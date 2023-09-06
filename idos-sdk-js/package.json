@@ -1,0 +1,25 @@
+{
+  "name": "@idos-network/idos-sdk",
+  "version": "0.0.7",
+  "description": "idOS JavaScript SDK",
+  "homepage": "https://idos.network",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "license": "MIT",
+  "dependencies": {
+    "@kwilteam/kwil-js": "^0.0.3",
+    "ethers": "^6.7.1",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4"
+  },
+  "scripts": {
+    "build": "npx webpack"
+  }
+}
