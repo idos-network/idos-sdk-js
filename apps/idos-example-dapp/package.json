@@ -1,0 +1,21 @@
+{
+  "name": "idos-example-dapp",
+  "version": "0.1.0",
+  "type": "module",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "prettier-plugin-organize-imports": "^3.2.3",
+    "typescript": "^5.0.2",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "@idos-network/idos-sdk": "workspace:*",
+    "ethers": "^6.7.1"
+  }
+}

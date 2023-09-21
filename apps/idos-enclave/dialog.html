@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>idOS Enclave Dialog</title>
+<style>* { text-align: center; }</style>
+<body>
+  <p><strong>idOS Secure Enclave<strong></p>
+  <hr />
+
+  <form name="password">
+    <p><input type="password" name="string" placeholder="Your idOS password" /></p>
+
+    <p><input type="submit" /></p>
+
+    <p>
+      Remember for:
+      <br>
+      <label><input type="radio" name="duration" value="1 day" checked/>1 day</label>
+      <label><input type="radio" name="duration" value="1 week"/>1 week</label>
+    </p>
+  </form>
+  <script type="module" src="/src/dialog.js"></script>
+</body>
