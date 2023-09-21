@@ -6,18 +6,21 @@ export class KwilWrapper {
     this.client = new WebKwil({ kwilProvider: options.url });
   }
 
-  async setSigner(signer) {
-    this.signer = signer;
-    this.publicKey = await KwilUtils.recoverSecp256k1PubKey(signer);
+  async setSigner(signer, publicKey) {
+    this.signer = signer || this.signer;
+    this.publicKey = this.publicKey
+      || publicKey
+      || await KwilUtils.recoverSecp256k1PubKey(this.signer);
   }
 
   async buildAction(actionName, inputs) {
     const action = this.client
       .actionBuilder()
       .dbid(this.dbId)
+      .name(actionName)
       .publicKey(this.publicKey)
       .signer(this.signer)
-      .name(actionName);
+      .nearConfig({});
 
     if (inputs) {
       const actionInput = new KwilUtils.ActionInput();

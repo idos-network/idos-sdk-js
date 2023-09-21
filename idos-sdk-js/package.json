@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/idos-sdk",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "idOS JavaScript SDK",
   "homepage": "https://idos.network",
   "main": "dist/index.js",
@@ -12,6 +12,7 @@
   "license": "MIT",
   "dependencies": {
     "@kwilteam/kwil-js": "^0.0.3",
+    "@stablelib/sha256": "^1.0.1",
     "ethers": "^6.7.1",
     "uuid": "^9.0.0"
   },

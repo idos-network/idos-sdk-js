@@ -3,7 +3,10 @@ import nacl from "tweetnacl";
 import * as StableBase64 from "@stablelib/base64";
 import * as StableUtf8 from "@stablelib/utf8";
 
+const dialogPath = "/dialog.html";
 const dialogName = "idos-dialog";
+const storageKey = "idos-password";
+const encoder = new TextEncoder();
 
 export class Enclave {
   constructor(options) {
@@ -12,82 +15,44 @@ export class Enclave {
   }
 
   async init() {
-    try {
-      window.addEventListener("message", (event) => {
-        const isFromParent = event.origin === this.parentUrl;
-        const isFromDialog = event.origin === this.dialog?.origin && event.source.name === dialogName;
+    this.listenToParent();
+    this.listenToDialog();
 
-        if (!isFromParent && !isFromDialog) { return; }
+    await this.ensurePassword();
+    await this.deriveKeyPair();
+    await this.deriveKeyPairSig();
 
-        const request = Object.keys(event.data)[0];
-        const requestData = Object.values(event.data)[0];
-
-        switch(request) {
-          case "dialog":
-            this.ensurePasswordResolver(requestData.password);
-            break;
-          case "encrypt":
-            this.#messageParent({
-              encrypted: this.#encrypt(
-                requestData.message,
-                StableBase64.decode(requestData.receiverPublicKey),
-              ),
-            });
-            break;
-          case "decrypt":
-            this.#messageParent({
-              decrypted: this.#decrypt(requestData.message),
-            });
-            break;
-          default:
-            console.log("Unexpected request: ", event);
+    this.messageParent({
+      publicKeys: {
+        encryption: {
+          base64: StableBase64.encode(this.keyPair.publicKey),
+          raw: this.keyPair.publicKey,
+        },
+        sig: {
+          base64: StableBase64.encode(this.keyPairSig.publicKey),
+          raw: this.keyPairSig.publicKey,
         }
-      });
-
-      await this.#ensurePassword();
-      await this.#deriveKeyPair();
-      const publicKey = StableBase64.encode(this.keyPair.publicKey);
-      this.#messageParent({ publicKey });
-    } catch (e) {
-      this.#messageParent(e?.message);
-    }
+      }
+    });
   }
 
+  // TODO
+  // passwordData.duration
   // FIXME
   // using both storage mediums because different browsers
   // handle sandboxed cross-origin iframes differently
   // wrt localstorage and cookies
-  async #ensurePassword() {
-    const storageKey = "idos-password";
+  async ensurePassword() {
+    this.password = this.password
+      || window.localStorage.getItem(storageKey)
+      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0)
+      || (await this.askPassword()).string;
 
-    this.password = window.localStorage.getItem(storageKey)
-      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
-
-    if (!this.password) {
-      this.dialog = window.open("/dialog.html", dialogName, Object.entries({
-          popup: 1,
-          top: 200,
-          left: 200,
-          width: 250,
-          height: 300,
-        }).map(feat => feat.join("=")).join(",")
-      );
-
-      return new Promise(resolve => this.ensurePasswordResolver = resolve)
-        .then((passwordData) => {
-          this.password = passwordData.string;
-          // TODO
-          // passwordData.duration
-          window.localStorage.setItem(storageKey, this.password);
-          document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
-          this.dialog.close();
-        });
-    }
+    window.localStorage.setItem(storageKey, this.password);
+    document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
   }
 
-  async #deriveKeyPair() {
-    const encoder = new TextEncoder();
-
+  async deriveKeyPair() {
     const normalized = encoder.encode(this.password.normalize("NFKC"));
     const salt = encoder.encode(this.humanId);
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
@@ -95,7 +60,23 @@ export class Enclave {
     this.keyPair = nacl.box.keyPair.fromSecretKey(derived);
   }
 
-  #encrypt(plaintext, receiverPublicKey) {
+  async deriveKeyPairSig() {
+    const normalized = encoder.encode(this.password.normalize("NFKC"));
+    const salt = encoder.encode("");
+    const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
+
+    this.keyPairSig = nacl.sign.keyPair.fromSeed(derived);
+  }
+
+  sign(message) {
+    return nacl.sign.detached(message, this.keyPairSig.secretKey);
+  }
+
+  verifySig(message, signature, signerPublicKey) {
+    return nacl.sign.detached.verify(message, signature, signerPublicKey);
+  }
+
+  encrypt(plaintext, receiverPublicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
     plaintext = StableUtf8.encode(plaintext);
 
@@ -108,7 +89,7 @@ export class Enclave {
     return StableBase64.encode(fullMessage);
   }
 
-  #decrypt(ciphertextBase64, senderPublicKey) {
+  decrypt(ciphertextBase64, senderPublicKey) {
     // FIXME
     // stub for sender's public key
     // (new database schema TK)
@@ -123,7 +104,63 @@ export class Enclave {
     return StableUtf8.decode(decryptedMessage);
   }
 
-  #messageParent(message) {
+  messageParent(message) {
     window.parent.postMessage(message, this.parentUrl);
+  }
+
+  listenToParent() {
+    window.addEventListener("message", (event) => {
+      const isFromParent = event.origin === this.parentUrl;
+      if (!isFromParent) { return; }
+
+      const [requestName, requestData] = Object.entries(event.data).flat();
+      const { password, message, signature, signerPublicKey, receiverPublicKey } = requestData;
+
+      const response = {
+        sign: () => ({ signed: [message] }),
+        verifySig: () => ({ verifiedSig: [message, signature, signerPublicKey] }),
+        encrypt: () => ({ encrypted: [message, StableBase64.decode(receiverPublicKey)] }),
+        decrypt: () => ({ decrypted: [message] }),
+      }[requestName];
+
+      if (!response) {
+        throw new Error(`Unexpected request from parent: ${requestName}`);
+      }
+
+      const [responseName, callArgs] = Object.entries(response()).flat();
+      this.messageParent({ [responseName]: this[requestName](...callArgs) });
+    });
+  };
+
+  listenToDialog() {
+    window.addEventListener("message", (event) => {
+      const isFromDialog = event.origin === this.dialog?.origin
+        && event.source.name === dialogName;
+
+      if (!isFromDialog) { return; }
+
+      const [requestName, requestData] = Object.entries(event.data).flat();
+      const { password } = requestData;
+
+      if (requestName !== "dialog") {
+        throw new Error(`Unexpected request from dialog: ${requestName}`);
+      }
+      this.ensurePasswordResolver(password);
+      this.dialog.close();
+    });
+  };
+
+  async askPassword() {
+    const popupConfig = Object.entries({
+      popup: 1,
+      top: 200,
+      left: 200,
+      width: 250,
+      height: 300,
+    }).map(feat => feat.join("=")).join(",");
+
+    this.dialog = window.open(dialogPath, dialogName, popupConfig);
+
+    return await new Promise(resolve => this.ensurePasswordResolver = resolve);
   }
 }
