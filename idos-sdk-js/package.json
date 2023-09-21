@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/idos-sdk",
-  "version": "0.0.8",
+  "version": "0.0.10",
   "description": "idOS JavaScript SDK",
   "homepage": "https://idos.network",
   "main": "dist/index.js",
