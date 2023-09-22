@@ -79,8 +79,18 @@ export class Enclave {
     this.keyPairSig = nacl.sign.keyPair.fromSeed(derived);
   }
 
-  sign(message) {
-    return nacl.sign.detached(message, this.keyPairSig.secretKey);
+  async sign(message) {
+    const consented = await this.askConsent(`
+      <strong>Data access request</strong>
+      <p><small>from ${this.parentUrl}</small></p>
+      <pre>${message}</pre>
+    `);
+
+    if (consented) {
+      return nacl.sign.detached(message, this.keyPairSig.secretKey);
+    } else {
+      return null;
+    }
   }
 
   verifySig(message, signature, signerPublicKey) {
@@ -104,15 +114,19 @@ export class Enclave {
     // FIXME
     // stub for sender's public key
     // (new database schema TK)
-    senderPublicKey = this.keyPair.publicKey;
+    try {
+      senderPublicKey = this.keyPair.publicKey;
 
-    const ciphertext = StableBase64.decode(ciphertextBase64);
-    const nonce = ciphertext.slice(0, nacl.box.nonceLength);
-    const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
+      const ciphertext = StableBase64.decode(ciphertextBase64);
+      const nonce = ciphertext.slice(0, nacl.box.nonceLength);
+      const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
 
-    const decryptedMessage = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey)
+      const decryptedMessage = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey)
 
-    return StableUtf8.decode(decryptedMessage);
+      return StableUtf8.decode(decryptedMessage);
+    } catch (e) {
+      return null;
+    }
   }
 
   messageParent(message) {
@@ -120,7 +134,7 @@ export class Enclave {
   }
 
   listenToParent() {
-    window.addEventListener("message", (event) => {
+    window.addEventListener("message", async (event) => {
       const isFromParent = event.origin === this.parentUrl;
       if (!isFromParent) { return; }
 
@@ -139,7 +153,7 @@ export class Enclave {
       }
 
       const [responseName, callArgs] = Object.entries(response()).flat();
-      this.messageParent({ [responseName]: this[requestName](...callArgs) });
+      this.messageParent({ [responseName]: await this[requestName](...callArgs) });
     });
   };
 
@@ -151,17 +165,24 @@ export class Enclave {
       if (!isFromDialog) { return; }
 
       const [requestName, requestData] = Object.entries(event.data).flat();
-      const { password } = requestData;
+      const { password, consent } = requestData;
 
-      if (requestName !== "dialog") {
-        throw new Error(`Unexpected request from dialog: ${requestName}`);
+      switch(requestName) {
+        case "passworded":
+          this.askPasswordResolver(password);
+          break;
+        case "consented":
+          this.askConsentResolver(consent);
+          break;
+        default:
+          throw new Error(`Unexpected request from dialog: ${requestName}`);
       }
-      this.askPasswordResolver(password);
+
       this.dialog.close();
     });
   };
 
-  async askPassword() {
+  openDialog(intent, message) {
     const popupConfig = Object.entries({
       popup: 1,
       top: 200,
@@ -170,8 +191,21 @@ export class Enclave {
       height: 300,
     }).map(feat => feat.join("=")).join(",");
 
-    this.dialog = window.open(dialogPath, dialogName, popupConfig);
+    const dialogURL = new URL(dialogPath, window.location.origin);
+    dialogURL.search = new URLSearchParams({ intent, message });
+
+    this.dialog = window.open(dialogURL, dialogName, popupConfig);
+  }
+
+  async askPassword() {
+    this.openDialog("password");
 
     return await new Promise(resolve => this.askPasswordResolver = resolve);
+  }
+
+  async askConsent(message) {
+    this.openDialog("consent", message);
+
+    return await new Promise(resolve => this.askConsentResolver = resolve);
   }
 }
