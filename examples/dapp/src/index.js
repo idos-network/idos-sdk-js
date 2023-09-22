@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = new idOS({ url: "https://nodes.idos.network" });
+const idos = new idOS({ url: "https://nodes.idos.network", container: "#idOS" });
 
 await idos.crypto.init();
 
@@ -11,7 +11,12 @@ await idos.crypto.init();
 await idos.auth.setEnclaveSigner();
 
 const currentUser = await idos.auth.currentUser();
-console.log(`idOS user: ${currentUser.humanId}`);
+
+document.querySelector("#display").innerHTML = `
+  <strong>Connected to idOS</strong>
+  <br>
+  <code>Human ID: ${currentUser.humanId}</code>
+`;
 
 const message = "some plaintext";
 const encrypted = await idos.crypto.encrypt(message, idos.crypto.publicKeys.encryption.base64);

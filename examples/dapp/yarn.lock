@@ -354,10 +354,10 @@
     "@ethersproject/properties" "^5.7.0"
     "@ethersproject/strings" "^5.7.0"
 
-"@idos-network/idos-sdk@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@idos-network/idos-sdk/-/idos-sdk-0.0.10.tgz#6aa85a73bdb701a2a5313a8ae46bccfa1d0f3ada"
-  integrity sha512-Ir0gXJwd4hZDkjWbyX9D3CibJXcHtXc1vOzrBRd+sfk7BNVpFcjn8z9foSJaY9bsBZ9gpMyZ/ShQ+LdsywxlqQ==
+"@idos-network/idos-sdk@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@idos-network/idos-sdk/-/idos-sdk-0.0.11.tgz#4e23dfc08af43341e4ddf0bf3434747c96dd3660"
+  integrity sha512-yoUBTdlYQ4WRfg5r0TehpKaFjt7PLxSrm5nnFvYauu3CDamZHB8eYqe/1UpprECPquMZQrIBFTrSFkQkJSU9ew==
   dependencies:
     "@kwilteam/kwil-js" "^0.0.3"
     "@stablelib/sha256" "^1.0.1"

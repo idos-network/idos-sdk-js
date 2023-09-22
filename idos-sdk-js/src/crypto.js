@@ -1,9 +1,11 @@
 import { IframeEnclave } from "./crypto-providers";
 
 export class Crypto {
-  constructor(idOS) {
+  constructor(idOS, options) {
     this.idOS = idOS;
-    this.cryptoProvider = new IframeEnclave(); // or new MetaMaskSnap()
+    this.cryptoProvider = new IframeEnclave({ // or new MetaMaskSnap()
+      container: this.idOS.container || "body",
+    });
   }
 
   async init() {

@@ -4,12 +4,12 @@
 export class IframeEnclave {
   constructor(options) {
     this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
+    this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
 
   init (humanId) {
     this.humanId = humanId;
-
 
     this.#listenToEnclave();
     this.#openEnclave();
@@ -49,7 +49,11 @@ export class IframeEnclave {
       const [responseName, responseData] = Object.entries(event.data).flat();
 
       switch(responseName) {
+        case "showEnclave":
+          this.#showEnclave();
+          break;
         case "publicKeys":
+          this.#hideEnclave();
         case "signed":
         case "verifiedSig":
         case "encrypted":
@@ -81,8 +85,23 @@ export class IframeEnclave {
       "scripts",
     ].map(permission => `allow-${permission}`).join(" ");
     this.iframe.src = `${this.hostUrl}?human_id=${this.humanId}`;
-    this.iframe.style.display = "none";
+    this.iframe.style = Object.entries({
+      "background-color": "transparent",
+      "border": "none",
+      "display": "none",
+      "height": "30px",
+      "width": "150px",
+    }).map(pair => pair.join(": ")).join("; ");
 
-    document.body.appendChild(this.iframe);
+    document.querySelector(this.container).appendChild(this.iframe);
+  }
+
+  #showEnclave() {
+    this.iframe.style.display = "block";
+  }
+
+  #hideEnclave() {
+    this.iframe.parentElement.style.display = "none";
+    this.iframe.style.display = "none";
   }
 }

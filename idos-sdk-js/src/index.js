@@ -7,6 +7,8 @@ export class idOS {
   constructor(options) {
     this.kwilWrapper = new KwilWrapper({ url: options.url });
 
+    this.container = options.container;
+
     this.auth = new Auth(this);
     this.crypto = new Crypto(this);
     this.data = new Data(this);

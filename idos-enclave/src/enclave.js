@@ -45,11 +45,22 @@ export class Enclave {
   async ensurePassword() {
     this.password = this.password
       || window.localStorage.getItem(storageKey)
-      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0)
-      || (await this.askPassword()).string;
+      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
 
-    window.localStorage.setItem(storageKey, this.password);
-    document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
+    if (!this.password) {
+      this.messageParent({ showEnclave: null });
+
+      document.querySelector("#start").addEventListener("click", async (e) => {
+        this.password = (await this.askPassword()).string;
+        window.localStorage.setItem(storageKey, this.password);
+        document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
+        this.ensurePasswordResolver();
+    });
+
+      return await new Promise(resolve => this.ensurePasswordResolver = resolve);
+    }
+
+    return Promise.resolve();
   }
 
   async deriveKeyPair() {
@@ -145,7 +156,7 @@ export class Enclave {
       if (requestName !== "dialog") {
         throw new Error(`Unexpected request from dialog: ${requestName}`);
       }
-      this.ensurePasswordResolver(password);
+      this.askPasswordResolver(password);
       this.dialog.close();
     });
   };
@@ -161,6 +172,6 @@ export class Enclave {
 
     this.dialog = window.open(dialogPath, dialogName, popupConfig);
 
-    return await new Promise(resolve => this.ensurePasswordResolver = resolve);
+    return await new Promise(resolve => this.askPasswordResolver = resolve);
   }
 }
