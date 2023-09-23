@@ -1,24 +1,65 @@
-const enclave = window.opener;
+class Dialog {
+  constructor(enclave, intent, message) {
+    if (enclave.origin !== window.origin) {
+      throw new Error("Wrong enclave origin, aborting.");
+    }
 
-if (enclave.origin === window.origin) {
-  const { intent, message } = Object.fromEntries(Array.from(
-    new URLSearchParams(document.location.search),
-  ));
+    this.enclave = enclave;
+    this.intent = intent;
+    this.message = message;
 
-  document.querySelector(`[name=${intent}]`).style.display = "block";
-  document.querySelector("#message").innerHTML = message;
+    this.listenToEnclave();
+    this.initUi();
+  }
 
-  document.querySelector("form[name=password]").addEventListener("submit", (e) => {
-    e.preventDefault();
+  initUi = () => {
+    document.querySelector(`[name=${this.intent}]`).style.display = "block";
+    document.querySelector("#message").innerHTML = this.message;
 
-    const password = Object.fromEntries(new FormData(e.target).entries());
+    document
+      .querySelector("form[name=password]")
+      .addEventListener("submit", (e) => {
+        e.preventDefault();
 
-    enclave.postMessage({ passworded: { password } }, enclave.origin);
-  });
+        const password = Object.fromEntries(new FormData(e.target).entries());
 
-  document.querySelectorAll("form[name=consent] button").forEach((elem) => elem.addEventListener("click", (e) => {
-    e.preventDefault();
+        this.respondToEnclave({ result: password });
+      });
 
-    enclave.postMessage({ consented: { consent: e.target.id === "yes"} }, enclave.origin);
-  }));
+    document
+      .querySelectorAll("form[name=consent] button")
+      .forEach((elem) => elem.addEventListener("click", (e) => {
+        e.preventDefault();
+
+        const consent = e.target.id === "yes";
+
+        this.respondToEnclave({ result: { consent } });
+      }));
+  }
+
+  listenToEnclave = () => {
+    window.addEventListener("message", async (event) => {
+      if (event.source !== enclave) { return; }
+
+      const requestName = event.data;
+
+      if (requestName !== "password" && requestName !== "consent") {
+        throw new Error(`Unexpected request from parent: ${requestName}`);
+      }
+
+      this.responsePort = event.ports[0];
+    });
+  }
+
+  respondToEnclave = (message) => {
+    this.responsePort.postMessage(message);
+    this.responsePort.close();
+  };
 }
+
+const enclave = window.opener;
+const { intent, message } = Object.fromEntries(Array.from(
+  new URLSearchParams(document.location.search),
+));
+
+new Dialog(enclave, intent, message);

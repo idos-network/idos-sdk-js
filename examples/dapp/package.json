@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@idos-network/idos-sdk": "^0.0.11",
+    "@idos-network/idos-sdk": "^0.0.12",
     "ethers": "^6.7.1"
   },
   "devDependencies": {

@@ -3,8 +3,6 @@ import nacl from "tweetnacl";
 import * as StableBase64 from "@stablelib/base64";
 import * as StableUtf8 from "@stablelib/utf8";
 
-const dialogPath = "/dialog.html";
-const dialogName = "idos-dialog";
 const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
@@ -15,25 +13,31 @@ export class Enclave {
   }
 
   async init() {
-    this.listenToParent();
-    this.listenToDialog();
+    this.password = this.password
+      || window.localStorage.getItem(storageKey)
+      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
+    this.#listenToRequests();
+  }
 
+  async isReady() {
+    return !!this.password;
+  }
+
+  async keys() {
     await this.ensurePassword();
     await this.deriveKeyPair();
     await this.deriveKeyPairSig();
 
-    this.messageParent({
-      publicKeys: {
-        encryption: {
-          base64: StableBase64.encode(this.keyPair.publicKey),
-          raw: this.keyPair.publicKey,
-        },
-        sig: {
-          base64: StableBase64.encode(this.keyPairSig.publicKey),
-          raw: this.keyPairSig.publicKey,
-        }
+    return {
+      encryption: {
+        base64: StableBase64.encode(this.keyPair.publicKey),
+        raw: this.keyPair.publicKey,
+      },
+      sig: {
+        base64: StableBase64.encode(this.keyPairSig.publicKey),
+        raw: this.keyPairSig.publicKey,
       }
-    });
+    }
   }
 
   // TODO
@@ -43,24 +47,19 @@ export class Enclave {
   // handle sandboxed cross-origin iframes differently
   // wrt localstorage and cookies
   async ensurePassword() {
-    this.password = this.password
-      || window.localStorage.getItem(storageKey)
-      || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
-
     if (!this.password) {
-      this.messageParent({ showEnclave: null });
-
       document.querySelector("#start").addEventListener("click", async (e) => {
-        this.password = (await this.askPassword()).string;
+        this.password = (await this.#openDialog("password")).string;
+
         window.localStorage.setItem(storageKey, this.password);
         document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
         this.ensurePasswordResolver();
-    });
+      });
 
       return await new Promise(resolve => this.ensurePasswordResolver = resolve);
     }
 
-    return Promise.resolve();
+    return Promise.resolve;
   }
 
   async deriveKeyPair() {
@@ -80,7 +79,7 @@ export class Enclave {
   }
 
   async sign(message) {
-    const consented = await this.askConsent(`
+    const consented = await this.#openDialog("consent", `
       <strong>Data access request</strong>
       <p><small>from ${this.parentUrl}</small></p>
       <pre>${message}</pre>
@@ -133,56 +132,40 @@ export class Enclave {
     window.parent.postMessage(message, this.parentUrl);
   }
 
-  listenToParent() {
+  #listenToRequests() {
     window.addEventListener("message", async (event) => {
       const isFromParent = event.origin === this.parentUrl;
       if (!isFromParent) { return; }
 
-      const [requestName, requestData] = Object.entries(event.data).flat();
-      const { password, message, signature, signerPublicKey, receiverPublicKey } = requestData;
+      try {
+        const [requestName, requestData] = Object.entries(event.data).flat();
+        const { password, message, signature, signerPublicKey, receiverPublicKey } = requestData;
 
-      const response = {
-        sign: () => ({ signed: [message] }),
-        verifySig: () => ({ verifiedSig: [message, signature, signerPublicKey] }),
-        encrypt: () => ({ encrypted: [message, StableBase64.decode(receiverPublicKey)] }),
-        decrypt: () => ({ decrypted: [message] }),
-      }[requestName];
+        const paramBuilder = {
+          isReady: () => [],
+          keys: () => [],
+          sign: () => [message],
+          verifySig: () => [message, signature, signerPublicKey],
+          encrypt: () => [message, StableBase64.decode(receiverPublicKey)],
+          decrypt: () => [message],
+        }[requestName];
 
-      if (!response) {
-        throw new Error(`Unexpected request from parent: ${requestName}`);
+        if (!paramBuilder) {
+          throw new Error(`Unexpected request from parent: ${requestName}`);
+        }
+
+        const response = await this[requestName](...paramBuilder());
+        event.ports[0].postMessage({ result: response });
+      } catch (e) {
+        console.log("catch", e);
+        event.ports[0].postMessage({ error: e });
+      } finally {
+        event.ports[0].close();
       }
-
-      const [responseName, callArgs] = Object.entries(response()).flat();
-      this.messageParent({ [responseName]: await this[requestName](...callArgs) });
     });
   };
 
-  listenToDialog() {
-    window.addEventListener("message", (event) => {
-      const isFromDialog = event.origin === this.dialog?.origin
-        && event.source.name === dialogName;
-
-      if (!isFromDialog) { return; }
-
-      const [requestName, requestData] = Object.entries(event.data).flat();
-      const { password, consent } = requestData;
-
-      switch(requestName) {
-        case "passworded":
-          this.askPasswordResolver(password);
-          break;
-        case "consented":
-          this.askConsentResolver(consent);
-          break;
-        default:
-          throw new Error(`Unexpected request from dialog: ${requestName}`);
-      }
-
-      this.dialog.close();
-    });
-  };
-
-  openDialog(intent, message) {
+  async #openDialog(intent, message) {
     const popupConfig = Object.entries({
       popup: 1,
       top: 200,
@@ -191,21 +174,25 @@ export class Enclave {
       height: 300,
     }).map(feat => feat.join("=")).join(",");
 
-    const dialogURL = new URL(dialogPath, window.location.origin);
+    const dialogURL = new URL("/dialog.html", window.location.origin);
     dialogURL.search = new URLSearchParams({ intent, message });
 
-    this.dialog = window.open(dialogURL, dialogName, popupConfig);
-  }
+    this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-  async askPassword() {
-    this.openDialog("password");
+    this.dialog.addEventListener("load", () => (this.windowLoaded()));
+    await new Promise(resolve => this.windowLoaded = resolve);
 
-    return await new Promise(resolve => this.askPasswordResolver = resolve);
-  }
+    return await new Promise((resolve, reject) => {
+      const { port1, port2 } = new MessageChannel();
 
-  async askConsent(message) {
-    this.openDialog("consent", message);
+      port1.onmessage = ({ data }) => {
+        port1.close();
+        this.dialog.close();
 
-    return await new Promise(resolve => this.askConsentResolver = resolve);
+        data.error ? reject(data.error) : resolve(data.result);
+      };
+
+      this.dialog.postMessage(intent, this.dialog.origin, [port2]);
+    });
   }
 }
