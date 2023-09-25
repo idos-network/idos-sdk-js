@@ -16,7 +16,6 @@ export class Data {
       records.forEach((record, index) => {
         records[index] = {
           ...record,
-          // FIXME what is `credential`?
           content: this.idOS.crypto.decrypt(credential.content),
         };
       });
