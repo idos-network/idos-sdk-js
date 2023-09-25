@@ -14,6 +14,7 @@ import { idOS } from "@idos-network/idos-sdk";
 // initialize SDK
 const idos = new idOS({ url: "..." });
 await idos.auth.setWeb3Signer(connectedSigner);
+// or          .setEnclaveSigner();
 await idos.crypto.init();
 
 // read data from the connected user's idOS profile
@@ -72,7 +73,9 @@ idos = new idOS({ url })
 
 idos.auth.
 
-    setWeb3Signer({ address, signFn }) -> null
+    setWalletSigner({ address, signFn }) -> null
+
+    setEnclaveSigner() -> null
 
     currentUser() -> Promise{ Profile }
 
