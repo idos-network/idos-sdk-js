@@ -1,0 +1,36 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>idOS Enclave Dialog</title>
+<body>
+  <style>
+    * {
+      text-align: center;
+    }
+    form {
+      display: none;
+    }
+  </style>
+  <p><strong>idOS Secure Enclave</strong></p>
+  <hr />
+
+  <form name="password">
+    <p><input type="password" name="string" placeholder="Your idOS password" /></p>
+
+    <p><input type="submit" /></p>
+
+    <p>
+      Remember for:
+      <br />
+      <label><input type="radio" name="duration" value="1 day" checked />1 day</label>
+      <label><input type="radio" name="duration" value="1 week" />1 week</label>
+    </p>
+  </form>
+
+  <form name="consent">
+    <p id="message"></p>
+    <p>
+      <button id="yes">Accept</button>
+      <button id="no">Reject</button>
+    </p>
+  </form>
+</body>
