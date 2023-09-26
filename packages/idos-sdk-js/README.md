@@ -4,7 +4,7 @@
 
 ## Installation
 
-Run `yarn add @idos-network/idos-sdk` or `npm install @idos-network/idos-sdk` to install [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk).
+Run `pnpm add @idos-network/idos-sdk` or `npm install @idos-network/idos-sdk` to install [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk).
 
 ## Quickstart
 
