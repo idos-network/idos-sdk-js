@@ -1,10 +1,10 @@
-import { CryptoProvider } from "./cryptoProvider";
+import { CryptoProvider } from "./crypto-provider";
 
 export class IframeEnclave extends CryptoProvider {
   constructor(options) {
     super(options);
 
-    this.hostUrl = options?.hostUrl || new URL("https://ca9d-188-80-19-108.ngrok-free.app");
+    this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }

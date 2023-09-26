@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "@kwilteam/kwil-js": "^0.0.3",
+    "@stablelib/sha256": "^1.0.1",
     "ethers": "^6.7.1",
     "uuid": "^9.0.1"
   }
