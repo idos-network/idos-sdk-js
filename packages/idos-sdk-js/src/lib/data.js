@@ -32,7 +32,7 @@ export class Data {
       records.forEach((record, index) => {
         records[index] = {
           ...record,
-          content: this.idOS.crypto.decrypt(record.value),
+          value: this.idOS.crypto.decrypt(record.value),
         };
       });
     }
