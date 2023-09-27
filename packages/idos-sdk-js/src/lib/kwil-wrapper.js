@@ -6,11 +6,16 @@ export class KwilWrapper {
     this.client = new WebKwil({ kwilProvider: options.url });
   }
 
+  /**
+   * Returns the schema of the database.
+   */
+  get schema() {
+    return this.client.getSchema(this.dbId);
+  }
+
   async setSigner(signer, publicKey) {
     this.signer = signer || this.signer;
-    this.publicKey = this.publicKey
-      || publicKey
-      || await KwilUtils.recoverSecp256k1PubKey(this.signer);
+    this.publicKey = this.publicKey || publicKey || (await KwilUtils.recoverSecp256k1PubKey(this.signer));
   }
 
   async buildAction(actionName, inputs) {
@@ -38,18 +43,14 @@ export class KwilWrapper {
   async call(actionName, actionInputs) {
     const action = await this.buildAction(actionName, actionInputs);
     const msg = await action.buildMsg();
-
     const res = await this.client.call(msg);
-
     return res.data.result;
   }
 
   async broadcast(actionName, actionInputs) {
     const action = await this.buildAction(actionName, actionInputs);
     const tx = await action.buildTx();
-
     const res = await this.client.broadcast(tx);
-
     return res.data.result;
   }
 }
