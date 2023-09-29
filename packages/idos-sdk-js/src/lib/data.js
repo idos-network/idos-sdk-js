@@ -1,5 +1,4 @@
 import { v4 as uuidv4 } from "uuid";
-
 export class Data {
   constructor(idOS) {
     this.idOS = idOS;
@@ -20,19 +19,19 @@ export class Data {
     let records = await this.idOS.kwilWrapper.call(`get_${tableName}`);
 
     if (tableName === "credentials") {
-      records.forEach((record, index) => {
+      records.forEach(async (record, index) => {
         records[index] = {
           ...record,
-          content: this.idOS.crypto.decrypt(record.content),
+          content: await this.idOS.crypto.decrypt(record.content),
         };
       });
     }
 
     if (tableName === "attributes") {
-      records.forEach((record, index) => {
+      records.forEach(async (record, index) => {
         records[index] = {
           ...record,
-          value: this.idOS.crypto.decrypt(record.value),
+          value: await this.idOS.crypto.decrypt(record.value),
         };
       });
     }
@@ -45,12 +44,71 @@ export class Data {
     return records.filter((record) => !record[key] || record[key] === value);
   }
 
-  async create(tableName, record) {
+  /**
+   * Creates a record in the given table name.
+   * @param {string} tableName
+   * @param {Record<string, unknown>} record
+   * @param {Record<string, unknown>} receiverPublicKey
+   * @throws {Error} if the record payload is invalid
+   * @returns {Promise<Record<string, unknown>>} the new created record
+   */
+  async create(tableName, record, receiverPublicKey) {
+    receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKeys.encryption.raw;
+    const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
+    const schema = await this.idOS.kwilWrapper.schema;
+    const actionFromSchema = schema.data.actions.find((action) => action.name === name);
+
+    const inputs = actionFromSchema.inputs.map((input) => input.substring(1));
+    const recordKeys = Object.keys(record);
+
+    if (inputs.every((input) => recordKeys.includes(input))) {
+      throw new Error(`Invalid payload for action ${name}`);
+    }
+
+    const id = uuidv4();
+
     let newRecord = await this.idOS.kwilWrapper.broadcast(`add_${this.singularize(tableName)}`, {
-      id: uuidv4(),
+      id,
       ...record,
+      value: await this.idOS.crypto.encrypt(record.value, receiverPublicKey),
     });
 
     return newRecord;
+  }
+
+  /**
+   * Gets a record from the given table name.
+   * @param {string} tableName
+   * @param {string} recordId
+   * @returns {Promise<Record<string, unknown>>}
+   */
+  async get(tableName, recordId) {
+    let records = await this.list(tableName, { id: recordId });
+    return records[0];
+  }
+
+  /**
+   * Deletes a record from the given table name.
+   * @param {string} tableName
+   * @param {string} recordId
+   */
+  async delete(tableName, recordId) {
+    await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, {
+      id: recordId,
+    });
+  }
+
+  /**
+   * Updates a record in the given table name.
+   * @param {string} tableName
+   * @param {Record<string, unknown>} record
+   * @returns {Promise<Record<string, unknown>>} the updated record payload
+   */
+  async update(tableName, record) {
+    await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
+      ...record,
+    });
+
+    return record;
   }
 }
