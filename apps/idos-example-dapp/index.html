@@ -15,14 +15,29 @@
         padding: 0;
       }
 
+      div#near_wallet_selector {
+        display: none;
+      }
+
       button#create_attribute {
         display: none;
       }
     </style>
     <div id="app"></div>
     <h1>Example dapp</h1>
+    <div id="near_wallet_selector">
+      <form>
+        <p>Choose a NEAR wallet</p>
+        <input type="submit" name="meteor-wallet" value="Meteor Wallet" />
+        <input type="submit" name="here-wallet" value="HERE Wallet" />
+        <input type="submit" name="nightly" value="Nightly" />
+      </form>
+    </div>
+
     <div id="idOS"></div>
     <p id="display"></p>
+
+    <ul id="list_wallets"></ul>
 
     <ul id="list_attributes"></ul>
     <button id="create_attribute">Create attribute</button>

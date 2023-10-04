@@ -16,24 +16,22 @@ export class Data {
    * @returns {Promise<Array<Record<string, unknown>>}
    */
   async list(tableName, filter) {
-    let records = await this.idOS.kwilWrapper.call(`get_${tableName}`);
+    let records = await this.idOS.kwilWrapper.call(
+      `get_${tableName}`,
+      null,
+      `List your ${tableName} in idOS`,
+    );
 
     if (tableName === "credentials") {
-      records.forEach(async (record, index) => {
-        records[index] = {
-          ...record,
-          content: await this.idOS.crypto.decrypt(record.content),
-        };
-      });
+      for (const record of records) {
+        record.content = await this.idOS.crypto.decrypt(record.content);
+      };
     }
 
     if (tableName === "attributes") {
-      records.forEach(async (record, index) => {
-        records[index] = {
-          ...record,
-          value: await this.idOS.crypto.decrypt(record.value),
-        };
-      });
+      for (const record of records) {
+        record.value = await this.idOS.crypto.decrypt(record.value);
+      }
     }
 
     if (!filter) {
@@ -67,11 +65,22 @@ export class Data {
 
     const id = uuidv4();
 
-    let newRecord = await this.idOS.kwilWrapper.broadcast(`add_${this.singularize(tableName)}`, {
-      id,
-      ...record,
-      value: await this.idOS.crypto.encrypt(record.value, receiverPublicKey),
-    });
+    if (tableName === "credentials") {
+      record.content = await this.idOS.crypto.encrypt(record.content);
+    }
+
+    if (tableName === "attributes") {
+      record.value = await this.idOS.crypto.encrypt(record.value);
+    }
+
+    let newRecord = await this.idOS.kwilWrapper.broadcast(
+      `add_${this.singularize(tableName)}`,
+      {
+        id,
+        ...record,
+      },
+      `Create new ${this.singularize(tableName)} in your idOS profile`,
+    );
 
     return newRecord;
   }

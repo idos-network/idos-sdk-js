@@ -18,7 +18,7 @@
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@kwilteam/kwil-js": "^0.0.3",
+    "@kwilteam/kwil-js": "^0.2.0",
     "@near-js/crypto": "^0.0.5",
     "@near-wallet-selector/core": "^8.5.1",
     "@near-wallet-selector/my-near-wallet": "^8.5.1",

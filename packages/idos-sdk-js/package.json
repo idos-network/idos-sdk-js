@@ -28,7 +28,7 @@
     "vite-plugin-dts": "^3.5.3"
   },
   "dependencies": {
-    "@kwilteam/kwil-js": "^0.0.3",
+    "@kwilteam/kwil-js": "^0.2.0",
     "@stablelib/sha256": "^1.0.1",
     "ethers": "^6.7.1",
     "uuid": "^9.0.1"
