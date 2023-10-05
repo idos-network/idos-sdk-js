@@ -116,13 +116,30 @@ export function Component() {
 
   const onEditorSubmit = (values: AttributeEditorFormValues) => {
     onEditorClose();
-    const mutation = values.id ? updateAttribute : createAttribute;
-    const id = values.id || crypto.randomUUID();
+    if (values.id) {
+      return updateAttribute.mutate(
+        {
+          ...values,
+        },
+        {
+          onSuccess() {
+            toast({
+              title: t("attribute-successfully-updated", { name: values.attribute_key }),
+            });
+          },
+          onError() {
+            toast({
+              title: t("error-while-updating-attribute", { name: values.attribute_key }),
+              status: "error",
+            });
+          },
+        }
+      );
+    }
 
-    mutation.mutate(
+    createAttribute.mutate(
       {
         ...values,
-        id,
       },
       {
         onSuccess() {
