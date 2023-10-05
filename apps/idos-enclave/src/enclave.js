@@ -77,12 +77,16 @@ export class Enclave {
   }
 
   async sign(message) {
+    const displayMessage = typeof message === "string"
+      ? message
+      : StableUtf8.decode(message);
+
     const consented = await this.#openDialog(
       "consent",
       `
       <strong>Data access request</strong>
       <p><small>from ${this.parentUrl}</small></p>
-      <pre>${message}</pre>
+      <pre>${displayMessage}</pre>
     `
     );
 
@@ -98,8 +102,12 @@ export class Enclave {
   }
 
   encrypt(plaintext, receiverPublicKey) {
+    receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    plaintext = StableUtf8.encode(plaintext);
+
+    if (typeof plaintext === "string") {
+      plaintext = StableUtf8.encode(plaintext);
+    }
 
     const encrypted = nacl.box(plaintext, nonce, receiverPublicKey, this.keyPair.secretKey);
 
@@ -114,18 +122,18 @@ export class Enclave {
     // FIXME
     // stub for sender's public key
     // (new database schema TK)
+    senderPublicKey = this.keyPair.publicKey;
+
+    const ciphertext = StableBase64.decode(ciphertextBase64);
+    const nonce = ciphertext.slice(0, nacl.box.nonceLength);
+    const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
+
+    const decryptedMessage = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
+
     try {
-      senderPublicKey = this.keyPair.publicKey;
-
-      const ciphertext = StableBase64.decode(ciphertextBase64);
-      const nonce = ciphertext.slice(0, nacl.box.nonceLength);
-      const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
-
-      const decryptedMessage = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
-
       return StableUtf8.decode(decryptedMessage);
-    } catch (e) {
-      return null;
+    } catch(e) {
+      return "(decryption failed)";
     }
   }
 
@@ -149,7 +157,7 @@ export class Enclave {
           keys: () => [],
           sign: () => [message],
           verifySig: () => [message, signature, signerPublicKey],
-          encrypt: () => [message, StableBase64.decode(receiverPublicKey)],
+          encrypt: () => [message, receiverPublicKey],
           decrypt: () => [message],
         }[requestName];
 
@@ -174,7 +182,7 @@ export class Enclave {
       top: 200,
       left: 200,
       width: 250,
-      height: 300,
+      height: 350,
     })
       .map((feat) => feat.join("="))
       .join(",");

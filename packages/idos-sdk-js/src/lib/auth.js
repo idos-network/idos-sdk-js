@@ -6,23 +6,27 @@ export class Auth {
   }
 
   async setEnclaveSigner() {
-    await this.idOS.kwilWrapper.setSigner(
-      {
-        signMessage: async (msg) => (
-          { signature: await this.idOS.crypto.sign(StableSha256.hash(msg)) }
-        ),
+    await this.#setSigner(
+      async (msg) => {
+        const signature = await this.idOS.crypto.sign(msg);
+        return signature;
       },
       this.idOS.crypto.publicKeys.sig.raw,
+      "ed25519",
     );
   }
 
-  async setWalletSigner(signer) {
-    await this.idOS.kwilWrapper.setSigner(signer);
+  async setWalletSigner(signer, publicKey, signatureType) {
+    await this.#setSigner(signer, publicKey, signatureType);
   }
 
   async currentUser() {
     if (!this._currentUser) {
-      const res = await this.idOS.kwilWrapper.call("get_wallet_human_id");
+      const res = await this.idOS.kwilWrapper.call(
+        "get_wallet_human_id",
+        null,
+        "See your idOS profile ID",
+      );
 
       this._currentUser = {
         address: this.idOS.kwilWrapper.signer.address,
@@ -31,5 +35,9 @@ export class Auth {
     }
 
     return this._currentUser;
+  }
+
+  async #setSigner() {
+    await this.idOS.kwilWrapper.setSigner(...arguments);
   }
 }
