@@ -4,7 +4,7 @@ export class IframeEnclave extends CryptoProvider {
   constructor(options) {
     super(options);
 
-    this.hostUrl = new URL(options?.hostUrl || "https://enclave.idos.network");
+    this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }

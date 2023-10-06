@@ -4,10 +4,7 @@ import { IframeEnclave } from "./crypto-providers";
 export class Crypto {
   constructor(idOS) {
     this.idOS = idOS;
-    this.provider = new IframeEnclave({
-      container: this.idOS.container,
-      hostUrl: "https://nodes.playground.idos.network",
-    });
+    this.provider = new IframeEnclave({ container: this.idOS.container });
   }
 
   async init() {
