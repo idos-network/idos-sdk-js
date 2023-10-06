@@ -63,6 +63,7 @@ export declare class idOS {
   crypto: SDKCrypto;
   data: Data;
   kwilWrapper: KwilWrapper;
+  grants: Grants;
   constructor(options: InitOptions);
 }
 
@@ -83,6 +84,17 @@ declare class KwilWrapper {
   buildAction(actionName: string, inputs?: Record<string, string>): Promise<ActionBuilder>;
   call<T = Record<string, string>>(actionName: string, actionInputs?: Record<string, string>): Promise<T[]>;
   broadcast(actionName: string, actionInputs: Record<string, string>): Promise<string | undefined>;
+}
+
+declare class Grants {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  init(args: any): void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  list(args): Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  create(args: any): Promise<any>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  revoke(args): Promise<any>;
 }
 
 export {};

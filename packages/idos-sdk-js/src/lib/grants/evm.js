@@ -184,9 +184,6 @@ export class EvmGrants {
       new Promise(async (resolve, reject) => {
         const transactionOrReceipt = wait ? await transaction.wait() : transaction;
         const transactionId = transactionOrReceipt.hash;
-
-        console.log(transaction);
-
         resolve({ grant, transactionId });
       });
   }
