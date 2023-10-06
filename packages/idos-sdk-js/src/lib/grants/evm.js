@@ -10,7 +10,7 @@ class Grant {
   }
 }
 
-export class Grants {
+export class EvmGrants {
   #abi = [
     {
       inputs: [
@@ -165,16 +165,12 @@ export class Grants {
   #address = "0x9A961ECd4d2EEB84f990EcD041Cb108083A3C1BA";
   #contract;
 
-  constructor(idOS) {
-    this.idOS = idOS;
-  }
+  constructor() {}
 
-  async init({ signer, type } = {}) {
-    if (type === "evm") {
-      this.signer = signer;
-      this.defaultOwner = await this.signer.getAddress();
-      this.#contract = new Contract(this.#address, this.#abi, this.signer);
-    }
+  async init({ signer } = {}) {
+    this.signer = signer;
+    this.defaultOwner = await this.signer.getAddress();
+    this.#contract = new Contract(this.#address, this.#abi, this.signer);
   }
 
   #newGrant({ owner, grantee, dataId, lockedUntil }) {
@@ -184,38 +180,28 @@ export class Grants {
   }
 
   #grantPromise(grant, wait = true) {
-    return (transaction) => new Promise(async (resolve, reject) => {
-      const transactionOrReceipt = wait ? await transaction.wait() : transaction;
-      const transactionId = transactionOrReceipt.hash;
+    return (transaction) =>
+      new Promise(async (resolve, reject) => {
+        const transactionOrReceipt = wait ? await transaction.wait() : transaction;
+        const transactionId = transactionOrReceipt.hash;
 
-      console.log(transaction);
+        console.log(transaction);
 
-      resolve({ grant, transactionId });
-    });
+        resolve({ grant, transactionId });
+      });
   }
 
-  async list({
-    owner = ZERO_ADDRESS,
-    grantee = ZERO_ADDRESS,
-    id: dataId = ZERO_DATA_ID,
-  } = {}) {
+  async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID } = {}) {
     if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
 
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
 
-    return grants.map(([ owner, grantee, dataId, lockedUntil ]) => (
-      new Grant({ owner, grantee, dataId, lockedUntil })
-    ));
+    return grants.map(([owner, grantee, dataId, lockedUntil]) => new Grant({ owner, grantee, dataId, lockedUntil }));
   }
 
-  async create({
-    grantee = ZERO_ADDRESS,
-    id: dataId = ZERO_DATA_ID,
-    lockedUntil = ZERO_TIMELOCK,
-    wait = true,
-  } = {}) {
+  async create({ grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -232,12 +218,7 @@ export class Grants {
     return await this.#grantPromise(grant, wait)(transaction);
   }
 
-  async revoke({
-    grantee = ZERO_ADDRESS,
-    id: dataId = ZERO_DATA_ID,
-    lockedUntil = ZERO_TIMELOCK,
-    wait = true,
-  } = {}) {
+  async revoke({ grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }

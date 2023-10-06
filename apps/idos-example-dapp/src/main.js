@@ -1,3 +1,4 @@
+import "@near-wallet-selector/modal-ui-js/styles.css";
 import { ethers, ZeroAddress, Contract } from "ethers";
 
 import { setupWalletSelector } from "@near-wallet-selector/core";
@@ -25,7 +26,7 @@ const useNearWallet = async () => {
   let wallet, walletSelectorReady;
 
   const selector = await setupWalletSelector({
-    network: "mainnet",
+    network: "testnet",
     modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
   });
 
@@ -42,7 +43,7 @@ const useNearWallet = async () => {
   // it will trigger wallet.signIn, which we don't need.
   // Cons: more signatures for the user
   // Pros: it's pretty and familiar
-  const modal = setupModal(selector, { contractId: "idos-dev-1.near" });
+  const modal = setupModal(selector, { contractId: "idos-dev-1.testnet" });
   const subscription = modal.on("onHide", async () => {
     wallet = await selector.wallet();
     walletSelectorReady();
@@ -64,6 +65,7 @@ const useNearWallet = async () => {
     return { signature };
   };
   idos.auth.setWalletSigner(signer, signMessage.publicKey, "ed25519_nr");
+  await idos.grants.init({ account: signMessage.accountId, wallet: await selector.wallet(), type: "near" });
 };
 
 const useEnclaveSigner = async () => {
@@ -77,7 +79,6 @@ await useEvmWallet();
 // await useNearWallet();
 // await useEnclaveSigner();
 
-/*
 const currentUser = await idos.auth.currentUser();
 
 if (!currentUser?.humanId) {
@@ -109,34 +110,24 @@ if (!currentUser?.humanId) {
     });
   });
 }
-*/
 
+// console.log(
+//   await idos.grants.create({
+//     grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+//     id: "121",
+//     wait: false,
+//   })
+// );
 
-/*
-console.log(await idos.grants.create({
-  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-  id: "121",
-  wait: false,
-}));
-*/
+// console.log(
+//   await idos.grants.list({
+//     grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+//     id: "120",
+//   })
+// );
 
-/*
-console.log(await idos.grants.list({
-  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-  id: "120",
-}));
-*/
-
-console.log(await idos.grants.revoke({
-  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-  id: "121",
-  wait: false,
-}));
-
-
-/*
-console.log(await idos.grants.list({
-  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-  id: "121",
-}));
-*/
+// console.log(await idos.grants.revoke({
+//   grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+//   id: "121",
+//   wait: false,
+// }));

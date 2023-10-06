@@ -1,7 +1,7 @@
 import { Auth } from "./auth";
 import { Crypto } from "./crypto";
 import { Data } from "./data";
-import { Grants } from "./grants";
+import { Grants } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 
 export class idOS {
