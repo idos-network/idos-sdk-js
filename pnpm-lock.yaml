@@ -269,6 +269,9 @@ importers:
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
+      near-api-js:
+        specifier: ^2.1.4
+        version: 2.1.4
       uuid:
         specifier: ^9.0.1
         version: 9.0.1
