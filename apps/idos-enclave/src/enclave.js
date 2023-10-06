@@ -77,9 +77,7 @@ export class Enclave {
   }
 
   async sign(message) {
-    const displayMessage = typeof message === "string"
-      ? message
-      : StableUtf8.decode(message);
+    const displayMessage = typeof message === "string" ? message : StableUtf8.decode(message);
 
     const consented = await this.#openDialog(
       "consent",
@@ -124,7 +122,14 @@ export class Enclave {
     // (new database schema TK)
     senderPublicKey = this.keyPair.publicKey;
 
-    const ciphertext = StableBase64.decode(ciphertextBase64);
+    let ciphertext;
+
+    try {
+      ciphertext = StableBase64.decode(ciphertextBase64);
+    } catch (error) {
+      ciphertext = StableUtf8.encode(ciphertextBase64);
+    }
+
     const nonce = ciphertext.slice(0, nacl.box.nonceLength);
     const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
 
@@ -132,7 +137,7 @@ export class Enclave {
 
     try {
       return StableUtf8.decode(decryptedMessage);
-    } catch(e) {
+    } catch (e) {
       return "(decryption failed)";
     }
   }
