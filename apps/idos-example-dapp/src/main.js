@@ -1,4 +1,4 @@
-import { ethers, Contract } from "ethers";
+import { ethers, ZeroAddress, Contract } from "ethers";
 
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupModal } from "@near-wallet-selector/modal-ui-js";
@@ -13,10 +13,12 @@ const idos = new idOS({ url: "https://nodes.playground.idos.network", container:
 await idos.crypto.init();
 
 const useEvmWallet = async () => {
-  const web3provider = new ethers.BrowserProvider(window.ethereum);
-  await web3provider.send("eth_requestAccounts", []);
-  window.signer = await web3provider.getSigner();
-  await idos.auth.setWalletSigner(await web3provider.getSigner());
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  await provider.send("eth_requestAccounts", []);
+  const signer = await provider.getSigner();
+
+  await idos.auth.setWalletSigner(signer);
+  await idos.grants.init({ signer, type: "evm" });
 };
 
 const useNearWallet = async () => {
@@ -75,6 +77,7 @@ await useEvmWallet();
 // await useNearWallet();
 // await useEnclaveSigner();
 
+/*
 const currentUser = await idos.auth.currentUser();
 
 if (!currentUser?.humanId) {
@@ -106,202 +109,34 @@ if (!currentUser?.humanId) {
     });
   });
 }
+*/
 
-window.ethers = ethers;
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+/*
+console.log(await idos.grants.create({
+  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+  id: "121",
+  wait: false,
+}));
+*/
 
-export class Grants {
-  #abi = [
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "grantee",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "dataId",
-          type: "string",
-        },
-        {
-          internalType: "uint256",
-          name: "lockedUntil",
-          type: "uint256",
-        },
-      ],
-      name: "deleteGrant",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "grantee",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "dataId",
-          type: "string",
-        },
-        {
-          internalType: "uint256",
-          name: "lockedUntil",
-          type: "uint256",
-        },
-      ],
-      name: "insertGrant",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      stateMutability: "nonpayable",
-      type: "constructor",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "owner",
-          type: "address",
-        },
-        {
-          internalType: "address",
-          name: "grantee",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "dataId",
-          type: "string",
-        },
-      ],
-      name: "findGrants",
-      outputs: [
-        {
-          components: [
-            {
-              internalType: "address",
-              name: "owner",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "grantee",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "dataId",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "lockedUntil",
-              type: "uint256",
-            },
-          ],
-          internalType: "struct AccessGrants.Grant[]",
-          name: "",
-          type: "tuple[]",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "grantee",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "dataId",
-          type: "string",
-        },
-      ],
-      name: "grantsFor",
-      outputs: [
-        {
-          components: [
-            {
-              internalType: "address",
-              name: "owner",
-              type: "address",
-            },
-            {
-              internalType: "address",
-              name: "grantee",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "dataId",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "lockedUntil",
-              type: "uint256",
-            },
-          ],
-          internalType: "struct AccessGrants.Grant[]",
-          name: "",
-          type: "tuple[]",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-  ];
+/*
+console.log(await idos.grants.list({
+  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+  id: "120",
+}));
+*/
 
-  #address = "0x9A961ECd4d2EEB84f990EcD041Cb108083A3C1BA";
-  #contract;
-  constructor(signer) {
-    this.#contract = new Contract(this.#address, this.#abi, signer);
-  }
+console.log(await idos.grants.revoke({
+  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+  id: "121",
+  wait: false,
+}));
 
-  async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, dataId = "0" }) {
-    if (owner || grantee) {
-      const grants = await this.#contract.findGrants(owner, grantee, dataId);
-      return grants;
-    } else {
-      throw new Error("Must provide `owner` and/or `grantee`");
-    }
-  }
 
-  async create({ address, id, lockedUntil = 0 }) {
-    return this.#contract.insertGrant(address, id, lockedUntil);
-  }
-
-  async revoke({ address, id, lockedUntil = 0 }) {
-    return await this.#contract.deleteGrant(address, id, lockedUntil);
-  }
-}
-const web3provider = new ethers.BrowserProvider(window.ethereum);
-const grants = new Grants(web3provider);
-
-// const g = await grants.create({
-//   address: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-//   id: "123",
-// });
-
-// const g = await grants.revoke({
-//   address: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-//   id: "123",
-// });
-
-const l = await grants.list({
-  owner: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-  dataId: "123",
-});
-
-console.log(l);
+/*
+console.log(await idos.grants.list({
+  grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
+  id: "121",
+}));
+*/
