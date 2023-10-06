@@ -1,5 +1,5 @@
 import { Box, Button, Flex, useDisclosure } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { RemoveCredential } from "@/routes/dashboard/credentials/components/remove-credential.tsx";
@@ -21,7 +21,15 @@ export function Component() {
   const { isOpen: isSharesEditorOpen, onOpen: onSharesEditorOpen, onClose: onSharesEditorClose } = useDisclosure();
   const { isOpen: isShareOpen, onOpen: onShareOpen, onClose: onShareClose } = useDisclosure();
 
-  const credentials = useFetchCredentials();
+  const credentials = useFetchCredentials({
+    select: (data) =>
+      data
+        ?.filter(({ original_id }) => original_id === "")
+        .map((credential) => ({
+          ...credential,
+          shares: data.filter((c) => c.original_id === credential.id).map((c) => c.id),
+        })),
+  });
 
   const handleOnEditorClose = () => {
     setCredential(undefined);
@@ -73,16 +81,6 @@ export function Component() {
     onSharesEditorClose();
   };
 
-  const ownCredentials = useMemo(
-    () =>
-      credentials.data
-        ?.filter(({ original_id }) => original_id === "")
-        .map((credential) => ({
-          ...credential,
-          shares: credentials.data.filter((c) => c.original_id === credential.id).map((c) => c.id),
-        })),
-    [credentials.data]
-  );
   return (
     <Box>
       <Flex align="center" justify="end" mb={5}>
@@ -93,7 +91,7 @@ export function Component() {
 
       <CredentialsTable
         isLoading={credentials.isFetching}
-        credentials={ownCredentials}
+        credentials={credentials.data}
         onCredentialRemove={handleCredentialRemove}
         onCredentialView={onCredentialView}
         onCredentialEdit={onCredentialEdit}
