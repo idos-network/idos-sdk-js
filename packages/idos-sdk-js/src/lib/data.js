@@ -16,17 +16,7 @@ export class Data {
    * @returns {Promise<Array<Record<string, unknown>>}
    */
   async list(tableName, filter) {
-    let records = await this.idOS.kwilWrapper.call(
-      `get_${tableName}`,
-      null,
-      `List your ${tableName} in idOS`,
-    );
-
-    if (tableName === "credentials") {
-      for (const record of records) {
-        record.content = await this.idOS.crypto.decrypt(record.content);
-      };
-    }
+    let records = await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`);
 
     if (tableName === "attributes") {
       for (const record of records) {
@@ -79,7 +69,7 @@ export class Data {
         id,
         ...record,
       },
-      `Create new ${this.singularize(tableName)} in your idOS profile`,
+      `Create new ${this.singularize(tableName)} in your idOS profile`
     );
 
     return newRecord;
@@ -92,6 +82,16 @@ export class Data {
    * @returns {Promise<Record<string, unknown>>}
    */
   async get(tableName, recordId) {
+    if (tableName === "credentials") {
+      let [record] = await this.idOS.kwilWrapper.call(
+        `get_credential_owned`,
+        { id: recordId },
+        `Get your credential in idOS`
+      );
+      record.content = await this.idOS.crypto.decrypt(record.content);
+      return record;
+    }
+
     let records = await this.list(tableName, { id: recordId });
     return records[0];
   }

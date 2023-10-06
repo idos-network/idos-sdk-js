@@ -2,33 +2,35 @@ import { Utils } from "@kwilteam/kwil-js";
 import { createMutation } from "react-query-kit";
 
 import { kwil } from "@/lib/db";
+import { idos } from "@/lib/idos";
 import { buildTx } from "@/lib/mutations";
+import invariant from "tiny-invariant";
 
-type AttributeVars = { id: string; attribute_key: string; value: string };
+type AttributeVars = { id?: string; attribute_key: string; value: string };
+
 export const useCreateAttribute = createMutation({
-  mutationFn: async ({ id, attribute_key, value }: AttributeVars) => {
-    const inputs = new Utils.ActionInput().put("$id", id).put("$attribute_key", attribute_key).put("$value", value);
-    const tx = await buildTx("add_attribute", inputs);
-
-    return kwil.broadcast(tx);
+  mutationFn: async ({ attribute_key, value }: AttributeVars) => {
+    return await idos.data.create("attributes", {
+      attribute_key,
+      value,
+    });
   },
 });
 
 export const useUpdateAttribute = createMutation({
   mutationFn: async ({ id, attribute_key, value }: AttributeVars) => {
-    const inputs = new Utils.ActionInput().put("$id", id).put("$attribute_key", attribute_key).put("$value", value);
-    const tx = await buildTx("edit_attribute", inputs);
-
-    return kwil.broadcast(tx);
+    invariant(id, "`id` is required in order to update an attribute value");
+    return await idos.data.update("attributes", {
+      id,
+      attribute_key,
+      value,
+    });
   },
 });
 
 export const useRemoveAttribute = createMutation({
   mutationFn: async ({ id }: { id: string }) => {
-    const inputs = new Utils.ActionInput().put("$id", id);
-    const tx = await buildTx("remove_attribute", inputs);
-
-    return kwil.broadcast(tx);
+    return idos.data.delete("attribute", id);
   },
 });
 
@@ -39,6 +41,7 @@ export const useShareAttribute = createMutation({
     value,
     original_attribute_id,
   }: AttributeVars & { original_attribute_id: string }) => {
+    invariant(id, "`id` is required in order to share an attribute");
     const inputs = new Utils.ActionInput()
       .put("$id", id)
       .put("$attribute_key", attribute_key)

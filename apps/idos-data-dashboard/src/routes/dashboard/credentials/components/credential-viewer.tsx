@@ -12,11 +12,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
-import invariant from "tiny-invariant";
 
 import { Loading } from "@/lib/components/loading";
-import { decrypt } from "@/lib/encryption";
-import { useStoredCredentials } from "@/lib/hooks";
 import { useFetchCredentialDetails } from "../queries";
 import { Credential } from "../types";
 
@@ -28,20 +25,14 @@ export type CredentialViewerProps = {
 
 export function CredentialViewer(props: CredentialViewerProps) {
   const { t } = useTranslation();
-  const credentials = useStoredCredentials();
-
-  invariant(credentials, "Credentials are not available");
-
   const credential = useFetchCredentialDetails({
     variables: {
       id: props.credential?.id as string,
     },
     enabled: !!props.credential?.id && props.isOpen,
-    select: (credential) => ({
-      ...credential,
-      content: decrypt(credential.content, credentials.publicKey, credentials.secretKey),
-    }),
   });
+
+  console.log(credential.data);
 
   return (
     <Modal

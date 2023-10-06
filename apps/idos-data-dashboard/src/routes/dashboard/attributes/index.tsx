@@ -1,16 +1,10 @@
 import { Box, Button, Code, Flex, useDisclosure, useToast } from "@chakra-ui/react";
 import { isError, useQueryClient } from "@tanstack/react-query";
-import { useAtomValue } from "jotai";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router-dom";
-import invariant from "tiny-invariant";
 
 import { ConfirmDialog } from "@/lib/components/confirm-dialog";
-import { decrypt, encrypt } from "@/lib/encryption";
-import { useStoredCredentials } from "@/lib/hooks";
-import { signerAtom } from "@/lib/store";
-
 import { AttributeEditor, AttributeEditorFormValues } from "./components/attribute-editor";
 import { AttributesTable } from "./components/attributes-table";
 import { ShareAttribute } from "./components/share-attribute";
@@ -37,13 +31,16 @@ export function Component() {
   const { isOpen: isShareOpen, onOpen: onShareOpen, onClose: onShareClose } = useDisclosure();
 
   const [attribute, setAttribute] = useState<Attribute>();
-  const signer = useAtomValue(signerAtom);
-  const credentials = useStoredCredentials();
-
-  invariant(credentials, "Credentials are not available");
 
   const attributes = useFetchAttributes({
     useErrorBoundary: true,
+    select: (data) =>
+      data
+        ?.filter(({ original_id }) => original_id === "")
+        .map((attribute) => ({
+          ...attribute,
+          shares: data?.filter((a) => a.original_id === attribute.id).map((a) => a.id),
+        })),
   });
 
   const createAttribute = useCreateAttribute({
@@ -73,14 +70,10 @@ export function Component() {
     async onMutate(vars) {
       await queryClient.cancelQueries(useFetchAttributes.getKey());
       const previousAttributes = queryClient.getQueryData<Attribute[]>(useFetchAttributes.getKey()) ?? [];
-
       const attributeIndex = previousAttributes?.findIndex(({ id }) => id === vars.id) ?? -1;
       previousAttributes[attributeIndex] = { ...vars };
-
       queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [...previousAttributes]);
-
       attributes.setData([...previousAttributes]);
-
       return { previousAttributes };
     },
 
@@ -94,9 +87,11 @@ export function Component() {
     async onMutate(attribute) {
       await queryClient.cancelQueries(useFetchAttributes.getKey());
       const previousAttributes = attributes.data;
+
       if (previousAttributes) {
         attributes.setData([...previousAttributes.filter((a) => a.id !== attribute.id)]);
       }
+
       return { previousAttributes };
     },
 
@@ -121,19 +116,30 @@ export function Component() {
 
   const onEditorSubmit = (values: AttributeEditorFormValues) => {
     onEditorClose();
-    const mutation = values.id ? updateAttribute : createAttribute;
-    const id = values.id || crypto.randomUUID();
+    if (values.id) {
+      return updateAttribute.mutate(
+        {
+          ...values,
+        },
+        {
+          onSuccess() {
+            toast({
+              title: t("attribute-successfully-updated", { name: values.attribute_key }),
+            });
+          },
+          onError() {
+            toast({
+              title: t("error-while-updating-attribute", { name: values.attribute_key }),
+              status: "error",
+            });
+          },
+        }
+      );
+    }
 
-    invariant(signer, "Signer is not available");
-
-    const { value } = values;
-    const encryptedValue = encrypt(value, credentials.publicKey, credentials.secretKey);
-
-    mutation.mutate(
+    createAttribute.mutate(
       {
         ...values,
-        value: encryptedValue,
-        id,
       },
       {
         onSuccess() {
@@ -163,7 +169,6 @@ export function Component() {
 
   const onRemoveConfirm = () => {
     onConfirmClose();
-    invariant(signer, "Signer is not available");
     if (attribute) {
       removeAttribute.mutate(
         {
@@ -172,7 +177,6 @@ export function Component() {
         {
           onSuccess() {
             setAttribute(createEmptyAttribute());
-
             toast({
               title: t("attribute-successfully-removed", { name: attribute.attribute_key }),
             });
@@ -208,18 +212,6 @@ export function Component() {
     onSharesEditorClose();
   };
 
-  const ownAttributes = useMemo(
-    () =>
-      attributes.data
-        ?.filter(({ original_id }) => original_id === "")
-        .map((attribute) => ({
-          ...attribute,
-          value: decrypt(attribute.value, credentials.publicKey, credentials.secretKey),
-          shares: attributes.data?.filter((a) => a.original_id === attribute.id).map((a) => a.id),
-        })),
-    [attributes.data, credentials.publicKey, credentials.secretKey]
-  );
-
   const isLoadingAttributes =
     attributes.isFetching || createAttribute.isLoading || updateAttribute.isLoading || removeAttribute.isLoading;
 
@@ -232,7 +224,7 @@ export function Component() {
       </Flex>
       <AttributesTable
         isLoading={isLoadingAttributes}
-        attributes={ownAttributes}
+        attributes={attributes.data}
         onAttributeEdit={onAttributeEdit}
         onAttributeRemove={onAttributeRemove}
         onViewAttributeShares={handleSharesEditorOpen}

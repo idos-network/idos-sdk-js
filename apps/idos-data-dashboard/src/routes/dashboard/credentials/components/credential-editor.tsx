@@ -19,11 +19,8 @@ import {
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
-import invariant from "tiny-invariant";
 
 import { Loading } from "@/lib/components/loading";
-import { decrypt, encrypt } from "@/lib/encryption";
-import { useStoredCredentials } from "@/lib/hooks";
 import { useQueryClient } from "@tanstack/react-query";
 import { useCreateCredential, useUpdateCredential } from "../mutations";
 import { useFetchCredentialDetails, useFetchCredentials } from "../queries";
@@ -44,19 +41,13 @@ export type CredentialEditorProps = {
 
 export function CredentialEditor(props: CredentialEditorProps) {
   const { t } = useTranslation();
-  const credentials = useStoredCredentials();
   const toast = useToast();
-  invariant(credentials, "Credentials are not available");
 
   const credential = useFetchCredentialDetails({
     variables: {
       id: props.credential?.id as string,
     },
     enabled: !!props.credential?.id && props.isOpen,
-    select: (credential) => ({
-      ...credential,
-      content: decrypt(credential.content, credentials.publicKey, credentials.secretKey),
-    }),
   });
 
   const {
@@ -82,6 +73,7 @@ export function CredentialEditor(props: CredentialEditorProps) {
       if (previousCredentials) {
         const newCredential: Credential = {
           ...credential,
+          id: crypto.randomUUID(),
           original_id: "",
           human_id: "",
         };
@@ -118,34 +110,47 @@ export function CredentialEditor(props: CredentialEditorProps) {
   });
 
   const onSubmit = (values: CredentialEditorFormValues) => {
-    invariant(credentials, "Credentials are not available");
-    const mutation = props.credential?.id ? updateCredential : createCredential;
-    const id = props.credential?.id || crypto.randomUUID();
-    const { content } = values;
-    const encryptedContent = encrypt(content, credentials.publicKey, credentials.secretKey);
+    if (values.id) {
+      return updateCredential.mutate(
+        {
+          ...values,
+          id: values.id,
+        },
+        {
+          onSuccess() {
+            props.onClose();
+            toast({
+              title: t("credential-successfully-updated"),
+            });
+          },
+          onError() {
+            toast({
+              title: t("error-while-updating-credential"),
+              status: "error",
+            });
+          },
+        }
+      );
+    }
 
-    mutation.mutate(
-      {
-        ...values,
-        content: encryptedContent,
-        id,
+    console.log(values);
+
+    return createCredential.mutate(values, {
+      onSuccess() {
+        props.onClose();
+        toast({
+          title: t("credential-successfully-created"),
+        });
       },
-      {
-        onSuccess() {
-          props.onClose();
-          toast({
-            title: t("credential-successfully-created"),
-          });
-        },
-        onError() {
-          toast({
-            title: t("error-while-creating-credential"),
-            status: "error",
-          });
-        },
-      }
-    );
+      onError() {
+        toast({
+          title: t("error-while-creating-credential"),
+          status: "error",
+        });
+      },
+    });
   };
+
   const title = props.credential?.id ? t("edit-credential") : t("new-credential");
   const isMutating = createCredential.isLoading || updateCredential.isLoading;
 

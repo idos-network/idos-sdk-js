@@ -1,42 +1,36 @@
 import { kwil } from "@/lib/db";
+import { idos } from "@/lib/idos";
 import { buildTx } from "@/lib/mutations";
 import { Utils } from "@kwilteam/kwil-js";
 import { createMutation } from "react-query-kit";
 
-type CredentialVars = { id: string; issuer: string; credential_type: string; content: string };
+type CreateCredentialVars = { issuer: string; credential_type: string; content: string };
+type UpdateCredentialVars = { id: string; issuer: string; credential_type: string; content: string };
 
 export const useCreateCredential = createMutation({
-  mutationFn: async ({ id, issuer, credential_type, content }: CredentialVars) => {
-    const inputs = new Utils.ActionInput()
-      .put("$id", id)
-      .put("$issuer", issuer)
-      .put("$credential_type", credential_type)
-      .put("$content", content);
-    const tx = await buildTx("add_credential", inputs);
-
-    return kwil.broadcast(tx);
+  mutationFn: async ({ issuer, credential_type, content }: CreateCredentialVars) => {
+    return idos.data.create("credentials", {
+      issuer,
+      credential_type,
+      content,
+    });
   },
 });
 
 export const useUpdateCredential = createMutation({
-  mutationFn: async ({ id, issuer, credential_type, content }: CredentialVars) => {
-    const inputs = new Utils.ActionInput()
-      .put("$id", id)
-      .put("$issuer", issuer)
-      .put("$credential_type", credential_type)
-      .put("$content", content);
-    const tx = await buildTx("edit_credential", inputs);
-
-    return kwil.broadcast(tx);
+  mutationFn: async ({ id, issuer, credential_type, content }: UpdateCredentialVars) => {
+    return idos.data.update("credentials", {
+      id,
+      issuer,
+      credential_type,
+      content,
+    });
   },
 });
 
 export const useRemoveCredential = createMutation({
   mutationFn: async ({ id }: { id: string }) => {
-    const inputs = new Utils.ActionInput().put("$id", id);
-    const tx = await buildTx("remove_credential", inputs);
-
-    return kwil.broadcast(tx);
+    return idos.data.delete("credentials", id);
   },
 });
 
@@ -47,7 +41,7 @@ export const useShareCredential = createMutation({
     credential_type,
     content,
     original_credential_id,
-  }: CredentialVars & { original_credential_id: string }) => {
+  }: UpdateCredentialVars & { original_credential_id: string }) => {
     const inputs = new Utils.ActionInput()
       .put("$id", id)
       .put("$issuer", issuer)
