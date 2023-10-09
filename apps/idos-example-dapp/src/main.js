@@ -19,33 +19,26 @@ const useEvmWallet = async () => {
   const signer = await provider.getSigner();
 
   await idos.auth.setWalletSigner(signer);
+
   await idos.grants.init({ signer, type: "evm" });
 };
 
 const useNearWallet = async () => {
-  let wallet, walletSelectorReady;
+  const contractId = "idos-dev-1.testnet";
+  let accountId, wallet, walletSelectorReady;
 
   const selector = await setupWalletSelector({
     network: "testnet",
     modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
   });
 
-  // custom selector
-  document.querySelector("#near_wallet_selector").style.display = "block";
-  document.querySelector("#near_wallet_selector form").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    wallet = await selector.wallet(e.submitter.name);
-    document.querySelector("#near_wallet_selector").style.display = "none";
-    walletSelectorReady();
+  const modal = setupModal(selector, {
+    contractId,
+    methodNames: idos.grants.near.contractMethods,
   });
-
-  // We can't use this modal just for wallet selection, because
-  // it will trigger wallet.signIn, which we don't need.
-  // Cons: more signatures for the user
-  // Pros: it's pretty and familiar
-  const modal = setupModal(selector, { contractId: "idos-dev-1.testnet" });
   const subscription = modal.on("onHide", async () => {
     wallet = await selector.wallet();
+    accountId = (await wallet.getAccounts())[0].accountId;
     walletSelectorReady();
   });
   modal.show();
@@ -53,6 +46,7 @@ const useNearWallet = async () => {
   await new Promise((resolve) => (walletSelectorReady = resolve));
 
   // initial signMessage needed to get the public key
+  // (because signIn will always return a different key)
   const message = "idOS authentication";
   const recipient = "idos.network";
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
@@ -64,21 +58,32 @@ const useNearWallet = async () => {
     const signature = Uint8Array.from(atob(signMessage.signature), (c) => c.charCodeAt(0));
     return { signature };
   };
+
   idos.auth.setWalletSigner(signer, signMessage.publicKey, "ed25519_nr");
-  await idos.grants.init({ account: signMessage.accountId, wallet: await selector.wallet(), type: "near" });
+
+  await idos.grants.init({ type: "near", accountId, wallet, contractId });
 };
 
 const useEnclaveSigner = async () => {
   await idos.auth.setEnclaveSigner();
 };
 
+
 /*
  * pick one
  */
-await useEvmWallet();
+// NOTE if using EVM
+// await useEvmWallet();
+// NOTE if using NEAR (for testing: before idOS nodes implement NEP-413)
+await useNearWallet();
+await useEnclaveSigner();
+// NOTE if using NEAR (production: after idOS nodes implement NEP-413)
 // await useNearWallet();
-// await useEnclaveSigner();
 
+
+/*
+ * finally
+ */
 const currentUser = await idos.auth.currentUser();
 
 if (!currentUser?.humanId) {
@@ -110,24 +115,3 @@ if (!currentUser?.humanId) {
     });
   });
 }
-
-// console.log(
-//   await idos.grants.create({
-//     grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-//     id: "121",
-//     wait: false,
-//   })
-// );
-
-// console.log(
-//   await idos.grants.list({
-//     grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-//     id: "120",
-//   })
-// );
-
-// console.log(await idos.grants.revoke({
-//   grantee: "0x220DB51B3444B0B5CF27319cA2E9486C5E896477",
-//   id: "121",
-//   wait: false,
-// }));

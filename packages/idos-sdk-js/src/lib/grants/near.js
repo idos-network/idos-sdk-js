@@ -1,38 +1,85 @@
 import * as nearAPI from "near-api-js";
 
 export class NearGrants {
-  #account;
   #contract;
   #wallet;
 
+  static contractMethods = {
+    list: "find_grants",
+    create: "insert_grant",
+    revoke: "delete_grant",
+  };
+
   constructor() {}
 
-  init({ account, wallet }) {
-    this.#account = account;
+  init({ accountId, wallet, contractId }) {
     this.#wallet = wallet;
-    this.#connectContract();
+    this.#connectContract(accountId, contractId);
   }
 
-  async list({ owner, grantee, id: dataId }) {
-    return await this.#contract.find_grants({ owner, grantee, data_id: dataId });
+  async list({ owner, grantee, id: dataId } = {}) {
+    if (!(owner || grantee)) {
+      throw new Error("Must provide `owner` and/or `grantee`");
+    }
+
+    return await this.#contract[
+      this.constructor.contractMethods.list
+    ]({ owner, grantee, dataId });
   }
 
   async create({ grantee, id: dataId } = {}) {
-    return await this.#wallet.signAndSendTransaction({
-      actions: [
-        {
-          type: "FunctionCall",
-          params: {
-            methodName: "insert_grant",
-            args: { grantee, data_id: dataId },
-            gas: "30000000000000",
+    let transactionResult;
+
+    try {
+      transactionResult = await this.#wallet.signAndSendTransaction({
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: this.constructor.contractMethods.create,
+              args: { grantee, dataId },
+              gas: "30000000000000",
+            },
           },
-        },
-      ],
-    });
+        ],
+      });
+    } catch (e) {
+      throw new Error("Grant creation failed", {
+        cause: JSON.parse(e.message).kind
+      });
+    }
+
+    return { transactionId: transactionResult.transaction.hash };
   }
 
-  async #connectContract() {
+  async revoke({ grantee, id: dataId } = {}) {
+    let transactionResult;
+
+    try {
+      transactionResult = await this.#wallet.signAndSendTransaction({
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: this.constructor.contractMethods.revoke,
+              args: { grantee, dataId },
+              gas: "30000000000000",
+            },
+          },
+        ],
+      });
+    } catch (e) {
+      throw new Error("Grant creation failed", {
+        cause: JSON.parse(e.message).kind
+      });
+    }
+
+    return { transactionId: transactionResult.transaction.hash };
+  }
+
+  async #connectContract(accountId, contractId) {
+    contractId = contractId || "idos-dev-1.testnet";
+
     const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
     const nearConnection = await nearAPI.connect({
       networkId: "testnet",
@@ -40,10 +87,10 @@ export class NearGrants {
       nodeUrl: "https://rpc.testnet.near.org",
     });
 
-    const account = await nearConnection.account(this.#account);
+    const account = await nearConnection.account(accountId);
 
-    this.#contract = new nearAPI.Contract(account, "idos-dev-1.testnet", {
-      viewMethods: ["find_grants"],
+    this.#contract = new nearAPI.Contract(account, contractId, {
+      viewMethods: [this.constructor.contractMethods.list],
     });
   }
 }
