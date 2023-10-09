@@ -8,8 +8,6 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
-import * as nearAPI from "near-api-js";
-
 import { idOS } from "@idos-network/idos-sdk";
 
 const idos = new idOS({ url: "https://nodes.playground.idos.network", container: "#idOS" });
@@ -22,12 +20,12 @@ const useEvmWallet = async () => {
 
   await idos.auth.setWalletSigner(signer);
 
-  // NOTE if using access grants
   await idos.grants.init({ signer, type: "evm" });
 };
 
 const useNearWallet = async () => {
-  let wallet, walletSelectorReady;
+  const contractId = "idos-dev-1.testnet";
+  let accountId, wallet, walletSelectorReady;
 
   const selector = await setupWalletSelector({
     network: "testnet",
@@ -35,11 +33,12 @@ const useNearWallet = async () => {
   });
 
   const modal = setupModal(selector, {
-    contractId: "idos-dev-1.near",
-    methodNames: ["insert_grant", "find_grants"],
+    contractId,
+    methodNames: idos.grants.near.contractMethods,
   });
   const subscription = modal.on("onHide", async () => {
     wallet = await selector.wallet();
+    accountId = (await wallet.getAccounts())[0].accountId;
     walletSelectorReady();
   });
   modal.show();
@@ -47,6 +46,7 @@ const useNearWallet = async () => {
   await new Promise((resolve) => (walletSelectorReady = resolve));
 
   // initial signMessage needed to get the public key
+  // (because signIn will always return a different key)
   const message = "idOS authentication";
   const recipient = "idos.network";
   const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
@@ -61,33 +61,24 @@ const useNearWallet = async () => {
 
   idos.auth.setWalletSigner(signer, signMessage.publicKey, "ed25519_nr");
 
-  // NOTE if using access grants
-  await idos.grants.init({
-    account: signMessage.accountId,
-    wallet: await selector.wallet(),
-    type: "near",
-  });
+  await idos.grants.init({ type: "near", accountId, wallet, contractId });
 };
 
 const useEnclaveSigner = async () => {
   await idos.auth.setEnclaveSigner();
 };
 
-let contract;
-
-
-// NOTE this method can only be used for reading, because keyStore only has public keys
-const findGrants = async ({ owner, grantee, dataId }) => (
-  await contract.find_grants({owner, grantee, data_id: dataId})
-);
-
 
 /*
  * pick one
  */
-//await useEvmWallet();
+// NOTE if using EVM
+// await useEvmWallet();
+// NOTE if using NEAR (for testing: before idOS nodes implement NEP-413)
 await useNearWallet();
-//await useEnclaveSigner();
+await useEnclaveSigner();
+// NOTE if using NEAR (production: after idOS nodes implement NEP-413)
+// await useNearWallet();
 
 
 /*

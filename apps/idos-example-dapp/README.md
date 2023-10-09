@@ -4,8 +4,4 @@
 
 A sample dapp demonstrating SDK usage. Uses [ethers.js](https://docs.ethers.org/) and [MetaMask](https://metamask.io/).
 
-To run:
-
-1. `pnpm install` and `pnpm build`
-2. serve the build through a web server (e.g. `python -m http.server` from within the `dist` folder)
-3. visit `localhost:5173` (replace with your chose port)
+Run with `pnpm install` and `pnpm dev`.

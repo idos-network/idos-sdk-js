@@ -3,6 +3,11 @@ import { NearGrants } from "./near";
 
 export class Grants {
   #child;
+
+  near = {
+    contractMethods: Object.values(NearGrants.contractMethods),
+  };
+
   constructor(idOS) {
     this.idOS = idOS;
   }
@@ -26,10 +31,12 @@ export class Grants {
   }
 
   async create(args) {
+    // TODO: create idOS record duplicate
     return this.#child.create(args);
   }
 
   async revoke(args) {
+    // TODO: delete idOS record duplicate
     return this.#child.create(args);
   }
 }

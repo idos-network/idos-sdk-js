@@ -4,7 +4,7 @@
 
 ## Installation
 
-Run `pnpm add @idos-network/idos-sdk` or `npm install @idos-network/idos-sdk` to install [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk).
+Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) with `pnpm add @idos-network/idos-sdk` (or the equivalent of your package manager of choice).
 
 ## Quickstart
 
@@ -13,18 +13,17 @@ import { idOS } from "@idos-network/idos-sdk";
 
 // initialize SDK
 const idos = new idOS({ url: "..." });
-await idos.auth.setWeb3Signer(connectedSigner);
-// or          .setEnclaveSigner();
 await idos.crypto.init();
+idos.auth.setWalletSigner(connectedSigner);
 
 // read data from the connected user's idOS profile
 const credentials = await idos.data.list("credentials");
 
 // write data to the connected user's idOS profile
-const attribute = await idos.data.create("attributes", { key: "foo", value: "bar" });
-
-// get an access grant (read data later, offline, without needing the user's signature)
-await idos.grants.create(attribute, { address: "0xYou", encryptionPublicKey: "0xYours" });
+const attribute = await idos.data.create("attributes", {
+  attribute_key: "foo",
+  value: "bar",
+});
 ```
 
 See the more complete example at at [examples/dapp](../examples/dapp/).
