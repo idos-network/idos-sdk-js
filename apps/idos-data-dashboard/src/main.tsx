@@ -1,6 +1,7 @@
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { MetaMaskProvider } from "metamask-react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
@@ -39,35 +40,37 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         })}
       >
         <QueryClientProvider client={queryClient}>
-          <RouterProvider
-            router={createBrowserRouter([
-              {
-                path: "/",
-                element: <App />,
-                children: [
-                  {
-                    lazy: () => import("@/routes/dashboard"),
-                    children: [
-                      {
-                        index: true,
-                        lazy: () => import("@/routes/dashboard/attributes"),
-                      },
-                      {
-                        path: "wallets",
-                        lazy: () => import("@/routes/dashboard/wallets"),
-                      },
-                      {
-                        path: "credentials",
-                        lazy: () => import("@/routes/dashboard/credentials"),
-                      },
-                    ],
-                  },
-                ],
-              },
-            ])}
-          />
+          <MetaMaskProvider>
+            <RouterProvider
+              router={createBrowserRouter([
+                {
+                  path: "/",
+                  element: <App />,
+                  children: [
+                    {
+                      lazy: () => import("@/routes/dashboard"),
+                      children: [
+                        {
+                          index: true,
+                          lazy: () => import("@/routes/dashboard/attributes"),
+                        },
+                        {
+                          path: "wallets",
+                          lazy: () => import("@/routes/dashboard/wallets"),
+                        },
+                        {
+                          path: "credentials",
+                          lazy: () => import("@/routes/dashboard/credentials"),
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ])}
+            />
 
-          <ReactQueryDevtools />
+            <ReactQueryDevtools />
+          </MetaMaskProvider>
         </QueryClientProvider>
       </ChakraProvider>
     </I18nextProvider>

@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 export class Data {
   constructor(idOS) {
     this.idOS = idOS;
@@ -61,7 +60,7 @@ export class Data {
       record.value = await this.idOS.crypto.encrypt(record.value);
     }
 
-    let newRecord = { id: uuidv4(), ...record };
+    let newRecord = { id: crypto.randomUUID(), ...record };
 
     await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
