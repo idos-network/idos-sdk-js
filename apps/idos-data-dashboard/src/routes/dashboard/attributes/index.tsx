@@ -50,6 +50,7 @@ export function Component() {
 
       if (previousAttributes) {
         const newAttribute: Attribute = {
+          id: crypto.randomUUID(),
           ...attribute,
           original_id: "",
         };
@@ -71,7 +72,7 @@ export function Component() {
       await queryClient.cancelQueries(useFetchAttributes.getKey());
       const previousAttributes = queryClient.getQueryData<Attribute[]>(useFetchAttributes.getKey()) ?? [];
       const attributeIndex = previousAttributes?.findIndex(({ id }) => id === vars.id) ?? -1;
-      previousAttributes[attributeIndex] = { ...vars };
+      previousAttributes[attributeIndex] = { ...vars, id: vars.id ?? "" };
       queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [...previousAttributes]);
       attributes.setData([...previousAttributes]);
       return { previousAttributes };
