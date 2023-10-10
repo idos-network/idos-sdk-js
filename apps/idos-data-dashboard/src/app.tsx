@@ -24,6 +24,7 @@ export default function App() {
 
   const onMetamaskConnect = async () => {
     await metamask.connect();
+    setIsLoading(true);
     await setupEvmWallet();
     setIsConnected(true);
     setIsLoading(false);
