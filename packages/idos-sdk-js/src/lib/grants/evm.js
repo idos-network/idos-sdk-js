@@ -188,7 +188,7 @@ export class EvmGrants {
       });
   }
 
-  async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID } = {}) {
+  async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID } = {}) {
     if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
@@ -198,7 +198,7 @@ export class EvmGrants {
     return grants.map(([owner, grantee, dataId, lockedUntil]) => new Grant({ owner, grantee, dataId, lockedUntil }));
   }
 
-  async create({ grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
+  async create({ grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -215,7 +215,7 @@ export class EvmGrants {
     return await this.#grantPromise(grant, wait)(transaction);
   }
 
-  async revoke({ grantee = ZERO_ADDRESS, id: dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
+  async revoke({ grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }

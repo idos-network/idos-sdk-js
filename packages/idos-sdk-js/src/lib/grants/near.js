@@ -17,7 +17,7 @@ export class NearGrants {
     this.#connectContract(accountId, contractId);
   }
 
-  async list({ owner, grantee, id: dataId } = {}) {
+  async list({ owner, grantee, dataId } = {}) {
     if (!(owner || grantee)) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
@@ -27,7 +27,7 @@ export class NearGrants {
     ]({ owner, grantee, dataId });
   }
 
-  async create({ grantee, id: dataId } = {}) {
+  async create({ grantee, dataId } = {}) {
     let transactionResult;
 
     try {
@@ -52,7 +52,7 @@ export class NearGrants {
     return { transactionId: transactionResult.transaction.hash };
   }
 
-  async revoke({ grantee, id: dataId } = {}) {
+  async revoke({ grantee, dataId } = {}) {
     let transactionResult;
 
     try {
