@@ -16,35 +16,30 @@ import {
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 
-import { Wallet } from "../types";
-
-export type WalletEditorFormValues = {
-  address: string;
-};
-
-export type WalletEditorProps = {
+export type ShareRecordProps = {
   isOpen: boolean;
-  values?: Wallet;
-  isLoading?: boolean;
-  onSubmit: (values: WalletEditorFormValues) => void;
+  title: string;
   onClose: () => void;
 };
 
-export function WalletEditor(props: WalletEditorProps) {
+export type ShareRecordFormValues = {
+  address: string;
+  key: string;
+};
+export function ShareRecord(props: ShareRecordProps) {
   const { t } = useTranslation();
-
-  const { values } = props;
 
   const {
     formState: { errors },
     handleSubmit,
     register,
     reset,
-  } = useForm<WalletEditorFormValues>({
-    values,
-  });
+  } = useForm<ShareRecordFormValues>();
 
-  const title = values?.id ? t("edit-wallet") : t("new-wallet");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const onSubmit = (_values: ShareRecordFormValues) => {
+    // @todo: implement
+  };
 
   return (
     <Modal
@@ -58,16 +53,16 @@ export function WalletEditor(props: WalletEditorProps) {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>{title}</ModalHeader>
+        <ModalHeader>{props.title}</ModalHeader>
         <ModalCloseButton />
-        <form onSubmit={handleSubmit(props.onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <ModalBody>
             <VStack gap={5}>
               <FormControl isInvalid={!!errors.address}>
-                <FormLabel htmlFor="address">{t("wallet-address")}</FormLabel>
+                <FormLabel htmlFor="address">{t("share-record-address")}</FormLabel>
                 <Input
                   id="address"
-                  placeholder={String(t("wallet-address"))}
+                  placeholder={String(t("share-record-address"))}
                   {...register("address", {
                     required: String(t("field-is-required")),
                   })}
@@ -75,12 +70,23 @@ export function WalletEditor(props: WalletEditorProps) {
 
                 <FormErrorMessage>{errors.address && errors.address.message}</FormErrorMessage>
               </FormControl>
+              <FormControl isInvalid={!!errors.key}>
+                <FormLabel htmlFor="key">{t("share-record-key")}</FormLabel>
+                <Input
+                  id="key"
+                  placeholder={String(t("share-record-key"))}
+                  {...register("key", {
+                    required: String(t("field-is-required")),
+                  })}
+                />
+
+                <FormErrorMessage>{errors.key && errors.key.message}</FormErrorMessage>
+              </FormControl>
             </VStack>
           </ModalBody>
-
           <ModalFooter>
-            <Button mr={3} colorScheme="orange" isLoading={props.isLoading} type="submit">
-              {t("save")}
+            <Button mr={3} colorScheme="orange" type="submit">
+              {t("share-credential")}
             </Button>
             <Button onClick={props.onClose} variant="ghost">
               {t("cancel")}

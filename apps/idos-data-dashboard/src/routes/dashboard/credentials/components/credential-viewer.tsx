@@ -32,8 +32,6 @@ export function CredentialViewer(props: CredentialViewerProps) {
     enabled: !!props.credential?.id && props.isOpen,
   });
 
-  console.log(credential.data);
-
   return (
     <Modal
       isOpen={props.isOpen}

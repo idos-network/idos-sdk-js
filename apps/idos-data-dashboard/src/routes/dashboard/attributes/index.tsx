@@ -7,8 +7,6 @@ import { useRouteError } from "react-router-dom";
 import { ConfirmDialog } from "@/lib/components/confirm-dialog";
 import { AttributeEditor, AttributeEditorFormValues } from "./components/attribute-editor";
 import { AttributesTable } from "./components/attributes-table";
-import { ShareAttribute } from "./components/share-attribute";
-import { SharesEditor } from "./components/shares-editor.tsx";
 import { useCreateAttribute, useRemoveAttribute, useUpdateAttribute } from "./mutations";
 import { useFetchAttributes } from "./queries";
 import { Attribute } from "./types";
@@ -27,8 +25,6 @@ export function Component() {
   const toast = useToast();
   const { isOpen: isEditorOpen, onOpen: onEditorOpen, onClose: onEditorClose } = useDisclosure();
   const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
-  const { isOpen: isSharesEditorOpen, onOpen: onSharesEditorOpen, onClose: onSharesEditorClose } = useDisclosure();
-  const { isOpen: isShareOpen, onOpen: onShareOpen, onClose: onShareClose } = useDisclosure();
 
   const [attribute, setAttribute] = useState<Attribute>();
 
@@ -121,6 +117,7 @@ export function Component() {
       return updateAttribute.mutate(
         {
           ...values,
+          id: values.id,
         },
         {
           onSuccess() {
@@ -193,26 +190,6 @@ export function Component() {
     }
   };
 
-  const handleShareOpen = (attribute: Attribute) => {
-    setAttribute(attribute);
-    onShareOpen();
-  };
-
-  const handleShareClose = () => {
-    setAttribute(undefined);
-    onShareClose();
-  };
-
-  const handleSharesEditorOpen = (attribute: Attribute) => {
-    setAttribute(attribute);
-    onSharesEditorOpen();
-  };
-
-  const handleSharesEditorClose = () => {
-    setAttribute(undefined);
-    onSharesEditorClose();
-  };
-
   const isLoadingAttributes =
     attributes.isFetching || createAttribute.isLoading || updateAttribute.isLoading || removeAttribute.isLoading;
 
@@ -228,8 +205,6 @@ export function Component() {
         attributes={attributes.data}
         onAttributeEdit={onAttributeEdit}
         onAttributeRemove={onAttributeRemove}
-        onViewAttributeShares={handleSharesEditorOpen}
-        onAttributeShare={handleShareOpen}
       />
       <AttributeEditor
         isOpen={isEditorOpen}
@@ -246,9 +221,6 @@ export function Component() {
         isLoading={removeAttribute.isLoading}
         description={t("are-sure-you-want-to-remove-attribute", { name: attribute?.attribute_key })}
       />
-
-      <ShareAttribute isOpen={isShareOpen} onClose={handleShareClose} attribute={attribute} />
-      <SharesEditor isOpen={isSharesEditorOpen} onClose={handleSharesEditorClose} attribute={attribute} />
     </Box>
   );
 }

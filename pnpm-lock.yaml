@@ -20,9 +20,6 @@ importers:
 
   apps/idos-data-dashboard:
     dependencies:
-      '@cfx-kit/wallet-avatar':
-        specifier: ^0.0.5
-        version: 0.0.5
       '@chakra-ui/react':
         specifier: ^2.8.0
         version: 2.8.1(@emotion/react@11.11.1)(@emotion/styled@11.11.0)(@types/react@18.2.23)(framer-motion@10.16.4)(react-dom@18.2.0)(react@18.2.0)
@@ -59,30 +56,12 @@ importers:
       '@near-wallet-selector/nightly':
         specifier: ^8.5.3
         version: 8.5.3(near-api-js@2.1.4)
-      '@stablelib/base64':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/utf8':
-        specifier: ^1.0.1
-        version: 1.0.1
       '@tanstack/react-query':
         specifier: ^4.33.0
         version: 4.35.3(react-dom@18.2.0)(react@18.2.0)
       '@tanstack/react-query-devtools':
         specifier: ^4.33.0
         version: 4.35.3(@tanstack/react-query@4.35.3)(react-dom@18.2.0)(react@18.2.0)
-      base58-js:
-        specifier: ^2.0.0
-        version: 2.0.0
-      bignumber.js:
-        specifier: ^9.1.2
-        version: 9.1.2
-      dayjs:
-        specifier: ^1.11.9
-        version: 1.11.10
-      delay:
-        specifier: ^6.0.0
-        version: 6.0.0
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
@@ -98,9 +77,6 @@ importers:
       i18next-http-backend:
         specifier: ^2.2.1
         version: 2.2.2
-      jotai:
-        specifier: ^2.4.1
-        version: 2.4.3(@types/react@18.2.23)(react@18.2.0)
       lucide-react:
         specifier: ^0.221.0
         version: 0.221.0(react@18.2.0)
@@ -128,21 +104,9 @@ importers:
       react-router-dom:
         specifier: ^6.15.0
         version: 6.16.0(react-dom@18.2.0)(react@18.2.0)
-      scrypt-js:
-        specifier: ^3.0.1
-        version: 3.0.1
-      tiny-invariant:
-        specifier: ^1.3.1
-        version: 1.3.1
-      tweetnacl:
-        specifier: ^1.0.3
-        version: 1.0.3
       usehooks-ts:
         specifier: ^2.9.1
         version: 2.9.1(react-dom@18.2.0)(react@18.2.0)
-      web-bip39:
-        specifier: ^0.0.2
-        version: 0.0.2
     devDependencies:
       '@playwright/test':
         specifier: ^1.37.1
@@ -369,13 +333,6 @@ packages:
       '@babel/helper-string-parser': 7.22.5
       '@babel/helper-validator-identifier': 7.22.20
       to-fast-properties: 2.0.0
-
-  /@cfx-kit/wallet-avatar@0.0.5:
-    resolution: {integrity: sha512-qQjAxtkAWAG2YCUEffFmySVRwFquYCk3fH62dEv0IKnuTHZeqbqmlTgsXPvNUqBo4wPRZt0J4IxxFhykTvFfbA==}
-    dependencies:
-      '@types/mersenne-twister': 1.1.5
-      mersenne-twister: 1.1.0
-    dev: false
 
   /@chakra-ui/accordion@2.3.1(@chakra-ui/system@2.6.1)(framer-motion@10.16.4)(react@18.2.0):
     resolution: {integrity: sha512-FSXRm8iClFyU+gVaXisOSEw0/4Q+qZbFRiuhIAkVU6Boj0FxAMrlo9a8AV5TuF77rgaHytCdHk0Ng+cyUijrag==}
@@ -2986,10 +2943,6 @@ packages:
   /@types/lodash@4.14.199:
     resolution: {integrity: sha512-Vrjz5N5Ia4SEzWWgIVwnHNEnb1UE1XMkvY5DGXrAeOGE9imk0hgTHh5GyDjLDJi9OTCn9oo9dXH1uToK1VRfrg==}
 
-  /@types/mersenne-twister@1.1.5:
-    resolution: {integrity: sha512-Tm5mA9RESFb2hoSDGGSyWaKIrSHAAPxP/RPwnNibPhwEducrnmtRS2pHLB62XUDMbDxuJ6o6uBHGSKtzDimmqw==}
-    dev: false
-
   /@types/node@18.15.13:
     resolution: {integrity: sha512-N+0kuo9KgrUQ1Sn/ifDXsvg0TTleP7rIy4zOBGECxAljqvqfqpTfzx0Q1NUedOixRMBfe2Whhb056a42cWs26Q==}
     dev: false
@@ -3597,21 +3550,12 @@ packages:
       safe-buffer: 5.2.1
     dev: false
 
-  /base58-js@2.0.0:
-    resolution: {integrity: sha512-nAV5d32QXuGcGptSApkKpC1gGakWBnfJMNjKrYTBh4tb0szfZF+ooueFLy8T4VrY+o4SrE/TyrtUnRZcwZchaA==}
-    engines: {node: '>= 8'}
-    dev: false
-
   /base64-js@1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
     dev: true
 
   /bech32@1.1.4:
     resolution: {integrity: sha512-s0IrSOzLlbvX7yp4WBfPITzpAU8sqQcpsmwXDiKwrG4r491vwCO/XpejasRNl0piBMe/DvP4Tz0mIS/X1DPJBQ==}
-    dev: false
-
-  /bignumber.js@9.1.2:
-    resolution: {integrity: sha512-2/mKyZH9K85bzOEfhXDBFZTGd1CTs+5IHpeFQo9luiBG7hghdC851Pj2WAhb6E3R6b9tZj/XKhbg4fum+Kepug==}
     dev: false
 
   /blueimp-md5@2.19.0:
@@ -4069,10 +4013,6 @@ packages:
       time-zone: 1.0.0
     dev: true
 
-  /dayjs@1.11.10:
-    resolution: {integrity: sha512-vjAczensTgRcqDERK0SR2XMwsF/tSvnvlv6VcF2GIhg6Sx4yOIt/irsr1RDJsKiIyBzJDpCoXiWWq28MqH2cnQ==}
-    dev: false
-
   /de-indent@1.0.2:
     resolution: {integrity: sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg==}
     dev: true
@@ -4150,11 +4090,6 @@ packages:
       has-property-descriptors: 1.0.0
       object-keys: 1.1.1
     dev: true
-
-  /delay@6.0.0:
-    resolution: {integrity: sha512-2NJozoOHQ4NuZuVIr5CWd0iiLVIRSDepakaovIN+9eIDHEhdCAEvSy2cuf1DCrPPQLvHmbqTHODlhHg8UCy4zw==}
-    engines: {node: '>=16'}
-    dev: false
 
   /delayed-stream@1.0.0:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
@@ -5281,22 +5216,6 @@ packages:
     resolution: {integrity: sha512-8wb9Yw966OSxApiCt0K3yNJL8pnNeIv+OEq2YMidz4FKP6nonSRoOXc80iXY4JaN2FC11B9qsNmDsm+ZOfMROA==}
     dev: true
 
-  /jotai@2.4.3(@types/react@18.2.23)(react@18.2.0):
-    resolution: {integrity: sha512-CSAHX9LqWG5WCrU8OgBoZbBJ+Bo9rQU0mPusEF4e0CZ/SNFgurG26vb3UpgvCSJZgYVcUQNiUBM5q86PA8rstQ==}
-    engines: {node: '>=12.20.0'}
-    peerDependencies:
-      '@types/react': '>=17.0.0'
-      react: '>=17.0.0'
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      react:
-        optional: true
-    dependencies:
-      '@types/react': 18.2.23
-      react: 18.2.0
-    dev: false
-
   /js-sha256@0.9.0:
     resolution: {integrity: sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==}
     dev: false
@@ -5487,10 +5406,6 @@ packages:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
     dev: true
-
-  /mersenne-twister@1.1.0:
-    resolution: {integrity: sha512-mUYWsMKNrm4lfygPkL3OfGzOPTR2DBlTkBNHM//F6hGp8cLThY897crAlk3/Jo17LEOOjQUrNAx6DvgO77QJkA==}
-    dev: false
 
   /metamask-react@2.7.0:
     resolution: {integrity: sha512-E1WuBLdy0bRYPb/W8vCiR28CHnuzBafX1X9tazg3ko8FMXzGlZFYvul8yXg8Y5nacGR9OyIuwc9lfI9gDGvS0A==}
@@ -6950,7 +6865,7 @@ packages:
       buffer-polyfill: /buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
-      vite: 4.4.9
+      vite: 4.4.9(@types/node@20.7.1)
     transitivePeerDependencies:
       - rollup
     dev: true
@@ -7120,10 +7035,6 @@ packages:
       semver: 7.5.4
       typescript: 5.2.2
     dev: true
-
-  /web-bip39@0.0.2:
-    resolution: {integrity: sha512-igGeSyMFKeCDe9osJ11tRgkCaKpiCPShkBeilDjpxCDUB0YshswXdXKewMH2K2QaDj+HS7HOCupcFopR7AVbNg==}
-    dev: false
 
   /webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
