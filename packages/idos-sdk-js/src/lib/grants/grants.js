@@ -37,6 +37,6 @@ export class Grants {
 
   async revoke(args) {
     // TODO: delete idOS record duplicate
-    return this.#child.create(args);
+    return this.#child.revoke(args);
   }
 }

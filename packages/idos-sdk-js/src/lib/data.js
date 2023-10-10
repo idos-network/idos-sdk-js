@@ -53,8 +53,6 @@ export class Data {
       throw new Error(`Invalid payload for action ${name}`);
     }
 
-    const id = uuidv4();
-
     if (tableName === "credentials") {
       record.content = await this.idOS.crypto.encrypt(record.content);
     }
@@ -63,12 +61,11 @@ export class Data {
       record.value = await this.idOS.crypto.encrypt(record.value);
     }
 
-    let newRecord = await this.idOS.kwilWrapper.broadcast(
+    let newRecord = { id: uuidv4(), ...record };
+
+    await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
-      {
-        id,
-        ...record,
-      },
+      newRecord,
       `Create new ${this.singularize(tableName)} in your idOS profile`
     );
 
@@ -115,6 +112,22 @@ export class Data {
    */
   async update(tableName, record) {
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
+      ...record,
+    });
+
+    return record;
+  }
+
+  /**
+   * Creates a duplicate record in the given table name,
+   * and a corresponding entry in the shared_tableName table
+   * @param {string} tableName
+   * @param {Record<string, unknown>} record
+   * @returns {Promise<Record<string, unknown>>} the updated record payload
+   */
+  // TODO conform to the schema
+  async share(tableName, record) {
+    await this.idOS.kwilWrapper.broadcast(`share_${this.singularize(tableName)}`, {
       ...record,
     });
 
