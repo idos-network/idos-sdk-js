@@ -10,6 +10,7 @@ import { idos } from "@/lib/idos";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
+
   useEffectOnce(() => {
     async function setup() {
       await idos.crypto.init();

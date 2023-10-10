@@ -13,7 +13,7 @@ import {
   Thead,
   Tr,
 } from "@chakra-ui/react";
-import { Edit2Icon, ShareIcon, Trash2Icon } from "lucide-react";
+import { Edit2Icon, Trash2Icon } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { Attribute } from "../types";
@@ -74,14 +74,14 @@ export function AttributesTable(props: AttributesTableProps) {
                           {t("shared-with-count", { count: attr.shares.length })}
                         </Button>
                       ) : null}
-                      <IconButton
+                      {/* <IconButton
                         aria-label={t("share-attribute")}
                         onClick={() => props.onAttributeShare?.(attr)}
                         size="sm"
                         variant="outline"
                       >
                         <ShareIcon width={16} height={16} />
-                      </IconButton>
+                      </IconButton> */}
 
                       <IconButton
                         aria-label={t("edit-attribute")}
