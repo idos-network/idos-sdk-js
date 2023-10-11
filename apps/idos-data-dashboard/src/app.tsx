@@ -1,22 +1,31 @@
 import { Box } from "@chakra-ui/react";
-import { Wallet, setupWalletSelector } from "@near-wallet-selector/core";
+import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { setupNightly } from "@near-wallet-selector/nightly";
-import { useState } from "react";
+import { BrowserProvider } from "ethers";
+import { useMetaMask } from "metamask-react";
+import { useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { useEffectOnce } from "usehooks-ts";
 
 import { ConnectWallet } from "@/lib/components/connect-wallet";
 import { Header } from "@/lib/components/header";
 import { Loading } from "@/lib/components/loading";
 import { idos } from "@/lib/idos";
-import { useEffectOnce } from "usehooks-ts";
+
+const setupEvmWallet = async () => {
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  await idos.auth.setEvmSigner(signer);
+  await idos.crypto.init();
+};
 
 const setUpNearWallet = async () => {
   const contractId = idos.grants.near.defaultContractId;
-  let wallet: Wallet, walletSelectorReady: (value?: unknown) => void;
+  let walletSelectorReady: (value?: unknown) => void;
 
   const selector = await setupWalletSelector({
     network: "testnet",
@@ -29,41 +38,81 @@ const setUpNearWallet = async () => {
   });
 
   modal.on("onHide", async () => {
-    wallet = await selector.wallet();
-    await idos.auth.setNearSigner(wallet);
-    await idos.crypto.init();
-    walletSelectorReady();
+    try {
+      const wallet = await selector.wallet();
+      await idos.auth.setNearSigner(wallet);
+      await idos.crypto.init();
+      walletSelectorReady();
+    } catch (error) {
+      walletSelectorReady(error);
+    }
   });
   modal.show();
-  await new Promise((resolve) => (walletSelectorReady = resolve));
+  const result = await new Promise<void>(
+    (resolve, reject) =>
+      (walletSelectorReady = (error) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve();
+        }
+      })
+  );
+  return result;
 };
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(false);
+  const metamask = useMetaMask();
+  const initialized = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
 
+  const onMetamaskConnect = async () => {
+    setIsLoading(true);
+    try {
+      await metamask.connect();
+      await setupEvmWallet();
+      setIsConnected(true);
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+    }
+  };
+
   const onNearConnect = async () => {
-    // setIsLoading(true);
-    await setUpNearWallet();
-    setIsLoading(false);
-    setIsConnected(true);
+    setIsLoading(true);
+    try {
+      await setUpNearWallet();
+      setIsConnected(true);
+      setIsLoading(false);
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+    }
   };
 
   useEffectOnce(() => {
-    (async () => {
-      setIsLoading(true);
-      const selector = await setupWalletSelector({
-        network: "testnet",
-        modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
-      });
-      if (selector.isSignedIn()) {
-        const wallet = await selector.wallet();
-        await idos.auth.setNearSigner(wallet);
-        await idos.crypto.init();
-        setIsConnected(true);
-      }
-      setIsLoading(false);
-    })();
+    if (!initialized.current) {
+      initialized.current = true;
+      (async () => {
+        if (metamask.status === "connected") {
+          await setupEvmWallet();
+          setIsConnected(true);
+        }
+        const selector = await setupWalletSelector({
+          network: "testnet",
+          modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
+        });
+        if (selector.isSignedIn()) {
+          const wallet = await selector.wallet();
+          await idos.auth.setNearSigner(wallet);
+          await idos.crypto.init();
+          setIsConnected(true);
+        }
+        setIsLoading(false);
+      })();
+    }
   });
 
   if (isLoading) {
@@ -75,7 +124,7 @@ export default function App() {
   }
 
   if (!isConnected) {
-    return <ConnectWallet onNearConnect={onNearConnect} />;
+    return <ConnectWallet onNearConnect={onNearConnect} onMetamaskConnect={onMetamaskConnect} />;
   }
 
   return (

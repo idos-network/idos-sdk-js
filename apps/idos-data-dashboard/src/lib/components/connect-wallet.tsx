@@ -1,4 +1,5 @@
 import { Button, Center, Heading, Stack, Text } from "@chakra-ui/react";
+import { useMetaMask } from "metamask-react";
 import { useTranslation } from "react-i18next";
 
 type ConnectWalletProps = {
@@ -8,7 +9,7 @@ type ConnectWalletProps = {
 
 export function ConnectWallet(props: ConnectWalletProps) {
   const { t } = useTranslation();
-
+  const metamask = useMetaMask();
   return (
     <Center minH="100vh">
       <Stack
@@ -30,7 +31,7 @@ export function ConnectWallet(props: ConnectWalletProps) {
           </Text>
         </Stack>
         <Stack gap={4}>
-          {/* <Button
+          <Button
             colorScheme="orange"
             isLoading={metamask.status === "connecting"}
             onClick={props.onMetamaskConnect}
@@ -38,7 +39,7 @@ export function ConnectWallet(props: ConnectWalletProps) {
             size="lg"
           >
             {t("connect-with-metamask")}
-          </Button> */}
+          </Button>
           <Button colorScheme="blue" onClick={props.onNearConnect} rounded="full" size="lg">
             {t("connect-with-near")}
           </Button>

@@ -19,7 +19,7 @@ export class Data {
 
     if (tableName === "attributes") {
       for (const record of records) {
-        record.value = await this.idOS.crypto.decrypt(record.value);
+        record.value = await this.idOS.crypto.decrypt(record.value, this.idOS.crypto.publicKeys.encryption.base64);
       }
     }
 
