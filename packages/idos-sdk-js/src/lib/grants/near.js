@@ -4,6 +4,7 @@ export class NearGrants {
   #contract;
   #wallet;
 
+  static defaultContractId = "idos-dev-1.testnet";
   static contractMethods = {
     list: "find_grants",
     create: "insert_grant",
@@ -78,7 +79,7 @@ export class NearGrants {
   }
 
   async #connectContract(accountId, contractId) {
-    contractId = contractId || "idos-dev-1.testnet";
+    contractId = contractId || this.constructor.defaultContractId;
 
     const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
     const nearConnection = await nearAPI.connect({

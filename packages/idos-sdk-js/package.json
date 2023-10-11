@@ -30,8 +30,12 @@
     "vite-plugin-dts": "^3.5.3"
   },
   "dependencies": {
-    "@kwilteam/kwil-js": "^0.2.0",
+    "@kwilteam/kwil-js": "^0.2.1",
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/binary": "^1.0.1",
+    "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
+    "borsh": "^1.0.0",
     "ethers": "^6.7.1",
     "near-api-js": "^2.1.4"
   }

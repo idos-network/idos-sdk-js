@@ -237,11 +237,23 @@ importers:
   packages/idos-sdk-js:
     dependencies:
       '@kwilteam/kwil-js':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/binary':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/bytes':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@stablelib/sha256':
         specifier: ^1.0.1
         version: 1.0.1
+      borsh:
+        specifier: ^1.0.0
+        version: 1.0.0
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
@@ -266,7 +278,7 @@ importers:
         version: 5.2.2
       vite:
         specifier: ^4.4.5
-        version: 4.4.9
+        version: 4.4.9(@types/node@20.7.1)
       vite-plugin-dts:
         specifier: ^3.5.3
         version: 3.5.3(typescript@5.2.2)(vite@4.4.9)
@@ -2229,8 +2241,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  /@kwilteam/kwil-js@0.2.0:
-    resolution: {integrity: sha512-4PA9Ur/wrg32TzeEoPM35ieira/O8f3XrJPxufYEL2sjjQMZyeXduk4EM0nZwnO3rJ2pQLPXkVGrTsMQgtPyXw==}
+  /@kwilteam/kwil-js@0.2.1:
+    resolution: {integrity: sha512-nul9MWWe34cbGVDom3JY0lwEqDDa/D1J+u7929QSlinpyFCp/yxmV8E0pBfZsCHAfaR8Uto21ZLV0FN6fuWRsg==}
     engines: {node: '>=18.0.0'}
     dependencies:
       axios: 0.27.2
@@ -2688,6 +2700,10 @@ packages:
     resolution: {integrity: sha512-ClJWvmL6UBM/wjkvv/7m5VP3GMr9t0osr4yVgLZsLCOz4hGN9gIAFEqnJ0TsSMAN+n840nf2cHZnA5/KFqHC7Q==}
     dependencies:
       '@stablelib/int': 1.0.1
+    dev: false
+
+  /@stablelib/bytes@1.0.1:
+    resolution: {integrity: sha512-Kre4Y4kdwuqL8BR2E9hV/R5sOrUj6NanZaZis0V6lX5yzqC3hBuVSDXUIBqQv/sCpmuWRiHLwqiT1pqqjuBXoQ==}
     dev: false
 
   /@stablelib/hash@1.0.1:
@@ -3578,6 +3594,10 @@ packages:
       bn.js: 5.2.1
       bs58: 4.0.1
       text-encoding-utf-8: 1.0.2
+    dev: false
+
+  /borsh@1.0.0:
+    resolution: {integrity: sha512-fSVWzzemnyfF89EPwlUNsrS5swF5CrtiN4e+h0/lLf4dz2he4L3ndM20PS9wj7ICSkXJe/TQUHdaPTq15b1mNQ==}
     dev: false
 
   /brace-expansion@1.1.11:
@@ -6828,7 +6848,7 @@ packages:
       debug: 4.3.4
       kolorist: 1.8.0
       typescript: 5.2.2
-      vite: 4.4.9
+      vite: 4.4.9(@types/node@20.7.1)
       vue-tsc: 1.8.13(typescript@5.2.2)
     transitivePeerDependencies:
       - '@types/node'
@@ -6865,7 +6885,7 @@ packages:
       buffer-polyfill: /buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
-      vite: 4.4.9(@types/node@20.7.1)
+      vite: 4.4.9
     transitivePeerDependencies:
       - rollup
     dev: true

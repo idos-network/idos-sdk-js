@@ -13,8 +13,8 @@ import { idOS } from "@idos-network/idos-sdk";
 
 // initialize SDK
 const idos = new idOS({ url: "..." });
+await idos.auth.setEvmSigner(connectedSigner);
 await idos.crypto.init();
-idos.auth.setWalletSigner(connectedSigner);
 
 // read data from the connected user's idOS profile
 const credentials = await idos.data.list("credentials");
