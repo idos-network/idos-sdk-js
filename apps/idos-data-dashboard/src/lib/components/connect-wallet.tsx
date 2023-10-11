@@ -10,7 +10,6 @@ type ConnectWalletProps = {
 export function ConnectWallet(props: ConnectWalletProps) {
   const { t } = useTranslation();
   const metamask = useMetaMask();
-
   return (
     <Center minH="100vh">
       <Stack
@@ -41,9 +40,9 @@ export function ConnectWallet(props: ConnectWalletProps) {
           >
             {t("connect-with-metamask")}
           </Button>
-          {/* <Button colorScheme="blue" onClick={props.onNearConnect} rounded="full" size="lg">
+          <Button colorScheme="blue" onClick={props.onNearConnect} rounded="full" size="lg">
             {t("connect-with-near")}
-          </Button> */}
+          </Button>
           tT
         </Stack>
       </Stack>
