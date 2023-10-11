@@ -55,6 +55,7 @@ export class Data {
 
     if (tableName === "credentials") {
       record.content = await this.idOS.crypto.encrypt(record.content);
+      record.encryption_public_key = this.idOS.crypto.publicKeys.encryption.base64;
     }
 
     if (tableName === "attributes") {
