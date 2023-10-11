@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dapp Example</title>
+    <title>idOS Example Dapp</title>
   </head>
   <body>
     <style>
@@ -19,16 +19,24 @@
         display: none;
       }
     </style>
-    <div id="app"></div>
-    <h1>Example dapp</h1>
+    <div id="app">
+      <h1>idOS Example Dapp</h1>
 
-    <div id="idOS"></div>
-    <p id="display"></p>
+      <form id="wallet-chooser">
+        <p>Connect wallet</p>
+        <button type="submit" name="useEvmWallet">EVM (e.g. MetaMask)</button>
+        <button type="submit" name="useNearWallet">NEAR (e.g. Meteor)</button>
+      </form>
 
-    <ul id="list_wallets"></ul>
+      <div id="idos_container"></div>
 
-    <ul id="list_attributes"></ul>
-    <button id="create_attribute">Create attribute</button>
+      <p id="display"></p>
+
+      <ul id="list_wallets"></ul>
+
+      <ul id="list_attributes"></ul>
+      <button id="create_attribute">Create attribute</button>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
