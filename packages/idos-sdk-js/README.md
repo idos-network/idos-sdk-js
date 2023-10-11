@@ -26,7 +26,7 @@ const attribute = await idos.data.create("attributes", {
 });
 ```
 
-See the more complete example at at [examples/dapp](../examples/dapp/).
+See the more complete example at at [examples/dapp](../../apps/idos-example-dapp).
 
 ## "Types"
 
