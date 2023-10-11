@@ -2,8 +2,8 @@ import { Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 
 export class KwilWrapper {
   constructor(options) {
-    //this.dbId = "x625a832c84f02fbebb229ee3b5e66b6767802b29d87acf72b8dd05d1";
-    this.dbId = "xc67930faf8ec97471caf3925a664a9bd87315ddc29efeb04ec9e76bb";
+    this.dbId = "x625a832c84f02fbebb229ee3b5e66b6767802b29d87acf72b8dd05d1";
+    //this.dbId = "xc67930faf8ec97471caf3925a664a9bd87315ddc29efeb04ec9e76bb";
     this.client = new WebKwil({ kwilProvider: options.url });
   }
 
@@ -14,10 +14,8 @@ export class KwilWrapper {
     return this.client.getSchema(this.dbId);
   }
 
-  async setSigner(signer, publicKey, signatureType) {
-    this.signer = signer || this.signer;
-    this.publicKey = publicKey || this.publicKey || (await KwilUtils.recoverSecp256k1PubKey(this.signer));
-    this.signatureType = signatureType || this.signatureType || "secp256k1_ep";
+  setSigner({ signer, publicKey, signatureType }) {
+    Object.assign(this, { signer, publicKey, signatureType });
   }
 
   async buildAction(actionName, inputs, description) {

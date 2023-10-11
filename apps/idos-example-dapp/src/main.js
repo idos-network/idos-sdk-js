@@ -8,23 +8,29 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
+import * as borsh from "borsh";
+
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = new idOS({ url: "https://nodes.playground.idos.network", container: "#idOS" });
-await idos.crypto.init();
+const idos = new idOS({ url: "https://nodes.staging.idos.network", container: "#idOS" });
 
 const useEvmWallet = async () => {
   const provider = new ethers.BrowserProvider(window.ethereum);
   await provider.send("eth_requestAccounts", []);
   const signer = await provider.getSigner();
 
-  await idos.auth.setWalletSigner(signer);
+  // NOTE setting up for querying the idOS
+  await idos.auth.setEvmSigner(signer);
+  await idos.crypto.init();
 
+  // NOTE setting up for querying the idOS
   await idos.grants.init({ signer, type: "evm" });
 };
 
 const useNearWallet = async () => {
-  const contractId = "idos-dev-1.testnet";
+  const contractId = idos.grants.near.defaultContractId;
+
+  // NOTE standard wallet-selector initialization with modal
   let accountId, wallet, walletSelectorReady;
 
   const selector = await setupWalletSelector({
@@ -45,39 +51,26 @@ const useNearWallet = async () => {
 
   await new Promise((resolve) => (walletSelectorReady = resolve));
 
-  // initial signMessage needed to get the public key
-  // (because signIn will always return a different key)
-  const message = "idOS authentication";
-  const recipient = "idos.network";
-  const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
-  const signMessage = await wallet.signMessage({ message, recipient, nonce });
+  // NOTE setting up for querying the idOS
+  await idos.auth.setNearSigner(wallet);
+  await idos.crypto.init();
 
-  const signer = async (message) => {
-    message = new TextDecoder().decode(message);
-    const signMessage = await wallet.signMessage({ message, recipient, nonce });
-    const signature = Uint8Array.from(atob(signMessage.signature), (c) => c.charCodeAt(0));
-    return { signature };
-  };
-
-  idos.auth.setWalletSigner(signer, signMessage.publicKey, "ed25519_nr");
-
-  await idos.grants.init({ type: "near", accountId, wallet, contractId });
-};
-
-const useEnclaveSigner = async () => {
-  await idos.auth.setEnclaveSigner();
+  // NOTE setting up for using access grants
+  await idos.grants.init({ type: "near", accountId, wallet });
 };
 
 /*
- * pick one
+ * NOTE pick one
  */
-// NOTE if using EVM
+// if using EVM
 // await useEvmWallet();
-// NOTE if using NEAR (for testing: before idOS nodes implement NEP-413)
+//
+// if using NEAR
 await useNearWallet();
-await useEnclaveSigner();
-// NOTE if using NEAR (production: after idOS nodes implement NEP-413)
-// await useNearWallet();
+//
+// if testing locally (not safe!)
+// await idos.crypto.init();
+// await idos.auth.setEnclaveSigner();
 
 /*
  * finally
