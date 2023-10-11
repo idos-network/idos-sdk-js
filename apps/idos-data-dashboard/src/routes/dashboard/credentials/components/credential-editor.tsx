@@ -133,8 +133,6 @@ export function CredentialEditor(props: CredentialEditorProps) {
       );
     }
 
-    console.log(values);
-
     return createCredential.mutate(values, {
       onSuccess() {
         props.onClose();

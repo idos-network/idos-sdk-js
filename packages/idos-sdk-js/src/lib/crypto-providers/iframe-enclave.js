@@ -5,12 +5,14 @@ export class IframeEnclave extends CryptoProvider {
     super(options);
 
     this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
+    // this.hostUrl = options?.hostUrl || new URL("https://localhost:5173/");
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
 
   async init(humanId) {
     this.humanId = humanId || "9a489a2e-820c-4e46-b717-a0e3740fa001";
+    // this.humanId = humanId || "f149f600-418b-4481-9efb-01c0ef72d8ba";
 
     await this.#loadEnclave();
 
@@ -39,8 +41,8 @@ export class IframeEnclave extends CryptoProvider {
     return this.#requestToEnclave({ encrypt: { message, receiverPublicKey } });
   }
 
-  decrypt(message) {
-    return this.#requestToEnclave({ decrypt: { message } });
+  decrypt(message, senderPublicKey) {
+    return this.#requestToEnclave({ decrypt: { message, senderPublicKey } });
   }
 
   async #loadEnclave() {

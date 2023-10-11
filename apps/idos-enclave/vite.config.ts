@@ -1,8 +1,12 @@
 import { defineConfig } from "vite";
+import mkcert from'vite-plugin-mkcert'
 import { resolve } from "path";
 import { createHtmlPlugin } from "vite-plugin-html";
 
 export default defineConfig({
+  server: {
+    https: true
+  },
   plugins: [
     createHtmlPlugin({
       pages: [
@@ -48,5 +52,6 @@ export default defineConfig({
         },
       ],
     }),
+    mkcert(),
   ],
 });

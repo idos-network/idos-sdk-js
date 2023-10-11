@@ -54,6 +54,7 @@ export class Data {
 
     if (tableName === "credentials") {
       record.content = await this.idOS.crypto.encrypt(record.content);
+      record.encryption_public_key = this.idOS.crypto.publicKeys.encryption.base64;
     }
 
     if (tableName === "attributes") {
@@ -84,7 +85,7 @@ export class Data {
         { id: recordId },
         `Get your credential in idOS`
       );
-      record.content = await this.idOS.crypto.decrypt(record.content);
+      record.content = await this.idOS.crypto.decrypt(record.content, record.encryption_public_key);
       return record;
     }
 
