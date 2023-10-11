@@ -13,7 +13,8 @@
   "devDependencies": {
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
-    "vite-plugin-html": "^3.2.0"
+    "vite-plugin-html": "^3.2.0",
+    "vite-plugin-mkcert": "^1.16.0"
   },
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
