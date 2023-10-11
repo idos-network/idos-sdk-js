@@ -15,6 +15,7 @@ export class Crypto {
     //   * we need the keys to run auth.currentUser()
     // (because salting happens within the enclave)
     this.publicKeys = await this.provider.init("9a489a2e-820c-4e46-b717-a0e3740fa001");
+    // this.publicKeys = await this.provider.init("f149f600-418b-4481-9efb-01c0ef72d8ba");
     return this.publicKeys;
   }
 
@@ -30,7 +31,7 @@ export class Crypto {
     return await this.provider.encrypt(message, receiverPublicKey);
   }
 
-  async decrypt(message) {
-    return await this.provider.decrypt(message);
+  async decrypt(message, public_key) {
+    return await this.provider.decrypt(message, public_key);
   }
 }

@@ -85,7 +85,7 @@ export class Data {
         { id: recordId },
         `Get your credential in idOS`
       );
-      record.content = await this.idOS.crypto.decrypt(record.content);
+      record.content = await this.idOS.crypto.decrypt(record.content, record.encryption_public_key);
       return record;
     }
 

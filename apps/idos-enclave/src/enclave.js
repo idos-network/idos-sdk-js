@@ -117,10 +117,7 @@ export class Enclave {
   }
 
   decrypt(ciphertextBase64, senderPublicKey) {
-    // FIXME
-    // stub for sender's public key
-    // (new database schema TK)
-    senderPublicKey = this.keyPair.publicKey;
+    const binarySenderPublicKey = StableBase64.decode(senderPublicKey)
 
     let ciphertext;
 
@@ -133,7 +130,7 @@ export class Enclave {
     const nonce = ciphertext.slice(0, nacl.box.nonceLength);
     const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
 
-    const decryptedMessage = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
+    const decryptedMessage = nacl.box.open(message, nonce, binarySenderPublicKey, this.keyPair.secretKey);
 
     try {
       return StableUtf8.decode(decryptedMessage);
@@ -155,7 +152,7 @@ export class Enclave {
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
-        const { password, message, signature, signerPublicKey, receiverPublicKey } = requestData;
+        const { password, message, signature, signerPublicKey, receiverPublicKey, senderPublicKey } = requestData;
 
         const paramBuilder = {
           isReady: () => [],
@@ -163,7 +160,7 @@ export class Enclave {
           sign: () => [message],
           verifySig: () => [message, signature, signerPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          decrypt: () => [message],
+          decrypt: () => [message, senderPublicKey],
         }[requestName];
 
         if (!paramBuilder) {
