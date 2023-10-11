@@ -14,9 +14,12 @@ export default function App() {
   useEffectOnce(() => {
     async function setup() {
       await idos.crypto.init();
-      const web3provider = new BrowserProvider(window.ethereum);
-      await web3provider.send("eth_requestAccounts", []);
-      await idos.auth.setWalletSigner(await web3provider.getSigner());
+      const provider = new BrowserProvider(window.ethereum);
+      await provider.send("eth_requestAccounts", []);
+      const signer = await provider.getSigner();
+
+      await idos.auth.setWalletSigner(signer);
+      await idos.grants.init({ signer, type: "evm" });
     }
     setup().then(() => setIsLoading(false));
   });
