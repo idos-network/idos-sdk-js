@@ -26,7 +26,7 @@ const attribute = await idos.data.create("attributes", {
 });
 ```
 
-See the more complete example at at [examples/dapp](../../apps/idos-example-dapp).
+See the more complete example at at [apps/idos-example-dapp](../../apps/idos-example-dapp).
 
 ## "Types"
 
@@ -82,28 +82,23 @@ idos = new idOS({
     url: nodeUrl?,
 })
 
-idos.crypto.
-
-    init(
-    ) -> Promise{ EncryptionPublicKey }
-
 idos.auth.
 
-    setWalletSigner(
+    setEvmSigner(
         ethers.Signer,
     ) -> null
 
-    setWalletSigner(
-        CustomSigner,
-        signerPublicKey,
-        keyType,
-    ) -> null
-
-    setEnclaveSigner(
+    setNearSigner(
+        WalletSelector.Wallet,
     ) -> null
 
     currentUser(
     ) -> Promise{ Profile }
+
+idos.crypto.
+
+    init(
+    ) -> Promise{ EncryptionPublicKey }
 
 idos.data.
 
