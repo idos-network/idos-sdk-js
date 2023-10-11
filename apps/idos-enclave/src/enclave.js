@@ -7,18 +7,36 @@ const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
 export class Enclave {
-  constructor(options) {
-    this.parentUrl = options.parentUrl;
-    this.humanId = options.humanId;
+  constructor({ parentUrl }) {
+    this.parentUrl = parentUrl;
   }
 
   async init() {
-    this.password = this.password || window.localStorage.getItem(storageKey) || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
+    this.password = window.localStorage.getItem(storageKey) || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
+    this.signerPublicKey = window.localStorage.getItem("spk") || document.cookie.match(`.*${"spk"}=(.*);`)?.at(0);
+    this.humanId = window.localStorage.getItem("hid") || document.cookie.match(`.*${"hid"}=(.*);`)?.at(0);
+
     this.#listenToRequests();
   }
 
   async isReady() {
     return !!this.password;
+  }
+
+  async storage(humanId, signerPublicKey) {
+    if (humanId) {
+      this.humanId = humanId;
+      window.localStorage.setItem("hid", this.humanId);
+      document.cookie = `${"hid"}=${this.humanId}; SameSite=None; Secure`;
+    }
+
+    if (signerPublicKey) {
+      this.signerPublicKey = signerPublicKey;
+      window.localStorage.setItem("spk", this.signerPublicKey);
+      document.cookie = `${"spk"}=${this.signerPublicKey}; SameSite=None; Secure`;
+    }
+
+    return { humanId: this.humanId, signerPublicKey: this.signerPublicKey };
   }
 
   async keys() {
@@ -153,8 +171,10 @@ export class Enclave {
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
         const { password, message, signature, signerPublicKey, receiverPublicKey, senderPublicKey } = requestData;
+        const { humanId, password, message, signature, signerPublicKey, senderPublicKey, receiverPublicKey } = requestData;
 
         const paramBuilder = {
+          storage: () => [humanId, signerPublicKey],
           isReady: () => [],
           keys: () => [],
           sign: () => [message],

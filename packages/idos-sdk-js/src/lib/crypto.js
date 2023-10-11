@@ -15,18 +15,19 @@ export class Crypto {
     this.provider = new IframeEnclave({ container: this.idOS.container });
   }
 
+  async loadProvider() {
+    const { humanId, signerPublicKey } = await this.provider.load();
+
+    this.humanId = humanId;
+    this.signerPublicKey = signerPublicKey;
+  }
+
   async init() {
-    let humanId;
+    this.humanId = this.humanId || (await this.idOS.auth.currentUser()).humanId;
 
-    try {
-      humanId = (await this.idOS.auth.currentUser()).humanId;
-    } catch (e) {
-      humanId = "unknown";
-    }
+    this.keys = await this.provider.init(this.humanId, this.signerPublicKey);
 
-    this.publicKeys = await this.provider.init(humanId);
-
-    return this.publicKeys.encryption;
+    return this.keys.encryption;
   }
 
   async sign(message) {

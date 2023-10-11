@@ -33,25 +33,32 @@ const journeys = {
     const contractId = idos.grants.near.defaultContractId;
 
     // NOTE standard wallet-selector initialization with modal
-    let accountId, wallet, walletSelectorReady;
+    let accountId, wallet;
 
     const selector = await setupWalletSelector({
       network: "testnet",
       modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
     });
 
-    const modal = setupModal(selector, {
-      contractId,
-      methodNames: idos.grants.near.contractMethods,
-    });
-    const subscription = modal.on("onHide", async () => {
-      wallet = await selector.wallet();
-      accountId = (await wallet.getAccounts())[0].accountId;
-      walletSelectorReady();
-    });
-    modal.show();
+    if (!selector.isSignedIn()) {
+      let walletSelectorReady;
 
-    await new Promise((resolve) => (walletSelectorReady = resolve));
+      const modal = setupModal(selector, {
+        contractId,
+        methodNames: idos.grants.near.contractMethods,
+      });
+
+      const subscription = modal.on("onHide", async () => {
+        walletSelectorReady();
+      });
+
+      modal.show();
+
+      await new Promise((resolve) => (walletSelectorReady = resolve));
+    }
+
+    wallet = await selector.wallet();
+    accountId = (await wallet.getAccounts())[0].accountId;
 
     // NOTE setting up for querying the idOS
     await idos.auth.setNearSigner(wallet);

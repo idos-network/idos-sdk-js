@@ -56,4 +56,14 @@ export class KwilWrapper {
     const res = await this.client.broadcast(tx);
     return res.data.result;
   }
+
+  async getHumanId() {
+    const result = await this.call(
+      "get_wallet_human_id",
+      null,
+      "See your idOS profile ID",
+    );
+
+    return result[0].human_id || null;
+  }
 }

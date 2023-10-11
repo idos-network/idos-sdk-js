@@ -15,5 +15,7 @@ export class idOS {
     this.data = new Data(this);
     this.grants = new Grants(this);
     this.utils = Utils;
+
+    this.crypto.loadProvider().then(this);
   }
 }

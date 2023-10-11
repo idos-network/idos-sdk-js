@@ -1,3 +1,6 @@
+import { generateMnemonic } from "web-bip39";
+import wordlist from "web-bip39/wordlists/english";
+
 class Dialog {
   constructor(enclave, intent, message) {
     if (enclave.origin !== window.origin) {
@@ -13,10 +16,38 @@ class Dialog {
   }
 
   initUi = () => {
+    const passwordForm = document.querySelector("form[name=password]");
+    const passwordInput = passwordForm.querySelector("input[type=password]");
+    const bip39Display = passwordForm.querySelector("#bip39_display");
+    const bip39Button = passwordForm.querySelector("button#bip39");
+
     document.querySelector(`[name=${this.intent}]`).style.display = "block";
     document.querySelector("#message").innerHTML = this.message;
 
-    document.querySelector("form[name=password]").addEventListener("submit", (e) => {
+    passwordForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const password = Object.fromEntries(new FormData(e.target).entries());
+
+      this.respondToEnclave({ result: password });
+    });
+
+    bip39Button.addEventListener("click", async e => {
+      e.preventDefault();
+      const seed = await generateMnemonic(wordlist);
+
+      passwordInput.value = seed;
+
+      const words = seed.split(" ");
+      const wordGroups = [];
+      while (words.length > 0) {
+        wordGroups.push(words.splice(0, 4).join(" "));
+      }
+
+      bip39Display.innerText = wordGroups.join("\n");
+    });
+
+    passwordForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
       const password = Object.fromEntries(new FormData(e.target).entries());

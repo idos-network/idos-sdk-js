@@ -11,34 +11,32 @@ export class Auth {
     this.idOS = idOS;
   }
 
-  async setEnclaveSigner() {
-    if (window.location.hostname !== "localhost") {
-      throw new Error("Enclave Signer only available for local development");
-    }
-
-    const signer = async (message) => (await this.idOS.crypto.sign(message));
-    const publicKey = this.idOS.crypto.publicKeys.sig.raw;
-
-    this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
-  }
-
   async setEvmSigner(signer) {
-    const publicKey = await (async (message) => (
-      SigningKey.recoverPublicKey(
+    let publicKey = this.idOS.crypto.signerPublicKey;
+
+    if (!publicKey || publicKey?.startsWith("ed25519")) {
+      const message = "idOS authentication";
+
+      publicKey = await SigningKey.recoverPublicKey(
         hashMessage(message),
         await signer.signMessage(message),
-      )
-    ))("idOS authentication");
+      );
+
+      this.idOS.crypto.signerPublicKey = publicKey;
+    }
 
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
   async setNearSigner(wallet, recipient="idos.network") {
-    // initial signMessage needed to get the public key
-    // (because signIn will always return a different key)
-    const message = "idOS authentication";
-    const nonce = new this.idOS.crypto.Nonce(32);
-    const { publicKey } = await wallet.signMessage({ message, recipient, nonce });
+    let publicKey = this.idOS.crypto.signerPublicKey;
+
+    if (!publicKey || !publicKey?.startsWith("ed25519")) {
+      const message = "idOS authentication";
+      const nonce = new this.idOS.crypto.Nonce(32);
+      ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
+      this.idOS.crypto.signerPublicKey = publicKey;
+    }
 
     const signer = async message => {
       message = StableBase64.encode(message);
@@ -70,22 +68,27 @@ export class Auth {
     this.#setSigner({ signer, publicKey, signatureType: "nep413" });
   }
 
+  async setEnclaveSigner() {
+    if (window.location.hostname !== "localhost") {
+      throw new Error("Enclave Signer only available for local development");
+    }
+
+    const signer = async (message) => (await this.idOS.crypto.sign(message));
+    const publicKey = this.idOS.crypto.publicKeys.sig.raw;
+
+    this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
+  }
+
+
   #setSigner() {
     this.idOS.kwilWrapper.setSigner(...arguments);
   }
 
   async currentUser() {
     if (!this._currentUser) {
-      const res = await this.idOS.kwilWrapper.call(
-        "get_wallet_human_id",
-        null,
-        "See your idOS profile ID",
-      );
+      const humanId = this.idOS.crypto.humanId || await this.idOS.kwilWrapper.getHumanId();
 
-      this._currentUser = {
-        address: this.idOS.kwilWrapper.signer.address,
-        humanId: res[0]?.human_id || null,
-      };
+      this._currentUser = { humanId };
     }
 
     return this._currentUser;
