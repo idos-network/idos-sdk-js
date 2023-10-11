@@ -31,6 +31,24 @@ See the more complete example at at [examples/dapp](../examples/dapp/).
 ## "Types"
 
 ```
+CustomSigner
+function(string) => { signature: string }
+
+Signer
+ethers.Signer | CustomSigner
+
+Address
+evmAddress | nearAddress
+
+NearWallet
+nearApiJs.Account
+
+EncryptionPublicKey
+{ base64: string, raw: uint8[] }
+
+TableName
+string
+
 Record
 { id: string }
 
@@ -38,7 +56,7 @@ Record
     { humanId: string, key: string, value: string }
 
     > Wallet
-    { humanId: string, address: string, message: string, signature: string }
+    { humanId: string, address: string, message: string, signature: string, publicKey: string }
 
     > Credential
     { humanId: string, type: string, issuer: string, content: string }
@@ -46,17 +64,8 @@ Record
 Profile
 { humanId: string, address: string }
 
-Grantee
-{ address: string, publicKey: string }
-
 Grant
-{ from: string, to: Grantee, dataId: string, lockedUntil: uint32 }
-
-GrantCreate
-{ grant: Grant, encryptedWith: string, transactionId: string }
-
-GrantRevoke
-{ grants: Grant[], transactionId: string }
+{ owner: Address, grantee: Address, dataId: string, lockedUntil: uint32 }
 
 CredentialIssuer
 { name: string, publicKey: string }
@@ -68,49 +77,110 @@ CryptoOptions
 ## Interface
 
 ```
-idos = new idOS({ url })
-
-idos.auth.
-
-    setWalletSigner({ address, signFn }) -> null
-
-    setEnclaveSigner() -> null
-
-    currentUser() -> Promise{ Profile }
+idos = new idOS({
+    container: cssSelector,
+    url: nodeUrl?,
+})
 
 idos.crypto.
 
-    init() -> Promise{ string }
+    init(
+    ) -> Promise{ EncryptionPublicKey }
+
+idos.auth.
+
+    setWalletSigner(
+        ethers.Signer,
+    ) -> null
+
+    setWalletSigner(
+        CustomSigner,
+        signerPublicKey,
+        keyType,
+    ) -> null
+
+    setEnclaveSigner(
+    ) -> null
+
+    currentUser(
+    ) -> Promise{ Profile }
 
 idos.data.
 
-    list(tableName, Record?) -> Promise{ Record[] }
+    list(
+        TableName,
+        Record?,
+    ) -> Promise{ Record[] }
 
-    get(Record{ id }) -> Promise{ Record }
+    get(
+        TableName,
+        id = Record.id,
+    ) -> Promise{ Record }
 
-    create(tableName, Record, CryptoOptions?) -> Promise{ Record }
+    create(
+        TableName,
+        Record,
+        EncryptionPublicKey.base64?,
+        CryptoOptions?,
+    ) -> Promise{ Record }
 
-    update(Record{ id }, Record, CryptoOptions?) -> Promise{ Record }
+    share(
+        TableName,
+        Record.id,
+        Record'.id,
+    ) -> Promise{ { id: Record'.id } )
 
-    delete(Record{ id }) -> Promise{ Record }
+    update(
+        TableName,
+        Record{ id },
+        CryptoOptions?,
+    ) -> Promise{ Record }
+
+    delete(
+        TableName,
+        id = Record{ id },
+    ) -> Promise{ Record }
 
 idos.grants.
 
-    list(
-        Profile{ address }?, Grantee{ address }?, Record{ id: dataId }?
-    ) -> Promise{ Grant[] }
+    init({
+        type: "evm",
+        signer: ethers.Signer,
+    }) -> null
 
-    create(
-	Grantee{ address }, Record{ id }?, Grant{ lockedUntil }?
-    ) -> Promise{ GrantCreate }
+    init({
+        type: "near",
+        accountId: nearAddress,
+        wallet: NearWallet,
+        contractId?: nearAddress,
+    }) -> null
 
-    revoke(
-        Grantee{ address }, Record{ id }?, Grant{ lockedUntil }?
-    ) -> Promise{ GrantRevoke }
+    list({
+        owner: Grant.owner?,
+        grantee: Grant.grantee?,
+        dataId: Grant.dataId?,
+    }) -> Promise{ Grant[] }
+
+    create({
+        grantee: Grant.grantee,
+        dataId: Grant.dataId,
+        lockedUntil: Grant.lockedUntil?,
+        wait: boolean?,
+    }) -> Promise{ { transactionId: string } }
+
+    revoke({
+        grantee: Grant.grantee,
+        dataId: Grant.dataId,
+        lockedUntil: Grant.lockedUntil?,
+        wait: boolean?,
+    }) -> Promise{ { transactionId: string } }
+
+    near.contractMethods -> string[]
 
 idos.utils.
 
     validateCredential(
-        Credential{ content, issuer? }, CredentialIssuer?,
+        Credential{ content, issuer? },
+        CredentialIssuer{ publicKey, name? }?,
     ) -> boolean
 ```

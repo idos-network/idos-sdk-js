@@ -7,9 +7,3 @@ export type Credential = {
   original_id: string;
   shares?: string[];
 };
-
-export type Grant = {
-  grantee: string;
-  id: string;
-  timelock?: string;
-};

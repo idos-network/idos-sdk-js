@@ -1,5 +1,6 @@
 import { idos } from "@/lib/idos";
 import { createQuery } from "react-query-kit";
+
 import { Attribute } from "../types";
 
 export const useFetchAttributes = createQuery({

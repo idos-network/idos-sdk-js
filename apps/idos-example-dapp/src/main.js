@@ -68,7 +68,6 @@ const useEnclaveSigner = async () => {
   await idos.auth.setEnclaveSigner();
 };
 
-
 /*
  * pick one
  */
@@ -79,7 +78,6 @@ await useNearWallet();
 await useEnclaveSigner();
 // NOTE if using NEAR (production: after idOS nodes implement NEP-413)
 // await useNearWallet();
-
 
 /*
  * finally

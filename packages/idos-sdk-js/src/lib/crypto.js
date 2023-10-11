@@ -14,9 +14,9 @@ export class Crypto {
     //   * we need the humanId for provider.init
     //   * we need the keys to run auth.currentUser()
     // (because salting happens within the enclave)
-    this.publicKeys = await this.provider.init("9a489a2e-820c-4e46-b717-a0e3740fa001");
-    // this.publicKeys = await this.provider.init("f149f600-418b-4481-9efb-01c0ef72d8ba");
-    return this.publicKeys;
+    this.publicKeys = await this.provider.init((await this.idOS.auth.currentUser()).humanId);
+
+    return this.publicKeys.encryption;
   }
 
   async sign(message) {

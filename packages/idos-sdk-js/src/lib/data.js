@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from "uuid";
 export class Data {
   constructor(idOS) {
     this.idOS = idOS;
@@ -62,7 +61,7 @@ export class Data {
       record.value = await this.idOS.crypto.encrypt(record.value);
     }
 
-    let newRecord = { id: uuidv4(), ...record };
+    let newRecord = { id: crypto.randomUUID(), ...record };
 
     await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
@@ -100,9 +99,11 @@ export class Data {
    * @param {string} recordId
    */
   async delete(tableName, recordId) {
-    await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, {
-      id: recordId,
-    });
+    const record = { id: recordId };
+
+    await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
+
+    return record;
   }
 
   /**
@@ -127,11 +128,14 @@ export class Data {
    * @returns {Promise<Record<string, unknown>>} the updated record payload
    */
   // TODO conform to the schema
-  async share(tableName, record) {
-    await this.idOS.kwilWrapper.broadcast(`share_${this.singularize(tableName)}`, {
-      ...record,
+  async share(tableName, record, newRecord) {
+    const name = this.singularize(tableName);
+
+    await this.idOS.kwilWrapper.broadcast(`share_${name}`, {
+      [`original_${name}_id`]: record.id,
+      ...newRecord,
     });
 
-    return record;
+    return { id: newRecord.id };
   }
 }
