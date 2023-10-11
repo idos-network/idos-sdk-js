@@ -12,6 +12,7 @@ import { ConnectWallet } from "@/lib/components/connect-wallet";
 import { Header } from "@/lib/components/header";
 import { Loading } from "@/lib/components/loading";
 import { idos } from "@/lib/idos";
+import { useEffectOnce } from "usehooks-ts";
 
 const setUpNearWallet = async () => {
   const contractId = idos.grants.near.defaultContractId;
@@ -42,28 +43,28 @@ export default function App() {
   const [isConnected, setIsConnected] = useState(false);
 
   const onNearConnect = async () => {
-    setIsLoading(true);
+    // setIsLoading(true);
     await setUpNearWallet();
     setIsLoading(false);
     setIsConnected(true);
   };
 
-  // useEffectOnce(() => {
-  //   (async () => {
-  //     setIsLoading(true);
-  //     const selector = await setupWalletSelector({
-  //       network: "testnet",
-  //       modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
-  //     });
-  //     if (selector.isSignedIn()) {
-  //       const wallet = await selector.wallet();
-  //       await idos.auth.setNearSigner(wallet);
-  //       await idos.crypto.init();
-  //       setIsConnected(true);
-  //     }
-  //     setIsLoading(false);
-  //   })();
-  // });
+  useEffectOnce(() => {
+    (async () => {
+      setIsLoading(true);
+      const selector = await setupWalletSelector({
+        network: "testnet",
+        modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
+      });
+      if (selector.isSignedIn()) {
+        const wallet = await selector.wallet();
+        await idos.auth.setNearSigner(wallet);
+        await idos.crypto.init();
+        setIsConnected(true);
+      }
+      setIsLoading(false);
+    })();
+  });
 
   if (isLoading) {
     return (

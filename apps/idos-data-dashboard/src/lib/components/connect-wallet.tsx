@@ -1,5 +1,4 @@
 import { Button, Center, Heading, Stack, Text } from "@chakra-ui/react";
-import { useMetaMask } from "metamask-react";
 import { useTranslation } from "react-i18next";
 
 type ConnectWalletProps = {
@@ -9,7 +8,6 @@ type ConnectWalletProps = {
 
 export function ConnectWallet(props: ConnectWalletProps) {
   const { t } = useTranslation();
-  const metamask = useMetaMask();
 
   return (
     <Center minH="100vh">
