@@ -32,7 +32,7 @@ export function ConnectWallet(props: ConnectWalletProps) {
           </Text>
         </Stack>
         <Stack gap={4}>
-          <Button
+          {/* <Button
             colorScheme="orange"
             isLoading={metamask.status === "connecting"}
             onClick={props.onMetamaskConnect}
@@ -40,10 +40,10 @@ export function ConnectWallet(props: ConnectWalletProps) {
             size="lg"
           >
             {t("connect-with-metamask")}
-          </Button>
-          {/* <Button colorScheme="blue" onClick={props.onNearConnect} rounded="full" size="lg">
-            {t("connect-with-near")}
           </Button> */}
+          <Button colorScheme="blue" onClick={props.onNearConnect} rounded="full" size="lg">
+            {t("connect-with-near")}
+          </Button>
           tT
         </Stack>
       </Stack>

@@ -9,7 +9,9 @@ declare class Auth {
   idOS: idOS;
   constructor(idOS: idOS);
   setEnclaveSigner(): Promise<void>;
-  setWalletSigner(signer: Signer): Promise<void>;
+  setEvmSigner(signer: Signer): Promise<void>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setNearSigner(wallet: any, recipient?: string): Promise<void>;
   currentUser(): Promise<AuthUser>;
 }
 
@@ -87,6 +89,7 @@ declare class KwilWrapper {
 }
 
 declare class Grants {
+  near: { defaultContractId: string; contractMethods: string[] };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   init(args: any): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
