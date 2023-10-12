@@ -1,10 +1,10 @@
+import { Store } from "idos-store";
 import { Auth } from "./auth";
 import { Crypto } from "./crypto";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
-import { Store } from "../../../store";
 import { Utils } from "./utils";
 
 export class idOS {
@@ -27,7 +27,7 @@ export class idOS {
     this.utils = Utils;
   }
 
-  static async init ({ nodeUrl, container }) {
+  static async init({ nodeUrl, container }) {
     this.initializing = true;
 
     const idos = new this({ nodeUrl, container });
