@@ -6,37 +6,85 @@ import * as StableUtf8 from "@stablelib/utf8";
 const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
+export class Store {
+  data = {};
+  keys = [
+    "human-id",
+    "password",
+    "signer-public-key",
+  ];
+
+  constructor() {
+    this.keys.forEach(key => (this.get(key)));
+  }
+
+  get (key) {
+    if (!this.data[key]) {
+      const values = [this.#getCookie(key), this.#getLocalStorage(key)];
+      const firstValue = values.shift(1);
+
+      if (!values.filter(v => !!v).every(v => (v && v === firstValue))) {
+        throw new Error("Inconsistent data");
+      }
+
+      this.data[key] = firstValue;
+    }
+
+    return this.data[key];
+  }
+
+  set (key, value) {
+    if (!key || !value) {
+      return;
+    }
+
+    this.data[key] = value;
+
+    this.#setCookie(key, value);
+    this.#setLocalStorage(key, value);
+  }
+
+  #getCookie (key) {
+    return document.cookie.match(`idos-${key}=(.*?)(;|$)`)?.at(1);
+  }
+
+  #setCookie (key, value) {
+    return document.cookie = `idos-${key}=${value}; SameSite=None; Secure`;
+  }
+
+  #getLocalStorage (key) {
+    return window.localStorage.getItem(`idos-${key}`);
+  }
+
+  #setLocalStorage (key, value) {
+    return window.localStorage.setItem(`idos-${key}`, value);
+  }
+}
+
 export class Enclave {
   constructor({ parentUrl }) {
     this.parentUrl = parentUrl;
-  }
-
-  async init() {
-    this.password = window.localStorage.getItem(storageKey) || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
-    this.signerPublicKey = window.localStorage.getItem("spk") || document.cookie.match(`.*${"spk"}=(.*);`)?.at(0);
-    this.humanId = window.localStorage.getItem("hid") || document.cookie.match(`.*${"hid"}=(.*);`)?.at(0);
-
+    this.store = new Store()
     this.#listenToRequests();
   }
 
   async isReady() {
-    return !!this.password;
+    return !!this.store.get("password");
   }
 
   async storage(humanId, signerPublicKey) {
     if (humanId) {
-      this.humanId = humanId;
-      window.localStorage.setItem("hid", this.humanId);
-      document.cookie = `${"hid"}=${this.humanId}; SameSite=None; Secure`;
+      this.store.set("human-id", humanId);
     }
 
     if (signerPublicKey) {
-      this.signerPublicKey = signerPublicKey;
-      window.localStorage.setItem("spk", this.signerPublicKey);
-      document.cookie = `${"spk"}=${this.signerPublicKey}; SameSite=None; Secure`;
+      this.store.set("signer-public-key", signerPublicKey);
     }
 
-    return { humanId: this.humanId, signerPublicKey: this.signerPublicKey };
+    return {
+      humanId: this.store.get("human-id"),
+      signerPublicKey: this.store.get("signer-public-key"),
+    };
   }
 
   async keys() {
@@ -63,12 +111,9 @@ export class Enclave {
   // handle sandboxed cross-origin iframes differently
   // wrt localstorage and cookies
   async ensurePassword() {
-    if (!this.password) {
+    if (!this.store.get("password")) {
       document.querySelector("#start").addEventListener("click", async (e) => {
-        this.password = (await this.#openDialog("password")).string;
-
-        window.localStorage.setItem(storageKey, this.password);
-        document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
+        this.store.set("password", (await this.#openDialog("password")).string);
         this.ensurePasswordResolver();
       });
 
@@ -79,15 +124,15 @@ export class Enclave {
   }
 
   async deriveKeyPair() {
-    const normalized = encoder.encode(this.password.normalize("NFKC"));
-    const salt = encoder.encode(this.humanId);
+    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
+    const salt = encoder.encode(this.store.get("human-id"));
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(derived);
   }
 
   async deriveKeyPairSig() {
-    const normalized = encoder.encode(this.password.normalize("NFKC"));
+    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
     const salt = encoder.encode("");
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
 

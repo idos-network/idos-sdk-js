@@ -12,9 +12,9 @@ export class Auth {
   }
 
   async setEvmSigner(signer) {
-    let publicKey = this.idOS.crypto.signerPublicKey;
+    let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (!publicKey || publicKey?.startsWith("ed25519")) {
+    if (!publicKey || publicKey.startsWith("ed25519")) {
       const message = "idOS authentication";
 
       publicKey = await SigningKey.recoverPublicKey(
@@ -22,20 +22,20 @@ export class Auth {
         await signer.signMessage(message),
       );
 
-      this.idOS.crypto.signerPublicKey = publicKey;
+      this.idOS.store.set("signer-public-key", publicKey);
     }
 
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
   async setNearSigner(wallet, recipient="idos.network") {
-    let publicKey = this.idOS.crypto.signerPublicKey;
+    let publicKey = this.idOS.store.get("signer-public-key");
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
       const message = "idOS authentication";
       const nonce = new this.idOS.crypto.Nonce(32);
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
-      this.idOS.crypto.signerPublicKey = publicKey;
+      this.idOS.store.set("signer-public-key", publicKey);
     }
 
     const signer = async message => {
@@ -86,7 +86,12 @@ export class Auth {
 
   async currentUser() {
     if (!this._currentUser) {
-      const humanId = this.idOS.crypto.humanId || await this.idOS.kwilWrapper.getHumanId();
+      let humanId = this.idOS.store.get("human-id");
+
+      if (!humanId) {
+        humanId = await this.idOS.kwilWrapper.getHumanId();
+        this.idOS.store.set("human-id", humanId);
+      }
 
       this._currentUser = { humanId };
     }

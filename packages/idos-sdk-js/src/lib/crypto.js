@@ -1,6 +1,3 @@
-import { IframeEnclave } from "./crypto-providers";
-//import { MetaMaskSnap } from "./crypto-providers";
-
 class Nonce {
   constructor(length=32) {
     return Buffer.from(crypto.getRandomValues(new Uint8Array(length)));
@@ -12,22 +9,18 @@ export class Crypto {
 
   constructor(idOS) {
     this.idOS = idOS;
-    this.provider = new IframeEnclave({ container: this.idOS.container });
-  }
-
-  async loadProvider() {
-    const { humanId, signerPublicKey } = await this.provider.load();
-
-    this.humanId = humanId;
-    this.signerPublicKey = signerPublicKey;
   }
 
   async init() {
-    this.humanId = this.humanId || (await this.idOS.auth.currentUser()).humanId;
+    this.provider = this.idOS.enclave.provider;
 
-    this.keys = await this.provider.init(this.humanId, this.signerPublicKey);
+    let signerPublicKey = this.idOS.store.get("signer-public-key");
+    let humanId = this.idOS.store.get("human-id");
+    humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
 
-    return this.keys.encryption;
+    this.publicKeys = await this.provider.init(humanId, signerPublicKey);
+
+    return this.publicKeys.encryption;
   }
 
   async sign(message) {

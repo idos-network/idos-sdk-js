@@ -10,8 +10,8 @@ import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = new idOS({
-  url: "https://nodes.staging.idos.network",
+const idos = await idOS.init({
+  nodeUrl: "https://nodes.staging.idos.network",
   container: "#idos_container",
 });
 

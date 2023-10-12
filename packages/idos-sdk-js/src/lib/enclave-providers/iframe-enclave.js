@@ -1,10 +1,11 @@
-import { CryptoProvider } from "./crypto-provider";
+import { EnclaveProvider } from "./enclave-provider";
 
-export class IframeEnclave extends CryptoProvider {
+export class IframeEnclave extends EnclaveProvider {
+  hostUrl = new URL("https://2c95-88-78-13-215.ngrok-free.app");
+
   constructor(options) {
     super(options);
 
-    this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
@@ -22,7 +23,10 @@ export class IframeEnclave extends CryptoProvider {
       this.#showEnclave();
     }
 
-    return await this.#requestToEnclave({ keys: {} });
+    const publicKeys = await this.#requestToEnclave({ keys: {} });
+    this.#hideEnclave();
+
+    return publicKeys;
   }
 
   sign(message) {

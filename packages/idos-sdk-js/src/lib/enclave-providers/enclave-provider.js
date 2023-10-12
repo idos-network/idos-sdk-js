@@ -1,7 +1,7 @@
-export class CryptoProvider {
+export class EnclaveProvider {
   constructor() {
-    if (this.constructor === CryptoProvider) {
-      throw new Error("Abstract class CryptoProvider can't be instantiated.");
+    if (this.constructor === EnclaveProvider) {
+      throw new Error("Abstract class EnclaveProvider can't be instantiated.");
     }
   }
 

@@ -1,10 +1,10 @@
 import { Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 
 export class KwilWrapper {
-  constructor(options) {
+  constructor({ nodeUrl: kwilProvider }) {
     this.dbId = "x625a832c84f02fbebb229ee3b5e66b6767802b29d87acf72b8dd05d1"; // staging
     // this.dbId = "xc67930faf8ec97471caf3925a664a9bd87315ddc29efeb04ec9e76bb"; // playground
-    this.client = new WebKwil({ kwilProvider: options.url });
+    this.client = new WebKwil({ kwilProvider });
   }
 
   /**
