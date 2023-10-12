@@ -2,7 +2,7 @@ import scrypt from "scrypt-js";
 import nacl from "tweetnacl";
 import * as StableBase64 from "@stablelib/base64";
 import * as StableUtf8 from "@stablelib/utf8";
-import { Store } from "../../../packages/store";
+import { Store } from "idos-store";
 
 const storageKey = "idos-password";
 const encoder = new TextEncoder();

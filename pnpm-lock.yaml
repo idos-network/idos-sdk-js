@@ -180,6 +180,9 @@ importers:
       '@stablelib/utf8':
         specifier: ^1.0.1
         version: 1.0.1
+      idos-store:
+        specifier: workspace:*
+        version: link:../../packages/store
       scrypt-js:
         specifier: ^3.0.1
         version: 3.0.1
@@ -263,6 +266,9 @@ importers:
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
+      idos-store:
+        specifier: workspace:*
+        version: link:../store
       near-api-js:
         specifier: ^2.1.4
         version: 2.1.4
@@ -288,6 +294,8 @@ importers:
       vite-plugin-dts:
         specifier: ^3.5.3
         version: 3.5.3(typescript@5.2.2)(vite@4.4.9)
+
+  packages/store: {}
 
 packages:
 
