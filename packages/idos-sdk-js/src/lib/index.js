@@ -4,7 +4,7 @@ import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
-import { Store } from "./store";
+import { Store } from "../../../store";
 import { Utils } from "./utils";
 
 export class idOS {
@@ -21,7 +21,9 @@ export class idOS {
     this.enclave = new Enclave(this, container);
     this.kwilWrapper = new KwilWrapper({ nodeUrl });
     this.grants = new Grants(this);
-    this.store = new Store();
+    this.store = new Store({
+      initWith: ["human-id", "signer-public-key"],
+    });
     this.utils = Utils;
   }
 
