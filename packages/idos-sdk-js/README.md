@@ -12,7 +12,7 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) with
 import { idOS } from "@idos-network/idos-sdk";
 
 // initialize SDK
-const idos = new idOS({ url: "..." });
+const idos = idOS.init({ container: "#idos" });
 await idos.auth.setEvmSigner(connectedSigner);
 await idos.crypto.init();
 
@@ -77,7 +77,7 @@ CryptoOptions
 ## Interface
 
 ```
-idos = new idOS({
+idos = idOS.init({
     container: cssSelector,
     url: nodeUrl?,
 })

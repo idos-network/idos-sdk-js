@@ -90,6 +90,7 @@ await new Promise((resolve) => {
 });
 
 const { humanId } = await idos.auth.currentUser();
+
 if (!humanId) {
   dom.display.innerHTML = `
     <strong>No idOS profile</strong>
@@ -97,7 +98,6 @@ if (!humanId) {
     Get one here: <a href="#">Fractal ID</a>
   `;
 } else {
-
   dom.display.innerHTML = `
     <strong>Connected to idOS</strong>
     <br>
