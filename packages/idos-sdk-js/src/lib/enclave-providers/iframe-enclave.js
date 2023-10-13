@@ -1,7 +1,7 @@
 import { EnclaveProvider } from "./enclave-provider";
 
 export class IframeEnclave extends EnclaveProvider {
-  hostUrl = new URL("https://2c95-88-78-13-215.ngrok-free.app");
+  hostUrl = new URL("https://enclave.idos.network");
 
   constructor(options) {
     super(options);
