@@ -1,6 +1,6 @@
 import { generateMnemonic } from "web-bip39";
 import wordlist from "web-bip39/wordlists/english";
-
+import "./styles.css";
 class Dialog {
   constructor(enclave, intent, message) {
     if (enclave.origin !== window.origin) {
@@ -32,7 +32,7 @@ class Dialog {
       this.respondToEnclave({ result: password });
     });
 
-    bip39Button.addEventListener("click", async e => {
+    bip39Button.addEventListener("click", async (e) => {
       e.preventDefault();
       const seed = await generateMnemonic(wordlist);
 
@@ -45,6 +45,7 @@ class Dialog {
       }
 
       bip39Display.innerText = wordGroups.join("\n");
+      bip39Display.style.display = "block";
     });
 
     passwordForm.addEventListener("submit", (e) => {

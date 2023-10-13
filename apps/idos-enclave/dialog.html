@@ -1,47 +1,64 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>idOS Enclave Dialog</title>
-<body>
+<body class="min-h-screen bg-white">
   <style>
-    * {
-      text-align: center;
-    }
     form {
       display: none;
     }
-
-    p#bip39_display {
-      font-size: 0.9em;
-      word-spacing: 0.4em;
-    }
   </style>
-  <p><strong>idOS Secure Enclave</strong></p>
-  <hr />
+  <main class="p-5 max-w-screen-sm mx-auto space-y-2">
+    <h1 class="font-semibold text-xl">idOS Secure Enclave</h1>
 
-  <form name="password">
-    <p>
-      <input type="password" name="string" placeholder="Your idOS password" />
-    </p>
-    <p id="bip39_display"></p>
+    <form name="password">
+      <div class="space-y-3">
+        <input
+          type="password"
+          name="string"
+          placeholder="Your idOS password"
+          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-400 focus:ring-opacity-50 px-3 py-1.5"
+        />
 
-    <p>
-      <button id="bip39">bip39</button>
-      <input type="submit" />
-    </p>
+        <!-- <code id="bip39_display" class="hidden font-semibold text-sm bg-neutral-100 p-2 rounded-md"></code> -->
 
-    <p>
-      Remember for:
-      <br />
-      <label><input type="radio" name="duration" value="1 day" checked />1 day</label>
-      <label><input type="radio" name="duration" value="1 week" />1 week</label>
-    </p>
-  </form>
+        <div class="space-y-1">
+          <p class="font-semibold text-sm">Remember for:</p>
+          <div class="flex items-center gap-x-3">
+            <div class="gap-x-1 flex items-center">
+              <input type="radio" id="1day" name="duration" value="1 day" class="form-radio text-green-400" checked /><label
+                for="1day"
+                class="font-semibold text-sm"
+                >1 day</label
+              >
+            </div>
+            <div class="gap-x-1 flex items-center">
+              <input type="radio" id="1week" name="duration" value="1 week" class="form-radio text-green-400" />
+              <label for="1week" class="font-semibold text-sm">1 week</label>
+            </div>
+          </div>
+        </div>
 
-  <form name="consent">
-    <p id="message"></p>
-    <p>
-      <button id="yes">Accept</button>
-      <button id="no">Reject</button>
-    </p>
-  </form>
+        <div class="flex flex-col items-center gap-y-3 justify-center">
+          <!-- <button
+            id="bip39"
+            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full"
+          >
+            bip39
+          </button> -->
+          <input
+            type="submit"
+            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full"
+          />
+        </div>
+      </div>
+    </form>
+
+    <form name="consent">
+      <p id="message"></p>
+      <p>
+        <button id="yes">Accept</button>
+        <button id="no">Reject</button>
+      </p>
+    </form>
+  </main>
 </body>

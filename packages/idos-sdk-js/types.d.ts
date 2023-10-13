@@ -66,11 +66,11 @@ export declare class idOS {
   data: Data;
   kwilWrapper: KwilWrapper;
   grants: Grants;
-  constructor(options: InitOptions);
+  static init(options: InitOptions): Promise<void>;
 }
 
 declare interface InitOptions {
-  url: string;
+  nodeUrl: string;
   container: string;
 }
 

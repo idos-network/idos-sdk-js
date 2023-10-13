@@ -11,6 +11,10 @@
     "preview": "vite preview"
   },
   "devDependencies": {
+    "@tailwindcss/forms": "^0.5.6",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-html": "^3.2.0",
@@ -19,9 +23,9 @@
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
+    "idos-store": "workspace:*",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "web-bip39": "^0.0.3",
-    "idos-store": "workspace:*"
+    "web-bip39": "^0.0.3"
   }
 }

@@ -58,20 +58,20 @@ export class IframeEnclave extends EnclaveProvider {
       "background-color": "transparent",
       border: "none",
       display: "none",
-      height: "30px",
-      width: "150px",
     })
       .map((pair) => pair.join(": "))
       .join("; ");
 
     this.iframe.addEventListener("load", () => this.iframeLoaded());
 
+    document.querySelector(this.container).style.display = "none";
     document.querySelector(this.container).appendChild(this.iframe);
 
     return new Promise((resolve) => (this.iframeLoaded = resolve));
   }
 
   #showEnclave() {
+    document.querySelector(this.container).style.display = "grid";
     this.iframe.style.display = "block";
   }
 

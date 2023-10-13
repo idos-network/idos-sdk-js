@@ -1,4 +1,5 @@
 import { Enclave } from "./enclave";
+import "./styles.css";
 
 if (window !== window.top) {
   const parentUrl = new URL(document.referrer).origin;

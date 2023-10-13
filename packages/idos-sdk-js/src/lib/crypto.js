@@ -1,5 +1,5 @@
 class Nonce {
-  constructor(length=32) {
+  constructor(length = 32) {
     return Buffer.from(crypto.getRandomValues(new Uint8Array(length)));
   }
 }
@@ -16,7 +16,12 @@ export class Crypto {
 
     let signerPublicKey = this.idOS.store.get("signer-public-key");
     let humanId = this.idOS.store.get("human-id");
+
     humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
+
+    if (!humanId) {
+      throw new Error("User is not in the idOS");
+    }
 
     this.publicKeys = await this.provider.init(humanId, signerPublicKey);
 

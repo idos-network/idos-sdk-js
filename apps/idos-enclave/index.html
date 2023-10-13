@@ -2,24 +2,27 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+      rel="stylesheet"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>idOS Enclave</title>
   </head>
   <body>
-    <style>
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      #start {
-        width: 100%;
-        display: block;
-        height: 30px;
-      }
-    </style>
-    <button id="start">Connect to idOS</button>
+    <div class="grid place-content-center">
+      <button id="start" class="px-10 py-4 bg-[#00ffb9] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium">
+        Connect to idOS
+      </button>
+    </div>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
