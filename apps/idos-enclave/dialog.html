@@ -9,14 +9,25 @@
     form {
       display: none;
     }
+
+    p#bip39_display {
+      font-size: 0.9em;
+      word-spacing: 0.4em;
+    }
   </style>
   <p><strong>idOS Secure Enclave</strong></p>
   <hr />
 
   <form name="password">
-    <p><input type="password" name="string" placeholder="Your idOS password" /></p>
+    <p>
+      <input type="password" name="string" placeholder="Your idOS password" />
+    </p>
+    <p id="bip39_display"></p>
 
-    <p><input type="submit" /></p>
+    <p>
+      <button id="bip39">bip39</button>
+      <input type="submit" />
+    </p>
 
     <p>
       Remember for:

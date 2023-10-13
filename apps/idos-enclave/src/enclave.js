@@ -2,23 +2,37 @@ import scrypt from "scrypt-js";
 import nacl from "tweetnacl";
 import * as StableBase64 from "@stablelib/base64";
 import * as StableUtf8 from "@stablelib/utf8";
+import { Store } from "idos-store";
 
 const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
 export class Enclave {
-  constructor(options) {
-    this.parentUrl = options.parentUrl;
-    this.humanId = options.humanId;
-  }
-
-  async init() {
-    this.password = this.password || window.localStorage.getItem(storageKey) || document.cookie.match(`.*${storageKey}=(.*);`)?.at(0);
+  constructor({ parentUrl }) {
+    this.parentUrl = parentUrl;
+    this.store = new Store({
+      initWith: ["human-id", "password", "signer-public-key"],
+    });
     this.#listenToRequests();
   }
 
   async isReady() {
-    return !!this.password;
+    return !!this.store.get("password");
+  }
+
+  async storage(humanId, signerPublicKey) {
+    if (humanId) {
+      this.store.set("human-id", humanId);
+    }
+
+    if (signerPublicKey) {
+      this.store.set("signer-public-key", signerPublicKey);
+    }
+
+    return {
+      humanId: this.store.get("human-id"),
+      signerPublicKey: this.store.get("signer-public-key"),
+    };
   }
 
   async keys() {
@@ -45,12 +59,9 @@ export class Enclave {
   // handle sandboxed cross-origin iframes differently
   // wrt localstorage and cookies
   async ensurePassword() {
-    if (!this.password) {
+    if (!this.store.get("password")) {
       document.querySelector("#start").addEventListener("click", async (e) => {
-        this.password = (await this.#openDialog("password")).string;
-
-        window.localStorage.setItem(storageKey, this.password);
-        document.cookie = `${storageKey}=${this.password}; SameSite=None; Secure`;
+        this.store.set("password", (await this.#openDialog("password")).string);
         this.ensurePasswordResolver();
       });
 
@@ -61,15 +72,15 @@ export class Enclave {
   }
 
   async deriveKeyPair() {
-    const normalized = encoder.encode(this.password.normalize("NFKC"));
-    const salt = encoder.encode(this.humanId);
+    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
+    const salt = encoder.encode(this.store.get("human-id"));
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(derived);
   }
 
   async deriveKeyPairSig() {
-    const normalized = encoder.encode(this.password.normalize("NFKC"));
+    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
     const salt = encoder.encode("");
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
 
@@ -77,6 +88,7 @@ export class Enclave {
   }
 
   async sign(message) {
+    console.log(message);
     const displayMessage = typeof message === "string" ? message : StableUtf8.decode(message);
 
     const consented = await this.#openDialog(
@@ -153,8 +165,10 @@ export class Enclave {
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
         const { password, message, signature, signerPublicKey, receiverPublicKey, senderPublicKey } = requestData;
+        const { humanId, password, message, signature, signerPublicKey, senderPublicKey, receiverPublicKey } = requestData;
 
         const paramBuilder = {
+          storage: () => [humanId, signerPublicKey],
           isReady: () => [],
           keys: () => [],
           sign: () => [message],

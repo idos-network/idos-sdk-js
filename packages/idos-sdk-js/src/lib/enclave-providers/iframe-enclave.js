@@ -1,30 +1,32 @@
-import { CryptoProvider } from "./crypto-provider";
+import { EnclaveProvider } from "./enclave-provider";
 
-export class IframeEnclave extends CryptoProvider {
+export class IframeEnclave extends EnclaveProvider {
+  hostUrl = new URL("https://2c95-88-78-13-215.ngrok-free.app");
+
   constructor(options) {
     super(options);
 
-    this.hostUrl = options?.hostUrl || new URL("https://enclave.idos.network");
-    // this.hostUrl = options?.hostUrl || new URL("https://localhost:5173/");
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
 
-  async init(humanId) {
-    this.humanId = humanId || "9a489a2e-820c-4e46-b717-a0e3740fa001";
-    // this.humanId = humanId || "f149f600-418b-4481-9efb-01c0ef72d8ba";
-
+  async load() {
     await this.#loadEnclave();
+
+    return await this.#requestToEnclave({ storage: {} });
+  }
+
+  async init(humanId, signerPublicKey) {
+    await this.#requestToEnclave({ storage: { humanId, signerPublicKey } });
 
     if (!(await this.#requestToEnclave({ isReady: {} }))) {
       this.#showEnclave();
     }
 
-    const keys = await this.#requestToEnclave({ keys: {} });
-
+    const publicKeys = await this.#requestToEnclave({ keys: {} });
     this.#hideEnclave();
 
-    return keys;
+    return publicKeys;
   }
 
   sign(message) {
@@ -51,7 +53,7 @@ export class IframeEnclave extends CryptoProvider {
     this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts"]
       .map((permission) => `allow-${permission}`)
       .join(" ");
-    this.iframe.src = `${this.hostUrl}?human_id=${this.humanId}`;
+    this.iframe.src = this.hostUrl;
     this.iframe.style = Object.entries({
       "background-color": "transparent",
       border: "none",
