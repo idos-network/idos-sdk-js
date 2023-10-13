@@ -88,7 +88,6 @@ export class Enclave {
   }
 
   async sign(message) {
-    console.log(message);
     const displayMessage = typeof message === "string" ? message : StableUtf8.decode(message);
 
     const consented = await this.#openDialog(
