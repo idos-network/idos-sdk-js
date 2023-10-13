@@ -129,7 +129,7 @@ export class Enclave {
   }
 
   decrypt(ciphertextBase64, senderPublicKey) {
-    const binarySenderPublicKey = StableBase64.decode(senderPublicKey)
+    const binarySenderPublicKey = StableBase64.decode(senderPublicKey);
 
     let ciphertext;
 
@@ -164,7 +164,6 @@ export class Enclave {
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
-        const { password, message, signature, signerPublicKey, receiverPublicKey, senderPublicKey } = requestData;
         const { humanId, password, message, signature, signerPublicKey, senderPublicKey, receiverPublicKey } = requestData;
 
         const paramBuilder = {
