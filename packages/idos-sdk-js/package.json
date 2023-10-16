@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/idos-sdk",
   "description": "idOS JavaScript SDK",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "homepage": "https://idos.network",
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
@@ -37,7 +37,6 @@
     "@stablelib/sha256": "^1.0.1",
     "borsh": "^1.0.0",
     "ethers": "^6.7.1",
-    "near-api-js": "^2.1.4",
-    "idos-store": "workspace:*"
+    "near-api-js": "^2.1.4"
   }
 }

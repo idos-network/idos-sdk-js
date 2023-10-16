@@ -1,4 +1,4 @@
-import { Store } from "idos-store";
+import { Store } from "../../../store";
 import { Auth } from "./auth";
 import { Crypto } from "./crypto";
 import { Data } from "./data";
