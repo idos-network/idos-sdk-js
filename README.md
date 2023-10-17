@@ -33,4 +33,4 @@ const attribute = await idos.data.create("attributes", {
 });
 ```
 
-See the more complete example at at [apps/idos-example-dapp](./apps/idos-example-dapp).
+See the more complete example at [apps/idos-example-dapp](./apps/idos-example-dapp).

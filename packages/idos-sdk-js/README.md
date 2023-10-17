@@ -26,46 +26,43 @@ const attribute = await idos.data.create("attributes", {
 });
 ```
 
-See the more complete example at at [apps/idos-example-dapp](../../apps/idos-example-dapp).
+See the more complete example at [apps/idos-example-dapp](../../apps/idos-example-dapp).
 
 ## "Types"
 
 ```
-CustomSigner
-function(string) => { signature: string }
+EvmSigner
+ethers.Signer | eip191Signer{ signMessage: Function }
 
-Signer
-ethers.Signer | CustomSigner
+NearSigner
+WalletSelector.Wallet | nep413Signer{ signMessage: Function }
 
 Address
-evmAddress | nearAddress
+evmAddress: string | nearAddress: string | string
 
-NearWallet
-nearApiJs.Account
-
-EncryptionPublicKey
-{ base64: string, raw: uint8[] }
-
-TableName
-string
+Profile
+{ humanId: string, address: Address }
 
 Record
 { id: string }
 
     > Attribute
-    { humanId: string, key: string, value: string }
+    { humanId: string, attribute_key: string, value: string }
 
     > Wallet
-    { humanId: string, address: string, message: string, signature: string, publicKey: string }
+    { humanId: string, address: Address, message: string, signature: string, publicKey: string }
 
     > Credential
-    { humanId: string, type: string, issuer: string, content: string }
-
-Profile
-{ humanId: string, address: string }
+    { humanId: string, credential_type: string, issuer: string, content: string }
 
 Grant
 { owner: Address, grantee: Address, dataId: string, lockedUntil: uint32 }
+
+EncryptionPublicKey
+{ base64: string, raw: Uint8Array[32] }
+
+TableName
+"attributes" | "wallets" | "credentials"
 
 CredentialIssuer
 { name: string, publicKey: string }
@@ -77,20 +74,20 @@ CryptoOptions
 ## Interface
 
 ```
-idos = idOS.init({
-    container: cssSelector,
-    url: nodeUrl?,
-})
-) -> Promise{ new idOS() }
+idos =
+    idOS.init({
+        container: cssSelector,
+        nodeUrl: string?,
+    }) -> Promise{ new idOS() }
 
 idos.auth.
 
     setEvmSigner(
-        ethers.Signer,
+        EvmSigner,
     ) -> null
 
     setNearSigner(
-        WalletSelector.Wallet,
+        NearSigner,
     ) -> null
 
     currentUser(
@@ -110,7 +107,7 @@ idos.data.
 
     get(
         TableName,
-        id = Record.id,
+        Record.id,
     ) -> Promise{ Record }
 
     create(
@@ -120,12 +117,6 @@ idos.data.
         CryptoOptions?,
     ) -> Promise{ Record }
 
-    share(
-        TableName,
-        Record.id,
-        Record'.id,
-    ) -> Promise{ { id: Record'.id } )
-
     update(
         TableName,
         Record{ id },
@@ -134,20 +125,20 @@ idos.data.
 
     delete(
         TableName,
-        id = Record{ id },
+        Record.id,
     ) -> Promise{ Record }
 
 idos.grants.
 
     init({
         type: "evm",
-        signer: ethers.Signer,
+        signer: EvmSigner,
     }) -> null
 
     init({
         type: "near",
         accountId: nearAddress,
-        wallet: NearWallet,
+        wallet: NearSigner,
         contractId?: nearAddress,
     }) -> null
 
