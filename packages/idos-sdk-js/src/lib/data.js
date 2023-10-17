@@ -113,6 +113,15 @@ export class Data {
    * @returns {Promise<Record<string, unknown>>} the updated record payload
    */
   async update(tableName, record) {
+    if (tableName === "credentials") {
+      console.log(record);
+      record.content = await this.idOS.crypto.encrypt(record.content);
+    }
+
+    if (tableName === "attributes") {
+      record.value = await this.idOS.crypto.encrypt(record.value);
+    }
+
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
       ...record,
     });
@@ -127,7 +136,6 @@ export class Data {
    * @param {Record<string, unknown>} record
    * @returns {Promise<Record<string, unknown>>} the updated record payload
    */
-  // TODO conform to the schema
   async share(tableName, record, newRecord) {
     const name = this.singularize(tableName);
 

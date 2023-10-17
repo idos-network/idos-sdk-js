@@ -40,7 +40,7 @@ export class Crypto {
     return await this.provider.encrypt(message, receiverPublicKey);
   }
 
-  async decrypt(message, public_key) {
-    return await this.provider.decrypt(message, public_key);
+  async decrypt(message, senderPublicKey) {
+    return await this.provider.decrypt(message, senderPublicKey);
   }
 }

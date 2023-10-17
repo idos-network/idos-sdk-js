@@ -28,8 +28,8 @@ declare class SDKCrypto {
   init(): Promise<CryptoKeys>;
   sign(message: Uint8Array): Promise<Uint8Array | null>;
   verifySig(message: Uint8Array, signature: Uint8Array, signerPublicKey: Uint8Array): Promise<boolean>;
-  encrypt(message: string, receiverPublicKey: Uint8Array): Promise<string>;
-  decrypt(message: string): Promise<string>;
+  encrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
+  decrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
 }
 
 declare type CryptoKeys = {
@@ -84,8 +84,16 @@ declare class KwilWrapper {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setSigner(signer: Signer | any, publicKey?: string | Uint8Array): Promise<void>;
   buildAction(actionName: string, inputs?: Record<string, string>): Promise<ActionBuilder>;
-  call<T = Record<string, string>>(actionName: string, actionInputs?: Record<string, string>): Promise<T[]>;
-  broadcast(actionName: string, actionInputs: Record<string, string>): Promise<string | undefined>;
+  call<T = Record<string, string>>(
+    actionName: string,
+    actionInputs?: Record<string, string> | null,
+    description?: string
+  ): Promise<T[]>;
+  broadcast(
+    actionName: string,
+    actionInputs: Record<string, string> | null,
+    description?: string
+  ): Promise<string | undefined>;
 }
 
 declare class Grants {
