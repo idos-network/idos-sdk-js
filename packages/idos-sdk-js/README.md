@@ -46,23 +46,23 @@ Profile
 Record
 { id: string }
 
-    > Attribute
-    { humanId: string, attribute_key: string, value: string }
+Attribute: Record
+{ ...Record, humanId: string, attribute_key: string, value: string }
 
-    > Wallet
-    { humanId: string, address: Address, message: string, signature: string, publicKey: string }
+Credential: Record
+{ ...Record, humanId: string, credential_type: string, issuer: string, content: string }
 
-    > Credential
-    { humanId: string, credential_type: string, issuer: string, content: string }
+Wallet: Record
+{ ...Record, humanId: string, address: Address, publicKey: string, message: string, signature: string }
 
 Grant
-{ owner: Address, grantee: Address, dataId: string, lockedUntil: uint32 }
+{ owner: Address, grantee: Address, dataId: Record.id, lockedUntil: uint32 }
 
 EncryptionPublicKey
 { base64: string, raw: Uint8Array[32] }
 
 TableName
-"attributes" | "wallets" | "credentials"
+"attributes" | "credentials" | "wallets"
 
 CredentialIssuer
 { name: string, publicKey: string }
@@ -128,6 +128,11 @@ idos.data.
         Record.id,
     ) -> Promise{ Record }
 
+    share(
+        TableName,
+        Record{ id },
+    ) -> Promise{ Record'{} )
+
 idos.grants.
 
     init({
@@ -167,7 +172,7 @@ idos.grants.
 idos.utils.
 
     validateCredential(
-        Credential{ content, issuer? },
-        CredentialIssuer{ publicKey, name? }?,
+        Credential{ content },
+        CredentialIssuer{ name?, publicKey? }?,
     ) -> boolean
 ```
