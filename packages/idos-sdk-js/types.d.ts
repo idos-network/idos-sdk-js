@@ -99,13 +99,11 @@ declare class KwilWrapper {
 declare class Grants {
   near: { defaultContractId: string; contractMethods: string[] };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init(args: any): void;
+  init(args: any): Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list(args): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create(args: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  revoke(args): Promise<any>;
+  create(tableName: string, recordId: string, address: string, receiverPublicKey: string): Promise<any>;
+  revoke(tableName: string, recordId: string, grantee: string, dataId: string): Promise<any>;
 }
 
 export {};

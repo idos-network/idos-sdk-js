@@ -18,8 +18,10 @@ import { useTranslation } from "react-i18next";
 
 export type ShareRecordProps = {
   isOpen: boolean;
+  isLoading: boolean;
   title: string;
   onClose: () => void;
+  onSubmit: (values: ShareRecordFormValues) => void;
 };
 
 export type ShareRecordFormValues = {
@@ -34,12 +36,12 @@ export function ShareRecord(props: ShareRecordProps) {
     handleSubmit,
     register,
     reset,
-  } = useForm<ShareRecordFormValues>();
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const onSubmit = (_values: ShareRecordFormValues) => {
-    // @todo: implement
-  };
+  } = useForm<ShareRecordFormValues>({
+    defaultValues: {
+      address: "0xA986BD19FCfA5620AcAE34A3B8d0AF01B0169D30",
+      key: "uF098gFghgHkKPS4YsvKX5nK70/f4QIuYexCMtk+7yo=",
+    },
+  });
 
   return (
     <Modal
@@ -55,7 +57,7 @@ export function ShareRecord(props: ShareRecordProps) {
       <ModalContent>
         <ModalHeader>{props.title}</ModalHeader>
         <ModalCloseButton />
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(props.onSubmit)}>
           <ModalBody>
             <VStack gap={5}>
               <FormControl isInvalid={!!errors.address}>
@@ -85,8 +87,8 @@ export function ShareRecord(props: ShareRecordProps) {
             </VStack>
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} colorScheme="orange" type="submit">
-              {t("share-credential")}
+            <Button mr={3} colorScheme="orange" isLoading={props.isLoading} type="submit">
+              {t("share")}
             </Button>
             <Button onClick={props.onClose} variant="ghost">
               {t("cancel")}
