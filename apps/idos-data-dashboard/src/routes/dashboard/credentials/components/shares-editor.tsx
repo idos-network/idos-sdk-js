@@ -34,7 +34,7 @@ export function SharesEditor(props: SharesEditorProps) {
   const { t } = useTranslation();
   const grants = useFetchCredentialShares({
     variables: {
-      owner: "thefuck.testnet",
+      owner: "juliosantos.testnet",
       dataId: props.credential?.id as string,
     },
     enabled: !!props.credential,
