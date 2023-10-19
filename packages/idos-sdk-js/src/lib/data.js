@@ -116,7 +116,6 @@ export class Data {
    */
   async update(tableName, record) {
     if (tableName === "credentials") {
-      console.log(record);
       record.content = await this.idOS.crypto.encrypt(record.content);
     }
 
