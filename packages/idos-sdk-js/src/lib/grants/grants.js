@@ -33,10 +33,14 @@ export class Grants {
 
   async create(tableName, recordId, address, receiverPublicKey) {
     const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
-    return this.#child.create({
+    const payload = await this.#child.create({
       grantee: address,
       dataId: share.id,
     });
+    return {
+      ...payload,
+      encryptedWith: this.idOS.store.get("signer-public-key"),
+    };
   }
 
   async revoke(tableName, recordId, grantee, dataId, lockedUntil) {
