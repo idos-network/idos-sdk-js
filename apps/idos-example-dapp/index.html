@@ -4,10 +4,36 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>idOS Example Dapp</title>
+    <title>Example idOS dapp</title>
   </head>
   <body>
     <style>
+      body {
+        font-family: sans-serif;
+        font-size: 0.9em;
+      }
+
+      h1 {
+        font-size: 1.3em;
+      }
+
+      h1 span {
+        display: block;
+        font-size: 1rem;
+        font-weight: normal;
+      }
+
+      h2 {
+        font-size: 1.1em;
+      }
+
+      button#reset {
+        position: absolute;
+        top: 1em;
+        right: 1em;
+
+      }
+
       div#idOS {
         width: 150px;
         height: 30px;
@@ -15,27 +41,106 @@
         padding: 0;
       }
 
-      button#create_attribute {
+      p#display-wrapper {
         display: none;
+        padding: 1em;
+        background-color: #333;
+        color: #bbb;
+        overflow: scroll;
+      }
+
+      code#display {
+        font-size: 1.1em;
+        line-height: 1.3em;
+        text-wrap: nowrap;
+      }
+
+      code#display em {
+        color: #eee;
+        font-style: normal;
+        margin-bottom: 0.2em;
+        display: inline-block;
+      }
+
+      @keyframes blinker {
+        50% {
+          opacity: 0;
+        }
+      }
+
+      code#display .wait {
+        background: #eee;
+        color: #333;
+        padding: 0 0.2em;
+        animation: blinker 1s linear infinite;
+      }
+
+      code#display .header ~ *:not(.header, .wait) {
+        margin-left: 0.5em;
+        padding-left: 1em;
+        border-left: 1px dotted #eee;
+      }
+
+      code#display .table {
+        display: table;
+      }
+
+      code#display .rocket::before {
+        content: "🚀";
+        padding-right: 0.5em;
+      }
+
+      code#display .eyes::before {
+        content: "👀";
+        padding-right: 0.5em;
+      }
+
+      code#display .table > div {
+        display: table-row;
+      }
+
+      code#display .table > div > div {
+        display: table-cell;
+      }
+
+      code#display .table > div > div:last-child::before {
+        content: ":";
+        margin: 0 1em;
+      }
+
+      .outer {
+        font-weight: normal;
+      }
+      .inner {
+        font-weight: normal;
       }
     </style>
     <div id="app">
-      <h1>idOS Example Dapp</h1>
+      <h1><span>idOS developer demo</span>Connect your dapp</h1>
 
-      <form id="wallet-chooser">
-        <p>Connect wallet</p>
-        <button type="submit" name="useEvmWallet">EVM (e.g. MetaMask)</button>
-        <button type="submit" name="useNearWallet">NEAR (e.g. Meteor)</button>
-      </form>
+      <ul>
+        <li>connecting an EVM or NEAR wallet</li>
+        <li>initializing the idOS SDK</li>
+        <li>querying the idOS</li>
+      </ul>
 
-      <div id="idos_container"></div>
+      <button id="reset">Reset demo</button>
 
-      <p id="display"></p>
+      <hr>
 
-      <ul id="list_wallets"></ul>
+      <div id="demo">
+        <form id="wallet-chooser">
+          <h2>Connect your wallet to start</h2>
+          <button type="submit" name="EVM">EVM (e.g. MetaMask)</button>
+          <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
+        </form>
 
-      <ul id="list_attributes"></ul>
-      <button id="create_attribute">Create attribute</button>
+        <div id="idos_container"></div>
+
+        <p id="display-wrapper">
+          <code id="display"></code>
+        </p>
+      </div>
     </div>
 
     <script type="module" src="/src/main.js"></script>

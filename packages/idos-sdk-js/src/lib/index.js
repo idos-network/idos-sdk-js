@@ -36,4 +36,9 @@ export class idOS {
 
     return idos;
   }
+
+  async reset() {
+    await this.store.reset();
+    await this.enclave.reset();
+  }
 }

@@ -16,6 +16,10 @@ export class Enclave {
     this.#listenToRequests();
   }
 
+  async reset() {
+    this.store.reset();
+  }
+
   async isReady() {
     return !!this.store.get("password");
   }
@@ -166,6 +170,7 @@ export class Enclave {
         const { humanId, password, message, signature, signerPublicKey, senderPublicKey, receiverPublicKey } = requestData;
 
         const paramBuilder = {
+          reset: () => [],
           storage: () => [humanId, signerPublicKey],
           isReady: () => [],
           keys: () => [],
