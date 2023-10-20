@@ -15,25 +15,19 @@ const idos = await idOS.init({
   container: "#idos_container",
 });
 
-const journeys = {
-  useEvmWallet: async () => {
+const connectWallet = {
+  EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = await provider.getSigner();
 
-    // NOTE setting up for querying the idOS
     await idos.auth.setEvmSigner(signer);
     await idos.crypto.init();
-
-    // NOTE setting up for querying the idOS
     await idos.grants.init({ signer, type: "evm" });
   },
 
-  useNearWallet: async () => {
-    const contractId = idos.grants.near.defaultContractId;
-
-    // NOTE standard wallet-selector initialization with modal
-    let accountId, wallet;
+  NEAR: async () => {
+    const { defaultContractId: contractId, contractMethods: methodNames } = idos.grants.near;
 
     const selector = await setupWalletSelector({
       network: "testnet",
@@ -41,89 +35,131 @@ const journeys = {
     });
 
     if (!selector.isSignedIn()) {
-      let walletSelectorReady;
-
-      const modal = setupModal(selector, {
-        contractId,
-        methodNames: idos.grants.near.contractMethods,
+      await new Promise((resolve) => {
+        const modal = setupModal(selector, { contractId, methodNames });
+        modal.on("onHide", resolve);
+        modal.show();
       });
-
-      const subscription = modal.on("onHide", async () => {
-        walletSelectorReady();
-      });
-
-      modal.show();
-
-      await new Promise((resolve) => (walletSelectorReady = resolve));
     }
 
-    wallet = await selector.wallet();
-    accountId = (await wallet.getAccounts())[0].accountId;
+    const wallet = await selector.wallet();
+    const accountId = (await wallet.getAccounts())[0].accountId;
 
-    // NOTE setting up for querying the idOS
     await idos.auth.setNearSigner(wallet);
     await idos.crypto.init();
-
-    // NOTE setting up for using access grants
     await idos.grants.init({ type: "near", accountId, wallet });
   },
 };
 
-const dom = ((selectorFn) =>
-  Object.entries({
-    walletChooser: "form#wallet-chooser",
-    display: "p#display",
-    createAttribute: "button#create_attribute",
-    attributeList: "ul#list_attributes",
-  }).reduce(
-    (result, [name, selector]) =>
-      Object.assign(result, { [name]: selectorFn(selector) }),
-    {},
-  ))(document.querySelector.bind(document));
+const idosQueries = async () => {
+  const elem = document.querySelector("code#display");
 
-await new Promise((resolve) => {
-  dom.walletChooser.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    e.target.style.display = "none";
+  const display = (html, nest) => ((nest ? elem.lastChild : elem).innerHTML += html);
 
-    resolve(await journeys[e.submitter.name]());
-  });
-});
+  const { humanId, address } = await idos.auth.currentUser();
 
-const { humanId } = await idos.auth.currentUser();
-
-if (!humanId) {
-  dom.display.innerHTML = `
-    <strong>No idOS profile</strong>
-    <br>
-    Get one here: <a href="#">Fractal ID</a>
-  `;
-} else {
-  dom.display.innerHTML = `
-    <strong>Connected to idOS</strong>
-    <br>
-    <code>Human ID: ${humanId}</code>
-  `;
-  dom.createAttribute.style.display = "block";
-
-  const attributes = await idos.data.list("attributes");
-
-  const shares = await idos.grants.list({
-    owner: "thefuck.testnet",
-  });
-
-  console.log(shares);
-
-  for (const attribute of attributes) {
-    const li = document.createElement("li");
-    li.innerText = `${attribute.attribute_key}: ${attribute.value}`;
-    dom.attributeList.appendChild(li);
+  elem.parentElement.style.display = "block";
+  if (!humanId) {
+    display(`
+      <em>No idOS profile</em><br>
+      <br>
+      Get one here: <a href="#">Fractal ID</a>
+    `);
+  } else {
+    display(`
+      <em class="rocket"><strong>Connected to the idOS</strong></em><br>
+      <br>
+      <em class="header eyes"><strong>Your ID</strong></em><br>
+      <span>${humanId}</span><br><br>
+    `);
   }
 
-  dom.createAttribute.addEventListener("click", async (e) => {
-    await idos.data.create("attributes", {
-      attribute_key: "example_dapp",
-      value: prompt("attribute value"),
-    });
+  let wallets;
+  await new Promise(async (resolve) => {
+    elem.innerHTML += `<span class="wait">awaiting signature</span>`;
+    wallets = await idos.data.list("wallets");
+    elem.lastChild.remove();
+    resolve();
   });
-}
+
+  display(`
+    <em class="header eyes"><strong>Your wallets</strong></em><br>
+    <div class="table">
+      <div>
+        <div><em><u>Address</u></em></div>
+        <div><em><u>Public key</u></em></div>
+      </div>
+  `);
+
+  for (const { address, public_key } of wallets) {
+    display(
+      `
+      <div>
+        <div>${address}</div>
+        <div>${public_key}</div>
+      </div>
+    `,
+      true
+    );
+  }
+  display(`</div><br>`);
+
+  let grants;
+  await new Promise(async (resolve) => {
+    elem.innerHTML += `<span class="wait">awaiting RPC</span>`;
+    grants = await idos.grants.list({ owner: address });
+    elem.lastChild.remove();
+    resolve();
+  });
+
+  display(`
+    <em class="header eyes"><strong>Your grants</strong></em><br>
+    <div class="table">
+      <div>
+        <div><em><u>Owner</u></em></div>
+        <div><em><u>Grantee</u></em></div>
+        <div><em><u>Data ID</u></em></div>
+        <div><em><u>Locked until</u></em></div>
+      </div>
+  `);
+
+  for (const { owner, grantee, dataId, lockedUntil } of grants) {
+    display(
+      `
+      <div>
+        <div>${owner}</div>
+        <div>${grantee}</div>
+        <div>${dataId}</div>
+        <div>${lockedUntil}</div>
+      </div>
+    `,
+      true
+    );
+  }
+  display(`</div><br><br>`);
+  display(`<em class="header tick"><strong>Complete</strong></em><br>`);
+};
+
+document.querySelector("#wallet-chooser").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  e.target.style.display = "none";
+
+  await connectWallet[e.submitter.name]();
+
+  /*
+   * idOS queries
+   *
+   * get the user's idOS ID:
+   *   await idos.auth.currentUser();
+   *
+   * get the user's wallets:
+   *   await idos.data.list("wallets");
+   *
+   */
+  idosQueries();
+});
+
+document.querySelector("#reset").addEventListener("click", async (e) => {
+  await idos.reset();
+  window.location.reload();
+});

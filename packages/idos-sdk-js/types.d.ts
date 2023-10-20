@@ -102,7 +102,13 @@ declare class Grants {
   init(args: any): Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list(args): Promise<any>;
-  create(tableName: string, recordId: string, address: string, receiverPublicKey: string): Promise<any>;
+  create(
+    tableName: string,
+    recordId: string,
+    address: string,
+    lockedUntil?: number,
+    receiverPublicKey: string
+  ): Promise<any>;
   revoke(tableName: string, recordId: string, grantee: string, dataId: string): Promise<any>;
 }
 

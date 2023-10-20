@@ -18,11 +18,13 @@ export const useFetchCredentialDetails = createQuery<Omit<Credential, "shares">,
   },
 });
 
-export const useFetchCredentialShares = createQuery<Grant[], { owner: string; dataId: string }>({
+export const useFetchCredentialShares = createQuery<Grant[], { owner?: string; grantee?: string; dataId?: string }>({
   primaryKey: "credential-shares",
-  queryFn: ({ queryKey: [, { owner, dataId }] }) =>
-    idos.grants.list({
+  queryFn: ({ queryKey: [, { owner, grantee, dataId }] }) => {
+    return idos.grants.list({
       owner,
+      grantee,
       dataId,
-    }),
+    });
+  },
 });

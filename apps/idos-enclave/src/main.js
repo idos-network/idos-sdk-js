@@ -1,10 +1,13 @@
 import { Enclave } from "./enclave";
 import "./styles.css";
 
-if (window !== window.top) {
-  const parentUrl = new URL(document.referrer).origin;
+const enclaveWindow = window.self;
+const hasParentWindow = enclaveWindow !== window.top;
 
-  new Enclave({ parentUrl });
+if (hasParentWindow) {
+  const parentOrigin = new URL(document.referrer).origin;
+
+  new Enclave({ parentOrigin });
 } else {
   window.location = "https://idos.network";
 }

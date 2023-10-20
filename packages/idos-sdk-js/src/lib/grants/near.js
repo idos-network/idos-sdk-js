@@ -18,18 +18,30 @@ export class NearGrants {
     await this.#connectContract(accountId, contractId);
   }
 
-  async list({ owner, grantee, dataId } = {}) {
+  async list({ owner, grantee, dataId, lockedUntil } = {}) {
+    lockedUntil *= 1e7;
+
+    let grantsFilter = { owner, grantee, dataId, lockedUntil };
+    Object.entries(grantsFilter).forEach(([k, v]) => !v && delete grantsFilter[k]);
+
     if (!(owner || grantee)) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
 
-    return await this.#contract[this.constructor.contractMethods.list]({ owner, grantee, dataId });
+    const grants = await this.#contract[this.constructor.contractMethods.list](grantsFilter);
+
+    grants.forEach((grant) => (grant.lockedUntil /= 1e6));
+
+    return grants;
   }
 
-  async create({ grantee, dataId } = {}) {
+  async create({ grantee, dataId, lockedUntil } = {}) {
+    lockedUntil *= 1e7;
+
     let transactionResult;
 
-    console.log({ grantee, dataId });
+    let newGrant = { grantee, dataId, lockedUntil };
+    Object.entries({ grantee, dataId, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
     try {
       transactionResult = await this.#wallet.signAndSendTransaction({
@@ -38,7 +50,7 @@ export class NearGrants {
             type: "FunctionCall",
             params: {
               methodName: this.constructor.contractMethods.create,
-              args: { grantee, dataId },
+              args: newGrant,
               gas: "30000000000000",
             },
           },

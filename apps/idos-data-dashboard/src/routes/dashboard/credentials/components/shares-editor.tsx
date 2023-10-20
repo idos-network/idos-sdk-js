@@ -37,7 +37,7 @@ export function SharesEditor(props: SharesEditorProps) {
       owner: "juliosantos.testnet",
       dataId: props.credential?.id as string,
     },
-    enabled: !!props.credential,
+    enabled: !!props.credential?.id && props.isOpen,
   });
   const revokeCredentialShare = useRevokeCredentialShare();
   const toast = useToast();

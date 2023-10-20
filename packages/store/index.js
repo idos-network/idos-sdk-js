@@ -54,4 +54,12 @@ export class Store {
   #setLocalStorage(key, value) {
     return window.localStorage.setItem(`idos-${key}`, value);
   }
+
+  async reset() {
+    window.localStorage.clear();
+
+    for (const { name } of await cookieStore.getAll()) {
+      await cookieStore.delete(name);
+    }
+  }
 }
