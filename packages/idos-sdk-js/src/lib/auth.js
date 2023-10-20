@@ -33,8 +33,9 @@ export class Auth {
       const nonce = new this.idOS.crypto.Nonce(32);
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
       this.idOS.store.set("signer-public-key", publicKey);
-      this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
     }
+
+    this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
 
     const signer = async (message) => {
       message = StableBase64.encode(message);

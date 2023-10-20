@@ -64,7 +64,7 @@ const idosQueries = async () => {
       <em>No idOS profile</em><br>
       <br>
       Get one here: <a href="#">Fractal ID</a>
-    `)
+    `);
   } else {
     display(`
       <em class="rocket"><strong>Connected to the idOS</strong></em><br>
@@ -75,7 +75,7 @@ const idosQueries = async () => {
   }
 
   let wallets;
-  await new Promise(async resolve => {
+  await new Promise(async (resolve) => {
     elem.innerHTML += `<span class="wait">awaiting signature</span>`;
     wallets = await idos.data.list("wallets");
     elem.lastChild.remove();
@@ -92,17 +92,20 @@ const idosQueries = async () => {
   `);
 
   for (const { address, public_key } of wallets) {
-    display(`
+    display(
+      `
       <div>
         <div>${address}</div>
         <div>${public_key}</div>
       </div>
-    `, true);
+    `,
+      true
+    );
   }
   display(`</div><br>`);
 
   let grants;
-  await new Promise(async resolve => {
+  await new Promise(async (resolve) => {
     elem.innerHTML += `<span class="wait">awaiting RPC</span>`;
     grants = await idos.grants.list({ owner: address });
     elem.lastChild.remove();
@@ -121,20 +124,23 @@ const idosQueries = async () => {
   `);
 
   for (const { owner, grantee, dataId, lockedUntil } of grants) {
-    display(`
+    display(
+      `
       <div>
         <div>${owner}</div>
         <div>${grantee}</div>
         <div>${dataId}</div>
         <div>${lockedUntil}</div>
       </div>
-    `, true);
+    `,
+      true
+    );
   }
   display(`</div><br><br>`);
   display(`<em class="header tick"><strong>Complete</strong></em><br>`);
 };
 
-document.querySelector("#wallet-chooser").addEventListener("submit", async e => {
+document.querySelector("#wallet-chooser").addEventListener("submit", async (e) => {
   e.preventDefault();
   e.target.style.display = "none";
 
@@ -153,7 +159,7 @@ document.querySelector("#wallet-chooser").addEventListener("submit", async e => 
   idosQueries();
 });
 
-document.querySelector("#reset").addEventListener("click", async e => {
+document.querySelector("#reset").addEventListener("click", async (e) => {
   await idos.reset();
   window.location.reload();
 });

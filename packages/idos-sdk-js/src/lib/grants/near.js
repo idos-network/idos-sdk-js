@@ -19,12 +19,10 @@ export class NearGrants {
   }
 
   async list({ owner, grantee, dataId, lockedUntil } = {}) {
-    lockedUntil*=1e7;
+    lockedUntil *= 1e7;
 
     let grantsFilter = { owner, grantee, dataId, lockedUntil };
-    Object.entries(grantsFilter).forEach(([k, v] = kv) => (
-      !v && delete grantsFilter[k]
-    ));
+    Object.entries(grantsFilter).forEach(([k, v]) => !v && delete grantsFilter[k]);
 
     if (!(owner || grantee)) {
       throw new Error("Must provide `owner` and/or `grantee`");
@@ -32,20 +30,18 @@ export class NearGrants {
 
     const grants = await this.#contract[this.constructor.contractMethods.list](grantsFilter);
 
-    grants.forEach(grant => grant.lockedUntil /= 1e6);
+    grants.forEach((grant) => (grant.lockedUntil /= 1e6));
 
     return grants;
   }
 
   async create({ grantee, dataId, lockedUntil } = {}) {
-    lockedUntil*=1e7;
+    lockedUntil *= 1e7;
 
     let transactionResult;
 
     let newGrant = { grantee, dataId, lockedUntil };
-    Object.entries({ grantee, dataId, lockedUntil }).forEach(([k, v] = kv) => (
-      !v && delete newGrant[k]
-    ));
+    Object.entries({ grantee, dataId, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
     try {
       transactionResult = await this.#wallet.signAndSendTransaction({
