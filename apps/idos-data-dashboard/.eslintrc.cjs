@@ -4,12 +4,12 @@ module.exports = {
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
     "plugin:react-hooks/recommended",
-    "prettier",
+    "prettier"
   ],
   parser: "@typescript-eslint/parser",
   parserOptions: {
     ecmaVersion: "latest",
-    sourceType: "module",
+    sourceType: "module"
   },
   plugins: ["react-refresh", "chakra-ui"],
 
@@ -18,6 +18,6 @@ module.exports = {
 
     "chakra-ui/props-order": "error",
     "chakra-ui/props-shorthand": "error",
-    "chakra-ui/require-specific-component": "error",
-  },
+    "chakra-ui/require-specific-component": "error"
+  }
 };

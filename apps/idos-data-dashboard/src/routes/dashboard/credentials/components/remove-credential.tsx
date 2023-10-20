@@ -21,11 +21,13 @@ export function RemoveCredential(props: RemoveCredentialProps) {
     async onMutate(credential) {
       await queryClient.cancelQueries(useFetchCredentials.getKey());
 
-      const previousCredentials = queryClient.getQueryData<Credential[]>(useFetchCredentials.getKey());
+      const previousCredentials = queryClient.getQueryData<Credential[]>(
+        useFetchCredentials.getKey()
+      );
 
       if (previousCredentials) {
         queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
-          ...previousCredentials.filter(({ id }) => id !== credential.id),
+          ...previousCredentials.filter(({ id }) => id !== credential.id)
         ]);
       }
 
@@ -33,9 +35,11 @@ export function RemoveCredential(props: RemoveCredentialProps) {
     },
     onError(_, __, context) {
       if (context?.previousCredentials) {
-        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...context.previousCredentials]);
+        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
+          ...context.previousCredentials
+        ]);
       }
-    },
+    }
   });
 
   const onCredentialRemove = () => {
@@ -45,21 +49,21 @@ export function RemoveCredential(props: RemoveCredentialProps) {
 
     removeCredential.mutate(
       {
-        id: props.credential.id,
+        id: props.credential.id
       },
       {
         onSuccess() {
           props.onClose();
           toast({
-            title: t("credential-successfully-removed"),
+            title: t("credential-successfully-removed")
           });
         },
         onError() {
           toast({
             title: t("error-while-removing-credential"),
-            status: "error",
+            status: "error"
           });
-        },
+        }
       }
     );
   };
@@ -68,7 +72,9 @@ export function RemoveCredential(props: RemoveCredentialProps) {
     <ConfirmDialog
       isOpen={props.isOpen}
       title={t("remove-credential")}
-      description={t("are-sure-you-want-to-remove-credential", { issuer: props.credential?.issuer })}
+      description={t("are-sure-you-want-to-remove-credential", {
+        issuer: props.credential?.issuer
+      })}
       isLoading={removeCredential.isLoading}
       onClose={props.onClose}
       onConfirm={onCredentialRemove}

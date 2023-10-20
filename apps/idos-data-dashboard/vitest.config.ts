@@ -7,7 +7,7 @@ export default mergeConfig(
   defineConfig({
     test: {
       globals: true,
-      environment: "happy-dom",
-    },
+      environment: "happy-dom"
+    }
   })
 );

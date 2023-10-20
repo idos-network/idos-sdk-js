@@ -1,6 +1,7 @@
 import { generateMnemonic } from "web-bip39";
 import wordlist from "web-bip39/wordlists/english";
 import "./styles.css";
+
 class Dialog {
   constructor(enclave, intent, message) {
     if (enclave.origin !== window.origin) {
@@ -26,20 +27,17 @@ class Dialog {
 
     passwordForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
       const password = Object.fromEntries(new FormData(e.target).entries());
-
       this.respondToEnclave({ result: password });
     });
 
     bip39Button.addEventListener("click", async (e) => {
       e.preventDefault();
       const seed = await generateMnemonic(wordlist);
-
       passwordInput.value = seed;
-
       const words = seed.split(" ");
       const wordGroups = [];
+
       while (words.length > 0) {
         wordGroups.push(words.splice(0, 4).join(" "));
       }
@@ -50,18 +48,14 @@ class Dialog {
 
     passwordForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
       const password = Object.fromEntries(new FormData(e.target).entries());
-
       this.respondToEnclave({ result: password });
     });
 
     document.querySelectorAll("form[name=consent] button").forEach((elem) =>
       elem.addEventListener("click", (e) => {
         e.preventDefault();
-
         const consent = e.target.id === "yes";
-
         this.respondToEnclave({ result: { consent } });
       })
     );
@@ -78,7 +72,6 @@ class Dialog {
       if (requestName !== "password" && requestName !== "consent") {
         throw new Error(`Unexpected request from parent: ${requestName}`);
       }
-
       this.responsePort = event.ports[0];
     });
   };
@@ -90,6 +83,7 @@ class Dialog {
 }
 
 const enclave = window.opener;
-const { intent, message } = Object.fromEntries(Array.from(new URLSearchParams(document.location.search)));
-
+const { intent, message } = Object.fromEntries(
+  Array.from(new URLSearchParams(document.location.search))
+);
 new Dialog(enclave, intent, message);

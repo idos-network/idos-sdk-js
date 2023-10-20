@@ -6,7 +6,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
-  Button,
+  Button
 } from "@chakra-ui/react";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -41,7 +41,12 @@ export function ConfirmDialog(props: ConfirmDialogProps) {
           <Button ref={cancelRef} onClick={props.onClose}>
             {t("no")}
           </Button>
-          <Button ml={3} colorScheme="red" isLoading={props.isLoading} onClick={props.onConfirm}>
+          <Button
+            ml={3}
+            colorScheme="red"
+            isLoading={props.isLoading}
+            onClick={props.onConfirm}
+          >
             {t("yes")}
           </Button>
         </AlertDialogFooter>

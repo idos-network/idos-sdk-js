@@ -1,5 +1,12 @@
-import { Link as ChakraLink, LinkProps as ChakraLinkProps } from "@chakra-ui/react";
-import { Link as RouterLink, LinkProps as RouterLinkProps, NavLink as RouterNavLink } from "react-router-dom";
+import {
+  Link as ChakraLink,
+  LinkProps as ChakraLinkProps
+} from "@chakra-ui/react";
+import {
+  Link as RouterLink,
+  LinkProps as RouterLinkProps,
+  NavLink as RouterNavLink
+} from "react-router-dom";
 
 export type LinkProps = ChakraLinkProps & RouterLinkProps;
 
@@ -13,7 +20,7 @@ export function NavLink(props: LinkProps) {
       as={RouterNavLink}
       fontWeight="semibold"
       _activeLink={{
-        color: "green.500",
+        color: "green.500"
       }}
       textUnderlineOffset={5}
       {...props}

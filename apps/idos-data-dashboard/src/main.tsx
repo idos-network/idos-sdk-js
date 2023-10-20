@@ -23,9 +23,9 @@ const queryClient = new QueryClient({
     queries: {
       retry: 0,
       refetchOnWindowFocus: false,
-      staleTime: Infinity,
-    },
-  },
+      staleTime: Infinity
+    }
+  }
 });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
@@ -35,8 +35,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         theme={extendTheme({
           config: {
             initialColorMode: "light",
-            useSystemColorMode: false,
-          },
+            useSystemColorMode: false
+          }
         })}
       >
         <QueryClientProvider client={queryClient}>
@@ -52,20 +52,20 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                       children: [
                         {
                           index: true,
-                          lazy: () => import("@/routes/dashboard/attributes"),
+                          lazy: () => import("@/routes/dashboard/attributes")
                         },
                         {
                           path: "wallets",
-                          lazy: () => import("@/routes/dashboard/wallets"),
+                          lazy: () => import("@/routes/dashboard/wallets")
                         },
                         {
                           path: "credentials",
-                          lazy: () => import("@/routes/dashboard/credentials"),
-                        },
-                      ],
-                    },
-                  ],
-                },
+                          lazy: () => import("@/routes/dashboard/credentials")
+                        }
+                      ]
+                    }
+                  ]
+                }
               ])}
             />
 

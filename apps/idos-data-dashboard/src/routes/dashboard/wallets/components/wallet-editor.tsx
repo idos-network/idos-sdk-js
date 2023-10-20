@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -39,9 +39,9 @@ export function WalletEditor(props: WalletEditorProps) {
     formState: { errors },
     handleSubmit,
     register,
-    reset,
+    reset
   } = useForm<WalletEditorFormValues>({
-    values,
+    values
   });
 
   const title = values?.id ? t("edit-wallet") : t("new-wallet");
@@ -53,7 +53,7 @@ export function WalletEditor(props: WalletEditorProps) {
       onCloseComplete={reset}
       size={{
         base: "full",
-        md: "lg",
+        md: "lg"
       }}
     >
       <ModalOverlay />
@@ -69,17 +69,24 @@ export function WalletEditor(props: WalletEditorProps) {
                   id="address"
                   placeholder={String(t("wallet-address"))}
                   {...register("address", {
-                    required: String(t("field-is-required")),
+                    required: String(t("field-is-required"))
                   })}
                 />
 
-                <FormErrorMessage>{errors.address && errors.address.message}</FormErrorMessage>
+                <FormErrorMessage>
+                  {errors.address && errors.address.message}
+                </FormErrorMessage>
               </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} colorScheme="orange" isLoading={props.isLoading} type="submit">
+            <Button
+              mr={3}
+              colorScheme="orange"
+              isLoading={props.isLoading}
+              type="submit"
+            >
               {t("save")}
             </Button>
             <Button onClick={props.onClose} variant="ghost">

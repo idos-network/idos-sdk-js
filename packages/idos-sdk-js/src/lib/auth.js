@@ -2,7 +2,6 @@ import * as StableBase64 from "@stablelib/base64";
 import * as StableBinary from "@stablelib/binary";
 import * as StableBytes from "@stablelib/bytes";
 import * as borsh from "borsh";
-
 import { SigningKey, hashMessage } from "ethers";
 
 export class Auth {
@@ -15,13 +14,10 @@ export class Auth {
 
     if (!publicKey || publicKey.startsWith("ed25519")) {
       const message = "idOS authentication";
-
-      publicKey = await SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
-
+      publicKey = SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
       this.idOS.store.set("signer-public-key", publicKey);
       this.idOS.store.set("signer-address", signer.address);
     }
-
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
@@ -34,16 +30,12 @@ export class Auth {
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
       this.idOS.store.set("signer-public-key", publicKey);
     }
-
     this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
-
       const nonce = new this.idOS.crypto.Nonce(32);
-
       const { signature } = await wallet.signMessage({ message, recipient, nonce });
-
       const nep413BorshPayload = borsh.serialize(
         {
           struct: {
@@ -56,7 +48,6 @@ export class Auth {
         },
         { tag: 2147484061, message, nonce, recipient }
       );
-
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
@@ -74,7 +65,6 @@ export class Auth {
 
     const signer = async (message) => await this.idOS.crypto.sign(message);
     const publicKey = this.idOS.crypto.publicKeys.sig.raw;
-
     this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
   }
 
@@ -90,13 +80,11 @@ export class Auth {
         humanId = await this.idOS.kwilWrapper.getHumanId();
         this.idOS.store.set("human-id", humanId);
       }
-
       this._currentUser = {
         humanId,
         address: this.idOS.store.get("signer-address"),
       };
     }
-
     return this._currentUser;
   }
 }

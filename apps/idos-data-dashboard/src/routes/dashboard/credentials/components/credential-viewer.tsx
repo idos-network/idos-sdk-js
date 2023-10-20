@@ -9,7 +9,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
+  Text
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 
@@ -27,9 +27,9 @@ export function CredentialViewer(props: CredentialViewerProps) {
   const { t } = useTranslation();
   const credential = useFetchCredentialDetails({
     variables: {
-      id: props.credential?.id as string,
+      id: props.credential?.id as string
     },
-    enabled: !!props.credential?.id && props.isOpen,
+    enabled: !!props.credential?.id && props.isOpen
   });
 
   return (
@@ -38,7 +38,7 @@ export function CredentialViewer(props: CredentialViewerProps) {
       onClose={props.onClose}
       size={{
         base: "full",
-        md: "2xl",
+        md: "2xl"
       }}
     >
       <ModalOverlay />
@@ -50,7 +50,10 @@ export function CredentialViewer(props: CredentialViewerProps) {
         ) : credential.isError ? (
           <>
             <ModalHeader isTruncated>
-              {t("credential", { type: credential.data?.credential_type, issuer: credential.data?.issuer })}
+              {t("credential", {
+                type: credential.data?.credential_type,
+                issuer: credential.data?.issuer
+              })}
             </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
@@ -61,7 +64,11 @@ export function CredentialViewer(props: CredentialViewerProps) {
               </Center>
             </ModalBody>
             <ModalFooter>
-              <Button mr={3} colorScheme="orange" onClick={() => credential.refetch()}>
+              <Button
+                mr={3}
+                colorScheme="orange"
+                onClick={() => credential.refetch()}
+              >
                 {t("retry")}
               </Button>
               <Button onClick={props.onClose} variant="ghost">
@@ -72,7 +79,10 @@ export function CredentialViewer(props: CredentialViewerProps) {
         ) : (
           <>
             <ModalHeader isTruncated>
-              {t("credential", { type: credential.data?.credential_type, issuer: credential.data?.issuer })}
+              {t("credential", {
+                type: credential.data?.credential_type,
+                issuer: credential.data?.issuer
+              })}
             </ModalHeader>
             <ModalCloseButton />
 

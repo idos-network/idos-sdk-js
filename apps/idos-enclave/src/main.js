@@ -6,7 +6,6 @@ const hasParentWindow = enclaveWindow !== window.top;
 
 if (hasParentWindow) {
   const parentOrigin = new URL(document.referrer).origin;
-
   new Enclave({ parentOrigin });
 } else {
   window.location = "https://idos.network";

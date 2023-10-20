@@ -9,9 +9,9 @@ export const useCreateAttribute = createMutation({
   mutationFn: async ({ attribute_key, value }: CreateAttributeVars) => {
     return await idos.data.create("attributes", {
       attribute_key,
-      value,
+      value
     });
-  },
+  }
 });
 
 export const useUpdateAttribute = createMutation({
@@ -19,13 +19,13 @@ export const useUpdateAttribute = createMutation({
     return await idos.data.update("attributes", {
       id,
       attribute_key,
-      value,
+      value
     });
-  },
+  }
 });
 
 export const useRemoveAttribute = createMutation({
   mutationFn: async ({ id }: { id: string }) => {
     return idos.data.delete("attribute", id);
-  },
+  }
 });

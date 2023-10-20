@@ -11,7 +11,7 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react";
 import { Edit2Icon, Trash2Icon } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -31,7 +31,12 @@ export function AttributesTable(props: AttributesTableProps) {
   const { t } = useTranslation();
 
   return (
-    <TableContainer overflowX="auto" border="1px solid" borderColor="gray.200" rounded="md">
+    <TableContainer
+      overflowX="auto"
+      border="1px solid"
+      borderColor="gray.200"
+      rounded="md"
+    >
       {props.isLoading ? (
         <Center gap={2} h={28}>
           <Text fontWeight="semibold">{t("loading-attributes")}</Text>
@@ -71,7 +76,9 @@ export function AttributesTable(props: AttributesTableProps) {
                           size="sm"
                           variant="outline"
                         >
-                          {t("shared-with-count", { count: attr.shares.length })}
+                          {t("shared-with-count", {
+                            count: attr.shares.length
+                          })}
                         </Button>
                       ) : null}
                       {/* <IconButton

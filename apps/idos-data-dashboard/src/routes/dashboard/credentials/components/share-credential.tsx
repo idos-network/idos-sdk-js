@@ -1,4 +1,7 @@
-import { ShareRecord, ShareRecordFormValues } from "@/lib/components/share-record";
+import {
+  ShareRecord,
+  ShareRecordFormValues
+} from "@/lib/components/share-record";
 import { useTranslation } from "react-i18next";
 import { useShareCredential } from "../mutations";
 import { Credential } from "../types";
@@ -21,12 +24,12 @@ export function ShareCredential(props: ShareCredentialProps) {
     shareCredential.mutate(
       {
         ...props.credential,
-        ...values,
+        ...values
       },
       {
         onSuccess() {
           props.onClose();
-        },
+        }
       }
     );
   };

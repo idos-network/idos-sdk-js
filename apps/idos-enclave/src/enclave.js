@@ -1,17 +1,16 @@
-import scrypt from "scrypt-js";
-import nacl from "tweetnacl";
 import * as StableBase64 from "@stablelib/base64";
 import * as StableUtf8 from "@stablelib/utf8";
 import { Store } from "idos-store";
+import scrypt from "scrypt-js";
+import nacl from "tweetnacl";
 
-const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store({
-      initWith: ["human-id", "password", "signer-public-key"],
+      initWith: ["human-id", "password", "signer-public-key"]
     });
     this.#listenToRequests();
   }
@@ -35,7 +34,7 @@ export class Enclave {
 
     return {
       humanId: this.store.get("human-id"),
-      signerPublicKey: this.store.get("signer-public-key"),
+      signerPublicKey: this.store.get("signer-public-key")
     };
   }
 
@@ -47,18 +46,17 @@ export class Enclave {
     return {
       encryption: {
         base64: StableBase64.encode(this.keyPair.publicKey),
-        raw: this.keyPair.publicKey,
+        raw: this.keyPair.publicKey
       },
       sig: {
         base64: StableBase64.encode(this.keyPairSig.publicKey),
-        raw: this.keyPairSig.publicKey,
-      },
+        raw: this.keyPairSig.publicKey
+      }
     };
   }
 
-  // TODO
-  // passwordData.duration
-  // FIXME
+  // @todo: add `passwordData.duration`
+  // @fixme
   // using both storage mediums because different browsers
   // handle sandboxed cross-origin iframes differently
   // wrt localstorage and cookies
@@ -68,32 +66,34 @@ export class Enclave {
         this.store.set("password", (await this.#openDialog("password")).string);
         this.ensurePasswordResolver();
       });
-
-      return await new Promise((resolve) => (this.ensurePasswordResolver = resolve));
+      return await new Promise(
+        (resolve) => (this.ensurePasswordResolver = resolve)
+      );
     }
-
     return Promise.resolve;
   }
 
   async deriveKeyPair() {
-    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
+    const normalized = encoder.encode(
+      this.store.get("password").normalize("NFKC")
+    );
     const salt = encoder.encode(this.store.get("human-id"));
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
-
     this.keyPair = nacl.box.keyPair.fromSecretKey(derived);
   }
 
   async deriveKeyPairSig() {
-    const normalized = encoder.encode(this.store.get("password").normalize("NFKC"));
+    const normalized = encoder.encode(
+      this.store.get("password").normalize("NFKC")
+    );
     const salt = encoder.encode("");
     const derived = await scrypt.scrypt(normalized, salt, 128, 8, 1, 32);
-
     this.keyPairSig = nacl.sign.keyPair.fromSeed(derived);
   }
 
   async sign(message) {
-    const displayMessage = typeof message === "string" ? message : StableUtf8.decode(message);
-
+    const displayMessage =
+      typeof message === "string" ? message : StableUtf8.decode(message);
     const consented = await this.#openDialog(
       "consent",
       `
@@ -122,8 +122,12 @@ export class Enclave {
       plaintext = StableUtf8.encode(plaintext);
     }
 
-    const encrypted = nacl.box(plaintext, nonce, receiverPublicKey, this.keyPair.secretKey);
-
+    const encrypted = nacl.box(
+      plaintext,
+      nonce,
+      receiverPublicKey,
+      this.keyPair.secretKey
+    );
     const fullMessage = new Uint8Array(nonce.length + encrypted.length);
     fullMessage.set(nonce);
     fullMessage.set(encrypted, nonce.length);
@@ -133,7 +137,6 @@ export class Enclave {
 
   decrypt(ciphertextBase64, senderPublicKey) {
     const binarySenderPublicKey = StableBase64.decode(senderPublicKey);
-
     let ciphertext;
 
     try {
@@ -144,8 +147,12 @@ export class Enclave {
 
     const nonce = ciphertext.slice(0, nacl.box.nonceLength);
     const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
-
-    const decryptedMessage = nacl.box.open(message, nonce, binarySenderPublicKey, this.keyPair.secretKey);
+    const decryptedMessage = nacl.box.open(
+      message,
+      nonce,
+      binarySenderPublicKey,
+      this.keyPair.secretKey
+    );
 
     try {
       return StableUtf8.decode(decryptedMessage);
@@ -161,13 +168,22 @@ export class Enclave {
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       const isFromParent = event.origin === this.parentOrigin;
+
       if (!isFromParent) {
         return;
       }
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
-        const { humanId, password, message, signature, signerPublicKey, senderPublicKey, receiverPublicKey } = requestData;
+        const {
+          humanId,
+          password,
+          message,
+          signature,
+          signerPublicKey,
+          senderPublicKey,
+          receiverPublicKey
+        } = requestData;
 
         const paramBuilder = {
           reset: () => [],
@@ -177,7 +193,7 @@ export class Enclave {
           sign: () => [message],
           verifySig: () => [message, signature, signerPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          decrypt: () => [message, senderPublicKey],
+          decrypt: () => [message, senderPublicKey]
         }[requestName];
 
         if (!paramBuilder) {
@@ -204,7 +220,7 @@ export class Enclave {
       top: 0,
       left: left,
       width: width,
-      height: 350,
+      height: 350
     })
       .map((feat) => feat.join("="))
       .join(",");
@@ -213,20 +229,16 @@ export class Enclave {
     dialogURL.search = new URLSearchParams({ intent, message });
 
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
-
     this.dialog.addEventListener("load", () => this.windowLoaded());
     await new Promise((resolve) => (this.windowLoaded = resolve));
 
     return await new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-
       port1.onmessage = ({ data }) => {
         port1.close();
         this.dialog.close();
-
         data.error ? reject(data.error) : resolve(data.result);
       };
-
       this.dialog.postMessage(intent, this.dialog.origin, [port2]);
     });
   }

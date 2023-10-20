@@ -18,7 +18,7 @@ import {
   Th,
   Thead,
   Tr,
-  useToast,
+  useToast
 } from "@chakra-ui/react";
 import { useTranslation } from "react-i18next";
 import { useFetchCredentialShares } from "../queries";
@@ -35,28 +35,30 @@ export function SharesEditor(props: SharesEditorProps) {
   const grants = useFetchCredentialShares({
     variables: {
       owner: "juliosantos.testnet",
-      dataId: props.credential?.id as string,
+      dataId: props.credential?.id as string
     },
-    enabled: !!props.credential?.id && props.isOpen,
+    enabled: !!props.credential?.id && props.isOpen
   });
   const revokeCredentialShare = useRevokeCredentialShare();
   const toast = useToast();
 
-  const credentialGrants = grants.data?.filter((grant) => props.credential?.shares?.includes(grant.dataId));
+  const credentialGrants = grants.data?.filter((grant) =>
+    props.credential?.shares?.includes(grant.dataId)
+  );
   const onRevokeGrant = (grant: Grant) => {
     revokeCredentialShare.mutate(
       {
         recordId: props.credential?.id as string,
         grantee: grant.grantee,
-        dataId: grant.dataId,
+        dataId: grant.dataId
       },
       {
         onSuccess() {
           toast({
-            title: t("credential-successfully-revoked"),
+            title: t("credential-successfully-revoked")
           });
           props.onClose();
-        },
+        }
       }
     );
   };
@@ -69,7 +71,10 @@ export function SharesEditor(props: SharesEditorProps) {
       <DrawerContent>
         <DrawerCloseButton />
         <DrawerHeader>
-          {t("credential-shares", { type: credential?.credential_type, issuer: credential?.issuer })}
+          {t("credential-shares", {
+            type: credential?.credential_type,
+            issuer: credential?.issuer
+          })}
         </DrawerHeader>
 
         <DrawerBody>
@@ -83,7 +88,11 @@ export function SharesEditor(props: SharesEditorProps) {
             </Center>
           ) : grants.isFetched ? (
             <>
-              <TableContainer border="1px solid" borderColor="gray.200" rounded="md">
+              <TableContainer
+                border="1px solid"
+                borderColor="gray.200"
+                rounded="md"
+              >
                 <Table>
                   <Thead>
                     <Tr>
@@ -96,7 +105,12 @@ export function SharesEditor(props: SharesEditorProps) {
                       <Tr key={grant.dataId}>
                         <Td fontWeight="semibold">{grant.grantee}</Td>
                         <Td isNumeric>
-                          <Button colorScheme="orange" onClick={() => onRevokeGrant(grant)} size="xs" variant="outline">
+                          <Button
+                            colorScheme="orange"
+                            onClick={() => onRevokeGrant(grant)}
+                            size="xs"
+                            variant="outline"
+                          >
                             {t("revoke")}
                           </Button>
                         </Td>

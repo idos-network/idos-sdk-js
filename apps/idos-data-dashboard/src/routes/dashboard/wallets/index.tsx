@@ -5,7 +5,10 @@ import { useTranslation } from "react-i18next";
 
 import { ConfirmDialog } from "@/lib/components/confirm-dialog.tsx";
 
-import { WalletEditor, WalletEditorFormValues } from "./components/wallet-editor";
+import {
+  WalletEditor,
+  WalletEditorFormValues
+} from "./components/wallet-editor";
 import { WalletsTable } from "./components/wallets-table";
 import { useCreateWallet, useRemoveWallet } from "./mutations";
 import { useFetchWallets } from "./queries";
@@ -17,8 +20,16 @@ export function Component() {
   const { t } = useTranslation();
   const [wallet, setWallet] = useState<Wallet>();
 
-  const { isOpen: isEditorOpen, onOpen: onEditorOpen, onClose: onEditorClose } = useDisclosure();
-  const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
+  const {
+    isOpen: isEditorOpen,
+    onOpen: onEditorOpen,
+    onClose: onEditorClose
+  } = useDisclosure();
+  const {
+    isOpen: isConfirmOpen,
+    onOpen: onConfirmOpen,
+    onClose: onConfirmClose
+  } = useDisclosure();
 
   const wallets = useFetchWallets();
 
@@ -27,7 +38,10 @@ export function Component() {
       await queryClient.cancelQueries(useFetchWallets.getKey());
       const previousWallets = wallets.data;
       if (previousWallets) {
-        wallets.setData([...previousWallets, { ...wallet, human_id: "", message: "", signature: "", id: "" }]);
+        wallets.setData([
+          ...previousWallets,
+          { ...wallet, human_id: "", message: "", signature: "", id: "" }
+        ]);
       }
       return { previousWallets };
     },
@@ -35,7 +49,7 @@ export function Component() {
       if (context?.previousWallets) {
         wallets.setData(context.previousWallets);
       }
-    },
+    }
   });
   const removeWallet = useRemoveWallet({
     async onMutate(wallet) {
@@ -50,27 +64,27 @@ export function Component() {
       if (context?.previousWallets) {
         wallets.setData(context.previousWallets);
       }
-    },
+    }
   });
 
   const onEditorSubmit = (values: WalletEditorFormValues) => {
     onEditorClose();
     createWallet.mutate(
       {
-        ...values,
+        ...values
       },
       {
         onSuccess() {
           toast({
-            title: t("wallet-successfully-created"),
+            title: t("wallet-successfully-created")
           });
         },
         onError() {
           toast({
             title: t("error-while-adding-wallet"),
-            status: "error",
+            status: "error"
           });
-        },
+        }
       }
     );
   };
@@ -91,26 +105,27 @@ export function Component() {
     if (wallet) {
       removeWallet.mutate(
         {
-          id: wallet.id,
+          id: wallet.id
         },
         {
           onSuccess() {
             toast({
-              title: t("wallet-successfully-removed"),
+              title: t("wallet-successfully-removed")
             });
           },
           onError() {
             toast({
               title: t("error-while-removing-wallet"),
-              status: "error",
+              status: "error"
             });
-          },
+          }
         }
       );
     }
   };
 
-  const isLoading = wallets.isFetching || createWallet.isLoading || removeWallet.isLoading;
+  const isLoading =
+    wallets.isFetching || createWallet.isLoading || removeWallet.isLoading;
 
   return (
     <Box>
@@ -119,7 +134,11 @@ export function Component() {
           {t("new-wallet")}
         </Button>
       </Flex>
-      <WalletsTable isLoading={isLoading} wallets={wallets.data} onWalletRemove={onWalletRemove} />
+      <WalletsTable
+        isLoading={isLoading}
+        wallets={wallets.data}
+        onWalletRemove={onWalletRemove}
+      />
       <WalletEditor
         isOpen={isEditorOpen}
         onClose={onEditorClose}
@@ -133,7 +152,7 @@ export function Component() {
         title={t("remove-wallet")}
         isLoading={removeWallet.isLoading}
         description={t("are-sure-you-want-to-remove-wallet", {
-          address: wallet?.address,
+          address: wallet?.address
         })}
       />
     </Box>
