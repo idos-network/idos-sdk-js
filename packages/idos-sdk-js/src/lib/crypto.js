@@ -1,3 +1,4 @@
+import { Buffer } from "buffer";
 class Nonce {
   constructor(length = 32) {
     return Buffer.from(crypto.getRandomValues(new Uint8Array(length)));
