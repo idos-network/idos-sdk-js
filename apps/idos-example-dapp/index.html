@@ -95,6 +95,11 @@
         padding-right: 0.5em;
       }
 
+      code#display .tick::before {
+        content: "✔️";
+        padding-right: 0.5em;
+      }
+
       code#display .table > div {
         display: table-row;
       }
@@ -103,7 +108,7 @@
         display: table-cell;
       }
 
-      code#display .table > div > div:last-child::before {
+      code#display .table > div > div:not(:first-child)::before {
         content: ":";
         margin: 0 1em;
       }

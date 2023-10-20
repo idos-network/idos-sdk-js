@@ -31,11 +31,12 @@ export class Grants {
     return this.#child.list(args);
   }
 
-  async create(tableName, recordId, address, receiverPublicKey) {
+  async create(tableName, recordId, address, lockedUntil, receiverPublicKey) {
     const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
     const payload = await this.#child.create({
       grantee: address,
       dataId: share.id,
+      lockedUntil: lockedUntil,
     });
     return {
       ...payload,

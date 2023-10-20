@@ -19,6 +19,7 @@ export class Auth {
       publicKey = await SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
 
       this.idOS.store.set("signer-public-key", publicKey);
+      this.idOS.store.set("signer-address", signer.address);
     }
 
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
@@ -32,6 +33,7 @@ export class Auth {
       const nonce = new this.idOS.crypto.Nonce(32);
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
       this.idOS.store.set("signer-public-key", publicKey);
+      this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
     }
 
     const signer = async (message) => {
@@ -88,7 +90,10 @@ export class Auth {
         this.idOS.store.set("human-id", humanId);
       }
 
-      this._currentUser = { humanId };
+      this._currentUser = {
+        humanId,
+        address: this.idOS.store.get("signer-address"),
+      };
     }
 
     return this._currentUser;

@@ -56,7 +56,7 @@ const idosQueries = async () => {
 
   const display = (html, nest) => ((nest ? elem.lastChild : elem).innerHTML += html);
 
-  const { humanId } = await idos.auth.currentUser();
+  const { humanId, address } = await idos.auth.currentUser();
 
   elem.parentElement.style.display = "block";
   if (!humanId) {
@@ -99,7 +99,39 @@ const idosQueries = async () => {
       </div>
     `, true);
   }
-  display(`</div>`);
+  display(`</div><br>`);
+
+  let grants;
+  await new Promise(async resolve => {
+    elem.innerHTML += `<span class="wait">awaiting RPC</span>`;
+    grants = await idos.grants.list({ owner: address });
+    elem.lastChild.remove();
+    resolve();
+  });
+
+  display(`
+    <em class="header eyes"><strong>Your grants</strong></em><br>
+    <div class="table">
+      <div>
+        <div><em><u>Owner</u></em></div>
+        <div><em><u>Grantee</u></em></div>
+        <div><em><u>Data ID</u></em></div>
+        <div><em><u>Locked until</u></em></div>
+      </div>
+  `);
+
+  for (const { owner, grantee, dataId, lockedUntil } of grants) {
+    display(`
+      <div>
+        <div>${owner}</div>
+        <div>${grantee}</div>
+        <div>${dataId}</div>
+        <div>${lockedUntil}</div>
+      </div>
+    `, true);
+  }
+  display(`</div><br><br>`);
+  display(`<em class="header tick"><strong>Complete</strong></em><br>`);
 };
 
 document.querySelector("#wallet-chooser").addEventListener("submit", async e => {
