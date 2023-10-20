@@ -124,24 +124,23 @@
         <li>querying the idOS</li>
       </ul>
 
-      <button id="reset">Reset demo</button>
 
       <hr>
 
-      <div id="demo">
-        <form id="wallet-chooser">
-          <h2>Connect your wallet to start</h2>
-          <button type="submit" name="EVM">EVM (e.g. MetaMask)</button>
-          <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
-        </form>
+      <form id="wallet-chooser">
+        <h2>Connect your wallet to start</h2>
+        <button type="submit" name="EVM">EVM (e.g. MetaMask)</button>
+        <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
+      </form>
 
-        <div id="idos_container"></div>
+      <p id="display-wrapper">
+        <code id="display"></code>
+      </p>
 
-        <p id="display-wrapper">
-          <code id="display"></code>
-        </p>
-      </div>
+      <div id="idos_container"></div>
     </div>
+
+    <button id="reset">Reset demo</button>
 
     <script type="module" src="/src/main.js"></script>
   </body>
