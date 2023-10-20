@@ -1,7 +1,6 @@
 import * as StableBase64 from "@stablelib/base64";
 import * as StableBinary from "@stablelib/binary";
 import * as StableBytes from "@stablelib/bytes";
-import * as StableSha256 from "@stablelib/sha256";
 import * as borsh from "borsh";
 
 import { SigningKey, hashMessage } from "ethers";
@@ -17,10 +16,7 @@ export class Auth {
     if (!publicKey || publicKey.startsWith("ed25519")) {
       const message = "idOS authentication";
 
-      publicKey = await SigningKey.recoverPublicKey(
-        hashMessage(message),
-        await signer.signMessage(message),
-      );
+      publicKey = await SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
 
       this.idOS.store.set("signer-public-key", publicKey);
     }
@@ -28,7 +24,7 @@ export class Auth {
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
-  async setNearSigner(wallet, recipient="idos.network") {
+  async setNearSigner(wallet, recipient = "idos.network") {
     let publicKey = this.idOS.store.get("signer-public-key");
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
@@ -38,7 +34,7 @@ export class Auth {
       this.idOS.store.set("signer-public-key", publicKey);
     }
 
-    const signer = async message => {
+    const signer = async (message) => {
       message = StableBase64.encode(message);
 
       const nonce = new this.idOS.crypto.Nonce(32);
@@ -55,13 +51,13 @@ export class Auth {
             callbackUrl: { option: "string" },
           },
         },
-        { tag: 2147484061, message, nonce, recipient },
+        { tag: 2147484061, message, nonce, recipient }
       );
 
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        StableBase64.decode(signature),
+        StableBase64.decode(signature)
       );
     };
 
@@ -73,15 +69,14 @@ export class Auth {
       throw new Error("Enclave Signer only available for local development");
     }
 
-    const signer = async (message) => (await this.idOS.crypto.sign(message));
+    const signer = async (message) => await this.idOS.crypto.sign(message);
     const publicKey = this.idOS.crypto.publicKeys.sig.raw;
 
     this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
   }
 
-
-  #setSigner() {
-    this.idOS.kwilWrapper.setSigner(...arguments);
+  #setSigner(...args) {
+    this.idOS.kwilWrapper.setSigner(...args);
   }
 
   async currentUser() {

@@ -30,6 +30,7 @@ export type CredentialEditorFormValues = {
   id?: string;
   issuer: string;
   credential_type: string;
+  encryption_public_key: string;
   content: string;
 };
 
@@ -57,8 +58,10 @@ export function CredentialEditor(props: CredentialEditorProps) {
     reset,
   } = useForm<CredentialEditorFormValues>({
     values: {
+      id: credential.data?.id ?? "",
       issuer: credential.data?.issuer ?? "",
       credential_type: credential.data?.credential_type ?? "",
+      encryption_public_key: credential.data?.encryption_public_key ?? "",
       content: credential.data?.content ?? "",
     },
   });
@@ -76,6 +79,7 @@ export function CredentialEditor(props: CredentialEditorProps) {
           id: crypto.randomUUID(),
           original_id: "",
           human_id: "",
+          encryption_public_key: "",
         };
         queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...previousCredentials, newCredential]);
       }
@@ -111,6 +115,7 @@ export function CredentialEditor(props: CredentialEditorProps) {
 
   const onSubmit = (values: CredentialEditorFormValues) => {
     if (values.id) {
+      console.log(values.id);
       return updateCredential.mutate(
         {
           ...values,

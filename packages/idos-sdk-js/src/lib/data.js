@@ -1,3 +1,5 @@
+import * as StableBase64 from "@stablelib/base64";
+
 export class Data {
   constructor(idOS) {
     this.idOS = idOS;
@@ -113,6 +115,14 @@ export class Data {
    * @returns {Promise<Record<string, unknown>>} the updated record payload
    */
   async update(tableName, record) {
+    if (tableName === "credentials") {
+      record.content = await this.idOS.crypto.encrypt(record.content);
+    }
+
+    if (tableName === "attributes") {
+      record.value = await this.idOS.crypto.encrypt(record.value);
+    }
+
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
       ...record,
     });
@@ -120,22 +130,27 @@ export class Data {
     return record;
   }
 
-  /**
-   * Creates a duplicate record in the given table name,
-   * and a corresponding entry in the shared_tableName table
-   * @param {string} tableName
-   * @param {Record<string, unknown>} record
-   * @returns {Promise<Record<string, unknown>>} the updated record payload
-   */
-  // TODO conform to the schema
-  async share(tableName, record, newRecord) {
+  async share(tableName, recordId, receiverPublicKey) {
     const name = this.singularize(tableName);
+    let record = await this.get(tableName, recordId);
 
+    if (tableName === "credentials") {
+      const content = record.content;
+      record.content = await this.idOS.crypto.encrypt(content, StableBase64.decode(receiverPublicKey));
+      record.encryption_public_key = receiverPublicKey;
+    }
+
+    const id = crypto.randomUUID();
     await this.idOS.kwilWrapper.broadcast(`share_${name}`, {
       [`original_${name}_id`]: record.id,
-      ...newRecord,
+      ...record,
+      id,
     });
 
-    return { id: newRecord.id };
+    return { id };
+  }
+
+  async unshare(tableName, recordId) {
+    return await this.delete(tableName, recordId);
   }
 }

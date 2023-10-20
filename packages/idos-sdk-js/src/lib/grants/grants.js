@@ -6,6 +6,7 @@ export class Grants {
 
   near = {
     contractMethods: Object.values(NearGrants.contractMethods),
+    defaultContractId: "idos-dev-1.testnet",
   };
 
   constructor(idOS) {
@@ -23,20 +24,27 @@ export class Grants {
       this.#child = new NearGrants();
     }
 
-    this.#child.init({ account, signer, wallet });
+    await this.#child.init({ account, signer, wallet });
   }
 
   async list(args) {
     return this.#child.list(args);
   }
 
-  async create(args) {
-    // TODO: create idOS record duplicate
-    return this.#child.create(args);
+  async create(tableName, recordId, address, receiverPublicKey) {
+    const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
+    const payload = await this.#child.create({
+      grantee: address,
+      dataId: share.id,
+    });
+    return {
+      ...payload,
+      encryptedWith: this.idOS.store.get("signer-public-key"),
+    };
   }
 
-  async revoke(args) {
-    // TODO: delete idOS record duplicate
-    return this.#child.revoke(args);
+  async revoke(tableName, recordId, grantee, dataId, lockedUntil) {
+    await this.idOS.data.unshare(tableName, recordId);
+    return this.#child.revoke({ grantee, dataId, lockedUntil });
   }
 }

@@ -28,8 +28,8 @@ declare class SDKCrypto {
   init(): Promise<CryptoKeys>;
   sign(message: Uint8Array): Promise<Uint8Array | null>;
   verifySig(message: Uint8Array, signature: Uint8Array, signerPublicKey: Uint8Array): Promise<boolean>;
-  encrypt(message: string, receiverPublicKey: Uint8Array): Promise<string>;
-  decrypt(message: string): Promise<string>;
+  encrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
+  decrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
 }
 
 declare type CryptoKeys = {
@@ -84,20 +84,26 @@ declare class KwilWrapper {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setSigner(signer: Signer | any, publicKey?: string | Uint8Array): Promise<void>;
   buildAction(actionName: string, inputs?: Record<string, string>): Promise<ActionBuilder>;
-  call<T = Record<string, string>>(actionName: string, actionInputs?: Record<string, string>): Promise<T[]>;
-  broadcast(actionName: string, actionInputs: Record<string, string>): Promise<string | undefined>;
+  call<T = Record<string, string>>(
+    actionName: string,
+    actionInputs?: Record<string, string> | null,
+    description?: string
+  ): Promise<T[]>;
+  broadcast(
+    actionName: string,
+    actionInputs: Record<string, string> | null,
+    description?: string
+  ): Promise<string | undefined>;
 }
 
 declare class Grants {
   near: { defaultContractId: string; contractMethods: string[] };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init(args: any): void;
+  init(args: any): Promise<void>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   list(args): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  create(args: any): Promise<any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  revoke(args): Promise<any>;
+  create(tableName: string, recordId: string, address: string, receiverPublicKey: string): Promise<any>;
+  revoke(tableName: string, recordId: string, grantee: string, dataId: string): Promise<any>;
 }
 
 export {};

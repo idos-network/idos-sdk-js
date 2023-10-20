@@ -6,4 +6,5 @@ export type Credential = {
   content: string;
   original_id: string;
   shares?: string[];
+  encryption_public_key: string;
 };

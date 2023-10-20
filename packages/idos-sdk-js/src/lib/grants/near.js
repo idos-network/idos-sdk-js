@@ -13,9 +13,9 @@ export class NearGrants {
 
   constructor() {}
 
-  init({ accountId, wallet, contractId }) {
+  async init({ accountId, wallet, contractId }) {
     this.#wallet = wallet;
-    this.#connectContract(accountId, contractId);
+    await this.#connectContract(accountId, contractId);
   }
 
   async list({ owner, grantee, dataId } = {}) {
@@ -23,13 +23,13 @@ export class NearGrants {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
 
-    return await this.#contract[
-      this.constructor.contractMethods.list
-    ]({ owner, grantee, dataId });
+    return await this.#contract[this.constructor.contractMethods.list]({ owner, grantee, dataId });
   }
 
   async create({ grantee, dataId } = {}) {
     let transactionResult;
+
+    console.log({ grantee, dataId });
 
     try {
       transactionResult = await this.#wallet.signAndSendTransaction({
@@ -45,8 +45,9 @@ export class NearGrants {
         ],
       });
     } catch (e) {
+      console.error(e);
       throw new Error("Grant creation failed", {
-        cause: JSON.parse(e.message).kind
+        // cause: JSON.parse(e.message).kind,
       });
     }
 
@@ -71,7 +72,7 @@ export class NearGrants {
       });
     } catch (e) {
       throw new Error("Grant creation failed", {
-        cause: JSON.parse(e.message).kind
+        cause: JSON.parse(e.message).kind,
       });
     }
 

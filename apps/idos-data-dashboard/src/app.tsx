@@ -21,6 +21,7 @@ const setupEvmWallet = async () => {
   const signer = await provider.getSigner();
   await idos.auth.setEvmSigner(signer);
   await idos.crypto.init();
+  await idos.grants.init({ signer, type: "evm" });
 };
 
 const setUpNearWallet = async () => {
@@ -42,6 +43,8 @@ const setUpNearWallet = async () => {
       const wallet = await selector.wallet();
       await idos.auth.setNearSigner(wallet);
       await idos.crypto.init();
+      const accountId = (await wallet.getAccounts())[0].accountId;
+      await idos.grants.init({ type: "near", accountId, wallet });
       walletSelectorReady();
     } catch (error) {
       walletSelectorReady(error);
@@ -108,6 +111,8 @@ export default function App() {
           const wallet = await selector.wallet();
           await idos.auth.setNearSigner(wallet);
           await idos.crypto.init();
+          const accountId = (await wallet.getAccounts())[0].accountId;
+          await idos.grants.init({ type: "near", accountId, wallet });
           setIsConnected(true);
         }
         setIsLoading(false);

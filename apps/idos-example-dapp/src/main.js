@@ -69,19 +69,20 @@ const journeys = {
   },
 };
 
-const dom = ((selectorFn) => (
+const dom = ((selectorFn) =>
   Object.entries({
     walletChooser: "form#wallet-chooser",
     display: "p#display",
     createAttribute: "button#create_attribute",
     attributeList: "ul#list_attributes",
-  }).reduce((result, [name, selector]) => (
-    Object.assign(result, { [name]: selectorFn(selector) })
-  ), {})
-))(document.querySelector.bind(document));
+  }).reduce(
+    (result, [name, selector]) =>
+      Object.assign(result, { [name]: selectorFn(selector) }),
+    {},
+  ))(document.querySelector.bind(document));
 
 await new Promise((resolve) => {
-  dom.walletChooser.addEventListener("submit", async e => {
+  dom.walletChooser.addEventListener("submit", async (e) => {
     e.preventDefault();
     e.target.style.display = "none";
 
@@ -107,13 +108,19 @@ if (!humanId) {
 
   const attributes = await idos.data.list("attributes");
 
+  const shares = await idos.grants.list({
+    owner: "thefuck.testnet",
+  });
+
+  console.log(shares);
+
   for (const attribute of attributes) {
     const li = document.createElement("li");
     li.innerText = `${attribute.attribute_key}: ${attribute.value}`;
     dom.attributeList.appendChild(li);
   }
 
-  dom.createAttribute.addEventListener("click", async e => {
+  dom.createAttribute.addEventListener("click", async (e) => {
     await idos.data.create("attributes", {
       attribute_key: "example_dapp",
       value: prompt("attribute value"),

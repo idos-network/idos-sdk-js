@@ -54,7 +54,7 @@ export class KwilWrapper {
     const action = await this.buildAction(actionName, actionInputs, description);
     const tx = await action.buildTx();
     const res = await this.client.broadcast(tx);
-    return res.data.result;
+    return res.data.tx_hash;
   }
 
   async getHumanId() {
