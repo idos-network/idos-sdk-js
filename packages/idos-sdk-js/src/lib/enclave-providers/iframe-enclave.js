@@ -62,6 +62,8 @@ export class IframeEnclave extends EnclaveProvider {
       "background-color": "transparent",
       border: "none",
       display: "none",
+      height: "100%",
+      width: "100%",
     })
       .map((pair) => pair.join(": "))
       .join("; ");
@@ -75,7 +77,7 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   #showEnclave() {
-    document.querySelector(this.container).style.display = "grid";
+    document.querySelector(this.container).style.display = "block";
     this.iframe.style.display = "block";
   }
 

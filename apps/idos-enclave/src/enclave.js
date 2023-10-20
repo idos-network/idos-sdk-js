@@ -8,8 +8,8 @@ const storageKey = "idos-password";
 const encoder = new TextEncoder();
 
 export class Enclave {
-  constructor({ parentUrl }) {
-    this.parentUrl = parentUrl;
+  constructor({ parentOrigin }) {
+    this.parentOrigin = parentOrigin;
     this.store = new Store({
       initWith: ["human-id", "password", "signer-public-key"],
     });
@@ -98,7 +98,7 @@ export class Enclave {
       "consent",
       `
       <strong>Data access request</strong>
-      <p><small>from ${this.parentUrl}</small></p>
+      <p><small>from ${this.parentOrigin}</small></p>
       <pre>${displayMessage}</pre>
     `
     );
@@ -155,12 +155,12 @@ export class Enclave {
   }
 
   messageParent(message) {
-    window.parent.postMessage(message, this.parentUrl);
+    window.parent.postMessage(message, this.parentOrigin);
   }
 
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
-      const isFromParent = event.origin === this.parentUrl;
+      const isFromParent = event.origin === this.parentOrigin;
       if (!isFromParent) {
         return;
       }
@@ -196,11 +196,14 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
+    const width = 250;
+    const left = window.screen.width - width;
+
     const popupConfig = Object.entries({
       popup: 1,
-      top: 200,
-      left: 200,
-      width: 250,
+      top: 0,
+      left: left,
+      width: width,
       height: 350,
     })
       .map((feat) => feat.join("="))
