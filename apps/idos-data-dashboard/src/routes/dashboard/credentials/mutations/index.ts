@@ -42,7 +42,7 @@ export const useRemoveCredential = createMutation({
 export const useShareCredential = createMutation({
   mutationFn: async (values: Credential & { address: string; key: string }) => {
     const { key, id, address } = values;
-    return idos.grants.create("credentials", id, address, 0, key);
+    return idos.grants.create("credentials", id, address, undefined, key);
   },
 });
 

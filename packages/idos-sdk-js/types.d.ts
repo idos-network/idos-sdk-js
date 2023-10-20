@@ -106,7 +106,7 @@ declare class Grants {
     tableName: string,
     recordId: string,
     address: string,
-    lockedUntil: number,
+    lockedUntil?: number,
     receiverPublicKey: string
   ): Promise<any>;
   revoke(tableName: string, recordId: string, grantee: string, dataId: string): Promise<any>;
