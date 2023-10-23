@@ -15,11 +15,31 @@ export function Component() {
   const { t } = useTranslation();
   const [credential, setCredential] = useState<Credential>();
 
-  const { isOpen: isEditorOpen, onOpen: onEditorOpen, onClose: onEditorClose } = useDisclosure();
-  const { isOpen: isViewerOpen, onOpen: onViewerOpen, onClose: onViewerClose } = useDisclosure();
-  const { isOpen: isRemoveOpen, onOpen: onRemoveOpen, onClose: onRemoveClose } = useDisclosure();
-  const { isOpen: isShareOpen, onOpen: onShareOpen, onClose: onShareClose } = useDisclosure();
-  const { isOpen: isSharesEditorOpen, onOpen: onSharesEditorOpen, onClose: onSharesEditorClose } = useDisclosure();
+  const {
+    isOpen: isEditorOpen,
+    onOpen: onEditorOpen,
+    onClose: onEditorClose
+  } = useDisclosure();
+  const {
+    isOpen: isViewerOpen,
+    onOpen: onViewerOpen,
+    onClose: onViewerClose
+  } = useDisclosure();
+  const {
+    isOpen: isRemoveOpen,
+    onOpen: onRemoveOpen,
+    onClose: onRemoveClose
+  } = useDisclosure();
+  const {
+    isOpen: isShareOpen,
+    onOpen: onShareOpen,
+    onClose: onShareClose
+  } = useDisclosure();
+  const {
+    isOpen: isSharesEditorOpen,
+    onOpen: onSharesEditorOpen,
+    onClose: onSharesEditorClose
+  } = useDisclosure();
 
   const credentials = useFetchCredentials({
     select: (data) =>
@@ -27,8 +47,10 @@ export function Component() {
         ?.filter(({ original_id }) => original_id === "")
         .map((credential) => ({
           ...credential,
-          shares: data.filter((c) => c.original_id === credential.id).map((c) => c.id),
-        })),
+          shares: data
+            .filter((c) => c.original_id === credential.id)
+            .map((c) => c.id)
+        }))
   });
 
   const handleOnEditorClose = () => {
@@ -99,11 +121,31 @@ export function Component() {
         onViewCredentialShares={onViewCredentialShares}
       />
 
-      <CredentialEditor isOpen={isEditorOpen} onClose={handleOnEditorClose} credential={credential} />
-      <CredentialViewer isOpen={isViewerOpen} onClose={handleOnViewerClose} credential={credential} />
-      <RemoveCredential isOpen={isRemoveOpen} onClose={handleCredentialRemoveClose} credential={credential} />
-      <ShareCredential credential={credential} isOpen={isShareOpen} onClose={onCredentialShareClose} />
-      <SharesEditor credential={credential} isOpen={isSharesEditorOpen} onClose={onViewCredentialSharesClose} />
+      <CredentialEditor
+        isOpen={isEditorOpen}
+        onClose={handleOnEditorClose}
+        credential={credential}
+      />
+      <CredentialViewer
+        isOpen={isViewerOpen}
+        onClose={handleOnViewerClose}
+        credential={credential}
+      />
+      <RemoveCredential
+        isOpen={isRemoveOpen}
+        onClose={handleCredentialRemoveClose}
+        credential={credential}
+      />
+      <ShareCredential
+        credential={credential}
+        isOpen={isShareOpen}
+        onClose={onCredentialShareClose}
+      />
+      <SharesEditor
+        credential={credential}
+        isOpen={isSharesEditorOpen}
+        onClose={onViewCredentialSharesClose}
+      />
     </Box>
   );
 }

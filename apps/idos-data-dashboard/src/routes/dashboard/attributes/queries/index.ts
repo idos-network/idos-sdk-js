@@ -7,5 +7,5 @@ export const useFetchAttributes = createQuery({
   primaryKey: "attributes",
   queryFn: async () => {
     return await idos.data.list<Attribute>("attributes");
-  },
+  }
 });

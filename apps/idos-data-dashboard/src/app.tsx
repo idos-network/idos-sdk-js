@@ -30,12 +30,12 @@ const setUpNearWallet = async () => {
 
   const selector = await setupWalletSelector({
     network: "testnet",
-    modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
+    modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
   });
 
   const modal = setupModal(selector, {
     contractId,
-    methodNames: idos.grants.near.contractMethods,
+    methodNames: idos.grants.near.contractMethods
   });
 
   modal.on("onHide", async () => {
@@ -105,7 +105,7 @@ export default function App() {
         }
         const selector = await setupWalletSelector({
           network: "testnet",
-          modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
+          modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
         });
         if (selector.isSignedIn()) {
           const wallet = await selector.wallet();
@@ -129,7 +129,12 @@ export default function App() {
   }
 
   if (!isConnected) {
-    return <ConnectWallet onNearConnect={onNearConnect} onMetamaskConnect={onMetamaskConnect} />;
+    return (
+      <ConnectWallet
+        onNearConnect={onNearConnect}
+        onMetamaskConnect={onMetamaskConnect}
+      />
+    );
   }
 
   return (

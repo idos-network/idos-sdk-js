@@ -3,7 +3,6 @@ import { NearGrants } from "./near";
 
 export class Grants {
   #child;
-
   near = {
     contractMethods: Object.values(NearGrants.contractMethods),
     defaultContractId: "idos-dev-1.testnet",

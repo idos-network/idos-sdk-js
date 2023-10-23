@@ -7,8 +7,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "format": "prettier --write ."
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.6",
@@ -23,7 +24,7 @@
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "idos-store": "workspace:*",
+    "@idos-network/idos-store": "workspace:*",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"

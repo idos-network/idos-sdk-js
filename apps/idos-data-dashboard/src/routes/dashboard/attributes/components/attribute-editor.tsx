@@ -11,7 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  VStack,
+  VStack
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -42,9 +42,9 @@ export function AttributeEditor(props: AttributeEditorProps) {
     formState: { errors },
     handleSubmit,
     register,
-    reset,
+    reset
   } = useForm<AttributeEditorFormValues>({
-    values,
+    values
   });
 
   const title = values?.id ? t("edit-attribute") : t("new-attribute");
@@ -56,7 +56,7 @@ export function AttributeEditor(props: AttributeEditorProps) {
       onCloseComplete={reset}
       size={{
         base: "full",
-        md: "lg",
+        md: "lg"
       }}
     >
       <ModalOverlay />
@@ -72,11 +72,13 @@ export function AttributeEditor(props: AttributeEditorProps) {
                   id="message"
                   placeholder={String(t("attribute-name"))}
                   {...register("attribute_key", {
-                    required: String(t("field-is-required")),
+                    required: String(t("field-is-required"))
                   })}
                 />
 
-                <FormErrorMessage>{errors.attribute_key && errors.attribute_key.message}</FormErrorMessage>
+                <FormErrorMessage>
+                  {errors.attribute_key && errors.attribute_key.message}
+                </FormErrorMessage>
               </FormControl>
               <FormControl isInvalid={!!errors.value}>
                 <FormLabel htmlFor="value">{t("attribute-value")}</FormLabel>
@@ -84,17 +86,24 @@ export function AttributeEditor(props: AttributeEditorProps) {
                   id="message"
                   placeholder={String(t("attribute-value"))}
                   {...register("value", {
-                    required: String(t("field-is-required")),
+                    required: String(t("field-is-required"))
                   })}
                 />
 
-                <FormErrorMessage>{errors.value && errors.value?.message}</FormErrorMessage>
+                <FormErrorMessage>
+                  {errors.value && errors.value?.message}
+                </FormErrorMessage>
               </FormControl>
             </VStack>
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} colorScheme="orange" isLoading={props.isLoading} type="submit">
+            <Button
+              mr={3}
+              colorScheme="orange"
+              isLoading={props.isLoading}
+              type="submit"
+            >
               {t("save")}
             </Button>
             <Button onClick={props.onClose} variant="ghost">

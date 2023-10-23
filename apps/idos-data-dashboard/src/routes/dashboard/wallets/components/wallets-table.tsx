@@ -10,7 +10,7 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react";
 import { Trash2Icon } from "lucide-react";
 import { useTranslation } from "react-i18next";

@@ -11,7 +11,7 @@ import {
   Text,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react";
 import { Edit2Icon, EyeIcon, ShareIcon, Trash2Icon } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -68,11 +68,15 @@ export function CredentialsTable(props: CredentialsTableProps) {
                       {credential.shares && credential.shares.length > 0 ? (
                         <Button
                           colorScheme="orange"
-                          onClick={() => props.onViewCredentialShares?.(credential)}
+                          onClick={() =>
+                            props.onViewCredentialShares?.(credential)
+                          }
                           size="sm"
                           variant="outline"
                         >
-                          {t("shared-with-count", { count: credential.shares.length })}
+                          {t("shared-with-count", {
+                            count: credential.shares.length
+                          })}
                         </Button>
                       ) : null}
 

@@ -161,7 +161,6 @@ export class EvmGrants {
       type: "function",
     },
   ];
-
   #address = "0x9A961ECd4d2EEB84f990EcD041Cb108083A3C1BA";
   #contract;
 
@@ -175,13 +174,12 @@ export class EvmGrants {
 
   #newGrant({ owner, grantee, dataId, lockedUntil }) {
     (!owner || owner === ZERO_ADDRESS) && (owner = this.defaultOwner);
-
     return new Grant({ owner, grantee, dataId, lockedUntil });
   }
 
   #grantPromise(grant, wait = true) {
     return (transaction) =>
-      new Promise(async (resolve, reject) => {
+      new Promise(async (resolve) => {
         const transactionOrReceipt = wait ? await transaction.wait() : transaction;
         const transactionId = transactionOrReceipt.hash;
         resolve({ grant, transactionId });
@@ -192,9 +190,7 @@ export class EvmGrants {
     if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
-
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
-
     return grants.map(([owner, grantee, dataId, lockedUntil]) => new Grant({ owner, grantee, dataId, lockedUntil }));
   }
 
@@ -202,7 +198,6 @@ export class EvmGrants {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
-
     const grant = this.#newGrant({ grantee, dataId, lockedUntil });
     let transaction;
 
@@ -211,7 +206,6 @@ export class EvmGrants {
     } catch (e) {
       throw new Error("Grant creation failed", { cause: e.cause });
     }
-
     return await this.#grantPromise(grant, wait)(transaction);
   }
 
@@ -219,7 +213,6 @@ export class EvmGrants {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
-
     const grant = this.#newGrant({ grantee, dataId, lockedUntil });
     let transaction;
 
@@ -228,7 +221,6 @@ export class EvmGrants {
     } catch (e) {
       throw new Error("Grant creation failed", { cause: e.cause });
     }
-
     return await this.#grantPromise(grant, wait)(transaction);
   }
 }

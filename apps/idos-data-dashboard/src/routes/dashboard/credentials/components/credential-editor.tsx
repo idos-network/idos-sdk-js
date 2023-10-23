@@ -15,7 +15,7 @@ import {
   Text,
   Textarea,
   VStack,
-  useToast,
+  useToast
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
@@ -46,24 +46,24 @@ export function CredentialEditor(props: CredentialEditorProps) {
 
   const credential = useFetchCredentialDetails({
     variables: {
-      id: props.credential?.id as string,
+      id: props.credential?.id as string
     },
-    enabled: !!props.credential?.id && props.isOpen,
+    enabled: !!props.credential?.id && props.isOpen
   });
 
   const {
     formState: { errors },
     handleSubmit,
     register,
-    reset,
+    reset
   } = useForm<CredentialEditorFormValues>({
     values: {
       id: credential.data?.id ?? "",
       issuer: credential.data?.issuer ?? "",
       credential_type: credential.data?.credential_type ?? "",
       encryption_public_key: credential.data?.encryption_public_key ?? "",
-      content: credential.data?.content ?? "",
-    },
+      content: credential.data?.content ?? ""
+    }
   });
 
   const queryClient = useQueryClient();
@@ -71,7 +71,9 @@ export function CredentialEditor(props: CredentialEditorProps) {
     async onMutate(credential) {
       await queryClient.cancelQueries(useFetchCredentials.getKey());
 
-      const previousCredentials = queryClient.getQueryData<Credential[]>(useFetchCredentials.getKey());
+      const previousCredentials = queryClient.getQueryData<Credential[]>(
+        useFetchCredentials.getKey()
+      );
 
       if (previousCredentials) {
         const newCredential: Credential = {
@@ -79,38 +81,54 @@ export function CredentialEditor(props: CredentialEditorProps) {
           id: crypto.randomUUID(),
           original_id: "",
           human_id: "",
-          encryption_public_key: "",
+          encryption_public_key: ""
         };
-        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...previousCredentials, newCredential]);
+        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
+          ...previousCredentials,
+          newCredential
+        ]);
       }
 
       return { previousCredentials };
     },
     onError(_, __, context) {
       if (context?.previousCredentials) {
-        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...context.previousCredentials]);
+        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
+          ...context.previousCredentials
+        ]);
       }
       props.onClose();
-    },
+    }
   });
 
   const updateCredential = useUpdateCredential({
     async onMutate(vars) {
       await queryClient.cancelQueries(useFetchCredentials.getKey());
-      const previousCredentials = queryClient.getQueryData<Credential[]>(useFetchCredentials.getKey()) ?? [];
+      const previousCredentials =
+        queryClient.getQueryData<Credential[]>(useFetchCredentials.getKey()) ??
+        [];
 
-      const credentialIndex = previousCredentials?.findIndex(({ id }) => id === vars.id) ?? -1;
-      previousCredentials[credentialIndex] = { ...vars, human_id: "", original_id: "" };
-      queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...previousCredentials]);
+      const credentialIndex =
+        previousCredentials?.findIndex(({ id }) => id === vars.id) ?? -1;
+      previousCredentials[credentialIndex] = {
+        ...vars,
+        human_id: "",
+        original_id: ""
+      };
+      queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
+        ...previousCredentials
+      ]);
       credential.setData({ ...vars, human_id: "", original_id: "" });
       return { previousCredentials };
     },
     onError(_, __, context) {
       if (context?.previousCredentials) {
-        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [...context.previousCredentials]);
+        queryClient.setQueryData<Credential[]>(useFetchCredentials.getKey(), [
+          ...context.previousCredentials
+        ]);
       }
       props.onClose();
-    },
+    }
   });
 
   const onSubmit = (values: CredentialEditorFormValues) => {
@@ -119,21 +137,21 @@ export function CredentialEditor(props: CredentialEditorProps) {
       return updateCredential.mutate(
         {
           ...values,
-          id: values.id,
+          id: values.id
         },
         {
           onSuccess() {
             props.onClose();
             toast({
-              title: t("credential-successfully-updated"),
+              title: t("credential-successfully-updated")
             });
           },
           onError() {
             toast({
               title: t("error-while-updating-credential"),
-              status: "error",
+              status: "error"
             });
-          },
+          }
         }
       );
     }
@@ -142,19 +160,21 @@ export function CredentialEditor(props: CredentialEditorProps) {
       onSuccess() {
         props.onClose();
         toast({
-          title: t("credential-successfully-created"),
+          title: t("credential-successfully-created")
         });
       },
       onError() {
         toast({
           title: t("error-while-creating-credential"),
-          status: "error",
+          status: "error"
         });
-      },
+      }
     });
   };
 
-  const title = props.credential?.id ? t("edit-credential") : t("new-credential");
+  const title = props.credential?.id
+    ? t("edit-credential")
+    : t("new-credential");
   const isMutating = createCredential.isLoading || updateCredential.isLoading;
 
   return (
@@ -164,7 +184,7 @@ export function CredentialEditor(props: CredentialEditorProps) {
       onCloseComplete={reset}
       size={{
         base: "full",
-        md: "lg",
+        md: "lg"
       }}
     >
       <ModalOverlay />
@@ -188,7 +208,11 @@ export function CredentialEditor(props: CredentialEditorProps) {
             </Center>
           </ModalBody>
           <ModalFooter>
-            <Button mr={3} colorScheme="orange" onClick={() => credential.refetch()}>
+            <Button
+              mr={3}
+              colorScheme="orange"
+              onClick={() => credential.refetch()}
+            >
               {t("retry")}
             </Button>
             <Button onClick={props.onClose} variant="ghost">
@@ -204,16 +228,20 @@ export function CredentialEditor(props: CredentialEditorProps) {
             <ModalBody>
               <VStack gap={5}>
                 <FormControl isInvalid={!!errors.issuer}>
-                  <FormLabel htmlFor="issuer">{t("credential-issuer")}</FormLabel>
+                  <FormLabel htmlFor="issuer">
+                    {t("credential-issuer")}
+                  </FormLabel>
                   <Input
                     id="issuer"
                     placeholder={String(t("credential-issuer"))}
                     {...register("issuer", {
-                      required: String(t("field-is-required")),
+                      required: String(t("field-is-required"))
                     })}
                   />
 
-                  <FormErrorMessage>{errors.credential_type && errors.credential_type.message}</FormErrorMessage>
+                  <FormErrorMessage>
+                    {errors.credential_type && errors.credential_type.message}
+                  </FormErrorMessage>
                 </FormControl>
                 <FormControl isInvalid={!!errors.credential_type}>
                   <FormLabel htmlFor="type">{t("credential-type")}</FormLabel>
@@ -221,29 +249,40 @@ export function CredentialEditor(props: CredentialEditorProps) {
                     id="type"
                     placeholder={String(t("credential-type"))}
                     {...register("credential_type", {
-                      required: String(t("field-is-required")),
+                      required: String(t("field-is-required"))
                     })}
                   />
 
-                  <FormErrorMessage>{errors.credential_type && errors.credential_type?.message}</FormErrorMessage>
+                  <FormErrorMessage>
+                    {errors.credential_type && errors.credential_type?.message}
+                  </FormErrorMessage>
                 </FormControl>
                 <FormControl isInvalid={!!errors.content}>
-                  <FormLabel htmlFor="content">{t("credential-content")}</FormLabel>
+                  <FormLabel htmlFor="content">
+                    {t("credential-content")}
+                  </FormLabel>
                   <Textarea
                     id="content"
                     placeholder={String(t("credential-content"))}
                     {...register("content", {
-                      required: String(t("field-is-required")),
+                      required: String(t("field-is-required"))
                     })}
                   />
 
-                  <FormErrorMessage>{errors.content && errors.content?.message}</FormErrorMessage>
+                  <FormErrorMessage>
+                    {errors.content && errors.content?.message}
+                  </FormErrorMessage>
                 </FormControl>
               </VStack>
             </ModalBody>
 
             <ModalFooter>
-              <Button mr={3} colorScheme="orange" isLoading={isMutating} type="submit">
+              <Button
+                mr={3}
+                colorScheme="orange"
+                isLoading={isMutating}
+                type="submit"
+              >
                 {t("save")}
               </Button>
               <Button onClick={props.onClose} variant="ghost">

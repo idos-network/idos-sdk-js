@@ -5,27 +5,23 @@ export class IframeEnclave extends EnclaveProvider {
 
   constructor(options) {
     super(options);
-
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
 
   async load() {
     await this.#loadEnclave();
-
     return await this.#requestToEnclave({ storage: {} });
   }
 
   async init(humanId, signerPublicKey) {
     await this.#requestToEnclave({ storage: { humanId, signerPublicKey } });
-
     if (!(await this.#requestToEnclave({ isReady: {} }))) {
       this.#showEnclave();
     }
 
     const publicKeys = await this.#requestToEnclave({ keys: {} });
     this.#hideEnclave();
-
     return publicKeys;
   }
 
@@ -57,6 +53,7 @@ export class IframeEnclave extends EnclaveProvider {
     this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts"]
       .map((permission) => `allow-${permission}`)
       .join(" ");
+
     this.iframe.src = this.hostUrl;
     this.iframe.style = Object.entries({
       "background-color": "transparent",
@@ -69,10 +66,8 @@ export class IframeEnclave extends EnclaveProvider {
       .join("; ");
 
     this.iframe.addEventListener("load", () => this.iframeLoaded());
-
     document.querySelector(this.container).style.display = "none";
     document.querySelector(this.container).appendChild(this.iframe);
-
     return new Promise((resolve) => (this.iframeLoaded = resolve));
   }
 
@@ -89,13 +84,10 @@ export class IframeEnclave extends EnclaveProvider {
   async #requestToEnclave(request) {
     return await new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-
       port1.onmessage = ({ data }) => {
         port1.close();
-
         data.error ? reject(data.error) : resolve(data.result);
       };
-
       this.iframe.contentWindow.postMessage(request, this.hostUrl.origin, [port2]);
     });
   }

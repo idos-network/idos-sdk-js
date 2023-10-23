@@ -18,7 +18,6 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "lint": {},
     "dev": {
       "cache": false,
       "persistent": true

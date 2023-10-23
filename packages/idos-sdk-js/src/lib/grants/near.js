@@ -29,17 +29,13 @@ export class NearGrants {
     }
 
     const grants = await this.#contract[this.constructor.contractMethods.list](grantsFilter);
-
     grants.forEach((grant) => (grant.lockedUntil /= 1e6));
-
     return grants;
   }
 
   async create({ grantee, dataId, lockedUntil } = {}) {
     lockedUntil *= 1e7;
-
     let transactionResult;
-
     let newGrant = { grantee, dataId, lockedUntil };
     Object.entries({ grantee, dataId, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
@@ -58,11 +54,8 @@ export class NearGrants {
       });
     } catch (e) {
       console.error(e);
-      throw new Error("Grant creation failed", {
-        // cause: JSON.parse(e.message).kind,
-      });
+      throw new Error("Grant creation failed");
     }
-
     return { transactionId: transactionResult.transaction.hash };
   }
 
@@ -87,7 +80,6 @@ export class NearGrants {
         cause: JSON.parse(e.message).kind,
       });
     }
-
     return { transactionId: transactionResult.transaction.hash };
   }
 
@@ -102,7 +94,6 @@ export class NearGrants {
     });
 
     const account = await nearConnection.account(accountId);
-
     this.#contract = new nearAPI.Contract(account, contractId, {
       viewMethods: [this.constructor.contractMethods.list],
     });

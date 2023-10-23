@@ -7,7 +7,7 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 export default defineConfig(() => {
   return {
     build: {
-      target: "esnext",
+      target: "esnext"
     },
     plugins: [react(), nodePolyfills({
       include: ["buffer"],
@@ -18,11 +18,11 @@ export default defineConfig(() => {
 
     resolve: {
       alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+        "@": path.resolve(__dirname, "./src")
+      }
     },
     define: {
-      global: "window",
-    },
+      global: "window"
+    }
   };
 });

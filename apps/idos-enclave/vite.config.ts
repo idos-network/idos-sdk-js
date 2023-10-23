@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
-import mkcert from'vite-plugin-mkcert'
-import { resolve } from "path";
 import { createHtmlPlugin } from "vite-plugin-html";
+import mkcert from "vite-plugin-mkcert";
 
 export default defineConfig({
   server: {
@@ -17,18 +16,18 @@ export default defineConfig({
           injectOptions: {
             data: {
               title: "index",
-              injectScript: `<script src="./inject.js"></script>`,
+              injectScript: `<script src="./inject.js"></script>`
             },
             tags: [
               {
                 injectTo: "body-prepend",
                 tag: "div",
                 attrs: {
-                  id: "tag1",
-                },
-              },
-            ],
-          },
+                  id: "tag1"
+                }
+              }
+            ]
+          }
         },
         {
           entry: "src/dialog.js",
@@ -37,21 +36,21 @@ export default defineConfig({
           injectOptions: {
             data: {
               title: "index",
-              injectScript: `<script src="./inject.js"></script>`,
+              injectScript: `<script src="./inject.js"></script>`
             },
             tags: [
               {
                 injectTo: "body-prepend",
                 tag: "div",
                 attrs: {
-                  id: "tag1",
-                },
-              },
-            ],
-          },
-        },
-      ],
+                  id: "tag1"
+                }
+              }
+            ]
+          }
+        }
+      ]
     }),
-    mkcert(),
-  ],
+    mkcert()
+  ]
 });

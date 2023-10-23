@@ -8,7 +8,6 @@ export class Enclave {
 
   async loadProvider() {
     const { humanId, signerPublicKey } = await this.provider.load();
-
     this.idOS.store.set("human-id", humanId);
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }

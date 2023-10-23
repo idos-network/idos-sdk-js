@@ -8,23 +8,29 @@ export const useFetchCredentials = createQuery({
   primaryKey: "credentials",
   queryFn: async () => {
     return idos.data.list<Credential>("credentials");
-  },
+  }
 });
 
-export const useFetchCredentialDetails = createQuery<Omit<Credential, "shares">, { id: string }>({
+export const useFetchCredentialDetails = createQuery<
+  Omit<Credential, "shares">,
+  { id: string }
+>({
   primaryKey: "credential_details",
   queryFn: ({ queryKey: [, { id }] }) => {
     return idos.data.get("credentials", id);
-  },
+  }
 });
 
-export const useFetchCredentialShares = createQuery<Grant[], { owner?: string; grantee?: string; dataId?: string }>({
+export const useFetchCredentialShares = createQuery<
+  Grant[],
+  { owner?: string; grantee?: string; dataId?: string }
+>({
   primaryKey: "credential-shares",
   queryFn: ({ queryKey: [, { owner, grantee, dataId }] }) => {
     return idos.grants.list({
       owner,
       grantee,
-      dataId,
+      dataId
     });
-  },
+  }
 });

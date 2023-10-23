@@ -4,15 +4,15 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupModal } from "@near-wallet-selector/modal-ui-js";
 import "@near-wallet-selector/modal-ui-js/styles.css";
 
-import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
+import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
 
 const idos = await idOS.init({
   nodeUrl: "https://nodes.staging.idos.network",
-  container: "#idos_container",
+  container: "#idos_container"
 });
 
 const connectWallet = {
@@ -27,11 +27,12 @@ const connectWallet = {
   },
 
   NEAR: async () => {
-    const { defaultContractId: contractId, contractMethods: methodNames } = idos.grants.near;
+    const { defaultContractId: contractId, contractMethods: methodNames } =
+      idos.grants.near;
 
     const selector = await setupWalletSelector({
       network: "testnet",
-      modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()],
+      modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
     });
 
     if (!selector.isSignedIn()) {
@@ -48,13 +49,14 @@ const connectWallet = {
     await idos.auth.setNearSigner(wallet);
     await idos.crypto.init();
     await idos.grants.init({ type: "near", accountId, wallet });
-  },
+  }
 };
 
 const idosQueries = async () => {
   const elem = document.querySelector("code#display");
 
-  const display = (html, nest) => ((nest ? elem.lastChild : elem).innerHTML += html);
+  const display = (html, nest) =>
+    ((nest ? elem.lastChild : elem).innerHTML += html);
 
   const { humanId, address } = await idos.auth.currentUser();
 
@@ -140,24 +142,26 @@ const idosQueries = async () => {
   display(`<em class="header tick"><strong>Complete</strong></em><br>`);
 };
 
-document.querySelector("#wallet-chooser").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  e.target.style.display = "none";
+document
+  .querySelector("#wallet-chooser")
+  .addEventListener("submit", async (e) => {
+    e.preventDefault();
+    e.target.style.display = "none";
 
-  await connectWallet[e.submitter.name]();
+    await connectWallet[e.submitter.name]();
 
-  /*
-   * idOS queries
-   *
-   * get the user's idOS ID:
-   *   await idos.auth.currentUser();
-   *
-   * get the user's wallets:
-   *   await idos.data.list("wallets");
-   *
-   */
-  idosQueries();
-});
+    /*
+     * idOS queries
+     *
+     * get the user's idOS ID:
+     *   await idos.auth.currentUser();
+     *
+     * get the user's wallets:
+     *   await idos.data.list("wallets");
+     *
+     */
+    idosQueries();
+  });
 
 document.querySelector("#reset").addEventListener("click", async (e) => {
   await idos.reset();

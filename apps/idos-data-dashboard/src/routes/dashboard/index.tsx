@@ -11,11 +11,11 @@ function DashboardLink(props: LinkProps) {
       borderBottom="1px solid transparent"
       _hover={{
         textDecoration: "none",
-        color: "green.300",
+        color: "green.300"
       }}
       _activeLink={{
         color: "green.500",
-        borderBottomColor: "green.500",
+        borderBottomColor: "green.500"
       }}
       {...props}
     />

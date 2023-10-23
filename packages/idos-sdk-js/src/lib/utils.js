@@ -1,5 +1,5 @@
 export class Utils {
-  // TODO
+  // @todo: implement.
   static validateCredential(credential, credentialIssuer) {
     return true;
   }

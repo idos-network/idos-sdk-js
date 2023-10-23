@@ -29,7 +29,7 @@ const credentials = await idos.data.list("credentials");
 // write data to the connected user's idOS profile
 const attribute = await idos.data.create("attributes", {
   attribute_key: "foo",
-  value: "bar",
+  value: "bar"
 });
 ```
 

@@ -7,9 +7,6 @@ export class KwilWrapper {
     this.client = new WebKwil({ kwilProvider });
   }
 
-  /**
-   * Returns the schema of the database.
-   */
   get schema() {
     return this.client.getSchema(this.dbId);
   }
@@ -32,14 +29,11 @@ export class KwilWrapper {
 
     if (inputs) {
       const actionInput = new KwilUtils.ActionInput();
-
       for (const key in inputs) {
         actionInput.put(`$${key}`, inputs[key]);
       }
-
       action.concat(actionInput);
     }
-
     return action;
   }
 
@@ -59,7 +53,6 @@ export class KwilWrapper {
 
   async getHumanId() {
     const result = await this.call("get_wallet_human_id", null, "See your idOS profile ID");
-
     return result[0]?.human_id || null;
   }
 }

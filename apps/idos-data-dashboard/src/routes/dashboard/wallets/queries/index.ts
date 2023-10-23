@@ -7,5 +7,5 @@ export const useFetchWallets = createQuery({
   primaryKey: "wallets",
   queryFn: async () => {
     return idos.data.list<Wallet>("wallets");
-  },
+  }
 });

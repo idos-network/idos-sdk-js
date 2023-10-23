@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0 --cache",
     "preview": "vite preview",
-    "format": "prettier --plugin-search-dir . --write .",
+    "format": "prettier --write .",
     "test": "playwright test",
     "test:unit": "vitest",
     "test:unit:coverage": "vitest run --coverage"

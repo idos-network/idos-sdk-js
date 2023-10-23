@@ -1,13 +1,27 @@
-import { Box, Button, Code, Flex, useDisclosure, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Code,
+  Flex,
+  useDisclosure,
+  useToast
+} from "@chakra-ui/react";
 import { isError, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useRouteError } from "react-router-dom";
 
 import { ConfirmDialog } from "@/lib/components/confirm-dialog";
-import { AttributeEditor, AttributeEditorFormValues } from "./components/attribute-editor";
+import {
+  AttributeEditor,
+  AttributeEditorFormValues
+} from "./components/attribute-editor";
 import { AttributesTable } from "./components/attributes-table";
-import { useCreateAttribute, useRemoveAttribute, useUpdateAttribute } from "./mutations";
+import {
+  useCreateAttribute,
+  useRemoveAttribute,
+  useUpdateAttribute
+} from "./mutations";
 import { useFetchAttributes } from "./queries";
 import { Attribute } from "./types";
 
@@ -15,7 +29,7 @@ const createEmptyAttribute = (): Attribute => ({
   id: "",
   attribute_key: "",
   value: "",
-  original_id: "",
+  original_id: ""
 });
 
 export function Component() {
@@ -23,8 +37,16 @@ export function Component() {
   const queryClient = useQueryClient();
 
   const toast = useToast();
-  const { isOpen: isEditorOpen, onOpen: onEditorOpen, onClose: onEditorClose } = useDisclosure();
-  const { isOpen: isConfirmOpen, onOpen: onConfirmOpen, onClose: onConfirmClose } = useDisclosure();
+  const {
+    isOpen: isEditorOpen,
+    onOpen: onEditorOpen,
+    onClose: onEditorClose
+  } = useDisclosure();
+  const {
+    isOpen: isConfirmOpen,
+    onOpen: onConfirmOpen,
+    onClose: onConfirmClose
+  } = useDisclosure();
 
   const [attribute, setAttribute] = useState<Attribute>();
 
@@ -35,23 +57,30 @@ export function Component() {
         ?.filter(({ original_id }) => original_id === "")
         .map((attribute) => ({
           ...attribute,
-          shares: data?.filter((a) => a.original_id === attribute.id).map((a) => a.id),
-        })),
+          shares: data
+            ?.filter((a) => a.original_id === attribute.id)
+            .map((a) => a.id)
+        }))
   });
 
   const createAttribute = useCreateAttribute({
     async onMutate(attribute) {
       await queryClient.cancelQueries(useFetchAttributes.getKey());
-      const previousAttributes = queryClient.getQueryData<Attribute[]>(useFetchAttributes.getKey());
+      const previousAttributes = queryClient.getQueryData<Attribute[]>(
+        useFetchAttributes.getKey()
+      );
 
       if (previousAttributes) {
         const newAttribute: Attribute = {
           id: crypto.randomUUID(),
           ...attribute,
-          original_id: "",
+          original_id: ""
         };
 
-        queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [...previousAttributes, newAttribute]);
+        queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [
+          ...previousAttributes,
+          newAttribute
+        ]);
       }
 
       return { previousAttributes };
@@ -61,15 +90,20 @@ export function Component() {
       if (context?.previousAttributes) {
         attributes.setData(context.previousAttributes);
       }
-    },
+    }
   });
   const updateAttribute = useUpdateAttribute({
     async onMutate(vars) {
       await queryClient.cancelQueries(useFetchAttributes.getKey());
-      const previousAttributes = queryClient.getQueryData<Attribute[]>(useFetchAttributes.getKey()) ?? [];
-      const attributeIndex = previousAttributes?.findIndex(({ id }) => id === vars.id) ?? -1;
+      const previousAttributes =
+        queryClient.getQueryData<Attribute[]>(useFetchAttributes.getKey()) ??
+        [];
+      const attributeIndex =
+        previousAttributes?.findIndex(({ id }) => id === vars.id) ?? -1;
       previousAttributes[attributeIndex] = { ...vars, id: vars.id ?? "" };
-      queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [...previousAttributes]);
+      queryClient.setQueryData<Attribute[]>(useFetchAttributes.getKey(), [
+        ...previousAttributes
+      ]);
       attributes.setData([...previousAttributes]);
       return { previousAttributes };
     },
@@ -78,7 +112,7 @@ export function Component() {
       if (context?.previousAttributes) {
         attributes.setData(context.previousAttributes);
       }
-    },
+    }
   });
   const removeAttribute = useRemoveAttribute({
     async onMutate(attribute) {
@@ -86,7 +120,9 @@ export function Component() {
       const previousAttributes = attributes.data;
 
       if (previousAttributes) {
-        attributes.setData([...previousAttributes.filter((a) => a.id !== attribute.id)]);
+        attributes.setData([
+          ...previousAttributes.filter((a) => a.id !== attribute.id)
+        ]);
       }
 
       return { previousAttributes };
@@ -96,7 +132,7 @@ export function Component() {
       if (context?.previousAttributes) {
         attributes.setData(context.previousAttributes);
       }
-    },
+    }
   });
 
   const handleOnEditorClose = () => {
@@ -106,7 +142,7 @@ export function Component() {
 
   const onAttributeEdit = (values: Attribute) => {
     setAttribute({
-      ...values,
+      ...values
     });
     onEditorOpen();
   };
@@ -117,40 +153,48 @@ export function Component() {
       return updateAttribute.mutate(
         {
           ...values,
-          id: values.id,
+          id: values.id
         },
         {
           onSuccess() {
             toast({
-              title: t("attribute-successfully-updated", { name: values.attribute_key }),
+              title: t("attribute-successfully-updated", {
+                name: values.attribute_key
+              })
             });
           },
           onError() {
             toast({
-              title: t("error-while-updating-attribute", { name: values.attribute_key }),
-              status: "error",
+              title: t("error-while-updating-attribute", {
+                name: values.attribute_key
+              }),
+              status: "error"
             });
-          },
+          }
         }
       );
     }
 
     createAttribute.mutate(
       {
-        ...values,
+        ...values
       },
       {
         onSuccess() {
           toast({
-            title: t("attribute-successfully-created", { name: values.attribute_key }),
+            title: t("attribute-successfully-created", {
+              name: values.attribute_key
+            })
           });
         },
         onError() {
           toast({
-            title: t("error-while-creating-attribute", { name: values.attribute_key }),
-            status: "error",
+            title: t("error-while-creating-attribute", {
+              name: values.attribute_key
+            }),
+            status: "error"
           });
-        },
+        }
       }
     );
   };
@@ -170,28 +214,35 @@ export function Component() {
     if (attribute) {
       removeAttribute.mutate(
         {
-          id: attribute.id,
+          id: attribute.id
         },
         {
           onSuccess() {
             setAttribute(createEmptyAttribute());
             toast({
-              title: t("attribute-successfully-removed", { name: attribute.attribute_key }),
+              title: t("attribute-successfully-removed", {
+                name: attribute.attribute_key
+              })
             });
           },
           onError() {
             toast({
-              title: t("error-while-removing-attribute", { name: attribute.attribute_key }),
-              status: "error",
+              title: t("error-while-removing-attribute", {
+                name: attribute.attribute_key
+              }),
+              status: "error"
             });
-          },
+          }
         }
       );
     }
   };
 
   const isLoadingAttributes =
-    attributes.isFetching || createAttribute.isLoading || updateAttribute.isLoading || removeAttribute.isLoading;
+    attributes.isFetching ||
+    createAttribute.isLoading ||
+    updateAttribute.isLoading ||
+    removeAttribute.isLoading;
 
   return (
     <Box>
@@ -219,7 +270,9 @@ export function Component() {
         onConfirm={onRemoveConfirm}
         title={t("remove-attribute")}
         isLoading={removeAttribute.isLoading}
-        description={t("are-sure-you-want-to-remove-attribute", { name: attribute?.attribute_key })}
+        description={t("are-sure-you-want-to-remove-attribute", {
+          name: attribute?.attribute_key
+        })}
       />
     </Box>
   );
