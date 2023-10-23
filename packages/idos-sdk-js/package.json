@@ -33,6 +33,9 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
+    "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
+    "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
+    "@digitalbazaar/vc": "^6.0.2",
     "@kwilteam/kwil-js": "^0.2.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
@@ -40,6 +43,8 @@
     "@stablelib/sha256": "^1.0.1",
     "borsh": "^1.0.0",
     "ethers": "^6.7.1",
+    "jsonld": "^8.3.1",
+    "jsonld-document-loader": "^2.0.0",
     "near-api-js": "^2.1.4"
   }
 }

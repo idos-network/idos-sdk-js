@@ -169,10 +169,15 @@ idos.grants.
 
     near.contractMethods -> string[]
 
-idos.utils.
+idos.verifiableCredentials.
 
-    validateCredential(
-        Credential{ content },
-        CredentialIssuer{ name?, publicKey? }?,
+    verify(
+        Credential.content,
+        {
+            allowedSigners?: jsigs.suites.LinkedDataSignature | jsigs.suites.LinkedDataSignature[],
+            allowedIssuers?: string[],
+            signatureBuilders?: Object.{ string, (any) => Promise{ jsigs.suites.LinkedDataSignature } },
+            documentLoader?: jsonld.documentLoader,
+        }?,
     ) -> boolean
 ```

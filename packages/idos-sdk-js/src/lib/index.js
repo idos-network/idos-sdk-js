@@ -5,10 +5,12 @@ import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
-import { Utils } from "./utils";
+import verifiableCredentials from "./verifiable-credentials";
 
 export class idOS {
   static initializing = false;
+
+  static verifiableCredentials = verifiableCredentials;
 
   constructor({ nodeUrl, container }) {
     if (!this.constructor.initializing) {
@@ -23,7 +25,6 @@ export class idOS {
     this.store = new Store({
       initWith: ["human-id", "signer-public-key"],
     });
-    this.utils = Utils;
   }
 
   static async init({ nodeUrl, container }) {
