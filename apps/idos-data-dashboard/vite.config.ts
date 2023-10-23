@@ -9,7 +9,12 @@ export default defineConfig(() => {
     build: {
       target: "esnext",
     },
-    plugins: [react(), nodePolyfills()],
+    plugins: [react(), nodePolyfills({
+      include: ["buffer"],
+      globals: {
+        Buffer: true,
+      },
+    })],
 
     resolve: {
       alias: {
