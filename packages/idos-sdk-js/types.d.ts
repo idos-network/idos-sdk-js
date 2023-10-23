@@ -2,16 +2,15 @@ import { WebKwil } from "@kwilteam/kwil-js";
 import { ActionBuilder } from "@kwilteam/kwil-js/dist/core/builders";
 import { Database } from "@kwilteam/kwil-js/dist/core/database";
 import { GenericResponse } from "@kwilteam/kwil-js/dist/core/resreq";
-import { Signer } from "ethers";
+import {BaseWallet, Signer, Wallet} from "ethers";
+import {WalletConnection} from'near-api-js'
 
 declare class Auth {
-  #private;
   idOS: idOS;
   constructor(idOS: idOS);
   setEnclaveSigner(): Promise<void>;
   setEvmSigner(signer: Signer): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setNearSigner(wallet: any, recipient?: string): Promise<void>;
+  setNearSigner<Wallet = any>(wallet: Wallet, recipient?: string): Promise<void>;
   currentUser(): Promise<AuthUser>;
 }
 
@@ -82,7 +81,7 @@ declare class KwilWrapper {
   constructor(options: { url: string });
   get schema(): Promise<GenericResponse<Database>>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  setSigner(signer: Signer | any, publicKey?: string | Uint8Array): Promise<void>;
+  setSigner(signer: Signer | any, publicKey?: string | Uint8Array): void;
   buildAction(actionName: string, inputs?: Record<string, string>): Promise<ActionBuilder>;
   call<T = Record<string, string>>(
     actionName: string,
@@ -98,17 +97,15 @@ declare class KwilWrapper {
 
 declare class Grants {
   near: { defaultContractId: string; contractMethods: string[] };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  init(args: any): Promise<void>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  list(args): Promise<any>;
+  init(args: Record<string, unknown>): Promise<void>;
+  list({owner, grantee, dataId}: {owner: string; grantee: string; dataId: string}): Promise<any>;
   create(
     tableName: string,
     recordId: string,
     address: string,
     lockedUntil?: number,
-    receiverPublicKey: string
-  ): Promise<any>;
+    receiverPublicKey?: string
+  ): Promise<Record<string, string>>;
   revoke(tableName: string, recordId: string, grantee: string, dataId: string): Promise<any>;
 }
 
