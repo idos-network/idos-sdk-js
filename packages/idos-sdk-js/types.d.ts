@@ -2,8 +2,7 @@ import { WebKwil } from "@kwilteam/kwil-js";
 import { ActionBuilder } from "@kwilteam/kwil-js/dist/core/builders";
 import { Database } from "@kwilteam/kwil-js/dist/core/database";
 import { GenericResponse } from "@kwilteam/kwil-js/dist/core/resreq";
-import {BaseWallet, Signer, Wallet} from "ethers";
-import {WalletConnection} from'near-api-js'
+import { Signer } from "ethers";
 
 declare class Auth {
   idOS: idOS;
@@ -98,7 +97,7 @@ declare class KwilWrapper {
 declare class Grants {
   near: { defaultContractId: string; contractMethods: string[] };
   init(args: Record<string, unknown>): Promise<void>;
-  list({owner, grantee, dataId}: {owner: string; grantee: string; dataId: string}): Promise<any>;
+  list({ owner, grantee, dataId }: { owner?: string; grantee?: string; dataId?: string }): Promise<any>;
   create(
     tableName: string,
     recordId: string,
