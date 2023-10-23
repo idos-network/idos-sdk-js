@@ -1,36 +1,29 @@
+import { idOS } from "#/lib/idos";
 import { createQuery } from "react-query-kit";
 
-import { idos } from "@/lib/idos";
-import { Grant } from "@/lib/types";
-import { Credential } from "../types";
+export type Credential = {
+  credential_type: string;
+  human_id: string;
+  id: string;
+  issuer: string;
+  original_id: string;
+};
+
+export type CredentialDetails = Credential & {
+  content: string;
+};
 
 export const useFetchCredentials = createQuery({
   primaryKey: "credentials",
-  queryFn: async () => {
-    return idos.data.list<Credential>("credentials");
-  }
+  queryFn: () => idOS.data.list<Credential>("credentials")
 });
 
 export const useFetchCredentialDetails = createQuery<
-  Omit<Credential, "shares">,
+  CredentialDetails,
   { id: string }
 >({
   primaryKey: "credential_details",
   queryFn: ({ queryKey: [, { id }] }) => {
-    return idos.data.get("credentials", id);
-  }
-});
-
-export const useFetchCredentialShares = createQuery<
-  Grant[],
-  { owner?: string; grantee?: string; dataId?: string }
->({
-  primaryKey: "credential-shares",
-  queryFn: ({ queryKey: [, { owner, grantee, dataId }] }) => {
-    return idos.grants.list({
-      owner,
-      grantee,
-      dataId
-    });
+    return idOS.data.get("credentials", id);
   }
 });

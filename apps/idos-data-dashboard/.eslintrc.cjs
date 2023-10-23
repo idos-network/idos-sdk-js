@@ -15,7 +15,6 @@ module.exports = {
 
   rules: {
     "react-refresh/only-export-components": "warn",
-
     "chakra-ui/props-order": "error",
     "chakra-ui/props-shorthand": "error",
     "chakra-ui/require-specific-component": "error"

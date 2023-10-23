@@ -1,6 +1,6 @@
-import { idOS } from "@idos-network/idos-sdk";
+import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 
-export const idos = await idOS.init({
+export const idOS = await idOSSDK.init({
   nodeUrl: import.meta.env.VITE_NODE_URL,
-  container: "#idos"
+  container: "#idOS"
 });

@@ -1,28 +1,36 @@
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
-export default defineConfig(() => {
-  return {
-    build: {
-      target: "esnext"
-    },
-    plugins: [react(), nodePolyfills({
+export default defineConfig({
+  define: {
+    global: "window"
+  },
+
+  build: {
+    target: "esnext"
+  },
+
+  plugins: [
+    react(),
+    nodePolyfills({
       include: ["buffer"],
       globals: {
-        Buffer: true,
-      },
-    })],
-
-    resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src")
+        Buffer: true
       }
-    },
-    define: {
-      global: "window"
+    })
+  ],
+
+  resolve: {
+    alias: {
+      "#": path.resolve(__dirname, "./src")
     }
-  };
+  },
+
+  test: {
+    globals: true,
+    environment: "jsdom"
+  }
 });

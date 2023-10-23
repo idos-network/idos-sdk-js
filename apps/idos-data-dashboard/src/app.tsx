@@ -1,4 +1,4 @@
-import { Box } from "@chakra-ui/react";
+import { Center, Text } from "@chakra-ui/react";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
@@ -7,26 +7,22 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import { setupNightly } from "@near-wallet-selector/nightly";
 import { BrowserProvider } from "ethers";
 import { useMetaMask } from "metamask-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { useEffectOnce } from "usehooks-ts";
 
-import { ConnectWallet } from "@/lib/components/connect-wallet";
-import { Header } from "@/lib/components/header";
-import { Loading } from "@/lib/components/loading";
-import { idos } from "@/lib/idos";
-import { idOS } from "@idos-network/idos-sdk";
+import { idOS } from "#/lib/idos";
+import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
-  await idos.auth.setEvmSigner(signer);
-  await idos.crypto.init();
-  await idos.grants.init({ signer, type: "evm" });
+  await idOS.auth.setEvmSigner(signer);
+  await idOS.crypto.init();
+  await idOS.grants.init({ signer, type: "evm" });
 };
 
 const setUpNearWallet = async () => {
-  const contractId = idOS.near.defaultContractId;
+  const contractId = idOSSDK.near.defaultContractId;
   let walletSelectorReady: (value?: unknown) => void;
 
   const selector = await setupWalletSelector({
@@ -36,16 +32,16 @@ const setUpNearWallet = async () => {
 
   const modal = setupModal(selector, {
     contractId,
-    methodNames: idOS.near.contractMethods
+    methodNames: idOSSDK.near.contractMethods
   });
 
   modal.on("onHide", async () => {
     try {
       const wallet = await selector.wallet();
-      await idos.auth.setNearSigner(wallet);
-      await idos.crypto.init();
+      await idOS.auth.setNearSigner(wallet);
+      await idOS.crypto.init();
       const accountId = (await wallet.getAccounts())[0].accountId;
-      await idos.grants.init({ type: "near", accountId, wallet });
+      await idOS.grants.init({ type: "near", accountId, wallet });
       walletSelectorReady();
     } catch (error) {
       walletSelectorReady(error);
@@ -95,7 +91,7 @@ export default function App() {
     }
   };
 
-  useEffectOnce(() => {
+  useEffect(() => {
     if (!initialized.current) {
       initialized.current = true;
       (async () => {
@@ -109,10 +105,10 @@ export default function App() {
         });
         if (selector.isSignedIn()) {
           const wallet = await selector.wallet();
-          await idos.auth.setNearSigner(wallet);
-          await idos.crypto.init();
+          await idOS.auth.setNearSigner(wallet);
+          await idOS.crypto.init();
           const accountId = (await wallet.getAccounts())[0].accountId;
-          await idos.grants.init({ type: "near", accountId, wallet });
+          await idOS.grants.init({ type: "near", accountId, wallet });
           setIsConnected(true);
         }
         setIsLoading(false);
@@ -122,29 +118,20 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <Box minH="100vh">
-        <Loading />
-      </Box>
+      <Center minH="100vh">
+        <Text>Loading ...</Text>
+      </Center>
     );
   }
 
   if (!isConnected) {
     return (
-      <ConnectWallet
-        onNearConnect={onNearConnect}
-        onMetamaskConnect={onMetamaskConnect}
-      />
+      <Center minH="100vh">
+        <button onClick={onMetamaskConnect}>Connect to Metamask</button>
+        <button onClick={onNearConnect}>Connect to Near</button>
+      </Center>
     );
   }
 
-  return (
-    <Box minH="100vh">
-      <Header />
-      <Box maxW="container.xl" mx="auto" p={6}>
-        <Box my={20}>
-          <Outlet />
-        </Box>
-      </Box>
-    </Box>
-  );
+  return <Outlet />;
 }

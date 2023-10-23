@@ -1,39 +1,38 @@
-import { Box, Divider, Flex } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
+import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
+import { ConnectedWallet } from "#/lib/components/connected-wallet";
+import { Sidebar } from "#/lib/components/sidebar";
+import { Box, Flex, Image } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 
-import { LinkProps, NavLink } from "@/lib/components/link";
-
-function DashboardLink(props: LinkProps) {
-  return (
-    <NavLink
-      py={1.5}
-      borderBottom="1px solid transparent"
-      _hover={{
-        textDecoration: "none",
-        color: "green.300"
-      }}
-      _activeLink={{
-        color: "green.500",
-        borderBottomColor: "green.500"
-      }}
-      {...props}
-    />
-  );
-}
-
 export function Component() {
-  const { t } = useTranslation();
-
   return (
-    <Box>
-      <Flex align="center" gap={6}>
-        <DashboardLink to="/">{t("attributes")}</DashboardLink>
-        <DashboardLink to="/wallets">{t("wallets")}</DashboardLink>
-        <DashboardLink to="/credentials">{t("credentials")}</DashboardLink>
+    <Box minH="100vh" px={[5, 10]}>
+      <Flex
+        pos="fixed"
+        top={0}
+        bottom={0}
+        direction="column"
+        gap={2.5}
+        display={["none", "none", "none", "flex"]}
+        w={340}
+        pb={10}
+      >
+        <Flex direction="column" flexGrow={1} gap={2.5} overflowY="auto">
+          <Flex align="center" h="125px" shrink={0}>
+            <Image
+              w="144px"
+              h="auto"
+              alt="idOS Data Dashboard"
+              src={idOSDashboardLogo}
+            />
+          </Flex>
+          <ConnectedWallet address="0x1234567890" />
+          <Sidebar />
+        </Flex>
       </Flex>
-      <Divider mb={5} borderColor="gray.200" />
-      <Outlet />
+      <Box as="main" maxW={["100%", "100%", "100%", "80vw"]}>
+        <Outlet />
+      </Box>
     </Box>
   );
 }

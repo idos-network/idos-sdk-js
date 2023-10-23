@@ -2,13 +2,13 @@ import { WebKwil } from "@kwilteam/kwil-js";
 import { ActionBuilder } from "@kwilteam/kwil-js/dist/core/builders";
 import { Database } from "@kwilteam/kwil-js/dist/core/database";
 import { GenericResponse } from "@kwilteam/kwil-js/dist/core/resreq";
-import { Signer } from "ethers";
+import { JsonRpcSigner, Signer } from "ethers";
 
 declare class Auth {
   idOS: idOS;
   constructor(idOS: idOS);
   setEnclaveSigner(): Promise<void>;
-  setEvmSigner(signer: Signer): Promise<void>;
+  setEvmSigner(signer: JsonRpcSigner): Promise<void>;
   setNearSigner<Wallet = any>(wallet: Wallet, recipient?: string): Promise<void>;
   currentUser(): Promise<AuthUser>;
 }
