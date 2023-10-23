@@ -51,7 +51,7 @@ const setUpNearWallet = async () => {
     }
   });
   modal.show();
-  const result = await new Promise<void>(
+  return await new Promise<void>(
     (resolve, reject) =>
       (walletSelectorReady = (error) => {
         if (error) {
@@ -61,7 +61,6 @@ const setUpNearWallet = async () => {
         }
       })
   );
-  return result;
 };
 
 export default function App() {
