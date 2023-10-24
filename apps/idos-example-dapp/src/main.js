@@ -125,13 +125,14 @@ const idosQueries = async () => {
       </div>
   `);
 
-  for (const { owner, grantee, dataId, lockedUntil } of grants) {
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  for (const { owner, grantee, dataId, data_id, lockedUntil } of grants) {
     display(
       `
       <div>
         <div>${owner}</div>
         <div>${grantee}</div>
-        <div>${dataId}</div>
+        <div>${dataId || data_id}</div>
         <div>${lockedUntil}</div>
       </div>
     `,
