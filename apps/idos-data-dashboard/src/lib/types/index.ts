@@ -9,5 +9,5 @@ export type HumanId = {
 export type Grant = {
   owner: string;
   grantee: string;
-  dataId: string;
+  data_id: string;
 };

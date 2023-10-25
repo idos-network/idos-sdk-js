@@ -34,23 +34,24 @@ export function SharesEditor(props: SharesEditorProps) {
   const { t } = useTranslation();
   const grants = useFetchCredentialShares({
     variables: {
-      owner: "juliosantos.testnet",
-      dataId: props.credential?.id as string
+      owner: "juliosantos.testnet"
     },
     enabled: !!props.credential?.id && props.isOpen
   });
+
   const revokeCredentialShare = useRevokeCredentialShare();
   const toast = useToast();
 
   const credentialGrants = grants.data?.filter((grant) =>
-    props.credential?.shares?.includes(grant.dataId)
+    props.credential?.shares?.includes(grant.data_id)
   );
+
   const onRevokeGrant = (grant: Grant) => {
     revokeCredentialShare.mutate(
       {
         recordId: props.credential?.id as string,
         grantee: grant.grantee,
-        dataId: grant.dataId
+        dataId: grant.data_id
       },
       {
         onSuccess() {
@@ -102,7 +103,7 @@ export function SharesEditor(props: SharesEditorProps) {
                   </Thead>
                   <Tbody>
                     {credentialGrants?.map((grant) => (
-                      <Tr key={grant.dataId}>
+                      <Tr key={grant.data_id}>
                         <Td fontWeight="semibold">{grant.grantee}</Td>
                         <Td isNumeric>
                           <Button
