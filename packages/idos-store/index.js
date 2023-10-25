@@ -50,7 +50,7 @@ export class Store {
   async reset() {
     window.localStorage.clear();
     for (const { name } of await cookieStore.getAll()) {
-      await cookieStore.delete(name);
+      document.cookie = `${name}=; SameSite=None; Secure; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
     }
   }
 }
