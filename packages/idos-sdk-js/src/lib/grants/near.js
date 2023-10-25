@@ -4,7 +4,7 @@ export class NearGrants {
   #contract;
   #wallet;
 
-  static defaultContractId = "idos-dev-1.testnet";
+  static defaultContractId = "idos-dev-2.testnet";
   static contractMethods = {
     list: "find_grants",
     create: "insert_grant",
@@ -18,10 +18,11 @@ export class NearGrants {
     await this.#connectContract(accountId, contractId);
   }
 
-  async list({ owner, grantee, dataId, lockedUntil } = {}) {
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  async list({ owner, grantee, dataId: data_id, lockedUntil } = {}) {
     lockedUntil *= 1e7;
 
-    let grantsFilter = { owner, grantee, dataId, lockedUntil };
+    let grantsFilter = { owner, grantee, data_id, lockedUntil };
     Object.entries(grantsFilter).forEach(([k, v]) => !v && delete grantsFilter[k]);
 
     if (!(owner || grantee)) {
@@ -33,11 +34,12 @@ export class NearGrants {
     return grants;
   }
 
-  async create({ grantee, dataId, lockedUntil } = {}) {
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  async create({ grantee, dataId: data_id, lockedUntil } = {}) {
     lockedUntil *= 1e7;
     let transactionResult;
-    let newGrant = { grantee, dataId, lockedUntil };
-    Object.entries({ grantee, dataId, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
+    let newGrant = { grantee, data_id, lockedUntil };
+    Object.entries({ grantee, data_id, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
     try {
       transactionResult = await this.#wallet.signAndSendTransaction({
@@ -59,7 +61,8 @@ export class NearGrants {
     return { transactionId: transactionResult.transaction.hash };
   }
 
-  async revoke({ grantee, dataId } = {}) {
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  async revoke({ grantee, dataId: data_id } = {}) {
     let transactionResult;
 
     try {
@@ -69,7 +72,7 @@ export class NearGrants {
             type: "FunctionCall",
             params: {
               methodName: this.constructor.contractMethods.revoke,
-              args: { grantee, dataId },
+              args: { grantee, data_id },
               gas: "30000000000000",
             },
           },
