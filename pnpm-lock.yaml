@@ -225,19 +225,22 @@ importers:
         version: link:../../packages/idos-sdk-js
       '@near-wallet-selector/core':
         specifier: ^8.5.1
-        version: 8.5.3(near-api-js@2.1.4)
+        version: 8.7.0
       '@near-wallet-selector/here-wallet':
         specifier: ^8.5.3
-        version: 8.5.3(borsh@0.7.0)(near-api-js@2.1.4)
+        version: 8.7.0(borsh@0.7.0)
       '@near-wallet-selector/meteor-wallet':
         specifier: ^8.5.3
-        version: 8.5.3(near-api-js@2.1.4)
+        version: 8.7.0
       '@near-wallet-selector/modal-ui-js':
         specifier: ^8.5.3
-        version: 8.5.3
+        version: 8.7.0
+      '@near-wallet-selector/my-near-wallet':
+        specifier: ^8.5.3
+        version: 8.7.0
       '@near-wallet-selector/nightly':
         specifier: ^8.5.3
-        version: 8.5.3(near-api-js@2.1.4)
+        version: 8.7.0
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
@@ -2481,6 +2484,17 @@ packages:
       rxjs: 7.8.1
     dev: false
 
+  /@near-wallet-selector/core@8.7.0:
+    resolution: {integrity: sha512-H1Mc0xyWsy5Vjscn8gjK8y0X1wG5EBH9VuVQ+mFOtdyt8y+7Pttf/0dD91oAIwCo7Pu/ryPukcr6IGAz1R05cA==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+    dependencies:
+      borsh: 0.7.0
+      events: 3.3.0
+      js-sha256: 0.9.0
+      rxjs: 7.8.1
+    dev: false
+
   /@near-wallet-selector/here-wallet@8.5.3(borsh@0.7.0)(near-api-js@2.1.4):
     resolution: {integrity: sha512-ZYmLo4t7S8EwYH2QLVOQs9Zg9AbJEkhvRHsz+TYIAzwDGHxYxNJ7BmohbtE7oICOSd5us4iYmLxn6PETmuICiA==}
     peerDependencies:
@@ -2490,6 +2504,18 @@ packages:
       '@near-wallet-selector/core': 8.5.3(near-api-js@2.1.4)
       bn.js: 5.2.1
       near-api-js: 2.1.4
+    transitivePeerDependencies:
+      - borsh
+    dev: false
+
+  /@near-wallet-selector/here-wallet@8.7.0(borsh@0.7.0):
+    resolution: {integrity: sha512-t7GfF0ZSzAK7bukHiC5H10wSB/mrBUaM2XyrjhpfQ37gnOFKGj1h3NQRwKCk8oCNpEPUxzf+h4lY49Plu1WkBg==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+    dependencies:
+      '@here-wallet/core': 1.5.1(bn.js@5.2.1)(borsh@0.7.0)(near-api-js@2.1.4)
+      '@near-wallet-selector/core': 8.7.0
+      bn.js: 5.2.1
     transitivePeerDependencies:
       - borsh
     dev: false
@@ -2505,10 +2531,20 @@ packages:
       near-api-js: 2.1.4
     dev: false
 
-  /@near-wallet-selector/modal-ui-js@8.5.3:
-    resolution: {integrity: sha512-6GpQuEhgygY+82jZIVsMGQ2KSR8UCDOdLSOvLOVgxMeRLdgYYCB44nQdwpPNkM08PC9EsVguRJM41mef51SNLg==}
+  /@near-wallet-selector/meteor-wallet@8.7.0:
+    resolution: {integrity: sha512-2uuxdQC79PhNqu2L8xzGRiYqeNEp/bW1tcniCyP4O/lJ9TwidTaHcqQIDqSrFFPSdN6c9OnZL9ZkLnciZq9IgQ==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
     dependencies:
-      '@near-wallet-selector/core': 8.5.3(near-api-js@2.1.4)
+      '@meteorwallet/sdk': 0.8.0(near-api-js@2.1.4)
+      '@near-wallet-selector/core': 8.7.0
+      '@near-wallet-selector/wallet-utils': 8.7.0
+    dev: false
+
+  /@near-wallet-selector/modal-ui-js@8.7.0:
+    resolution: {integrity: sha512-kNfUqXrQ9S4LUfzeq53M7mrkidGk25IhphP3Ak2Y+U20ddq1TvsQf8LXxt3H3qGi9SwyAbLiVmCAQIVFx4r7Cg==}
+    dependencies:
+      '@near-wallet-selector/core': 8.7.0
       copy-to-clipboard: 3.3.3
       qrcode: 1.5.3
     transitivePeerDependencies:
@@ -2537,6 +2573,15 @@ packages:
       near-api-js: 2.1.4
     dev: false
 
+  /@near-wallet-selector/my-near-wallet@8.7.0:
+    resolution: {integrity: sha512-UDL+KHvkLbDtN1WanpGrVCWIQ4XBPUlwohNScwWC2CKSI/M7lQGsHeKWffgxuzTO6mMedH9QHvbnWc8OjF34zQ==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+    dependencies:
+      '@near-wallet-selector/core': 8.7.0
+      '@near-wallet-selector/wallet-utils': 8.7.0
+    dev: false
+
   /@near-wallet-selector/nightly@8.5.3(near-api-js@2.1.4):
     resolution: {integrity: sha512-tEhx55RrAzOqtsIJM/mh4OA19h+URckefR2E6RSnScAnc/4UnC3K1zXQqZaO9SYWOttbM9w5EbLQQtrNgkFT9A==}
     peerDependencies:
@@ -2548,6 +2593,16 @@ packages:
       near-api-js: 2.1.4
     dev: false
 
+  /@near-wallet-selector/nightly@8.7.0:
+    resolution: {integrity: sha512-1zTs5RMZt9VQG3+F796ia9sHBXBUZkgrz1ddcuKypCQbnspR3bbFFBa7BryorUzA/9tRhvwiWnQ1mZV7jlQeuw==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+    dependencies:
+      '@near-wallet-selector/core': 8.7.0
+      '@near-wallet-selector/wallet-utils': 8.7.0
+      is-mobile: 4.0.0
+    dev: false
+
   /@near-wallet-selector/wallet-utils@8.5.3(near-api-js@2.1.4):
     resolution: {integrity: sha512-Ag5bRtQwkPciMSeTrd6TOQyAV3tUWSQTRsZxFqy+aYsQA6vBSI3qsXLSlbjvIQGA8vRgyQdzkkilHWu3gC/Mrg==}
     peerDependencies:
@@ -2556,6 +2611,15 @@ packages:
       '@near-wallet-selector/core': 8.5.3(near-api-js@2.1.4)
       bn.js: 5.2.1
       near-api-js: 2.1.4
+    dev: false
+
+  /@near-wallet-selector/wallet-utils@8.7.0:
+    resolution: {integrity: sha512-iS/RYnsmih/lEbPt90hGld6h967Iq3KYC+CESyxDw4bPKeadLB7d6nqnN7r6WarYeTG1iwkkbHsM52/eQmSdoQ==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+    dependencies:
+      '@near-wallet-selector/core': 8.7.0
+      bn.js: 5.2.1
     dev: false
 
   /@noble/ed25519@1.7.3:

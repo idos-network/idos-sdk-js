@@ -22,20 +22,70 @@ export class Auth {
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
+    if (wallet.id === "my-near-wallet") {
+      wallet.signMessage = async ({ message, recipient, nonce }) => {
+        let paramsSinature = window.location.hash.match(/signature=(.*?)&/);
+        let paramsPublicKey = window.location.hash.match(/publicKey=(.*?)&/);
+
+        if (paramsSinature && message === this.idOS.store.get("sign-last-message")) {
+          const publicKey = decodeURIComponent(paramsPublicKey[1]);
+          const signature = decodeURIComponent(paramsSinature[1]);
+
+          return {
+            publicKey,
+            signature,
+            lastNonce: this.idOS.store.get("sign-last-nonce"),
+            lastMessage: this.idOS.store.get("sign-last-message"),
+            lastUrl: this.idOS.store.get("sign-last-url"),
+          };
+        } else {
+          const callbackUrl = window.location.href;
+
+          const href = new URL("https://app.mynearwallet.com/");
+          href.pathname = "sign-message";
+          href.searchParams.append("message", message);
+          href.searchParams.append("nonce", nonce.toString());
+          href.searchParams.append("recipient", recipient);
+          href.searchParams.append("callbackUrl", callbackUrl);
+
+          this.idOS.store.set("sign-last-message", message);
+          this.idOS.store.set("sign-last-nonce", nonce.toString());
+          this.idOS.store.set("sign-last-url", callbackUrl);
+
+          window.location.replace(href.toString());
+        }
+      };
+    }
+
     let publicKey = this.idOS.store.get("signer-public-key");
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
-      const message = "idOS authentication";
-      const nonce = new this.idOS.crypto.Nonce(32);
+      let message = "idOS authentication";
+      let nonce = new this.idOS.crypto.Nonce(32, true);
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
+
       this.idOS.store.set("signer-public-key", publicKey);
     }
+
     this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
-      const nonce = new this.idOS.crypto.Nonce(32);
-      const { signature } = await wallet.signMessage({ message, recipient, nonce });
+      let nonce = new this.idOS.crypto.Nonce(32, true);
+
+      const { lastNonce, signature, lastUrl } = await wallet.signMessage({ message, recipient, nonce });
+
+      const nep413BorshParams = {
+        tag: 2147484061,
+        message,
+        recipient,
+        nonce: lastNonce ? Buffer.from(lastNonce) : nonce,
+      };
+
+      if (lastUrl) {
+        nep413BorshParams.callbackUrl = lastUrl;
+      }
+
       const nep413BorshPayload = borsh.serialize(
         {
           struct: {
@@ -46,7 +96,7 @@ export class Auth {
             callbackUrl: { option: "string" },
           },
         },
-        { tag: 2147484061, message, nonce, recipient }
+        nep413BorshParams
       );
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),

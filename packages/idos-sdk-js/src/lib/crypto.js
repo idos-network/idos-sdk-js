@@ -1,6 +1,9 @@
 class Nonce {
-  constructor(length = 32) {
-    return Buffer.from(crypto.getRandomValues(new Uint8Array(length)));
+  constructor(length = 32, uuid = false) {
+    const values = uuid
+      ? crypto.randomUUID().substring(0, length)
+      : crypto.getRandomValues(new Uint8Array(length));
+    return Buffer.from(values);
   }
 }
 

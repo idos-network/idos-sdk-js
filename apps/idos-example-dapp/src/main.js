@@ -6,6 +6,7 @@ import "@near-wallet-selector/modal-ui-js/styles.css";
 
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
@@ -27,21 +28,24 @@ const connectWallet = {
   },
 
   NEAR: async () => {
-    const { defaultContractId: contractId, contractMethods: methodNames } =
-      idos.grants.near;
-
     const selector = await setupWalletSelector({
       network: "testnet",
-      modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
+      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
     });
 
-    if (!selector.isSignedIn()) {
-      await new Promise((resolve) => {
-        const modal = setupModal(selector, { contractId, methodNames });
-        modal.on("onHide", resolve);
-        modal.show();
-      });
-    }
+    !selector.isSignedIn() && await new Promise((resolve) => {
+      const { defaultContractId: contractId, contractMethods: methodNames } =
+        idos.grants.near;
+      const modal = setupModal(selector, { contractId, methodNames });
+
+      // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
+      // We observe that it triggers this callback before it's ready for a
+      // second method call, which `setNearSigner` does immediately after
+      // this promise resolves
+      modal.on("onHide", () => setTimeout(resolve, 100));
+
+      modal.show();
+    });
 
     const wallet = await selector.wallet();
     const accountId = (await wallet.getAccounts())[0].accountId;
