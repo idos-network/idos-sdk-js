@@ -5,7 +5,7 @@ export class Grants {
   #child;
   near = {
     contractMethods: Object.values(NearGrants.contractMethods),
-    defaultContractId: { NearGrants },
+    defaultContractId: NearGrants.defaultContractId,
   };
 
   constructor(idOS) {
