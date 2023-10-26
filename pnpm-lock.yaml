@@ -224,22 +224,22 @@ importers:
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
       '@near-wallet-selector/core':
-        specifier: ^8.5.1
+        specifier: ^8.7.0
         version: 8.7.0
       '@near-wallet-selector/here-wallet':
-        specifier: ^8.5.3
+        specifier: ^8.7.0
         version: 8.7.0(borsh@0.7.0)
       '@near-wallet-selector/meteor-wallet':
-        specifier: ^8.5.3
+        specifier: ^8.7.0
         version: 8.7.0
       '@near-wallet-selector/modal-ui-js':
-        specifier: ^8.5.3
+        specifier: ^8.7.0
         version: 8.7.0
       '@near-wallet-selector/my-near-wallet':
-        specifier: ^8.5.3
+        specifier: ^8.7.0
         version: 8.7.0
       '@near-wallet-selector/nightly':
-        specifier: ^8.5.3
+        specifier: ^8.7.0
         version: 8.7.0
       ethers:
         specifier: ^6.7.1
@@ -282,6 +282,9 @@ importers:
         specifier: ^1.0.1
         version: 1.0.1
       '@stablelib/sha256':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
         specifier: ^1.0.1
         version: 1.0.1
       borsh:

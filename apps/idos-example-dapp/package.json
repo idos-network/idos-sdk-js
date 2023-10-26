@@ -18,12 +18,12 @@
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
-    "@near-wallet-selector/core": "^8.5.1",
-    "@near-wallet-selector/here-wallet": "^8.5.3",
-    "@near-wallet-selector/meteor-wallet": "^8.5.3",
-    "@near-wallet-selector/modal-ui-js": "^8.5.3",
-    "@near-wallet-selector/my-near-wallet": "^8.5.3",
-    "@near-wallet-selector/nightly": "^8.5.3",
+    "@near-wallet-selector/core": "^8.7.0",
+    "@near-wallet-selector/here-wallet": "^8.7.0",
+    "@near-wallet-selector/meteor-wallet": "^8.7.0",
+    "@near-wallet-selector/modal-ui-js": "^8.7.0",
+    "@near-wallet-selector/my-near-wallet": "^8.7.0",
+    "@near-wallet-selector/nightly": "^8.7.0",
     "ethers": "^6.7.1"
   }
 }

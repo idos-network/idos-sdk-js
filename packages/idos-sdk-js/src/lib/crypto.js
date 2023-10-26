@@ -1,10 +1,19 @@
+import * as StableUtf8 from "@stablelib/utf8";
+
 class Nonce {
-  constructor(length = 32, uuid = false) {
-    const values = uuid
-      ? crypto.randomUUID().substring(0, length)
-      : crypto.getRandomValues(new Uint8Array(length));
-    return Buffer.from(values);
-  }
+  // returns Uint8Array
+  static random = (length = 32) => (
+    crypto.getRandomValues(new Uint8Array(length))
+  )
+
+  // returns Uint8Array
+  static trimmedUUID = (length = 32) => (
+    StableUtf8.encode(crypto.randomUUID().substring(0, length))
+  )
+
+  static fill = (value = 0, length = 32) => (
+    new Uint8Array(length).fill(value)
+  )
 }
 
 export class Crypto {

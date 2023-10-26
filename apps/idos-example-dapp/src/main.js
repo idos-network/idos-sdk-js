@@ -172,3 +172,9 @@ document.querySelector("#reset").addEventListener("click", async (e) => {
   await idos.reset();
   window.location.reload();
 });
+
+// Automatically continue with NEAR when Back from MNW
+if (window.location.href.match(/(accountId|account_id)=(.*?)&/)) {
+  await connectWallet["NEAR"]();
+  await idosQueries();
+}

@@ -23,6 +23,7 @@ export class Auth {
 
   async setNearSigner(wallet, recipient = "idos.network") {
     if (wallet.id === "my-near-wallet") {
+      wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
       wallet.signMessage = async ({ message, recipient, nonce }) => {
         let paramsSinature = window.location.hash.match(/signature=(.*?)&/);
         let paramsPublicKey = window.location.hash.match(/publicKey=(.*?)&/);
@@ -31,28 +32,23 @@ export class Auth {
           const publicKey = decodeURIComponent(paramsPublicKey[1]);
           const signature = decodeURIComponent(paramsSinature[1]);
 
-          return {
+          return Promise.resolve({
             publicKey,
             signature,
-            lastNonce: this.idOS.store.get("sign-last-nonce"),
+            lastNonce: JSON.parse(this.idOS.store.get("sign-last-nonce")).data,
             lastMessage: this.idOS.store.get("sign-last-message"),
             lastUrl: this.idOS.store.get("sign-last-url"),
-          };
+          });
         } else {
           const callbackUrl = window.location.href;
 
-          const href = new URL("https://app.mynearwallet.com/");
-          href.pathname = "sign-message";
-          href.searchParams.append("message", message);
-          href.searchParams.append("nonce", nonce.toString());
-          href.searchParams.append("recipient", recipient);
-          href.searchParams.append("callbackUrl", callbackUrl);
-
           this.idOS.store.set("sign-last-message", message);
-          this.idOS.store.set("sign-last-nonce", nonce.toString());
+          this.idOS.store.set("sign-last-nonce", JSON.stringify(nonce));
           this.idOS.store.set("sign-last-url", callbackUrl);
 
-          window.location.replace(href.toString());
+          wallet.signMessageOriginal({ callbackUrl, message, nonce, recipient });
+
+          await new Promise((_) => (_));
         }
       };
     }
@@ -61,8 +57,8 @@ export class Auth {
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
       let message = "idOS authentication";
-      let nonce = new this.idOS.crypto.Nonce(32, true);
-      ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
+      let nonce = this.idOS.crypto.Nonce.trimmedUUID();
+      ({ publicKey } = await wallet.signMessage({ message, recipient, nonce: Buffer.from(nonce) }));
 
       this.idOS.store.set("signer-public-key", publicKey);
     }
@@ -71,15 +67,25 @@ export class Auth {
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
-      let nonce = new this.idOS.crypto.Nonce(32, true);
+      //let nonce = this.idOS.crypto.Nonce.trimmedUUID();
+      let nonce = this.idOS.crypto.Nonce.fill(1);
 
-      const { lastNonce, signature, lastUrl } = await wallet.signMessage({ message, recipient, nonce });
+      const { lastNonce, signature, lastUrl } = await wallet.signMessage({ message, recipient, nonce: Buffer.from(nonce) });
 
+      const nep413BorschSchema = {
+        struct: {
+          tag: "u32",
+          message: "string",
+          nonce: { array: { type: "u8", len: 32 } },
+          recipient: "string",
+          callbackUrl: { option: "string" },
+        },
+      };
       const nep413BorshParams = {
         tag: 2147484061,
         message,
+        nonce: Array.from(lastNonce || nonce),
         recipient,
-        nonce: lastNonce ? Buffer.from(lastNonce) : nonce,
       };
 
       if (lastUrl) {
@@ -87,17 +93,10 @@ export class Auth {
       }
 
       const nep413BorshPayload = borsh.serialize(
-        {
-          struct: {
-            tag: "u32",
-            message: "string",
-            nonce: { array: { type: "u8", len: 32 } },
-            recipient: "string",
-            callbackUrl: { option: "string" },
-          },
-        },
-        nep413BorshParams
+        nep413BorschSchema,
+        nep413BorshParams,
       );
+
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,

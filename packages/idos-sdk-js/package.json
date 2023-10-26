@@ -41,6 +41,7 @@
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
+    "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
     "ethers": "^6.7.1",
     "jsonld": "^8.3.1",
