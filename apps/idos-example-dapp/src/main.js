@@ -10,6 +10,7 @@ import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
+import { Terminal } from "./terminal";
 
 const idos = await idOS.init({
   nodeUrl: "https://nodes.staging.idos.network",
@@ -56,125 +57,74 @@ const connectWallet = {
   }
 };
 
-const idosQueries = async () => {
-  const elem = document.querySelector("code#display");
-
-  const display = (html, nest) =>
-    ((nest ? elem.lastChild : elem).innerHTML += html);
-
-  const { humanId, address } = await idos.auth.currentUser();
-
-  elem.parentElement.style.display = "block";
-  if (!humanId) {
-    display(`
-      <em>No idOS profile</em><br>
-      <br>
-      Get one here: <a href="#">Fractal ID</a>
-    `);
-  } else {
-    display(`
-      <em class="rocket"><strong>Connected to the idOS</strong></em><br>
-      <br>
-      <em class="header eyes"><strong>Your ID</strong></em><br>
-      <span>${humanId}</span><br><br>
-    `);
-  }
-
-  let wallets;
-  await new Promise(async (resolve) => {
-    elem.innerHTML += `<span class="wait">awaiting signature</span>`;
-    wallets = await idos.data.list("wallets");
-    elem.lastChild.remove();
-    resolve();
-  });
-
-  display(`
-    <em class="header eyes"><strong>Your wallets</strong></em><br>
-    <div class="table">
-      <div>
-        <div><em><u>Address</u></em></div>
-        <div><em><u>Public key</u></em></div>
-      </div>
-  `);
-
-  for (const { address, public_key } of wallets) {
-    display(
-      `
-      <div>
-        <div>${address}</div>
-        <div>${public_key}</div>
-      </div>
-    `,
-      true
-    );
-  }
-  display(`</div><br>`);
-
-  let grants;
-  await new Promise(async (resolve) => {
-    elem.innerHTML += `<span class="wait">awaiting RPC</span>`;
-    grants = await idos.grants.list({ owner: address });
-    elem.lastChild.remove();
-    resolve();
-  });
-
-  display(`
-    <em class="header eyes"><strong>Your grants</strong></em><br>
-    <div class="table">
-      <div>
-        <div><em><u>Owner</u></em></div>
-        <div><em><u>Grantee</u></em></div>
-        <div><em><u>Data ID</u></em></div>
-        <div><em><u>Locked until</u></em></div>
-      </div>
-  `);
-
-  // FIXME: near-rs expects data_id, near-ts expects dataId
-  for (const { owner, grantee, dataId, data_id, lockedUntil } of grants) {
-    display(
-      `
-      <div>
-        <div>${owner}</div>
-        <div>${grantee}</div>
-        <div>${dataId || data_id}</div>
-        <div>${lockedUntil}</div>
-      </div>
-    `,
-      true
-    );
-  }
-  display(`</div><br><br>`);
-  display(`<em class="header tick"><strong>Complete</strong></em><br>`);
-};
-
-document
-  .querySelector("#wallet-chooser")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
-    e.target.style.display = "none";
-
-    await connectWallet[e.submitter.name]();
-
-    /*
-     * idOS queries
-     *
-     * get the user's idOS ID:
-     *   await idos.auth.currentUser();
-     *
-     * get the user's wallets:
-     *   await idos.data.list("wallets");
-     *
-     */
-    idosQueries();
-  });
-
 document.querySelector("#reset").addEventListener("click", async (e) => {
   await idos.reset();
   window.location.reload();
 });
 
-// Automatically continue with NEAR when Back from MNW
-if (window.location.href.match(/(accountId|account_id)=(.*?)&/)) {
-  await connectWallet["NEAR"]();
-  await idosQueries();
+
+let chosenWallet = window.localStorage.getItem("chosen-wallet");
+if (!chosenWallet) {
+  await new Promise((resolve) => {
+    const walletChooser = document.querySelector("#wallet-chooser");
+    walletChooser.style.display = "block";
+    walletChooser.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      walletChooser.style.display = "none";
+
+      chosenWallet = e.submitter.name;
+      window.localStorage.setItem("chosen-wallet", chosenWallet);
+      resolve();
+    });
+  });
+}
+
+try {
+  await connectWallet[chosenWallet]();
+} catch (e) {
+  console.log(e);
+}
+
+/*
+ * idOS queries
+ *
+ * get the user's idOS ID:
+ *   await idos.auth.currentUser();
+ *
+ * get the user's wallets:
+ *   await idos.data.list("wallets");
+ *
+ */
+const terminal = new Terminal("#terminal");
+
+const { humanId, address } = await idos.auth.currentUser();
+
+if (!humanId) {
+  terminal
+    .header("pleading", "No idOS profile")
+    .log(`You can get one at <a href="https://app.fractal.id">Fractal ID</a>`);
+} else {
+  terminal.header("rocket", "Connected to the idOS");
+
+  terminal
+    .header("eyes", "Your ID")
+    .log(humanId);
+
+  let wallets = idos.data.list("wallets");
+  terminal.header("eyes", "Your wallets");
+  terminal.wait("awaiting signature", wallets);
+  terminal.table(await wallets, ["address", "public_key"]);
+
+  let credentials = idos.data.list("credentials");
+  terminal.header("eyes", "Your credentials");
+  terminal.wait("awaiting signature", credentials);
+  terminal.table(await credentials, ["issuer", "credential_type"]);
+
+  let grants = idos.grants.list({ owner: address });
+  terminal.header("eyes", "Your grants");
+  terminal.wait("awaiting RPC", grants);
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  terminal.table(await grants, ["owner", "grantee", "data_id", "dataId", "lockedUntil"]);
+
+  terminal.done();
 }

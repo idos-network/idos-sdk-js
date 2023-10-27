@@ -4,6 +4,7 @@ export class NearGrants {
   #contract;
   #wallet;
 
+  static defaultNetwork = "testnet";
   static defaultContractId = "idos-dev-2.testnet";
   static contractMethods = {
     list: "find_grants",
@@ -91,7 +92,7 @@ export class NearGrants {
 
     const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
     const nearConnection = await nearAPI.connect({
-      networkId: "testnet",
+      networkId: this.constructor.defaultNetwork,
       keyStore: keyStore,
       nodeUrl: "https://rpc.testnet.near.org",
     });

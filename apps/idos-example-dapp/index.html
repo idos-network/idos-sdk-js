@@ -33,6 +33,10 @@
         right: 1em;
       }
 
+      form#wallet-chooser {
+        display: none;
+      }
+
       div#idos_container {
         width: 140px;
         height: 35px;
@@ -40,7 +44,7 @@
         padding: 0;
       }
 
-      p#display-wrapper {
+      div#terminal {
         display: none;
         padding: 1em;
         background-color: #333;
@@ -58,11 +62,45 @@
         text-wrap: nowrap;
       }
 
-      code#display em {
+      code#display > * {
+        display: block;
+      }
+
+      code#display a {
         color: #eee;
-        font-style: normal;
-        margin-bottom: 0.2em;
-        display: inline-block;
+      }
+
+      code#display .header {
+        color: #eee;
+        font-weight: bold;
+      }
+
+      code#display > .header:not(:first-child) {
+        margin-top: 2em;
+      }
+
+      code#display > .header ~ *:not(.header, .status) {
+        margin-left: 0.5em;
+        padding: 0.5em 0 0 1em;
+        border-left: 1px dotted #eee;
+      }
+
+      code#display .status {
+        background: #eee;
+        color: #333;
+        margin-top: 1em;
+        padding: 0 0.2em;
+        width: fit-content;
+      }
+
+      code#display .status.done {
+        background: #6e6;
+        color: #000;
+      }
+
+      code#display .status.done::before {
+        content: "✔️ Complete";
+        font-weight: bold;
       }
 
       @keyframes blinker {
@@ -71,25 +109,28 @@
         }
       }
 
-      code#display .wait {
-        background: #eee;
-        color: #333;
-        padding: 0 0.2em;
+      code#display .status.wait {
         animation: blinker 1s linear infinite;
       }
 
-      code#display .header ~ *:not(.header, .wait) {
-        margin-left: 0.5em;
-        padding-left: 1em;
-        border-left: 1px dotted #eee;
+      code#display .status.wait.fail {
+        animation: none;
+        background: #e66;
+        color: #000;
       }
 
-      code#display .table {
-        display: table;
+      code#display .status.wait.fail::before {
+        content: "✗ ";
+        font-weight: bold;
       }
 
       code#display .rocket::before {
         content: "🚀";
+        padding-right: 0.5em;
+      }
+
+      code#display .pleading::before {
+        content: "🥺";
         padding-right: 0.5em;
       }
 
@@ -103,18 +144,50 @@
         padding-right: 0.5em;
       }
 
+      code#display .table {
+        display: table;
+      }
+
       code#display .table > div {
         display: table-row;
+      }
+
+      code#display .table > div:first-child {
+        color: #eee;
+      }
+
+      code#display .table > div:first-child > div > span {
+        border-bottom: 1px solid #eee;
+        line-height: calc(1em - 1px);
+      }
+
+      code#display .table > div:first-child *::first-letter {
+        text-transform: uppercase;
       }
 
       code#display .table > div > div {
         display: table-cell;
       }
 
+      code#display .table > div > div > *:first-child {
+        display: inline-block;
+      }
+
+      code#display .table > div > div:first-child::before {
+        color: #fff;
+      }
+
       code#display .table > div > div:not(:first-child)::before {
         content: ":";
+        width: 0;
         margin: 0 1em;
       }
+
+      code#display .table > div:first-child > div:not(:first-child)::before {
+        display: inline-block;
+        width: 0;
+      }
+
 
       .outer {
         font-weight: normal;
@@ -140,11 +213,10 @@
         <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
       </form>
 
-      <p id="display-wrapper">
-        <code id="display"></code>
-      </p>
 
       <div id="idos_container"></div>
+
+      <div id="terminal"></div>
     </div>
 
     <button id="reset">Reset demo</button>

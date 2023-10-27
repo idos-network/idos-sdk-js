@@ -67,8 +67,7 @@ export class Auth {
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
-      //let nonce = this.idOS.crypto.Nonce.trimmedUUID();
-      let nonce = this.idOS.crypto.Nonce.fill(1);
+      let nonce = this.idOS.crypto.Nonce.trimmedUUID();
 
       const { lastNonce, signature, lastUrl } = await wallet.signMessage({ message, recipient, nonce: Buffer.from(nonce) });
 
