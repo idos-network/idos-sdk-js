@@ -79,6 +79,10 @@ if (!chosenWallet) {
   });
 }
 
+/*
+ * idOS: setup
+ *
+ */
 try {
   await connectWallet[chosenWallet]();
 } catch (e) {
@@ -86,29 +90,26 @@ try {
 }
 
 /*
- * idOS queries
- *
- * get the user's idOS ID:
- *   await idos.auth.currentUser();
- *
- * get the user's wallets:
- *   await idos.data.list("wallets");
+ * idOS: queries
  *
  */
 const terminal = new Terminal("#terminal");
+const { humanId, address, publicKey } = await idos.auth.currentUser();
 
-const { humanId, address } = await idos.auth.currentUser();
 
 if (!humanId) {
   terminal
-    .header("pleading", "No idOS profile")
-    .log(`You can get one at <a href="https://app.fractal.id">Fractal ID</a>`);
+    .status("fail", "No idOS profile found")
+    .header("next", "Need an idOS profile?")
+    .log(`Get one at <a href="https://app.fractal.id">Fractal ID</a>`)
+    .header("next", "Already have one? Please connect the right signer")
+    .log(`Currently connected signer`)
+    .table({ address, publicKey });
 } else {
-  terminal.header("rocket", "Connected to the idOS");
-
   terminal
-    .header("eyes", "Your ID")
-    .log(humanId);
+    .header("rocket", "Connected to the idOS")
+    .table({"node URL": idos.nodeUrl})
+    .table({"Your idOS ID": humanId});
 
   let wallets = idos.data.list("wallets");
   terminal.header("eyes", "Your wallets");

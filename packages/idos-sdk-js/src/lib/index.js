@@ -16,6 +16,9 @@ export class idOS {
     if (!this.constructor.initializing) {
       throw new Error("Usage: `idOS.init(options)`");
     }
+
+    this.nodeUrl = nodeUrl;
+
     this.auth = new Auth(this);
     this.crypto = new Crypto(this);
     this.data = new Data(this);

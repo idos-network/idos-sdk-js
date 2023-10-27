@@ -11,6 +11,8 @@
       body {
         font-family: sans-serif;
         font-size: 0.9em;
+        background: #eee;
+        color: #333;
       }
 
       h1 {
@@ -25,6 +27,10 @@
 
       h2 {
         font-size: 1.1em;
+      }
+
+      button {
+        cursor: pointer;
       }
 
       button#reset {
@@ -89,7 +95,7 @@
         background: #eee;
         color: #333;
         margin-top: 1em;
-        padding: 0 0.2em;
+        padding: 0 0.5em;
         width: fit-content;
       }
 
@@ -113,15 +119,18 @@
         animation: blinker 1s linear infinite;
       }
 
-      code#display .status.wait.fail {
+      code#display .status.wait::before {
+        content: "⧖ ";
+      }
+
+      code#display .status.fail {
         animation: none;
         background: #e66;
         color: #000;
       }
 
-      code#display .status.wait.fail::before {
+      code#display .status.fail::before {
         content: "✗ ";
-        font-weight: bold;
       }
 
       code#display .rocket::before {
@@ -139,8 +148,8 @@
         padding-right: 0.5em;
       }
 
-      code#display .tick::before {
-        content: "✔️";
+      code#display .next::before {
+        content: "➜";
         padding-right: 0.5em;
       }
 
@@ -158,7 +167,9 @@
 
       code#display .table > div:first-child > div > span {
         border-bottom: 1px solid #eee;
-        line-height: calc(1em - 1px);
+        padding-bottom: 1px;
+        padding-right: 0.5em;
+        margin-bottom: 1px;
       }
 
       code#display .table > div:first-child *::first-letter {
@@ -174,7 +185,7 @@
       }
 
       code#display .table > div > div:first-child::before {
-        color: #fff;
+        color: #eee;
       }
 
       code#display .table > div > div:not(:first-child)::before {
@@ -188,12 +199,24 @@
         width: 0;
       }
 
-
-      .outer {
-        font-weight: normal;
+      div#terminal button#restart {
+        display: none;
+        margin-top: 2em;
+        font-size: 1.1em;
+        line-height: 1.3em;
+        font-family: monospace;
+        background-color: transparent;
+        border: 2px solid #eee;
+        color: #eee;
+        padding: 0.1em 0.5em;
       }
-      .inner {
-        font-weight: normal;
+
+      div#terminal button#restart::before {
+        content: "↻";
+        font-size: 1.3em;
+        margin-right: 0.5em;
+        padding-right: 0.4em;
+        border-right: 1px solid #eee;
       }
     </style>
     <div id="app">
@@ -216,7 +239,10 @@
 
       <div id="idos_container"></div>
 
-      <div id="terminal"></div>
+      <div id="terminal">
+        <code id="display"></code>
+        <button id="restart">Restart</button>
+      </div>
     </div>
 
     <button id="reset">Reset demo</button>

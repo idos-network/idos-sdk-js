@@ -131,6 +131,7 @@ export class Auth {
       this._currentUser = {
         humanId,
         address: this.idOS.store.get("signer-address"),
+        publicKey: this.idOS.store.get("signer-public-key"),
       };
     }
     return this._currentUser;

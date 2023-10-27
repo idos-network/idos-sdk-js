@@ -1,9 +1,12 @@
 export class Terminal {
   constructor(selector) {
-    this.wrapper = document.querySelector(selector);
-    this.#append(this.wrapper, `<code id="display"></code>`);
-    this.elem = this.wrapper.children.display;
-    this.wrapper.style.display = "block";
+    const wrapper = document.querySelector(selector);
+    wrapper.style.display = "block";
+
+    this.elem = wrapper.children.display;
+    this.restartButton = wrapper.querySelector("button");
+
+    this.restartButton.addEventListener("click", e => window.location.reload());
 
     return this;
   }
@@ -32,13 +35,23 @@ export class Terminal {
   }
   
   table(items, keys) {
+    items = Array.isArray(items) ? items : [items];
+
+    keys = keys
+      ? keys.map(key => key
+        .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
+        .toLowerCase()
+        .replaceAll(/[^a-z0-9]/g, " ")
+      )
+      : Object.keys(items[0]);
+
     return this.log(`
       <div class="table">
         <div class="thead">
           ${keys.reduce((row, key) => row + `
             <div>
               <span>
-                ${key.toLowerCase().replaceAll(/[^a-z0-9]/g, " ")}
+                ${key}
               </span>
             </div>
           `, "")}
@@ -68,13 +81,14 @@ export class Terminal {
       this.waitElem.remove();
     } catch (e) {
       this.waitElem.classList.add("fail");
+      this.restartButton.style.display = "block";
     }
 
     return this;
   }
 
   done() {
-    return this.status("done");
+    this.status("done");
+    this.restartButton.style.display = "block";
   }
-
 }
