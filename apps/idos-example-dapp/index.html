@@ -56,6 +56,7 @@
         background-color: #333;
         color: #bbb;
         overflow: scroll;
+        padding: 1em 0.5em
       }
 
       ul.intro {
@@ -76,25 +77,66 @@
         color: #eee;
       }
 
-      code#display .header {
+      code#display .h1 {
         color: #eee;
         font-weight: bold;
       }
 
-      code#display > .header:not(:first-child) {
+      code#display > .h1:not(:first-child) {
         margin-top: 2em;
       }
 
-      code#display > .header ~ *:not(.header, .status) {
-        margin-left: 0.5em;
-        padding: 0.5em 0 0 1em;
-        border-left: 1px dotted #eee;
+      code#display .h1::before {
+        content: "*";
+        display: inline-flex;
+        width: 2em;
+        justify-content: center;
+      }
+
+      code#display .rocket::before {
+        content: "🚀";
+      }
+
+      code#display .pleading::before {
+        content: "🥺";
+      }
+
+      code#display .eyes::before {
+        content: "👀";
+      }
+
+      code#display .next::before {
+        content: "➜";
+      }
+
+      code#display > .h1 + *:not(.status) {
+        padding-top: 1em;
+      }
+
+      code#display > .h1 ~ *:not(.h1, .status) {
+        margin-left: calc(1em - 1px);
+        padding-left: 1em;
+        border-left: 1px solid #999;
+      }
+
+      code#display .h2 > * {
+        display: inline-block;
+        color: #eee;
+        border-bottom: 1px solid #eee;
+        padding-right: 1em;
+        padding-bottom: 1px;
+        margin-bottom: 2px;
+      }
+
+      code#display .h2 {
+        padding-top: 1em;
       }
 
       code#display .status {
         background: #eee;
         color: #333;
         margin-top: 1em;
+        margin-left: 0.5em;
         padding: 0 0.5em;
         width: fit-content;
       }
@@ -105,7 +147,7 @@
       }
 
       code#display .status.done::before {
-        content: "✔️ Complete";
+        content: "✔️ Done";
         font-weight: bold;
       }
 
@@ -133,65 +175,64 @@
         content: "✗ ";
       }
 
-      code#display .rocket::before {
-        content: "🚀";
-        padding-right: 0.5em;
-      }
-
-      code#display .pleading::before {
-        content: "🥺";
-        padding-right: 0.5em;
-      }
-
-      code#display .eyes::before {
-        content: "👀";
-        padding-right: 0.5em;
-      }
-
-      code#display .next::before {
-        content: "➜";
-        padding-right: 0.5em;
-      }
-
       code#display .table {
         display: table;
       }
 
-      code#display .table > div {
+      code#display .table > .thead {
+        display: table-header-group;
+      }
+
+      code#display .table > .tbody {
+        display: table-row-group;
+      }
+
+      code#display .table .tr {
         display: table-row;
+      }
+
+      code#display .table .td {
+        display: table-cell;
+      }
+
+      code#display .table .tr > .td:not(:first-child)::before {
+        content: "·";
+        display: inline-flex;
+        justify-content: center;
+        width: 2em;
+        overflow: hidden;
+      }
+
+      code#display .table > .thead .tr > .td:not(:first-child)::before {
+        content: "";
       }
 
       code#display .table > div:first-child {
         color: #eee;
       }
 
-      code#display .table > div:first-child > div > span {
+      code#display .table > .thead span {
+        display: inline-block;
         border-bottom: 1px solid #eee;
+        padding-right: 1em;
         padding-bottom: 1px;
-        padding-right: 0.5em;
-        margin-bottom: 1px;
+        margin-bottom: 2px;
       }
 
-      code#display .table > div:first-child *::first-letter {
+      code#display .table > .thead span::first-letter {
         text-transform: uppercase;
       }
 
-      code#display .table > div > div {
+      code#display .table > .tbody > div > div {
         display: table-cell;
       }
 
       code#display .table > div > div > *:first-child {
-        display: inline-block;
+        /*display: inline-block;*/
       }
 
       code#display .table > div > div:first-child::before {
         color: #eee;
-      }
-
-      code#display .table > div > div:not(:first-child)::before {
-        content: ":";
-        width: 0;
-        margin: 0 1em;
       }
 
       code#display .table > div:first-child > div:not(:first-child)::before {
@@ -199,25 +240,29 @@
         width: 0;
       }
 
-      div#terminal button#restart {
+      div#terminal #controls {
         display: none;
-        margin-top: 2em;
+        margin-top: 1em;
+        margin-left: -0.5em;
+        padding-top: 1em;
+        padding-left: 1em;
+        border-top: 1px solid #eee;
+      }
+
+      div#terminal button {
         font-size: 1.1em;
         line-height: 1.3em;
         font-family: monospace;
         background-color: transparent;
         border: 2px solid #eee;
         color: #eee;
-        padding: 0.1em 0.5em;
       }
 
-      div#terminal button#restart::before {
-        content: "↻";
-        font-size: 1.3em;
-        margin-right: 0.5em;
-        padding-right: 0.4em;
-        border-right: 1px solid #eee;
+      div#terminal #controls > button:not(:first-child) {
+        margin-left: 1em;
       }
+
+
     </style>
     <div id="app">
       <h1><span>idOS developer demo</span>Connecting your dapp to the idOS</h1>
@@ -241,7 +286,10 @@
 
       <div id="terminal">
         <code id="display"></code>
-        <button id="restart">Restart</button>
+        <div id="controls">
+          <button id="restart">Restart</button>
+          <button id="change-signer">Forget signer</button>
+        </div>
       </div>
     </div>
 

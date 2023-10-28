@@ -1,28 +1,30 @@
 export class Terminal {
-  constructor(selector) {
+  constructor(selector, idos) {
     const wrapper = document.querySelector(selector);
     wrapper.style.display = "block";
 
     this.elem = wrapper.children.display;
-    this.restartButton = wrapper.querySelector("button");
+    this.controls = wrapper.children.controls;
 
+    this.restartButton = wrapper.querySelector("button#restart");
     this.restartButton.addEventListener("click", e => window.location.reload());
 
-    return this;
-  }
+    this.changeSignerButton = wrapper.querySelector("button#change-signer");
+    this.changeSignerButton.addEventListener("click", async e => {
+      await idos.reset({ keep: ["password"] });
+      window.location.reload();
+    });
 
-  #append(elem, str) {
-    elem.innerHTML += str;
-  }
-
-  log(html, nest = false) {
-    html = /^<\/?[a-z][\s\S]*>$/i.test(html) ? html : `<span>${html}</span>`;
-
-    this.#append(nest ? this.elem.lastChild : this.elem, html);
+    window.this = this;
 
     return this;
   }
 
+  log(str) {
+    this.elem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+
+    return this;
+  }
 
   br(count = 1) {
     [...Array(count)].map(() => this.log(`<br>`));
@@ -30,40 +32,46 @@ export class Terminal {
     return this;
   }
 
-  header(icon, html, nest = false) {
-    return this.log(`<span class="header ${icon}">${html}</span>`, nest)
+  h1(icon, html) {
+    return this.log(`<span class="h1 ${icon}">${html}</span>`);
+  }
+
+  h2(html) {
+    return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
   
   table(items, keys) {
     items = Array.isArray(items) ? items : [items];
+    keys = keys || Object.keys(items[0]);
 
-    keys = keys
-      ? keys.map(key => key
+    const headers = keys.map(key =>
+      key
         .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
         .toLowerCase()
         .replaceAll(/[^a-z0-9]/g, " ")
-      )
-      : Object.keys(items[0]);
+    );
 
     return this.log(`
       <div class="table">
         <div class="thead">
-          ${keys.reduce((row, key) => row + `
-            <div>
-              <span>
-                ${key}
-              </span>
-            </div>
-          `, "")}
+          <div class="tr">
+            ${headers.reduce((row, header) => row + `
+              <div class="td"><span>${header}</span></div>
+            `, "")}
+          </div>
         </div>
 
+        <div class="tbody">
         ${items
           .map(item => keys.map(key => item[key]))
           .reduce((row, values) => row + `
-            <div>
-              ${values.reduce((row, v) => row + `<div>${v}</div>`, "")}
+            <div class="tr">
+              ${values.reduce((row, v) => row + `
+                <div class="td">${v}</div>
+              `, "")}
             </div>
           `, "")}
+        </div>
       </div>
     `);
   }
@@ -81,7 +89,7 @@ export class Terminal {
       this.waitElem.remove();
     } catch (e) {
       this.waitElem.classList.add("fail");
-      this.restartButton.style.display = "block";
+      this.controls.style.display = "block";
     }
 
     return this;
@@ -89,6 +97,6 @@ export class Terminal {
 
   done() {
     this.status("done");
-    this.restartButton.style.display = "block";
+    this.controls.style.display = "block";
   }
 }

@@ -3,7 +3,7 @@ import { NearGrants } from "./near";
 
 export class Grants {
   #child;
-  near = {
+  static near = {
     contractMethods: Object.values(NearGrants.contractMethods),
     defaultContractId: NearGrants.defaultContractId,
   };
@@ -12,7 +12,7 @@ export class Grants {
     this.idOS = idOS;
   }
 
-  async init({ account, signer, type, wallet }) {
+  async init({ accountId, signer, type, wallet }) {
     this.type = type;
 
     if (type === "evm") {
@@ -23,7 +23,7 @@ export class Grants {
       this.#child = new NearGrants();
     }
 
-    await this.#child.init({ account, signer, wallet });
+    await this.#child.init({ accountId, signer, wallet });
   }
 
   async list(args) {

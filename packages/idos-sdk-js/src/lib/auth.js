@@ -18,7 +18,11 @@ export class Auth {
       this.idOS.store.set("signer-public-key", publicKey);
       this.idOS.store.set("signer-address", signer.address);
     }
+
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
+
+    await this.idOS.crypto.init();
+    await this.idOS.grants.init({ signer, type: "evm" });
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
@@ -63,7 +67,8 @@ export class Auth {
       this.idOS.store.set("signer-public-key", publicKey);
     }
 
-    this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
+    const accountId = (await wallet.getAccounts())[0].accountId;
+    this.idOS.store.set("signer-address", accountId);
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
@@ -104,6 +109,9 @@ export class Auth {
     };
 
     this.#setSigner({ signer, publicKey, signatureType: "nep413" });
+
+    await this.idOS.crypto.init();
+    await this.idOS.grants.init({ type: "near", accountId, wallet });
   }
 
   async setEnclaveSigner() {

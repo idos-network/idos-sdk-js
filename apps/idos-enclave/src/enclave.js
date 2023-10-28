@@ -15,8 +15,8 @@ export class Enclave {
     this.#listenToRequests();
   }
 
-  async reset() {
-    this.store.reset();
+  async reset(keep) {
+    this.store.reset(keep);
   }
 
   async isReady() {
@@ -182,11 +182,12 @@ export class Enclave {
           signature,
           signerPublicKey,
           senderPublicKey,
-          receiverPublicKey
+          receiverPublicKey,
+          keep,
         } = requestData;
 
         const paramBuilder = {
-          reset: () => [],
+          reset: () => [keep],
           storage: () => [humanId, signerPublicKey],
           isReady: () => [],
           keys: () => [],

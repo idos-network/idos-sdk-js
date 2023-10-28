@@ -7,9 +7,7 @@ export class Store {
 
   get(key) {
     if (!this.#data[key]) {
-      const values = [this.#getCookie(key), this.#getLocalStorage(key)].filter(
-        Boolean
-      );
+      const values = [this.#getCookie(key), this.#getLocalStorage(key)].filter(Boolean);
       const firstValue = values.shift(1);
       if (!values.filter((v) => !!v).every((v) => v && v === firstValue)) {
         throw new Error("Inconsistent data");
@@ -47,10 +45,25 @@ export class Store {
     return window.localStorage.setItem(`idos-${key}`, value);
   }
 
-  async reset() {
-    window.localStorage.clear();
+  async reset({ keep = [] }) {
+    keep = keep.map(name => `idos-${name}`);
+
+    for (const name of Object.keys(window.localStorage)) {
+      if (keep.includes(name)) continue;
+
+      window.localStorage.removeItem(name);
+    }
+
     for (const { name } of await cookieStore.getAll()) {
-      document.cookie = `${name}=; SameSite=None; Secure; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;`;
+      if (keep.includes(name)) continue;
+
+      document.cookie = [
+        `${name}=`,
+        `SameSite=None`,
+        `Secure`,
+        `Path=/`,
+        `Expires=Thu, 01 Jan 1970 00:00:01 GMT`,
+      ].join(";");
     }
   }
 }

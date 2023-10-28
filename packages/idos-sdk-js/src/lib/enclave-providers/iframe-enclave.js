@@ -25,8 +25,8 @@ export class IframeEnclave extends EnclaveProvider {
     return publicKeys;
   }
 
-  reset() {
-    return this.#requestToEnclave({ reset: {} });
+  reset(keep) {
+    return this.#requestToEnclave({ reset: { keep } });
   }
 
   sign(message) {

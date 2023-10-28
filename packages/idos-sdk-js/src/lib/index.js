@@ -10,6 +10,8 @@ import verifiableCredentials from "./verifiable-credentials";
 export class idOS {
   static initializing = false;
 
+  static near = Grants.near;
+
   static verifiableCredentials = verifiableCredentials;
 
   constructor({ nodeUrl, container }) {
@@ -34,11 +36,22 @@ export class idOS {
     this.initializing = true;
     const idos = new this({ nodeUrl, container });
     await idos.enclave.loadProvider();
+
     return idos;
   }
 
-  async reset() {
-    await this.store.reset();
-    await this.enclave.reset();
+  async setSigner(type, signer) {
+    if (type === "NEAR") {
+      await this.auth.setNearSigner(signer);
+    } else if (type === "EVM") {
+      await this.auth.setEvmSigner(signer);
+    } else {
+      throw("Signer type not recognized");
+    }
+  }
+
+  async reset(keep = {}) {
+    await this.store.reset(keep);
+    await this.enclave.reset(keep);
   }
 }
