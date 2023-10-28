@@ -10,7 +10,7 @@ export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store({
-      initWith: ["human-id", "password", "signer-public-key"]
+      initWith: ["human-id", "password", "signer-public-key", "signer-address"]
     });
     this.#listenToRequests();
   }

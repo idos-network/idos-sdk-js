@@ -23,6 +23,8 @@ export class Auth {
 
     await this.idOS.crypto.init();
     await this.idOS.grants.init({ signer, type: "evm" });
+
+    return await this.currentUser();
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
@@ -104,7 +106,7 @@ export class Auth {
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        StableBase64.decode(signature)
+        StableBase64.decode(signature),
       );
     };
 
@@ -112,6 +114,8 @@ export class Auth {
 
     await this.idOS.crypto.init();
     await this.idOS.grants.init({ type: "near", accountId, wallet });
+
+    return await this.currentUser();
   }
 
   async setEnclaveSigner() {

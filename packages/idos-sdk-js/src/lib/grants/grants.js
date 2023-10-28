@@ -6,6 +6,7 @@ export class Grants {
   static near = {
     contractMethods: Object.values(NearGrants.contractMethods),
     defaultContractId: NearGrants.defaultContractId,
+    defaultNetwork: NearGrants.defaultNetwork,
   };
 
   constructor(idOS) {

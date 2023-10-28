@@ -1,7 +1,6 @@
 export class Terminal {
   constructor(selector, idos) {
     const wrapper = document.querySelector(selector);
-    wrapper.style.display = "block";
 
     this.elem = wrapper.children.display;
     this.controls = wrapper.children.controls;
@@ -14,8 +13,6 @@ export class Terminal {
       await idos.reset({ keep: ["password"] });
       window.location.reload();
     });
-
-    window.this = this;
 
     return this;
   }
@@ -87,16 +84,16 @@ export class Terminal {
     try {
       await promise;
       this.waitElem.remove();
+      return promise;
     } catch (e) {
       this.waitElem.classList.add("fail");
       this.controls.style.display = "block";
+      console.warn(e);
+      throw new Error("Error in promise");
     }
-
-    return this;
   }
 
   done() {
     this.status("done");
-    this.controls.style.display = "block";
   }
 }

@@ -58,7 +58,7 @@ export class IframeEnclave extends EnclaveProvider {
     this.iframe.style = Object.entries({
       "background-color": "transparent",
       border: "none",
-      display: "none",
+      display: "block",
       height: "100%",
       width: "100%",
     })
@@ -66,19 +66,16 @@ export class IframeEnclave extends EnclaveProvider {
       .join("; ");
 
     this.iframe.addEventListener("load", () => this.iframeLoaded());
-    document.querySelector(this.container).style.display = "none";
     document.querySelector(this.container).appendChild(this.iframe);
     return new Promise((resolve) => (this.iframeLoaded = resolve));
   }
 
   #showEnclave() {
-    document.querySelector(this.container).style.display = "block";
-    this.iframe.style.display = "block";
+    this.iframe.parentElement.classList.add("visible");
   }
 
   #hideEnclave() {
-    this.iframe.parentElement.style.display = "none";
-    this.iframe.style.display = "none";
+    this.iframe.parentElement.classList.remove("visible");
   }
 
   async #requestToEnclave(request) {

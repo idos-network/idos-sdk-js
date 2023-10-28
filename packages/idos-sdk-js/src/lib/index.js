@@ -11,6 +11,7 @@ export class idOS {
   static initializing = false;
 
   static near = Grants.near;
+  static profileProviders = [import.meta.env.VITE_FRACTAL_ID_URL];
 
   static verifiableCredentials = verifiableCredentials;
 
@@ -42,9 +43,9 @@ export class idOS {
 
   async setSigner(type, signer) {
     if (type === "NEAR") {
-      await this.auth.setNearSigner(signer);
+      return this.auth.setNearSigner(signer);
     } else if (type === "EVM") {
-      await this.auth.setEvmSigner(signer);
+      return this.auth.setEvmSigner(signer);
     } else {
       throw("Signer type not recognized");
     }

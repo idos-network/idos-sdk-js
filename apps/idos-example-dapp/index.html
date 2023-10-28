@@ -39,15 +39,63 @@
         right: 1em;
       }
 
+      ul.intro {
+        padding-left: 1em;
+      }
+
       form#wallet-chooser {
         display: none;
       }
 
-      div#idos_container {
+      div#idos-wrapper {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: #eeeeeecc;
+        border-radius: 50%;
+        border: 1em solid #333;
+        outline: 0.2em solid #eee;
+        backdrop-filter: blur(2px);
+        aspect-ratio: 1;
+        padding: 1em;
+      }
+
+      div#idos-wrapper:has(#idos-container.visible) {
+        display: flex;
+      }
+
+      div#idos-container {
         width: 140px;
         height: 35px;
         margin: 0;
         padding: 0;
+      }
+
+      div#idos-wrapper > span {
+        display: block;
+        width: 75%;
+        height: 25%;
+        margin: 0.5em 0;
+        position: relative;
+        text-align: center;
+      }
+
+      div#idos-wrapper > span > span {
+        display: block;
+        position: absolute;
+        width: 100%;
+      }
+
+      div#idos-wrapper > span:first-child > span {
+        bottom: 0;
+      }
+
+      div#idos-wrapper > span:last-child > span {
+        top: 0;
       }
 
       div#terminal {
@@ -59,8 +107,8 @@
         padding: 1em 0.5em
       }
 
-      ul.intro {
-        padding-left: 1em;
+      div#terminal:has(> code#display:not(:empty)) {
+        display: block;
       }
 
       code#display {
@@ -74,7 +122,7 @@
       }
 
       code#display a {
-        color: #eee;
+        color: #aaf;
       }
 
       code#display .h1 {
@@ -93,6 +141,16 @@
         justify-content: center;
       }
 
+      code#display > .h1 + *:not(.status) {
+        padding-top: 1em;
+      }
+
+      code#display > .h1 ~ *:not(.h1, .status) {
+        margin-left: calc(1em - 1px);
+        padding-left: 1em;
+        border-left: 1px solid #999;
+      }
+
       code#display .rocket::before {
         content: "🚀";
       }
@@ -109,14 +167,8 @@
         content: "➜";
       }
 
-      code#display > .h1 + *:not(.status) {
+      code#display .h2 {
         padding-top: 1em;
-      }
-
-      code#display > .h1 ~ *:not(.h1, .status) {
-        margin-left: calc(1em - 1px);
-        padding-left: 1em;
-        border-left: 1px solid #999;
       }
 
       code#display .h2 > * {
@@ -126,10 +178,6 @@
         padding-right: 1em;
         padding-bottom: 1px;
         margin-bottom: 2px;
-      }
-
-      code#display .h2 {
-        padding-top: 1em;
       }
 
       code#display .status {
@@ -181,6 +229,7 @@
 
       code#display .table > .thead {
         display: table-header-group;
+        color: #eee;
       }
 
       code#display .table > .tbody {
@@ -207,10 +256,6 @@
         content: "";
       }
 
-      code#display .table > div:first-child {
-        color: #eee;
-      }
-
       code#display .table > .thead span {
         display: inline-block;
         border-bottom: 1px solid #eee;
@@ -223,25 +268,7 @@
         text-transform: uppercase;
       }
 
-      code#display .table > .tbody > div > div {
-        display: table-cell;
-      }
-
-      code#display .table > div > div > *:first-child {
-        /*display: inline-block;*/
-      }
-
-      code#display .table > div > div:first-child::before {
-        color: #eee;
-      }
-
-      code#display .table > div:first-child > div:not(:first-child)::before {
-        display: inline-block;
-        width: 0;
-      }
-
       div#terminal #controls {
-        display: none;
         margin-top: 1em;
         margin-left: -0.5em;
         padding-top: 1em;
@@ -261,15 +288,18 @@
       div#terminal #controls > button:not(:first-child) {
         margin-left: 1em;
       }
-
-
     </style>
+
     <div id="app">
-      <h1><span>idOS developer demo</span>Connecting your dapp to the idOS</h1>
+      <h1>
+        <span>idOS developer demo</span>
+        Connecting your dapp to the idOS
+      </h1>
 
       <ul class="intro">
         <li>connecting an EVM or NEAR wallet</li>
-        <li>initializing the idOS SDK</li>
+        <li>initializing the idOS SDK with the wallet signer</li>
+        <li>unlocking the idOS</li>
         <li>querying the idOS</li>
       </ul>
 
@@ -281,9 +311,6 @@
         <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
       </form>
 
-
-      <div id="idos_container"></div>
-
       <div id="terminal">
         <code id="display"></code>
         <div id="controls">
@@ -291,10 +318,15 @@
           <button id="change-signer">Forget signer</button>
         </div>
       </div>
+
+      <div id="idos-wrapper">
+        <span><span>this is the idOS container</span></span>
+        <div id="idos-container"></div>
+        <span><span>place and style it however you like</span></span>
+      </div>
+
+      <button id="reset">Reset demo</button>
     </div>
-
-    <button id="reset">Reset demo</button>
-
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

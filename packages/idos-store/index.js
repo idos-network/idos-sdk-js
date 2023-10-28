@@ -10,7 +10,7 @@ export class Store {
       const values = [this.#getCookie(key), this.#getLocalStorage(key)].filter(Boolean);
       const firstValue = values.shift(1);
       if (!values.filter((v) => !!v).every((v) => v && v === firstValue)) {
-        throw new Error("Inconsistent data");
+        console.warn(`Inconsistent idOS store data (${window.location.origin})`);
       }
       this.#data[key] = firstValue;
     }

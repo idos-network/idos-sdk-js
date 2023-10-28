@@ -29,7 +29,8 @@ export class Crypto {
     humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
 
     if (!humanId) {
-      throw new Error("User is not in the idOS");
+      console.warn("User is not in the idOS");
+      return;
     }
     this.publicKeys = await this.provider.init(humanId, signerPublicKey);
     return this.publicKeys.encryption;
