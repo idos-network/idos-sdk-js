@@ -1,7 +1,7 @@
 import { EnclaveProvider } from "./enclave-provider";
 
 export class IframeEnclave extends EnclaveProvider {
-  hostUrl = new URL("https://enclave.idos.network");
+  hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
   constructor(options) {
     super(options);

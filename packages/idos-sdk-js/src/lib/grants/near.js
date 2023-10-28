@@ -4,8 +4,8 @@ export class NearGrants {
   #contract;
   #wallet;
 
-  static defaultNetwork = "testnet";
-  static defaultContractId = "idos-dev-2.testnet";
+  static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
+  static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
   static contractMethods = {
     list: "find_grants",
     create: "insert_grant",

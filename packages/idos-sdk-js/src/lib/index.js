@@ -32,7 +32,7 @@ export class idOS {
     });
   }
 
-  static async init({ nodeUrl, container }) {
+  static async init({ nodeUrl = import.meta.env.VITE_IDOS_NODE_URL, container }) {
     this.initializing = true;
     const idos = new this({ nodeUrl, container });
     await idos.enclave.loadProvider();
