@@ -52,7 +52,7 @@ export class Auth {
           this.idOS.store.set("sign-last-nonce", JSON.stringify(nonce));
           this.idOS.store.set("sign-last-url", callbackUrl);
 
-          wallet.signMessageOriginal({ callbackUrl, message, nonce, recipient });
+          wallet.signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
           await new Promise((_) => (_));
         }
@@ -92,11 +92,8 @@ export class Auth {
         message,
         nonce: Array.from(lastNonce || nonce),
         recipient,
+        callbackUrl: lastUrl,
       };
-
-      if (lastUrl) {
-        nep413BorshParams.callbackUrl = lastUrl;
-      }
 
       const nep413BorshPayload = borsh.serialize(
         nep413BorschSchema,
