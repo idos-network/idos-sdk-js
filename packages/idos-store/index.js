@@ -1,4 +1,5 @@
 export class Store {
+  keyPrefix = "idOS-";
   #data = {};
 
   constructor({ initWith: keys }) {
@@ -30,31 +31,33 @@ export class Store {
   }
 
   #getCookie(key) {
-    return document.cookie.match(`idos-${key}=(.*?)(;|$)`)?.at(1);
+    return document.cookie.match(`${this.keyPrefix}${key}=(.*?)(;|$)`)?.at(1);
   }
 
   #setCookie(key, value) {
-    return (document.cookie = `idos-${key}=${value}; SameSite=None; Secure`);
+    return (document.cookie = `${this.keyPrefix}${key}=${value}; SameSite=None; Secure`);
   }
 
   #getLocalStorage(key) {
-    return window.localStorage.getItem(`idos-${key}`);
+    return window.localStorage.getItem(`${this.keyPrefix}${key}`);
   }
 
   #setLocalStorage(key, value) {
-    return window.localStorage.setItem(`idos-${key}`, value);
+    return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
   }
 
-  async reset({ keep = [] }) {
-    keep = keep.map(name => `idos-${name}`);
+  async reset({ keep = [] } = {}) {
+    keep = keep.map(name => `${this.keyPrefix}${name}`);
 
     for (const name of Object.keys(window.localStorage)) {
+      if (!name.startsWith(this.keyPrefix)) continue;
       if (keep.includes(name)) continue;
 
       window.localStorage.removeItem(name);
     }
 
     for (const { name } of await cookieStore.getAll()) {
+      if (!name.startsWith(this.keyPrefix)) continue;
       if (keep.includes(name)) continue;
 
       document.cookie = [

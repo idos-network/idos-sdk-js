@@ -51,8 +51,9 @@ export class idOS {
     }
   }
 
-  async reset(keep = {}) {
-    await this.store.reset(keep);
-    await this.enclave.reset(keep);
+  async reset({ enclave = false, reload = false } = {}) {
+    await this.store.reset();
+    if (enclave) await this.enclave.reset();
+    if (reload) window.location.reload();
   }
 }

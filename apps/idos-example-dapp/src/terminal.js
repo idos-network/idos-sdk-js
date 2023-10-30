@@ -5,13 +5,21 @@ export class Terminal {
     this.elem = wrapper.children.display;
     this.controls = wrapper.children.controls;
 
-    this.restartButton = wrapper.querySelector("button#restart");
-    this.restartButton.addEventListener("click", e => window.location.reload());
+    this.restartButton = wrapper.querySelector("button.restart");
+    this.restartButton.addEventListener("click", e => (
+      window.location.reload()
+    ));
 
-    this.changeSignerButton = wrapper.querySelector("button#change-signer");
-    this.changeSignerButton.addEventListener("click", async e => {
-      await idos.reset({ keep: ["password"] });
-      window.location.reload();
+    this.resetDappButton = wrapper.querySelector("button.reset-dapp");
+    this.resetDappButton.addEventListener("click", async e => {
+      window.localStorage.clear();
+      await idos.reset({ reload: true });
+    });
+
+    this.resetFullButton = wrapper.querySelector("button.reset-full");
+    this.resetFullButton.addEventListener("click", async e => {
+      window.localStorage.clear();
+      await idos.reset({ enclave: true, reload: true })
     });
 
     return this;

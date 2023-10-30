@@ -8,7 +8,7 @@ export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store({
-      initWith: ["human-id", "password", "signer-public-key", "signer-address"]
+      initWith: ["human-id", "password", "encryption-public-key", "encryption-private-key", "signer-public-key", "signer-address"]
     });
     this.#listenToRequests();
   }
@@ -21,28 +21,26 @@ export class Enclave {
     return !!this.store.get("password");
   }
 
-  async storage(humanId, signerPublicKey) {
-    if (humanId) {
-      this.store.set("human-id", humanId);
-    }
-
-    if (signerPublicKey) {
-      this.store.set("signer-public-key", signerPublicKey);
-    }
+  async storage(humanId, signerAddress, signerPublicKey) {
+    humanId && this.store.set("human-id", humanId);
+    signerAddress && this.store.set("signer-address", signerAddress);
+    signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     return {
       humanId: this.store.get("human-id"),
-      signerPublicKey: this.store.get("signer-public-key")
+      encryptionPublicKey: this.store.get("encryption-public-key"),
+      signerAddress: this.store.get("signer-address"),
+      signerPublicKey: this.store.get("signer-public-key"),
     };
   }
 
   async keys() {
     await this.ensurePassword();
-    await this.deriveKeyPair();
+    await this.ensureKeyPair();
 
     return {
       base64: StableBase64.encode(this.keyPair.publicKey),
-      raw: this.keyPair.publicKey
+      raw: this.keyPair.publicKey,
     };
   }
 
@@ -65,13 +63,21 @@ export class Enclave {
     return Promise.resolve;
   }
 
-  async deriveKeyPair() {
-    const salt = this.store.get("human-id");
-    const password = this.store.get("password");
+  async ensureKeyPair() {
+    let secretKey = this.store.get("encryption-private-key");
+    secretKey = secretKey && StableBase64.decode(secretKey);
 
-    const secretKey = await idOSKeyDerivation(password, salt);
+    if (!secretKey) {
+      const salt = this.store.get("human-id");
+      const password = this.store.get("password");
+
+      secretKey = await idOSKeyDerivation(password, salt);
+
+      this.store.set("encryption-private-key", StableBase64.encode(secretKey));
+    }
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+    this.store.set("encryption-public-key", StableBase64.encode(this.keyPair.publicKey));
   }
 
   encrypt(plaintext, receiverPublicKey) {
@@ -139,6 +145,7 @@ export class Enclave {
           humanId,
           message,
           signerPublicKey,
+          signerAddress,
           senderPublicKey,
           receiverPublicKey,
           keep,
@@ -146,7 +153,7 @@ export class Enclave {
 
         const paramBuilder = {
           reset: () => [keep],
-          storage: () => [humanId, signerPublicKey],
+          storage: () => [humanId, signerAddress, signerPublicKey],
           isReady: () => [],
           keys: () => [],
           encrypt: () => [message, receiverPublicKey],

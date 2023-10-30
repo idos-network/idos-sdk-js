@@ -14,15 +14,16 @@ export class IframeEnclave extends EnclaveProvider {
     return await this.#requestToEnclave({ storage: {} });
   }
 
-  async init(humanId, signerPublicKey) {
-    await this.#requestToEnclave({ storage: { humanId, signerPublicKey } });
+  async init(humanId, signerAddress, signerPublicKey) {
+    await this.#requestToEnclave({ storage: { humanId, signerAddress, signerPublicKey } });
     if (!(await this.#requestToEnclave({ isReady: {} }))) {
       this.#showEnclave();
     }
 
-    const publicKeys = await this.#requestToEnclave({ keys: {} });
+    const encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
     this.#hideEnclave();
-    return publicKeys;
+
+    return encryptionPublicKey;
   }
 
   reset(keep) {

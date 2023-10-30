@@ -24,16 +24,20 @@ export class Crypto {
 
   async init() {
     this.provider = this.idOS.enclave.provider;
-    let signerPublicKey = this.idOS.store.get("signer-public-key");
+
+    const signerAddress = this.idOS.store.get("signer-address");
+    const signerPublicKey = this.idOS.store.get("signer-public-key");
+
     let humanId = this.idOS.store.get("human-id");
     humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
-
     if (!humanId) {
       console.warn("User is not in the idOS");
       return;
     }
-    this.publicKeys = await this.provider.init(humanId, signerPublicKey);
-    return this.publicKeys.encryption;
+
+    this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
+
+    return this.encryptionPublicKey;
   }
 
   async encrypt(message, receiverPublicKey) {

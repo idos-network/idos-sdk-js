@@ -11,6 +11,8 @@ class Grant {
 }
 
 export class EvmGrants {
+  #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
+
   #abi = [
     {
       inputs: [
@@ -161,7 +163,6 @@ export class EvmGrants {
       type: "function",
     },
   ];
-  #address = "0x9A961ECd4d2EEB84f990EcD041Cb108083A3C1BA";
   #contract;
 
   constructor() {}
@@ -169,7 +170,7 @@ export class EvmGrants {
   async init({ signer } = {}) {
     this.signer = signer;
     this.defaultOwner = await this.signer.getAddress();
-    this.#contract = new Contract(this.#address, this.#abi, this.signer);
+    this.#contract = new Contract(this.#defaultContractAddress, this.#abi, this.signer);
   }
 
   #newGrant({ owner, grantee, dataId, lockedUntil }) {

@@ -25,8 +25,10 @@ const idos = await idOS.init({ container: "#idos-container" });
  *
  */
 const terminal = new Terminal("#terminal", idos);
-const reset = async () => (await idos.reset(), window.location.reload());
-document.querySelector("button#reset").addEventListener("click", reset);
+document.querySelector("button#reset").addEventListener("click", async e => {
+  window.localStorage.clear();
+  await idos.reset({ enclave: true, reload: true });
+});
 
 let chosenWallet = window.localStorage.getItem("chosen-wallet");
 
@@ -137,7 +139,7 @@ const connectWallet = {
   let credentials = await terminal
     .h1("eyes", "Your credentials")
     .wait("awaiting signature", idos.data.list("credentials"));
-  terminal.table(await credentials, ["issuer", "credential_type"]);
+  terminal.table(await credentials, ["issuer", "credential_type", "id", "encryption_public_key"]);
 
   let grants = await terminal
     .h1("eyes", "Your grants")
