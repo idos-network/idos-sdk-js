@@ -118,16 +118,6 @@ export class Auth {
     return await this.currentUser();
   }
 
-  async setEnclaveSigner() {
-    if (window.location.hostname !== "localhost") {
-      throw new Error("Enclave Signer only available for local development");
-    }
-
-    const signer = async (message) => await this.idOS.crypto.sign(message);
-    const publicKey = this.idOS.crypto.publicKeys.sig.raw;
-    this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
-  }
-
   #setSigner(...args) {
     this.idOS.kwilWrapper.setSigner(...args);
   }

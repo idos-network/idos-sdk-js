@@ -36,14 +36,6 @@ export class Crypto {
     return this.publicKeys.encryption;
   }
 
-  async sign(message) {
-    return await this.provider.sign(message);
-  }
-
-  async verifySig(message, signature, signerPublicKey) {
-    return await this.provider.verifySig(message, signature, signerPublicKey);
-  }
-
   async encrypt(message, receiverPublicKey) {
     return await this.provider.encrypt(message, receiverPublicKey);
   }

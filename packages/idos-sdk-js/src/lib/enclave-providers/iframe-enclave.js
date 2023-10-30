@@ -29,16 +29,6 @@ export class IframeEnclave extends EnclaveProvider {
     return this.#requestToEnclave({ reset: { keep } });
   }
 
-  sign(message) {
-    return this.#requestToEnclave({ sign: { message } });
-  }
-
-  verifySig(message, signature, signerPublicKey) {
-    return this.#requestToEnclave({
-      verifySig: { message, signature, signerPublicKey },
-    });
-  }
-
   encrypt(message, receiverPublicKey) {
     return this.#requestToEnclave({ encrypt: { message, receiverPublicKey } });
   }

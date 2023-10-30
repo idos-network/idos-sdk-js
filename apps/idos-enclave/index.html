@@ -15,6 +15,17 @@
     />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>idOS Enclave</title>
+    <style>
+      button#start::before {
+        content: "🔐 Unlock idOS";
+      }
+      button#start:disabled {
+        background-color: grey;
+      }
+      button#start:disabled::before {
+        content: "unlocking..."
+      }
+    </style>
   </head>
   <body>
     <div id="container" class="w-screen h-screen">
@@ -22,7 +33,6 @@
         id="start"
         class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[45cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"
       >
-        🔐 Unlock idOS
       </button>
     </div>
 
