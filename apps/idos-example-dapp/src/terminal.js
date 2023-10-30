@@ -45,10 +45,13 @@ export class Terminal {
     return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
   
-  table(items, keys) {
-    items = Array.isArray(items) ? items : [items];
-    keys = keys || Object.keys(items[0]);
+  table(items = [{}], keyFilter = []) {
+    const wrappedItems = Array.isArray(items) ? items : [items];
 
+    const allKeys = Object.keys(wrappedItems[0] || {});
+    if (!allKeys.length) throw new Error(`No keys in ${JSON.stringify(items)}`);
+
+    const keys = keyFilter.length ? keyFilter : allKeys;
     const headers = keys.map(key =>
       key
         .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
@@ -67,7 +70,7 @@ export class Terminal {
         </div>
 
         <div class="tbody">
-        ${items
+        ${wrappedItems
           .map(item => keys.map(key => item[key]))
           .reduce((row, values) => row + `
             <div class="tr">
