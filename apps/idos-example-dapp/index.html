@@ -51,7 +51,10 @@
         position: absolute;
         top: 50px;
         left: 50px;
-        display: none;
+        display: flex;
+        visibility: hidden;
+        opacity: 0;
+        transition: opacity 150ms ease-in, visibility 0ms ease-in 150ms;
         align-items: center;
         justify-content: center;
         flex-direction: column;
@@ -65,7 +68,9 @@
       }
 
       div#idos-wrapper:has(#idos-container.visible) {
-        display: flex;
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 150ms ease-in, visibility 0ms ease-in 0ms;
       }
 
       div#idos-container {

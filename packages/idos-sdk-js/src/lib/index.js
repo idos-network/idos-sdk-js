@@ -15,27 +15,23 @@ export class idOS {
 
   static verifiableCredentials = verifiableCredentials;
 
-  constructor({ nodeUrl, container }) {
+  constructor({ kwilProvider, container }) {
     if (!this.constructor.initializing) {
       throw new Error("Usage: `idOS.init(options)`");
     }
-
-    this.nodeUrl = nodeUrl;
 
     this.auth = new Auth(this);
     this.crypto = new Crypto(this);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container);
-    this.kwilWrapper = new KwilWrapper({ nodeUrl });
+    this.kwilWrapper = new KwilWrapper({ kwilProvider });
     this.grants = new Grants(this);
-    this.store = new Store({
-      initWith: ["human-id", "signer-public-key"],
-    });
+    this.store = new Store();
   }
 
-  static async init({ nodeUrl = import.meta.env.VITE_IDOS_NODE_URL, container }) {
+  static async init({ nodeUrl, container }) {
     this.initializing = true;
-    const idos = new this({ nodeUrl, container });
+    const idos = new this({ kwilProvider: nodeUrl, container });
     await idos.enclave.loadProvider();
 
     return idos;
@@ -51,9 +47,12 @@ export class idOS {
     }
   }
 
-  async reset({ enclave = false, reload = false } = {}) {
+  async reset({ enclave = false } = {}) {
     await this.store.reset();
     if (enclave) await this.enclave.reset();
-    if (reload) window.location.reload();
+  }
+
+  get nodeUrl() {
+    return this.kwilWrapper.kwilProvider;
   }
 }

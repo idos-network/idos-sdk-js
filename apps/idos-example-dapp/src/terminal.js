@@ -7,19 +7,21 @@ export class Terminal {
 
     this.restartButton = wrapper.querySelector("button.restart");
     this.restartButton.addEventListener("click", e => (
-      window.location.reload()
+      window.location = window.location.origin
     ));
 
     this.resetDappButton = wrapper.querySelector("button.reset-dapp");
     this.resetDappButton.addEventListener("click", async e => {
       window.localStorage.clear();
-      await idos.reset({ reload: true });
+      await idos.reset();
+      window.location = window.location.origin;
     });
 
     this.resetFullButton = wrapper.querySelector("button.reset-full");
     this.resetFullButton.addEventListener("click", async e => {
       window.localStorage.clear();
       await idos.reset({ enclave: true, reload: true })
+      window.location = window.location.origin;
     });
 
     return this;
@@ -45,10 +47,11 @@ export class Terminal {
     return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
   
-  table(items = [{}], keyFilter = []) {
+  table(items = [], keyFilter = []) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
-    const allKeys = Object.keys(wrappedItems[0] || {});
+    const allKeys =
+      Object.keys(wrappedItems[0] || Object.fromEntries(keyFilter.map(e => [e])));
     if (!allKeys.length) throw new Error(`No keys in ${JSON.stringify(items)}`);
 
     const keys = keyFilter.length ? keyFilter : allKeys;

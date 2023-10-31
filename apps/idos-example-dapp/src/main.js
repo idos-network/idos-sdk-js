@@ -11,6 +11,7 @@ import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
 import { Terminal } from "./terminal";
+import { Cache } from "./cache";
 
 
 /*
@@ -25,11 +26,18 @@ const idos = await idOS.init({ container: "#idos-container" });
  *
  */
 const terminal = new Terminal("#terminal", idos);
+const cache = new Cache();
 document.querySelector("button#reset").addEventListener("click", async e => {
+  await idos.reset({ enclave: true });
   window.localStorage.clear();
-  await idos.reset({ enclave: true, reload: true });
+  window.location = window.location.origin;
 });
 
+
+/*
+ * Example wallet connection options
+ *
+ */
 let chosenWallet = window.localStorage.getItem("chosen-wallet");
 
 if (!chosenWallet) {
@@ -80,6 +88,7 @@ const connectWallet = {
   }
 };
 
+
 /*
  * 🚀 idOS, here we go!
  *
@@ -96,6 +105,7 @@ const connectWallet = {
     .wait("awaiting wallet", connectWallet[chosenWallet]());
 
   if (!signer) return;
+
 
   /*
    * Are you in the idOS?
@@ -123,47 +133,53 @@ const connectWallet = {
     return;
   }
 
-  /*
-   * idOS queries
-   *
-   */
   terminal
     .h2("Your idOS ID")
     .log(humanId);
 
-  await terminal
+
+  /*
+   * Optional consent screen
+   *
+   */
+
+  let consent = cache.get("consent");
+  await new Promise(resolve => setTimeout(resolve, consent ? 0 : 250));
+  consent = await terminal
     .h1("ask", "Consent request")
     .log("(optional) you can use our SDK as consent UI")
-    .wait("timer", new Promise(resolve => setTimeout(resolve, 500)));
+    .wait(
+      "awaiting consent",
+      consent || idos.crypto.confirm("Do we have your consent to read data from the idOS?"),
+    );
+  terminal.h2("Consent").log(consent);
+  cache.set("consent", consent);
 
-  const consent = await terminal
-    .wait("awaiting consent", idos.crypto.confirm(`
-      Do we have your consent to read data from the idOS?
-    `));
+  if (!consent) return terminal.done();
 
-  terminal
-    .h2("Consent")
-    .log(consent);
 
-  if (!consent) {
-    terminal.done();
-    return;
-  }
+  /*
+   * Some idOS queries
+   *
+   */
 
-  const wallets = await terminal
-    .h1("eyes", "Your wallets")
-    .wait("awaiting signature", idos.data.list("wallets"));
-  terminal.table(wallets, ["address", "public_key"]);
+  // or just use the console:
+  // console.log(await idos.data.list("wallets"));
 
-  let credentials = await terminal
-    .h1("eyes", "Your credentials")
-    .wait("awaiting signature", idos.data.list("credentials"));
-  terminal.table(await credentials, ["issuer", "credential_type", "id", "encryption_public_key"]);
+  const wallets = cache.get("wallets") || idos.data.list("wallets");
+  terminal.h1("eyes", "Your wallets").wait("awaiting signature", wallets);
+  terminal.table(await wallets, ["address", "public_key"]);
+  cache.set("wallets", await wallets);
 
-  let grants = await terminal
-    .h1("eyes", "Your grants")
-    .wait("awaiting RPC", idos.grants.list({ owner: address }));
-  terminal.table(await grants);
+  const credentials = cache.get("credentials") || idos.data.list("credentials");
+  terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
+  terminal.table(await credentials, ["issuer", "credential_type"]);
+  cache.set("credentials", await credentials);
+
+  const grants = cache.get("grants") || idos.grants.list({ owner: address });
+  terminal.h1("eyes", "Your grants").wait("awaiting RPC", grants);
+  terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
+  cache.set("grants", await grants);
 
   terminal.done();
 })();

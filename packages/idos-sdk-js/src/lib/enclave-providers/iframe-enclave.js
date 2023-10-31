@@ -26,8 +26,8 @@ export class IframeEnclave extends EnclaveProvider {
     return encryptionPublicKey;
   }
 
-  reset(keep) {
-    return this.#requestToEnclave({ reset: { keep } });
+  reset() {
+    return this.#requestToEnclave({ reset: {} });
   }
 
   async confirm(message) {
@@ -81,7 +81,7 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async #requestToEnclave(request) {
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = ({ data }) => {
         port1.close();

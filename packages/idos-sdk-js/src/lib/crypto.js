@@ -1,23 +1,25 @@
-import * as StableUtf8 from "@stablelib/utf8";
+import * as Utf8Codec from "@stablelib/utf8";
+
 
 class Nonce {
-  // returns Uint8Array
-  static random = (length = 32) => (
-    crypto.getRandomValues(new Uint8Array(length))
-  )
+  static random (length = 32, { bitCap = 8 } = {}) {
+    const identity = _ => _;
+    const bitmask = (bits, byte) => byte & bits;
+    const [ typedArray, transformBytes = identity ] = {
+      [ 7]: [Int8Array, bitmask.bind(null, 127)],
+      [ 8]: [Uint8Array],
+      [16]: [Uint16Array],
+    }[bitCap];
 
-  // returns Uint8Array
-  static trimmedUUID = (length = 32) => (
-    StableUtf8.encode(crypto.randomUUID().substring(0, length))
-  )
+    if (!typedArray) throw new Error(`\`bitCap = ${bitCap}\` not supported`);
 
-  static fill = (value = 0, length = 32) => (
-    new Uint8Array(length).fill(value)
-  )
-}
+    return crypto.getRandomValues(new typedArray(length)).map(transformBytes);
+  }
+};
 
 export class Crypto {
   Nonce = Nonce;
+
   constructor(idOS) {
     this.idOS = idOS;
   }
@@ -28,27 +30,28 @@ export class Crypto {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
-    let humanId = this.idOS.store.get("human-id");
-    humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
-    if (!humanId) {
-      console.warn("User is not in the idOS");
-      return;
-    }
+    const { humanId } = await this.idOS.auth.currentUser();
 
-    this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
-
-    return this.encryptionPublicKey;
+    return this.provider.init(humanId, signerAddress, signerPublicKey);
   }
 
   async encrypt(message, receiverPublicKey) {
-    return await this.provider.encrypt(message, receiverPublicKey);
+    [ message, receiverPublicKey ] = [message, receiverPublicKey]
+      .filter(arg => typeof arg === "string" || arg instanceof string)
+      .map(Utf8codec.encode);
+
+    return this.provider.encrypt(message, receiverPublicKey);
   }
 
   async decrypt(message, senderPublicKey) {
-    return await this.provider.decrypt(message, senderPublicKey);
+    [ message, senderPublicKey ] = [message, senderPublicKey]
+      .filter(arg => typeof arg === "string" || arg instanceof string)
+      .map(Utf8codec.encode);
+
+    return this.provider.decrypt(message, senderPublicKey);
   }
 
   async confirm(message) {
-    return await this.provider.confirm(message);
+    return this.provider.confirm(message);
   }
 }

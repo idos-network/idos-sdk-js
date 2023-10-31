@@ -18,7 +18,6 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@idos-network/idos-sdk": "workspace:*",
-    "@kwilteam/kwil-js": "^0.0.3",
     "@near-js/crypto": "^0.0.5",
     "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",

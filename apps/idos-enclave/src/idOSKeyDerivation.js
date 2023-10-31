@@ -1,43 +1,58 @@
 import scrypt from "scrypt-js";
+import * as Utf8Codec from "@stablelib/utf8";
 
-const Config = {
-  // UUID v4 format (idOS human IDs)
-  uuidFormat: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+/*
+ * normalizePassword
+ *    Unicode normalization of input strigs
+ *    NFKC: compatibility decomposition followed by canonical composition
+ * validateSalt
+ *    UUID v4 format (idOS human IDs)
+ * n, r, p
+ *    CPU/RAM cost (higher = costlier)
+ *    n: iteration count
+ *    r: block size
+ *    p: parallelistm factor
+ * dkLen
+ *    length of derived key (bytes)
+ */
 
-  // Unicode normalization of input strigs
-  // NFKC: compatibility decomposition followed by canonical composition
-  unicodeNormalizationForm: "NFKC", 
+const latestVersion = 0.1;
+const allowedVersions = [0, 0.1];
 
-  // CPU/RAM cost (higher = costlier)
-  // n: iteration count
-  // r: block size
-  // p: parallelistm factor
-  n: 16384,
-  r: 8,
-  p: 1,
+const uuidv4Regex =
+  /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
-  // Output size (bytes)
-  dkLen: 32, // derived key length
+const kdfConfig = (version = latestVersion) => {
+  if (!allowedVersions.includes(version)) throw new Error("Wrong KDF");
+
+  let versions = {};
+
+  versions[0] = {
+    normalizePassword: password => password.normalize("NFKC"),
+    validateSalt: uuidv4Regex.test.bind(uuidv4Regex),
+    n: 128,
+    r: 8,
+    p: 1,
+    dkLen: 32,
+  };
+
+  versions[0.1] = {
+    ...versions[0],
+
+    n: 16384,
+  };
+
+  return versions[version];
 };
 
-const assertValidSalt = (str) => {
-  if (Config.uuidFormat.test(str) !== true) throw new Error("Invalid salt");
-};
+export const idOSKeyDerivation = async ({ password, salt, version }) => {
+  const { validateSalt, normalizePassword } = kdfConfig();
 
-const normalize = (str) => {
-  return str.normalize(Config.unicodeNormalizationForm);
-};
+  if (validateSalt(salt) !== true) throw new Error("Invalid salt");
+  password = normalizePassword(password);
 
-const bytesFrom = (str) => {
-  return new TextEncoder().encode(str);
-}
+  [ password, salt ] = [password, salt].map(Utf8Codec.encode);
+  const { n, r, p, dkLen } = kdfConfig();
 
-export const idOSKeyDerivation = async (password, salt) => {
-  assertValidSalt(salt);
-
-  const { n, r, p, dkLen } = Config;
-
-  [password, salt] = [password, salt].map(str => bytesFrom(normalize(str)));
-
-  return await scrypt.scrypt(password, salt, n, r, p, dkLen);
+  return scrypt.scrypt(password, salt, n, r, p, dkLen);
 };
