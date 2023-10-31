@@ -31,11 +31,13 @@ export class Auth {
     if (wallet.id === "my-near-wallet") {
       wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
       wallet.signMessage = async ({ message, recipient, nonce }) => {
-        const params = ["signature", "publicKey"];
-        const { signature, publicKey } = params.reduce((obj, p) => {
-          const match = window.location.hash.match(new RegExp(`${p}=(.*?)&`));
-          return Object.assign(obj, match && { [p]: decodeURIComponent(match[1]) });
-        }, {});
+
+        const { signature, publicKey, error } =
+          [...window.location.hash.matchAll(/(?<k>.*?)=(?<v>.*?)&/g)]
+            .map(m => m.groups)
+           .reduce((result, { k, v }) => Object.assign(result, { [k]: decodeURIComponent(v) }), {});
+
+        if (error) return Promise.reject();
 
         const lastMessage = this.idOS.store.get("sign-last-message", { json: true });
         if (signature && message === lastMessage) {
@@ -58,7 +60,7 @@ export class Auth {
 
           wallet.signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
-          await new Promise(() => ({}));
+          await new Promise(() => {});
         }
       };
     }
