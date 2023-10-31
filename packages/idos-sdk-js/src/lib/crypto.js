@@ -47,4 +47,8 @@ export class Crypto {
   async decrypt(message, senderPublicKey) {
     return await this.provider.decrypt(message, senderPublicKey);
   }
+
+  async confirm(message) {
+    return await this.provider.confirm(message);
+  }
 }

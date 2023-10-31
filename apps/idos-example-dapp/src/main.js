@@ -102,7 +102,7 @@ const connectWallet = {
    *
    */
   const currentUser = await terminal.wait(
-    "awaiting setup signature(s)",
+    "awaiting idOS setup (signatures and password)",
     idos.setSigner(chosenWallet, signer),
   );
 
@@ -130,6 +130,25 @@ const connectWallet = {
   terminal
     .h2("Your idOS ID")
     .log(humanId);
+
+  await terminal
+    .h1("ask", "Consent request")
+    .log("(optional) you can use our SDK as consent UI")
+    .wait("timer", new Promise(resolve => setTimeout(resolve, 500)));
+
+  const consent = await terminal
+    .wait("awaiting consent", idos.crypto.confirm(`
+      Do we have your consent to read data from the idOS?
+    `));
+
+  terminal
+    .h2("Consent")
+    .log(consent);
+
+  if (!consent) {
+    terminal.done();
+    return;
+  }
 
   const wallets = await terminal
     .h1("eyes", "Your wallets")

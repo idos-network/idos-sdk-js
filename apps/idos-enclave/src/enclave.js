@@ -7,6 +7,8 @@ import nacl from "tweetnacl";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
+    this.passwordButton = document.querySelector("button#password");
+    this.consentButton = document.querySelector("button#consent");
     this.store = new Store({
       initWith: ["human-id", "password", "encryption-public-key", "encryption-private-key", "signer-public-key", "signer-address"]
     });
@@ -51,15 +53,16 @@ export class Enclave {
   // wrt localstorage and cookies
   async ensurePassword() {
     if (!this.store.get("password")) {
-      this.startButton = document.querySelector("#start");
-      this.startButton.addEventListener("click", async (e) => {
+      this.passwordButton.style.display = "block";
+      this.passwordButton.addEventListener("click", async (e) => {
+        this.passwordButton.disabled = true;
         this.store.set("password", (await this.#openDialog("password")).string);
-        this.startButton.disabled = true;
         this.ensurePasswordResolver();
       });
 
       return await new Promise((resolve) => this.ensurePasswordResolver = resolve);
     }
+
     return Promise.resolve;
   }
 
@@ -127,6 +130,28 @@ export class Enclave {
     }
   }
 
+  async confirm(message) {
+    this.consentButton.style.display = "block";
+    this.consentButton.addEventListener("click", async (e) => {
+      this.consentButton.disabled = true;
+      this.ensureConsentResolver();
+    });
+
+    await new Promise((resolve) => this.ensureConsentResolver = resolve);
+
+    const { consent } = await this.#openDialog(
+      "consent",
+      `
+      <strong>Consent request</strong>
+      <p><small>from ${this.parentOrigin}</small></p>
+      <hr>
+      <p><code>${message}</code></p>
+    `
+    );
+
+    return consent;
+  }
+
   messageParent(message) {
     window.parent.postMessage(message, this.parentOrigin);
   }
@@ -157,7 +182,8 @@ export class Enclave {
           isReady: () => [],
           keys: () => [],
           encrypt: () => [message, receiverPublicKey],
-          decrypt: () => [message, senderPublicKey]
+          decrypt: () => [message, senderPublicKey],
+          confirm: () => [message],
         }[requestName];
 
         if (!paramBuilder) {
@@ -170,6 +196,8 @@ export class Enclave {
         console.log("catch", e);
         event.ports[0].postMessage({ error: e });
       } finally {
+        this.passwordButton.style.display = "none";
+        this.consentButton.style.display = "none";
         event.ports[0].close();
       }
     });

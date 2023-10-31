@@ -30,6 +30,17 @@ export class IframeEnclave extends EnclaveProvider {
     return this.#requestToEnclave({ reset: { keep } });
   }
 
+  async confirm(message) {
+    let response = this.#requestToEnclave({ confirm: { message } });
+    this.#showEnclave();
+
+    await response;
+
+    this.#hideEnclave();
+
+    return response;
+  }
+
   encrypt(message, receiverPublicKey) {
     return this.#requestToEnclave({ encrypt: { message, receiverPublicKey } });
   }
