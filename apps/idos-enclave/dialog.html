@@ -6,6 +6,11 @@
     form {
       display: none;
     }
+
+    code {
+      display: block;
+      margin-top: 1em;
+    }
   </style>
   <main class="p-5 max-w-screen-sm mx-auto space-y-2">
     <h1 class="font-semibold text-xl">idOS Secure Enclave</h1>
@@ -63,11 +68,13 @@
     </form>
 
     <form name="consent">
+      <div class="space-y-3">
       <p id="message"></p>
       <p>
-        <button id="yes">Accept</button>
-        <button id="no">Reject</button>
+        <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="yes">Accept</button>
+        <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="no">Reject</button>
       </p>
+      </div>
     </form>
   </main>
 </body>

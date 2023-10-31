@@ -31,6 +31,7 @@ class Dialog {
       this.respondToEnclave({ result: password });
     });
 
+    /*
     bip39Button.addEventListener("click", async (e) => {
       e.preventDefault();
       const seed = await generateMnemonic(wordlist);
@@ -45,6 +46,7 @@ class Dialog {
       bip39Display.innerText = wordGroups.join("\n");
       bip39Display.style.display = "block";
     });
+    */
 
     passwordForm.addEventListener("submit", (e) => {
       e.preventDefault();

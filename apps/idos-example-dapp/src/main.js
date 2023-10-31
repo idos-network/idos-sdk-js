@@ -6,165 +6,164 @@ import "@near-wallet-selector/modal-ui-js/styles.css";
 
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
+import { Terminal } from "./terminal";
 
-const idos = await idOS.init({
-  nodeUrl: "https://nodes.staging.idos.network",
-  container: "#idos_container"
+
+/*
+ * Initializing the idOS
+ *
+ */
+const idos = await idOS.init({ container: "#idos-container" });
+
+
+/*
+ * Setting up the demo
+ *
+ */
+const terminal = new Terminal("#terminal", idos);
+document.querySelector("button#reset").addEventListener("click", async e => {
+  window.localStorage.clear();
+  await idos.reset({ enclave: true, reload: true });
 });
+
+let chosenWallet = window.localStorage.getItem("chosen-wallet");
+
+if (!chosenWallet) {
+  await new Promise((resolve) => {
+    const walletChooser = document.querySelector("#wallet-chooser");
+    walletChooser.style.display = "block";
+    walletChooser.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      walletChooser.style.display = "none";
+
+      chosenWallet = e.submitter.name;
+      window.localStorage.setItem("chosen-wallet", chosenWallet);
+      resolve();
+    });
+  });
+}
 
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
-    const signer = await provider.getSigner();
-
-    await idos.auth.setEvmSigner(signer);
-    await idos.crypto.init();
-    await idos.grants.init({ signer, type: "evm" });
+    return provider.getSigner();
   },
 
   NEAR: async () => {
-    const { defaultContractId: contractId, contractMethods: methodNames } =
-      idos.grants.near;
+    const {
+      defaultContractId: contractId,
+      contractMethods: methodNames,
+    } = idOS.near;
 
     const selector = await setupWalletSelector({
-      network: "testnet",
-      modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
+      network: idOS.near.defaultNetwork,
+      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
     });
 
-    if (!selector.isSignedIn()) {
-      await new Promise((resolve) => {
-        const modal = setupModal(selector, { contractId, methodNames });
-        modal.on("onHide", resolve);
-        modal.show();
-      });
-    }
+    !selector.isSignedIn() && await new Promise((resolve) => {
+      const modal = setupModal(selector, { contractId, methodNames });
 
-    const wallet = await selector.wallet();
-    const accountId = (await wallet.getAccounts())[0].accountId;
+      // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
+      // We observe that it triggers this callback before it's ready for a
+      // second method call, which `setNearSigner` does immediately after
+      // this promise resolves
+      modal.on("onHide", () => setTimeout(resolve, 100));
+      modal.show();
+    });
 
-    await idos.auth.setNearSigner(wallet);
-    await idos.crypto.init();
-    await idos.grants.init({ type: "near", accountId, wallet });
+    return selector.wallet();
   }
 };
 
-const idosQueries = async () => {
-  const elem = document.querySelector("code#display");
+/*
+ * 🚀 idOS, here we go!
+ *
+ */
+(async () => {
+  /*
+   * Connecting a wallet
+   *
+   */
+  const signer = await terminal
+    .h1("rocket", "idOS connection")
+    .h2("Node URL")
+    .log(idos.nodeUrl)
+    .wait("awaiting wallet", connectWallet[chosenWallet]());
 
-  const display = (html, nest) =>
-    ((nest ? elem.lastChild : elem).innerHTML += html);
+  if (!signer) return;
 
-  const { humanId, address } = await idos.auth.currentUser();
+  /*
+   * Are you in the idOS?
+   *
+   */
+  const currentUser = await terminal.wait(
+    "awaiting idOS setup (signatures and password)",
+    idos.setSigner(chosenWallet, signer),
+  );
 
-  elem.parentElement.style.display = "block";
+  if (!currentUser) return;
+
+  const {humanId, address, publicKey} = currentUser;
+
   if (!humanId) {
-    display(`
-      <em>No idOS profile</em><br>
-      <br>
-      Get one here: <a href="#">Fractal ID</a>
-    `);
-  } else {
-    display(`
-      <em class="rocket"><strong>Connected to the idOS</strong></em><br>
-      <br>
-      <em class="header eyes"><strong>Your ID</strong></em><br>
-      <span>${humanId}</span><br><br>
-    `);
+    terminal
+      .h1("pleading", "No idOS profile found")
+      .h2(`Need an idOS profile?`)
+      .log(`Get one at <a href="${idOS.profileProviders[0]}">Fractal ID</a>`)
+      .h2(`Already have one?`)
+      .log(`Please connect the right signer`)
+      .h1("eyes", `Currently connected signer:`)
+      .table({ address, publicKey })
+      .done();
+    return;
   }
 
-  let wallets;
-  await new Promise(async (resolve) => {
-    elem.innerHTML += `<span class="wait">awaiting signature</span>`;
-    wallets = await idos.data.list("wallets");
-    elem.lastChild.remove();
-    resolve();
-  });
+  /*
+   * idOS queries
+   *
+   */
+  terminal
+    .h2("Your idOS ID")
+    .log(humanId);
 
-  display(`
-    <em class="header eyes"><strong>Your wallets</strong></em><br>
-    <div class="table">
-      <div>
-        <div><em><u>Address</u></em></div>
-        <div><em><u>Public key</u></em></div>
-      </div>
-  `);
+  await terminal
+    .h1("ask", "Consent request")
+    .log("(optional) you can use our SDK as consent UI")
+    .wait("timer", new Promise(resolve => setTimeout(resolve, 500)));
 
-  for (const { address, public_key } of wallets) {
-    display(
-      `
-      <div>
-        <div>${address}</div>
-        <div>${public_key}</div>
-      </div>
-    `,
-      true
-    );
+  const consent = await terminal
+    .wait("awaiting consent", idos.crypto.confirm(`
+      Do we have your consent to read data from the idOS?
+    `));
+
+  terminal
+    .h2("Consent")
+    .log(consent);
+
+  if (!consent) {
+    terminal.done();
+    return;
   }
-  display(`</div><br>`);
 
-  let grants;
-  await new Promise(async (resolve) => {
-    elem.innerHTML += `<span class="wait">awaiting RPC</span>`;
-    grants = await idos.grants.list({ owner: address });
-    elem.lastChild.remove();
-    resolve();
-  });
+  const wallets = await terminal
+    .h1("eyes", "Your wallets")
+    .wait("awaiting signature", idos.data.list("wallets"));
+  terminal.table(wallets, ["address", "public_key"]);
 
-  display(`
-    <em class="header eyes"><strong>Your grants</strong></em><br>
-    <div class="table">
-      <div>
-        <div><em><u>Owner</u></em></div>
-        <div><em><u>Grantee</u></em></div>
-        <div><em><u>Data ID</u></em></div>
-        <div><em><u>Locked until</u></em></div>
-      </div>
-  `);
+  let credentials = await terminal
+    .h1("eyes", "Your credentials")
+    .wait("awaiting signature", idos.data.list("credentials"));
+  terminal.table(await credentials, ["issuer", "credential_type", "id", "encryption_public_key"]);
 
-  // FIXME: near-rs expects data_id, near-ts expects dataId
-  for (const { owner, grantee, dataId, data_id, lockedUntil } of grants) {
-    display(
-      `
-      <div>
-        <div>${owner}</div>
-        <div>${grantee}</div>
-        <div>${dataId || data_id}</div>
-        <div>${lockedUntil}</div>
-      </div>
-    `,
-      true
-    );
-  }
-  display(`</div><br><br>`);
-  display(`<em class="header tick"><strong>Complete</strong></em><br>`);
-};
+  let grants = await terminal
+    .h1("eyes", "Your grants")
+    .wait("awaiting RPC", idos.grants.list({ owner: address }));
+  terminal.table(await grants);
 
-document
-  .querySelector("#wallet-chooser")
-  .addEventListener("submit", async (e) => {
-    e.preventDefault();
-    e.target.style.display = "none";
-
-    await connectWallet[e.submitter.name]();
-
-    /*
-     * idOS queries
-     *
-     * get the user's idOS ID:
-     *   await idos.auth.currentUser();
-     *
-     * get the user's wallets:
-     *   await idos.data.list("wallets");
-     *
-     */
-    idosQueries();
-  });
-
-document.querySelector("#reset").addEventListener("click", async (e) => {
-  await idos.reset();
-  window.location.reload();
-});
+  terminal.done();
+})();

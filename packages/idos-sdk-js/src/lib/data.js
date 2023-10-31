@@ -101,7 +101,7 @@ export class Data {
       [`original_${name}_id`]: record.id,
       ...record,
       id,
-    });
+    }, `Share a ${name} on idOS`);
     return { id };
   }
 

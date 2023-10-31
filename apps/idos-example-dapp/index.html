@@ -11,6 +11,8 @@
       body {
         font-family: sans-serif;
         font-size: 0.9em;
+        background: #eee;
+        color: #333;
       }
 
       h1 {
@@ -27,29 +29,86 @@
         font-size: 1.1em;
       }
 
+      button {
+        cursor: pointer;
+      }
+
       button#reset {
         position: absolute;
         top: 1em;
         right: 1em;
       }
 
-      div#idos_container {
+      ul.intro {
+        padding-left: 1em;
+      }
+
+      form#wallet-chooser {
+        display: none;
+      }
+
+      div#idos-wrapper {
+        position: absolute;
+        top: 50px;
+        left: 50px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: #eeeeeecc;
+        border-radius: 50%;
+        border: 1em solid #333;
+        outline: 0.2em solid #eee;
+        backdrop-filter: blur(2px);
+        aspect-ratio: 1;
+        padding: 1em;
+      }
+
+      div#idos-wrapper:has(#idos-container.visible) {
+        display: flex;
+      }
+
+      div#idos-container {
         width: 140px;
         height: 35px;
         margin: 0;
         padding: 0;
       }
 
-      p#display-wrapper {
+      div#idos-wrapper > span {
+        display: block;
+        width: 75%;
+        height: 25%;
+        margin: 0.5em 0;
+        position: relative;
+        text-align: center;
+      }
+
+      div#idos-wrapper > span > span {
+        display: block;
+        position: absolute;
+        width: 100%;
+      }
+
+      div#idos-wrapper > span:first-child > span {
+        bottom: 0;
+      }
+
+      div#idos-wrapper > span:last-child > span {
+        top: 0;
+      }
+
+      div#terminal {
         display: none;
         padding: 1em;
         background-color: #333;
         color: #bbb;
         overflow: scroll;
+        padding: 1em 0.5em
       }
 
-      ul.intro {
-        padding-left: 1em;
+      div#terminal:has(> code#display:not(:empty)) {
+        display: block;
       }
 
       code#display {
@@ -58,11 +117,90 @@
         text-wrap: nowrap;
       }
 
-      code#display em {
+      code#display > * {
+        display: block;
+      }
+
+      code#display a {
+        color: #aaf;
+      }
+
+      code#display .h1 {
         color: #eee;
-        font-style: normal;
-        margin-bottom: 0.2em;
+        font-weight: bold;
+      }
+
+      code#display > .h1:not(:first-child) {
+        margin-top: 2em;
+      }
+
+      code#display .h1::before {
+        content: "*";
+        display: inline-flex;
+        width: 2em;
+        justify-content: center;
+      }
+
+      code#display > .h1 + *:not(.status) {
+        padding-top: 1em;
+      }
+
+      code#display > .h1 ~ *:not(.h1, .status) {
+        margin-left: calc(1em - 1px);
+        padding-left: 1em;
+        border-left: 1px solid #999;
+      }
+
+      code#display .rocket::before {
+        content: "🚀";
+      }
+
+      code#display .pleading::before {
+        content: "🥺";
+      }
+
+      code#display .eyes::before {
+        content: "👀";
+      }
+
+      code#display .next::before {
+        content: "➜";
+      }
+
+      code#display .ask::before{
+        content: "🙋";
+      }
+
+      code#display .h2 {
+        padding-top: 1em;
+      }
+
+      code#display .h2 > * {
         display: inline-block;
+        color: #eee;
+        border-bottom: 1px solid #eee;
+        padding-right: 1em;
+        padding-bottom: 1px;
+        margin-bottom: 2px;
+      }
+
+      code#display .status {
+        background: #eee;
+        color: #333;
+        margin-top: 1em;
+        margin-left: 0.5em;
+        padding: 0 0.5em;
+        width: fit-content;
+      }
+
+      code#display .status.done {
+        background: #6e6;
+        color: #000;
+      }
+
+      code#display .status.done::before {
+        content: "✔️ Done";
+        font-weight: bold;
       }
 
       @keyframes blinker {
@@ -71,64 +209,101 @@
         }
       }
 
-      code#display .wait {
-        background: #eee;
-        color: #333;
-        padding: 0 0.2em;
+      code#display .status.wait {
         animation: blinker 1s linear infinite;
       }
 
-      code#display .header ~ *:not(.header, .wait) {
-        margin-left: 0.5em;
-        padding-left: 1em;
-        border-left: 1px dotted #eee;
+      code#display .status.wait::before {
+        content: "⧖ ";
+      }
+
+      code#display .status.fail {
+        animation: none;
+        background: #e66;
+        color: #000;
+      }
+
+      code#display .status.fail::before {
+        content: "✗ ";
       }
 
       code#display .table {
         display: table;
       }
 
-      code#display .rocket::before {
-        content: "🚀";
-        padding-right: 0.5em;
+      code#display .table > .thead {
+        display: table-header-group;
+        color: #eee;
       }
 
-      code#display .eyes::before {
-        content: "👀";
-        padding-right: 0.5em;
+      code#display .table > .tbody {
+        display: table-row-group;
       }
 
-      code#display .tick::before {
-        content: "✔️";
-        padding-right: 0.5em;
-      }
-
-      code#display .table > div {
+      code#display .table .tr {
         display: table-row;
       }
 
-      code#display .table > div > div {
+      code#display .table .td {
         display: table-cell;
       }
 
-      code#display .table > div > div:not(:first-child)::before {
-        content: ":";
-        margin: 0 1em;
+      code#display .table .tr > .td:not(:first-child)::before {
+        content: "·";
+        display: inline-flex;
+        justify-content: center;
+        width: 2em;
+        overflow: hidden;
       }
 
-      .outer {
-        font-weight: normal;
+      code#display .table > .thead .tr > .td:not(:first-child)::before {
+        content: "";
       }
-      .inner {
-        font-weight: normal;
+
+      code#display .table > .thead span {
+        display: inline-block;
+        border-bottom: 1px solid #eee;
+        padding-right: 1em;
+        padding-bottom: 1px;
+        margin-bottom: 2px;
+      }
+
+      code#display .table > .thead span::first-letter {
+        text-transform: uppercase;
+      }
+
+      div#terminal #controls {
+        margin-top: 1em;
+        margin-left: -0.5em;
+        padding-top: 1em;
+        padding-left: 1em;
+        border-top: 1px solid #eee;
+      }
+
+      div#terminal button {
+        font-size: 1.1em;
+        line-height: 1.3em;
+        font-family: monospace;
+        background-color: transparent;
+        border: 2px solid #eee;
+        color: #eee;
+      }
+
+      div#terminal #controls > button:not(:first-child) {
+        margin-left: 1em;
       }
     </style>
+
     <div id="app">
-      <h1><span>idOS developer demo</span>Connecting your dapp to the idOS</h1>
+      <h1>
+        <span>idOS developer demo</span>
+        Connecting your dapp to the idOS
+      </h1>
 
       <ul class="intro">
         <li>connecting an EVM or NEAR wallet</li>
-        <li>initializing the idOS SDK</li>
+        <li>initializing the idOS SDK with the wallet signer</li>
+        <li>unlocking the idOS</li>
         <li>querying the idOS</li>
       </ul>
 
@@ -140,15 +315,23 @@
         <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
       </form>
 
-      <p id="display-wrapper">
+      <div id="terminal">
         <code id="display"></code>
-      </p>
+        <div id="controls">
+          <button class="restart">Restart</button>
+          <button class="reset-dapp">Reset dapp</button>
+          <button class="reset-full">Full reset</button>
+        </div>
+      </div>
 
-      <div id="idos_container"></div>
+      <div id="idos-wrapper">
+        <span><span>this is the idOS container</span></span>
+        <div id="idos-container"></div>
+        <span><span>place and style it however you like</span></span>
+      </div>
+
+      <button id="reset">Full reset</button>
     </div>
-
-    <button id="reset">Reset demo</button>
-
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

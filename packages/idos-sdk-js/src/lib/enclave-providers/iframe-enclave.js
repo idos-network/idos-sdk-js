@@ -1,7 +1,7 @@
 import { EnclaveProvider } from "./enclave-provider";
 
 export class IframeEnclave extends EnclaveProvider {
-  hostUrl = new URL("https://enclave.idos.network");
+  hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
   constructor(options) {
     super(options);
@@ -14,29 +14,31 @@ export class IframeEnclave extends EnclaveProvider {
     return await this.#requestToEnclave({ storage: {} });
   }
 
-  async init(humanId, signerPublicKey) {
-    await this.#requestToEnclave({ storage: { humanId, signerPublicKey } });
+  async init(humanId, signerAddress, signerPublicKey) {
+    await this.#requestToEnclave({ storage: { humanId, signerAddress, signerPublicKey } });
     if (!(await this.#requestToEnclave({ isReady: {} }))) {
       this.#showEnclave();
     }
 
-    const publicKeys = await this.#requestToEnclave({ keys: {} });
+    const encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
     this.#hideEnclave();
-    return publicKeys;
+
+    return encryptionPublicKey;
   }
 
-  reset() {
-    return this.#requestToEnclave({ reset: {} });
+  reset(keep) {
+    return this.#requestToEnclave({ reset: { keep } });
   }
 
-  sign(message) {
-    return this.#requestToEnclave({ sign: { message } });
-  }
+  async confirm(message) {
+    let response = this.#requestToEnclave({ confirm: { message } });
+    this.#showEnclave();
 
-  verifySig(message, signature, signerPublicKey) {
-    return this.#requestToEnclave({
-      verifySig: { message, signature, signerPublicKey },
-    });
+    await response;
+
+    this.#hideEnclave();
+
+    return response;
   }
 
   encrypt(message, receiverPublicKey) {
@@ -58,7 +60,7 @@ export class IframeEnclave extends EnclaveProvider {
     this.iframe.style = Object.entries({
       "background-color": "transparent",
       border: "none",
-      display: "none",
+      display: "block",
       height: "100%",
       width: "100%",
     })
@@ -66,19 +68,16 @@ export class IframeEnclave extends EnclaveProvider {
       .join("; ");
 
     this.iframe.addEventListener("load", () => this.iframeLoaded());
-    document.querySelector(this.container).style.display = "none";
     document.querySelector(this.container).appendChild(this.iframe);
     return new Promise((resolve) => (this.iframeLoaded = resolve));
   }
 
   #showEnclave() {
-    document.querySelector(this.container).style.display = "block";
-    this.iframe.style.display = "block";
+    this.iframe.parentElement.classList.add("visible");
   }
 
   #hideEnclave() {
-    this.iframe.parentElement.style.display = "none";
-    this.iframe.style.display = "none";
+    this.iframe.parentElement.classList.remove("visible");
   }
 
   async #requestToEnclave(request) {

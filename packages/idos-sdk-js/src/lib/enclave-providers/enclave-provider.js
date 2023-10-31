@@ -13,14 +13,6 @@ export class EnclaveProvider {
     throw new Error(`${this.constructor} doesn't implement method \`init()\'.`);
   }
 
-  async sign() {
-    throw new Error(`${this.constructor} doesn't implement method \`sign()\'.`);
-  }
-
-  async verifySig() {
-    throw new Error(`${this.constructor} doesn't implement method \`verifySig()\'.`);
-  }
-
   async encrypt() {
     throw new Error(`${this.constructor} doesn't implement method \`encrypt()\'.`);
   }

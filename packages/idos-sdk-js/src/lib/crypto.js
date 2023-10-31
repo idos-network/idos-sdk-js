@@ -1,7 +1,19 @@
+import * as StableUtf8 from "@stablelib/utf8";
+
 class Nonce {
-  constructor(length = 32) {
-    return Buffer.from(crypto.getRandomValues(new Uint8Array(length)));
-  }
+  // returns Uint8Array
+  static random = (length = 32) => (
+    crypto.getRandomValues(new Uint8Array(length))
+  )
+
+  // returns Uint8Array
+  static trimmedUUID = (length = 32) => (
+    StableUtf8.encode(crypto.randomUUID().substring(0, length))
+  )
+
+  static fill = (value = 0, length = 32) => (
+    new Uint8Array(length).fill(value)
+  )
 }
 
 export class Crypto {
@@ -12,23 +24,20 @@ export class Crypto {
 
   async init() {
     this.provider = this.idOS.enclave.provider;
-    let signerPublicKey = this.idOS.store.get("signer-public-key");
+
+    const signerAddress = this.idOS.store.get("signer-address");
+    const signerPublicKey = this.idOS.store.get("signer-public-key");
+
     let humanId = this.idOS.store.get("human-id");
     humanId = humanId || (await this.idOS.auth.currentUser()).humanId;
-
     if (!humanId) {
-      throw new Error("User is not in the idOS");
+      console.warn("User is not in the idOS");
+      return;
     }
-    this.publicKeys = await this.provider.init(humanId, signerPublicKey);
-    return this.publicKeys.encryption;
-  }
 
-  async sign(message) {
-    return await this.provider.sign(message);
-  }
+    this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
 
-  async verifySig(message, signature, signerPublicKey) {
-    return await this.provider.verifySig(message, signature, signerPublicKey);
+    return this.encryptionPublicKey;
   }
 
   async encrypt(message, receiverPublicKey) {
@@ -37,5 +46,9 @@ export class Crypto {
 
   async decrypt(message, senderPublicKey) {
     return await this.provider.decrypt(message, senderPublicKey);
+  }
+
+  async confirm(message) {
+    return await this.provider.confirm(message);
   }
 }

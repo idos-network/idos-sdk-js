@@ -7,12 +7,16 @@ export class Enclave {
   }
 
   async loadProvider() {
-    const { humanId, signerPublicKey } = await this.provider.load();
+    const { humanId, encryptionPublicKey, signerAddress, signerPublicKey } =
+      await this.provider.load();
+
     this.idOS.store.set("human-id", humanId);
+    this.idOS.store.set("encryption-public-key", encryptionPublicKey);
+    this.idOS.store.set("signer-address", signerAddress);
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async reset() {
-    return await this.provider.reset();
+  async reset(keep) {
+    return await this.provider.reset(keep);
   }
 }

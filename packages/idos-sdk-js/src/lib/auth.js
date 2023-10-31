@@ -18,54 +18,115 @@ export class Auth {
       this.idOS.store.set("signer-public-key", publicKey);
       this.idOS.store.set("signer-address", signer.address);
     }
+
     this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
+
+    await this.idOS.crypto.init();
+    await this.idOS.grants.init({ signer, type: "evm" });
+
+    return await this.currentUser();
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
+    if (wallet.id === "my-near-wallet") {
+      wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
+      wallet.signMessage = async ({ message, recipient, nonce }) => {
+        const params = ["signature", "publicKey"];
+        const { signature, publicKey } = params.reduce((obj, p) => {
+          const match = window.location.hash.match(new RegExp(`${p}=(.*?)&`));
+          return Object.assign(obj, match && { [p]: decodeURIComponent(match[1]) });
+        }, {});
+
+        const lastMessage = this.idOS.store.get("sign-last-message", { json: true });
+        if (signature && message === lastMessage) {
+          const nonce = Buffer.from(this.idOS.store.get("sign-last-nonce", { json: true }));
+          const callbackUrl = this.idOS.store.get("sign-last-url");
+
+          return Promise.resolve({
+            publicKey,
+            signature,
+            nonce,
+            message,
+            callbackUrl,
+          });
+        } else {
+          const callbackUrl = window.location.href;
+
+          this.idOS.store.set("sign-last-message", message, { json: true });
+          this.idOS.store.set("sign-last-nonce", Array.from(nonce), { json: true });
+          this.idOS.store.set("sign-last-url", callbackUrl);
+
+          wallet.signMessageOriginal({ message, nonce, recipient, callbackUrl });
+
+          await new Promise(() => ({}));
+        }
+      };
+    }
+
     let publicKey = this.idOS.store.get("signer-public-key");
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
       const message = "idOS authentication";
-      const nonce = new this.idOS.crypto.Nonce(32);
+      const nonce = Buffer.from(this.idOS.crypto.Nonce.trimmedUUID());
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
+
       this.idOS.store.set("signer-public-key", publicKey);
     }
-    this.idOS.store.set("signer-address", (await wallet.getAccounts())[0].accountId);
+
+    const accountId = (await wallet.getAccounts())[0].accountId;
+    this.idOS.store.set("signer-address", accountId);
 
     const signer = async (message) => {
       message = StableBase64.encode(message);
-      const nonce = new this.idOS.crypto.Nonce(32);
-      const { signature } = await wallet.signMessage({ message, recipient, nonce });
-      const nep413BorshPayload = borsh.serialize(
-        {
-          struct: {
-            tag: "u32",
-            message: "string",
-            nonce: { array: { type: "u8", len: 32 } },
-            recipient: "string",
-            callbackUrl: { option: "string" },
-          },
+      //message = new TextDecoder().decode(message);
+
+      const uuidNonce = this.idOS.crypto.Nonce.trimmedUUID();
+      const {
+        nonce = uuidNonce,
+        signature,
+        callbackUrl,
+      } = await wallet.signMessage({
+        message,
+        recipient,
+        nonce: Buffer.from(uuidNonce),
+      });
+
+      const nep413BorschSchema = {
+        struct: {
+          tag: "u32",
+          message: "string",
+          nonce: { array: { type: "u8", len: 32 } },
+          recipient: "string",
+          callbackUrl: { option: "string" },
         },
-        { tag: 2147484061, message, nonce, recipient }
+      };
+
+      const nep413BorshParams = {
+        tag: 2147484061,
+        message,
+        nonce: Array.from(nonce),
+        recipient,
+        callbackUrl,
+      };
+
+      const nep413BorshPayload = borsh.serialize(
+        nep413BorschSchema,
+        nep413BorshParams,
       );
+
       return StableBytes.concat(
         StableBinary.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        StableBase64.decode(signature)
+        StableBase64.decode(signature),
       );
     };
 
     this.#setSigner({ signer, publicKey, signatureType: "nep413" });
-  }
 
-  async setEnclaveSigner() {
-    if (window.location.hostname !== "localhost") {
-      throw new Error("Enclave Signer only available for local development");
-    }
+    await this.idOS.crypto.init();
+    await this.idOS.grants.init({ type: "near", accountId, wallet });
 
-    const signer = async (message) => await this.idOS.crypto.sign(message);
-    const publicKey = this.idOS.crypto.publicKeys.sig.raw;
-    this.#setSigner({ signer, publicKey, signatureType: "ed25519" });
+    return await this.currentUser();
   }
 
   #setSigner(...args) {
@@ -83,6 +144,7 @@ export class Auth {
       this._currentUser = {
         humanId,
         address: this.idOS.store.get("signer-address"),
+        publicKey: this.idOS.store.get("signer-public-key"),
       };
     }
     return this._currentUser;
