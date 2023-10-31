@@ -6,7 +6,7 @@ export class Store {
     keys.forEach((key) => this.get(key));
   }
 
-  get(key) {
+  get(key, { json } = {}) {
     if (!this.#data[key]) {
       const values = [this.#getCookie(key), this.#getLocalStorage(key)].filter(Boolean);
       const firstValue = values.shift(1);
@@ -15,16 +15,20 @@ export class Store {
       }
       this.#data[key] = firstValue;
     }
-    return this.#data[key];
+    return json ? this.#data[key] && JSON.parse(this.#data[key]) : this.#data[key];
   }
 
-  set(key, value, force = false) {
+  set(key, value, { json } = {}) {
     if (typeof key !== "string" || !key) {
       throw new Error("Storage key not provided");
     }
-    if ((typeof value !== "string" || !value) && force !== true) {
+
+    if (!value) {
       return;
     }
+
+    value = json ? JSON.stringify(value) : value;
+
     this.#data[key] = value;
     this.#setCookie(key, value);
     this.#setLocalStorage(key, value);
