@@ -15,6 +15,7 @@ import { ConnectWallet } from "@/lib/components/connect-wallet";
 import { Header } from "@/lib/components/header";
 import { Loading } from "@/lib/components/loading";
 import { idos } from "@/lib/idos";
+import { idOS } from "@idos-network/idos-sdk";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
@@ -25,7 +26,7 @@ const setupEvmWallet = async () => {
 };
 
 const setUpNearWallet = async () => {
-  const contractId = idos.grants.near.defaultContractId;
+  const contractId = idOS.near.defaultContractId;
   let walletSelectorReady: (value?: unknown) => void;
 
   const selector = await setupWalletSelector({
@@ -35,7 +36,7 @@ const setUpNearWallet = async () => {
 
   const modal = setupModal(selector, {
     contractId,
-    methodNames: idos.grants.near.contractMethods
+    methodNames: idOS.near.contractMethods
   });
 
   modal.on("onHide", async () => {
