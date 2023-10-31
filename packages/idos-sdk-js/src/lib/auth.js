@@ -33,9 +33,7 @@ export class Auth {
       wallet.signMessage = async ({ message, recipient, nonce }) => {
 
         const { signature, publicKey, error } =
-          [...window.location.hash.matchAll(/(?<k>.*?)=(?<v>.*?)&/g)]
-            .map(m => m.groups)
-           .reduce((result, { k, v }) => Object.assign(result, { [k]: decodeURIComponent(v) }), {});
+          Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)).entries());
 
         if (error) return Promise.reject();
 
