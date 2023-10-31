@@ -65,6 +65,7 @@ export declare class idOS {
   kwilWrapper: KwilWrapper;
   grants: Grants;
   static init(options: InitOptions): Promise<idOS>;
+  static near: Grants.near;
 }
 
 declare interface InitOptions {
