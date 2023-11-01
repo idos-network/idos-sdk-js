@@ -21,25 +21,11 @@ declare type AuthUser = {
 declare class SDKCrypto {
   idOS: idOS;
   private provider;
-  publicKeys: CryptoKeys | undefined;
   constructor(idOS: idOS);
-  init(): Promise<CryptoKeys>;
-  sign(message: Uint8Array): Promise<Uint8Array | null>;
-  verifySig(message: Uint8Array, signature: Uint8Array, signerPublicKey: Uint8Array): Promise<boolean>;
-  encrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
-  decrypt(message: string, receiverPublicKey?: Uint8Array): Promise<string>;
+  init(): Promise<Uint8Array>;
+  encrypt(message: string | Uint8Array, receiverPublicKey?: string | Uint8Array): Promise<Uint8Array>;
+  decrypt(message: string | Uint8Array, receiverPublicKey?: string | Uint8Array): Promise<Uint8Array>;
 }
-
-declare type CryptoKeys = {
-  encryption: {
-    base64: string;
-    raw: Uint8Array;
-  };
-  sig: {
-    base64: string;
-    raw: Uint8Array;
-  };
-};
 
 declare class Data {
   idOS: idOS;

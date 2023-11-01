@@ -1,7 +1,8 @@
-import * as StableBase64 from "@stablelib/base64";
-import * as StableBinary from "@stablelib/binary";
-import * as StableBytes from "@stablelib/bytes";
-import * as borsh from "borsh";
+import * as Base64Codec from "@stablelib/base64";
+import * as BinaryCodec from "@stablelib/binary";
+import * as BytesCodec from "@stablelib/bytes";
+import * as Utf8Codec from "@stablelib/utf8";
+import * as BorshCodec from "borsh";
 import { SigningKey, hashMessage } from "ethers";
 
 export class Auth {
@@ -30,16 +31,17 @@ export class Auth {
   async setNearSigner(wallet, recipient = "idos.network") {
     if (wallet.id === "my-near-wallet") {
       wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
-      wallet.signMessage = async ({ message, recipient, nonce }) => {
-
+      wallet.signMessage = async ({ message, recipient }) => {
         const { signature, publicKey, error } =
-          Object.fromEntries(new URLSearchParams(window.location.hash.slice(1)).entries());
+          Object.fromEntries(
+            new URLSearchParams(window.location.hash.slice(1)).entries(),
+          );
 
         if (error) return Promise.reject();
 
-        const lastMessage = this.idOS.store.get("sign-last-message", { json: true });
+        const lastMessage = this.idOS.store.get("sign-last-message");
         if (signature && message === lastMessage) {
-          const nonce = Buffer.from(this.idOS.store.get("sign-last-nonce", { json: true }));
+          const nonce = Buffer.from(this.idOS.store.get("sign-last-nonce"));
           const callbackUrl = this.idOS.store.get("sign-last-url");
 
           return Promise.resolve({
@@ -51,9 +53,12 @@ export class Auth {
           });
         } else {
           const callbackUrl = window.location.href;
+          const nonce = Buffer.from(
+            this.idOS.crypto.Nonce.random(32, { bitCap: 7 }),
+          );
 
-          this.idOS.store.set("sign-last-message", message, { json: true });
-          this.idOS.store.set("sign-last-nonce", Array.from(nonce), { json: true });
+          this.idOS.store.set("sign-last-message", message);
+          this.idOS.store.set("sign-last-nonce", Array.from(nonce));
           this.idOS.store.set("sign-last-url", callbackUrl);
 
           wallet.signMessageOriginal({ message, nonce, recipient, callbackUrl });
@@ -67,7 +72,7 @@ export class Auth {
 
     if (!publicKey || !publicKey?.startsWith("ed25519")) {
       const message = "idOS authentication";
-      const nonce = Buffer.from(this.idOS.crypto.Nonce.trimmedUUID());
+      const nonce = Buffer.from(this.idOS.crypto.Nonce.random(32));
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
 
       this.idOS.store.set("signer-public-key", publicKey);
@@ -77,18 +82,18 @@ export class Auth {
     this.idOS.store.set("signer-address", accountId);
 
     const signer = async (message) => {
-      message = StableBase64.encode(message);
-      //message = new TextDecoder().decode(message);
+      message = Utf8Codec.decode(message);
 
-      const uuidNonce = this.idOS.crypto.Nonce.trimmedUUID();
+      let nonceSuggestion = Buffer.from(this.idOS.crypto.Nonce.random(32));
+
       const {
-        nonce = uuidNonce,
+        nonce = nonceSuggestion,
         signature,
         callbackUrl,
       } = await wallet.signMessage({
         message,
         recipient,
-        nonce: Buffer.from(uuidNonce),
+        nonce: nonceSuggestion,
       });
 
       const nep413BorschSchema = {
@@ -109,15 +114,15 @@ export class Auth {
         callbackUrl,
       };
 
-      const nep413BorshPayload = borsh.serialize(
+      const nep413BorshPayload = BorshCodec.serialize(
         nep413BorschSchema,
         nep413BorshParams,
       );
 
-      return StableBytes.concat(
-        StableBinary.writeUint16BE(nep413BorshPayload.length),
+      return BytesCodec.concat(
+        BinaryCodec.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        StableBase64.decode(signature),
+        Base64Codec.decode(signature),
       );
     };
 
@@ -134,19 +139,16 @@ export class Auth {
   }
 
   async currentUser() {
-    if (!this._currentUser) {
-      let humanId = this.idOS.store.get("human-id");
+    const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
 
-      if (!humanId) {
-        humanId = await this.idOS.kwilWrapper.getHumanId();
-        this.idOS.store.set("human-id", humanId);
-      }
-      this._currentUser = {
-        humanId,
-        address: this.idOS.store.get("signer-address"),
-        publicKey: this.idOS.store.get("signer-public-key"),
-      };
-    }
-    return this._currentUser;
+    let [humanId, address, publicKey] =
+      currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
+
+    if (!humanId || !address || !publicKey) {
+      humanId = await this.idOS.kwilWrapper.getHumanId();
+      this.idOS.store.set("human-id", humanId);
+    };
+
+    return { humanId, address, publicKey };
   }
 }

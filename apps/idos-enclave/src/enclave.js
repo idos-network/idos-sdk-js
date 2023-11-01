@@ -1,6 +1,6 @@
 import { Store } from "@idos-network/idos-store";
-import * as StableBase64 from "@stablelib/base64";
-import * as StableUtf8 from "@stablelib/utf8";
+import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 import nacl from "tweetnacl";
 
@@ -9,21 +9,19 @@ export class Enclave {
     this.parentOrigin = parentOrigin;
     this.passwordButton = document.querySelector("button#password");
     this.consentButton = document.querySelector("button#consent");
-    this.store = new Store({
-      initWith: ["human-id", "password", "encryption-public-key", "encryption-private-key", "signer-public-key", "signer-address"]
-    });
+    this.store = new Store();
     this.#listenToRequests();
   }
 
-  async reset(keep) {
-    this.store.reset(keep);
+  reset() {
+    this.store.reset();
   }
 
   async isReady() {
     return !!this.store.get("password");
   }
 
-  async storage(humanId, signerAddress, signerPublicKey) {
+  storage(humanId, signerAddress, signerPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
@@ -40,10 +38,7 @@ export class Enclave {
     await this.ensurePassword();
     await this.ensureKeyPair();
 
-    return {
-      base64: StableBase64.encode(this.keyPair.publicKey),
-      raw: this.keyPair.publicKey,
-    };
+    return this.keyPair.publicKey;
   }
 
   // @todo: add `passwordData.duration`
@@ -56,7 +51,8 @@ export class Enclave {
       this.passwordButton.style.display = "block";
       this.passwordButton.addEventListener("click", async (e) => {
         this.passwordButton.disabled = true;
-        this.store.set("password", (await this.#openDialog("password")).string);
+        const { password, duration } = await this.#openDialog("password");
+        this.store.set("password", password, duration);
         this.ensurePasswordResolver();
       });
 
@@ -67,67 +63,41 @@ export class Enclave {
   }
 
   async ensureKeyPair() {
-    let secretKey = this.store.get("encryption-private-key");
-    secretKey = secretKey && StableBase64.decode(secretKey);
+    const password = this.store.get("password");
+    const salt = this.store.get("human-id");
 
-    if (!secretKey) {
-      const salt = this.store.get("human-id");
-      const password = this.store.get("password");
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
-      secretKey = await idOSKeyDerivation(password, salt);
-
-      this.store.set("encryption-private-key", StableBase64.encode(secretKey));
-    }
+    let secretKey = storeWithCodec.get("encryption-private-key")
+      || await idOSKeyDerivation({ password, salt });
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-    this.store.set("encryption-public-key", StableBase64.encode(this.keyPair.publicKey));
+
+    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
+    storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
-  encrypt(plaintext, receiverPublicKey) {
-    receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
+  encrypt(message, receiverPublicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
-    if (typeof plaintext === "string") {
-      plaintext = StableUtf8.encode(plaintext);
-    }
+    const encrypted =
+      nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
-    const encrypted = nacl.box(
-      plaintext,
-      nonce,
-      receiverPublicKey,
-      this.keyPair.secretKey
-    );
     const fullMessage = new Uint8Array(nonce.length + encrypted.length);
-    fullMessage.set(nonce);
+    fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
 
-    return StableBase64.encode(fullMessage);
+    return fullMessage;
   }
 
-  decrypt(ciphertextBase64, senderPublicKey) {
-    const binarySenderPublicKey = StableBase64.decode(senderPublicKey);
-    let ciphertext;
+  decrypt(fullMessage, senderPublicKey) {
+    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+    const message = fullMessage.slice(nacl.box.nonceLength, ciphertext.length);
 
-    try {
-      ciphertext = StableBase64.decode(ciphertextBase64);
-    } catch (error) {
-      ciphertext = StableUtf8.encode(ciphertextBase64);
-    }
+    const decrypted =
+      nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
-    const nonce = ciphertext.slice(0, nacl.box.nonceLength);
-    const message = ciphertext.slice(nacl.box.nonceLength, ciphertext.length);
-    const decryptedMessage = nacl.box.open(
-      message,
-      nonce,
-      binarySenderPublicKey,
-      this.keyPair.secretKey
-    );
-
-    try {
-      return StableUtf8.decode(decryptedMessage);
-    } catch (e) {
-      return "(decryption failed)";
-    }
+    return decryptedMessage;
   }
 
   async confirm(message) {
@@ -173,11 +143,10 @@ export class Enclave {
           signerAddress,
           senderPublicKey,
           receiverPublicKey,
-          keep,
         } = requestData;
 
         const paramBuilder = {
-          reset: () => [keep],
+          reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
           isReady: () => [],
           keys: () => [],
