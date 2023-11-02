@@ -17,10 +17,6 @@ export class Enclave {
     this.store.reset();
   }
 
-  async isReady() {
-    return !!this.store.get("password");
-  }
-
   storage(humanId, signerAddress, signerPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
@@ -41,11 +37,6 @@ export class Enclave {
     return this.keyPair.publicKey;
   }
 
-  // @todo: add `passwordData.duration`
-  // @fixme
-  // using both storage mediums because different browsers
-  // handle sandboxed cross-origin iframes differently
-  // wrt localstorage and cookies
   async ensurePassword() {
     if (!this.store.get("password")) {
       this.passwordButton.style.display = "block";
@@ -157,7 +148,6 @@ export class Enclave {
         const paramBuilder = {
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
-          isReady: () => [],
           keys: () => [],
           encrypt: () => [message, receiverPublicKey],
           decrypt: () => [fullMessage, senderPublicKey],
