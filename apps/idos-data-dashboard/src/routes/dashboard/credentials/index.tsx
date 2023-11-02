@@ -1,7 +1,7 @@
 import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
-import { DeleteCredential } from "#/routes/dashboard/credentials/components/delete-credential.tsx";
+import { DeleteCredential } from "#/routes/dashboard/credentials/components/delete-credential";
 import {
   AbsoluteCenter,
   Box,
@@ -46,6 +46,11 @@ export function Component() {
     onCredentialViewerOpen();
   };
 
+  const handleCloseCredentialViewer = () => {
+    setCredential(undefined);
+    onCredentialViewerClose();
+  };
+
   const onAddCredential = () => {
     onAddProofOpen();
   };
@@ -53,6 +58,11 @@ export function Component() {
   const handleDeleteCredential = (credential: Credential) => {
     setCredential(credential);
     onCredentialDeleteOpen();
+  };
+
+  const handleDeleteCredentialClose = () => {
+    setCredential(undefined);
+    onCredentialDeleteClose();
   };
 
   return (
@@ -64,12 +74,16 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Credentials</Title>
-            <Text>
-              0
-              <Text as="span" mx={1} hideBelow="xl">
-                Connected Credentials
+            {credentials.isLoading ? (
+              <Spinner size="sm" />
+            ) : (
+              <Text>
+                {credentials.data?.length}
+                <Text as="span" mx={1} hideBelow="xl">
+                  Connected Credentials
+                </Text>
               </Text>
-            </Text>
+            )}
           </TitleBar>
           <Button
             colorScheme="green"
@@ -111,12 +125,12 @@ export function Component() {
           <CredentialViewer
             credential={credential}
             isOpen={isViewCredentialOpen}
-            onClose={onCredentialViewerClose}
+            onClose={handleCloseCredentialViewer}
           />
           <DeleteCredential
             isOpen={isCredentialDeleteOpen}
             credential={credential}
-            onClose={onCredentialDeleteClose}
+            onClose={handleDeleteCredentialClose}
           />
         </>
       ) : null}
