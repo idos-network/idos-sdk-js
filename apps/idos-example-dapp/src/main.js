@@ -188,9 +188,11 @@ const connectWallet = {
     terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
     terminal.table(await credentials, ["issuer", "credential_type", "id"], {
       id: async (id) => {
-        const credential = await idos.data.get("credentials", id);
-        console.log(credential);
-        console.log(credential.content);
+        const credential = idos.data.get("credentials", id);
+        await terminal.detail()
+          .h1("eyes", `Credential ${id}`)
+          .wait("awaiting signature", credential);
+        terminal.detail(await credential);
       },
     });
     cache.set("credentials", await credentials);

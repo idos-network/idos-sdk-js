@@ -2,8 +2,17 @@ export class Terminal {
   constructor(selector, idos) {
     const wrapper = document.querySelector(selector);
 
-    this.elem = wrapper.children.display;
-    this.controls = wrapper.children.controls;
+    this.overviewElem = wrapper.children.overview;
+    this.detailElem = wrapper.querySelector("#detail");
+    this.controlsElem = wrapper.children.controls;
+
+    this.currentElem = this.overviewElem;
+
+    document.querySelector("button#close").addEventListener("click", e => {
+      this.detailElem.parentElement.style.display = "none";
+      this.detailElem.innerHTML = "";
+      this.currentElem = this.overviewElem;
+    });
 
     this.restartButton = wrapper.querySelector("button.restart");
     this.restartButton.addEventListener("click", e => (
@@ -29,7 +38,7 @@ export class Terminal {
   }
 
   log(str) {
-    this.elem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+    this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
 
     return this;
   }
@@ -100,9 +109,21 @@ export class Terminal {
     return this.log(`<span class="status ${className}">${html}</span>`);
   }
 
+  detail(object) {
+    this.detailElem.parentElement.style.display = "block";
+    this.currentElem = this.detailElem;
+
+    if (!object) return this;
+
+    return this.log(typeof object === "object"
+      ? `<pre>${JSON.stringify(object, "", 2)}</pre>`
+      : object
+    );
+  }
+
   async wait(html, promise) {
     this.status("wait", html);
-    this.waitElem = this.elem.lastChild;
+    this.waitElem = this.currentElem.lastChild;
 
     try {
       await promise;
@@ -110,7 +131,7 @@ export class Terminal {
       return promise;
     } catch (e) {
       this.waitElem.classList.add("fail");
-      this.controls.style.display = "block";
+      this.controlsElem.style.display = "block";
       console.warn(e);
       throw new Error("Error in promise");
     }

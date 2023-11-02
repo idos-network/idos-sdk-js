@@ -98,6 +98,7 @@
       }
 
       div#terminal {
+        position: relative;
         display: none;
         padding: 1em;
         background-color: #333;
@@ -106,77 +107,100 @@
         padding: 1em 0.5em
       }
 
-      div#terminal:has(> code#display:not(:empty)) {
+      div#terminal:has(> #overview:not(:empty)) {
         display: block;
       }
 
-      code#display {
+      code#detail-wrapper {
+        display: none;
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 70%;
+        height: calc(100% - 2em);
+        padding: 1em 0.5em;
+        border-left: 1em solid black;
+        background: #333333cc;
+        backdrop-filter: blur(1px);
+      }
+
+      code#detail-wrapper button#close {
+        margin-bottom: 1em;
+      }
+
+      code.display {
         font-size: 1.1em;
         line-height: 1.3em;
         text-wrap: nowrap;
       }
 
-      code#display > * {
+      code.display pre {
+        margin: 0;
+        max-width: 100%;
+        overflow: hidden;
+      }
+
+      .display > * {
         display: block;
       }
 
-      code#display a {
+      code.display a {
         color: #aaf;
         text-decoration: underline dotted;
         cursor: pointer;
       }
 
-      code#display .h1 {
+      code.display .h1 {
         color: #eee;
         font-weight: bold;
       }
 
-      code#display > .h1:not(:first-child) {
+      code.display > .h1:not(:first-child) {
         margin-top: 2em;
       }
 
-      code#display .h1::before {
+      code.display .h1::before {
         content: "*";
         display: inline-flex;
         width: 2em;
         justify-content: center;
       }
 
-      code#display > .h1 + *:not(.status) {
+      code.display > .h1 + *:not(.status) {
         padding-top: 1em;
       }
 
-      code#display > .h1 ~ *:not(.h1, .status) {
+      code.display > .h1 ~ *:not(.h1, .status) {
         margin-left: calc(1em - 1px);
         padding-left: 1em;
         border-left: 1px solid #999;
       }
 
-      code#display .rocket::before {
+      code.display .rocket::before {
         content: "🚀";
       }
 
-      code#display .pleading::before {
+      code.display .pleading::before {
         content: "🥺";
       }
 
-      code#display .eyes::before {
+      code.display .eyes::before {
         content: "👀";
       }
 
-      code#display .next::before {
+      code.display .next::before {
         content: "➜";
       }
 
-      code#display .ask::before{
+      code.display .ask::before{
         content: "🙋";
       }
 
-      code#display .h2 {
+      code.display .h2 {
         padding-top: 1em;
       }
 
-      code#display .h2 > * {
+      code.display .h2 > * {
         display: inline-block;
         color: #eee;
         border-bottom: 1px solid #eee;
@@ -185,7 +209,7 @@
         margin-bottom: 2px;
       }
 
-      code#display .status {
+      code.display .status {
         background: #eee;
         color: #333;
         margin-top: 1em;
@@ -194,12 +218,12 @@
         width: fit-content;
       }
 
-      code#display .status.done {
+      code.display .status.done {
         background: #6e6;
         color: #000;
       }
 
-      code#display .status.done::before {
+      code.display .status.done::before {
         content: "✔️ Done";
         font-weight: bold;
       }
@@ -210,46 +234,46 @@
         }
       }
 
-      code#display .status.wait {
+      code.display .status.wait {
         animation: blinker 1s linear infinite;
       }
 
-      code#display .status.wait::before {
+      code.display .status.wait::before {
         content: "⧖ ";
       }
 
-      code#display .status.fail {
+      code.display .status.fail {
         animation: none;
         background: #e66;
         color: #000;
       }
 
-      code#display .status.fail::before {
+      code.display .status.fail::before {
         content: "✗ ";
       }
 
-      code#display .table {
+      code.display .table {
         display: table;
       }
 
-      code#display .table > .thead {
+      code.display .table > .thead {
         display: table-header-group;
         color: #eee;
       }
 
-      code#display .table > .tbody {
+      code.display .table > .tbody {
         display: table-row-group;
       }
 
-      code#display .table .tr {
+      code.display .table .tr {
         display: table-row;
       }
 
-      code#display .table .td {
+      code.display .table .td {
         display: table-cell;
       }
 
-      code#display .table .tr > .td:not(:first-child)::before {
+      code.display .table .tr > .td:not(:first-child)::before {
         content: "·";
         display: inline-flex;
         justify-content: center;
@@ -257,11 +281,11 @@
         overflow: hidden;
       }
 
-      code#display .table > .thead .tr > .td:not(:first-child)::before {
+      code.display .table > .thead .tr > .td:not(:first-child)::before {
         content: "";
       }
 
-      code#display .table > .thead span {
+      code.display .table > .thead span {
         display: inline-block;
         border-bottom: 1px solid #eee;
         padding-right: 1em;
@@ -269,7 +293,7 @@
         margin-bottom: 2px;
       }
 
-      code#display .table > .thead span::first-letter {
+      code.display .table > .thead span::first-letter {
         text-transform: uppercase;
       }
 
@@ -328,7 +352,11 @@
       </form>
 
       <div id="terminal">
-        <code id="display"></code>
+        <code id="overview" class="display"></code>
+        <code id="detail-wrapper" class="display">
+          <button id="close">Close</button>
+          <div id="detail" class="display"></div>
+        </code>
         <div id="controls">
           <button class="restart">Restart</button>
           <button class="reset-dapp">Reset dapp</button>
