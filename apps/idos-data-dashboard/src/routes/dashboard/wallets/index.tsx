@@ -1,15 +1,34 @@
 import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
-import { AbsoluteCenter, Box, Button, Flex, Spinner, Stack, Text } from "@chakra-ui/react";
-import { Wallet, useFetchWallets } from "./queries";
+import {
+  AbsoluteCenter,
+  Box,
+  Button,
+  Flex,
+  Spinner,
+  Stack,
+  Text,
+  useDisclosure
+} from "@chakra-ui/react";
+import { useState } from "react";
+import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
+import { Wallet, useFetchWallets } from "./queries";
 
 export function Component() {
   const wallets = useFetchWallets();
-  const onDeleteWallet = (wallet: Wallet) => {
-    console.log(wallet);
-  }
+  const [wallet, setWallet] = useState<Wallet | undefined>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleDeleteWalletClose = () => {
+    setWallet(undefined);
+    onClose();
+  };
+  const onDeleteWallet = async (wallet: Wallet) => {
+    setWallet(wallet);
+    onOpen();
+  };
 
   return (
     <Box>
@@ -20,19 +39,23 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Wallets</Title>
-            <Text>
-              0
-              <Text as="span" mx={1} hideBelow="xl">
-                Connected wallets
+            {wallets.isLoading ? (
+              <Spinner size="sm" />
+            ) : (
+              <Text>
+                {wallets.data?.length}
+                <Text as="span" mx={1} hideBelow="xl">
+                  Connected wallet(s)
+                </Text>
               </Text>
-            </Text>
+            )}
           </TitleBar>
           <Button colorScheme="green" hideBelow="lg" size="xl">
             Add wallet
           </Button>
         </Flex>
         <Box>
-        {wallets.isFetching ? (
+          {wallets.isFetching ? (
             <AbsoluteCenter>
               <Spinner />
             </AbsoluteCenter>
@@ -54,6 +77,13 @@ export function Component() {
           ) : null}
         </Box>
       </Stack>
+      {wallet ? (
+        <DeleteWallet
+          isOpen={isOpen}
+          wallet={wallet}
+          onClose={handleDeleteWalletClose}
+        />
+      ) : null}
     </Box>
   );
 }
