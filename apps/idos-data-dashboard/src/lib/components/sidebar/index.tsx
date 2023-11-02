@@ -1,6 +1,9 @@
 import { ComingSoon } from "#/lib/components/coming-soon";
 import { NavLink, type LinkProps } from "#/lib/components/link";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
+import { LogOutIcon } from "lucide-react";
+import { KeyRoundIcon } from "../icons/key-round";
+import { WalletIcon } from "../icons/wallet";
 
 const SidebarLink = ({
   children,
@@ -11,7 +14,7 @@ const SidebarLink = ({
     <Text
       as="span"
       alignItems="center"
-      justifyContent="space-between"
+      gap={2}
       display="flex"
       px={7}
       py={3}
@@ -25,9 +28,9 @@ const SidebarLink = ({
     <NavLink
       display="flex"
       alignItems="center"
-      justifyContent="space-between"
       px={7}
       py={3.5}
+      gap={2}
       bg="neutral.900"
       _hover={{
         bg: "neutral.950"
@@ -54,15 +57,25 @@ export const Sidebar = () => {
       rounded="xl"
     >
       <VStack align="stretch" gap={2}>
-        <SidebarLink to="/">Credentials</SidebarLink>
-        <SidebarLink to="/wallets">Wallets</SidebarLink>
+        <SidebarLink to="/">
+          <KeyRoundIcon w={6} h={6} stroke="neutral.100" />
+          Credentials
+        </SidebarLink>
+        <SidebarLink to="/wallets">
+          <WalletIcon w={6} h={6} stroke="neutral.100" />
+          Wallets
+        </SidebarLink>
         <SidebarLink to="/attributes" disabled>
           Attributes
           <ComingSoon mr={-6} />
         </SidebarLink>
       </VStack>
       <Box mt="auto">
-        <Button colorScheme="green" size="xl">
+        <Button
+          colorScheme="green"
+          leftIcon={<LogOutIcon size={24} />}
+          size="xl"
+        >
           Disconnect Wallet
         </Button>
       </Box>

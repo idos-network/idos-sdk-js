@@ -11,7 +11,9 @@ import {
   Text,
   useDisclosure
 } from "@chakra-ui/react";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 import { Wallet, useFetchWallets } from "./queries";
@@ -21,10 +23,13 @@ export function Component() {
   const [wallet, setWallet] = useState<Wallet | undefined>();
   const { isOpen, onOpen, onClose } = useDisclosure();
 
+  const onAddWallet = () => {};
+
   const handleDeleteWalletClose = () => {
     setWallet(undefined);
     onClose();
   };
+
   const onDeleteWallet = async (wallet: Wallet) => {
     setWallet(wallet);
     onOpen();
@@ -50,7 +55,13 @@ export function Component() {
               </Text>
             )}
           </TitleBar>
-          <Button colorScheme="green" hideBelow="lg" size="xl">
+          <Button
+            colorScheme="green"
+            hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
+            onClick={onAddWallet}
+            size="xl"
+          >
             Add wallet
           </Button>
         </Flex>
@@ -63,7 +74,7 @@ export function Component() {
           {wallets.isSuccess ? (
             <>
               {wallets.data.length === 0 ? (
-                <></>
+                <AddWalletCard onAddWallet={onAddWallet} />
               ) : (
                 wallets.data.map((wallet) => (
                   <WalletCard

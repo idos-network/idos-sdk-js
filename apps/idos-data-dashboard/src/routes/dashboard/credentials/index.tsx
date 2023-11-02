@@ -12,6 +12,7 @@ import {
   Text,
   useDisclosure
 } from "@chakra-ui/react";
+import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { AddCredentialCard } from "./components/add-credential-card";
 import { AddProofOfPersonhood } from "./components/add-proof-of-personhood";
@@ -88,6 +89,7 @@ export function Component() {
           <Button
             colorScheme="green"
             hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
             onClick={onAddCredential}
             size="xl"
           >
