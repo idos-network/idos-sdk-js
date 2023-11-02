@@ -20,10 +20,11 @@ export class Terminal {
     this.resetFullButton = wrapper.querySelector("button.reset-full");
     this.resetFullButton.addEventListener("click", async e => {
       window.localStorage.clear();
-      await idos.reset({ enclave: true, reload: true })
+      await idos.reset({ enclave: true })
       window.location = window.location.origin;
     });
 
+    window.terminalHandlers = {};
     return this;
   }
 
@@ -47,7 +48,7 @@ export class Terminal {
     return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
   
-  table(items = [], keyFilter = []) {
+  table(items = [], keyFilter = [], handlers) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
     const allKeys =
@@ -62,6 +63,9 @@ export class Terminal {
         .replaceAll(/[^a-z0-9]/g, " ")
     );
 
+    const handlerId = crypto.randomUUID();
+    if (handlers) window.terminalHandlers[handlerId] = handlers;
+
     return this.log(`
       <div class="table">
         <div class="thead">
@@ -74,11 +78,16 @@ export class Terminal {
 
         <div class="tbody">
         ${wrappedItems
-          .map(item => keys.map(key => item[key]))
+          .map(item => keys.map(key => [key, item[key]]))
           .reduce((row, values) => row + `
             <div class="tr">
-              ${values.reduce((row, v) => row + `
-                <div class="td">${v}</div>
+              ${values.reduce((row, [key, value]) => row + `
+                <div class="td">
+                  ${handlers?.[key]
+                    ? `<a onclick="terminalHandlers['${handlerId}']['${key}']('${value}')">${value}</a>`
+                    : value
+                  }
+                </div>
               `, "")}
             </div>
           `, "")}

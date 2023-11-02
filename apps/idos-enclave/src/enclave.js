@@ -78,6 +78,7 @@ export class Enclave {
   }
 
   encrypt(message, receiverPublicKey) {
+    receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
     const encrypted =
@@ -92,12 +93,12 @@ export class Enclave {
 
   decrypt(fullMessage, senderPublicKey) {
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-    const message = fullMessage.slice(nacl.box.nonceLength, ciphertext.length);
+    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 
     const decrypted =
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
-    return decryptedMessage;
+    return decrypted;
   }
 
   async confirm(message) {
@@ -139,6 +140,7 @@ export class Enclave {
         const {
           humanId,
           message,
+          fullMessage,
           signerPublicKey,
           signerAddress,
           senderPublicKey,
@@ -151,7 +153,7 @@ export class Enclave {
           isReady: () => [],
           keys: () => [],
           encrypt: () => [message, receiverPublicKey],
-          decrypt: () => [message, senderPublicKey],
+          decrypt: () => [fullMessage, senderPublicKey],
           confirm: () => [message],
         }[requestName];
 

@@ -1,4 +1,5 @@
 import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
 
 export class Data {
   constructor(idOS) {
@@ -15,8 +16,8 @@ export class Data {
       for (const record of records) {
         record.value = Utf8Codec.decode(
           await this.idOS.crypto.decrypt(
-            record.value,
-            this.idOS.crypto.publicKeys.encryption,
+            Base64Codec.decode(record.value),
+            this.idOS.crypto.publicKey,
           ),
         );
       }
@@ -31,7 +32,7 @@ export class Data {
 
   async create(tableName, record, receiverPublicKey) {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKeys.encryption;
+    receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKey;
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;
     const actionFromSchema = schema.data.actions.find((action) => action.name === name);
@@ -42,10 +43,12 @@ export class Data {
     }
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
-        await this.idOS.crypto.encrypt(record.content),
+        Utf8Codec.decode(
+          await this.idOS.crypto.encrypt(record.content),
+        ),
       );
       record.encryption_public_key = Base64Codec.encode(
-        this.idOS.crypto.publicKeys.encryption,
+        this.idOS.crypto.publicKey,
       );
     }
     if (tableName === "attributes") {
@@ -64,21 +67,23 @@ export class Data {
 
   async get(tableName, recordId) {
     if (tableName === "credentials") {
-      let [record] = await this.idOS.kwilWrapper.call(
+      let records = await this.idOS.kwilWrapper.call(
         `get_credential_owned`,
         { id: recordId },
         `Get your credential in idOS`
       );
+      let record = records.find(r => r.id === recordId);
       record.content = Utf8Codec.decode(
         await this.idOS.crypto.decrypt(
-          record.content,
+          Base64Codec.decode(record.content),
           Base64Codec.decode(record.encryption_public_key),
-        )
+        ),
       );
       return record;
     }
     let records = await this.list(tableName, { id: recordId });
-    return records[0];
+    let record = records.find(r => r.id === recordId);
+    return record;
   }
 
   async delete(tableName, recordId) {
@@ -90,12 +95,16 @@ export class Data {
   async update(tableName, record) {
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
-        await this.idOS.crypto.encrypt(record.content),
+        Utf8Codec.decode(
+          await this.idOS.crypto.encrypt(record.content),
+        ),
       );
     }
 
     if (tableName === "attributes") {
-      record.value = await this.idOS.crypto.encrypt(record.value);
+      record.value = Base64Codec.encode(
+        await this.idOS.crypto.encrypt(record.value),
+      );
     }
 
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
@@ -110,7 +119,13 @@ export class Data {
 
     if (tableName === "credentials") {
       const content = record.content;
-      record.content = await this.idOS.crypto.encrypt(content, Base64Codec.decode(receiverPublicKey));
+      record.content = Base64Codec.encode(
+        Utf8Codec.decode(
+          await this.idOS.crypto.encrypt(
+            Base64Codec.decode(content),
+            Base64Codec.decode(receiverPublicKey)),
+        ),
+      );
       record.encryption_public_key = receiverPublicKey;
     }
 

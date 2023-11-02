@@ -15,7 +15,7 @@ export class idOS {
 
   static verifiableCredentials = verifiableCredentials;
 
-  constructor({ kwilProvider, container }) {
+  constructor({ nodeUrl, dbId, container }) {
     if (!this.constructor.initializing) {
       throw new Error("Usage: `idOS.init(options)`");
     }
@@ -24,14 +24,14 @@ export class idOS {
     this.crypto = new Crypto(this);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container);
-    this.kwilWrapper = new KwilWrapper({ kwilProvider });
+    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this);
     this.store = new Store();
   }
 
-  static async init({ nodeUrl, container }) {
+  static async init({ nodeUrl, dbId, container }) {
     this.initializing = true;
-    const idos = new this({ kwilProvider: nodeUrl, container });
+    const idos = new this({ nodeUrl, dbId, container });
     await idos.enclave.loadProvider();
 
     return idos;
@@ -39,12 +39,17 @@ export class idOS {
 
   async setSigner(type, signer) {
     if (type === "NEAR") {
-      return this.auth.setNearSigner(signer);
+      const { accountId } = await this.auth.setNearSigner(signer);
+      await this.grants.init({ type, accountId, signer });
     } else if (type === "EVM") {
-      return this.auth.setEvmSigner(signer);
+      await this.auth.setEvmSigner(signer);
+      await this.grants.init({ type, signer });
     } else {
       throw("Signer type not recognized");
     }
+
+    await this.crypto.init();
+    return this.auth.currentUser();
   }
 
   async reset({ enclave = false } = {}) {
