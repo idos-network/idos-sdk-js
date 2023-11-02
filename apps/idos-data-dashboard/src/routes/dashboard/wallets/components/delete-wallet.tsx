@@ -1,3 +1,4 @@
+import { WalletIcon } from "#/lib/components/icons/wallet";
 import {
   Box,
   Button,
@@ -14,7 +15,6 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { WalletIcon } from "lucide-react";
 import { useDeleteWallet } from "../mutations";
 import { Wallet, useFetchWallets } from "../queries";
 
@@ -64,7 +64,7 @@ export const DeleteWallet = (props: DeleteCredentialProps) => {
               rounded="xl"
             >
               <Box>
-                <WalletIcon size={26} color="#00ffb9" />
+                <WalletIcon w={46} h={27} stroke="#00ffb9" fill="transparent" />
               </Box>
               <VStack align="start" gap={2}>
                 <Heading color="neutral.600" fontWeight="medium" size="sm">

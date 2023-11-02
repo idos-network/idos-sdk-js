@@ -1,8 +1,9 @@
 import { ComingSoon } from "#/lib/components/coming-soon";
 import { NavLink, type LinkProps } from "#/lib/components/link";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
-import { LogOutIcon } from "lucide-react";
+import { AttributeIcon } from "../icons/attribute";
 import { KeyRoundIcon } from "../icons/key-round";
+import { SignOutIcon } from "../icons/sign-out";
 import { WalletIcon } from "../icons/wallet";
 
 const SidebarLink = ({
@@ -14,7 +15,7 @@ const SidebarLink = ({
     <Text
       as="span"
       alignItems="center"
-      gap={2}
+      gap={4}
       display="flex"
       px={7}
       py={3}
@@ -30,7 +31,7 @@ const SidebarLink = ({
       alignItems="center"
       px={7}
       py={3.5}
-      gap={2}
+      gap={4}
       bg="neutral.900"
       _hover={{
         bg: "neutral.950"
@@ -66,6 +67,7 @@ export const Sidebar = () => {
           Wallets
         </SidebarLink>
         <SidebarLink to="/attributes" disabled>
+          <AttributeIcon w={6} h={6} stroke="neutral.600" />
           Attributes
           <ComingSoon mr={-6} />
         </SidebarLink>
@@ -73,7 +75,7 @@ export const Sidebar = () => {
       <Box mt="auto">
         <Button
           colorScheme="green"
-          leftIcon={<LogOutIcon size={24} />}
+          leftIcon={<SignOutIcon w={6} h={6} stroke="neutral.600" strokeWidth={1.5}  fill="none" />}
           size="xl"
         >
           Disconnect Wallet

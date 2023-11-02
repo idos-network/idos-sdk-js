@@ -86,15 +86,17 @@ export function Component() {
               </Text>
             )}
           </TitleBar>
-          <Button
-            colorScheme="green"
-            hideBelow="lg"
-            leftIcon={<PlusIcon size={24} />}
-            onClick={onAddCredential}
-            size="xl"
-          >
-            Add credential
-          </Button>
+          {credentials.data?.length === 0 ? (
+            <Button
+              colorScheme="green"
+              hideBelow="lg"
+              leftIcon={<PlusIcon size={24} />}
+              onClick={onAddCredential}
+              size="xl"
+            >
+              Add credential
+            </Button>
+          ) : null}
         </Flex>
 
         <Box>
