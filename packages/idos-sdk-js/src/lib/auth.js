@@ -12,14 +12,20 @@ export class Auth {
   }
 
   async setEvmSigner(signer) {
+    const storedAddress = this.idOS.store.get("signer-address", signer.address);
+    const currentAddress = signer.address;
+
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (!publicKey || publicKey.startsWith("ed25519")) {
+    if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
+      this.idOS.store.reset();
+      await this.idOS.enclave.reset();
       const message = "idOS authentication";
       publicKey = SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
-      this.idOS.store.set("signer-public-key", publicKey);
-      this.idOS.store.set("signer-address", signer.address);
     }
+
+    this.idOS.store.set("signer-public-key", publicKey);
+    this.idOS.store.set("signer-address", currentAddress);
 
     return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
@@ -64,9 +70,14 @@ export class Auth {
       };
     }
 
+    const storedAddress = this.idOS.store.get("signer-address");
+    const currentAddress = (await wallet.getAccounts())[0].accountId;
+
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (!publicKey || !publicKey?.startsWith("ed25519")) {
+    if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
+      this.idOS.store.reset();
+      await this.idOS.enclave.reset();
       const message = "idOS authentication";
       const nonce = Buffer.from(this.idOS.crypto.Nonce.random(32));
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
@@ -74,8 +85,7 @@ export class Auth {
       this.idOS.store.set("signer-public-key", publicKey);
     }
 
-    const accountId = (await wallet.getAccounts())[0].accountId;
-    this.idOS.store.set("signer-address", accountId);
+    this.idOS.store.set("signer-address", currentAddress);
 
     const signer = async (message) => {
       message = Utf8Codec.decode(message);
@@ -122,7 +132,7 @@ export class Auth {
       );
     };
 
-    return this.#setSigner({ accountId, signer, publicKey, signatureType: "nep413" });
+    return this.#setSigner({ accountId: currentAddress, signer, publicKey, signatureType: "nep413" });
   }
 
   #setSigner(args) {
