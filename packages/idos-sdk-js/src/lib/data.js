@@ -43,9 +43,7 @@ export class Data {
     }
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
-        Utf8Codec.decode(
-          await this.idOS.crypto.encrypt(record.content),
-        ),
+        await this.idOS.crypto.encrypt(record.content),
       );
       record.encryption_public_key = Base64Codec.encode(
         this.idOS.crypto.publicKey,
@@ -95,9 +93,7 @@ export class Data {
   async update(tableName, record) {
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
-        Utf8Codec.decode(
-          await this.idOS.crypto.encrypt(record.content),
-        ),
+        await this.idOS.crypto.encrypt(record.content),
       );
     }
 
@@ -120,10 +116,9 @@ export class Data {
     if (tableName === "credentials") {
       const content = record.content;
       record.content = Base64Codec.encode(
-        Utf8Codec.decode(
-          await this.idOS.crypto.encrypt(
-            Base64Codec.decode(content),
-            Base64Codec.decode(receiverPublicKey)),
+        await this.idOS.crypto.encrypt(
+          Base64Codec.decode(content),
+          Base64Codec.decode(receiverPublicKey),
         ),
       );
       record.encryption_public_key = receiverPublicKey;
