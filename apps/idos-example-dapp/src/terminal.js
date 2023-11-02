@@ -20,7 +20,7 @@ export class Terminal {
     this.resetFullButton = wrapper.querySelector("button.reset-full");
     this.resetFullButton.addEventListener("click", async e => {
       window.localStorage.clear();
-      await idos.reset({ enclave: true, reload: true })
+      await idos.reset({ enclave: true })
       window.location = window.location.origin;
     });
 
