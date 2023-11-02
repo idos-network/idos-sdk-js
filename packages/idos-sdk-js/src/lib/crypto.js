@@ -1,6 +1,5 @@
 import * as Utf8Codec from "@stablelib/utf8";
 
-
 class Nonce {
   static random (length = 32, { bitCap = 8 } = {}) {
     const identity = _ => _;
