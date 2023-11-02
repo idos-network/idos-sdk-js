@@ -10,6 +10,11 @@ export class Enclave {
     this.passwordButton = document.querySelector("button#password");
     this.consentButton = document.querySelector("button#consent");
     this.store = new Store();
+
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    let secretKey = storeWithCodec.get("encryption-private-key")
+    if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
     this.#listenToRequests();
   }
 

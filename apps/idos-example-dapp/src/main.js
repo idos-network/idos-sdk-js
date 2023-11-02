@@ -192,7 +192,17 @@ const connectWallet = {
         await terminal.detail()
           .h1("eyes", `Credential ${id}`)
           .wait("awaiting signature", credential);
-        terminal.detail(await credential);
+        terminal.h2("Verification");
+        await terminal
+          .wait(
+            "verifying credential...",
+            idOS.verifiableCredentials.verify((await credential).content),
+          )
+          .then(_ => terminal.log("✅ Verified"))
+          .catch(error => terminal.br().log(error));
+        terminal
+          .h2("Content")
+          .detail(JSON.parse((await credential).content));
       },
     });
     cache.set("credentials", await credentials);

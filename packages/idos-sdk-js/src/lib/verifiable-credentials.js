@@ -1,11 +1,11 @@
-import { Ed25519Signature2020 } from '@digitalbazaar/ed25519-signature-2020';
-import { Ed25519VerificationKey2020 } from '@digitalbazaar/ed25519-verification-key-2020';
-import * as vc from '@digitalbazaar/vc';
-import * as jsonld from 'jsonld';
+import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
+import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
+import * as vc from "@digitalbazaar/vc";
+import * as jsonld from "jsonld";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
 
-const FRACTAL_ISSUER = 'https://vc-issuers.fractal.id/idos';
-const FRACTAL_PUBLIC_KEY_MULTIBASE = "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2";
+const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
+const FRACTAL_PUBLIC_KEY_MULTIBASE = import.meta.env.VITE_FRACTAL_ID_ISSUER_CREDENTIAL_PUBLIC_KEY_MULTIBASE;
 
 const issuerDoc = (id, publicKeyMultibase) => ({
   "@context": [
@@ -89,6 +89,10 @@ const verify = async (credential, options = {}) => {
 
   documentLoader = documentLoaderWithStaticFractal(documentLoader)
 
+  if(typeof credential === "string" || credential instanceof String) {
+    credential = JSON.parse(credential);
+  }
+
   const proof = credential.proof;
   if(!proof) throw new Error("This function is only supports embedded proofs.")
 
@@ -111,7 +115,7 @@ const verify = async (credential, options = {}) => {
   })();
 
   const result = await vc.verifyCredential({ credential, suite, documentLoader });
-  if(!result.verified) throw result.results[0].error;
+  if(!result.verified) throw result?.results?.[0]?.error || result;
   return true;
 }
 

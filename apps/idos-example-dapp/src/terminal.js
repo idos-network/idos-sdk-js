@@ -133,7 +133,7 @@ export class Terminal {
       this.waitElem.classList.add("fail");
       this.controlsElem.style.display = "block";
       console.warn(e);
-      throw new Error("Error in promise");
+      throw e;
     }
   }
 
