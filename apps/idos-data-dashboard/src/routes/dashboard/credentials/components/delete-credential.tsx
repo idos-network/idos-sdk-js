@@ -63,7 +63,7 @@ export const DeleteCredential = (props: DeleteCredentialProps) => {
               <Box>
                 <KeyIcon size={26} color="#00ffb9" />
               </Box>
-              <VStack align="start" gap={4}>
+              <VStack align="start" gap={2}>
                 <Heading color="neutral.600" fontWeight="medium" size="sm">
                   Type
                 </Heading>
