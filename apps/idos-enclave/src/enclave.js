@@ -102,7 +102,7 @@ export class Enclave {
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
 
-    if (encrypted == null) {
+    if (decrypted == null) {
       throw Error(`Couldn't decrypt. ${JSON.stringify({
         fullMessage: Base64Codec.encode(fullMessage),
         message: Base64Codec.encode(message),
