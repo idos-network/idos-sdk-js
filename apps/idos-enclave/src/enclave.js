@@ -79,6 +79,14 @@ export class Enclave {
     const encrypted =
       nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
+    if (encrypted == null)
+      throw Error(`Couldn't encrypt. ${JSON.stringify({
+        message: Base64Codec.encode(message),
+        nonce: Base64Codec.encode(nonce),
+        senderPublicKey: Base64Codec.encode(senderPublicKey),
+        localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
+      }, null, 2)}`);
+
     const fullMessage = new Uint8Array(nonce.length + encrypted.length);
     fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
@@ -92,6 +100,17 @@ export class Enclave {
 
     const decrypted =
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
+
+
+    if (encrypted == null) {
+      throw Error(`Couldn't decrypt. ${JSON.stringify({
+        fullMessage: Base64Codec.encode(fullMessage),
+        message: Base64Codec.encode(message),
+        nonce: Base64Codec.encode(nonce),
+        senderPublicKey: Base64Codec.encode(senderPublicKey),
+        localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
+      }, null, 2)}`);
+    }
 
     return decrypted;
   }
