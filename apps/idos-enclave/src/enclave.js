@@ -51,9 +51,13 @@ export class Enclave {
       this.passwordButton.style.display = "block";
       this.passwordButton.addEventListener("click", async (e) => {
         this.passwordButton.disabled = true;
-        const { password, duration } = await this.#openDialog("password");
-        this.store.set("password", password, duration);
-        this.ensurePasswordResolver();
+        try {
+          const { password, duration } = await this.#openDialog("password");
+          this.store.set("password", password, duration);
+          this.ensurePasswordResolver();
+        } catch (e) {
+          this.passwordButton.disabled = false;
+        }
       });
 
       return await new Promise((resolve) => this.ensurePasswordResolver = resolve);
@@ -105,22 +109,25 @@ export class Enclave {
     this.consentButton.style.display = "block";
     this.consentButton.addEventListener("click", async (e) => {
       this.consentButton.disabled = true;
-      this.ensureConsentResolver();
+
+      try {
+        const { consent } = await this.#openDialog(
+          "consent",
+          `
+          <strong>Consent request</strong>
+          <p><small>from ${this.parentOrigin}</small></p>
+          <hr>
+          <p><code>${message}</code></p>
+        `
+        );
+
+        this.ensureConsentResolver(consent);
+      } catch (e) {
+        this.consentButton.disabled = false;
+      }
     });
 
-    await new Promise((resolve) => this.ensureConsentResolver = resolve);
-
-    const { consent } = await this.#openDialog(
-      "consent",
-      `
-      <strong>Consent request</strong>
-      <p><small>from ${this.parentOrigin}</small></p>
-      <hr>
-      <p><code>${message}</code></p>
-    `
-    );
-
-    return consent;
+    return await new Promise((resolve) => this.ensureConsentResolver = resolve);
   }
 
   messageParent(message) {
@@ -181,11 +188,11 @@ export class Enclave {
     const popupConfig = Object.entries({
       popup: 1,
       top: 0,
-      left: left,
-      width: width,
-      height: 350
+      left,
+      width,
+      height: 350,
     })
-      .map((feat) => feat.join("="))
+      .map(feat => feat.join("="))
       .join(",");
 
     const dialogURL = new URL("/dialog.html", window.location.origin);
