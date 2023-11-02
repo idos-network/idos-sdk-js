@@ -2,10 +2,11 @@ import * as nearAPI from "near-api-js";
 
 export class NearGrants {
   #contract;
-  #wallet;
+  #signer;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
   static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+  static defaultRpcUrl = import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL;
   static contractMethods = {
     list: "find_grants",
     create: "insert_grant",
@@ -14,9 +15,9 @@ export class NearGrants {
 
   constructor() {}
 
-  async init({ accountId, wallet, contractId }) {
-    this.#wallet = wallet;
-    await this.#connectContract(accountId, contractId);
+  async init({ accountId, signer }) {
+    this.#signer = signer;
+    return this.#connectContract(accountId);
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
@@ -43,7 +44,7 @@ export class NearGrants {
     Object.entries({ grantee, data_id, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
     try {
-      transactionResult = await this.#wallet.signAndSendTransaction({
+      transactionResult = await this.#signer.signAndSendTransaction({
         actions: [
           {
             type: "FunctionCall",
@@ -67,7 +68,7 @@ export class NearGrants {
     let transactionResult;
 
     try {
-      transactionResult = await this.#wallet.signAndSendTransaction({
+      transactionResult = await this.#signer.signAndSendTransaction({
         actions: [
           {
             type: "FunctionCall",
@@ -87,19 +88,20 @@ export class NearGrants {
     return { transactionId: transactionResult.transaction.hash };
   }
 
-  async #connectContract(accountId, contractId) {
-    contractId = contractId || this.constructor.defaultContractId;
-
+  async #connectContract(accountId) {
     const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
     const nearConnection = await nearAPI.connect({
       networkId: this.constructor.defaultNetwork,
       keyStore: keyStore,
-      nodeUrl: "https://rpc.testnet.near.org",
+      nodeUrl: this.constructor.defaultRpcUrl,
     });
 
     const account = await nearConnection.account(accountId);
-    this.#contract = new nearAPI.Contract(account, contractId, {
-      viewMethods: [this.constructor.contractMethods.list],
-    });
+    this.#contract = new nearAPI.Contract(
+      account,
+      this.constructor.defaultContractId, {
+        viewMethods: [this.constructor.contractMethods.list],
+      },
+    );
   }
 }

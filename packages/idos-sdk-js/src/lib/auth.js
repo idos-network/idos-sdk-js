@@ -8,6 +8,7 @@ import { SigningKey, hashMessage } from "ethers";
 export class Auth {
   constructor(idOS) {
     this.idOS = idOS;
+    this.user = {};
   }
 
   async setEvmSigner(signer) {
@@ -20,12 +21,7 @@ export class Auth {
       this.idOS.store.set("signer-address", signer.address);
     }
 
-    this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
-
-    await this.idOS.crypto.init();
-    await this.idOS.grants.init({ signer, type: "evm" });
-
-    return await this.currentUser();
+    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
@@ -126,29 +122,26 @@ export class Auth {
       );
     };
 
-    this.#setSigner({ signer, publicKey, signatureType: "nep413" });
-
-    await this.idOS.crypto.init();
-    await this.idOS.grants.init({ type: "near", accountId, wallet });
-
-    return await this.currentUser();
+    return this.#setSigner({ accountId, signer, publicKey, signatureType: "nep413" });
   }
 
-  #setSigner(...args) {
-    this.idOS.kwilWrapper.setSigner(...args);
+  #setSigner(args) {
+    this.idOS.kwilWrapper.setSigner(args);
+    return args;
   }
 
   async currentUser() {
-    const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
+    if (this.user.humanId !== null) {
+      const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
+      let [humanId, address, publicKey] =
+        currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
 
-    let [humanId, address, publicKey] =
-      currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
+      humanId = humanId || await this.idOS.kwilWrapper.getHumanId();
 
-    if (!humanId || !address || !publicKey) {
-      humanId = await this.idOS.kwilWrapper.getHumanId();
+      this.user = { humanId, address, publicKey };
       this.idOS.store.set("human-id", humanId);
-    };
+    }
 
-    return { humanId, address, publicKey };
+    return this.user;
   }
 }

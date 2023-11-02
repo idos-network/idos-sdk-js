@@ -46,7 +46,7 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   decrypt(message, senderPublicKey) {
-    return this.#requestToEnclave({ decrypt: { message, senderPublicKey } });
+    return this.#requestToEnclave({ decrypt: { fullMessage: message, senderPublicKey } });
   }
 
   async #loadEnclave() {

@@ -32,21 +32,24 @@ export class Crypto {
 
     const { humanId } = await this.idOS.auth.currentUser();
 
-    return this.provider.init(humanId, signerAddress, signerPublicKey);
+    if (!humanId) return;
+
+    this.publicKey = this.provider.init(humanId, signerAddress, signerPublicKey);
+
+    return this.publicKey;
   }
+
 
   async encrypt(message, receiverPublicKey) {
     [ message, receiverPublicKey ] = [message, receiverPublicKey]
-      .filter(arg => typeof arg === "string" || arg instanceof string)
-      .map(Utf8codec.encode);
+      .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
 
     return this.provider.encrypt(message, receiverPublicKey);
   }
 
   async decrypt(message, senderPublicKey) {
     [ message, senderPublicKey ] = [message, senderPublicKey]
-      .filter(arg => typeof arg === "string" || arg instanceof string)
-      .map(Utf8codec.encode);
+      .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
 
     return this.provider.decrypt(message, senderPublicKey);
   }

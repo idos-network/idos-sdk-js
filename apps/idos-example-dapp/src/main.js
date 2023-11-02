@@ -27,18 +27,13 @@ const idos = await idOS.init({ container: "#idos-container" });
  */
 const terminal = new Terminal("#terminal", idos);
 const cache = new Cache();
-document.querySelector("button#reset").addEventListener("click", async e => {
-  await idos.reset({ enclave: true });
-  window.localStorage.clear();
-  window.location = window.location.origin;
-});
-
 
 /*
  * Example wallet connection options
  *
  */
 let chosenWallet = window.localStorage.getItem("chosen-wallet");
+let chosenFlow = JSON.parse(window.localStorage.getItem("chosen-flow")) || {};
 
 if (!chosenWallet) {
   await new Promise((resolve) => {
@@ -50,6 +45,11 @@ if (!chosenWallet) {
 
       chosenWallet = e.submitter.name;
       window.localStorage.setItem("chosen-wallet", chosenWallet);
+
+      [...e.target.querySelectorAll("input[type=checkbox]")]
+        .forEach(({ name, checked }) => chosenFlow[name] = checked)
+      window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
+
       resolve();
     });
   });
@@ -143,19 +143,21 @@ const connectWallet = {
    *
    */
 
-  let consent = cache.get("consent");
-  await new Promise(resolve => setTimeout(resolve, consent ? 0 : 250));
-  consent = await terminal
-    .h1("ask", "Consent request")
-    .log("(optional) you can use our SDK as consent UI")
-    .wait(
-      "awaiting consent",
-      consent || idos.crypto.confirm("Do we have your consent to read data from the idOS?"),
-    );
-  terminal.h2("Consent").log(consent);
-  cache.set("consent", consent);
+  if (chosenFlow.consent) {
+    let consent = cache.get("consent");
+    await new Promise(resolve => setTimeout(resolve, consent ? 0 : 250));
+    consent = await terminal
+      .h1("ask", "Consent request")
+      .log("(optional) you can use our SDK as consent UI")
+      .wait(
+        "awaiting consent",
+        consent || idos.crypto.confirm("Do we have your consent to read data from the idOS?"),
+      );
+    terminal.h2("Consent").log(consent);
+    cache.set("consent", consent);
 
-  if (!consent) return terminal.done();
+    if (!consent) return terminal.done();
+  }
 
 
   /*
@@ -166,20 +168,40 @@ const connectWallet = {
   // or just use the console:
   // console.log(await idos.data.list("wallets"));
 
-  const wallets = cache.get("wallets") || idos.data.list("wallets");
-  terminal.h1("eyes", "Your wallets").wait("awaiting signature", wallets);
-  terminal.table(await wallets, ["address", "public_key"]);
-  cache.set("wallets", await wallets);
+  if (chosenFlow.wallets) {
+    const wallets = cache.get("wallets") || idos.data.list("wallets");
+    terminal.h1("eyes", "Your wallets").wait("awaiting signature", wallets);
+    terminal.table(await wallets, ["address", "public_key"], {
+      address: (address) => {
+        if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
+          window.open(`https://zapper.xyz/account/${address}`);
+        } else if (address.match(/^\w+\.(near|testnet)$/i)) {
+          window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
+        }
+      }
+    });
+    cache.set("wallets", await wallets);
+  }
 
-  const credentials = cache.get("credentials") || idos.data.list("credentials");
-  terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
-  terminal.table(await credentials, ["issuer", "credential_type"]);
-  cache.set("credentials", await credentials);
+  if (chosenFlow.credentials) {
+    const credentials = cache.get("credentials") || idos.data.list("credentials");
+    terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
+    terminal.table(await credentials, ["issuer", "credential_type", "id"], {
+      id: async (id) => {
+        const credential = await idos.data.get("credentials", id);
+        console.log(credential);
+        console.log(credential.content);
+      },
+    });
+    cache.set("credentials", await credentials);
+  }
 
-  const grants = cache.get("grants") || idos.grants.list({ owner: address });
-  terminal.h1("eyes", "Your grants").wait("awaiting RPC", grants);
-  terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
-  cache.set("grants", await grants);
+  if (chosenFlow.grants) {
+    const grants = cache.get("grants") || idos.grants.list({ owner: address });
+    terminal.h1("eyes", "Your grants").wait("awaiting RPC", grants);
+    terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
+    cache.set("grants", await grants);
+  }
 
   terminal.done();
 })();

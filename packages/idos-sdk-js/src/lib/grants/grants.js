@@ -13,18 +13,18 @@ export class Grants {
     this.idOS = idOS;
   }
 
-  async init({ accountId, signer, type, wallet }) {
+  async init({ accountId, signer, type }) {
     this.type = type;
 
-    if (type === "evm") {
+    if (type === "EVM") {
       this.#child = new EvmGrants();
     }
 
-    if (type === "near") {
+    if (type === "NEAR") {
       this.#child = new NearGrants();
     }
 
-    await this.#child.init({ accountId, signer, wallet });
+    await this.#child.init({ accountId, signer });
   }
 
   async list(args) {

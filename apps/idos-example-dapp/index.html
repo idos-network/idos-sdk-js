@@ -33,12 +33,6 @@
         cursor: pointer;
       }
 
-      button#reset {
-        position: absolute;
-        top: 1em;
-        right: 1em;
-      }
-
       ul.intro {
         padding-left: 1em;
       }
@@ -128,6 +122,8 @@
 
       code#display a {
         color: #aaf;
+        text-decoration: underline dotted;
+        cursor: pointer;
       }
 
       code#display .h1 {
@@ -315,9 +311,20 @@
       <hr />
 
       <form id="wallet-chooser">
-        <h2>Connect your wallet to start</h2>
-        <button type="submit" name="EVM">EVM (e.g. MetaMask)</button>
-        <button type="submit" name="NEAR">NEAR (e.g. Meteor)</button>
+        <h2>Connect wallet</h2>
+        <button type="submit" name="EVM">EVM</button>
+        <button type="submit" name="NEAR">NEAR</button>
+        <p>
+          <strong>Show:</strong>
+          <br>
+          <label><input type="checkbox" checked="checked" name="wallets" />Wallets</label>
+          <br>
+          <label><input type="checkbox" name="consent" />Consent</label>
+          <br>
+          <label><input type="checkbox" name="credentials" />Credentials</label>
+          <br>
+          <label><input type="checkbox" name="grants" />Grants</label>
+        </p>
       </form>
 
       <div id="terminal">
@@ -325,7 +332,7 @@
         <div id="controls">
           <button class="restart">Restart</button>
           <button class="reset-dapp">Reset dapp</button>
-          <button class="reset-full">Full reset</button>
+          <button class="reset-full">Reset dapp + enclave</button>
         </div>
       </div>
 
@@ -334,8 +341,6 @@
         <div id="idos-container"></div>
         <span><span>place and style it however you like</span></span>
       </div>
-
-      <button id="reset">Full reset</button>
     </div>
     <script type="module" src="/src/main.js"></script>
   </body>
