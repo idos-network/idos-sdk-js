@@ -67,9 +67,9 @@ export class IframeEnclave extends EnclaveProvider {
       .map((pair) => pair.join(": "))
       .join("; ");
 
-    this.iframe.addEventListener("load", () => this.iframeLoaded());
+    const ready = new Promise((resolve) => this.iframe.addEventListener("load", resolve));
     document.querySelector(this.container).appendChild(this.iframe);
-    return new Promise((resolve) => (this.iframeLoaded = resolve));
+    return ready;
   }
 
   #showEnclave() {
