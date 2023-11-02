@@ -46,6 +46,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                         {
                           index: true,
                           lazy: () => import("#/routes/dashboard/credentials")
+                        },
+                        {
+                          path: '/wallets',
+                          lazy: () => import("#/routes/dashboard/wallets")
                         }
                       ]
                     }
