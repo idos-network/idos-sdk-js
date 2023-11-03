@@ -26,7 +26,7 @@ export function Component() {
               src={idOSDashboardLogo}
             />
           </Flex>
-          <ConnectedWallet address="0x1234567890" />
+          <ConnectedWallet />
           <Sidebar />
         </Flex>
       </Flex>

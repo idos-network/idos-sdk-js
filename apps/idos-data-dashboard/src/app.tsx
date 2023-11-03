@@ -1,4 +1,3 @@
-import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
@@ -10,6 +9,7 @@ import { Outlet } from "react-router-dom";
 import { ConnectWallet } from "#/connect-wallet.tsx";
 import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
 import { idOS } from "#/lib/idos";
+import { Center, Spinner } from "@chakra-ui/react";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
@@ -20,13 +20,13 @@ const setUpNearWallet = async () => {
   const selector = await setupNearWalletSelector();
 
   if (!selector.isSignedIn()) {
-    await new Promise((resolve) => {
+    await new Promise<void>((resolve) => {
       const modal = setupModal(selector, {
         contractId: idOSSDK.near.defaultContractId,
         methodNames: idOSSDK.near.contractMethods
       });
       modal.on("onHide", () => {
-        setTimeout(resolve, 100);
+        resolve();
       });
       modal.show();
     });
@@ -62,7 +62,6 @@ export default function App() {
       await idOS.setSigner("NEAR", signer);
       setIsConnected(true);
       setIsLoading(false);
-      console.log(isLoading);
     } catch (error) {
       console.error(error);
       setIsLoading(false);
@@ -75,7 +74,7 @@ export default function App() {
       (async () => {
         if (metamask.status === "connected") {
           const signer = await setupEvmWallet();
-          await idOS.setSigner("EVM", signer);
+          idOS.setSigner("EVM", signer);
           setIsConnected(true);
           setIsLoading(false);
         }
@@ -83,14 +82,15 @@ export default function App() {
         const selector = await setupNearWalletSelector();
         if (selector.isSignedIn()) {
           const signer = await setUpNearWallet();
-          await idOS.setSigner("NEAR", signer);
+          idOS.setSigner("NEAR", signer);
           setIsConnected(true);
           setIsLoading(false);
         }
+        setIsConnected(true);
         setIsLoading(false);
       })();
     }
-  }, []);
+  });
 
   if (isLoading) {
     return (
