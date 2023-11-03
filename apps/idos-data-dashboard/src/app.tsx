@@ -100,7 +100,7 @@ export default function App() {
         bg={`url('/cubes.png') center center no-repeat`}
         bgSize="cover"
       >
-        <Center gap={2} p={5} bg="neutral.800" rounded="lg">
+        <Center gap={2} p={5} bg="blackAlpha.700" rounded="lg">
           <Spinner />
         </Center>
       </Center>
