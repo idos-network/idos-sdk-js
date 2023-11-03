@@ -8,8 +8,7 @@ import {
   ModalContent,
   ModalFooter,
   ModalOverlay,
-  Spinner,
-  Text
+  Spinner
 } from "@chakra-ui/react";
 
 import { DownloadIcon } from "lucide-react";
@@ -48,8 +47,10 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
           <>
             <ModalCloseButton />
             <ModalBody>
-              <Center p={10}>
-                <Text color="red.400">Error while reading credential data</Text>
+              <Center p={5}>
+                <Code px={3} py={1} color="red.400" rounded="lg">
+                  Error while reading credential data
+                </Code>
               </Center>
             </ModalBody>
             <ModalFooter>
