@@ -2,6 +2,7 @@ import { WebKwil } from "@kwilteam/kwil-js";
 import { ActionBuilder } from "@kwilteam/kwil-js/dist/core/builders";
 import { Database } from "@kwilteam/kwil-js/dist/core/database";
 import { GenericResponse } from "@kwilteam/kwil-js/dist/core/resreq";
+import { Wallet } from "@near-wallet-selector/core";
 import { JsonRpcSigner, Signer } from "ethers";
 
 declare class Auth {
@@ -50,12 +51,13 @@ export declare class idOS {
   data: Data;
   kwilWrapper: KwilWrapper;
   grants: Grants;
+  setSigner(type: "NEAR" | "EVM", signer: (Wallet & SignMessageMethod) | JsonRpcSigner): Promise<AuthUser>;
   static init(options: InitOptions): Promise<idOS>;
   static near: Grants.near;
 }
 
 declare interface InitOptions {
-  nodeUrl: string;
+  nodeUrl?: string;
   container: string;
 }
 
@@ -82,7 +84,7 @@ declare class KwilWrapper {
 }
 
 declare class Grants {
-  near: { defaultContractId: string; contractMethods: string[] };
+  near: { defaultContractId: string; contractMethods: string[]; defaultNetwork: string };
   init(args: Record<string, unknown>): Promise<void>;
   list({ owner, grantee, dataId }: { owner?: string; grantee?: string; dataId?: string }): Promise<any>;
   create(

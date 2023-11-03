@@ -1,4 +1,5 @@
 import { Center, Text } from "@chakra-ui/react";
+import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
@@ -10,54 +11,32 @@ import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
+import { ConnectWallet } from "#/connect-wallet.tsx";
 import { idOS } from "#/lib/idos";
-import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  await idOS.auth.setEvmSigner(signer);
-  await idOS.crypto.init();
-  await idOS.grants.init({ signer, type: "evm" });
+  return provider.getSigner();
 };
 
 const setUpNearWallet = async () => {
-  const contractId = idOSSDK.near.defaultContractId;
-  let walletSelectorReady: (value?: unknown) => void;
-
   const selector = await setupWalletSelector({
-    network: "testnet",
+    network: idOSSDK.near.defaultNetwork,
     modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
   });
 
-  const modal = setupModal(selector, {
-    contractId,
-    methodNames: idOSSDK.near.contractMethods
-  });
+  if (!selector.isSignedIn()) {
+    await new Promise((resolve) => {
+      const modal = setupModal(selector, {
+        contractId: idOSSDK.near.defaultContractId,
+        methodNames: idOSSDK.near.contractMethods
+      });
+      modal.on("onHide", () => setTimeout(resolve, 100));
+      modal.show();
+    });
+  }
 
-  modal.on("onHide", async () => {
-    try {
-      const wallet = await selector.wallet();
-      await idOS.auth.setNearSigner(wallet);
-      await idOS.crypto.init();
-      const accountId = (await wallet.getAccounts())[0].accountId;
-      await idOS.grants.init({ type: "near", accountId, wallet });
-      walletSelectorReady();
-    } catch (error) {
-      walletSelectorReady(error);
-    }
-  });
-  modal.show();
-  return await new Promise<void>(
-    (resolve, reject) =>
-      (walletSelectorReady = (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      })
-  );
+  return selector.wallet();
 };
 
 export default function App() {
@@ -70,7 +49,8 @@ export default function App() {
     setIsLoading(true);
     try {
       await metamask.connect();
-      await setupEvmWallet();
+      const signer = await setupEvmWallet();
+      await idOS.setSigner("EVM", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -82,7 +62,8 @@ export default function App() {
   const onNearConnect = async () => {
     setIsLoading(true);
     try {
-      await setUpNearWallet();
+      const signer = await setUpNearWallet();
+      await idOS.setSigner("NEAR", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -96,19 +77,17 @@ export default function App() {
       initialized.current = true;
       (async () => {
         if (metamask.status === "connected") {
-          await setupEvmWallet();
+          const signer = await setupEvmWallet();
+          await idOS.setSigner("EVM", signer);
           setIsConnected(true);
         }
         const selector = await setupWalletSelector({
-          network: "testnet",
+          network: idOSSDK.near.defaultNetwork,
           modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
         });
         if (selector.isSignedIn()) {
-          const wallet = await selector.wallet();
-          await idOS.auth.setNearSigner(wallet);
-          await idOS.crypto.init();
-          const accountId = (await wallet.getAccounts())[0].accountId;
-          await idOS.grants.init({ type: "near", accountId, wallet });
+          const signer = await setUpNearWallet();
+          await idOS.setSigner("NEAR", signer);
           setIsConnected(true);
         }
         setIsLoading(false);
@@ -126,10 +105,10 @@ export default function App() {
 
   if (!isConnected) {
     return (
-      <Center minH="100vh">
-        <button onClick={onMetamaskConnect}>Connect to Metamask</button>
-        <button onClick={onNearConnect}>Connect to Near</button>
-      </Center>
+      <ConnectWallet
+        onNearConnect={onNearConnect}
+        onMetamaskConnect={onMetamaskConnect}
+      />
     );
   }
 

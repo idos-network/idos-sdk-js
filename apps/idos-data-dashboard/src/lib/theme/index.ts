@@ -85,6 +85,12 @@ export const theme = extendTheme({
           px: 10,
           py: 4,
           rounded: "lg"
+        },
+        "2xl": {
+          h: "75px",
+          px: 10,
+          py: 4,
+          rounded: "lg"
         }
       }
     } satisfies ComponentStyleConfig,
