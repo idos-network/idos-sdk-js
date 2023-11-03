@@ -7,9 +7,10 @@ import nacl from "tweetnacl";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
-    this.passwordButton = document.querySelector("button#password");
-    this.consentButton = document.querySelector("button#consent");
     this.store = new Store();
+
+    this.unlockButton = document.querySelector("button#unlock");
+    this.confirmButton = document.querySelector("button#confirm");
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     let secretKey = storeWithCodec.get("encryption-private-key")
@@ -35,31 +36,65 @@ export class Enclave {
     };
   }
 
-  async keys() {
-    await this.ensurePassword();
+  async keys(usePasskeys = false) {
+    await this.ensurePassword(usePasskeys);
     await this.ensureKeyPair();
 
     return this.keyPair.publicKey;
   }
 
-  async ensurePassword() {
-    if (!this.store.get("password")) {
-      this.passwordButton.style.display = "block";
-      this.passwordButton.addEventListener("click", async (e) => {
-        this.passwordButton.disabled = true;
-        try {
-          const { password, duration } = await this.#openDialog("password");
-          this.store.set("password", password, duration);
-          this.ensurePasswordResolver();
-        } catch (e) {
-          this.passwordButton.disabled = false;
-        }
-      });
+  async ensurePassword(usePasskeys) {
+    if (this.store.get("password")) return Promise.resolve;
 
-      return await new Promise((resolve) => this.ensurePasswordResolver = resolve);
+    this.unlockButton.style.display = "block";
+    this.unlockButton.disabled = false;
+
+    const humanId = this.store.get("human-id");
+    let password, duration, credentialId;
+
+    const doPasskey = async () => {
+      const storedCredentialId = this.store.get("credential-id")?.[humanId];
+
+      let credentialRequest = {
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(10)),
+        },
+      };
+
+      if (storedCredentialId) {
+        credentialRequest.publicKey.allowCredentials = [{
+          type: "public-key",
+          id: Base64Codec.decode(storedCredentialId),
+        }];
+      }
+
+      const credential = await navigator.credentials.get(credentialRequest);
+      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+
+      return { password, credentialId };
     }
 
-    return Promise.resolve;
+    return new Promise(async resolve => (
+      this.unlockButton.addEventListener("click", async e => {
+        this.unlockButton.disabled = true;
+
+        if (usePasskeys) {
+          try {
+            ({ password, credentialId } = await doPasskey());
+          } catch (e) {
+            ({ password, duration, credentialId } = await this.#openDialog("passkey"));
+          }
+          this.store.set("credential-id", { [humanId]: credentialId });
+        } else {
+          ({ password, duration } = await this.#openDialog("password"));
+        }
+
+        this.store.set("password", password, duration);
+
+        resolve();
+      })
+    ));
   }
 
   async ensureKeyPair() {
@@ -121,28 +156,21 @@ export class Enclave {
   }
 
   async confirm(message) {
-    this.consentButton.style.display = "block";
-    this.consentButton.addEventListener("click", async (e) => {
-      this.consentButton.disabled = true;
+    this.confirmButton.style.display = "block";
+    this.confirmButton.disabled = false;
 
-      try {
-        const { consent } = await this.#openDialog(
-          "consent",
-          `
-          <strong>Consent request</strong>
-          <p><small>from ${this.parentOrigin}</small></p>
-          <hr>
-          <p><code>${message}</code></p>
-        `
-        );
+    return new Promise(resolve => (
+      this.confirmButton.addEventListener("click", async (e) => {
+        this.confirmButton.disabled = true;
 
-        this.ensureConsentResolver(consent);
-      } catch (e) {
-        this.consentButton.disabled = false;
-      }
-    });
+        const { confirmed } = await this.#openDialog("confirm", {
+          message,
+          origin: this.parentOrigin,
+        });
 
-    return await new Promise((resolve) => this.ensureConsentResolver = resolve);
+        resolve(confirmed);
+      })
+    ));
   }
 
   messageParent(message) {
@@ -151,11 +179,7 @@ export class Enclave {
 
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
-      const isFromParent = event.origin === this.parentOrigin;
-
-      if (!isFromParent) {
-        return;
-      }
+      if (event.origin !== this.parentOrigin) return;
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
@@ -167,12 +191,13 @@ export class Enclave {
           signerAddress,
           senderPublicKey,
           receiverPublicKey,
+          usePasskeys,
         } = requestData;
 
         const paramBuilder = {
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
-          keys: () => [],
+          keys: () => [usePasskeys],
           encrypt: () => [message, receiverPublicKey],
           decrypt: () => [fullMessage, senderPublicKey],
           confirm: () => [message],
@@ -188,15 +213,15 @@ export class Enclave {
         console.log("catch", e);
         event.ports[0].postMessage({ error: e });
       } finally {
-        this.passwordButton.style.display = "none";
-        this.consentButton.style.display = "none";
+        this.unlockButton.style.display = "none";
+        this.confirmButton.style.display = "none";
         event.ports[0].close();
       }
     });
   }
 
   async #openDialog(intent, message) {
-    const width = 250;
+    const width = intent === "passkey" ? 500 : 250;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -210,20 +235,18 @@ export class Enclave {
       .join(",");
 
     const dialogURL = new URL("/dialog.html", window.location.origin);
-    dialogURL.search = new URLSearchParams({ intent, message });
-
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
-    this.dialog.addEventListener("load", () => this.windowLoaded());
-    await new Promise((resolve) => (this.windowLoaded = resolve));
 
-    return await new Promise((resolve, reject) => {
+    await new Promise(resolve => this.dialog.addEventListener("load", resolve));
+
+    return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-      port1.onmessage = ({ data }) => {
+      port1.onmessage = ({ data: { error, result } }) => {
         port1.close();
         this.dialog.close();
-        data.error ? reject(data.error) : resolve(data.result);
+        error ? reject(error) : resolve(result);
       };
-      this.dialog.postMessage(intent, this.dialog.origin, [port2]);
+      this.dialog.postMessage({ intent, message }, this.dialog.origin, [port2]);
     });
   }
 }

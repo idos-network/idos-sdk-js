@@ -102,6 +102,7 @@ export class Store {
   reset() {
     for (const storage of [window.localStorage, window.sessionStorage]) {
       for (const key of Object.keys(storage)) {
+        if (key === "idOS-credential-id") continue;
         key.startsWith(this.keyPrefix) && storage.removeItem(key);
       }
     }
@@ -111,6 +112,7 @@ export class Store {
     ));
 
     for (const key of keysInCookies) {
+      if (key === "idOS-credential-id") continue;
       key.startsWith(this.keyPrefix) && (document.cookie = [
         `${key}=`,
         `SameSite=None`,

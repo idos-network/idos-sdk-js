@@ -16,44 +16,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>idOS Enclave</title>
     <style>
-      button {
-        display: none;
-      }
-
-      button#password::before {
+      button#unlock::before {
         content: "🔐 Unlock idOS";
       }
 
-      button#password:disabled {
+      button#unlock:disabled {
         background-color: grey;
       }
 
-      button#password:disabled::before {
+      button#unlock:disabled::before {
         content: "unlocking..."
       }
 
-      button#consent::before {
+      button#confirm::before {
         content: "👀 See request";
       }
 
-      button#consent:disabled {
+      button#confirm:disabled {
         background-color: grey;
       }
 
-      button#consent:disabled::before {
-        content: "deciding..."
+      button#confirm:disabled::before {
+        content: "waiting..."
       }
     </style>
   </head>
   <body>
     <div id="container" class="w-screen h-screen">
       <button
-        id="password"
+        id="unlock"
         class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[45cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"
       >
       </button>
       <button
-        id="consent"
+        id="confirm"
         class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[45cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"
       >
       </button>
