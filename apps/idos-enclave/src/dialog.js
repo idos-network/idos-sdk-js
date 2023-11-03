@@ -2,6 +2,15 @@ import { generateMnemonic } from "web-bip39";
 import wordlist from "web-bip39/wordlists/english";
 import "./styles.css";
 
+const base64ToArrayBuffer = (base64) => (
+  Uint8Array.from(atob(base64), c => c.charCodeAt(0)).buffer
+);
+
+const arrayBufferToBase64 = (bytes) => (
+  btoa(String.fromCharCode(...new Uint8Array(bytes)))
+);
+
+
 class Dialog {
   constructor(enclave, intent, message) {
     if (enclave.origin !== window.origin) {
@@ -23,6 +32,8 @@ class Dialog {
       this.respondToEnclave({ error: "closed" });
     };
     window.addEventListener("beforeunload", beforeUnload);
+
+    if (this.intent === "passkey") return;
 
     const passwordForm = document.querySelector("form[name=password]");
     const passwordInput = passwordForm.querySelector("input[type=password]");
@@ -66,20 +77,131 @@ class Dialog {
         this.respondToEnclave({ result: { consent } });
       })
     );
+
+    document.querySelectorAll("form[name=passkey] button").forEach((elem) =>
+      elem.addEventListener("click", async (e) => {
+        e.preventDefault();
+        //window.removeEventListener("beforeunload", beforeUnload);
+        const password = await (e.target.id === "findOrCreate" ? this.passkey1() : this.passkey2());
+        this.respondToEnclave({ result: { password, duration: 7 } });
+      })
+    );
   };
 
-  listenToEnclave = () => {
+  passkey1 = async () => {
+    console.warn("checking if one exists...");
+    const challenge = crypto.getRandomValues(new Uint8Array(10));
+
+    const credentialId = window.localStorage.getItem("idOS-credential-id");
+
+    let credential;
+    let publicKey;
+    try {
+      publicKey = {
+        challenge: challenge,
+        //rpId: "idos.network",
+      }
+
+      if (credentialId !== null) {
+        publicKey.allowCredentials = [{
+          id: base64ToArrayBuffer(credentialId),
+          type: "public-key",
+        }];
+      }
+
+      credential = await navigator.credentials.get({ publicKey });
+
+      if (credential !== null) {
+        console.warn("already exists");
+        const password = new TextDecoder().decode(credential.response.userHandle);
+        window.localStorage.setItem("idOS-credential-id", arrayBufferToBase64(credential.rawId));
+        return { password, credentialId };
+      }
+    } catch (e) {
+      // user cancelled passkey lookup; let's create one
+      console.warn("no thanks i don't want to reuse");
+    }
+
+    console.warn("creating...");
+
+    const password = window.prompt("IDOS password");
+
+    if (password === null) {
+      console.warn("user cancelled prompt");
+      return;
+    }
+
+    try {
+      publicKey = {
+        challenge: challenge,
+        rp: {
+          // id: "idos.network",
+          name: "IDOS",
+        },
+        user: {
+          id: new TextEncoder().encode(password),
+          name: "idos user",
+          displayName: "idos user"
+        },
+        pubKeyCredParams: [ {type: "public-key", alg: -7} ]
+      };
+
+      credential = await navigator.credentials.create({ publicKey });
+
+      window.localStorage.setItem("idOS-credential-id", arrayBufferToBase64(credential.rawId));
+
+      console.warn("created");
+    } catch (e) {
+      console.warn("user cancelled creation");
+      throw(e);
+    }
+
+    return { password, credentialId };
+  };
+
+  passkey2 = async () => {
+    const publicKey = {
+      challenge: crypto.getRandomValues(new Uint8Array(10)),
+      //rpId: "idos.network",
+    };
+
+    const credentialId = window.localStorage.getItem("idOS-credential-id");
+
+    if (credentialId !== null) {
+      publicKey.allowCredentials = [{
+        id: base64ToArrayBuffer(credentialId),
+        type: "public-key",
+      }];
+    }
+
+    const credential = await navigator.credentials.get({ publicKey });
+    const password = new TextDecoder().decode(credential.response.userHandle);
+
+    return password;
+  };
+
+  listenToEnclave = async () => {
     window.addEventListener("message", async (event) => {
       if (event.source !== enclave) {
         return;
       }
 
+      this.responsePort = event.ports[0];
+
       const requestName = event.data;
 
-      if (requestName !== "password" && requestName !== "consent") {
-        throw new Error(`Unexpected request from parent: ${requestName}`);
+      switch(requestName) {
+        case "passkey":
+          const { password, credentialId } = await this.passkey1();
+          this.respondToEnclave({ result: { password, credentialId, duration: 7 } });
+          break;
+        case "password":
+        case "consent":
+          break;
+        default:
+          throw new Error(`Unexpected request from parent: ${requestName}`);
       }
-      this.responsePort = event.ports[0];
+
     });
   };
 

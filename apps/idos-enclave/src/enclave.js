@@ -35,7 +35,9 @@ export class Enclave {
     };
   }
 
-  async keys() {
+  async keys(usePasskeys) {
+    this.usePasskeys = usePasskeys;
+
     await this.ensurePassword();
     await this.ensureKeyPair();
 
@@ -47,11 +49,53 @@ export class Enclave {
       this.passwordButton.style.display = "block";
       this.passwordButton.addEventListener("click", async (e) => {
         this.passwordButton.disabled = true;
+        let password, duration, credentialId;
         try {
-          const { password, duration } = await this.#openDialog("password");
+          if (this.usePasskeys) {
+
+            console.warn("checking if one exists...");
+            const challenge = crypto.getRandomValues(new Uint8Array(10));
+
+            credentialId = this.store.get("credential-id");
+
+            let credential;
+            let publicKey;
+            try {
+              publicKey = {
+                challenge: challenge,
+                //rpId: "idos.network",
+              }
+
+              if (credentialId !== null) {
+                publicKey.allowCredentials = [{
+                  id: Base64Codec.decode(credentialId),
+                  type: "public-key",
+                }];
+              }
+
+              credential = await navigator.credentials.get({ publicKey });
+
+              if (credential !== null) {
+                console.warn("already exists");
+                password = new TextDecoder().decode(credential.response.userHandle);
+              }
+              //({ password, duration, credentialId } = await this.#openDialog("passkey"));
+            } catch (e) {
+              // user cancelled passkey lookup; let's create one
+              console.warn("no thanks i don't want to reuse");
+              console.warn(e);
+              ({ password, duration, credentialId } = await this.#openDialog("passkey"));
+            }
+          } else {
+            ({ password, duration } = await this.#openDialog("password"));
+          }
+
+
+          this.store.set("credential-id", credentialId);
           this.store.set("password", password, duration);
           this.ensurePasswordResolver();
-        } catch (e) {
+        } catch(e) {
+          throw(e);
           this.passwordButton.disabled = false;
         }
       });
@@ -167,12 +211,13 @@ export class Enclave {
           signerAddress,
           senderPublicKey,
           receiverPublicKey,
+          usePasskeys,
         } = requestData;
 
         const paramBuilder = {
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
-          keys: () => [],
+          keys: () => [usePasskeys],
           encrypt: () => [message, receiverPublicKey],
           decrypt: () => [fullMessage, senderPublicKey],
           confirm: () => [message],
@@ -196,7 +241,7 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
-    const width = 250;
+    const width = intent === "passkey" ? 500 : 250;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({

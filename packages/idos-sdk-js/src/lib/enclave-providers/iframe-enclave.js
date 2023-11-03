@@ -21,7 +21,7 @@ export class IframeEnclave extends EnclaveProvider {
 
     if (!encryptionPublicKey) {
       this.#showEnclave();
-      encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
+      encryptionPublicKey = await this.#requestToEnclave({ keys: { usePasskeys: true} });
       this.#hideEnclave();
     }
 
@@ -52,9 +52,9 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async #loadEnclave() {
-    this.iframe.allow = "storage-access";
+    this.iframe.allow = "storage-access; publickey-credentials-get *";
     this.iframe.referrerPolicy = "origin";
-    this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts"]
+    this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts", "popups-to-escape-sandbox"]
       .map((permission) => `allow-${permission}`)
       .join(" ");
 
