@@ -9,14 +9,15 @@ import {
   Spinner,
   Stack,
   Text,
-  useDisclosure
+  useDisclosure,
+  VStack
 } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
-import { Wallet, useFetchWallets } from "./queries";
+import { useFetchWallets, Wallet } from "./queries";
 
 export function Component() {
   const wallets = useFetchWallets();
@@ -72,7 +73,7 @@ export function Component() {
             </AbsoluteCenter>
           ) : null}
           {wallets.isSuccess ? (
-            <>
+            <VStack alignItems="stretch" gap={2.5}>
               {wallets.data.length === 0 ? (
                 <AddWalletCard onAddWallet={onAddWallet} />
               ) : (
@@ -84,7 +85,7 @@ export function Component() {
                   />
                 ))
               )}
-            </>
+            </VStack>
           ) : null}
         </Box>
       </Stack>
