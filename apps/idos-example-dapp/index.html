@@ -103,33 +103,48 @@
         padding: 1em;
         background-color: #333;
         color: #bbb;
-        overflow: scroll;
-        padding: 1em 0.5em
+        overflow: hidden;
+        padding: 1em 0.5em;
+        height: 500px;
+        flex-direction: column;
+        justify-content: flex-end;
       }
 
       div#terminal:has(> #overview:not(:empty)) {
-        display: block;
+        display: flex;
       }
 
-      code#detail-wrapper {
-        overflow-y: scroll;
-        display: none;
+      div#terminal:has(> #detail-wrapper.visible) >*:not(#detail-wrapper) {
+        opacity: 50%;
+        pointer-events: none;
+      }
+
+      div#detail-wrapper {
+        display: flex;
         position: absolute;
         top: 0;
         right: 0;
-        width: 70%;
+        width: 85%;
         height: calc(100% - 2em);
         padding: 1em 0.5em;
         border-left: 1em solid black;
-        background: #333333cc;
+        background: #222222cc;
         backdrop-filter: blur(1px);
+        transform: translateX(100%);
+        transition: 150ms ease-in;
+        flex-direction: column;
+        justify-content: flex-end;
       }
 
-      code#detail-wrapper button#close {
-        margin-bottom: 1em;
+      div#detail-wrapper.visible {
+        transform: translateX(0);
       }
 
-      code.display {
+      code#overview, code#detail {
+        overflow-y: scroll;
+      }
+
+      code#overview, code#detail {
         font-size: 1.1em;
         line-height: 1.3em;
         text-wrap: nowrap;
@@ -161,7 +176,6 @@
       }
 
       code.display .h1::before {
-        content: "*";
         display: inline-flex;
         width: 2em;
         justify-content: center;
@@ -171,10 +185,19 @@
         padding-top: 1em;
       }
 
+      code.display > .h1 + .h1 {
+        padding-top: 0;
+      }
+
       code.display > .h1 ~ *:not(.h1, .status) {
         margin-left: calc(1em - 1px);
         padding-left: 1em;
         border-left: 1px solid #999;
+      }
+
+      code.display .error {
+        color: #e66;
+        border-color: #e66 !important;
       }
 
       code.display .rocket::before {
@@ -195,6 +218,10 @@
 
       code.display .ask::before{
         content: "🙋";
+      }
+
+      code.display .inspect::before{
+        content: "🔍";
       }
 
       code.display .h2 {
@@ -225,7 +252,7 @@
       }
 
       code.display .status.done::before {
-        content: "✔️ Done";
+        content: "✔️  ";
         font-weight: bold;
       }
 
@@ -247,6 +274,12 @@
         animation: none;
         background: #e66;
         color: #000;
+      }
+
+      code.display .status.fail + .error {
+        padding-top: 0.5em;
+        margin-left: calc(1em - 1px);
+        border-color: #e66 !important;
       }
 
       code.display .status.fail::before {
@@ -298,7 +331,7 @@
         text-transform: uppercase;
       }
 
-      div#terminal #controls {
+      div#terminal .controls {
         margin-top: 1em;
         margin-left: -0.5em;
         padding-top: 1em;
@@ -315,7 +348,7 @@
         color: #eee;
       }
 
-      div#terminal #controls > button:not(:first-child) {
+      div#terminal .controls > button:not(:first-child) {
         margin-left: 1em;
       }
     </style>
@@ -342,7 +375,7 @@
         <p>
           <strong>Show:</strong>
           <br>
-          <label><input type="checkbox" checked="checked" name="wallets" />Wallets</label>
+          <label><input type="checkbox" checked name="wallets" />Wallets</label>
           <br>
           <label><input type="checkbox" name="consent" />Consent</label>
           <br>
@@ -354,14 +387,16 @@
 
       <div id="terminal">
         <code id="overview" class="display"></code>
-        <code id="detail-wrapper" class="display">
-          <button id="close">Close</button>
-          <div id="detail" class="display"></div>
-        </code>
-        <div id="controls">
+        <div class="controls">
           <button class="restart">Restart</button>
           <button class="reset-dapp">Reset dapp</button>
           <button class="reset-full">Reset dapp + enclave</button>
+        </div>
+        <div id="detail-wrapper" class="display">
+          <code id="detail" class="display"></code>
+          <div class="controls">
+            <button id="close">Close</button>
+          </div>
         </div>
       </div>
 

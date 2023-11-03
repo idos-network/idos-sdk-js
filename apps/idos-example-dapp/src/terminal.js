@@ -9,7 +9,7 @@ export class Terminal {
     this.currentElem = this.overviewElem;
 
     document.querySelector("button#close").addEventListener("click", e => {
-      this.detailElem.parentElement.style.display = "none";
+      this.detailElem.parentElement.classList.remove("visible");
       this.detailElem.innerHTML = "";
       this.currentElem = this.overviewElem;
     });
@@ -39,6 +39,10 @@ export class Terminal {
 
   log(str) {
     this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+    this.overviewElem.scrollTo({
+      top: this.currentElem.scrollHeight,
+      behavior: "smooth",
+    });
 
     return this;
   }
@@ -109,19 +113,25 @@ export class Terminal {
     return this.log(`<span class="status ${className}">${html}</span>`);
   }
 
-  detail(object) {
-    this.detailElem.parentElement.style.display = "block";
-    this.currentElem = this.detailElem;
-
-    if (!object) return this;
-
-    return this.log(typeof object === "object"
-      ? `<pre>${JSON.stringify(object, "", 2)}</pre>`
-      : object
-    );
+  json(object) {
+    const stringified = JSON.stringify(object, "", 2)
+      .replace(/"(data:.*?;).*/g, "$1 (...)");
+    return this.log(`<pre>${stringified}</pre>`);
   }
 
-  async wait(html, promise) {
+  error(error) {
+    return this.log(`<span class="error">${error.toString()}</span>`);
+  }
+
+  detail() {
+    this.detailElem.innerHTML = "";
+    this.detailElem.parentElement.classList.add("visible");
+    this.currentElem = this.detailElem;
+
+    return this;
+  }
+
+  async wait(html, promise, onError) {
     this.status("wait", html);
     this.waitElem = this.currentElem.lastChild;
 
@@ -130,14 +140,9 @@ export class Terminal {
       this.waitElem.remove();
       return promise;
     } catch (e) {
-      this.waitElem.classList.add("fail");
-      this.controlsElem.style.display = "block";
       console.warn(e);
+      this.waitElem.classList.add("fail");
       throw e;
     }
-  }
-
-  done() {
-    this.status("done");
   }
 }

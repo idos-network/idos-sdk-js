@@ -24,21 +24,26 @@ export class Auth {
       publicKey = SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
     }
 
-    this.idOS.store.set("signer-public-key", publicKey);
     this.idOS.store.set("signer-address", currentAddress);
+    this.idOS.store.set("signer-public-key", publicKey);
 
     return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
   async setNearSigner(wallet, recipient = "idos.network") {
     if (wallet.id === "my-near-wallet") {
+      const { accountId, signature, publicKey, error } =
+        Object.fromEntries(
+          new URLSearchParams(window.location.hash.slice(1)).entries(),
+        );
+
+      if (signature) {
+        this.idOS.store.set("signer-address", accountId);
+        this.idOS.store.set("signer-public-key", publicKey);
+      }
+
       wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
       wallet.signMessage = async ({ message, recipient }) => {
-        const { signature, publicKey, error } =
-          Object.fromEntries(
-            new URLSearchParams(window.location.hash.slice(1)).entries(),
-          );
-
         if (error) return Promise.reject();
 
         const lastMessage = this.idOS.store.get("sign-last-message");
@@ -75,17 +80,16 @@ export class Auth {
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
+    if (storedAddress != currentAddress || !publicKey) {
       this.idOS.store.reset();
       await this.idOS.enclave.reset();
       const message = "idOS authentication";
       const nonce = Buffer.from(this.idOS.crypto.Nonce.random(32));
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
 
+      this.idOS.store.set("signer-address", currentAddress);
       this.idOS.store.set("signer-public-key", publicKey);
     }
-
-    this.idOS.store.set("signer-address", currentAddress);
 
     const signer = async (message) => {
       message = Utf8Codec.decode(message);
