@@ -1,7 +1,7 @@
 import { EnclaveProvider } from "./enclave-provider";
 
 export class IframeEnclave extends EnclaveProvider {
-  hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
+  hostUrl = new URL("https://idos-enclave-git-experiment-passkeys-fractal-id.vercel.app");
 
   constructor(options) {
     super(options);
