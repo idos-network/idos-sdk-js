@@ -129,7 +129,7 @@ const connectWallet = {
       .log(`Please connect the right signer`)
       .h1("eyes", `Currently connected signer:`)
       .table({ address, publicKey })
-      .done();
+      .status("done", "Done");
     return;
   }
 
@@ -188,9 +188,19 @@ const connectWallet = {
     terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
     terminal.table(await credentials, ["issuer", "credential_type", "id"], {
       id: async (id) => {
-        const credential = await idos.data.get("credentials", id);
-        console.log(credential);
-        console.log(credential.content);
+        const credential = cache.get(`credential_${id}`) || idos.data.get("credentials", id);
+        await terminal
+          .detail()
+          .h1("inspect", `Credential # ${id}`)
+          .wait("awaiting signature", credential);
+        cache.set(`credential_${id}`, await credential);
+        await terminal
+          .wait("verifying credential...", idOS.verifiableCredentials.verify((await credential).content))
+          .then(_ => terminal.status("done", "Verified"))
+          .catch(terminal.error.bind(terminal));
+        terminal
+          .h1("eyes", "Content")
+          .json(JSON.parse((await credential).content));
       },
     });
     cache.set("credentials", await credentials);
@@ -203,5 +213,5 @@ const connectWallet = {
     cache.set("grants", await grants);
   }
 
-  terminal.done();
+  terminal.status("done", "Done");
 })();

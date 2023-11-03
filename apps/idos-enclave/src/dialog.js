@@ -17,6 +17,13 @@ class Dialog {
   }
 
   initUi = () => {
+    const beforeUnload = e => {
+      e.preventDefault();
+      e.returnValue = ""
+      this.respondToEnclave({ error: "closed" });
+    };
+    window.addEventListener("beforeunload", beforeUnload);
+
     const passwordForm = document.querySelector("form[name=password]");
     const passwordInput = passwordForm.querySelector("input[type=password]");
     const bip39Display = passwordForm.querySelector("#bip39_display");
@@ -25,8 +32,11 @@ class Dialog {
     document.querySelector(`[name=${this.intent}]`).style.display = "block";
     document.querySelector("#message").innerHTML = this.message;
 
+    passwordInput.focus();
+
     passwordForm.addEventListener("submit", (e) => {
       e.preventDefault();
+      window.removeEventListener("beforeunload", beforeUnload);
       const password = Object.fromEntries(new FormData(e.target).entries());
       this.respondToEnclave({ result: password });
     });
@@ -48,15 +58,10 @@ class Dialog {
     });
     */
 
-    passwordForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const password = Object.fromEntries(new FormData(e.target).entries());
-      this.respondToEnclave({ result: password });
-    });
-
     document.querySelectorAll("form[name=consent] button").forEach((elem) =>
       elem.addEventListener("click", (e) => {
         e.preventDefault();
+        window.removeEventListener("beforeunload", beforeUnload);
         const consent = e.target.id === "yes";
         this.respondToEnclave({ result: { consent } });
       })

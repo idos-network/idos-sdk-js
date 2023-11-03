@@ -2,8 +2,17 @@ export class Terminal {
   constructor(selector, idos) {
     const wrapper = document.querySelector(selector);
 
-    this.elem = wrapper.children.display;
-    this.controls = wrapper.children.controls;
+    this.overviewElem = wrapper.children.overview;
+    this.detailElem = wrapper.querySelector("#detail");
+    this.controlsElem = wrapper.children.controls;
+
+    this.currentElem = this.overviewElem;
+
+    document.querySelector("button#close").addEventListener("click", e => {
+      this.detailElem.parentElement.classList.remove("visible");
+      this.detailElem.innerHTML = "";
+      this.currentElem = this.overviewElem;
+    });
 
     this.restartButton = wrapper.querySelector("button.restart");
     this.restartButton.addEventListener("click", e => (
@@ -29,7 +38,11 @@ export class Terminal {
   }
 
   log(str) {
-    this.elem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+    this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+    this.overviewElem.scrollTo({
+      top: this.currentElem.scrollHeight,
+      behavior: "smooth",
+    });
 
     return this;
   }
@@ -100,23 +113,36 @@ export class Terminal {
     return this.log(`<span class="status ${className}">${html}</span>`);
   }
 
-  async wait(html, promise) {
+  json(object) {
+    const stringified = JSON.stringify(object, "", 2)
+      .replace(/"(data:.*?;).*/g, "$1 (...)");
+    return this.log(`<pre>${stringified}</pre>`);
+  }
+
+  error(error) {
+    return this.log(`<span class="error">${error.toString()}</span>`);
+  }
+
+  detail() {
+    this.detailElem.innerHTML = "";
+    this.detailElem.parentElement.classList.add("visible");
+    this.currentElem = this.detailElem;
+
+    return this;
+  }
+
+  async wait(html, promise, onError) {
     this.status("wait", html);
-    this.waitElem = this.elem.lastChild;
+    this.waitElem = this.currentElem.lastChild;
 
     try {
       await promise;
       this.waitElem.remove();
       return promise;
     } catch (e) {
-      this.waitElem.classList.add("fail");
-      this.controls.style.display = "block";
       console.warn(e);
-      throw new Error("Error in promise");
+      this.waitElem.classList.add("fail");
+      throw e;
     }
-  }
-
-  done() {
-    this.status("done");
   }
 }

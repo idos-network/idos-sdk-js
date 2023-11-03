@@ -16,7 +16,7 @@ export class Enclave {
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async reset(keep) {
-    return await this.provider.reset(keep);
+  async reset() {
+    return await this.provider.reset();
   }
 }

@@ -15,13 +15,15 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async init(humanId, signerAddress, signerPublicKey) {
-    await this.#requestToEnclave({ storage: { humanId, signerAddress, signerPublicKey } });
-    if (!(await this.#requestToEnclave({ isReady: {} }))) {
-      this.#showEnclave();
-    }
+    let { encryptionPublicKey } = await this.#requestToEnclave({
+      storage: { humanId, signerAddress, signerPublicKey },
+    });
 
-    const encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
-    this.#hideEnclave();
+    if (!encryptionPublicKey) {
+      this.#showEnclave();
+      encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
+      this.#hideEnclave();
+    }
 
     return encryptionPublicKey;
   }
@@ -67,9 +69,8 @@ export class IframeEnclave extends EnclaveProvider {
       .map((pair) => pair.join(": "))
       .join("; ");
 
-    this.iframe.addEventListener("load", () => this.iframeLoaded());
     document.querySelector(this.container).appendChild(this.iframe);
-    return new Promise((resolve) => (this.iframeLoaded = resolve));
+    return new Promise((resolve) => this.iframe.addEventListener("load", resolve));
   }
 
   #showEnclave() {

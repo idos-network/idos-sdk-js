@@ -10,15 +10,16 @@ export class Enclave {
     this.passwordButton = document.querySelector("button#password");
     this.consentButton = document.querySelector("button#consent");
     this.store = new Store();
+
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    let secretKey = storeWithCodec.get("encryption-private-key")
+    if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
     this.#listenToRequests();
   }
 
   reset() {
     this.store.reset();
-  }
-
-  async isReady() {
-    return !!this.store.get("password");
   }
 
   storage(humanId, signerAddress, signerPublicKey) {
@@ -41,19 +42,18 @@ export class Enclave {
     return this.keyPair.publicKey;
   }
 
-  // @todo: add `passwordData.duration`
-  // @fixme
-  // using both storage mediums because different browsers
-  // handle sandboxed cross-origin iframes differently
-  // wrt localstorage and cookies
   async ensurePassword() {
     if (!this.store.get("password")) {
       this.passwordButton.style.display = "block";
       this.passwordButton.addEventListener("click", async (e) => {
         this.passwordButton.disabled = true;
-        const { password, duration } = await this.#openDialog("password");
-        this.store.set("password", password, duration);
-        this.ensurePasswordResolver();
+        try {
+          const { password, duration } = await this.#openDialog("password");
+          this.store.set("password", password, duration);
+          this.ensurePasswordResolver();
+        } catch (e) {
+          this.passwordButton.disabled = false;
+        }
       });
 
       return await new Promise((resolve) => this.ensurePasswordResolver = resolve);
@@ -84,6 +84,14 @@ export class Enclave {
     const encrypted =
       nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
+    if (encrypted == null)
+      throw Error(`Couldn't encrypt. ${JSON.stringify({
+        message: Base64Codec.encode(message),
+        nonce: Base64Codec.encode(nonce),
+        senderPublicKey: Base64Codec.encode(senderPublicKey),
+        localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
+      }, null, 2)}`);
+
     const fullMessage = new Uint8Array(nonce.length + encrypted.length);
     fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
@@ -98,6 +106,17 @@ export class Enclave {
     const decrypted =
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
+
+    if (decrypted == null) {
+      throw Error(`Couldn't decrypt. ${JSON.stringify({
+        fullMessage: Base64Codec.encode(fullMessage),
+        message: Base64Codec.encode(message),
+        nonce: Base64Codec.encode(nonce),
+        senderPublicKey: Base64Codec.encode(senderPublicKey),
+        localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
+      }, null, 2)}`);
+    }
+
     return decrypted;
   }
 
@@ -105,22 +124,25 @@ export class Enclave {
     this.consentButton.style.display = "block";
     this.consentButton.addEventListener("click", async (e) => {
       this.consentButton.disabled = true;
-      this.ensureConsentResolver();
+
+      try {
+        const { consent } = await this.#openDialog(
+          "consent",
+          `
+          <strong>Consent request</strong>
+          <p><small>from ${this.parentOrigin}</small></p>
+          <hr>
+          <p><code>${message}</code></p>
+        `
+        );
+
+        this.ensureConsentResolver(consent);
+      } catch (e) {
+        this.consentButton.disabled = false;
+      }
     });
 
-    await new Promise((resolve) => this.ensureConsentResolver = resolve);
-
-    const { consent } = await this.#openDialog(
-      "consent",
-      `
-      <strong>Consent request</strong>
-      <p><small>from ${this.parentOrigin}</small></p>
-      <hr>
-      <p><code>${message}</code></p>
-    `
-    );
-
-    return consent;
+    return await new Promise((resolve) => this.ensureConsentResolver = resolve);
   }
 
   messageParent(message) {
@@ -150,7 +172,6 @@ export class Enclave {
         const paramBuilder = {
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
-          isReady: () => [],
           keys: () => [],
           encrypt: () => [message, receiverPublicKey],
           decrypt: () => [fullMessage, senderPublicKey],
@@ -181,11 +202,11 @@ export class Enclave {
     const popupConfig = Object.entries({
       popup: 1,
       top: 0,
-      left: left,
-      width: width,
-      height: 350
+      left,
+      width,
+      height: 350,
     })
-      .map((feat) => feat.join("="))
+      .map(feat => feat.join("="))
       .join(",");
 
     const dialogURL = new URL("/dialog.html", window.location.origin);
