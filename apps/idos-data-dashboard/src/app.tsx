@@ -1,17 +1,14 @@
-import { Center, Text } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
-import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupHereWallet } from "@near-wallet-selector/here-wallet";
-import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { setupNightly } from "@near-wallet-selector/nightly";
 import { BrowserProvider } from "ethers";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
 
 import { ConnectWallet } from "#/connect-wallet.tsx";
+import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
 import { idOS } from "#/lib/idos";
 
 const setupEvmWallet = async () => {
@@ -20,10 +17,7 @@ const setupEvmWallet = async () => {
 };
 
 const setUpNearWallet = async () => {
-  const selector = await setupWalletSelector({
-    network: idOSSDK.near.defaultNetwork,
-    modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
-  });
+  const selector = await setupNearWalletSelector();
 
   if (!selector.isSignedIn()) {
     await new Promise((resolve) => {
@@ -31,7 +25,9 @@ const setUpNearWallet = async () => {
         contractId: idOSSDK.near.defaultContractId,
         methodNames: idOSSDK.near.contractMethods
       });
-      modal.on("onHide", () => setTimeout(resolve, 100));
+      modal.on("onHide", () => {
+        setTimeout(resolve, 100);
+      });
       modal.show();
     });
   }
@@ -66,6 +62,7 @@ export default function App() {
       await idOS.setSigner("NEAR", signer);
       setIsConnected(true);
       setIsLoading(false);
+      console.log(isLoading);
     } catch (error) {
       console.error(error);
       setIsLoading(false);
@@ -80,25 +77,32 @@ export default function App() {
           const signer = await setupEvmWallet();
           await idOS.setSigner("EVM", signer);
           setIsConnected(true);
+          setIsLoading(false);
         }
-        const selector = await setupWalletSelector({
-          network: idOSSDK.near.defaultNetwork,
-          modules: [setupMeteorWallet(), setupHereWallet(), setupNightly()]
-        });
+
+        const selector = await setupNearWalletSelector();
         if (selector.isSignedIn()) {
           const signer = await setUpNearWallet();
           await idOS.setSigner("NEAR", signer);
           setIsConnected(true);
+          setIsLoading(false);
         }
         setIsLoading(false);
       })();
     }
-  });
+  }, []);
 
   if (isLoading) {
     return (
-      <Center minH="100vh">
-        <Text>Loading ...</Text>
+      <Center
+        minH="100vh"
+        p={6}
+        bg={`url('/cubes.png') center center no-repeat`}
+        bgSize="cover"
+      >
+        <Center gap={2} p={5} bg="neutral.800" rounded="lg">
+          <Spinner />
+        </Center>
       </Center>
     );
   }

@@ -1,6 +1,9 @@
+import { setupNearWalletSelector } from "#/lib/ near/utils";
 import { ComingSoon } from "#/lib/components/coming-soon";
 import { NavLink, type LinkProps } from "#/lib/components/link";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
+import { WalletSelector } from "@near-wallet-selector/core";
+import { useEffect, useState } from "react";
 import { AttributeIcon } from "../icons/attribute";
 import { KeyRoundIcon } from "../icons/key-round";
 import { SignOutIcon } from "../icons/sign-out";
@@ -48,6 +51,24 @@ const SidebarLink = ({
 };
 
 export const Sidebar = () => {
+  const [selector, setSelector] = useState<WalletSelector | undefined>();
+
+  useEffect(() => {
+    const setupSelector = async () => {
+      const selector = await setupNearWalletSelector();
+      setSelector(selector);
+    };
+    setupSelector();
+  }, []);
+  const onDisconnect = async () => {
+    if (!selector) {
+      return;
+    }
+    const wallet = await selector.wallet();
+    await wallet.signOut();
+    window.location.reload();
+  };
+
   return (
     <Flex
       as="nav"
@@ -73,13 +94,24 @@ export const Sidebar = () => {
         </SidebarLink>
       </VStack>
       <Box mt="auto">
-        <Button
-          colorScheme="green"
-          leftIcon={<SignOutIcon w={6} h={6} stroke="neutral.600" strokeWidth={1.5}  fill="none" />}
-          size="xl"
-        >
-          Disconnect Wallet
-        </Button>
+        {selector && selector.isSignedIn() ? (
+          <Button
+            colorScheme="green"
+            leftIcon={
+              <SignOutIcon
+                w={6}
+                h={6}
+                stroke="neutral.600"
+                strokeWidth={1.5}
+                fill="none"
+              />
+            }
+            onClick={onDisconnect}
+            size="xl"
+          >
+            Disconnect Wallet
+          </Button>
+        ) : null}
       </Box>
     </Flex>
   );
