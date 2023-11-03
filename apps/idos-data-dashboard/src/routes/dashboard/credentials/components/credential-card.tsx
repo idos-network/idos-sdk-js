@@ -1,5 +1,5 @@
 import { Button, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
-import { KeyIcon, XIcon } from "lucide-react";
+import { XIcon } from "lucide-react";
 import { Credential } from "../queries";
 
 type CredentialCardProps = {
@@ -51,9 +51,6 @@ export const CredentialCard = (props: CredentialCardProps) => {
           variant="ghost"
         >
           View Details
-        </Button>
-        <Button isDisabled leftIcon={<KeyIcon />} variant="ghost">
-          Manage Grants
         </Button>
         <Button
           leftIcon={<XIcon />}
