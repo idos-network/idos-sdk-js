@@ -11,7 +11,6 @@ export const WalletCard = (props: WalletCardProps) => {
     <HStack
       alignItems="center"
       justifyContent="space-between"
-      gap={14}
       gap={5}
       px={7}
       py={5}
@@ -24,9 +23,15 @@ export const WalletCard = (props: WalletCardProps) => {
         <Text color="neutral.600" fontSize="sm">
           Address
         </Text>
-        <Text>{props.wallet.address}</Text>
+        <Text w={240} isTruncated>
+          {props.wallet.address}
+        </Text>
       </VStack>
-      <Button leftIcon={<XIcon size={24} />} onClick={() => props.onDeleteWallet(props.wallet)} variant="ghost">
+      <Button
+        leftIcon={<XIcon size={24} />}
+        onClick={() => props.onDeleteWallet(props.wallet)}
+        variant="ghost"
+      >
         Delete
       </Button>
     </HStack>
