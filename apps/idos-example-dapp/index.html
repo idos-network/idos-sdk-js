@@ -42,59 +42,49 @@
       }
 
       div#idos-wrapper {
+        visibility: hidden;
         position: absolute;
         top: 50px;
         left: 50px;
-        display: flex;
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 150ms ease-in, visibility 0ms ease-in 150ms;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        background: #eeeeeecc;
+
+        aspect-ratio: 1;
+        width: min-content;
+        padding: 1em;
+
         border-radius: 50%;
         border: 1em solid #333;
         outline: 0.2em solid #eee;
+        background: #eeeeeecc;
         backdrop-filter: blur(2px);
-        aspect-ratio: 1;
-        padding: 1em;
+
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-evenly;
+
+        opacity: 0;
+        transition: 150ms ease-in;
       }
 
       div#idos-wrapper:has(#idos-container.visible) {
         visibility: visible;
         opacity: 1;
-        transition: opacity 150ms ease-in, visibility 0ms ease-in 0ms;
       }
 
-      div#idos-container {
-        width: 140px;
-        height: 35px;
-        margin: 0;
-        padding: 0;
+      div#idos-wrapper::before {
+        content: "this is the idOS container";
       }
-
-      div#idos-wrapper > span {
-        display: block;
-        width: 75%;
-        height: 25%;
-        margin: 0.5em 0;
-        position: relative;
+      div#idos-wrapper::after {
+        content: "place and style it however you like";
+      }
+      div#idos-wrapper::before,
+      div#idos-wrapper::after {
         text-align: center;
+        max-width: 80%;
       }
 
-      div#idos-wrapper > span > span {
-        display: block;
-        position: absolute;
-        width: 100%;
-      }
-
-      div#idos-wrapper > span:first-child > span {
-        bottom: 0;
-      }
-
-      div#idos-wrapper > span:last-child > span {
-        top: 0;
+      div#idos-wrapper > #idos-container {
+        width: 140px;
       }
 
       div#terminal {
@@ -401,9 +391,7 @@
       </div>
 
       <div id="idos-wrapper">
-        <span><span>this is the idOS container</span></span>
         <div id="idos-container"></div>
-        <span><span>place and style it however you like</span></span>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

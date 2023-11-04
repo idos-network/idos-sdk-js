@@ -66,10 +66,11 @@ const connectWallet = {
     const {
       defaultContractId: contractId,
       contractMethods: methodNames,
+      defaultNetwork: network,
     } = idOS.near;
 
     const selector = await setupWalletSelector({
-      network: idOS.near.defaultNetwork,
+      network,
       modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
     });
 

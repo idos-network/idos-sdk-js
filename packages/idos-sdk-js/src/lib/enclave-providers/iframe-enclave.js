@@ -62,8 +62,8 @@ export class IframeEnclave extends EnclaveProvider {
       "background-color": "transparent",
       border: "none",
       display: "block",
-      height: "100%",
       width: "100%",
+      "aspect-ratio": "4/1",
     })
       .map((pair) => pair.join(": "))
       .join("; ");
