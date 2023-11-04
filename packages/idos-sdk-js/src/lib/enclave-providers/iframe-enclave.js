@@ -19,13 +19,14 @@ export class IframeEnclave extends EnclaveProvider {
       storage: { humanId, signerAddress, signerPublicKey },
     });
 
-    if (!encryptionPublicKey) {
-      this.#showEnclave();
-      encryptionPublicKey = await this.#requestToEnclave({ keys: {} });
-      this.#hideEnclave();
-    }
+    if (encryptionPublicKey) return encryptionPublicKey;
 
-    return encryptionPublicKey;
+    this.#showEnclave();
+    return this.#requestToEnclave({ keys: { usePasskeys: true } })
+      .then(encryptionPublicKey => {
+        this.#hideEnclave();
+        return encryptionPublicKey;
+      });
   }
 
   reset() {
@@ -33,14 +34,12 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async confirm(message) {
-    let response = this.#requestToEnclave({ confirm: { message } });
     this.#showEnclave();
-
-    await response;
-
-    this.#hideEnclave();
-
-    return response;
+    return this.#requestToEnclave({ confirm: { message } })
+      .then(response => {
+        this.#hideEnclave();
+        return response;
+      });
   }
 
   encrypt(message, receiverPublicKey) {
@@ -52,9 +51,9 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async #loadEnclave() {
-    this.iframe.allow = "storage-access";
+    this.iframe.allow = "storage-access; publickey-credentials-get *";
     this.iframe.referrerPolicy = "origin";
-    this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts"]
+    this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts", "popups-to-escape-sandbox"]
       .map((permission) => `allow-${permission}`)
       .join(" ");
 

@@ -151,12 +151,12 @@ const connectWallet = {
       .log("(optional) you can use our SDK as consent UI")
       .wait(
         "awaiting consent",
-        consent || idos.crypto.confirm("Do we have your consent to read data from the idOS?"),
+        consent || idos.enclave.confirm("Do we have your consent to read data from the idOS?"),
       );
     terminal.h2("Consent").log(consent);
     cache.set("consent", consent);
 
-    if (!consent) return terminal.done();
+    if (!consent) return terminal.status("done", "No consent: stopped");
   }
 
 

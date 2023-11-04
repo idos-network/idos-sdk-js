@@ -3,13 +3,14 @@
 <title>🔐 idOS Secure Enclave</title>
 <body class="min-h-screen bg-white">
   <style>
-    form {
+    main > *:not(h1) {
       display: none;
     }
 
-    code {
-      display: block;
-      margin-top: 1em;
+    p#message {
+      border-left: 1px solid black;
+      padding-left: 0.5em;
+      font-style: italic;
     }
   </style>
   <main class="p-5 max-w-screen-sm mx-auto space-y-2">
@@ -24,8 +25,6 @@
           placeholder="Your idOS password"
           class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-400 focus:ring-opacity-50 px-3 py-1.5"
         />
-
-        <!-- <code id="bip39_display" class="hidden font-semibold text-sm bg-neutral-100 p-2 rounded-md"></code> -->
 
         <div class="space-y-1">
           <p class="font-semibold text-sm">Remember for:</p>
@@ -54,12 +53,6 @@
         </div>
 
         <div class="flex flex-col items-center gap-y-3 justify-center">
-          <!-- <button
-            id="bip39"
-            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full"
-          >
-            bip39
-          </button> -->
           <input
             type="submit"
             class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full"
@@ -68,13 +61,18 @@
       </div>
     </form>
 
-    <form name="consent">
+    <form name="confirm">
       <div class="space-y-3">
-      <p id="message"></p>
-      <p>
-        <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="yes">Accept</button>
-        <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="no">Reject</button>
-      </p>
+        <p>
+          <strong>Confirmation request</strong>
+          <br>
+          <small>from&nbsp;<span id="origin"></span></small>
+        </p>
+        <p id="message"></p>
+        <p>
+          <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="yes">Accept</button>
+          <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="no">Reject</button>
+        </p>
       </div>
     </form>
   </main>
