@@ -29,7 +29,7 @@ export class Terminal {
     this.resetFullButton = wrapper.querySelector("button.reset-full");
     this.resetFullButton.addEventListener("click", async e => {
       window.localStorage.clear();
-      await idos.reset({ enclave: true })
+      await idos.reset({ enclave: true });
       window.location = window.location.origin;
     });
 
@@ -39,8 +39,9 @@ export class Terminal {
 
   log(str) {
     this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+
     this.overviewElem.scrollTo({
-      top: this.currentElem.scrollHeight,
+      top: this.overviewElem.scrollHeight,
       behavior: "smooth",
     });
 
