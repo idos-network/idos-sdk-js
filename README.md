@@ -18,19 +18,15 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) with
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-// initialize SDK
-const idos = await idOS.init({ container: "#idos" });
-await idos.auth.setEvmSigner(connectedSigner);
-await idos.crypto.init();
+// Connect your user's wallet however you do it today, for example:
+const provider = new ethers.BrowserProvider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
+const signer = await provider.getSigner();
 
-// read data from the connected user's idOS profile
-const credentials = await idos.data.list("credentials");
+// Initialize SDK
+const idos = await idOS.init({ container: "#idos-container" });
+await idos.setSigner("EVM", signer);
 
-// write data to the connected user's idOS profile
-const attribute = await idos.data.create("attributes", {
-  attribute_key: "foo",
-  value: "bar"
-});
-```
-
-See the more complete example at [apps/idos-example-dapp](./apps/idos-example-dapp).
+// Overview of user's credentials
+await idos.data.list("credentials").then(console.log);
+// [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]

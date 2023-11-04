@@ -8,176 +8,194 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) with
 
 ## Quickstart
 
+Create a container anywhere on your page, and ensure it's displayed when assigned the `visible` class.
+
+```html
+<div id="idos-container"></div>
+```
+
+```css
+div#idos-container         { display: none; }
+div#idos-container.visible { display: block; }
+```
+
+Import the SDK and initialize it with a selector for the container:
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-// initialize SDK
-const idos = await idOS.init({ container: "#idos" });
-await idos.auth.setEvmSigner(connectedSigner);
-await idos.crypto.init();
+const idos = await idOS.init({ container: "#idos-container" });
+```
 
-// read data from the connected user's idOS profile
+Connect your user's wallet and use its signer to complete the setup. If no `humanId` is returned, the user has no idOS profile.
+```js
+const { humanId } = await idos.setSigner("EVM", signer); // e.g. ethers.Signer
+```
+
+You're all set!
+```js
 const credentials = await idos.data.list("credentials");
+console.log(credentials);
+// [{ id: "4f4d...", issuer: "Fractal ID", type: "human" }, ...]
 
-// write data to the connected user's idOS profile
-const attribute = await idos.data.create("attributes", {
-  attribute_key: "foo",
-  value: "bar",
+const { id } = credentials[0];
+const { content } = await idos.data.get("credentials", id);
+const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
+```
+
+## Diving deeper
+
+### Initialization and the `#idos-container`
+
+```js
+import { idOS } from "@idos-network/idos-sdk";
+
+const idos = await idos.init({ container: "#idos-container" });
+```
+
+After importing the SDK, you initialize it with a selector string for a DOM node. Make sure to add it to your page:
+
+```html
+<div id="idos-container"></div>
+```
+
+This container will be used by the SDK to load the idOS secure enclave during initialization. The [`📁 idos-enclave`](../../apps/idos-enclave) is a sandboxed browser context, used to safekeep a keyring for cryptographic operations users need to perform. When the enclave requires user interaction, it uses this container to render UI such as the **`🔓 Unlock idOS`** button.
+
+<img src="./assets/readme-container-1.png" width="145" />
+
+To avoid surprising your UI, the SDK doesn't make itself visible and sets no CSS properties. Instead, it toggles the `visible` class on this container. This means you retain control over your UI, and need to define what "visible" means, for example:
+
+```css
+#idos-container {
+  display: none;
+}
+
+#idos-container.visible {
+  display: block;
+}
+```
+This barebones setup is enough to get you started, but you can naturally style and animate the container as you like, for example within a toast component.
+
+Our [`📁 idos-example-dapp`](../../apps/idos-example-dapp) shows an example of blending this into a UI. It wraps the container and floats it over the page, and animates its opacity when the `visible` class is applied. You can see it below (pulsating forcefully to illustrate the point):
+
+<img src="./assets/readme-container-2.gif" />
+
+### The `setSigner` flow and supported wallets
+
+```js
+const { humanId } = await idos.setSigner("EVM", signer);
+```
+
+All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavour to remember or learn two things:
+1. a public key for this signer;
+2. the idOS human ID of the user controlling this signer.
+
+The SDK first attempts to recall both from local storage and from the secure enclave. If it can't, it will engage with the signer. In this scenario, the SDK first requests a signed message from which it can extract the public key. Finally, it performs the first idOS query: asking it for the ID of the user controlling the signer.
+
+Your user's wallet will be triggered when this happens, so you should be mindful of when in your user's journey you call this method. Here's how these requests appear in MetaMask.
+
+<table border="0"><tr align="center">
+  <td><i>Asking the signer for a public key:</i></td>
+  <td><i>Fetching the human ID from idOS:</i></td>
+</tr><tr align="center">
+  <td><img src="./assets/readme-sign-1.png" width="250" /></td>
+  <td><img src="./assets/readme-sign-2.png" width="250" /></td>
+</td></tr></table>
+
+The idOS currently supports two classes of signers:
+* Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
+* NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
+
+### The idOS password
+
+Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from a password chosen by the user. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
+
+
+Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
+
+
+Users can control how long the enclave remembers this key for. When that period expires, or when faced with a new signer, the enclave will prompt the user. It first brings the idOS container into view as shown above and, after the user clicks the **`🔓 Unlock idOS`** button, a secure dialog opens where the user can safely enter their password.
+
+<table border="0"><tr align="center"><td>
+  <i>The password dialog</i>
+</td></tr><tr align="center"><td>
+  <img src="./assets/readme-dialog-password.png" width="250" />
+</td></tr></table>
+
+
+## Quick reference
+
+```js
+import { idOS } from "@idos-network/idos-sdk";
+
+idos = await idOS.init({ container: "css selector" });
+```
+
+### EVM signer setup
+
+```js
+const provider = new ethers.BrowserProvider(window.ethereum);
+await provider.send("eth_requestAccounts", []);
+const signer = await provider.getSigner());
+
+const { humanId } = await idos.setSigner("EVM", signer);
+```
+
+### NEAR signer setup
+
+```js
+const {
+  defaultContractId: contractId,
+  contractMethods: methodNames,
+  defaultNetwork: network
+} = idOS.near;
+
+const selector = await setupWalletSelector({
+  network,
+  modules: [setupMeteorWallet(), setupMeteorWallet()],
 });
+
+!selector.isSignedIn() && await new Promise(resolve => {
+  const modal = setupModal(selector, { contractId, methodNames });
+
+  modal.on("onHide", resolve);
+  modal.show();
+});
+
+const signer = selector.wallet();
+
+const { humanId } = await idos.setSigner("NEAR", signer);
 ```
 
-See the more complete example at [apps/idos-example-dapp](../../apps/idos-example-dapp).
+### idOS profile found?
 
-## "Types"
-
-```
-EvmSigner
-ethers.Signer | eip191Signer{ signMessage: Function }
-
-NearSigner
-WalletSelector.Wallet | nep413Signer{ signMessage: Function }
-
-Address
-evmAddress: string | nearAddress: string | string
-
-Profile
-{ humanId: string, address: Address }
-
-Record
-{ id: string }
-
-Attribute: Record
-{ ...Record, humanId: string, attribute_key: string, value: string }
-
-Credential: Record
-{ ...Record, humanId: string, credential_type: string, issuer: string, content: string }
-
-Wallet: Record
-{ ...Record, humanId: string, address: Address, publicKey: string, message: string, signature: string }
-
-Grant
-{ owner: Address, grantee: Address, dataId: Record.id, lockedUntil: uint32 }
-
-EncryptionPublicKey
-{ base64: string, raw: Uint8Array[32] }
-
-TableName
-"attributes" | "credentials" | "wallets"
-
-CredentialIssuer
-{ name: string, publicKey: string }
-
-CryptoOptions
-{ skipEncryption: string[] }
+```js
+if (!humanId) {
+  // no idOS profile associated with this signer
+}
 ```
 
-## Interface
+### Credentials
 
+```js
+const credentials = await idos.data.list("credentials");
+const credentials = await idos.data.list("credentials", { issuer: "Fractal ID" };
+
+const { id } = credentials.find(c => c.credential_type === "basic");
+
+const { content } = await idos.data.get("credentials", id);
+
+const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
 ```
-idos =
-    idOS.init({
-        container: cssSelector,
-        nodeUrl: string?,
-    }) -> Promise{ new idOS() }
 
-idos.auth.
+### Creating / updating / deleting data
 
-    setEvmSigner(
-        EvmSigner,
-    ) -> null
+```js
+const { id } = await idos.data.create("attributes", {
+  attribute_key: "highScore",
+  value: "10",
+});
 
-    setNearSigner(
-        NearSigner,
-    ) -> null
+await idos.data.update("attributes", { id, value: "1000" });
 
-    currentUser(
-    ) -> Promise{ Profile }
-
-idos.crypto.
-
-    init(
-    ) -> Promise{ EncryptionPublicKey }
-
-idos.data.
-
-    list(
-        TableName,
-        Record?,
-    ) -> Promise{ Record[] }
-
-    get(
-        TableName,
-        Record.id,
-    ) -> Promise{ Record }
-
-    create(
-        TableName,
-        Record,
-        EncryptionPublicKey.base64?,
-        CryptoOptions?,
-    ) -> Promise{ Record }
-
-    update(
-        TableName,
-        Record{ id },
-        CryptoOptions?,
-    ) -> Promise{ Record }
-
-    delete(
-        TableName,
-        Record.id,
-    ) -> Promise{ Record }
-
-    share(
-        TableName,
-        Record{ id },
-    ) -> Promise{ Record'{} )
-
-idos.grants.
-
-    init({
-        type: "evm",
-        signer: EvmSigner,
-    }) -> null
-
-    init({
-        type: "near",
-        accountId: nearAddress,
-        wallet: NearSigner,
-        contractId?: nearAddress,
-    }) -> null
-
-    list({
-        owner: Grant.owner?,
-        grantee: Grant.grantee?,
-        dataId: Grant.dataId?,
-    }) -> Promise{ Grant[] }
-
-    create({
-        grantee: Grant.grantee,
-        dataId: Grant.dataId,
-        lockedUntil: Grant.lockedUntil?,
-        wait: boolean?,
-    }) -> Promise{ { transactionId: string } }
-
-    revoke({
-        grantee: Grant.grantee,
-        dataId: Grant.dataId,
-        lockedUntil: Grant.lockedUntil?,
-        wait: boolean?,
-    }) -> Promise{ { transactionId: string } }
-
-    near.contractMethods -> string[]
-
-idos.verifiableCredentials.
-
-    verify(
-        Credential.content,
-        {
-            allowedSigners?: jsigs.suites.LinkedDataSignature | jsigs.suites.LinkedDataSignature[],
-            allowedIssuers?: string[],
-            signatureBuilders?: Object.{ string, (any) => Promise{ jsigs.suites.LinkedDataSignature } },
-            documentLoader?: jsonld.documentLoader,
-        }?,
-    ) -> boolean
+await idos.data.delete("attributes", { id });
 ```
