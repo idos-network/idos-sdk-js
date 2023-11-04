@@ -22,7 +22,7 @@ export class IframeEnclave extends EnclaveProvider {
     if (encryptionPublicKey) return encryptionPublicKey;
 
     this.#showEnclave();
-    return this.#requestToEnclave({ keys: { usePasskeys: true } })
+    return this.#requestToEnclave({ keys: { usePasskeys: false } })
       .then(encryptionPublicKey => {
         this.#hideEnclave();
         return encryptionPublicKey;
