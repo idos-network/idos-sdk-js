@@ -46,7 +46,7 @@ export default function App() {
     try {
       await metamask.connect();
       const signer = await setupEvmWallet();
-      await idOS.setSigner("EVM", signer);
+      idOS.setSigner("EVM", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -59,7 +59,7 @@ export default function App() {
     setIsLoading(true);
     try {
       const signer = await setUpNearWallet();
-      await idOS.setSigner("NEAR", signer);
+      idOS.setSigner("NEAR", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -86,7 +86,6 @@ export default function App() {
           setIsConnected(true);
           setIsLoading(false);
         }
-        setIsConnected(true);
         setIsLoading(false);
       })();
     }

@@ -14,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { AddWallet } from "./components/add-wallet";
 import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
@@ -23,8 +24,11 @@ export function Component() {
   const wallets = useFetchWallets();
   const [wallet, setWallet] = useState<Wallet | undefined>();
   const { isOpen, onOpen, onClose } = useDisclosure();
-
-  const onAddWallet = () => {};
+  const {
+    isOpen: isAddWalletOpen,
+    onOpen: onAddWalletOpen,
+    onClose: onAddWalletClose
+  } = useDisclosure();
 
   const handleDeleteWalletClose = () => {
     setWallet(undefined);
@@ -34,6 +38,14 @@ export function Component() {
   const onDeleteWallet = async (wallet: Wallet) => {
     setWallet(wallet);
     onOpen();
+  };
+
+  const handleOnAddWalletOpen = () => {
+    onAddWalletOpen();
+  };
+
+  const handleOnAddWalletClose = () => {
+    onAddWalletClose();
   };
 
   return (
@@ -60,7 +72,7 @@ export function Component() {
             colorScheme="green"
             hideBelow="lg"
             leftIcon={<PlusIcon size={24} />}
-            onClick={onAddWallet}
+            onClick={handleOnAddWalletOpen}
             size="xl"
           >
             Add wallet
@@ -75,7 +87,7 @@ export function Component() {
           {wallets.isSuccess ? (
             <VStack alignItems="stretch" gap={2.5}>
               {wallets.data.length === 0 ? (
-                <AddWalletCard onAddWallet={onAddWallet} />
+                <AddWalletCard onAddWallet={handleOnAddWalletOpen} />
               ) : (
                 wallets.data.map((wallet) => (
                   <WalletCard
@@ -96,6 +108,8 @@ export function Component() {
           onClose={handleDeleteWalletClose}
         />
       ) : null}
+
+      <AddWallet isOpen={isAddWalletOpen} onClose={handleOnAddWalletClose} />
     </Box>
   );
 }

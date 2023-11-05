@@ -1,10 +1,8 @@
 import { setupNearWalletSelector } from "#/lib/ near/utils";
-import { ComingSoon } from "#/lib/components/coming-soon";
 import { NavLink, type LinkProps } from "#/lib/components/link";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { useEffect, useState } from "react";
-import { AttributeIcon } from "../icons/attribute";
 import { KeyRoundIcon } from "../icons/key-round";
 import { SignOutIcon } from "../icons/sign-out";
 import { WalletIcon } from "../icons/wallet";
@@ -86,11 +84,6 @@ export const Sidebar = () => {
         <SidebarLink to="/wallets">
           <WalletIcon w={6} h={6} stroke="neutral.100" />
           Wallets
-        </SidebarLink>
-        <SidebarLink to="/attributes" disabled>
-          <AttributeIcon w={6} h={6} stroke="neutral.600" />
-          Attributes
-          <ComingSoon mr={-6} />
         </SidebarLink>
       </VStack>
       <Box mt="auto">

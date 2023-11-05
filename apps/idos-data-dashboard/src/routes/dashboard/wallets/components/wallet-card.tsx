@@ -1,6 +1,14 @@
 import Metamask from "#/assets/metamask.svg";
 import Near from "#/assets/near.svg";
-import { Button, Center, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Center,
+  HStack,
+  IconButton,
+  Image,
+  Text,
+  VStack
+} from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
 import { Wallet } from "../queries";
 type WalletCardProps = {
@@ -33,12 +41,16 @@ export const WalletCard = (props: WalletCardProps) => {
           <Text color="neutral.600" fontSize="sm">
             Address
           </Text>
-          <Text w={240} isTruncated>
+          <Text maxW={160} isTruncated>
             {props.wallet.address}
           </Text>
         </VStack>
       </Center>
+      <IconButton aria-label="Delete wallet" hideFrom="md" size="sm">
+        <XIcon size={24} />
+      </IconButton>
       <Button
+        hideBelow="md"
         leftIcon={<XIcon size={24} />}
         onClick={() => props.onDeleteWallet(props.wallet)}
         variant="ghost"
