@@ -26,9 +26,9 @@ import { idOS } from "@idos-network/idos-sdk";
 const idos = await idOS.init({ container: "#idos-container" });
 ```
 
-Connect your user's wallet and use its signer to complete the setup. If no `humanId` is returned, the user has no idOS profile.
+Connect your user's wallet and use its signer to complete the setup.
 ```js
-const { humanId } = await idos.setSigner("EVM", signer); // e.g. ethers.Signer
+await idos.setSigner("EVM", signer); // e.g. ethers.Signer
 ```
 
 You're all set!
@@ -166,12 +166,17 @@ const signer = selector.wallet();
 const { humanId } = await idos.setSigner("NEAR", signer);
 ```
 
-### idOS profile found?
+### idOS profile
+
 
 ```js
-if (!humanId) {
-  // no idOS profile associated with this signer
-}
+if (humanId) { /* user has an idOS profile */ }
+```
+
+If your user does not have an idOS profile, you can send them to Fractal ID for them to get one, by redirecting them to the first URL in `idOS.profileProviders`. By using that URL, you agree to [Fractal ID's Terms of Service](https://web.fractal.id/wp-content/uploads/2023/11/Onboarding-link.pdf).
+
+```js
+if (!humanId) window.location = idOs.profileProviders[0];
 ```
 
 ### Credentials
@@ -197,5 +202,5 @@ const { id } = await idos.data.create("attributes", {
 
 await idos.data.update("attributes", { id, value: "1000" });
 
-await idos.data.delete("attributes", { id });
+await idos.data.delete("attributes", id);
 ```
