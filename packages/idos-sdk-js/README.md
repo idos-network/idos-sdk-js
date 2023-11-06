@@ -42,6 +42,12 @@ const { content } = await idos.data.get("credentials", id);
 const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
 ```
 
+> [!NOTE]
+> For more examples and data queries, see:
+> * the [quick reference](#quick-reference) below
+> * [`📁 idos-example-dapp`](../../apps/idos-example-dapp) for a simple implementation
+> * [`📁 idos-data-dashboard`](../../apps/idos-example-dapp) for a thorough example
+
 ## Diving deeper
 
 ### Initialization and the `#idos-container`
@@ -123,6 +129,8 @@ Users can control how long the enclave remembers this key for. When that period 
 
 
 ## Quick reference
+
+### Importing and initializing
 
 ```js
 import { idOS } from "@idos-network/idos-sdk";
