@@ -4,8 +4,8 @@ export const Title = (props: HeadingProps) => {
   return (
     <Heading
       as="h1"
-      fontSize="40px"
-      fontWeight="medium"
+      fontSize={[32, "40px"]}
+      fontWeight={["semibold", "medium"]}
       lineHeight="1"
       {...props}
     />

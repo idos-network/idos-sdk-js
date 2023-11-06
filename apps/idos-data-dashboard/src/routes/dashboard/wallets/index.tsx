@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Spinner,
   Stack,
   Text,
@@ -51,7 +52,7 @@ export function Component() {
   return (
     <Box>
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
-        <Flex align="center" justify="space-between" h={125}>
+        <Flex align="center" justify="space-between" h={[82, 125]}>
           <Breadcrumbs items={["Dashboard", "Wallets"]} />
         </Flex>
         <Flex align="center" gap={2.5}>
@@ -68,6 +69,18 @@ export function Component() {
               </Text>
             )}
           </TitleBar>
+          <IconButton
+            w="60px"
+            h="60px"
+            p={0}
+            aria-label="Add wallet"
+            colorScheme="green"
+            hideFrom="lg"
+            onClick={handleOnAddWalletOpen}
+            size="xl"
+          >
+            <PlusIcon size={24} />
+          </IconButton>
           <Button
             colorScheme="green"
             hideBelow="lg"

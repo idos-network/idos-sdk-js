@@ -1,12 +1,16 @@
 import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
 import { ConnectedWallet } from "#/lib/components/connected-wallet";
 import { Sidebar } from "#/lib/components/sidebar";
-import { Box, Flex, Image } from "@chakra-ui/react";
+import { Box, Flex, IconButton, Image } from "@chakra-ui/react";
+import { MenuIcon } from "lucide-react";
 import { Outlet } from "react-router-dom";
 
 export function Component() {
   return (
-    <Box minH="100vh" px={[5, 10]}>
+    <Box minH="100vh" px={[5, 10]} py={5}>
+      <IconButton aria-label="Toggle menu" hideFrom="lg">
+        <MenuIcon size={24} />
+      </IconButton>
       <Flex
         pos="fixed"
         top={0}

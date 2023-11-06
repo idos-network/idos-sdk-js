@@ -13,7 +13,8 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { KeyIcon } from "lucide-react";
+
+import { KeyRoundIcon } from "#/lib/components/icons/key-round.tsx";
 import { useDeleteCredential } from "../mutations";
 import { Credential } from "../queries";
 
@@ -53,6 +54,7 @@ export const DeleteCredential = (props: DeleteCredentialProps) => {
           <Flex direction="column" gap={10}>
             <Text>Do you want to delete this credential?</Text>
             <Flex
+              align="center"
               gap={14}
               p={8}
               bg="neutral.800"
@@ -61,7 +63,7 @@ export const DeleteCredential = (props: DeleteCredentialProps) => {
               rounded="xl"
             >
               <Box>
-                <KeyIcon size={26} color="#00ffb9" />
+                <KeyRoundIcon w={26} h={26} stroke="neutral.100" />
               </Box>
               <VStack align="start" gap={2}>
                 <Heading color="neutral.600" fontWeight="medium" size="sm">

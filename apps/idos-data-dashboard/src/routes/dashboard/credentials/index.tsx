@@ -69,7 +69,7 @@ export function Component() {
   return (
     <Box>
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
-        <Flex align="center" justify="space-between" h={125}>
+        <Flex align="center" justify="space-between" h={[82, 125]}>
           <Breadcrumbs items={["Dashboard", "Credentials"]} />
         </Flex>
         <Flex align="center" gap={2.5}>
