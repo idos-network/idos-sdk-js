@@ -72,6 +72,7 @@ export const Sidebar = () => {
       as="nav"
       direction="column"
       flex="1"
+      h={["100%", "auto"]}
       p={5}
       bg="neutral.900"
       rounded="xl"

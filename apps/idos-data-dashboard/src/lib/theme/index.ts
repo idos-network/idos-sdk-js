@@ -1,4 +1,4 @@
-import { modalAnatomy } from "@chakra-ui/anatomy";
+import { drawerAnatomy, modalAnatomy } from "@chakra-ui/anatomy";
 import {
   ComponentStyleConfig,
   createMultiStyleConfigHelpers,
@@ -8,7 +8,7 @@ import {
 const { definePartsStyle, defineMultiStyleConfig } =
   createMultiStyleConfigHelpers(modalAnatomy.keys);
 
-const baseStyle = definePartsStyle({
+const modalBaseStyle = definePartsStyle({
   dialog: {
     bg: "neutral.900",
     border: "1px solid",
@@ -18,7 +18,21 @@ const baseStyle = definePartsStyle({
   }
 });
 
-export const modalTheme = defineMultiStyleConfig({ baseStyle });
+const {
+  definePartsStyle: defineDrawerPartsStyle,
+  defineMultiStyleConfig: defineDrawerStyleConfig
+} = createMultiStyleConfigHelpers(drawerAnatomy.keys);
+
+const drawerBaseStyle = defineDrawerPartsStyle({
+  dialog: {
+    bg: "neutral.900"
+  }
+});
+
+export const modalTheme = defineMultiStyleConfig({ baseStyle: modalBaseStyle });
+export const drawerTheme = defineDrawerStyleConfig({
+  baseStyle: drawerBaseStyle
+});
 
 export const theme = extendTheme({
   colors: {
@@ -94,6 +108,7 @@ export const theme = extendTheme({
         }
       }
     } satisfies ComponentStyleConfig,
-    Modal: modalTheme
+    Modal: modalTheme,
+    Drawer: drawerTheme
   }
 });

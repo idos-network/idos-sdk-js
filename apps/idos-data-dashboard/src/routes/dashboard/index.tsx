@@ -1,14 +1,34 @@
 import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
 import { ConnectedWallet } from "#/lib/components/connected-wallet";
 import { Sidebar } from "#/lib/components/sidebar";
-import { Box, Flex, IconButton, Image } from "@chakra-ui/react";
+import {
+  Box,
+  Drawer,
+  DrawerBody,
+  DrawerCloseButton,
+  DrawerContent,
+  DrawerHeader,
+  DrawerOverlay,
+  Flex,
+  IconButton,
+  Image,
+  useDisclosure
+} from "@chakra-ui/react";
 import { MenuIcon } from "lucide-react";
-import { Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 
 export function Component() {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const location = useLocation();
+  useEffect(() => {
+    onClose();
+  }, [location]);
+
   return (
     <Box minH="100vh" px={[5, 10]} py={5}>
-      <IconButton aria-label="Toggle menu" hideFrom="lg">
+      <IconButton aria-label="Toggle menu" hideFrom="lg" onClick={onOpen}>
         <MenuIcon size={24} />
       </IconButton>
       <Flex
@@ -37,6 +57,16 @@ export function Component() {
       <Box as="main" maxW={["100%", "100%", "100%", "80vw"]}>
         <Outlet />
       </Box>
+      <Drawer isOpen={isOpen} onClose={onClose} placement="left">
+        <DrawerOverlay />
+        <DrawerContent>
+          <DrawerHeader />
+          <DrawerCloseButton />
+          <DrawerBody flex="1" p={0}>
+            <Sidebar />
+          </DrawerBody>
+        </DrawerContent>
+      </Drawer>
     </Box>
   );
 }
