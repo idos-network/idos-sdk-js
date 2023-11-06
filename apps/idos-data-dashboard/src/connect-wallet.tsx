@@ -36,7 +36,7 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
         border="1px solid"
         borderColor="neutral.800"
         shadow="lg"
-        rounded="xl"
+        rounded="2xl"
       >
         <Box mx="auto">
           <Image alt="idOS Data Dashboard" src={idOSDashboardLogo} />

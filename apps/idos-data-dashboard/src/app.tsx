@@ -46,7 +46,7 @@ export default function App() {
     try {
       await metamask.connect();
       const signer = await setupEvmWallet();
-      idOS.setSigner("EVM", signer);
+      await idOS.setSigner("EVM", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -59,7 +59,7 @@ export default function App() {
     setIsLoading(true);
     try {
       const signer = await setUpNearWallet();
-      idOS.setSigner("NEAR", signer);
+      await idOS.setSigner("NEAR", signer);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -74,7 +74,7 @@ export default function App() {
       (async () => {
         if (metamask.status === "connected") {
           const signer = await setupEvmWallet();
-          idOS.setSigner("EVM", signer);
+          await idOS.setSigner("EVM", signer);
           setIsConnected(true);
           setIsLoading(false);
         }
@@ -82,7 +82,7 @@ export default function App() {
         const selector = await setupNearWalletSelector();
         if (selector.isSignedIn()) {
           const signer = await setUpNearWallet();
-          idOS.setSigner("NEAR", signer);
+          await idOS.setSigner("NEAR", signer);
           setIsConnected(true);
           setIsLoading(false);
         }
@@ -90,6 +90,12 @@ export default function App() {
       })();
     }
   });
+
+  useEffect(() => {
+    if (metamask.status === "notConnected") {
+      setIsConnected(false);
+    }
+  }, [metamask.status]);
 
   if (isLoading) {
     return (

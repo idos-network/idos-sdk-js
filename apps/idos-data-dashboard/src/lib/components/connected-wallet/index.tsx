@@ -38,7 +38,7 @@ export const ConnectedWallet = () => {
       </Center>
       <Box>
         <Text>Connected Wallet</Text>
-        <Text color="neutral.600" isTruncated>
+        <Text maxW={180} color="neutral.600" isTruncated>
           {address}
         </Text>
       </Box>

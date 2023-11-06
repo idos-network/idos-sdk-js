@@ -1,6 +1,7 @@
 import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
+import { useFetchCurrentUser } from "#/lib/queries";
 import { DeleteCredential } from "#/routes/dashboard/credentials/components/delete-credential";
 import {
   AbsoluteCenter,
@@ -41,6 +42,7 @@ export function Component() {
 
   const credentials = useFetchCredentials();
   const [credential, setCredential] = useState<Credential | undefined>();
+  const currentUser = useFetchCurrentUser();
 
   const handleOpenCredentialViewer = (credential: Credential) => {
     setCredential(credential);
@@ -75,7 +77,7 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Credentials</Title>
-            {credentials.isLoading ? (
+            {currentUser.isPending || credentials.isPending ? (
               <Spinner size="sm" />
             ) : (
               <Text>
@@ -100,14 +102,14 @@ export function Component() {
         </Flex>
 
         <Box>
-          {credentials.isFetching ? (
+          {credentials.isPending || currentUser.isPending ? (
             <AbsoluteCenter>
               <Spinner />
             </AbsoluteCenter>
           ) : null}
           {credentials.isSuccess ? (
             <>
-              {credentials.data.length === 0 ? (
+              {!currentUser.data?.humanId || credentials.data.length === 0 ? (
                 <AddCredentialCard onAddCredential={onAddCredential} />
               ) : (
                 credentials.data.map((credential) => (

@@ -27,7 +27,7 @@ export function Component() {
   }, [location]);
 
   return (
-    <Box minH="100vh" px={[5, 10]} py={5}>
+    <Box minH="100vh" px={[5, 10]} py={[5, 0]}>
       <IconButton aria-label="Toggle menu" hideFrom="lg" onClick={onOpen}>
         <MenuIcon size={24} />
       </IconButton>
