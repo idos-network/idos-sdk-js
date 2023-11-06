@@ -13,7 +13,6 @@ import {
   VStack
 } from "@chakra-ui/react";
 
-import { useState } from "react";
 import WalletAddress from "../assets/wallet-address.svg";
 import WalletsGrid from "../assets/wallets-grid.svg";
 
@@ -46,12 +45,7 @@ const AddWalletButton = (props: BoxProps) => {
   );
 };
 
-type AddWalletMode = "manual" | "wallet-selector";
-
 export const AddWallet = (props: AddWalletProps) => {
-  const [mode, setMode] = useState<AddWalletMode | undefined>();
-  console.log(mode);
-
   return (
     <Modal
       isOpen={props.isOpen}
@@ -71,22 +65,14 @@ export const AddWallet = (props: AddWalletProps) => {
         <ModalCloseButton />
         <ModalBody mb={4}>
           <HStack gap={3}>
-            <AddWalletButton
-              onClick={() => {
-                setMode("manual");
-              }}
-            >
+            <AddWalletButton>
               <Image alt="Insert wallet address" src={WalletAddress} />
               <Text as="span" color="neutral.500">
                 Insert wallet <br />
                 address
               </Text>
             </AddWalletButton>
-            <AddWalletButton
-              onClick={() => {
-                setMode("wallet-selector");
-              }}
-            >
+            <AddWalletButton>
               <Image
                 w={120}
                 h={108}
