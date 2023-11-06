@@ -61,7 +61,7 @@ export class Terminal {
   h2(html) {
     return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
-  
+
   table(items = [], keyFilter = [], handlers) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
