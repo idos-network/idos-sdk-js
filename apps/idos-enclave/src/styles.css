@@ -5,13 +5,3 @@
 :root {
   @apply antialiased;
 }
-
-#container {
-  container-type: size;
-}
-
-@media (max-aspect-ratio: 7/2) {
-  button#start {
-    font-size: 20cqmin;
-  }
-}
