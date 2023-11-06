@@ -46,7 +46,7 @@ const isValid = await idOS.verifiableCredentials.verify(content).catch(e => fals
 > For more examples and data queries, see:
 > * the [quick reference](#quick-reference) below
 > * [`📁 idos-example-dapp`](../../main/apps/idos-example-dapp) for a simple implementation
-> * [`📁 idos-data-dashboard`](../../main/apps/idos-example-dapp) for a thorough example
+> * [`📁 idos-data-dashboard`](../../main/apps/idos-data-dashboard) for a thorough example
 
 ## Diving deeper
 
