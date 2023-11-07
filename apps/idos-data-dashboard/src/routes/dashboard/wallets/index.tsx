@@ -1,160 +1,130 @@
-import { Box, Button, Flex, useDisclosure, useToast } from "@chakra-ui/react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-
-import { ConfirmDialog } from "@/lib/components/confirm-dialog.tsx";
-
+import { Breadcrumbs } from "#/lib/components/breadcrumbs";
+import { Title } from "#/lib/components/title";
+import { TitleBar } from "#/lib/components/title-bar";
 import {
-  WalletEditor,
-  WalletEditorFormValues
-} from "./components/wallet-editor";
-import { WalletsTable } from "./components/wallets-table";
-import { useCreateWallet, useRemoveWallet } from "./mutations";
-import { useFetchWallets } from "./queries";
-import { Wallet } from "./types";
+  AbsoluteCenter,
+  Box,
+  Button,
+  Flex,
+  IconButton,
+  Spinner,
+  Stack,
+  Text,
+  useDisclosure,
+  VStack
+} from "@chakra-ui/react";
+import { PlusIcon } from "lucide-react";
+import { useState } from "react";
+import { AddWallet } from "./components/add-wallet";
+import { AddWalletCard } from "./components/add-wallet-card";
+import { DeleteWallet } from "./components/delete-wallet";
+import { WalletCard } from "./components/wallet-card";
+import { useFetchWallets, Wallet } from "./queries";
 
 export function Component() {
-  const queryClient = useQueryClient();
-  const toast = useToast();
-  const { t } = useTranslation();
-  const [wallet, setWallet] = useState<Wallet>();
-
-  const {
-    isOpen: isEditorOpen,
-    onOpen: onEditorOpen,
-    onClose: onEditorClose
-  } = useDisclosure();
-  const {
-    isOpen: isConfirmOpen,
-    onOpen: onConfirmOpen,
-    onClose: onConfirmClose
-  } = useDisclosure();
-
   const wallets = useFetchWallets();
+  const [wallet, setWallet] = useState<Wallet | undefined>();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isAddWalletOpen,
+    onOpen: onAddWalletOpen,
+    onClose: onAddWalletClose
+  } = useDisclosure();
 
-  const createWallet = useCreateWallet({
-    async onMutate(wallet) {
-      await queryClient.cancelQueries(useFetchWallets.getKey());
-      const previousWallets = wallets.data;
-      if (previousWallets) {
-        wallets.setData([
-          ...previousWallets,
-          { ...wallet, human_id: "", message: "", signature: "", id: "" }
-        ]);
-      }
-      return { previousWallets };
-    },
-    onError(_, __, context) {
-      if (context?.previousWallets) {
-        wallets.setData(context.previousWallets);
-      }
-    }
-  });
-  const removeWallet = useRemoveWallet({
-    async onMutate(wallet) {
-      await queryClient.cancelQueries(useFetchWallets.getKey());
-      const previousWallets = wallets.data;
-      if (previousWallets) {
-        wallets.setData([...previousWallets.filter((w) => w.id !== wallet.id)]);
-      }
-      return { previousWallets };
-    },
-    onError(_, __, context) {
-      if (context?.previousWallets) {
-        wallets.setData(context.previousWallets);
-      }
-    }
-  });
-
-  const onEditorSubmit = (values: WalletEditorFormValues) => {
-    onEditorClose();
-    createWallet.mutate(
-      {
-        ...values
-      },
-      {
-        onSuccess() {
-          toast({
-            title: t("wallet-successfully-created")
-          });
-        },
-        onError() {
-          toast({
-            title: t("error-while-adding-wallet"),
-            status: "error"
-          });
-        }
-      }
-    );
+  const handleDeleteWalletClose = () => {
+    setWallet(undefined);
+    onClose();
   };
 
-  const onWalletRemove = (wallet: Wallet) => {
+  const onDeleteWallet = async (wallet: Wallet) => {
     setWallet(wallet);
-    onConfirmOpen();
+    onOpen();
   };
 
-  const onWalletRemoveCancel = () => {
-    setWallet(undefined);
-    onConfirmClose();
+  const handleOnAddWalletOpen = () => {
+    onAddWalletOpen();
   };
 
-  const onRemoveConfirm = () => {
-    onConfirmClose();
-    setWallet(undefined);
-    if (wallet) {
-      removeWallet.mutate(
-        {
-          id: wallet.id
-        },
-        {
-          onSuccess() {
-            toast({
-              title: t("wallet-successfully-removed")
-            });
-          },
-          onError() {
-            toast({
-              title: t("error-while-removing-wallet"),
-              status: "error"
-            });
-          }
-        }
-      );
-    }
+  const handleOnAddWalletClose = () => {
+    onAddWalletClose();
   };
-
-  const isLoading =
-    wallets.isFetching || createWallet.isLoading || removeWallet.isLoading;
 
   return (
     <Box>
-      <Flex align="center" justify="end" mb={5}>
-        <Button colorScheme="green" onClick={onEditorOpen} variant="outline">
-          {t("new-wallet")}
-        </Button>
-      </Flex>
-      <WalletsTable
-        isLoading={isLoading}
-        wallets={wallets.data}
-        onWalletRemove={onWalletRemove}
-      />
-      <WalletEditor
-        isOpen={isEditorOpen}
-        onClose={onEditorClose}
-        onSubmit={onEditorSubmit}
-        isLoading={createWallet.isLoading}
-      />
-      <ConfirmDialog
-        isOpen={isConfirmOpen}
-        onClose={onWalletRemoveCancel}
-        onConfirm={onRemoveConfirm}
-        title={t("remove-wallet")}
-        isLoading={removeWallet.isLoading}
-        description={t("are-sure-you-want-to-remove-wallet", {
-          address: wallet?.address
-        })}
-      />
+      <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
+        <Flex align="center" justify="space-between" h={[82, 125]}>
+          <Breadcrumbs items={["Dashboard", "Wallets"]} />
+        </Flex>
+        <Flex align="center" gap={2.5}>
+          <TitleBar>
+            <Title>Wallets</Title>
+            {wallets.isLoading ? (
+              <Spinner size="sm" />
+            ) : (
+              <Text>
+                {wallets.data?.length}
+                <Text as="span" mx={1} hideBelow="xl">
+                  Connected wallet(s)
+                </Text>
+              </Text>
+            )}
+          </TitleBar>
+          <IconButton
+            w="60px"
+            h="60px"
+            p={0}
+            aria-label="Add wallet"
+            colorScheme="green"
+            hideFrom="lg"
+            onClick={handleOnAddWalletOpen}
+            size="xl"
+          >
+            <PlusIcon size={24} />
+          </IconButton>
+          <Button
+            colorScheme="green"
+            hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
+            onClick={handleOnAddWalletOpen}
+            size="xl"
+          >
+            Add wallet
+          </Button>
+        </Flex>
+        <Box>
+          {wallets.isFetching ? (
+            <AbsoluteCenter>
+              <Spinner />
+            </AbsoluteCenter>
+          ) : null}
+          {wallets.isSuccess ? (
+            <VStack alignItems="stretch" gap={2.5}>
+              {wallets.data.length === 0 ? (
+                <AddWalletCard onAddWallet={handleOnAddWalletOpen} />
+              ) : (
+                wallets.data.map((wallet) => (
+                  <WalletCard
+                    key={wallet.id}
+                    wallet={wallet}
+                    onDeleteWallet={onDeleteWallet}
+                  />
+                ))
+              )}
+            </VStack>
+          ) : null}
+        </Box>
+      </Stack>
+      {wallet ? (
+        <DeleteWallet
+          isOpen={isOpen}
+          wallet={wallet}
+          onClose={handleDeleteWalletClose}
+        />
+      ) : null}
+
+      <AddWallet isOpen={isAddWalletOpen} onClose={handleOnAddWalletClose} />
     </Box>
   );
 }
+
+Component.displayName = "DashboardWallets";

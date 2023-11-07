@@ -9,28 +9,36 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text
+  Spinner
 } from "@chakra-ui/react";
-import { useTranslation } from "react-i18next";
 
-import { Loading } from "@/lib/components/loading";
-import { useFetchCredentialDetails } from "../queries";
-import { Credential } from "../types";
+import { DownloadIcon } from "lucide-react";
+import { Credential, useFetchCredentialDetails } from "../queries";
 
 export type CredentialViewerProps = {
   isOpen: boolean;
-  credential?: Credential;
+  credential: Credential;
   onClose: () => void;
 };
 
-export function CredentialViewer(props: CredentialViewerProps) {
-  const { t } = useTranslation();
+export const CredentialViewer = (props: CredentialViewerProps) => {
   const credential = useFetchCredentialDetails({
     variables: {
-      id: props.credential?.id as string
+      id: props.credential.id
     },
-    enabled: !!props.credential?.id && props.isOpen
+    enabled: !!props.credential.id && props.isOpen
   });
+
+  const onDownload = () => {
+    // create a donwlodable json file
+    if (credential.data) {
+      const file = new Blob([credential.data?.content], {
+        type: "application/json"
+      });
+      const href = URL.createObjectURL(file);
+      window.open(href, "_blank");
+    }
+  };
 
   return (
     <Modal
@@ -44,62 +52,55 @@ export function CredentialViewer(props: CredentialViewerProps) {
       <ModalOverlay />
       <ModalContent>
         {credential.isFetching ? (
-          <Center p={10}>
-            <Loading />
+          <Center>
+            <Spinner />
           </Center>
         ) : credential.isError ? (
           <>
-            <ModalHeader isTruncated>
-              {t("credential", {
-                type: credential.data?.credential_type,
-                issuer: credential.data?.issuer
-              })}
-            </ModalHeader>
             <ModalCloseButton />
             <ModalBody>
-              <Center p={10}>
-                <Text color="red.400" fontWeight="semibold">
-                  {t("error-while-reading-credential")}
-                </Text>
+              <Center p={5}>
+                <Code px={3} py={1} color="red.400" rounded="lg">
+                  Error while reading credential data
+                </Code>
               </Center>
             </ModalBody>
             <ModalFooter>
-              <Button
-                mr={3}
-                colorScheme="orange"
-                onClick={() => credential.refetch()}
-              >
-                {t("retry")}
+              <Button mr={3} onClick={() => credential.refetch()}>
+                Retry
               </Button>
               <Button onClick={props.onClose} variant="ghost">
-                {t("cancel")}
+                Cancel
               </Button>
             </ModalFooter>
           </>
         ) : (
           <>
-            <ModalHeader isTruncated>
-              {t("credential", {
-                type: credential.data?.credential_type,
-                issuer: credential.data?.issuer
-              })}
-            </ModalHeader>
+            <ModalHeader />
             <ModalCloseButton />
-
             <ModalBody>
-              <Code overflowX="auto" maxW="100%" whiteSpace="pre">
+              <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre">
                 {credential.data?.content}
               </Code>
             </ModalBody>
 
-            <ModalFooter>
-              <Button colorScheme="orange" onClick={props.onClose}>
-                {t("done")}
+            <ModalFooter alignItems="center" justifyContent="center" gap={10}>
+              <Button onClick={props.onClose} variant="outline">
+                Close
               </Button>
+              {credential.isSuccess ? (
+                <Button
+                  colorScheme="green"
+                  leftIcon={<DownloadIcon />}
+                  onClick={onDownload}
+                >
+                  Download .json file
+                </Button>
+              ) : null}
             </ModalFooter>
           </>
         )}
       </ModalContent>
     </Modal>
   );
-}
+};

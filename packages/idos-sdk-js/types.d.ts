@@ -2,13 +2,13 @@ import { WebKwil } from "@kwilteam/kwil-js";
 import { ActionBuilder } from "@kwilteam/kwil-js/dist/core/builders";
 import { Database } from "@kwilteam/kwil-js/dist/core/database";
 import { GenericResponse } from "@kwilteam/kwil-js/dist/core/resreq";
-import { Signer } from "ethers";
+import { JsonRpcSigner, Signer } from "ethers";
 
 declare class Auth {
   idOS: idOS;
   constructor(idOS: idOS);
   setEnclaveSigner(): Promise<void>;
-  setEvmSigner(signer: Signer): Promise<void>;
+  setEvmSigner(signer: JsonRpcSigner): Promise<void>;
   setNearSigner<Wallet = any>(wallet: Wallet, recipient?: string): Promise<void>;
   currentUser(): Promise<AuthUser>;
 }
@@ -50,12 +50,13 @@ export declare class idOS {
   data: Data;
   kwilWrapper: KwilWrapper;
   grants: Grants;
+  setSigner(type: "NEAR" | "EVM", signer: unknown): Promise<AuthUser>;
   static init(options: InitOptions): Promise<idOS>;
-  static near: Grants.near;
+  static near: Grants["near"];
 }
 
 declare interface InitOptions {
-  nodeUrl: string;
+  nodeUrl?: string;
   container: string;
 }
 
@@ -82,7 +83,7 @@ declare class KwilWrapper {
 }
 
 declare class Grants {
-  near: { defaultContractId: string; contractMethods: string[] };
+  near: { defaultContractId: string; contractMethods: string[]; defaultNetwork: string };
   init(args: Record<string, unknown>): Promise<void>;
   list({ owner, grantee, dataId }: { owner?: string; grantee?: string; dataId?: string }): Promise<any>;
   create(
