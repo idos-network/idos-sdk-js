@@ -6,18 +6,18 @@ export class EnclaveProvider {
   }
 
   async init() {
-    throw new Error(`${this.constructor} doesn't implement method \`init()\'.`);
+    throw new Error(`${this.constructor} doesn't implement method \`init()\`.`);
   }
 
   async reset() {
-    throw new Error(`${this.constructor} doesn't implement method \`init()\'.`);
+    throw new Error(`${this.constructor} doesn't implement method \`init()\`.`);
   }
 
   async encrypt() {
-    throw new Error(`${this.constructor} doesn't implement method \`encrypt()\'.`);
+    throw new Error(`${this.constructor} doesn't implement method \`encrypt()\`.`);
   }
 
   async decrypt() {
-    throw new Error(`${this.constructor} doesn't implement method \`decrypt()\'.`);
+    throw new Error(`${this.constructor} doesn't implement method \`decrypt()\`.`);
   }
 }

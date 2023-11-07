@@ -5,6 +5,8 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import { SigningKey, hashMessage } from "ethers";
 
+/* global Buffer */
+
 export class Auth {
   constructor(idOS) {
     this.idOS = idOS;

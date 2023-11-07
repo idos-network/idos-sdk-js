@@ -41,7 +41,9 @@ const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 export const documentLoaderWithStaticFractal = documentLoader => async (url, options={}) => {
   try {
     return await staticLoader(url, options);
-  } catch (e) {}
+  } catch (e) {
+    // Ignored on purpose.
+  }
 
   return await documentLoader(url, options);
 };
