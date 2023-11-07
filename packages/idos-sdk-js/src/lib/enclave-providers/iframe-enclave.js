@@ -51,22 +51,39 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async #loadEnclave() {
-    this.iframe.allow = "storage-access; publickey-credentials-get *";
-    this.iframe.referrerPolicy = "origin";
-    this.iframe.sandbox = ["forms", "modals", "popups", "same-origin", "scripts", "popups-to-escape-sandbox"]
-      .map((permission) => `allow-${permission}`)
-      .join(" ");
+    // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
+    const permissionsPolicies = [
+      "publickey-credentials-get",
+      "storage-access",
+    ];
 
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
+    const liftedSandboxRestrictions = [
+      "forms",
+      "modals",
+      "popups",
+      "popups-to-escape-sandbox",
+      "same-origin",
+      "scripts",
+    ].map(toLift => `allow-${toLift}`);
+
+    // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
+    const referrerPolicy = "origin";
+
+    const styles = [
+      "aspect-ratio: 4/1",
+      "background-color: transparent",
+      "border: none",
+      "display: block",
+      "width: 100%",
+    ];
+
+
+    this.iframe.allow = permissionsPolicies.join("; ");
+    this.iframe.referrerpolicy = referrerPolicy;
+    this.iframe.sandbox = liftedSandboxRestrictions.join(" ");
     this.iframe.src = this.hostUrl;
-    this.iframe.style = Object.entries({
-      "background-color": "transparent",
-      border: "none",
-      display: "block",
-      width: "100%",
-      "aspect-ratio": "4/1",
-    })
-      .map((pair) => pair.join(": "))
-      .join("; ");
+    this.iframe.style = styles.join("; ");
 
     document.querySelector(this.container).appendChild(this.iframe);
     return new Promise((resolve) => this.iframe.addEventListener("load", resolve));

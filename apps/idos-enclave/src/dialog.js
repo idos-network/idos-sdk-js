@@ -2,7 +2,12 @@ import { generateMnemonic } from "web-bip39";
 import * as Base64Codec from "@stablelib/base64"
 import * as Utf8Codec from "@stablelib/utf8"
 import wordlist from "web-bip39/wordlists/english";
+import * as DOMPurify from "dompurify";
 import "./styles.css";
+
+const sanitize = (html) => (
+  DOMPurify.default.sanitize(html, { ALLOWED_TAGS: [] })
+);
 
 class Dialog {
   constructor() {
@@ -23,6 +28,9 @@ class Dialog {
   }
 
   async confirmForm({ message, origin }) {
+    message = sanitize(message);
+    origin = sanitize(origin);
+
     const confirmForm = document.querySelector("form[name=confirm]");
     confirmForm.style.display = "block";
     confirmForm.querySelector("#origin").innerHTML = origin;
@@ -66,8 +74,8 @@ class Dialog {
     }
   }
 
-  async confirm({ message }) {
-    const confirmed = await this.confirmForm(message);
+  async confirm({ message: { message, origin } }) {
+    const confirmed = await this.confirmForm({ message, origin });
 
     this.respondToEnclave({ result: { confirmed } });
   }
@@ -84,8 +92,8 @@ class Dialog {
           displayName,
           name: displayName,
         },
-        pubKeyCredParams: [ {type: "public-key", alg: -7} ]
-      }
+        pubKeyCredParams: [ {type: "public-key", alg: -7} ],
+      },
     });
 
     return Base64Codec.encode(new Uint8Array(credential.rawId));

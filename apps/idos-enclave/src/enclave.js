@@ -184,23 +184,23 @@ export class Enclave {
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
         const {
+          fullMessage,
           humanId,
           message,
-          fullMessage,
-          signerPublicKey,
-          signerAddress,
-          senderPublicKey,
           receiverPublicKey,
+          senderPublicKey,
+          signerAddress,
+          signerPublicKey,
           usePasskeys,
         } = requestData;
 
         const paramBuilder = {
+          confirm: () => [message],
+          decrypt: () => [fullMessage, senderPublicKey],
+          encrypt: () => [message, receiverPublicKey],
+          keys: () => [usePasskeys],
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey],
-          keys: () => [usePasskeys],
-          encrypt: () => [message, receiverPublicKey],
-          decrypt: () => [fullMessage, senderPublicKey],
-          confirm: () => [message],
         }[requestName];
 
         if (!paramBuilder) {
@@ -225,14 +225,12 @@ export class Enclave {
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
+      height: 350,
+      left,
       popup: 1,
       top: 0,
-      left,
       width,
-      height: 350,
-    })
-      .map(feat => feat.join("="))
-      .join(",");
+    }).map(feat => feat.join("=")).join(",");
 
     const dialogURL = new URL("/dialog.html", window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);

@@ -22,9 +22,10 @@
     "vite-plugin-mkcert": "^1.16.0"
   },
   "dependencies": {
+    "@idos-network/idos-store": "workspace:*",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "@idos-network/idos-store": "workspace:*",
+    "dompurify": "^3.0.6",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"
