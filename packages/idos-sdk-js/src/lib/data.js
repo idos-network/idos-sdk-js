@@ -31,7 +31,7 @@ export class Data {
   }
 
   async create(tableName, record, receiverPublicKey) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line no-unused-vars
     receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKey;
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;

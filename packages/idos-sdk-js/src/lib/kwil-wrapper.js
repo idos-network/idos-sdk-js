@@ -3,6 +3,7 @@ import { Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 export class KwilWrapper {
   constructor({
     nodeUrl: kwilProvider = import.meta.env.VITE_IDOS_NODE_URL,
+    // eslint-disable-next-line no-unused-vars
     chainId = import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
     dbId = import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
   }) {

@@ -179,12 +179,11 @@ export class EvmGrants {
   }
 
   #grantPromise(grant, wait = true) {
-    return (transaction) =>
-      new Promise(async (resolve) => {
+    return async (transaction) => {
         const transactionOrReceipt = wait ? await transaction.wait() : transaction;
         const transactionId = transactionOrReceipt.hash;
-        resolve({ grant, transactionId });
-      });
+        return { grant, transactionId };
+      };
   }
 
   async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID } = {}) {

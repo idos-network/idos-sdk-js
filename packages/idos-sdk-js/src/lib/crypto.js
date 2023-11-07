@@ -14,7 +14,7 @@ class Nonce {
 
     return crypto.getRandomValues(new typedArray(length)).map(transformBytes);
   }
-};
+}
 
 export class Crypto {
   Nonce = Nonce;
