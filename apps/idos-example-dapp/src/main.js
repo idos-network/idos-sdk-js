@@ -28,6 +28,7 @@ const idos = await idOS.init({ container: "#idos-container" });
 const terminal = new Terminal("#terminal", idos);
 const cache = new Cache();
 
+
 /*
  * Example wallet connection options
  *
@@ -119,7 +120,7 @@ const connectWallet = {
 
   if (!currentUser) return;
 
-  const {humanId, address, publicKey} = currentUser;
+  const { humanId, address, publicKey } = currentUser;
 
   if (!humanId) {
     terminal
@@ -143,7 +144,6 @@ const connectWallet = {
    * Optional consent screen
    *
    */
-
   if (chosenFlow.consent) {
     let consent = cache.get("consent");
     await new Promise(resolve => setTimeout(resolve, consent ? 0 : 250));
@@ -164,11 +164,10 @@ const connectWallet = {
   /*
    * Some idOS queries
    *
+   * or just use the console:
+   * console.log(await idos.data.list("wallets"));
+   *
    */
-
-  // or just use the console:
-  // console.log(await idos.data.list("wallets"));
-
   if (chosenFlow.wallets) {
     const wallets = cache.get("wallets") || idos.data.list("wallets");
     terminal.h1("eyes", "Your wallets").wait("awaiting signature", wallets);
