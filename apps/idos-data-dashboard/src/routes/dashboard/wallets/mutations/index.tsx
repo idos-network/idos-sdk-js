@@ -6,3 +6,9 @@ export const useDeleteWallet = createMutation({
     return idOS.data.delete("wallets", id);
   }
 });
+
+export const useAddWallet = createMutation({
+  mutationFn: ({ address }: { address: string }) => {
+    return idOS.data.create("wallets", { address, signature: "", message: "" });
+  }
+});

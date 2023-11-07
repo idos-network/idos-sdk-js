@@ -7,6 +7,7 @@ import {
   ModalCloseButton,
   ModalContent,
   ModalFooter,
+  ModalHeader,
   ModalOverlay,
   Spinner
 } from "@chakra-ui/react";
@@ -27,6 +28,17 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
     },
     enabled: !!props.credential.id && props.isOpen
   });
+
+  const onDownload = () => {
+    // create a donwlodable json file
+    if (credential.data) {
+      const file = new Blob([credential.data?.content], {
+        type: "application/json"
+      });
+      const href = URL.createObjectURL(file);
+      window.open(href, "_blank");
+    }
+  };
 
   return (
     <Modal
@@ -64,9 +76,10 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
           </>
         ) : (
           <>
+            <ModalHeader />
             <ModalCloseButton />
             <ModalBody>
-              <Code overflowX="auto" maxW="100%" whiteSpace="pre">
+              <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre">
                 {credential.data?.content}
               </Code>
             </ModalBody>
@@ -79,7 +92,7 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
                 <Button
                   colorScheme="green"
                   leftIcon={<DownloadIcon />}
-                  onClick={props.onClose}
+                  onClick={onDownload}
                 >
                   Download .json file
                 </Button>

@@ -32,6 +32,7 @@ export const DeleteWallet = (props: DeleteCredentialProps) => {
     queryClient.invalidateQueries({
       queryKey: useFetchWallets.getKey()
     });
+    props.onClose();
   };
 
   return (
