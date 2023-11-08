@@ -48,7 +48,6 @@ export class idOS {
       throw("Signer type not recognized");
     }
 
-    await this.crypto.init();
     return this.auth.currentUser();
   }
 

@@ -86,7 +86,9 @@ const connectWallet = {
       modal.show();
     });
 
-    return selector.wallet();
+    const wallet = await selector.wallet();
+    wallet.address = (await wallet.getAccounts())[0].accountId;
+    return wallet;
   }
 };
 
