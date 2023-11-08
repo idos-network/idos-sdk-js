@@ -117,33 +117,21 @@ const connectWallet = {
    * Are you in the idOS?
    *
    */
-  if (!Object.values(chosenFlow).includes(true)) return;
-
-  const currentUser = await terminal.wait(
-    "awaiting idOS setup (signatures and password)",
-    idos.setSigner(chosenWallet, signer),
+  const hasProfile = await terminal.wait(
+    `checking if idOS profile exists`,
+    idos.hasProfile(address),
   );
 
-  if (!currentUser) return;
-
-  const { humanId, publicKey } = currentUser;
-
-  if (!humanId) {
+  if (!hasProfile) {
     terminal
-      .h1("pleading", "No idOS profile found")
+      .h1("pleading", `No idOS profile found for ${address}`)
       .h2(`Need an idOS profile?`)
       .log(`Get one at <a href="${idOS.profileProviders[0]}">Fractal ID</a>`)
       .h2(`Already have one?`)
-      .log(`Please connect the right signer`)
-      .h1("eyes", `Currently connected signer:`)
-      .table({ address, publicKey })
+      .log(`Please connect with the right address`)
       .status("done", "Done");
     return;
   }
-
-  terminal
-    .h2("Your idOS ID")
-    .log(humanId);
 
 
   /*
@@ -165,6 +153,18 @@ const connectWallet = {
 
     if (!consent) return terminal.status("done", "No consent: stopped");
   }
+
+
+  /*
+   * Setting the signer right before querying
+   *
+   */
+  if (!Object.values(chosenFlow).includes(true)) return;
+
+  await terminal.wait(
+    "awaiting idOS authentication (signatures and password)",
+    idos.setSigner(chosenWallet, signer),
+  );
 
 
   /*

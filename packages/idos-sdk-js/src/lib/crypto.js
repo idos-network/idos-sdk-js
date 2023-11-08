@@ -24,13 +24,13 @@ export class Crypto {
     this.initialized = false;
   }
 
-  async init() {
+  async init(humanId) {
     this.provider = this.idOS.enclave.provider;
 
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
-    const { humanId } = await this.idOS.auth.currentUser();
+    humanId = humanId || await this.idOS.auth.currentUser();
 
     if (!humanId) return;
 
