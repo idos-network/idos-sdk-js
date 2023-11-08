@@ -11,9 +11,11 @@ export class Data {
   }
 
   async list(tableName, filter) {
-    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
-
     let records = await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`);
+
+    const humanId = records[0]?.human_id;
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init(humanId);
+
     if (tableName === "attributes") {
       for (const record of records) {
         record.value = Utf8Codec.decode(
