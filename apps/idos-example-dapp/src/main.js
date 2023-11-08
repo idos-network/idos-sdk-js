@@ -117,6 +117,8 @@ const connectWallet = {
    * Are you in the idOS?
    *
    */
+  if (!Object.values(chosenFlow).includes(true)) return;
+
   const currentUser = await terminal.wait(
     "awaiting idOS setup (signatures and password)",
     idos.setSigner(chosenWallet, signer),

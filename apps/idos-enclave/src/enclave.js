@@ -75,7 +75,7 @@ export class Enclave {
         this.unlockButton.disabled = true;
 
         if (usePasskeys) {
-          const storedCredentialId = this.store.get("credential-id")?.[humanId];
+          const storedCredentialId = this.store.get("credential-id");
           if (storedCredentialId) {
             try {
               ({ password, credentialId } = await getPasskeyCredential(storedCredentialId));
@@ -85,7 +85,7 @@ export class Enclave {
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("passkey"));
           }
-          this.store.set("credential-id", { [humanId]: credentialId });
+          this.store.set("credential-id", credentialId);
         } else {
           ({ password, duration } = await this.#openDialog("password"));
         }
