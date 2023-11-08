@@ -51,6 +51,10 @@ export class idOS {
     return this.auth.currentUser();
   }
 
+  async hasProfile(address) {
+    return this.kwilWrapper.hasProfile(address);
+  }
+
   async reset({ enclave = false } = {}) {
     await this.store.reset();
     if (enclave) await this.enclave.reset();

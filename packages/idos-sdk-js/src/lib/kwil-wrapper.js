@@ -19,16 +19,20 @@ export class KwilWrapper {
     Object.assign(this, { signer, publicKey, signatureType });
   }
 
-  async buildAction(actionName, inputs, description) {
+  async buildAction(actionName, inputs, description, useSigner=true) {
     const action = this.client
       .actionBuilder()
       .dbid(this.dbId)
-      .name(actionName)
-      .publicKey(this.publicKey)
-      .signer(this.signer, this.signatureType);
+      .name(actionName);
 
     if (description) {
       action.description(`*${description}*`);
+    }
+
+    if (useSigner) {
+      action
+        .publicKey(this.publicKey)
+        .signer(this.signer, this.signatureType);
     }
 
     if (inputs) {
@@ -41,8 +45,8 @@ export class KwilWrapper {
     return action;
   }
 
-  async call(actionName, actionInputs, description) {
-    const action = await this.buildAction(actionName, actionInputs, description);
+  async call(actionName, actionInputs, description, useSigner=true) {
+    const action = await this.buildAction(actionName, actionInputs, description, useSigner);
     const msg = await action.buildMsg();
     const res = await this.client.call(msg);
     return res.data.result;
@@ -56,7 +60,12 @@ export class KwilWrapper {
   }
 
   async getHumanId() {
-    const result = await this.call("get_wallet_human_id", null, "See your idOS profile ID");
+    const result = await this.call("get_wallet_human_id", "See your idOS profile ID");
     return result[0]?.human_id || null;
+  }
+
+  async hasProfile(address) {
+    const result = await this.call("has_profile", { address }, undefined, false);
+    return !!result[0]?.has_profile;
   }
 }
