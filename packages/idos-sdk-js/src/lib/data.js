@@ -11,6 +11,8 @@ export class Data {
   }
 
   async list(tableName, filter) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     let records = await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`);
     if (tableName === "attributes") {
       for (const record of records) {
@@ -31,6 +33,8 @@ export class Data {
   }
 
   async create(tableName, record, receiverPublicKey) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     // eslint-disable-next-line no-unused-vars
     receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKey;
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
@@ -64,6 +68,8 @@ export class Data {
   }
 
   async get(tableName, recordId) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     if (tableName === "credentials") {
       let records = await this.idOS.kwilWrapper.call(
         `get_credential_owned`,
@@ -85,12 +91,16 @@ export class Data {
   }
 
   async delete(tableName, recordId) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     const record = { id: recordId };
     await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
     return record;
   }
 
   async update(tableName, record) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
         await this.idOS.crypto.encrypt(record.content),
@@ -110,6 +120,8 @@ export class Data {
   }
 
   async share(tableName, recordId, receiverPublicKey) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     const name = this.singularize(tableName);
     let record = await this.get(tableName, recordId);
 
@@ -134,6 +146,8 @@ export class Data {
   }
 
   async unshare(tableName, recordId) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
     return await this.delete(tableName, recordId);
   }
 }

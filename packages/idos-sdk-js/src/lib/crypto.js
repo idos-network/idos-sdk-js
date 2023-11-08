@@ -21,6 +21,7 @@ export class Crypto {
 
   constructor(idOS) {
     this.idOS = idOS;
+    this.initialized = false;
   }
 
   async init() {
@@ -34,6 +35,7 @@ export class Crypto {
     if (!humanId) return;
 
     this.publicKey = this.provider.init(humanId, signerAddress, signerPublicKey);
+    this.initialized = true;
 
     return this.publicKey;
   }
