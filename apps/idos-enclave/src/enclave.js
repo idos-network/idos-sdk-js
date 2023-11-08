@@ -52,21 +52,16 @@ export class Enclave {
     const humanId = this.store.get("human-id");
     let password, duration, credentialId;
 
-    const doPasskey = async () => {
-      const storedCredentialId = this.store.get("credential-id")?.[humanId];
-
+    const getPasskeyCredential = async (storedCredentialId) => {
       let credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
+          allowCredentials: [{
+            type: "public-key",
+            id: Base64Codec.decode(storedCredentialId),
+          }]
         },
       };
-
-      if (storedCredentialId) {
-        credentialRequest.publicKey.allowCredentials = [{
-          type: "public-key",
-          id: Base64Codec.decode(storedCredentialId),
-        }];
-      }
 
       const credential = await navigator.credentials.get(credentialRequest);
       password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
@@ -80,9 +75,14 @@ export class Enclave {
         this.unlockButton.disabled = true;
 
         if (usePasskeys) {
-          try {
-            ({ password, credentialId } = await doPasskey());
-          } catch (e) {
+          const storedCredentialId = this.store.get("credential-id")?.[humanId];
+          if (storedCredentialId) {
+            try {
+              ({ password, credentialId } = await getPasskeyCredential(storedCredentialId));
+            } catch (e) {
+              ({ password, duration, credentialId } = await this.#openDialog("passkey"));
+            }
+          } else {
             ({ password, duration, credentialId } = await this.#openDialog("passkey"));
           }
           this.store.set("credential-id", { [humanId]: credentialId });
