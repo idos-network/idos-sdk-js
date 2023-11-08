@@ -11,6 +11,7 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
+import { isDesktop } from "react-device-detect";
 
 type ConnectWalletProps = {
   onNearConnect: () => Promise<void>;
@@ -18,6 +19,11 @@ type ConnectWalletProps = {
 };
 
 export const ConnectWallet = (props: ConnectWalletProps) => {
+  const handleMobileMetaMaskConnect = () => {
+    window.location.href =
+      "https://metamask.app.link/dapp/dashboard.idos.network/";
+  };
+
   return (
     <Center
       minH="100vh"
@@ -45,22 +51,49 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
           Connect your Wallet
         </Heading>
         <VStack alignItems="stretch" gap={3}>
-          <Button
-            justifyContent="space-between"
-            onClick={props.onNearConnect}
-            size="2xl"
-          >
-            Connect with Near
-            <Image w={47} alt="Near icon" src={Near} />
-          </Button>
-          <Button
-            justifyContent="space-between"
-            onClick={props.onMetamaskConnect}
-            size="2xl"
-          >
-            Connect with Metamask
-            <Image alt="Metamask icon" src={Metamask} />
-          </Button>
+          {isDesktop ? (
+            <Button
+              justifyContent="space-between"
+              onClick={props.onNearConnect}
+              size="2xl"
+            >
+              Connect with Near
+              <Image alt="Near icon" src={Near} />
+            </Button>
+          ) : null}
+
+          {isDesktop ? (
+            <Button
+              justifyContent="space-between"
+              onClick={props.onMetamaskConnect}
+              size="2xl"
+            >
+              Connect with Metamask
+              <Image
+                pos="relative"
+                left={2}
+                alt="Metamask icon"
+                src={Metamask}
+              />
+            </Button>
+          ) : (
+            <Button
+              justifyContent="space-between"
+              _hover={{
+                textDecoration: "none"
+              }}
+              onClick={handleMobileMetaMaskConnect}
+              size="2xl"
+            >
+              Connect with Metamask
+              <Image
+                pos="relative"
+                left={2}
+                alt="Metamask icon"
+                src={Metamask}
+              />
+            </Button>
+          )}
         </VStack>
         <Text
           alignItems="center"
