@@ -21,8 +21,10 @@ export class IframeEnclave extends EnclaveProvider {
 
     if (encryptionPublicKey) return encryptionPublicKey;
 
+    const usePasskeys = window.localStorage.getItem("use");
+
     this.#showEnclave();
-    return this.#requestToEnclave({ keys: { usePasskeys: true } })
+    return this.#requestToEnclave({ keys: { usePasskeys } })
       .then(encryptionPublicKey => {
         this.#hideEnclave();
         return encryptionPublicKey;

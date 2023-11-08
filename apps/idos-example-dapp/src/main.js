@@ -51,6 +51,9 @@ if (!chosenWallet) {
         .forEach(({ name, checked }) => chosenFlow[name] = checked)
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
 
+      window.localStorage.setItem("use",
+        e.target.querySelector("input[type=radio]:checked").value);
+
       resolve();
     });
   });
