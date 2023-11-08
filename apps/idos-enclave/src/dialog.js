@@ -64,11 +64,13 @@ class Dialog {
   }
 
   async passkey() {
-    const { password, duration } = await this.passwordForm();
+    const password = Base64Codec.encode(
+      crypto.getRandomValues(new Uint8Array(32)),
+    );
 
     try {
       const credentialId = await this.maybeCreatePasskeyCredential(password);
-      this.respondToEnclave({ result: { password, duration, credentialId } });
+      this.respondToEnclave({ result: { password, credentialId } });
     } catch (e) {
       this.respondToEnclave({ error: e.toString() });
     }
