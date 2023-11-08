@@ -52,7 +52,7 @@ export class Enclave {
     const humanId = this.store.get("human-id");
     let password, duration, credentialId;
 
-    const getPasskeyCredential = async (storedCredentialId) => {
+    const getWebAuthnCredential = async (storedCredentialId) => {
       let credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
@@ -68,24 +68,26 @@ export class Enclave {
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
 
       return { password, credentialId };
-    }
+    };
 
     return new Promise(async resolve => (
       this.unlockButton.addEventListener("click", async e => {
         this.unlockButton.disabled = true;
 
-        if (usePasskeys) {
+        if (usePasskeys === "webauthn") {
           const storedCredentialId = this.store.get("credential-id");
           if (storedCredentialId) {
             try {
-              ({ password, credentialId } = await getPasskeyCredential(storedCredentialId));
+              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
             } catch (e) {
-              ({ password, duration, credentialId } = await this.#openDialog("passkey"));
+              ({ password, credentialId } = await this.#openDialog("passkey", { type: "webauthn" }));
             }
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("passkey"));
+            ({ password, credentialId } = await this.#openDialog("passkey", { type: "webauthn" }));
           }
           this.store.set("credential-id", credentialId);
+        } else if (usePasskeys === "password") {
+          ({ password } = await this.#openDialog("passkey", { type: "password" }));
         } else {
           ({ password, duration } = await this.#openDialog("password"));
         }

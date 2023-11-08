@@ -1,3 +1,4 @@
+import { Store } from "@idos-network/idos-store";
 import { generateMnemonic } from "web-bip39";
 import * as Base64Codec from "@stablelib/base64"
 import * as Utf8Codec from "@stablelib/utf8"
@@ -14,6 +15,7 @@ class Dialog {
     this.enclave = window.opener;
     if (this.enclave.origin !== window.origin) throw new Error("Bad origin");
 
+    this.store = new Store();
     this.initUi();
     this.listenToEnclave();
   }
@@ -63,14 +65,15 @@ class Dialog {
     this.respondToEnclave({ result: { password, duration } });
   }
 
-  async passkey() {
-    const password = Base64Codec.encode(
-      crypto.getRandomValues(new Uint8Array(32)),
-    );
-
+  async passkey({ message: { type } }) {
     try {
-      const credentialId = await this.maybeCreatePasskeyCredential(password);
-      this.respondToEnclave({ result: { password, credentialId } });
+      if (type === "password") {
+        const { password } = await this.getOrCreatePasswordCredential();
+        this.respondToEnclave({ result: { password } });
+      } else if (type === "webauthn") {
+        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
+        this.respondToEnclave({ result: { password, credentialId } });
+      }
     } catch (e) {
       this.respondToEnclave({ error: e.toString() });
     }
@@ -82,23 +85,69 @@ class Dialog {
     this.respondToEnclave({ result: { confirmed } });
   }
 
-  async maybeCreatePasskeyCredential(password) {
-    const displayName = "idOS User";
+  async getOrCreatePasswordCredential() {
+    const credential = await navigator.credentials.get({ password: true });
 
-    const credential = await navigator.credentials.create({
-      publicKey: {
-        challenge: crypto.getRandomValues(new Uint8Array(10)),
-        rp: { name: "idOS.network" },
-        user: {
-          id: Utf8Codec.encode(password),
-          displayName,
-          name: displayName,
+    if (credential) return { password: credential.password };
+
+    await navigator.credentials.store(new PasswordCredential({
+      id: "idos",
+      name: "idOS user",
+      password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32))),
+    }));
+
+    const password = await new Promise(resolve => setInterval(async () => {
+      let credential = await navigator.credentials.get({ password: true });
+      if (credential) resolve(credential.password);
+    }, 100));
+
+    return { password };
+  }
+
+  async getOrCreateWebAuthnCredential() {
+    let credential, credentialId, password;
+
+    const storedCredentialId = this.store.get("credential-id");
+
+    try {
+      let credentialRequest = {
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(10)),
+          allowCredentials: [{
+            type: "public-key",
+            id: Base64Codec.decode(storedCredentialId),
+          }],
         },
-        pubKeyCredParams: [ {type: "public-key", alg: -7} ],
-      },
-    });
+      };
 
-    return Base64Codec.encode(new Uint8Array(credential.rawId));
+      credential = await navigator.credentials.get(credentialRequest);
+      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+    } catch (e) {
+      const displayName = "idOS User";
+
+      password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
+
+      credential = await navigator.credentials.create({
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(10)),
+          rp: { name: "idOS.network" },
+          user: {
+            id: Utf8Codec.encode(password),
+            displayName,
+            name: displayName,
+          },
+          pubKeyCredParams: [ {type: "public-key", alg: -7} ],
+        },
+      });
+
+      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+    }
+
+    this.store.set("credential-id", credentialId);
+    this.store.set("password", password);
+
+    return { password, credentialId };
   }
 
   async listenToEnclave() {
