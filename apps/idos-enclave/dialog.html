@@ -1,7 +1,7 @@
 <!doctype html>
 <meta charset="utf-8" />
 <title>🔐 idOS Secure Enclave</title>
-<body class="min-h-screen bg-white">
+<body class="min-h-screen bg-neutral-950 text-neutral-50">
   <style>
     main > *:not(h1) {
       display: none;
@@ -23,7 +23,7 @@
           name="password"
           required
           placeholder="Your idOS password"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-300 focus:ring focus:ring-green-400 focus:ring-opacity-50 px-3 py-1.5"
+          class="block w-full rounded-md border-neutral-300 bg-neutral-950 focus:border-neutral-300 focus:ring-0 outline-none px-3 py-1.5"
         />
 
         <div class="space-y-1">
@@ -65,13 +65,23 @@
       <div class="space-y-3">
         <p>
           <strong>Confirmation request</strong>
-          <br>
+          <br />
           <small>from&nbsp;<span id="origin"></span></small>
         </p>
         <p id="message"></p>
         <p>
-          <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="yes">Accept</button>
-          <button class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium" id="no">Reject</button>
+          <button
+            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium"
+            id="yes"
+          >
+            Accept
+          </button>
+          <button
+            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium"
+            id="no"
+          >
+            Reject
+          </button>
         </p>
       </div>
     </form>

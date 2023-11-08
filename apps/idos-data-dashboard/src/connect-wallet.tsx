@@ -51,7 +51,7 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
             size="2xl"
           >
             Connect with Near
-            <Image alt="Near icon" src={Near} />
+            <Image w={47} alt="Near icon" src={Near} />
           </Button>
           <Button
             justifyContent="space-between"
@@ -59,7 +59,7 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
             size="2xl"
           >
             Connect with Metamask
-            <Image pos="relative" left={2} alt="Metamask icon" src={Metamask} />
+            <Image alt="Metamask icon" src={Metamask} />
           </Button>
         </VStack>
         <Text

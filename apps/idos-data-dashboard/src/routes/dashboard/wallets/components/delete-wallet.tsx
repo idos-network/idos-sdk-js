@@ -71,7 +71,9 @@ export const DeleteWallet = (props: DeleteCredentialProps) => {
                 <Heading color="neutral.600" fontWeight="medium" size="sm">
                   Address
                 </Heading>
-                <Text>{props.wallet.address}</Text>
+                <Text maxW={200} isTruncated>
+                  {props.wallet.address}
+                </Text>
               </VStack>
             </Flex>
           </Flex>
