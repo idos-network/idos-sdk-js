@@ -109,7 +109,7 @@ class Dialog {
 
     const storedCredentialId = this.store.get("credential-id");
 
-    try {
+    if (storedCredentialId) {
       let credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
@@ -120,10 +120,13 @@ class Dialog {
         },
       };
 
-      credential = await navigator.credentials.get(credentialRequest);
-      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
-      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-    } catch (e) {
+      try {
+        credential = await navigator.credentials.get(credentialRequest);
+        password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+        credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+      } catch (e) {
+      }
+    } else {
       const displayName = "idOS User";
 
       password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
@@ -140,9 +143,9 @@ class Dialog {
           pubKeyCredParams: [ {type: "public-key", alg: -7} ],
         },
       });
-
-      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
     }
+
+    credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
 
     this.store.set("credential-id", credentialId);
     this.store.set("password", password);
