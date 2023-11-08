@@ -59,8 +59,11 @@ if (!chosenWallet) {
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("wallet_switchEthereumChain", [{ chainId: "0x5" }]);
     await provider.send("eth_requestAccounts", []);
-    return provider.getSigner();
+
+    const signer = await provider.getSigner();
+    return { signer, address: signer.address };
   },
 
   NEAR: async () => {
@@ -86,9 +89,8 @@ const connectWallet = {
       modal.show();
     });
 
-    const wallet = await selector.wallet();
-    wallet.address = (await wallet.getAccounts())[0].accountId;
-    return wallet;
+    const signer = await selector.wallet();
+    return { signer, address: (await signer.getAccounts())[0].accountId };
   }
 };
 
@@ -102,13 +104,13 @@ const connectWallet = {
    * Connecting a wallet
    *
    */
-  const signer = await terminal
+  const { signer, address } = await terminal
     .h1("rocket", "idOS connection")
     .h2("Node URL")
     .log(idos.nodeUrl)
     .wait("awaiting wallet", connectWallet[chosenWallet]());
 
-  if (!signer) return;
+  if (!address) return;
 
 
   /*
@@ -122,7 +124,7 @@ const connectWallet = {
 
   if (!currentUser) return;
 
-  const { humanId, address, publicKey } = currentUser;
+  const { humanId, publicKey } = currentUser;
 
   if (!humanId) {
     terminal
