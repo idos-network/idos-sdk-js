@@ -52,12 +52,15 @@ export class Data {
         await this.idOS.crypto.encrypt(record.content),
       );
       record.encryption_public_key = Base64Codec.encode(
-        this.idOS.crypto.publicKey,
+        await this.idOS.crypto.publicKey,
       );
     }
     if (tableName === "attributes") {
       record.value = Base64Codec.encode(
         await this.idOS.crypto.encrypt(record.value),
+      );
+      record.encryption_public_key = Base64Codec.encode(
+        await this.idOS.crypto.publicKey,
       );
     }
     let newRecord = { id: crypto.randomUUID(), ...record };
