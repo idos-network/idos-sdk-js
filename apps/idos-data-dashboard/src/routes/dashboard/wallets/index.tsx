@@ -97,9 +97,9 @@ export function Component() {
               <Spinner />
             </AbsoluteCenter>
           ) : null}
-          {wallets.isSuccess ? (
+          {wallets.isFetched ? (
             <VStack alignItems="stretch" gap={2.5}>
-              {wallets.data.length === 0 ? (
+              {!wallets.data ? (
                 <AddWalletCard onAddWallet={handleOnAddWalletOpen} />
               ) : (
                 wallets.data.map((wallet) => (

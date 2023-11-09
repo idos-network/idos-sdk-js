@@ -51,6 +51,7 @@ export declare class idOS {
   kwilWrapper: KwilWrapper;
   grants: Grants;
   setSigner(type: "NEAR" | "EVM", signer: unknown): Promise<AuthUser>;
+  hasProfile(address: string): Promise<boolean>;
   static init(options: InitOptions): Promise<idOS>;
   static near: Grants["near"];
 }

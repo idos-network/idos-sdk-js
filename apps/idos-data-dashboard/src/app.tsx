@@ -13,7 +13,8 @@ import { Center, Spinner } from "@chakra-ui/react";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
-  return provider.getSigner();
+  const signer = await provider.getSigner();
+  return { signer, address: signer.address };
 };
 
 const setUpNearWallet = async () => {
@@ -25,6 +26,7 @@ const setUpNearWallet = async () => {
         contractId: idOSSDK.near.defaultContractId,
         methodNames: idOSSDK.near.contractMethods
       });
+
       modal.on("onHide", () => {
         resolve();
       });
@@ -32,7 +34,8 @@ const setUpNearWallet = async () => {
     });
   }
 
-  return selector.wallet();
+  const signer = await selector.wallet();
+  return { signer, address: (await signer.getAccounts())[0].accountId };
 };
 
 export default function App() {
@@ -45,8 +48,13 @@ export default function App() {
     setIsLoading(true);
     try {
       await metamask.connect();
-      const signer = await setupEvmWallet();
-      await idOS.setSigner("EVM", signer);
+      const { signer, address } = await setupEvmWallet();
+      const hasProfile = await idOS.hasProfile(address);
+
+      if (hasProfile) {
+        await idOS.setSigner("EVM", signer);
+      }
+
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -58,8 +66,13 @@ export default function App() {
   const onNearConnect = async () => {
     setIsLoading(true);
     try {
-      const signer = await setUpNearWallet();
-      await idOS.setSigner("NEAR", signer);
+      const { signer, address } = await setUpNearWallet();
+      const hasProfile = await idOS.hasProfile(address);
+
+      if (hasProfile) {
+        await idOS.setSigner("NEAR", signer);
+      }
+
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -73,16 +86,26 @@ export default function App() {
       initialized.current = true;
       (async () => {
         if (metamask.status === "connected") {
-          const signer = await setupEvmWallet();
-          await idOS.setSigner("EVM", signer);
+          const { signer, address } = await setupEvmWallet();
+          const hasProfile = await idOS.hasProfile(address);
+
+          if (hasProfile) {
+            await idOS.setSigner("EVM", signer);
+          }
+
           setIsConnected(true);
           setIsLoading(false);
         }
 
         const selector = await setupNearWalletSelector();
         if (selector.isSignedIn()) {
-          const signer = await setUpNearWallet();
-          await idOS.setSigner("NEAR", signer);
+          const { signer, address } = await setUpNearWallet();
+          const hasProfile = await idOS.hasProfile(address);
+
+          if (hasProfile) {
+            await idOS.setSigner("NEAR", signer);
+          }
+
           setIsConnected(true);
           setIsLoading(false);
         }

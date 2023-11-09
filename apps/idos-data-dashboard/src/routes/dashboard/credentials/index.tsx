@@ -88,7 +88,7 @@ export function Component() {
               </Text>
             )}
           </TitleBar>
-          {credentials.data?.length === 0 ? (
+          {!credentials.data ? (
             <Button
               colorScheme="green"
               hideBelow="lg"
@@ -107,9 +107,9 @@ export function Component() {
               <Spinner />
             </AbsoluteCenter>
           ) : null}
-          {credentials.isSuccess ? (
+          {credentials.isFetched ? (
             <>
-              {!currentUser.data?.humanId || credentials.data.length === 0 ? (
+              {!credentials.data ? (
                 <AddCredentialCard onAddCredential={onAddCredential} />
               ) : (
                 credentials.data.map((credential) => (
