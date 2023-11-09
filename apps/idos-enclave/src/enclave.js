@@ -219,7 +219,7 @@ export class Enclave {
       } finally {
         this.unlockButton.style.display = "none";
         this.confirmButton.style.display = "none";
-        event.ports[0].close();
+        event.ports[0]?.close();
       }
     });
   }
