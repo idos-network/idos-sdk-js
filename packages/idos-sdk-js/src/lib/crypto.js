@@ -40,7 +40,6 @@ export class Crypto {
     return this.publicKey;
   }
 
-
   async encrypt(message, receiverPublicKey) {
     [ message, receiverPublicKey ] = [message, receiverPublicKey]
       .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
