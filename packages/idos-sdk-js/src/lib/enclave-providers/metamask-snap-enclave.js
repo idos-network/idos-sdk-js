@@ -11,15 +11,12 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
 
   async load() {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
-
     const connected = Object.values(snaps).find(snap => snap.id === this.snapId);
 
-    if (!connected) {
-      await this.enclaveHost.request({
-        method: "wallet_requestSnaps",
-        params: { [this.snapId]: {} },
-      });
-    }
+    if (!connected) await this.enclaveHost.request({
+      method: "wallet_requestSnaps",
+      params: { [this.snapId]: {} },
+    });
 
     const storage = JSON.parse(await this.invokeSnap("storage") || {});
     storage.encryptionPublicKey &&= Base64Codec.encode(Uint8Array.from(Object.values(storage.encryptionPublicKey)));
