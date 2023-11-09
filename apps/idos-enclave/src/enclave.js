@@ -118,6 +118,8 @@ export class Enclave {
     receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
+    console.log("enclave encrypt")
+    console.log([message, nonce, receiverPublicKey, this.keyPair.secretKey])
     const encrypted =
       nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
@@ -140,6 +142,8 @@ export class Enclave {
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 
+    console.log("enclave encrypt")
+    console.log([message, nonce, senderPublicKey, this.keyPair.secretKey])
     const decrypted =
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 

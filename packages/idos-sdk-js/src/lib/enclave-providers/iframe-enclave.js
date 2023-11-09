@@ -1,4 +1,5 @@
 import { EnclaveProvider } from "./enclave-provider";
+import * as Base64Codec from "@stablelib/base64"
 
 export class IframeEnclave extends EnclaveProvider {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
@@ -25,7 +26,7 @@ export class IframeEnclave extends EnclaveProvider {
     return this.#requestToEnclave({ keys: { usePasskeys: false } })
       .then(encryptionPublicKey => {
         this.#hideEnclave();
-        return encryptionPublicKey;
+        return Base64Codec.encode(encryptionPublicKey);
       });
   }
 

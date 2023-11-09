@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import * as Base64Codec from "@stablelib/base64"
 
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupModal } from "@near-wallet-selector/modal-ui-js";
@@ -13,6 +14,8 @@ import { idOS } from "@idos-network/idos-sdk";
 import { Terminal } from "./terminal";
 import { Cache } from "./cache";
 
+import * as nearAPI from "near-api-js";
+window.nearAPI = nearAPI;
 
 /*
  * Initializing the idOS
@@ -20,17 +23,62 @@ import { Cache } from "./cache";
  */
 const idos = await idOS.init({ container: "#idos-container" });
 window.idos = idos;
-// {humanId: '134e7678-b2b2-4f4e-bf9f-ec9b75804c1d', address: '8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39', publicKey: 'ed25519:9r78Bid58xWmJZ1suyVZb1qLus8JNt1oXxuQUwcy9cat'}
-// {humanId: '8c92df31-6ae3-46e9-a1a9-50d10f74d99a', address: 'a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596', publicKey: 'ed25519:CJrEg6AzBvnfKxkywawdVKN1cTRsXKZpjet8McUkjBdf'}
-// kwil-cli database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d'
-// kwil-cli database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d' '$address:8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39' '$public_key:g3HhHKv2VSrBnzg6PWidhG1UPJfpmcH0+bz5rAhtLTk=' '$message:message' '$signature:signature'
-// kwil-cli database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a'
-// kwil-cli database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a' '$address:a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596' '$public_key:qAMZ2qynqdbCVw76Px457T/3QtPeq0Gygdwxzg+RRZY=' '$message:message' '$signature:signature'
-//
-/* Using 8c92df31-6ae3-46e9-a1a9-50d10f74d99a:
-record = await idos.data.create("credentials", {issuer: "pkoch", credential_type: "toy", content: "airplane"}, "qAMZ2qynqdbCVw76Px457T/3QtPeq0Gygdwxzg+RRZY=")
+// {humanId: '134e7678-b2b2-4f4e-bf9f-ec9b75804c1d', address: '8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39', publicKey: 'ed25519:9r78Bid58xWmJZ1suyVZb1qLus8JNt1oXxuQUwcy9cat'} 5erx4hp8F9zbta+Pl526R9Y5oVGIIQni6AvjLFFkKxQ=
+// {humanId: '8c92df31-6ae3-46e9-a1a9-50d10f74d99a', address: 'a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596', publicKey: 'ed25519:CJrEg6AzBvnfKxkywawdVKN1cTRsXKZpjet8McUkjBdf'} ClQjD0H2v4VKZhi/hlPb0df/jwlsA7A5UvypOGo+pUA=
+/*
+kwil-cli-0.2-alpha--0.5.0-SNAPSHOT-ea6d961e database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d'
+sleep 3
+kwil-cli-0.2-alpha--0.5.0-SNAPSHOT-ea6d961e database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d' '$address:8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39' '$public_key:g3HhHKv2VSrBnzg6PWidhG1UPJfpmcH0+bz5rAhtLTk=' '$message:message' '$signature:signature'
+sleep 3
+kwil-cli-0.2-alpha--0.5.0-SNAPSHOT-ea6d961e database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a'
+sleep 3
+kwil-cli-0.2-alpha--0.5.0-SNAPSHOT-ea6d961e database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a' '$address:a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596' '$public_key:qAMZ2qynqdbCVw76Px457T/3QtPeq0Gygdwxzg+RRZY=' '$message:message' '$signature:signature'
+sleep 3
+kwil-cli-0.2-alpha--0.5.0-SNAPSHOT-ea6d961e database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a' '$address:pkoch.testnet' '$public_key:bxPqlYkJ3YujvWeUG1qWnbDOZe6y8Tfc3t1GGexCcg4=' '$message:message' '$signature:signature'
+
+*/
+/* Using a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596:
+record = await idos.data.create("credentials", {issuer: "pkoch", credential_type: "toy", content: JSON.stringify({"it's an": "airplane"})})
 await new Promise(resolve => setTimeout(resolve, 2 * 1000))
-access_grant = await idos.grants.create("credentials", record.id, "8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39", 0, 'g3HhHKv2VSrBnzg6PWidhG1UPJfpmcH0+bz5rAhtLTk=')
+access_grant = await idos.grants.create("credentials", record.id, "ed25519:9r78Bid58xWmJZ1suyVZb1qLus8JNt1oXxuQUwcy9cat", '5erx4hp8F9zbta+Pl526R9Y5oVGIIQni6AvjLFFkKxQ=')
+
+*/
+/* Using 8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39:
+await idos.grants.list("credentials", {grantee: "8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39"})
+*/
+/*
+await signer.signAndSendTransaction({
+        actions: [
+          {
+            type: "FunctionCall",
+            params: {
+              methodName: "insert_grant",
+              args: { grantee: "ed25519:9r78Bid58xWmJZ1suyVZb1qLus8JNt1oXxuQUwcy9cat", data_id: "ai ui um data id"},
+              gas: "30000000000000",
+            },
+          },
+        ],
+      });
+
+
+const accountId = "a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596";
+const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
+const nearConnection = await nearAPI.connect({
+  networkId: "testnet",
+  keyStore: keyStore,
+  nodeUrl: "https://rpc.testnet.near.org",
+});
+
+const account = await nearConnection.account(accountId);
+window.contract = new nearAPI.Contract(account, "idos-dev-3.testnet", {
+  viewMethods: ["find_grants"],
+  changeMethods: [
+    "insert_grant",
+    "delete_grant",
+  ],
+});
+
+
 */
 
 
@@ -102,7 +150,9 @@ const connectWallet = {
       modal.show();
     });
 
+    window.selector = selector;
     const signer = await selector.wallet();
+    window.signer = signer;
     return { signer, address: (await signer.getAccounts())[0].accountId };
   }
 };
@@ -174,11 +224,20 @@ const connectWallet = {
    */
   if (!Object.values(chosenFlow).includes(true)) return;
 
-  await terminal.wait(
+  const { publicKey } = await terminal.wait(
     "awaiting idOS authentication (signatures and password)",
     idos.setSigner(chosenWallet, signer),
   );
+  window.signerPublicKey = publicKey;
 
+  if (!idos.crypto.initialized) {
+    await terminal
+        .wait("Initting crypto", idos.crypto.init())
+  }
+  await terminal
+      .h1("key", "idOS.crypto.publicKey")
+      .wait("Getting it", idos.crypto.publicKey)
+  terminal.log(await idos.crypto.publicKey)
 
   /*
    * Some idOS queries
@@ -226,10 +285,25 @@ const connectWallet = {
   }
 
   if (chosenFlow.grants) {
-    const grants = cache.get("grants") || idos.grants.list({ owner: address });
-    terminal.h1("eyes", "Your grants").wait("awaiting RPC", grants);
-    terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
-    cache.set("grants", await grants);
+    const issuedGrants = cache.get("grants") || idos.grants.list({ owner: signerPublicKey });
+    terminal.h1("eyes", "Your issued grants (we're the owner)").wait("awaiting RPC", issuedGrants);
+    terminal.table(await issuedGrants, ["owner", "grantee", "data_id", "lockedUntil"]);
+    cache.set("grants", await issuedGrants);
+
+    const receivedGrants = idos.grants.list({ grantee: signerPublicKey });
+    terminal.h1("eyes", "Your received grants (we're the grantee)").wait("awaiting RPC", receivedGrants);
+    terminal.table(await receivedGrants, ["owner", "grantee", "data_id", "lockedUntil"], {
+      data_id: async (data_id) => {
+        await idos.grants.get_credential_shared({id: data_id});
+        await terminal
+          .wait("verifying credential...", idOS.verifiableCredentials.verify((await credential).content))
+          .then(_ => terminal.status("done", "Verified"))
+          .catch(terminal.error.bind(terminal));
+        terminal
+          .h1("eyes", "Content")
+          .json(JSON.parse((await credential).content));
+      },
+    });
   }
 
   terminal.status("done", "Done");

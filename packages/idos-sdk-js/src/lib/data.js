@@ -38,7 +38,7 @@ export class Data {
     if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
 
     // eslint-disable-next-line no-unused-vars
-    receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKey;
+    receiverPublicKey = receiverPublicKey ?? await this.idOS.crypto.publicKey;
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;
     const actionFromSchema = schema.data.actions.find((action) => action.name === name);
@@ -49,19 +49,15 @@ export class Data {
     }
     if (tableName === "credentials") {
       record.content = Base64Codec.encode(
-        await this.idOS.crypto.encrypt(record.content),
+        await this.idOS.crypto.encrypt(record.content, Base64Codec.decode(receiverPublicKey)),
       );
-      record.encryption_public_key = Base64Codec.encode(
-        await this.idOS.crypto.publicKey,
-      );
+      record.encryption_public_key = receiverPublicKey;
     }
     if (tableName === "attributes") {
       record.value = Base64Codec.encode(
-        await this.idOS.crypto.encrypt(record.value),
+        await this.idOS.crypto.encrypt(record.value, Base64Codec.decode(receiverPublicKey)),
       );
-      record.encryption_public_key = Base64Codec.encode(
-        await this.idOS.crypto.publicKey,
-      );
+      record.encryption_public_key = receiverPublicKey
     }
     let newRecord = { id: crypto.randomUUID(), ...record };
     await this.idOS.kwilWrapper.broadcast(
@@ -131,10 +127,9 @@ export class Data {
     let record = await this.get(tableName, recordId);
 
     if (tableName === "credentials") {
-      const content = record.content;
       record.content = Base64Codec.encode(
         await this.idOS.crypto.encrypt(
-          Base64Codec.decode(content),
+          record.content,
           Base64Codec.decode(receiverPublicKey),
         ),
       );

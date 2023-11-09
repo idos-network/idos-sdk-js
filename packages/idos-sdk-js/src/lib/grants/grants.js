@@ -1,3 +1,6 @@
+import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
+
 import { EvmGrants } from "./evm";
 import { NearGrants } from "./near";
 
@@ -13,7 +16,7 @@ export class Grants {
     this.idOS = idOS;
   }
 
-  async init({ accountId, signer, type }) {
+  async init({ accountId, signer, type, publicKey }) {
     this.type = type;
 
     if (type === "EVM") {
@@ -24,14 +27,31 @@ export class Grants {
       this.#child = new NearGrants();
     }
 
-    await this.#child.init({ accountId, signer });
+    await this.#child.init({ accountId, signer, publicKey });
+
+    return { publicKey };
   }
 
   async list(args) {
     return this.#child.list(args);
   }
 
-  async create(tableName, recordId, address, lockedUntil, receiverPublicKey) {
+  // FIXME: near-rs expects data_id, near-ts expects dataId
+  async get_credential_shared({ id } = {}) {
+    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
+
+    let records = await this.idOS.kwilWrapper.call(`get_credential_shared`, { id }, `Get your credential in idOS`);
+    let record = records.find((r) => r.id === id);
+    record.content = Utf8Codec.decode(
+      await this.idOS.crypto.decrypt(
+        Base64Codec.decode(record.content),
+        Base64Codec.decode(record.encryption_public_key)
+      )
+    );
+    return record;
+  }
+
+  async create(tableName, recordId, address, receiverPublicKey, lockedUntil = undefined) {
     const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
     const payload = await this.#child.create({
       grantee: address,

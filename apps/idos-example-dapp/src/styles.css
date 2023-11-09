@@ -188,6 +188,10 @@ code.display .pleading::before {
   content: "🥺";
 }
 
+code.display .identification_card::before {
+  content: "🪪";
+}
+
 code.display .eyes::before {
   content: "👀";
 }

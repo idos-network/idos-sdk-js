@@ -1,4 +1,5 @@
 import * as Utf8Codec from "@stablelib/utf8";
+import * as Base64Codec from "@stablelib/base64"
 
 class Nonce {
   static random (length = 32, { bitCap = 8 } = {}) {
@@ -30,7 +31,7 @@ export class Crypto {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
-    humanId = humanId || await this.idOS.auth.currentUser();
+    humanId ||= (await this.idOS.auth.currentUser()).humanId;
 
     if (!humanId) return;
 
@@ -42,15 +43,23 @@ export class Crypto {
 
 
   async encrypt(message, receiverPublicKey) {
-    [ message, receiverPublicKey ] = [message, receiverPublicKey]
-      .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
+    if(typeof message === "string" || message instanceof String){
+      message = Utf8Codec.encode(message)
+    }
+    if(typeof receiverPublicKey === "string" || receiverPublicKey instanceof String){
+      receiverPublicKey = Base64Codec.decode(receiverPublicKey)
+    }
 
     return this.provider.encrypt(message, receiverPublicKey);
   }
 
   async decrypt(message, senderPublicKey) {
-    [ message, senderPublicKey ] = [message, senderPublicKey]
-      .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
+    if(typeof message === "string" || message instanceof String){
+      message = Utf8Codec.encode(message)
+    }
+    if(typeof senderPublicKey === "string" || senderPublicKey instanceof String){
+      senderPublicKey = Base64Codec.decode(senderPublicKey)
+    }
 
     return this.provider.decrypt(message, senderPublicKey);
   }

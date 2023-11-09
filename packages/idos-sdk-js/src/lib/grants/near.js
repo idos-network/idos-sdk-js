@@ -7,6 +7,7 @@ export class NearGrants {
   #accountId;
   #publicKey;
   #signer;
+  #nearConnection;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
   static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
@@ -19,36 +20,44 @@ export class NearGrants {
 
   constructor() {}
 
+  dump() {
+    return {
+      contract: this.#contract,
+      accountId: this.#accountId,
+      publicKey: this.#publicKey,
+      signer: this.#signer,
+      nearConnection: this.#nearConnection,
+    };
+  }
+
   async init({ accountId, signer, publicKey }) {
     this.#accountId = accountId;
     this.#publicKey = publicKey;
     this.#signer = signer;
-    return this.#connectContract(accountId);
-  }
+    this.#nearConnection = await nearAPI.connect({
+      networkId: this.constructor.defaultNetwork,
+      keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
+      nodeUrl: this.constructor.defaultRpcUrl,
+    });
 
-  async #eldestKnownImplicitAccountForAccountId(accountId) {
-    if (accountId === this.#accountId) return this.#publicKey;
-    if (IMPLICIT_ACCOUNTS_RE.test(accountId)) return accountId;
-
-    const allAccessKeys = await (await nearAPI.account(accountId)).getAccessKeys();
-
-    const fullAccessKeys = allAccessKeys.filter((ak) => ak.access_key.permission === "FullAccess");
-    if (!fullAccessKeys.length) throw new Error(`No FullAccess keys found for ${accountId}`);
-
-    allAccessKeys.sort((a, b) => a.access_key.none - b.access_key.nonce);
-    return allAccessKeys[0];
+    this.#contract = new nearAPI.Contract(
+      await this.#nearConnection.account(accountId),
+      this.constructor.defaultContractId,
+      {
+        viewMethods: [this.constructor.contractMethods.list],
+        changeMethods: [this.constructor.contractMethods.create, this.constructor.contractMethods.revoke],
+      }
+    );
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
-  async list({ owner, grantee, dataId: data_id, lockedUntil } = {}) {
-    owner = this.#eldestKnownImplicitAccountForAccountId(owner);
-    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
+  async list({ owner: ownerPublicKey, grantee: granteePublicKey, dataId: data_id, lockedUntil } = {}) {
     lockedUntil *= 1e7;
 
-    let grantsFilter = { owner, grantee, data_id, lockedUntil };
+    let grantsFilter = { owner: ownerPublicKey, grantee: granteePublicKey, data_id, lockedUntil };
     Object.entries(grantsFilter).forEach(([k, v]) => !v && delete grantsFilter[k]);
 
-    if (!(owner || grantee)) {
+    if (!(grantsFilter.owner || grantsFilter.grantee)) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
 
@@ -58,12 +67,11 @@ export class NearGrants {
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
-  async create({ grantee, dataId: data_id, lockedUntil } = {}) {
-    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
+  async create({ grantee: granteePublicKey, dataId: data_id, lockedUntil } = {}) {
     lockedUntil *= 1e7;
 
-    let newGrant = { grantee, data_id, lockedUntil };
-    Object.entries({ grantee, data_id, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
+    let newGrant = { grantee: granteePublicKey, data_id, lockedUntil };
+    Object.entries({ grantee: granteePublicKey, data_id, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
     let transactionResult;
     try {
@@ -87,9 +95,7 @@ export class NearGrants {
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
-  async revoke({ grantee, dataId: data_id } = {}) {
-    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
-
+  async revoke({ grantee: granteePublicKey, dataId: data_id } = {}) {
     let transactionResult;
     try {
       transactionResult = await this.#signer.signAndSendTransaction({
@@ -98,7 +104,7 @@ export class NearGrants {
             type: "FunctionCall",
             params: {
               methodName: this.constructor.contractMethods.revoke,
-              args: { grantee, data_id },
+              args: { grantee: granteePublicKey, data_id },
               gas: "30000000000000",
             },
           },
@@ -110,19 +116,5 @@ export class NearGrants {
       });
     }
     return { transactionId: transactionResult.transaction.hash };
-  }
-
-  async #connectContract(accountId) {
-    const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
-    const nearConnection = await nearAPI.connect({
-      networkId: this.constructor.defaultNetwork,
-      keyStore: keyStore,
-      nodeUrl: this.constructor.defaultRpcUrl,
-    });
-
-    const account = await nearConnection.account(accountId);
-    this.#contract = new nearAPI.Contract(account, this.constructor.defaultContractId, {
-      viewMethods: [this.constructor.contractMethods.list],
-    });
   }
 }

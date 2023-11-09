@@ -237,16 +237,22 @@ importers:
         version: 8.7.0(near-api-js@2.1.4)
       '@near-wallet-selector/modal-ui-js':
         specifier: ^8.7.0
-        version: 8.7.0
+        version: 8.7.0(near-api-js@2.1.4)
       '@near-wallet-selector/my-near-wallet':
         specifier: ^8.7.0
         version: 8.7.0(near-api-js@2.1.4)
       '@near-wallet-selector/nightly':
         specifier: ^8.7.0
         version: 8.7.0(near-api-js@2.1.4)
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
+      near-api-js:
+        specifier: ^2.1.4
+        version: 2.1.4
     devDependencies:
       prettier-plugin-organize-imports:
         specifier: ^3.2.3
@@ -2472,7 +2478,7 @@ packages:
       near-api-js: 2.1.4
     dev: false
 
-  /@near-wallet-selector/modal-ui-js@8.7.0:
+  /@near-wallet-selector/modal-ui-js@8.7.0(near-api-js@2.1.4):
     resolution: {integrity: sha512-kNfUqXrQ9S4LUfzeq53M7mrkidGk25IhphP3Ak2Y+U20ddq1TvsQf8LXxt3H3qGi9SwyAbLiVmCAQIVFx4r7Cg==}
     dependencies:
       '@near-wallet-selector/core': 8.7.0(near-api-js@2.1.4)
