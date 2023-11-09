@@ -107,7 +107,7 @@ const ManualMode = (props: ManualModeProps) => {
 };
 
 export const AddWallet = (props: AddWalletProps) => {
-  const [mode, setMode] = useState<AddWalletMode | undefined>();
+  const [mode, setMode] = useState<AddWalletMode | undefined>("manual");
   const addWallet = useAddWallet();
   const queryClient = useQueryClient();
 
