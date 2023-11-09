@@ -1,7 +1,11 @@
 import * as nearAPI from "near-api-js";
 
+const IMPLICIT_ACCOUNTS_RE = /^[0-9a-f]{64,64}$/i;
+
 export class NearGrants {
   #contract;
+  #accountId;
+  #publicKey;
   #signer;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
@@ -15,13 +19,30 @@ export class NearGrants {
 
   constructor() {}
 
-  async init({ accountId, signer }) {
+  async init({ accountId, signer, publicKey }) {
+    this.#accountId = accountId;
+    this.#publicKey = publicKey;
     this.#signer = signer;
     return this.#connectContract(accountId);
   }
 
+  async #eldestKnownImplicitAccountForAccountId(accountId) {
+    if (accountId === this.#accountId) return this.#publicKey;
+    if (IMPLICIT_ACCOUNTS_RE.test(accountId)) return accountId;
+
+    const allAccessKeys = await (await nearAPI.account(accountId)).getAccessKeys();
+
+    const fullAccessKeys = allAccessKeys.filter((ak) => ak.access_key.permission === "FullAccess");
+    if (!fullAccessKeys.length) throw new Error(`No FullAccess keys found for ${accountId}`);
+
+    allAccessKeys.sort((a, b) => a.access_key.none - b.access_key.nonce);
+    return allAccessKeys[0];
+  }
+
   // FIXME: near-rs expects data_id, near-ts expects dataId
   async list({ owner, grantee, dataId: data_id, lockedUntil } = {}) {
+    owner = this.#eldestKnownImplicitAccountForAccountId(owner);
+    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
     lockedUntil *= 1e7;
 
     let grantsFilter = { owner, grantee, data_id, lockedUntil };
@@ -38,11 +59,13 @@ export class NearGrants {
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
   async create({ grantee, dataId: data_id, lockedUntil } = {}) {
+    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
     lockedUntil *= 1e7;
-    let transactionResult;
+
     let newGrant = { grantee, data_id, lockedUntil };
     Object.entries({ grantee, data_id, lockedUntil }).forEach(([k, v]) => !v && delete newGrant[k]);
 
+    let transactionResult;
     try {
       transactionResult = await this.#signer.signAndSendTransaction({
         actions: [
@@ -65,8 +88,9 @@ export class NearGrants {
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
   async revoke({ grantee, dataId: data_id } = {}) {
-    let transactionResult;
+    grantee = this.#eldestKnownImplicitAccountForAccountId(grantee);
 
+    let transactionResult;
     try {
       transactionResult = await this.#signer.signAndSendTransaction({
         actions: [

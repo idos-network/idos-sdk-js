@@ -182,6 +182,7 @@ export class Enclave {
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin) return;
+      if (event.data.target == "metamask-inpage") return;
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
@@ -206,7 +207,8 @@ export class Enclave {
         }[requestName];
 
         if (!paramBuilder) {
-          throw new Error(`Unexpected request from parent: ${requestName}`);
+          console.dir(event)
+          throw new Error(`Unexpected request from parent: ${JSON.stringify(event, null, 2)}`);
         }
 
         const response = await this[requestName](...paramBuilder());
@@ -217,7 +219,7 @@ export class Enclave {
       } finally {
         this.unlockButton.style.display = "none";
         this.confirmButton.style.display = "none";
-        event.ports[0].close();
+        event.ports[0]?.close();
       }
     });
   }

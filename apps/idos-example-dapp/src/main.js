@@ -19,6 +19,19 @@ import { Cache } from "./cache";
  *
  */
 const idos = await idOS.init({ container: "#idos-container" });
+window.idos = idos;
+// {humanId: '134e7678-b2b2-4f4e-bf9f-ec9b75804c1d', address: '8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39', publicKey: 'ed25519:9r78Bid58xWmJZ1suyVZb1qLus8JNt1oXxuQUwcy9cat'}
+// {humanId: '8c92df31-6ae3-46e9-a1a9-50d10f74d99a', address: 'a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596', publicKey: 'ed25519:CJrEg6AzBvnfKxkywawdVKN1cTRsXKZpjet8McUkjBdf'}
+// kwil-cli database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d'
+// kwil-cli database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:134e7678-b2b2-4f4e-bf9f-ec9b75804c1d' '$address:8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39' '$public_key:g3HhHKv2VSrBnzg6PWidhG1UPJfpmcH0+bz5rAhtLTk=' '$message:message' '$signature:signature'
+// kwil-cli database execute --action add_human_as_owner --dbid `kwil-idos-dbid` '$id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a'
+// kwil-cli database execute --action upsert_wallet_as_owner --dbid `kwil-idos-dbid` '$id:'`uuidgen` '$human_id:8c92df31-6ae3-46e9-a1a9-50d10f74d99a' '$address:a80319daaca7a9d6c2570efa3f1e39ed3ff742d3deab41b281dc31ce0f914596' '$public_key:qAMZ2qynqdbCVw76Px457T/3QtPeq0Gygdwxzg+RRZY=' '$message:message' '$signature:signature'
+//
+/* Using 8c92df31-6ae3-46e9-a1a9-50d10f74d99a:
+record = await idos.data.create("credentials", {issuer: "pkoch", credential_type: "toy", content: "airplane"}, "qAMZ2qynqdbCVw76Px457T/3QtPeq0Gygdwxzg+RRZY=")
+await new Promise(resolve => setTimeout(resolve, 2 * 1000))
+access_grant = await idos.grants.create("credentials", record.id, "8371e11cabf6552ac19f383a3d689d846d543c97e999c1f4f9bcf9ac086d2d39", 0, 'g3HhHKv2VSrBnzg6PWidhG1UPJfpmcH0+bz5rAhtLTk=')
+*/
 
 
 /*
