@@ -100,8 +100,10 @@ export class IframeEnclave extends EnclaveProvider {
   async #requestToEnclave(request) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
+      console.dir(request)
       port1.onmessage = ({ data }) => {
         port1.close();
+        console.dir(data)
         data.error ? reject(data.error) : resolve(data.result);
       };
       this.iframe.contentWindow.postMessage(request, this.hostUrl.origin, [port2]);
