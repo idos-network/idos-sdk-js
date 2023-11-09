@@ -97,11 +97,8 @@ export class NearGrants {
     });
 
     const account = await nearConnection.account(accountId);
-    this.#contract = new nearAPI.Contract(
-      account,
-      this.constructor.defaultContractId, {
-        viewMethods: [this.constructor.contractMethods.list],
-      },
-    );
+    this.#contract = new nearAPI.Contract(account, this.constructor.defaultContractId, {
+      viewMethods: [this.constructor.contractMethods.list],
+    });
   }
 }
