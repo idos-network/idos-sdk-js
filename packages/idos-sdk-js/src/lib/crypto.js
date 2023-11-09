@@ -30,18 +30,20 @@ export class Crypto {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
-    humanId = humanId || await this.idOS.auth.currentUser();
+    humanId ||= (await this.idOS.auth.currentUser()).humanId;
 
     if (!humanId) return;
 
-    this.publicKey = this.provider.init(humanId, signerAddress, signerPublicKey);
+    this.publicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
+    this.idOS.store.set("encryption-public-key", this.publicKey);
     this.initialized = true;
 
     return this.publicKey;
   }
 
-
   async encrypt(message, receiverPublicKey) {
+    if (!this.initialized) await this.init();
+
     [ message, receiverPublicKey ] = [message, receiverPublicKey]
       .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
 
@@ -49,6 +51,8 @@ export class Crypto {
   }
 
   async decrypt(message, senderPublicKey) {
+    if (!this.initialized) await this.init();
+
     [ message, senderPublicKey ] = [message, senderPublicKey]
       .map(arg => (typeof arg === "string" || arg instanceof String) ? Utf8Codec.encode(arg) : arg);
 

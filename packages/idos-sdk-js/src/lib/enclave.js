@@ -1,9 +1,18 @@
-import { IframeEnclave } from "./enclave-providers";
+import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
 
 export class Enclave {
-  constructor(idOS, container) {
+  constructor(idOS, container, providerType = "iframe") {
     this.idOS = idOS;
-    this.provider = new IframeEnclave({ container });
+    switch (providerType) {
+      case "iframe":
+        this.provider = new IframeEnclave({ container })
+        break;
+      case "metamask-snap":
+        this.provider = new MetaMaskSnapEnclave();
+        break;
+      default:
+        throw new Error(`Unexpected provider type: ${providerType}`);
+    }
   }
 
   async loadProvider() {
