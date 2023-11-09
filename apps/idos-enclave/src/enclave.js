@@ -207,7 +207,8 @@ export class Enclave {
         }[requestName];
 
         if (!paramBuilder) {
-          throw new Error(`Unexpected request from parent: ${requestName}`);
+          console.dir(event)
+          throw new Error(`Unexpected request from parent: ${JSON.stringify(event, null, 2)}`);
         }
 
         const response = await this[requestName](...paramBuilder());
