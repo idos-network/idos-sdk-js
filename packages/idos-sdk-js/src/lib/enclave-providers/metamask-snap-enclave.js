@@ -6,7 +6,7 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
   constructor(options) {
     super(options);
     this.enclaveHost = window.ethereum;
-    this.snapId = "local:http://localhost:8080";
+    this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
 
   async load() {
