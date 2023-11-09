@@ -81,7 +81,7 @@ export class NearGrants {
         ],
       });
     } catch (e) {
-      throw new Error("Grant creation failed", {
+      throw new Error("Grant revocation failed", {
         cause: JSON.parse(e.message).kind,
       });
     }
