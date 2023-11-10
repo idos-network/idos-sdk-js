@@ -15,7 +15,8 @@ export type CredentialDetails = Credential & {
 
 export const useFetchCredentials = createQuery({
   primaryKey: "credentials",
-  queryFn: () => idOS.data.list<Credential>("credentials")
+  queryFn: () => idOS.data.list<Credential>("credentials"),
+  retry: true
 });
 
 export const useFetchCredentialDetails = createQuery<
