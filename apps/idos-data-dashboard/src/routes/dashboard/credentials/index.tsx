@@ -60,6 +60,10 @@ export function Component() {
   const currentUser = useFetchCurrentUser();
 
   const handleOpenCredentialViewer = (credential: Credential) => {
+    if (isMobile) {
+      onMobileAlertOpen();
+      return;
+    }
     setCredential(credential);
     onCredentialViewerOpen();
   };
