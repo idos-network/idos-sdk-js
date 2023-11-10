@@ -125,7 +125,7 @@ export class Enclave {
       throw Error(`Couldn't encrypt. ${JSON.stringify({
         message: Base64Codec.encode(message),
         nonce: Base64Codec.encode(nonce),
-        senderPublicKey: Base64Codec.encode(senderPublicKey),
+        receiverPublicKey: Base64Codec.encode(receiverPublicKey),
         localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
       }, null, 2)}`);
 
