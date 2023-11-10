@@ -24,7 +24,7 @@ export function Component() {
   const location = useLocation();
   useEffect(() => {
     onClose();
-  }, [location]);
+  }, [location, onClose]);
 
   return (
     <Box
