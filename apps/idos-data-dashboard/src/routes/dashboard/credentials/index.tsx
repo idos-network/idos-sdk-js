@@ -17,6 +17,7 @@ import {
 import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { isDesktop } from "react-device-detect";
 import { AddCredentialCard } from "./components/add-credential-card";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialViewer } from "./components/credential-viewer";
@@ -91,16 +92,17 @@ export function Component() {
               </Text>
             </Text>
           </TitleBar>
-
-          <Button
-            colorScheme="green"
-            hideBelow="lg"
-            leftIcon={<PlusIcon size={24} />}
-            onClick={onAddCredential}
-            size="xl"
-          >
-            Add credential
-          </Button>
+          {isDesktop ? (
+            <Button
+              colorScheme="green"
+              hideBelow="lg"
+              leftIcon={<PlusIcon size={24} />}
+              onClick={onAddCredential}
+              size="xl"
+            >
+              Add credential
+            </Button>
+          ) : null}
         </Flex>
 
         <AddCredentialCard onAddCredential={onAddCredential} />
