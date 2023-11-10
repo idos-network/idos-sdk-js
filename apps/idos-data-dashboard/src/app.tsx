@@ -1,17 +1,16 @@
+import { ConnectWallet } from "#/connect-wallet.tsx";
+import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
+import { idOS } from "#/lib/idos";
+import { addressAtom } from "#/lib/state";
+import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { BrowserProvider } from "ethers";
+import { useAtom } from "jotai";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
-
-import { ConnectWallet } from "#/connect-wallet.tsx";
-import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
-import { idOS } from "#/lib/idos";
-import { Center, Spinner } from "@chakra-ui/react";
-import { useAtom } from "jotai";
-import { addressAtom } from "./lib/state";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);

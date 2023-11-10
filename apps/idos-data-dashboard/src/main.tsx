@@ -1,4 +1,5 @@
 import i18n from "#/lib/i18n";
+import { theme } from "#/lib/theme";
 import { ChakraProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
@@ -9,7 +10,6 @@ import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 
-import { theme } from "#/lib/theme";
 import App from "./app";
 
 declare global {
