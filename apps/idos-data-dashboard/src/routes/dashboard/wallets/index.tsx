@@ -1,3 +1,4 @@
+import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
 import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
@@ -31,6 +32,12 @@ export function Component() {
 
   const [wallet, setWallet] = useState<Wallet | undefined>();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isAddProofOpen,
+    onOpen: onAddProofOpen,
+    onClose: onAddProofClose
+  } = useDisclosure();
+
   const {
     isOpen: isAddWalletOpen,
     onOpen: onAddWalletOpen,
@@ -81,7 +88,7 @@ export function Component() {
                 colorScheme="green"
                 hideBelow="lg"
                 leftIcon={<PlusIcon size={24} />}
-                onClick={handleOnAddWalletOpen}
+                onClick={onAddProofOpen}
                 size="xl"
               >
                 Add wallet
@@ -89,7 +96,11 @@ export function Component() {
             </>
           </TitleBar>
         </Flex>
-        <AddWalletCard onAddWallet={handleOnAddWalletOpen} />
+        <AddWalletCard onAddWallet={onAddProofOpen} />
+        <AddProofOfPersonhood
+          isOpen={isAddProofOpen}
+          onClose={onAddProofClose}
+        />
       </Stack>
     );
   }

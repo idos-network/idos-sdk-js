@@ -1,9 +1,9 @@
+import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
 import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
 import { useFetchCurrentUser } from "#/lib/queries";
 import { addressAtom } from "#/lib/state";
-import { DeleteCredential } from "#/routes/dashboard/credentials/components/delete-credential";
 import {
   AbsoluteCenter,
   Box,
@@ -18,9 +18,9 @@ import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { AddCredentialCard } from "./components/add-credential-card";
-import { AddProofOfPersonhood } from "./components/add-proof-of-personhood";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialViewer } from "./components/credential-viewer";
+import { DeleteCredential } from "./components/delete-credential";
 import { Credential, useFetchCredentials } from "./queries";
 
 export function Component() {
@@ -104,6 +104,10 @@ export function Component() {
         </Flex>
 
         <AddCredentialCard onAddCredential={onAddCredential} />
+        <AddProofOfPersonhood
+          isOpen={isAddProofOpen}
+          onClose={onAddProofClose}
+        />
       </Stack>
     );
   }

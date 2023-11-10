@@ -16,9 +16,9 @@ import {
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { PropsWithChildren } from "react";
-import Flow1Icon from "../assets/flow-1-icon.svg";
-import Flow2Icon from "../assets/flow-2-icon.svg";
-import Flow3Icon from "../assets/flow-3-icon.svg";
+import Flow1Icon from "./assets/flow-1-icon.svg";
+import Flow2Icon from "./assets/flow-2-icon.svg";
+import Flow3Icon from "./assets/flow-3-icon.svg";
 
 const ProofBox = ({ children }: PropsWithChildren) => (
   <Flex
