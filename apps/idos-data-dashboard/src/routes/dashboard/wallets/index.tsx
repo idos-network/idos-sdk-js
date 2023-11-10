@@ -18,6 +18,7 @@ import {
 import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
+import { isDesktop } from "react-device-detect";
 import { AddWallet } from "./components/add-wallet";
 import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
@@ -71,29 +72,31 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Wallets</Title>
-            <>
-              <IconButton
-                w="60px"
-                h="60px"
-                p={0}
-                aria-label="Add wallet"
-                colorScheme="green"
-                hideFrom="lg"
-                onClick={handleOnAddWalletOpen}
-                size="xl"
-              >
-                <PlusIcon size={24} />
-              </IconButton>
-              <Button
-                colorScheme="green"
-                hideBelow="lg"
-                leftIcon={<PlusIcon size={24} />}
-                onClick={onAddProofOpen}
-                size="xl"
-              >
-                Add wallet
-              </Button>
-            </>
+            {isDesktop ? (
+              <>
+                <IconButton
+                  w="60px"
+                  h="60px"
+                  p={0}
+                  aria-label="Add wallet"
+                  colorScheme="green"
+                  hideFrom="lg"
+                  onClick={handleOnAddWalletOpen}
+                  size="xl"
+                >
+                  <PlusIcon size={24} />
+                </IconButton>
+                <Button
+                  colorScheme="green"
+                  hideBelow="lg"
+                  leftIcon={<PlusIcon size={24} />}
+                  onClick={onAddProofOpen}
+                  size="xl"
+                >
+                  Add wallet
+                </Button>
+              </>
+            ) : null}
           </TitleBar>
         </Flex>
         <AddWalletCard onAddWallet={onAddProofOpen} />

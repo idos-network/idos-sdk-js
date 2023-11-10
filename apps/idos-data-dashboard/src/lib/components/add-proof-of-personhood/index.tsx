@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { PropsWithChildren } from "react";
+import { isDesktop } from "react-device-detect";
 import Flow1Icon from "./assets/flow-1-icon.svg";
 import Flow2Icon from "./assets/flow-2-icon.svg";
 import Flow3Icon from "./assets/flow-3-icon.svg";
@@ -75,15 +76,17 @@ export const AddProofOfPersonhood = (props: Omit<ModalProps, "children">) => {
           </Stack>
         </ModalBody>
         <ModalFooter alignItems="center" justifyContent="center" mb={2}>
-          <Button
-            as="a"
-            href="https://app.fractal.id/login?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-eth%3Aread%20verification.wallet-eth.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread"
-            rightIcon={<ArrowUpRightIcon size={20} />}
-            size="lg"
-            variant="ghost"
-          >
-            Verify with Fractal ID
-          </Button>
+          {isDesktop ? (
+            <Button
+              as="a"
+              href="https://app.fractal.id/login?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-eth%3Aread%20verification.wallet-eth.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread"
+              rightIcon={<ArrowUpRightIcon size={20} />}
+              size="lg"
+              variant="ghost"
+            >
+              Verify with Fractal ID
+            </Button>
+          ) : null}
         </ModalFooter>
       </ModalContent>
     </Modal>
