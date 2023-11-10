@@ -2,6 +2,7 @@ import { Breadcrumbs } from "#/lib/components/breadcrumbs";
 import { Title } from "#/lib/components/title";
 import { TitleBar } from "#/lib/components/title-bar";
 import { useFetchCurrentUser } from "#/lib/queries";
+import { addressAtom } from "#/lib/state";
 import { DeleteCredential } from "#/routes/dashboard/credentials/components/delete-credential";
 import {
   AbsoluteCenter,
@@ -13,6 +14,7 @@ import {
   Text,
   useDisclosure
 } from "@chakra-ui/react";
+import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { AddCredentialCard } from "./components/add-credential-card";
@@ -40,7 +42,11 @@ export function Component() {
     onClose: onCredentialDeleteClose
   } = useDisclosure();
 
-  const credentials = useFetchCredentials();
+  const address = useAtomValue(addressAtom);
+
+  const credentials = useFetchCredentials({
+    enabled: !!address
+  });
   const [credential, setCredential] = useState<Credential | undefined>();
   const currentUser = useFetchCurrentUser();
 
@@ -68,6 +74,40 @@ export function Component() {
     onCredentialDeleteClose();
   };
 
+  if (!address) {
+    return (
+      <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
+        <Flex align="center" justify="space-between" h={[82, 125]}>
+          <Breadcrumbs items={["Dashboard", "Credentials"]} />
+        </Flex>
+        <Flex align="center" gap={2.5}>
+          <TitleBar>
+            <Title>Credentials</Title>
+
+            <Text>
+              0
+              <Text as="span" mx={1} hideBelow="xl">
+                Connected Credentials
+              </Text>
+            </Text>
+          </TitleBar>
+
+          <Button
+            colorScheme="green"
+            hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
+            onClick={onAddCredential}
+            size="xl"
+          >
+            Add credential
+          </Button>
+        </Flex>
+
+        <AddCredentialCard onAddCredential={onAddCredential} />
+      </Stack>
+    );
+  }
+
   return (
     <Box>
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
@@ -77,18 +117,18 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Credentials</Title>
-            {currentUser.isPending || credentials.isPending ? (
+            {currentUser.isFetching || credentials.isFetching ? (
               <Spinner size="sm" />
             ) : (
               <Text>
-                {credentials.data?.length}
+                {credentials.data?.length || 0}
                 <Text as="span" mx={1} hideBelow="xl">
                   Connected Credentials
                 </Text>
               </Text>
             )}
           </TitleBar>
-          {!credentials.data ? (
+          {credentials.isSuccess && !credentials.data ? (
             <Button
               colorScheme="green"
               hideBelow="lg"
@@ -102,12 +142,13 @@ export function Component() {
         </Flex>
 
         <Box>
-          {credentials.isPending || currentUser.isPending ? (
+          {credentials.isFetching || currentUser.isFetching ? (
             <AbsoluteCenter>
               <Spinner />
             </AbsoluteCenter>
           ) : null}
-          {credentials.isFetched ? (
+
+          {credentials.isSuccess ? (
             <>
               {!credentials.data ? (
                 <AddCredentialCard onAddCredential={onAddCredential} />

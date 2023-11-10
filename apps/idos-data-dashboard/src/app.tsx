@@ -10,6 +10,8 @@ import { ConnectWallet } from "#/connect-wallet.tsx";
 import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
 import { idOS } from "#/lib/idos";
 import { Center, Spinner } from "@chakra-ui/react";
+import { useAtom } from "jotai";
+import { addressAtom } from "./lib/state";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
@@ -43,6 +45,7 @@ export default function App() {
   const initialized = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
+  const [, setAddress] = useAtom(addressAtom);
 
   const onMetamaskConnect = async () => {
     setIsLoading(true);
@@ -53,6 +56,7 @@ export default function App() {
 
       if (hasProfile) {
         await idOS.setSigner("EVM", signer);
+        setAddress(address);
       }
 
       setIsConnected(true);
@@ -71,7 +75,7 @@ export default function App() {
 
       if (hasProfile) {
         await idOS.setSigner("NEAR", signer);
-        console.log(signer, address);
+        setAddress(address);
       }
 
       setIsConnected(true);
@@ -92,6 +96,7 @@ export default function App() {
 
           if (hasProfile) {
             await idOS.setSigner("EVM", signer);
+            setAddress(address);
           }
 
           setIsConnected(true);
@@ -105,6 +110,7 @@ export default function App() {
 
           if (hasProfile) {
             await idOS.setSigner("NEAR", signer);
+            setAddress(address);
           }
 
           setIsConnected(true);
@@ -118,8 +124,9 @@ export default function App() {
   useEffect(() => {
     if (metamask.status === "notConnected") {
       setIsConnected(false);
+      setAddress("");
     }
-  }, [metamask.status]);
+  }, [metamask.status, setAddress]);
 
   if (isLoading) {
     return (

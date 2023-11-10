@@ -128,7 +128,6 @@ export const AddWallet = (props: AddWalletProps) => {
   };
 
   const onClose = () => {
-    setMode(undefined);
     props.onClose();
   };
 

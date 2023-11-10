@@ -34,6 +34,7 @@
     "i18next": "^22.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "i18next-http-backend": "^2.2.2",
+    "jotai": "^2.5.1",
     "lucide-react": "^0.221.0",
     "metamask-react": "^2.7.0",
     "near-api-js": "^2.1.4",
