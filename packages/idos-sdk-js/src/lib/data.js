@@ -48,9 +48,7 @@ export class Data {
       record.content = Base64Codec.encode(
         await this.idOS.crypto.encrypt(record.content),
       );
-      record.encryption_public_key = Base64Codec.encode(
-        this.idOS.crypto.publicKey,
-      );
+      record.encryption_public_key = this.idOS.crypto.publicKey;
     }
     if (tableName === "attributes") {
       record.value = Base64Codec.encode(
