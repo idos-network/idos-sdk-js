@@ -1,6 +1,20 @@
-import { Button, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Center,
+  GridItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalOverlay,
+  SimpleGrid,
+  Stack,
+  Text,
+  useDisclosure
+} from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
-import { isDesktop } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { Credential } from "../queries";
 
 type CredentialCardProps = {
@@ -11,6 +25,12 @@ type CredentialCardProps = {
 };
 
 export const CredentialCard = (props: CredentialCardProps) => {
+  const { isOpen, onClose, onOpen } = useDisclosure();
+
+  const handleViewDetails = () => {
+    isMobile ? onOpen() : props.onViewDetails(props.credential);
+  };
+
   return (
     <Stack
       gap={14}
@@ -47,23 +67,44 @@ export const CredentialCard = (props: CredentialCardProps) => {
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
-        {isDesktop ? (
-          <Button
-            onClick={() => props.onViewDetails(props.credential)}
-            variant="ghost"
-          >
-            View Details
-          </Button>
-        ) : null}
+        <Button onClick={handleViewDetails} variant="ghost">
+          View Details
+        </Button>
 
         <Button
           leftIcon={<XIcon />}
-          onClick={() => props.onDelete(props.credential)}
+          onClick={handleViewDetails}
           variant="ghost"
         >
           Delete
         </Button>
       </Stack>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        size={{
+          base: "full",
+          md: "2xl"
+        }}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalBody>
+            <Center p={5}>
+              <Text px={3} py={1} color="red.400" rounded="lg">
+                Please use the idOS Dashboard in your desktop's browser to see
+                your credential's content
+              </Text>
+            </Center>
+          </ModalBody>
+          <ModalFooter>
+            <Button onClick={onClose} variant="ghost">
+              Ok
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Stack>
   );
 };
