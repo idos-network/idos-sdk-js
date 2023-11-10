@@ -22,9 +22,9 @@ declare class SDKCrypto {
   idOS: idOS;
   private provider;
   constructor(idOS: idOS);
-  init(): Promise<Uint8Array>;
-  encrypt(message: string | Uint8Array, receiverPublicKey?: string | Uint8Array): Promise<Uint8Array>;
-  decrypt(message: string | Uint8Array, receiverPublicKey?: string | Uint8Array): Promise<Uint8Array>;
+  init(): Promise<string>;
+  encrypt(message: string, receiverPublicKey?: string): Promise<string>;
+  decrypt(message: string, receiverPublicKey?: string): Promise<string>;
 }
 
 declare class Data {
@@ -36,7 +36,7 @@ declare class Data {
   create(
     tableName: string,
     record: Record<string, string>,
-    receiverPublicKey?: Uint8Array
+    receiverPublicKey?: string
   ): Promise<string | undefined>;
   get<T extends Record<string, string>>(tableName: string, recordId: string): Promise<T>;
   delete(tableName: string, recordId: string): Promise<void>;

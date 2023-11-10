@@ -1,6 +1,5 @@
 import { Store } from "../../../idos-store";
 import { Auth } from "./auth";
-import { Crypto } from "./crypto";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants/grants";
@@ -21,7 +20,6 @@ export class idOS {
     }
 
     this.auth = new Auth(this);
-    this.crypto = new Crypto(this);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container);
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
@@ -32,7 +30,7 @@ export class idOS {
   static async init({ nodeUrl, dbId, container }) {
     this.initializing = true;
     const idos = new this({ nodeUrl, dbId, container });
-    await idos.enclave.loadProvider();
+    await idos.enclave.load();
 
     return idos;
   }

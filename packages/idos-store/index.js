@@ -6,7 +6,7 @@ export class Store {
   }
 
   constructor() {
-    this.#sync();
+    this.#rebuild();
   }
 
   pipeCodec({ encode, decode }) {
@@ -53,7 +53,7 @@ export class Store {
     }
   }
 
-  #sync() {
+  #rebuild() {
     const keysInCookies = Object.values(Object.fromEntries(
       document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
     ));

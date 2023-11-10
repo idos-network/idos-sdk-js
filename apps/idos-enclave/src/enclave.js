@@ -7,13 +7,14 @@ import nacl from "tweetnacl";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
+
     this.store = new Store();
+    this.storeBase64 = this.store.pipeCodec(Base64Codec);
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
 
-    const storeWithCodec = this.store.pipeCodec(Base64Codec);
-    let secretKey = storeWithCodec.get("encryption-private-key")
+    let secretKey = this.storeBase64.get("encryption-private-key")
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.#listenToRequests();
@@ -29,8 +30,8 @@ export class Enclave {
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     return {
+      encryptionPublicKey: this.storeBase64.get("encryption-public-key"),
       humanId: this.store.get("human-id"),
-      encryptionPublicKey: this.store.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
     };
@@ -59,7 +60,7 @@ export class Enclave {
           allowCredentials: [{
             type: "public-key",
             id: Base64Codec.decode(storedCredentialId),
-          }]
+          }],
         },
       };
 
@@ -103,15 +104,13 @@ export class Enclave {
     const password = this.store.get("password");
     const salt = this.store.get("human-id");
 
-    const storeWithCodec = this.store.pipeCodec(Base64Codec);
-
-    let secretKey = storeWithCodec.get("encryption-private-key")
+    let secretKey = this.storeBase64.get("encryption-private-key")
       || await idOSKeyDerivation({ password, salt });
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
-    storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
+    this.storeBase64.set("encryption-private-key", this.keyPair.secretKey);
+    this.storeBase64.set("encryption-public-key", this.keyPair.publicKey);
   }
 
   encrypt(message, receiverPublicKey) {
@@ -137,12 +136,13 @@ export class Enclave {
   }
 
   decrypt(fullMessage, senderPublicKey) {
+    senderPublicKey = senderPublicKey || this.keyPair.publicKey;
+
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 
     const decrypted =
       nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
-
 
     if (decrypted == null) {
       throw Error(`Couldn't decrypt. ${JSON.stringify({
