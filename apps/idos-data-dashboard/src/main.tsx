@@ -21,9 +21,7 @@ declare global {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 0,
-      refetchOnWindowFocus: false,
-      staleTime: Infinity
+      retry: 0
     }
   }
 });
@@ -48,7 +46,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                           lazy: () => import("#/routes/dashboard/credentials")
                         },
                         {
-                          path: '/wallets',
+                          path: "/wallets",
                           lazy: () => import("#/routes/dashboard/wallets")
                         }
                       ]

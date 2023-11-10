@@ -13,8 +13,7 @@ export class Data {
   async list(tableName, filter) {
     let records = await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`);
 
-    const humanId = records[0]?.human_id;
-    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init(humanId);
+    this.idOS.store.set("human-id", records[0]?.human_id);
 
     if (tableName === "attributes") {
       for (const record of records) {
@@ -35,8 +34,6 @@ export class Data {
   }
 
   async create(tableName, record, receiverPublicKey) {
-    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
-
     // eslint-disable-next-line no-unused-vars
     receiverPublicKey = receiverPublicKey ?? this.idOS.crypto.publicKey;
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
@@ -70,14 +67,15 @@ export class Data {
   }
 
   async get(tableName, recordId) {
-    if (!this.idOS.crypto.initialized) await this.idOS.crypto.init();
-
     if (tableName === "credentials") {
       let records = await this.idOS.kwilWrapper.call(
         `get_credential_owned`,
         { id: recordId },
         `Get your credential in idOS`
       );
+
+      this.idOS.store.set("human-id", records[0]?.human_id);
+
       let record = records.find(r => r.id === recordId);
       record.content = Utf8Codec.decode(
         await this.idOS.crypto.decrypt(

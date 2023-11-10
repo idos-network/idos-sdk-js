@@ -71,6 +71,7 @@ export default function App() {
 
       if (hasProfile) {
         await idOS.setSigner("NEAR", signer);
+        console.log(signer, address);
       }
 
       setIsConnected(true);
