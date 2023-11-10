@@ -18,7 +18,8 @@ import {
 import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isMobile } from "react-device-detect";
+import { MobileAlert } from "../credentials/components/mobile-alert";
 import { AddWallet } from "./components/add-wallet";
 import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
@@ -45,6 +46,12 @@ export function Component() {
     onClose: onAddWalletClose
   } = useDisclosure();
 
+  const {
+    isOpen: isMobileAlertOpen,
+    onOpen: onMobileAlertOpen,
+    onClose: onMobileAlertClose
+  } = useDisclosure();
+
   const handleDeleteWalletClose = () => {
     setWallet(undefined);
     onClose();
@@ -55,12 +62,22 @@ export function Component() {
     onOpen();
   };
 
-  const handleOnAddWalletOpen = () => {
-    onAddWalletOpen();
-  };
-
   const handleOnAddWalletClose = () => {
     onAddWalletClose();
+  };
+
+  const handleAddWallet = () => {
+    if (isMobile && !address) {
+      onMobileAlertOpen();
+      return;
+    }
+
+    if (!address) {
+      onAddProofOpen();
+      return;
+    }
+
+    onAddWalletOpen();
   };
 
   if (!address) {
@@ -72,37 +89,44 @@ export function Component() {
         <Flex align="center" gap={2.5}>
           <TitleBar>
             <Title>Wallets</Title>
-            {isDesktop ? (
-              <>
-                <IconButton
-                  w="60px"
-                  h="60px"
-                  p={0}
-                  aria-label="Add wallet"
-                  colorScheme="green"
-                  hideFrom="lg"
-                  onClick={handleOnAddWalletOpen}
-                  size="xl"
-                >
-                  <PlusIcon size={24} />
-                </IconButton>
-                <Button
-                  colorScheme="green"
-                  hideBelow="lg"
-                  leftIcon={<PlusIcon size={24} />}
-                  onClick={onAddProofOpen}
-                  size="xl"
-                >
-                  Add wallet
-                </Button>
-              </>
-            ) : null}
+            <Text>
+              0
+              <Text as="span" mx={1} hideBelow="xl">
+                Connected wallet(s)
+              </Text>
+            </Text>
           </TitleBar>
+          <IconButton
+            w="60px"
+            h="60px"
+            p={0}
+            aria-label="Add wallet"
+            colorScheme="green"
+            hideFrom="lg"
+            onClick={handleAddWallet}
+            size="xl"
+          >
+            <PlusIcon size={24} />
+          </IconButton>
+          <Button
+            colorScheme="green"
+            hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
+            onClick={handleAddWallet}
+            size="xl"
+          >
+            Add wallet
+          </Button>
         </Flex>
-        <AddWalletCard onAddWallet={onAddProofOpen} />
+        <AddWalletCard onAddWallet={handleAddWallet} />
         <AddProofOfPersonhood
           isOpen={isAddProofOpen}
           onClose={onAddProofClose}
+        />
+        <MobileAlert
+          isOpen={isMobileAlertOpen}
+          onClose={onMobileAlertClose}
+          content="Please use the idOS Dashboard in your desktop's browser to add a new wallet to idOS"
         />
       </Stack>
     );
@@ -137,7 +161,7 @@ export function Component() {
                 aria-label="Add wallet"
                 colorScheme="green"
                 hideFrom="lg"
-                onClick={handleOnAddWalletOpen}
+                onClick={handleAddWallet}
                 size="xl"
               >
                 <PlusIcon size={24} />
@@ -146,7 +170,7 @@ export function Component() {
                 colorScheme="green"
                 hideBelow="lg"
                 leftIcon={<PlusIcon size={24} />}
-                onClick={handleOnAddWalletOpen}
+                onClick={handleAddWallet}
                 size="xl"
               >
                 Add wallet
@@ -163,7 +187,7 @@ export function Component() {
           {wallets.isSuccess ? (
             <VStack alignItems="stretch" gap={2.5}>
               {!wallets.data ? (
-                <AddWalletCard onAddWallet={handleOnAddWalletOpen} />
+                <AddWalletCard onAddWallet={handleAddWallet} />
               ) : (
                 wallets.data.map((wallet) => (
                   <WalletCard
