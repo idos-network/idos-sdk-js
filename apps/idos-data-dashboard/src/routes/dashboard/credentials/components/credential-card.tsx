@@ -1,5 +1,6 @@
 import { Button, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
+import { isDesktop } from "react-device-detect";
 import { Credential } from "../queries";
 
 type CredentialCardProps = {
@@ -46,12 +47,15 @@ export const CredentialCard = (props: CredentialCardProps) => {
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
-        <Button
-          onClick={() => props.onViewDetails(props.credential)}
-          variant="ghost"
-        >
-          View Details
-        </Button>
+        {isDesktop ? (
+          <Button
+            onClick={() => props.onViewDetails(props.credential)}
+            variant="ghost"
+          >
+            View Details
+          </Button>
+        ) : null}
+
         <Button
           leftIcon={<XIcon />}
           onClick={() => props.onDelete(props.credential)}
