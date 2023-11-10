@@ -9,6 +9,7 @@ import {
   Box,
   Button,
   Flex,
+  IconButton,
   Spinner,
   Stack,
   Text,
@@ -17,11 +18,12 @@ import {
 import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import { isDesktop } from "react-device-detect";
+import { isMobile } from "react-device-detect";
 import { AddCredentialCard } from "./components/add-credential-card";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialViewer } from "./components/credential-viewer";
 import { DeleteCredential } from "./components/delete-credential";
+import { MobileAlert } from "./components/mobile-alert";
 import { Credential, useFetchCredentials } from "./queries";
 
 export function Component() {
@@ -41,6 +43,12 @@ export function Component() {
     isOpen: isCredentialDeleteOpen,
     onOpen: onCredentialDeleteOpen,
     onClose: onCredentialDeleteClose
+  } = useDisclosure();
+
+  const {
+    isOpen: isMobileAlertOpen,
+    onOpen: onMobileAlertOpen,
+    onClose: onMobileAlertClose
   } = useDisclosure();
 
   const address = useAtomValue(addressAtom);
@@ -75,6 +83,15 @@ export function Component() {
     onCredentialDeleteClose();
   };
 
+  const handleAddCredential = () => {
+    if (isMobile) {
+      onMobileAlertOpen();
+      return;
+    }
+
+    onAddProofOpen();
+  };
+
   if (!address) {
     return (
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
@@ -92,23 +109,38 @@ export function Component() {
               </Text>
             </Text>
           </TitleBar>
-          {isDesktop ? (
-            <Button
-              colorScheme="green"
-              hideBelow="lg"
-              leftIcon={<PlusIcon size={24} />}
-              onClick={onAddCredential}
-              size="xl"
-            >
-              Add credential
-            </Button>
-          ) : null}
+          <IconButton
+            w="60px"
+            h="60px"
+            p={0}
+            aria-label="Add wallet"
+            colorScheme="green"
+            hideFrom="lg"
+            onClick={handleAddCredential}
+            size="xl"
+          >
+            <PlusIcon size={24} />
+          </IconButton>
+          <Button
+            colorScheme="green"
+            hideBelow="lg"
+            leftIcon={<PlusIcon size={24} />}
+            onClick={handleAddCredential}
+            size="xl"
+          >
+            Add credential
+          </Button>
         </Flex>
 
-        <AddCredentialCard onAddCredential={onAddCredential} />
+        <AddCredentialCard onAddCredential={handleAddCredential} />
         <AddProofOfPersonhood
           isOpen={isAddProofOpen}
           onClose={onAddProofClose}
+        />
+        <MobileAlert
+          isOpen={isMobileAlertOpen}
+          onClose={onMobileAlertClose}
+          content="Please use the idOS Dashboard in your desktop's browser to create new idOS credentials"
         />
       </Stack>
     );
@@ -157,7 +189,7 @@ export function Component() {
           {credentials.isSuccess ? (
             <>
               {!credentials.data ? (
-                <AddCredentialCard onAddCredential={onAddCredential} />
+                <AddCredentialCard onAddCredential={handleAddCredential} />
               ) : (
                 credentials.data.map((credential) => (
                   <CredentialCard
@@ -187,6 +219,13 @@ export function Component() {
           />
         </>
       ) : null}
+
+      <MobileAlert
+        isOpen={isMobileAlertOpen}
+        onClose={onMobileAlertClose}
+        content="Please use the idOS Dashboard in your desktop's browser to see
+              your credential's content"
+      />
     </Box>
   );
 }
