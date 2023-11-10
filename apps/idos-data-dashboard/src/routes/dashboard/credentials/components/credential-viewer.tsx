@@ -2,6 +2,7 @@ import {
   Button,
   Center,
   Code,
+  Link,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -28,17 +29,6 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
     },
     enabled: !!props.credential.id && props.isOpen
   });
-
-  const onDownload = () => {
-    // create a donwlodable json file
-    if (credential.data) {
-      const file = new Blob([credential.data?.content], {
-        type: "application/json"
-      });
-      const href = URL.createObjectURL(file);
-      window.open(href, "_blank");
-    }
-  };
 
   return (
     <Modal
@@ -90,9 +80,16 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
               </Button>
               {credential.isSuccess ? (
                 <Button
+                  as={Link}
+                  _hover={{
+                    textDecoration: "none"
+                  }}
                   colorScheme="green"
+                  download={`${credential.data.issuer}-${credential.data?.credential_type}.json`}
+                  href={`data:text/json;charset=utf-8,${encodeURIComponent(
+                    credential.data.content
+                  )}`}
                   leftIcon={<DownloadIcon />}
-                  onClick={onDownload}
                 >
                   Download .json file
                 </Button>
