@@ -85,6 +85,10 @@ Our [`📁 idos-example-dapp`](../../apps/idos-example-dapp) shows an example of
 
 <img src="./assets/readme-container-2.gif" />
 
+### Using `hasPassword`
+
+You can check id your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users.
+
 ### The `setSigner` flow and supported wallets
 
 ```js
@@ -181,10 +185,12 @@ const { humanId } = await idos.setSigner("NEAR", signer);
 if (humanId) { /* user has an idOS profile */ }
 ```
 
+You can also use `idos.hasProfile(signer.address)` before `setSigner` for a check that won't require a signature.
+
 If your user does not have an idOS profile, you can send them to Fractal ID for them to get one, by redirecting them to the first URL in `idOS.profileProviders`. By using that URL, you agree to [Fractal ID's Terms of Service](https://web.fractal.id/wp-content/uploads/2023/11/Onboarding-link.pdf).
 
 ```js
-if (!humanId) window.location = idOs.profileProviders[0];
+if (!idos.hasProfile(signer.address)) window.location = idOS.profileProviders[0];
 ```
 
 ### Credentials
