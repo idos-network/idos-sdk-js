@@ -4,6 +4,7 @@ import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import { SigningKey, hashMessage } from "ethers";
+import { Nonce } from "./nonce";
 
 /* global Buffer */
 
@@ -13,6 +14,16 @@ export class Auth {
     this.user = {};
   }
 
+  async forget() {
+    this.idOS.store.reset();
+    await this.idOS.enclave.reset();
+  }
+
+  async remember(key, value) {
+    this.idOS.store.set(key, value);
+    await this.idOS.enclave.store(key, value);
+  }
+
   async setEvmSigner(signer) {
     const storedAddress = this.idOS.store.get("signer-address", signer.address);
     const currentAddress = signer.address;
@@ -20,14 +31,13 @@ export class Auth {
     let publicKey = this.idOS.store.get("signer-public-key");
 
     if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
-      this.idOS.store.reset();
-      await this.idOS.enclave.reset();
+      await this.forget();
       const message = "idOS authentication";
       publicKey = SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
     }
 
-    this.idOS.store.set("signer-address", currentAddress);
-    this.idOS.store.set("signer-public-key", publicKey);
+    await this.remember("signer-address", currentAddress);
+    await this.remember("signer-public-key", publicKey);
 
     return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
@@ -40,8 +50,8 @@ export class Auth {
         );
 
       if (signature) {
-        this.idOS.store.set("signer-address", accountId);
-        this.idOS.store.set("signer-public-key", publicKey);
+        await this.remember("signer-address", accountId);
+        await this.remember("signer-public-key", publicKey);
       }
 
       wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
@@ -62,9 +72,7 @@ export class Auth {
           });
         } else {
           const callbackUrl = window.location.href;
-          const nonce = Buffer.from(
-            this.idOS.crypto.Nonce.random(32, { bitCap: 7 }),
-          );
+          const nonce = Buffer.from(new Nonce(32).clampUTF8);
 
           this.idOS.store.set("sign-last-message", message);
           this.idOS.store.set("sign-last-nonce", Array.from(nonce));
@@ -83,20 +91,19 @@ export class Auth {
     let publicKey = this.idOS.store.get("signer-public-key");
 
     if (storedAddress != currentAddress || !publicKey) {
-      this.idOS.store.reset();
-      await this.idOS.enclave.reset();
+      await this.forget();
       const message = "idOS authentication";
-      const nonce = Buffer.from(this.idOS.crypto.Nonce.random(32));
+      const nonce = Buffer.from(new Nonce(32).bytes);
       ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
 
-      this.idOS.store.set("signer-address", currentAddress);
-      this.idOS.store.set("signer-public-key", publicKey);
+      await this.remember("signer-address", currentAddress);
+      await this.remember("signer-public-key", publicKey);
     }
 
     const signer = async (message) => {
       message = Utf8Codec.decode(message);
 
-      let nonceSuggestion = Buffer.from(this.idOS.crypto.Nonce.random(32));
+      let nonceSuggestion = Buffer.from(new Nonce(32).bytes);
 
       const {
         nonce = nonceSuggestion,
@@ -144,6 +151,13 @@ export class Auth {
   #setSigner(args) {
     this.idOS.kwilWrapper.setSigner(args);
     return args;
+  }
+
+  async setHumanId(humanId) {
+    if (!humanId) return;
+
+    this.user.humanId = humanId;
+    await this.remember("human-id", humanId);
   }
 
   async currentUser() {

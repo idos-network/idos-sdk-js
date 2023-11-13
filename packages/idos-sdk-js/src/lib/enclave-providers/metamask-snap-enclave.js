@@ -1,10 +1,5 @@
-import { EnclaveProvider } from "./enclave-provider";
-import * as Base64Codec from "@stablelib/base64";
-
-export class MetaMaskSnapEnclave extends EnclaveProvider {
-
+export class MetaMaskSnapEnclave {
   constructor(options) {
-    super(options);
     this.enclaveHost = window.ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
@@ -19,7 +14,7 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
     });
 
     const storage = JSON.parse(await this.invokeSnap("storage") || {});
-    storage.encryptionPublicKey &&= Base64Codec.encode(Uint8Array.from(Object.values(storage.encryptionPublicKey)));
+    storage.encryptionPublicKey &&= Uint8Array.from(Object.values(storage.encryptionPublicKey));
 
     return storage;
   }
@@ -30,12 +25,12 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
     );
 
     encryptionPublicKey ||= await this.invokeSnap("init");
-    encryptionPublicKey &&= Base64Codec.encode(Uint8Array.from(Object.values(encryptionPublicKey)));
+    encryptionPublicKey &&= Uint8Array.from(Object.values(encryptionPublicKey));
 
     return encryptionPublicKey;
   }
 
-  async invokeSnap (method, params = {}) {
+  invokeSnap (method, params = {}) {
     return this.enclaveHost.request({
       method: 'wallet_invokeSnap',
       params: {
@@ -45,12 +40,16 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
     });
   }
 
-  async reset() {
-    return await this.invokeSnap("reset");
+  store(key, value) {
+    return this.invokeSnap("storage", { [key]: value });
   }
 
-  async confirm(message) {
-    return await this.invokeSnap("confirm", { message });
+  reset() {
+    return this.invokeSnap("reset");
+  }
+
+  confirm(message) {
+    return this.invokeSnap("confirm", { message });
   }
 
   async encrypt(message, receiverPublicKey) {

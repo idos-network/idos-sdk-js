@@ -1,10 +1,7 @@
-import { EnclaveProvider } from "./enclave-provider";
-
-export class IframeEnclave extends EnclaveProvider {
+export class IframeEnclave {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
   constructor(options) {
-    super(options);
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
@@ -22,11 +19,14 @@ export class IframeEnclave extends EnclaveProvider {
     if (encryptionPublicKey) return encryptionPublicKey;
 
     this.#showEnclave();
-    return this.#requestToEnclave({ keys: { usePasskeys: false } })
-      .then(encryptionPublicKey => {
-        this.#hideEnclave();
-        return encryptionPublicKey;
-      });
+    return this.#requestToEnclave({ keys: { usePasskeys: false } }).then((encryptionPublicKey) => {
+      this.#hideEnclave();
+      return encryptionPublicKey;
+    });
+  }
+
+  store(key, value) {
+    return this.#requestToEnclave({ storage: { [key]: value } });
   }
 
   reset() {
@@ -35,11 +35,10 @@ export class IframeEnclave extends EnclaveProvider {
 
   async confirm(message) {
     this.#showEnclave();
-    return this.#requestToEnclave({ confirm: { message } })
-      .then(response => {
-        this.#hideEnclave();
-        return response;
-      });
+    return this.#requestToEnclave({ confirm: { message } }).then((response) => {
+      this.#hideEnclave();
+      return response;
+    });
   }
 
   encrypt(message, receiverPublicKey) {
@@ -52,10 +51,7 @@ export class IframeEnclave extends EnclaveProvider {
 
   async #loadEnclave() {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
-    const permissionsPolicies = [
-      "publickey-credentials-get",
-      "storage-access",
-    ];
+    const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
     const liftedSandboxRestrictions = [
@@ -65,7 +61,7 @@ export class IframeEnclave extends EnclaveProvider {
       "popups-to-escape-sandbox",
       "same-origin",
       "scripts",
-    ].map(toLift => `allow-${toLift}`);
+    ].map((toLift) => `allow-${toLift}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
     const referrerPolicy = "origin";
@@ -77,7 +73,6 @@ export class IframeEnclave extends EnclaveProvider {
       "display: block",
       "width: 100%",
     ];
-
 
     this.iframe.allow = permissionsPolicies.join("; ");
     this.iframe.referrerpolicy = referrerPolicy;
