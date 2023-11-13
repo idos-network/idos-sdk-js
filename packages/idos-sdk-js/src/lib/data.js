@@ -1,3 +1,5 @@
+import * as Base64Codec from "@stablelib/base64";
+
 export class Data {
   constructor(idOS) {
     this.idOS = idOS;
@@ -26,8 +28,7 @@ export class Data {
   }
 
   async create(tableName, record, receiverPublicKey) {
-    // eslint-disable-next-line no-unused-vars
-    receiverPublicKey = receiverPublicKey ?? this.idOS.enclave.encryptionPublicKey;
+    receiverPublicKey = Base64Codec.encode(receiverPublicKey ?? await this.idOS.enclave.init());
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;
     const actionFromSchema = schema.data.actions.find((action) => action.name === name);
@@ -37,11 +38,12 @@ export class Data {
       throw new Error(`Invalid payload for action ${name}`);
     }
     if (tableName === "credentials") {
-      record.content = await this.idOS.enclave.encrypt(record.content);
-      record.encryption_public_key = this.idOS.enclave.encryptionPublicKey;
+      record.content = await this.idOS.enclave.encrypt(record.content, receiverPublicKey);
+      record.encryption_public_key = receiverPublicKey;
     }
     if (tableName === "attributes") {
-      record.value = await this.idOS.enclave.encrypt(record.value);
+      record.value = await this.idOS.enclave.encrypt(record.value, receiverPublicKey);
+      record.encryption_public_key = receiverPublicKey;
     }
     let newRecord = { id: crypto.randomUUID(), ...record };
     await this.idOS.kwilWrapper.broadcast(
@@ -60,9 +62,9 @@ export class Data {
         `Get your credential in idOS`
       );
 
-      await this.idOS.auth.setHumanId(records[0]?.human_id);
-
+      await this.idOS.auth.setHumanId(records?.[0]?.human_id);
       let record = records.find(r => r.id === recordId);
+      if(!record) return record;
       record.content = await this.idOS.enclave.decrypt(
         record.content,
         record.encryption_public_key,
