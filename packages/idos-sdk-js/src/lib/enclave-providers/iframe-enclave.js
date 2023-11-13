@@ -1,5 +1,5 @@
 export class IframeEnclave {
-  hostUrl = new URL("https://foo.com:5174");
+  hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
   constructor(options) {
     this.container = options.container;
@@ -19,11 +19,10 @@ export class IframeEnclave {
     if (encryptionPublicKey) return encryptionPublicKey;
 
     this.#showEnclave();
-    return this.#requestToEnclave({ keys: { usePasskeys: false } })
-      .then(encryptionPublicKey => {
-        this.#hideEnclave();
-        return encryptionPublicKey;
-      });
+    return this.#requestToEnclave({ keys: { usePasskeys: false } }).then((encryptionPublicKey) => {
+      this.#hideEnclave();
+      return encryptionPublicKey;
+    });
   }
 
   store(key, value) {
@@ -36,11 +35,10 @@ export class IframeEnclave {
 
   async confirm(message) {
     this.#showEnclave();
-    return this.#requestToEnclave({ confirm: { message } })
-      .then(response => {
-        this.#hideEnclave();
-        return response;
-      });
+    return this.#requestToEnclave({ confirm: { message } }).then((response) => {
+      this.#hideEnclave();
+      return response;
+    });
   }
 
   encrypt(message, receiverPublicKey) {
@@ -53,10 +51,7 @@ export class IframeEnclave {
 
   async #loadEnclave() {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
-    const permissionsPolicies = [
-      "publickey-credentials-get",
-      "storage-access",
-    ];
+    const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#sandbox
     const liftedSandboxRestrictions = [
@@ -66,7 +61,7 @@ export class IframeEnclave {
       "popups-to-escape-sandbox",
       "same-origin",
       "scripts",
-    ].map(toLift => `allow-${toLift}`);
+    ].map((toLift) => `allow-${toLift}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
     const referrerPolicy = "origin";
@@ -78,7 +73,6 @@ export class IframeEnclave {
       "display: block",
       "width: 100%",
     ];
-
 
     this.iframe.allow = permissionsPolicies.join("; ");
     this.iframe.referrerpolicy = referrerPolicy;
