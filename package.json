@@ -5,7 +5,8 @@
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
     "lint": "turbo run lint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "eslint": "^8.52.0",
