@@ -2,8 +2,8 @@ export class Store {
   keyPrefix = "idOS-";
   cookieExpiries = {
     past: new Date(0).toUTCString(),
-    future: new Date(Date.now() + 365*3600*24*1000).toUTCString(),
-  }
+    future: new Date(Date.now() + 365 * 3600 * 24 * 1000).toUTCString()
+  };
 
   constructor() {
     this.#rebuild();
@@ -16,7 +16,7 @@ export class Store {
         const result = this.get(key);
         if (result) return decode(result);
       },
-      set: (key, value, days) => this.set.call(this, key, encode(value), days),
+      set: (key, value, days) => this.set.call(this, key, encode(value), days)
     };
   }
 
@@ -24,15 +24,18 @@ export class Store {
     const values = [
       this.#getCookie(key),
       this.#getLocalStorage(key),
-      this.#getSessionStorage(key),
+      this.#getSessionStorage(key)
     ].filter(Boolean);
 
     if (!values.length) return;
 
-    if (!values.every(value => value === values[0])) console.warn([
-      `Inconsistent idOS store data (${window.location.origin})`,
-      `${values.join("\nvs\n")}`
-    ].join("\n"));
+    if (!values.every((value) => value === values[0]))
+      console.warn(
+        [
+          `Inconsistent idOS store data (${window.location.origin})`,
+          `${values.join("\nvs\n")}`
+        ].join("\n")
+      );
 
     return values[0] ? JSON.parse(values[0]) : undefined;
   }
@@ -54,9 +57,11 @@ export class Store {
   }
 
   #rebuild() {
-    const keysInCookies = Object.values(Object.fromEntries(
-      document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
-    ));
+    const keysInCookies = Object.values(
+      Object.fromEntries(
+        document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
+      )
+    );
 
     const keysInLocalStorage = Object.keys(window.localStorage);
 
@@ -79,7 +84,7 @@ export class Store {
       `${this.keyPrefix}${key}=${value}`,
       `SameSite=None`,
       `Secure`,
-      `Expires=${expiry}`,
+      `Expires=${expiry}`
     ].join(";");
   }
 
@@ -107,19 +112,22 @@ export class Store {
       }
     }
 
-    const keysInCookies = Object.values(Object.fromEntries(
-      document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
-    ));
+    const keysInCookies = Object.values(
+      Object.fromEntries(
+        document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
+      )
+    );
 
     for (const key of keysInCookies) {
       if (key === "idOS-credential-id") continue;
-      key.startsWith(this.keyPrefix) && (document.cookie = [
-        `${key}=`,
-        `SameSite=None`,
-        `Secure`,
-        `Path=/`,
-        `Expires=${this.cookieExpiries.past}`,
-      ].join(";"));
-    };
+      key.startsWith(this.keyPrefix) &&
+        (document.cookie = [
+          `${key}=`,
+          `SameSite=None`,
+          `Secure`,
+          `Path=/`,
+          `Expires=${this.cookieExpiries.past}`
+        ].join(";"));
+    }
   }
 }

@@ -1,14 +1,11 @@
 import { Store } from "@idos-network/idos-store";
-import { generateMnemonic } from "web-bip39";
-import * as Base64Codec from "@stablelib/base64"
-import * as Utf8Codec from "@stablelib/utf8"
-import wordlist from "web-bip39/wordlists/english";
+import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
 import * as DOMPurify from "dompurify";
 import "./styles.css";
 
-const sanitize = (html) => (
-  DOMPurify.default.sanitize(html, { ALLOWED_TAGS: [] })
-);
+const sanitize = (html) =>
+  DOMPurify.default.sanitize(html, { ALLOWED_TAGS: [] });
 
 class Dialog {
   constructor() {
@@ -21,7 +18,7 @@ class Dialog {
   }
 
   initUi() {
-    this.beforeUnload = e => {
+    this.beforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = "";
       this.respondToEnclave({ error: "closed" });
@@ -38,12 +35,12 @@ class Dialog {
     confirmForm.querySelector("#origin").innerHTML = origin;
     confirmForm.querySelector("#message").innerHTML = message;
 
-    return new Promise(resolve => (
-      confirmForm.addEventListener("submit", e => {
+    return new Promise((resolve) =>
+      confirmForm.addEventListener("submit", (e) => {
         e.preventDefault();
         resolve(e.submitter.id === "yes");
       })
-    ));
+    );
   }
 
   async passwordForm() {
@@ -51,12 +48,12 @@ class Dialog {
     passwordForm.style.display = "block";
     passwordForm.querySelector("input[type=password]").focus();
 
-    return new Promise(resolve => (
-      passwordForm.addEventListener("submit", e => {
+    return new Promise((resolve) =>
+      passwordForm.addEventListener("submit", (e) => {
         e.preventDefault();
         resolve(Object.fromEntries(new FormData(e.target).entries()));
       })
-    ));
+    );
   }
 
   async password() {
@@ -71,7 +68,8 @@ class Dialog {
         const { password } = await this.getOrCreatePasswordCredential();
         this.respondToEnclave({ result: { password } });
       } else if (type === "webauthn") {
-        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
+        const { password, credentialId } =
+          await this.getOrCreateWebAuthnCredential();
         this.respondToEnclave({ result: { password, credentialId } });
       }
     } catch (e) {
@@ -90,16 +88,20 @@ class Dialog {
 
     if (credential) return { password: credential.password };
 
-    await navigator.credentials.store(new PasswordCredential({
-      id: "idos",
-      name: "idOS user",
-      password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32))),
-    }));
+    await navigator.credentials.store(
+      new PasswordCredential({
+        id: "idos",
+        name: "idOS user",
+        password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)))
+      })
+    );
 
-    const password = await new Promise(resolve => setInterval(async () => {
-      let credential = await navigator.credentials.get({ password: true });
-      if (credential) resolve(credential.password);
-    }, 100));
+    const password = await new Promise((resolve) =>
+      setInterval(async () => {
+        let credential = await navigator.credentials.get({ password: true });
+        if (credential) resolve(credential.password);
+      }, 100)
+    );
 
     return { password };
   }
@@ -113,19 +115,22 @@ class Dialog {
       let credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
-          allowCredentials: [{
-            type: "public-key",
-            id: Base64Codec.decode(storedCredentialId),
-          }],
-        },
+          allowCredentials: [
+            {
+              type: "public-key",
+              id: Base64Codec.decode(storedCredentialId)
+            }
+          ]
+        }
       };
 
       try {
         credential = await navigator.credentials.get(credentialRequest);
-        password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+        password = Utf8Codec.decode(
+          new Uint8Array(credential.response.userHandle)
+        );
         credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-      } catch (e) {
-      }
+      } catch (e) {}
     } else {
       const displayName = "idOS User";
 
@@ -138,10 +143,10 @@ class Dialog {
           user: {
             id: Utf8Codec.encode(password),
             displayName,
-            name: displayName,
+            name: displayName
           },
-          pubKeyCredParams: [ {type: "public-key", alg: -7} ],
-        },
+          pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+        }
       });
     }
 
@@ -160,7 +165,9 @@ class Dialog {
       const { data: requestData, ports } = event;
 
       if (!["passkey", "password", "confirm"].includes(requestData.intent))
-        throw new Error(`Unexpected request from parent: ${requestData.intent}`);
+        throw new Error(
+          `Unexpected request from parent: ${requestData.intent}`
+        );
 
       this.responsePort = ports[0];
 
@@ -168,12 +175,12 @@ class Dialog {
     });
   }
 
-  respondToEnclave (message) {
+  respondToEnclave(message) {
     this.responsePort.postMessage(message);
 
     window.removeEventListener("beforeunload", this.beforeUnload);
     this.responsePort.close();
-  };
+  }
 }
 
 new Dialog();

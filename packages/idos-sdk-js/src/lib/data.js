@@ -28,7 +28,7 @@ export class Data {
   }
 
   async create(tableName, record, receiverPublicKey) {
-    receiverPublicKey = Base64Codec.encode(receiverPublicKey ?? await this.idOS.enclave.init());
+    receiverPublicKey = Base64Codec.encode(receiverPublicKey ?? (await this.idOS.enclave.init()));
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;
     const actionFromSchema = schema.data.actions.find((action) => action.name === name);
@@ -63,16 +63,13 @@ export class Data {
       );
 
       await this.idOS.auth.setHumanId(records?.[0]?.human_id);
-      let record = records.find(r => r.id === recordId);
-      if(!record) return record;
-      record.content = await this.idOS.enclave.decrypt(
-        record.content,
-        record.encryption_public_key,
-      );
+      let record = records.find((r) => r.id === recordId);
+      if (!record) return record;
+      record.content = await this.idOS.enclave.decrypt(record.content, record.encryption_public_key);
       return record;
     }
     let records = await this.list(tableName, { id: recordId });
-    let record = records.find(r => r.id === recordId);
+    let record = records.find((r) => r.id === recordId);
     return record;
   }
 
@@ -108,19 +105,20 @@ export class Data {
     let record = await this.get(tableName, recordId);
 
     if (tableName === "credentials") {
-      record.content = await this.idOS.enclave.encrypt(
-        content,
-        receiverPublicKey,
-      );
+      record.content = await this.idOS.enclave.encrypt(content, receiverPublicKey);
       record.encryption_public_key = receiverPublicKey;
     }
 
     const id = crypto.randomUUID();
-    await this.idOS.kwilWrapper.broadcast(`share_${name}`, {
-      [`original_${name}_id`]: record.id,
-      ...record,
-      id,
-    }, `Share a ${name} on idOS`);
+    await this.idOS.kwilWrapper.broadcast(
+      `share_${name}`,
+      {
+        [`original_${name}_id`]: record.id,
+        ...record,
+        id,
+      },
+      `Share a ${name} on idOS`
+    );
     return { id };
   }
 

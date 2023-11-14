@@ -43,7 +43,7 @@ export class idOS {
       await this.auth.setEvmSigner(signer);
       return this.grants.init({ type, signer });
     } else {
-      throw("Signer type not recognized");
+      throw "Signer type not recognized";
     }
   }
 

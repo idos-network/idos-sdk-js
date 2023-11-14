@@ -8,26 +8,27 @@ export class Terminal {
 
     this.currentElem = this.overviewElem;
 
-    document.querySelector("button#close").addEventListener("click", e => {
+    document.querySelector("button#close").addEventListener("click", (e) => {
       this.detailElem.parentElement.classList.remove("visible");
       this.detailElem.innerHTML = "";
       this.currentElem = this.overviewElem;
     });
 
     this.restartButton = wrapper.querySelector("button.restart");
-    this.restartButton.addEventListener("click", e => (
-      window.location = window.location.origin
-    ));
+    this.restartButton.addEventListener(
+      "click",
+      (e) => (window.location = window.location.origin)
+    );
 
     this.resetDappButton = wrapper.querySelector("button.reset-dapp");
-    this.resetDappButton.addEventListener("click", async e => {
+    this.resetDappButton.addEventListener("click", async (e) => {
       window.localStorage.clear();
       await idos.reset();
       window.location = window.location.origin;
     });
 
     this.resetFullButton = wrapper.querySelector("button.reset-full");
-    this.resetFullButton.addEventListener("click", async e => {
+    this.resetFullButton.addEventListener("click", async (e) => {
       window.localStorage.clear();
       await idos.reset({ enclave: true });
       window.location = window.location.origin;
@@ -38,11 +39,13 @@ export class Terminal {
   }
 
   log(str) {
-    this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
+    this.currentElem.innerHTML += /^<.*>$/.test(str)
+      ? str
+      : `<span>${str}</span>`;
 
     this.overviewElem.scrollTo({
       top: this.overviewElem.scrollHeight,
-      behavior: "smooth",
+      behavior: "smooth"
     });
 
     return this;
@@ -65,12 +68,13 @@ export class Terminal {
   table(items = [], keyFilter = [], handlers) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
-    const allKeys =
-      Object.keys(wrappedItems[0] || Object.fromEntries(keyFilter.map(e => [e])));
+    const allKeys = Object.keys(
+      wrappedItems[0] || Object.fromEntries(keyFilter.map((e) => [e]))
+    );
     if (!allKeys.length) throw new Error(`No keys in ${JSON.stringify(items)}`);
 
     const keys = keyFilter.length ? keyFilter : allKeys;
-    const headers = keys.map(key =>
+    const headers = keys.map((key) =>
       key
         .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
         .toLowerCase()
@@ -84,39 +88,57 @@ export class Terminal {
       <div class="table">
         <div class="thead">
           <div class="tr">
-            ${headers.reduce((row, header) => row + `
+            ${headers.reduce(
+              (row, header) =>
+                row +
+                `
               <div class="td"><span>${header}</span></div>
-            `, "")}
+            `,
+              ""
+            )}
           </div>
         </div>
 
         <div class="tbody">
         ${wrappedItems
-          .map(item => keys.map(key => [key, item[key]]))
-          .reduce((row, values) => row + `
+          .map((item) => keys.map((key) => [key, item[key]]))
+          .reduce(
+            (row, values) =>
+              row +
+              `
             <div class="tr">
-              ${values.reduce((row, [key, value]) => row + `
+              ${values.reduce(
+                (row, [key, value]) =>
+                  row +
+                  `
                 <div class="td">
-                  ${handlers?.[key]
-                    ? `<a onclick="terminalHandlers['${handlerId}']['${key}']('${value}')">${value}</a>`
-                    : value
+                  ${
+                    handlers?.[key]
+                      ? `<a onclick="terminalHandlers['${handlerId}']['${key}']('${value}')">${value}</a>`
+                      : value
                   }
                 </div>
-              `, "")}
+              `,
+                ""
+              )}
             </div>
-          `, "")}
+          `,
+            ""
+          )}
         </div>
       </div>
     `);
   }
 
-  status(className, html="") {
+  status(className, html = "") {
     return this.log(`<span class="status ${className}">${html}</span>`);
   }
 
   json(object) {
-    const stringified = JSON.stringify(object, "", 2)
-      .replace(/"(data:.*?;).*/g, "$1 (...)");
+    const stringified = JSON.stringify(object, "", 2).replace(
+      /"(data:.*?;).*/g,
+      "$1 (...)"
+    );
     return this.log(`<pre>${stringified}</pre>`);
   }
 
