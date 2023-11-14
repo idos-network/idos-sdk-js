@@ -38,10 +38,10 @@ export class idOS {
   async setSigner(type, signer) {
     if (type === "NEAR") {
       const { accountId } = await this.auth.setNearSigner(signer);
-      return this.grants.init({ type, accountId, signer });
+      this.grants = await this.grants.init({ type, accountId, signer });
     } else if (type === "EVM") {
       await this.auth.setEvmSigner(signer);
-      return this.grants.init({ type, signer });
+      this.grants = await this.grants.init({ type, signer });
     } else {
       throw new Error("Signer type not recognized");
     }
