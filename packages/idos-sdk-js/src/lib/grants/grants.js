@@ -21,8 +21,7 @@ export class Grants {
     }
 
     if (type === "NEAR") {
-      this.#child = new NearGrants();
-      await this.#child.init({ accountId, signer });
+      this.#child = await NearGrants.build({ accountId, signer });
     }
   }
 
