@@ -1,12 +1,18 @@
-export class MetaMaskSnapEnclave {
-  constructor(options) {
-    this.enclaveHost = window.ethereum;
+import { EnclaveProvider, StoredData } from "./enclave-provider";
+
+export class MetaMaskSnapEnclave extends EnclaveProvider {
+  enclaveHost: any;
+  snapId: string;
+
+  constructor(_?: {}) {
+    super();
+    this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
 
-  async load() {
+  async load(): Promise<StoredData> {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
-    const connected = Object.values(snaps).find((snap) => snap.id === this.snapId);
+    const connected = Object.values(snaps).find((snap: any) => snap.id === this.snapId);
 
     if (!connected)
       await this.enclaveHost.request({
@@ -20,7 +26,7 @@ export class MetaMaskSnapEnclave {
     return storage;
   }
 
-  async init(humanId, signerAddress, signerPublicKey) {
+  async init(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array> {
     let { encryptionPublicKey } = JSON.parse(
       await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey })
     );
@@ -31,7 +37,7 @@ export class MetaMaskSnapEnclave {
     return encryptionPublicKey;
   }
 
-  invokeSnap(method, params = {}) {
+  invokeSnap(method: string, params: any = {}) {
     return this.enclaveHost.request({
       method: "wallet_invokeSnap",
       params: {
@@ -41,25 +47,25 @@ export class MetaMaskSnapEnclave {
     });
   }
 
-  store(key, value) {
+  async store(key: string, value: string): Promise<string> {
     return this.invokeSnap("storage", { [key]: value });
   }
 
-  reset() {
+  async reset(): Promise<void> {
     return this.invokeSnap("reset");
   }
 
-  confirm(message) {
+  async confirm(message: string): Promise<boolean> {
     return this.invokeSnap("confirm", { message });
   }
 
-  async encrypt(message, receiverPublicKey) {
-    const encrypted = await this.invokeSnap("encrypt", { message, receiverPublicKey });
+  async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
+    const encrypted: any = await this.invokeSnap("encrypt", { message, receiverPublicKey });
 
     return Uint8Array.from(Object.values(encrypted));
   }
 
-  async decrypt(message, senderPublicKey) {
+  async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
     const decrypted = await this.invokeSnap("decrypt", { message, senderPublicKey });
     return Uint8Array.from(Object.values(decrypted));
   }
