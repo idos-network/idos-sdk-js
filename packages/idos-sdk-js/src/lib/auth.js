@@ -44,10 +44,9 @@ export class Auth {
 
   async setNearSigner(wallet, recipient = "idos.network") {
     if (wallet.id === "my-near-wallet") {
-      const { accountId, signature, publicKey, error } =
-        Object.fromEntries(
-          new URLSearchParams(window.location.hash.slice(1)).entries(),
-        );
+      const { accountId, signature, publicKey, error } = Object.fromEntries(
+        new URLSearchParams(window.location.hash.slice(1)).entries()
+      );
 
       if (signature) {
         await this.remember("signer-address", accountId);
@@ -133,15 +132,12 @@ export class Auth {
         callbackUrl,
       };
 
-      const nep413BorshPayload = BorshCodec.serialize(
-        nep413BorschSchema,
-        nep413BorshParams,
-      );
+      const nep413BorshPayload = BorshCodec.serialize(nep413BorschSchema, nep413BorshParams);
 
       return BytesCodec.concat(
         BinaryCodec.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        Base64Codec.decode(signature),
+        Base64Codec.decode(signature)
       );
     };
 
@@ -163,10 +159,9 @@ export class Auth {
   async currentUser() {
     if (this.user.humanId !== null) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
-      let [humanId, address, publicKey] =
-        currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
+      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
 
-      humanId = humanId || await this.idOS.kwilWrapper.getHumanId();
+      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId());
 
       this.user = { humanId, address, publicKey };
       this.idOS.store.set("human-id", humanId);

@@ -19,20 +19,15 @@ export class KwilWrapper {
     Object.assign(this, { signer, publicKey, signatureType });
   }
 
-  async buildAction(actionName, inputs, description, useSigner=true) {
-    const action = this.client
-      .actionBuilder()
-      .dbid(this.dbId)
-      .name(actionName);
+  async buildAction(actionName, inputs, description, useSigner = true) {
+    const action = this.client.actionBuilder().dbid(this.dbId).name(actionName);
 
     if (description) {
       action.description(`*${description}*`);
     }
 
     if (useSigner) {
-      action
-        .publicKey(this.publicKey)
-        .signer(this.signer, this.signatureType);
+      action.publicKey(this.publicKey).signer(this.signer, this.signatureType);
     }
 
     if (inputs) {
@@ -45,7 +40,7 @@ export class KwilWrapper {
     return action;
   }
 
-  async call(actionName, actionInputs, description, useSigner=true) {
+  async call(actionName, actionInputs, description, useSigner = true) {
     const action = await this.buildAction(actionName, actionInputs, description, useSigner);
     const msg = await action.buildMsg();
     const res = await this.client.call(msg);

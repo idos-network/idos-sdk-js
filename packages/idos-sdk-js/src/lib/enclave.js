@@ -8,7 +8,7 @@ export class Enclave {
     this.idOS = idOS;
     switch (providerType) {
       case "iframe":
-        this.provider = new IframeEnclave({ container })
+        this.provider = new IframeEnclave({ container });
         break;
       case "metamask-snap":
         this.provider = new MetaMaskSnapEnclave();
@@ -19,12 +19,7 @@ export class Enclave {
   }
 
   async load() {
-    const {
-      encryptionPublicKey,
-      humanId,
-      signerAddress,
-      signerPublicKey,
-    } = await this.provider.load();
+    const { encryptionPublicKey, humanId, signerAddress, signerPublicKey } = await this.provider.load();
 
     this.idOS.store.set("encryption-public-key", encryptionPublicKey);
     this.idOS.store.set("human-id", humanId);
@@ -63,9 +58,7 @@ export class Enclave {
     message = Utf8Codec.encode(message);
     receiverPublicKey &&= Base64Codec.decode(receiverPublicKey);
 
-    return Base64Codec.encode(
-      await this.provider.encrypt(message, receiverPublicKey),
-    );
+    return Base64Codec.encode(await this.provider.encrypt(message, receiverPublicKey));
   }
 
   async decrypt(message, senderPublicKey) {
@@ -74,9 +67,7 @@ export class Enclave {
     message = Base64Codec.decode(message);
     senderPublicKey &&= Base64Codec.decode(senderPublicKey);
 
-    return Utf8Codec.decode(
-      await this.provider.decrypt(message, senderPublicKey),
-    );
+    return Utf8Codec.decode(await this.provider.decrypt(message, senderPublicKey));
   }
 
   confirm(message) {

@@ -1,5 +1,5 @@
-import scrypt from "scrypt-js";
 import * as Utf8Codec from "@stablelib/utf8";
+import scrypt from "scrypt-js";
 
 /*
  * normalizePassword
@@ -28,18 +28,18 @@ const kdfConfig = (version = latestVersion) => {
   let versions = {};
 
   versions[0] = {
-    normalizePassword: password => password.normalize("NFKC"),
+    normalizePassword: (password) => password.normalize("NFKC"),
     validateSalt: uuidv4Regex.test.bind(uuidv4Regex),
     n: 128,
     r: 8,
     p: 1,
-    dkLen: 32,
+    dkLen: 32
   };
 
   versions[0.1] = {
     ...versions[0],
 
-    n: 16384,
+    n: 16384
   };
 
   return versions[version];
@@ -51,7 +51,7 @@ export const idOSKeyDerivation = async ({ password, salt, version }) => {
   if (validateSalt(salt) !== true) throw new Error("Invalid salt");
   password = normalizePassword(password);
 
-  [ password, salt ] = [password, salt].map(Utf8Codec.encode);
+  [password, salt] = [password, salt].map(Utf8Codec.encode);
   const { n, r, p, dkLen } = kdfConfig();
 
   return scrypt.scrypt(password, salt, n, r, p, dkLen);

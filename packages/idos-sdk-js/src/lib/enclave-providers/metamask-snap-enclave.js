@@ -6,14 +6,15 @@ export class MetaMaskSnapEnclave {
 
   async load() {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
-    const connected = Object.values(snaps).find(snap => snap.id === this.snapId);
+    const connected = Object.values(snaps).find((snap) => snap.id === this.snapId);
 
-    if (!connected) await this.enclaveHost.request({
-      method: "wallet_requestSnaps",
-      params: { [this.snapId]: {} },
-    });
+    if (!connected)
+      await this.enclaveHost.request({
+        method: "wallet_requestSnaps",
+        params: { [this.snapId]: {} },
+      });
 
-    const storage = JSON.parse(await this.invokeSnap("storage") || {});
+    const storage = JSON.parse((await this.invokeSnap("storage")) || {});
     storage.encryptionPublicKey &&= Uint8Array.from(Object.values(storage.encryptionPublicKey));
 
     return storage;
@@ -21,7 +22,7 @@ export class MetaMaskSnapEnclave {
 
   async init(humanId, signerAddress, signerPublicKey) {
     let { encryptionPublicKey } = JSON.parse(
-      await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey }),
+      await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey })
     );
 
     encryptionPublicKey ||= await this.invokeSnap("init");
@@ -30,13 +31,13 @@ export class MetaMaskSnapEnclave {
     return encryptionPublicKey;
   }
 
-  invokeSnap (method, params = {}) {
+  invokeSnap(method, params = {}) {
     return this.enclaveHost.request({
-      method: 'wallet_invokeSnap',
+      method: "wallet_invokeSnap",
       params: {
         snapId: this.snapId,
         request: { method, params },
-      }
+      },
     });
   }
 

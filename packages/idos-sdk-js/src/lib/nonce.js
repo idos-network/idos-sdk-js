@@ -4,6 +4,6 @@ export class Nonce {
   }
 
   get clampUTF8() {
-    return this.bytes.map(byte => byte & 127);
+    return this.bytes.map((byte) => byte & 127);
   }
 }

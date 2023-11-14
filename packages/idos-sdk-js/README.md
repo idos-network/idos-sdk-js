@@ -15,11 +15,16 @@ Create a container anywhere on your page, and ensure it's displayed when assigne
 ```
 
 ```css
-div#idos-container         { display: none; }
-div#idos-container.visible { display: block; }
+div#idos-container {
+  display: none;
+}
+div#idos-container.visible {
+  display: block;
+}
 ```
 
 Import the SDK and initialize it with a selector for the container:
+
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
@@ -27,11 +32,13 @@ const idos = await idOS.init({ container: "#idos-container" });
 ```
 
 Connect your user's wallet and use its signer to complete the setup.
+
 ```js
 await idos.setSigner("EVM", signer); // e.g. ethers.Signer
 ```
 
 You're all set!
+
 ```js
 const credentials = await idos.data.list("credentials");
 console.log(credentials);
@@ -39,14 +46,15 @@ console.log(credentials);
 
 const { id } = credentials[0];
 const { content } = await idos.data.get("credentials", id);
-const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
+const isValid = await idOS.verifiableCredentials.verify(content).catch((e) => false);
 ```
 
 > [!NOTE]
 > For more examples and data queries, see:
-> * the [quick reference](#quick-reference) below
-> * [`📁 idos-example-dapp`](../../main/apps/idos-example-dapp) for a simple implementation
-> * [`📁 idos-data-dashboard`](../../main/apps/idos-data-dashboard) for a thorough example
+>
+> - the [quick reference](#quick-reference) below
+> - [`📁 idos-example-dapp`](../../main/apps/idos-example-dapp) for a simple implementation
+> - [`📁 idos-data-dashboard`](../../main/apps/idos-data-dashboard) for a thorough example
 
 ## Diving deeper
 
@@ -79,6 +87,7 @@ To avoid surprising your UI, the SDK doesn't make itself visible and sets no CSS
   display: block;
 }
 ```
+
 This barebones setup is enough to get you started, but you can naturally style and animate the container as you like, for example within a toast component.
 
 Our [`📁 idos-example-dapp`](../../apps/idos-example-dapp) shows an example of blending this into a UI. It wraps the container and floats it over the page, and animates its opacity when the `visible` class is applied. You can see it below (pulsating forcefully to illustrate the point):
@@ -96,6 +105,7 @@ const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
 All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavour to remember or learn two things:
+
 1. a public key for this signer;
 2. the idOS human ID of the user controlling this signer.
 
@@ -112,16 +122,15 @@ Your user's wallet will be triggered when this happens, so you should be mindful
 </td></tr></table>
 
 The idOS currently supports two classes of signers:
-* Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
-* NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
+
+- Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
+- NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
 
 ### The idOS password
 
 Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from a password chosen by the user. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
 
-
 Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
-
 
 Users can control how long the enclave remembers this key for. When that period expires, or when faced with a new signer, the enclave will prompt the user. It first brings the idOS container into view as shown above and, after the user clicks the **`🔓 Unlock idOS`** button, a secure dialog opens where the user can safely enter their password.
 
@@ -130,7 +139,6 @@ Users can control how long the enclave remembers this key for. When that period 
 </td></tr><tr align="center"><td>
   <img src="./assets/readme-dialog-password.png" width="250" />
 </td></tr></table>
-
 
 ## Quick reference
 
@@ -155,23 +163,20 @@ const { humanId } = await idos.setSigner("EVM", signer);
 ### NEAR signer setup
 
 ```js
-const {
-  defaultContractId: contractId,
-  contractMethods: methodNames,
-  defaultNetwork: network
-} = idOS.near;
+const { defaultContractId: contractId, contractMethods: methodNames, defaultNetwork: network } = idOS.near;
 
 const selector = await setupWalletSelector({
   network,
   modules: [setupMeteorWallet(), setupMeteorWallet()],
 });
 
-!selector.isSignedIn() && await new Promise(resolve => {
-  const modal = setupModal(selector, { contractId, methodNames });
+!selector.isSignedIn() &&
+  (await new Promise((resolve) => {
+    const modal = setupModal(selector, { contractId, methodNames });
 
-  modal.on("onHide", resolve);
-  modal.show();
-});
+    modal.on("onHide", resolve);
+    modal.show();
+  }));
 
 const signer = selector.wallet();
 
@@ -180,9 +185,10 @@ const { humanId } = await idos.setSigner("NEAR", signer);
 
 ### idOS profile
 
-
 ```js
-if (humanId) { /* user has an idOS profile */ }
+if (humanId) {
+  /* user has an idOS profile */
+}
 ```
 
 You can also use `idos.hasProfile(signer.address)` before `setSigner` for a check that won't require a signature.

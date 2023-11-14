@@ -33,11 +33,7 @@ declare class Data {
   singularize(tableName: string): string;
 
   list<T extends Record<string, unknown>>(tableName: string, filter?: Record<string, string>): Promise<T[]>;
-  create(
-    tableName: string,
-    record: Record<string, string>,
-    receiverPublicKey?: string
-  ): Promise<string | undefined>;
+  create(tableName: string, record: Record<string, string>, receiverPublicKey?: string): Promise<string | undefined>;
   get<T extends Record<string, string>>(tableName: string, recordId: string): Promise<T>;
   delete(tableName: string, recordId: string): Promise<void>;
   update<T extends Record<string, string>>(tableName: string, record: T): Promise<T>;

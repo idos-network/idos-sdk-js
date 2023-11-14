@@ -35,18 +35,19 @@ const staticLoader = (() => {
   return loader.build();
 })();
 
-
 const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 
-export const documentLoaderWithStaticFractal = documentLoader => async (url, options={}) => {
-  try {
-    return await staticLoader(url, options);
-  } catch (e) {
-    // Ignored on purpose.
-  }
+export const documentLoaderWithStaticFractal =
+  (documentLoader) =>
+  async (url, options = {}) => {
+    try {
+      return await staticLoader(url, options);
+    } catch (e) {
+      // Ignored on purpose.
+    }
 
-  return await documentLoader(url, options);
-};
+    return await documentLoader(url, options);
+  };
 
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (m) =>
@@ -84,41 +85,43 @@ const buildSignatures = async (methods, signatureBuilders) => {
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
 const verify = async (credential, options = {}) => {
-  let {allowedSigners, allowedIssuers, signatureBuilders, documentLoader} = options
-  if(!signatureBuilders) signatureBuilders = knownSignatureBuilders;
-  if(!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
-  if(!documentLoader) documentLoader = xhrLoader
+  let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
+  if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
+  if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
+  if (!documentLoader) documentLoader = xhrLoader;
 
-  documentLoader = documentLoaderWithStaticFractal(documentLoader)
+  documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
-  if(typeof credential === "string" || credential instanceof String) {
+  if (typeof credential === "string" || credential instanceof String) {
     credential = JSON.parse(credential);
   }
 
   const proof = credential.proof;
-  if(!proof) throw new Error("This function is only supports embedded proofs.")
+  if (!proof) throw new Error("This function is only supports embedded proofs.");
 
   const proofPurpose = proof.proofPurpose;
-  if(!proofPurpose) throw new Error("Invalid proof: missing proofPurpose.")
+  if (!proofPurpose) throw new Error("Invalid proof: missing proofPurpose.");
 
   const issuer = credential.issuer;
-  if(!issuer) throw new Error("Invalid credential: missing issuer.")
+  if (!issuer) throw new Error("Invalid credential: missing issuer.");
 
-  if(!allowedIssuers.includes(issuer)) throw new Error("Unfit credential: issuer is not allowed.")
+  if (!allowedIssuers.includes(issuer)) throw new Error("Unfit credential: issuer is not allowed.");
 
-  const suite = allowedSigners ?? await (async () => {
-    const issuerDoc = (await documentLoader(issuer))?.document;
-    if(!issuerDoc) throw new Error("Couldn't fetch document for the issuer.")
+  const suite =
+    allowedSigners ??
+    (await (async () => {
+      const issuerDoc = (await documentLoader(issuer))?.document;
+      if (!issuerDoc) throw new Error("Couldn't fetch document for the issuer.");
 
-    const methods = issuerDoc[proofPurpose];
-    if (!methods || !methods.length) throw new Error(`Empty or absent "${proofPurpose}" in issuer.`);
+      const methods = issuerDoc[proofPurpose];
+      if (!methods || !methods.length) throw new Error(`Empty or absent "${proofPurpose}" in issuer.`);
 
-    return buildSignatures(methods, signatureBuilders);
-  })();
+      return buildSignatures(methods, signatureBuilders);
+    })());
 
   const result = await vc.verifyCredential({ credential, suite, documentLoader });
-  if(!result.verified) throw result?.results?.[0]?.error || result;
+  if (!result.verified) throw result?.results?.[0]?.error || result;
   return true;
-}
+};
 
-export default {verify}
+export default { verify };
