@@ -8,7 +8,11 @@ import { MetaMaskProvider } from "metamask-react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { I18nextProvider } from "react-i18next";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  Navigate,
+  RouterProvider,
+  createBrowserRouter
+} from "react-router-dom";
 
 import App from "./app";
 
@@ -48,6 +52,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                         {
                           path: "/wallets",
                           lazy: () => import("#/routes/dashboard/wallets")
+                        },
+                        {
+                          path: "/success",
+                          element: <Navigate to="/" />
                         }
                       ]
                     }
