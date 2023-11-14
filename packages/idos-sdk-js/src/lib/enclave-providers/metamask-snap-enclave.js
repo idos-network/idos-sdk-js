@@ -56,7 +56,7 @@ export class MetaMaskSnapEnclave {
   async encrypt(message, receiverPublicKey) {
     const encrypted = await this.invokeSnap("encrypt", { message, receiverPublicKey });
 
-    return Uint8Array.from(Object.values(decrypted));
+    return Uint8Array.from(Object.values(encrypted));
   }
 
   async decrypt(message, senderPublicKey) {
