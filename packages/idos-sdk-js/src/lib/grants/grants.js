@@ -17,14 +17,13 @@ export class Grants {
     this.type = type;
 
     if (type === "EVM") {
-      this.#child = new EvmGrants();
+      this.#child = await EvmGrants.build({signer});
     }
 
     if (type === "NEAR") {
       this.#child = new NearGrants();
+      await this.#child.init({ accountId, signer });
     }
-
-    await this.#child.init({ accountId, signer });
   }
 
   async list(args) {
