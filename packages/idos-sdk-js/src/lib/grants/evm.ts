@@ -1,11 +1,12 @@
 import { Contract, Signer, TransactionResponse, ZeroAddress } from "ethers";
 import Grant from "./grant";
+import { GrantChild } from "./grant-child";
 
 const ZERO_ADDRESS = ZeroAddress;
 const ZERO_DATA_ID = "0";
 const ZERO_TIMELOCK = 0;
 
-export class EvmGrants {
+export class EvmGrants extends GrantChild {
   static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
 
   static #abi = [
@@ -164,6 +165,7 @@ export class EvmGrants {
   #contract: Contract;
 
   private constructor(signer: Signer, defaultOwner: string, contract: Contract) {
+    super();
     this.signer = signer;
     this.defaultOwner = defaultOwner;
     this.#contract = contract;

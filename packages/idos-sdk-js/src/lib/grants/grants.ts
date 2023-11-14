@@ -4,6 +4,7 @@ import type { Signer } from "ethers";
 import { assertNever } from "../../types";
 import { EvmGrants } from "./evm";
 import Grant from "./grant";
+import { GrantChild } from "./grant-child";
 import { NearGrants } from "./near";
 
 const SIGNER_TYPES = {
@@ -94,7 +95,6 @@ export class Grants {
   }
 }
 
-type GrantChild = EvmGrants | NearGrants;
 class ConnectedGrants extends Grants {
   #child: GrantChild;
 

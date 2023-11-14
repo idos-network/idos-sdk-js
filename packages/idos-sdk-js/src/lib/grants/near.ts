@@ -1,6 +1,7 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import * as nearAPI from "near-api-js";
 import Grant from "./grant";
+import { GrantChild } from "./grant-child";
 
 interface NearContractGrant {
   owner: string;
@@ -13,7 +14,7 @@ const compact = <T extends Object>(obj: T): Partial<T> => {
   return Object.fromEntries(Object.entries(obj).filter(([_k, v]) => v)) as Partial<T>;
 };
 
-export class NearGrants {
+export class NearGrants extends GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
 
@@ -27,6 +28,7 @@ export class NearGrants {
   } as const;
 
   private constructor(signer: Wallet, contract: nearAPI.Contract) {
+    super();
     this.#signer = signer;
     this.#contract = contract;
   }
