@@ -55,7 +55,7 @@ export class KwilWrapper {
   }
 
   async getHumanId() {
-    const result = await this.call("get_wallet_human_id", "See your idOS profile ID");
+    const result = await this.call("get_wallet_human_id", {}, "See your idOS profile ID");
     return result[0]?.human_id || null;
   }
 
