@@ -105,7 +105,7 @@ export class Data {
     let record = await this.get(tableName, recordId);
 
     if (tableName === "credentials") {
-      record.content = await this.idOS.enclave.encrypt(content, receiverPublicKey);
+      record.content = await this.idOS.enclave.encrypt(record.content, receiverPublicKey);
       record.encryption_public_key = receiverPublicKey;
     }
 
