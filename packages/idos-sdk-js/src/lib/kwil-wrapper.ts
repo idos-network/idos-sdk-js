@@ -1,6 +1,14 @@
 import { Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
+import type { SignerSupplier } from "@kwilteam/kwil-js/dist/core/builders.d";
 
 export class KwilWrapper {
+  dbId: string;
+  kwilProvider: string;
+  client: WebKwil;
+  signer?: SignerSupplier;
+  publicKey?: string;
+  signatureType?: string;
+
   constructor({
     nodeUrl: kwilProvider = import.meta.env.VITE_IDOS_NODE_URL,
     chainId = import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
@@ -15,11 +23,21 @@ export class KwilWrapper {
     return this.client.getSchema(this.dbId);
   }
 
-  setSigner({ signer, publicKey, signatureType }) {
-    Object.assign(this, { signer, publicKey, signatureType });
+  setSigner({
+    signer,
+    publicKey,
+    signatureType,
+  }: {
+    signer: SignerSupplier;
+    publicKey: string;
+    signatureType: string;
+  }) {
+    this.signer = signer;
+    this.publicKey = publicKey;
+    this.signatureType = signatureType;
   }
 
-  async buildAction(actionName, inputs, description, useSigner = true) {
+  async buildAction(actionName: string, inputs: Record<string, any>, description?: string, useSigner: boolean = true) {
     const action = this.client.actionBuilder().dbid(this.dbId).name(actionName);
 
     if (description) {
@@ -27,6 +45,8 @@ export class KwilWrapper {
     }
 
     if (useSigner) {
+      if (!this.publicKey || !this.signer || !this.signatureType) throw new Error("Call idOS.setSigner first.");
+
       action.publicKey(this.publicKey).signer(this.signer, this.signatureType);
     }
 
@@ -40,27 +60,27 @@ export class KwilWrapper {
     return action;
   }
 
-  async call(actionName, actionInputs, description, useSigner = true) {
+  async call(actionName: string, actionInputs: Record<string, any>, description?: string, useSigner: boolean = true) {
     const action = await this.buildAction(actionName, actionInputs, description, useSigner);
     const msg = await action.buildMsg();
     const res = await this.client.call(msg);
-    return res.data.result;
+    return res.data!.result;
   }
 
-  async broadcast(actionName, actionInputs, description) {
+  async broadcast(actionName: string, actionInputs: Record<string, any>, description?: string) {
     const action = await this.buildAction(actionName, actionInputs, description);
     const tx = await action.buildTx();
     const res = await this.client.broadcast(tx);
-    return res.data.tx_hash;
+    return res.data!.tx_hash;
   }
 
-  async getHumanId() {
-    const result = await this.call("get_wallet_human_id", {}, "See your idOS profile ID");
-    return result[0]?.human_id || null;
+  async getHumanId(): Promise<string | null> {
+    const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
+    return result?.[0]?.human_id || null;
   }
 
-  async hasProfile(address) {
-    const result = await this.call("has_profile", { address }, undefined, false);
+  async hasProfile(address: string): Promise<boolean> {
+    const result = (await this.call("has_profile", { address }, undefined, false)) as any;
     return !!result[0]?.has_profile;
   }
 }
