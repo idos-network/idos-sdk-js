@@ -26,7 +26,7 @@ export class Auth {
 
   async setEvmSigner(signer) {
     const storedAddress = this.idOS.store.get("signer-address");
-    const currentAddress = signer.address;
+    const currentAddress = await signer.getAddress();
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
