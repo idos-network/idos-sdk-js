@@ -8,10 +8,8 @@
   "type": "module",
   "main": "dist/idos-sdk.js",
   "module": "dist/idos-sdk.js",
-  "types": "types.d.ts",
   "files": [
-    "dist",
-    "types.d.ts"
+    "dist"
   ],
   "scripts": {
     "dev": "vite build --watch",
