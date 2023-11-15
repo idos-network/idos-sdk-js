@@ -1,6 +1,5 @@
 import { Wallet } from "@near-wallet-selector/core";
 import { Signer } from "ethers";
-import { assertNever } from "src/types";
 import { Store } from "../../../idos-store";
 import { Auth } from "./auth";
 import { Data } from "./data";
