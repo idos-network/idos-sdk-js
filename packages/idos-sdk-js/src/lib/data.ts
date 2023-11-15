@@ -1,15 +1,19 @@
 import * as Base64Codec from "@stablelib/base64";
 
+type idOS = any; // TODO Replace this when it's typed.
+
 export class Data {
-  constructor(idOS) {
+  idOS: idOS;
+
+  constructor(idOS: idOS) {
     this.idOS = idOS;
   }
 
-  singularize(tableName) {
+  singularize(tableName: string) {
     return tableName.replace(/s$/, "");
   }
 
-  async list(tableName, filter) {
+  async list(tableName: string, filter: Record<string, any>) {
     let records = await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`);
 
     await this.idOS.auth.setHumanId(records[0]?.human_id);
@@ -24,15 +28,15 @@ export class Data {
       return records;
     }
     const [key, value] = Object.entries(filter)[0];
-    return records.filter((record) => !record[key] || record[key] === value);
+    return records.filter((record: any) => !record[key] || record[key] === value);
   }
 
-  async create(tableName, record, receiverPublicKey) {
-    receiverPublicKey = Base64Codec.encode(receiverPublicKey ?? (await this.idOS.enclave.init()));
+  async create(tableName: string, record: any, receiverPublicKey: string) {
+    receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
     const schema = await this.idOS.kwilWrapper.schema;
-    const actionFromSchema = schema.data.actions.find((action) => action.name === name);
-    const inputs = actionFromSchema.inputs.map((input) => input.substring(1));
+    const actionFromSchema = schema.data.actions.find((action: any) => action.name === name);
+    const inputs: string[] = actionFromSchema.inputs.map((input: string) => input.substring(1));
     const recordKeys = Object.keys(record);
     if (inputs.every((input) => recordKeys.includes(input))) {
       throw new Error(`Invalid payload for action ${name}`);
@@ -54,7 +58,7 @@ export class Data {
     return newRecord;
   }
 
-  async get(tableName, recordId) {
+  async get(tableName: string, recordId: string) {
     if (tableName === "credentials") {
       let records = await this.idOS.kwilWrapper.call(
         `get_credential_owned`,
@@ -63,17 +67,17 @@ export class Data {
       );
 
       await this.idOS.auth.setHumanId(records?.[0]?.human_id);
-      let record = records.find((r) => r.id === recordId);
+      let record = records.find((r: any) => r.id === recordId);
       if (!record) return record;
       record.content = await this.idOS.enclave.decrypt(record.content, record.encryption_public_key);
       return record;
     }
     let records = await this.list(tableName, { id: recordId });
-    let record = records.find((r) => r.id === recordId);
+    let record = records.find((r: any) => r.id === recordId);
     return record;
   }
 
-  async delete(tableName, recordId) {
+  async delete(tableName: string, recordId: string) {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
     const record = { id: recordId };
@@ -81,7 +85,7 @@ export class Data {
     return record;
   }
 
-  async update(tableName, record) {
+  async update(tableName: string, record: any) {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
     if (tableName === "credentials") {
@@ -98,7 +102,7 @@ export class Data {
     return record;
   }
 
-  async share(tableName, recordId, receiverPublicKey) {
+  async share(tableName: string, recordId: string, receiverPublicKey: string) {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
     const name = this.singularize(tableName);
@@ -122,7 +126,7 @@ export class Data {
     return { id };
   }
 
-  async unshare(tableName, recordId) {
+  async unshare(tableName: string, recordId: string) {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
     return await this.delete(tableName, recordId);
