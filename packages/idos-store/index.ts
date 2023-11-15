@@ -1,3 +1,8 @@
+interface PipeCodecArgs<T> {
+  encode: (o: string) => T;
+  decode: (o: T) => string;
+}
+
 export class Store {
   keyPrefix = "idOS-";
   cookieExpiries = {
@@ -9,23 +14,24 @@ export class Store {
     this.#rebuild();
   }
 
-  pipeCodec({ encode, decode }) {
+  pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>) {
     return {
       ...this,
-      get: (key) => {
+      get: (key: string) => {
         const result = this.get(key);
         if (result) return decode(result);
       },
-      set: (key, value, days) => this.set.call(this, key, encode(value), days)
+      set: (key: string, value: any, days: string | number) =>
+        this.set.call(this, key, encode(value), days)
     };
   }
 
-  get(key) {
+  get(key: string): any {
     const values = [
       this.#getCookie(key),
       this.#getLocalStorage(key),
       this.#getSessionStorage(key)
-    ].filter(Boolean);
+    ].filter(Boolean) as string[];
 
     if (!values.length) return;
 
@@ -40,24 +46,25 @@ export class Store {
     return values[0] ? JSON.parse(values[0]) : undefined;
   }
 
-  set(key, value, days) {
+  set(key: string, value: any, days?: number | string) {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    days = isNaN(Number(days)) ? undefined : parseInt(days);
+    const daysNumber =
+      !days || isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
     value = JSON.stringify(value);
 
-    if (days === 0) {
+    if (daysNumber === 0) {
       this.#setSessionStorage(key, value);
     } else {
-      this.#setCookie(key, value, days);
+      this.#setCookie(key, value, daysNumber);
       this.#setLocalStorage(key, value);
     }
   }
 
   #rebuild() {
-    const keysInCookies = Object.values(
+    const keysInCookies: string[] = Object.values(
       Object.fromEntries(
         document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
       )
@@ -71,11 +78,11 @@ export class Store {
     }
   }
 
-  #getCookie(key) {
+  #getCookie(key: string) {
     return document.cookie.match(`${this.keyPrefix}${key}=(.*?)(;|$)`)?.at(1);
   }
 
-  #setCookie(key, value, days) {
+  #setCookie(key: string, value: any, days?: number) {
     const expiry = days
       ? new Date(Date.now() + days * 86400 * 1000).toUTCString()
       : this.cookieExpiries.future;
@@ -88,19 +95,19 @@ export class Store {
     ].join(";");
   }
 
-  #getLocalStorage(key) {
+  #getLocalStorage(key: string) {
     return window.localStorage.getItem(`${this.keyPrefix}${key}`);
   }
 
-  #getSessionStorage(key) {
+  #getSessionStorage(key: string) {
     return window.sessionStorage.getItem(`${this.keyPrefix}${key}`);
   }
 
-  #setLocalStorage(key, value) {
+  #setLocalStorage(key: string, value: string) {
     return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
   }
 
-  #setSessionStorage(key, value) {
+  #setSessionStorage(key: string, value: string) {
     return window.sessionStorage.setItem(`${this.keyPrefix}${key}`, value);
   }
 
@@ -112,7 +119,7 @@ export class Store {
       }
     }
 
-    const keysInCookies = Object.values(
+    const keysInCookies: string[] = Object.values(
       Object.fromEntries(
         document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
       )
