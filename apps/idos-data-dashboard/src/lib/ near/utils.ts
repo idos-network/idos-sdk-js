@@ -9,3 +9,5 @@ export const setupNearWalletSelector = async () => {
     modules: [setupMeteorWallet(), setupHereWallet()]
   });
 };
+
+export const nearWalletSelector = await setupNearWalletSelector();

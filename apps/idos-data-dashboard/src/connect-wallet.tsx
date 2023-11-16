@@ -1,6 +1,5 @@
 import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
 import idOSLogo from "#/assets/idos-logo.svg";
-import Metamask from "#/assets/metamask.svg";
 import Near from "#/assets/near.svg";
 import {
   Box,
@@ -11,19 +10,13 @@ import {
   Text,
   VStack
 } from "@chakra-ui/react";
-import { isDesktop } from "react-device-detect";
 
 type ConnectWalletProps = {
   onNearConnect: () => Promise<void>;
-  onMetamaskConnect: () => Promise<void>;
+  onWalletConnect: () => Promise<void>;
 };
 
 export const ConnectWallet = (props: ConnectWalletProps) => {
-  const handleMobileMetaMaskConnect = () => {
-    window.location.href =
-      "https://metamask.app.link/dapp/dashboard.idos.network/";
-  };
-
   return (
     <Center
       minH="100vh"
@@ -51,39 +44,22 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
           Connect your Wallet
         </Heading>
         <VStack alignItems="stretch" gap={3}>
-          {isDesktop ? (
-            <Button
-              justifyContent="space-between"
-              onClick={props.onNearConnect}
-              size="2xl"
-            >
-              Connect with Near
-              <Image w={47} alt="Near icon" src={Near} />
-            </Button>
-          ) : null}
+          <Button
+            justifyContent="space-between"
+            onClick={props.onNearConnect}
+            size="2xl"
+          >
+            Connect with Near
+            <Image w={47} alt="Near icon" src={Near} />
+          </Button>
 
-          {isDesktop ? (
-            <Button
-              justifyContent="space-between"
-              onClick={props.onMetamaskConnect}
-              size="2xl"
-            >
-              Connect with Metamask
-              <Image alt="Metamask icon" src={Metamask} />
-            </Button>
-          ) : (
-            <Button
-              justifyContent="space-between"
-              _hover={{
-                textDecoration: "none"
-              }}
-              onClick={handleMobileMetaMaskConnect}
-              size="2xl"
-            >
-              Connect with Metamask
-              <Image alt="Metamask icon" src={Metamask} />
-            </Button>
-          )}
+          <Button
+            justifyContent="space-between"
+            onClick={props.onWalletConnect}
+            size="2xl"
+          >
+            Connect a Wallet
+          </Button>
         </VStack>
         <Text
           alignItems="center"

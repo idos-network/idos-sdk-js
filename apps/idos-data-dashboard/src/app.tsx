@@ -1,131 +1,76 @@
 import { ConnectWallet } from "#/connect-wallet.tsx";
-import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
+import { nearWalletSelector } from "#/lib/ near/utils.ts";
+import { getEthersSigner } from "#/lib/ethers";
 import { idOS } from "#/lib/idos";
 import { addressAtom } from "#/lib/state";
 import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { BrowserProvider } from "ethers";
-import { useAtom } from "jotai";
-import { useMetaMask } from "metamask-react";
-import { useEffect, useRef, useState } from "react";
+import { useModal } from "connectkit";
+import { useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-
-const setupEvmWallet = async () => {
-  const provider = new BrowserProvider(window.ethereum);
-  const signer = await provider.getSigner();
-  return { signer, address: signer.address };
-};
-
-const setUpNearWallet = async () => {
-  const selector = await setupNearWalletSelector();
-
-  if (!selector.isSignedIn()) {
-    await new Promise<void>((resolve) => {
-      const modal = setupModal(selector, {
-        contractId: idOSSDK.near.defaultContractId,
-        methodNames: idOSSDK.near.contractMethods
-      });
-
-      modal.on("onHide", () => {
-        resolve();
-      });
-      modal.show();
-    });
-  }
-
-  const signer = await selector.wallet();
-  return { signer, address: (await signer.getAccounts())[0].accountId };
-};
+import { useAccount as useEVMAccount } from "wagmi";
+import { goerli } from "wagmi/chains";
 
 export default function App() {
-  const metamask = useMetaMask();
-  const initialized = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [, setAddress] = useAtom(addressAtom);
+  const setAddress = useSetAtom(addressAtom);
+  const ckModal = useModal();
+  const evmAccount = useEVMAccount();
 
-  const onMetamaskConnect = async () => {
-    setIsLoading(true);
-    try {
-      await metamask.connect();
-      const { signer, address } = await setupEvmWallet();
-      const hasProfile = await idOS.hasProfile(address);
-
-      if (hasProfile) {
-        await idOS.setSigner("EVM", signer);
-        setAddress(address);
-      }
-
-      setIsConnected(true);
-      setIsLoading(false);
-    } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-    }
+  const onWalletConect = async () => {
+    ckModal.setOpen(true);
   };
 
   const onNearConnect = async () => {
-    setIsLoading(true);
-    try {
-      const { signer, address } = await setUpNearWallet();
-      const hasProfile = await idOS.hasProfile(address);
-
-      if (hasProfile) {
-        await idOS.setSigner("NEAR", signer);
-        setAddress(address);
-      }
-
-      setIsConnected(true);
-      setIsLoading(false);
-    } catch (error) {
-      console.error(error);
-      setIsLoading(false);
-    }
+    const modal = setupModal(nearWalletSelector, {
+      contractId: idOSSDK.near.defaultContractId,
+      methodNames: idOSSDK.near.contractMethods
+    });
+    modal.show();
   };
 
   useEffect(() => {
-    if (!initialized.current) {
-      initialized.current = true;
-      (async () => {
-        if (metamask.status === "connected") {
-          const { signer, address } = await setupEvmWallet();
-          const hasProfile = await idOS.hasProfile(address);
+    (async () => {
+      if (evmAccount.isDisconnected) {
+        setAddress("");
+        setIsConnected(false);
+      }
+
+      if (evmAccount.isConnected) {
+        const signer = await getEthersSigner({ chainId: goerli.id });
+        const hasProfile = await idOS.hasProfile(evmAccount.address as string);
+
+        if (hasProfile) {
+          await idOS.setSigner("EVM", signer);
+          setAddress(evmAccount.address as string);
+          setIsConnected(true);
+        }
+      }
+
+      const subscription = nearWalletSelector.store.observable.subscribe(
+        async (state) => {
+          const account = state.accounts?.[0]?.accountId;
+          const hasProfile = await idOS.hasProfile(account);
 
           if (hasProfile) {
-            await idOS.setSigner("EVM", signer);
-            setAddress(address);
+            await idOS.setSigner("NEAR", await nearWalletSelector.wallet());
+            setAddress(account);
+            setIsConnected(true);
           }
 
-          setIsConnected(true);
           setIsLoading(false);
         }
+      );
 
-        const selector = await setupNearWalletSelector();
-        if (selector.isSignedIn()) {
-          const { signer, address } = await setUpNearWallet();
-          const hasProfile = await idOS.hasProfile(address);
-
-          if (hasProfile) {
-            await idOS.setSigner("NEAR", signer);
-            setAddress(address);
-          }
-
-          setIsConnected(true);
-          setIsLoading(false);
-        }
-        setIsLoading(false);
-      })();
-    }
-  });
-
-  useEffect(() => {
-    if (metamask.status === "notConnected") {
-      setIsConnected(false);
-      setAddress("");
-    }
-  }, [metamask.status, setAddress]);
+      return () => {
+        subscription.unsubscribe();
+      };
+    })();
+  }, [evmAccount, setAddress]);
 
   if (isLoading) {
     return (
@@ -146,7 +91,7 @@ export default function App() {
     return (
       <ConnectWallet
         onNearConnect={onNearConnect}
-        onMetamaskConnect={onMetamaskConnect}
+        onWalletConnect={onWalletConect}
       />
     );
   }
