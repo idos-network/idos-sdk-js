@@ -74,7 +74,7 @@ export default function App() {
         subscription.unsubscribe();
       };
     })();
-  }, [evmAccount, setAddress]);
+  }, [evmAccount, setAddress, disconnect]);
 
   if (isLoading) {
     return (
