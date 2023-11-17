@@ -1,28 +1,30 @@
 import { ConnectWallet } from "#/connect-wallet.tsx";
-import { nearWalletSelector } from "#/lib/ near/utils.ts";
 import { getEthersSigner } from "#/lib/ethers";
 import { idOS } from "#/lib/idos";
+
+import { nearWalletSelector } from "#/lib/near/utils";
 import { addressAtom } from "#/lib/state";
 import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { useModal } from "connectkit";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { useAccount as useEVMAccount } from "wagmi";
+import { useDisconnect, useAccount as useEVMAccount } from "wagmi";
 import { goerli } from "wagmi/chains";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
   const setAddress = useSetAtom(addressAtom);
-  const ckModal = useModal();
+  const ckModal = useWeb3Modal();
   const evmAccount = useEVMAccount();
+  const { disconnect } = useDisconnect();
 
   const onWalletConect = async () => {
-    ckModal.setOpen(true);
+    ckModal.open();
   };
 
   const onNearConnect = async () => {
@@ -36,6 +38,7 @@ export default function App() {
   useEffect(() => {
     (async () => {
       if (evmAccount.isDisconnected) {
+        disconnect();
         setAddress("");
         setIsConnected(false);
       }
@@ -50,6 +53,7 @@ export default function App() {
           setIsConnected(true);
         }
       }
+      setIsLoading(false);
 
       const subscription = nearWalletSelector.store.observable.subscribe(
         async (state) => {

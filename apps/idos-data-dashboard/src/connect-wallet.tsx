@@ -1,6 +1,7 @@
 import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
 import idOSLogo from "#/assets/idos-logo.svg";
 import Near from "#/assets/near.svg";
+import WalletConnect from "#/assets/wallet-connect.svg";
 import {
   Box,
   Button,
@@ -59,6 +60,13 @@ export const ConnectWallet = (props: ConnectWalletProps) => {
             size="2xl"
           >
             Connect a Wallet
+            <Image
+              pos="relative"
+              left={-1}
+              w={39}
+              alt="WalletConnect icon"
+              src={WalletConnect}
+            />
           </Button>
         </VStack>
         <Text

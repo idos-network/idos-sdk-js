@@ -1,5 +1,5 @@
-import { setupNearWalletSelector } from "#/lib/ near/utils";
 import { NavLink, type LinkProps } from "#/lib/components/link";
+import { setupNearWalletSelector } from "#/lib/near/utils";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { useEffect, useState } from "react";
