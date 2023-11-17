@@ -12,7 +12,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import { useDisconnect, useAccount as useEVMAccount } from "wagmi";
+import { useAccount as useEVMAccount } from "wagmi";
 import { goerli } from "wagmi/chains";
 
 export default function App() {
@@ -21,7 +21,6 @@ export default function App() {
   const setAddress = useSetAtom(addressAtom);
   const ckModal = useWeb3Modal();
   const evmAccount = useEVMAccount();
-  const { disconnect } = useDisconnect();
 
   const onWalletConect = async () => {
     ckModal.open();
@@ -38,7 +37,6 @@ export default function App() {
   useEffect(() => {
     (async () => {
       if (evmAccount.isDisconnected) {
-        disconnect();
         setAddress("");
         setIsConnected(false);
       }
@@ -53,7 +51,6 @@ export default function App() {
           setIsConnected(true);
         }
       }
-      setIsLoading(false);
 
       const subscription = nearWalletSelector.store.observable.subscribe(
         async (state) => {
@@ -74,7 +71,7 @@ export default function App() {
         subscription.unsubscribe();
       };
     })();
-  }, [evmAccount, setAddress, disconnect]);
+  });
 
   if (isLoading) {
     return (
