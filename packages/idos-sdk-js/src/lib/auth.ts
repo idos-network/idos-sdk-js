@@ -189,13 +189,13 @@ export class Auth {
   }
 
   async currentUser() {
-    if (this.user.humanId !== null) {
+    if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
       let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store)) as Array<
         string | undefined
       >;
 
-      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId());
+      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
 
       this.user = { humanId, address, publicKey };
       this.idOS.store.set("human-id", humanId);

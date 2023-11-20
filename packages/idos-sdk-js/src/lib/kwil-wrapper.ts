@@ -88,9 +88,9 @@ export class KwilWrapper {
     return res.data!.tx_hash;
   }
 
-  async getHumanId(): Promise<string | undefined> {
+  async getHumanId(): Promise<string | null> {
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
-    return result[0]?.human_id || undefined;
+    return result[0]?.human_id;
   }
 
   async hasProfile(address: string): Promise<boolean> {
