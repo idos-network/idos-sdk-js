@@ -1,6 +1,7 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
+import { idOS } from "..";
 import { assertNever } from "../../types";
 import { EvmGrants } from "./evm";
 import Grant from "./grant";
@@ -13,8 +14,6 @@ const SIGNER_TYPES = {
 } as const;
 
 export type SignerType = keyof typeof SIGNER_TYPES;
-
-type idOS = any; // TODO Replace this when it's typed.
 
 export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;

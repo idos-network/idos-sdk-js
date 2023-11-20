@@ -9,6 +9,12 @@ import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
 
+interface InitParams {
+  nodeUrl?: string;
+  dbId?: string;
+  container: string;
+}
+
 export class idOS {
   static initializing = false;
 
@@ -24,7 +30,7 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({ nodeUrl, dbId, container }: { nodeUrl: string; dbId: string; container: string }) {
+  private constructor({ nodeUrl, dbId, container }: InitParams) {
     if (!idOS.initializing) {
       throw new Error("Usage: `idOS.init(options)`");
     }
@@ -37,7 +43,7 @@ export class idOS {
     this.store = new Store();
   }
 
-  static async init({ nodeUrl, dbId, container }: { nodeUrl: string; dbId: string; container: string }): Promise<idOS> {
+  static async init({ nodeUrl, dbId, container }: InitParams): Promise<idOS> {
     this.initializing = true;
     const idos = new this({ nodeUrl, dbId, container });
     await idos.enclave.load();

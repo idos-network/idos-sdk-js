@@ -6,25 +6,24 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 import { SigningKey, hashMessage } from "ethers";
+import { idOS } from ".";
 import { Nonce } from "./nonce";
 
 /* global Buffer */
 
-type idOS = any; // TODO Replace this when it's typed.
-
-export interface User {
-  humanId: string;
-  address: string;
-  publicKey: string;
+export interface AuthUser {
+  humanId?: string;
+  address?: string;
+  publicKey?: string;
 }
 
 export class Auth {
   idOS: idOS;
-  user: User;
+  user: AuthUser;
 
   constructor(idOS: idOS) {
     this.idOS = idOS;
-    this.user = <User>{};
+    this.user = {};
   }
 
   async forget() {
@@ -192,7 +191,9 @@ export class Auth {
   async currentUser() {
     if (this.user.humanId !== null) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
-      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store)) as string[];
+      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store)) as Array<
+        string | undefined
+      >;
 
       humanId = humanId || (await this.idOS.kwilWrapper.getHumanId());
 
