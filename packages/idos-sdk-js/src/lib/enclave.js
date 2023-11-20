@@ -36,7 +36,7 @@ export class Enclave {
     if (!humanId) return;
 
     this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
-    this.idOS.store.set("encryption-public-key", this.publicKey);
+    this.idOS.store.set("encryption-public-key", this.encryptionPublicKey);
     this.initialized = true;
 
     return this.encryptionPublicKey;
