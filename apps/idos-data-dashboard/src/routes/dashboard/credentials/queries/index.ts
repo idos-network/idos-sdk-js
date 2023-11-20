@@ -1,12 +1,21 @@
 import { idOS } from "#/lib/idos";
 import { createQuery } from "react-query-kit";
 
+export type CredentialStatus =
+  | "pending"
+  | "contacted"
+  | "approved"
+  | "rejected"
+  | "expired";
+
 export type Credential = {
   credential_type: string;
   human_id: string;
   id: string;
   issuer: string;
   original_id: string;
+  credential_level: string;
+  credential_status: CredentialStatus;
 };
 
 export type CredentialDetails = Credential & {

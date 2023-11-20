@@ -1,12 +1,34 @@
 import { Button, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
-import { Credential } from "../queries";
+import { Credential, CredentialStatus } from "../queries";
 
 type CredentialCardProps = {
   credential: Credential;
   onDelete: (credential: Credential) => void;
   onViewDetails: (credential: Credential) => void;
   onManageGrants?: () => void;
+};
+
+const CredentialStatus = ({ status }: { status: CredentialStatus }) => {
+  if (!status) {
+    return <Text>-</Text>;
+  }
+
+  return (
+    <Text
+      color={
+        status === "approved"
+          ? "green.500"
+          : status === "pending" || status === "contacted"
+          ? "neutral.500"
+          : status === "rejected" || status === "expired"
+          ? "red.500"
+          : "neutral.100"
+      }
+    >
+      {status.toLocaleUpperCase()}
+    </Text>
+  );
 };
 
 export const CredentialCard = (props: CredentialCardProps) => {
@@ -19,7 +41,7 @@ export const CredentialCard = (props: CredentialCardProps) => {
       borderColor="neutral.800"
       rounded="xl"
     >
-      <SimpleGrid maxW="container.lg" columns={[2, 4]} spacing={10}>
+      <SimpleGrid maxW="container.lg" columns={[2, 6]} spacing={10}>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
             Type
@@ -31,6 +53,12 @@ export const CredentialCard = (props: CredentialCardProps) => {
             Issuer
           </Text>
           <Text>{props.credential.issuer}</Text>
+        </GridItem>
+        <GridItem>
+          <Text mb={5} color="neutral.600" fontSize="sm">
+            Status
+          </Text>
+          <CredentialStatus status={"approved"} />
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
