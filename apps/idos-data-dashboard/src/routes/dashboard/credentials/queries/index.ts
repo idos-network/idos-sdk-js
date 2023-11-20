@@ -29,7 +29,7 @@ export const useFetchCredentials = createQuery({
 });
 
 export const useFetchCredentialDetails = createQuery<
-  CredentialDetails,
+  CredentialDetails | null,
   { id: string }
 >({
   primaryKey: "credential_details",

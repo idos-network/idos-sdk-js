@@ -1,10 +1,9 @@
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
+import { idOS } from ".";
 import { assertNever } from "../types";
 import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/enclave-provider";
-
-type idOS = any; // TODO Replace this when it's typed.
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
@@ -43,13 +42,13 @@ export class Enclave {
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async init(humanId?: string): Promise<Uint8Array | undefined> {
+  async init(humanId?: string): Promise<Uint8Array> {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
     humanId ||= (await this.idOS.auth.currentUser()).humanId;
 
-    if (!humanId) return undefined;
+    if (!humanId) throw new Error("Could not initialize user.");
 
     this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
     this.idOS.store.set("encryption-public-key", this.encryptionPublicKey);
