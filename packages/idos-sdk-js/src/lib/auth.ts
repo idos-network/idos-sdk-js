@@ -6,7 +6,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 import { SigningKey, hashMessage } from "ethers";
-import { idOS } from ".";
+import { idOS } from "./idos";
 import { Nonce } from "./nonce";
 
 /* global Buffer */
