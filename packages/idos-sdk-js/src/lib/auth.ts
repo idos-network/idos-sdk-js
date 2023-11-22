@@ -1,15 +1,27 @@
+import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
 import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
+import type { Signer } from "ethers";
 import { SigningKey, hashMessage } from "ethers";
+import { idOS } from "./idos";
 import { Nonce } from "./nonce";
 
 /* global Buffer */
 
+export interface AuthUser {
+  humanId?: string;
+  address?: string;
+  publicKey?: string;
+}
+
 export class Auth {
-  constructor(idOS) {
+  idOS: idOS;
+  user: AuthUser;
+
+  constructor(idOS: idOS) {
     this.idOS = idOS;
     this.user = {};
   }
@@ -19,12 +31,12 @@ export class Auth {
     await this.idOS.enclave.reset();
   }
 
-  async remember(key, value) {
+  async remember(key: string, value: any) {
     this.idOS.store.set(key, value);
     await this.idOS.enclave.store(key, value);
   }
 
-  async setEvmSigner(signer) {
+  async setEvmSigner(signer: Signer) {
     const storedAddress = this.idOS.store.get("signer-address");
     const currentAddress = await signer.getAddress();
 
@@ -42,7 +54,11 @@ export class Auth {
     return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
   }
 
-  async setNearSigner(wallet, recipient = "idos.network") {
+  async setNearSigner(wallet: Wallet, recipient = "idos.network") {
+    if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
+
+    const currentAddress = (await wallet.getAccounts())[0].accountId;
+
     if (wallet.id === "my-near-wallet") {
       const { accountId, signature, publicKey, error } = Object.fromEntries(
         new URLSearchParams(window.location.hash.slice(1)).entries()
@@ -53,8 +69,11 @@ export class Auth {
         await this.remember("signer-public-key", publicKey);
       }
 
-      wallet.signMessageOriginal = wallet.signMessage.bind(wallet);
-      wallet.signMessage = async ({ message, recipient }) => {
+      const signMessageOriginal = wallet.signMessage.bind(wallet);
+      wallet.signMessage = async ({
+        message,
+        recipient,
+      }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
         if (error) return Promise.reject();
 
         const lastMessage = this.idOS.store.get("sign-last-message");
@@ -63,6 +82,7 @@ export class Auth {
           const callbackUrl = this.idOS.store.get("sign-last-url");
 
           return Promise.resolve({
+            accountId: currentAddress,
             publicKey,
             signature,
             nonce,
@@ -77,15 +97,14 @@ export class Auth {
           this.idOS.store.set("sign-last-nonce", Array.from(nonce));
           this.idOS.store.set("sign-last-url", callbackUrl);
 
-          wallet.signMessageOriginal({ message, nonce, recipient, callbackUrl });
+          signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
-          await new Promise(() => {});
+          return new Promise(() => ({}) as SignedMessage);
         }
       };
     }
 
     const storedAddress = this.idOS.store.get("signer-address");
-    const currentAddress = (await wallet.getAccounts())[0].accountId;
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
@@ -93,26 +112,28 @@ export class Auth {
       await this.forget();
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
-      ({ publicKey } = await wallet.signMessage({ message, recipient, nonce }));
+      ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
       await this.remember("signer-address", currentAddress);
       await this.remember("signer-public-key", publicKey);
     }
 
-    const signer = async (message) => {
-      message = Utf8Codec.decode(message);
+    const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
+      if (typeof message !== "string") message = Utf8Codec.decode(message);
+      if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
       let nonceSuggestion = Buffer.from(new Nonce(32).bytes);
 
       const {
         nonce = nonceSuggestion,
         signature,
+        // @ts-ignore Signatures don't seem to be updated for NEP413 yet.
         callbackUrl,
-      } = await wallet.signMessage({
+      } = (await (wallet.signMessage as (_: SignMessageParams) => Promise<SignedMessage & { nonce?: Uint8Array }>)({
         message,
         recipient,
         nonce: nonceSuggestion,
-      });
+      }))!;
 
       const nep413BorschSchema = {
         struct: {
@@ -141,15 +162,26 @@ export class Auth {
       );
     };
 
-    return this.#setSigner({ accountId: currentAddress, signer, publicKey, signatureType: "nep413" });
+    return this.#setSigner({
+      accountId: currentAddress,
+      signer,
+      publicKey,
+      signatureType: "nep413",
+    });
   }
 
-  #setSigner(args) {
+  #setSigner<
+    T extends {
+      signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
+      publicKey: string;
+      signatureType: string;
+    },
+  >(args: T) {
     this.idOS.kwilWrapper.setSigner(args);
     return args;
   }
 
-  async setHumanId(humanId) {
+  async setHumanId(humanId: string) {
     if (!humanId) return;
 
     this.user.humanId = humanId;
@@ -157,11 +189,13 @@ export class Auth {
   }
 
   async currentUser() {
-    if (this.user.humanId !== null) {
+    if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
-      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store));
+      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store)) as Array<
+        string | undefined
+      >;
 
-      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId());
+      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
 
       this.user = { humanId, address, publicKey };
       this.idOS.store.set("human-id", humanId);

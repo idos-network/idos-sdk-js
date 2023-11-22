@@ -78,7 +78,7 @@ export const CredentialViewer = (props: CredentialViewerProps) => {
               <Button onClick={props.onClose} variant="outline">
                 Close
               </Button>
-              {credential.isSuccess ? (
+              {credential.isSuccess && credential.data ? (
                 <Button
                   as={Link}
                   _hover={{

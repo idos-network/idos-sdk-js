@@ -1,19 +1,15 @@
-import { Contract, ZeroAddress } from "ethers";
+import { Contract, Signer, TransactionResponse, ZeroAddress } from "ethers";
+import Grant from "./grant";
+import { GrantChild } from "./grant-child";
 
 const ZERO_ADDRESS = ZeroAddress;
 const ZERO_DATA_ID = "0";
 const ZERO_TIMELOCK = 0;
 
-class Grant {
-  constructor({ owner, grantee, dataId, lockedUntil }) {
-    Object.assign(this, { owner, grantee, dataId, lockedUntil });
-  }
-}
+export class EvmGrants extends GrantChild {
+  static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
 
-export class EvmGrants {
-  #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
-
-  #abi = [
+  static #abi = [
     {
       inputs: [
         {
@@ -162,39 +158,58 @@ export class EvmGrants {
       stateMutability: "view",
       type: "function",
     },
-  ];
-  #contract;
+  ] as const;
 
-  constructor() {}
+  signer: Signer;
+  defaultOwner: string;
+  #contract: Contract;
 
-  async init({ signer } = {}) {
+  private constructor(signer: Signer, defaultOwner: string, contract: Contract) {
+    super();
     this.signer = signer;
-    this.defaultOwner = await this.signer.getAddress();
-    this.#contract = new Contract(this.#defaultContractAddress, this.#abi, this.signer);
+    this.defaultOwner = defaultOwner;
+    this.#contract = contract;
   }
 
-  #newGrant({ owner, grantee, dataId, lockedUntil }) {
+  static async build({ signer }: { signer: Signer }): Promise<EvmGrants> {
+    return new this(signer, await signer.getAddress(), new Contract(this.#defaultContractAddress, this.#abi, signer));
+  }
+
+  #newGrant({ owner, grantee, dataId, lockedUntil }: Omit<Grant, "owner"> & { owner?: string }) {
     (!owner || owner === ZERO_ADDRESS) && (owner = this.defaultOwner);
     return new Grant({ owner, grantee, dataId, lockedUntil });
   }
 
-  #grantPromise(grant, wait = true) {
-    return async (transaction) => {
-      const transactionOrReceipt = wait ? await transaction.wait() : transaction;
+  #grantPromise(grant: Grant, wait = true) {
+    return async (transaction: TransactionResponse) => {
+      // `transaction.wait()` only returns null when given `confirms = 0`.
+      const transactionOrReceipt = wait ? (await transaction.wait())! : transaction;
       const transactionId = transactionOrReceipt.hash;
       return { grant, transactionId };
     };
   }
 
-  async list({ owner = ZERO_ADDRESS, grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID } = {}) {
+  async list({
+    owner = ZERO_ADDRESS,
+    grantee = ZERO_ADDRESS,
+    dataId = ZERO_DATA_ID,
+  }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
     if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) {
       throw new Error("Must provide `owner` and/or `grantee`");
     }
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
-    return grants.map(([owner, grantee, dataId, lockedUntil]) => new Grant({ owner, grantee, dataId, lockedUntil }));
+    return grants.map(
+      ([owner, grantee, dataId, lockedUntil]: [string, string, string, number]) =>
+        new Grant({ owner, grantee, dataId, lockedUntil })
+    );
   }
 
-  async create({ grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
+  async create({
+    grantee = ZERO_ADDRESS,
+    dataId = ZERO_DATA_ID,
+    lockedUntil = ZERO_TIMELOCK,
+    wait = true,
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -202,14 +217,19 @@ export class EvmGrants {
     let transaction;
 
     try {
-      transaction = await this.#contract.insertGrant(grantee, dataId, lockedUntil);
+      transaction = (await this.#contract.insertGrant(grantee, dataId, lockedUntil)) as TransactionResponse;
     } catch (e) {
-      throw new Error("Grant creation failed", { cause: e.cause });
+      throw new Error("Grant creation failed", { cause: (e as Error).cause });
     }
     return await this.#grantPromise(grant, wait)(transaction);
   }
 
-  async revoke({ grantee = ZERO_ADDRESS, dataId = ZERO_DATA_ID, lockedUntil = ZERO_TIMELOCK, wait = true } = {}) {
+  async revoke({
+    grantee = ZERO_ADDRESS,
+    dataId = ZERO_DATA_ID,
+    lockedUntil = ZERO_TIMELOCK,
+    wait = true,
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -217,9 +237,9 @@ export class EvmGrants {
     let transaction;
 
     try {
-      transaction = this.#contract.deleteGrant(grantee, dataId, lockedUntil);
+      transaction = (await this.#contract.deleteGrant(grantee, dataId, lockedUntil)) as TransactionResponse;
     } catch (e) {
-      throw new Error("Grant creation failed", { cause: e.cause });
+      throw new Error("Grant creation failed", { cause: (e as Error).cause });
     }
     return await this.#grantPromise(grant, wait)(transaction);
   }

@@ -1,4 +1,6 @@
 export class Nonce {
+  bytes: Uint8Array;
+
   constructor(length = 32) {
     this.bytes = crypto.getRandomValues(new Uint8Array(length));
   }
