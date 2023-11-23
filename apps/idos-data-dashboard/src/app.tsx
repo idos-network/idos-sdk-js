@@ -7,7 +7,7 @@ import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { BrowserProvider } from "ethers";
-import { useAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
@@ -45,7 +45,7 @@ export default function App() {
   const initialized = useRef(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isConnected, setIsConnected] = useState(false);
-  const [, setAddress] = useAtom(addressAtom);
+  const setAddress = useSetAtom(addressAtom);
 
   const onMetamaskConnect = async () => {
     setIsLoading(true);
@@ -56,9 +56,9 @@ export default function App() {
 
       if (hasProfile) {
         await idOS.setSigner("EVM", signer);
-        setAddress(address);
       }
 
+      setAddress(address);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -75,9 +75,9 @@ export default function App() {
 
       if (hasProfile) {
         await idOS.setSigner("NEAR", signer);
-        setAddress(address);
       }
 
+      setAddress(address);
       setIsConnected(true);
       setIsLoading(false);
     } catch (error) {
@@ -96,9 +96,9 @@ export default function App() {
 
           if (hasProfile) {
             await idOS.setSigner("EVM", signer);
-            setAddress(address);
           }
 
+          setAddress(address);
           setIsConnected(true);
           setIsLoading(false);
         }
@@ -110,9 +110,9 @@ export default function App() {
 
           if (hasProfile) {
             await idOS.setSigner("NEAR", signer);
-            setAddress(address);
           }
 
+          setAddress(address);
           setIsConnected(true);
           setIsLoading(false);
         }

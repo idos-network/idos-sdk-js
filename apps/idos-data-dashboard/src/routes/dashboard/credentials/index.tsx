@@ -52,7 +52,6 @@ export function Component() {
   } = useDisclosure();
 
   const address = useAtomValue(addressAtom);
-
   const credentials = useFetchCredentials({
     enabled: !!address
   });
@@ -96,7 +95,7 @@ export function Component() {
     onAddProofOpen();
   };
 
-  if (!address) {
+  if (!currentUser.data || credentials.isPending) {
     return (
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
         <Flex align="center" justify="space-between" h={[82, 125]}>
