@@ -95,6 +95,9 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.2.0
+      react-cookie-consent:
+        specifier: ^9.0.0
+        version: 9.0.0(react@18.2.0)
       react-device-detect:
         specifier: ^2.2.3
         version: 2.2.3(react-dom@18.2.0)(react@18.2.0)
@@ -5686,6 +5689,10 @@ packages:
       react: 18.2.0
     dev: false
 
+  /js-cookie@2.2.1:
+    resolution: {integrity: sha512-HvdH2LzI/EAZcUwA8+0nKNtWHqS+ZmijLA30RwZA0bo7ToCckjK5MkGhjED9KoRcXO6BaGI3I9UIzSA1FKFPOQ==}
+    dev: false
+
   /js-sha256@0.9.0:
     resolution: {integrity: sha512-sga3MHh9sgQN2+pJ9VYZ+1LPwXOxuBJBA5nrR5/ofPfuiJBE2hnjsaN8se8JznOmGLN2p49Pe5U/ttafcs/apA==}
 
@@ -6703,6 +6710,16 @@ packages:
       react: ^15.3.0 || ^16.0.0 || ^17.0.0 || ^18.0.0
     dependencies:
       '@babel/runtime': 7.23.2
+      react: 18.2.0
+    dev: false
+
+  /react-cookie-consent@9.0.0(react@18.2.0):
+    resolution: {integrity: sha512-Blyj+m+Zz7SFHYqT18p16EANgnSg2sIyU6Yp3vk83AnOnSW7qnehPkUe4+8+qxztJrNmCH5GP+VHsWzAKVOoZA==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: '>=16'
+    dependencies:
+      js-cookie: 2.2.1
       react: 18.2.0
     dev: false
 
