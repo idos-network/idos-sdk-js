@@ -11,6 +11,7 @@ import { useAtom } from "jotai";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { CookieConsent } from "./cookie-consent";
 
 const setupEvmWallet = async () => {
   const provider = new BrowserProvider(window.ethereum);
@@ -144,12 +145,20 @@ export default function App() {
 
   if (!isConnected) {
     return (
-      <ConnectWallet
-        onNearConnect={onNearConnect}
-        onMetamaskConnect={onMetamaskConnect}
-      />
+      <>
+        <ConnectWallet
+          onNearConnect={onNearConnect}
+          onMetamaskConnect={onMetamaskConnect}
+        />
+        <CookieConsent />
+      </>
     );
   }
 
-  return <Outlet />;
+  return (
+    <>
+      <Outlet />
+      <CookieConsent />
+    </>
+  );
 }
