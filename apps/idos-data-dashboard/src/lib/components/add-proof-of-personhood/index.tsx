@@ -1,3 +1,4 @@
+import { addressAtom } from "#/lib/state";
 import {
   Button,
   Flex,
@@ -14,6 +15,7 @@ import {
   Stack,
   Text
 } from "@chakra-ui/react";
+import { useAtomValue } from "jotai";
 import { ArrowUpRightIcon } from "lucide-react";
 import { PropsWithChildren } from "react";
 import { isDesktop } from "react-device-detect";
@@ -39,6 +41,14 @@ const ProofBox = ({ children }: PropsWithChildren) => (
 );
 
 export const AddProofOfPersonhood = (props: Omit<ModalProps, "children">) => {
+  const proofLink = {
+    near: "https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-near%3Aread%20verification.wallet-near.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread",
+    eth: "https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-eth%3Aread%20verification.wallet-eth.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread"
+  };
+  const address = useAtomValue(addressAtom);
+  const walletType = address?.includes("near") ? "near" : "eth";
+  const url = proofLink[walletType];
+
   return (
     <Modal isCentered isOpen={props.isOpen} onClose={props.onClose} size="2xl">
       <ModalOverlay />
@@ -79,7 +89,7 @@ export const AddProofOfPersonhood = (props: Omit<ModalProps, "children">) => {
           {isDesktop ? (
             <Button
               as="a"
-              href="https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-eth%3Aread%20verification.wallet-eth.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread"
+              href={url}
               rightIcon={<ArrowUpRightIcon size={20} />}
               size="lg"
               variant="ghost"
