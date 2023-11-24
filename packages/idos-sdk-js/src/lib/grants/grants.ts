@@ -18,8 +18,16 @@ export type SignerType = keyof typeof SIGNER_TYPES;
 export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;
   static near = {
+    /**
+     * @deprecated Use methodNames instead.
+     */
     contractMethods: Object.values(NearGrants.contractMethods),
+    methodNames: Object.values(NearGrants.contractMethods),
+    /**
+     * @deprecated Use contractId instead.
+     */
     defaultContractId: NearGrants.defaultContractId,
+    contractId: NearGrants.defaultContractId,
     defaultNetwork: NearGrants.defaultNetwork,
   };
 
