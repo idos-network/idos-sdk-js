@@ -324,6 +324,9 @@ importers:
       '@vitest/ui':
         specifier: ^0.34.6
         version: 0.34.6(vitest@0.31.4)
+      clean-package:
+        specifier: ^2.2.0
+        version: 2.2.0
       eslint:
         specifier: ^8.52.0
         version: 8.52.0
@@ -4405,6 +4408,13 @@ packages:
     engines: {node: '>= 10.0'}
     dependencies:
       source-map: 0.6.1
+    dev: true
+
+  /clean-package@2.2.0:
+    resolution: {integrity: sha512-vLv8kRqvh4smPDpqAYFPLEijTppAd/cfCz4yBcUGoVl/JKu6ZWKhlo+G/cAmwlSa29RudfBeuyiNEzas8bTwEQ==}
+    hasBin: true
+    dependencies:
+      dot-prop: 6.0.1
     dev: true
 
   /cli-boxes@3.0.0:
