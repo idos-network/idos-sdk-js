@@ -95,7 +95,7 @@ export function Component() {
     onAddProofOpen();
   };
 
-  if (!currentUser.data || credentials.isPending) {
+  if (!currentUser.data || credentials.data?.length === 0) {
     return (
       <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
         <Flex align="center" justify="space-between" h={[82, 125]}>
