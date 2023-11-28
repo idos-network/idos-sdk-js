@@ -177,6 +177,7 @@ export class EvmGrants extends GrantChild {
 
   #newGrant({ owner, grantee, dataId, lockedUntil }: Omit<Grant, "owner"> & { owner?: string }) {
     (!owner || owner === ZERO_ADDRESS) && (owner = this.defaultOwner);
+
     return new Grant({ owner, grantee, dataId, lockedUntil });
   }
 
@@ -185,6 +186,7 @@ export class EvmGrants extends GrantChild {
       // `transaction.wait()` only returns null when given `confirms = 0`.
       const transactionOrReceipt = wait ? (await transaction.wait())! : transaction;
       const transactionId = transactionOrReceipt.hash;
+
       return { grant, transactionId };
     };
   }
@@ -194,10 +196,10 @@ export class EvmGrants extends GrantChild {
     grantee = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
-    if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) {
-      throw new Error("Must provide `owner` and/or `grantee`");
-    }
+    if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) throw new Error("Must provide `owner` and/or `grantee`");
+
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
+
     return grants.map(
       ([owner, grantee, dataId, lockedUntil]: [string, string, string, number]) =>
         new Grant({ owner, grantee, dataId, lockedUntil })
@@ -213,7 +215,9 @@ export class EvmGrants extends GrantChild {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
+
     const grant = this.#newGrant({ grantee, dataId, lockedUntil });
+
     let transaction;
 
     try {
@@ -233,6 +237,7 @@ export class EvmGrants extends GrantChild {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
+
     const grant = this.#newGrant({ grantee, dataId, lockedUntil });
     let transaction;
 
@@ -241,6 +246,7 @@ export class EvmGrants extends GrantChild {
     } catch (e) {
       throw new Error("Grant creation failed", { cause: (e as Error).cause });
     }
+
     return await this.#grantPromise(grant, wait)(transaction);
   }
 }

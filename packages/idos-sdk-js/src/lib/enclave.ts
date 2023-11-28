@@ -21,6 +21,7 @@ export class Enclave {
   constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe") {
     this.initialized = false;
     this.idOS = idOS;
+
     switch (providerType) {
       case "iframe":
         this.provider = new IframeEnclave({ container });

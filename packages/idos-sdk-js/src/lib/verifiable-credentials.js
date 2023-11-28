@@ -120,7 +120,9 @@ const verify = async (credential, options = {}) => {
     })());
 
   const result = await vc.verifyCredential({ credential, suite, documentLoader });
+
   if (!result.verified) throw result?.results?.[0]?.error || result;
+
   return true;
 };
 
