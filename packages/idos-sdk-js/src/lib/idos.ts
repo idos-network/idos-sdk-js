@@ -31,9 +31,7 @@ export class idOS {
   store: Store;
 
   private constructor({ nodeUrl, dbId, container }: InitParams) {
-    if (!idOS.initializing) {
-      throw new Error("Usage: `idOS.init(options)`");
-    }
+    if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
@@ -45,6 +43,7 @@ export class idOS {
 
   static async init({ nodeUrl, dbId, container }: InitParams): Promise<idOS> {
     this.initializing = true;
+
     const idos = new this({ nodeUrl, dbId, container });
     await idos.enclave.load();
 
@@ -52,7 +51,9 @@ export class idOS {
   }
 
   async setSigner(type: "NEAR", signer: Wallet): Promise<void>;
+
   async setSigner(type: "EVM", signer: Signer): Promise<void>;
+
   async setSigner(type: SignerType, signer: Wallet | Signer): Promise<void> {
     if (type === "NEAR") {
       const { accountId } = await this.auth.setNearSigner(signer as Wallet);
@@ -70,7 +71,7 @@ export class idOS {
   }
 
   async reset({ enclave = false } = {}): Promise<void> {
-    await this.store.reset();
+    this.store.reset();
     if (enclave) await this.enclave.reset();
   }
 

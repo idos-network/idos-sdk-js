@@ -90,7 +90,9 @@ export class NearGrants extends GrantChild {
     } catch (e) {
       throw new Error("Grant creation failed", { cause: e });
     }
+
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
+
     return { transactionId: transactionResult.transaction.hash };
   }
 
@@ -117,7 +119,9 @@ export class NearGrants extends GrantChild {
     } catch (e) {
       throw new Error("Grant revocation failed", { cause: e });
     }
+
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
+
     return { transactionId: transactionResult.transaction.hash };
   }
 }

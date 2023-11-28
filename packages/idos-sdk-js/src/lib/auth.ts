@@ -70,6 +70,7 @@ export class Auth {
       }
 
       const signMessageOriginal = wallet.signMessage.bind(wallet);
+
       wallet.signMessage = async ({
         message,
         recipient,
@@ -110,6 +111,7 @@ export class Auth {
 
     if (storedAddress != currentAddress || !publicKey) {
       await this.forget();
+
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
       ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);

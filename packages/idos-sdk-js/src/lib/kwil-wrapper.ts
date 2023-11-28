@@ -61,11 +61,13 @@ export class KwilWrapper {
 
     if (inputs) {
       const actionInput = new KwilUtils.ActionInput();
+
       for (const key in inputs) {
         actionInput.put(`$${key}`, inputs[key]);
       }
       action.concat(actionInput);
     }
+
     return action;
   }
 
@@ -78,6 +80,7 @@ export class KwilWrapper {
     const action = await this.buildAction(actionName, actionInputs, description, useSigner);
     const msg = await action.buildMsg();
     const res = await this.client.call(msg);
+
     return res.data!.result;
   }
 
@@ -85,16 +88,19 @@ export class KwilWrapper {
     const action = await this.buildAction(actionName, actionInputs, description);
     const tx = await action.buildTx();
     const res = await this.client.broadcast(tx);
+
     return res.data!.tx_hash;
   }
 
   async getHumanId(): Promise<string | null> {
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
+
     return result[0]?.human_id;
   }
 
   async hasProfile(address: string): Promise<boolean> {
     const result = (await this.call("has_profile", { address }, undefined, false)) as any;
+
     return !!result[0]?.has_profile;
   }
 }

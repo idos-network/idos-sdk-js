@@ -1,5 +1,5 @@
 import * as Base64Codec from "@stablelib/base64";
-import { idOS } from ".";
+import { idOS } from "./idos";
 
 export class Data {
   idOS: idOS;
@@ -26,6 +26,7 @@ export class Data {
     if (!filter) {
       return records;
     }
+
     const [key, value] = Object.entries(filter)[0];
     return records.filter((record: any) => !record[key] || record[key] === value);
   }
@@ -37,27 +38,34 @@ export class Data {
   ): Promise<T & { id: string }> {
     receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
     const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
+
     const inputs: string[] = ((await this.idOS.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)
       .inputs.map((input: string) => input.substring(1));
+
     const recordKeys = Object.keys(record);
+
     if (inputs.every((input) => recordKeys.includes(input))) {
       throw new Error(`Invalid payload for action ${name}`);
     }
+
     if (tableName === "credentials") {
       (record as any).content = await this.idOS.enclave.encrypt((record as any).content as string, receiverPublicKey);
       (record as any).encryption_public_key = receiverPublicKey;
     }
+
     if (tableName === "attributes") {
       (record as any).value = await this.idOS.enclave.encrypt((record as any).value as string, receiverPublicKey);
       (record as any).encryption_public_key = receiverPublicKey;
     }
+
     let newRecord = { id: crypto.randomUUID(), ...record };
     await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
       newRecord,
       `Create new ${this.singularize(tableName)} in your idOS profile`
     );
+
     return newRecord;
   }
 
@@ -70,13 +78,18 @@ export class Data {
       )) as any;
 
       await this.idOS.auth.setHumanId(records?.[0]?.human_id);
+
       let record = records.find((r: any) => r.id === recordId);
       if (!record) return null;
+
       record.content = await this.idOS.enclave.decrypt(record.content, record.encryption_public_key);
+
       return record;
     }
+
     let records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{ id: recordId });
     let record = records.find((r) => r.id === recordId);
+
     return record || null;
   }
 
@@ -85,6 +98,7 @@ export class Data {
 
     const record = { id: recordId };
     await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
+
     return record;
   }
 
@@ -102,6 +116,7 @@ export class Data {
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
       ...record,
     });
+
     return record;
   }
 
@@ -126,6 +141,7 @@ export class Data {
       },
       `Share a ${name} on idOS`
     );
+
     return { id };
   }
 

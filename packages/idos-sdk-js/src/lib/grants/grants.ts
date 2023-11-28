@@ -19,12 +19,12 @@ export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;
   static near = {
     /**
-     * @deprecated Use methodNames instead.
+     * @deprecated Use {@link Grants.methodNames} instead.
      */
     contractMethods: Object.values(NearGrants.contractMethods),
     methodNames: Object.values(NearGrants.contractMethods),
     /**
-     * @deprecated Use contractId instead.
+     * @deprecated Use {@link Grants.contractId } instead.
      */
     defaultContractId: NearGrants.defaultContractId,
     contractId: NearGrants.defaultContractId,
@@ -38,6 +38,7 @@ export class Grants {
   }
 
   async init({ type, signer }: { type: "EVM"; signer: Signer }): Promise<ConnectedGrants>;
+
   async init({
     type,
     signer,
@@ -47,6 +48,7 @@ export class Grants {
     signer: Wallet;
     accountId: string;
   }): Promise<ConnectedGrants>;
+
   async init({
     type,
     signer,
@@ -57,6 +59,7 @@ export class Grants {
     accountId?: string;
   }): Promise<ConnectedGrants> {
     let child;
+
     switch (type) {
       case "EVM":
         child = await EvmGrants.build({ signer: signer as Signer });
@@ -137,6 +140,7 @@ class ConnectedGrants extends Grants {
       dataId: share.id,
       lockedUntil: lockedUntil,
     });
+
     return {
       ...payload,
       encryptedWith: this.idOS.store.get("signer-public-key"),
@@ -151,6 +155,7 @@ class ConnectedGrants extends Grants {
     lockedUntil: number
   ): Promise<{ transactionId: string }> {
     await this.idOS.data.unshare(tableName, recordId);
+
     return this.#child.revoke({ grantee, dataId, lockedUntil });
   }
 }
