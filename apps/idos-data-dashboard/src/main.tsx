@@ -15,7 +15,7 @@ import {
   createBrowserRouter
 } from "react-router-dom";
 import { WagmiConfig } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
 
 import App from "./app";
 
@@ -33,7 +33,7 @@ const metadata = {
 };
 
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
-const chains = [goerli];
+const chains = [mainnet];
 const wagmiConfig = defaultWagmiConfig({
   chains,
   projectId,

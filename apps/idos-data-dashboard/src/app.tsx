@@ -13,7 +13,7 @@ import { useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useAccount as useEVMAccount } from "wagmi";
-import { goerli } from "wagmi/chains";
+import { mainnet } from "wagmi/chains";
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -42,7 +42,7 @@ export default function App() {
       }
 
       if (evmAccount.isConnected) {
-        const signer = await getEthersSigner({ chainId: goerli.id });
+        const signer = await getEthersSigner({ chainId: mainnet.id });
         const hasProfile = await idOS.hasProfile(evmAccount.address as string);
 
         if (hasProfile) {
