@@ -88,13 +88,14 @@ div#terminal {
   height: 500px;
   flex-direction: column;
   justify-content: flex-end;
+  margin: 10px 0;
 }
 
 div#terminal:has(> #overview:not(:empty)) {
   display: flex;
 }
 
-div#terminal:has(> #detail-wrapper.visible) >*:not(#detail-wrapper) {
+div#terminal:has(> #detail-wrapper.visible) > *:not(#detail-wrapper) {
   opacity: 50%;
   pointer-events: none;
 }
@@ -120,11 +121,13 @@ div#detail-wrapper.visible {
   transform: translateX(0);
 }
 
-code#overview, code#detail {
+code#overview,
+code#detail {
   overflow-y: scroll;
 }
 
-code#overview, code#detail {
+code#overview,
+code#detail {
   font-size: 1.1em;
   line-height: 1.3em;
   text-wrap: nowrap;
@@ -196,11 +199,11 @@ code.display .next::before {
   content: "➜";
 }
 
-code.display .ask::before{
+code.display .ask::before {
   content: "🙋";
 }
 
-code.display .inspect::before{
+code.display .inspect::before {
   content: "🔍";
 }
 

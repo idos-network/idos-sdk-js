@@ -4,7 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Example idOS dapp</title>
-    <style type="text/css">@import "/src/styles.css"</style>
+    <style type="text/css">
+      @import "/src/styles.css";
+    </style>
   </head>
   <body>
     <div id="app">
@@ -28,23 +30,31 @@
         <button type="submit" name="NEAR">NEAR</button>
         <p>
           <strong>Show:</strong>
-          <br>
+          <br />
           <label><input type="checkbox" name="consent" />Consent</label>
-          <br>
+          <br />
           <label><input type="checkbox" name="wallets" />Wallets</label>
-          <br>
+          <br />
           <label><input type="checkbox" name="credentials" />Credentials</label>
-          <br>
+          <br />
           <label><input type="checkbox" name="grants" />Grants</label>
         </p>
         <p>
           <strong>Use:</strong>
-          <br>
-          <label><input type="radio" name="use" value="" checked />Password</label>
-          <br>
-          <label><input type="radio" name="use" value="password" />Passkey (password)</label>
-          <br>
-          <label><input type="radio" name="use" value="webauthn" />Passkey (WebAuthn)</label>
+          <br />
+          <label
+            ><input type="radio" name="use" value="" checked />Password</label
+          >
+          <br />
+          <label
+            ><input type="radio" name="use" value="password" />Passkey
+            (password)</label
+          >
+          <br />
+          <label
+            ><input type="radio" name="use" value="webauthn" />Passkey
+            (WebAuthn)</label
+          >
         </p>
       </form>
 
@@ -62,6 +72,8 @@
           </div>
         </div>
       </div>
+
+      <button id="create-wallet">Create a new wallet</button>
 
       <div id="idos-wrapper">
         <div id="idos-container"></div>
