@@ -10,8 +10,9 @@ import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
-import { Cache } from "./cache";
 import { Terminal } from "./terminal";
+import { Cache } from "./cache";
+
 
 /*
  * Initializing the idOS
@@ -19,12 +20,14 @@ import { Terminal } from "./terminal";
  */
 const idos = await idOS.init({ container: "#idos-container" });
 
+
 /*
  * Setting up the demo
  *
  */
 const terminal = new Terminal("#terminal", idos);
 const cache = new Cache();
+
 
 /*
  * Example wallet connection options
@@ -44,10 +47,12 @@ if (!chosenWallet) {
       chosenWallet = e.submitter.name;
       window.localStorage.setItem("chosen-wallet", chosenWallet);
 
-      [...e.target.querySelectorAll("input[type=checkbox]")].forEach(
-        ({ name, checked }) => (chosenFlow[name] = checked)
-      );
+      [...e.target.querySelectorAll("input[type=checkbox]")]
+        .forEach(({ name, checked }) => chosenFlow[name] = checked)
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
+
+      window.localStorage.setItem("use",
+        e.target.querySelector("input[type=radio]:checked").value);
 
       resolve();
     });
@@ -68,35 +73,30 @@ const connectWallet = {
     const {
       defaultContractId: contractId,
       contractMethods: methodNames,
-      defaultNetwork: network
+      defaultNetwork: network,
     } = idOS.near;
 
     const selector = await setupWalletSelector({
       network,
-      modules: [
-        setupHereWallet(),
-        setupMeteorWallet(),
-        setupMyNearWallet(),
-        setupNightly()
-      ]
+      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
     });
 
-    !selector.isSignedIn() &&
-      (await new Promise((resolve) => {
-        const modal = setupModal(selector, { contractId, methodNames });
+    !selector.isSignedIn() && await new Promise((resolve) => {
+      const modal = setupModal(selector, { contractId, methodNames });
 
-        // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
-        // We observe that it triggers this callback before it's ready for a
-        // second method call, which `setNearSigner` does immediately after
-        // this promise resolves
-        modal.on("onHide", () => setTimeout(resolve, 100));
-        modal.show();
-      }));
+      // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
+      // We observe that it triggers this callback before it's ready for a
+      // second method call, which `setNearSigner` does immediately after
+      // this promise resolves
+      modal.on("onHide", () => setTimeout(resolve, 100));
+      modal.show();
+    });
 
     const signer = await selector.wallet();
     return { signer, address: (await signer.getAccounts())[0].accountId };
   }
 };
+
 
 /*
  * 🚀 idOS, here we go!
@@ -115,13 +115,14 @@ const connectWallet = {
 
   if (!address) return;
 
+
   /*
    * Are you in the idOS?
    *
    */
   const hasProfile = await terminal.wait(
     `checking if idOS profile exists`,
-    idos.hasProfile(address)
+    idos.hasProfile(address),
   );
 
   if (!hasProfile) {
@@ -135,28 +136,27 @@ const connectWallet = {
     return;
   }
 
+
   /*
    * Optional consent screen
    *
    */
   if (chosenFlow.consent) {
     let consent = cache.get("consent");
-    await new Promise((resolve) => setTimeout(resolve, consent ? 0 : 250));
+    await new Promise(resolve => setTimeout(resolve, consent ? 0 : 250));
     consent = await terminal
       .h1("ask", "Consent request")
       .log("(optional) you can use our SDK as consent UI")
       .wait(
         "awaiting consent",
-        consent ||
-          idos.enclave.confirm(
-            "Do we have your consent to read data from the idOS?"
-          )
+        consent || idos.enclave.confirm("Do we have your consent to read data from the idOS?"),
       );
     terminal.h2("Consent").log(consent);
     cache.set("consent", consent);
 
     if (!consent) return terminal.status("done", "No consent: stopped");
   }
+
 
   /*
    * Setting the signer right before querying
@@ -166,8 +166,9 @@ const connectWallet = {
 
   await terminal.wait(
     "awaiting idOS authentication (signatures and password)",
-    idos.setSigner(chosenWallet, signer)
+    idos.setSigner(chosenWallet, signer),
   );
+
 
   /*
    * Some idOS queries
@@ -184,9 +185,7 @@ const connectWallet = {
         if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
           window.open(`https://zapper.xyz/account/${address}`);
         } else if (address.match(/^\w+\.(near|testnet)$/i)) {
-          window.open(
-            `https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`
-          );
+          window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
         }
       }
     });
@@ -194,31 +193,24 @@ const connectWallet = {
   }
 
   if (chosenFlow.credentials) {
-    const credentials =
-      cache.get("credentials") || idos.data.list("credentials");
-    terminal
-      .h1("eyes", "Your credentials")
-      .wait("awaiting signature", credentials);
+    const credentials = cache.get("credentials") || idos.data.list("credentials");
+    terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
     terminal.table(await credentials, ["issuer", "credential_type", "id"], {
       id: async (id) => {
-        const credential =
-          cache.get(`credential_${id}`) || idos.data.get("credentials", id);
+        const credential = cache.get(`credential_${id}`) || idos.data.get("credentials", id);
         await terminal
           .detail()
           .h1("inspect", `Credential # ${id}`)
           .wait("awaiting signature", credential);
         cache.set(`credential_${id}`, await credential);
         await terminal
-          .wait(
-            "verifying credential...",
-            idOS.verifiableCredentials.verify((await credential).content)
-          )
-          .then((_) => terminal.status("done", "Verified"))
+          .wait("verifying credential...", idOS.verifiableCredentials.verify((await credential).content))
+          .then(_ => terminal.status("done", "Verified"))
           .catch(terminal.error.bind(terminal));
         terminal
           .h1("eyes", "Content")
           .json(JSON.parse((await credential).content));
-      }
+      },
     });
     cache.set("credentials", await credentials);
   }
