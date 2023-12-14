@@ -13,7 +13,7 @@ interface InitParams {
   nodeUrl?: string;
   dbId?: string;
   container: string;
-  usePasskeys: boolean;
+  usePasskeys?: boolean;
 }
 
 export class idOS {
