@@ -5,11 +5,13 @@ export class IframeEnclave extends EnclaveProvider {
 
   container: string;
   iframe: HTMLIFrameElement;
+  usePasskeys?: string;
 
-  constructor(options: { container: string }) {
+  constructor(options: { container: string; usePasskeys?: boolean }) {
     super();
     this.container = options.container;
     this.iframe = document.createElement("iframe");
+    this.usePasskeys = options.usePasskeys ? "webauthn" : undefined;
   }
 
   async load(): Promise<StoredData> {
@@ -25,11 +27,9 @@ export class IframeEnclave extends EnclaveProvider {
 
     if (encryptionPublicKey) return encryptionPublicKey;
 
-    const usePasskeys = window.localStorage.getItem("use");
-
     this.#showEnclave();
 
-    return this.#requestToEnclave({ keys: { usePasskeys } }).then((encryptionPublicKey) => {
+    return this.#requestToEnclave({ keys: { usePasskeys: this.usePasskeys } }).then((encryptionPublicKey) => {
       this.#hideEnclave();
       return encryptionPublicKey as Uint8Array;
     });
