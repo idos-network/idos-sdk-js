@@ -17,7 +17,9 @@ import { Terminal } from "./terminal";
  * Initializing the idOS
  *
  */
-const idos = await idOS.init({ container: "#idos-container" });
+const idos = await idOS.init({
+  container: "#idos-container"
+});
 
 /*
  * Setting up the demo
@@ -234,14 +236,6 @@ const connectWallet = {
     terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
     cache.set("grants", await grants);
   }
-
-  document
-    .querySelector("#create-wallet")
-    .addEventListener("click", async () => {
-      await idos.data.create("wallets", {
-        address: "0x00"
-      });
-    });
 
   terminal.status("done", "Done");
 })();
