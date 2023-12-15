@@ -1,11 +1,10 @@
+import { useAddWallet } from "#/routes/dashboard/wallets/mutations";
+import { useFetchWallets } from "#/routes/dashboard/wallets/queries";
 import {
-  BoxProps,
   Button,
   FormControl,
   FormLabel,
-  HStack,
   Heading,
-  Image,
   Input,
   Modal,
   ModalBody,
@@ -13,48 +12,15 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  ModalOverlay,
-  Text,
-  VStack
+  ModalOverlay
 } from "@chakra-ui/react";
-
-import { useAddWallet } from "#/routes/dashboard/wallets/mutations";
-import { useFetchWallets } from "#/routes/dashboard/wallets/queries";
 import { useQueryClient } from "@tanstack/react-query";
-import { FormEvent, useState } from "react";
-import WalletAddress from "../assets/wallet-address.svg";
-import WalletsGrid from "../assets/wallets-grid.svg";
+import { FormEvent } from "react";
 
 type AddWalletProps = {
   isOpen: boolean;
   onClose: () => void;
 };
-
-const AddWalletButton = (props: BoxProps) => {
-  return (
-    <VStack
-      as="button"
-      alignContent="stretch"
-      justify="space-between"
-      direction="column"
-      gap={5}
-      w="50%"
-      h={60}
-      px={5}
-      py={8}
-      bg="neutral.800"
-      border="1px solid"
-      borderColor="neutral.600"
-      _hover={{
-        bg: "neutral.600"
-      }}
-      rounded="2xl"
-      {...props}
-    />
-  );
-};
-
-type AddWalletMode = "manual" | "wallet-selector";
 
 type ManualModeProps = {
   onSubmit: (address: string) => void;
@@ -107,17 +73,14 @@ const ManualMode = (props: ManualModeProps) => {
 };
 
 export const AddWallet = (props: AddWalletProps) => {
-  const [mode, setMode] = useState<AddWalletMode | undefined>("manual");
   const addWallet = useAddWallet();
   const queryClient = useQueryClient();
 
   const onSubmit = (address: string) => {
-    console.log(address);
     addWallet.mutate(
       { address },
       {
         onSuccess() {
-          setMode(undefined);
           queryClient.invalidateQueries({
             queryKey: useFetchWallets.getKey()
           });
@@ -142,44 +105,11 @@ export const AddWallet = (props: AddWalletProps) => {
     >
       <ModalOverlay />
       <ModalContent gap={5}>
-        {mode === "manual" ? (
-          <ManualMode
-            onSubmit={onSubmit}
-            onClose={onClose}
-            isPending={addWallet.isPending}
-          />
-        ) : (
-          <>
-            <ModalHeader mt={2}>
-              <Heading fontSize="2xl" fontWeight="medium" textAlign="center">
-                Add New Wallet
-              </Heading>
-            </ModalHeader>
-            <ModalCloseButton />
-            <ModalBody mb={4}>
-              <HStack gap={3}>
-                <AddWalletButton onClick={() => setMode("manual")}>
-                  <Image alt="Insert wallet address" src={WalletAddress} />
-                  <Text as="span" color="neutral.500">
-                    Insert wallet <br />
-                    address
-                  </Text>
-                </AddWalletButton>
-                <AddWalletButton onClick={() => setMode("wallet-selector")}>
-                  <Image
-                    w={120}
-                    h={108}
-                    alt="Select and connect a wallet"
-                    src={WalletsGrid}
-                  />
-                  <Text as="span" color="neutral.500">
-                    Select and connect a wallet
-                  </Text>
-                </AddWalletButton>
-              </HStack>
-            </ModalBody>
-          </>
-        )}
+        <ManualMode
+          onSubmit={onSubmit}
+          onClose={onClose}
+          isPending={addWallet.isPending}
+        />
       </ModalContent>
     </Modal>
   );
