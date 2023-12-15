@@ -2,11 +2,12 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { idOS } from ".";
 import { assertNever } from "../types";
-import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
+import { IframeEnclave, MetaMaskSnapEnclave, ModalEnclave } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/enclave-provider";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
+  modal: ModalEnclave,
   "metamask-snap": MetaMaskSnapEnclave,
 } as const;
 
@@ -23,6 +24,9 @@ export class Enclave {
     this.idOS = idOS;
 
     switch (providerType) {
+      case "modal":
+        this.provider = new ModalEnclave({ container });
+        break;
       case "iframe":
         this.provider = new IframeEnclave({ container });
         break;

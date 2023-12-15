@@ -35,13 +35,14 @@ export class idOS {
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container);
+    this.enclave = new Enclave(this, container, "modal");
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this);
     this.store = new Store();
   }
 
   static async init({ nodeUrl, dbId, container }: InitParams): Promise<idOS> {
+
     this.initializing = true;
 
     const idos = new this({ nodeUrl, dbId, container });

@@ -147,7 +147,6 @@ const connectWallet = {
       .log("(optional) you can use our SDK as consent UI")
       .wait(
         "awaiting consent",
-        consent ||
           idos.enclave.confirm(
             "Do we have your consent to read data from the idOS?"
           )
