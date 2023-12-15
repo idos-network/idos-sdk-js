@@ -31,13 +31,30 @@
         <p>
           <strong>Show:</strong>
           <br />
-          <label><input type="checkbox" name="wallets" />Wallets</label>
-          <br />
           <label><input type="checkbox" name="consent" />Consent</label>
+          <br />
+          <label><input type="checkbox" name="wallets" />Wallets</label>
           <br />
           <label><input type="checkbox" name="credentials" />Credentials</label>
           <br />
           <label><input type="checkbox" name="grants" />Grants</label>
+        </p>
+        <p>
+          <strong>Use:</strong>
+          <br />
+          <label
+            ><input type="radio" name="use" value="" checked />Password</label
+          >
+          <br />
+          <label
+            ><input type="radio" name="use" value="password" />Passkey
+            (password)</label
+          >
+          <br />
+          <label
+            ><input type="radio" name="use" value="webauthn" />Passkey
+            (WebAuthn)</label
+          >
         </p>
       </form>
 

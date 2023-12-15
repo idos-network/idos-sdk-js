@@ -88,6 +88,7 @@ div#terminal {
   height: 500px;
   flex-direction: column;
   justify-content: flex-end;
+  margin: 10px 0;
 }
 
 div#terminal:has(> #overview:not(:empty)) {

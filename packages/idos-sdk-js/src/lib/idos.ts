@@ -13,6 +13,7 @@ interface InitParams {
   nodeUrl?: string;
   dbId?: string;
   container: string;
+  usePasskeys?: boolean;
 }
 
 export class idOS {
@@ -30,21 +31,21 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({ nodeUrl, dbId, container }: InitParams) {
+  private constructor({ nodeUrl, dbId, container, usePasskeys = false }: InitParams) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container);
+    this.enclave = new Enclave(this, container, undefined, usePasskeys);
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this);
     this.store = new Store();
   }
 
-  static async init({ nodeUrl, dbId, container }: InitParams): Promise<idOS> {
+  static async init({ nodeUrl, dbId, container, usePasskeys }: InitParams): Promise<idOS> {
     this.initializing = true;
 
-    const idos = new this({ nodeUrl, dbId, container });
+    const idos = new this({ nodeUrl, dbId, container, usePasskeys });
     await idos.enclave.load();
 
     return idos;
