@@ -7,14 +7,13 @@ import { idOSKeyDerivation } from "./idOSKeyDerivation";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
-
     this.store = new Store();
-    this.storeBase64 = this.store.pipeCodec(Base64Codec);
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
 
-    let secretKey = this.storeBase64.get("encryption-private-key");
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    let secretKey = storeWithCodec.get("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.#listenToRequests();
@@ -30,8 +29,8 @@ export class Enclave {
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     return {
-      encryptionPublicKey: this.storeBase64.get("encryption-public-key"),
       humanId: this.store.get("human-id"),
+      encryptionPublicKey: this.store.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key")
     };
@@ -115,14 +114,16 @@ export class Enclave {
     const password = this.store.get("password");
     const salt = this.store.get("human-id");
 
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+
     let secretKey =
-      this.storeBase64.get("encryption-private-key") ||
+      storeWithCodec.get("encryption-private-key") ||
       (await idOSKeyDerivation({ password, salt }));
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    this.storeBase64.set("encryption-private-key", this.keyPair.secretKey);
-    this.storeBase64.set("encryption-public-key", this.keyPair.publicKey);
+    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
+    storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
   encrypt(message, receiverPublicKey) {
@@ -142,7 +143,7 @@ export class Enclave {
           {
             message: Base64Codec.encode(message),
             nonce: Base64Codec.encode(nonce),
-            receiverPublicKey: Base64Codec.encode(receiverPublicKey),
+            senderPublicKey: Base64Codec.encode(senderPublicKey),
             localPublicKey: Base64Codec.encode(this.keyPair.publicKey)
           },
           null,
@@ -158,8 +159,6 @@ export class Enclave {
   }
 
   decrypt(fullMessage, senderPublicKey) {
-    senderPublicKey = senderPublicKey || this.keyPair.publicKey;
-
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 

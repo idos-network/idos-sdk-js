@@ -17,7 +17,9 @@ import { Terminal } from "./terminal";
  * Initializing the idOS
  *
  */
-const idos = await idOS.init({ container: "#idos-container" });
+const idos = await idOS.init({
+  container: "#idos-container"
+});
 
 /*
  * Setting up the demo
@@ -48,6 +50,11 @@ if (!chosenWallet) {
         ({ name, checked }) => (chosenFlow[name] = checked)
       );
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
+
+      window.localStorage.setItem(
+        "use",
+        e.target.querySelector("input[type=radio]:checked").value
+      );
 
       resolve();
     });
