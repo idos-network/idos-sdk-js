@@ -55,6 +55,8 @@ export default function App() {
       const hasProfile = await idOS.hasProfile(address);
 
       if (hasProfile) {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-expect-error
         await idOS.setSigner("EVM", signer);
       }
 
@@ -95,6 +97,8 @@ export default function App() {
           const hasProfile = await idOS.hasProfile(address);
 
           if (hasProfile) {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-expect-error
             await idOS.setSigner("EVM", signer);
           }
 
