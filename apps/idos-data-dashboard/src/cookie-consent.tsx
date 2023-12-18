@@ -16,10 +16,10 @@ export const CookieConsent = () => {
     <Flex
       pos="fixed"
       bottom="0"
-      alignItems="center"
-      justifyContent="space-between"
-      bg="neutral.900"
+      align="center"
+      justify="space-between"
       w="full"
+      bg="neutral.900"
     >
       <CK
         cookieName="idos-dashboard-cookie-consent"
@@ -51,10 +51,10 @@ export const CookieConsent = () => {
           padding: 24
         }}
       >
-        <Heading size="md" mb={2}>
+        <Heading mb={2} size="md">
           We value your privacy
         </Heading>
-        <Text fontSize="sm" color="neutral.500">
+        <Text color="neutral.500" fontSize="sm">
           By pressing the approving button I voluntarily give my consent to set
           or activate cookies and external connections. I know their functions
           because they are described in the Privacy Policy or explained in more
@@ -62,7 +62,7 @@ export const CookieConsent = () => {
         </Text>
 
         {disclosure.isOpen ? (
-          <Text fontSize="sm" color="neutral.500">
+          <Text color="neutral.500" fontSize="sm">
             By pressing this button, I also voluntarily give my explicit consent
             pursuant to Article 49 (1) (1) (a) GDPR for personalized advertising
             and for other data transfers to third countries to the and by the
