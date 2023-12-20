@@ -6,21 +6,13 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "idos-data-dashboard#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "idos-enclave#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
-    "idos-example-dapp#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["dist/**"]
-    },
+
     "dev": {
       "cache": false,
       "persistent": true
-    }
+    },
+
+    "cleanup": {},
+    "lint": {}
   }
 }
