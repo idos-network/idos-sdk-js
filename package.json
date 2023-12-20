@@ -11,7 +11,7 @@
   "devDependencies": {
     "eslint": "^8.52.0",
     "prettier": "^3.0.3",
-    "turbo": "latest"
+    "turbo": "^1.11.2"
   },
   "packageManager": "pnpm@8.6.10",
   "name": "idos-sdk-js"
