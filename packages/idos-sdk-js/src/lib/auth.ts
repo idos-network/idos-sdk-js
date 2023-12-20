@@ -45,7 +45,10 @@ export class Auth {
     if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
       await this.forget();
       const message = "idOS authentication";
-      publicKey = SigningKey.recoverPublicKey(hashMessage(message), await signer.signMessage(message));
+      publicKey = SigningKey.recoverPublicKey(
+        hashMessage(message),
+        await signer.signMessage(message)
+      );
     }
 
     await this.remember("signer-address", currentAddress);
@@ -73,7 +76,7 @@ export class Auth {
 
       wallet.signMessage = async ({
         message,
-        recipient,
+        recipient
       }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
         if (error) return Promise.reject();
 
@@ -88,7 +91,7 @@ export class Auth {
             signature,
             nonce,
             message,
-            callbackUrl,
+            callbackUrl
           });
         } else {
           const callbackUrl = window.location.href;
@@ -124,17 +127,21 @@ export class Auth {
       if (typeof message !== "string") message = Utf8Codec.decode(message);
       if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
-      let nonceSuggestion = Buffer.from(new Nonce(32).bytes);
+      const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
 
       const {
         nonce = nonceSuggestion,
         signature,
         // @ts-ignore Signatures don't seem to be updated for NEP413 yet.
-        callbackUrl,
-      } = (await (wallet.signMessage as (_: SignMessageParams) => Promise<SignedMessage & { nonce?: Uint8Array }>)({
+        callbackUrl
+      } = (await (
+        wallet.signMessage as (
+          _: SignMessageParams
+        ) => Promise<SignedMessage & { nonce?: Uint8Array }>
+      )({
         message,
         recipient,
-        nonce: nonceSuggestion,
+        nonce: nonceSuggestion
       }))!;
 
       const nep413BorschSchema = {
@@ -143,8 +150,8 @@ export class Auth {
           message: "string",
           nonce: { array: { type: "u8", len: 32 } },
           recipient: "string",
-          callbackUrl: { option: "string" },
-        },
+          callbackUrl: { option: "string" }
+        }
       };
 
       const nep413BorshParams = {
@@ -152,7 +159,7 @@ export class Auth {
         message,
         nonce: Array.from(nonce),
         recipient,
-        callbackUrl,
+        callbackUrl
       };
 
       const nep413BorshPayload = BorshCodec.serialize(nep413BorschSchema, nep413BorshParams);
@@ -168,7 +175,7 @@ export class Auth {
       accountId: currentAddress,
       signer,
       publicKey,
-      signatureType: "nep413",
+      signatureType: "nep413"
     });
   }
 
@@ -177,7 +184,7 @@ export class Auth {
       signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
       publicKey: string;
       signatureType: string;
-    },
+    }
   >(args: T) {
     this.idOS.kwilWrapper.setSigner(args);
     return args;
@@ -193,9 +200,9 @@ export class Auth {
   async currentUser() {
     if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
-      let [humanId, address, publicKey] = currentUserKeys.map(this.idOS.store.get.bind(this.idOS.store)) as Array<
-        string | undefined
-      >;
+      let [humanId, address, publicKey] = currentUserKeys.map(
+        this.idOS.store.get.bind(this.idOS.store)
+      ) as Array<string | undefined>;
 
       humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
 

@@ -1,5 +1,5 @@
-import { idOS } from "#/lib/idos";
 import { createMutation } from "react-query-kit";
+import { idOS } from "#/lib/idos";
 
 export const useDeleteWallet = createMutation({
   mutationFn: async ({ id }: { id: string }) => {

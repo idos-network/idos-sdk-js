@@ -1,7 +1,3 @@
-import { ConnectWallet } from "#/connect-wallet.tsx";
-import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
-import { idOS } from "#/lib/idos";
-import { addressAtom } from "#/lib/state";
 import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import { setupModal } from "@near-wallet-selector/modal-ui";
@@ -11,6 +7,10 @@ import { useSetAtom } from "jotai";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { ConnectWallet } from "#/connect-wallet.tsx";
+import { idOS } from "#/lib/idos";
+import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
+import { addressAtom } from "#/lib/state";
 import { CookieConsent } from "./cookie-consent";
 
 const setupEvmWallet = async () => {
@@ -134,12 +134,7 @@ export default function App() {
 
   if (isLoading) {
     return (
-      <Center
-        minH="100vh"
-        p={6}
-        bg={`url('/cubes.png') center center no-repeat`}
-        bgSize="cover"
-      >
+      <Center minH="100vh" p={6} bg={`url('/cubes.png') center center no-repeat`} bgSize="cover">
         <Center gap={2} p={5} bg="blackAlpha.700" rounded="lg">
           <Spinner />
         </Center>
@@ -150,10 +145,7 @@ export default function App() {
   if (!isConnected) {
     return (
       <>
-        <ConnectWallet
-          onNearConnect={onNearConnect}
-          onMetamaskConnect={onMetamaskConnect}
-        />
+        <ConnectWallet onNearConnect={onNearConnect} onMetamaskConnect={onMetamaskConnect} />
         <CookieConsent />
       </>
     );

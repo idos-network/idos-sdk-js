@@ -15,69 +15,69 @@ export class EvmGrants extends GrantChild {
         {
           internalType: "address",
           name: "grantee",
-          type: "address",
+          type: "address"
         },
         {
           internalType: "string",
           name: "dataId",
-          type: "string",
+          type: "string"
         },
         {
           internalType: "uint256",
           name: "lockedUntil",
-          type: "uint256",
-        },
+          type: "uint256"
+        }
       ],
       name: "deleteGrant",
       outputs: [],
       stateMutability: "nonpayable",
-      type: "function",
+      type: "function"
     },
     {
       inputs: [
         {
           internalType: "address",
           name: "grantee",
-          type: "address",
+          type: "address"
         },
         {
           internalType: "string",
           name: "dataId",
-          type: "string",
+          type: "string"
         },
         {
           internalType: "uint256",
           name: "lockedUntil",
-          type: "uint256",
-        },
+          type: "uint256"
+        }
       ],
       name: "insertGrant",
       outputs: [],
       stateMutability: "nonpayable",
-      type: "function",
+      type: "function"
     },
     {
       inputs: [],
       stateMutability: "nonpayable",
-      type: "constructor",
+      type: "constructor"
     },
     {
       inputs: [
         {
           internalType: "address",
           name: "owner",
-          type: "address",
+          type: "address"
         },
         {
           internalType: "address",
           name: "grantee",
-          type: "address",
+          type: "address"
         },
         {
           internalType: "string",
           name: "dataId",
-          type: "string",
-        },
+          type: "string"
+        }
       ],
       name: "findGrants",
       outputs: [
@@ -86,44 +86,44 @@ export class EvmGrants extends GrantChild {
             {
               internalType: "address",
               name: "owner",
-              type: "address",
+              type: "address"
             },
             {
               internalType: "address",
               name: "grantee",
-              type: "address",
+              type: "address"
             },
             {
               internalType: "string",
               name: "dataId",
-              type: "string",
+              type: "string"
             },
             {
               internalType: "uint256",
               name: "lockedUntil",
-              type: "uint256",
-            },
+              type: "uint256"
+            }
           ],
           internalType: "struct AccessGrants.Grant[]",
           name: "",
-          type: "tuple[]",
-        },
+          type: "tuple[]"
+        }
       ],
       stateMutability: "view",
-      type: "function",
+      type: "function"
     },
     {
       inputs: [
         {
           internalType: "address",
           name: "grantee",
-          type: "address",
+          type: "address"
         },
         {
           internalType: "string",
           name: "dataId",
-          type: "string",
-        },
+          type: "string"
+        }
       ],
       name: "grantsFor",
       outputs: [
@@ -132,32 +132,32 @@ export class EvmGrants extends GrantChild {
             {
               internalType: "address",
               name: "owner",
-              type: "address",
+              type: "address"
             },
             {
               internalType: "address",
               name: "grantee",
-              type: "address",
+              type: "address"
             },
             {
               internalType: "string",
               name: "dataId",
-              type: "string",
+              type: "string"
             },
             {
               internalType: "uint256",
               name: "lockedUntil",
-              type: "uint256",
-            },
+              type: "uint256"
+            }
           ],
           internalType: "struct AccessGrants.Grant[]",
           name: "",
-          type: "tuple[]",
-        },
+          type: "tuple[]"
+        }
       ],
       stateMutability: "view",
-      type: "function",
-    },
+      type: "function"
+    }
   ] as const;
 
   signer: Signer;
@@ -172,7 +172,11 @@ export class EvmGrants extends GrantChild {
   }
 
   static async build({ signer }: { signer: Signer }): Promise<EvmGrants> {
-    return new this(signer, await signer.getAddress(), new Contract(this.#defaultContractAddress, this.#abi, signer));
+    return new this(
+      signer,
+      await signer.getAddress(),
+      new Contract(this.#defaultContractAddress, this.#abi, signer)
+    );
   }
 
   #newGrant({ owner, grantee, dataId, lockedUntil }: Omit<Grant, "owner"> & { owner?: string }) {
@@ -194,9 +198,10 @@ export class EvmGrants extends GrantChild {
   async list({
     owner = ZERO_ADDRESS,
     grantee = ZERO_ADDRESS,
-    dataId = ZERO_DATA_ID,
+    dataId = ZERO_DATA_ID
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
-    if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS) throw new Error("Must provide `owner` and/or `grantee`");
+    if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS)
+      throw new Error("Must provide `owner` and/or `grantee`");
 
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
 
@@ -210,8 +215,10 @@ export class EvmGrants extends GrantChild {
     grantee = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
     lockedUntil = ZERO_TIMELOCK,
-    wait = true,
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
+    wait = true
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{
+    transactionId: string;
+  }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -221,7 +228,11 @@ export class EvmGrants extends GrantChild {
     let transaction;
 
     try {
-      transaction = (await this.#contract.insertGrant(grantee, dataId, lockedUntil)) as TransactionResponse;
+      transaction = (await this.#contract.insertGrant(
+        grantee,
+        dataId,
+        lockedUntil
+      )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant creation failed", { cause: (e as Error).cause });
     }
@@ -232,8 +243,10 @@ export class EvmGrants extends GrantChild {
     grantee = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
     lockedUntil = ZERO_TIMELOCK,
-    wait = true,
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
+    wait = true
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{
+    transactionId: string;
+  }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
@@ -242,7 +255,11 @@ export class EvmGrants extends GrantChild {
     let transaction;
 
     try {
-      transaction = (await this.#contract.deleteGrant(grantee, dataId, lockedUntil)) as TransactionResponse;
+      transaction = (await this.#contract.deleteGrant(
+        grantee,
+        dataId,
+        lockedUntil
+      )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant creation failed", { cause: (e as Error).cause });
     }

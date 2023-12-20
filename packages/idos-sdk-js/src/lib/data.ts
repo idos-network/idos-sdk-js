@@ -12,8 +12,15 @@ export class Data {
     return tableName.replace(/s$/, "");
   }
 
-  async list<T extends Record<string, unknown>>(tableName: string, filter?: Partial<T>): Promise<T[]> {
-    let records = (await this.idOS.kwilWrapper.call(`get_${tableName}`, null, `List your ${tableName} in idOS`)) as any;
+  async list<T extends Record<string, unknown>>(
+    tableName: string,
+    filter?: Partial<T>
+  ): Promise<T[]> {
+    const records = (await this.idOS.kwilWrapper.call(
+      `get_${tableName}`,
+      null,
+      `List your ${tableName} in idOS`
+    )) as any;
 
     await this.idOS.auth.setHumanId(records[0]?.human_id);
 
@@ -37,7 +44,9 @@ export class Data {
     receiverPublicKey?: string
   ): Promise<T & { id: string }> {
     receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
-    const name = `add_${this.singularize(tableName === "human_attributes" ? "attributes" : tableName)}`;
+    const name = `add_${this.singularize(
+      tableName === "human_attributes" ? "attributes" : tableName
+    )}`;
 
     const inputs: string[] = ((await this.idOS.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)
@@ -50,16 +59,22 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      (record as any).content = await this.idOS.enclave.encrypt((record as any).content as string, receiverPublicKey);
+      (record as any).content = await this.idOS.enclave.encrypt(
+        (record as any).content as string,
+        receiverPublicKey
+      );
       (record as any).encryption_public_key = receiverPublicKey;
     }
 
     if (tableName === "attributes") {
-      (record as any).value = await this.idOS.enclave.encrypt((record as any).value as string, receiverPublicKey);
+      (record as any).value = await this.idOS.enclave.encrypt(
+        (record as any).value as string,
+        receiverPublicKey
+      );
       (record as any).encryption_public_key = receiverPublicKey;
     }
 
-    let newRecord = { id: crypto.randomUUID(), ...record };
+    const newRecord = { id: crypto.randomUUID(), ...record };
     await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
       newRecord,
@@ -69,9 +84,12 @@ export class Data {
     return newRecord;
   }
 
-  async get<T extends Record<string, unknown>>(tableName: string, recordId: string): Promise<T | null> {
+  async get<T extends Record<string, unknown>>(
+    tableName: string,
+    recordId: string
+  ): Promise<T | null> {
     if (tableName === "credentials") {
-      let records = (await this.idOS.kwilWrapper.call(
+      const records = (await this.idOS.kwilWrapper.call(
         `get_credential_owned`,
         { id: recordId },
         `Get your credential in idOS`
@@ -79,16 +97,21 @@ export class Data {
 
       await this.idOS.auth.setHumanId(records?.[0]?.human_id);
 
-      let record = records.find((r: any) => r.id === recordId);
+      const record = records.find((r: any) => r.id === recordId);
       if (!record) return null;
 
-      record.content = await this.idOS.enclave.decrypt(record.content, record.encryption_public_key);
+      record.content = await this.idOS.enclave.decrypt(
+        record.content,
+        record.encryption_public_key
+      );
 
       return record;
     }
 
-    let records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{ id: recordId });
-    let record = records.find((r) => r.id === recordId);
+    const records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{
+      id: recordId
+    });
+    const record = records.find((r) => r.id === recordId);
 
     return record || null;
   }
@@ -114,17 +137,21 @@ export class Data {
     }
 
     await this.idOS.kwilWrapper.broadcast(`edit_${this.singularize(tableName)}`, {
-      ...record,
+      ...record
     });
 
     return record;
   }
 
-  async share(tableName: string, recordId: string, receiverPublicKey: string): Promise<{ id: string }> {
+  async share(
+    tableName: string,
+    recordId: string,
+    receiverPublicKey: string
+  ): Promise<{ id: string }> {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
     const name = this.singularize(tableName);
-    let record = (await this.get(tableName, recordId)) as any;
+    const record = (await this.get(tableName, recordId)) as any;
 
     if (tableName === "credentials") {
       record.content = await this.idOS.enclave.encrypt(record.content as string, receiverPublicKey);
@@ -137,7 +164,7 @@ export class Data {
       {
         [`original_${name}_id`]: record.id,
         ...record,
-        id,
+        id
       },
       `Share a ${name} on idOS`
     );

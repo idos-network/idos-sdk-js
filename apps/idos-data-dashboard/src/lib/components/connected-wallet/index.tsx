@@ -1,7 +1,7 @@
-import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
 import { Box, Center, Flex, Image, Text } from "@chakra-ui/react";
 import { useMetaMask } from "metamask-react";
 import { useEffect, useState } from "react";
+import { setupNearWalletSelector } from "#/lib/ near/utils.ts";
 import UserWallet from "./assets/user-wallet.svg";
 
 export const ConnectedWallet = () => {
@@ -24,15 +24,7 @@ export const ConnectedWallet = () => {
   const address = selectorAddress ?? metamask.account;
 
   return (
-    <Flex
-      align="center"
-      gap={5}
-      h={78}
-      px={5}
-      py={3}
-      bg="neutral.900"
-      rounded="xl"
-    >
+    <Flex align="center" gap={5} h={78} px={5} py={3} bg="neutral.900" rounded="xl">
       <Center w="50px" h="50px" bg="neutral.800" rounded="lg">
         <Image alt={`Connected wallet ${address}`} src={UserWallet} />
       </Center>

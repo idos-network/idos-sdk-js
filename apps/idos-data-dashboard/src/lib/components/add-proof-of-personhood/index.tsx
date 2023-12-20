@@ -1,4 +1,3 @@
-import { addressAtom } from "#/lib/state";
 import {
   Button,
   Flex,
@@ -19,6 +18,7 @@ import { useAtomValue } from "jotai";
 import { ArrowUpRightIcon } from "lucide-react";
 import { PropsWithChildren } from "react";
 import { isDesktop } from "react-device-detect";
+import { addressAtom } from "#/lib/state";
 import Flow1Icon from "./assets/flow-1-icon.svg";
 import Flow2Icon from "./assets/flow-2-icon.svg";
 import Flow3Icon from "./assets/flow-3-icon.svg";
@@ -62,10 +62,7 @@ export const AddProofOfPersonhood = (props: Omit<ModalProps, "children">) => {
         <ModalBody>
           <Stack justifyContent="space-between" direction={["column", "row"]}>
             <ProofBox>
-              <Image
-                alt="Prove that you are a unique human being"
-                src={Flow1Icon}
-              />
+              <Image alt="Prove that you are a unique human being" src={Flow1Icon} />
               <Text color="neutral.500" fontSize="xl">
                 Prove that you are a unique human being
               </Text>

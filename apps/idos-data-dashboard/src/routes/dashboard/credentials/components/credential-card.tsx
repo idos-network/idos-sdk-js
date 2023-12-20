@@ -20,10 +20,10 @@ const CredentialStatus = ({ status }: { status: CredentialStatus }) => {
         status === "approved"
           ? "green.500"
           : status === "pending" || status === "contacted"
-          ? "neutral.500"
-          : status === "rejected" || status === "expired"
-          ? "red.500"
-          : "neutral.100"
+            ? "neutral.500"
+            : status === "rejected" || status === "expired"
+              ? "red.500"
+              : "neutral.100"
       }
     >
       {status.toLocaleUpperCase()}
@@ -74,10 +74,7 @@ export const CredentialCard = (props: CredentialCardProps) => {
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
-        <Button
-          onClick={() => props.onViewDetails(props.credential)}
-          variant="ghost"
-        >
+        <Button onClick={() => props.onViewDetails(props.credential)} variant="ghost">
           View Details
         </Button>
 

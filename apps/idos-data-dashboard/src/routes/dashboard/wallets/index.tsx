@@ -1,8 +1,3 @@
-import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
-import { Breadcrumbs } from "#/lib/components/breadcrumbs";
-import { Title } from "#/lib/components/title";
-import { TitleBar } from "#/lib/components/title-bar";
-import { addressAtom } from "#/lib/state";
 import {
   AbsoluteCenter,
   Box,
@@ -12,19 +7,24 @@ import {
   Spinner,
   Stack,
   Text,
-  useDisclosure,
-  VStack
+  VStack,
+  useDisclosure
 } from "@chakra-ui/react";
 import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
+import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
+import { Breadcrumbs } from "#/lib/components/breadcrumbs";
+import { Title } from "#/lib/components/title";
+import { TitleBar } from "#/lib/components/title-bar";
+import { addressAtom } from "#/lib/state";
 import { MobileAlert } from "../credentials/components/mobile-alert";
 import { AddWallet } from "./components/add-wallet";
 import { AddWalletCard } from "./components/add-wallet-card";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
-import { useFetchWallets, Wallet } from "./queries";
+import { Wallet, useFetchWallets } from "./queries";
 
 export function Component() {
   const address = useAtomValue(addressAtom);
@@ -119,10 +119,7 @@ export function Component() {
           </Button>
         </Flex>
         <AddWalletCard onAddWallet={handleAddWallet} />
-        <AddProofOfPersonhood
-          isOpen={isAddProofOpen}
-          onClose={onAddProofClose}
-        />
+        <AddProofOfPersonhood isOpen={isAddProofOpen} onClose={onAddProofClose} />
         <MobileAlert
           isOpen={isMobileAlertOpen}
           onClose={onMobileAlertClose}
@@ -190,11 +187,7 @@ export function Component() {
                 <AddWalletCard onAddWallet={handleAddWallet} />
               ) : (
                 wallets.data.map((wallet) => (
-                  <WalletCard
-                    key={wallet.id}
-                    wallet={wallet}
-                    onDeleteWallet={onDeleteWallet}
-                  />
+                  <WalletCard key={wallet.id} wallet={wallet} onDeleteWallet={onDeleteWallet} />
                 ))
               )}
             </VStack>
@@ -202,11 +195,7 @@ export function Component() {
         </Box>
       </Stack>
       {wallet ? (
-        <DeleteWallet
-          isOpen={isOpen}
-          wallet={wallet}
-          onClose={handleDeleteWalletClose}
-        />
+        <DeleteWallet isOpen={isOpen} wallet={wallet} onClose={handleDeleteWalletClose} />
       ) : null}
 
       <AddWallet isOpen={isAddWalletOpen} onClose={handleOnAddWalletClose} />
