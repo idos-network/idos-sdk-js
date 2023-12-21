@@ -5,7 +5,8 @@ import * as jsonld from "jsonld";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
 
 const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
-const FRACTAL_PUBLIC_KEY_MULTIBASE = import.meta.env.VITE_FRACTAL_ID_ISSUER_CREDENTIAL_PUBLIC_KEY_MULTIBASE;
+const FRACTAL_PUBLIC_KEY_MULTIBASE = import.meta.env
+  .VITE_FRACTAL_ID_ISSUER_CREDENTIAL_PUBLIC_KEY_MULTIBASE;
 
 const issuerDoc = (id, publicKeyMultibase) => ({
   "@context": [
@@ -14,9 +15,9 @@ const issuerDoc = (id, publicKeyMultibase) => ({
       assertionMethod: {
         "@id": "https://w3id.org/security#assertionMethod",
         "@type": "@id",
-        "@container": "@set",
-      },
-    },
+        "@container": "@set"
+      }
+    }
   ],
   id,
   assertionMethod: [
@@ -24,9 +25,9 @@ const issuerDoc = (id, publicKeyMultibase) => ({
       id: `${id}#${publicKeyMultibase}`,
       type: "Ed25519VerificationKey2020",
       controller: id,
-      publicKeyMultibase,
-    },
-  ],
+      publicKeyMultibase
+    }
+  ]
 });
 
 const staticLoader = (() => {
@@ -37,28 +38,28 @@ const staticLoader = (() => {
 
 const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 
-export const documentLoaderWithStaticFractal =
-  (documentLoader) =>
-  async (url, options = {}) => {
-    try {
-      return await staticLoader(url, options);
-    } catch (e) {
-      // Ignored on purpose.
-    }
+export const documentLoaderWithStaticFractal = (documentLoader) => async (url, options = {}) => {
+  try {
+    return await staticLoader(url, options);
+  } catch (e) {
+    // Ignored on purpose.
+  }
 
-    return await documentLoader(url, options);
-  };
+  return await documentLoader(url, options);
+};
 
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (m) =>
     new Ed25519Signature2020({
-      key: await Ed25519VerificationKey2020.from(m),
-    }),
+      key: await Ed25519VerificationKey2020.from(m)
+    })
 };
 
 const buildSignatures = async (methods, signatureBuilders) => {
   const result = (
-    await Promise.all(methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method)))
+    await Promise.all(
+      methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method))
+    )
   ).filter((o) => !!o);
 
   if (!result.length) throw new Error("Didn't find any supported keys.");
@@ -114,7 +115,8 @@ const verify = async (credential, options = {}) => {
       if (!issuerDoc) throw new Error("Couldn't fetch document for the issuer.");
 
       const methods = issuerDoc[proofPurpose];
-      if (!methods || !methods.length) throw new Error(`Empty or absent "${proofPurpose}" in issuer.`);
+      if (!methods || !methods.length)
+        throw new Error(`Empty or absent "${proofPurpose}" in issuer.`);
 
       return buildSignatures(methods, signatureBuilders);
     })());

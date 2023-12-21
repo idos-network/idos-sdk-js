@@ -1,12 +1,7 @@
-import { idOS } from "#/lib/idos";
 import { createQuery } from "react-query-kit";
+import { idOS } from "#/lib/idos";
 
-export type CredentialStatus =
-  | "pending"
-  | "contacted"
-  | "approved"
-  | "rejected"
-  | "expired";
+export type CredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
 export type Credential = {
   credential_type: string;
@@ -28,10 +23,7 @@ export const useFetchCredentials = createQuery({
   retry: true
 });
 
-export const useFetchCredentialDetails = createQuery<
-  CredentialDetails | null,
-  { id: string }
->({
+export const useFetchCredentialDetails = createQuery<CredentialDetails | null, { id: string }>({
   primaryKey: "credential_details",
   queryFn: ({ queryKey: [, { id }] }) => {
     return idOS.data.get("credentials", id);

@@ -10,7 +10,7 @@ import { NearGrants } from "./near";
 
 const SIGNER_TYPES = {
   EVM: EvmGrants,
-  NEAR: NearGrants,
+  NEAR: NearGrants
 } as const;
 
 export type SignerType = keyof typeof SIGNER_TYPES;
@@ -28,7 +28,7 @@ export class Grants {
      */
     defaultContractId: NearGrants.defaultContractId,
     contractId: NearGrants.defaultContractId,
-    defaultNetwork: NearGrants.defaultNetwork,
+    defaultNetwork: NearGrants.defaultNetwork
   };
 
   idOS: idOS;
@@ -42,7 +42,7 @@ export class Grants {
   async init({
     type,
     signer,
-    accountId,
+    accountId
   }: {
     type: "NEAR";
     signer: Wallet;
@@ -52,7 +52,7 @@ export class Grants {
   async init({
     type,
     signer,
-    accountId,
+    accountId
   }: {
     type: SignerType;
     signer: Wallet | Signer;
@@ -113,7 +113,11 @@ class ConnectedGrants extends Grants {
     this.#child = child;
   }
 
-  async init(_args: { type: SignerType; signer: Wallet | Signer; accountId?: string }): Promise<ConnectedGrants> {
+  async init(_args: {
+    type: SignerType;
+    signer: Wallet | Signer;
+    accountId?: string;
+  }): Promise<ConnectedGrants> {
     throw new Error("Can't re-init");
   }
 
@@ -138,12 +142,12 @@ class ConnectedGrants extends Grants {
     const payload = await this.#child.create({
       grantee: address,
       dataId: share.id,
-      lockedUntil: lockedUntil,
+      lockedUntil: lockedUntil
     });
 
     return {
       ...payload,
-      encryptedWith: this.idOS.store.get("signer-public-key"),
+      encryptedWith: this.idOS.store.get("signer-public-key")
     };
   }
 

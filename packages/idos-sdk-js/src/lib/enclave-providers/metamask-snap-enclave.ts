@@ -17,7 +17,7 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
     if (!connected)
       await this.enclaveHost.request({
         method: "wallet_requestSnaps",
-        params: { [this.snapId]: {} },
+        params: { [this.snapId]: {} }
       });
 
     const storage = JSON.parse((await this.invokeSnap("storage")) || {});
@@ -26,7 +26,11 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
     return storage;
   }
 
-  async init(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array> {
+  async init(
+    humanId?: string,
+    signerAddress?: string,
+    signerPublicKey?: string
+  ): Promise<Uint8Array> {
     let { encryptionPublicKey } = JSON.parse(
       await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey })
     );
@@ -42,8 +46,8 @@ export class MetaMaskSnapEnclave extends EnclaveProvider {
       method: "wallet_invokeSnap",
       params: {
         snapId: this.snapId,
-        request: { method, params },
-      },
+        request: { method, params }
+      }
     });
   }
 

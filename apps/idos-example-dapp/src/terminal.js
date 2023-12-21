@@ -15,10 +15,7 @@ export class Terminal {
     });
 
     this.restartButton = wrapper.querySelector("button.restart");
-    this.restartButton.addEventListener(
-      "click",
-      (e) => (window.location = window.location.origin)
-    );
+    this.restartButton.addEventListener("click", (e) => (window.location = window.location.origin));
 
     this.resetDappButton = wrapper.querySelector("button.reset-dapp");
     this.resetDappButton.addEventListener("click", async (e) => {
@@ -39,9 +36,7 @@ export class Terminal {
   }
 
   log(str) {
-    this.currentElem.innerHTML += /^<.*>$/.test(str)
-      ? str
-      : `<span>${str}</span>`;
+    this.currentElem.innerHTML += /^<.*>$/.test(str) ? str : `<span>${str}</span>`;
 
     this.overviewElem.scrollTo({
       top: this.overviewElem.scrollHeight,
@@ -68,9 +63,7 @@ export class Terminal {
   table(items = [], keyFilter = [], handlers) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
-    const allKeys = Object.keys(
-      wrappedItems[0] || Object.fromEntries(keyFilter.map((e) => [e]))
-    );
+    const allKeys = Object.keys(wrappedItems[0] || Object.fromEntries(keyFilter.map((e) => [e])));
     if (!allKeys.length) throw new Error(`No keys in ${JSON.stringify(items)}`);
 
     const keys = keyFilter.length ? keyFilter : allKeys;
@@ -135,10 +128,7 @@ export class Terminal {
   }
 
   json(object) {
-    const stringified = JSON.stringify(object, "", 2).replace(
-      /"(data:.*?;).*/g,
-      "$1 (...)"
-    );
+    const stringified = JSON.stringify(object, "", 2).replace(/"(data:.*?;).*/g, "$1 (...)");
     return this.log(`<pre>${stringified}</pre>`);
   }
 

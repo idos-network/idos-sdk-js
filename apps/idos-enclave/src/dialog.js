@@ -4,8 +4,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as DOMPurify from "dompurify";
 import "./styles.css";
 
-const sanitize = (html) =>
-  DOMPurify.default.sanitize(html, { ALLOWED_TAGS: [] });
+const sanitize = (html) => DOMPurify.default.sanitize(html, { ALLOWED_TAGS: [] });
 
 class Dialog {
   constructor() {
@@ -68,8 +67,7 @@ class Dialog {
         const { password } = await this.getOrCreatePasswordCredential();
         this.respondToEnclave({ result: { password } });
       } else if (type === "webauthn") {
-        const { password, credentialId } =
-          await this.getOrCreateWebAuthnCredential();
+        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
         this.respondToEnclave({ result: { password, credentialId } });
       }
     } catch (e) {
@@ -98,7 +96,7 @@ class Dialog {
 
     const password = await new Promise((resolve) =>
       setInterval(async () => {
-        let credential = await navigator.credentials.get({ password: true });
+        const credential = await navigator.credentials.get({ password: true });
         if (credential) resolve(credential.password);
       }, 100)
     );
@@ -112,7 +110,7 @@ class Dialog {
     const storedCredentialId = this.store.get("credential-id");
 
     if (storedCredentialId) {
-      let credentialRequest = {
+      const credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
           allowCredentials: [
@@ -126,9 +124,7 @@ class Dialog {
 
       try {
         credential = await navigator.credentials.get(credentialRequest);
-        password = Utf8Codec.decode(
-          new Uint8Array(credential.response.userHandle)
-        );
+        password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
         credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
       } catch (e) {}
     } else {
@@ -165,9 +161,7 @@ class Dialog {
       const { data: requestData, ports } = event;
 
       if (!["passkey", "password", "confirm"].includes(requestData.intent))
-        throw new Error(
-          `Unexpected request from parent: ${requestData.intent}`
-        );
+        throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
       this.responsePort = ports[0];
 

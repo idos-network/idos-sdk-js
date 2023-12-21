@@ -12,7 +12,8 @@
       "persistent": true
     },
 
-    "cleanup": {},
+    "clean": {},
+    "format": {},
     "lint": {}
   }
 }

@@ -7,7 +7,7 @@ import { EnclaveProvider } from "./enclave-providers/enclave-provider";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
-  "metamask-snap": MetaMaskSnapEnclave,
+  "metamask-snap": MetaMaskSnapEnclave
 } as const;
 
 type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
@@ -18,7 +18,12 @@ export class Enclave {
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
-  constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe", usePasskeys = false) {
+  constructor(
+    idOS: idOS,
+    container: string,
+    providerType: ProviderType = "iframe",
+    usePasskeys = false
+  ) {
     this.initialized = false;
     this.idOS = idOS;
 
@@ -35,7 +40,8 @@ export class Enclave {
   }
 
   async load() {
-    const { encryptionPublicKey, humanId, signerAddress, signerPublicKey } = await this.provider.load();
+    const { encryptionPublicKey, humanId, signerAddress, signerPublicKey } =
+      await this.provider.load();
 
     this.idOS.store.set("encryption-public-key", encryptionPublicKey);
     this.idOS.store.set("human-id", humanId);
@@ -62,7 +68,7 @@ export class Enclave {
     const transportKey = {
       "human-id": "humanId",
       "signer-address": "signerAddress",
-      "signer-public-key": "signerPublicKey",
+      "signer-public-key": "signerPublicKey"
     }[key]!;
 
     return this.provider.store(transportKey, value);

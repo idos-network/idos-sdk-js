@@ -24,7 +24,7 @@ export class NearGrants extends GrantChild {
   static contractMethods = {
     list: "find_grants",
     create: "insert_grant",
-    revoke: "delete_grant",
+    revoke: "delete_grant"
   } as const;
 
   private constructor(signer: Wallet, contract: nearAPI.Contract) {
@@ -33,41 +33,56 @@ export class NearGrants extends GrantChild {
     this.#contract = contract;
   }
 
-  static async build({ accountId, signer }: { accountId: string; signer: Wallet }): Promise<NearGrants> {
+  static async build({
+    accountId,
+    signer
+  }: { accountId: string; signer: Wallet }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
       networkId: this.defaultNetwork,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-      nodeUrl: this.defaultRpcUrl,
+      nodeUrl: this.defaultRpcUrl
     });
 
     return new this(
       signer,
       new nearAPI.Contract(await keylessNearConnection.account(accountId), this.defaultContractId, {
         viewMethods: [this.contractMethods.list],
-        changeMethods: [],
+        changeMethods: []
       })
     );
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
-  async list({ owner, grantee, dataId: data_id }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
+  async list({
+    owner,
+    grantee,
+    dataId: data_id
+  }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
     if (!(owner || grantee)) throw new Error("Must provide `owner` and/or `grantee`");
 
-    let grantsFilter: Partial<Omit<NearContractGrant, "locked_until">> = compact({ owner, grantee, data_id });
+    const grantsFilter: Partial<Omit<NearContractGrant, "locked_until">> = compact({
+      owner,
+      grantee,
+      data_id
+    });
 
     // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
     const method = this.#contract[this.constructor.contractMethods.list] as (
       args: Partial<NearContractGrant>
     ) => Promise<NearContractGrant[]>;
 
-    return (await method(grantsFilter)).map((o) => ({ ...o, dataId: o.data_id, lockedUntil: (o.locked_until /= 1e6) }));
+    return (await method(grantsFilter)).map((o) => ({
+      ...o,
+      dataId: o.data_id,
+      lockedUntil: (o.locked_until /= 1e6)
+    }));
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
   async create({
     grantee,
     dataId: data_id,
-    lockedUntil,
+    lockedUntil
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
     const grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
@@ -82,10 +97,10 @@ export class NearGrants extends GrantChild {
               methodName: NearGrants.contractMethods.create,
               args: grant,
               gas: "30000000000000",
-              deposit: "0",
-            },
-          },
-        ],
+              deposit: "0"
+            }
+          }
+        ]
       });
     } catch (e) {
       throw new Error("Grant creation failed", { cause: e });
@@ -97,9 +112,13 @@ export class NearGrants extends GrantChild {
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
-  async revoke({ grantee, dataId: data_id, lockedUntil }: Omit<Grant, "owner">): Promise<{ transactionId: string }> {
+  async revoke({
+    grantee,
+    dataId: data_id,
+    lockedUntil
+  }: Omit<Grant, "owner">): Promise<{ transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
-    let grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
+    const grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
 
     let transactionResult;
     try {
@@ -111,10 +130,10 @@ export class NearGrants extends GrantChild {
               methodName: NearGrants.contractMethods.revoke,
               args: grant,
               gas: "30000000000000",
-              deposit: "0",
-            },
-          },
-        ],
+              deposit: "0"
+            }
+          }
+        ]
       });
     } catch (e) {
       throw new Error("Grant revocation failed", { cause: e });

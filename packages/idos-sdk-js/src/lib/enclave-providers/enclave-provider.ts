@@ -10,7 +10,11 @@ export abstract class EnclaveProvider {
     throw new Error("Unimplemented");
   }
 
-  async init(_humanId?: string, _signerAddress?: string, _signerPublicKey?: string): Promise<Uint8Array> {
+  async init(
+    _humanId?: string,
+    _signerAddress?: string,
+    _signerPublicKey?: string
+  ): Promise<Uint8Array> {
     throw new Error("Unimplemented");
   }
 

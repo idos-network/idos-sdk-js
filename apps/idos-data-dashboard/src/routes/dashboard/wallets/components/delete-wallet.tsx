@@ -1,4 +1,3 @@
-import { WalletIcon } from "#/lib/components/icons/wallet";
 import {
   Box,
   Button,
@@ -15,6 +14,7 @@ import {
   VStack
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
+import { WalletIcon } from "#/lib/components/icons/wallet";
 import { useDeleteWallet } from "../mutations";
 import { Wallet, useFetchWallets } from "../queries";
 
@@ -78,20 +78,12 @@ export const DeleteWallet = (props: DeleteCredentialProps) => {
             </Flex>
           </Flex>
         </ModalBody>
-        <ModalFooter
-          alignItems="center"
-          justifyContent="space-between"
-          gap={10}
-        >
+        <ModalFooter alignItems="center" justifyContent="space-between" gap={10}>
           <Button onClick={props.onClose} variant="outline">
             Cancel
           </Button>
 
-          <Button
-            colorScheme="green"
-            isLoading={deleteWallet.isPending}
-            onClick={handleDelete}
-          >
+          <Button colorScheme="green" isLoading={deleteWallet.isPending} onClick={handleDelete}>
             Delete
           </Button>
         </ModalFooter>

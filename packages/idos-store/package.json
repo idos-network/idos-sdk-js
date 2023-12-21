@@ -3,5 +3,9 @@
   "private": true,
   "version": "1.0.0",
   "description": "",
-  "main": "index.ts"
+  "main": "index.ts",
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome check --apply ."
+  }
 }

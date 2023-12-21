@@ -7,16 +7,16 @@ export default defineConfig({
     lib: {
       entry: path.resolve(__dirname, "src/lib/index.ts"),
       name: "idOS",
-      fileName: "idos-sdk",
-    },
+      fileName: "idos-sdk"
+    }
   },
   plugins: [
     dts({
-      rollupTypes: true,
-    }),
+      rollupTypes: true
+    })
   ],
   test: {
     globals: true,
-    environment: "jsdom",
-  },
+    environment: "jsdom"
+  }
 });

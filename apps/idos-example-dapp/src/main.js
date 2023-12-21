@@ -33,7 +33,7 @@ const cache = new Cache();
  *
  */
 let chosenWallet = window.localStorage.getItem("chosen-wallet");
-let chosenFlow = JSON.parse(window.localStorage.getItem("chosen-flow")) || {};
+const chosenFlow = JSON.parse(window.localStorage.getItem("chosen-flow")) || {};
 
 if (!chosenWallet) {
   await new Promise((resolve) => {
@@ -45,16 +45,12 @@ if (!chosenWallet) {
 
       chosenWallet = e.submitter.name;
       window.localStorage.setItem("chosen-wallet", chosenWallet);
-
       [...e.target.querySelectorAll("input[type=checkbox]")].forEach(
         ({ name, checked }) => (chosenFlow[name] = checked)
       );
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
 
-      window.localStorage.setItem(
-        "use",
-        e.target.querySelector("input[type=radio]:checked").value
-      );
+      window.localStorage.setItem("use", e.target.querySelector("input[type=radio]:checked").value);
 
       resolve();
     });
@@ -80,12 +76,7 @@ const connectWallet = {
 
     const selector = await setupWalletSelector({
       network,
-      modules: [
-        setupHereWallet(),
-        setupMeteorWallet(),
-        setupMyNearWallet(),
-        setupNightly()
-      ]
+      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()]
     });
 
     !selector.isSignedIn() &&
@@ -154,10 +145,7 @@ const connectWallet = {
       .log("(optional) you can use our SDK as consent UI")
       .wait(
         "awaiting consent",
-        consent ||
-          idos.enclave.confirm(
-            "Do we have your consent to read data from the idOS?"
-          )
+        consent || idos.enclave.confirm("Do we have your consent to read data from the idOS?")
       );
     terminal.h2("Consent").log(consent);
     cache.set("consent", consent);
@@ -191,9 +179,7 @@ const connectWallet = {
         if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
           window.open(`https://zapper.xyz/account/${address}`);
         } else if (address.match(/^\w+\.(near|testnet)$/i)) {
-          window.open(
-            `https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`
-          );
+          window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
         }
       }
     });
@@ -201,15 +187,11 @@ const connectWallet = {
   }
 
   if (chosenFlow.credentials) {
-    const credentials =
-      cache.get("credentials") || idos.data.list("credentials");
-    terminal
-      .h1("eyes", "Your credentials")
-      .wait("awaiting signature", credentials);
+    const credentials = cache.get("credentials") || idos.data.list("credentials");
+    terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
     terminal.table(await credentials, ["issuer", "credential_type", "id"], {
       id: async (id) => {
-        const credential =
-          cache.get(`credential_${id}`) || idos.data.get("credentials", id);
+        const credential = cache.get(`credential_${id}`) || idos.data.get("credentials", id);
         await terminal
           .detail()
           .h1("inspect", `Credential # ${id}`)
@@ -222,9 +204,7 @@ const connectWallet = {
           )
           .then((_) => terminal.status("done", "Verified"))
           .catch(terminal.error.bind(terminal));
-        terminal
-          .h1("eyes", "Content")
-          .json(JSON.parse((await credential).content));
+        terminal.h1("eyes", "Content").json(JSON.parse((await credential).content));
       }
     });
     cache.set("credentials", await credentials);
