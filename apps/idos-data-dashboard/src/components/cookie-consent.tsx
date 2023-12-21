@@ -1,52 +1,89 @@
-import { Button, Flex, Heading, Link, Text, chakra, useDisclosure } from "@chakra-ui/react";
-import { CookieConsent as CK } from "react-cookie-consent";
+import {
+  Box,
+  Button,
+  HStack,
+  Heading,
+  Link,
+  Stack,
+  Text,
+  VStack,
+  chakra,
+  useDisclosure
+} from "@chakra-ui/react";
+import { useState } from "react";
+
+function storeCookieConsentResult(consent: boolean) {
+  // Store the consent result as a cookie
+  // The key is 'cookieConsent' and the value is the consent result
+  // The cookie will expire in 365 days
+  const date = new Date();
+  date.setTime(date.getTime() + 365 * 24 * 60 * 60 * 1000);
+  const expires = `; expires=${date.toUTCString()}`;
+  document.cookie = `idOSCookieConsent=${consent.toString()}${expires}; path=/`;
+}
+
+function getCookieConsentResult(): boolean | null {
+  // Get all cookies
+  const cookies = document.cookie.split("; ");
+
+  // Find the 'cookieConsent' cookie
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i];
+    const [name, value] = cookie.split("=");
+
+    // If the 'cookieConsent' cookie is found, return its value
+    if (name === "idOSCookieConsent") {
+      return value === "true";
+    }
+  }
+
+  // If the 'cookieConsent' cookie is not found, return null
+  return null;
+}
 
 export const CookieConsent = () => {
-  const disclosure = useDisclosure();
+  const { isOpen, onToggle } = useDisclosure();
+  const [value, setValue] = useState(getCookieConsentResult());
+
+  const onAccept = () => {
+    storeCookieConsentResult(true);
+    setValue(true);
+  };
+
+  const onReject = () => {
+    storeCookieConsentResult(false);
+    setValue(false);
+  };
+
+  if (value !== null) {
+    return null;
+  }
 
   return (
-    <Flex pos="fixed" bottom="0" align="center" justify="space-between" w="full" bg="neutral.900">
-      <CK
-        cookieName="idos-dashboard-cookie-consent"
-        disableStyles
-        disableButtonStyles
-        enableDeclineButton
-        buttonText="Accept All"
-        declineButtonText="Reject All"
-        ButtonComponent={Button}
-        customButtonProps={{
-          colorScheme: "green",
-          size: "sm"
-        }}
-        customDeclineButtonProps={{
-          variant: "outline",
-          mx: 5,
-          borderColor: "green.300",
-          size: "sm",
-          color: "green.300"
-        }}
-        contentStyle={{
-          flex: 1
-        }}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          justifyContent: "space-between",
-          padding: 24
-        }}
-      >
-        <Heading mb={2} size="md">
-          We value your privacy
-        </Heading>
-        <Text color="neutral.500" fontSize="sm">
+    <Stack
+      flexDir={{
+        base: "column",
+        lg: "row"
+      }}
+      align="stretch"
+      justify="space-between"
+      pos="fixed"
+      bottom={0}
+      p={5}
+      gap={5}
+      w="100%"
+      bg="neutral.900"
+      shadow="lg"
+    >
+      <VStack align="stretch" gap={1.5}>
+        <Heading size="md">We value your privacy</Heading>
+        <Text color="neutral.500" fontSize="sm" align="justify">
           By pressing the approving button I voluntarily give my consent to set or activate cookies
           and external connections. I know their functions because they are described in the Privacy
           Policy or explained in more detail in documents or external links implemented there.
         </Text>
-
-        {disclosure.isOpen ? (
-          <Text color="neutral.500" fontSize="sm">
+        {isOpen ? (
+          <Text color="neutral.500" fontSize="sm" align="justify">
             By pressing this button, I also voluntarily give my explicit consent pursuant to Article
             49 (1) (1) (a) GDPR for personalized advertising and for other data transfers to third
             countries to the and by the companies mentioned in the Privacy Policy and purposes, in
@@ -86,10 +123,20 @@ export const CookieConsent = () => {
           </Text>
         ) : null}
 
-        <chakra.button onClick={disclosure.onToggle} color="green.100" fontSize="sm">
-          {disclosure.isOpen ? "Read less" : "Read more"}
-        </chakra.button>
-      </CK>
-    </Flex>
+        <Box>
+          <chakra.button onClick={onToggle} color="green.100" fontSize="sm">
+            {isOpen ? "Read less" : "Read more"}
+          </chakra.button>
+        </Box>
+      </VStack>
+      <HStack justify="end">
+        <Button colorScheme="green" size="sm" variant="outline" onClick={onReject}>
+          Reject all
+        </Button>
+        <Button colorScheme="green" size="sm" onClick={onAccept}>
+          Accept all
+        </Button>
+      </HStack>
+    </Stack>
   );
 };

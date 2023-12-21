@@ -1,72 +1,93 @@
-import { Box, Button, Center, Heading, Image, Text, VStack } from "@chakra-ui/react";
-import { isDesktop } from "react-device-detect";
-import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
-import idOSLogo from "#/assets/idos-logo.svg";
-import Metamask from "#/assets/metamask.svg";
-import Near from "#/assets/near.svg";
+import { Box, Button, Heading, Image, Text, VStack } from "@chakra-ui/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
-type ConnectWalletProps = {
-  onNearConnect: () => Promise<void>;
-  onMetamaskConnect: () => Promise<void>;
-};
+import { useWalletSelector } from "@/core/near";
 
-export const ConnectWallet = (props: ConnectWalletProps) => {
-  const handleMobileMetaMaskConnect = () => {
-    window.location.href = "https://metamask.app.link/dapp/dashboard.idos.network/";
-  };
+export const ConnectWallet = () => {
+  const { open } = useWeb3Modal();
+  const { modal } = useWalletSelector();
 
   return (
-    <Center minH="100vh" p={6} bg={`url('/cubes.png') center center no-repeat`} bgSize="cover">
+    <Box
+      gap={0}
+      h="100dvh"
+      background="url('/cubes.png') center center repeat"
+      backgroundSize="cover"
+    >
       <VStack
-        alignItems="stretch"
-        direction="column"
-        gap={10}
-        minW={["100%", 640]}
-        px={[6, 12]}
-        py={12}
+        pos="fixed"
+        insetY={0}
+        right={0}
+        align={{
+          base: "stretch",
+          md: "center"
+        }}
+        w={{
+          base: "100%",
+          lg: 728
+        }}
+        h="100dvh"
+        p={5}
         bg="neutral.900"
-        border="1px solid"
-        borderColor="neutral.800"
-        shadow="lg"
-        rounded="2xl"
       >
-        <Box mx="auto">
-          <Image alt="idOS Data Dashboard" src={idOSDashboardLogo} />
-        </Box>
-        <Heading fontWeight="medium" textAlign="center" size="xl">
-          Connect your Wallet
-        </Heading>
-        <VStack alignItems="stretch" gap={3}>
-          {isDesktop ? (
-            <Button justifyContent="space-between" onClick={props.onNearConnect} size="2xl">
-              Connect with Near
-              <Image w={47} alt="Near icon" src={Near} />
-            </Button>
-          ) : null}
+        <VStack
+          align={{
+            base: "stretch",
+            md: "center"
+          }}
+          placeContent="center"
+          gap={5}
+          flex={1}
+        >
+          <Image
+            src="/idos-dashboard-logo.svg"
+            alt="idOS Dashboard logo"
+            w="200px"
+            h="80px"
+            mx="auto"
+            loading="eager"
+          />
 
-          {isDesktop ? (
-            <Button justifyContent="space-between" onClick={props.onMetamaskConnect} size="2xl">
-              Connect with Metamask
-              <Image alt="Metamask icon" src={Metamask} />
+          <Heading as="h1" size="md" fontWeight="normal" textAlign="center">
+            Manage your data and grants effortlessly with the idOS Dashboard.
+          </Heading>
+
+          <Heading size="sm" fontWeight="normal" textAlign="center">
+            Connect your wallet to get started.
+          </Heading>
+
+          <VStack
+            align="stretch"
+            minW={{
+              base: "360",
+              lg: 400
+            }}
+            gap={3}
+          >
+            <Button size="lg" justifyContent="space-between" onClick={() => open()}>
+              Connect a wallet
+              <Image alt="Near logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
             </Button>
-          ) : (
-            <Button
-              justifyContent="space-between"
-              _hover={{
-                textDecoration: "none"
-              }}
-              onClick={handleMobileMetaMaskConnect}
-              size="2xl"
-            >
-              Connect with Metamask
-              <Image alt="Metamask icon" src={Metamask} />
+            <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
+              Connect with Near
+              <Image alt="Near logo" src="/near.svg" w={10} h={10} />
             </Button>
-          )}
+          </VStack>
         </VStack>
-        <Text alignItems="center" justifyContent="center" gap={2} display="flex">
-          Powered by <Image alt="idOS" src={idOSLogo} />
-        </Text>
+        <VStack>
+          <Text
+            display="flex"
+            gap={2}
+            alignItems="center"
+            placeContent="center"
+            fontSize="small"
+            fontWeight="semibold"
+          >
+            <Text as="span">POWERED BY</Text>
+            <Image src="/idos-logo.svg" alt="idOS logo" w={68} h="auto" />
+          </Text>
+        </VStack>
       </VStack>
-    </Center>
+    </Box>
   );
 };

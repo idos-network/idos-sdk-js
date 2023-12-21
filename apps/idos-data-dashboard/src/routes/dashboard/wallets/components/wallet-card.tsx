@@ -1,54 +1,124 @@
-import { Button, Center, HStack, IconButton, Image, Text, VStack } from "@chakra-ui/react";
+import {
+  AlertDialog,
+  AlertDialogBody,
+  AlertDialogCloseButton,
+  AlertDialogContent,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogOverlay,
+  Button,
+  Code,
+  HStack,
+  Image,
+  Text,
+  VStack,
+  useDisclosure
+} from "@chakra-ui/react";
+import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
-import Metamask from "#/assets/metamask.svg";
-import Near from "#/assets/near.svg";
-import { Wallet } from "../queries";
+import { useRef } from "react";
+
+import { useIdOS } from "@/core/idos";
+import { idOSWallet } from "../types";
+
 type WalletCardProps = {
-  wallet: Wallet;
-  onDeleteWallet: (wallet: Wallet) => void;
+  wallet: idOSWallet;
 };
-export const WalletCard = (props: WalletCardProps) => {
-  const { wallet } = props;
-  const isNear = wallet.address.includes("near");
-  const imageSrc = isNear ? Near : Metamask;
-  const imageAlt = isNear ? "Near" : "Metamask";
+
+type DeleteWalletProps = {
+  isOpen: boolean;
+  wallet: idOSWallet;
+  onClose: () => void;
+};
+
+const useDeleteWalletMutation = () => {
+  const { sdk } = useIdOS();
+  return useMutation<{ id: string }, DefaultError, { id: string }>({
+    mutationFn: ({ id }) => sdk.data.delete("wallets", id)
+  });
+};
+
+const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => {
+  const queryClient = useQueryClient();
+  const cancelRef = useRef<HTMLButtonElement | null>(null);
+  const deleteWallet = useDeleteWalletMutation();
+
+  const handleDeleteWallet = (id: string) => {
+    deleteWallet.mutate(
+      { id },
+      {
+        async onSuccess() {
+          onClose();
+          queryClient.invalidateQueries({
+            queryKey: ["wallets"]
+          });
+        }
+      }
+    );
+  };
 
   return (
-    <HStack
-      alignItems="center"
-      justifyContent="space-between"
-      gap={5}
-      px={7}
-      py={5}
-      bg="neutral.900"
-      border="1px solid"
-      borderColor="neutral.800"
-      rounded="xl"
+    <AlertDialog
+      isOpen={isOpen}
+      size={{
+        base: "full",
+        lg: "lg"
+      }}
+      isCentered
+      leastDestructiveRef={cancelRef}
+      onClose={onClose}
     >
-      <Center gap={8}>
-        <Center w={12} h={12} bg="neutral.800" rounded="lg">
-          <Image alt={imageAlt} src={imageSrc} />
-        </Center>
-        <VStack alignItems="start" gap={0}>
-          <Text color="neutral.600" fontSize="sm">
-            Address
-          </Text>
-          <Text maxW={160} isTruncated>
-            {props.wallet.address}
+      <AlertDialogOverlay>
+        <AlertDialogContent bg="neutral.900" rounded="xl">
+          <AlertDialogHeader>Delete wallet</AlertDialogHeader>
+          <AlertDialogCloseButton />
+          <AlertDialogBody>
+            {deleteWallet.isError ? (
+              <Code w="100%" mb={4} px={2} py={1} color="red.500" rounded="lg">
+                An unexpected error ocurred. Please try again.
+              </Code>
+            ) : (
+              false
+            )}
+            Do you want to delete this wallet from the idOS?
+          </AlertDialogBody>
+          <AlertDialogFooter>
+            <Button ref={cancelRef} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="red"
+              ml={3}
+              onClick={() => handleDeleteWallet(wallet.id)}
+              isLoading={deleteWallet.isPending}
+            >
+              {deleteWallet.isError ? "Retry" : "Delete"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialogOverlay>
+    </AlertDialog>
+  );
+};
+
+export const WalletCard = ({ wallet }: WalletCardProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
+      <HStack gap={5}>
+        <Image src="/idos-dashboard-logo-dark.svg" alt="Wallet image" w={50} h={50} />
+        <VStack align="stretch" gap={0} overflow="hidden">
+          <Text color="neutral.600">Address</Text>
+          <Text isTruncated maxW={200}>
+            {wallet.address}
           </Text>
         </VStack>
-      </Center>
-      <IconButton aria-label="Delete wallet" hideFrom="md" size="sm">
-        <XIcon size={24} />
-      </IconButton>
-      <Button
-        hideBelow="md"
-        leftIcon={<XIcon size={24} />}
-        onClick={() => props.onDeleteWallet(props.wallet)}
-        variant="ghost"
-      >
+      </HStack>
+      <Button leftIcon={<XIcon size={20} />} onClick={onOpen}>
         Delete
       </Button>
+      <DeleteWallet isOpen={isOpen} wallet={wallet} onClose={onClose} />
     </HStack>
   );
 };
