@@ -22,8 +22,8 @@
   "scripts": {
     "dev": "vite build --watch",
     "build": "vite build",
-    "lint": "eslint src --ext ts,js --report-unused-disable-directives --max-warnings 0 --cache",
-    "format": "prettier --write .",
+    "lint": "biome check --apply ./src",
+    "format": "biome format --write .",
     "test": "vitest run",
     "test:ui": "vitest --ui",
     "test:watch": "vitest",

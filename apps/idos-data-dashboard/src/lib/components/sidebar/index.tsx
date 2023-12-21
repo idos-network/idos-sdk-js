@@ -1,17 +1,13 @@
-import { setupNearWalletSelector } from "#/lib/ near/utils";
-import { NavLink, type LinkProps } from "#/lib/components/link";
 import { Box, Button, Flex, Text, VStack } from "@chakra-ui/react";
 import { WalletSelector } from "@near-wallet-selector/core";
 import { useEffect, useState } from "react";
+import { type LinkProps, NavLink } from "#/lib/components/link";
+import { setupNearWalletSelector } from "#/lib/ near/utils";
 import { KeyRoundIcon } from "../icons/key-round";
 import { SignOutIcon } from "../icons/sign-out";
 import { WalletIcon } from "../icons/wallet";
 
-const SidebarLink = ({
-  children,
-  disabled,
-  ...props
-}: LinkProps & { disabled?: boolean }) => {
+const SidebarLink = ({ children, disabled, ...props }: LinkProps & { disabled?: boolean }) => {
   return disabled ? (
     <Text
       as="span"
@@ -92,13 +88,7 @@ export const Sidebar = () => {
           <Button
             colorScheme="green"
             leftIcon={
-              <SignOutIcon
-                w={6}
-                h={6}
-                stroke="neutral.600"
-                strokeWidth={1.5}
-                fill="none"
-              />
+              <SignOutIcon w={6} h={6} stroke="neutral.600" strokeWidth={1.5} fill="none" />
             }
             onClick={onDisconnect}
             size="xl"

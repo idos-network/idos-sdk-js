@@ -27,12 +27,12 @@ export default {
         "@protected": true,
         address: "xsd:string",
         currency: "xsd:string",
-        verified: "xsd:boolean",
-      },
+        verified: "xsd:boolean"
+      }
     },
     identification_document_front_file: "xsd:string",
     identification_document_back_file: "xsd:string",
     identification_document_selfie_file: "xsd:string",
-    residential_address_proof_file: "xsd:string",
-  },
+    residential_address_proof_file: "xsd:string"
+  }
 };

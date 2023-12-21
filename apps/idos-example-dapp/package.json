@@ -8,10 +8,10 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write ."
+    "lint": "biome check --apply ./src",
+    "format": "biome format --write ."
   },
   "devDependencies": {
-    "prettier-plugin-organize-imports": "^3.2.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-node-polyfills": "^0.12.0",

@@ -20,19 +20,25 @@ export class IframeEnclave extends EnclaveProvider {
     return (await this.#requestToEnclave({ storage: {} })) as StoredData;
   }
 
-  async init(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array> {
-    let { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey },
+  async init(
+    humanId?: string,
+    signerAddress?: string,
+    signerPublicKey?: string
+  ): Promise<Uint8Array> {
+    const { encryptionPublicKey } = (await this.#requestToEnclave({
+      storage: { humanId, signerAddress, signerPublicKey }
     })) as { encryptionPublicKey: Uint8Array };
 
     if (encryptionPublicKey) return encryptionPublicKey;
 
     this.#showEnclave();
 
-    return this.#requestToEnclave({ keys: { usePasskeys: this.usePasskeys } }).then((encryptionPublicKey) => {
-      this.#hideEnclave();
-      return encryptionPublicKey as Uint8Array;
-    });
+    return this.#requestToEnclave({ keys: { usePasskeys: this.usePasskeys } }).then(
+      (encryptionPublicKey) => {
+        this.#hideEnclave();
+        return encryptionPublicKey as Uint8Array;
+      }
+    );
   }
 
   async store(key: string, value: string): Promise<string> {
@@ -53,11 +59,15 @@ export class IframeEnclave extends EnclaveProvider {
   }
 
   async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
-    return this.#requestToEnclave({ encrypt: { message, receiverPublicKey } }) as Promise<Uint8Array>;
+    return this.#requestToEnclave({
+      encrypt: { message, receiverPublicKey }
+    }) as Promise<Uint8Array>;
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
-    return this.#requestToEnclave({ decrypt: { fullMessage: message, senderPublicKey } }) as Promise<Uint8Array>;
+    return this.#requestToEnclave({
+      decrypt: { fullMessage: message, senderPublicKey }
+    }) as Promise<Uint8Array>;
   }
 
   async #loadEnclave() {
@@ -71,7 +81,7 @@ export class IframeEnclave extends EnclaveProvider {
       "popups",
       "popups-to-escape-sandbox",
       "same-origin",
-      "scripts",
+      "scripts"
     ].map((toLift) => `allow-${toLift}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
@@ -82,7 +92,7 @@ export class IframeEnclave extends EnclaveProvider {
       "background-color": "transparent",
       border: "none",
       display: "block",
-      width: "100%",
+      width: "100%"
     };
 
     this.iframe.allow = permissionsPolicies.join("; ");

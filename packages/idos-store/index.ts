@@ -50,8 +50,7 @@ export class Store {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    const daysNumber =
-      !days || isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const daysNumber = !days || isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
     value = JSON.stringify(value);
 
@@ -65,9 +64,7 @@ export class Store {
 
   #rebuild() {
     const keysInCookies: string[] = Object.values(
-      Object.fromEntries(
-        document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
-      )
+      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g")))
     );
 
     const keysInLocalStorage = Object.keys(window.localStorage);
@@ -120,9 +117,7 @@ export class Store {
     }
 
     const keysInCookies: string[] = Object.values(
-      Object.fromEntries(
-        document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))
-      )
+      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g")))
     );
 
     for (const key of keysInCookies) {

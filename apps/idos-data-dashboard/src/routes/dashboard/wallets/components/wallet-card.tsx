@@ -1,15 +1,7 @@
+import { Button, Center, HStack, IconButton, Image, Text, VStack } from "@chakra-ui/react";
+import { XIcon } from "lucide-react";
 import Metamask from "#/assets/metamask.svg";
 import Near from "#/assets/near.svg";
-import {
-  Button,
-  Center,
-  HStack,
-  IconButton,
-  Image,
-  Text,
-  VStack
-} from "@chakra-ui/react";
-import { XIcon } from "lucide-react";
 import { Wallet } from "../queries";
 type WalletCardProps = {
   wallet: Wallet;

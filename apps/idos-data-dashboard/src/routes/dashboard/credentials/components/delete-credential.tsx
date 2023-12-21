@@ -80,20 +80,12 @@ export const DeleteCredential = (props: DeleteCredentialProps) => {
             </Flex>
           </Flex>
         </ModalBody>
-        <ModalFooter
-          alignItems="center"
-          justifyContent="space-between"
-          gap={10}
-        >
+        <ModalFooter alignItems="center" justifyContent="space-between" gap={10}>
           <Button onClick={props.onClose} variant="outline">
             Cancel
           </Button>
 
-          <Button
-            colorScheme="green"
-            isLoading={deleteCredential.isPending}
-            onClick={handleDelete}
-          >
+          <Button colorScheme="green" isLoading={deleteCredential.isPending} onClick={handleDelete}>
             Delete
           </Button>
         </ModalFooter>

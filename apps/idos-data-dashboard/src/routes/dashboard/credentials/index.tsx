@@ -1,9 +1,3 @@
-import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
-import { Breadcrumbs } from "#/lib/components/breadcrumbs";
-import { Title } from "#/lib/components/title";
-import { TitleBar } from "#/lib/components/title-bar";
-import { useFetchCurrentUser } from "#/lib/queries";
-import { addressAtom } from "#/lib/state";
 import {
   AbsoluteCenter,
   Box,
@@ -19,6 +13,12 @@ import { useAtomValue } from "jotai";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
 import { isMobile } from "react-device-detect";
+import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
+import { Breadcrumbs } from "#/lib/components/breadcrumbs";
+import { Title } from "#/lib/components/title";
+import { TitleBar } from "#/lib/components/title-bar";
+import { useFetchCurrentUser } from "#/lib/queries";
+import { addressAtom } from "#/lib/state";
 import { AddCredentialCard } from "./components/add-credential-card";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialViewer } from "./components/credential-viewer";
@@ -136,10 +136,7 @@ export function Component() {
         </Flex>
 
         <AddCredentialCard onAddCredential={handleAddCredential} />
-        <AddProofOfPersonhood
-          isOpen={isAddProofOpen}
-          onClose={onAddProofClose}
-        />
+        <AddProofOfPersonhood isOpen={isAddProofOpen} onClose={onAddProofClose} />
         <MobileAlert
           isOpen={isMobileAlertOpen}
           onClose={onMobileAlertClose}

@@ -1,6 +1,3 @@
-import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
-import { ConnectedWallet } from "#/lib/components/connected-wallet";
-import { Sidebar } from "#/lib/components/sidebar";
 import {
   Box,
   Drawer,
@@ -17,6 +14,9 @@ import {
 import { MenuIcon } from "lucide-react";
 import { useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
+import idOSDashboardLogo from "#/assets/idos-dashboard-logo.svg";
+import { ConnectedWallet } from "#/lib/components/connected-wallet";
+import { Sidebar } from "#/lib/components/sidebar";
 
 export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -50,12 +50,7 @@ export function Component() {
       >
         <Flex direction="column" flexGrow={1} gap={2.5} overflowY="auto">
           <Flex align="center" h="125px" shrink={0}>
-            <Image
-              w="144px"
-              h="auto"
-              alt="idOS Data Dashboard"
-              src={idOSDashboardLogo}
-            />
+            <Image w="144px" h="auto" alt="idOS Data Dashboard" src={idOSDashboardLogo} />
           </Flex>
           <ConnectedWallet />
           <Sidebar />

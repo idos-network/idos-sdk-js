@@ -13,7 +13,7 @@ export class Enclave {
     this.confirmButton = document.querySelector("button#confirm");
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
-    let secretKey = storeWithCodec.get("encryption-private-key");
+    const secretKey = storeWithCodec.get("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.#listenToRequests();
@@ -53,7 +53,7 @@ export class Enclave {
     let password, duration, credentialId;
 
     const getWebAuthnCredential = async (storedCredentialId) => {
-      let credentialRequest = {
+      const credentialRequest = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
           allowCredentials: [
@@ -66,9 +66,7 @@ export class Enclave {
       };
 
       const credential = await navigator.credentials.get(credentialRequest);
-      password = Utf8Codec.decode(
-        new Uint8Array(credential.response.userHandle)
-      );
+      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
 
       return { password, credentialId };
@@ -82,8 +80,7 @@ export class Enclave {
           const storedCredentialId = this.store.get("credential-id");
           if (storedCredentialId) {
             try {
-              ({ password, credentialId } =
-                await getWebAuthnCredential(storedCredentialId));
+              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
             } catch (e) {
               ({ password, credentialId } = await this.#openDialog("passkey", {
                 type: "webauthn"
@@ -116,9 +113,8 @@ export class Enclave {
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
-    let secretKey =
-      storeWithCodec.get("encryption-private-key") ||
-      (await idOSKeyDerivation({ password, salt }));
+    const secretKey =
+      storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
@@ -130,12 +126,7 @@ export class Enclave {
     receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
 
-    const encrypted = nacl.box(
-      message,
-      nonce,
-      receiverPublicKey,
-      this.keyPair.secretKey
-    );
+    const encrypted = nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
     if (encrypted == null)
       throw Error(
@@ -162,12 +153,7 @@ export class Enclave {
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 
-    const decrypted = nacl.box.open(
-      message,
-      nonce,
-      senderPublicKey,
-      this.keyPair.secretKey
-    );
+    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
     if (decrypted == null) {
       throw Error(
@@ -271,9 +257,7 @@ export class Enclave {
     const dialogURL = new URL("/dialog.html", window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-    await new Promise((resolve) =>
-      this.dialog.addEventListener("load", resolve)
-    );
+    await new Promise((resolve) => this.dialog.addEventListener("load", resolve));
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();

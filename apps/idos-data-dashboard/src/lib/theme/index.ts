@@ -1,12 +1,9 @@
 import { drawerAnatomy, modalAnatomy } from "@chakra-ui/anatomy";
-import {
-  ComponentStyleConfig,
-  createMultiStyleConfigHelpers,
-  extendTheme
-} from "@chakra-ui/react";
+import { ComponentStyleConfig, createMultiStyleConfigHelpers, extendTheme } from "@chakra-ui/react";
 
-const { definePartsStyle, defineMultiStyleConfig } =
-  createMultiStyleConfigHelpers(modalAnatomy.keys);
+const { definePartsStyle, defineMultiStyleConfig } = createMultiStyleConfigHelpers(
+  modalAnatomy.keys
+);
 
 const modalBaseStyle = definePartsStyle({
   dialog: {

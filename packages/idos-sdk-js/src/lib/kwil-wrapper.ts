@@ -13,7 +13,7 @@ export class KwilWrapper {
   constructor({
     nodeUrl: kwilProvider = import.meta.env.VITE_IDOS_NODE_URL,
     chainId = import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
-    dbId = import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
+    dbId = import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
   }) {
     this.dbId = dbId;
     this.kwilProvider = kwilProvider;
@@ -27,7 +27,7 @@ export class KwilWrapper {
   setSigner({
     signer,
     publicKey,
-    signatureType,
+    signatureType
   }: {
     signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
     publicKey: string;
@@ -42,7 +42,7 @@ export class KwilWrapper {
     actionName: string,
     inputs: Record<string, any> | null,
     description?: string,
-    useSigner: boolean = true
+    useSigner = true
   ) {
     const action = this.client.actionBuilder().dbid(this.dbId).name(actionName);
 
@@ -51,7 +51,8 @@ export class KwilWrapper {
     }
 
     if (useSigner) {
-      if (!this.publicKey || !this.signer || !this.signatureType) throw new Error("Call idOS.setSigner first.");
+      if (!this.publicKey || !this.signer || !this.signatureType)
+        throw new Error("Call idOS.setSigner first.");
 
       action.publicKey(this.publicKey).signer(
         this.signer as SignerSupplier, // TODO: pkoch knows the types line up enough (i.e., it runs just fine as is), but he didn't find a way to express that in types.
@@ -75,7 +76,7 @@ export class KwilWrapper {
     actionName: string,
     actionInputs: Record<string, any> | null,
     description?: string,
-    useSigner: boolean = true
+    useSigner = true
   ) {
     const action = await this.buildAction(actionName, actionInputs, description, useSigner);
     const msg = await action.buildMsg();

@@ -1,4 +1,4 @@
-import { Box, Text, type BoxProps } from "@chakra-ui/react";
+import { Box, type BoxProps, Text } from "@chakra-ui/react";
 
 export const ComingSoon = (props: BoxProps) => {
   return (

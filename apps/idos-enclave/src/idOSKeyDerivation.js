@@ -19,13 +19,12 @@ import scrypt from "scrypt-js";
 const latestVersion = 0.1;
 const allowedVersions = [0, 0.1];
 
-const uuidv4Regex =
-  /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
+const uuidv4Regex = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
 const kdfConfig = (version = latestVersion) => {
   if (!allowedVersions.includes(version)) throw new Error("Wrong KDF");
 
-  let versions = {};
+  const versions = {};
 
   versions[0] = {
     normalizePassword: (password) => password.normalize("NFKC"),
@@ -50,7 +49,6 @@ export const idOSKeyDerivation = async ({ password, salt, version }) => {
 
   if (validateSalt(salt) !== true) throw new Error("Invalid salt");
   password = normalizePassword(password);
-
   [password, salt] = [password, salt].map(Utf8Codec.encode);
   const { n, r, p, dkLen } = kdfConfig();
 

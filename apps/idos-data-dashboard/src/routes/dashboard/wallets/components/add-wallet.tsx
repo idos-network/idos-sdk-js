@@ -18,10 +18,10 @@ import {
   VStack
 } from "@chakra-ui/react";
 
-import { useAddWallet } from "#/routes/dashboard/wallets/mutations";
-import { useFetchWallets } from "#/routes/dashboard/wallets/queries";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormEvent, useState } from "react";
+import { useAddWallet } from "#/routes/dashboard/wallets/mutations";
+import { useFetchWallets } from "#/routes/dashboard/wallets/queries";
 import WalletAddress from "../assets/wallet-address.svg";
 import WalletsGrid from "../assets/wallets-grid.svg";
 
@@ -83,12 +83,7 @@ const ManualMode = (props: ManualModeProps) => {
           <FormLabel fontSize="sm" htmlFor="address">
             WALLET ADDRESS
           </FormLabel>
-          <Input
-            id="address"
-            name="address"
-            placeholder="Enter address"
-            required={true}
-          />
+          <Input id="address" name="address" placeholder="Enter address" required={true} />
         </FormControl>
       </ModalBody>
       <ModalFooter justifyContent="center">
@@ -143,11 +138,7 @@ export const AddWallet = (props: AddWalletProps) => {
       <ModalOverlay />
       <ModalContent gap={5}>
         {mode === "manual" ? (
-          <ManualMode
-            onSubmit={onSubmit}
-            onClose={onClose}
-            isPending={addWallet.isPending}
-          />
+          <ManualMode onSubmit={onSubmit} onClose={onClose} isPending={addWallet.isPending} />
         ) : (
           <>
             <ModalHeader mt={2}>
@@ -166,12 +157,7 @@ export const AddWallet = (props: AddWalletProps) => {
                   </Text>
                 </AddWalletButton>
                 <AddWalletButton onClick={() => setMode("wallet-selector")}>
-                  <Image
-                    w={120}
-                    h={108}
-                    alt="Select and connect a wallet"
-                    src={WalletsGrid}
-                  />
+                  <Image w={120} h={108} alt="Select and connect a wallet" src={WalletsGrid} />
                   <Text as="span" color="neutral.500">
                     Select and connect a wallet
                   </Text>
