@@ -6,7 +6,7 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "format:check": "biome format ."
+    "format:check": "biome ci --formatter-enabled=true --linter-enabled=false ."
   },
   "devDependencies": {
     "@biomejs/biome": "1.4.1",
