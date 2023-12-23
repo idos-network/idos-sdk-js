@@ -8,7 +8,11 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/lib/index.ts"),
       name: "idOS",
       fileName: "idos-sdk"
-    }
+    },
+    rollupOptions: {
+      // Don't bundle those dependencies
+      external: ["near-api-js", "ethers"],
+    },
   },
   plugins: [
     dts({
