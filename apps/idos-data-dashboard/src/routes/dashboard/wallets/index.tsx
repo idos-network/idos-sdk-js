@@ -1,206 +1,114 @@
 import {
-  AbsoluteCenter,
-  Box,
   Button,
-  Flex,
+  HStack,
+  Heading,
   IconButton,
-  Spinner,
-  Stack,
-  Text,
+  List,
+  ListItem,
   VStack,
   useDisclosure
 } from "@chakra-ui/react";
-import { useAtomValue } from "jotai";
+import { useQuery } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
-import { isMobile } from "react-device-detect";
-import { AddProofOfPersonhood } from "#/lib/components/add-proof-of-personhood";
-import { Breadcrumbs } from "#/lib/components/breadcrumbs";
-import { Title } from "#/lib/components/title";
-import { TitleBar } from "#/lib/components/title-bar";
-import { addressAtom } from "#/lib/state";
-import { MobileAlert } from "../credentials/components/mobile-alert";
+
+import { DataError } from "@/components/data-error";
+import { DataLoading } from "@/components/data-loading";
+import { NoData } from "@/components/no-data";
+import { useIdOS } from "@/core/idos";
+
 import { AddWallet } from "./components/add-wallet";
-import { AddWalletCard } from "./components/add-wallet-card";
-import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
-import { Wallet, useFetchWallets } from "./queries";
+import { idOSWallet } from "./types";
 
-export function Component() {
-  const address = useAtomValue(addressAtom);
-  const wallets = useFetchWallets({
-    enabled: !!address
+const useFetchWallets = () => {
+  const { sdk } = useIdOS();
+
+  return useQuery({
+    queryKey: ["wallets"],
+    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName)
   });
+};
 
-  const [wallet, setWallet] = useState<Wallet | undefined>();
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const {
-    isOpen: isAddProofOpen,
-    onOpen: onAddProofOpen,
-    onClose: onAddProofClose
-  } = useDisclosure();
+const NoWallets = () => {
+  return (
+    <NoData
+      title="You have 0 wallets added."
+      subtitle="Create your first wallet and store it on the idOS."
+      cta="Add a wallet"
+    />
+  );
+};
 
-  const {
-    isOpen: isAddWalletOpen,
-    onOpen: onAddWalletOpen,
-    onClose: onAddWalletClose
-  } = useDisclosure();
+const WalletsList = () => {
+  const wallets = useFetchWallets();
 
-  const {
-    isOpen: isMobileAlertOpen,
-    onOpen: onMobileAlertOpen,
-    onClose: onMobileAlertClose
-  } = useDisclosure();
-
-  const handleDeleteWalletClose = () => {
-    setWallet(undefined);
-    onClose();
-  };
-
-  const onDeleteWallet = async (wallet: Wallet) => {
-    setWallet(wallet);
-    onOpen();
-  };
-
-  const handleOnAddWalletClose = () => {
-    onAddWalletClose();
-  };
-
-  const handleAddWallet = () => {
-    if (isMobile && !address) {
-      onMobileAlertOpen();
-      return;
-    }
-
-    if (!address) {
-      onAddProofOpen();
-      return;
-    }
-
-    onAddWalletOpen();
-  };
-
-  if (!address) {
-    return (
-      <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
-        <Flex align="center" justify="space-between" h={[82, 125]}>
-          <Breadcrumbs items={["Dashboard", "Wallets"]} />
-        </Flex>
-        <Flex align="center" gap={2.5}>
-          <TitleBar>
-            <Title>Wallets</Title>
-            <Text>
-              0
-              <Text as="span" mx={1} hideBelow="xl">
-                Connected wallet(s)
-              </Text>
-            </Text>
-          </TitleBar>
-          <IconButton
-            w="60px"
-            h="60px"
-            p={0}
-            aria-label="Add wallet"
-            colorScheme="green"
-            hideFrom="lg"
-            onClick={handleAddWallet}
-            size="xl"
-          >
-            <PlusIcon size={24} />
-          </IconButton>
-          <Button
-            colorScheme="green"
-            hideBelow="lg"
-            leftIcon={<PlusIcon size={24} />}
-            onClick={handleAddWallet}
-            size="xl"
-          >
-            Add wallet
-          </Button>
-        </Flex>
-        <AddWalletCard onAddWallet={handleAddWallet} />
-        <AddProofOfPersonhood isOpen={isAddProofOpen} onClose={onAddProofClose} />
-        <MobileAlert
-          isOpen={isMobileAlertOpen}
-          onClose={onMobileAlertClose}
-          content="Please use the idOS Dashboard in your desktop's browser to add a new wallet to idOS"
-        />
-      </Stack>
-    );
+  if (wallets.isLoading) {
+    return <DataLoading />;
   }
 
-  return (
-    <Box>
-      <Stack flex={1} gap={2.5} ml={[0, 0, 0, 380]}>
-        <Flex align="center" justify="space-between" h={[82, 125]}>
-          <Breadcrumbs items={["Dashboard", "Wallets"]} />
-        </Flex>
-        <Flex align="center" gap={2.5}>
-          <TitleBar>
-            <Title>Wallets</Title>
-            {wallets.isFetching ? (
-              <Spinner size="sm" />
-            ) : (
-              <Text>
-                {wallets.data?.length || 0}
-                <Text as="span" mx={1} hideBelow="xl">
-                  Connected wallet(s)
-                </Text>
-              </Text>
-            )}
-          </TitleBar>
-          {wallets.isSuccess ? (
-            <>
-              <IconButton
-                w="60px"
-                h="60px"
-                p={0}
-                aria-label="Add wallet"
-                colorScheme="green"
-                hideFrom="lg"
-                onClick={handleAddWallet}
-                size="xl"
-              >
-                <PlusIcon size={24} />
-              </IconButton>
-              <Button
-                colorScheme="green"
-                hideBelow="lg"
-                leftIcon={<PlusIcon size={24} />}
-                onClick={handleAddWallet}
-                size="xl"
-              >
-                Add wallet
-              </Button>
-            </>
-          ) : null}
-        </Flex>
-        <Box>
-          {wallets.isFetching ? (
-            <AbsoluteCenter>
-              <Spinner />
-            </AbsoluteCenter>
-          ) : null}
-          {wallets.isSuccess ? (
-            <VStack alignItems="stretch" gap={2.5}>
-              {!wallets.data ? (
-                <AddWalletCard onAddWallet={handleAddWallet} />
-              ) : (
-                wallets.data.map((wallet) => (
-                  <WalletCard key={wallet.id} wallet={wallet} onDeleteWallet={onDeleteWallet} />
-                ))
-              )}
-            </VStack>
-          ) : null}
-        </Box>
-      </Stack>
-      {wallet ? (
-        <DeleteWallet isOpen={isOpen} wallet={wallet} onClose={handleDeleteWalletClose} />
-      ) : null}
+  if (wallets.isError) {
+    return <DataError onRetry={wallets.refetch} />;
+  }
 
-      <AddWallet isOpen={isAddWalletOpen} onClose={handleOnAddWalletClose} />
-    </Box>
+  if (wallets.isSuccess) {
+    return (
+      <List display="flex" flexDir="column" gap={2.5} flex={1}>
+        {wallets.data.map((wallet) => (
+          <ListItem key={wallet.id}>
+            <WalletCard wallet={wallet} />
+          </ListItem>
+        ))}
+      </List>
+    );
+  }
+};
+
+export function Component() {
+  const { hasProfile } = useIdOS();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  return (
+    <VStack align="stretch" flex={1} gap={2.5}>
+      <HStack
+        justifyContent="space-between"
+        h={{
+          base: 14,
+          lg: 20
+        }}
+        p={5}
+        bg="neutral.900"
+        rounded="xl"
+      >
+        <Heading
+          as="h1"
+          fontSize={{
+            base: "x-large",
+            lg: "xx-large"
+          }}
+        >
+          Wallets
+        </Heading>
+        {hasProfile ? (
+          <>
+            <Button
+              colorScheme="green"
+              leftIcon={<PlusIcon size={24} />}
+              hideBelow="lg"
+              onClick={onOpen}
+            >
+              Add wallet
+            </Button>
+            <IconButton colorScheme="green" aria-label="Add wallet" hideFrom="lg" onClick={onOpen}>
+              <PlusIcon size={24} />
+            </IconButton>
+          </>
+        ) : (
+          false
+        )}
+      </HStack>
+      {hasProfile ? <WalletsList /> : <NoWallets />}
+      <AddWallet isOpen={isOpen} onClose={onClose} />
+    </VStack>
   );
 }
-
-Component.displayName = "DashboardWallets";
+Component.displayName = "Wallets";

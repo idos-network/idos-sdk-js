@@ -1,64 +1,142 @@
-import { Button, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import {
+  Button,
+  ButtonGroup,
+  Center,
+  Code,
+  GridItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  SimpleGrid,
+  Spinner,
+  Stack,
+  Text,
+  useBreakpointValue,
+  useDisclosure
+} from "@chakra-ui/react";
+import { useQuery } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
-import { Credential, CredentialStatus } from "../queries";
 
-type CredentialCardProps = {
-  credential: Credential;
-  onDelete: (credential: Credential) => void;
-  onViewDetails: (credential: Credential) => void;
-  onManageGrants?: () => void;
+import { useIdOS } from "@/core/idos";
+import { idOSCredential } from "../types";
+
+type CredentialDetailsProps = {
+  isOpen: boolean;
+  recordId: string;
+  onClose: () => void;
 };
 
-const CredentialStatus = ({ status }: { status: CredentialStatus }) => {
-  if (!status) {
-    return <Text>-</Text>;
-  }
+const useFetchCredentialDetails = ({
+  recordId,
+  enabled
+}: { recordId: string; enabled: boolean }) => {
+  const { sdk } = useIdOS();
+
+  return useQuery({
+    queryKey: ["credential_details", recordId],
+    queryFn: ({ queryKey: [, recordId] }) =>
+      sdk.data.get<idOSCredential & { content: string }>("credentials", recordId),
+    enabled
+  });
+};
+
+const CredentialDetails = ({ isOpen, recordId, onClose }: CredentialDetailsProps) => {
+  const isCentered = useBreakpointValue(
+    {
+      base: false,
+      md: true
+    },
+    {
+      fallback: "base"
+    }
+  );
+
+  const credential = useFetchCredentialDetails({ recordId, enabled: isOpen });
 
   return (
-    <Text
-      color={
-        status === "approved"
-          ? "green.500"
-          : status === "pending" || status === "contacted"
-            ? "neutral.500"
-            : status === "rejected" || status === "expired"
-              ? "red.500"
-              : "neutral.100"
-      }
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={{
+        base: "full",
+        lg: "xl"
+      }}
+      isCentered={isCentered}
     >
-      {status.toLocaleUpperCase()}
-    </Text>
+      <ModalOverlay />
+      <ModalContent bg="neutral.900" rounded="xl">
+        <ModalHeader>Credential details</ModalHeader>
+        <ModalCloseButton onClick={onClose} />
+        <ModalBody display="flex" alignItems="center">
+          {credential.isLoading ? (
+            <Center flex={1}>
+              <Spinner />
+            </Center>
+          ) : (
+            false
+          )}
+          {credential.isError ? (
+            <Text color="red.500">Something went wrong, please retry.</Text>
+          ) : (
+            false
+          )}
+          {credential.isSuccess ? (
+            <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre">
+              {credential.data ? credential.data.content : "No content to display"}
+            </Code>
+          ) : (
+            false
+          )}
+          <Code />
+        </ModalBody>
+        <ModalFooter gap={2.5}>
+          {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
+          <Button onClick={onClose}>Close</Button>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 };
 
-export const CredentialCard = (props: CredentialCardProps) => {
+type CredentialCardProps = {
+  credential: idOSCredential;
+};
+
+export const CredentialCard = ({ credential }: CredentialCardProps) => {
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
+  const handleOpen = () => {
+    onOpen();
+  };
+
+  const handleClose = () => {
+    onClose();
+  };
+
   return (
-    <Stack
-      gap={14}
-      p={7}
-      bg="neutral.900"
-      border="1px solid"
-      borderColor="neutral.800"
-      rounded="xl"
-    >
-      <SimpleGrid maxW="container.lg" columns={[2, 6]} spacing={10}>
+    <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
+      <SimpleGrid columns={[2, 6]} spacing={10}>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
             Type
           </Text>
-          <Text>{props.credential.credential_type}</Text>
+          <Text>{credential.credential_type}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
             Issuer
           </Text>
-          <Text>{props.credential.issuer}</Text>
+          <Text>{credential.issuer}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
             Status
           </Text>
-          <CredentialStatus status={"approved"} />
+          <Text>{credential.credential_status}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.600" fontSize="sm">
@@ -74,18 +152,19 @@ export const CredentialCard = (props: CredentialCardProps) => {
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
-        <Button onClick={() => props.onViewDetails(props.credential)} variant="ghost">
-          View Details
-        </Button>
-
-        <Button
-          leftIcon={<XIcon />}
-          onClick={() => props.onViewDetails(props.credential)}
-          variant="ghost"
+        <ButtonGroup
+          spacing={0}
+          gap={4}
+          flexDir={{
+            base: "column",
+            lg: "row"
+          }}
         >
-          Delete
-        </Button>
+          <Button onClick={handleOpen}>View details</Button>
+          <Button leftIcon={<XIcon size={20} />}>Delete</Button>
+        </ButtonGroup>
       </Stack>
+      <CredentialDetails isOpen={isOpen} recordId={credential.id} onClose={handleClose} />
     </Stack>
   );
 };
