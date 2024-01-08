@@ -9,9 +9,7 @@
   "main": "dist/idos-sdk.js",
   "module": "dist/idos-sdk.umd.cjs",
   "types": "dist/idos-sdk.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "exports": {
     ".": {
       "import": "./dist/idos-sdk.js",
@@ -31,6 +29,10 @@
     "prepack": "clean-package",
     "postpack": "clean-package restore"
   },
+  "peerDependencies": {
+    "ethers": "^6.8.0",
+    "near-api-js": "^2.1.4"
+  },
   "devDependencies": {
     "@near-wallet-selector/core": "^8.7.0",
     "@release-it/keep-a-changelog": "^5.0.0",
@@ -43,6 +45,7 @@
     "typescript": "^5.2.2",
     "vite": "^4.5.0",
     "vite-plugin-dts": "^3.6.3",
+    "vite-plugin-externalize-deps": "^0.8.0",
     "vitest": "^0.31.4"
   },
   "dependencies": {
@@ -55,10 +58,8 @@
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
-    "ethers": "^6.8.0",
     "jsonld": "^8.3.1",
-    "jsonld-document-loader": "^2.0.0",
-    "near-api-js": "^2.1.4"
+    "jsonld-document-loader": "^2.0.0"
   },
   "clean-package": {
     "replace": {

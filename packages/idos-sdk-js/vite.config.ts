@@ -1,5 +1,6 @@
 import path from "path";
 import dts from "vite-plugin-dts";
+import { externalizeDeps } from "vite-plugin-externalize-deps";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -13,6 +14,14 @@ export default defineConfig({
   plugins: [
     dts({
       rollupTypes: true
+    }),
+    externalizeDeps({
+      deps: true,
+      devDeps: false,
+      except: [],
+      nodeBuiltins: true,
+      optionalDeps: true,
+      peerDeps: true
     })
   ],
   test: {
