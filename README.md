@@ -11,7 +11,7 @@
 
 ## Installation
 
-Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) with `pnpm add @idos-network/idos-sdk` (or the equivalent of your package manager of choice).
+Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with `pnpm add @idos-network/idos-sdk ethers near-api-js` (or the equivalent of your package manager of choice).
 
 ## Quickstart
 
