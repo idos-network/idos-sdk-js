@@ -14,39 +14,30 @@
     "test:unit:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@chakra-ui/anatomy": "^2.2.2",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@idos-network/idos-sdk": "workspace:*",
-    "@near-js/crypto": "^0.0.5",
     "@near-wallet-selector/core": "^8.9.1",
     "@near-wallet-selector/here-wallet": "^8.9.1",
     "@near-wallet-selector/meteor-wallet": "^8.9.1",
     "@near-wallet-selector/modal-ui": "^8.9.1",
-    "@near-wallet-selector/my-near-wallet": "^8.9.1",
-    "@near-wallet-selector/nightly": "^8.9.1",
-    "@tanstack/react-query": "^5.14.1",
-    "@tanstack/react-query-devtools": "^5.14.1",
-    "@uidotdev/usehooks": "^2.4.1",
-    "ethers": "^6.9.0",
+    "@tanstack/react-query": "^5.14.2",
+    "@tanstack/react-query-devtools": "^5.14.2",
+    "@web3modal/wagmi": "^3.5.2",
+    "ethers": "^6.9.1",
     "framer-motion": "^10.16.16",
-    "jotai": "^2.6.0",
-    "lucide-react": "^0.221.0",
-    "metamask-react": "^2.7.0",
-    "near-api-js": "^2.1.4",
+    "lucide-react": "^0.299.0",
+    "near-api-js": "^3.0.1",
     "react": "^18.2.0",
-    "react-cookie-consent": "^9.0.0",
-    "react-device-detect": "^2.2.3",
     "react-dom": "^18.2.0",
-    "react-hook-form": "^7.49.2",
-    "react-query-kit": "^1.5.2",
-    "react-router-dom": "^6.21.0"
+    "react-router-dom": "^6.21.0",
+    "viem": "^1.21.0",
+    "wagmi": "^1.4.12"
   },
   "devDependencies": {
     "@playwright/test": "^1.40.1",
     "@testing-library/react": "^14.1.2",
-    "@types/lodash": "^4.14.202",
     "@types/node": "^20.10.5",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
@@ -54,7 +45,7 @@
     "jsdom": "^22.1.0",
     "typescript": "^5.3.3",
     "vite": "^5.0.10",
-    "vite-plugin-node-polyfills": "^0.12.0",
-    "vitest": "^0.31.4"
+    "vite-plugin-node-polyfills": "^0.17.0",
+    "vitest": "^1.1.0"
   }
 }

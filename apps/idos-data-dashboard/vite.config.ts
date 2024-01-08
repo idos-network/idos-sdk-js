@@ -1,18 +1,29 @@
-import path from "path";
+import { resolve } from "path";
 import react from "@vitejs/plugin-react-swc";
+import { defineConfig } from "vite";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
-import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  define: {
-    global: "window"
-  },
-
   build: {
-    target: "esnext"
+    target: "esnext",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          react: ["react", "react-dom", "react-router-dom"],
+          idos: ["@idos-network/idos-sdk"],
+          vendor: [
+            "@chakra-ui/react",
+            "@tanstack/react-query",
+            "@emotion/react",
+            "@emotion/styled",
+            "framer-motion"
+          ],
+          web3: ["wagmi", "viem"]
+        }
+      }
+    }
   },
-
   plugins: [
     react(),
     nodePolyfills({
@@ -22,15 +33,10 @@ export default defineConfig({
       }
     })
   ],
-
   resolve: {
+    dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
     alias: {
-      "#": path.resolve(__dirname, "./src")
+      "@": resolve(__dirname, "./src")
     }
-  },
-
-  test: {
-    globals: true,
-    environment: "jsdom"
   }
 });
