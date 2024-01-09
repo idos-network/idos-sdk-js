@@ -1,9 +1,10 @@
-import { Center, Spinner } from "@chakra-ui/react";
+import { HStack, Spinner, Text } from "@chakra-ui/react";
 
 export const DataLoading = () => {
   return (
-    <Center flex={1}>
-      <Spinner />
-    </Center>
+    <HStack gap={5} p={5}>
+      <Text size="sm">Loading...</Text>
+      <Spinner size="sm" />
+    </HStack>
   );
 };
