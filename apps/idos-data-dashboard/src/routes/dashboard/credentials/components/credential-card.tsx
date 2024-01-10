@@ -19,7 +19,6 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
-import { XIcon } from "lucide-react";
 
 import { useIdOS } from "@/core/idos";
 import { idOSCredential } from "../types";
