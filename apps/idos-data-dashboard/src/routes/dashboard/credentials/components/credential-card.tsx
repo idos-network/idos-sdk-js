@@ -161,7 +161,6 @@ export const CredentialCard = ({ credential }: CredentialCardProps) => {
           }}
         >
           <Button onClick={handleOpen}>View details</Button>
-          <Button leftIcon={<XIcon size={20} />}>Delete</Button>
         </ButtonGroup>
       </Stack>
       <CredentialDetails isOpen={isOpen} recordId={credential.id} onClose={handleClose} />
