@@ -23,11 +23,12 @@ import {
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRightIcon, KeyRoundIcon, LogOutIcon, MenuIcon, Wallet2Icon } from "lucide-react";
-import { NavLink, NavLinkProps, Outlet, useMatches } from "react-router-dom";
+import { NavLink, NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
 import { useIdOS } from "@/core/idos";
 import { useWalletSelector } from "@/core/near";
+import { useEffect } from "react";
 
 const ConnectedWallet = () => {
   const { address } = useIdOS();
@@ -125,6 +126,15 @@ const Breadcrumbs = () => {
 
 export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const location = useLocation();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (isOpen) {
+      onClose();
+    }
+  }, [location]);
+
   return (
     <Flex minH="100dvh">
       <VStack
