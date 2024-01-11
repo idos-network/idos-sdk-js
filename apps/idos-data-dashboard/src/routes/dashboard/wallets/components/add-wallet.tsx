@@ -1,6 +1,5 @@
 import {
   Button,
-  Code,
   FormControl,
   FormLabel,
   Input,
@@ -11,7 +10,8 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  useBreakpointValue
+  useBreakpointValue,
+  useToast
 } from "@chakra-ui/react";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent } from "react";
@@ -32,6 +32,8 @@ const useAddWalletMutation = () => {
 };
 
 export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
+  const toast = useToast();
+
   const isCentered = useBreakpointValue(
     {
       base: false,
@@ -57,9 +59,17 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
       {
         async onSuccess() {
           form.reset();
-          onClose();
+          handleClose();
           queryClient.invalidateQueries({
             queryKey: ["wallets"]
+          });
+        },
+        async onError() {
+          toast({
+            title: "Error while adding wallet",
+            description: "An unexpected error. Please try again.",
+            position: "bottom-right",
+            status: "error"
           });
         }
       }
@@ -74,7 +84,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       size={{
         base: "full",
         lg: "xl"
@@ -87,14 +97,6 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
           <ModalHeader>Insert wallet address</ModalHeader>
           <ModalCloseButton onClick={handleClose} />
           <ModalBody>
-            {addWallet.isError ? (
-              <Code w="100%" mb={4} px={2} py={1} color="red.500" rounded="lg">
-                An unexpected error ocurred. Please try again.
-              </Code>
-            ) : (
-              false
-            )}
-
             <FormControl>
               <FormLabel fontSize="sm" htmlFor="address">
                 Wallet address
@@ -104,7 +106,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="green" type="submit" isLoading={addWallet.isPending}>
-              {addWallet.isError ? "Retry" : "Add wallet"}
+              {addWallet.isError ? "Try again" : "Add wallet"}
             </Button>
           </ModalFooter>
         </form>

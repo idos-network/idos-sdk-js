@@ -7,12 +7,12 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
-  Code,
   HStack,
   Image,
   Text,
   VStack,
-  useDisclosure
+  useDisclosure,
+  useToast
 } from "@chakra-ui/react";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { XIcon } from "lucide-react";
@@ -39,18 +39,32 @@ const useDeleteWalletMutation = () => {
 };
 
 const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => {
+  const toast = useToast();
   const queryClient = useQueryClient();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteWallet = useDeleteWalletMutation();
+
+  const handleClose = () => {
+    deleteWallet.reset();
+    onClose();
+  };
 
   const handleDeleteWallet = (id: string) => {
     deleteWallet.mutate(
       { id },
       {
         async onSuccess() {
-          onClose();
+          handleClose();
           queryClient.invalidateQueries({
             queryKey: ["wallets"]
+          });
+        },
+        async onError() {
+          toast({
+            title: "Error while deleting wallet",
+            description: "An unexpected error. Please try again.",
+            position: "bottom-right",
+            status: "error"
           });
         }
       }
@@ -66,24 +80,15 @@ const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => {
       }}
       isCentered
       leastDestructiveRef={cancelRef}
-      onClose={onClose}
+      onClose={handleClose}
     >
       <AlertDialogOverlay>
         <AlertDialogContent bg="neutral.900" rounded="xl">
           <AlertDialogHeader>Delete wallet</AlertDialogHeader>
           <AlertDialogCloseButton />
-          <AlertDialogBody>
-            {deleteWallet.isError ? (
-              <Code w="100%" mb={4} px={2} py={1} color="red.500" rounded="lg">
-                An unexpected error ocurred. Please try again.
-              </Code>
-            ) : (
-              false
-            )}
-            Do you want to delete this wallet from the idOS?
-          </AlertDialogBody>
+          <AlertDialogBody>Do you want to delete this wallet from the idOS?</AlertDialogBody>
           <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={onClose}>
+            <Button ref={cancelRef} onClick={handleClose}>
               Cancel
             </Button>
             <Button
