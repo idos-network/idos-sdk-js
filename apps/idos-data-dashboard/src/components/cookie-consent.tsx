@@ -107,7 +107,7 @@ export const CookieConsent = () => {
             confirm that I have read and taken note of the{" "}
             <Link
               color="green.200"
-              href="https://app.fractal.id/documents/41a635413a9fd3081492/privacy-policy-v11.pdf"
+              href="https://drive.google.com/file/d/1VZ5JJ_17IsPnLEdC6j7fm2j4EFE2BpYV/view?usp=sharing"
               target="_blank"
             >
               Privacy Policy
@@ -115,7 +115,7 @@ export const CookieConsent = () => {
             and the{" "}
             <Link
               color="green.200"
-              href="https://fractal.id/documents/transparency-document"
+              href="https://drive.google.com/file/d/1B4ink7Hq-5662a0S2C7v7nMLeQiBljVX/view?usp=sharing"
               target="_blank"
             >
               Transparency Document.
