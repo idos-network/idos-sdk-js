@@ -107,10 +107,17 @@ export const CookieConsent = () => {
             confirm that I have read and taken note of the{" "}
             <Link
               color="green.200"
-              href="https://drive.google.com/file/d/1VZ5JJ_17IsPnLEdC6j7fm2j4EFE2BpYV/view?usp=sharing"
+              href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
               target="_blank"
             >
-              Privacy Policy
+              Privacy Policy,
+            </Link>{" "}
+            <Link
+              color="green.200"
+              href="https://drive.google.com/file/d/11s9TXwmn-497WgFj02KJrcLkgAW_8_KV/view?usp=drive_link"
+              target="_blank"
+            >
+              User agreement
             </Link>{" "}
             and the{" "}
             <Link
