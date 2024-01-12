@@ -60,7 +60,7 @@ if (!chosenWallet) {
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("wallet_switchEthereumChain", [{ chainId: "0x5" }]);
+    await provider.send("wallet_switchEthereumChain", [{ chainId: idOS.evm.defaultChainId }]);
     await provider.send("eth_requestAccounts", []);
 
     const signer = await provider.getSigner();

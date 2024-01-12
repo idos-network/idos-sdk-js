@@ -1,6 +1,6 @@
 import { extendBaseTheme, theme as chakraTheme } from "@chakra-ui/react";
 
-const { Alert, Button, CloseButton, Drawer, FormLabel, Heading, Input, Modal, Spinner, } =
+const { Alert, Button, CloseButton, Drawer, FormLabel, Heading, Input, Modal, Spinner } =
   chakraTheme.components;
 
 export const theme = extendBaseTheme({
