@@ -20,6 +20,7 @@ export class idOS {
   static initializing = false;
 
   static near = Grants.near;
+  static evm = Grants.evm;
   static profileProviders = [import.meta.env.VITE_FRACTAL_ID_URL];
 
   static verifiableCredentials = verifiableCredentials;
