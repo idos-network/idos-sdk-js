@@ -18,17 +18,13 @@ import { useQuery } from "@tanstack/react-query";
 
 import { idOSCredential } from "../types";
 
-const useFetchCredentialDetails = ({
-  credentialId,
-  enabled
-}: { credentialId: string; enabled: boolean }) => {
+const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const { sdk } = useIdOS();
 
   return useQuery({
     queryKey: ["credential_details", credentialId],
     queryFn: ({ queryKey: [, credentialId] }) =>
-      sdk.data.get<idOSCredential & { content: string }>("credentials", credentialId),
-    enabled
+      sdk.data.get<idOSCredential & { content: string }>("credentials", credentialId)
   });
 };
 
@@ -40,8 +36,7 @@ type CredentialDetailsProps = {
 
 export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialDetailsProps) => {
   const credential = useFetchCredentialDetails({
-    credentialId,
-    enabled: isOpen
+    credentialId
   });
 
   const isCentered = useBreakpointValue(
