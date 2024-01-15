@@ -83,7 +83,6 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
           ) : (
             false
           )}
-          <Code />
         </ModalBody>
         <ModalFooter gap={2.5}>
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
