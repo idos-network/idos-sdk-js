@@ -199,6 +199,7 @@ export class Enclave {
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin) return;
+      if (event.data.target === "metamask-inpage") return;
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
