@@ -1,20 +1,21 @@
 import { HStack, Heading, List, ListItem, VStack } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 import { CredentialCard } from "./components/credential-card";
+import { CredentialDetails } from "./components/credential-details";
 import { idOSCredential } from "./types";
 
 const useFetchCredentials = () => {
-  const { sdk, hasProfile } = useIdOS();
+  const { sdk } = useIdOS();
 
   return useQuery({
     queryKey: ["credentials"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSCredential>(tableName),
-    enabled: hasProfile
+    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSCredential>(tableName)
   });
 };
 
@@ -28,8 +29,9 @@ const NoCredentials = () => {
   );
 };
 
-const CredentialsList = () => {
+const Credentials = () => {
   const credentials = useFetchCredentials();
+  const [credentialId, setCredentialId] = useState<string | null>(null);
 
   if (credentials.isLoading) {
     return <DataLoading />;
@@ -41,13 +43,22 @@ const CredentialsList = () => {
 
   if (credentials.isSuccess) {
     return (
-      <List display="flex" flexDir="column" gap={2.5} flex={1}>
-        {credentials.data.map((credential) => (
-          <ListItem key={credential.id}>
-            <CredentialCard credential={credential} />
-          </ListItem>
-        ))}
-      </List>
+      <>
+        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+          {credentials.data.map((credential) => (
+            <ListItem key={credential.id}>
+              <CredentialCard credential={credential} onViewDetails={setCredentialId} />
+            </ListItem>
+          ))}
+        </List>
+        {credentialId ? (
+          <CredentialDetails
+            credentialId={credentialId}
+            isOpen={!!credentialId}
+            onClose={() => setCredentialId(null)}
+          />
+        ) : null}
+      </>
     );
   }
 };
@@ -77,7 +88,7 @@ export function Component() {
           Credentials
         </Heading>
       </HStack>
-      {hasProfile ? <CredentialsList /> : <NoCredentials />}
+      {hasProfile ? <Credentials /> : <NoCredentials />}
     </VStack>
   );
 }
