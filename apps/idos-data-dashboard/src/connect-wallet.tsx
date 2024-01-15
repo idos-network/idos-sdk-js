@@ -66,11 +66,11 @@ export const ConnectWallet = () => {
           >
             <Button size="lg" justifyContent="space-between" onClick={() => open()}>
               Connect a wallet
-              <Image alt="Near logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
+              <Image alt="NEAR logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
             </Button>
             <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
-              Connect with Near
-              <Image alt="Near logo" src="/near.svg" w={10} h={10} />
+              Connect with NEAR
+              <Image alt="NEAR logo" src="/near.svg" w={10} h={10} />
             </Button>
           </VStack>
         </VStack>
