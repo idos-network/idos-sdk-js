@@ -1,7 +1,18 @@
 import { extendBaseTheme, theme as chakraTheme } from "@chakra-ui/react";
 
-const { Alert, Button, CloseButton, Drawer, FormLabel, Heading, Input, Modal, Spinner } =
-  chakraTheme.components;
+const {
+  Alert,
+  Button,
+  CloseButton,
+  Drawer,
+  FormLabel,
+  Heading,
+  Input,
+  Modal,
+  Spinner,
+  Switch,
+  Table
+} = chakraTheme.components;
 
 export const theme = extendBaseTheme({
   colors: {
@@ -50,6 +61,8 @@ export const theme = extendBaseTheme({
     Heading,
     Input,
     Modal,
-    Spinner
+    Spinner,
+    Switch,
+    Table
   }
 });

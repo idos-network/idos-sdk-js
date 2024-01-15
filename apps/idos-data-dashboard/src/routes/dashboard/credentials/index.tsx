@@ -8,6 +8,7 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
+import { GrantsCenter } from "./components/grants-center";
 import { idOSCredential } from "./types";
 
 const useFetchCredentials = () => {
@@ -15,7 +16,16 @@ const useFetchCredentials = () => {
 
   return useQuery({
     queryKey: ["credentials"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSCredential>(tableName)
+    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSCredential>(tableName),
+    select(credentials) {
+      return credentials
+        .map((credential) => ({
+          ...credential,
+          shares: credentials.filter((_credential) => _credential.original_id === credential.id)
+            .length
+        }))
+        .filter((credential) => !credential.original_id);
+    }
   });
 };
 
@@ -31,7 +41,8 @@ const NoCredentials = () => {
 
 const Credentials = () => {
   const credentials = useFetchCredentials();
-  const [credentialId, setCredentialId] = useState<string | null>(null);
+  const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
+  const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
 
   if (credentials.isLoading) {
     return <DataLoading />;
@@ -47,15 +58,29 @@ const Credentials = () => {
         <List display="flex" flexDir="column" gap={2.5} flex={1}>
           {credentials.data.map((credential) => (
             <ListItem key={credential.id}>
-              <CredentialCard credential={credential} onViewDetails={setCredentialId} />
+              <CredentialCard
+                credential={credential}
+                onViewDetails={setCredentialDetalsId}
+                onManageGrants={setCredentialGrantsId}
+              />
             </ListItem>
           ))}
         </List>
-        {credentialId ? (
+        {credentialDetailsId ? (
           <CredentialDetails
-            credentialId={credentialId}
-            isOpen={!!credentialId}
-            onClose={() => setCredentialId(null)}
+            credentialId={credentialDetailsId}
+            isOpen={!!credentialDetailsId}
+            onClose={() => setCredentialDetalsId(null)}
+          />
+        ) : null}
+
+        {credentialGrantsId ? (
+          <GrantsCenter
+            credentialId={credentialGrantsId}
+            isOpen={!!credentialGrantsId}
+            onClose={() => {
+              setCredentialGrantsId(null);
+            }}
           />
         ) : null}
       </>
