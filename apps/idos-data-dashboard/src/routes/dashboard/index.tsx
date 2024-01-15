@@ -23,12 +23,12 @@ import {
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRightIcon, KeyRoundIcon, LogOutIcon, MenuIcon, Wallet2Icon } from "lucide-react";
+import { useEffect } from "react";
 import { NavLink, NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
 import { useIdOS } from "@/core/idos";
 import { useWalletSelector } from "@/core/near";
-import { useEffect } from "react";
 
 const ConnectedWallet = () => {
   const { address } = useIdOS();
