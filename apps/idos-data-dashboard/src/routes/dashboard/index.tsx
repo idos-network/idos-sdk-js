@@ -164,7 +164,7 @@ export function Component() {
               <List display="flex" flexDir="column" gap={1.5}>
                 <ListItem>
                   <ListItemLink to="/">
-                    <KeyRoundIcon size={24} strokeWidth="2.5" />
+                    <KeyRoundIcon size={24} strokeWidth="1.5" />
                     <Text as="span">Credentials</Text>
                   </ListItemLink>
                 </ListItem>
