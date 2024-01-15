@@ -17,6 +17,9 @@ export type SignerType = keyof typeof SIGNER_TYPES;
 
 export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;
+  static evm = {
+    defaultChainId: EvmGrants.defaultChainId
+  };
   static near = {
     /**
      * @deprecated Use {@link Grants.methodNames} instead.

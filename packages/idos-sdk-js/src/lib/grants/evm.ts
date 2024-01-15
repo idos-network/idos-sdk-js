@@ -8,6 +8,7 @@ const ZERO_TIMELOCK = 0;
 
 export class EvmGrants extends GrantChild {
   static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
+  static defaultChainId = import.meta.env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID;
 
   static #abi = [
     {
