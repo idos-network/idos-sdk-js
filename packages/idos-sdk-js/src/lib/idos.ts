@@ -5,6 +5,7 @@ import { assertNever } from "../types";
 import { Auth } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
+import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
@@ -14,6 +15,8 @@ interface InitParams {
   dbId?: string;
   container: string;
   usePasskeys?: boolean;
+  evmGrantsOptions?: EvmGrantsOptions;
+  nearGrantsOptions?: NearGrantsOptions;
 }
 
 export class idOS {
@@ -32,21 +35,28 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({ nodeUrl, dbId, container, usePasskeys = false }: InitParams) {
+  private constructor({
+    nodeUrl,
+    dbId,
+    container,
+    evmGrantsOptions,
+    nearGrantsOptions,
+    usePasskeys = false
+  }: InitParams) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container, undefined, usePasskeys);
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
-    this.grants = new Grants(this);
+    this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
   }
 
-  static async init({ nodeUrl, dbId, container, usePasskeys }: InitParams): Promise<idOS> {
+  static async init(params: InitParams): Promise<idOS> {
     this.initializing = true;
 
-    const idos = new this({ nodeUrl, dbId, container, usePasskeys });
+    const idos = new this(params);
     await idos.enclave.load();
 
     return idos;
