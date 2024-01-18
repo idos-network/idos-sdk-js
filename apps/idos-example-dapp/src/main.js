@@ -173,7 +173,7 @@ const connectWallet = {
    */
   if (chosenFlow.wallets) {
     const wallets = cache.get("wallets") || idos.data.list("wallets");
-    terminal.h1("eyes", "Your wallets").wait("awaiting signature", wallets);
+    terminal.h1("eyes", "User's wallets").wait("awaiting signature", wallets);
     terminal.table(await wallets, ["address", "public_key"], {
       address: (address) => {
         if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
@@ -188,8 +188,8 @@ const connectWallet = {
 
   if (chosenFlow.credentials) {
     const credentials = cache.get("credentials") || idos.data.list("credentials");
-    terminal.h1("eyes", "Your credentials").wait("awaiting signature", credentials);
-    terminal.table(await credentials, ["issuer", "credential_type", "id"], {
+    terminal.h1("eyes", "User's credentials").wait("awaiting signature", credentials);
+    terminal.table(await credentials, ["issuer", "credential_type",  "credential_level",  "credential_status", "id"], {
       id: async (id) => {
         const credential = cache.get(`credential_${id}`) || idos.data.get("credentials", id);
         await terminal
@@ -212,7 +212,7 @@ const connectWallet = {
 
   if (chosenFlow.grants) {
     const grants = cache.get("grants") || idos.grants.list({ owner: address });
-    terminal.h1("eyes", "Your grants").wait("awaiting RPC", grants);
+    terminal.h1("eyes", "User's grants").wait("awaiting RPC", grants);
     terminal.table(await grants, ["owner", "grantee", "dataId", "lockedUntil"]);
     cache.set("grants", await grants);
   }
