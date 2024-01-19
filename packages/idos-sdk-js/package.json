@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/idos-sdk",
   "description": "idOS JavaScript SDK",
-  "version": "0.0.35",
+  "version": "0.0.36",
   "homepage": "https://idos.network",
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
