@@ -179,14 +179,14 @@ export class Data {
     recordId: string,
     receiverPublicKey: string
   ): Promise<{ id: string }> {
-    if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
+    const encPublicKey = await this.idOS.enclave.init();
 
     const name = this.singularize(tableName);
     const record = (await this.get(tableName, recordId)) as any;
 
     if (tableName === "credentials") {
       record.content = await this.idOS.enclave.encrypt(record.content as string, receiverPublicKey);
-      record.encryption_public_key = Base64Codec.encode(await this.idOS.enclave.init());
+      record.encryption_public_key = encPublicKey;
     }
 
     const id = crypto.randomUUID();
