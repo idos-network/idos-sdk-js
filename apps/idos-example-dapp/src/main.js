@@ -11,6 +11,7 @@ import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { idOS } from "@idos-network/idos-sdk";
 import { Cache } from "./cache";
+import * as fakeServer from "./fake-server";
 import { Terminal } from "./terminal";
 
 /*
@@ -187,46 +188,95 @@ const connectWallet = {
   }
 
   if (chosenFlow.credentials) {
+    // TODO: Why is this showing me the copies that belong to AGs? :x
+    // https://github.com/idos-network/idos-schema/pull/36
     const credentials = await terminal
       .h1("eyes", "User's credentials")
-      .wait(
-        "awaiting signature",
-        cache.get("credentials") || idos.data.list("credentials"),
-      );
+      .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
     cache.set("credentials", credentials);
 
-    terminal.table(credentials, ["issuer", "credential_type",  "credential_level",  "credential_status", "id"], {
-      id: async (id) => {
-        const credential = await terminal
-          .detail()
-          .h1("inspect", `Credential # ${id}`)
-          .wait(
-            "awaiting signature",
-            cache.get(`credential_${id}`) || idos.data.get("credentials", id),
-          );
-        cache.set(`credential_${id}`, credential);
-        await terminal
-          .wait(
-            "verifying credential...",
-            idOS.verifiableCredentials.verify(credential.content)
-          )
-          .then((_) => terminal.status("done", "Verified"))
-          .catch(terminal.error.bind(terminal));
-        terminal.h1("eyes", "Content").json(JSON.parse(credential.content));
+    terminal.table(
+      credentials,
+      ["issuer", "credential_type", "credential_level", "credential_status", "id"],
+      {
+        id: async (id) => {
+          const credential = await terminal
+            .detail()
+            .h1("inspect", `Credential # ${id}`)
+            .wait(
+              "awaiting signature",
+              cache.get(`credential_${id}`) || idos.data.get("credentials", id)
+            );
+          cache.set(`credential_${id}`, credential);
+
+          await terminal
+            .wait("verifying credential...", idOS.verifiableCredentials.verify(credential.content))
+            .then((_) => terminal.status("done", "Verified"))
+            .catch(terminal.error.bind(terminal));
+
+          terminal.h1("eyes", "Content").json(JSON.parse(credential.content));
+          terminal.br();
+
+          const buttonId = `acquire-access-grant-${id}`;
+          terminal.button(buttonId, "🔏 Acquire access grant", async () => {
+            terminal.removeButton(buttonId);
+
+            const grantPromise = idos.grants.create(
+              "credentials",
+              id,
+              fakeServer.publicInfo.granteeAddress,
+              Math.floor(Date.now() / 1000) + fakeServer.publicInfo.lockTimeSpanSeconds,
+              fakeServer.publicInfo.encryptionPublicKey
+            );
+
+            try {
+              const result = await terminal.wait("creating access grant...", grantPromise);
+              terminal.status("done", `Created access grant with dataId ${result.grant.dataId}`);
+            } catch (e) {
+              terminal.error(e);
+              return;
+            }
+
+            cache.set("grants", null);
+            terminal.br();
+            terminal.log("Press Restart to see the newly created access grant.");
+            terminal.br();
+            terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
+          });
+        }
       }
-    });
+    );
   }
 
   if (chosenFlow.grants) {
     const grants = await terminal
-      .h1("eyes", "User's grants")
+      .h1("eyes", "User's grants to this dApp")
       .wait(
         "awaiting RPC",
-        cache.get("grants") || idos.grants.list({ owner: address }),
+        cache.get("grants") ||
+          idos.grants.list({ owner: address, grantee: fakeServer.publicInfo.granteeAddress })
       );
     cache.set("grants", grants);
 
-    terminal.table(grants, ["owner", "grantee", "dataId", "lockedUntil"]);
+    terminal.table(grants, ["owner", "grantee", "dataId", "lockedUntil"], {
+      dataId: async (dataId) => {
+        terminal.detail().h1("inspect", `Access grant for ${dataId}`);
+
+        let content;
+        try {
+          content = await terminal.wait(
+            "awaiting server decryption",
+            fakeServer.getAccessGrantsContentDecrypted(dataId)
+          );
+          terminal.status("done", "Decrypted");
+        } catch (e) {
+          terminal.error(e);
+          return;
+        }
+
+        terminal.h1("eyes", "Content").json(JSON.parse(content));
+      }
+    });
   }
 
   terminal.status("done", "Done");
