@@ -186,7 +186,7 @@ export class Data {
 
     if (tableName === "credentials") {
       record.content = await this.idOS.enclave.encrypt(record.content as string, receiverPublicKey);
-      record.encryption_public_key = receiverPublicKey;
+      record.encryption_public_key = Base64Codec.encode(await this.idOS.enclave.init());
     }
 
     const id = crypto.randomUUID();
