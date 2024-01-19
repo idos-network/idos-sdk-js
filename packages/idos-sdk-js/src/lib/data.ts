@@ -179,7 +179,7 @@ export class Data {
     recordId: string,
     receiverPublicKey: string
   ): Promise<{ id: string }> {
-    const encPublicKey = await this.idOS.enclave.init();
+    const encPublicKey = Base64Codec.encode(await this.idOS.enclave.init());
 
     const name = this.singularize(tableName);
     const record = (await this.get(tableName, recordId)) as any;
