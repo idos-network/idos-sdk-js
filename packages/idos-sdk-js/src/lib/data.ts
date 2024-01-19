@@ -116,6 +116,37 @@ export class Data {
     return record || null;
   }
 
+  async getShared<T extends Record<string, unknown>>(
+    tableName: string,
+    recordId: string
+  ): Promise<T | null> {
+    if (tableName === "credentials") {
+      const records = (await this.idOS.kwilWrapper.call(
+        `get_credential_shared`,
+        { id: recordId },
+        `Get credential shared with you in idOS`
+      )) as any;
+
+      const record = records.find((r: any) => r.id === recordId);
+      if (!record) return null;
+
+      record.content = await this.idOS.enclave.decrypt(
+        record.content,
+        record.encryption_public_key
+      );
+
+      return record;
+    }
+
+    const records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{
+      id: recordId
+    });
+
+    const record = records.find((r) => r.id === recordId);
+
+    return record || null;
+  }
+
   async delete(tableName: string, recordId: string): Promise<{ id: string }> {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
 
