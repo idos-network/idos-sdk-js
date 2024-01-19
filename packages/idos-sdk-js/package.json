@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/idos-sdk",
   "description": "idOS JavaScript SDK",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "homepage": "https://idos.network",
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
@@ -9,9 +9,7 @@
   "main": "dist/idos-sdk.js",
   "module": "dist/idos-sdk.umd.cjs",
   "types": "dist/idos-sdk.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "exports": {
     ".": {
       "import": "./dist/idos-sdk.js",
