@@ -3,6 +3,12 @@ import type { SignerSupplier } from "@kwilteam/kwil-js/dist/core/builders.d";
 import { Signer } from "ethers";
 
 export class KwilWrapper {
+  static defaults = {
+    kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
+    chainId: import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
+    dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
+  };
+
   dbId: string;
   kwilProvider: string;
   client: WebKwil;
@@ -11,9 +17,9 @@ export class KwilWrapper {
   signatureType?: string;
 
   constructor({
-    nodeUrl: kwilProvider = import.meta.env.VITE_IDOS_NODE_URL,
-    chainId = import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
-    dbId = import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
+    nodeUrl: kwilProvider = KwilWrapper.defaults.kwilProvider,
+    chainId = KwilWrapper.defaults.chainId,
+    dbId = KwilWrapper.defaults.dbId
   }) {
     this.dbId = dbId;
     this.kwilProvider = kwilProvider;
