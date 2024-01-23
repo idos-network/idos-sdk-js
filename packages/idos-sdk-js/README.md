@@ -56,6 +56,9 @@ const isValid = await idOS.verifiableCredentials.verify(content).catch((e) => fa
 > - [`📁 idos-example-dapp`](../../apps/idos-example-dapp) for a simple implementation
 > - [`📁 idos-data-dashboard`](../../apps/idos-data-dashboard) for a thorough example
 
+> [!TIP]
+> Need support? Please follow [this process](https://github.com/idos-network/.github/blob/main/profile/README.md).
+
 ## Diving deeper
 
 ### Initialization and the `#idos-container`
