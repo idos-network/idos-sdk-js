@@ -31,3 +31,7 @@ await idos.setSigner("EVM", signer);
 await idos.data.list("credentials").then(console.log);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```
+
+## Support
+
+Please follow the process outlined here: https://github.com/idos-network/.github/blob/main/profile/README.md
