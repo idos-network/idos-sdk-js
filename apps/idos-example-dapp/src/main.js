@@ -241,6 +241,9 @@ const connectWallet = {
             terminal.br();
             terminal.log("Press Restart to see the newly created access grant.");
             terminal.br();
+
+            chosenFlow["grants"] = true;
+            window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
             terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
           });
         }
