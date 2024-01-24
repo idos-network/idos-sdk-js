@@ -1,3 +1,4 @@
+import { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
@@ -42,7 +43,7 @@ export class Auth {
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
+    if (storedAddress !== currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
       await this.forget();
       const message = "idOS authentication";
       publicKey = SigningKey.recoverPublicKey(
@@ -54,7 +55,9 @@ export class Auth {
     await this.remember("signer-address", currentAddress);
     await this.remember("signer-public-key", publicKey);
 
-    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
+    const accountId = await signer.getAddress();
+
+    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep", accountId });
   }
 
   async setNearSigner(wallet: Wallet, recipient = "idos.network") {
@@ -181,12 +184,14 @@ export class Auth {
 
   #setSigner<
     T extends {
-      signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
+      accountId: string;
+      signer: EthSigner | ((message: Uint8Array) => Promise<Uint8Array>);
       publicKey: string;
       signatureType: string;
     }
   >(args: T) {
     this.idOS.kwilWrapper.setSigner(args);
+
     return args;
   }
 
