@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 
+import { DownloadIcon } from "lucide-react";
 import { idOSCredential } from "../types";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
@@ -49,15 +50,20 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     }
   );
 
+  const jsonLink = `data:text/json;chatset=utf-8,${encodeURIComponent(
+    JSON.stringify(credential.data)
+  )}`;
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       size={{
         base: "full",
-        lg: "xl"
+        lg: "2xl"
       }}
       isCentered={isCentered}
+      scrollBehavior="inside"
     >
       <ModalOverlay />
       <ModalContent bg="neutral.900" rounded="xl">
@@ -77,7 +83,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
             false
           )}
           {credential.isSuccess ? (
-            <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre">
+            <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre" bg="neutral.950" rounded="xl">
               {credential.data ? credential.data.content : "No content to display"}
             </Code>
           ) : (
@@ -87,6 +93,15 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
         <ModalFooter gap={2.5}>
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
           <Button onClick={onClose}>Close</Button>
+          <Button
+            as="a"
+            href={jsonLink}
+            colorScheme="green"
+            leftIcon={<DownloadIcon />}
+            download={`${credential.data?.credential_type}_${credential.data?.issuer}.json`}
+          >
+            Download as .json
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
