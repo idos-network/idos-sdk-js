@@ -166,6 +166,9 @@ importers:
       '@idos-network/idos-sdk':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
+      '@kwilteam/kwil-js':
+        specifier: 0.3.0
+        version: 0.3.0
       '@near-wallet-selector/core':
         specifier: ^8.7.0
         version: 8.7.0(near-api-js@2.1.4)
@@ -184,9 +187,18 @@ importers:
       '@near-wallet-selector/nightly':
         specifier: ^8.7.0
         version: 8.7.0
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
       ethers:
         specifier: ^6.7.1
         version: 6.7.1
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
     devDependencies:
       typescript:
         specifier: ^5.0.2
@@ -2614,7 +2626,7 @@ packages:
     dependencies:
       axios: 0.27.2
       dotenv: 16.3.1
-      ethers: 6.8.0
+      ethers: 6.9.1
       ethers5: /ethers@5.7.2
       jssha: 3.3.1
       long: 5.2.3

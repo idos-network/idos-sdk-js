@@ -15,7 +15,7 @@ export class Terminal {
     });
 
     this.restartButton = wrapper.querySelector("button.restart");
-    this.restartButton.addEventListener("click", (e) => (window.location = window.location.origin));
+    this.restartButton.addEventListener("click", this.reloadPage);
 
     this.resetDappButton = wrapper.querySelector("button.reset-dapp");
     this.resetDappButton.addEventListener("click", async (e) => {
@@ -33,6 +33,10 @@ export class Terminal {
 
     window.terminalHandlers = {};
     return this;
+  }
+
+  reloadPage() {
+    window.location = window.location.origin;
   }
 
   log(str) {
@@ -142,6 +146,16 @@ export class Terminal {
     this.currentElem = this.detailElem;
 
     return this;
+  }
+
+  button(id, text, click) {
+    const res = this.log(`<button id="${id}">${text}</button>`);
+    document.querySelector(`button#${id}`).addEventListener("click", click);
+    return res;
+  }
+
+  removeButton(id) {
+    document.querySelector(`button#${id}`).remove();
   }
 
   async wait(html, promise, onError) {
