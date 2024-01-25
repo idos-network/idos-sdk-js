@@ -226,6 +226,7 @@ export class EvmGrants extends GrantChild {
     lockedUntil = ZERO_TIMELOCK,
     wait = true
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{
+    grant: Grant;
     transactionId: string;
   }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
@@ -254,6 +255,7 @@ export class EvmGrants extends GrantChild {
     lockedUntil = ZERO_TIMELOCK,
     wait = true
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{
+    grant: Grant;
     transactionId: string;
   }> {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
