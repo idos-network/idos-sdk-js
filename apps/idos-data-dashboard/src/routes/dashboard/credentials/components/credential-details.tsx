@@ -93,15 +93,17 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
         <ModalFooter gap={2.5}>
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
           <Button onClick={onClose}>Close</Button>
-          <Button
-            as="a"
-            href={jsonLink}
-            colorScheme="green"
-            leftIcon={<DownloadIcon />}
-            download={`${credential.data?.credential_type}_${credential.data?.issuer}.json`}
-          >
-            Download as .json
-          </Button>
+          {credential.isSuccess ? (
+            <Button
+              as="a"
+              href={jsonLink}
+              colorScheme="green"
+              leftIcon={<DownloadIcon />}
+              download={`${credential.data?.credential_type}_${credential.data?.issuer}.json`}
+            >
+              Download as .json
+            </Button>
+          ) : null}
         </ModalFooter>
       </ModalContent>
     </Modal>
