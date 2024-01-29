@@ -23,6 +23,7 @@ export interface NearGrantsOptions {
 export class NearGrants extends GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
+  #owner: string;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
   static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
@@ -34,9 +35,10 @@ export class NearGrants extends GrantChild {
     revoke: "delete_grant"
   } as const;
 
-  private constructor(signer: Wallet, contract: nearAPI.Contract) {
+  private constructor(signer: Wallet, owner: string, contract: nearAPI.Contract) {
     super();
     this.#signer = signer;
+    this.#owner = owner;
     this.#contract = contract;
   }
 
@@ -53,6 +55,7 @@ export class NearGrants extends GrantChild {
 
     return new this(
       signer,
+      accountId,
       new nearAPI.Contract(
         await keylessNearConnection.account(accountId),
         options.contractId ?? this.defaultContractId,
@@ -62,6 +65,23 @@ export class NearGrants extends GrantChild {
         }
       )
     );
+  }
+
+  #result(
+    grant: Omit<NearContractGrant, "owner">,
+    transactionResult: nearAPI.providers.FinalExecutionOutcome | undefined
+  ): { grant: Grant; transactionId: string } {
+    if (!transactionResult) throw new Error("Unexpected absent transactionResult");
+
+    return {
+      grant: {
+        grantee: grant.grantee,
+        lockedUntil: grant.locked_until,
+        dataId: grant.data_id,
+        owner: this.#owner
+      },
+      transactionId: transactionResult.transaction.hash
+    };
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
@@ -95,32 +115,31 @@ export class NearGrants extends GrantChild {
     grantee,
     dataId: data_id,
     lockedUntil
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
     const grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
 
     let transactionResult;
     try {
-      transactionResult = await this.#signer.signAndSendTransaction({
-        actions: [
-          {
-            type: "FunctionCall",
-            params: {
-              methodName: NearGrants.contractMethods.create,
-              args: grant,
-              gas: "30000000000000",
-              deposit: "0"
+      transactionResult =
+        (await this.#signer.signAndSendTransaction({
+          actions: [
+            {
+              type: "FunctionCall",
+              params: {
+                methodName: NearGrants.contractMethods.create,
+                args: grant,
+                gas: "30000000000000",
+                deposit: "0"
+              }
             }
-          }
-        ]
-      });
+          ]
+        })) || undefined;
     } catch (e) {
       throw new Error("Grant creation failed", { cause: e });
     }
 
-    if (!transactionResult) throw new Error("Unexpected absent transactionResult");
-
-    return { transactionId: transactionResult.transaction.hash };
+    return this.#result(grant, transactionResult);
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
@@ -128,31 +147,30 @@ export class NearGrants extends GrantChild {
     grantee,
     dataId: data_id,
     lockedUntil
-  }: Omit<Grant, "owner">): Promise<{ transactionId: string }> {
+  }: Omit<Grant, "owner">): Promise<{ grant: Grant; transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
     const grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
 
     let transactionResult;
     try {
-      transactionResult = await this.#signer.signAndSendTransaction({
-        actions: [
-          {
-            type: "FunctionCall",
-            params: {
-              methodName: NearGrants.contractMethods.revoke,
-              args: grant,
-              gas: "30000000000000",
-              deposit: "0"
+      transactionResult =
+        (await this.#signer.signAndSendTransaction({
+          actions: [
+            {
+              type: "FunctionCall",
+              params: {
+                methodName: NearGrants.contractMethods.revoke,
+                args: grant,
+                gas: "30000000000000",
+                deposit: "0"
+              }
             }
-          }
-        ]
-      });
+          ]
+        })) || undefined;
     } catch (e) {
       throw new Error("Grant revocation failed", { cause: e });
     }
 
-    if (!transactionResult) throw new Error("Unexpected absent transactionResult");
-
-    return { transactionId: transactionResult.transaction.hash };
+    return this.#result(grant, transactionResult);
   }
 }

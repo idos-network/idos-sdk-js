@@ -9,11 +9,15 @@ export abstract class GrantChild {
     throw new Error("Unimplemented");
   }
 
-  async create(_: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
+  async create(
+    _: Omit<Grant, "owner"> & { wait?: boolean }
+  ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Unimplemented");
   }
 
-  async revoke(_: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ transactionId: string }> {
+  async revoke(
+    _: Omit<Grant, "owner"> & { wait?: boolean }
+  ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Unimplemented");
   }
 }

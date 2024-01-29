@@ -224,7 +224,7 @@ const connectWallet = {
             const grantPromise = idos.grants.create(
               "credentials",
               id,
-              fakeServer.publicInfo.granteeAddress,
+              fakeServer.publicInfo[chosenWallet].grantee,
               Math.floor(Date.now() / 1000) + fakeServer.publicInfo.lockTimeSpanSeconds,
               fakeServer.publicInfo.encryptionPublicKey
             );
@@ -269,7 +269,7 @@ const connectWallet = {
         try {
           content = await terminal.wait(
             "awaiting server decryption",
-            fakeServer.getAccessGrantsContentDecrypted(dataId)
+            fakeServer.getAccessGrantsContentDecrypted(chosenWallet, dataId)
           );
           terminal.status("done", "Decrypted");
         } catch (e) {
