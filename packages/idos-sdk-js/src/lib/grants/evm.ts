@@ -7,14 +7,11 @@ const ZERO_DATA_ID = "0";
 const ZERO_TIMELOCK = 0;
 
 export interface EvmGrantsOptions {
-  contractAddress?: string;
-  chainId?: string;
+  contractAddress: string;
+  chainId: string;
 }
 
 export class EvmGrants extends GrantChild {
-  static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
-  static defaultChainId = import.meta.env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID;
-
   static #abi = [
     {
       inputs: [
@@ -184,7 +181,7 @@ export class EvmGrants extends GrantChild {
     return new this(
       signer,
       await signer.getAddress(),
-      new Contract(options.contractAddress ?? this.#defaultContractAddress, this.#abi, signer)
+      new Contract(options.contractAddress, this.#abi, signer)
     );
   }
 

@@ -2,8 +2,9 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { idOS } from ".";
 import { assertNever } from "../types";
-import { IframeEnclave, MetaMaskSnapEnclave, ServerProvider, IframeEnclaveOptions, MetaMaskSnapEnclaveOptions, ServerProviderOptions } from "./enclave-providers";
+import { IframeEnclave, MetaMaskSnapEnclave, ServerProvider } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/enclave-provider";
+import { Config } from "./config";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
@@ -19,31 +20,25 @@ export class Enclave {
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
-
-  constructor(idOS: idOS, providerType: "iframe", options: IframeEnclaveOptions);
-  constructor(idOs: idOS, providerType: "metamask-snap", options: MetaMaskSnapEnclaveOptions)
-  constructor(idOS: idOS, providerType: "server", options: ServerProviderOptions);
-
   constructor(
     idOS: idOS,
-    providerType: ProviderType,
-    options: IframeEnclaveOptions | MetaMaskSnapEnclaveOptions | ServerProviderOptions,
+    config: Config["enclave"],
   ) {
     this.initialized = false;
     this.idOS = idOS;
 
-    switch (providerType) {
+    switch (config.provider) {
       case "iframe":
-        this.provider = new IframeEnclave(options as IframeEnclaveOptions);
+        this.provider = new IframeEnclave(config.options?.iframe!);
         break;
       case "metamask-snap":
-        this.provider = new MetaMaskSnapEnclave(options as MetaMaskSnapEnclave);
+        this.provider = new MetaMaskSnapEnclave(config.options?.metamask!);
         break;
       case "server":
-        this.provider = new ServerProvider(options as ServerProviderOptions);
+        this.provider = new ServerProvider(config.options?.server!);
         break;
       default:
-        this.provider = assertNever(providerType, `Unexpected provider type: ${providerType}`);
+        this.provider = assertNever(config.provider, `Unexpected provider type: ${config.provider}`);
     }
   }
 

@@ -3,10 +3,11 @@ import type { Signer } from "ethers";
 
 import { idOS } from "..";
 import { assertNever } from "../../types";
-import { EvmGrants, EvmGrantsOptions } from "./evm";
+import { EvmGrants } from "./evm";
 import Grant from "./grant";
 import { GrantChild } from "./grant-child";
-import { NearGrants, NearGrantsOptions } from "./near";
+import { NearGrants } from "./near";
+import { Config } from "../config";
 
 const SIGNER_TYPES = {
   EVM: EvmGrants,
@@ -17,35 +18,24 @@ export type SignerType = keyof typeof SIGNER_TYPES;
 
 export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;
-  static evm = {
-    defaultChainId: EvmGrants.defaultChainId
-  };
+
   static near = {
     /**
      * @deprecated Use {@link Grants.methodNames} instead.
      */
     contractMethods: Object.values(NearGrants.contractMethods),
     methodNames: Object.values(NearGrants.contractMethods),
-    /**
-     * @deprecated Use {@link Grants.contractId } instead.
-     */
-    defaultContractId: NearGrants.defaultContractId,
-    contractId: NearGrants.defaultContractId,
-    defaultNetwork: NearGrants.defaultNetwork
   };
 
   idOS: idOS;
-  evmGrantsOptions: EvmGrantsOptions;
-  nearGrantsOptions: NearGrantsOptions;
+  config: Config["grants"];
 
   constructor(
     idOS: idOS,
-    evmGrantsOptions: EvmGrantsOptions = {},
-    nearGrantsOptions: NearGrantsOptions = {}
+    config: Config["grants"],
   ) {
     this.idOS = idOS;
-    this.evmGrantsOptions = evmGrantsOptions;
-    this.nearGrantsOptions = nearGrantsOptions;
+    this.config = config;
   }
 
   async init({ type, signer }: { type: "EVM"; signer: Signer }): Promise<ConnectedGrants>;
@@ -73,20 +63,20 @@ export class Grants {
 
     switch (type) {
       case "EVM":
-        child = await EvmGrants.build({ signer: signer as Signer, options: this.evmGrantsOptions });
+        child = await EvmGrants.build({ signer: signer as Signer, options: this.config.evm });
         break;
       case "NEAR":
         child = await NearGrants.build({
           accountId: accountId!,
           signer: signer as Wallet,
-          options: this.nearGrantsOptions
+          options: this.config.near,
         });
         break;
       default:
         child = assertNever(type, `Unexpected signer type: ${type}`);
     }
 
-    return new ConnectedGrants(this.idOS, child);
+    return new ConnectedGrants(this.idOS, this.config, child);
   }
 
   async list(
@@ -123,8 +113,9 @@ export class Grants {
 class ConnectedGrants extends Grants {
   #child: GrantChild;
 
-  constructor(idOS: idOS, child: GrantChild) {
-    super(idOS);
+  constructor(idOS: idOS, config: Config["grants"], child: GrantChild) {
+    super(idOS, config);
+
     this.#child = child;
   }
 

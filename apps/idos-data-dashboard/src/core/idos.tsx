@@ -15,6 +15,7 @@ import { useAccount } from "wagmi";
 
 import { useWalletSelector } from "./near";
 import { useEthersSigner } from "./wagmi";
+import config from "@/config";
 
 type idOSContextValue = {
   sdk: idOS;
@@ -81,11 +82,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
 
     if (!signer || !userAddress) return;
 
-    const _sdk = await idOS.init({
-      enclaveProviderOptions: {
-        container: "#idos",
-      },
-    });
+    const _sdk = await idOS.init(config);
 
     const profile = await _sdk.hasProfile(userAddress);
     setHasProfile(profile);

@@ -4,29 +4,16 @@ import { Store } from "../../../idos-store";
 import { assertNever } from "../types";
 import { Auth } from "./auth";
 import { Data } from "./data";
-import { Enclave, ProviderType } from "./enclave";
-import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
+import { Enclave } from "./enclave";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
-import { IframeEnclaveOptions, MetaMaskSnapEnclaveOptions, ServerProviderOptions } from "./enclave-providers";
-
-interface InitParams {
-  nodeUrl?: string;
-  dbId?: string;
-  enclaveProvider?: ProviderType,
-  evmGrantsOptions?: EvmGrantsOptions;
-  nearGrantsOptions?: NearGrantsOptions;
-  enclaveProviderOptions?: IframeEnclaveOptions | MetaMaskSnapEnclaveOptions | ServerProviderOptions;
-  customStore?: Store;
-}
+import createConfig, { Config, ConfigParams } from "./config";
 
 export class idOS {
   static initializing = false;
 
   static near = Grants.near;
-  static evm = Grants.evm;
-  static kwil = KwilWrapper.defaults;
 
   static profileProviders = [import.meta.env.VITE_FRACTAL_ID_URL];
 
@@ -39,32 +26,23 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({
-    nodeUrl,
-    dbId,
-    enclaveProvider = "iframe",
-    enclaveProviderOptions,
-    evmGrantsOptions,
-    nearGrantsOptions,
-    customStore,
-  }: InitParams) {
+  private constructor(config: Config) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-
-    // @ts-expect-error
-    this.enclave = new Enclave(this, enclaveProvider, enclaveProviderOptions as any);
-
-    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
-    this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
-    this.store = customStore ?? new Store();
+    this.enclave = new Enclave(this, config.enclave);
+    this.kwilWrapper = new KwilWrapper(config.db);
+    this.grants = new Grants(this, config.grants);
+    this.store = config.customStore ?? new Store();
   }
 
-  static async init(params: InitParams): Promise<idOS> {
+  static async init(params: ConfigParams | Config): Promise<idOS> {
     this.initializing = true;
 
-    const idos = new this(params);
+    const config = params instanceof Config ? params : createConfig(params);
+
+    const idos = new this(config);
     await idos.enclave.load();
 
     return idos;

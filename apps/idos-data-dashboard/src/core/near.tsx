@@ -9,6 +9,7 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import type { ReactNode } from "react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import config from "../config";
 
 declare global {
   interface Window {
@@ -42,7 +43,7 @@ export const WalletSelectorContextProvider: React.FC<{
     });
 
     const _modal = setupModal(_selector, {
-      contractId: idOSSDK.near.contractId,
+      contractId: config.grants.near.contractId,
       methodNames: idOSSDK.near.contractMethods
     });
     const state = _selector.store.getState();

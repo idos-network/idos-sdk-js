@@ -15,18 +15,14 @@ const compact = <T extends Object>(obj: T): Partial<T> => {
 };
 
 export interface NearGrantsOptions {
-  network?: string;
-  contractId?: string;
-  rpcUrl?: string;
+  network: string;
+  contractId: string;
+  rpcUrl: string;
 }
 
 export class NearGrants extends GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
-
-  static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
-  static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
-  static defaultRpcUrl = import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL;
 
   static contractMethods = {
     list: "find_grants",
@@ -46,16 +42,16 @@ export class NearGrants extends GrantChild {
     options
   }: { accountId: string; signer: Wallet; options: NearGrantsOptions }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
-      networkId: options.network ?? this.defaultNetwork,
+      networkId: options.network,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-      nodeUrl: options.rpcUrl ?? this.defaultRpcUrl
+      nodeUrl: options.rpcUrl,
     });
 
     return new this(
       signer,
       new nearAPI.Contract(
         await keylessNearConnection.account(accountId),
-        options.contractId ?? this.defaultContractId,
+        options.contractId,
         {
           viewMethods: [this.contractMethods.list],
           changeMethods: []
