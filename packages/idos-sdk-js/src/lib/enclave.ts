@@ -2,15 +2,16 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { idOS } from ".";
 import { assertNever } from "../types";
-import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
+import { IframeEnclave, MetaMaskSnapEnclave, ServerProvider, IframeEnclaveOptions, MetaMaskSnapEnclaveOptions, ServerProviderOptions } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/enclave-provider";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
-  "metamask-snap": MetaMaskSnapEnclave
+  "metamask-snap": MetaMaskSnapEnclave,
+  server: ServerProvider,
 } as const;
 
-type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
+export type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
   idOS: idOS;
@@ -18,21 +19,28 @@ export class Enclave {
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
+
+  constructor(idOS: idOS, providerType: "iframe", options: IframeEnclaveOptions);
+  constructor(idOs: idOS, providerType: "metamask-snap", options: MetaMaskSnapEnclaveOptions)
+  constructor(idOS: idOS, providerType: "server", options: ServerProviderOptions);
+
   constructor(
     idOS: idOS,
-    container: string,
-    providerType: ProviderType = "iframe",
-    usePasskeys = false
+    providerType: ProviderType,
+    options: IframeEnclaveOptions | MetaMaskSnapEnclaveOptions | ServerProviderOptions,
   ) {
     this.initialized = false;
     this.idOS = idOS;
 
     switch (providerType) {
       case "iframe":
-        this.provider = new IframeEnclave({ container, usePasskeys });
+        this.provider = new IframeEnclave(options as IframeEnclaveOptions);
         break;
       case "metamask-snap":
-        this.provider = new MetaMaskSnapEnclave({});
+        this.provider = new MetaMaskSnapEnclave(options as MetaMaskSnapEnclave);
+        break;
+      case "server":
+        this.provider = new ServerProvider(options as ServerProviderOptions);
         break;
       default:
         this.provider = assertNever(providerType, `Unexpected provider type: ${providerType}`);

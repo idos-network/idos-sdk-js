@@ -1,10 +1,12 @@
 import { EnclaveProvider, StoredData } from "./enclave-provider";
 
+export interface MetaMaskSnapEnclaveOptions {}
+
 export class MetaMaskSnapEnclave extends EnclaveProvider {
   enclaveHost: any;
   snapId: string;
 
-  constructor(_?: {}) {
+  constructor(_options: MetaMaskSnapEnclaveOptions) {
     super();
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";

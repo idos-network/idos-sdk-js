@@ -4,19 +4,21 @@ import { Store } from "../../../idos-store";
 import { assertNever } from "../types";
 import { Auth } from "./auth";
 import { Data } from "./data";
-import { Enclave } from "./enclave";
+import { Enclave, ProviderType } from "./enclave";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
+import { IframeEnclaveOptions, MetaMaskSnapEnclaveOptions, ServerProviderOptions } from "./enclave-providers";
 
 interface InitParams {
   nodeUrl?: string;
   dbId?: string;
-  container: string;
-  usePasskeys?: boolean;
+  enclaveProvider?: ProviderType,
   evmGrantsOptions?: EvmGrantsOptions;
   nearGrantsOptions?: NearGrantsOptions;
+  enclaveProviderOptions?: IframeEnclaveOptions | MetaMaskSnapEnclaveOptions | ServerProviderOptions;
+  customStore?: Store;
 }
 
 export class idOS {
@@ -40,19 +42,23 @@ export class idOS {
   private constructor({
     nodeUrl,
     dbId,
-    container,
+    enclaveProvider = "iframe",
+    enclaveProviderOptions,
     evmGrantsOptions,
     nearGrantsOptions,
-    usePasskeys = false
+    customStore,
   }: InitParams) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container, undefined, usePasskeys);
+
+    // @ts-expect-error
+    this.enclave = new Enclave(this, enclaveProvider, enclaveProviderOptions as any);
+
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
-    this.store = new Store();
+    this.store = customStore ?? new Store();
   }
 
   static async init(params: InitParams): Promise<idOS> {

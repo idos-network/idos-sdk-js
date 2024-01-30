@@ -82,7 +82,9 @@ export const Provider = ({ children }: PropsWithChildren) => {
     if (!signer || !userAddress) return;
 
     const _sdk = await idOS.init({
-      container: "#idos"
+      enclaveProviderOptions: {
+        container: "#idos",
+      },
     });
 
     const profile = await _sdk.hasProfile(userAddress);
