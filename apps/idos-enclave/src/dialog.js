@@ -62,17 +62,26 @@ class Dialog {
   }
 
   async passkey({ message: { type } }) {
-    try {
-      if (type === "password") {
-        const { password } = await this.getOrCreatePasswordCredential();
-        this.respondToEnclave({ result: { password } });
-      } else if (type === "webauthn") {
-        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
-        this.respondToEnclave({ result: { password, credentialId } });
-      }
-    } catch (e) {
-      this.respondToEnclave({ error: e.toString() });
-    }
+    const passkeyButton = document.querySelector("#passkeys-btn");
+    passkeyButton.style.display = "block";
+
+    return new Promise((resolve) => {
+      passkeyButton.addEventListener("click", async (e) => {
+        e.preventDefault();
+        try {
+          if (type === "password") {
+            const { password } = await this.getOrCreatePasswordCredential();
+            this.respondToEnclave({ result: { password } });
+          } else if (type === "webauthn") {
+            const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
+            this.respondToEnclave({ result: { password, credentialId } });
+            resolve();
+          }
+        } catch (e) {
+          this.respondToEnclave({ error: e.toString() });
+        }
+      });
+    });
   }
 
   async confirm({ message: { message, origin } }) {

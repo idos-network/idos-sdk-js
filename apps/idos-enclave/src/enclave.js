@@ -242,14 +242,14 @@ export class Enclave {
 
   async #openDialog(intent, message) {
     const width = intent === "passkey" ? 450 : 250;
-    const height = intent === "passkey" ? 100 : 350;
+    const height = intent === "passkey" ? 150 : 350;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
       height,
       left,
-      popup: 1,
       top: 0,
+      popup: 1,
       width
     })
       .map((feat) => feat.join("="))
