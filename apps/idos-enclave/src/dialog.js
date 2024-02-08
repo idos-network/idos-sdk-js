@@ -62,8 +62,9 @@ class Dialog {
   }
 
   async passkey({ message: { type } }) {
+    const passkeys = document.querySelector("#passkeys");
     const passkeyButton = document.querySelector("#passkeys-btn");
-    passkeyButton.style.display = "block";
+    passkeys.style.display = "block";
 
     return new Promise((resolve) => {
       passkeyButton.addEventListener("click", async (e) => {
