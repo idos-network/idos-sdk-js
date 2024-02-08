@@ -15,21 +15,6 @@ import * as fakeServer from "./fake-server";
 import { Terminal } from "./terminal";
 
 /*
- * Initializing the idOS
- *
- */
-const idos = await idOS.init({
-  container: "#idos-container"
-});
-
-/*
- * Setting up the demo
- *
- */
-const terminal = new Terminal("#terminal", idos);
-const cache = new Cache();
-
-/*
  * Example wallet connection options
  *
  */
@@ -99,9 +84,24 @@ const connectWallet = {
 
 /*
  * 🚀 idOS, here we go!
- *
- */
+ * */
 (async () => {
+  /*
+   * Initializing the idOS
+   *
+   */
+  const idos = await idOS.init({
+    container: "#idos-container",
+    usePasskeys: window.localStorage.getItem("use")
+  });
+
+  /*
+   * Setting up the demo
+   *
+   */
+  const terminal = new Terminal("#terminal", idos);
+  const cache = new Cache();
+
   /*
    * Connecting a wallet
    *
