@@ -13,7 +13,7 @@
 />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>🔐 idOS Secure Enclave</title>
-<body class="min-h-screen bg-neutral-950 text-neutral-50">
+<body class="bg-neutral-950 text-neutral-50">
   <style>
     main > *:not(h1) {
       display: none;
@@ -26,7 +26,7 @@
     }
   </style>
   <main
-    class="px-5 max-w-xs mx-auto flex flex-col place-content-center gap-5 h-[100dvh] items-stretch"
+    class="p-5 max-w-md mx-auto flex flex-col items-stretch justify-center gap-5 h-[100dvh] "
   >
     <h1 class="font-semibold text-2xl text-center">idOS Secure Enclave</h1>
 
@@ -99,12 +99,14 @@
       </div>
     </form>
 
+    <div id="passkeys">
     <button
-      class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium inline-flex gap-2 items-center place-content-center"
+      class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium inline-flex gap-2 items-center place-content-center w-full"
       id="passkeys-btn"
     >
       <span> Use Passkeys </span>
       <span>🔑</span>
     </button>
+  </div>
   </main>
 </body>
