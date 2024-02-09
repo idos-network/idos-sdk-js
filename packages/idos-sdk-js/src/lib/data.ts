@@ -147,7 +147,7 @@ export class Data {
     return record || null;
   }
 
-  async delete(tableName: string, recordId: string): Promise<{ id: string }> {    
+  async delete(tableName: string, recordId: string): Promise<{ id: string }> {
     const record = { id: recordId };
     await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
 
