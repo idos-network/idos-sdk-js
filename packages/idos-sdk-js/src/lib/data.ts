@@ -40,10 +40,8 @@ export class Data {
 
   async create<T extends Record<string, unknown>>(
     tableName: string,
-    record: T,
-
+    record: T
   ): Promise<T & { id: string }> {
-    
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName
     )}`;
