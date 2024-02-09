@@ -148,8 +148,6 @@ export class Data {
   }
 
   async delete(tableName: string, recordId: string): Promise<{ id: string }> {
-    if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
-
     const record = { id: recordId };
     await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
 
