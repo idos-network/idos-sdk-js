@@ -1,14 +1,11 @@
 import {
-  Box,
   Button,
   HStack,
   Heading,
   Link,
   Stack,
   Text,
-  VStack,
-  chakra,
-  useDisclosure
+  VStack
 } from "@chakra-ui/react";
 import { useState } from "react";
 
@@ -42,7 +39,6 @@ function getCookieConsentResult(): boolean | null {
 }
 
 export const CookieConsent = () => {
-  const { isOpen, onToggle } = useDisclosure();
   const [value, setValue] = useState(getCookieConsentResult());
 
   const onAccept = () => {
@@ -63,7 +59,7 @@ export const CookieConsent = () => {
     <Stack
       flexDir={{
         base: "column",
-        lg: "row"
+        lg: "row",
       }}
       align="stretch"
       justify="space-between"
@@ -78,66 +74,28 @@ export const CookieConsent = () => {
       <VStack align="stretch" gap={1.5}>
         <Heading size="md">We value your privacy</Heading>
         <Text color="neutral.500" fontSize="sm" align="justify">
-          By pressing the approving button I voluntarily give my consent to set or activate cookies
-          and external connections. I know their functions because they are described in the Privacy
-          Policy or explained in more detail in documents or external links implemented there.
+          We do not use non-essential cookies on this website, but we do collect
+          some important data in order to properly customize the website for
+          you. We collect the URL of the website you visited before our website,
+          bounce rate, session record, time spent on the site and sub-pages,
+          mouse events, your device type and browser information. If you do not
+          consent to the collection of the above data, click "decline."
+          <Link
+            color="green.200"
+            href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
+            target="_blank"
+          >
+            Privacy Policy
+          </Link>
         </Text>
-        {isOpen ? (
-          <Text color="neutral.500" fontSize="sm" align="justify">
-            By pressing this button, I also voluntarily give my explicit consent pursuant to Article
-            49 (1) (1) (a) GDPR for personalized advertising and for other data transfers to third
-            countries to the and by the companies mentioned in the Privacy Policy and purposes, in
-            particular for such transfers to third countries for which an adequacy decision of the
-            EU/EEA is absent or does exist, and to companies or other entities that are not subject
-            to an existing adequacy decision on the basis of self-certification or other accession
-            criteria, and that involve significant risks and no appropriate safeguards for the
-            protection of my personal data (e.g., because of Section 702 FISA, Executive Order
-            EO12333 and the CloudAct in the USA). When giving my voluntary and explicit consent, I
-            was aware that an adequate level of data protection may not exist in third countries and
-            that my data subjects rights may not be enforceable. I have the right to withdraw my
-            data protection consent at any time with effect for the future, by changing my cookie
-            preferences or deleting my cookies. The withdrawal of consent shall not affect the
-            lawfulness of processing based on consent before its withdrawal. With a single action
-            (pressing the approving button), several consents are granted. These are consents under
-            EU/EEA data protection law as well as those under CCPA/CPRA, ePrivacy and telemedia law,
-            and other international legislation, that are, among other things, necessary for storing
-            and reading out information and are required as a legal basis for planned further
-            processing of the data read out. I am aware that I can refuse my consent by clicking on
-            the other button or, if necessary, make individual settings. With my action I also
-            confirm that I have read and taken note of the{" "}
-            <Link
-              color="green.200"
-              href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
-              target="_blank"
-            >
-              Privacy Policy,
-            </Link>{" "}
-            <Link
-              color="green.200"
-              href="https://drive.google.com/file/d/11s9TXwmn-497WgFj02KJrcLkgAW_8_KV/view?usp=drive_link"
-              target="_blank"
-            >
-              User agreement
-            </Link>{" "}
-            and the{" "}
-            <Link
-              color="green.200"
-              href="https://drive.google.com/file/d/1B4ink7Hq-5662a0S2C7v7nMLeQiBljVX/view?usp=sharing"
-              target="_blank"
-            >
-              Transparency Document.
-            </Link>
-          </Text>
-        ) : null}
-
-        <Box>
-          <chakra.button onClick={onToggle} color="green.100" fontSize="sm">
-            {isOpen ? "Read less" : "Read more"}
-          </chakra.button>
-        </Box>
       </VStack>
       <HStack justify="end">
-        <Button colorScheme="green" size="sm" variant="outline" onClick={onReject}>
+        <Button
+          colorScheme="green"
+          size="sm"
+          variant="outline"
+          onClick={onReject}
+        >
           Reject all
         </Button>
         <Button colorScheme="green" size="sm" onClick={onAccept}>
