@@ -1,12 +1,4 @@
-import {
-  Button,
-  HStack,
-  Heading,
-  Link,
-  Stack,
-  Text,
-  VStack
-} from "@chakra-ui/react";
+import { Button, HStack, Heading, Link, Stack, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
 function storeCookieConsentResult(consent: boolean) {
@@ -59,7 +51,7 @@ export const CookieConsent = () => {
     <Stack
       flexDir={{
         base: "column",
-        lg: "row",
+        lg: "row"
       }}
       align="stretch"
       justify="space-between"
@@ -74,12 +66,11 @@ export const CookieConsent = () => {
       <VStack align="stretch" gap={1.5}>
         <Heading size="md">We value your privacy</Heading>
         <Text color="neutral.500" fontSize="sm" align="justify">
-          We do not use non-essential cookies on this website, but we do collect
-          some important data in order to properly customize the website for
-          you. We collect the URL of the website you visited before our website,
-          bounce rate, session record, time spent on the site and sub-pages,
-          mouse events, your device type and browser information. If you do not
-          consent to the collection of the above data, click "decline."
+          We do not use non-essential cookies on this website, but we do collect some important data
+          in order to properly customize the website for you. We collect the URL of the website you
+          visited before our website, bounce rate, session record, time spent on the site and
+          sub-pages, mouse events, your device type and browser information. If you do not consent
+          to the collection of the above data, click "decline."
           <Link
             color="green.200"
             href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
@@ -90,12 +81,7 @@ export const CookieConsent = () => {
         </Text>
       </VStack>
       <HStack justify="end">
-        <Button
-          colorScheme="green"
-          size="sm"
-          variant="outline"
-          onClick={onReject}
-        >
+        <Button colorScheme="green" size="sm" variant="outline" onClick={onReject}>
           Reject all
         </Button>
         <Button colorScheme="green" size="sm" onClick={onAccept}>
