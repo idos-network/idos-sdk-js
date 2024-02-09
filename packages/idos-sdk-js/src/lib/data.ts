@@ -41,9 +41,9 @@ export class Data {
   async create<T extends Record<string, unknown>>(
     tableName: string,
     record: T,
-    receiverPublicKey?: string
+
   ): Promise<T & { id: string }> {
-    receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
+    
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName
     )}`;
@@ -59,6 +59,7 @@ export class Data {
     }
 
     if (tableName === "credentials") {
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
       (record as any).content = await this.idOS.enclave.encrypt(
         (record as any).content as string,
         receiverPublicKey
@@ -67,6 +68,7 @@ export class Data {
     }
 
     if (tableName === "attributes") {
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.init());
       (record as any).value = await this.idOS.enclave.encrypt(
         (record as any).value as string,
         receiverPublicKey
