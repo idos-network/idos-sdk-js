@@ -269,7 +269,7 @@ export class Enclave {
         if (error) {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
-          return reject(error)
+          return reject(error);
         }
 
         return resolve(result);
