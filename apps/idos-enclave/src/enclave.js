@@ -265,7 +265,14 @@ export class Enclave {
       port1.onmessage = ({ data: { error, result } }) => {
         port1.close();
         this.dialog.close();
-        error ? reject(error) : resolve(result);
+
+        if (error) {
+          this.unlockButton.disabled = false;
+          this.confirmButton.disabled = false;
+          return reject(error);
+        }
+
+        return resolve(result);
       };
       this.dialog.postMessage({ intent, message }, this.dialog.origin, [port2]);
     });
