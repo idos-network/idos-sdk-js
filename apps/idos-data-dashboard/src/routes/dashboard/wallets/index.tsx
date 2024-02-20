@@ -1,5 +1,7 @@
 import {
+  Box,
   Button,
+  Flex,
   HStack,
   Heading,
   IconButton,
@@ -8,8 +10,8 @@ import {
   VStack,
   useDisclosure
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { PlusIcon, RefreshCcwDot, RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -42,7 +44,7 @@ const NoWallets = () => {
 const WalletsList = () => {
   const wallets = useFetchWallets();
 
-  if (wallets.isLoading) {
+  if (wallets.isFetching) {
     return <DataLoading />;
   }
 
@@ -66,6 +68,7 @@ const WalletsList = () => {
 export function Component() {
   const { hasProfile } = useIdOS();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -89,7 +92,7 @@ export function Component() {
           Wallets
         </Heading>
         {hasProfile ? (
-          <>
+          <HStack>
             <Button
               colorScheme="green"
               leftIcon={<PlusIcon size={24} />}
@@ -98,10 +101,23 @@ export function Component() {
             >
               Add wallet
             </Button>
-            <IconButton colorScheme="green" aria-label="Add wallet" hideFrom="lg" onClick={onOpen}>
-              <PlusIcon size={24} />
-            </IconButton>
-          </>
+            <IconButton
+              aria-label="Add wallet"
+              colorScheme="green"
+              icon={<PlusIcon size={24} />}
+              hideFrom="lg"
+              onClick={onOpen}
+            />
+            <IconButton
+              aria-label="Refresh wallets"
+              icon={<RotateCw size={18} />}
+              onClick={() => {
+                queryClient.refetchQueries({
+                  queryKey: ["wallets"]
+                });
+              }}
+            />
+          </HStack>
         ) : (
           false
         )}
