@@ -19,6 +19,8 @@ import { useIdOS } from "@/core/idos";
 import { AddWallet } from "./components/add-wallet";
 import { WalletCard } from "./components/wallet-card";
 import { idOSWallet } from "./types";
+import { useState } from "react";
+import { DeleteWallet } from "./components/delete-wallet";
 
 const useFetchWallets = () => {
   const { sdk } = useIdOS();
@@ -41,6 +43,18 @@ const NoWallets = () => {
 
 const WalletsList = () => {
   const wallets = useFetchWallets();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [walletToDelete, setWalletToDelete] = useState<idOSWallet | null>(null);
+
+  const handleDelete = (wallet: idOSWallet) => {
+    setWalletToDelete(wallet);
+    onOpen();
+  };
+
+  const handleClose = () => {
+    setWalletToDelete(null);
+    onClose();
+  }
 
   if (wallets.isFetching) {
     return <DataLoading />;
@@ -52,13 +66,16 @@ const WalletsList = () => {
 
   if (wallets.isSuccess) {
     return (
-      <List display="flex" flexDir="column" gap={2.5} flex={1}>
-        {wallets.data.map((wallet) => (
-          <ListItem key={wallet.id}>
-            <WalletCard wallet={wallet} />
-          </ListItem>
-        ))}
-      </List>
+      <>
+        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+          {wallets.data.map((wallet) => (
+            <ListItem key={wallet.id}>
+              <WalletCard wallet={wallet} onDelete={handleDelete} />
+            </ListItem>
+          ))}
+        </List>
+        <DeleteWallet isOpen={isOpen} wallet={walletToDelete} onClose={handleClose} />
+      </>
     );
   }
 };
