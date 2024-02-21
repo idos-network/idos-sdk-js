@@ -1,7 +1,5 @@
 import {
-  Box,
   Button,
-  Flex,
   HStack,
   Heading,
   IconButton,
@@ -11,7 +9,7 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, RefreshCcwDot, RotateCw } from "lucide-react";
+import { PlusIcon, RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
