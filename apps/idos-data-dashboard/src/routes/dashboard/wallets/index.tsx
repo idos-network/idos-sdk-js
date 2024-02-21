@@ -9,6 +9,7 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { PlusIcon, RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
@@ -19,7 +20,6 @@ import { useIdOS } from "@/core/idos";
 import { AddWallet } from "./components/add-wallet";
 import { WalletCard } from "./components/wallet-card";
 import { idOSWallet } from "./types";
-import { useState } from "react";
 import { DeleteWallet } from "./components/delete-wallet";
 
 const useFetchWallets = () => {
@@ -54,7 +54,7 @@ const WalletsList = () => {
   const handleClose = () => {
     setWalletToDelete(null);
     onClose();
-  }
+  };
 
   if (wallets.isFetching) {
     return <DataLoading />;
