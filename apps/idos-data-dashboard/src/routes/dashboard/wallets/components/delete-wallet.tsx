@@ -21,10 +21,23 @@ type DeleteWalletProps = {
   onClose: () => void;
 };
 
+type Ctx = { previousWallets: idOSWallet[] };
+
 const useDeleteWalletMutation = () => {
   const { sdk } = useIdOS();
-  return useMutation<{ id: string }, DefaultError, { id: string }>({
-    mutationFn: ({ id }) => sdk.data.delete("wallets", id)
+  const queryClient = useQueryClient();
+
+  return useMutation<{ id: string }, DefaultError, idOSWallet, Ctx>({
+    mutationFn: ({ id }) => sdk.data.delete("wallets", id),
+    async onMutate({ address }) {
+      await queryClient.cancelQueries({ queryKey: ["wallets"] });
+      const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+      queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) =>
+        old.filter((wallet) => wallet.address !== address)
+      );
+
+      return { previousWallets };
+    }
   });
 };
 
@@ -39,26 +52,21 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
     onClose();
   };
 
-  const handleDeleteWallet = (id: string) => {
-    deleteWallet.mutate(
-      { id },
-      {
-        async onSuccess() {
-          handleClose();
-          queryClient.invalidateQueries({
-            queryKey: ["wallets"]
-          });
-        },
-        async onError() {
-          toast({
-            title: "Error while deleting wallet",
-            description: "An unexpected error. Please try again.",
-            position: "bottom-right",
-            status: "error"
-          });
-        }
+  const handleDeleteWallet = (wallet: idOSWallet) => {
+    deleteWallet.mutate(wallet, {
+      async onSuccess() {
+        handleClose();
+      },
+      async onError(_, __, ctx) {
+        queryClient.setQueryData(["wallets"], ctx?.previousWallets);
+        toast({
+          title: "Error while deleting wallet",
+          description: "An unexpected error. Please try again.",
+          position: "bottom-right",
+          status: "error"
+        });
       }
-    );
+    });
   };
 
   if (!wallet) return null;
@@ -86,7 +94,7 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
             <Button
               colorScheme="red"
               ml={3}
-              onClick={() => handleDeleteWallet(wallet.id)}
+              onClick={() => handleDeleteWallet(wallet)}
               isLoading={deleteWallet.isPending}
             >
               {deleteWallet.isError ? "Retry" : "Delete"}

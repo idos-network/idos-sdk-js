@@ -26,14 +26,16 @@ type AddWalletProps = {
 
 type Vars = { address: string };
 type Ctx = { previousWallets: idOSWallet[] };
+type AddWalletMutationData = Partial<idOSWallet> & { address: string };
 
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<Vars, DefaultError, Vars, Ctx>({
+  return useMutation<AddWalletMutationData, DefaultError, Vars, Ctx>({
     mutationFn: ({ address }) =>
-      sdk.data.create("wallets", { address, signature: "", message: "" }),
+      sdk.data.create<AddWalletMutationData>("wallets", { address, signature: "", message: "" }),
+
     onMutate: async ({ address }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
@@ -42,7 +44,7 @@ const useAddWalletMutation = () => {
         {
           address,
           human_id: "",
-          id: crypto.randomUUID(),
+          id: "",
           public_key: "",
           message: "",
           signature: ""
@@ -80,7 +82,11 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     addWallet.mutate(
       { address },
       {
-        async onSuccess() {
+        async onSuccess(wallet) {
+          const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+          const updated = cache.map((_wallet) => (!_wallet.id ? { ...wallet } : _wallet));
+          queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
+
           form.reset();
           handleClose();
         },
