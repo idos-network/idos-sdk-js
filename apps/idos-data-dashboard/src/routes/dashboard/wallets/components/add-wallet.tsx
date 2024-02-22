@@ -17,17 +17,42 @@ import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query
 import { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
+import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
   isOpen: boolean;
   onClose: () => void;
 };
 
+type Vars = { address: string };
+type Ctx = { previousWallets: idOSWallet[] };
+type AddWalletMutationData = Partial<idOSWallet> & { address: string };
+
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
+  const queryClient = useQueryClient();
 
-  return useMutation<{ address: string }, DefaultError, { address: string }>({
-    mutationFn: ({ address }) => sdk.data.create("wallets", { address, signature: "", message: "" })
+  return useMutation<AddWalletMutationData, DefaultError, Vars, Ctx>({
+    mutationFn: ({ address }) =>
+      sdk.data.create<AddWalletMutationData>("wallets", { address, signature: "", message: "" }),
+
+    onMutate: async ({ address }) => {
+      await queryClient.cancelQueries({ queryKey: ["wallets"] });
+      const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+      queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
+        ...old,
+        {
+          address,
+          human_id: "",
+          id: "",
+          public_key: "",
+          message: "",
+          signature: ""
+        }
+      ]);
+
+      return { previousWallets };
+    }
   });
 };
 
@@ -57,14 +82,18 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     addWallet.mutate(
       { address },
       {
-        async onSuccess() {
+        async onSuccess(wallet) {
+          const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+          const updated = cache.map((cachedWallet) =>
+            !cachedWallet.id ? { ...wallet } : cachedWallet
+          );
+          queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
+
           form.reset();
           handleClose();
-          queryClient.invalidateQueries({
-            queryKey: ["wallets"]
-          });
         },
-        async onError() {
+        async onError(_, __, ctx) {
+          queryClient.setQueryData(["wallets"], ctx?.previousWallets);
           toast({
             title: "Error while adding wallet",
             description: "An unexpected error. Please try again.",

@@ -1,6 +1,7 @@
-import { HStack, Heading, List, ListItem, VStack } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
+import { HStack, Heading, IconButton, List, ListItem, VStack } from "@chakra-ui/react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -44,7 +45,7 @@ const Credentials = () => {
   const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
 
-  if (credentials.isLoading) {
+  if (credentials.isFetching) {
     return <DataLoading />;
   }
 
@@ -90,6 +91,7 @@ const Credentials = () => {
 
 export function Component() {
   const { hasProfile } = useIdOS();
+  const queryClient = useQueryClient();
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -112,6 +114,15 @@ export function Component() {
         >
           Credentials
         </Heading>
+        <IconButton
+          aria-label="Refresh wallets"
+          icon={<RotateCw size={18} />}
+          onClick={() => {
+            queryClient.refetchQueries({
+              queryKey: ["credentials"]
+            });
+          }}
+        />
       </HStack>
       {hasProfile ? <Credentials /> : <NoCredentials />}
     </VStack>

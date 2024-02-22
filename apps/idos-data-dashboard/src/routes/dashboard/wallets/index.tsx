@@ -8,8 +8,9 @@ import {
   VStack,
   useDisclosure
 } from "@chakra-ui/react";
-import { useQuery } from "@tanstack/react-query";
-import { PlusIcon } from "lucide-react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import { PlusIcon, RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -19,6 +20,7 @@ import { useIdOS } from "@/core/idos";
 import { AddWallet } from "./components/add-wallet";
 import { WalletCard } from "./components/wallet-card";
 import { idOSWallet } from "./types";
+import { DeleteWallet } from "./components/delete-wallet";
 
 const useFetchWallets = () => {
   const { sdk } = useIdOS();
@@ -41,8 +43,20 @@ const NoWallets = () => {
 
 const WalletsList = () => {
   const wallets = useFetchWallets();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [walletToDelete, setWalletToDelete] = useState<idOSWallet | null>(null);
 
-  if (wallets.isLoading) {
+  const handleDelete = (wallet: idOSWallet) => {
+    setWalletToDelete(wallet);
+    onOpen();
+  };
+
+  const handleClose = () => {
+    setWalletToDelete(null);
+    onClose();
+  };
+
+  if (wallets.isFetching) {
     return <DataLoading />;
   }
 
@@ -52,13 +66,16 @@ const WalletsList = () => {
 
   if (wallets.isSuccess) {
     return (
-      <List display="flex" flexDir="column" gap={2.5} flex={1}>
-        {wallets.data.map((wallet) => (
-          <ListItem key={wallet.id}>
-            <WalletCard wallet={wallet} />
-          </ListItem>
-        ))}
-      </List>
+      <>
+        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+          {wallets.data.map((wallet) => (
+            <ListItem key={wallet.id}>
+              <WalletCard wallet={wallet} onDelete={handleDelete} />
+            </ListItem>
+          ))}
+        </List>
+        <DeleteWallet isOpen={isOpen} wallet={walletToDelete} onClose={handleClose} />
+      </>
     );
   }
 };
@@ -66,6 +83,7 @@ const WalletsList = () => {
 export function Component() {
   const { hasProfile } = useIdOS();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const queryClient = useQueryClient();
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -89,7 +107,7 @@ export function Component() {
           Wallets
         </Heading>
         {hasProfile ? (
-          <>
+          <HStack>
             <Button
               colorScheme="green"
               leftIcon={<PlusIcon size={24} />}
@@ -98,10 +116,23 @@ export function Component() {
             >
               Add wallet
             </Button>
-            <IconButton colorScheme="green" aria-label="Add wallet" hideFrom="lg" onClick={onOpen}>
-              <PlusIcon size={24} />
-            </IconButton>
-          </>
+            <IconButton
+              aria-label="Add wallet"
+              colorScheme="green"
+              icon={<PlusIcon size={24} />}
+              hideFrom="lg"
+              onClick={onOpen}
+            />
+            <IconButton
+              aria-label="Refresh wallets"
+              icon={<RotateCw size={18} />}
+              onClick={() => {
+                queryClient.refetchQueries({
+                  queryKey: ["wallets"]
+                });
+              }}
+            />
+          </HStack>
         ) : (
           false
         )}
