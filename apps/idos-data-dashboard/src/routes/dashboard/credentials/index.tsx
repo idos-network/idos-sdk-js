@@ -1,6 +1,7 @@
 import { HStack, Heading, IconButton, List, ListItem, VStack } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { RotateCw } from "lucide-react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -10,7 +11,6 @@ import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { GrantsCenter } from "./components/grants-center";
 import { idOSCredential } from "./types";
-import { RotateCw } from "lucide-react";
 
 const useFetchCredentials = () => {
   const { sdk } = useIdOS();
