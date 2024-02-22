@@ -84,7 +84,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
       {
         async onSuccess(wallet) {
           const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
-          const updated = cache.map((_wallet) => (!_wallet.id ? { ...wallet } : _wallet));
+          const updated = cache.map((cachedWallet) => (!cachedWallet.id ? { ...wallet } : cachedWallet));
           queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
 
           form.reset();
