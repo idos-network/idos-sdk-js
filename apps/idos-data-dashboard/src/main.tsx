@@ -5,14 +5,13 @@ import { createWeb3Modal } from "@web3modal/wagmi/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
-import { mainnet } from "viem/chains";
 import { WagmiConfig } from "wagmi";
 
 import App from "@/app";
 import { CookieConsent } from "@/components/cookie-consent";
 import { Provider as IDOSProvider } from "@/core/idos";
 import { WalletSelectorContextProvider } from "@/core/near";
-import { projectId, wagmiConfig } from "@/core/wagmi";
+import { chains, projectId, wagmiConfig } from "@/core/wagmi";
 import { theme } from "@/theme";
 
 const queryClient = new QueryClient({
@@ -25,7 +24,6 @@ const queryClient = new QueryClient({
   }
 });
 
-const chains = [mainnet];
 
 createWeb3Modal({ wagmiConfig, projectId, chains });
 

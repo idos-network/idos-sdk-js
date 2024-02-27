@@ -2,7 +2,6 @@ import { defaultWagmiConfig } from "@web3modal/wagmi/react";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import { type WalletClient, sepolia, useWalletClient } from "wagmi";
-import { mainnet } from "wagmi/chains";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -13,7 +12,8 @@ const metadata = {
   icons: ["/idos-dashboard-logo.svg"]
 };
 
-export const chains = [import.meta.env.DEV ? sepolia : mainnet];
+// export const chains = [import.meta.env.DEV ? sepolia : mainnet];
+export const chains = [sepolia];
 
 export const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
 
