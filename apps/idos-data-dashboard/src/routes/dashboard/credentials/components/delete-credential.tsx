@@ -13,54 +13,54 @@ import {
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import type { idOSWallet } from "../types";
+import type { idOSCredential } from "../types";
 
-type DeleteWalletProps = {
+type DeleteCredentialProps = {
   isOpen: boolean;
-  wallet: idOSWallet | null;
+  credential: idOSCredential | null;
   onClose: () => void;
 };
 
-type Ctx = { previousWallets: idOSWallet[] };
+type Ctx = { previousCredentials: idOSCredential[] };
 
-const useDeleteWalletMutation = () => {
+const useDeleteCredentialMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }, DefaultError, idOSWallet, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("wallets", id),
-    async onMutate({ address }) {
-      await queryClient.cancelQueries({ queryKey: ["wallets"] });
-      const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
-      queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) =>
-        old.filter((wallet) => wallet.address !== address)
+  return useMutation<{ id: string }, DefaultError, idOSCredential, Ctx>({
+    mutationFn: ({ id }) => sdk.data.delete("credentials", id),
+    async onMutate({ id }) {
+      await queryClient.cancelQueries({ queryKey: ["credentials"] });
+      const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];
+      queryClient.setQueryData<idOSCredential[]>(["credentials"], (old = []) =>
+        old.filter((cred) => cred.id !== id)
       );
 
-      return { previousWallets };
+      return { previousCredentials };
     }
   });
 };
 
-export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => {
+export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredentialProps) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
-  const deleteWallet = useDeleteWalletMutation();
+  const deleteCredential = useDeleteCredentialMutation();
 
   const handleClose = () => {
-    deleteWallet.reset();
+    deleteCredential.reset();
     onClose();
   };
 
-  const handleDeleteWallet = (wallet: idOSWallet) => {
-    deleteWallet.mutate(wallet, {
+  const handleDeleteCredential = (credential: idOSCredential) => {
+    deleteCredential.mutate(credential, {
       async onSuccess() {
         handleClose();
       },
       async onError(_, __, ctx) {
-        queryClient.setQueryData(["wallets"], ctx?.previousWallets);
+        queryClient.setQueryData(["credentials"], ctx?.previousCredentials);
         toast({
-          title: "Error while deleting wallet",
+          title: "Error while deleting credential",
           description: "An unexpected error. Please try again.",
           position: "bottom-right",
           status: "error"
@@ -69,7 +69,7 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
     });
   };
 
-  if (!wallet) return null;
+  if (!credential) return null;
 
   return (
     <AlertDialog
@@ -84,9 +84,9 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
     >
       <AlertDialogOverlay>
         <AlertDialogContent bg="neutral.900" rounded="xl">
-          <AlertDialogHeader>Delete wallet</AlertDialogHeader>
+          <AlertDialogHeader>Delete credential</AlertDialogHeader>
           <AlertDialogCloseButton />
-          <AlertDialogBody>Do you want to delete this wallet from the idOS?</AlertDialogBody>
+          <AlertDialogBody>Do you want to delete this credentail from the idOS?</AlertDialogBody>
           <AlertDialogFooter>
             <Button ref={cancelRef} onClick={handleClose}>
               Cancel
@@ -94,10 +94,10 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
             <Button
               colorScheme="red"
               ml={3}
-              onClick={() => handleDeleteWallet(wallet)}
-              isLoading={deleteWallet.isPending}
+              onClick={() => handleDeleteCredential(credential)}
+              isLoading={deleteCredential.isPending}
             >
-              {deleteWallet.isError ? "Retry" : "Delete"}
+              {deleteCredential.isError ? "Retry" : "Delete"}
             </Button>
           </AlertDialogFooter>
         </AlertDialogContent>

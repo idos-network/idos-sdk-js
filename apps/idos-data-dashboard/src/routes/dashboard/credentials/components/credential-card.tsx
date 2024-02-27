@@ -1,18 +1,20 @@
 import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import { KeyRoundIcon, XIcon } from "lucide-react";
 
-import { KeyRoundIcon } from "lucide-react";
 import { idOSCredential } from "../types";
 
 type CredentialCardProps = {
   credential: idOSCredential;
   onViewDetails: (credentialId: string) => void;
   onManageGrants: (credentialId: string) => void;
+  onDelete: (credential: idOSCredential) => void;
 };
 
 export const CredentialCard = ({
   credential,
   onViewDetails,
-  onManageGrants
+  onManageGrants,
+  onDelete
 }: CredentialCardProps) => {
   return (
     <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
@@ -57,6 +59,9 @@ export const CredentialCard = ({
             onClick={() => onManageGrants(credential.id)}
           >
             Manage grants
+          </Button>
+          <Button leftIcon={<XIcon size={16} />} onClick={() => onDelete(credential)}>
+            Delete
           </Button>
         </ButtonGroup>
       </Stack>
