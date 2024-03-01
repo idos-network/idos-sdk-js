@@ -27,18 +27,17 @@ const useFetchCredentials = () => {
 
   return useQuery({
     queryKey: ["credentials"],
-    queryFn: ({ queryKey: [tableName] }) =>
-      sdk.data.list<idOSCredential>(tableName),
-    select(credentials) {
-      return credentials
-        .map((credential) => ({
-          ...credential,
-          shares: credentials.filter(
-            (_credential) => _credential.original_id === credential.id
-          ).length,
-        }))
-        .filter((credential) => !credential.original_id);
+    queryFn: async ({ queryKey: [tableName] }) => {
+      const credentials = await sdk.data.list<idOSCredential>(tableName);
+      return credentials.map((credential) => ({
+        ...credential,
+        shares: credentials
+          .filter((_credential) => _credential.original_id === credential.id)
+          .map((c) => c.id),
+      }));
     },
+    select: (credentials) =>
+      credentials.filter((credential) => !credential.original_id),
   });
 };
 
@@ -122,11 +121,13 @@ const Credentials = () => {
           />
         ) : null}
 
-        <DeleteCredential
-          credential={credentialToDelete}
-          isOpen={isOpen}
-          onClose={handleClose}
-        />
+        {credentialToDelete ? (
+          <DeleteCredential
+            credential={credentialToDelete}
+            isOpen={isOpen}
+            onClose={handleClose}
+          />
+        ) : null}
       </>
     );
   }

@@ -41,11 +41,12 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Shares
           </Text>
-          <Text>{credential.shares}</Text>
+          <Text>{credential.shares.length}</Text>
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
         <ButtonGroup
+          w="full"
           spacing={0}
           gap={4}
           flexDir={{

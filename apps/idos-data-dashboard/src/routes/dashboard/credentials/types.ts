@@ -8,7 +8,7 @@ export type idOSCredential = {
   original_id: string;
   credential_level: string;
   credential_status: idOSCredentialStatus;
-  shares: number;
+  shares: string[];
 };
 
 export type idOSGrant = {

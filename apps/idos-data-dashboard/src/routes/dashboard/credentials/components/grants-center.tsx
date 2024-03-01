@@ -1,6 +1,4 @@
-import { useIdOS } from "@/core/idos";
 import {
-  Box,
   Button,
   Center,
   Code,
@@ -12,6 +10,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
+  Stack,
   Table,
   TableContainer,
   Tbody,
@@ -23,43 +22,15 @@ import {
   VStack,
   useBreakpointValue
 } from "@chakra-ui/react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-import { idOSCredential, idOSGrant } from "../types";
+import { useFetchGrants, useRevokeGrant } from "../shared";
+import { idOSGrant } from "../types";
 
 type GrantsCenterProps = {
   credentialId: string;
   isOpen: boolean;
   onClose: () => void;
-};
-
-const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
-  const { sdk, address } = useIdOS();
-  const queryClient = useQueryClient();
-  const credentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]);
-
-  return useQuery({
-    queryKey: ["grants", credentialId],
-    queryFn: () => sdk.grants.list({ owner: address }),
-    select(grants) {
-      if (!credentials || !grants) return [];
-
-      const _credentials = credentials
-        .filter((credential) => credential.original_id === credentialId)
-        .map((credential) => credential.id);
-
-      return grants.filter((grant) => _credentials.includes(grant.dataId));
-    }
-  });
-};
-
-const useRevokeGrant = () => {
-  const { sdk } = useIdOS();
-
-  return useMutation({
-    mutationFn: ({ grantee, dataId, lockedUntil }: idOSGrant) =>
-      sdk.grants.revoke("credentials", dataId, grantee, dataId, lockedUntil)
-  });
 };
 
 const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
@@ -81,14 +52,14 @@ const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
   };
 
   return (
-    <VStack align="stretch" gap={10}>
-      <Box>
+    <VStack align="stretch" gap={8}>
+      <Stack gap={2}>
         <Text>Credentials Grants Access Center</Text>
         <Text color="neutral.500">
           This is where you can manage your credentials grants. You can choose which access is
           revoked or granted.
         </Text>
-      </Box>
+      </Stack>
       <TableContainer rounded="lg" bg="neutral.800" border="1px solid" borderColor="neutral.700">
         <Table variant="simple" w="100%">
           <Thead>
