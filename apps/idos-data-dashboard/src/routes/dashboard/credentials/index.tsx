@@ -1,7 +1,8 @@
 import { HStack, Heading, IconButton, List, ListItem, VStack } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { RotateCw } from "lucide-react";
+import { useState } from "react";
+import { sepolia, useNetwork, useSwitchNetwork } from "wagmi";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -44,6 +45,13 @@ const Credentials = () => {
   const credentials = useFetchCredentials();
   const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
+  const { chain } = useNetwork();
+  const { switchNetworkAsync } = useSwitchNetwork();
+
+  const handleManageGrants = async (credentialId: string) => {
+    if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
+    setCredentialGrantsId(credentialId);
+  };
 
   if (credentials.isFetching) {
     return <DataLoading />;
@@ -62,7 +70,7 @@ const Credentials = () => {
               <CredentialCard
                 credential={credential}
                 onViewDetails={setCredentialDetalsId}
-                onManageGrants={setCredentialGrantsId}
+                onManageGrants={handleManageGrants}
               />
             </ListItem>
           ))}
