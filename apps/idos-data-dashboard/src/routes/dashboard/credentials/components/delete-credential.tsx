@@ -112,29 +112,27 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   };
 
   const handleDeleteCredential = async (credential: idOSCredential) => {
-    try {
-      await handleRevokeGrants();
-      await deleteCredential.mutateAsync(credential, {
-        onSuccess() {
-          toast({
-            title: "Credenital successfully removed",
-            description: "Credential has been successfully removed",
-            position: "bottom-right",
-            status: "success"
-          });
-        },
-        onError() {
-          toast({
-            title: "Error while deleting credential",
-            description: "An unexpected error. Please try again.",
-            duration: 3000,
-            position: "bottom-right",
-            status: "error"
-          });
-        }
-      });
-      handleClose();
-    } catch (error) {}
+    await handleRevokeGrants();
+    await deleteCredential.mutateAsync(credential, {
+      onSuccess() {
+        handleClose();
+        toast({
+          title: "Credential successfully removed",
+          description: "Credential has been successfully removed",
+          position: "bottom-right",
+          status: "success"
+        });
+      },
+      onError() {
+        toast({
+          title: "Error while deleting credential",
+          description: "An unexpected error. Please try again.",
+          duration: 3000,
+          position: "bottom-right",
+          status: "error"
+        });
+      }
+    });
   };
 
   if (!credential) return null;
