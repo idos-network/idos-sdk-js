@@ -89,6 +89,15 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
       });
 
       await revokeGrants.mutateAsync(grants.data ?? [], {
+        onSuccess() {
+          toast({
+            title: "Grant revocation successful",
+            description: "All grants have been successfully revoked. Deleting credential...",
+            icon: <Spinner size="sm" />,
+            position: "bottom-right",
+            status: "success"
+          });
+        },
         onError() {
           toast({
             title: "Error while revoking grants",
@@ -99,34 +108,33 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           });
         }
       });
-
-      toast({
-        title: "Grant revocation successful",
-        description: "All grants have been successfully revoked. Deleting credential...",
-        icon: <Spinner size="sm" />,
-        position: "bottom-right",
-        status: "error"
-      });
     }
   };
 
   const handleDeleteCredential = async (credential: idOSCredential) => {
-    await handleRevokeGrants();
-
-    deleteCredential.mutate(credential, {
-      onSuccess() {
-        handleClose();
-      },
-      onError() {
-        toast({
-          title: "Error while deleting credential",
-          description: "An unexpected error. Please try again.",
-          duration: 3000,
-          position: "bottom-right",
-          status: "error"
-        });
-      }
-    });
+    try {
+      await handleRevokeGrants();
+      await deleteCredential.mutateAsync(credential, {
+        onSuccess() {
+          toast({
+            title: "Credenital successfully removed",
+            description: "Credential has been successfully removed",
+            position: "bottom-right",
+            status: "success"
+          });
+        },
+        onError() {
+          toast({
+            title: "Error while deleting credential",
+            description: "An unexpected error. Please try again.",
+            duration: 3000,
+            position: "bottom-right",
+            status: "error"
+          });
+        }
+      });
+      handleClose();
+    } catch (error) {}
   };
 
   if (!credential) return null;
