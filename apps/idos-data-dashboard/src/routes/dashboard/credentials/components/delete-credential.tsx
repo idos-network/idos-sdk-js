@@ -77,7 +77,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
     onClose();
   };
 
-  const handleDeleteCredential = async (credential: idOSCredential) => {
+  const handleRevokeGrants = async () => {
     if (grants.data && grants.data.length > 0) {
       toast({
         title: "Revoking grants",
@@ -108,6 +108,10 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
         status: "error"
       });
     }
+  };
+
+  const handleDeleteCredential = async (credential: idOSCredential) => {
+    await handleRevokeGrants();
 
     deleteCredential.mutate(credential, {
       onSuccess() {

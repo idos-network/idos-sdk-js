@@ -5,7 +5,7 @@ import {
   List,
   ListItem,
   VStack,
-  useDisclosure,
+  useDisclosure
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
@@ -33,11 +33,10 @@ const useFetchCredentials = () => {
         ...credential,
         shares: credentials
           .filter((_credential) => _credential.original_id === credential.id)
-          .map((c) => c.id),
+          .map((c) => c.id)
       }));
     },
-    select: (credentials) =>
-      credentials.filter((credential) => !credential.original_id),
+    select: (credentials) => credentials.filter((credential) => !credential.original_id)
   });
 };
 
@@ -53,14 +52,9 @@ const NoCredentials = () => {
 
 const Credentials = () => {
   const credentials = useFetchCredentials();
-  const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(
-    null
-  );
-  const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(
-    null
-  );
-  const [credentialToDelete, setCredentialToDelete] =
-    useState<idOSCredential | null>(null);
+  const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
+  const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
+  const [credentialToDelete, setCredentialToDelete] = useState<idOSCredential | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { chain } = useNetwork();
   const { switchNetworkAsync } = useSwitchNetwork();
@@ -70,7 +64,8 @@ const Credentials = () => {
     setCredentialGrantsId(credentialId);
   };
 
-  const handleDelete = (credential: idOSCredential) => {
+  const handleDelete = async (credential: idOSCredential) => {
+    if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
     setCredentialToDelete(credential);
     onOpen();
   };
@@ -122,11 +117,7 @@ const Credentials = () => {
         ) : null}
 
         {credentialToDelete ? (
-          <DeleteCredential
-            credential={credentialToDelete}
-            isOpen={isOpen}
-            onClose={handleClose}
-          />
+          <DeleteCredential credential={credentialToDelete} isOpen={isOpen} onClose={handleClose} />
         ) : null}
       </>
     );
@@ -143,7 +134,7 @@ export function Component() {
         justifyContent="space-between"
         h={{
           base: 14,
-          lg: 20,
+          lg: 20
         }}
         p={5}
         bg="neutral.900"
@@ -153,7 +144,7 @@ export function Component() {
           as="h1"
           fontSize={{
             base: "x-large",
-            lg: "xx-large",
+            lg: "xx-large"
           }}
         >
           Credentials
@@ -163,7 +154,7 @@ export function Component() {
           icon={<RotateCw size={18} />}
           onClick={() => {
             queryClient.refetchQueries({
-              queryKey: ["credentials"],
+              queryKey: ["credentials"]
             });
           }}
         />
