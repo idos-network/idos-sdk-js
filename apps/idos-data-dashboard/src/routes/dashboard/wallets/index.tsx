@@ -9,8 +9,8 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import { PlusIcon, RotateCw } from "lucide-react";
+import { useState } from "react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -18,9 +18,9 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 
 import { AddWallet } from "./components/add-wallet";
+import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 import { idOSWallet } from "./types";
-import { DeleteWallet } from "./components/delete-wallet";
 
 const useFetchWallets = () => {
   const { sdk } = useIdOS();

@@ -10,7 +10,7 @@ import {
   Button,
   useToast
 } from "@chakra-ui/react";
-import { useMutation, type DefaultError, useQueryClient } from "@tanstack/react-query";
+import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 
 import type { idOSWallet } from "../types";

@@ -1,4 +1,12 @@
-import { HStack, Heading, IconButton, List, ListItem, VStack } from "@chakra-ui/react";
+import {
+  HStack,
+  Heading,
+  IconButton,
+  List,
+  ListItem,
+  VStack,
+  useDisclosure
+} from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { useState } from "react";
@@ -10,6 +18,7 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
+import { DeleteCredential } from "./components/delete-credential";
 import { GrantsCenter } from "./components/grants-center";
 import { idOSCredential } from "./types";
 
@@ -18,16 +27,16 @@ const useFetchCredentials = () => {
 
   return useQuery({
     queryKey: ["credentials"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSCredential>(tableName),
-    select(credentials) {
-      return credentials
-        .map((credential) => ({
-          ...credential,
-          shares: credentials.filter((_credential) => _credential.original_id === credential.id)
-            .length
-        }))
-        .filter((credential) => !credential.original_id);
-    }
+    queryFn: async ({ queryKey: [tableName] }) => {
+      const credentials = await sdk.data.list<idOSCredential>(tableName);
+      return credentials.map((credential) => ({
+        ...credential,
+        shares: credentials
+          .filter((_credential) => _credential.original_id === credential.id)
+          .map((c) => c.id)
+      }));
+    },
+    select: (credentials) => credentials.filter((credential) => !credential.original_id)
   });
 };
 
@@ -45,12 +54,25 @@ const Credentials = () => {
   const credentials = useFetchCredentials();
   const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
+  const [credentialToDelete, setCredentialToDelete] = useState<idOSCredential | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
   const { chain } = useNetwork();
   const { switchNetworkAsync } = useSwitchNetwork();
 
   const handleManageGrants = async (credentialId: string) => {
     if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
     setCredentialGrantsId(credentialId);
+  };
+
+  const handleDelete = async (credential: idOSCredential) => {
+    if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
+    setCredentialToDelete(credential);
+    onOpen();
+  };
+
+  const handleClose = () => {
+    setCredentialToDelete(null);
+    onClose();
   };
 
   if (credentials.isFetching) {
@@ -71,6 +93,7 @@ const Credentials = () => {
                 credential={credential}
                 onViewDetails={setCredentialDetalsId}
                 onManageGrants={handleManageGrants}
+                onDelete={handleDelete}
               />
             </ListItem>
           ))}
@@ -91,6 +114,10 @@ const Credentials = () => {
               setCredentialGrantsId(null);
             }}
           />
+        ) : null}
+
+        {credentialToDelete ? (
+          <DeleteCredential credential={credentialToDelete} isOpen={isOpen} onClose={handleClose} />
         ) : null}
       </>
     );
@@ -123,7 +150,7 @@ export function Component() {
           Credentials
         </Heading>
         <IconButton
-          aria-label="Refresh wallets"
+          aria-label="Refresh credentials"
           icon={<RotateCw size={18} />}
           onClick={() => {
             queryClient.refetchQueries({
