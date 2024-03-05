@@ -22,7 +22,14 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronRightIcon, KeyRoundIcon, LogOutIcon, MenuIcon, Wallet2Icon } from "lucide-react";
+import {
+  ChevronRightIcon,
+  ExternalLinkIcon,
+  KeyRoundIcon,
+  LogOutIcon,
+  MenuIcon,
+  Wallet2Icon
+} from "lucide-react";
 import { useEffect } from "react";
 import { NavLink, NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
@@ -242,6 +249,20 @@ export function Component() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
+      <Box pos="fixed" right={5} bottom={5}>
+        <Button
+          as={ChakraLink}
+          isExternal
+          href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
+          target="_blank"
+          color="green.200"
+          display="inline-flex"
+          alignItems="center"
+          gap={2}
+        >
+          Privacy Policy <ExternalLinkIcon size={16} />
+        </Button>
+      </Box>
     </Flex>
   );
 }
