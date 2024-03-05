@@ -8,7 +8,6 @@ import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom"
 import { WagmiConfig } from "wagmi";
 
 import App from "@/app";
-import { CookieConsent } from "@/components/cookie-consent";
 import { Provider as IDOSProvider } from "@/core/idos";
 import { WalletSelectorContextProvider } from "@/core/near";
 import { chains, projectId, wagmiConfig } from "@/core/wagmi";
@@ -71,9 +70,8 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
             </IDOSProvider>
           </WagmiConfig>
         </WalletSelectorContextProvider>
-        <CookieConsent />
       </ChakraBaseProvider>
-      <ReactQueryDevtools />
+      <ReactQueryDevtools buttonPosition="bottom-left" />
     </QueryClientProvider>
   </React.StrictMode>
 );

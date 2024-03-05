@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Image, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { useWalletSelector } from "@/core/near";
@@ -88,6 +88,23 @@ export const ConnectWallet = () => {
           </Text>
         </VStack>
       </VStack>
+      <Link
+        isExternal
+        href="https://drive.google.com/file/d/1QcOwFjAove024h0pdiFIrqujraEfzV1c/view?usp=drive_link"
+        target="_blank"
+        pos="fixed"
+        right={5}
+        bottom={5}
+        color="green.200"
+        display="inline-flex"
+        alignItems="center"
+        gap={2}
+        fontSize="sm"
+        textUnderlineOffset={4}
+        _hover={{ color: "green.400", textDecoration: "underline" }}
+      >
+        Privacy Policy
+      </Link>
     </Box>
   );
 };
