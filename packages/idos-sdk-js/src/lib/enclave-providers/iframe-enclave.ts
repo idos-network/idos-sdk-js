@@ -1,5 +1,10 @@
 import { EnclaveProvider, StoredData } from "./enclave-provider";
 
+export interface IframeEnclaveOptions {
+  container: string;
+  usePasskeys?: boolean;
+}
+
 export class IframeEnclave extends EnclaveProvider {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
@@ -7,7 +12,7 @@ export class IframeEnclave extends EnclaveProvider {
   iframe: HTMLIFrameElement;
   usePasskeys?: string;
 
-  constructor(options: { container: string; usePasskeys?: boolean }) {
+  constructor(options: IframeEnclaveOptions) {
     super();
     this.container = options.container;
     this.iframe = document.createElement("iframe");

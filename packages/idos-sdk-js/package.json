@@ -33,7 +33,8 @@
   },
   "peerDependencies": {
     "ethers": "^6.8.0",
-    "near-api-js": "^2.1.4"
+    "near-api-js": "^2.1.4",
+    "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@near-wallet-selector/core": "^8.7.0",

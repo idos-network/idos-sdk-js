@@ -2,15 +2,17 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { idOS } from ".";
 import { assertNever } from "../types";
-import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
+import { IframeEnclave, MetaMaskSnapEnclave, ServerProvider } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/enclave-provider";
+import { Config } from "./config";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
-  "metamask-snap": MetaMaskSnapEnclave
+  "metamask-snap": MetaMaskSnapEnclave,
+  server: ServerProvider,
 } as const;
 
-type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
+export type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
   idOS: idOS;
@@ -20,22 +22,23 @@ export class Enclave {
 
   constructor(
     idOS: idOS,
-    container: string,
-    providerType: ProviderType = "iframe",
-    usePasskeys = false
+    config: Config["enclave"],
   ) {
     this.initialized = false;
     this.idOS = idOS;
 
-    switch (providerType) {
+    switch (config.provider) {
       case "iframe":
-        this.provider = new IframeEnclave({ container, usePasskeys });
+        this.provider = new IframeEnclave(config.options?.iframe!);
         break;
       case "metamask-snap":
-        this.provider = new MetaMaskSnapEnclave({});
+        this.provider = new MetaMaskSnapEnclave(config.options?.metamask!);
+        break;
+      case "server":
+        this.provider = new ServerProvider(config.options?.server!);
         break;
       default:
-        this.provider = assertNever(providerType, `Unexpected provider type: ${providerType}`);
+        this.provider = assertNever(config.provider, `Unexpected provider type: ${config.provider}`);
     }
   }
 

@@ -5,26 +5,15 @@ import { assertNever } from "../types";
 import { Auth } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
-import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
-
-interface InitParams {
-  nodeUrl?: string;
-  dbId?: string;
-  container: string;
-  usePasskeys?: boolean;
-  evmGrantsOptions?: EvmGrantsOptions;
-  nearGrantsOptions?: NearGrantsOptions;
-}
+import createConfig, { Config, ConfigParams } from "./config";
 
 export class idOS {
   static initializing = false;
 
   static near = Grants.near;
-  static evm = Grants.evm;
-  static kwil = KwilWrapper.defaults;
 
   static profileProviders = [import.meta.env.VITE_FRACTAL_ID_URL];
 
@@ -37,28 +26,23 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({
-    nodeUrl,
-    dbId,
-    container,
-    evmGrantsOptions,
-    nearGrantsOptions,
-    usePasskeys = false
-  }: InitParams) {
+  private constructor(config: Config) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container, undefined, usePasskeys);
-    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
-    this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
-    this.store = new Store();
+    this.enclave = new Enclave(this, config.enclave);
+    this.kwilWrapper = new KwilWrapper(config.db);
+    this.grants = new Grants(this, config.grants);
+    this.store = config.customStore ?? new Store();
   }
 
-  static async init(params: InitParams): Promise<idOS> {
+  static async init(params: ConfigParams | Config): Promise<idOS> {
     this.initializing = true;
 
-    const idos = new this(params);
+    const config = params instanceof Config ? params : createConfig(params);
+
+    const idos = new this(config);
     await idos.enclave.load();
 
     return idos;
