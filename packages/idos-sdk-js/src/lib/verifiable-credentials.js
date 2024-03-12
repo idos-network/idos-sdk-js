@@ -49,9 +49,9 @@ export const documentLoaderWithStaticFractal = (documentLoader) => async (url, o
 };
 
 const knownSignatureBuilders = {
-  Ed25519VerificationKey2020: async (m) =>
+  Ed25519VerificationKey2020: async (method) =>
     new Ed25519Signature2020({
-      key: await Ed25519VerificationKey2020.from(m)
+      key: await Ed25519VerificationKey2020.from(method)
     })
 };
 
