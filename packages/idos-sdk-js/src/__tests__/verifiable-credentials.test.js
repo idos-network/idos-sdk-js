@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 
 import { documentLoader } from "./cachedSchemas";
 
-import verifiedCredential from "../lib/verifiable-credentials";
+import verifiedCredentials from "../lib/verifiable-credentials";
 
 test("verifies an example credential", async () => {
   const credential = {
@@ -38,5 +38,5 @@ test("verifies an example credential", async () => {
     }
   };
 
-  expect(await verifiedCredential.verify(credential, { documentLoader })).toBe(true);
+  expect(await verifiedCredentials.verify(credential, { documentLoader })).toBe(true);
 });
