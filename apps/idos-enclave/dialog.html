@@ -1,76 +1,66 @@
 <!doctype html>
-<meta charset="utf-8" />
-<link
-  rel="icon"
-  href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>"
-/>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-  rel="stylesheet"
-/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>🔐 idOS Secure Enclave</title>
-<body class="bg-neutral-950 text-neutral-50">
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔒</text></svg>" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+    rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🔐 idOS Secure Enclave</title>
+
   <style>
-    main > *:not(h1) {
+    main>*:not(h1) {
       display: none;
     }
-
-    p#message {
-      border-left: 1px solid black;
-      padding-left: 0.5em;
-      font-style: italic;
-    }
   </style>
-  <main
-    class="p-5 max-w-md mx-auto flex flex-col items-stretch justify-center gap-5 h-[100dvh] "
-  >
+</head>
+
+<body class="bg-neutral-950 text-neutral-50">
+  <main class="p-5 max-w-md mx-auto flex flex-col items-stretch justify-center gap-5 h-[100dvh]">
     <h1 class="font-semibold text-2xl text-center">idOS Secure Enclave</h1>
+
+    <div id="auth-method" class="flex flex-col gap-y-4">
+      <button
+        class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium flex-1"
+        id="auth-method-password">
+        Use a password
+      </button>
+      <button
+        class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium flex-1"
+        id="auth-method-passkey">
+        Use a passkey
+      </button>
+    </div>
 
     <form name="password">
       <div class="flex flex-col gap-y-5">
-        <input
-          type="password"
-          name="password"
-          required
-          placeholder="Your idOS password"
-          class="block w-full rounded-md border-neutral-300 bg-neutral-950 focus:border-neutral-300 focus:ring-0 outline-none px-3 py-1.5"
-        />
-
+        <input type="password" name="password" required placeholder="Your idOS password"
+          class="block w-full rounded-md border-neutral-300 bg-neutral-950 focus:border-neutral-300 focus:ring-0 outline-none px-3 py-1.5" />
         <div class="flex flex-col gap-y-3">
           <p class="font-semibold text-sm">Remember for:</p>
           <div class="flex items-center gap-x-3">
             <div class="gap-x-1 flex items-center">
-              <input
-                type="radio"
-                id="1week"
-                name="duration"
-                value="7"
-                class="form-radio text-green-400"
-                checked
-              /><label for="1week" class="font-semibold text-sm">1 week</label>
+              <input type="radio" id="1week" name="duration" value="7" class="form-radio text-green-400"
+                checked /><label for="1week" class="font-semibold text-sm">1 week</label>
             </div>
             <div class="gap-x-1 flex items-center">
-              <input
-                type="radio"
-                id="1month"
-                name="duration"
-                value="30"
-                class="form-radio text-green-400"
-              />
+              <input type="radio" id="1month" name="duration" value="30" class="form-radio text-green-400" />
               <label for="1month" class="font-semibold text-sm">1 month</label>
             </div>
           </div>
         </div>
 
         <div class="flex flex-col items-center gap-y-3 justify-center">
-          <input
-            type="submit"
-            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full"
-          />
+          <button
+            class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium w-full">Submit</button>
+
+          <button id="auth-method-select" class="text-[#00ffb9] transition-colors hover:text-green-300  font-medium w-full text-sm
+          ">Use another method</button>
         </div>
       </div>
     </form>
@@ -80,33 +70,21 @@
         <h3 class="font-bold">Confirmation request</h3>
         <small>from&nbsp;<span id="origin"></span></small>
 
-        <div id="message"></div>
+        <div id="message" class="border-l pl-2 italic"></div>
 
         <div class="flex items-center gap-x-5">
           <button
             class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium flex-1"
-            id="yes"
-          >
+            id="yes">
             Accept
           </button>
           <button
             class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium flex-1"
-            id="no"
-          >
+            id="no">
             Reject
           </button>
         </div>
       </div>
     </form>
-
-    <div id="passkeys">
-    <button
-      class="px-6 py-2 rounded-lg bg-[#00ffb9] transition-colors hover:bg-green-300 text-zinc-950 font-medium inline-flex gap-2 items-center place-content-center w-full"
-      id="passkeys-btn"
-    >
-      <span> Use Passkeys </span>
-      <span>🔑</span>
-    </button>
-  </div>
   </main>
 </body>

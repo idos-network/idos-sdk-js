@@ -62,28 +62,19 @@ class Dialog {
   }
 
   async passkey({ message: { type } }) {
-    const passkeys = document.querySelector("#passkeys");
-    const passkeyButton = document.querySelector("#passkeys-btn");
-    passkeys.style.display = "block";
-
-    return new Promise((resolve) => {
-      passkeyButton.addEventListener("click", async (e) => {
-        e.preventDefault();
-        try {
-          if (type === "password") {
-            const { password } = await this.getOrCreatePasswordCredential();
-            this.respondToEnclave({ result: { password } });
-            resolve();
-          } else if (type === "webauthn") {
-            const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
-            this.respondToEnclave({ result: { password, credentialId } });
-            resolve();
-          }
-        } catch (e) {
-          this.respondToEnclave({ error: e.toString() });
-        }
-      });
-    });
+    try {
+      if (type === "password") {
+        const { password } = await this.getOrCreatePasswordCredential();
+        this.respondToEnclave({ result: { password } });
+        resolve();
+      } else if (type === "webauthn") {
+        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
+        this.respondToEnclave({ result: { password, credentialId } });
+        resolve();
+      }
+    } catch (e) {
+      this.respondToEnclave({ error: e.toString() });
+    }
   }
 
   async confirm({ message: { message, origin } }) {
@@ -116,7 +107,9 @@ class Dialog {
   }
 
   async getOrCreateWebAuthnCredential() {
-    let credential, credentialId, password;
+    let credential;
+    let credentialId;
+    let password;
 
     const storedCredentialId = this.store.get("credential-id");
 
@@ -129,7 +122,12 @@ class Dialog {
               type: "public-key",
               id: Base64Codec.decode(storedCredentialId)
             }
-          ]
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
         }
       };
 
@@ -140,7 +138,6 @@ class Dialog {
       } catch (e) {}
     } else {
       const displayName = "idOS User";
-
       password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
 
       credential = await navigator.credentials.create({
@@ -152,7 +149,17 @@ class Dialog {
             displayName,
             name: displayName
           },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+          pubKeyCredParams: [
+            {
+              type: "public-key",
+              alg: -7
+            }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
         }
       });
     }
@@ -165,13 +172,43 @@ class Dialog {
     return { password, credentialId };
   }
 
+  async auth() {
+    const auth = document.querySelector("#auth-method");
+    auth.style.display = "flex";
+    const passwordMethod = document.querySelector("#auth-method-password");
+    const passkeyMethod = document.querySelector("#auth-method-passkey");
+    const methodSelect = document.querySelector("#auth-method-select");
+    const passwordForm = document.querySelector("form[name=password]");
+
+    return new Promise((resolve, reject) => {
+      passwordMethod.addEventListener("click", async () => {
+        auth.style.display = "none";
+        await this.password();
+        resolve();
+      });
+
+      passkeyMethod.addEventListener("click", async () => {
+        auth.style.display = "none";
+        await this.passkey({
+          message: { type: "webauthn" }
+        });
+        resolve();
+      });
+
+      methodSelect.addEventListener("click", async () => {
+        auth.style.display = "flex";
+        passwordForm.style.display = "none";
+      });
+    });
+  }
+
   async listenToEnclave() {
     window.addEventListener("message", async (event) => {
       if (event.source !== this.enclave) return;
 
       const { data: requestData, ports } = event;
 
-      if (!["passkey", "password", "confirm"].includes(requestData.intent))
+      if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
         throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
       this.responsePort = ports[0];
