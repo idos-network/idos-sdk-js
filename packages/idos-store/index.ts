@@ -39,6 +39,7 @@ export class Store {
       console.warn(
         [
           `Inconsistent idOS store data (${window.location.origin})`,
+          `Key: ${key}`,
           `${values.join("\nvs\n")}`
         ].join("\n")
       );
@@ -70,8 +71,10 @@ export class Store {
     const keysInLocalStorage = Object.keys(window.localStorage);
 
     for (let key of [...new Set(keysInCookies.concat(keysInLocalStorage))]) {
-      key = key.replace(this.keyPrefix, "");
-      this.set(key, this.get(key));
+      if (key) {
+        key = key.replace(this.keyPrefix, "");
+        this.set(key, this.get(key));
+      }
     }
   }
 
@@ -121,7 +124,7 @@ export class Store {
     );
 
     for (const key of keysInCookies) {
-      if (key === "idOS-credential-id") continue;
+      if (key === "idOS-credential-id" || key === "idOS-preferred-auth-method") continue;
       key.startsWith(this.keyPrefix) &&
         (document.cookie = [
           `${key}=`,

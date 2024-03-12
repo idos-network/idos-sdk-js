@@ -65,7 +65,9 @@ export class Enclave {
             }
           ],
           authenticatorSelection: {
-            authenticatorAttachment: "platform"
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
           }
         }
       };
@@ -73,7 +75,6 @@ export class Enclave {
       const credential = await navigator.credentials.get(credentialRequest);
       password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-
       return { password, credentialId };
     };
 
@@ -86,46 +87,108 @@ export class Enclave {
         if (preferredAuthMethod === "password") {
           ({ password, duration } = await this.#openDialog("password"));
           this.store.set("password", password, duration);
-          resolve();
+          return resolve();
         }
 
         if (preferredAuthMethod === "webauthn") {
-          if (usePasskeys === "webauthn") {
-            const storedCredentialId = this.store.get("credential-id");
+          const storedCredentialId = this.store.get("credential-id");
 
-            if (storedCredentialId) {
-              try {
-                ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-              } catch (e) {
-                ({ password, credentialId } = await this.#openDialog("passkey", {
-                  type: "webauthn"
-                }));
-              }
-            } else {
+          if (storedCredentialId) {
+            try {
+              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
+            } catch (e) {
               ({ password, credentialId } = await this.#openDialog("passkey", {
                 type: "webauthn"
               }));
             }
-            this.store.set("credential-id", credentialId);
-            resolve();
-          }
-
-          if (usePasskeys === "password") {
-            ({ password } = await this.#openDialog("passkey", {
-              type: "password"
+          } else {
+            ({ password, credentialId } = await this.#openDialog("passkey", {
+              type: "webauthn"
             }));
-            this.store.set("password", password, duration);
-            resolve();
           }
+          this.store.set("credential-id", credentialId);
+          this.store.set("password", password);
+          return resolve();
         }
 
         ({ password, duration, credentialId } = await this.#openDialog("auth"));
 
         if (credentialId) {
           this.store.set("credential-id", credentialId);
+          this.store.set("preferred-auth-method", "webauthn");
         } else {
-          this.store.set("password", password, duration);
+          this.store.set("preferred-auth-method", "password");
         }
+        this.store.set("password", password, duration);
+        resolve();
+      })
+    );
+  }
+
+  ensurePassword_(usePasskeys) {
+    if (this.store.get("password")) return Promise.resolve;
+
+    this.unlockButton.style.display = "block";
+    this.unlockButton.disabled = false;
+
+    let password;
+    let duration;
+    let credentialId;
+
+    const getWebAuthnCredential = async (storedCredentialId) => {
+      const credentialRequest = {
+        publicKey: {
+          challenge: crypto.getRandomValues(new Uint8Array(10)),
+          allowCredentials: [
+            {
+              type: "public-key",
+              id: Base64Codec.decode(storedCredentialId)
+            }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
+        }
+      };
+
+      const credential = await navigator.credentials.get(credentialRequest);
+      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+      return { password, credentialId };
+    };
+
+    return new Promise((resolve) =>
+      this.unlockButton.addEventListener("click", async (e) => {
+        this.unlockButton.disabled = true;
+
+        if (usePasskeys === "webauthn") {
+          const storedCredentialId = this.store.get("credential-id");
+          if (storedCredentialId) {
+            try {
+              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
+            } catch (e) {
+              ({ password, credentialId } = await this.#openDialog("passkey", {
+                type: "webauthn"
+              }));
+            }
+          } else {
+            ({ password, credentialId } = await this.#openDialog("passkey", {
+              type: "webauthn"
+            }));
+          }
+          this.store.set("credential-id", credentialId);
+        } else if (usePasskeys === "password") {
+          ({ password } = await this.#openDialog("passkey", {
+            type: "password"
+          }));
+        } else {
+          ({ password, duration } = await this.#openDialog("password"));
+        }
+
+        this.store.set("password", password, duration);
+
         resolve();
       })
     );
