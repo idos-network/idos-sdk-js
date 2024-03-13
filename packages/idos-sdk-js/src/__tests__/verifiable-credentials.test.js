@@ -2,7 +2,7 @@ import { expect, test } from "vitest";
 
 import { documentLoader } from "./cachedSchemas";
 
-import * as verifiedCredentials from "../lib/verifiable-credentials";
+import * as verifiableCredentials from "../lib/verifiable-credentials";
 
 test("verifies an example credential", async () => {
   const credential = {
@@ -43,10 +43,10 @@ test("verifies an example credential", async () => {
   };
 
   expect(
-    await verifiedCredentials.verify(credential, {
-      documentLoader: verifiedCredentials.documentLoaderWithFallbackCompose(
+    await verifiableCredentials.verify(credential, {
+      documentLoader: verifiableCredentials.documentLoaderWithFallbackCompose(
         documentLoader,
-        verifiedCredentials.staticLoader(
+        verifiableCredentials.staticLoader(
           "https://vc-issuers.fractal.id/idos",
           "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2"
         )
