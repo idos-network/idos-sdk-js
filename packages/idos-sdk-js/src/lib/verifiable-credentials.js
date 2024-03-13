@@ -38,7 +38,7 @@ export const staticLoader = (id, publicKeyMultibase) => {
 
 export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE);
 
-const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
+export const defaultLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 
 export const documentLoaderWithFallbackCompose = (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
   let ex;
@@ -100,7 +100,7 @@ export const verify = async (credential, options = {}) => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
-  if (!documentLoader) documentLoader = xhrLoader;
+  if (!documentLoader) documentLoader = defaultLoader;
 
   documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
