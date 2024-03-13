@@ -51,7 +51,7 @@ export class Store {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    const daysNumber = !days || isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
     value = JSON.stringify(value);
 
@@ -71,10 +71,9 @@ export class Store {
     const keysInLocalStorage = Object.keys(window.localStorage);
 
     for (let key of [...new Set(keysInCookies.concat(keysInLocalStorage))]) {
-      if (key) {
-        key = key.replace(this.keyPrefix, "");
-        this.set(key, this.get(key));
-      }
+      if (!key) continue;
+      key = key.replace(this.keyPrefix, "");
+      this.set(key, this.get(key));
     }
   }
 

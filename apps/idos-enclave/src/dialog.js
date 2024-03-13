@@ -17,6 +17,7 @@ class Dialog {
   }
 
   initUi() {
+    this.authContainer = document.querySelector("#auth-method");
     this.beforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = "";
@@ -43,6 +44,7 @@ class Dialog {
   }
 
   async passwordForm() {
+    this.authContainer.style.display = "none";
     const passwordForm = document.querySelector("form[name=password]");
     passwordForm.style.display = "block";
     passwordForm.querySelector("input[type=password]").focus();
@@ -50,6 +52,8 @@ class Dialog {
     return new Promise((resolve) =>
       passwordForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        this.authContainer.style.display = "flex";
+        passwordForm.style.display = "none";
         resolve(Object.fromEntries(new FormData(e.target).entries()));
       })
     );
@@ -57,7 +61,6 @@ class Dialog {
 
   async password() {
     const { password, duration } = await this.passwordForm();
-
     this.respondToEnclave({ result: { password, duration } });
   }
 
@@ -66,11 +69,9 @@ class Dialog {
       if (type === "password") {
         const { password } = await this.getOrCreatePasswordCredential();
         this.respondToEnclave({ result: { password } });
-        resolve();
       } else if (type === "webauthn") {
         const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
         this.respondToEnclave({ result: { password, credentialId } });
-        resolve();
       }
     } catch (e) {
       this.respondToEnclave({ error: e.toString() });
@@ -172,32 +173,40 @@ class Dialog {
     return { password, credentialId };
   }
 
-  async auth() {
-    const auth = document.querySelector("#auth-method");
-    auth.style.display = "flex";
+  async #authWithPassword() {
+    this.authContainer.style.display = "none";
+    await this.password();
+  }
+
+  async #authWithPasskey() {
+    this.authContainer.style.display = "none";
+    await this.passkey({
+      message: { type: "webauthn" }
+    });
+  }
+
+  async auth({ message }) {
+    if (message === "password") {
+      await this.#authWithPassword();
+    }
+
+    if (message === "passkey") {
+      await this.#authWithPasskey();
+    }
+
+    this.authContainer.style.display = "flex";
     const passwordMethod = document.querySelector("#auth-method-password");
     const passkeyMethod = document.querySelector("#auth-method-passkey");
-    const methodSelect = document.querySelector("#auth-method-select");
-    const passwordForm = document.querySelector("form[name=password]");
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       passwordMethod.addEventListener("click", async () => {
-        auth.style.display = "none";
-        await this.password();
+        await this.#authWithPassword();
         resolve();
       });
 
       passkeyMethod.addEventListener("click", async () => {
-        auth.style.display = "none";
-        await this.passkey({
-          message: { type: "webauthn" }
-        });
+        await this.#authWithPasskey();
         resolve();
-      });
-
-      methodSelect.addEventListener("click", async () => {
-        auth.style.display = "flex";
-        passwordForm.style.display = "none";
       });
     });
   }

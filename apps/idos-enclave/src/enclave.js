@@ -29,19 +29,28 @@ export class Enclave {
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+
     return {
       humanId: this.store.get("human-id"),
-      encryptionPublicKey: this.store.pipeCodec(Base64Codec).get("encryption-public-key"),
+      encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key")
     };
   }
 
-  async keys(usePasskeys = false) {
+  async keys(usePasskeys, authMethod) {
+    if (authMethod) await this.#openDialog("auth", authMethod);
     await this.ensurePassword(usePasskeys);
     await this.ensureKeyPair();
 
     return this.keyPair.publicKey;
+  }
+
+  async authWithPassword() {
+    const { password, duration } = await this.#openDialog("password");
+    this.store.set("password", password, duration);
+    return { password, duration };
   }
 
   async ensurePassword(usePasskeys) {
@@ -90,7 +99,7 @@ export class Enclave {
           return resolve();
         }
 
-        if (preferredAuthMethod === "webauthn") {
+        if (usePasskeys || preferredAuthMethod === "webauthn") {
           const storedCredentialId = this.store.get("credential-id");
 
           if (storedCredentialId) {
@@ -294,14 +303,15 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          usePasskeys
+          usePasskeys,
+          authMethod
         } = requestData;
 
         const paramBuilder = {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [usePasskeys],
+          keys: () => [usePasskeys, authMethod],
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey]
         }[requestName];
