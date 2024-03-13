@@ -40,24 +40,26 @@ export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_K
 
 export const defaultLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 
-export const documentLoaderWithFallbackCompose = (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
-  let ex;
-  try {
-    return await documentLoaderA(url, options);
-  } catch (e) {
-    ex = e;
-  }
+export const documentLoaderWithFallbackCompose =
+  (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
+    let ex;
+    try {
+      return await documentLoaderA(url, options);
+    } catch (e) {
+      ex = e;
+    }
 
-  try {
-    return await documentLoaderB(url, options);
-  } catch (_) {
-    // Ignored on purpose.
-  }
+    try {
+      return await documentLoaderB(url, options);
+    } catch (_) {
+      // Ignored on purpose.
+    }
 
-  throw ex;
-};
+    throw ex;
+  };
 
-export const documentLoaderWithStaticFractal = (documentLoader) => documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
+export const documentLoaderWithStaticFractal = (documentLoader) =>
+  documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
 
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (method) =>
@@ -132,7 +134,11 @@ export const verify = async (credential, options = {}) => {
       return buildSignatures(methods, signatureBuilders);
     })());
 
-  const result = await vc.verifyCredential({ credential, suite, documentLoader });
+  const result = await vc.verifyCredential({
+    credential,
+    suite,
+    documentLoader
+  });
 
   if (!result.verified) throw result?.results?.[0]?.error || result;
 
