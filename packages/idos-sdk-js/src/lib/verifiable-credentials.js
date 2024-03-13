@@ -30,23 +30,34 @@ const issuerDoc = (id, publicKeyMultibase) => ({
   ]
 });
 
-const staticLoader = (() => {
+export const staticLoader = (id, publicKeyMultibase) => {
   const loader = new JsonLdDocumentLoader();
-  loader.addStatic(FRACTAL_ISSUER, issuerDoc(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE));
+  loader.addStatic(id, issuerDoc(id, publicKeyMultibase));
   return loader.build();
-})();
+};
+
+export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE);
 
 const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
 
-export const documentLoaderWithStaticFractal = (documentLoader) => async (url, options = {}) => {
+export const documentLoaderWithFallbackCompose = (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
+  let ex;
   try {
-    return await staticLoader(url, options);
+    return await documentLoaderA(url, options);
   } catch (e) {
+    ex = e;
+  }
+
+  try {
+    return await documentLoaderB(url, options);
+  } catch (_) {
     // Ignored on purpose.
   }
 
-  return await documentLoader(url, options);
+  throw ex;
 };
+
+export const documentLoaderWithStaticFractal = (documentLoader) => documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
 
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (method) =>
@@ -85,7 +96,7 @@ const buildSignatures = async (methods, signatureBuilders) => {
  *
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
-const verify = async (credential, options = {}) => {
+export const verify = async (credential, options = {}) => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
