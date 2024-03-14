@@ -30,28 +30,41 @@ const issuerDoc = (id, publicKeyMultibase) => ({
   ]
 });
 
-const staticLoader = (() => {
+export const staticLoader = (id, publicKeyMultibase) => {
   const loader = new JsonLdDocumentLoader();
-  loader.addStatic(FRACTAL_ISSUER, issuerDoc(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE));
+  loader.addStatic(id, issuerDoc(id, publicKeyMultibase));
   return loader.build();
-})();
-
-const xhrLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
-
-export const documentLoaderWithStaticFractal = (documentLoader) => async (url, options = {}) => {
-  try {
-    return await staticLoader(url, options);
-  } catch (e) {
-    // Ignored on purpose.
-  }
-
-  return await documentLoader(url, options);
 };
 
+export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE);
+
+export const defaultLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
+
+export const documentLoaderWithFallbackCompose =
+  (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
+    let ex;
+    try {
+      return await documentLoaderA(url, options);
+    } catch (e) {
+      ex = e;
+    }
+
+    try {
+      return await documentLoaderB(url, options);
+    } catch (_) {
+      // Ignored on purpose.
+    }
+
+    throw ex;
+  };
+
+export const documentLoaderWithStaticFractal = (documentLoader) =>
+  documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
+
 const knownSignatureBuilders = {
-  Ed25519VerificationKey2020: async (m) =>
+  Ed25519VerificationKey2020: async (method) =>
     new Ed25519Signature2020({
-      key: await Ed25519VerificationKey2020.from(m)
+      key: await Ed25519VerificationKey2020.from(method)
     })
 };
 
@@ -85,11 +98,11 @@ const buildSignatures = async (methods, signatureBuilders) => {
  *
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
-const verify = async (credential, options = {}) => {
+export const verify = async (credential, options = {}) => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
-  if (!documentLoader) documentLoader = xhrLoader;
+  if (!documentLoader) documentLoader = defaultLoader;
 
   documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
@@ -121,7 +134,11 @@ const verify = async (credential, options = {}) => {
       return buildSignatures(methods, signatureBuilders);
     })());
 
-  const result = await vc.verifyCredential({ credential, suite, documentLoader });
+  const result = await vc.verifyCredential({
+    credential,
+    suite,
+    documentLoader
+  });
 
   if (!result.verified) throw result?.results?.[0]?.error || result;
 
