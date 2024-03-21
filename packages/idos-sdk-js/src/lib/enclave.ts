@@ -44,7 +44,13 @@ export class Enclave {
       await this.provider.load();
 
     if (encryptionPublicKey) {
-      this.idOS.store.set("encryption-public-key", Base64Codec.encode(encryptionPublicKey as any));
+      if (encryptionPublicKey.length !== 32) throw new Error("Invalid `encryptionPublicKey`");
+
+      const key = Base64Codec.encode(encryptionPublicKey as any);
+
+      if (key.length !== 44) throw new Error("Invalid serialised `encryptionPublicKey` length");
+
+      this.idOS.store.set("encryption-public-key", key);
     }
 
     this.idOS.store.set("human-id", humanId);
