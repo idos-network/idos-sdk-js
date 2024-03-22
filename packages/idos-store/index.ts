@@ -39,6 +39,7 @@ export class Store {
       console.warn(
         [
           `Inconsistent idOS store data (${window.location.origin})`,
+          `Key: ${key}`,
           `${values.join("\nvs\n")}`
         ].join("\n")
       );
@@ -50,7 +51,7 @@ export class Store {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    const daysNumber = !days || isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
     value = JSON.stringify(value);
 
@@ -70,6 +71,7 @@ export class Store {
     const keysInLocalStorage = Object.keys(window.localStorage);
 
     for (let key of [...new Set(keysInCookies.concat(keysInLocalStorage))]) {
+      if (!key) continue;
       key = key.replace(this.keyPrefix, "");
       this.set(key, this.get(key));
     }
@@ -121,7 +123,7 @@ export class Store {
     );
 
     for (const key of keysInCookies) {
-      if (key === "idOS-credential-id") continue;
+      if (key === "idOS-credential-id" || key === "idOS-preferred-auth-method") continue;
       key.startsWith(this.keyPrefix) &&
         (document.cookie = [
           `${key}=`,

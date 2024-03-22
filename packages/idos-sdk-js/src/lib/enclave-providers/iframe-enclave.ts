@@ -23,7 +23,8 @@ export class IframeEnclave extends EnclaveProvider {
   async init(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string
+    signerPublicKey?: string,
+    authMethod?: "passkey" | "password"
   ): Promise<Uint8Array> {
     const { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey }
@@ -31,9 +32,11 @@ export class IframeEnclave extends EnclaveProvider {
 
     if (encryptionPublicKey) return encryptionPublicKey;
 
-    this.#showEnclave();
+    if (!authMethod) {
+      this.#showEnclave();
+    }
 
-    return this.#requestToEnclave({ keys: { usePasskeys: this.usePasskeys } }).then(
+    return this.#requestToEnclave({ keys: { usePasskeys: this.usePasskeys, authMethod } }).then(
       (encryptionPublicKey) => {
         this.#hideEnclave();
         return encryptionPublicKey as Uint8Array;

@@ -43,13 +43,22 @@ export class Enclave {
     const { encryptionPublicKey, humanId, signerAddress, signerPublicKey } =
       await this.provider.load();
 
-    this.idOS.store.set("encryption-public-key", encryptionPublicKey);
+    if (encryptionPublicKey) {
+      if (encryptionPublicKey.length !== 32) throw new Error("Invalid `encryptionPublicKey`");
+
+      const key = Base64Codec.encode(encryptionPublicKey as any);
+
+      if (key.length !== 44) throw new Error("Invalid serialised `encryptionPublicKey` length");
+
+      this.idOS.store.set("encryption-public-key", key);
+    }
+
     this.idOS.store.set("human-id", humanId);
     this.idOS.store.set("signer-address", signerAddress);
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async init(humanId?: string): Promise<Uint8Array> {
+  async init(humanId?: string, authMethod?: "passkey" | "password"): Promise<Uint8Array> {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
@@ -57,8 +66,13 @@ export class Enclave {
 
     if (!humanId) throw new Error("Could not initialize user.");
 
-    this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
-    this.idOS.store.set("encryption-public-key", this.encryptionPublicKey);
+    this.encryptionPublicKey = await this.provider.init(
+      humanId,
+      signerAddress,
+      signerPublicKey,
+      authMethod
+    );
+    this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
     this.initialized = true;
 
     return this.encryptionPublicKey;

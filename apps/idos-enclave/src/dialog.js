@@ -17,6 +17,7 @@ class Dialog {
   }
 
   initUi() {
+    this.authContainer = document.querySelector("#auth-method");
     this.beforeUnload = (e) => {
       e.preventDefault();
       e.returnValue = "";
@@ -43,6 +44,7 @@ class Dialog {
   }
 
   async passwordForm() {
+    this.authContainer.style.display = "none";
     const passwordForm = document.querySelector("form[name=password]");
     passwordForm.style.display = "block";
     passwordForm.querySelector("input[type=password]").focus();
@@ -50,6 +52,8 @@ class Dialog {
     return new Promise((resolve) =>
       passwordForm.addEventListener("submit", (e) => {
         e.preventDefault();
+        this.authContainer.style.display = "flex";
+        passwordForm.style.display = "none";
         resolve(Object.fromEntries(new FormData(e.target).entries()));
       })
     );
@@ -57,33 +61,21 @@ class Dialog {
 
   async password() {
     const { password, duration } = await this.passwordForm();
-
     this.respondToEnclave({ result: { password, duration } });
   }
 
   async passkey({ message: { type } }) {
-    const passkeys = document.querySelector("#passkeys");
-    const passkeyButton = document.querySelector("#passkeys-btn");
-    passkeys.style.display = "block";
-
-    return new Promise((resolve) => {
-      passkeyButton.addEventListener("click", async (e) => {
-        e.preventDefault();
-        try {
-          if (type === "password") {
-            const { password } = await this.getOrCreatePasswordCredential();
-            this.respondToEnclave({ result: { password } });
-            resolve();
-          } else if (type === "webauthn") {
-            const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
-            this.respondToEnclave({ result: { password, credentialId } });
-            resolve();
-          }
-        } catch (e) {
-          this.respondToEnclave({ error: e.toString() });
-        }
-      });
-    });
+    try {
+      if (type === "password") {
+        const { password } = await this.getOrCreatePasswordCredential();
+        this.respondToEnclave({ result: { password } });
+      } else if (type === "webauthn") {
+        const { password, credentialId } = await this.getOrCreateWebAuthnCredential();
+        this.respondToEnclave({ result: { password, credentialId } });
+      }
+    } catch (e) {
+      this.respondToEnclave({ error: e.toString() });
+    }
   }
 
   async confirm({ message: { message, origin } }) {
@@ -116,7 +108,9 @@ class Dialog {
   }
 
   async getOrCreateWebAuthnCredential() {
-    let credential, credentialId, password;
+    let credential;
+    let credentialId;
+    let password;
 
     const storedCredentialId = this.store.get("credential-id");
 
@@ -129,7 +123,12 @@ class Dialog {
               type: "public-key",
               id: Base64Codec.decode(storedCredentialId)
             }
-          ]
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
         }
       };
 
@@ -140,7 +139,6 @@ class Dialog {
       } catch (e) {}
     } else {
       const displayName = "idOS User";
-
       password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
 
       credential = await navigator.credentials.create({
@@ -152,7 +150,17 @@ class Dialog {
             displayName,
             name: displayName
           },
-          pubKeyCredParams: [{ type: "public-key", alg: -7 }]
+          pubKeyCredParams: [
+            {
+              type: "public-key",
+              alg: -7
+            }
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
         }
       });
     }
@@ -165,13 +173,51 @@ class Dialog {
     return { password, credentialId };
   }
 
+  async #authWithPassword() {
+    this.authContainer.style.display = "none";
+    await this.password();
+  }
+
+  async #authWithPasskey() {
+    this.authContainer.style.display = "none";
+    await this.passkey({
+      message: { type: "webauthn" }
+    });
+  }
+
+  async auth({ message }) {
+    if (message === "password") {
+      await this.#authWithPassword();
+    }
+
+    if (message === "passkey") {
+      await this.#authWithPasskey();
+    }
+
+    this.authContainer.style.display = "flex";
+    const passwordMethod = document.querySelector("#auth-method-password");
+    const passkeyMethod = document.querySelector("#auth-method-passkey");
+
+    return new Promise((resolve) => {
+      passwordMethod.addEventListener("click", async () => {
+        await this.#authWithPassword();
+        resolve();
+      });
+
+      passkeyMethod.addEventListener("click", async () => {
+        await this.#authWithPasskey();
+        resolve();
+      });
+    });
+  }
+
   async listenToEnclave() {
     window.addEventListener("message", async (event) => {
       if (event.source !== this.enclave) return;
 
       const { data: requestData, ports } = event;
 
-      if (!["passkey", "password", "confirm"].includes(requestData.intent))
+      if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
         throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
       this.responsePort = ports[0];

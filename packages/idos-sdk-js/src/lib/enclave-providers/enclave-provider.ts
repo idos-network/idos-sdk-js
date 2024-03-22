@@ -13,7 +13,8 @@ export abstract class EnclaveProvider {
   async init(
     _humanId?: string,
     _signerAddress?: string,
-    _signerPublicKey?: string
+    _signerPublicKey?: string,
+    _authMethod?: "passkey" | "password"
   ): Promise<Uint8Array> {
     throw new Error("Unimplemented");
   }

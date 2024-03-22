@@ -2,6 +2,7 @@ import { Store } from "@idos-network/idos-store";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import nacl from "tweetnacl";
+
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 export class Enclave {
@@ -28,19 +29,28 @@ export class Enclave {
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+
     return {
       humanId: this.store.get("human-id"),
-      encryptionPublicKey: this.store.pipeCodec(Base64Codec).get("encryption-public-key"),
+      encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key")
     };
   }
 
-  async keys(usePasskeys = false) {
+  async keys(usePasskeys, authMethod) {
+    if (authMethod) await this.#openDialog("auth", authMethod);
     await this.ensurePassword(usePasskeys);
     await this.ensureKeyPair();
 
     return this.keyPair.publicKey;
+  }
+
+  async authWithPassword() {
+    const { password, duration } = await this.#openDialog("password");
+    this.store.set("password", password, duration);
+    return { password, duration };
   }
 
   async ensurePassword(usePasskeys) {
@@ -49,8 +59,9 @@ export class Enclave {
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
-    const humanId = this.store.get("human-id");
-    let password, duration, credentialId;
+    let password;
+    let duration;
+    let credentialId;
 
     const getWebAuthnCredential = async (storedCredentialId) => {
       const credentialRequest = {
@@ -61,23 +72,36 @@ export class Enclave {
               type: "public-key",
               id: Base64Codec.decode(storedCredentialId)
             }
-          ]
+          ],
+          authenticatorSelection: {
+            authenticatorAttachment: "platform",
+            userVerification: "required",
+            residentKey: "preferred"
+          }
         }
       };
 
       const credential = await navigator.credentials.get(credentialRequest);
       password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-
       return { password, credentialId };
     };
 
-    return new Promise(async (resolve) =>
-      this.unlockButton.addEventListener("click", async (e) => {
+    return new Promise((resolve) =>
+      this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        if (usePasskeys === "webauthn") {
+        const preferredAuthMethod = this.store.get("preferred-auth-method");
+
+        if (preferredAuthMethod === "password") {
+          ({ password, duration } = await this.#openDialog("password"));
+          this.store.set("password", password, duration);
+          return resolve();
+        }
+
+        if (usePasskeys || preferredAuthMethod === "webauthn") {
           const storedCredentialId = this.store.get("credential-id");
+
           if (storedCredentialId) {
             try {
               ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
@@ -92,16 +116,19 @@ export class Enclave {
             }));
           }
           this.store.set("credential-id", credentialId);
-        } else if (usePasskeys === "password") {
-          ({ password } = await this.#openDialog("passkey", {
-            type: "password"
-          }));
-        } else {
-          ({ password, duration } = await this.#openDialog("password"));
+          this.store.set("password", password);
+          return resolve();
         }
 
-        this.store.set("password", password, duration);
+        ({ password, duration, credentialId } = await this.#openDialog("auth"));
 
+        if (credentialId) {
+          this.store.set("credential-id", credentialId);
+          this.store.set("preferred-auth-method", "webauthn");
+        } else {
+          this.store.set("preferred-auth-method", "password");
+        }
+        this.store.set("password", password, duration);
         resolve();
       })
     );
@@ -122,13 +149,11 @@ export class Enclave {
     storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
-  encrypt(message, receiverPublicKey) {
-    receiverPublicKey = receiverPublicKey || this.keyPair.publicKey;
+  encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-
     const encrypted = nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
 
-    if (encrypted == null)
+    if (encrypted === null)
       throw Error(
         `Couldn't encrypt. ${JSON.stringify(
           {
@@ -152,10 +177,9 @@ export class Enclave {
   decrypt(fullMessage, senderPublicKey) {
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-
     const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
-    if (decrypted == null) {
+    if (decrypted === null) {
       throw Error(
         `Couldn't decrypt. ${JSON.stringify(
           {
@@ -198,8 +222,7 @@ export class Enclave {
 
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
-      if (event.origin !== this.parentOrigin) return;
-      if (event.data.target === "metamask-inpage") return;
+      if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
@@ -211,27 +234,26 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          usePasskeys
+          usePasskeys,
+          authMethod
         } = requestData;
 
         const paramBuilder = {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [usePasskeys],
+          keys: () => [usePasskeys, authMethod],
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey]
         }[requestName];
 
-        if (!paramBuilder) {
-          throw new Error(`Unexpected request from parent: ${requestName}`);
-        }
+        if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);
 
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
-      } catch (e) {
-        console.log("catch", e);
-        event.ports[0].postMessage({ error: e });
+      } catch (error) {
+        console.log("catch", error);
+        event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
         this.confirmButton.style.display = "none";
@@ -274,6 +296,7 @@ export class Enclave {
 
         return resolve(result);
       };
+
       this.dialog.postMessage({ intent, message }, this.dialog.origin, [port2]);
     });
   }
