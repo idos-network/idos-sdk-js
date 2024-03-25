@@ -36,8 +36,6 @@ if (!chosenWallet) {
       }
 
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
-      window.localStorage.setItem("use", e.target.querySelector("input[type=radio]:checked").value);
-
       resolve();
     });
   });
