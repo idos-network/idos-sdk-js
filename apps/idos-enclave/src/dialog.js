@@ -176,6 +176,7 @@ class Dialog {
   async #authWithPassword() {
     this.authContainer.style.display = "none";
     await this.password();
+    this.store.set("preferred-auth-method", "password");
   }
 
   async #authWithPasskey() {
@@ -183,6 +184,7 @@ class Dialog {
     await this.passkey({
       message: { type: "webauthn" }
     });
+    this.store.set("preferred-auth-method", "webauthn");
   }
 
   async auth({ message }) {
