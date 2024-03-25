@@ -1,3 +1,4 @@
+import { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
@@ -5,9 +6,12 @@ import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
-import { SigningKey, hashMessage } from "ethers";
+import { SigningKey, hashMessage, decodeBase58, toBeHex } from "ethers";
+import * as nearAPI from "near-api-js";
+
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
+
 
 /* global Buffer */
 
@@ -42,7 +46,7 @@ export class Auth {
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (storedAddress != currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
+    if (storedAddress !== currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
       await this.forget();
       const message = "idOS authentication";
       publicKey = SigningKey.recoverPublicKey(
@@ -54,7 +58,9 @@ export class Auth {
     await this.remember("signer-address", currentAddress);
     await this.remember("signer-public-key", publicKey);
 
-    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep" });
+    const accountId = await signer.getAddress();
+
+    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep", accountId });
   }
 
   async setNearSigner(wallet: Wallet, recipient = "idos.network") {
@@ -171,8 +177,24 @@ export class Auth {
       );
     };
 
+    const { connect } = nearAPI;
+    const connectionConfig = {
+      networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
+      nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
+    };
+    const nearConnection = await connect(connectionConfig);
+
+    const response = await nearConnection.connection.provider.query({
+      request_type: "view_access_key_list",
+      finality: "final",
+      account_id: currentAddress,
+    });
+    const public_key_with_prefix = response.keys.find((element: object) => element.access_key.permission == "FullAccess").public_key;
+    const public_key = public_key_with_prefix.replace(/^ed25519:/, "");
+    const implicitAccount = toBeHex(decodeBase58(public_key));
+
     return this.#setSigner({
-      accountId: currentAddress,
+      accountId: implicitAccount,
       signer,
       publicKey,
       signatureType: "nep413"
@@ -181,12 +203,14 @@ export class Auth {
 
   #setSigner<
     T extends {
-      signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
+      accountId: string;
+      signer: EthSigner | ((message: Uint8Array) => Promise<Uint8Array>);
       publicKey: string;
       signatureType: string;
     }
   >(args: T) {
     this.idOS.kwilWrapper.setSigner(args);
+
     return args;
   }
 
