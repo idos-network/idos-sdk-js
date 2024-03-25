@@ -14,7 +14,6 @@ interface InitParams {
   nodeUrl?: string;
   dbId?: string;
   container: string;
-  usePasskeys?: boolean;
   evmGrantsOptions?: EvmGrantsOptions;
   nearGrantsOptions?: NearGrantsOptions;
 }
@@ -42,14 +41,13 @@ export class idOS {
     dbId,
     container,
     evmGrantsOptions,
-    nearGrantsOptions,
-    usePasskeys = false
+    nearGrantsOptions
   }: InitParams) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container, undefined, usePasskeys);
+    this.enclave = new Enclave(this, container, undefined);
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
