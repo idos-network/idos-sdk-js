@@ -123,7 +123,7 @@ export class Store {
     );
 
     for (const key of keysInCookies) {
-      if (key === "idOS-credential-id" || key === "idOS-preferred-auth-method") continue;
+      if (key === "idOS-credential-id") continue;
       key.startsWith(this.keyPrefix) &&
         (document.cookie = [
           `${key}=`,

@@ -1,15 +1,14 @@
 import { ethers } from "ethers";
 
+import { idOS } from "@idos-network/idos-sdk";
 import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupModal } from "@near-wallet-selector/modal-ui-js";
-import "@near-wallet-selector/modal-ui-js/styles.css";
-
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
+import { setupModal } from "@near-wallet-selector/modal-ui-js";
+import "@near-wallet-selector/modal-ui-js/styles.css";
 import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
-import { idOS } from "@idos-network/idos-sdk";
 import { Cache } from "./cache";
 import * as fakeServer from "./fake-server";
 import { Terminal } from "./terminal";
@@ -31,13 +30,12 @@ if (!chosenWallet) {
 
       chosenWallet = e.submitter.name;
       window.localStorage.setItem("chosen-wallet", chosenWallet);
-      [...e.target.querySelectorAll("input[type=checkbox]")].forEach(
-        ({ name, checked }) => (chosenFlow[name] = checked)
-      );
+
+      for (const flow of walletChooser.querySelectorAll("input[type=checkbox]")) {
+        chosenFlow[flow.name] = flow.checked;
+      }
+
       window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
-
-      window.localStorage.setItem("use", e.target.querySelector("input[type=radio]:checked").value);
-
       resolve();
     });
   });
@@ -91,8 +89,7 @@ const connectWallet = {
    *
    */
   const idos = await idOS.init({
-    container: "#idos-container",
-    usePasskeys: window.localStorage.getItem("use")
+    container: "#idos-container"
   });
 
   /*
@@ -119,17 +116,17 @@ const connectWallet = {
    *
    */
   const hasProfile = await terminal.wait(
-    `checking if idOS profile exists`,
+    "checking if idOS profile exists",
     idos.hasProfile(address)
   );
 
   if (!hasProfile) {
     terminal
       .h1("pleading", `No idOS profile found for ${address}`)
-      .h2(`Need an idOS profile?`)
+      .h2("Need an idOS profile?")
       .log(`Get one at <a href="${idOS.profileProviders[0]}">Fractal ID</a>`)
-      .h2(`Already have one?`)
-      .log(`Please connect with the right address`)
+      .h2("Already have one?")
+      .log("Please connect with the right address")
       .status("done", "Done");
     return;
   }
@@ -242,7 +239,7 @@ const connectWallet = {
             terminal.log("Press Restart to see the newly created access grant.");
             terminal.br();
 
-            chosenFlow["grants"] = true;
+            chosenFlow.grants = true;
             window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
             terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
           });

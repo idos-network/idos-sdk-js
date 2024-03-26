@@ -18,18 +18,13 @@ export class Enclave {
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
-  constructor(
-    idOS: idOS,
-    container: string,
-    providerType: ProviderType = "iframe",
-    usePasskeys = false
-  ) {
+  constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe") {
     this.initialized = false;
     this.idOS = idOS;
 
     switch (providerType) {
       case "iframe":
-        this.provider = new IframeEnclave({ container, usePasskeys });
+        this.provider = new IframeEnclave({ container });
         break;
       case "metamask-snap":
         this.provider = new MetaMaskSnapEnclave({});

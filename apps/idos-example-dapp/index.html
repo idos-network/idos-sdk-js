@@ -1,82 +1,68 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Example idOS dapp</title>
-    <style type="text/css">
-      @import "/src/styles.css";
-    </style>
-  </head>
-  <body>
-    <div id="app">
-      <h1>
-        <span>idOS developer demo</span>
-        Connecting your dapp to the idOS
-      </h1>
 
-      <ul class="intro">
-        <li>connecting an EVM or NEAR wallet</li>
-        <li>initializing the idOS SDK with the wallet signer</li>
-        <li>unlocking the idOS</li>
-        <li>querying the idOS</li>
-      </ul>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Example idOS dapp</title>
+  <style type="text/css">
+    @import "/src/styles.css";
+  </style>
+</head>
 
-      <hr />
+<body>
+  <div id="app">
+    <h1>
+      <span>idOS developer demo</span>
+      Connecting your dapp to the idOS
+    </h1>
 
-      <form id="wallet-chooser">
-        <h2>Connect wallet</h2>
-        <button type="submit" name="EVM">EVM</button>
-        <button type="submit" name="NEAR">NEAR</button>
-        <p>
-          <strong>Show:</strong>
-          <br />
-          <label><input type="checkbox" name="consent" />Consent</label>
-          <br />
-          <label><input type="checkbox" name="wallets" />Wallets</label>
-          <br />
-          <label><input type="checkbox" name="credentials" />Credentials</label>
-          <br />
-          <label><input type="checkbox" name="grants" />Grants</label>
-        </p>
-        <p>
-          <strong>Use:</strong>
-          <br />
-          <label
-            ><input type="radio" name="use" value="" checked />Password</label
-          >
-          <br />
-          <label
-            ><input type="radio" name="use" value="password" />Passkey
-            (password)</label
-          >
-          <br />
-          <label
-            ><input type="radio" name="use" value="webauthn" />Passkey
-            (WebAuthn)</label
-          >
-        </p>
-      </form>
+    <ul class="intro">
+      <li>connecting an EVM or NEAR wallet</li>
+      <li>initializing the idOS SDK with the wallet signer</li>
+      <li>unlocking the idOS</li>
+      <li>querying the idOS</li>
+    </ul>
 
-      <div id="terminal">
-        <code id="overview" class="display"></code>
-        <div class="controls">
-          <button class="restart">Restart</button>
-          <button class="reset-dapp">Reset dapp</button>
-          <button class="reset-full">Reset dapp + enclave</button>
-        </div>
-        <div id="detail-wrapper" class="display">
-          <code id="detail" class="display"></code>
-          <div class="controls">
-            <button id="close">Close</button>
-          </div>
-        </div>
+    <hr />
+
+    <form id="wallet-chooser">
+      <h2>Connect wallet</h2>
+      <button type="submit" name="EVM">EVM</button>
+      <button type="submit" name="NEAR">NEAR</button>
+      <p>
+        <strong>Show:</strong>
+        <br />
+        <label><input type="checkbox" name="consent" />Consent</label>
+        <br />
+        <label><input type="checkbox" name="wallets" />Wallets</label>
+        <br />
+        <label><input type="checkbox" name="credentials" />Credentials</label>
+        <br />
+        <label><input type="checkbox" name="grants" />Grants</label>
+      </p>
+    </form>
+
+    <div id="terminal">
+      <code id="overview" class="display"></code>
+      <div class="controls">
+        <button class="restart">Restart</button>
+        <button class="reset-dapp">Reset dapp</button>
+        <button class="reset-full">Reset dapp + enclave</button>
       </div>
-
-      <div id="idos-wrapper">
-        <div id="idos-container"></div>
+      <div id="detail-wrapper" class="display">
+        <code id="detail" class="display"></code>
+        <div class="controls">
+          <button id="close">Close</button>
+        </div>
       </div>
     </div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+
+    <div id="idos-wrapper">
+      <div id="idos-container"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+
 </html>

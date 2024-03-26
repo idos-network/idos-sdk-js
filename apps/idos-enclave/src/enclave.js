@@ -39,9 +39,9 @@ export class Enclave {
     };
   }
 
-  async keys(usePasskeys, authMethod) {
+  async keys(authMethod) {
     if (authMethod) await this.#openDialog("auth", authMethod);
-    await this.ensurePassword(usePasskeys);
+    await this.ensurePassword();
     await this.ensureKeyPair();
 
     return this.keyPair.publicKey;
@@ -53,7 +53,7 @@ export class Enclave {
     return { password, duration };
   }
 
-  async ensurePassword(usePasskeys) {
+  async ensurePassword() {
     if (this.store.get("password")) return Promise.resolve;
 
     this.unlockButton.style.display = "block";
@@ -99,7 +99,7 @@ export class Enclave {
           return resolve();
         }
 
-        if (usePasskeys || preferredAuthMethod === "webauthn") {
+        if (preferredAuthMethod === "webauthn") {
           const storedCredentialId = this.store.get("credential-id");
 
           if (storedCredentialId) {
@@ -234,7 +234,6 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          usePasskeys,
           authMethod
         } = requestData;
 
@@ -242,7 +241,7 @@ export class Enclave {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [usePasskeys, authMethod],
+          keys: () => [authMethod],
           reset: () => [],
           storage: () => [humanId, signerAddress, signerPublicKey]
         }[requestName];
