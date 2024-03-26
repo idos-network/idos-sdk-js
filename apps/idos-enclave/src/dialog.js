@@ -190,10 +190,12 @@ class Dialog {
   async auth({ message }) {
     if (message === "password") {
       await this.#authWithPassword();
+      resolve();
     }
 
     if (message === "passkey") {
       await this.#authWithPasskey();
+      resolve();
     }
 
     this.authContainer.style.display = "flex";
