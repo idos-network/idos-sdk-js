@@ -91,6 +91,7 @@ const connectWallet = {
   const idos = await idOS.init({
     container: "#idos-container"
   });
+  window.idos = idos;
 
   /*
    * Setting up the demo
