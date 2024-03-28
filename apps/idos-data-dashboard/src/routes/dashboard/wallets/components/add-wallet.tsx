@@ -17,6 +17,7 @@ import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query
 import { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
+import { getNearFullAccessPublicKey } from "@idos-network/idos-sdk";
 import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
@@ -24,17 +25,12 @@ type AddWalletProps = {
   onClose: () => void;
 };
 
-type Vars = { address: string };
-type Ctx = { previousWallets: idOSWallet[] };
-type AddWalletMutationData = Partial<idOSWallet> & { address: string };
-
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<AddWalletMutationData, DefaultError, Vars, Ctx>({
-    mutationFn: ({ address }) =>
-      sdk.data.create<AddWalletMutationData>("wallets", { address, signature: "", message: "" }),
+  return useMutation<{ address: string }, DefaultError, { address: string; public_key: string }>({
+    mutationFn: ({ address, public_key }) => sdk.data.create("wallets", { address, public_key, signature: "", message: "" }),
 
     onMutate: async ({ address }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
@@ -73,14 +69,31 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
 
   const addWallet = useAddWalletMutation();
 
-  const handleSubmit = (event: FormEvent) => {
+  const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
 
     const form = event.currentTarget as HTMLFormElement;
     const address = new FormData(form).get("address") as string;
+    const address_regexp = /^0x[0-9a-fA-F]{40}$/;
+    const address_type = address_regexp.test(address) ? "EVM" : "NEAR"
+    var public_key: string;
+    if (address_type == "NEAR") {
+      public_key = await getNearFullAccessPublicKey(address);
+      if (!public_key) {
+        toast({
+          title: "Error while adding wallet",
+          description: "This is not correct ENV or NEAR wallet",
+          position: "bottom-right",
+          status: "error"
+        });
+        return;
+      }
+    } else {
+      public_key = ""
+    }
 
     addWallet.mutate(
-      { address },
+      { address, public_key },
       {
         async onSuccess(wallet) {
           const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
