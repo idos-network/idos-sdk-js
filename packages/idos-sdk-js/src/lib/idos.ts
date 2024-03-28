@@ -9,6 +9,7 @@ import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
+import { WebKwil } from "@kwilteam/kwil-js";
 
 interface InitParams {
   nodeUrl?: string;
@@ -51,6 +52,13 @@ export class idOS {
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
+    this.initializeKwilWrapper({ nodeUrl, dbId });
+  }
+
+  async initializeKwilWrapper({ nodeUrl, dbId }) {
+    const kwil = new WebKwil({ kwilProvider: KwilWrapper.defaults.kwilProvider, chainId: "" })
+    const chainId = (await kwil.chainInfo()).data?.chain_id;
+    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId, chainId });
   }
 
   static async init(params: InitParams): Promise<idOS> {
