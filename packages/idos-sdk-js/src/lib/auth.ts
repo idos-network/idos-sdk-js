@@ -7,11 +7,10 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 import { SigningKey, hashMessage, decodeBase58, toBeHex } from "ethers";
-import * as nearAPI from "near-api-js";
 
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
-
+import { getNearImlicitAddress } from "./utils";
 
 /* global Buffer */
 
@@ -177,22 +176,7 @@ export class Auth {
       );
     };
 
-    const { connect } = nearAPI;
-    const connectionConfig = {
-      networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
-      nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
-    };
-    const nearConnection = await connect(connectionConfig);
-
-    const response = await nearConnection.connection.provider.query({
-      request_type: "view_access_key_list",
-      finality: "final",
-      account_id: currentAddress,
-    });
-    const public_key_with_prefix = response.keys.find((element: object) => element.access_key.permission == "FullAccess").public_key;
-    const public_key = public_key_with_prefix.replace(/^ed25519:/, "");
-    const implicitAccount = toBeHex(decodeBase58(public_key));
-
+    const implicitAccount = await getNearImlicitAddress(currentAddress);
     return this.#setSigner({
       accountId: implicitAccount,
       signer,
