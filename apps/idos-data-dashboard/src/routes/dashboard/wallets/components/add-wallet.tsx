@@ -10,6 +10,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Stack,
   useBreakpointValue,
   useToast
 } from "@chakra-ui/react";
@@ -125,12 +126,23 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
         <form onSubmit={handleSubmit}>
           <ModalHeader>Insert wallet address</ModalHeader>
           <ModalCloseButton onClick={handleClose} />
-          <ModalBody>
+          <ModalBody as={Stack} gap={5}>
             <FormControl>
               <FormLabel fontSize="sm" htmlFor="address">
                 Wallet address
               </FormLabel>
-              <Input id="address" name="address" placeholder="Enter address" required={true} />
+              <Input
+                id="address"
+                name="address"
+                placeholder="Enter your wallet address"
+                required={true}
+              />
+            </FormControl>
+            <FormControl>
+              <FormLabel fontSize="sm" htmlFor="address">
+                Wallet public key
+              </FormLabel>
+              <Input id="public-key" name="public-key" placeholder="Enter your wallet public key" />
             </FormControl>
           </ModalBody>
           <ModalFooter>
