@@ -22,7 +22,7 @@ export async function getNearFullAccessPublicKey(namedAddress: string) {
   }
 }
 
-export async function getNearImlicitAddress(namedAddress: string) {
+export async function getNearImplicitAddress(namedAddress: string) {
   const publicKey = await getNearFullAccessPublicKey(namedAddress);
   if (!publicKey) return;
 

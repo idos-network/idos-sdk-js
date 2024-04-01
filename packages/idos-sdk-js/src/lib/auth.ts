@@ -10,7 +10,7 @@ import { SigningKey, hashMessage, decodeBase58, toBeHex } from "ethers";
 
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
-import { getNearImlicitAddress } from "./utils";
+import { getNearImplicitAddress } from "./utils";
 
 /* global Buffer */
 
@@ -176,7 +176,7 @@ export class Auth {
       );
     };
 
-    const implicitAccount = await getNearImlicitAddress(currentAddress);
+    const implicitAccount = await getNearImplicitAddress(currentAddress);
     return this.#setSigner({
       accountId: implicitAccount,
       signer,
