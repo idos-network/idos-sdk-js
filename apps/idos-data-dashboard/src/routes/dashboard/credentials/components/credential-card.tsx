@@ -16,6 +16,9 @@ export const CredentialCard = ({
   onManageGrants,
   onDelete
 }: CredentialCardProps) => {
+  const credentialLevelDisplay =
+    credential.credential_type !== credential.credential_level &&
+    ` (${credential.credential_level})`;
   return (
     <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
       <SimpleGrid columns={[2, 6]} spacing={10}>
@@ -23,7 +26,10 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Type
           </Text>
-          <Text>{credential.credential_type}</Text>
+          <Text>
+            {credential.credential_type}
+            {credentialLevelDisplay}
+          </Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
