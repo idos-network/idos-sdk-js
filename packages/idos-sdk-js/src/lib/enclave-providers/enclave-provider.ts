@@ -14,7 +14,7 @@ export abstract class EnclaveProvider {
     _humanId?: string,
     _signerAddress?: string,
     _signerPublicKey?: string,
-    _authMethod?: "passkey" | "password"
+    _authMethod?: boolean
   ): Promise<Uint8Array> {
     throw new Error("Unimplemented");
   }

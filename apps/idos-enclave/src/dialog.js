@@ -187,17 +187,7 @@ class Dialog {
     this.store.set("preferred-auth-method", "webauthn");
   }
 
-  async auth({ message }) {
-    if (message === "password") {
-      await this.#authWithPassword();
-      resolve();
-    }
-
-    if (message === "passkey") {
-      await this.#authWithPasskey();
-      resolve();
-    }
-
+  async auth() {
     this.authContainer.style.display = "flex";
     const passwordMethod = document.querySelector("#auth-method-password");
     const passkeyMethod = document.querySelector("#auth-method-passkey");

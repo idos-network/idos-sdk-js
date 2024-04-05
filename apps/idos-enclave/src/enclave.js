@@ -40,7 +40,7 @@ export class Enclave {
   }
 
   async keys(authMethod) {
-    if (authMethod) await this.#openDialog("auth", authMethod);
+    if (authMethod) await this.#openDialog("auth");
     await this.ensurePassword();
     await this.ensureKeyPair();
 

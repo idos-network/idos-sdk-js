@@ -22,7 +22,7 @@ export class IframeEnclave extends EnclaveProvider {
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
-    authMethod?: "passkey" | "password"
+    authMethod?: boolean
   ): Promise<Uint8Array> {
     const { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey }
