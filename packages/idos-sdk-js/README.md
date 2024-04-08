@@ -97,9 +97,13 @@ Our [`📁 idos-example-dapp`](../../apps/idos-example-dapp) shows an example of
 
 <img src="./assets/readme-container-2.gif" />
 
-### Using `hasPassword`
+### Using `hasProfile`
 
-You can check id your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users.
+You can check id your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
+
+```
+const hasProfile = await idos.hasProfile(signer.address) // true if there is a profile associated  with the passed adddress.
+```
 
 ### The `setSigner` flow and supported wallets
 
@@ -129,6 +133,22 @@ The idOS currently supports two classes of signers:
 - Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
 - NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
 
+
+### the idOS auth
+We currently support two auth methods:
+* Password
+* Passkeys
+
+After the user clicks the 🔓 Unlock idOS button, a secure dialog opens where the user can choose between a password or a passkey for managing their data.
+
+<table border="0"><tr align="center"><td>
+  <i>The auth dialog</i>
+</td></tr><tr align="center"><td>
+  <img src="./assets/readme-auth-dialog.png" width="250" />
+</td></tr></table>
+
+
+
 ### The idOS password
 
 Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from a password chosen by the user. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
@@ -142,6 +162,26 @@ Users can control how long the enclave remembers this key for. When that period 
 </td></tr><tr align="center"><td>
   <img src="./assets/readme-dialog-password.png" width="250" />
 </td></tr></table>
+
+### The idOS passkey
+
+Alternative to using a password, it is possible to use passkeys. The passkey is attached to the platform authenticator.
+You can learn more about passkeys [here](https://developers.google.com/identity/passkeys)
+
+<table border="0"><tr align="center"><td>
+  <i>The password dialog</i>
+</td></tr><tr align="center"><td>
+  <img src="./assets/readme-dialog-passkey.png" width="250" />
+</td></tr></table>
+
+The selected auth method will be stored and will be reused until it is not explicitly removed:
+
+```js
+import { idOS } from "@idos-network/idos-sdk";
+idos = await idOS.init({ container: "css selector" });
+
+await idos.store.reset() // This clears the idOS information from the storage.
+```
 
 ## Quick reference
 
@@ -158,7 +198,7 @@ idos = await idOS.init({ container: "css selector" });
 ```js
 const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
-const signer = await provider.getSigner());
+const signer = await provider.getSigner();
 
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
@@ -205,13 +245,19 @@ if (!idos.hasProfile(signer.address)) window.location = idOS.profileProviders[0]
 ### Credentials
 
 ```js
+// Get all credentials
 const credentials = await idos.data.list("credentials");
+
+//Get all credentials that match a condition
 const credentials = await idos.data.list("credentials", { issuer: "Fractal ID" };
+
 
 const { id } = credentials.find(c => c.credential_type === "basic");
 
+// Get the credential details
 const { content } = await idos.data.get("credentials", id);
 
+// Validate a credential
 const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
 ```
 
@@ -227,3 +273,31 @@ await idos.data.update("attributes", { id, value: "1000" });
 
 await idos.data.delete("attributes", id);
 ```
+
+### Grant sharing / revocation / list
+
+```js
+// Sharing a credential
+await idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
+    
+// Revoke an access grant
+await idos.grants.revoke('credentials', recordId, grantee, dataId, timelock)
+
+// List all grants that match a criteria
+await idos.grants.list({
+    owner,
+    dataId,
+    grantee
+})
+
+```
+
+When creating an access grant some things happen under the hood:
+* A new record is created from the original
+* The new record encryption public key value is assigned to be the grantee public key
+* An access grant is created on the chain
+
+The access grant can be revoked only once the timelock of it has passed.
+
+* You can view a functioning example for access grants in the [idos-example-dapp](../../apps/idos-example-dapp)
+

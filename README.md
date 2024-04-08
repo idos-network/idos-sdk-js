@@ -23,7 +23,7 @@ const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
 
-// Initialize SDK
+// Initialize the SDK
 const idos = await idOS.init({ container: "#idos-container" });
 await idos.setSigner("EVM", signer);
 

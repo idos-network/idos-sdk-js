@@ -6,4 +6,10 @@ A sample dapp demonstrating SDK usage. Deployed at [idos-example-dapp.vercel.app
 
 Can be driven with either an EVM wallet (e.g. MetaMask) or a NEAR wallet (e.g. Meteor Wallet).
 
+Within the app a user can connect a wallet and:
+* List credentials
+* List wallets
+* List access grants
+* Create an access grant
+
 Run with `pnpm install` and `pnpm dev`
