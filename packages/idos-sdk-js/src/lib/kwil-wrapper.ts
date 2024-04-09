@@ -1,6 +1,6 @@
-import { Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
-import type { SignerSupplier } from "@kwilteam/kwil-js/dist/core/builders.d";
-import { Signer } from "ethers";
+import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
+import { type ActionBody } from "@kwilteam/kwil-js/dist/core/action";
+import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 
 export class KwilWrapper {
   static defaults = {
@@ -12,7 +12,7 @@ export class KwilWrapper {
   dbId: string;
   kwilProvider: string;
   client: WebKwil;
-  signer?: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
+  signer?: KwilSigner;
   publicKey?: string;
   signatureType?: string;
 
@@ -30,40 +30,35 @@ export class KwilWrapper {
     return this.client.getSchema(this.dbId);
   }
 
-  setSigner({
+  async setSigner({
+    accountId,
     signer,
     publicKey,
     signatureType
   }: {
-    signer: Signer | ((message: Uint8Array) => Promise<Uint8Array>);
+    accountId: string;
+    signer: EthSigner | CustomSigner;
     publicKey: string;
     signatureType: string;
   }) {
-    this.signer = signer;
+    if (signatureType === "nep413") {
+      this.signer = new KwilSigner(signer as CustomSigner, accountId, signatureType);
+    } else {
+      this.signer = new KwilSigner(signer as EthSigner, accountId);
+    }
+
     this.publicKey = publicKey;
     this.signatureType = signatureType;
   }
 
-  async buildAction(
-    actionName: string,
-    inputs: Record<string, any> | null,
-    description?: string,
-    useSigner = true
-  ) {
-    const action = this.client.actionBuilder().dbid(this.dbId).name(actionName);
+  async buildAction(actionName: string, inputs: Record<string, any> | null, description?: string) {
+    const payload: ActionBody = {
+      action: actionName,
+      dbid: this.dbId
+    };
 
     if (description) {
-      action.description(`*${description}*`);
-    }
-
-    if (useSigner) {
-      if (!this.publicKey || !this.signer || !this.signatureType)
-        throw new Error("Call idOS.setSigner first.");
-
-      action.publicKey(this.publicKey).signer(
-        this.signer as SignerSupplier, // TODO: pkoch knows the types line up enough (i.e., it runs just fine as is), but he didn't find a way to express that in types.
-        this.signatureType
-      );
+      payload.description = `*${description}*`;
     }
 
     if (inputs) {
@@ -72,10 +67,11 @@ export class KwilWrapper {
       for (const key in inputs) {
         actionInput.put(`$${key}`, inputs[key]);
       }
-      action.concat(actionInput);
+
+      payload.inputs = [actionInput];
     }
 
-    return action;
+    return payload;
   }
 
   async call(
@@ -84,19 +80,20 @@ export class KwilWrapper {
     description?: string,
     useSigner = true
   ) {
-    const action = await this.buildAction(actionName, actionInputs, description, useSigner);
-    const msg = await action.buildMsg();
-    const res = await this.client.call(msg);
+    const action = await this.buildAction(actionName, actionInputs, description);
 
-    return res.data!.result;
+    const res = await this.client.call(action, useSigner ? this.signer : undefined);
+
+    return res.data?.result;
   }
 
-  async broadcast(actionName: string, actionInputs: Record<string, any>, description?: string) {
+  async broadcast(actionName: string, actionInputs: Record<string, unknown>, description?: string) {
+    if (!this.signer) throw new Error("No signer set");
     const action = await this.buildAction(actionName, actionInputs, description);
-    const tx = await action.buildTx();
-    const res = await this.client.broadcast(tx);
 
-    return res.data!.tx_hash;
+    const res = await this.client.execute(action, this.signer);
+
+    return res.data?.tx_hash;
   }
 
   async getHumanId(): Promise<string | null> {

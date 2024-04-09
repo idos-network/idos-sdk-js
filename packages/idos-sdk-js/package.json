@@ -33,10 +33,10 @@
   },
   "peerDependencies": {
     "ethers": "^6.8.0",
-    "near-api-js": "^2.1.4"
+    "near-api-js": "^3.0.4"
   },
   "devDependencies": {
-    "@near-wallet-selector/core": "^8.7.0",
+    "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
@@ -54,7 +54,7 @@
     "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
     "@digitalbazaar/vc": "^6.0.2",
-    "@kwilteam/kwil-js": "0.3.0",
+    "@kwilteam/kwil-js": "0.5.6",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",

@@ -1,3 +1,4 @@
+import { WebKwil } from "@kwilteam/kwil-js";
 import { Wallet } from "@near-wallet-selector/core";
 import { Signer } from "ethers";
 import { Store } from "../../../idos-store";
@@ -51,6 +52,13 @@ export class idOS {
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
+    this.initializeKwilWrapper({ nodeUrl, dbId });
+  }
+
+  async initializeKwilWrapper({ nodeUrl, dbId }) {
+    const kwil = new WebKwil({ kwilProvider: KwilWrapper.defaults.kwilProvider, chainId: "" });
+    const chainId = (await kwil.chainInfo()).data?.chain_id;
+    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId, chainId });
   }
 
   static async init(params: InitParams): Promise<idOS> {
