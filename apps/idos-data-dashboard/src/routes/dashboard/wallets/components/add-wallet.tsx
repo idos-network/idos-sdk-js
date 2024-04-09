@@ -88,7 +88,8 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
       if (!public_key) {
         toast({
           title: "Error while adding wallet",
-          description: "This is not correct ENV or NEAR wallet",
+          description:
+            "This doesn't look like an EVM wallet, and we can't find a `FullAccessKey` for this NEAR address. idOS doesn't support this wallet.",
           position: "bottom-right",
           status: "error"
         });
