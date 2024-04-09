@@ -88,8 +88,8 @@ export class KwilWrapper {
   }
 
   async broadcast(actionName: string, actionInputs: Record<string, unknown>, description?: string) {
-    const action = await this.buildAction(actionName, actionInputs, description);
     if (!this.signer) throw new Error("No signer set");
+    const action = await this.buildAction(actionName, actionInputs, description);
 
     const res = await this.client.execute(action, this.signer);
 
