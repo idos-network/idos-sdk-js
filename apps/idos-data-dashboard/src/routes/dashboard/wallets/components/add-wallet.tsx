@@ -29,8 +29,14 @@ const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ address: string }, DefaultError, { address: string; public_key: string }>({
-    mutationFn: ({ address, public_key }) => sdk.data.create("wallets", { address, public_key, signature: "", message: "" }),
+  return useMutation<
+    { address: string },
+    DefaultError,
+    { address: string; public_key: string },
+    { previousWallets: idOSWallet[] }
+  >({
+    mutationFn: ({ address, public_key }) =>
+      sdk.data.create("wallets", { address, public_key, signature: "", message: "" }),
 
     onMutate: async ({ address }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
@@ -75,9 +81,9 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     const form = event.currentTarget as HTMLFormElement;
     const address = new FormData(form).get("address") as string;
     const address_regexp = /^0x[0-9a-fA-F]{40}$/;
-    const address_type = address_regexp.test(address) ? "EVM" : "NEAR"
-    var public_key: string;
-    if (address_type == "NEAR") {
+    const address_type = address_regexp.test(address) ? "EVM" : "NEAR";
+    let public_key: string;
+    if (address_type === "NEAR") {
       public_key = await getNearFullAccessPublicKey(address);
       if (!public_key) {
         toast({
@@ -89,7 +95,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
         return;
       }
     } else {
-      public_key = ""
+      public_key = "";
     }
 
     addWallet.mutate(
