@@ -1,3 +1,4 @@
+import { WebKwil } from "@kwilteam/kwil-js";
 import { Wallet } from "@near-wallet-selector/core";
 import { Signer } from "ethers";
 import { Store } from "../../../idos-store";
@@ -9,7 +10,6 @@ import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
-import { WebKwil } from "@kwilteam/kwil-js";
 
 interface InitParams {
   nodeUrl?: string;
