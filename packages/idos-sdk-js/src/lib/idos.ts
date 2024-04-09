@@ -56,7 +56,7 @@ export class idOS {
   }
 
   async initializeKwilWrapper({ nodeUrl, dbId }) {
-    const kwil = new WebKwil({ kwilProvider: KwilWrapper.defaults.kwilProvider, chainId: "" })
+    const kwil = new WebKwil({ kwilProvider: KwilWrapper.defaults.kwilProvider, chainId: "" });
     const chainId = (await kwil.chainInfo()).data?.chain_id;
     this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId, chainId });
   }

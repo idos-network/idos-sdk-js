@@ -5,19 +5,22 @@ export async function getNearFullAccessPublicKey(namedAddress: string) {
   const { connect } = nearAPI;
   const connectionConfig = {
     networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
-    nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
+    nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL
   };
   const nearConnection = await connect(connectionConfig);
 
   try {
     const response = await nearConnection.connection.provider.query({
-    request_type: "view_access_key_list",
-    finality: "final",
-    account_id: namedAddress,
-  });
-  const publicKey = response.keys.find((element: object) => element.access_key.permission == "FullAccess")?.public_key;
-  return publicKey;
-  } catch { // near failed if namedAddress contains uppercase symbols
+      request_type: "view_access_key_list",
+      finality: "final",
+      account_id: namedAddress
+    });
+    const publicKey = response.keys.find(
+      (element: object) => element.access_key.permission == "FullAccess"
+    )?.public_key;
+    return publicKey;
+  } catch {
+    // near failed if namedAddress contains uppercase symbols
     return;
   }
 }

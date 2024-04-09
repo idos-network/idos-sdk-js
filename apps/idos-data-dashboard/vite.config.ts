@@ -32,7 +32,7 @@ export default defineConfig({
       globals: {
         Buffer: true
       }
-    }),
+    })
     // mkcert()
   ],
   resolve: {
