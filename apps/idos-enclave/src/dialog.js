@@ -79,9 +79,11 @@ class Dialog {
   }
 
   async confirm({ message: { message, origin } }) {
+    this.authContainer.style.display = "none";
     const confirmed = await this.confirmForm({ message, origin });
 
     this.respondToEnclave({ result: { confirmed } });
+    this.authContainer.style.display = "flex";
   }
 
   async getOrCreatePasswordCredential() {
