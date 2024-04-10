@@ -21,14 +21,15 @@ type DeleteWalletProps = {
   onClose: () => void;
 };
 
+type Data = { id: string };
 type Ctx = { previousWallets: idOSWallet[] };
 
 const useDeleteWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }, DefaultError, idOSWallet, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("wallets", id),
+  return useMutation<Data, DefaultError, idOSWallet, Ctx>({
+    mutationFn: ({ id }) => sdk.data.delete("wallets", id, true),
     async onMutate({ address }) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
@@ -65,6 +66,9 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
           position: "bottom-right",
           status: "error"
         });
+      },
+      onSettled() {
+        queryClient.invalidateQueries({ queryKey: ["wallets"] });
       }
     });
   };

@@ -87,11 +87,16 @@ export class KwilWrapper {
     return res.data?.result;
   }
 
-  async broadcast(actionName: string, actionInputs: Record<string, unknown>, description?: string) {
+  async broadcast(
+    actionName: string,
+    actionInputs: Record<string, unknown>,
+    description?: string,
+    synchronous?: boolean
+  ) {
     if (!this.signer) throw new Error("No signer set");
     const action = await this.buildAction(actionName, actionInputs, description);
 
-    const res = await this.client.execute(action, this.signer);
+    const res = await this.client.execute(action, this.signer, synchronous);
 
     return res.data?.tx_hash;
   }

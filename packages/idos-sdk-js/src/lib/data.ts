@@ -40,7 +40,8 @@ export class Data {
 
   async create<T extends Record<string, unknown>>(
     tableName: string,
-    record: T
+    record: T,
+    synchronous?: boolean
   ): Promise<T & { id: string }> {
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName
@@ -78,7 +79,8 @@ export class Data {
     await this.idOS.kwilWrapper.broadcast(
       `add_${this.singularize(tableName)}`,
       newRecord,
-      `Create new ${this.singularize(tableName)} in your idOS profile`
+      `Create new ${this.singularize(tableName)} in your idOS profile`,
+      synchronous
     );
 
     return newRecord;
@@ -147,9 +149,18 @@ export class Data {
     return record || null;
   }
 
-  async delete(tableName: string, recordId: string): Promise<{ id: string }> {
+  async delete(
+    tableName: string,
+    recordId: string,
+    synchronous?: boolean
+  ): Promise<{ id: string }> {
     const record = { id: recordId };
-    await this.idOS.kwilWrapper.broadcast(`remove_${this.singularize(tableName)}`, record);
+    await this.idOS.kwilWrapper.broadcast(
+      `remove_${this.singularize(tableName)}`,
+      record,
+      undefined,
+      synchronous
+    );
 
     return record;
   }

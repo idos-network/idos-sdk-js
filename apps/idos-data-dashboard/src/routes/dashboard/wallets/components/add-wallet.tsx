@@ -13,11 +13,11 @@ import {
   useBreakpointValue,
   useToast
 } from "@chakra-ui/react";
+import { getNearFullAccessPublicKey } from "@idos-network/idos-sdk";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
-import { getNearFullAccessPublicKey } from "@idos-network/idos-sdk";
 import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
@@ -25,22 +25,34 @@ type AddWalletProps = {
   onClose: () => void;
 };
 
+type Data = { address: string };
+type Variables = { address: string; public_key: string };
+type Ctx = { previousWallets: idOSWallet[] };
+
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<
-    { address: string },
-    DefaultError,
-    { address: string; public_key: string },
-    { previousWallets: idOSWallet[] }
-  >({
-    mutationFn: ({ address, public_key }) =>
-      sdk.data.create("wallets", { address, public_key, signature: "", message: "" }),
+  return useMutation<Data, DefaultError, Variables, Ctx>({
+    mutationFn: async ({ address, public_key }) => {
+      const wallet = await sdk.data.create(
+        "wallets",
+        {
+          address,
+          public_key,
+          signature: "",
+          message: ""
+        },
+        true
+      );
+
+      return wallet;
+    },
 
     onMutate: async ({ address }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
         {
@@ -102,13 +114,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     addWallet.mutate(
       { address, public_key },
       {
-        async onSuccess(wallet) {
-          const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
-          const updated = cache.map((cachedWallet) =>
-            !cachedWallet.id ? { ...wallet } : cachedWallet
-          );
-          queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
-
+        async onSuccess() {
           form.reset();
           handleClose();
         },
@@ -120,6 +126,9 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
             position: "bottom-right",
             status: "error"
           });
+        },
+        onSettled() {
+          queryClient.invalidateQueries({ queryKey: ["wallets"] });
         }
       }
     );

@@ -56,7 +56,7 @@ const WalletsList = () => {
     onClose();
   };
 
-  if (wallets.isFetching) {
+  if (wallets.isLoading) {
     return <DataLoading />;
   }
 
@@ -67,7 +67,14 @@ const WalletsList = () => {
   if (wallets.isSuccess) {
     return (
       <>
-        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+        <List
+          display="flex"
+          flexDir="column"
+          gap={2.5}
+          flex={1}
+          opacity={wallets.isRefetching ? 0.5 : 1}
+          transition={"opacity 0.15s ease"}
+        >
           {wallets.data.map((wallet) => (
             <ListItem key={wallet.id}>
               <WalletCard wallet={wallet} onDelete={handleDelete} />

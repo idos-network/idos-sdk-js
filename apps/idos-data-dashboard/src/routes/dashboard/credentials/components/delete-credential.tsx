@@ -30,14 +30,15 @@ type DeleteCredentialProps = {
   onClose: () => void;
 };
 
+type Data = { id: string };
 type Ctx = { previousCredentials: idOSCredential[] };
 
 const useDeleteCredentialMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }, DefaultError, idOSCredential, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("credentials", id),
+  return useMutation<Data, DefaultError, idOSCredential, Ctx>({
+    mutationFn: ({ id }) => sdk.data.delete("credentials", id, true),
     async onMutate({ id }) {
       await queryClient.cancelQueries({ queryKey: ["credentials"] });
       const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];
@@ -50,6 +51,9 @@ const useDeleteCredentialMutation = () => {
     },
     async onError(_, __, ctx) {
       queryClient.setQueryData(["credentials"], ctx?.previousCredentials);
+    },
+    onSettled() {
+      queryClient.invalidateQueries({ queryKey: ["credentials"] });
     }
   });
 };

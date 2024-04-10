@@ -75,7 +75,7 @@ const Credentials = () => {
     onClose();
   };
 
-  if (credentials.isFetching) {
+  if (credentials.isLoading) {
     return <DataLoading />;
   }
 
@@ -86,7 +86,14 @@ const Credentials = () => {
   if (credentials.isSuccess) {
     return (
       <>
-        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+        <List
+          display="flex"
+          flexDir="column"
+          gap={2.5}
+          flex={1}
+          opacity={credentials.isRefetching ? 0.5 : 1}
+          transition={"opacity 0.15s ease"}
+        >
           {credentials.data.map((credential) => (
             <ListItem key={credential.id}>
               <CredentialCard
