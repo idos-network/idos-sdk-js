@@ -291,13 +291,10 @@ await idos.grants.list({
 })
 
 ```
-
 When creating an access grant some things happen under the hood:
-* A new record is created from the original
-* The new record encryption public key value is assigned to be the grantee public key
+* A new credental is created from the original one, the content of this new credential is encrypted with the grantee's encryption key
 * An access grant is created on the chain
 
 The access grant can be revoked only once the timelock of it has passed.
 
 * You can view a functioning example for access grants in the [idos-example-dapp](../../apps/idos-example-dapp)
-
