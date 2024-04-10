@@ -99,10 +99,10 @@ Our [`📁 idos-example-dapp`](../../apps/idos-example-dapp) shows an example of
 
 ### Using `hasProfile`
 
-You can check id your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
+You can check if your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
 
 ```
-const hasProfile = await idos.hasProfile(signer.address) // true if there is a profile associated  with the passed adddress.
+const hasProfile = await idos.hasProfile(signer.address) // true if there is an idOS profile associated with the passed adddress
 ```
 
 ### The `setSigner` flow and supported wallets
@@ -133,29 +133,21 @@ The idOS currently supports two classes of signers:
 - Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
 - NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
 
+### Unlocking the idOS enclave
 
-### the idOS auth
-We currently support two auth methods:
-* Password
-* Passkeys
+Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
 
-After the user clicks the 🔓 Unlock idOS button, a secure dialog opens where the user can choose between a password or a passkey for managing their data.
+Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
+
+After the user clicks the **🔓 Unlock idOS** button, a secure dialog opens for the user to choose their preferred unlocking method.
 
 <table border="0"><tr align="center"><td>
-  <i>The auth dialog</i>
+  <i>The unlock dialog</i>
 </td></tr><tr align="center"><td>
   <img src="./assets/readme-auth-dialog.png" width="250" />
 </td></tr></table>
 
-
-
-### The idOS password
-
-Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from a password chosen by the user. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
-
-Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
-
-Users can control how long the enclave remembers this key for. When that period expires, or when faced with a new signer, the enclave will prompt the user. It first brings the idOS container into view as shown above and, after the user clicks the **`🔓 Unlock idOS`** button, a secure dialog opens where the user can safely enter their password.
+If the user chooses **Password**, they'll be prompted to enter it.
 
 <table border="0"><tr align="center"><td>
   <i>The password dialog</i>
@@ -163,13 +155,10 @@ Users can control how long the enclave remembers this key for. When that period 
   <img src="./assets/readme-dialog-password.png" width="250" />
 </td></tr></table>
 
-### The idOS passkey
-
-Alternative to using a password, it is possible to use passkeys. The passkey is attached to the platform authenticator.
-You can learn more about passkeys [here](https://developers.google.com/identity/passkeys)
+If they choose **Passkey**, we'll use their platform authenticator (you can learn more about passkeys [here](https://developers.google.com/identity/passkeys)).
 
 <table border="0"><tr align="center"><td>
-  <i>The password dialog</i>
+  <i>A passkey dialog</i>
 </td></tr><tr align="center"><td>
   <img src="./assets/readme-dialog-passkey.png" width="250" />
 </td></tr></table>
@@ -251,13 +240,11 @@ const credentials = await idos.data.list("credentials");
 //Get all credentials that match a condition
 const credentials = await idos.data.list("credentials", { issuer: "Fractal ID" };
 
-
-const { id } = credentials.find(c => c.credential_type === "basic");
-
 // Get the credential details
+const { id } = credentials.find(c => c.credential_type === "basic");
 const { content } = await idos.data.get("credentials", id);
 
-// Validate a credential
+// Validate that a credential is well signed
 const isValid = await idOS.verifiableCredentials.verify(content).catch(e => false);
 ```
 
@@ -274,10 +261,10 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
-### Grant sharing / revocation / list
+### Access Grant creation / revocation / list
 
 ```js
-// Sharing a credential
+// Share a credential by creating an access grant
 await idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
     
 // Revoke an access grant
@@ -292,9 +279,10 @@ await idos.grants.list({
 
 ```
 When creating an access grant some things happen under the hood:
-* A new credental is created from the original one, the content of this new credential is encrypted with the grantee's encryption key
-* An access grant is created on the chain
+* A duplicate of the underlying data is created, encrypted to the provided `receiverPublicKey`
+* An access grant is created on the connected chain
 
-The access grant can be revoked only once the timelock of it has passed.
+The access grant can be revoked only once its timelock has expired.
 
-* You can view a functioning example for access grants in the [idos-example-dapp](../../apps/idos-example-dapp)
+> [!TIP]
+> See a working example [idos-example-dapp](../../apps/idos-example-dapp)
