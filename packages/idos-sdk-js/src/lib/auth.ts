@@ -40,26 +40,13 @@ export class Auth {
   }
 
   async setEvmSigner(signer: Signer) {
-    const storedAddress = this.idOS.store.get("signer-address");
     const currentAddress = await signer.getAddress();
 
-    let publicKey = this.idOS.store.get("signer-public-key");
-
-    if (storedAddress !== currentAddress || !publicKey || !this.idOS.store.get("human-id")) {
-      await this.forget();
-      const message = "idOS authentication";
-      publicKey = SigningKey.recoverPublicKey(
-        hashMessage(message),
-        await signer.signMessage(message)
-      );
-    }
-
     await this.remember("signer-address", currentAddress);
-    await this.remember("signer-public-key", publicKey);
 
     const accountId = await signer.getAddress();
 
-    return this.#setSigner({ signer, publicKey, signatureType: "secp256k1_ep", accountId });
+    return this.#setSigner({ signer, signatureType: "secp256k1_ep", accountId });
   }
 
   async setNearSigner(wallet: Wallet, recipient = "idos.network") {
@@ -179,7 +166,6 @@ export class Auth {
     return this.#setSigner({
       accountId: implicitAddressFromPublicKey(publicKey),
       signer,
-      publicKey,
       signatureType: "nep413"
     });
   }
@@ -188,7 +174,6 @@ export class Auth {
     T extends {
       accountId: string;
       signer: EthSigner | ((message: Uint8Array) => Promise<Uint8Array>);
-      publicKey: string;
       signatureType: string;
     }
   >(args: T) {
@@ -206,7 +191,7 @@ export class Auth {
 
   async currentUser() {
     if (this.user.humanId === undefined) {
-      const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
+      const currentUserKeys = ["human-id", "signer-address"];
       let [humanId, address, publicKey] = currentUserKeys.map(
         this.idOS.store.get.bind(this.idOS.store)
       ) as Array<string | undefined>;
