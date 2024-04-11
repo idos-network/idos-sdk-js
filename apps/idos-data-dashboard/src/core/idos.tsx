@@ -20,6 +20,7 @@ type idOSContextValue = {
   sdk: idOS;
   address: string | undefined;
   hasProfile: boolean;
+  publicKey: string | undefined;
   reset: () => Promise<void>;
 };
 
@@ -47,6 +48,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
   const [sdk, setSdk] = useState<idOS | null>(null);
+  const [publicKey, setPublicKey] = useState<string | undefined>();
   const ethSigner = useEthersSigner();
   const { accountId, accounts, selector } = useWalletSelector();
   const { address: ethAddress, isConnected: isEthConnected } = useAccount();
@@ -91,6 +93,8 @@ export const Provider = ({ children }: PropsWithChildren) => {
     if (profile) {
       // @ts-expect-error
       await _sdk.setSigner(signer.type, signer.value);
+      const _pk = (await _sdk.auth.currentUser()).publicKey;
+      setPublicKey(_pk);
     }
 
     setSdk(_sdk);
@@ -127,6 +131,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
         sdk,
         hasProfile,
         address: userAddress,
+        publicKey,
         async reset() {
           await sdk.reset({ enclave: true });
         }
