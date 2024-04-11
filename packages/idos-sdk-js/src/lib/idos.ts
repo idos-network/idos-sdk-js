@@ -38,33 +38,37 @@ export class idOS {
   store: Store;
 
   private constructor({
-    nodeUrl,
-    dbId,
     container,
+    kwilWrapper,
     evmGrantsOptions,
     nearGrantsOptions
-  }: InitParams) {
+  }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
     this.auth = new Auth(this);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container, undefined);
-    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId });
+    this.kwilWrapper = kwilWrapper;
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
-    this.initializeKwilWrapper({ nodeUrl, dbId });
   }
 
-  async initializeKwilWrapper({ nodeUrl = KwilWrapper.defaults.kwilProvider, dbId }) {
+  private static async initializeKwilWrapper({
+    nodeUrl = KwilWrapper.defaults.kwilProvider,
+    dbId = KwilWrapper.defaults.dbId
+  }) {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
-    const chainId = (await kwil.chainInfo()).data?.chain_id;
-    this.kwilWrapper = new KwilWrapper({ nodeUrl, dbId, chainId });
+    const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
+    return new KwilWrapper({ nodeUrl, dbId, chainId });
   }
 
   static async init(params: InitParams): Promise<idOS> {
     this.initializing = true;
 
-    const idos = new this(params);
+    const idos = new this({
+      ...params,
+      kwilWrapper: await this.initializeKwilWrapper(params)
+    });
     await idos.enclave.load();
 
     return idos;
