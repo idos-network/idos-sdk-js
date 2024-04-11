@@ -15,10 +15,9 @@ export async function getNearFullAccessPublicKey(namedAddress: string) {
       finality: "final",
       account_id: namedAddress
     });
-    const publicKey = response.keys.find(
-      (element: object) => element.access_key.permission == "FullAccess"
-    )?.public_key;
-    return publicKey;
+    return response.keys
+      .filter((element: object) => element.access_key.permission === "FullAccess")
+      ?.map((i) => i.public_key);
   } catch {
     // near failed if namedAddress contains uppercase symbols
     return;

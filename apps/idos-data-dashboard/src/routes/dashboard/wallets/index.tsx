@@ -68,8 +68,8 @@ const WalletsList = () => {
     return (
       <>
         <List display="flex" flexDir="column" gap={2.5} flex={1}>
-          {wallets.data.map((wallet) => (
-            <ListItem key={wallet.id}>
+          {wallets.data.map((wallet, index) => (
+            <ListItem key={`${wallet.address}-${index}`}>
               <WalletCard wallet={wallet} onDelete={handleDelete} />
             </ListItem>
           ))}

@@ -37,7 +37,7 @@ const useDeleteCredentialMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<{ id: string }, DefaultError, idOSCredential, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("credentials", id),
+    mutationFn: ({ id }) => sdk.data.delete("credentials", id, true),
     async onMutate({ id }) {
       await queryClient.cancelQueries({ queryKey: ["credentials"] });
       const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];

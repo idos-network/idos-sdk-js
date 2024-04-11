@@ -1,5 +1,5 @@
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
-import { type ActionBody } from "@kwilteam/kwil-js/dist/core/action";
+import { type ActionBody, type ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 
 export class KwilWrapper {
@@ -51,10 +51,16 @@ export class KwilWrapper {
     this.signatureType = signatureType;
   }
 
-  async buildAction(actionName: string, inputs: Record<string, any> | null, description?: string) {
+  async buildAction(
+    actionName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
+    inputs: Record<string, any>[] | null | any,
+    description?: string
+  ) {
     const payload: ActionBody = {
       action: actionName,
-      dbid: this.dbId
+      dbid: this.dbId,
+      inputs: []
     };
 
     if (description) {
@@ -62,13 +68,13 @@ export class KwilWrapper {
     }
 
     if (inputs) {
-      const actionInput = new KwilUtils.ActionInput();
-
-      for (const key in inputs) {
-        actionInput.put(`$${key}`, inputs[key]);
+      for (const input of inputs) {
+        const actionInput = new KwilUtils.ActionInput();
+        for (const key in input) {
+          actionInput.put(`$${key}`, input[key]);
+        }
+        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
       }
-
-      payload.inputs = [actionInput];
     }
 
     return payload;
@@ -80,19 +86,23 @@ export class KwilWrapper {
     description?: string,
     useSigner = true
   ) {
-    const action = await this.buildAction(actionName, actionInputs, description);
+    const action = await this.buildAction(actionName, [actionInputs], description);
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
     return res.data?.result;
   }
 
-  async broadcast(actionName: string, actionInputs: Record<string, unknown>, description?: string) {
+  async execute(
+    actionName: string,
+    actionInputs: Record<string, unknown>[],
+    description?: string,
+    synchronous?: boolean
+  ) {
     if (!this.signer) throw new Error("No signer set");
+
     const action = await this.buildAction(actionName, actionInputs, description);
-
-    const res = await this.client.execute(action, this.signer);
-
+    const res = await this.client.execute(action, this.signer, synchronous);
     return res.data?.tx_hash;
   }
 
