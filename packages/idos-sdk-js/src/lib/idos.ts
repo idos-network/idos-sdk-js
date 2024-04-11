@@ -77,7 +77,8 @@ export class idOS {
   async setSigner(type: SignerType, signer: Wallet | Signer): Promise<void> {
     if (type === "NEAR") {
       const { accountId } = await this.auth.setNearSigner(signer as Wallet);
-      this.grants = await this.grants.init({ type, accountId, signer: signer as Wallet });
+      const publicKey = (await this.auth.currentUser()).publicKey
+      this.grants = await this.grants.init({ type, accountId, signer: signer as Wallet, publicKey });
     } else if (type === "EVM") {
       await this.auth.setEvmSigner(signer as Signer);
       this.grants = await this.grants.init({ type, signer: signer as Signer });

@@ -53,21 +53,25 @@ export class Grants {
   async init({
     type,
     signer,
-    accountId
+    accountId,
+    publicKey
   }: {
     type: "NEAR";
     signer: Wallet;
     accountId: string;
+    publicKey: string;
   }): Promise<ConnectedGrants>;
 
   async init({
     type,
     signer,
-    accountId
+    accountId,
+    publicKey
   }: {
     type: SignerType;
     signer: Wallet | Signer;
     accountId?: string;
+    publicKey?: string;
   }): Promise<ConnectedGrants> {
     let child;
 
@@ -79,7 +83,8 @@ export class Grants {
         child = await NearGrants.build({
           accountId: accountId!,
           signer: signer as Wallet,
-          options: this.nearGrantsOptions
+          options: this.nearGrantsOptions,
+          publicKey
         });
         break;
       default:
