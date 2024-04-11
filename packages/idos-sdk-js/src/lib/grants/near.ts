@@ -1,5 +1,7 @@
-import type { Wallet } from "@near-wallet-selector/core";
+import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
+import * as Base64Codec from "@stablelib/base64";
 import * as nearAPI from "near-api-js";
+import { Nonce } from "../nonce";
 import Grant from "./grant";
 import { GrantChild } from "./grant-child";
 
@@ -24,6 +26,7 @@ export class NearGrants extends GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
   #owner: string;
+  #publicKey: string;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
   static defaultContractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
@@ -31,22 +34,35 @@ export class NearGrants extends GrantChild {
 
   static contractMethods = {
     list: "find_grants",
-    create: "insert_grant",
+    create: "insert_grant_by_signature",
+    prepareMessage: "insert_grant_by_signature_message",
     revoke: "delete_grant"
   } as const;
 
-  private constructor(signer: Wallet, owner: string, contract: nearAPI.Contract) {
+  private constructor(
+    signer: Wallet,
+    owner: string,
+    contract: nearAPI.Contract,
+    publicKey: string
+  ) {
     super();
     this.#signer = signer;
     this.#owner = owner;
     this.#contract = contract;
+    this.#publicKey = publicKey;
   }
 
   static async build({
     accountId,
     signer,
-    options
-  }: { accountId: string; signer: Wallet; options: NearGrantsOptions }): Promise<NearGrants> {
+    options,
+    publicKey
+  }: {
+    accountId: string;
+    signer: Wallet;
+    options: NearGrantsOptions;
+    publicKey: string;
+  }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
       networkId: options.network ?? this.defaultNetwork,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
@@ -63,7 +79,8 @@ export class NearGrants extends GrantChild {
           viewMethods: [this.contractMethods.list],
           changeMethods: []
         }
-      )
+      ),
+      publicKey
     );
   }
 
@@ -117,7 +134,35 @@ export class NearGrants extends GrantChild {
     lockedUntil
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
-    const grant: Omit<NearContractGrant, "owner"> = { grantee, data_id, locked_until };
+
+    const recipient = "idos.network";
+    const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
+    const message = [
+      "operation: insertGrant",
+      `owner: ${this.#publicKey}`,
+      `grantee: ${grantee}`,
+      `dataId: ${data_id}`,
+      `lockedUntil: ${locked_until}`
+    ].join("\n");
+
+    const { nonce = nonceSuggestion, signature } = (await (
+      this.#signer.signMessage as (
+        _: SignMessageParams
+      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
+    )({
+      message,
+      recipient,
+      nonce: nonceSuggestion
+    }))!;
+
+    const grant = {
+      owner: this.#publicKey,
+      grantee,
+      data_id,
+      locked_until,
+      nonce: Array.from(nonce),
+      signature: Array.from(Base64Codec.decode(signature))
+    };
 
     let transactionResult;
     try {
