@@ -1,9 +1,9 @@
-import type { Wallet, SignMessageParams, SignedMessage } from "@near-wallet-selector/core";
+import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
+import * as Base64Codec from "@stablelib/base64";
 import * as nearAPI from "near-api-js";
+import { Nonce } from "../nonce";
 import Grant from "./grant";
 import { GrantChild } from "./grant-child";
-import { Nonce } from "../nonce";
-import * as Base64Codec from "@stablelib/base64";
 
 interface NearContractGrant {
   owner: string;
@@ -39,7 +39,12 @@ export class NearGrants extends GrantChild {
     revoke: "delete_grant"
   } as const;
 
-  private constructor(signer: Wallet, owner: string, contract: nearAPI.Contract, publicKey: string) {
+  private constructor(
+    signer: Wallet,
+    owner: string,
+    contract: nearAPI.Contract,
+    publicKey: string
+  ) {
     super();
     this.#signer = signer;
     this.#owner = owner;
@@ -52,7 +57,12 @@ export class NearGrants extends GrantChild {
     signer,
     options,
     publicKey
-  }: { accountId: string; signer: Wallet; options: NearGrantsOptions; publicKey: string }): Promise<NearGrants> {
+  }: {
+    accountId: string;
+    signer: Wallet;
+    options: NearGrantsOptions;
+    publicKey: string;
+  }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
       networkId: options.network ?? this.defaultNetwork,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
@@ -125,20 +135,17 @@ export class NearGrants extends GrantChild {
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
 
-    const recipient = "idos.network"
+    const recipient = "idos.network";
     const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
     const message = [
-      'operation: insertGrant',
+      "operation: insertGrant",
       `owner: ${this.#publicKey}`,
       `grantee: ${grantee}`,
       `dataId: ${data_id}`,
       `lockedUntil: ${locked_until}`
-    ].join('\n')
+    ].join("\n");
 
-    const {
-      nonce = nonceSuggestion,
-      signature,
-    } = (await (
+    const { nonce = nonceSuggestion, signature } = (await (
       this.#signer.signMessage as (
         _: SignMessageParams
       ) => Promise<SignedMessage & { nonce?: Uint8Array }>
