@@ -10,7 +10,7 @@ import { SigningKey, hashMessage } from "ethers";
 
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
-import { getNearImplicitAddress } from "./utils";
+import { implicitAddressFromPublicKey } from "./utils";
 
 /* global Buffer */
 
@@ -176,9 +176,8 @@ export class Auth {
       );
     };
 
-    const implicitAccount = await getNearImplicitAddress(currentAddress);
     return this.#setSigner({
-      accountId: implicitAccount,
+      accountId: implicitAddressFromPublicKey(publicKey),
       signer,
       publicKey,
       signatureType: "nep413"

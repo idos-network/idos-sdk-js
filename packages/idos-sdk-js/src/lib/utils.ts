@@ -25,10 +25,7 @@ export async function getNearFullAccessPublicKey(namedAddress: string) {
   }
 }
 
-export async function getNearImplicitAddress(namedAddress: string) {
-  const publicKey = await getNearFullAccessPublicKey(namedAddress);
-  if (!publicKey) return;
-
+export function implicitAddressFromPublicKey(publicKey: string) {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
   const implicitAddress = toBeHex(decodeBase58(key_without_prefix));
   return implicitAddress;
