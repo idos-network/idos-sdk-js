@@ -191,7 +191,7 @@ export class Auth {
 
   async currentUser() {
     if (this.user.humanId === undefined) {
-      const currentUserKeys = ["human-id", "signer-address"];
+      const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
       let [humanId, address, publicKey] = currentUserKeys.map(
         this.idOS.store.get.bind(this.idOS.store)
       ) as Array<string | undefined>;
