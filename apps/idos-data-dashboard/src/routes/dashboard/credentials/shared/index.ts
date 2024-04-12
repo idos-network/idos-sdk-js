@@ -3,13 +3,15 @@ import { type DefaultError, useMutation, useQuery, useQueryClient } from "@tanst
 import type { idOSCredential, idOSGrant } from "../types";
 
 export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
-  const { sdk, address } = useIdOS();
+  const { sdk, address, publicKey } = useIdOS();
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]);
 
+  const owner = address?.includes("0x") ? address : publicKey;
+
   return useQuery({
     queryKey: ["grants", credentialId],
-    queryFn: () => sdk.grants.list({ owner: address }),
+    queryFn: () => sdk.grants.list({ owner }),
     select(grants) {
       if (!credentials || !grants) return [];
 
