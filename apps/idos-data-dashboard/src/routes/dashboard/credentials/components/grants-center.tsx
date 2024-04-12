@@ -33,6 +33,12 @@ type GrantsCenterProps = {
   onClose: () => void;
 };
 
+function bigintToDate(bi: bigint): string {
+  const seconds = Number(bi) * 1000;
+
+  return new Intl.DateTimeFormat(["ban", "id"]).format(new Date(seconds));
+}
+
 const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
   const revokeGrant = useRevokeGrant();
   const queryClient = useQueryClient();
@@ -76,7 +82,7 @@ const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
                   <Text isTruncated>{grant.grantee}</Text>
                 </Td>
                 <Td>
-                  <Text>{grant.lockedUntil ? grant.lockedUntil : "-"}</Text>
+                  <Text>{grant.lockedUntil ? bigintToDate(BigInt(grant.lockedUntil)) : "-"}</Text>
                 </Td>
                 <Td isNumeric>
                   <Button
