@@ -85,17 +85,20 @@ const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
                   <Text>{grant.lockedUntil ? bigintToDate(BigInt(grant.lockedUntil)) : "-"}</Text>
                 </Td>
                 <Td isNumeric>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    colorScheme="red"
-                    isLoading={
-                      revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
-                    }
-                    onClick={() => onRevoke(grant)}
-                  >
-                    Revoke
-                  </Button>
+                  {grant.lockedUntil &&
+                  BigInt(grant.lockedUntil) <= BigInt(Math.floor(Date.now() / 1000)) ? (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      colorScheme="red"
+                      isLoading={
+                        revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
+                      }
+                      onClick={() => onRevoke(grant)}
+                    >
+                      Revoke
+                    </Button>
+                  ) : null}
                 </Td>
               </Tr>
             ))}
