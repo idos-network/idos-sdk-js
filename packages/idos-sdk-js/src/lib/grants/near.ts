@@ -224,7 +224,6 @@ export class NearGrants extends GrantChild {
       signature: Array.from(Base64Codec.decode(signature))
     };
 
-
     let transactionResult;
     try {
       transactionResult =
