@@ -34,9 +34,9 @@ type GrantsCenterProps = {
 };
 
 function bigintToDate(bi: bigint): string {
-  const seconds = Number(bi) * 1000;
+  const milliseconds = Number(bi) * 1000;
 
-  return new Intl.DateTimeFormat(["ban", "id"]).format(new Date(seconds));
+  return new Intl.DateTimeFormat(["ban", "id"]).format(new Date(milliseconds));
 }
 
 const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
