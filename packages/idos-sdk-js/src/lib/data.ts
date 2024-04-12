@@ -202,8 +202,6 @@ export class Data {
   }
 
   async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
-    if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
-
     return await this.delete(tableName, recordId);
   }
 }
