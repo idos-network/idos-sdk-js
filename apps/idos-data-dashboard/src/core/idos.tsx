@@ -82,7 +82,9 @@ export const Provider = ({ children }: PropsWithChildren) => {
     if (!signer || !userAddress) return;
 
     const _sdk = await idOS.init({
-      container: "#idos"
+      container: "#idos",
+      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
     });
 
     const profile = await _sdk.hasProfile(userAddress);
