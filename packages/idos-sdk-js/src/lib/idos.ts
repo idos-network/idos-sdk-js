@@ -59,7 +59,13 @@ export class idOS {
   }: Pick<InitParams, "nodeUrl" | "dbId">) {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
-    return new KwilWrapper({ nodeUrl, dbId, chainId });
+
+    // This assumes that nobody else created a db named "idos".
+    // Given we intend to not let db creation open, that's a safe enough assumption.
+    const dbId_ =
+      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid || dbId;
+
+    return new KwilWrapper({ nodeUrl, dbId: dbId_, chainId });
   }
 
   static async init(params: InitParams): Promise<idOS> {
