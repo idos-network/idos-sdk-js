@@ -56,7 +56,7 @@ export class idOS {
   private static async initializeKwilWrapper({
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     dbId = KwilWrapper.defaults.dbId
-  }) {
+  }: Pick<InitParams, "nodeUrl" | "dbId">) {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
     return new KwilWrapper({ nodeUrl, dbId, chainId });
