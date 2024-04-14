@@ -19,21 +19,13 @@
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
-    "@kwilteam/kwil-js": "0.5.8",
     "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
     "@near-wallet-selector/my-near-wallet": "^8.7.0",
     "@near-wallet-selector/nightly": "^8.7.0",
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/binary": "^1.0.1",
-    "@stablelib/bytes": "^1.0.1",
-    "@stablelib/sha256": "^1.0.1",
-    "@stablelib/utf8": "^1.0.1",
-    "borsh": "^1.0.0",
     "ethers": "^6.7.1",
-    "near-api-js": "^3.0.1",
-    "tweetnacl": "^1.0.3"
+    "near-api-js": "^3.0.1"
   }
 }

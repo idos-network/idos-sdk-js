@@ -10,7 +10,7 @@ import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { Cache } from "./cache";
-import * as fakeServer from "./fake-server";
+import { fakeServer } from "./fake-server";
 import { Terminal } from "./terminal";
 
 /*
@@ -222,9 +222,9 @@ const connectWallet = {
             const grantPromise = idos.grants.create(
               "credentials",
               id,
-              fakeServer.publicInfo[chosenWallet].grantee,
-              Math.floor(Date.now() / 1000) + fakeServer.publicInfo.lockTimeSpanSeconds,
-              fakeServer.publicInfo.encryptionPublicKey
+              fakeServer[chosenWallet].grantee,
+              Math.floor(Date.now() / 1000) + fakeServer.lockTimeSpanSeconds,
+              fakeServer[chosenWallet].encryptionPublicKey
             );
 
             try {
@@ -255,7 +255,7 @@ const connectWallet = {
       .wait(
         "awaiting RPC",
         cache.get("grants") ||
-          idos.grants.list({ owner: address, grantee: fakeServer.publicInfo.granteeAddress })
+          idos.grants.list({ owner: address, grantee: fakeServer[chosenWallet].grantee })
       );
     cache.set("grants", grants);
 
@@ -267,7 +267,7 @@ const connectWallet = {
         try {
           content = await terminal.wait(
             "awaiting server decryption",
-            fakeServer.getAccessGrantsContentDecrypted(chosenWallet, dataId)
+            fakeServer[chosenWallet].getSharedCredentialContentDecrypted(dataId)
           );
           terminal.status("done", "Decrypted");
         } catch (e) {
