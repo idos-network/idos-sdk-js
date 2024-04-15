@@ -58,7 +58,7 @@ export class idOS {
 
     const idos = new this({
       ...params,
-      kwilWrapper: await await KwilWrapper.init(params)
+      kwilWrapper: await KwilWrapper.init(params)
     });
     await idos.enclave.load();
 
