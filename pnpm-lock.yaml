@@ -167,8 +167,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
       '@kwilteam/kwil-js':
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: 0.5.8
+        version: 0.5.8
       '@near-wallet-selector/core':
         specifier: ^8.7.0
         version: 8.7.0(near-api-js@3.0.4)
@@ -240,8 +240,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       '@kwilteam/kwil-js':
-        specifier: 0.5.6
-        version: 0.5.6
+        specifier: 0.5.8
+        version: 0.5.8
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -2649,24 +2649,8 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
-  /@kwilteam/kwil-js@0.3.0:
-    resolution: {integrity: sha512-SS+Emn4XqiWX2L3pcfEflAXVVv+eceHBVAtnXbgDW/8Owqw34YVNWE/LRhApREedqzZo/GPoGvaSQRMjHHkyaA==}
-    engines: {node: '>=18.0.0'}
-    dependencies:
-      axios: 0.27.2
-      dotenv: 16.3.1
-      ethers: 6.9.1
-      ethers5: /ethers@5.7.2
-      jssha: 3.3.1
-      long: 5.2.3
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - utf-8-validate
-    dev: false
-
-  /@kwilteam/kwil-js@0.5.6:
-    resolution: {integrity: sha512-ELn1iiTgUdDyN25tQyU68kM8erGQu9xQPm13hHBKEZ/etAQv873VCbSWmgSrWIWcqPPtrL5GS67abxCy+qNR8A==}
+  /@kwilteam/kwil-js@0.5.8:
+    resolution: {integrity: sha512-KrElnbsQqMOpOSyIRO9sUuRur2LwsFvTpTzcGOGJ/M5PoBqFYMkqkP40EEH8/HQ7LBetlveuNzU9snOdkcDYVQ==}
     engines: {node: '>=18.0.0'}
     dependencies:
       axios: 0.27.2
@@ -5259,13 +5243,6 @@ packages:
   /@web3modal/siwe@3.5.2(@types/react@18.2.45)(typescript@5.3.3):
     resolution: {integrity: sha512-PT6/V/cvUNkt3KNQ4b6biTqWKqXVVwrhodRU5GaUtls/tYv/lIFjk3Y50tivj9UK6kW9NX/XH9SO2xl8ob3VsA==}
     requiresBuild: true
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      vue:
-        optional: true
     dependencies:
       '@web3modal/core': 3.5.2(@types/react@18.2.45)(react@18.2.0)
       '@web3modal/scaffold-utils': 3.5.2(@types/react@18.2.45)(react@18.2.0)
@@ -5291,15 +5268,6 @@ packages:
     peerDependencies:
       '@wagmi/core': '>=1'
       viem: '>=1'
-    peerDependenciesMeta:
-      '@web3modal/siwe':
-        optional: true
-      react:
-        optional: true
-      react-dom:
-        optional: true
-      vue:
-        optional: true
     dependencies:
       '@wagmi/core': 1.4.12(@types/react@18.2.45)(react@18.2.0)(typescript@5.3.3)(viem@1.21.0)
       '@web3modal/polyfills': 3.5.2
