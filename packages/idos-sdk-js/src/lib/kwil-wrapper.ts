@@ -26,6 +26,21 @@ export class KwilWrapper {
     this.client = new WebKwil({ kwilProvider, chainId });
   }
 
+  static async init({
+    nodeUrl = KwilWrapper.defaults.kwilProvider,
+    dbId = KwilWrapper.defaults.dbId
+  }) {
+    const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
+    const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
+
+    // This assumes that nobody else created a db named "idos".
+    // Given we intend to not let db creation open, that's a safe enough assumption.
+    const dbId_ =
+      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid || dbId;
+
+    return new KwilWrapper({ nodeUrl, dbId: dbId_, chainId });
+  }
+
   get schema() {
     return this.client.getSchema(this.dbId);
   }
