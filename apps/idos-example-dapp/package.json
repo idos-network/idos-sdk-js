@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
-    "@kwilteam/kwil-js": "0.3.0",
+    "@kwilteam/kwil-js": "0.5.8",
     "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
