@@ -3,7 +3,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import { idOS } from ".";
 import { assertNever } from "../types";
 import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
-import { EnclaveProvider } from "./enclave-providers/enclave-provider";
+import { EnclaveProvider } from "./enclave-providers/interface";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,

@@ -1,13 +1,12 @@
-import { EnclaveProvider, StoredData } from "./enclave-provider";
+import { EnclaveProvider, StoredData } from "./interface";
 
-export class IframeEnclave extends EnclaveProvider {
+export class IframeEnclave implements EnclaveProvider {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
   container: string;
   iframe: HTMLIFrameElement;
 
   constructor(options: { container: string }) {
-    super();
     this.container = options.container;
     this.iframe = document.createElement("iframe");
   }
