@@ -1,11 +1,12 @@
-import { KwilSigner } from "@kwilteam/kwil-js";
+import crypto from "node:crypto";
+import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
 import * as BytesCodec from "@stablelib/bytes";
 import * as sha256 from "@stablelib/sha256";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
-import { ethers, getBytes } from "ethers";
+import { ethers } from "ethers";
 import * as nearAPI from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
@@ -69,10 +70,14 @@ const kwilNep413Signer =
   };
 
 export class NoncedBox {
-  encryptionKeyPair: nacl.BoxKeyPair;
+  keyPair: nacl.BoxKeyPair;
 
-  constructor(encryptionKeyPair: nacl.BoxKeyPair) {
-    this.encryptionKeyPair = encryptionKeyPair;
+  constructor(keyPair: nacl.BoxKeyPair) {
+    this.keyPair = keyPair;
+  }
+
+  static fromBase64SecretKey(secret: string): NoncedBox {
+    return new NoncedBox(nacl.box.keyPair.fromSecretKey(Base64Codec.decode(secret)));
   }
 
   async decrypt(b64FullMessage: string, b64SenderPublicKey: string): Promise<string> {
@@ -82,12 +87,7 @@ export class NoncedBox {
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
 
-    const decrypted = nacl.box.open(
-      message,
-      nonce,
-      senderPublicKey,
-      this.encryptionKeyPair.secretKey
-    );
+    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
     if (decrypted == null) {
       throw Error(
@@ -97,7 +97,7 @@ export class NoncedBox {
             message: Base64Codec.encode(message),
             nonce: Base64Codec.encode(nonce),
             senderPublicKey: Base64Codec.encode(senderPublicKey),
-            receiverPublicKey: Base64Codec.encode(this.encryptionKeyPair.publicKey)
+            receiverPublicKey: Base64Codec.encode(this.keyPair.publicKey)
           },
           null,
           2
@@ -118,25 +118,14 @@ const buildKwilSignerAndGrantee = (
   switch (chainType) {
     case "EVM": {
       const signer = granteeSigner as ethers.Wallet;
-      return [
-        new KwilSigner(
-          async (message: string | Uint8Array): Promise<Uint8Array> =>
-            getBytes(await signer.signMessage(message)),
-          signer.signingKey.publicKey,
-          "secp256k1_ep"
-        ),
-        signer.address
-      ];
+      return [new KwilSigner(signer, signer.address), signer.address];
     }
     case "NEAR": {
       const signer = granteeSigner as nearAPI.utils.key_pair.KeyPair;
+      const publicKey = signer.getPublicKey().toString();
       return [
-        new KwilSigner(
-          kwilNep413Signer(signer),
-          implicitAddressFromPublicKey(signer.getPublicKey().toString()),
-          "nep413"
-        ),
-        signer.getPublicKey().toString()
+        new KwilSigner(kwilNep413Signer(signer), implicitAddressFromPublicKey(publicKey), "nep413"),
+        publicKey
       ];
     }
     default:
@@ -147,42 +136,70 @@ const buildKwilSignerAndGrantee = (
 interface idOSGranteeInitParams {
   encryptionSecret: string;
   nodeUrl?: string;
+  chainId?: string;
   dbId?: string;
   chainType: ChainType;
-  grantee: nearAPI.utils.key_pair.KeyPair | ethers.Wallet;
-  address: string;
+  granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet;
 }
 
+const throwError = (message: string): never => {
+  throw new Error(message);
+};
+
 export class idOSGrantee {
-  boxer: NoncedBox;
-  kwilWrapper: KwilWrapper;
+  noncedBox: NoncedBox;
+  nodeKwil: NodeKwil;
+  kwilSigner: KwilSigner;
+  dbId: string;
   chainType: ChainType;
   address: string;
 
   static async init({
     encryptionSecret,
-    nodeUrl,
+    nodeUrl = KwilWrapper.defaults.kwilProvider,
+    chainId,
     dbId,
     chainType,
-    grantee
+    granteeSigner
   }: idOSGranteeInitParams) {
-    const encryptionKeyPair = nacl.box.keyPair.fromSecretKey(Base64Codec.decode(encryptionSecret));
+    const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
-    const kwilWrapper = await KwilWrapper.init({ nodeUrl, dbId });
-    const [signer, address] = buildKwilSignerAndGrantee(chainType, grantee);
-    kwilWrapper.signer = signer;
+    chainId ||=
+      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      (await kwil.chainInfo()).data?.chain_id! ||
+      throwError("Can't discover chainId. You must pass it explicitly.");
 
-    return new this(new NoncedBox(encryptionKeyPair), kwilWrapper, chainType, address);
+    dbId ||=
+      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
+      throwError("Can't discover dbId. You must pass it explicitly.");
+
+    const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
+
+    const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
+
+    return new idOSGrantee(
+      NoncedBox.fromBase64SecretKey(encryptionSecret),
+      nodeKwil,
+      kwilSigner,
+      dbId,
+      chainType,
+      address
+    );
   }
 
   private constructor(
-    boxer: NoncedBox,
-    kwilWrapper: KwilWrapper,
+    noncedBox: NoncedBox,
+    nodeKwil: NodeKwil,
+    kwilSigner: KwilSigner,
+    dbId: string,
     chainType: ChainType,
     address: string
   ) {
-    this.boxer = boxer;
-    this.kwilWrapper = kwilWrapper;
+    this.noncedBox = noncedBox;
+    this.nodeKwil = nodeKwil;
+    this.kwilSigner = kwilSigner;
+    this.dbId = dbId;
     this.chainType = chainType;
     this.address = address;
   }
@@ -191,22 +208,28 @@ export class idOSGrantee {
     dataId: string
   ): Promise<T> {
     return (
-      await this.kwilWrapper.call("get_credential_shared", { id: dataId }, undefined, true)
-    )?.[0] as unknown as T;
+      (await this.nodeKwil.call(
+        {
+          action: "get_credential_shared",
+          dbid: this.dbId,
+          inputs: [{ $id: dataId }]
+        },
+        this.kwilSigner
+        // biome-ignore lint/suspicious/noExplicitAny: NodeKwil doesn't have the best type defs.
+      )) as any
+    ).data.result[0] as unknown as T;
   }
 
-  async getSharedCredentialContentDecrypted(dataId: string) {
+  async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     const credentialCopy = await this.fetchSharedCredentialFromIdos<{
       content: string;
       encryption_public_key: string;
     }>(dataId);
 
-    const decryptedContent = await this.boxer.decrypt(
+    return await this.noncedBox.decrypt(
       credentialCopy.content,
       credentialCopy.encryption_public_key
     );
-
-    return decryptedContent;
   }
 
   get grantee() {
@@ -214,6 +237,6 @@ export class idOSGrantee {
   }
 
   get encryptionPublicKey() {
-    return Base64Codec.encode(this.boxer.encryptionKeyPair.publicKey);
+    return Base64Codec.encode(this.noncedBox.keyPair.publicKey);
   }
 }

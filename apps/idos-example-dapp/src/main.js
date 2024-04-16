@@ -10,7 +10,7 @@ import { setupMyNearWallet } from "@near-wallet-selector/my-near-wallet";
 import { setupNightly } from "@near-wallet-selector/nightly";
 
 import { Cache } from "./cache";
-import { fakeServer } from "./fake-server";
+import * as client from "./client";
 import { Terminal } from "./terminal";
 
 /*
@@ -185,6 +185,9 @@ const connectWallet = {
     cache.set("wallets", await wallets);
   }
 
+  // We'll need this later on to request grants.
+  const granteeInfo = await terminal.wait("awaiting server data", client.getInfo(chosenWallet));
+
   if (chosenFlow.credentials) {
     // TODO: Why is this showing me the copies that belong to AGs? :x
     // https://github.com/idos-network/idos-schema/pull/36
@@ -222,9 +225,9 @@ const connectWallet = {
             const grantPromise = idos.grants.create(
               "credentials",
               id,
-              fakeServer[chosenWallet].grantee,
-              Math.floor(Date.now() / 1000) + fakeServer.lockTimeSpanSeconds,
-              fakeServer[chosenWallet].encryptionPublicKey
+              granteeInfo.grantee,
+              Math.floor(Date.now() / 1000) + granteeInfo.lockTimeSpanSeconds,
+              granteeInfo.encryptionPublicKey
             );
 
             try {
@@ -255,7 +258,7 @@ const connectWallet = {
       .wait(
         "awaiting RPC",
         cache.get("grants") ||
-          idos.grants.list({ owner: address, grantee: fakeServer[chosenWallet].grantee })
+          idos.grants.list({ owner: address, grantee: granteeInfo.grantee })
       );
     cache.set("grants", grants);
 
@@ -267,7 +270,7 @@ const connectWallet = {
         try {
           content = await terminal.wait(
             "awaiting server decryption",
-            fakeServer[chosenWallet].getSharedCredentialContentDecrypted(dataId)
+            client.fetchAndDecryptSharedCredential(chosenWallet, dataId)
           );
           terminal.status("done", "Decrypted");
         } catch (e) {

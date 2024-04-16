@@ -12,6 +12,11 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.10.5",
+    "@vercel/node": "^3.0.26",
+    "express": "^4.19.2",
+    "raw-body": "^2.5.2",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-mkcert": "^1.16.0",
@@ -25,7 +30,10 @@
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
     "@near-wallet-selector/my-near-wallet": "^8.7.0",
     "@near-wallet-selector/nightly": "^8.7.0",
-    "ethers": "^6.7.1",
-    "near-api-js": "^3.0.1"
+    "axios": "^1.6.8"
+  },
+  "peerDependencies": {
+    "ethers": "^6.8.0",
+    "near-api-js": "^3.0.4"
   }
 }
