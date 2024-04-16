@@ -30,6 +30,9 @@ export class KwilWrapper {
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     dbId = KwilWrapper.defaults.dbId
   }) {
+    console.warn(
+      `Discovering chainId. This might generate a warning with "WARNING: Chain ID mismatch"`
+    );
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
 
