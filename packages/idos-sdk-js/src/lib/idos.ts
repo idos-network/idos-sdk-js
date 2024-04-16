@@ -1,4 +1,3 @@
-import { WebKwil } from "@kwilteam/kwil-js";
 import { Wallet } from "@near-wallet-selector/core";
 import { Signer } from "ethers";
 import { Store } from "../../../idos-store";
