@@ -253,12 +253,24 @@ const connectWallet = {
   }
 
   if (chosenFlow.grants) {
+    /** @type {string} */
+    let owner;
+    switch (chosenWallet) {
+      case "EVM":
+        owner = address;
+        break;
+      case "NEAR":
+        owner = (await idos.auth.currentUser()).publicKey;
+        break;
+      default:
+        throw new Error("Unreachable");
+    }
+
     const grants = await terminal
       .h1("eyes", "User's grants to this dApp")
       .wait(
         "awaiting RPC",
-        cache.get("grants") ||
-          idos.grants.list({ owner: address, grantee: granteeInfo.grantee })
+        cache.get("grants") || idos.grants.list({ owner, grantee: granteeInfo.grantee })
       );
     cache.set("grants", grants);
 
