@@ -13,11 +13,11 @@ import {
   useBreakpointValue,
   useToast
 } from "@chakra-ui/react";
+import { getNearFullAccessPublicKeys } from "@idos-network/idos-sdk";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
-import { getNearFullAccessPublicKey } from "@idos-network/idos-sdk";
 import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
@@ -99,7 +99,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     let publicKeys: string[] = [];
 
     if (address_type === "NEAR") {
-      publicKeys = await getNearFullAccessPublicKey(address);
+      publicKeys = await getNearFullAccessPublicKeys(address);
 
       if (publicKeys.length === 0) {
         toast({

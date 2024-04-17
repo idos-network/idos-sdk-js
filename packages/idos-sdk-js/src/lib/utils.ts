@@ -1,7 +1,7 @@
 import { decodeBase58, toBeHex } from "ethers";
 import * as nearAPI from "near-api-js";
 
-export async function getNearFullAccessPublicKey(namedAddress: string) {
+export async function getNearFullAccessPublicKeys(namedAddress: string) {
   const { connect } = nearAPI;
   const connectionConfig = {
     networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
