@@ -28,7 +28,7 @@ const useDeleteWalletMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation<{ id: string }, DefaultError, idOSWallet, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("wallets", id),
+    mutationFn: ({ id }) => sdk.data.delete("wallets", id, true),
     async onMutate({ address }) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];

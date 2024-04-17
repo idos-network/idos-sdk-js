@@ -13,11 +13,11 @@ import {
   useBreakpointValue,
   useToast
 } from "@chakra-ui/react";
+import { getNearFullAccessPublicKeys } from "@idos-network/idos-sdk";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
-import { getNearFullAccessPublicKey } from "@idos-network/idos-sdk";
 import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
@@ -25,32 +25,45 @@ type AddWalletProps = {
   onClose: () => void;
 };
 
+const createWalletFactory = ({
+  address,
+  public_key
+}: { address: string; public_key?: string }) => ({
+  address,
+  public_key,
+  message: "",
+  signature: ""
+});
+
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
   return useMutation<
-    { address: string },
+    // biome-ignore lint/suspicious/noExplicitAny: Will need to be fixed in the future.
+    any,
     DefaultError,
-    { address: string; public_key: string },
+    { address: string; publicKeys: string[] },
     { previousWallets: idOSWallet[] }
   >({
-    mutationFn: ({ address, public_key }) =>
-      sdk.data.create("wallets", { address, public_key, signature: "", message: "" }),
+    mutationFn: async ({ address, publicKeys }) => {
+      const payload = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
 
-    onMutate: async ({ address }) => {
+      if (payload.length > 0) return await sdk.data.createMultiple("wallets", payload, true);
+
+      return await sdk.data.create("wallets", createWalletFactory({ address }), true);
+    },
+
+    onMutate: async ({ address, publicKeys }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+
+      const wallets = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
+      const payload = wallets.length > 0 ? wallets : [createWalletFactory({ address })];
+
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
-        {
-          address,
-          human_id: "",
-          id: "",
-          public_key: "",
-          message: "",
-          signature: ""
-        }
+        ...(payload as idOSWallet[])
       ]);
 
       return { previousWallets };
@@ -82,10 +95,13 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     const address = new FormData(form).get("address") as string;
     const address_regexp = /^0x[0-9a-fA-F]{40}$/;
     const address_type = address_regexp.test(address) ? "EVM" : "NEAR";
-    let public_key: string;
+
+    let publicKeys: string[] = [];
+
     if (address_type === "NEAR") {
-      public_key = await getNearFullAccessPublicKey(address);
-      if (!public_key) {
+      publicKeys = await getNearFullAccessPublicKeys(address);
+
+      if (publicKeys.length === 0) {
         toast({
           title: "Error while adding wallet",
           description:
@@ -95,24 +111,33 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
         });
         return;
       }
-    } else {
-      public_key = "";
     }
 
     addWallet.mutate(
-      { address, public_key },
+      { address, publicKeys },
       {
-        async onSuccess(wallet) {
-          const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
-          const updated = cache.map((cachedWallet) =>
-            !cachedWallet.id ? { ...wallet } : cachedWallet
-          );
-          queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
+        async onSuccess(data: idOSWallet | idOSWallet[]) {
+          const wallets = Array.isArray(data) ? data : [data];
 
+          const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+          const updated = cache.map((cachedWallet) => {
+            if (!cachedWallet.id) {
+              const wallet = wallets.find(
+                (wallet) =>
+                  wallet.address === cachedWallet.address &&
+                  wallet.public_key === cachedWallet.public_key
+              );
+              return wallet;
+            }
+            return cachedWallet;
+          });
+          queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
           form.reset();
           handleClose();
         },
         async onError(_, __, ctx) {
+          console.log(_);
+
           queryClient.setQueryData(["wallets"], ctx?.previousWallets);
           toast({
             title: "Error while adding wallet",
