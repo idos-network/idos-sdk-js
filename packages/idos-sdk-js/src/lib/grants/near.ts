@@ -121,11 +121,11 @@ export class NearGrants extends GrantChild {
     ) => Promise<NearContractGrant[]>;
 
     return (await method(grantsFilter)).map(
-      (o) =>
+      ({ data_id, locked_until, ...values }) =>
         new Grant({
-          ...o,
-          dataId: o.data_id,
-          lockedUntil: o.locked_until / 1e6
+          ...values,
+          dataId: data_id,
+          lockedUntil: locked_until / 1e6
         })
     );
   }
