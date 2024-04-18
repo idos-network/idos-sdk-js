@@ -215,8 +215,8 @@ export class EvmGrants extends GrantChild {
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
 
     return grants.map(
-      ([owner, grantee, dataId, lockedUntil]: [string, string, string, number]) =>
-        new Grant({ owner, grantee, dataId, lockedUntil })
+      ([owner, grantee, dataId, lockedUntil]: [string, string, string, bigint]) =>
+        new Grant({ owner, grantee, dataId, lockedUntil: Number(lockedUntil) })
     );
   }
 

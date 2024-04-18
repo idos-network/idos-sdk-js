@@ -120,11 +120,14 @@ export class NearGrants extends GrantChild {
       args: Partial<NearContractGrant>
     ) => Promise<NearContractGrant[]>;
 
-    return (await method(grantsFilter)).map((o) => ({
-      ...o,
-      dataId: o.data_id,
-      lockedUntil: (o.locked_until /= 1e6)
-    }));
+    return (await method(grantsFilter)).map(
+      ({ data_id, locked_until, ...values }) =>
+        new Grant({
+          ...values,
+          dataId: data_id,
+          lockedUntil: locked_until / 1e6
+        })
+    );
   }
 
   // FIXME: near-rs expects data_id, near-ts expects dataId
