@@ -58,10 +58,12 @@
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
+    "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
     "jsonld": "^8.3.1",
-    "jsonld-document-loader": "^2.0.0"
+    "jsonld-document-loader": "^2.0.0",
+    "tweetnacl": "^1.0.3"
   },
   "clean-package": {
     "replace": {
