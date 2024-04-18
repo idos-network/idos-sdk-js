@@ -13,7 +13,6 @@ export class KwilWrapper {
   kwilProvider: string;
   client: WebKwil;
   signer?: KwilSigner;
-  publicKey?: string;
   signatureType?: string;
 
   constructor({
@@ -51,12 +50,10 @@ export class KwilWrapper {
   async setSigner({
     accountId,
     signer,
-    publicKey,
     signatureType
   }: {
     accountId: string;
     signer: EthSigner | CustomSigner;
-    publicKey: string;
     signatureType: string;
   }) {
     // To avoid re-using the old signer's kgw cookie.
@@ -69,7 +66,6 @@ export class KwilWrapper {
       this.signer = new KwilSigner(signer as EthSigner, accountId);
     }
 
-    this.publicKey = publicKey;
     this.signatureType = signatureType;
   }
 

@@ -167,7 +167,7 @@ class ConnectedGrants extends Grants {
 
     return {
       ...payload,
-      encryptedWith: this.idOS.store.get("signer-public-key")
+      encryptedWith: this.idOS.store.get("encryption-public-key")
     };
   }
 
