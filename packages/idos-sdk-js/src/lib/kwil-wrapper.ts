@@ -131,7 +131,7 @@ export class KwilWrapper {
   }
 
   async hasProfile(address: string): Promise<boolean> {
-    const result = (await this.call("has_profile", { address }, undefined, false)) as any;
+    const result = (await this.call("has_profile", { address }, undefined, true)) as any;
 
     return !!result[0]?.has_profile;
   }
