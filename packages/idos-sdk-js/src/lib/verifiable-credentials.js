@@ -38,7 +38,17 @@ export const staticLoader = (id, publicKeyMultibase) => {
 
 export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE);
 
-export const defaultLoader = (jsonld.documentLoaders.xhr ?? jsonld.documentLoaders.node)();
+let xhrLoader = jsonld.documentLoaders?.xhr;
+try {
+  xhrLoader ||= require("jsonld/lib/documentLoaders/xhr")();
+} catch {}
+
+let nodeLoader = jsonld.documentLoaders?.node;
+try {
+  nodeLoader ||= require("jsonld/lib/documentLoaders/node")();
+} catch {}
+
+export const defaultLoader = xhrLoader || nodeLoader;
 
 export const documentLoaderWithFallbackCompose =
   (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
@@ -102,7 +112,14 @@ export const verify = async (credential, options = {}) => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
-  if (!documentLoader) documentLoader = defaultLoader;
+
+  if (!documentLoader) {
+    if (!defaultLoader)
+      throw new Error(
+        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader."
+      );
+    documentLoader = defaultLoader;
+  }
 
   documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
