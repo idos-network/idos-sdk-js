@@ -261,6 +261,16 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
+
+### Access Grants
+
+An Access Grant is a record in the blockchain that consists of the following values:
+* `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
+* `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
+* `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
+* `lockedUntil`: the span of time during which the AG can not be revoked.
+
+
 ### Access Grant creation / revocation / list
 
 ```js
@@ -286,3 +296,10 @@ The access grant can be revoked only once its timelock has expired.
 
 > [!TIP]
 > See a working example [idos-example-dapp](../../apps/idos-example-dapp)
+
+
+### Delegated Access Grants
+
+A Delegated Access Grant (DAG) is a way of creating / revoking an Access Grant by the user delegating the operations to a third party (dApp) by signing a special type of message.
+The Access Grant will be created for the user that signed the message (not for the dApp which calls the `insertGrantBySignature` contract method).
+You can en example of a contract [here](https://sepolia.etherscan.io/address/0x1673b9fd14c30332990314d99826f22a628a2601#code) 
