@@ -34,7 +34,7 @@ export class Auth {
     await this.idOS.enclave.reset();
   }
 
-  async remember(key: string, value: any) {
+  private async remember(key: string, value: any) {
     this.idOS.store.set(key, value);
     await this.idOS.enclave.store(key, value);
   }
