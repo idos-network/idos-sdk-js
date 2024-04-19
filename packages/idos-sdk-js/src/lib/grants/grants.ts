@@ -80,8 +80,10 @@ export class Grants {
         child = await EvmGrants.build({ signer: signer as Signer, options: this.evmGrantsOptions });
         break;
       case "NEAR":
+        if (accountId === undefined) throw new Error("accountId required for NEAR signers");
+        if (publicKey === undefined) throw new Error("publicKey required for NEAR signers");
         child = await NearGrants.build({
-          accountId: accountId!,
+          accountId,
           signer: signer as Wallet,
           options: this.nearGrantsOptions,
           publicKey
