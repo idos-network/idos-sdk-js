@@ -53,7 +53,7 @@ export class Enclave {
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async init(humanId?: string, authMethod?: boolean): Promise<Uint8Array> {
+  async init(): Promise<Uint8Array> {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
@@ -65,7 +65,7 @@ export class Enclave {
       humanId,
       signerAddress,
       signerPublicKey,
-      authMethod
+      undefined
     );
     this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
     this.initialized = true;
