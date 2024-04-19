@@ -273,6 +273,10 @@ An Access Grant is a record in the blockchain that consists of the following val
 
 ### Access Grant creation / revocation / list
 
+For EVM wallets, the access grant is created by invoking the `insertGrant` contract action, where the grant owner is the user who signed the transaction.
+For EVM wallets, the access grant is revoked by invoking the `deleteGrant` contract action, where the grant owner is the user who signed the transaction.
+You can en example of a contract [here](https://sepolia.etherscan.io/address/0x1673b9fd14c30332990314d99826f22a628a2601#code)
+
 ```js
 // Share a credential by creating an access grant
 await idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
@@ -301,5 +305,14 @@ The access grant can be revoked only once its timelock has expired.
 ### Delegated Access Grants
 
 A Delegated Access Grant (DAG) is a way of creating / revoking an Access Grant by the user delegating the operations to a third party (dApp) by signing a special type of message.
-The Access Grant will be created for the user that signed the message (not for the dApp which calls the `insertGrantBySignature` contract method).
-You can en example of a contract [here](https://sepolia.etherscan.io/address/0x1673b9fd14c30332990314d99826f22a628a2601#code) 
+The Access Grant will be created for the user that signed the message (not for the dApp which calls the `insert_grant_by_signature` contract method).
+
+The interface for creating a DAG is the same as the one for creating an Access Grant:
+
+```js
+// Share a credential by creating a DAG
+idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
+
+// Revoke an access grant
+idos.grants.revoke('credentials', recordId, grantee, dataId, timelock)
+```
