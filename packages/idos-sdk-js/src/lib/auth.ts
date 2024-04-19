@@ -182,13 +182,6 @@ export class Auth {
     return args;
   }
 
-  async setHumanId(humanId: string) {
-    if (!humanId) return;
-
-    this.user.humanId = humanId;
-    await this.remember("human-id", humanId);
-  }
-
   async currentUser() {
     if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
