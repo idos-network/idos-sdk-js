@@ -54,7 +54,7 @@ export class idOS {
       async () => (await this.auth.currentUser()).humanId,
       undefined
     );
-    this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
+    this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);
   }
 
   static async init(params: InitParams): Promise<idOS> {

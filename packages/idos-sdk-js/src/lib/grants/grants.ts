@@ -1,12 +1,12 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
-import { idOS } from "..";
 import { assertNever } from "../../types";
 import { EvmGrants, EvmGrantsOptions } from "./evm";
 import Grant from "./grant";
 import { GrantChild } from "./grant-child";
 import { NearGrants, NearGrantsOptions } from "./near";
+import { Data } from "../data";
 
 const SIGNER_TYPES = {
   EVM: EvmGrants,
@@ -34,16 +34,16 @@ export class Grants {
     defaultNetwork: NearGrants.defaultNetwork
   };
 
-  idOS: idOS;
+  idOSData: Data;
   evmGrantsOptions: EvmGrantsOptions;
   nearGrantsOptions: NearGrantsOptions;
 
   constructor(
-    idOS: idOS,
+    idOSData: Data,
     evmGrantsOptions: EvmGrantsOptions = {},
     nearGrantsOptions: NearGrantsOptions = {}
   ) {
-    this.idOS = idOS;
+    this.idOSData = idOSData;
     this.evmGrantsOptions = evmGrantsOptions;
     this.nearGrantsOptions = nearGrantsOptions;
   }
@@ -93,7 +93,7 @@ export class Grants {
         child = assertNever(type, `Unexpected signer type: ${type}`);
     }
 
-    return new ConnectedGrants(this.idOS, child);
+    return new ConnectedGrants(this.idOSData, child);
   }
 
   async list(
@@ -130,8 +130,8 @@ export class Grants {
 class ConnectedGrants extends Grants {
   #child: GrantChild;
 
-  constructor(idOS: idOS, child: GrantChild) {
-    super(idOS);
+  constructor(idOSData: Data, child: GrantChild) {
+    super(idOSData);
     this.#child = child;
   }
 
@@ -160,7 +160,7 @@ class ConnectedGrants extends Grants {
     lockedUntil: number,
     receiverPublicKey: string
   ): Promise<{ grant: Grant; transactionId: string }> {
-    const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
+    const share = await this.idOSData.share(tableName, recordId, receiverPublicKey);
 
     return await this.#child.create({
       grantee: address,
@@ -176,7 +176,7 @@ class ConnectedGrants extends Grants {
     dataId: string,
     lockedUntil: number
   ): Promise<{ grant: Grant; transactionId: string }> {
-    await this.idOS.data.unshare(tableName, recordId);
+    await this.idOSData.unshare(tableName, recordId);
 
     return this.#child.revoke({ grantee, dataId, lockedUntil });
   }
