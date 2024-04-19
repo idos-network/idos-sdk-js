@@ -17,10 +17,17 @@ export class Enclave {
   initialized: boolean;
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
+  humanIdDiscoverer: () => Promise<string | undefined>;
 
-  constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe") {
+  constructor(
+    idOS: idOS,
+    container: string,
+    humanIdDiscoverer: () => Promise<string | undefined>,
+    providerType: ProviderType = "iframe"
+  ) {
     this.initialized = false;
     this.idOS = idOS;
+    this.humanIdDiscoverer = humanIdDiscoverer;
 
     switch (providerType) {
       case "iframe":
@@ -57,7 +64,7 @@ export class Enclave {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
-    humanId ||= (await this.idOS.auth.currentUser()).humanId;
+    const humanId = await this.humanIdDiscoverer();
 
     if (!humanId) throw new Error("Could not initialize user.");
 

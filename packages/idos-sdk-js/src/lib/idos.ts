@@ -46,7 +46,12 @@ export class idOS {
 
     this.auth = new Auth(this);
     this.data = new Data(this);
-    this.enclave = new Enclave(this, container, undefined);
+    this.enclave = new Enclave(
+      this,
+      container,
+      async () => (await this.auth.currentUser()).humanId,
+      undefined
+    );
     this.kwilWrapper = kwilWrapper;
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
     this.store = new Store();
