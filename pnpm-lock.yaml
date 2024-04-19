@@ -228,8 +228,8 @@ importers:
         specifier: ^6.0.2
         version: 6.0.2
       '@kwilteam/kwil-js':
-        specifier: 0.5.8
-        version: 0.5.8
+        specifier: 0.5.10
+        version: 0.5.10
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -2665,8 +2665,8 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.15
     dev: true
 
-  /@kwilteam/kwil-js@0.5.8:
-    resolution: {integrity: sha512-KrElnbsQqMOpOSyIRO9sUuRur2LwsFvTpTzcGOGJ/M5PoBqFYMkqkP40EEH8/HQ7LBetlveuNzU9snOdkcDYVQ==}
+  /@kwilteam/kwil-js@0.5.10:
+    resolution: {integrity: sha512-wUEt9Uo3tZt/O0UHOMh66PcSvYbn4/mlJNinzp/+bgMZK1D5BeCXsKmm6TbPp0MbZoFrlfzLpC81HKYoLEx6Ng==}
     engines: {node: '>=18.0.0'}
     dependencies:
       axios: 0.27.2
