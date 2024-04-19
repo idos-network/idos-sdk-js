@@ -29,18 +29,19 @@ export class KwilWrapper {
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     dbId = KwilWrapper.defaults.dbId
   }) {
-    console.warn(
-      `Discovering chainId. This might generate a warning with "WARNING: Chain ID mismatch"`
-    );
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
-    const chainId = (await kwil.chainInfo()).data?.chain_id ?? KwilWrapper.defaults.chainId;
+    const chainId =
+      (await kwil.chainInfo({ disableWarning: true })).data?.chain_id ??
+      KwilWrapper.defaults.chainId;
 
     // This assumes that nobody else created a db named "idos".
     // Given we intend to not let db creation open, that's a safe enough assumption.
-    const dbId_ =
-      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid || dbId;
+    if (dbId === KwilWrapper.defaults.dbId) {
+      dbId =
+        (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid ?? dbId;
+    }
 
-    return new KwilWrapper({ nodeUrl, dbId: dbId_, chainId });
+    return new KwilWrapper({ nodeUrl, dbId, chainId });
   }
 
   get schema() {

@@ -170,7 +170,7 @@ export class idOSGrantee {
 
     chainId ||=
       // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
-      (await kwil.chainInfo()).data?.chain_id! ||
+      (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
       throwError("Can't discover chainId. You must pass it explicitly.");
 
     dbId ||=
