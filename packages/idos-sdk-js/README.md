@@ -265,11 +265,13 @@ await idos.data.delete("attributes", id);
 ### Access Grants
 
 An Access Grant is a record in the blockchain that consists of the following values:
+
 * `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
 * `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
 * `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
-* `lockedUntil`: the span of time during which the AG can not be revoked.
+* `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
 
+Acquiring an access grant assures a dApp that they'll have a copy of the user's credential until `lockedUntil`. This is especially relevant to be able to fulfill compliance obligations.
 
 ### Access Grant creation / revocation / list
 
@@ -304,13 +306,14 @@ The access grant can be revoked only once its timelock has expired.
 
 ### Delegated Access Grants
 
-A Delegated Access Grant (DAG) is a way of creating / revoking an Access Grant by the user delegating the operations to a third party (dApp) by signing a special type of message.
-The Access Grant will be created for the user that signed the message (not for the dApp which calls the `insert_grant_by_signature` contract method).
+A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
 
-The interface for creating a DAG is the same as the one for creating an Access Grant:
+This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
+
+The interface for creating a dAG is the same as the one for creating an Access Grant:
 
 ```js
-// Share a credential by creating a DAG
+// Share a credential by creating a dAG
 idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
 
 // Revoke an access grant
