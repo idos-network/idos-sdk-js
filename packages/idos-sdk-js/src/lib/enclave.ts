@@ -1,9 +1,9 @@
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { idOS } from ".";
 import { assertNever } from "../types";
 import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
 import { EnclaveProvider } from "./enclave-providers/interface";
+import { Store } from "../../../idos-store";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
@@ -13,21 +13,20 @@ const ENCLAVE_PROVIDERS = {
 type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
-  idOS: idOS;
+  idOSStore: Store;
   initialized: boolean;
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
   humanIdDiscoverer: () => Promise<string | undefined>;
 
   constructor(
-    idOS: idOS,
+    store: Store,
     container: string,
     humanIdDiscoverer: () => Promise<string | undefined>,
     providerType: ProviderType = "iframe"
   ) {
+    this.idOSStore = store;
     this.initialized = false;
-    this.idOS = idOS;
-    this.humanIdDiscoverer = humanIdDiscoverer;
 
     switch (providerType) {
       case "iframe":
@@ -39,6 +38,8 @@ export class Enclave {
       default:
         this.provider = assertNever(providerType, `Unexpected provider type: ${providerType}`);
     }
+
+    this.humanIdDiscoverer = humanIdDiscoverer;
   }
 
   async load() {
@@ -52,17 +53,17 @@ export class Enclave {
 
       if (key.length !== 44) throw new Error("Invalid serialised `encryptionPublicKey` length");
 
-      this.idOS.store.set("encryption-public-key", key);
+      this.idOSStore.set("encryption-public-key", key);
     }
 
-    this.idOS.store.set("human-id", humanId);
-    this.idOS.store.set("signer-address", signerAddress);
-    this.idOS.store.set("signer-public-key", signerPublicKey);
+    this.idOSStore.set("human-id", humanId);
+    this.idOSStore.set("signer-address", signerAddress);
+    this.idOSStore.set("signer-public-key", signerPublicKey);
   }
 
   async init(): Promise<Uint8Array> {
-    const signerAddress = this.idOS.store.get("signer-address");
-    const signerPublicKey = this.idOS.store.get("signer-public-key");
+    const signerAddress = this.idOSStore.get("signer-address");
+    const signerPublicKey = this.idOSStore.get("signer-public-key");
 
     const humanId = await this.humanIdDiscoverer();
 
@@ -74,7 +75,7 @@ export class Enclave {
       signerPublicKey,
       undefined
     );
-    this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
+    this.idOSStore.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
     this.initialized = true;
 
     return this.encryptionPublicKey;
