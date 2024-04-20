@@ -48,9 +48,9 @@ export class Grants {
     this.nearGrantsOptions = nearGrantsOptions;
   }
 
-  async init({ type, signer }: { type: "EVM"; signer: Signer }): Promise<ConnectedGrants>;
+  async connect({ type, signer }: { type: "EVM"; signer: Signer }): Promise<ConnectedGrants>;
 
-  async init({
+  async connect({
     type,
     signer,
     accountId,
@@ -62,7 +62,7 @@ export class Grants {
     publicKey: string;
   }): Promise<ConnectedGrants>;
 
-  async init({
+  async connect({
     type,
     signer,
     accountId,
@@ -135,12 +135,12 @@ class ConnectedGrants extends Grants {
     this.#child = child;
   }
 
-  async init(_args: {
+  async connect(_args: {
     type: SignerType;
     signer: Wallet | Signer;
     accountId?: string;
   }): Promise<ConnectedGrants> {
-    throw new Error("Can't re-init");
+    throw new Error("Can't re-connect");
   }
 
   async list(
