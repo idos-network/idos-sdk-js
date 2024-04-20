@@ -9,6 +9,7 @@ import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
+import { IframeEnclave } from "./enclave-providers";
 
 interface InitParams {
   nodeUrl?: string;
@@ -50,9 +51,8 @@ export class idOS {
     this.data = new Data(this);
     this.enclave = new Enclave(
       this.store,
-      container,
-      async () => (await this.auth.currentUser()).humanId,
-      undefined
+      new IframeEnclave({ container }),
+      async () => (await this.auth.currentUser()).humanId
     );
     this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);
   }

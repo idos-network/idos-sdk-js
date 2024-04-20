@@ -1,16 +1,7 @@
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { assertNever } from "../types";
-import { IframeEnclave, MetaMaskSnapEnclave } from "./enclave-providers";
-import { EnclaveProvider } from "./enclave-providers/interface";
+import type { EnclaveProvider } from "./enclave-providers/interface";
 import { Store } from "../../../idos-store";
-
-const ENCLAVE_PROVIDERS = {
-  iframe: IframeEnclave,
-  "metamask-snap": MetaMaskSnapEnclave
-} as const;
-
-type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
   idOSStore: Store;
@@ -21,24 +12,12 @@ export class Enclave {
 
   constructor(
     store: Store,
-    container: string,
-    humanIdDiscoverer: () => Promise<string | undefined>,
-    providerType: ProviderType = "iframe"
+    provider: EnclaveProvider,
+    humanIdDiscoverer: () => Promise<string | undefined>
   ) {
     this.idOSStore = store;
     this.initialized = false;
-
-    switch (providerType) {
-      case "iframe":
-        this.provider = new IframeEnclave({ container });
-        break;
-      case "metamask-snap":
-        this.provider = new MetaMaskSnapEnclave({});
-        break;
-      default:
-        this.provider = assertNever(providerType, `Unexpected provider type: ${providerType}`);
-    }
-
+    this.provider = provider;
     this.humanIdDiscoverer = humanIdDiscoverer;
   }
 
