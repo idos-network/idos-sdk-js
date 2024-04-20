@@ -11,6 +11,7 @@ import { SigningKey, hashMessage } from "ethers";
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
+import { Store } from "../../../idos-store";
 
 /* global Buffer */
 
@@ -22,20 +23,22 @@ export interface AuthUser {
 
 export class Auth {
   idOS: idOS;
+  idOSStore: Store;
   user: AuthUser;
 
   constructor(idOS: idOS) {
     this.idOS = idOS;
+    this.idOSStore = idOS.store;
     this.user = {};
   }
 
   async forget() {
-    this.idOS.store.reset();
+    this.idOSStore.reset();
     await this.idOS.enclave.reset();
   }
 
   private async remember(key: string, value: any) {
-    this.idOS.store.set(key, value);
+    this.idOSStore.set(key, value);
     await this.idOS.enclave.store(key, value);
   }
 
@@ -72,10 +75,10 @@ export class Auth {
       }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
         if (error) return Promise.reject();
 
-        const lastMessage = this.idOS.store.get("sign-last-message");
+        const lastMessage = this.idOSStore.get("sign-last-message");
         if (signature && message === lastMessage) {
-          const nonce = Buffer.from(this.idOS.store.get("sign-last-nonce"));
-          const callbackUrl = this.idOS.store.get("sign-last-url");
+          const nonce = Buffer.from(this.idOSStore.get("sign-last-nonce"));
+          const callbackUrl = this.idOSStore.get("sign-last-url");
 
           return Promise.resolve({
             accountId: currentAddress,
@@ -89,9 +92,9 @@ export class Auth {
           const callbackUrl = window.location.href;
           const nonce = Buffer.from(new Nonce(32).clampUTF8);
 
-          this.idOS.store.set("sign-last-message", message);
-          this.idOS.store.set("sign-last-nonce", Array.from(nonce));
-          this.idOS.store.set("sign-last-url", callbackUrl);
+          this.idOSStore.set("sign-last-message", message);
+          this.idOSStore.set("sign-last-nonce", Array.from(nonce));
+          this.idOSStore.set("sign-last-url", callbackUrl);
 
           signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
@@ -100,9 +103,9 @@ export class Auth {
       };
     }
 
-    const storedAddress = this.idOS.store.get("signer-address");
+    const storedAddress = this.idOSStore.get("signer-address");
 
-    let publicKey = this.idOS.store.get("signer-public-key");
+    let publicKey = this.idOSStore.get("signer-public-key");
 
     if (storedAddress != currentAddress || !publicKey) {
       await this.forget();
@@ -186,13 +189,13 @@ export class Auth {
     if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
       let [humanId, address, publicKey] = currentUserKeys.map(
-        this.idOS.store.get.bind(this.idOS.store)
+        this.idOSStore.get.bind(this.idOSStore)
       ) as Array<string | undefined>;
 
       humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
 
       this.user = { humanId, address, publicKey };
-      this.idOS.store.set("human-id", humanId);
+      this.idOSStore.set("human-id", humanId);
     }
 
     return this.user;
