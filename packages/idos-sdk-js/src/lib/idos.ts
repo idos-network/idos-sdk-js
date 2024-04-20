@@ -48,12 +48,12 @@ export class idOS {
     this.store = new Store();
     this.kwilWrapper = kwilWrapper;
     this.auth = new Auth(this);
-    this.data = new Data(this);
     this.enclave = new Enclave(
       this.store,
       new IframeEnclave({ container }),
       async () => (await this.auth.currentUser()).humanId
     );
+    this.data = new Data(this.kwilWrapper, this.enclave);
     this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);
   }
 
