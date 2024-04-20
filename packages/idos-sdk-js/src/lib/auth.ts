@@ -12,6 +12,7 @@ import { idOS } from "./idos";
 import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
 import { Store } from "../../../idos-store";
+import { KwilWrapper } from "./kwil-wrapper";
 
 /* global Buffer */
 
@@ -24,11 +25,13 @@ export interface AuthUser {
 export class Auth {
   idOS: idOS;
   idOSStore: Store;
+  idOSKwilWrapper: KwilWrapper;
   user: AuthUser;
 
-  constructor(idOS: idOS) {
+  constructor(idOS: idOS, idOSStore: Store, idOSKwilWrapper: KwilWrapper) {
     this.idOS = idOS;
-    this.idOSStore = idOS.store;
+    this.idOSStore = idOSStore;
+    this.idOSKwilWrapper = idOSKwilWrapper;
     this.user = {};
   }
 
@@ -180,7 +183,7 @@ export class Auth {
       signatureType: string;
     }
   >(args: T) {
-    this.idOS.kwilWrapper.setSigner(args);
+    this.idOSKwilWrapper.setSigner(args);
 
     return args;
   }
@@ -192,7 +195,7 @@ export class Auth {
         this.idOSStore.get.bind(this.idOSStore)
       ) as Array<string | undefined>;
 
-      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
+      humanId = humanId || (await this.idOSKwilWrapper.getHumanId()) || undefined;
 
       this.user = { humanId, address, publicKey };
       this.idOSStore.set("human-id", humanId);

@@ -47,7 +47,7 @@ export class idOS {
 
     this.store = new Store();
     this.kwilWrapper = kwilWrapper;
-    this.auth = new Auth(this);
+    this.auth = new Auth(this, this.store, this.kwilWrapper);
     this.enclave = new Enclave(
       this.store,
       new IframeEnclave({ container }),
