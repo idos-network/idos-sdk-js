@@ -47,7 +47,7 @@ export class Data {
     let receiverPublicKey;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.init());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.ready());
       for (const record of records) {
         (record as any).content = await this.idOSEnclave.encrypt(
           (record as any).content as string,
@@ -58,7 +58,7 @@ export class Data {
     }
 
     if (tableName === "attributes") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.init());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.ready());
       for (const record of records) {
         (record as any).value = await this.idOSEnclave.encrypt(
           (record as any).value as string,
@@ -101,7 +101,7 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.init());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.ready());
       (record as any).content = await this.idOSEnclave.encrypt(
         (record as any).content as string,
         receiverPublicKey
@@ -110,7 +110,7 @@ export class Data {
     }
 
     if (tableName === "attributes") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.init());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOSEnclave.ready());
       (record as any).value = await this.idOSEnclave.encrypt(
         (record as any).value as string,
         receiverPublicKey
@@ -224,7 +224,7 @@ export class Data {
     record: T,
     synchronous?: boolean
   ): Promise<T> {
-    if (!this.idOSEnclave.initialized) await this.idOSEnclave.init();
+    if (!this.idOSEnclave.readied) await this.idOSEnclave.ready();
 
     if (tableName === "credentials") {
       record.content = await this.idOSEnclave.encrypt(record.content);
@@ -249,7 +249,7 @@ export class Data {
     recordId: string,
     receiverPublicKey: string
   ): Promise<{ id: string }> {
-    const encPublicKey = Base64Codec.encode(await this.idOSEnclave.init());
+    const encPublicKey = Base64Codec.encode(await this.idOSEnclave.ready());
 
     const name = this.singularize(tableName);
 

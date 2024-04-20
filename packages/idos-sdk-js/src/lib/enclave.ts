@@ -5,7 +5,7 @@ import { Store } from "../../../idos-store";
 
 export class Enclave {
   idOSStore: Store;
-  initialized: boolean;
+  readied: boolean;
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
   humanIdDiscoverer: () => Promise<string | undefined>;
@@ -16,7 +16,7 @@ export class Enclave {
     humanIdDiscoverer: () => Promise<string | undefined>
   ) {
     this.idOSStore = store;
-    this.initialized = false;
+    this.readied = false;
     this.provider = provider;
     this.humanIdDiscoverer = humanIdDiscoverer;
   }
@@ -40,7 +40,7 @@ export class Enclave {
     this.idOSStore.set("signer-public-key", signerPublicKey);
   }
 
-  async init(): Promise<Uint8Array> {
+  async ready(): Promise<Uint8Array> {
     const signerAddress = this.idOSStore.get("signer-address");
     const signerPublicKey = this.idOSStore.get("signer-public-key");
 
@@ -50,7 +50,7 @@ export class Enclave {
 
     this.encryptionPublicKey = await this.provider.init(humanId, signerAddress, signerPublicKey);
     this.idOSStore.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
-    this.initialized = true;
+    this.readied = true;
 
     return this.encryptionPublicKey;
   }
@@ -66,7 +66,7 @@ export class Enclave {
   }
 
   async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
-    if (!this.initialized) await this.init();
+    if (!this.readied) await this.ready();
 
     return Base64Codec.encode(
       await this.provider.encrypt(
@@ -77,7 +77,7 @@ export class Enclave {
   }
 
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {
-    if (!this.initialized) await this.init();
+    if (!this.readied) await this.ready();
 
     return Utf8Codec.decode(
       await this.provider.decrypt(
