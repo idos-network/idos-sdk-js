@@ -6,7 +6,6 @@ import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
-import { SigningKey, hashMessage } from "ethers";
 
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
