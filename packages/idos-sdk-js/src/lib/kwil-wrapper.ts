@@ -57,10 +57,6 @@ export class KwilWrapper {
     signer: EthSigner | CustomSigner;
     signatureType: string;
   }) {
-    // To avoid re-using the old signer's kgw cookie.
-    // When kwil-js supports multi cookies, we can remove this.
-    this.client.auth.logout();
-
     if (signatureType === "nep413") {
       this.signer = new KwilSigner(signer as CustomSigner, accountId, signatureType);
     } else {

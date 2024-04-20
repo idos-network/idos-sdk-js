@@ -45,11 +45,13 @@ export class Auth {
   }
 
   async setEvmSigner(signer: Signer) {
-    const currentAddress = await signer.getAddress();
-
-    await this.remember("signer-address", currentAddress);
-
     const accountId = await signer.getAddress();
+
+    if (this.idOSStore.get("signer-address") !== accountId) {
+      await this.idOSKwilWrapper.client.auth.logout();
+    }
+
+    await this.remember("signer-address", accountId);
 
     return this.#setSigner({ signer, signatureType: "secp256k1_ep", accountId });
   }
@@ -110,6 +112,7 @@ export class Auth {
     let publicKey = this.idOSStore.get("signer-public-key");
 
     if (storedAddress != currentAddress || !publicKey) {
+      await this.idOSKwilWrapper.client.auth.logout();
       await this.forget();
 
       const message = "idOS authentication";
