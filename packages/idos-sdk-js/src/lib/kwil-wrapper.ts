@@ -28,7 +28,7 @@ export class KwilWrapper {
   static async init({
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     dbId = KwilWrapper.defaults.dbId
-  }) {
+  }): Promise<KwilWrapper> {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId =
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id ??
