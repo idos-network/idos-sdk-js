@@ -17,7 +17,7 @@ import type { idOSWallet } from "../types";
 
 type DeleteWalletProps = {
   isOpen: boolean;
-  wallet: idOSWallet | null;
+  wallets: idOSWallet[] | undefined;
   onClose: () => void;
 };
 
@@ -27,13 +27,19 @@ const useDeleteWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }, DefaultError, idOSWallet, Ctx>({
-    mutationFn: ({ id }) => sdk.data.delete("wallets", id, true),
-    async onMutate({ address }) {
+  return useMutation<{ id: string }[], DefaultError, idOSWallet[], Ctx>({
+    mutationFn: (wallets) =>
+      sdk.data.deleteMultiple(
+        "wallets",
+        wallets.map((wallet) => wallet.id),
+        true
+      ),
+    async onMutate(wallets) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
+
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) =>
-        old.filter((wallet) => wallet.address !== address)
+        old.filter((wallet) => wallet.address !== wallets[0].address)
       );
 
       return { previousWallets };
@@ -41,7 +47,7 @@ const useDeleteWalletMutation = () => {
   });
 };
 
-export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => {
+export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) => {
   const toast = useToast();
   const queryClient = useQueryClient();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
@@ -52,8 +58,8 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
     onClose();
   };
 
-  const handleDeleteWallet = (wallet: idOSWallet) => {
-    deleteWallet.mutate(wallet, {
+  const handleDeleteWallet = (wallets: idOSWallet[]) => {
+    deleteWallet.mutate(wallets, {
       async onSuccess() {
         handleClose();
       },
@@ -69,7 +75,7 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
     });
   };
 
-  if (!wallet) return null;
+  if (!wallets || wallets.length === 0) return null;
 
   return (
     <AlertDialog
@@ -94,7 +100,7 @@ export const DeleteWallet = ({ isOpen, wallet, onClose }: DeleteWalletProps) => 
             <Button
               colorScheme="red"
               ml={3}
-              onClick={() => handleDeleteWallet(wallet)}
+              onClick={() => handleDeleteWallet(wallets)}
               isLoading={deleteWallet.isPending}
             >
               {deleteWallet.isError ? "Retry" : "Delete"}
