@@ -112,7 +112,7 @@ export class Grants {
     _address: string,
     _lockedUntil: number,
     _receiverPublicKey: string
-  ): Promise<{ encryptedWith: string; transactionId: string }> {
+  ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Call idOS.setSigner first.");
   }
 
@@ -122,7 +122,7 @@ export class Grants {
     _grantee: string,
     _dataId: string,
     _lockedUntil: number
-  ): Promise<{ transactionId: string }> {
+  ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Call idOS.setSigner first.");
   }
 }
@@ -159,18 +159,14 @@ class ConnectedGrants extends Grants {
     address: string,
     lockedUntil: number,
     receiverPublicKey: string
-  ): Promise<{ encryptedWith: string; transactionId: string }> {
+  ): Promise<{ grant: Grant; transactionId: string }> {
     const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
-    const payload = await this.#child.create({
+
+    return await this.#child.create({
       grantee: address,
       dataId: share.id,
       lockedUntil: lockedUntil
     });
-
-    return {
-      ...payload,
-      encryptedWith: this.idOS.store.get("encryption-public-key")
-    };
   }
 
   async revoke(
@@ -179,7 +175,7 @@ class ConnectedGrants extends Grants {
     grantee: string,
     dataId: string,
     lockedUntil: number
-  ): Promise<{ transactionId: string }> {
+  ): Promise<{ grant: Grant; transactionId: string }> {
     await this.idOS.data.unshare(tableName, recordId);
 
     return this.#child.revoke({ grantee, dataId, lockedUntil });
