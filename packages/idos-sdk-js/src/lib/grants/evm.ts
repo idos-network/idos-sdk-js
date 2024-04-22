@@ -196,7 +196,7 @@ export class EvmGrants extends GrantChild {
 
   #grantPromise(grant: Grant, wait = true) {
     return async (transaction: TransactionResponse) => {
-      // `transaction.wait()` only returns null when given `confirms = 0`.
+      // biome-ignore lint/style/noNonNullAssertion: `transaction.wait()` only returns null when given `confirms = 0`.
       const transactionOrReceipt = wait ? (await transaction.wait())! : transaction;
       const transactionId = transactionOrReceipt.hash;
 
