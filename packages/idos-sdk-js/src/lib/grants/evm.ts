@@ -380,10 +380,6 @@ export class EvmGrants implements GrantChild {
     );
   }
 
-  #newGrant({ owner, grantee, dataId, lockedUntil }: Grant) {
-    return new Grant({ owner, grantee, dataId, lockedUntil });
-  }
-
   #grantPromise(grant: Grant, wait = true) {
     return async (transaction: TransactionResponse) => {
       // biome-ignore lint/style/noNonNullAssertion: `transaction.wait()` only returns null when given `confirms = 0`.
@@ -422,12 +418,11 @@ export class EvmGrants implements GrantChild {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
-    const owner = await this.signer.getAddress();
 
-    const grant = this.#newGrant({ owner, grantee, dataId, lockedUntil });
+    const owner = await this.signer.getAddress();
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
     let transaction;
-
     try {
       transaction = (await this.#contract.insertGrant(
         grantee,
@@ -460,10 +455,9 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    const grant = this.#newGrant({ owner, grantee, dataId, lockedUntil });
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
     let transaction;
-
     try {
       transaction = (await this.#contract.insertGrantBySignature(
         owner,
@@ -490,11 +484,11 @@ export class EvmGrants implements GrantChild {
     if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
+
     const owner = await this.signer.getAddress();
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
-    const grant = this.#newGrant({ owner, grantee, dataId, lockedUntil });
     let transaction;
-
     try {
       transaction = (await this.#contract.deleteGrant(
         grantee,
@@ -528,10 +522,9 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    const grant = this.#newGrant({ owner, grantee, dataId, lockedUntil });
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
     let transaction;
-
     try {
       transaction = (await this.#contract.deleteGrantBySignature(
         owner,
