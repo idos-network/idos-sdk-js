@@ -196,13 +196,14 @@ export class Data {
   async deleteMultiple(
     tableName: string,
     recordIds: string[],
+    description?: string,
     synchronous?: boolean
   ): Promise<{ id: string }[]> {
     const records = recordIds.map((id) => ({ id }));
     await this.idOS.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       records,
-      undefined,
+      description,
       synchronous
     );
 

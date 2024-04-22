@@ -32,6 +32,7 @@ const useDeleteWalletMutation = () => {
       sdk.data.deleteMultiple(
         "wallets",
         wallets.map((wallet) => wallet.id),
+        "Delete wallet from idOS",
         true
       ),
     async onMutate(wallets) {
