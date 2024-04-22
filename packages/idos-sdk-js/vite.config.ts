@@ -5,10 +5,12 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   build: {
+    target: "esnext",
     lib: {
       entry: path.resolve(__dirname, "src/lib/index.ts"),
       name: "idOS",
-      fileName: "idos-sdk"
+      fileName: "idos-sdk",
+      formats: ["es"]
     }
   },
   plugins: [

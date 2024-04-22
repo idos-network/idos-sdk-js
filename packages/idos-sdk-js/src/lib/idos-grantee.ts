@@ -1,4 +1,3 @@
-import crypto from "node:crypto";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
@@ -14,6 +13,9 @@ import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
 
 export type WalletType = "EVM" | "NEAR";
+
+const crypto =
+  typeof window === "undefined" ? (await import("node:crypto")).default : window.crypto;
 
 const kwilNep413Signer =
   (recipient: string) =>
