@@ -11,7 +11,7 @@ export interface EvmGrantsOptions {
   chainId?: string;
 }
 
-export class EvmGrants extends GrantChild {
+export class EvmGrants implements GrantChild {
   static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
   static defaultChainId = import.meta.env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID;
 
@@ -366,7 +366,6 @@ export class EvmGrants extends GrantChild {
   #contract: Contract;
 
   private constructor(signer: Signer, contract: Contract) {
-    super();
     this.signer = signer;
     this.#contract = contract;
   }

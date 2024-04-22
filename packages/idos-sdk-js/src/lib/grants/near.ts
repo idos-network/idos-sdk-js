@@ -22,7 +22,7 @@ export interface NearGrantsOptions {
   rpcUrl?: string;
 }
 
-export class NearGrants extends GrantChild {
+export class NearGrants implements GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
   #publicKey: string;
@@ -41,7 +41,6 @@ export class NearGrants extends GrantChild {
   } as const;
 
   private constructor(signer: Wallet, contract: nearAPI.Contract, publicKey: string) {
-    super();
     this.#signer = signer;
     this.#contract = contract;
     this.#publicKey = publicKey;
