@@ -1,6 +1,8 @@
 import * as Base64Codec from "@stablelib/base64";
 import { idOS } from "./idos";
 
+/* global crypto */
+
 export class Data {
   idOS: idOS;
 

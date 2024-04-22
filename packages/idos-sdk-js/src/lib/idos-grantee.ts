@@ -12,10 +12,9 @@ import { assertNever } from "../types";
 import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
 
-export type WalletType = "EVM" | "NEAR";
+/* global crypto */
 
-const crypto =
-  typeof window === "undefined" ? (await import("node:crypto")).default : window.crypto;
+export type WalletType = "EVM" | "NEAR";
 
 const kwilNep413Signer =
   (recipient: string) =>
