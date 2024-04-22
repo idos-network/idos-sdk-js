@@ -15,7 +15,7 @@
     "@types/node": "^20.10.5",
     "@vercel/node": "^3.0.26",
     "raw-body": "^2.5.2",
-    "typescript": "^5.0.2",
+    "typescript": "^5.4.5",
     "vite": "^4.4.5",
     "vite-plugin-mkcert": "^1.16.0",
     "vite-plugin-node-polyfills": "^0.12.0"

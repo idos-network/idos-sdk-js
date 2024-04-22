@@ -44,7 +44,7 @@
     "jsdom": "^22.1.0",
     "prettier": "^3.0.3",
     "release-it": "^17.0.0",
-    "typescript": "^5.2.2",
+    "typescript": "^5.4.5",
     "vite": "^4.5.0",
     "vite-plugin-dts": "^3.8.3",
     "vite-plugin-externalize-deps": "^0.8.0",
