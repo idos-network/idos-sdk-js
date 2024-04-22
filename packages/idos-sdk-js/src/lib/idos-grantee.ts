@@ -17,10 +17,6 @@ export type WalletType = "EVM" | "NEAR";
 const crypto =
   typeof window === "undefined" ? (await import("node:crypto")).default : window.crypto;
 
-export const getRandomValues = () => {
-  return crypto.getRandomValues(new Uint8Array(32));
-};
-
 const kwilNep413Signer =
   (recipient: string) =>
   (keyPair: nearAPI.KeyPair) =>
