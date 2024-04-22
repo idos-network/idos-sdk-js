@@ -272,7 +272,7 @@ export class EvmGrants extends GrantChild {
         lockedUntil
       )) as TransactionResponse;
     } catch (e) {
-      throw new Error("Grant creation failed", { cause: (e as Error).cause });
+      throw new Error("Grant revocation failed", { cause: (e as Error).cause });
     }
 
     return await this.#grantPromise(grant, wait)(transaction);
