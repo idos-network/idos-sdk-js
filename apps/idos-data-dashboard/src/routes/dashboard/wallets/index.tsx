@@ -27,7 +27,8 @@ const useFetchWallets = () => {
 
   return useQuery({
     queryKey: ["wallets"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName)
+    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName),
+    select: (data) => Object.groupBy(data, (wallet) => wallet.address)
   });
 };
 
@@ -44,15 +45,19 @@ const NoWallets = () => {
 const WalletsList = () => {
   const wallets = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [walletToDelete, setWalletToDelete] = useState<idOSWallet | null>(null);
+  const [walletsToDelete, setWalletToDelete] = useState<idOSWallet[] | undefined>([]);
 
-  const handleDelete = (wallet: idOSWallet) => {
-    setWalletToDelete(wallet);
+  const handleDelete = (address: string) => {
+    const walletsToDelete = wallets.data?.[address];
+
+    if (!walletsToDelete) return;
+
+    setWalletToDelete(walletsToDelete);
     onOpen();
   };
 
   const handleClose = () => {
-    setWalletToDelete(null);
+    setWalletToDelete([]);
     onClose();
   };
 
@@ -65,16 +70,17 @@ const WalletsList = () => {
   }
 
   if (wallets.isSuccess) {
+    const addresses = Object.keys(wallets.data);
     return (
       <>
         <List display="flex" flexDir="column" gap={2.5} flex={1}>
-          {wallets.data.map((wallet, index) => (
-            <ListItem key={`${wallet.address}-${index}`}>
-              <WalletCard wallet={wallet} onDelete={handleDelete} />
+          {addresses.map((address, index) => (
+            <ListItem key={`${address}-${index}`}>
+              <WalletCard address={address} onDelete={handleDelete} />
             </ListItem>
           ))}
         </List>
-        <DeleteWallet isOpen={isOpen} wallet={walletToDelete} onClose={handleClose} />
+        <DeleteWallet isOpen={isOpen} wallets={walletsToDelete} onClose={handleClose} />
       </>
     );
   }

@@ -1,14 +1,12 @@
 import { Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
 
-import { idOSWallet } from "../types";
-
 type WalletCardProps = {
-  wallet: idOSWallet;
-  onDelete: (wallet: idOSWallet) => void;
+  address: string;
+  onDelete: (address: string) => void;
 };
 
-export const WalletCard = ({ wallet, onDelete }: WalletCardProps) => {
+export const WalletCard = ({ address, onDelete }: WalletCardProps) => {
   return (
     <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
       <HStack gap={5}>
@@ -16,11 +14,11 @@ export const WalletCard = ({ wallet, onDelete }: WalletCardProps) => {
         <VStack align="stretch" gap={0} overflow="hidden">
           <Text color="neutral.600">Address</Text>
           <Text isTruncated maxW={200}>
-            {wallet.address}
+            {address}
           </Text>
         </VStack>
       </HStack>
-      <Button leftIcon={<XIcon size={20} />} onClick={() => onDelete(wallet)}>
+      <Button leftIcon={<XIcon size={20} />} onClick={() => onDelete(address)}>
         Delete
       </Button>
     </HStack>
