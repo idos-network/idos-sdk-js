@@ -99,9 +99,9 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     let publicKeys: string[] = [];
 
     if (address_type === "NEAR") {
-      publicKeys = await getNearFullAccessPublicKeys(address);
+      publicKeys = (await getNearFullAccessPublicKeys(address)) || [];
 
-      if (publicKeys.length === 0) {
+      if (!publicKeys.length) {
         toast({
           title: "Error while adding wallet",
           description:
