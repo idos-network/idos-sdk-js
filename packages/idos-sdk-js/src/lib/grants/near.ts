@@ -46,7 +46,7 @@ export class NearGrants implements GrantChild {
     this.#publicKey = publicKey;
   }
 
-  static async build({
+  static async init({
     accountId,
     signer,
     options,

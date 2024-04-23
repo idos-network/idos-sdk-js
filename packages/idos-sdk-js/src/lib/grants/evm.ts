@@ -370,7 +370,7 @@ export class EvmGrants implements GrantChild {
     this.#contract = contract;
   }
 
-  static async build({
+  static async init({
     signer,
     options,
   }: { signer: Signer; options: EvmGrantsOptions }): Promise<EvmGrants> {
