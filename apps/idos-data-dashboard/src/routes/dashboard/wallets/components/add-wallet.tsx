@@ -11,7 +11,7 @@ import {
   ModalHeader,
   ModalOverlay,
   useBreakpointValue,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { getNearFullAccessPublicKeys } from "@idos-network/idos-sdk";
 import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,12 +27,12 @@ type AddWalletProps = {
 
 const createWalletFactory = ({
   address,
-  public_key
+  public_key,
 }: { address: string; public_key?: string }) => ({
   address,
   public_key,
   message: "",
-  signature: ""
+  signature: "",
 });
 
 const useAddWalletMutation = () => {
@@ -63,11 +63,11 @@ const useAddWalletMutation = () => {
 
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
-        ...(payload as idOSWallet[])
+        ...(payload as idOSWallet[]),
       ]);
 
       return { previousWallets };
-    }
+    },
   });
 };
 
@@ -77,10 +77,10 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
   const isCentered = useBreakpointValue(
     {
       base: false,
-      md: true
+      md: true,
     },
     {
-      fallback: "base"
+      fallback: "base",
     }
   );
 
@@ -107,7 +107,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
           description:
             "This doesn't look like an EVM wallet, and we can't find a `FullAccessKey` for this NEAR address. idOS doesn't support this wallet.",
           position: "bottom-right",
-          status: "error"
+          status: "error",
         });
         return;
       }
@@ -143,9 +143,9 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
             title: "Error while adding wallet",
             description: "An unexpected error. Please try again.",
             position: "bottom-right",
-            status: "error"
+            status: "error",
           });
-        }
+        },
       }
     );
   };
@@ -161,7 +161,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
       onClose={handleClose}
       size={{
         base: "full",
-        lg: "xl"
+        lg: "xl",
       }}
       isCentered={isCentered}
     >

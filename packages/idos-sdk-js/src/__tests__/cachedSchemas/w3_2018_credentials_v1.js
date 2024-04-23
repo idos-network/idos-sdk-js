@@ -31,8 +31,8 @@ export default {
 
             cred: "https://www.w3.org/2018/credentials#",
 
-            JsonSchemaValidator2018: "cred:JsonSchemaValidator2018"
-          }
+            JsonSchemaValidator2018: "cred:JsonSchemaValidator2018",
+          },
         },
         credentialStatus: { "@id": "cred:credentialStatus", "@type": "@id" },
         credentialSubject: { "@id": "cred:credentialSubject", "@type": "@id" },
@@ -55,13 +55,13 @@ export default {
 
             cred: "https://www.w3.org/2018/credentials#",
 
-            ManualRefreshService2018: "cred:ManualRefreshService2018"
-          }
+            ManualRefreshService2018: "cred:ManualRefreshService2018",
+          },
         },
         termsOfUse: { "@id": "cred:termsOfUse", "@type": "@id" },
         validFrom: { "@id": "cred:validFrom", "@type": "xsd:dateTime" },
-        validUntil: { "@id": "cred:validUntil", "@type": "xsd:dateTime" }
-      }
+        validUntil: { "@id": "cred:validUntil", "@type": "xsd:dateTime" },
+      },
     },
 
     VerifiablePresentation: {
@@ -81,9 +81,9 @@ export default {
         verifiableCredential: {
           "@id": "cred:verifiableCredential",
           "@type": "@id",
-          "@container": "@graph"
-        }
-      }
+          "@container": "@graph",
+        },
+      },
     },
 
     EcdsaSecp256k1Signature2019: {
@@ -120,13 +120,13 @@ export default {
             authentication: {
               "@id": "sec:authenticationMethod",
               "@type": "@id",
-              "@container": "@set"
-            }
-          }
+              "@container": "@set",
+            },
+          },
         },
         proofValue: "sec:proofValue",
-        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" }
-      }
+        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" },
+      },
     },
 
     EcdsaSecp256r1Signature2019: {
@@ -163,13 +163,13 @@ export default {
             authentication: {
               "@id": "sec:authenticationMethod",
               "@type": "@id",
-              "@container": "@set"
-            }
-          }
+              "@container": "@set",
+            },
+          },
         },
         proofValue: "sec:proofValue",
-        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" }
-      }
+        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" },
+      },
     },
 
     Ed25519Signature2018: {
@@ -206,13 +206,13 @@ export default {
             authentication: {
               "@id": "sec:authenticationMethod",
               "@type": "@id",
-              "@container": "@set"
-            }
-          }
+              "@container": "@set",
+            },
+          },
         },
         proofValue: "sec:proofValue",
-        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" }
-      }
+        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" },
+      },
     },
 
     RsaSignature2018: {
@@ -243,15 +243,15 @@ export default {
             authentication: {
               "@id": "sec:authenticationMethod",
               "@type": "@id",
-              "@container": "@set"
-            }
-          }
+              "@container": "@set",
+            },
+          },
         },
         proofValue: "sec:proofValue",
-        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" }
-      }
+        verificationMethod: { "@id": "sec:verificationMethod", "@type": "@id" },
+      },
     },
 
-    proof: { "@id": "https://w3id.org/security#proof", "@type": "@id", "@container": "@graph" }
-  }
+    proof: { "@id": "https://w3id.org/security#proof", "@type": "@id", "@container": "@graph" },
+  },
 };

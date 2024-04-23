@@ -67,7 +67,7 @@ export class Auth {
 
       wallet.signMessage = async ({
         message,
-        recipient
+        recipient,
       }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
         if (error) return Promise.reject();
 
@@ -82,7 +82,7 @@ export class Auth {
             signature,
             nonce,
             message,
-            callbackUrl
+            callbackUrl,
           });
         }
         const callbackUrl = window.location.href;
@@ -123,7 +123,7 @@ export class Auth {
         nonce = nonceSuggestion,
         signature,
         // @ts-ignore Signatures don't seem to be updated for NEP413 yet.
-        callbackUrl
+        callbackUrl,
       } = (await (
         wallet.signMessage as (
           _: SignMessageParams
@@ -131,7 +131,7 @@ export class Auth {
       )({
         message,
         recipient,
-        nonce: nonceSuggestion
+        nonce: nonceSuggestion,
       }))!;
 
       const nep413BorschSchema = {
@@ -140,8 +140,8 @@ export class Auth {
           message: "string",
           nonce: { array: { type: "u8", len: 32 } },
           recipient: "string",
-          callbackUrl: { option: "string" }
-        }
+          callbackUrl: { option: "string" },
+        },
       };
 
       const nep413BorshParams = {
@@ -149,7 +149,7 @@ export class Auth {
         message,
         nonce: Array.from(nonce),
         recipient,
-        callbackUrl
+        callbackUrl,
       };
 
       const nep413BorshPayload = BorshCodec.serialize(nep413BorschSchema, nep413BorshParams);
@@ -164,7 +164,7 @@ export class Auth {
     return this.#setSigner({
       accountId: implicitAddressFromPublicKey(publicKey),
       signer,
-      signatureType: "nep413"
+      signatureType: "nep413",
     });
   }
 
@@ -173,7 +173,7 @@ export class Auth {
       accountId: string;
       signer: EthSigner | ((message: Uint8Array) => Promise<Uint8Array>);
       signatureType: string;
-    }
+    },
   >(args: T) {
     this.idOS.kwilWrapper.setSigner(args);
 

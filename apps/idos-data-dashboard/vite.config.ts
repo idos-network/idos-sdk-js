@@ -17,26 +17,26 @@ export default defineConfig({
             "@tanstack/react-query",
             "@emotion/react",
             "@emotion/styled",
-            "framer-motion"
+            "framer-motion",
           ],
-          web3: ["wagmi", "viem"]
-        }
-      }
-    }
+          web3: ["wagmi", "viem"],
+        },
+      },
+    },
   },
   plugins: [
     react(),
     nodePolyfills({
       include: ["buffer"],
       globals: {
-        Buffer: true
-      }
-    })
+        Buffer: true,
+      },
+    }),
   ],
   resolve: {
     dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
     alias: {
-      "@": resolve(__dirname, "./src")
-    }
-  }
+      "@": resolve(__dirname, "./src"),
+    },
+  },
 });

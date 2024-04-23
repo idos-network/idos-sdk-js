@@ -37,7 +37,7 @@ export class NearGrants implements GrantChild {
     messageForCreateBySignature: "insert_grant_by_signature_message",
     createBySignature: "insert_grant_by_signature",
     messageForRevokeBySignature: "delete_grant_by_signature_message",
-    revokeBySignature: "delete_grant_by_signature"
+    revokeBySignature: "delete_grant_by_signature",
   } as const;
 
   private constructor(signer: Wallet, contract: nearAPI.Contract, publicKey: string) {
@@ -50,7 +50,7 @@ export class NearGrants implements GrantChild {
     accountId,
     signer,
     options,
-    publicKey
+    publicKey,
   }: {
     accountId: string;
     signer: Wallet;
@@ -60,7 +60,7 @@ export class NearGrants implements GrantChild {
     const keylessNearConnection = await nearAPI.connect({
       networkId: options.network ?? NearGrants.defaultNetwork,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-      nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl
+      nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl,
     });
 
     return new NearGrants(
@@ -74,12 +74,12 @@ export class NearGrants implements GrantChild {
             NearGrants.contractMethods.list,
             NearGrants.contractMethods.messageRecipient,
             NearGrants.contractMethods.messageForCreateBySignature,
-            NearGrants.contractMethods.messageForRevokeBySignature
+            NearGrants.contractMethods.messageForRevokeBySignature,
           ],
           changeMethods: [
             NearGrants.contractMethods.createBySignature,
-            NearGrants.contractMethods.revokeBySignature
-          ]
+            NearGrants.contractMethods.revokeBySignature,
+          ],
         }
       ),
       publicKey
@@ -97,9 +97,9 @@ export class NearGrants implements GrantChild {
         owner: grant.owner,
         grantee: grant.grantee,
         lockedUntil: grant.locked_until,
-        dataId: grant.data_id
+        dataId: grant.data_id,
       },
-      transactionId: transactionResult.transaction.hash
+      transactionId: transactionResult.transaction.hash,
     };
   }
 
@@ -116,7 +116,7 @@ export class NearGrants implements GrantChild {
     )({
       message,
       recipient,
-      nonce: nonceSuggestion
+      nonce: nonceSuggestion,
     }))!;
     const signature = Base64Codec.decode(b64Signature);
 
@@ -126,14 +126,14 @@ export class NearGrants implements GrantChild {
   async list({
     owner,
     grantee,
-    dataId: data_id
+    dataId: data_id,
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
     if (!(owner || grantee)) throw new Error("Must provide `owner` and/or `grantee`");
 
     const grantsFilter: Partial<Omit<NearContractGrant, "locked_until">> = compact({
       owner,
       grantee,
-      data_id
+      data_id,
     });
 
     // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
@@ -146,7 +146,7 @@ export class NearGrants implements GrantChild {
         new Grant({
           ...values,
           dataId: data_id,
-          lockedUntil: locked_until / 1e6
+          lockedUntil: locked_until / 1e6,
         })
     );
   }
@@ -158,7 +158,7 @@ export class NearGrants implements GrantChild {
   async create({
     grantee,
     dataId,
-    lockedUntil
+    lockedUntil,
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
     const owner = this.#publicKey;
 
@@ -167,7 +167,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       dataId,
-      lockedUntil
+      lockedUntil,
     });
 
     const { nonce, signature } = await this.#sign(message, recipient);
@@ -178,7 +178,7 @@ export class NearGrants implements GrantChild {
       dataId,
       lockedUntil,
       signature,
-      nonce
+      nonce,
     });
   }
 
@@ -195,7 +195,7 @@ export class NearGrants implements GrantChild {
     owner,
     grantee,
     dataId: data_id,
-    lockedUntil
+    lockedUntil,
   }: Grant): Promise<string> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
 
@@ -208,7 +208,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       data_id,
-      locked_until
+      locked_until,
     });
   }
 
@@ -218,7 +218,7 @@ export class NearGrants implements GrantChild {
     dataId: data_id,
     lockedUntil,
     signature,
-    nonce
+    nonce,
   }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
     grant: Grant;
     transactionId: string;
@@ -230,7 +230,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       data_id,
-      locked_until
+      locked_until,
     };
 
     let transactionResult;
@@ -245,13 +245,13 @@ export class NearGrants implements GrantChild {
                 args: {
                   ...grant,
                   nonce: Array.from(nonce),
-                  signature: Array.from(signature)
+                  signature: Array.from(signature),
                 },
                 gas: "30000000000000",
-                deposit: "0"
-              }
-            }
-          ]
+                deposit: "0",
+              },
+            },
+          ],
         })) || undefined;
     } catch (e) {
       throw new Error("Grant creation by signature failed", { cause: e });
@@ -267,7 +267,7 @@ export class NearGrants implements GrantChild {
   async revoke({
     grantee,
     dataId,
-    lockedUntil
+    lockedUntil,
   }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
     const owner = this.#publicKey;
 
@@ -276,7 +276,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       dataId,
-      lockedUntil
+      lockedUntil,
     });
 
     const { nonce, signature } = await this.#sign(message, recipient);
@@ -287,7 +287,7 @@ export class NearGrants implements GrantChild {
       dataId,
       lockedUntil,
       signature,
-      nonce
+      nonce,
     });
   }
 
@@ -295,7 +295,7 @@ export class NearGrants implements GrantChild {
     owner,
     grantee,
     dataId: data_id,
-    lockedUntil
+    lockedUntil,
   }: Grant): Promise<string> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
 
@@ -308,7 +308,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       data_id,
-      locked_until
+      locked_until,
     });
   }
 
@@ -318,7 +318,7 @@ export class NearGrants implements GrantChild {
     dataId: data_id,
     lockedUntil,
     signature,
-    nonce
+    nonce,
   }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
     grant: Grant;
     transactionId: string;
@@ -330,7 +330,7 @@ export class NearGrants implements GrantChild {
       owner,
       grantee,
       data_id,
-      locked_until
+      locked_until,
     };
 
     let transactionResult;
@@ -345,13 +345,13 @@ export class NearGrants implements GrantChild {
                 args: {
                   ...grant,
                   nonce: Array.from(nonce),
-                  signature: Array.from(signature)
+                  signature: Array.from(signature),
                 },
                 gas: "30000000000000",
-                deposit: "0"
-              }
-            }
-          ]
+                deposit: "0",
+              },
+            },
+          ],
         })) || undefined;
     } catch (e) {
       throw new Error("Grant revocation by signature failed", { cause: e });

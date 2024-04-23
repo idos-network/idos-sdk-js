@@ -156,7 +156,7 @@ export class Data {
     }
 
     const records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{
-      id: recordId
+      id: recordId,
     });
     const record = records.find((r) => r.id === recordId);
 
@@ -187,7 +187,7 @@ export class Data {
     }
 
     const records = await this.list<T & { id: string }>(tableName, <T & { id: string }>{
-      id: recordId
+      id: recordId,
     });
 
     const record = records.find((r) => r.id === recordId);
@@ -279,8 +279,8 @@ export class Data {
         {
           [`original_${name}_id`]: record.id,
           ...record,
-          id
-        }
+          id,
+        },
       ],
       `Share a ${name} on idOS`
     );

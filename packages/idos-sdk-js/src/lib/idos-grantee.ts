@@ -29,8 +29,8 @@ const kwilNep413Signer =
         message: "string",
         nonce: { array: { type: "u8", len: nonceLength } },
         recipient: "string",
-        callbackUrl: { option: "string" }
-      }
+        callbackUrl: { option: "string" },
+      },
     } as const;
 
     const tag = 2147484061; // 2**31 + 413
@@ -47,15 +47,15 @@ const kwilNep413Signer =
     const kwilNep413BorschSchema = {
       struct: {
         tag: "u32",
-        ...nep413BorschSchema.struct
-      }
+        ...nep413BorschSchema.struct,
+      },
     };
 
     const kwilNep413BorshParams = {
       tag,
       message,
       nonce,
-      recipient
+      recipient,
     };
 
     const kwilNep413BorshPayload = BorshCodec.serialize(
@@ -98,7 +98,7 @@ export class NoncedBox {
             message: Base64Codec.encode(message),
             nonce: Base64Codec.encode(nonce),
             senderPublicKey: Base64Codec.encode(senderPublicKey),
-            receiverPublicKey: Base64Codec.encode(this.keyPair.publicKey)
+            receiverPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
           2
@@ -130,7 +130,7 @@ const buildKwilSignerAndGrantee = (
           implicitAddressFromPublicKey(publicKey),
           "nep413"
         ),
-        publicKey
+        publicKey,
       ];
     }
     default:
@@ -165,7 +165,7 @@ export class idOSGrantee {
     chainId,
     dbId,
     chainType,
-    granteeSigner
+    granteeSigner,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
@@ -217,7 +217,7 @@ export class idOSGrantee {
         {
           action: "get_credential_shared",
           dbid: this.dbId,
-          inputs: [{ $id: dataId }]
+          inputs: [{ $id: dataId }],
         },
         this.kwilSigner
         // biome-ignore lint/suspicious/noExplicitAny: NodeKwil doesn't have the best type defs.

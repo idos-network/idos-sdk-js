@@ -12,7 +12,7 @@ import {
   ModalOverlay,
   Spinner,
   Text,
-  useBreakpointValue
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useQuery } from "@tanstack/react-query";
 
@@ -25,7 +25,7 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
   return useQuery({
     queryKey: ["credential_details", credentialId],
     queryFn: ({ queryKey: [, credentialId] }) =>
-      sdk.data.get<idOSCredential & { content: string }>("credentials", credentialId)
+      sdk.data.get<idOSCredential & { content: string }>("credentials", credentialId),
   });
 };
 
@@ -37,16 +37,16 @@ type CredentialDetailsProps = {
 
 export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialDetailsProps) => {
   const credential = useFetchCredentialDetails({
-    credentialId
+    credentialId,
   });
 
   const isCentered = useBreakpointValue(
     {
       base: false,
-      md: true
+      md: true,
     },
     {
-      fallback: "base"
+      fallback: "base",
     }
   );
 
@@ -60,7 +60,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
       onClose={onClose}
       size={{
         base: "full",
-        lg: "2xl"
+        lg: "2xl",
       }}
       isCentered={isCentered}
       scrollBehavior="inside"

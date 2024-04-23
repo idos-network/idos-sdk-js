@@ -11,13 +11,13 @@ import {
   Code,
   Spinner,
   Text,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import {
   type DefaultError,
   useMutation,
   useMutationState,
-  useQueryClient
+  useQueryClient,
 } from "@tanstack/react-query";
 import { useRef } from "react";
 
@@ -51,7 +51,7 @@ const useDeleteCredentialMutation = () => {
     },
     async onError(_, __, ctx) {
       queryClient.setQueryData(["credentials"], ctx?.previousCredentials);
-    }
+    },
   });
 };
 
@@ -61,15 +61,15 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const deleteCredential = useDeleteCredentialMutation();
   const revokeGrants = useRevokeGrants();
   const grants = useFetchGrants({
-    credentialId: credential.id
+    credentialId: credential.id,
   });
 
   const state = useMutationState({
     filters: {
       mutationKey: ["revokeGrant"],
-      status: "pending"
+      status: "pending",
     },
-    select: (mutation) => mutation.state.variables as idOSGrant
+    select: (mutation) => mutation.state.variables as idOSGrant,
   });
 
   const handleClose = () => {
@@ -86,7 +86,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
         icon: <Spinner size="sm" />,
         position: "bottom-right",
         duration: 3000,
-        status: "error"
+        status: "error",
       });
 
       await revokeGrants.mutateAsync(grants.data ?? [], {
@@ -96,7 +96,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
             description: "All grants have been successfully revoked. Deleting credential...",
             icon: <Spinner size="sm" />,
             position: "bottom-right",
-            status: "success"
+            status: "success",
           });
         },
         onError() {
@@ -105,9 +105,9 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
             description: "An unexpected error. Please try again.",
             duration: 3000,
             position: "bottom-right",
-            status: "error"
+            status: "error",
           });
-        }
+        },
       });
     }
   };
@@ -121,7 +121,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           title: "Credential successfully removed",
           description: "Credential has been successfully removed",
           position: "bottom-right",
-          status: "success"
+          status: "success",
         });
       },
       onError() {
@@ -130,9 +130,9 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           description: "An unexpected error. Please try again.",
           duration: 3000,
           position: "bottom-right",
-          status: "error"
+          status: "error",
         });
-      }
+      },
     });
   };
 
@@ -146,7 +146,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
       isOpen={isOpen}
       size={{
         base: "full",
-        lg: "lg"
+        lg: "lg",
       }}
       isCentered
       leastDestructiveRef={cancelRef}

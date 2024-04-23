@@ -20,7 +20,7 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
         .map((credential) => credential.id);
 
       return grants.filter((grant) => _credentials.includes(grant.dataId));
-    }
+    },
   });
 };
 
@@ -45,13 +45,13 @@ export const useRevokeGrant = () => {
       queryClient.setQueryData<idOSCredential[]>(["credentials"], () => credentials);
 
       return {
-        previousCredentials
+        previousCredentials,
       };
     },
 
     onError(_, __, ctx) {
       queryClient.setQueryData<idOSCredential[]>(["credentials"], ctx?.previousCredentials);
-    }
+    },
   });
 };
 
@@ -64,6 +64,6 @@ export const useRevokeGrants = () => {
         await revokeGrant.mutateAsync(grant, { onError() {} });
       }
     },
-    mutationKey: ["revokeGrants"]
+    mutationKey: ["revokeGrants"],
   });
 };

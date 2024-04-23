@@ -16,7 +16,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     if (!connected)
       await this.enclaveHost.request({
         method: "wallet_requestSnaps",
-        params: { [this.snapId]: {} }
+        params: { [this.snapId]: {} },
       });
 
     const storage = JSON.parse((await this.invokeSnap("storage")) || {});
@@ -45,8 +45,8 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
       method: "wallet_invokeSnap",
       params: {
         snapId: this.snapId,
-        request: { method, params }
-      }
+        request: { method, params },
+      },
     });
   }
 

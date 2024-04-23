@@ -55,12 +55,12 @@ const connectWallet = {
     const {
       defaultContractId: contractId,
       contractMethods: methodNames,
-      defaultNetwork: network
+      defaultNetwork: network,
     } = idOS.near;
 
     const selector = await setupWalletSelector({
       network,
-      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()]
+      modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
     });
 
     !selector.isSignedIn() &&
@@ -77,7 +77,7 @@ const connectWallet = {
 
     const signer = await selector.wallet();
     return { signer, address: (await signer.getAccounts())[0].accountId };
-  }
+  },
 };
 
 /*
@@ -89,7 +89,7 @@ const connectWallet = {
    *
    */
   const idos = await idOS.init({
-    container: "#idos-container"
+    container: "#idos-container",
   });
   window.idos = idos;
 
@@ -180,7 +180,7 @@ const connectWallet = {
         } else if (address.match(/^\w+\.(near|testnet)$/i)) {
           window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
         }
-      }
+      },
     });
     cache.set("wallets", await wallets);
   }
@@ -247,7 +247,7 @@ const connectWallet = {
             window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
             terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
           });
-        }
+        },
       }
     );
   }
@@ -291,7 +291,7 @@ const connectWallet = {
         }
 
         terminal.h1("eyes", "Content").json(JSON.parse(content));
-      }
+      },
     });
   }
 

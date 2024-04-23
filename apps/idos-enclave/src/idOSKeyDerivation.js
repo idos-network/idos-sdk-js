@@ -32,13 +32,13 @@ const kdfConfig = (version = latestVersion) => {
     n: 128,
     r: 8,
     p: 1,
-    dkLen: 32
+    dkLen: 32,
   };
 
   versions[0.1] = {
     ...versions[0],
 
-    n: 16384
+    n: 16384,
   };
 
   return versions[version];

@@ -8,7 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogOverlay,
   Button,
-  useToast
+  useToast,
 } from "@chakra-ui/react";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
@@ -44,7 +44,7 @@ const useDeleteWalletMutation = () => {
       );
 
       return { previousWallets };
-    }
+    },
   });
 };
 
@@ -70,9 +70,9 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
           title: "Error while deleting wallet",
           description: "An unexpected error. Please try again.",
           position: "bottom-right",
-          status: "error"
+          status: "error",
         });
-      }
+      },
     });
   };
 
@@ -83,7 +83,7 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
       isOpen={isOpen}
       size={{
         base: "full",
-        lg: "lg"
+        lg: "lg",
       }}
       isCentered
       leastDestructiveRef={cancelRef}

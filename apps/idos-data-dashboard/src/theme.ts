@@ -11,7 +11,7 @@ const {
   Modal,
   Spinner,
   Switch,
-  Table
+  Table,
 } = chakraTheme.components;
 
 export const theme = extendBaseTheme({
@@ -27,8 +27,8 @@ export const theme = extendBaseTheme({
       700: "#404040",
       800: "#262626",
       900: "#171717",
-      950: "#0a0a0a"
-    }
+      950: "#0a0a0a",
+    },
   },
 
   styles: {
@@ -37,19 +37,19 @@ export const theme = extendBaseTheme({
         color: "neutral.100",
         bg: "neutral.950",
         minH: "100dvh",
-        WrbkitFontSmoothing: "antialiased"
-      }
-    }
+        WrbkitFontSmoothing: "antialiased",
+      },
+    },
   },
 
   fonts: {
     heading: "Urbanist, sans-serif",
-    body: "Urbanist, sans-serif"
+    body: "Urbanist, sans-serif",
   },
 
   config: {
     initialColorMode: "dark",
-    useSystemColorMode: false
+    useSystemColorMode: false,
   },
 
   components: {
@@ -63,6 +63,6 @@ export const theme = extendBaseTheme({
     Modal,
     Spinner,
     Switch,
-    Table
-  }
+    Table,
+  },
 });

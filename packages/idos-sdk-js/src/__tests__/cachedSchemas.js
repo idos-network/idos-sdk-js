@@ -10,7 +10,7 @@ export const cachedSchemas = {
   "https://www.w3.org/ns/credentials/v2": w3_ns_credentials_v2,
   "https://raw.githubusercontent.com/trustfractal/claim-schemas/master/verifiable_credential/fractal_id.json-ld":
     fractal_id,
-  "https://w3id.org/security/suites/ed25519-2020/v1": w3id_security_suitesed255192020_v1
+  "https://w3id.org/security/suites/ed25519-2020/v1": w3id_security_suitesed255192020_v1,
 };
 
 // pkoch cached the remote documents to prevent timeouts. This opens us up to be blind to document drift. But the other

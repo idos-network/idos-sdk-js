@@ -9,12 +9,12 @@ export const DataError = ({ onRetry }: DataErrorProps) => {
     <Stack
       align={{
         base: "stretch",
-        lg: "center"
+        lg: "center",
       }}
       gap={2.5}
       flexDir={{
         base: "column",
-        lg: "row"
+        lg: "row",
       }}
       p={5}
       bg="neutral.900"

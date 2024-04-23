@@ -7,7 +7,7 @@ import { EnclaveProvider } from "./enclave-providers/interface";
 
 const ENCLAVE_PROVIDERS = {
   iframe: IframeEnclave,
-  "metamask-snap": MetaMaskSnapEnclave
+  "metamask-snap": MetaMaskSnapEnclave,
 } as const;
 
 type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
@@ -77,7 +77,7 @@ export class Enclave {
     const transportKey = {
       "human-id": "humanId",
       "signer-address": "signerAddress",
-      "signer-public-key": "signerPublicKey"
+      "signer-public-key": "signerPublicKey",
     }[key]!;
 
     return this.provider.store(transportKey, value);

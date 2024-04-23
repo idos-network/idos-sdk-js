@@ -57,22 +57,22 @@ const devBackendPlugin = () => ({
       .use("/api/EVM", adaptVercelHandler(evmHandler))
       .use("/api/NEAR", adaptVercelHandler(nearHandler));
   },
-  apply: "serve" as const
+  apply: "serve" as const,
 });
 
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    target: "esnext"
+    target: "esnext",
   },
   plugins: [
     nodePolyfills({
       include: ["buffer"],
       globals: {
-        Buffer: true
-      }
+        Buffer: true,
+      },
     }),
     devBackendPlugin(),
-    mkcert()
-  ]
+    mkcert(),
+  ],
 });

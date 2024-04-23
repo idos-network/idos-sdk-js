@@ -3,6 +3,10 @@
   "organizeImports": {
     "enabled": true
   },
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git"
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -19,7 +23,7 @@
   },
   "javascript": {
     "formatter": {
-      "trailingComma": "none",
+      "trailingComma": "es5",
       "semicolons": "always"
     }
   }

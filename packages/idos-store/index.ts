@@ -7,7 +7,7 @@ export class Store {
   keyPrefix = "idOS-";
   cookieExpiries = {
     past: new Date(0).toUTCString(),
-    future: new Date(Date.now() + 365 * 3600 * 24 * 1000).toUTCString()
+    future: new Date(Date.now() + 365 * 3600 * 24 * 1000).toUTCString(),
   };
 
   constructor() {
@@ -22,7 +22,7 @@ export class Store {
         if (result) return decode(result);
       },
       set: (key: string, value: any, days: string | number) =>
-        this.set.call(this, key, encode(value), days)
+        this.set.call(this, key, encode(value), days),
     };
   }
 
@@ -30,7 +30,7 @@ export class Store {
     const values = [
       this.#getCookie(key),
       this.#getLocalStorage(key),
-      this.#getSessionStorage(key)
+      this.#getSessionStorage(key),
     ].filter(Boolean) as string[];
 
     if (!values.length) return;
@@ -40,7 +40,7 @@ export class Store {
         [
           `Inconsistent idOS store data (${window.location.origin})`,
           `Key: ${key}`,
-          `${values.join("\nvs\n")}`
+          `${values.join("\nvs\n")}`,
         ].join("\n")
       );
 
@@ -90,7 +90,7 @@ export class Store {
       `${this.keyPrefix}${key}=${value}`,
       "SameSite=None",
       "Secure",
-      `Expires=${expiry}`
+      `Expires=${expiry}`,
     ].join(";");
   }
 
@@ -130,7 +130,7 @@ export class Store {
           "SameSite=None",
           "Secure",
           "Path=/",
-          `Expires=${this.cookieExpiries.past}`
+          `Expires=${this.cookieExpiries.past}`,
         ].join(";"));
     }
   }

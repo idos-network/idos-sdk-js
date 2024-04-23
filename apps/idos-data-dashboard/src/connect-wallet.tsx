@@ -20,11 +20,11 @@ export const ConnectWallet = () => {
         right={0}
         align={{
           base: "stretch",
-          md: "center"
+          md: "center",
         }}
         w={{
           base: "100%",
-          lg: 728
+          lg: 728,
         }}
         h="100dvh"
         p={5}
@@ -33,7 +33,7 @@ export const ConnectWallet = () => {
         <VStack
           align={{
             base: "stretch",
-            md: "center"
+            md: "center",
           }}
           placeContent="center"
           gap={5}
@@ -60,7 +60,7 @@ export const ConnectWallet = () => {
             align="stretch"
             minW={{
               base: "360",
-              lg: 400
+              lg: 400,
             }}
             gap={3}
           >

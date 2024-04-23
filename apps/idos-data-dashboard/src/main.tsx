@@ -18,9 +18,9 @@ const queryClient = new QueryClient({
     queries: {
       retry: 0,
       refetchOnWindowFocus: false,
-      staleTime: Infinity
-    }
-  }
+      staleTime: Infinity,
+    },
+  },
 });
 
 createWeb3Modal({ wagmiConfig, projectId, chains });
@@ -47,24 +47,24 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             index: true,
                             lazy: () => import("@/routes/dashboard/credentials"),
                             handle: {
-                              crumb: () => "Credentials"
-                            }
+                              crumb: () => "Credentials",
+                            },
                           },
                           {
                             path: "/wallets",
                             lazy: () => import("@/routes/dashboard/wallets"),
                             handle: {
-                              crumb: () => "Wallets"
-                            }
+                              crumb: () => "Wallets",
+                            },
                           },
                           {
                             path: "/success",
-                            element: <Navigate to="/" />
-                          }
-                        ]
-                      }
-                    ]
-                  }
+                            element: <Navigate to="/" />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
                 ])}
               />
             </IDOSProvider>

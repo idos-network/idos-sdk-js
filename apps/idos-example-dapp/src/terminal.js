@@ -43,7 +43,7 @@ export class Terminal {
 
     this.overviewElem.scrollTo({
       top: this.overviewElem.scrollHeight,
-      behavior: "smooth"
+      behavior: "smooth",
     });
 
     return this;

@@ -12,7 +12,7 @@ import {
   SimpleGrid,
   Text,
   VStack,
-  useBreakpointValue
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 
@@ -31,10 +31,10 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
   const isCentered = useBreakpointValue(
     {
       base: false,
-      md: true
+      md: true,
     },
     {
-      fallback: "base"
+      fallback: "base",
     }
   );
 
@@ -46,7 +46,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
       isOpen={isOpen}
       size={{
         base: "full",
-        lg: "2xl"
+        lg: "2xl",
       }}
       isCentered={isCentered}
       onClose={onClose}
@@ -59,7 +59,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
           <SimpleGrid
             columns={{
               base: 1,
-              lg: 3
+              lg: 3,
             }}
             spacing={5}
           >
@@ -109,7 +109,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
             rightIcon={<ArrowUpRightIcon size={24} />}
             flex={{
               base: 1,
-              lg: "none"
+              lg: "none",
             }}
             onClick={() => window.location.assign(PROOF_LINK)}
           >
