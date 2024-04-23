@@ -374,9 +374,13 @@ export class EvmGrants implements GrantChild {
     signer,
     options
   }: { signer: Signer; options: EvmGrantsOptions }): Promise<EvmGrants> {
-    return new this(
+    return new EvmGrants(
       signer,
-      new Contract(options.contractAddress ?? this.#defaultContractAddress, this.#abi, signer)
+      new Contract(
+        options.contractAddress ?? EvmGrants.#defaultContractAddress,
+        EvmGrants.#abi,
+        signer
+      )
     );
   }
 
@@ -395,7 +399,7 @@ export class EvmGrants implements GrantChild {
     grantee = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
-    if (owner == ZERO_ADDRESS && grantee == ZERO_ADDRESS)
+    if (owner === ZERO_ADDRESS && grantee === ZERO_ADDRESS)
       throw new Error("Must provide `owner` and/or `grantee`");
 
     const grants = await this.#contract.findGrants(owner, grantee, dataId);
@@ -415,7 +419,7 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
+    if (grantee === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 
@@ -481,7 +485,7 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    if (grantee == ZERO_ADDRESS || dataId == ZERO_DATA_ID) {
+    if (grantee === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 

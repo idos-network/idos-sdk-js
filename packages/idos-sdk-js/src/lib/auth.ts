@@ -6,7 +6,6 @@ import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
-import { SigningKey, hashMessage } from "ethers";
 
 import { idOS } from "./idos";
 import { Nonce } from "./nonce";
@@ -85,18 +84,17 @@ export class Auth {
             message,
             callbackUrl
           });
-        } else {
-          const callbackUrl = window.location.href;
-          const nonce = Buffer.from(new Nonce(32).clampUTF8);
-
-          this.idOS.store.set("sign-last-message", message);
-          this.idOS.store.set("sign-last-nonce", Array.from(nonce));
-          this.idOS.store.set("sign-last-url", callbackUrl);
-
-          signMessageOriginal({ message, nonce, recipient, callbackUrl });
-
-          return new Promise(() => ({}) as SignedMessage);
         }
+        const callbackUrl = window.location.href;
+        const nonce = Buffer.from(new Nonce(32).clampUTF8);
+
+        this.idOS.store.set("sign-last-message", message);
+        this.idOS.store.set("sign-last-nonce", Array.from(nonce));
+        this.idOS.store.set("sign-last-url", callbackUrl);
+
+        signMessageOriginal({ message, nonce, recipient, callbackUrl });
+
+        return new Promise(() => ({}) as SignedMessage);
       };
     }
 
@@ -104,7 +102,7 @@ export class Auth {
 
     let publicKey = this.idOS.store.get("signer-public-key");
 
-    if (storedAddress != currentAddress || !publicKey) {
+    if (storedAddress !== currentAddress || !publicKey) {
       await this.forget();
 
       const message = "idOS authentication";

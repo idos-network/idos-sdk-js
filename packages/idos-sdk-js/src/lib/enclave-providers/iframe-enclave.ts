@@ -110,10 +110,12 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   #showEnclave() {
+    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.add("visible");
   }
 
   #hideEnclave() {
+    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.remove("visible");
   }
 
@@ -126,6 +128,7 @@ export class IframeEnclave implements EnclaveProvider {
         data.error ? reject(data.error) : resolve(data.result);
       };
 
+      // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
     });
   }
