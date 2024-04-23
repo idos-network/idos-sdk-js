@@ -35,7 +35,7 @@ export class Enclave {
       humanId: this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
-      signerPublicKey: this.store.get("signer-public-key")
+      signerPublicKey: this.store.get("signer-public-key"),
     };
   }
 
@@ -70,15 +70,15 @@ export class Enclave {
           allowCredentials: [
             {
               type: "public-key",
-              id: Base64Codec.decode(storedCredentialId)
-            }
+              id: Base64Codec.decode(storedCredentialId),
+            },
           ],
           authenticatorSelection: {
             authenticatorAttachment: "platform",
             userVerification: "required",
-            residentKey: "preferred"
-          }
-        }
+            residentKey: "preferred",
+          },
+        },
       };
 
       const credential = await navigator.credentials.get(credentialRequest);
@@ -107,12 +107,12 @@ export class Enclave {
               ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
             } catch (e) {
               ({ password, credentialId } = await this.#openDialog("passkey", {
-                type: "webauthn"
+                type: "webauthn",
               }));
             }
           } else {
             ({ password, credentialId } = await this.#openDialog("passkey", {
-              type: "webauthn"
+              type: "webauthn",
             }));
           }
           this.store.set("credential-id", credentialId);
@@ -160,7 +160,7 @@ export class Enclave {
             message: Base64Codec.encode(message),
             nonce: Base64Codec.encode(nonce),
             receiverPublicKey: Base64Codec.encode(receiverPublicKey),
-            localPublicKey: Base64Codec.encode(this.keyPair.publicKey)
+            localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
           2
@@ -187,7 +187,7 @@ export class Enclave {
             message: Base64Codec.encode(message),
             nonce: Base64Codec.encode(nonce),
             senderPublicKey: Base64Codec.encode(senderPublicKey),
-            localPublicKey: Base64Codec.encode(this.keyPair.publicKey)
+            localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
           2
@@ -208,7 +208,7 @@ export class Enclave {
 
         const { confirmed } = await this.#openDialog("confirm", {
           message,
-          origin: this.parentOrigin
+          origin: this.parentOrigin,
         });
 
         resolve(confirmed);
@@ -234,7 +234,7 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          authMethod
+          authMethod,
         } = requestData;
 
         const paramBuilder = {
@@ -243,7 +243,7 @@ export class Enclave {
           encrypt: () => [message, receiverPublicKey],
           keys: () => [authMethod],
           reset: () => [],
-          storage: () => [humanId, signerAddress, signerPublicKey]
+          storage: () => [humanId, signerAddress, signerPublicKey],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);
@@ -271,7 +271,7 @@ export class Enclave {
       left,
       top: 0,
       popup: 1,
-      width
+      width,
     })
       .map((feat) => feat.join("="))
       .join(",");

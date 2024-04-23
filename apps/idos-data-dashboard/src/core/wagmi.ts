@@ -9,7 +9,7 @@ const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
   url: "https://dashboard.idos.network",
-  icons: ["/idos-dashboard-logo.svg"]
+  icons: ["/idos-dashboard-logo.svg"],
 };
 
 // export const chains = [import.meta.env.DEV ? sepolia : mainnet];
@@ -22,7 +22,7 @@ export function walletClientToSigner(walletClient: WalletClient) {
   const network = {
     chainId: chain.id,
     name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address
+    ensAddress: chain.contracts?.ensRegistry?.address,
   };
   const provider = new BrowserProvider(transport, network);
   const signer = new JsonRpcSigner(provider, account.address);

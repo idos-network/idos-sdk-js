@@ -6,9 +6,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Urbanist", ...defaultTheme.fontFamily.sans]
-      }
-    }
+        sans: ["Urbanist", ...defaultTheme.fontFamily.sans],
+      },
+    },
   },
-  plugins: [require("@tailwindcss/forms")]
+  plugins: [require("@tailwindcss/forms")],
 };

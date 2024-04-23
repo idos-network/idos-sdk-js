@@ -24,7 +24,7 @@ export class IframeEnclave implements EnclaveProvider {
     authMethod?: boolean
   ): Promise<Uint8Array> {
     const { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey }
+      storage: { humanId, signerAddress, signerPublicKey },
     })) as { encryptionPublicKey: Uint8Array };
 
     if (encryptionPublicKey) return encryptionPublicKey;
@@ -58,13 +58,13 @@ export class IframeEnclave implements EnclaveProvider {
 
   async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
     return this.#requestToEnclave({
-      encrypt: { message, receiverPublicKey }
+      encrypt: { message, receiverPublicKey },
     }) as Promise<Uint8Array>;
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
     return this.#requestToEnclave({
-      decrypt: { fullMessage: message, senderPublicKey }
+      decrypt: { fullMessage: message, senderPublicKey },
     }) as Promise<Uint8Array>;
   }
 
@@ -79,7 +79,7 @@ export class IframeEnclave implements EnclaveProvider {
       "popups",
       "popups-to-escape-sandbox",
       "same-origin",
-      "scripts"
+      "scripts",
     ].map((toLift) => `allow-${toLift}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
@@ -90,7 +90,7 @@ export class IframeEnclave implements EnclaveProvider {
       "background-color": "transparent",
       border: "none",
       display: "block",
-      width: "100%"
+      width: "100%",
     };
 
     this.iframe.allow = permissionsPolicies.join("; ");

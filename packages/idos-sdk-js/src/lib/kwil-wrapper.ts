@@ -6,7 +6,7 @@ export class KwilWrapper {
   static defaults = {
     kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
     chainId: import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
-    dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
+    dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
   };
 
   client: WebKwil;
@@ -27,7 +27,7 @@ export class KwilWrapper {
 
   static async init({
     nodeUrl = KwilWrapper.defaults.kwilProvider,
-    dbId = KwilWrapper.defaults.dbId
+    dbId = KwilWrapper.defaults.dbId,
   }): Promise<KwilWrapper> {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId =
@@ -51,7 +51,7 @@ export class KwilWrapper {
   async setSigner({
     accountId,
     signer,
-    signatureType
+    signatureType,
   }: {
     accountId: string;
     signer: EthSigner | CustomSigner;
@@ -79,7 +79,7 @@ export class KwilWrapper {
     const payload: ActionBody = {
       action: actionName,
       dbid: this.dbId,
-      inputs: []
+      inputs: [],
     };
 
     if (description) {

@@ -7,7 +7,7 @@ export async function getNearFullAccessPublicKeys(
   const { connect } = nearAPI;
   const connectionConfig = {
     networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
-    nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL
+    nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
   };
   const nearConnection = await connect(connectionConfig);
 
@@ -15,7 +15,7 @@ export async function getNearFullAccessPublicKeys(
     const response = await nearConnection.connection.provider.query({
       request_type: "view_access_key_list",
       finality: "final",
-      account_id: namedAddress
+      account_id: namedAddress,
     });
     return response.keys
       .filter((element: object) => element.access_key.permission === "FullAccess")

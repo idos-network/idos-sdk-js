@@ -14,7 +14,7 @@ export const CredentialCard = ({
   credential,
   onViewDetails,
   onManageGrants,
-  onDelete
+  onDelete,
 }: CredentialCardProps) => {
   const credentialLevelDisplay =
     credential.credential_type !== credential.credential_level &&
@@ -57,7 +57,7 @@ export const CredentialCard = ({
           gap={4}
           flexDir={{
             base: "column",
-            lg: "row"
+            lg: "row",
           }}
         >
           <Button onClick={() => onViewDetails(credential.id)}>View details</Button>

@@ -20,7 +20,7 @@ import {
   Thead,
   Tr,
   VStack,
-  useBreakpointValue
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -51,9 +51,9 @@ const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
     revokeGrant.mutate(grant, {
       onSuccess() {
         queryClient.invalidateQueries({
-          queryKey: ["grants"]
+          queryKey: ["grants"],
         });
-      }
+      },
     });
   };
 
@@ -114,10 +114,10 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
   const isCentered = useBreakpointValue(
     {
       base: false,
-      md: true
+      md: true,
     },
     {
-      fallback: "base"
+      fallback: "base",
     }
   );
 
@@ -129,7 +129,7 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
       onClose={onClose}
       size={{
         base: "full",
-        lg: "2xl"
+        lg: "2xl",
       }}
       isCentered={isCentered}
     >

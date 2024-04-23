@@ -95,7 +95,7 @@ class Dialog {
       new PasswordCredential({
         id: "idos",
         name: "idOS user",
-        password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)))
+        password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32))),
       })
     );
 
@@ -123,15 +123,15 @@ class Dialog {
           allowCredentials: [
             {
               type: "public-key",
-              id: Base64Codec.decode(storedCredentialId)
-            }
+              id: Base64Codec.decode(storedCredentialId),
+            },
           ],
           authenticatorSelection: {
             authenticatorAttachment: "platform",
             userVerification: "required",
-            residentKey: "preferred"
-          }
-        }
+            residentKey: "preferred",
+          },
+        },
       };
 
       try {
@@ -150,20 +150,20 @@ class Dialog {
           user: {
             id: Utf8Codec.encode(password),
             displayName,
-            name: displayName
+            name: displayName,
           },
           pubKeyCredParams: [
             {
               type: "public-key",
-              alg: -7
-            }
+              alg: -7,
+            },
           ],
           authenticatorSelection: {
             authenticatorAttachment: "platform",
             userVerification: "required",
-            residentKey: "preferred"
-          }
-        }
+            residentKey: "preferred",
+          },
+        },
       });
     }
 
@@ -184,7 +184,7 @@ class Dialog {
   async #authWithPasskey() {
     this.authContainer.style.display = "none";
     await this.passkey({
-      message: { type: "webauthn" }
+      message: { type: "webauthn" },
     });
     this.store.set("preferred-auth-method", "webauthn");
   }

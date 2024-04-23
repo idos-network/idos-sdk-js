@@ -15,9 +15,9 @@ const issuerDoc = (id, publicKeyMultibase) => ({
       assertionMethod: {
         "@id": "https://w3id.org/security#assertionMethod",
         "@type": "@id",
-        "@container": "@set"
-      }
-    }
+        "@container": "@set",
+      },
+    },
   ],
   id,
   assertionMethod: [
@@ -25,9 +25,9 @@ const issuerDoc = (id, publicKeyMultibase) => ({
       id: `${id}#${publicKeyMultibase}`,
       type: "Ed25519VerificationKey2020",
       controller: id,
-      publicKeyMultibase
-    }
-  ]
+      publicKeyMultibase,
+    },
+  ],
 });
 
 export const staticLoader = (id, publicKeyMultibase) => {
@@ -74,8 +74,8 @@ export const documentLoaderWithStaticFractal = (documentLoader) =>
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (method) =>
     new Ed25519Signature2020({
-      key: await Ed25519VerificationKey2020.from(method)
-    })
+      key: await Ed25519VerificationKey2020.from(method),
+    }),
 };
 
 const buildSignatures = async (methods, signatureBuilders) => {
@@ -154,7 +154,7 @@ export const verify = async (credential, options = {}) => {
   const result = await vc.verifyCredential({
     credential,
     suite,
-    documentLoader
+    documentLoader,
   });
 
   if (!result.verified) throw result?.results?.[0]?.error || result;

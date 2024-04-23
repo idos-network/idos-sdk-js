@@ -15,7 +15,7 @@ const nearGranteeSigner = nearAPI.KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 const idosGrantee = await idOSGrantee.init({
   chainType: "NEAR",
   granteeSigner: nearGranteeSigner,
-  encryptionSecret: ENCRYPTION_SECRET_KEY
+  encryptionSecret: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
@@ -29,7 +29,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
     return response.json({
       encryptionPublicKey,
       lockTimeSpanSeconds,
-      grantee: idosGrantee.grantee
+      grantee: idosGrantee.grantee,
     });
   }
 

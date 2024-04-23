@@ -10,12 +10,12 @@ export default defineConfig({
       entry: path.resolve(__dirname, "src/lib/index.ts"),
       name: "idOS",
       fileName: "idos-sdk",
-      formats: ["es"]
-    }
+      formats: ["es"],
+    },
   },
   plugins: [
     dts({
-      rollupTypes: true
+      rollupTypes: true,
     }),
     externalizeDeps({
       deps: true,
@@ -23,11 +23,11 @@ export default defineConfig({
       except: [],
       nodeBuiltins: true,
       optionalDeps: true,
-      peerDeps: true
-    })
+      peerDeps: true,
+    }),
   ],
   test: {
     globals: true,
-    environment: "jsdom"
-  }
+    environment: "jsdom",
+  },
 });

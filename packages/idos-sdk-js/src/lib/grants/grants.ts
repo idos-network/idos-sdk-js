@@ -10,7 +10,7 @@ import { NearGrants, NearGrantsOptions } from "./near";
 
 const SIGNER_TYPES = {
   EVM: EvmGrants,
-  NEAR: NearGrants
+  NEAR: NearGrants,
 } as const;
 
 export type SignerType = keyof typeof SIGNER_TYPES;
@@ -18,7 +18,7 @@ export type SignerType = keyof typeof SIGNER_TYPES;
 export class Grants {
   static SIGNER_TYPES = SIGNER_TYPES;
   static evm = {
-    defaultChainId: EvmGrants.defaultChainId
+    defaultChainId: EvmGrants.defaultChainId,
   };
   static near = {
     /**
@@ -31,7 +31,7 @@ export class Grants {
      */
     defaultContractId: NearGrants.defaultContractId,
     contractId: NearGrants.defaultContractId,
-    defaultNetwork: NearGrants.defaultNetwork
+    defaultNetwork: NearGrants.defaultNetwork,
   };
 
   idOS: idOS;
@@ -54,7 +54,7 @@ export class Grants {
     type,
     signer,
     accountId,
-    publicKey
+    publicKey,
   }: {
     type: "NEAR";
     signer: Wallet;
@@ -66,7 +66,7 @@ export class Grants {
     type,
     signer,
     accountId,
-    publicKey
+    publicKey,
   }: {
     type: SignerType;
     signer: Wallet | Signer;
@@ -86,7 +86,7 @@ export class Grants {
           accountId,
           signer: signer as Wallet,
           options: this.nearGrantsOptions,
-          publicKey
+          publicKey,
         });
         break;
       default:
@@ -165,7 +165,7 @@ class ConnectedGrants extends Grants {
     return await this.#child.create({
       grantee: address,
       dataId: share.id,
-      lockedUntil: lockedUntil
+      lockedUntil: lockedUntil,
     });
   }
 

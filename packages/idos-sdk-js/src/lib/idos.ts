@@ -40,7 +40,7 @@ export class idOS {
     container,
     kwilWrapper,
     evmGrantsOptions,
-    nearGrantsOptions
+    nearGrantsOptions,
   }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
@@ -57,7 +57,7 @@ export class idOS {
 
     const idos = new idOS({
       ...params,
-      kwilWrapper: await KwilWrapper.init(params)
+      kwilWrapper: await KwilWrapper.init(params),
     });
     await idos.enclave.load();
 
@@ -76,7 +76,7 @@ export class idOS {
         type,
         accountId,
         signer: signer as Wallet,
-        publicKey: publicKey as string
+        publicKey: publicKey as string,
       });
     } else if (type === "EVM") {
       await this.auth.setEvmSigner(signer as Signer);

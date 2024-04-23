@@ -38,12 +38,12 @@ export const WalletSelectorContextProvider: React.FC<{
     const _selector = await setupWalletSelector({
       network: import.meta.env.DEV ? "testnet" : "mainnet",
       debug: true,
-      modules: [setupMeteorWallet(), setupHereWallet()]
+      modules: [setupMeteorWallet(), setupHereWallet()],
     });
 
     const _modal = setupModal(_selector, {
       contractId: idOSSDK.near.contractId,
-      methodNames: idOSSDK.near.contractMethods
+      methodNames: idOSSDK.near.contractMethods,
     });
     const state = _selector.store.getState();
     setAccounts(state.accounts);
@@ -91,7 +91,7 @@ export const WalletSelectorContextProvider: React.FC<{
       // biome-ignore lint/style/noNonNullAssertion: TBD
       modal: modal!,
       accounts,
-      accountId: accounts.find((account) => account.active)?.accountId || null
+      accountId: accounts.find((account) => account.active)?.accountId || null,
     }),
     [selector, modal, accounts]
   );

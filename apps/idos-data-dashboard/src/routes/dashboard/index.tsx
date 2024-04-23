@@ -19,7 +19,7 @@ import {
   ListItem,
   Text,
   VStack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -28,7 +28,7 @@ import {
   KeyRoundIcon,
   LogOutIcon,
   MenuIcon,
-  Wallet2Icon
+  Wallet2Icon,
 } from "lucide-react";
 import { useEffect } from "react";
 import { NavLink, NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
@@ -76,7 +76,7 @@ const ListItemLink = (props: NavLinkProps & LinkProps) => {
       rounded="xl"
       _hover={{ bg: "neutral.950" }}
       _activeLink={{
-        bg: "neutral.950"
+        bg: "neutral.950",
       }}
     />
   );
@@ -196,11 +196,11 @@ export function Component() {
           justifyContent="space-between"
           h={{
             base: 10,
-            lg: 120
+            lg: 120,
           }}
           mb={{
             base: 5,
-            lg: 0
+            lg: 0,
           }}
         >
           <IconButton aria-label="Open menu" onClick={onOpen} hideFrom="lg">

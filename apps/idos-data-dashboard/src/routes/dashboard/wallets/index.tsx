@@ -6,7 +6,7 @@ import {
   List,
   ListItem,
   VStack,
-  useDisclosure
+  useDisclosure,
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, RotateCw } from "lucide-react";
@@ -28,7 +28,7 @@ const useFetchWallets = () => {
   return useQuery({
     queryKey: ["wallets"],
     queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName),
-    select: (data) => Object.groupBy(data, (wallet) => wallet.address)
+    select: (data) => Object.groupBy(data, (wallet) => wallet.address),
   });
 };
 
@@ -97,7 +97,7 @@ export function Component() {
         justifyContent="space-between"
         h={{
           base: 14,
-          lg: 20
+          lg: 20,
         }}
         p={5}
         bg="neutral.900"
@@ -107,7 +107,7 @@ export function Component() {
           as="h1"
           fontSize={{
             base: "x-large",
-            lg: "xx-large"
+            lg: "xx-large",
           }}
         >
           Wallets
@@ -134,7 +134,7 @@ export function Component() {
               icon={<RotateCw size={18} />}
               onClick={() => {
                 queryClient.refetchQueries({
-                  queryKey: ["wallets"]
+                  queryKey: ["wallets"],
                 });
               }}
             />

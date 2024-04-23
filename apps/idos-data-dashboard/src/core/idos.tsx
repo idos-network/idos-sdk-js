@@ -9,7 +9,7 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState
+  useState,
 } from "react";
 import { useAccount } from "wagmi";
 
@@ -40,7 +40,7 @@ export const useFetchIdOSProfile = () => {
   const { sdk } = useIdOS();
   return useQuery({
     queryKey: ["idos-profile"],
-    queryFn: () => sdk.auth.currentUser()
+    queryFn: () => sdk.auth.currentUser(),
   });
 };
 
@@ -64,14 +64,14 @@ export const Provider = ({ children }: PropsWithChildren) => {
     if (selector.isSignedIn()) {
       return {
         type: "NEAR",
-        value: await selector.wallet()
+        value: await selector.wallet(),
       };
     }
 
     if (ethSigner) {
       return {
         type: "EVM",
-        value: ethSigner
+        value: ethSigner,
       };
     }
 
@@ -86,7 +86,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
     const _sdk = await idOS.init({
       container: "#idos",
       nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-      dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
+      dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
     });
 
     const profile = await _sdk.hasProfile(userAddress);
@@ -136,7 +136,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
         publicKey,
         async reset() {
           await sdk.reset({ enclave: true });
-        }
+        },
       }}
     >
       {children}

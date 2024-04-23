@@ -19,7 +19,7 @@ const evmGranteeSigner = new ethers.Wallet(
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
   granteeSigner: evmGranteeSigner,
-  encryptionSecret: ENCRYPTION_SECRET_KEY
+  encryptionSecret: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
@@ -33,7 +33,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
     return response.json({
       encryptionPublicKey,
       lockTimeSpanSeconds,
-      grantee: idosGrantee.grantee
+      grantee: idosGrantee.grantee,
     });
   }
 
