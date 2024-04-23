@@ -34,7 +34,7 @@ export const WalletSelectorContextProvider: React.FC<{
   const [accounts, setAccounts] = useState<Array<AccountState>>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const init = useCallback(async () => {
+  const initialize = useCallback(async () => {
     const _selector = await setupWalletSelector({
       network: import.meta.env.DEV ? "testnet" : "mainnet",
       debug: true,
@@ -59,11 +59,11 @@ export const WalletSelectorContextProvider: React.FC<{
   }, []);
 
   useEffect(() => {
-    init().catch((err) => {
+    initialize().catch((err) => {
       console.error(err);
-      alert("Failed to initialise wallet selector");
+      alert("Failed to initialize wallet selector");
     });
-  }, [init]);
+  }, [initialize]);
 
   useEffect(() => {
     if (!selector) {
