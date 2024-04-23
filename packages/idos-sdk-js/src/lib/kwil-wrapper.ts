@@ -9,20 +9,20 @@ export class KwilWrapper {
     dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID
   };
 
-  dbId: string;
-  kwilProvider: string;
   client: WebKwil;
+  kwilProvider: string;
+  dbId: string;
   signer?: KwilSigner;
   signatureType?: string;
 
-  constructor({
-    nodeUrl: kwilProvider = KwilWrapper.defaults.kwilProvider,
-    chainId = KwilWrapper.defaults.chainId,
-    dbId = KwilWrapper.defaults.dbId
-  }) {
-    this.dbId = dbId;
+  constructor(
+    client: WebKwil,
+    kwilProvider: string = KwilWrapper.defaults.kwilProvider,
+    dbId: string = KwilWrapper.defaults.dbId
+  ) {
+    this.client = client;
     this.kwilProvider = kwilProvider;
-    this.client = new WebKwil({ kwilProvider, chainId });
+    this.dbId = dbId;
   }
 
   static async init({
@@ -41,7 +41,7 @@ export class KwilWrapper {
         (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid ?? dbId;
     }
 
-    return new KwilWrapper({ nodeUrl, dbId, chainId });
+    return new KwilWrapper(new WebKwil({ kwilProvider: nodeUrl, chainId }), nodeUrl, dbId);
   }
 
   get schema() {
