@@ -1,23 +1,21 @@
 import Grant from "./grant";
 
-export abstract class GrantChild {
-  static async build(..._: any[]): Promise<GrantChild> {
-    throw new Error("Unimplemented");
-  }
-
-  async list(_: Partial<Omit<Grant, "lockedUntil">>): Promise<Grant[]> {
-    throw new Error("Unimplemented");
-  }
-
-  async create(
+export interface GrantChild {
+  list(_: Partial<Omit<Grant, "lockedUntil">>): Promise<Grant[]>;
+  create(
     _: Omit<Grant, "owner"> & { wait?: boolean }
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Unimplemented");
-  }
-
-  async revoke(
+  ): Promise<{ grant: Grant; transactionId: string }>;
+  messageForCreateBySignature(_: Grant): Promise<string>;
+  createBySignature(_: Grant & { signature: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }>;
+  revoke(
     _: Omit<Grant, "owner"> & { wait?: boolean }
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Unimplemented");
-  }
+  ): Promise<{ grant: Grant; transactionId: string }>;
+  messageForRevokeBySignature(_: Grant): Promise<string>;
+  revokeBySignature(_: Grant & { signature: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }>;
 }

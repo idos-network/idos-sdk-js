@@ -11,11 +11,78 @@ export interface EvmGrantsOptions {
   chainId?: string;
 }
 
-export class EvmGrants extends GrantChild {
+export class EvmGrants implements GrantChild {
   static #defaultContractAddress = import.meta.env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS;
   static defaultChainId = import.meta.env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID;
 
   static #abi = [
+    {
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        }
+      ],
+      name: "GrantAdded",
+      type: "event"
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          indexed: true,
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        }
+      ],
+      name: "GrantDeleted",
+      type: "event"
+    },
     {
       inputs: [
         {
@@ -43,6 +110,44 @@ export class EvmGrants extends GrantChild {
       inputs: [
         {
           internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        },
+        {
+          internalType: "bytes",
+          name: "signature",
+          type: "bytes"
+        }
+      ],
+      name: "deleteGrantBySignature",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "address",
           name: "grantee",
           type: "address"
         },
@@ -57,15 +162,16 @@ export class EvmGrants extends GrantChild {
           type: "uint256"
         }
       ],
-      name: "insertGrant",
-      outputs: [],
-      stateMutability: "nonpayable",
+      name: "deleteGrantBySignatureMessage",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "pure",
       type: "function"
-    },
-    {
-      inputs: [],
-      stateMutability: "nonpayable",
-      type: "constructor"
     },
     {
       inputs: [
@@ -163,17 +269,104 @@ export class EvmGrants extends GrantChild {
       ],
       stateMutability: "view",
       type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        }
+      ],
+      name: "insertGrant",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        },
+        {
+          internalType: "bytes",
+          name: "signature",
+          type: "bytes"
+        }
+      ],
+      name: "insertGrantBySignature",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function"
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "owner",
+          type: "address"
+        },
+        {
+          internalType: "address",
+          name: "grantee",
+          type: "address"
+        },
+        {
+          internalType: "string",
+          name: "dataId",
+          type: "string"
+        },
+        {
+          internalType: "uint256",
+          name: "lockedUntil",
+          type: "uint256"
+        }
+      ],
+      name: "insertGrantBySignatureMessage",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string"
+        }
+      ],
+      stateMutability: "pure",
+      type: "function"
     }
   ] as const;
 
   signer: Signer;
-  defaultOwner: string;
   #contract: Contract;
 
-  private constructor(signer: Signer, defaultOwner: string, contract: Contract) {
-    super();
+  private constructor(signer: Signer, contract: Contract) {
     this.signer = signer;
-    this.defaultOwner = defaultOwner;
     this.#contract = contract;
   }
 
@@ -183,15 +376,8 @@ export class EvmGrants extends GrantChild {
   }: { signer: Signer; options: EvmGrantsOptions }): Promise<EvmGrants> {
     return new this(
       signer,
-      await signer.getAddress(),
       new Contract(options.contractAddress ?? this.#defaultContractAddress, this.#abi, signer)
     );
-  }
-
-  #newGrant({ owner, grantee, dataId, lockedUntil }: Omit<Grant, "owner"> & { owner?: string }) {
-    (!owner || owner === ZERO_ADDRESS) && (owner = this.defaultOwner);
-
-    return new Grant({ owner, grantee, dataId, lockedUntil });
   }
 
   #grantPromise(grant: Grant, wait = true) {
@@ -233,10 +419,10 @@ export class EvmGrants extends GrantChild {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 
-    const grant = this.#newGrant({ grantee, dataId, lockedUntil });
+    const owner = await this.signer.getAddress();
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
     let transaction;
-
     try {
       transaction = (await this.#contract.insertGrant(
         grantee,
@@ -245,6 +431,43 @@ export class EvmGrants extends GrantChild {
       )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant creation failed", { cause: (e as Error).cause });
+    }
+    return await this.#grantPromise(grant, wait)(transaction);
+  }
+
+  async messageForCreateBySignature({
+    owner,
+    grantee,
+    dataId,
+    lockedUntil
+  }: Grant): Promise<string> {
+    return await this.#contract.insertGrantBySignatureMessage(owner, grantee, dataId, lockedUntil);
+  }
+
+  async createBySignature({
+    owner,
+    grantee,
+    dataId,
+    lockedUntil,
+    signature,
+    wait
+  }: Grant & { signature: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+
+    let transaction;
+    try {
+      transaction = (await this.#contract.insertGrantBySignature(
+        owner,
+        grantee,
+        dataId,
+        lockedUntil,
+        signature
+      )) as TransactionResponse;
+    } catch (e) {
+      throw new Error("Grant creation by signature failed", { cause: (e as Error).cause });
     }
     return await this.#grantPromise(grant, wait)(transaction);
   }
@@ -262,9 +485,10 @@ export class EvmGrants extends GrantChild {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 
-    const grant = this.#newGrant({ grantee, dataId, lockedUntil });
-    let transaction;
+    const owner = await this.signer.getAddress();
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
+    let transaction;
     try {
       transaction = (await this.#contract.deleteGrant(
         grantee,
@@ -272,9 +496,46 @@ export class EvmGrants extends GrantChild {
         lockedUntil
       )) as TransactionResponse;
     } catch (e) {
-      throw new Error("Grant creation failed", { cause: (e as Error).cause });
+      throw new Error("Grant revocation failed", { cause: (e as Error).cause });
     }
 
+    return await this.#grantPromise(grant, wait)(transaction);
+  }
+
+  async messageForRevokeBySignature({
+    owner,
+    grantee,
+    dataId,
+    lockedUntil
+  }: Grant): Promise<string> {
+    return await this.#contract.deleteGrantBySignatureMessage(owner, grantee, dataId, lockedUntil);
+  }
+
+  async revokeBySignature({
+    owner,
+    grantee,
+    dataId,
+    lockedUntil,
+    signature,
+    wait
+  }: Grant & { signature: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+
+    let transaction;
+    try {
+      transaction = (await this.#contract.deleteGrantBySignature(
+        owner,
+        grantee,
+        dataId,
+        lockedUntil,
+        signature
+      )) as TransactionResponse;
+    } catch (e) {
+      throw new Error("Grant revocation by signature failed", { cause: (e as Error).cause });
+    }
     return await this.#grantPromise(grant, wait)(transaction);
   }
 }

@@ -22,10 +22,9 @@ export interface NearGrantsOptions {
   rpcUrl?: string;
 }
 
-export class NearGrants extends GrantChild {
+export class NearGrants implements GrantChild {
   #contract: nearAPI.Contract;
   #signer: Wallet;
-  #owner: string;
   #publicKey: string;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
@@ -34,20 +33,15 @@ export class NearGrants extends GrantChild {
 
   static contractMethods = {
     list: "find_grants",
-    create: "insert_grant_by_signature",
-    prepareMessage: "insert_grant_by_signature_message",
-    revoke: "delete_grant_by_signature"
+    messageRecipient: "grant_message_recipient",
+    messageForCreateBySignature: "insert_grant_by_signature_message",
+    createBySignature: "insert_grant_by_signature",
+    messageForRevokeBySignature: "delete_grant_by_signature_message",
+    revokeBySignature: "delete_grant_by_signature"
   } as const;
 
-  private constructor(
-    signer: Wallet,
-    owner: string,
-    contract: nearAPI.Contract,
-    publicKey: string
-  ) {
-    super();
+  private constructor(signer: Wallet, contract: nearAPI.Contract, publicKey: string) {
     this.#signer = signer;
-    this.#owner = owner;
     this.#contract = contract;
     this.#publicKey = publicKey;
   }
@@ -71,13 +65,21 @@ export class NearGrants extends GrantChild {
 
     return new this(
       signer,
-      accountId,
       new nearAPI.Contract(
         await keylessNearConnection.account(accountId),
         options.contractId ?? this.defaultContractId,
         {
-          viewMethods: [this.contractMethods.list],
-          changeMethods: []
+          useLocalViewExecution: false,
+          viewMethods: [
+            this.contractMethods.list,
+            this.contractMethods.messageRecipient,
+            this.contractMethods.messageForCreateBySignature,
+            this.contractMethods.messageForRevokeBySignature
+          ],
+          changeMethods: [
+            this.contractMethods.createBySignature,
+            this.contractMethods.revokeBySignature
+          ]
         }
       ),
       publicKey
@@ -85,23 +87,42 @@ export class NearGrants extends GrantChild {
   }
 
   #result(
-    grant: Omit<NearContractGrant, "owner">,
+    grant: NearContractGrant,
     transactionResult: nearAPI.providers.FinalExecutionOutcome | undefined
   ): { grant: Grant; transactionId: string } {
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
 
     return {
       grant: {
+        owner: grant.owner,
         grantee: grant.grantee,
         lockedUntil: grant.locked_until,
-        dataId: grant.data_id,
-        owner: this.#owner
+        dataId: grant.data_id
       },
       transactionId: transactionResult.transaction.hash
     };
   }
 
-  // FIXME: near-rs expects data_id, near-ts expects dataId
+  async #sign(
+    message: string,
+    recipient: string,
+    nonceSuggestion: Buffer = Buffer.from(new Nonce(32).bytes)
+  ) {
+    // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
+    const { nonce = nonceSuggestion, signature: b64Signature } = (await (
+      this.#signer.signMessage as (
+        _: SignMessageParams
+      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
+    )({
+      message,
+      recipient,
+      nonce: nonceSuggestion
+    }))!;
+    const signature = Base64Codec.decode(b64Signature);
+
+    return { signature, nonce };
+  }
+
   async list({
     owner,
     grantee,
@@ -130,41 +151,86 @@ export class NearGrants extends GrantChild {
     );
   }
 
-  // FIXME: near-rs expects data_id, near-ts expects dataId
+  /// Creates an AccessGrant for the current signer.
+  ///
+  /// NOTE: NEAR is problematic for the current implementation. The only way to create an AG in the contract if to
+  /// create an dAG for yourself.
   async create({
+    grantee,
+    dataId,
+    lockedUntil
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
+    const owner = this.#publicKey;
+
+    const recipient = await this.messageRecipient();
+    const message = await this.messageForCreateBySignature({
+      owner,
+      grantee,
+      dataId,
+      lockedUntil
+    });
+
+    const { nonce, signature } = await this.#sign(message, recipient);
+
+    return this.createBySignature({
+      owner,
+      grantee,
+      dataId,
+      lockedUntil,
+      signature,
+      nonce
+    });
+  }
+
+  async messageRecipient() {
+    // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
+    const method = this.#contract[
+      NearGrants.contractMethods.messageRecipient
+    ] as () => Promise<string>;
+
+    return await method();
+  }
+
+  async messageForCreateBySignature({
+    owner,
     grantee,
     dataId: data_id,
     lockedUntil
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
+  }: Grant): Promise<string> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
 
-    const recipient = "idos.network";
-    const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
-    const message = [
-      "operation: insertGrant",
-      `owner: ${this.#publicKey}`,
-      `grantee: ${grantee}`,
-      `dataId: ${data_id}`,
-      `lockedUntil: ${locked_until}`
-    ].join("\n");
+    // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
+    const method = this.#contract[NearGrants.contractMethods.messageForCreateBySignature] as (
+      args: NearContractGrant
+    ) => Promise<string>;
 
-    const { nonce = nonceSuggestion, signature } = (await (
-      this.#signer.signMessage as (
-        _: SignMessageParams
-      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
-    )({
-      message,
-      recipient,
-      nonce: nonceSuggestion
-    }))!;
-
-    const grant = {
-      owner: this.#publicKey,
+    return await method({
+      owner,
       grantee,
       data_id,
-      locked_until,
-      nonce: Array.from(nonce),
-      signature: Array.from(Base64Codec.decode(signature))
+      locked_until
+    });
+  }
+
+  async createBySignature({
+    owner,
+    grantee,
+    dataId: data_id,
+    lockedUntil,
+    signature,
+    nonce
+  }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    if (!nonce) throw new Error("Must provide nonce");
+
+    const locked_until = lockedUntil && lockedUntil * 1e7;
+    const grant = {
+      owner,
+      grantee,
+      data_id,
+      locked_until
     };
 
     let transactionResult;
@@ -175,8 +241,12 @@ export class NearGrants extends GrantChild {
             {
               type: "FunctionCall",
               params: {
-                methodName: NearGrants.contractMethods.create,
-                args: grant,
+                methodName: NearGrants.contractMethods.createBySignature,
+                args: {
+                  ...grant,
+                  nonce: Array.from(nonce),
+                  signature: Array.from(signature)
+                },
                 gas: "30000000000000",
                 deposit: "0"
               }
@@ -184,47 +254,83 @@ export class NearGrants extends GrantChild {
           ]
         })) || undefined;
     } catch (e) {
-      throw new Error("Grant creation failed", { cause: e });
+      throw new Error("Grant creation by signature failed", { cause: e });
     }
 
     return this.#result(grant, transactionResult);
   }
 
-  // FIXME: near-rs expects data_id, near-ts expects dataId
+  /// Revokes an AccessGrant for the current signer.
+  ///
+  /// NOTE: NEAR is problematic for the current implementation. The only way to revoke an AG in the contract if to
+  /// create an dAG for yourself.
   async revoke({
+    grantee,
+    dataId,
+    lockedUntil
+  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
+    const owner = this.#publicKey;
+
+    const recipient = await this.messageRecipient();
+    const message = await this.messageForRevokeBySignature({
+      owner,
+      grantee,
+      dataId,
+      lockedUntil
+    });
+
+    const { nonce, signature } = await this.#sign(message, recipient);
+
+    return this.revokeBySignature({
+      owner,
+      grantee,
+      dataId,
+      lockedUntil,
+      signature,
+      nonce
+    });
+  }
+
+  async messageForRevokeBySignature({
+    owner,
     grantee,
     dataId: data_id,
     lockedUntil
-  }: Omit<Grant, "owner">): Promise<{ grant: Grant; transactionId: string }> {
+  }: Grant): Promise<string> {
     const locked_until = lockedUntil && lockedUntil * 1e7;
 
-    const recipient = "idos.network";
-    const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
-    const message = [
-      "operation: deleteGrant",
-      `owner: ${this.#publicKey}`,
-      `grantee: ${grantee}`,
-      `dataId: ${data_id}`,
-      `lockedUntil: ${locked_until}`
-    ].join("\n");
+    // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
+    const method = this.#contract[NearGrants.contractMethods.messageForRevokeBySignature] as (
+      args: NearContractGrant
+    ) => Promise<string>;
 
-    const { nonce = nonceSuggestion, signature } = (await (
-      this.#signer.signMessage as (
-        _: SignMessageParams
-      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
-    )({
-      message,
-      recipient,
-      nonce: nonceSuggestion
-    }))!;
-
-    const grant = {
-      owner: this.#publicKey,
+    return await method({
+      owner,
       grantee,
       data_id,
-      locked_until,
-      nonce: Array.from(nonce),
-      signature: Array.from(Base64Codec.decode(signature))
+      locked_until
+    });
+  }
+
+  async revokeBySignature({
+    owner,
+    grantee,
+    dataId: data_id,
+    lockedUntil,
+    signature,
+    nonce
+  }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    if (!nonce) throw new Error("Must provide nonce");
+
+    const locked_until = lockedUntil && lockedUntil * 1e7;
+    const grant = {
+      owner,
+      grantee,
+      data_id,
+      locked_until
     };
 
     let transactionResult;
@@ -235,8 +341,12 @@ export class NearGrants extends GrantChild {
             {
               type: "FunctionCall",
               params: {
-                methodName: NearGrants.contractMethods.revoke,
-                args: grant,
+                methodName: NearGrants.contractMethods.revokeBySignature,
+                args: {
+                  ...grant,
+                  nonce: Array.from(nonce),
+                  signature: Array.from(signature)
+                },
                 gas: "30000000000000",
                 deposit: "0"
               }
@@ -244,7 +354,7 @@ export class NearGrants extends GrantChild {
           ]
         })) || undefined;
     } catch (e) {
-      throw new Error("Grant revocation failed", { cause: e });
+      throw new Error("Grant revocation by signature failed", { cause: e });
     }
 
     return this.#result(grant, transactionResult);
