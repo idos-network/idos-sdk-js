@@ -61,12 +61,7 @@ export class Enclave {
 
     if (!humanId) throw new Error("Could not initialize user.");
 
-    this.encryptionPublicKey = await this.provider.ready(
-      humanId,
-      signerAddress,
-      signerPublicKey,
-      undefined
-    );
+    this.encryptionPublicKey = await this.provider.ready(humanId, signerAddress, signerPublicKey);
     this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
     this.readied = true;
 

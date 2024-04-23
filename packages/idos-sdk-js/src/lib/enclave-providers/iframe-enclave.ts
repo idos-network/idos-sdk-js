@@ -20,23 +20,19 @@ export class IframeEnclave implements EnclaveProvider {
   async ready(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string,
-    authMethod?: boolean
+    signerPublicKey?: string
   ): Promise<Uint8Array> {
-    const { encryptionPublicKey } = (await this.#requestToEnclave({
+    let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey },
     })) as { encryptionPublicKey: Uint8Array };
 
     if (encryptionPublicKey) return encryptionPublicKey;
 
-    if (!authMethod) {
-      this.#showEnclave();
-    }
+    this.#showEnclave();
+    encryptionPublicKey = (await this.#requestToEnclave({ keys: {} })) as Uint8Array;
+    this.#hideEnclave();
 
-    return this.#requestToEnclave({ keys: { authMethod } }).then((encryptionPublicKey) => {
-      this.#hideEnclave();
-      return encryptionPublicKey as Uint8Array;
-    });
+    return encryptionPublicKey;
   }
 
   async store(key: string, value: string): Promise<string> {
