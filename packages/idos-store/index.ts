@@ -88,8 +88,8 @@ export class Store {
 
     document.cookie = [
       `${this.keyPrefix}${key}=${value}`,
-      `SameSite=None`,
-      `Secure`,
+      "SameSite=None",
+      "Secure",
       `Expires=${expiry}`
     ].join(";");
   }
@@ -127,9 +127,9 @@ export class Store {
       key.startsWith(this.keyPrefix) &&
         (document.cookie = [
           `${key}=`,
-          `SameSite=None`,
-          `Secure`,
-          `Path=/`,
+          "SameSite=None",
+          "Secure",
+          "Path=/",
           `Expires=${this.cookieExpiries.past}`
         ].join(";"));
     }

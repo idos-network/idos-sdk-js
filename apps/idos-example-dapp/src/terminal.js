@@ -32,7 +32,6 @@ export class Terminal {
     });
 
     window.terminalHandlers = {};
-    return this;
   }
 
   reloadPage() {
@@ -51,7 +50,7 @@ export class Terminal {
   }
 
   br(count = 1) {
-    [...Array(count)].map(() => this.log(`<br>`));
+    [...Array(count)].map(() => this.log("<br>"));
 
     return this;
   }

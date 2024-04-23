@@ -58,27 +58,27 @@ export class NearGrants implements GrantChild {
     publicKey: string;
   }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
-      networkId: options.network ?? this.defaultNetwork,
+      networkId: options.network ?? NearGrants.defaultNetwork,
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
-      nodeUrl: options.rpcUrl ?? this.defaultRpcUrl
+      nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl
     });
 
-    return new this(
+    return new NearGrants(
       signer,
       new nearAPI.Contract(
         await keylessNearConnection.account(accountId),
-        options.contractId ?? this.defaultContractId,
+        options.contractId ?? NearGrants.defaultContractId,
         {
           useLocalViewExecution: false,
           viewMethods: [
-            this.contractMethods.list,
-            this.contractMethods.messageRecipient,
-            this.contractMethods.messageForCreateBySignature,
-            this.contractMethods.messageForRevokeBySignature
+            NearGrants.contractMethods.list,
+            NearGrants.contractMethods.messageRecipient,
+            NearGrants.contractMethods.messageForCreateBySignature,
+            NearGrants.contractMethods.messageForRevokeBySignature
           ],
           changeMethods: [
-            this.contractMethods.createBySignature,
-            this.contractMethods.revokeBySignature
+            NearGrants.contractMethods.createBySignature,
+            NearGrants.contractMethods.revokeBySignature
           ]
         }
       ),

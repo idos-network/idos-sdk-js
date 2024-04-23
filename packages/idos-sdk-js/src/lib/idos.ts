@@ -53,9 +53,9 @@ export class idOS {
   }
 
   static async init(params: InitParams): Promise<idOS> {
-    this.initializing = true;
+    idOS.initializing = true;
 
-    const idos = new this({
+    const idos = new idOS({
       ...params,
       kwilWrapper: await KwilWrapper.init(params)
     });
