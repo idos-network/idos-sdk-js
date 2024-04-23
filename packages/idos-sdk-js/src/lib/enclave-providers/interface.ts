@@ -7,12 +7,7 @@ export interface StoredData {
 
 export interface EnclaveProvider {
   load(): Promise<StoredData>;
-  ready(
-    humanId?: string,
-    signerAddress?: string,
-    signerPublicKey?: string,
-    authMethod?: boolean
-  ): Promise<Uint8Array>;
+  ready(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
