@@ -41,7 +41,7 @@ export class Enclave {
     if (encryptionPublicKey) {
       if (encryptionPublicKey.length !== 32) throw new Error("Invalid `encryptionPublicKey`");
 
-      const key = Base64Codec.encode(encryptionPublicKey as any);
+      const key = Base64Codec.encode(encryptionPublicKey);
 
       if (key.length !== 44) throw new Error("Invalid serialised `encryptionPublicKey` length");
 
