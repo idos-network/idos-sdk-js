@@ -17,7 +17,7 @@ export class IframeEnclave implements EnclaveProvider {
     return (await this.#requestToEnclave({ storage: {} })) as StoredData;
   }
 
-  async init(
+  async ready(
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string,

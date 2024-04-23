@@ -25,7 +25,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return storage;
   }
 
-  async init(
+  async ready(
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string

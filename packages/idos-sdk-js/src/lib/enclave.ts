@@ -14,12 +14,12 @@ type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
   idOS: idOS;
-  initialized: boolean;
+  readied: boolean;
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
   constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe") {
-    this.initialized = false;
+    this.readied = false;
     this.idOS = idOS;
 
     switch (providerType) {
@@ -53,7 +53,7 @@ export class Enclave {
     this.idOS.store.set("signer-public-key", signerPublicKey);
   }
 
-  async init(humanId?: string, authMethod?: boolean): Promise<Uint8Array> {
+  async ready(humanId?: string, authMethod?: boolean): Promise<Uint8Array> {
     const signerAddress = this.idOS.store.get("signer-address");
     const signerPublicKey = this.idOS.store.get("signer-public-key");
 
@@ -61,14 +61,14 @@ export class Enclave {
 
     if (!humanId) throw new Error("Could not initialize user.");
 
-    this.encryptionPublicKey = await this.provider.init(
+    this.encryptionPublicKey = await this.provider.ready(
       humanId,
       signerAddress,
       signerPublicKey,
       authMethod
     );
     this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
-    this.initialized = true;
+    this.readied = true;
 
     return this.encryptionPublicKey;
   }
@@ -84,7 +84,7 @@ export class Enclave {
   }
 
   async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
-    if (!this.initialized) await this.init();
+    if (!this.readied) await this.ready();
 
     return Base64Codec.encode(
       await this.provider.encrypt(
@@ -95,7 +95,7 @@ export class Enclave {
   }
 
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {
-    if (!this.initialized) await this.init();
+    if (!this.readied) await this.ready();
 
     return Utf8Codec.decode(
       await this.provider.decrypt(
