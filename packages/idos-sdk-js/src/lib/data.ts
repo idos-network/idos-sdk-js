@@ -215,13 +215,14 @@ export class Data {
   async delete(
     tableName: string,
     recordId: string,
+    description?: string,
     synchronous?: boolean
   ): Promise<{ id: string }> {
     const record = { id: recordId };
     await this.idOS.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       [record],
-      undefined,
+      description,
       synchronous
     );
 
@@ -231,6 +232,7 @@ export class Data {
   async update<T extends Record<string, unknown>>(
     tableName: string,
     record: T,
+    description?: string,
     synchronous?: boolean
   ): Promise<T> {
     if (!this.idOS.enclave.initialized) await this.idOS.enclave.init();
@@ -246,7 +248,7 @@ export class Data {
     await this.idOS.kwilWrapper.execute(
       `edit_${this.singularize(tableName)}`,
       [record],
-      undefined,
+      description,
       synchronous
     );
 
