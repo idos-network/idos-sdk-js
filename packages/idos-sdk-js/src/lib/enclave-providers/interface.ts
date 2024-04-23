@@ -7,7 +7,7 @@ export interface StoredData {
 
 export interface EnclaveProvider {
   load(): Promise<StoredData>;
-  init(
+  ready(
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
