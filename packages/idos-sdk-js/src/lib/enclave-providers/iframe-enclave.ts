@@ -24,7 +24,7 @@ export class IframeEnclave implements EnclaveProvider {
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey },
-    })) as { encryptionPublicKey: Uint8Array };
+    })) as StoredData;
 
     if (encryptionPublicKey) return encryptionPublicKey;
 

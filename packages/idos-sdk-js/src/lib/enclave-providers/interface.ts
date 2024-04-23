@@ -1,5 +1,5 @@
 export interface StoredData {
-  encryptionPublicKey?: string;
+  encryptionPublicKey?: Uint8Array;
   humanId?: string;
   signerAddress?: string;
   signerPublicKey?: string;
