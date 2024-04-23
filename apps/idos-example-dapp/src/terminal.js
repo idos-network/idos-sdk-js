@@ -63,7 +63,7 @@ export class Terminal {
     return this.log(`<span class="h2"><span>${html}</span></span>`);
   }
 
-  table(items = [], keyFilter = [], handlers) {
+  table(items, keyFilter, handlers) {
     const wrappedItems = Array.isArray(items) ? items : [items];
 
     const allKeys = Object.keys(wrappedItems[0] || Object.fromEntries(keyFilter.map((e) => [e])));
