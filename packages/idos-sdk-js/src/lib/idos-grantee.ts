@@ -166,7 +166,7 @@ export class idOSGrantee {
     dbId,
     chainType,
     granteeSigner
-  }: idOSGranteeInitParams) {
+  }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
     chainId ||=
