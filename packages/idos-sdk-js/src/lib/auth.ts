@@ -41,11 +41,21 @@ export class Auth {
   async setEvmSigner(signer: Signer) {
     const currentAddress = await signer.getAddress();
 
-    await this.remember("signer-address", currentAddress);
+    const storedAddress = this.idOS.store.get("signer-address");
 
-    const accountId = await signer.getAddress();
+    if (storedAddress !== currentAddress) {
+      // To avoid re-using the old signer's kgw cookie.
+      // When kwil-js supports multi cookies, we can remove this.
+      await this.idOS.kwilWrapper.client.auth.logout();
 
-    return this.#setSigner({ signer, signatureType: "secp256k1_ep", accountId });
+      await this.remember("signer-address", currentAddress);
+    }
+
+    return this.#setSigner({
+      accountId: currentAddress,
+      signer,
+      signatureType: "secp256k1_ep",
+    });
   }
 
   async setNearSigner(wallet: Wallet, recipient = "idos.network") {
@@ -104,6 +114,9 @@ export class Auth {
 
     if (storedAddress !== currentAddress || !publicKey) {
       await this.forget();
+      // To avoid re-using the old signer's kgw cookie.
+      // When kwil-js supports multi cookies, we can remove this.
+      await this.idOS.kwilWrapper.client.auth.logout();
 
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
