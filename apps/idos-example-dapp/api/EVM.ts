@@ -1,6 +1,10 @@
 import { idOSGrantee } from "@idos-network/idos-sdk";
 import { ethers } from "ethers";
 
+/* global crypto */
+//@ts-ignore 🔨 to make it work locally and on Vercel.
+if (!global.crypto) global.crypto = (await import("node:crypto")).default;
+
 // These should be secrets and gotten from process.env, or wherever you keep your secrets.
 const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const EVM_GRANTEE_PRIVATE_KEY =
