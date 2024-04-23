@@ -310,12 +310,40 @@ A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant b
 
 This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
 
-The interface for creating a dAG is the same as the one for creating an Access Grant:
+### Creating a dAG for Near:
 
 ```js
-// Share a credential by creating a dAG
-idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
+// Create a share (duplicate) in the idOS and get its id:
+const { id: dataId } = await sdk.data.share(tableName, recordId, receiverPublicKey);)
 
-// Revoke an access grant
-idos.grants.revoke('credentials', recordId, grantee, dataId, timelock)
+// Get a message that needs to be signed by the user:
+const message = await sdk.grants.messageForCreateBySignature({
+  owner,
+  grantee,
+  dataId,
+  lockedUntil
+})
+
+// The dApp should ask the user to sign this message:
+// Get a recepient.
+const recipient = await getMessageRecipient();
+// Example nonce
+const nonce = crypto.getRandomValues(new Uint8Array(32))
+const { signature } = await wallet.signMessage({ message, recipient, nonce }); // `wallet` is a Near wallet from near wallet selector in this case. Meteor, Here, etc. @todo: add link to Near wallet selector.
+
+// Next steps should be done on server side
+
+// Initialise the idOSGrantee
+const idOSGrantee = idOSGrantee.init({
+  chainType: "NEAR",
+  granteeSigner: nearGranteeSigner,
+  encryptionSecret: process.env.ENCRYPTION_SECRET_KEY
+});
+
+// Create the dAG
+await idOSGrantee.createBySignature({
+  grantee,
+  dataId,
+  lockedUntil
+})
 ```
