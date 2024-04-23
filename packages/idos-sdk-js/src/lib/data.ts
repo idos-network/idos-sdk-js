@@ -24,8 +24,6 @@ export class Data {
       `List your ${tableName} in idOS`
     )) as any;
 
-    await this.idOS.auth.setHumanId(records[0]?.human_id);
-
     if (tableName === "attributes") {
       for (const record of records) {
         record.value = await this.idOS.enclave.decrypt(record.value);
@@ -140,8 +138,6 @@ export class Data {
         { id: recordId },
         "Get your credential in idOS"
       )) as any;
-
-      await this.idOS.auth.setHumanId(records?.[0]?.human_id);
 
       const record = records.find((r: { id: string }) => r.id === recordId);
 
