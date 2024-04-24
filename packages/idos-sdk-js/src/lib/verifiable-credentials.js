@@ -81,7 +81,7 @@ const knownSignatureBuilders = {
 const buildSignatures = async (methods, signatureBuilders) => {
   const result = (
     await Promise.all(
-      methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method))
+      methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method)),
     )
   ).filter((o) => !!o);
 
@@ -116,7 +116,7 @@ export const verify = async (credential, options = {}) => {
   if (!documentLoader) {
     if (!defaultLoader)
       throw new Error(
-        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader."
+        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader.",
       );
     documentLoader = defaultLoader;
   }

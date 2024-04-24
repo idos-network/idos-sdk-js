@@ -37,7 +37,7 @@ export const useRevokeGrant = () => {
     async onMutate(grant) {
       const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];
       const index = previousCredentials.findIndex((credential) =>
-        credential.shares.includes(grant.dataId)
+        credential.shares.includes(grant.dataId),
       );
       const parent = { ...previousCredentials[index] };
       parent.shares = parent.shares.filter((id) => id !== grant.dataId);

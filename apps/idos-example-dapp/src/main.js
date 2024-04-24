@@ -118,7 +118,7 @@ const connectWallet = {
    */
   const hasProfile = await terminal.wait(
     "checking if idOS profile exists",
-    idos.hasProfile(address)
+    idos.hasProfile(address),
   );
 
   if (!hasProfile) {
@@ -144,7 +144,7 @@ const connectWallet = {
       .log("(optional) you can use our SDK as consent UI")
       .wait(
         "awaiting consent",
-        consent || idos.enclave.confirm("Do we have your consent to read data from the idOS?")
+        consent || idos.enclave.confirm("Do we have your consent to read data from the idOS?"),
       );
     terminal.h2("Consent").log(consent);
     cache.set("consent", consent);
@@ -160,7 +160,7 @@ const connectWallet = {
 
   await terminal.wait(
     "awaiting idOS authentication (signatures and password)",
-    idos.setSigner(chosenWallet, signer)
+    idos.setSigner(chosenWallet, signer),
   );
 
   /*
@@ -206,7 +206,7 @@ const connectWallet = {
             .h1("inspect", `Credential # ${id}`)
             .wait(
               "awaiting signature",
-              cache.get(`credential_${id}`) || idos.data.get("credentials", id)
+              cache.get(`credential_${id}`) || idos.data.get("credentials", id),
             );
           cache.set(`credential_${id}`, credential);
 
@@ -227,7 +227,7 @@ const connectWallet = {
               id,
               granteeInfo.grantee,
               Math.floor(Date.now() / 1000) + granteeInfo.lockTimeSpanSeconds,
-              granteeInfo.encryptionPublicKey
+              granteeInfo.encryptionPublicKey,
             );
 
             try {
@@ -248,7 +248,7 @@ const connectWallet = {
             terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
           });
         },
-      }
+      },
     );
   }
 
@@ -270,7 +270,7 @@ const connectWallet = {
       .h1("eyes", "User's grants to this dApp")
       .wait(
         "awaiting RPC",
-        cache.get("grants") || idos.grants.list({ owner, grantee: granteeInfo.grantee })
+        cache.get("grants") || idos.grants.list({ owner, grantee: granteeInfo.grantee }),
       );
     cache.set("grants", grants);
 
@@ -282,7 +282,7 @@ const connectWallet = {
         try {
           content = await terminal.wait(
             "awaiting server decryption",
-            client.fetchAndDecryptSharedCredential(chosenWallet, dataId)
+            client.fetchAndDecryptSharedCredential(chosenWallet, dataId),
           );
           terminal.status("done", "Decrypted");
         } catch (e) {

@@ -41,7 +41,7 @@ export class Store {
           `Inconsistent idOS store data (${window.location.origin})`,
           `Key: ${key}`,
           `${values.join("\nvs\n")}`,
-        ].join("\n")
+        ].join("\n"),
       );
 
     return values[0] ? JSON.parse(values[0]) : undefined;
@@ -65,7 +65,7 @@ export class Store {
 
   #rebuild() {
     const keysInCookies: string[] = Object.values(
-      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g")))
+      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))),
     );
 
     const keysInLocalStorage = Object.keys(window.localStorage);
@@ -119,7 +119,7 @@ export class Store {
     }
 
     const keysInCookies: string[] = Object.values(
-      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g")))
+      Object.fromEntries(document.cookie.matchAll(new RegExp(`(${"idOS-"}.*?)=`, "g"))),
     );
 
     for (const key of keysInCookies) {

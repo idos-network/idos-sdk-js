@@ -18,7 +18,7 @@ const injectRawBody = (req, res, next) => {
 };
 
 const adaptVercelHandler = (
-  handler: (VercelRequest, VercelResponse) => Promise<VercelResponse>
+  handler: (VercelRequest, VercelResponse) => Promise<VercelResponse>,
 ) => {
   return async (req: Connect.IncomingMessage, res: ServerResponse) => {
     // biome-ignore lint/suspicious/noExplicitAny: 🤠

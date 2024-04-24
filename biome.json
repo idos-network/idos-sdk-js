@@ -23,7 +23,7 @@
   },
   "javascript": {
     "formatter": {
-      "trailingComma": "es5",
+      "trailingComma": "all",
       "semicolons": "always"
     }
   }

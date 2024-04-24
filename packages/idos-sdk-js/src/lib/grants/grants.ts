@@ -41,7 +41,7 @@ export class Grants {
   constructor(
     idOS: idOS,
     evmGrantsOptions: EvmGrantsOptions = {},
-    nearGrantsOptions: NearGrantsOptions = {}
+    nearGrantsOptions: NearGrantsOptions = {},
   ) {
     this.idOS = idOS;
     this.evmGrantsOptions = evmGrantsOptions;
@@ -101,7 +101,7 @@ export class Grants {
       owner?: string;
       grantee?: string;
       dataId?: string;
-    } = {}
+    } = {},
   ): Promise<Grant[]> {
     throw new Error("Call idOS.setSigner first.");
   }
@@ -111,7 +111,7 @@ export class Grants {
     _recordId: string,
     _address: string,
     _lockedUntil: number,
-    _receiverPublicKey: string
+    _receiverPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Call idOS.setSigner first.");
   }
@@ -121,7 +121,7 @@ export class Grants {
     _recordId: string,
     _grantee: string,
     _dataId: string,
-    _lockedUntil: number
+    _lockedUntil: number,
   ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Call idOS.setSigner first.");
   }
@@ -148,7 +148,7 @@ class ConnectedGrants extends Grants {
       owner?: string;
       grantee?: string;
       dataId?: string;
-    } = {}
+    } = {},
   ): Promise<Grant[]> {
     return this.#child.list(args);
   }
@@ -158,7 +158,7 @@ class ConnectedGrants extends Grants {
     recordId: string,
     address: string,
     lockedUntil: number,
-    receiverPublicKey: string
+    receiverPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
     const share = await this.idOS.data.share(tableName, recordId, receiverPublicKey);
 
@@ -174,7 +174,7 @@ class ConnectedGrants extends Grants {
     recordId: string,
     grantee: string,
     dataId: string,
-    lockedUntil: number
+    lockedUntil: number,
   ): Promise<{ grant: Grant; transactionId: string }> {
     await this.idOS.data.unshare(tableName, recordId);
 

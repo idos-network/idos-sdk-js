@@ -93,7 +93,7 @@ export const WalletSelectorContextProvider: React.FC<{
       accounts,
       accountId: accounts.find((account) => account.active)?.accountId || null,
     }),
-    [selector, modal, accounts]
+    [selector, modal, accounts],
   );
 
   if (loading) {

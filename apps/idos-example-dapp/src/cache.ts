@@ -12,7 +12,7 @@ export class Cache {
   // biome-ignore lint/suspicious/noExplicitAny: Same API as JSON.stringify.
   set(key: string, value: any): string {
     const serializedValue = JSON.stringify(value, (k, v) =>
-      typeof v === "bigint" ? { bigint: v.toString() } : v
+      typeof v === "bigint" ? { bigint: v.toString() } : v,
     );
     this.store.setItem(key, serializedValue);
     return serializedValue;

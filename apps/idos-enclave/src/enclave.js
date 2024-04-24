@@ -130,7 +130,7 @@ export class Enclave {
         }
         this.store.set("password", password, duration);
         resolve();
-      })
+      }),
     );
   }
 
@@ -163,8 +163,8 @@ export class Enclave {
             localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       );
 
     const fullMessage = new Uint8Array(nonce.length + encrypted.length);
@@ -190,8 +190,8 @@ export class Enclave {
             localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       );
     }
 
@@ -212,7 +212,7 @@ export class Enclave {
         });
 
         resolve(confirmed);
-      })
+      }),
     );
   }
 

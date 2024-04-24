@@ -81,7 +81,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     },
     {
       fallback: "base",
-    }
+    },
   );
 
   const queryClient = useQueryClient();
@@ -125,7 +125,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
               const wallet = wallets.find(
                 (wallet) =>
                   wallet.address === cachedWallet.address &&
-                  wallet.public_key === cachedWallet.public_key
+                  wallet.public_key === cachedWallet.public_key,
               );
               return wallet;
             }
@@ -146,7 +146,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
             status: "error",
           });
         },
-      }
+      },
     );
   };
 

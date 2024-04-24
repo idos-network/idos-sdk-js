@@ -2,7 +2,7 @@ import { decodeBase58, toBeHex } from "ethers";
 import * as nearAPI from "near-api-js";
 
 export async function getNearFullAccessPublicKeys(
-  namedAddress: string
+  namedAddress: string,
 ): Promise<string[] | undefined> {
   const { connect } = nearAPI;
   const connectionConfig = {

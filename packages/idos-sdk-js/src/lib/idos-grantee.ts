@@ -39,9 +39,9 @@ const kwilNep413Signer =
       sha256.hash(
         BytesCodec.concat(
           BorshCodec.serialize("u32", tag),
-          BorshCodec.serialize(nep413BorschSchema, { message, nonce, recipient })
-        )
-      )
+          BorshCodec.serialize(nep413BorschSchema, { message, nonce, recipient }),
+        ),
+      ),
     );
 
     const kwilNep413BorschSchema = {
@@ -60,13 +60,13 @@ const kwilNep413Signer =
 
     const kwilNep413BorshPayload = BorshCodec.serialize(
       kwilNep413BorschSchema,
-      kwilNep413BorshParams
+      kwilNep413BorshParams,
     );
 
     return BytesCodec.concat(
       BinaryCodec.writeUint16BE(kwilNep413BorshPayload.length),
       kwilNep413BorshPayload,
-      signature
+      signature,
     );
   };
 
@@ -101,8 +101,8 @@ export class NoncedBox {
             receiverPublicKey: Base64Codec.encode(this.keyPair.publicKey),
           },
           null,
-          2
-        )}`
+          2,
+        )}`,
       );
     }
 
@@ -114,7 +114,7 @@ type ChainType = "EVM" | "NEAR";
 
 const buildKwilSignerAndGrantee = (
   chainType: ChainType,
-  granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet
+  granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet,
 ): [KwilSigner, string] => {
   switch (chainType) {
     case "EVM": {
@@ -128,7 +128,7 @@ const buildKwilSignerAndGrantee = (
         new KwilSigner(
           kwilNep413Signer("idos-grantee")(signer),
           implicitAddressFromPublicKey(publicKey),
-          "nep413"
+          "nep413",
         ),
         publicKey,
       ];
@@ -189,7 +189,7 @@ export class idOSGrantee {
       kwilSigner,
       dbId,
       chainType,
-      address
+      address,
     );
   }
 
@@ -199,7 +199,7 @@ export class idOSGrantee {
     kwilSigner: KwilSigner,
     dbId: string,
     chainType: ChainType,
-    address: string
+    address: string,
   ) {
     this.noncedBox = noncedBox;
     this.nodeKwil = nodeKwil;
@@ -210,7 +210,7 @@ export class idOSGrantee {
   }
 
   async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
-    dataId: string
+    dataId: string,
   ): Promise<T> {
     return (
       (await this.nodeKwil.call(
@@ -219,7 +219,7 @@ export class idOSGrantee {
           dbid: this.dbId,
           inputs: [{ $id: dataId }],
         },
-        this.kwilSigner
+        this.kwilSigner,
         // biome-ignore lint/suspicious/noExplicitAny: NodeKwil doesn't have the best type defs.
       )) as any
     ).data.result[0] as unknown as T;
@@ -233,7 +233,7 @@ export class idOSGrantee {
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
-      credentialCopy.encryption_public_key
+      credentialCopy.encryption_public_key,
     );
   }
 

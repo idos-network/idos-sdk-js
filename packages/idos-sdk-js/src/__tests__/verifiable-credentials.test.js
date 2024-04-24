@@ -48,10 +48,10 @@ test("verifies an example credential", async () => {
         documentLoader,
         verifiableCredentials.staticLoader(
           "https://vc-issuers.fractal.id/idos",
-          "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2"
-        )
+          "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2",
+        ),
       ),
-    })
+    }),
   ).toBe(true);
 });
 
@@ -59,7 +59,7 @@ test("needs the multibase key to exist", async () => {
   // Note how we're not adding a static loader for z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2, which is what's
   // being used in `credential`.
   expect(
-    await verifiableCredentials.verify(credential, { documentLoader }).catch((e) => e)
+    await verifiableCredentials.verify(credential, { documentLoader }).catch((e) => e),
   ).toMatchObject({
     verified: false,
     error: {

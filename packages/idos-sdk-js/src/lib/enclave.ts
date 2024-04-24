@@ -84,8 +84,8 @@ export class Enclave {
     return Base64Codec.encode(
       await this.provider.encrypt(
         Utf8Codec.encode(message),
-        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey)
-      )
+        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
+      ),
     );
   }
 
@@ -95,8 +95,8 @@ export class Enclave {
     return Utf8Codec.decode(
       await this.provider.decrypt(
         Base64Codec.decode(message),
-        senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey)
-      )
+        senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey),
+      ),
     );
   }
 

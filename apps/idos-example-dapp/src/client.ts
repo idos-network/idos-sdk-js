@@ -12,7 +12,7 @@ export const getInfo = async (walletType: string): Promise<GranteeInfo> => {
 
 export const fetchAndDecryptSharedCredential = async (
   walletType: string,
-  dataId: string
+  dataId: string,
 ): Promise<string> => {
   return (await axios.post<string>(`/api/${walletType}`, { dataId })).data;
 };

@@ -379,8 +379,8 @@ export class EvmGrants implements GrantChild {
       new Contract(
         options.contractAddress ?? EvmGrants.#defaultContractAddress,
         EvmGrants.#abi,
-        signer
-      )
+        signer,
+      ),
     );
   }
 
@@ -406,7 +406,7 @@ export class EvmGrants implements GrantChild {
 
     return grants.map(
       ([owner, grantee, dataId, lockedUntil]: [string, string, string, bigint]) =>
-        new Grant({ owner, grantee, dataId, lockedUntil: Number(lockedUntil) })
+        new Grant({ owner, grantee, dataId, lockedUntil: Number(lockedUntil) }),
     );
   }
 
@@ -431,7 +431,7 @@ export class EvmGrants implements GrantChild {
       transaction = (await this.#contract.insertGrant(
         grantee,
         dataId,
-        lockedUntil
+        lockedUntil,
       )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant creation failed", { cause: (e as Error).cause });
@@ -468,7 +468,7 @@ export class EvmGrants implements GrantChild {
         grantee,
         dataId,
         lockedUntil,
-        signature
+        signature,
       )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant creation by signature failed", { cause: (e as Error).cause });
@@ -497,7 +497,7 @@ export class EvmGrants implements GrantChild {
       transaction = (await this.#contract.deleteGrant(
         grantee,
         dataId,
-        lockedUntil
+        lockedUntil,
       )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant revocation failed", { cause: (e as Error).cause });
@@ -535,7 +535,7 @@ export class EvmGrants implements GrantChild {
         grantee,
         dataId,
         lockedUntil,
-        signature
+        signature,
       )) as TransactionResponse;
     } catch (e) {
       throw new Error("Grant revocation by signature failed", { cause: (e as Error).cause });

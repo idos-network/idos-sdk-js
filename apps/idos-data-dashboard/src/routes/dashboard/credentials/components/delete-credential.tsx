@@ -44,7 +44,7 @@ const useDeleteCredentialMutation = () => {
       const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];
 
       queryClient.setQueryData<idOSCredential[]>(["credentials"], (old = []) =>
-        old.filter((cred) => cred.id !== id)
+        old.filter((cred) => cred.id !== id),
       );
 
       return { previousCredentials };

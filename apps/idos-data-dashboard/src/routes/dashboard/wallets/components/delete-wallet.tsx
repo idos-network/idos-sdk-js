@@ -33,14 +33,14 @@ const useDeleteWalletMutation = () => {
         "wallets",
         wallets.map((wallet) => wallet.id),
         "Delete wallet from idOS",
-        true
+        true,
       ),
     async onMutate(wallets) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
 
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) =>
-        old.filter((wallet) => wallet.address !== wallets[0].address)
+        old.filter((wallet) => wallet.address !== wallets[0].address),
       );
 
       return { previousWallets };

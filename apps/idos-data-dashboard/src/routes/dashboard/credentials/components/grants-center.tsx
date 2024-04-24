@@ -91,7 +91,7 @@ const Shares = ({ grants }: { credentialId: string; grants: idOSGrant[] }) => {
                     colorScheme="red"
                     isDisabled={Boolean(
                       grant.lockedUntil &&
-                        BigInt(grant.lockedUntil) <= BigInt(Math.floor(Date.now() / 1000))
+                        BigInt(grant.lockedUntil) <= BigInt(Math.floor(Date.now() / 1000)),
                     )}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
@@ -118,7 +118,7 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
     },
     {
       fallback: "base",
-    }
+    },
   );
 
   const grants = useFetchGrants({ credentialId });
