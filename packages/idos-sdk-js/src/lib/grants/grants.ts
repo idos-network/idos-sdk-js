@@ -180,4 +180,12 @@ class ConnectedGrants extends Grants {
 
     return this.#child.revoke({ grantee, dataId, lockedUntil });
   }
+
+  async messageForCreateBySignature(grant: Grant) {
+    return this.#child.messageForCreateBySignature(grant);
+  }
+
+  async messageForRevokeBySignature(grant: Grant) {
+    return this.#child.messageForRevokeBySignature(grant);
+  }
 }
