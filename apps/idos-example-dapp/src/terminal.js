@@ -74,7 +74,7 @@ export class Terminal {
       key
         .replaceAll(/([a-z])([A-Z])/g, "$1 $2")
         .toLowerCase()
-        .replaceAll(/[^a-z0-9]/g, " ")
+        .replaceAll(/[^a-z0-9]/g, " "),
     );
 
     const handlerId = crypto.randomUUID();
@@ -90,7 +90,7 @@ export class Terminal {
                 `
               <div class="td"><span>${header}</span></div>
             `,
-              ""
+              "",
             )}
           </div>
         </div>
@@ -115,11 +115,11 @@ export class Terminal {
                   }
                 </div>
               `,
-                ""
+                "",
               )}
             </div>
           `,
-            ""
+            "",
           )}
         </div>
       </div>

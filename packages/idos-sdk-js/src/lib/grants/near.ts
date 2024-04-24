@@ -80,15 +80,15 @@ export class NearGrants implements GrantChild {
             NearGrants.contractMethods.createBySignature,
             NearGrants.contractMethods.revokeBySignature,
           ],
-        }
+        },
       ),
-      publicKey
+      publicKey,
     );
   }
 
   #result(
     grant: NearContractGrant,
-    transactionResult: nearAPI.providers.FinalExecutionOutcome | undefined
+    transactionResult: nearAPI.providers.FinalExecutionOutcome | undefined,
   ): { grant: Grant; transactionId: string } {
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
 
@@ -106,12 +106,12 @@ export class NearGrants implements GrantChild {
   async #sign(
     message: string,
     recipient: string,
-    nonceSuggestion: Buffer = Buffer.from(new Nonce(32).bytes)
+    nonceSuggestion: Buffer = Buffer.from(new Nonce(32).bytes),
   ) {
     // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     const { nonce = nonceSuggestion, signature: b64Signature } = (await (
       this.#signer.signMessage as (
-        _: SignMessageParams
+        _: SignMessageParams,
       ) => Promise<SignedMessage & { nonce?: Uint8Array }>
     )({
       message,
@@ -138,7 +138,7 @@ export class NearGrants implements GrantChild {
 
     // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
     const method = this.#contract[this.constructor.contractMethods.list] as (
-      args: Partial<NearContractGrant>
+      args: Partial<NearContractGrant>,
     ) => Promise<NearContractGrant[]>;
 
     return (await method(grantsFilter)).map(
@@ -147,7 +147,7 @@ export class NearGrants implements GrantChild {
           ...values,
           dataId: data_id,
           lockedUntil: locked_until / 1e6,
-        })
+        }),
     );
   }
 
@@ -201,7 +201,7 @@ export class NearGrants implements GrantChild {
 
     // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
     const method = this.#contract[NearGrants.contractMethods.messageForCreateBySignature] as (
-      args: NearContractGrant
+      args: NearContractGrant,
     ) => Promise<string>;
 
     return await method({
@@ -301,7 +301,7 @@ export class NearGrants implements GrantChild {
 
     // @ts-ignore This is not declared, but it's documented. See https://docs.near.org/tools/near-api-js/contract#call-contract
     const method = this.#contract[NearGrants.contractMethods.messageForRevokeBySignature] as (
-      args: NearContractGrant
+      args: NearContractGrant,
     ) => Promise<string>;
 
     return await method({

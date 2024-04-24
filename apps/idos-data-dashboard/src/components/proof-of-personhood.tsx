@@ -35,7 +35,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
     },
     {
       fallback: "base",
-    }
+    },
   );
 
   const { address } = useIdOS();

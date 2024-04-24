@@ -65,7 +65,7 @@ export class Auth {
 
     if (wallet.id === "my-near-wallet") {
       const { accountId, signature, publicKey, error } = Object.fromEntries(
-        new URLSearchParams(window.location.hash.slice(1)).entries()
+        new URLSearchParams(window.location.hash.slice(1)).entries(),
       );
 
       if (signature) {
@@ -139,7 +139,7 @@ export class Auth {
         callbackUrl,
       } = (await (
         wallet.signMessage as (
-          _: SignMessageParams
+          _: SignMessageParams,
         ) => Promise<SignedMessage & { nonce?: Uint8Array }>
       )({
         message,
@@ -170,7 +170,7 @@ export class Auth {
       return BytesCodec.concat(
         BinaryCodec.writeUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        Base64Codec.decode(signature)
+        Base64Codec.decode(signature),
       );
     };
 
@@ -197,7 +197,7 @@ export class Auth {
     if (this.user.humanId === undefined) {
       const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
       let [humanId, address, publicKey] = currentUserKeys.map(
-        this.idOS.store.get.bind(this.idOS.store)
+        this.idOS.store.get.bind(this.idOS.store),
       ) as Array<string | undefined>;
 
       humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;

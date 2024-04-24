@@ -18,7 +18,7 @@ export class KwilWrapper {
   constructor(
     client: WebKwil,
     kwilProvider: string = KwilWrapper.defaults.kwilProvider,
-    dbId: string = KwilWrapper.defaults.dbId
+    dbId: string = KwilWrapper.defaults.dbId,
   ) {
     this.client = client;
     this.kwilProvider = kwilProvider;
@@ -70,7 +70,7 @@ export class KwilWrapper {
     actionName: string,
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     inputs: Record<string, any>[] | null | any,
-    description?: string
+    description?: string,
   ) {
     const payload: ActionBody = {
       action: actionName,
@@ -99,7 +99,7 @@ export class KwilWrapper {
     actionName: string,
     actionInputs: Record<string, any> | null,
     description?: string,
-    useSigner = true
+    useSigner = true,
   ) {
     const action = await this.buildAction(actionName, [actionInputs], description);
 
@@ -112,7 +112,7 @@ export class KwilWrapper {
     actionName: string,
     actionInputs: Record<string, unknown>[],
     description?: string,
-    synchronous?: boolean
+    synchronous?: boolean,
   ) {
     if (!this.signer) throw new Error("No signer set");
 

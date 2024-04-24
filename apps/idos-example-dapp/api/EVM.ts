@@ -13,7 +13,7 @@ const EVM_NODE_URL = "https://ethereum-sepolia.publicnode.com";
 
 const evmGranteeSigner = new ethers.Wallet(
   EVM_GRANTEE_PRIVATE_KEY,
-  new ethers.JsonRpcProvider(EVM_NODE_URL)
+  new ethers.JsonRpcProvider(EVM_NODE_URL),
 );
 
 const idosGrantee = await idOSGrantee.init({

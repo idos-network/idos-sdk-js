@@ -20,7 +20,7 @@ export class IframeEnclave implements EnclaveProvider {
   async ready(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string
+    signerPublicKey?: string,
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey },

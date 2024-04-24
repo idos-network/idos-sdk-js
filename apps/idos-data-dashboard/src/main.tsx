@@ -73,5 +73,5 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
       </ChakraBaseProvider>
       <ReactQueryDevtools buttonPosition="bottom-left" />
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

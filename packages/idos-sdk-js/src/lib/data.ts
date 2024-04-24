@@ -16,12 +16,12 @@ export class Data {
 
   async list<T extends Record<string, unknown>>(
     tableName: string,
-    filter?: Partial<T>
+    filter?: Partial<T>,
   ): Promise<T[]> {
     const records = (await this.idOS.kwilWrapper.call(
       `get_${tableName}`,
       null,
-      `List your ${tableName} in idOS`
+      `List your ${tableName} in idOS`,
     )) as any;
 
     if (tableName === "attributes") {
@@ -41,7 +41,7 @@ export class Data {
   async createMultiple<T extends Record<string, unknown>>(
     tableName: string,
     records: T[],
-    synchronous?: boolean
+    synchronous?: boolean,
   ) {
     let receiverPublicKey;
 
@@ -50,7 +50,7 @@ export class Data {
       for (const record of records) {
         (record as any).content = await this.idOS.enclave.encrypt(
           (record as any).content as string,
-          receiverPublicKey
+          receiverPublicKey,
         );
         (record as any).encryption_public_key = receiverPublicKey;
       }
@@ -61,7 +61,7 @@ export class Data {
       for (const record of records) {
         (record as any).value = await this.idOS.enclave.encrypt(
           (record as any).value as string,
-          receiverPublicKey
+          receiverPublicKey,
         );
         (record as any).encryption_public_key = receiverPublicKey;
       }
@@ -72,7 +72,7 @@ export class Data {
       `add_${this.singularize(tableName)}`,
       newRecords,
       `Create new ${this.singularize(tableName)} in your idOS profile`,
-      synchronous
+      synchronous,
     );
 
     return newRecords;
@@ -81,10 +81,10 @@ export class Data {
   async create<T extends Record<string, unknown>>(
     tableName: string,
     record: T,
-    synchronous?: boolean
+    synchronous?: boolean,
   ): Promise<T & { id: string }> {
     const name = `add_${this.singularize(
-      tableName === "human_attributes" ? "attributes" : tableName
+      tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
 
     let receiverPublicKey;
@@ -103,7 +103,7 @@ export class Data {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
       (record as any).content = await this.idOS.enclave.encrypt(
         (record as any).content as string,
-        receiverPublicKey
+        receiverPublicKey,
       );
       (record as any).encryption_public_key = receiverPublicKey;
     }
@@ -112,7 +112,7 @@ export class Data {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
       (record as any).value = await this.idOS.enclave.encrypt(
         (record as any).value as string,
-        receiverPublicKey
+        receiverPublicKey,
       );
       (record as any).encryption_public_key = receiverPublicKey;
     }
@@ -122,7 +122,7 @@ export class Data {
       `add_${this.singularize(tableName)}`,
       [newRecord],
       `Create new ${this.singularize(tableName)} in your idOS profile`,
-      synchronous
+      synchronous,
     );
 
     return newRecord;
@@ -130,13 +130,13 @@ export class Data {
 
   async get<T extends Record<string, unknown>>(
     tableName: string,
-    recordId: string
+    recordId: string,
   ): Promise<T | null> {
     if (tableName === "credentials") {
       const records = (await this.idOS.kwilWrapper.call(
         "get_credential_owned",
         { id: recordId },
-        "Get your credential in idOS"
+        "Get your credential in idOS",
       )) as any;
 
       const record = records.find((r: { id: string }) => r.id === recordId);
@@ -145,7 +145,7 @@ export class Data {
 
       record.content = await this.idOS.enclave.decrypt(
         record.content,
-        record.encryption_public_key
+        record.encryption_public_key,
       );
 
       return record;
@@ -161,13 +161,13 @@ export class Data {
 
   async getShared<T extends Record<string, unknown>>(
     tableName: string,
-    recordId: string
+    recordId: string,
   ): Promise<T | null> {
     if (tableName === "credentials") {
       const records = (await this.idOS.kwilWrapper.call(
         "get_credential_shared",
         { id: recordId },
-        "Get credential shared with you in idOS"
+        "Get credential shared with you in idOS",
       )) as any;
 
       const record = records.find((r: { id: string }) => r.id === recordId);
@@ -176,7 +176,7 @@ export class Data {
 
       record.content = await this.idOS.enclave.decrypt(
         record.content,
-        record.encryption_public_key
+        record.encryption_public_key,
       );
 
       return record;
@@ -195,14 +195,14 @@ export class Data {
     tableName: string,
     recordIds: string[],
     description?: string,
-    synchronous?: boolean
+    synchronous?: boolean,
   ): Promise<{ id: string }[]> {
     const records = recordIds.map((id) => ({ id }));
     await this.idOS.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       records,
       description,
-      synchronous
+      synchronous,
     );
 
     return records;
@@ -212,14 +212,14 @@ export class Data {
     tableName: string,
     recordId: string,
     description?: string,
-    synchronous?: boolean
+    synchronous?: boolean,
   ): Promise<{ id: string }> {
     const record = { id: recordId };
     await this.idOS.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       [record],
       description,
-      synchronous
+      synchronous,
     );
 
     return record;
@@ -229,7 +229,7 @@ export class Data {
     tableName: string,
     record: T,
     description?: string,
-    synchronous?: boolean
+    synchronous?: boolean,
   ): Promise<T> {
     if (!this.idOS.enclave.readied) await this.idOS.enclave.ready();
 
@@ -245,7 +245,7 @@ export class Data {
       `edit_${this.singularize(tableName)}`,
       [record],
       description,
-      synchronous
+      synchronous,
     );
 
     return record;
@@ -254,7 +254,7 @@ export class Data {
   async share(
     tableName: string,
     recordId: string,
-    receiverPublicKey: string
+    receiverPublicKey: string,
   ): Promise<{ id: string }> {
     const encPublicKey = Base64Codec.encode(await this.idOS.enclave.ready());
 
@@ -278,7 +278,7 @@ export class Data {
           id,
         },
       ],
-      `Share a ${name} on idOS`
+      `Share a ${name} on idOS`,
     );
 
     return { id };

@@ -47,11 +47,11 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     },
     {
       fallback: "base",
-    }
+    },
   );
 
   const jsonLink = `data:text/json;chatset=utf-8,${encodeURIComponent(
-    JSON.stringify(credential.data)
+    JSON.stringify(credential.data),
   )}`;
 
   return (

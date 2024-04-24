@@ -57,7 +57,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
 
   const isConnected = useMemo(
     () => accounts.length > 0 || isEthConnected,
-    [accounts, isEthConnected]
+    [accounts, isEthConnected],
   );
 
   const getSigner = useCallback(async () => {

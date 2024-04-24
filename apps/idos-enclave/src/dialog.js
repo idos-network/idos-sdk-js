@@ -39,7 +39,7 @@ class Dialog {
       confirmForm.addEventListener("submit", (e) => {
         e.preventDefault();
         resolve(e.submitter.id === "yes");
-      })
+      }),
     );
   }
 
@@ -55,7 +55,7 @@ class Dialog {
         this.authContainer.style.display = "flex";
         passwordForm.style.display = "none";
         resolve(Object.fromEntries(new FormData(e.target).entries()));
-      })
+      }),
     );
   }
 
@@ -96,14 +96,14 @@ class Dialog {
         id: "idos",
         name: "idOS user",
         password: Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32))),
-      })
+      }),
     );
 
     const password = await new Promise((resolve) =>
       setInterval(async () => {
         const credential = await navigator.credentials.get({ password: true });
         if (credential) resolve(credential.password);
-      }, 100)
+      }, 100),
     );
 
     return { password };
