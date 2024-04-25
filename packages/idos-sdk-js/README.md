@@ -320,11 +320,14 @@ await idos.grants.list({
 
 A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
 
-The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature **is not implemented yet**, but we're planning on exposing it as `idosGrantee.grants.createBySignature`. If you want to use dAGs today, you'll have to call the right contract directly.
+The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
+
+> [!CAUTION]
+> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
 
 This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
 
-### Creating a dAG for Near:
+### Creating a dAG on EVM:
 
 ```js
 /*
@@ -332,10 +335,10 @@ This is especially relevant for dApps who want to subsidise the cost of transact
  */
 
 // Create a share (duplicate) in the idOS and get its id:
-const { id: dataId } = await sdk.data.share(tableName, recordId, receiverPublicKey);)
+const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);)
 
 // Get a message that needs to be signed by the user:
-const message = await sdk.grants.messageForCreateBySignature({
+const message = await idos.grants.messageForCreateBySignature({
   owner,
   grantee,
   dataId,
@@ -343,27 +346,29 @@ const message = await sdk.grants.messageForCreateBySignature({
 })
 
 // The dApp should ask the user to sign this message:
-// Get a recepient for NEP-413 signing.
-const recipient = await getMessageRecipient();
-const nonce = crypto.getRandomValues(new Uint8Array(32))
-const { signature } = await wallet.signMessage({ message, recipient, nonce }); // `wallet` is a Near wallet from near wallet selector in this case. Meteor, Here, etc. @todo: add link to Near wallet selector.
+const { signature } = await wallet.signMessage({ message, recipient, nonce });
 
 /*
  * Server side.
+ *
+ * !! NOT IMPLEMENTED FOR NEAR YET !!
  */
 
 // Initialise the idOSGrantee
-const idOSGrantee = idOSGrantee.init({
-  chainType: "NEAR",
-  granteeSigner: nearGranteeSigner,
+const idosGrantee = await idOSGrantee.init({
+  chainType: "EVM",
+  granteeSigner: evmGranteeSigner,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY
 });
 
 // Create the dAG
-// !! NOT IMPLEMENTED YET. !!
-await idOSGrantee.grants.createBySignature({
-  grantee: idOSGrantee.grantee,
-  dataId, // you get this from the client
-  lockedUntil, // Has to match what you provided to messageForCreateBySignature
+await idosGrantee.createBySignature({
+  // These values need to be the same you used to generate the singed message
+  owner,
+  grantee,
+  dataId,
+  lockedUntil,
+  // This is the signature you got from the user.
+  signature,
 })
 ```

@@ -9,6 +9,8 @@ import { ethers } from "ethers";
 import * as nearAPI from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
+import { EvmGrants } from "./grants";
+import { GrantChild } from "./grants/grant-child";
 import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
 
@@ -158,6 +160,25 @@ export class idOSGrantee {
   dbId: string;
   chainType: ChainType;
   address: string;
+  grants?: GrantChild;
+
+  static async init(_: {
+    encryptionSecret: string;
+    nodeUrl?: string;
+    chainId?: string;
+    dbId?: string;
+    chainType: "EVM";
+    granteeSigner: ethers.Wallet;
+  }): Promise<idOSGrantee>;
+
+  static async init(_: {
+    encryptionSecret: string;
+    nodeUrl?: string;
+    chainId?: string;
+    dbId?: string;
+    chainType: "NEAR";
+    granteeSigner: nearAPI.utils.key_pair.KeyPair;
+  }): Promise<idOSGrantee>;
 
   static async init({
     encryptionSecret,
@@ -183,6 +204,21 @@ export class idOSGrantee {
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
 
+    let grants;
+    switch (chainType) {
+      case "EVM": {
+        const signer = granteeSigner as ethers.Wallet;
+        grants = await EvmGrants.init({ signer, options: {} });
+        break;
+      }
+      case "NEAR": {
+        grants = undefined;
+        break;
+      }
+      default:
+        grants = throwError(`Unknown chainType: ${chainType}`);
+    }
+
     return new idOSGrantee(
       NoncedBox.fromBase64SecretKey(encryptionSecret),
       nodeKwil,
@@ -190,6 +226,7 @@ export class idOSGrantee {
       dbId,
       chainType,
       address,
+      grants,
     );
   }
 
@@ -200,6 +237,7 @@ export class idOSGrantee {
     dbId: string,
     chainType: ChainType,
     address: string,
+    grants: GrantChild | undefined,
   ) {
     this.noncedBox = noncedBox;
     this.nodeKwil = nodeKwil;
@@ -207,6 +245,7 @@ export class idOSGrantee {
     this.dbId = dbId;
     this.chainType = chainType;
     this.address = address;
+    this.grants = grants;
   }
 
   async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
@@ -235,6 +274,22 @@ export class idOSGrantee {
       credentialCopy.content,
       credentialCopy.encryption_public_key,
     );
+  }
+
+  async createBySignature(
+    ...args: Parameters<GrantChild["createBySignature"]>
+  ): ReturnType<GrantChild["createBySignature"]> {
+    if (!this.grants) throw new Error("NEAR is not implemented yet");
+
+    return this.grants.createBySignature(...args);
+  }
+
+  async revokeBySignature(
+    ...args: Parameters<GrantChild["revokeBySignature"]>
+  ): ReturnType<GrantChild["revokeBySignature"]> {
+    if (!this.grants) throw new Error("NEAR is not implemented yet");
+
+    return this.grants.revokeBySignature(...args);
   }
 
   get grantee() {
