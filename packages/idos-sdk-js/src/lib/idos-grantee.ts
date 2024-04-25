@@ -212,7 +212,10 @@ export class idOSGrantee {
     switch (chainType) {
       case "EVM": {
         const signer = granteeSigner as ethers.Wallet;
-        grants = await EvmGrants.init({ signer, options: (granteeOptions ?? {}) as EvmGrantsOptions });
+        grants = await EvmGrants.init({
+          signer,
+          options: (granteeOptions ?? {}) as EvmGrantsOptions,
+        });
         break;
       }
       case "NEAR": {
