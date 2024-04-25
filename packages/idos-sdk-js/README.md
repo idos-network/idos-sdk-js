@@ -46,7 +46,9 @@ console.log(credentials);
 
 const { id } = credentials[0];
 const { content } = await idos.data.get("credentials", id);
-const isValid = await idOS.verifiableCredentials.verify(content).catch((e) => false);
+const isValid = await idOS.verifiableCredentials
+  .verify(content)
+  .catch((e) => false);
 ```
 
 > [!NOTE]
@@ -163,14 +165,7 @@ If they choose **Passkey**, we'll use their platform authenticator (you can lear
   <img src="./assets/readme-dialog-passkey.png" width="250" />
 </td></tr></table>
 
-The selected auth method will be stored and will be reused until it is not explicitly removed:
-
-```js
-import { idOS } from "@idos-network/idos-sdk";
-idos = await idOS.init({ container: "css selector" });
-
-await idos.store.reset() // This clears the idOS information from the storage.
-```
+The selected auth method will not have a bearing on the encryption capabilities.
 
 ## Quick reference
 
@@ -195,7 +190,11 @@ const { humanId } = await idos.setSigner("EVM", signer);
 ### NEAR signer setup
 
 ```js
-const { defaultContractId: contractId, contractMethods: methodNames, defaultNetwork: network } = idOS.near;
+const {
+  defaultContractId: contractId,
+  contractMethods: methodNames,
+  defaultNetwork: network,
+} = idOS.near;
 
 const selector = await setupWalletSelector({
   network,
@@ -228,7 +227,8 @@ You can also use `idos.hasProfile(signer.address)` before `setSigner` for a chec
 If your user does not have an idOS profile, you can send them to Fractal ID for them to get one, by redirecting them to the first URL in `idOS.profileProviders`. By using that URL, you agree to [Fractal ID's Terms of Service](https://web.fractal.id/wp-content/uploads/2023/11/Onboarding-link.pdf).
 
 ```js
-if (!idos.hasProfile(signer.address)) window.location = idOS.profileProviders[0];
+if (!idos.hasProfile(signer.address))
+  window.location = idOS.profileProviders[0];
 ```
 
 ### Credentials
@@ -261,58 +261,76 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
-
 ### Access Grants
 
-An Access Grant is a record in the blockchain that consists of the following values:
+Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
 
-* `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
-* `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
-* `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
-* `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
+This is achived by combining two mechanisms:
 
-Acquiring an access grant assures a dApp that they'll have a copy of the user's credential until `lockedUntil`. This is especially relevant to be able to fulfill compliance obligations.
+- On idOS,by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
+- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
+
+The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
+
+An Access Grant record consists of the following values:
+
+- `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
+- `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
+- `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
+- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
 
 ### Access Grant creation / revocation / list
 
-For EVM wallets, the access grant is created by invoking the `insertGrant` contract action, where the grant owner is the user who signed the transaction.
-For EVM wallets, the access grant is revoked by invoking the `deleteGrant` contract action, where the grant owner is the user who signed the transaction.
-You can en example of a contract [here](https://sepolia.etherscan.io/address/0x1673b9fd14c30332990314d99826f22a628a2601#code)
+Here's some example code of creating, revoking and listing Access Grants.
 
 ```js
+// Decide on the credential you want to create an Access Grant for
+const credentialId = credential.id;
+
 // Share a credential by creating an access grant
-await idos.grants.create('credential', credential.id, grantee, timelock, receiverPublicKey)
-    
+const { grant } = await idos.grants.create(
+  "credential",
+  credentialId,
+  grantee,
+  timelock,
+  receiverPublicKey
+);
+
 // Revoke an access grant
-await idos.grants.revoke('credentials', recordId, grantee, dataId, timelock)
+await idos.grants.revoke(
+  "credentials",
+  credentialId,
+  grantee,
+  dataId,
+  timelock
+);
 
 // List all grants that match a criteria
 await idos.grants.list({
-    owner,
-    dataId,
-    grantee
-})
-
+  owner,
+  dataId,
+  grantee,
+});
 ```
-When creating an access grant some things happen under the hood:
-* A duplicate of the underlying data is created, encrypted to the provided `receiverPublicKey`
-* An access grant is created on the connected chain
-
-The access grant can be revoked only once its timelock has expired.
 
 > [!TIP]
 > See a working example [idos-example-dapp](../../apps/idos-example-dapp)
 
-
 ### Delegated Access Grants
 
 A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+
+The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature **is not implemented yet**, but we're planning on exposing it as `idosGrantee.grants.createBySignature`. If you want to use dAGs today, you'll have to call the right contract directly.
 
 This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
 
 ### Creating a dAG for Near:
 
 ```js
+/*
+ * Client side.
+ */
+
 // Create a share (duplicate) in the idOS and get its id:
 const { id: dataId } = await sdk.data.share(tableName, recordId, receiverPublicKey);)
 
@@ -325,13 +343,14 @@ const message = await sdk.grants.messageForCreateBySignature({
 })
 
 // The dApp should ask the user to sign this message:
-// Get a recepient.
+// Get a recepient for NEP-413 signing.
 const recipient = await getMessageRecipient();
-// Example nonce
 const nonce = crypto.getRandomValues(new Uint8Array(32))
 const { signature } = await wallet.signMessage({ message, recipient, nonce }); // `wallet` is a Near wallet from near wallet selector in this case. Meteor, Here, etc. @todo: add link to Near wallet selector.
 
-// Next steps should be done on server side
+/*
+ * Server side.
+ */
 
 // Initialise the idOSGrantee
 const idOSGrantee = idOSGrantee.init({
@@ -341,9 +360,10 @@ const idOSGrantee = idOSGrantee.init({
 });
 
 // Create the dAG
-await idOSGrantee.createBySignature({
-  grantee,
-  dataId,
-  lockedUntil
+// !! NOT IMPLEMENTED YET. !!
+await idOSGrantee.grants.createBySignature({
+  grantee: idOSGrantee.grantee,
+  dataId, // you get this from the client
+  lockedUntil, // Has to match what you provided to messageForCreateBySignature
 })
 ```
