@@ -101,6 +101,8 @@ export class KwilWrapper {
     description?: string,
     useSigner = true,
   ) {
+    if (useSigner && !this.signer) throw new Error("Call idOS.setSigner first.");
+
     const action = await this.buildAction(actionName, [actionInputs], description);
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
@@ -124,7 +126,7 @@ export class KwilWrapper {
   async getHumanId(): Promise<string | null> {
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
 
-    return result[0]?.human_id;
+    return result[0]?.human_id || null;
   }
 
   async hasProfile(address: string): Promise<boolean> {
