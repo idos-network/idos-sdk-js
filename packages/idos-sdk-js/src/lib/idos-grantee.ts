@@ -9,7 +9,7 @@ import { ethers } from "ethers";
 import * as nearAPI from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
-import { EvmGrants } from "./grants";
+import { EvmGrants, EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { GrantChild } from "./grants/grant-child";
 import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
@@ -147,6 +147,7 @@ interface idOSGranteeInitParams {
   dbId?: string;
   chainType: ChainType;
   granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet;
+  granteeOptions?: EvmGrantsOptions | NearGrantsOptions;
 }
 
 const throwError = (message: string): never => {
@@ -169,6 +170,7 @@ export class idOSGrantee {
     dbId?: string;
     chainType: "EVM";
     granteeSigner: ethers.Wallet;
+    granteeOptions?: EvmGrantsOptions;
   }): Promise<idOSGrantee>;
 
   static async init(_: {
@@ -178,6 +180,7 @@ export class idOSGrantee {
     dbId?: string;
     chainType: "NEAR";
     granteeSigner: nearAPI.utils.key_pair.KeyPair;
+    granteeOptions?: NearGrantsOptions;
   }): Promise<idOSGrantee>;
 
   static async init({
@@ -187,6 +190,7 @@ export class idOSGrantee {
     dbId,
     chainType,
     granteeSigner,
+    granteeOptions,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
@@ -208,7 +212,7 @@ export class idOSGrantee {
     switch (chainType) {
       case "EVM": {
         const signer = granteeSigner as ethers.Wallet;
-        grants = await EvmGrants.init({ signer, options: {} });
+        grants = await EvmGrants.init({ signer, options: (granteeOptions ?? {}) as EvmGrantsOptions });
         break;
       }
       case "NEAR": {
