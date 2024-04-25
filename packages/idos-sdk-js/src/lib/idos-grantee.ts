@@ -284,6 +284,14 @@ export class idOSGrantee {
     return this.grants.createBySignature(...args);
   }
 
+  async revokeBySignature(
+    ...args: Parameters<GrantChild["revokeBySignature"]>
+  ): ReturnType<GrantChild["revokeBySignature"]> {
+    if (!this.grants) throw new Error("NEAR is not implemented yet");
+
+    return this.grants.revokeBySignature(...args);
+  }
+
   get grantee() {
     return this.address;
   }
