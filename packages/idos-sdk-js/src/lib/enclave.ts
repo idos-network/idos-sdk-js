@@ -54,14 +54,13 @@ export class Enclave {
   }
 
   async ready(): Promise<Uint8Array> {
-    const signerAddress = this.idOS.store.get("signer-address");
-    const signerPublicKey = this.idOS.store.get("signer-public-key");
+    const { humanId, address, publicKey } = await this.idOS.auth.currentUser();
 
-    const humanId = (await this.idOS.auth.currentUser()).humanId;
+    if (!humanId) {
+      throw new Error("Can't operate on a user that has no profile.");
+    }
 
-    if (!humanId) throw new Error("Could not initialize user.");
-
-    this.encryptionPublicKey = await this.provider.ready(humanId, signerAddress, signerPublicKey);
+    this.encryptionPublicKey = await this.provider.ready(humanId, address, publicKey);
     this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
     this.readied = true;
 

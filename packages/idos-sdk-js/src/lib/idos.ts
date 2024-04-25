@@ -2,7 +2,7 @@ import { Wallet } from "@near-wallet-selector/core";
 import { Signer } from "ethers";
 import { Store } from "../../../idos-store";
 import { assertNever } from "../types";
-import { Auth } from "./auth";
+import { Auth, AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
@@ -64,26 +64,34 @@ export class idOS {
     return idos;
   }
 
-  async setSigner(type: "NEAR", signer: Wallet): Promise<void>;
+  async setSigner(type: "NEAR", signer: Wallet): Promise<AuthUser>;
 
-  async setSigner(type: "EVM", signer: Signer): Promise<void>;
+  async setSigner(type: "EVM", signer: Signer): Promise<AuthUser>;
 
-  async setSigner(type: SignerType, signer: Wallet | Signer): Promise<void> {
+  async setSigner(type: SignerType, signer: Wallet | Signer): Promise<AuthUser> {
     if (type === "NEAR") {
-      const { accountId } = await this.auth.setNearSigner(signer as Wallet);
-      const publicKey = (await this.auth.currentUser()).publicKey;
+      await this.auth.setNearSigner(signer as Wallet);
+      const currentUser = await this.auth.currentUser();
       this.grants = await this.grants.connect({
         type,
-        accountId,
+        accountId: currentUser.address,
         signer: signer as Wallet,
-        publicKey: publicKey as string,
+        // biome-ignore lint/style/noNonNullAssertion: we put it there when we're using NEAR.
+        publicKey: currentUser.publicKey!,
       });
-    } else if (type === "EVM") {
-      await this.auth.setEvmSigner(signer as Signer);
-      this.grants = await this.grants.connect({ type, signer: signer as Signer });
-    } else {
-      this.grants = assertNever(type, `Signer type "${type}" not recognized`);
+
+      return currentUser;
     }
+
+    if (type === "EVM") {
+      await this.auth.setEvmSigner(signer as Signer);
+      const currentUser = await this.auth.currentUser();
+      this.grants = await this.grants.connect({ type, signer: signer as Signer });
+
+      return currentUser;
+    }
+
+    return assertNever(type, `Signer type "${type}" not recognized`);
   }
 
   async hasProfile(address: string): Promise<boolean> {
