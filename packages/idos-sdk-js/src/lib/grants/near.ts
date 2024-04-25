@@ -1,4 +1,8 @@
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
+import type {
+  HardwareWallet,
+  SignMessageMethod,
+} from "@near-wallet-selector/core/src/lib/wallet/wallet.types";
 import * as Base64Codec from "@stablelib/base64";
 import * as nearAPI from "near-api-js";
 import { Nonce } from "../nonce";
@@ -10,6 +14,11 @@ interface NearContractGrant {
   grantee: string;
   data_id: string;
   locked_until: number;
+}
+
+interface MinimumNEARWallet {
+  signMessage: SignMessageMethod;
+  signAndSendTransaction: HardwareWallet["signAndSendTransaction"];
 }
 
 const compact = <T extends Object>(obj: T): Partial<T> => {
@@ -24,7 +33,7 @@ export interface NearGrantsOptions {
 
 export class NearGrants implements GrantChild {
   #contract: nearAPI.Contract;
-  #signer: Wallet;
+  #signer: MinimumNEARWallet;
   #publicKey: string;
 
   static defaultNetwork = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
@@ -40,7 +49,7 @@ export class NearGrants implements GrantChild {
     revokeBySignature: "delete_grant_by_signature",
   } as const;
 
-  private constructor(signer: Wallet, contract: nearAPI.Contract, publicKey: string) {
+  private constructor(signer: MinimumNEARWallet, contract: nearAPI.Contract, publicKey: string) {
     this.#signer = signer;
     this.#contract = contract;
     this.#publicKey = publicKey;
@@ -53,7 +62,7 @@ export class NearGrants implements GrantChild {
     publicKey,
   }: {
     accountId: string;
-    signer: Wallet;
+    signer: MinimumNEARWallet;
     options: NearGrantsOptions;
     publicKey: string;
   }): Promise<NearGrants> {
@@ -63,8 +72,6 @@ export class NearGrants implements GrantChild {
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
       nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl,
     });
-
-    const account = await keylessNearConnection.account(accountId);
 
     return new NearGrants(
       signer,
@@ -113,7 +120,7 @@ export class NearGrants implements GrantChild {
   ) {
     // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     const { nonce = nonceSuggestion, signature: b64Signature } = (await (
-      this.#signer.signMessage as (
+      this.#signer.signMessage as unknown as (
         _: SignMessageParams,
       ) => Promise<SignedMessage & { nonce?: Uint8Array }>
     )({

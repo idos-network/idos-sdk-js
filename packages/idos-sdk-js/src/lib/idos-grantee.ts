@@ -1,4 +1,5 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
+import type { SignMessageParams, SignedMessage } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
 import * as BytesCodec from "@stablelib/bytes";
@@ -17,6 +18,55 @@ import { implicitAddressFromPublicKey } from "./utils";
 /* global crypto */
 
 export type WalletType = "EVM" | "NEAR";
+const nonceLength = 32;
+const tag = 2147484061; // 2**31  413
+
+const nep413BorschSchema = {
+  struct: {
+    message: "string",
+    nonce: { array: { type: "u8", len: nonceLength } },
+    recipient: "string",
+    callbackUrl: { option: "string" },
+  },
+} as const;
+
+const kwilNep413BorschSchema = {
+  struct: {
+    tag: "u32",
+    ...nep413BorschSchema.struct,
+  },
+};
+
+const nep413SignMessage =
+  (keyPair: nearAPI.KeyPair) =>
+  async ({
+    message,
+    recipient,
+    nonce,
+    state,
+  }: SignMessageParams): Promise<SignedMessage & { nonce: Buffer }> => {
+    const publicKey = keyPair.getPublicKey().toString();
+    const accountId = implicitAddressFromPublicKey(publicKey);
+
+    const tag = 2147484061; // 2**31  413
+
+    const { signature } = keyPair.sign(
+      sha256.hash(
+        BytesCodec.concat(
+          BorshCodec.serialize("u32", tag),
+          BorshCodec.serialize(nep413BorschSchema, { message, nonce, recipient }),
+        ),
+      ),
+    );
+
+    return {
+      nonce,
+      signature: Base64Codec.encode(signature),
+      state,
+      accountId,
+      publicKey,
+    };
+  };
 
 const kwilNep413Signer =
   (recipient: string) =>
@@ -26,32 +76,11 @@ const kwilNep413Signer =
     const nonceLength = 32;
     const nonce = crypto.getRandomValues(new Uint8Array(nonceLength));
 
-    const nep413BorschSchema = {
-      struct: {
-        message: "string",
-        nonce: { array: { type: "u8", len: nonceLength } },
-        recipient: "string",
-        callbackUrl: { option: "string" },
-      },
-    } as const;
-
-    const tag = 2147484061; // 2**31  413
-
-    const { signature } = await keyPair.sign(
-      sha256.hash(
-        BytesCodec.concat(
-          BorshCodec.serialize("u32", tag),
-          BorshCodec.serialize(nep413BorschSchema, { message, nonce, recipient }),
-        ),
-      ),
-    );
-
-    const kwilNep413BorschSchema = {
-      struct: {
-        tag: "u32",
-        ...nep413BorschSchema.struct,
-      },
-    };
+    const { signature } = await nep413SignMessage(keyPair)({
+      message,
+      recipient,
+      nonce: Buffer.from(nonce),
+    });
 
     const kwilNep413BorshParams = {
       tag,
@@ -68,7 +97,7 @@ const kwilNep413Signer =
     return BytesCodec.concat(
       BinaryCodec.writeUint16BE(kwilNep413BorshPayload.length),
       kwilNep413BorshPayload,
-      signature,
+      Base64Codec.decode(signature),
     );
   };
 
@@ -120,7 +149,7 @@ const buildKwilSignerAndGrantee = (
 ): [KwilSigner, string] => {
   switch (chainType) {
     case "EVM": {
-      const signer = granteeSigner as ethers.Wallet;
+      const signer = granteeSigner as unknown as ethers.Wallet;
       return [new KwilSigner(signer, signer.address), signer.address];
     }
     case "NEAR": {
