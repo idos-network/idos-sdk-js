@@ -35,7 +35,7 @@ const kwilNep413Signer =
       },
     } as const;
 
-    const tag = 2147484061; // 2**31 + 413
+    const tag = 2147484061; // 2**31  413
 
     const { signature } = await keyPair.sign(
       sha256.hash(
@@ -126,6 +126,7 @@ const buildKwilSignerAndGrantee = (
     case "NEAR": {
       const signer = granteeSigner as nearAPI.utils.key_pair.KeyPair;
       const publicKey = signer.getPublicKey().toString();
+
       return [
         new KwilSigner(
           kwilNep413Signer("idos-grantee")(signer),
@@ -286,8 +287,6 @@ export class idOSGrantee {
   async createBySignature(
     ...args: Parameters<GrantChild["createBySignature"]>
   ): ReturnType<GrantChild["createBySignature"]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
-
     return this.grants.createBySignature(...args);
   }
 

@@ -59,9 +59,12 @@ export class NearGrants implements GrantChild {
   }): Promise<NearGrants> {
     const keylessNearConnection = await nearAPI.connect({
       networkId: options.network ?? NearGrants.defaultNetwork,
+      // this wiill break on server side envs.
       keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
       nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl,
     });
+
+    const account = await keylessNearConnection.account(accountId);
 
     return new NearGrants(
       signer,
