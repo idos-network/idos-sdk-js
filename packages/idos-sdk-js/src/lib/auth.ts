@@ -1,4 +1,3 @@
-import { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as BinaryCodec from "@stablelib/binary";
@@ -14,18 +13,17 @@ import { implicitAddressFromPublicKey } from "./utils";
 /* global Buffer */
 
 export interface AuthUser {
-  humanId?: string;
-  address?: string;
+  humanId: string | null;
+  address: string;
   publicKey?: string;
 }
 
 export class Auth {
   idOS: idOS;
-  user: AuthUser;
+  user?: AuthUser;
 
   constructor(idOS: idOS) {
     this.idOS = idOS;
-    this.user = {};
   }
 
   async forget() {
@@ -51,11 +49,16 @@ export class Auth {
       await this.remember("signer-address", currentAddress);
     }
 
-    return this.#setSigner({
+    this.idOS.kwilWrapper.setSigner({
       accountId: currentAddress,
       signer,
       signatureType: "secp256k1_ep",
     });
+
+    this.user = {
+      humanId: await this.idOS.kwilWrapper.getHumanId(),
+      address: currentAddress,
+    };
   }
 
   async setNearSigner(wallet: Wallet, recipient = "idos.network") {
@@ -120,6 +123,7 @@ export class Auth {
 
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
+      // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
       ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
       await this.remember("signer-address", currentAddress);
@@ -127,6 +131,7 @@ export class Auth {
     }
 
     const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
+      // biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
       if (typeof message !== "string") message = Utf8Codec.decode(message);
       if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
@@ -137,6 +142,7 @@ export class Auth {
         signature,
         // @ts-ignore Signatures don't seem to be updated for NEP413 yet.
         callbackUrl,
+        // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
       } = (await (
         wallet.signMessage as (
           _: SignMessageParams,
@@ -174,37 +180,21 @@ export class Auth {
       );
     };
 
-    return this.#setSigner({
+    this.idOS.kwilWrapper.setSigner({
       accountId: implicitAddressFromPublicKey(publicKey),
       signer,
       signatureType: "nep413",
     });
-  }
 
-  #setSigner<
-    T extends {
-      accountId: string;
-      signer: EthSigner | ((message: Uint8Array) => Promise<Uint8Array>);
-      signatureType: string;
-    },
-  >(args: T) {
-    this.idOS.kwilWrapper.setSigner(args);
-
-    return args;
+    this.user = {
+      humanId: await this.idOS.kwilWrapper.getHumanId(),
+      address: currentAddress,
+      publicKey,
+    };
   }
 
   async currentUser() {
-    if (this.user.humanId === undefined) {
-      const currentUserKeys = ["human-id", "signer-address", "signer-public-key"];
-      let [humanId, address, publicKey] = currentUserKeys.map(
-        this.idOS.store.get.bind(this.idOS.store),
-      ) as Array<string | undefined>;
-
-      humanId = humanId || (await this.idOS.kwilWrapper.getHumanId()) || undefined;
-
-      this.user = { humanId, address, publicKey };
-      this.idOS.store.set("human-id", humanId);
-    }
+    if (!this.user) throw new Error("Call idOS.setSigner first.");
 
     return this.user;
   }
