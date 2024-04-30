@@ -52,7 +52,10 @@ const knownSignatureBuilders = {
 const buildSignatures = async (methods, signatureBuilders) => {
   const result = (
     await Promise.all(
-      methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method)),
+      methods.map(
+        async (method) =>
+          await signatureBuilders[method.type]?.call(null, method)
+      )
     )
   ).filter((o) => !!o);
 
@@ -80,14 +83,15 @@ const buildSignatures = async (methods, signatureBuilders) => {
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
 export const verify = async (credential, options = {}) => {
-  let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
+  let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } =
+    options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
 
   if (!documentLoader) {
     if (!defaultLoader)
       throw new Error(
-        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader.",
+        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader."
       );
     documentLoader = defaultLoader;
   }
@@ -97,7 +101,8 @@ export const verify = async (credential, options = {}) => {
   }
 
   const proof = credential.proof;
-  if (!proof) throw new Error("This function is only supports embedded proofs.");
+  if (!proof)
+    throw new Error("This function is only supports embedded proofs.");
 
   const proofPurpose = proof.proofPurpose;
   if (!proofPurpose) throw new Error("Invalid proof: missing proofPurpose.");
@@ -105,12 +110,12 @@ export const verify = async (credential, options = {}) => {
   const issuer = credential.issuer;
   if (!issuer) throw new Error("Invalid credential: missing issuer.");
 
-  if (!allowedIssuers.includes(issuer)) throw new Error("Unfit credential: issuer is not allowed.");
+  if (!allowedIssuers.includes(issuer))
+    throw new Error("Unfit credential: issuer is not allowed.");
 
   multibaseKey = credential.proof.verificationMethod.split("#")[1];
 
   const staticLoader = (id) => {
-    console.log({ id, multibaseKey });
     const loader = new JsonLdDocumentLoader();
     loader.addStatic(id, issuerDoc(id, multibaseKey));
     return loader.build();
@@ -119,7 +124,8 @@ export const verify = async (credential, options = {}) => {
   const staticFractalLoader = staticLoader(FRACTAL_ISSUER);
 
   const documentLoaderWithFallbackCompose =
-    (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
+    (documentLoaderA, documentLoaderB) =>
+    async (url, options = {}) => {
       let ex;
       try {
         return await documentLoaderA(url, options);
@@ -137,7 +143,10 @@ export const verify = async (credential, options = {}) => {
     };
 
   const documentLoaderWithStaticFractal = (documentLoader) => {
-    return documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
+    return documentLoaderWithFallbackCompose(
+      documentLoader,
+      staticFractalLoader
+    );
   };
 
   documentLoader = documentLoaderWithStaticFractal(documentLoader);
@@ -146,7 +155,8 @@ export const verify = async (credential, options = {}) => {
     allowedSigners ??
     (await (async () => {
       const issuerDoc = (await documentLoader(issuer))?.document;
-      if (!issuerDoc) throw new Error("Couldn't fetch document for the issuer.");
+      if (!issuerDoc)
+        throw new Error("Couldn't fetch document for the issuer.");
 
       const methods = issuerDoc[proofPurpose];
       if (!methods || !methods.length)
