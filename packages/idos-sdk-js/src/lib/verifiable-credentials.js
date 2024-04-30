@@ -5,8 +5,8 @@ import * as jsonld from "jsonld";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
 
 const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
-const FRACTAL_PUBLIC_KEY_MULTIBASE = import.meta.env
-  .VITE_FRACTAL_ID_ISSUER_CREDENTIAL_PUBLIC_KEY_MULTIBASE;
+
+let multibaseKey;
 
 const issuerDoc = (id, publicKeyMultibase) => ({
   "@context": [
@@ -30,14 +30,6 @@ const issuerDoc = (id, publicKeyMultibase) => ({
   ],
 });
 
-export const staticLoader = (id, publicKeyMultibase) => {
-  const loader = new JsonLdDocumentLoader();
-  loader.addStatic(id, issuerDoc(id, publicKeyMultibase));
-  return loader.build();
-};
-
-export const staticFractalLoader = staticLoader(FRACTAL_ISSUER, FRACTAL_PUBLIC_KEY_MULTIBASE);
-
 let xhrLoader = jsonld.documentLoaders?.xhr;
 try {
   xhrLoader ||= require("jsonld/lib/documentLoaders/xhr")();
@@ -50,27 +42,6 @@ try {
 
 export const defaultLoader = xhrLoader || nodeLoader;
 
-export const documentLoaderWithFallbackCompose =
-  (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
-    let ex;
-    try {
-      return await documentLoaderA(url, options);
-    } catch (e) {
-      ex = e;
-    }
-
-    try {
-      return await documentLoaderB(url, options);
-    } catch (_) {
-      // Ignored on purpose.
-    }
-
-    throw ex;
-  };
-
-export const documentLoaderWithStaticFractal = (documentLoader) =>
-  documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
-
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (method) =>
     new Ed25519Signature2020({
@@ -81,7 +52,10 @@ const knownSignatureBuilders = {
 const buildSignatures = async (methods, signatureBuilders) => {
   const result = (
     await Promise.all(
-      methods.map(async (method) => await signatureBuilders[method.type]?.call(null, method)),
+      methods.map(
+        async (method) =>
+          await signatureBuilders[method.type]?.call(null, method)
+      )
     )
   ).filter((o) => !!o);
 
@@ -109,26 +83,26 @@ const buildSignatures = async (methods, signatureBuilders) => {
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
 export const verify = async (credential, options = {}) => {
-  let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
+  let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } =
+    options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
 
   if (!documentLoader) {
     if (!defaultLoader)
       throw new Error(
-        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader.",
+        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader."
       );
     documentLoader = defaultLoader;
   }
-
-  documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
   if (typeof credential === "string" || credential instanceof String) {
     credential = JSON.parse(credential);
   }
 
   const proof = credential.proof;
-  if (!proof) throw new Error("This function is only supports embedded proofs.");
+  if (!proof)
+    throw new Error("This function is only supports embedded proofs.");
 
   const proofPurpose = proof.proofPurpose;
   if (!proofPurpose) throw new Error("Invalid proof: missing proofPurpose.");
@@ -136,13 +110,53 @@ export const verify = async (credential, options = {}) => {
   const issuer = credential.issuer;
   if (!issuer) throw new Error("Invalid credential: missing issuer.");
 
-  if (!allowedIssuers.includes(issuer)) throw new Error("Unfit credential: issuer is not allowed.");
+  if (!allowedIssuers.includes(issuer))
+    throw new Error("Unfit credential: issuer is not allowed.");
+
+  multibaseKey = credential.proof.verificationMethod.split("#")[1];
+
+  const staticLoader = (id) => {
+    const loader = new JsonLdDocumentLoader();
+    loader.addStatic(id, issuerDoc(id, multibaseKey));
+    return loader.build();
+  };
+
+  const staticFractalLoader = staticLoader(FRACTAL_ISSUER);
+
+  const documentLoaderWithFallbackCompose =
+    (documentLoaderA, documentLoaderB) =>
+    async (url, options = {}) => {
+      let ex;
+      try {
+        return await documentLoaderA(url, options);
+      } catch (e) {
+        ex = e;
+      }
+
+      try {
+        return await documentLoaderB(url, options);
+      } catch (_) {
+        // Ignored on purpose.
+      }
+
+      throw ex;
+    };
+
+  const documentLoaderWithStaticFractal = (documentLoader) => {
+    return documentLoaderWithFallbackCompose(
+      documentLoader,
+      staticFractalLoader
+    );
+  };
+
+  documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
   const suite =
     allowedSigners ??
     (await (async () => {
       const issuerDoc = (await documentLoader(issuer))?.document;
-      if (!issuerDoc) throw new Error("Couldn't fetch document for the issuer.");
+      if (!issuerDoc)
+        throw new Error("Couldn't fetch document for the issuer.");
 
       const methods = issuerDoc[proofPurpose];
       if (!methods || !methods.length)

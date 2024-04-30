@@ -92,6 +92,7 @@ const connectWallet = {
     container: "#idos-container",
   });
   window.idos = idos;
+  window.vc = idOS.verifiableCredentials;
 
   /*
    * Setting up the demo
