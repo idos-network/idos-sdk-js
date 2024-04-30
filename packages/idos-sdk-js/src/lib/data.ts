@@ -231,7 +231,7 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.idOS.enclave.readied) await this.idOS.enclave.ready();
+    if (!this.idOS.enclave.encryptionPublicKey) await this.idOS.enclave.ready();
 
     if (tableName === "credentials") {
       record.content = await this.idOS.enclave.encrypt(record.content);
