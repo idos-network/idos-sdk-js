@@ -28,12 +28,10 @@ export class Auth {
 
   async forget() {
     this.idOS.store.reset();
-    await this.idOS.enclave.reset();
   }
 
   async remember(key: string, value: any) {
     this.idOS.store.set(key, value);
-    await this.idOS.enclave.store(key, value);
   }
 
   async setEvmSigner(signer: Signer) {

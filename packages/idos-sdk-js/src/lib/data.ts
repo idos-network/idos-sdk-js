@@ -67,7 +67,10 @@ export class Data {
       }
     }
 
-    const newRecords = records.map((record) => ({ id: crypto.randomUUID(), ...record }));
+    const newRecords = records.map((record) => ({
+      id: crypto.randomUUID(),
+      ...record,
+    }));
     await this.idOS.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,
       newRecords,
@@ -231,10 +234,14 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.idOS.enclave.readied) await this.idOS.enclave.ready();
+    if (!this.idOS.enclave.encryptionPublicKey) await this.idOS.enclave.ready();
+
+    let receiverPublicKey;
 
     if (tableName === "credentials") {
-      record.content = await this.idOS.enclave.encrypt(record.content);
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
+      record.encryption_public_key = receiverPublicKey;
+      record.content = await this.idOS.enclave.encrypt(record.content, receiverPublicKey);
     }
 
     if (tableName === "attributes") {

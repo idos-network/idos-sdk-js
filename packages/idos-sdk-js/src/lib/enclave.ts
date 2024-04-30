@@ -14,12 +14,10 @@ type ProviderType = keyof typeof ENCLAVE_PROVIDERS;
 
 export class Enclave {
   idOS: idOS;
-  readied: boolean;
   provider: EnclaveProvider;
   encryptionPublicKey?: Uint8Array;
 
   constructor(idOS: idOS, container: string, providerType: ProviderType = "iframe") {
-    this.readied = false;
     this.idOS = idOS;
 
     switch (providerType) {
@@ -35,25 +33,12 @@ export class Enclave {
   }
 
   async load() {
-    const { encryptionPublicKey, humanId, signerAddress, signerPublicKey } =
-      await this.provider.load();
-
-    if (encryptionPublicKey) {
-      if (encryptionPublicKey.length !== 32) throw new Error("Invalid `encryptionPublicKey`");
-
-      const key = Base64Codec.encode(encryptionPublicKey);
-
-      if (key.length !== 44) throw new Error("Invalid serialised `encryptionPublicKey` length");
-
-      this.idOS.store.set("encryption-public-key", key);
-    }
-
-    this.idOS.store.set("human-id", humanId);
-    this.idOS.store.set("signer-address", signerAddress);
-    this.idOS.store.set("signer-public-key", signerPublicKey);
+    await this.provider.load();
   }
 
   async ready(): Promise<Uint8Array> {
+    if (this.encryptionPublicKey) return this.encryptionPublicKey;
+
     const { humanId, address, publicKey } = await this.idOS.auth.currentUser();
 
     if (!humanId) {
@@ -61,24 +46,12 @@ export class Enclave {
     }
 
     this.encryptionPublicKey = await this.provider.ready(humanId, address, publicKey);
-    this.idOS.store.set("encryption-public-key", Base64Codec.encode(this.encryptionPublicKey));
-    this.readied = true;
 
     return this.encryptionPublicKey;
   }
 
-  store(key: string, value: any) {
-    const transportKey = {
-      "human-id": "humanId",
-      "signer-address": "signerAddress",
-      "signer-public-key": "signerPublicKey",
-    }[key]!;
-
-    return this.provider.store(transportKey, value);
-  }
-
   async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
-    if (!this.readied) await this.ready();
+    if (!this.encryptionPublicKey) await this.ready();
 
     return Base64Codec.encode(
       await this.provider.encrypt(
@@ -89,7 +62,7 @@ export class Enclave {
   }
 
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {
-    if (!this.readied) await this.ready();
+    if (!this.encryptionPublicKey) await this.ready();
 
     return Utf8Codec.decode(
       await this.provider.decrypt(
