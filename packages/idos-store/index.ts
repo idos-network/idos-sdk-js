@@ -7,10 +7,13 @@ export class Store {
   keyPrefix = "idOS-";
 
   constructor() {
-    const expiration = this.#getLocalStorage(`${this.keyPrefix}-expiration`);
-    if (expiration) {
-      if (Number(expiration) < Date.now()) {
-        this.reset();
+    for (const key in localStorage) {
+      if (key.startsWith(this.keyPrefix)) {
+        const expires = localStorage.getItem(`${key}-expires`);
+        if (expires) {
+          this.reset();
+          break;
+        }
       }
     }
   }
@@ -30,6 +33,7 @@ export class Store {
   get(key: string): any {
     const value = this.#getLocalStorage(key);
     if (!value) return undefined;
+
     return JSON.parse(value);
   }
 
@@ -46,8 +50,10 @@ export class Store {
     if (_daysNumber) {
       const date = new Date();
       date.setTime(date.getTime() + _daysNumber * 24 * 60 * 60 * 1000);
-      this.#setLocalStorage(key, JSON.stringify(value));
-      this.#setLocalStorage(`${key}-expiration`, date.toISOString());
+      this.#setLocalStorage(
+        `${key}-expires`,
+        JSON.stringify(date.toISOString())
+      );
     }
 
     this.#setLocalStorage(key, JSON.stringify(value));
