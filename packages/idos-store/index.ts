@@ -42,18 +42,12 @@ export class Store {
     if (!value) return;
 
     //@ts-ignore TODO Actually use this.
-    const _daysNumber =
-      !days || Number.isNaN(Number(days))
-        ? undefined
-        : parseInt(days.toString());
+    const _daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
     if (_daysNumber) {
       const date = new Date();
       date.setTime(date.getTime() + _daysNumber * 24 * 60 * 60 * 1000);
-      this.#setLocalStorage(
-        `${key}-expires`,
-        JSON.stringify(date.toISOString())
-      );
+      this.#setLocalStorage(`${key}-expires`, JSON.stringify(date.toISOString()));
     }
 
     this.#setLocalStorage(key, JSON.stringify(value));
