@@ -6,6 +6,15 @@ interface PipeCodecArgs<T> {
 export class Store {
   keyPrefix = "idOS-";
 
+  constructor() {
+    const expiration = this.#getLocalStorage(`${this.keyPrefix}-expiration`);
+    if (expiration) {
+      if (Number(expiration) < new Date().getTime()) {
+        this.reset();
+      }
+    }
+  }
+
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>) {
     return {
       ...this,
@@ -29,7 +38,17 @@ export class Store {
     if (!value) return;
 
     //@ts-ignore TODO Actually use this.
-    const _daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const _daysNumber =
+      !days || Number.isNaN(Number(days))
+        ? undefined
+        : parseInt(days.toString());
+
+    if (_daysNumber) {
+      const date = new Date();
+      date.setTime(date.getTime() + _daysNumber * 24 * 60 * 60 * 1000);
+      this.#setLocalStorage(key, JSON.stringify(value));
+      this.#setLocalStorage(`${key}-expiration`, date.toISOString());
+    }
 
     this.#setLocalStorage(key, JSON.stringify(value));
   }
