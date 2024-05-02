@@ -3,8 +3,8 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import * as vc from "@digitalbazaar/vc";
 import * as jsonld from "jsonld";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
-import * as cachedSchemas from "./cachedSchemas";
-import * as cachedIssuers from "./cachedIssuers";
+import { cachedSchemas } from "./cachedSchemas";
+import { cachedIssuers } from "./cachedIssuers";
 
 export const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
 export const STAGING_FRACTAL_ISSUER = "https://staging.vc-issuers.fractal.id/idos";
