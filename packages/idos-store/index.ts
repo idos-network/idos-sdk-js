@@ -41,12 +41,11 @@ export class Store {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    //@ts-ignore TODO Actually use this.
-    const _daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
-    if (_daysNumber) {
+    if (daysNumber) {
       const date = new Date();
-      date.setTime(date.getTime() + _daysNumber * 24 * 60 * 60 * 1000);
+      date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
       this.#setLocalStorage(`${key}-expires`, JSON.stringify(date.toISOString()));
     }
 
