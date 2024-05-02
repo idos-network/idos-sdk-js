@@ -9,7 +9,7 @@ export class Store {
   constructor() {
     const expiration = this.#getLocalStorage(`${this.keyPrefix}-expiration`);
     if (expiration) {
-      if (Number(expiration) < new Date().getTime()) {
+      if (Number(expiration) < Date.now()) {
         this.reset();
       }
     }
