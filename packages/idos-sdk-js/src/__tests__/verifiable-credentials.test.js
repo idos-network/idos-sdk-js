@@ -1,7 +1,5 @@
 import { expect, test } from "vitest";
 
-import { documentLoader } from "./cachedSchemas";
-
 import * as verifiableCredentials from "../lib/verifiable-credentials";
 
 const credential = {
@@ -19,15 +17,7 @@ const credential = {
   approved_at: "2023-10-05T12:37:35Z",
   credentialSubject: {
     id: "uuid:f149f600-418b-4481-9efb-01c0ef72d8ba",
-    wallets: [
-      { currency: "near", verified: true, address: "example.testnet" },
-      {
-        currency: "eth",
-        verified: true,
-        address: "0x05a56f2d52c817161883f50c441c3228cfe54d9f",
-      },
-    ],
-    emails: ["email@example.com"],
+    emails: ["fernando still needs to generate a valid credential on staging for us to test here."],
   },
   proof: {
     type: "Ed25519Signature2020",
@@ -44,29 +34,21 @@ const credential = {
 test("verifies an example credential", async () => {
   expect(
     await verifiableCredentials.verify(credential, {
-      documentLoader: verifiableCredentials.documentLoaderWithFallbackCompose(
-        documentLoader,
-        verifiableCredentials.staticLoader(
-          "https://vc-issuers.fractal.id/idos",
-          "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2",
-        ),
-      ),
+      allowedIssuers: [verifiableCredentials.STAGING_FRACTAL_ISSUER],
     }),
   ).toBe(true);
 });
 
 test("needs the multibase key to exist", async () => {
-  // Note how we're not adding a static loader for z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2, which is what's
-  // being used in `credential`.
-  expect(
-    await verifiableCredentials.verify(credential, { documentLoader }).catch((e) => e),
-  ).toMatchObject({
+  // Note how we're not overriding `allowedIssuers`, which only accept production credentials.
+  expect(await verifiableCredentials.verify(credential).catch((e) => e)).toMatchObject({
     verified: false,
     error: {
       message: "Verification error(s).",
       errors: [
         {
           message:
+            // TODO this might not be the right error.
             "Did not verify any proofs; insufficient proofs matched the acceptable suite(s) and required purpose(s).",
         },
       ],
