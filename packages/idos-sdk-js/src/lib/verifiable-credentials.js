@@ -8,7 +8,7 @@ import { cachedSchemas } from "./cachedSchemas";
 
 export const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
 export const STAGING_FRACTAL_ISSUER = "https://vc-issuers.staging.sandbox.fractal.id/idos";
-export const CLIENTS_FRACTAL_ISSUER = "https://vc-issuers.next.fractal.id/idos";
+export const PLAYGROUND_FRACTAL_ISSUER = "https://vc-issuers.next.fractal.id/idos";
 
 export const defaultLoader = (() => {
   const loader = new JsonLdDocumentLoader();
