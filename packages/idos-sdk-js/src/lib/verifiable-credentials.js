@@ -3,44 +3,20 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import * as vc from "@digitalbazaar/vc";
 import * as jsonld from "jsonld";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
+import { cachedIssuers } from "./cachedIssuers";
+import { cachedSchemas } from "./cachedSchemas";
 
-const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
+export const FRACTAL_ISSUER = "https://vc-issuers.fractal.id/idos";
+export const STAGING_FRACTAL_ISSUER = "https://vc-issuers.staging.sandbox.fractal.id/idos";
+export const PLAYGROUND_FRACTAL_ISSUER = "https://vc-issuers.next.fractal.id/idos";
 
-let multibaseKey;
-
-const issuerDoc = (id, publicKeyMultibase) => ({
-  "@context": [
-    "https://w3id.org/security/suites/ed25519-2020/v1",
-    {
-      assertionMethod: {
-        "@id": "https://w3id.org/security#assertionMethod",
-        "@type": "@id",
-        "@container": "@set",
-      },
-    },
-  ],
-  id,
-  assertionMethod: [
-    {
-      id: `${id}#${publicKeyMultibase}`,
-      type: "Ed25519VerificationKey2020",
-      controller: id,
-      publicKeyMultibase,
-    },
-  ],
-});
-
-let xhrLoader = jsonld.documentLoaders?.xhr;
-try {
-  xhrLoader ||= require("jsonld/lib/documentLoaders/xhr")();
-} catch {}
-
-let nodeLoader = jsonld.documentLoaders?.node;
-try {
-  nodeLoader ||= require("jsonld/lib/documentLoaders/node")();
-} catch {}
-
-export const defaultLoader = xhrLoader || nodeLoader;
+export const defaultLoader = (() => {
+  const loader = new JsonLdDocumentLoader();
+  for (const [url, doc] of [...Object.entries(cachedSchemas), ...Object.entries(cachedIssuers)]) {
+    loader.addStatic(url, doc);
+  }
+  return loader.build();
+})();
 
 const knownSignatureBuilders = {
   Ed25519VerificationKey2020: async (method) =>
@@ -83,14 +59,7 @@ export const verify = async (credential, options = {}) => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
-
-  if (!documentLoader) {
-    if (!defaultLoader)
-      throw new Error(
-        "No documentLoader provided, and no default document loader was discovered. Please build and provide a documentLoader.",
-      );
-    documentLoader = defaultLoader;
-  }
+  if (!documentLoader) documentLoader = defaultLoader;
 
   if (typeof credential === "string" || credential instanceof String) {
     credential = JSON.parse(credential);
@@ -106,40 +75,6 @@ export const verify = async (credential, options = {}) => {
   if (!issuer) throw new Error("Invalid credential: missing issuer.");
 
   if (!allowedIssuers.includes(issuer)) throw new Error("Unfit credential: issuer is not allowed.");
-
-  multibaseKey = credential.proof.verificationMethod.split("#")[1];
-
-  const staticLoader = (id) => {
-    const loader = new JsonLdDocumentLoader();
-    loader.addStatic(id, issuerDoc(id, multibaseKey));
-    return loader.build();
-  };
-
-  const staticFractalLoader = staticLoader(FRACTAL_ISSUER);
-
-  const documentLoaderWithFallbackCompose =
-    (documentLoaderA, documentLoaderB) => async (url, options = {}) => {
-      let ex;
-      try {
-        return await documentLoaderA(url, options);
-      } catch (e) {
-        ex = e;
-      }
-
-      try {
-        return await documentLoaderB(url, options);
-      } catch (_) {
-        // Ignored on purpose.
-      }
-
-      throw ex;
-    };
-
-  const documentLoaderWithStaticFractal = (documentLoader) => {
-    return documentLoaderWithFallbackCompose(documentLoader, staticFractalLoader);
-  };
-
-  documentLoader = documentLoaderWithStaticFractal(documentLoader);
 
   const suite =
     allowedSigners ??

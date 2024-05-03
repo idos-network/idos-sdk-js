@@ -1,75 +1,50 @@
 import { expect, test } from "vitest";
 
-import { documentLoader } from "./cachedSchemas";
-
 import * as verifiableCredentials from "../lib/verifiable-credentials";
 
-const credential = {
+const playgroundCredential = {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
-    "https://raw.githubusercontent.com/trustfractal/claim-schemas/master/verifiable_credential/fractal_id.json-ld",
+    "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
     "https://w3id.org/security/suites/ed25519-2020/v1",
   ],
-  id: "uuid:ddedb27a-0a7f-48ac-baa7-848631918d6e",
+  id: "uuid:909225d0-6af3-416d-a770-fd6c15bb06da",
   type: ["VerifiableCredential"],
-  issuer: "https://vc-issuers.fractal.id/idos",
-  issuanceDate: "2023-10-05T12:37:35Z",
-  level: "basic",
-  status: "approved",
-  approved_at: "2023-10-05T12:37:35Z",
+  issuer: "https://vc-issuers.next.fractal.id/idos",
+  level: "human",
   credentialSubject: {
-    id: "uuid:f149f600-418b-4481-9efb-01c0ef72d8ba",
+    id: "uuid:fc7af2fd-4b37-48c6-96a6-ea09ec257282",
     wallets: [
-      { currency: "near", verified: true, address: "example.testnet" },
-      {
-        currency: "eth",
-        verified: true,
-        address: "0x05a56f2d52c817161883f50c441c3228cfe54d9f",
-      },
+      { currency: "eth", verified: true, address: "0x2591f18f0a7339c167b2ddf813fbf50b9970e8c2" },
     ],
-    emails: ["email@example.com"],
+    emails: [{ verified: false, address: "derp@derp.dep" }],
   },
+  status: "approved",
+  issuanceDate: "2024-05-03T14:02:06Z",
+  approved_at: "2024-05-03T14:02:06Z",
   proof: {
     type: "Ed25519Signature2020",
-    created: "2023-10-20T18:02:40Z",
+    created: "2024-05-03T14:45:13Z",
     verificationMethod:
-      "https://vc-issuers.fractal.id/idos#z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2",
+      "https://vc-issuers.next.fractal.id/idos#z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
     proofPurpose: "assertionMethod",
     "@context": ["https://www.w3.org/ns/credentials/v2"],
     proofValue:
-      "z4ucudi8ihgid5aUPotF7M5wHCH5C6ZGQJwkvjWMvjSYL5kYqkHEF9WZ1nZBDcJzkTh7zmL2HEtLzmEAiveW28wsT",
+      "z5QRnxqqXMZ7dyB5Sd7RLPLhpUdA99UXRzJd93ekr1Q8BL2KAStkNoqFwkq5DVveUXULA5qWGm9JMDfuytBi6aVP4",
   },
 };
 
-test("verifies an example credential", async () => {
+test("verifies an playground credential", async () => {
   expect(
-    await verifiableCredentials.verify(credential, {
-      documentLoader: verifiableCredentials.documentLoaderWithFallbackCompose(
-        documentLoader,
-        verifiableCredentials.staticLoader(
-          "https://vc-issuers.fractal.id/idos",
-          "z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2",
-        ),
-      ),
+    await verifiableCredentials.verify(playgroundCredential, {
+      allowedIssuers: [verifiableCredentials.PLAYGROUND_FRACTAL_ISSUER],
     }),
   ).toBe(true);
 });
 
-test("needs the multibase key to exist", async () => {
-  // Note how we're not adding a static loader for z6MkrJVnaZkeFzdQyMZu1cgjg7k1pZZ6pvBQ7XJPt4swbTQ2, which is what's
-  // being used in `credential`.
-  expect(
-    await verifiableCredentials.verify(credential, { documentLoader }).catch((e) => e),
-  ).toMatchObject({
-    verified: false,
-    error: {
-      message: "Verification error(s).",
-      errors: [
-        {
-          message:
-            "Did not verify any proofs; insufficient proofs matched the acceptable suite(s) and required purpose(s).",
-        },
-      ],
-    },
+test("doesn't validate a playground credential with the default settings", async () => {
+  // Note how we're not overriding `allowedIssuers`, which only accept production credentials.
+  expect(await verifiableCredentials.verify(playgroundCredential).catch((e) => e)).toMatchObject({
+    message: "Unfit credential: issuer is not allowed.",
   });
 });
