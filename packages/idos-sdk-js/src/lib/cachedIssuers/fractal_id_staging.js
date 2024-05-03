@@ -9,12 +9,12 @@ export default {
       },
     },
   ],
-  id: "https://staging.vc-issuers.fractal.id",
+  id: "https://vc-issuers.staging.sandbox.fractal.id/idos",
   assertionMethod: [
     {
-      id: "https://staging.vc-issuers.fractal.id/idos#z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
+      id: "https://vc-issuers.staging.sandbox.fractal.id/idos#z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
       type: "Ed25519VerificationKey2020",
-      controller: "https://staging.vc-issuers.fractal.id/idos",
+      controller: "https://vc-issuers.staging.sandbox.fractal.id/idos",
       publicKeyMultibase: "z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
     },
   ],
