@@ -5,6 +5,13 @@ import nacl from "tweetnacl";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
+// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
+export class UserDisallowedDecryption extends Error {
+  static default() {
+    return new UserDisallowedDecryption("User disallowed decryption.")
+  }
+}
+
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
@@ -174,7 +181,19 @@ export class Enclave {
     return fullMessage;
   }
 
-  decrypt(fullMessage, senderPublicKey) {
+  async decrypt(fullMessage, senderPublicKey) {
+    if(!this.store.get("auto-confirm-decrypt", {})[this.parentOrigin]) {
+      const {confirm, remember} = await this.confirm("Do you allow decryption of your data?", true)
+      if(!confirm) throw UserDisallowedDecryption.default()
+
+      this.store.update(
+        "auto-confirm-decrypt",
+        {},
+        (memory) => Object.assign(memory, {[this.parentOrigin]: remember})
+      )
+    }
+
+
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
     const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
@@ -198,7 +217,7 @@ export class Enclave {
     return decrypted;
   }
 
-  async confirm(message) {
+  async confirm(message, remember) {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
 
@@ -206,12 +225,13 @@ export class Enclave {
       this.confirmButton.addEventListener("click", async (e) => {
         this.confirmButton.disabled = true;
 
-        const { confirmed } = await this.#openDialog("confirm", {
+        const result = await this.#openDialog("confirm", {
           message,
           origin: this.parentOrigin,
+          remember,
         });
 
-        resolve(confirmed);
+        resolve(result);
       }),
     );
   }

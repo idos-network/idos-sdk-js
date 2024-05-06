@@ -26,7 +26,7 @@ class Dialog {
     window.addEventListener("beforeunload", this.beforeUnload);
   }
 
-  async confirmForm({ message, origin }) {
+  async confirmForm({ message, origin, remember }) {
     message = sanitize(message);
     origin = sanitize(origin);
 
@@ -34,11 +34,15 @@ class Dialog {
     confirmForm.style.display = "block";
     confirmForm.querySelector("#origin").innerHTML = origin;
     confirmForm.querySelector("#message").innerHTML = message;
+    confirmForm.querySelector("#remember").hidden = !remember;
 
     return new Promise((resolve) =>
       confirmForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        resolve(e.submitter.id === "yes");
+        resolve({
+          confirm: e.submitter.id === "yes",
+          remember: confirmForm.querySelector('#remember input[name="remember"]').checked,
+        })
       }),
     );
   }
@@ -78,11 +82,11 @@ class Dialog {
     }
   }
 
-  async confirm({ message: { message, origin } }) {
+  async confirm({ message: { message, origin, remember = false } }) {
     this.authContainer.style.display = "none";
-    const confirmed = await this.confirmForm({ message, origin });
+    const result = await this.confirmForm({ message, origin, remember });
 
-    this.respondToEnclave({ result: { confirmed } });
+    this.respondToEnclave({ result });
     this.authContainer.style.display = "flex";
   }
 

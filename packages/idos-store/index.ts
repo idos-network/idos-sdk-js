@@ -18,10 +18,19 @@ export class Store {
     };
   }
 
-  get(key: string): any {
+  get(key: string, fallback?: any): any {
     const value = this.#getLocalStorage(key);
-    if (!value) return undefined;
+    if (!value) {
+      if (!fallback) return undefined;
+
+      this.set(key, fallback);
+      return fallback;
+    }
     return JSON.parse(value);
+  }
+
+  update(key: string, fallback: any, updater: (old: any) => any): any {
+    this.set(key, updater(this.get(key, fallback)));
   }
 
   set(key: string, value: any, days?: number | string) {

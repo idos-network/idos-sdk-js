@@ -59,9 +59,14 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
-    return this.#requestToEnclave({
-      decrypt: { fullMessage: message, senderPublicKey },
-    }) as Promise<Uint8Array>;
+    this.#showEnclave();
+    try {
+      return (await this.#requestToEnclave({
+        decrypt: { fullMessage: message, senderPublicKey },
+      })) as Promise<Uint8Array>;
+    } finally {
+      this.#hideEnclave();
+    }
   }
 
   async #loadEnclave() {
