@@ -14,17 +14,19 @@ export class Store {
           let str;
 
           try {
-            str = JSON.parse(value)
+            str = JSON.parse(value);
           } catch (error) {
-            str = ''
+            str = "";
           }
 
           const expires = Date.parse(str);
 
-          if (Number.isNaN(expires) || (expires && expires < Date.now())) {
+          console.log({ expires });
+
+          if (Number.isNaN(expires) || expires < Date.now()) {
             // this.reset()
-            localStorage.removeItem(key)
-            localStorage.removeItem(key.replace('-expires', ''))
+            localStorage.removeItem(key);
+            localStorage.removeItem(key.replace("-expires", ""));
           }
         }
       }
