@@ -21,10 +21,7 @@ export class Store {
 
           const expires = Date.parse(str);
 
-          console.log({ expires });
-
           if (Number.isNaN(expires) || expires < Date.now()) {
-            // this.reset()
             localStorage.removeItem(key);
             localStorage.removeItem(key.replace("-expires", ""));
           }
