@@ -6,26 +6,10 @@ interface PipeCodecArgs<T> {
 export class Store {
   keyPrefix = "idOS-";
 
+  readonly REMEMBER_DURATION_KEY = "storage-expiration";
+
   constructor() {
-    for (const key in localStorage) {
-      if (!key.startsWith(this.keyPrefix) || !key.endsWith("-expires")) continue;
-
-      const value = localStorage.getItem(key);
-      if (!value) continue;
-
-      let str;
-      try {
-        str = JSON.parse(value);
-      } catch (error) {
-        continue;
-      }
-
-      const expires = Date.parse(str);
-      if (Number.isNaN(expires) || expires < Date.now()) {
-        localStorage.removeItem(key);
-        localStorage.removeItem(key.replace("-expires", ""));
-      }
-    }
+    if (this.hasRememberDurationElapsed()) this.reset();
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>) {
@@ -47,17 +31,47 @@ export class Store {
     return JSON.parse(value);
   }
 
-  set(key: string, value: any, days?: number | string) {
-    if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
-    if (!value) return;
-
+  setRememberDuration(days?: number | string) {
     const daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
 
-    if (daysNumber) {
-      const date = new Date();
-      date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
-      this.#setLocalStorage(`${key}-expires`, JSON.stringify(date.toISOString()));
+    if (!daysNumber) {
+      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      return;
     }
+
+    const date = new Date();
+    date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
+    this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
+  }
+
+  hasRememberDurationElapsed(): boolean {
+    const value = this.#getLocalStorage(this.REMEMBER_DURATION_KEY);
+    if (!value) return false;
+
+    // If the value doesn't decode right, we're going to assume that somebody messed around with it.
+    // The absence of a value means `false` today. So, we're following suit on the reasoning: consider it absent.
+    // Furthermore, since this is not really a recoverable situation, we're going to clean up that stored value.
+
+    let str;
+    try {
+      str = JSON.parse(value);
+    } catch (error) {
+      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      return false;
+    }
+
+    const expires = Date.parse(str);
+    if (Number.isNaN(expires)) {
+      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      return false;
+    }
+
+    return expires < Date.now();
+  }
+
+  set(key: string, value: any) {
+    if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
+    if (!value) return;
 
     this.#setLocalStorage(key, JSON.stringify(value));
   }
@@ -68,6 +82,10 @@ export class Store {
 
   #setLocalStorage(key: string, value: string) {
     return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
+  }
+
+  #removeLocalStorage(key: string) {
+    return window.localStorage.removeItem(`${this.keyPrefix}${key}`);
   }
 
   reset() {
