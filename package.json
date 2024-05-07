@@ -6,10 +6,12 @@
     "dev": "turbo run dev",
     "lint": "turbo run lint",
     "format": "turbo run format",
-    "format:check": "biome ci --formatter-enabled=true --linter-enabled=false ."
+    "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
+    "postinstall": "lefthook install"
   },
   "devDependencies": {
     "@biomejs/biome": "1.4.1",
+    "lefthook": "^1.6.10",
     "turbo": "^1.11.2"
   },
   "packageManager": "pnpm@8.6.10",
