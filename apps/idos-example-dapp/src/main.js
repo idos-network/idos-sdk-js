@@ -192,9 +192,10 @@ const connectWallet = {
   if (chosenFlow.credentials) {
     // TODO: Why is this showing me the copies that belong to AGs? :x
     // https://github.com/idos-network/idos-schema/pull/36
-    const credentials = await terminal
+    let credentials = await terminal
       .h1("eyes", "User's credentials")
       .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
+    credentials = credentials.filter(c => c.original_id === null);
     cache.set("credentials", credentials);
 
     terminal.table(
