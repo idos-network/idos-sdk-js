@@ -49,7 +49,8 @@ export class Enclave {
 
   async authWithPassword() {
     const { password, duration } = await this.#openDialog("password");
-    this.store.set("password", password, duration);
+    this.store.set("password", password);
+    this.store.setRememberDuration(duration);
     return { password, duration };
   }
 
@@ -95,7 +96,8 @@ export class Enclave {
 
         if (preferredAuthMethod === "password") {
           ({ password, duration } = await this.#openDialog("password"));
-          this.store.set("password", password, duration);
+          this.store.set("password", password);
+          this.store.setRememberDuration(duration);
           return resolve();
         }
 
@@ -128,7 +130,8 @@ export class Enclave {
         } else {
           this.store.set("preferred-auth-method", "password");
         }
-        this.store.set("password", password, duration);
+        this.store.set("password", password);
+        this.store.setRememberDuration(duration);
         resolve();
       }),
     );
