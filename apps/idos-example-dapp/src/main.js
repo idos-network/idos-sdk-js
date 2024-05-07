@@ -195,7 +195,7 @@ const connectWallet = {
     let credentials = await terminal
       .h1("eyes", "User's credentials")
       .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
-    credentials = credentials.filter(c => c.original_id === null);
+    credentials = credentials.filter((c) => c.original_id === null);
     cache.set("credentials", credentials);
 
     terminal.table(
