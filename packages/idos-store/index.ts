@@ -8,24 +8,22 @@ export class Store {
 
   constructor() {
     for (const key in localStorage) {
-      if (key.startsWith(this.keyPrefix) && key.endsWith("-expires")) {
-        const value = localStorage.getItem(key);
-        if (value) {
-          let str;
+      if (!key.startsWith(this.keyPrefix) || !key.endsWith("-expires")) continue;
 
-          try {
-            str = JSON.parse(value);
-          } catch (error) {
-            str = "";
-          }
+      const value = localStorage.getItem(key);
+      if (!value) continue;
 
-          const expires = Date.parse(str);
+      let str;
+      try {
+        str = JSON.parse(value);
+      } catch (error) {
+        continue;
+      }
 
-          if (Number.isNaN(expires) || expires < Date.now()) {
-            localStorage.removeItem(key);
-            localStorage.removeItem(key.replace("-expires", ""));
-          }
-        }
+      const expires = Date.parse(str);
+      if (Number.isNaN(expires) || expires < Date.now()) {
+        localStorage.removeItem(key);
+        localStorage.removeItem(key.replace("-expires", ""));
       }
     }
   }
