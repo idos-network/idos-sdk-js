@@ -44,12 +44,12 @@ export class idOS {
   }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
-    this.auth = new Auth(this);
+    this.store = new Store();
+    this.auth = new Auth(kwilWrapper, this.store);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container, undefined);
     this.kwilWrapper = kwilWrapper;
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
-    this.store = new Store();
   }
 
   static async init(params: InitParams): Promise<idOS> {

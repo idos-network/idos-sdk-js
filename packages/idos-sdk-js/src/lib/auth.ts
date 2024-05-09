@@ -6,11 +6,10 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 
-import { idOS } from "./idos";
+import type { Store } from "../../../idos-store";
+import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
-
-/* global Buffer */
 
 export interface AuthUser {
   humanId: string | null;
@@ -19,42 +18,43 @@ export interface AuthUser {
 }
 
 export class Auth {
-  idOS: idOS;
   user?: AuthUser;
 
-  constructor(idOS: idOS) {
-    this.idOS = idOS;
+  constructor(public readonly kwilWrapper: KwilWrapper, public readonly store: Store) {}
+
+  static async init(kwilWrapper: KwilWrapper, store: Store) {
+    return new Auth(kwilWrapper, store);
   }
 
-  async forget() {
-    this.idOS.store.reset();
+  forget() {
+    this.store.reset();
   }
 
-  async remember(key: string, value: any) {
-    this.idOS.store.set(key, value);
+  remember(key: string, value: unknown) {
+    this.store.set(key, value);
   }
 
   async setEvmSigner(signer: Signer) {
     const currentAddress = await signer.getAddress();
 
-    const storedAddress = this.idOS.store.get("signer-address");
+    const storedAddress = this.store.get("signer-address");
 
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.idOS.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logout();
 
-      await this.remember("signer-address", currentAddress);
+      this.remember("signer-address", currentAddress);
     }
 
-    this.idOS.kwilWrapper.setSigner({
+    this.kwilWrapper.setSigner({
       accountId: currentAddress,
       signer,
       signatureType: "secp256k1_ep",
     });
 
     this.user = {
-      humanId: await this.idOS.kwilWrapper.getHumanId(),
+      humanId: await this.kwilWrapper.getHumanId(),
       address: currentAddress,
     };
   }
@@ -70,8 +70,8 @@ export class Auth {
       );
 
       if (signature) {
-        await this.remember("signer-address", accountId);
-        await this.remember("signer-public-key", publicKey);
+        this.remember("signer-address", accountId);
+        this.remember("signer-public-key", publicKey);
       }
 
       const signMessageOriginal = wallet.signMessage.bind(wallet);
@@ -82,10 +82,10 @@ export class Auth {
       }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
         if (error) return Promise.reject();
 
-        const lastMessage = this.idOS.store.get("sign-last-message");
+        const lastMessage = this.store.get("sign-last-message");
         if (signature && message === lastMessage) {
-          const nonce = Buffer.from(this.idOS.store.get("sign-last-nonce"));
-          const callbackUrl = this.idOS.store.get("sign-last-url");
+          const nonce = Buffer.from(this.store.get("sign-last-nonce"));
+          const callbackUrl = this.store.get("sign-last-url");
 
           return Promise.resolve({
             accountId: currentAddress,
@@ -99,9 +99,9 @@ export class Auth {
         const callbackUrl = window.location.href;
         const nonce = Buffer.from(new Nonce(32).clampUTF8);
 
-        this.idOS.store.set("sign-last-message", message);
-        this.idOS.store.set("sign-last-nonce", Array.from(nonce));
-        this.idOS.store.set("sign-last-url", callbackUrl);
+        this.store.set("sign-last-message", message);
+        this.store.set("sign-last-nonce", Array.from(nonce));
+        this.store.set("sign-last-url", callbackUrl);
 
         signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
@@ -109,23 +109,23 @@ export class Auth {
       };
     }
 
-    const storedAddress = this.idOS.store.get("signer-address");
+    const storedAddress = this.store.get("signer-address");
 
-    let publicKey = this.idOS.store.get("signer-public-key");
+    let publicKey = this.store.get("signer-public-key");
 
     if (storedAddress !== currentAddress || !publicKey) {
-      await this.forget();
+      this.forget();
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.idOS.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logout();
 
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
       // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
       ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
-      await this.remember("signer-address", currentAddress);
-      await this.remember("signer-public-key", publicKey);
+      this.remember("signer-address", currentAddress);
+      this.remember("signer-public-key", publicKey);
     }
 
     const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
@@ -178,14 +178,14 @@ export class Auth {
       );
     };
 
-    this.idOS.kwilWrapper.setSigner({
+    this.kwilWrapper.setSigner({
       accountId: implicitAddressFromPublicKey(publicKey),
       signer,
       signatureType: "nep413",
     });
 
     this.user = {
-      humanId: await this.idOS.kwilWrapper.getHumanId(),
+      humanId: await this.kwilWrapper.getHumanId(),
       address: currentAddress,
       publicKey,
     };
