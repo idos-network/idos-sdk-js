@@ -13,7 +13,6 @@ export class KwilWrapper {
   kwilProvider: string;
   dbId: string;
   signer?: KwilSigner;
-  signatureType?: string;
 
   constructor(
     client: WebKwil,
@@ -62,8 +61,6 @@ export class KwilWrapper {
     } else {
       this.signer = new KwilSigner(signer as EthSigner, accountId);
     }
-
-    this.signatureType = signatureType;
   }
 
   async buildAction(
