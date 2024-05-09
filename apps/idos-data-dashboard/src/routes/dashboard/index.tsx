@@ -249,7 +249,7 @@ export function Component() {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <Box pos="fixed" right={5} bottom={5}>
+      <Flex pos="fixed" right={5} bottom={5} gap="2">
         <Button
           as={ChakraLink}
           isExternal
@@ -262,7 +262,19 @@ export function Component() {
         >
           Privacy Policy <ExternalLinkIcon size={16} />
         </Button>
-      </Box>
+        <Button
+          as={ChakraLink}
+          isExternal
+          href="https://drive.google.com/file/d/1uiFXUTM3cwCvbEUGPAZwj_ru06H8beLh/view?usp=drive_link"
+          target="_blank"
+          color="green.200"
+          display="inline-flex"
+          alignItems="center"
+          gap={2}
+        >
+          User Agreement <ExternalLinkIcon size={16} />
+        </Button>
+      </Flex>
     </Flex>
   );
 }
