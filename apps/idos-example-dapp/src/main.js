@@ -262,7 +262,7 @@ const connectWallet = {
         owner = address;
         break;
       case "NEAR":
-        owner = (await idos.auth.currentUser()).publicKey;
+        owner = idos.auth.currentUser.publicKey;
         break;
       default:
         throw new Error("Unreachable");

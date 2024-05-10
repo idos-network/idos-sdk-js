@@ -18,7 +18,12 @@ export interface AuthUser {
 }
 
 export class Auth {
-  user?: AuthUser;
+  private user?: AuthUser;
+
+  get currentUser() {
+    if (!this.user) throw new Error("Call idOS.setSigner first.");
+    return this.user;
+  }
 
   constructor(public readonly kwilWrapper: KwilWrapper, public readonly store: Store) {}
 
@@ -189,11 +194,5 @@ export class Auth {
       address: currentAddress,
       publicKey,
     };
-  }
-
-  async currentUser() {
-    if (!this.user) throw new Error("Call idOS.setSigner first.");
-
-    return this.user;
   }
 }
