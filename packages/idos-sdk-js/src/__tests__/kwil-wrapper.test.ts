@@ -8,7 +8,7 @@ const kwilProvider = "kwil-provider";
 const chainId = "chain-id";
 const dbId = "db-id";
 
-class TestKwilClient extends WebKwil {
+export class TestKwilClient extends WebKwil {
   constructor() {
     super({ kwilProvider, chainId });
   }
