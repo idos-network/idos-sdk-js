@@ -1,13 +1,14 @@
 import * as Base64Codec from "@stablelib/base64";
-import { idOS } from "./idos";
+import type { Enclave } from "./enclave";
+import type { KwilWrapper } from "./kwil-wrapper";
 
 /* global crypto */
 
 export class Data {
-  idOS: idOS;
+  constructor(public readonly kwilWrapper: KwilWrapper, public readonly enclave: Enclave) {}
 
-  constructor(idOS: idOS) {
-    this.idOS = idOS;
+  static async init(kwilWrapper: KwilWrapper, enclave: Enclave) {
+    return new Data(kwilWrapper, enclave);
   }
 
   singularize(tableName: string): string {
@@ -18,7 +19,7 @@ export class Data {
     tableName: string,
     filter?: Partial<T>,
   ): Promise<T[]> {
-    const records = (await this.idOS.kwilWrapper.call(
+    const records = (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
       `List your ${tableName} in idOS`,
@@ -26,7 +27,7 @@ export class Data {
 
     if (tableName === "attributes") {
       for (const record of records) {
-        record.value = await this.idOS.enclave.decrypt(record.value);
+        record.value = await this.enclave.decrypt(record.value);
       }
     }
 
@@ -46,9 +47,9 @@ export class Data {
     let receiverPublicKey;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       for (const record of records) {
-        (record as any).content = await this.idOS.enclave.encrypt(
+        (record as any).content = await this.enclave.encrypt(
           (record as any).content as string,
           receiverPublicKey,
         );
@@ -57,9 +58,9 @@ export class Data {
     }
 
     if (tableName === "attributes") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       for (const record of records) {
-        (record as any).value = await this.idOS.enclave.encrypt(
+        (record as any).value = await this.enclave.encrypt(
           (record as any).value as string,
           receiverPublicKey,
         );
@@ -71,7 +72,7 @@ export class Data {
       id: crypto.randomUUID(),
       ...record,
     }));
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,
       newRecords,
       `Create new ${this.singularize(tableName)} in your idOS profile`,
@@ -92,7 +93,7 @@ export class Data {
 
     let receiverPublicKey;
 
-    const inputs: string[] = ((await this.idOS.kwilWrapper.schema) as any).data.actions
+    const inputs: string[] = ((await this.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)
       .inputs.map((input: string) => input.substring(1));
 
@@ -103,8 +104,8 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
-      (record as any).content = await this.idOS.enclave.encrypt(
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      (record as any).content = await this.enclave.encrypt(
         (record as any).content as string,
         receiverPublicKey,
       );
@@ -112,8 +113,8 @@ export class Data {
     }
 
     if (tableName === "attributes") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
-      (record as any).value = await this.idOS.enclave.encrypt(
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      (record as any).value = await this.enclave.encrypt(
         (record as any).value as string,
         receiverPublicKey,
       );
@@ -121,7 +122,7 @@ export class Data {
     }
 
     const newRecord = { id: crypto.randomUUID(), ...record };
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,
       [newRecord],
       `Create new ${this.singularize(tableName)} in your idOS profile`,
@@ -136,7 +137,7 @@ export class Data {
     recordId: string,
   ): Promise<T | null> {
     if (tableName === "credentials") {
-      const records = (await this.idOS.kwilWrapper.call(
+      const records = (await this.kwilWrapper.call(
         "get_credential_owned",
         { id: recordId },
         "Get your credential in idOS",
@@ -146,10 +147,7 @@ export class Data {
 
       if (!record) return null;
 
-      record.content = await this.idOS.enclave.decrypt(
-        record.content,
-        record.encryption_public_key,
-      );
+      record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
 
       return record;
     }
@@ -167,7 +165,7 @@ export class Data {
     recordId: string,
   ): Promise<T | null> {
     if (tableName === "credentials") {
-      const records = (await this.idOS.kwilWrapper.call(
+      const records = (await this.kwilWrapper.call(
         "get_credential_shared",
         { id: recordId },
         "Get credential shared with you in idOS",
@@ -177,10 +175,7 @@ export class Data {
 
       if (!record) return null;
 
-      record.content = await this.idOS.enclave.decrypt(
-        record.content,
-        record.encryption_public_key,
-      );
+      record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
 
       return record;
     }
@@ -201,7 +196,7 @@ export class Data {
     synchronous?: boolean,
   ): Promise<{ id: string }[]> {
     const records = recordIds.map((id) => ({ id }));
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       records,
       description,
@@ -218,7 +213,7 @@ export class Data {
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const record = { id: recordId };
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `remove_${this.singularize(tableName)}`,
       [record],
       description,
@@ -234,21 +229,21 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.idOS.enclave.encryptionPublicKey) await this.idOS.enclave.ready();
+    if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
 
     let receiverPublicKey;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.idOS.enclave.ready());
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       record.encryption_public_key = receiverPublicKey;
-      record.content = await this.idOS.enclave.encrypt(record.content, receiverPublicKey);
+      record.content = await this.enclave.encrypt(record.content, receiverPublicKey);
     }
 
     if (tableName === "attributes") {
-      (record as any).value = await this.idOS.enclave.encrypt((record as any).value);
+      (record as any).value = await this.enclave.encrypt((record as any).value);
     }
 
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `edit_${this.singularize(tableName)}`,
       [record],
       description,
@@ -263,7 +258,7 @@ export class Data {
     recordId: string,
     receiverPublicKey: string,
   ): Promise<{ id: string }> {
-    const encPublicKey = Base64Codec.encode(await this.idOS.enclave.ready());
+    const encPublicKey = Base64Codec.encode(await this.enclave.ready());
 
     const name = this.singularize(tableName);
 
@@ -271,12 +266,12 @@ export class Data {
     const record = (await this.get(tableName, recordId)) as any;
 
     if (tableName === "credentials") {
-      record.content = await this.idOS.enclave.encrypt(record.content as string, receiverPublicKey);
+      record.content = await this.enclave.encrypt(record.content as string, receiverPublicKey);
       record.encryption_public_key = encPublicKey;
     }
 
     const id = crypto.randomUUID();
-    await this.idOS.kwilWrapper.execute(
+    await this.kwilWrapper.execute(
       `share_${name}`,
       [
         {

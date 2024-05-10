@@ -46,9 +46,10 @@ export class idOS {
 
     this.store = new Store();
     this.auth = new Auth(kwilWrapper, this.store);
-    this.data = new Data(this);
     this.enclave = new Enclave(this, container, undefined);
+    this.data = new Data(kwilWrapper, this.enclave);
     this.kwilWrapper = kwilWrapper;
+    this.data = new Data(this.kwilWrapper, this.enclave);
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
   }
 
