@@ -1,4 +1,4 @@
-import { EnclaveProvider, StoredData } from "./interface";
+import { EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
