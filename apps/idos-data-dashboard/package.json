@@ -8,10 +8,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "lint": "biome check --apply ./src",
-    "format": "biome format --write .",
-    "test": "playwright test",
-    "test:unit": "vitest",
-    "test:unit:coverage": "vitest run --coverage"
+    "format": "biome format --write ."
   },
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
