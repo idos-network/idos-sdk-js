@@ -27,10 +27,6 @@ export class Auth {
 
   constructor(public readonly kwilWrapper: KwilWrapper, public readonly store: Store) {}
 
-  static async init(kwilWrapper: KwilWrapper, store: Store) {
-    return new Auth(kwilWrapper, store);
-  }
-
   forget() {
     this.store.reset();
   }
