@@ -40,7 +40,7 @@ export const useFetchIdOSProfile = () => {
   const { sdk } = useIdOS();
   return useQuery({
     queryKey: ["idos-profile"],
-    queryFn: () => sdk.auth.currentUser(),
+    queryFn: () => sdk.auth.currentUser,
   });
 };
 
@@ -95,7 +95,8 @@ export const Provider = ({ children }: PropsWithChildren) => {
     if (profile) {
       // @ts-expect-error
       await _sdk.setSigner(signer.type, signer.value);
-      const _pk = (await _sdk.auth.currentUser()).publicKey;
+      const _pk = _sdk.auth.currentUser.publicKey;
+
       setPublicKey(_pk);
     }
 

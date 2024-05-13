@@ -44,12 +44,12 @@ export class idOS {
   }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
 
-    this.auth = new Auth(this);
+    this.store = new Store();
+    this.auth = new Auth(kwilWrapper, this.store);
     this.data = new Data(this);
     this.enclave = new Enclave(this, container, undefined);
     this.kwilWrapper = kwilWrapper;
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
-    this.store = new Store();
   }
 
   static async init(params: InitParams): Promise<idOS> {
@@ -71,7 +71,7 @@ export class idOS {
   async setSigner(type: SignerType, signer: Wallet | Signer): Promise<AuthUser> {
     if (type === "NEAR") {
       await this.auth.setNearSigner(signer as Wallet);
-      const currentUser = await this.auth.currentUser();
+      const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({
         type,
         accountId: currentUser.address,
@@ -85,7 +85,7 @@ export class idOS {
 
     if (type === "EVM") {
       await this.auth.setEvmSigner(signer as Signer);
-      const currentUser = await this.auth.currentUser();
+      const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({ type, signer: signer as Signer });
 
       return currentUser;
