@@ -7,10 +7,6 @@ import type { KwilWrapper } from "./kwil-wrapper";
 export class Data {
   constructor(public readonly kwilWrapper: KwilWrapper, public readonly enclave: Enclave) {}
 
-  static async init(kwilWrapper: KwilWrapper, enclave: Enclave) {
-    return new Data(kwilWrapper, enclave);
-  }
-
   singularize(tableName: string): string {
     return tableName.replace(/s$/, "");
   }
