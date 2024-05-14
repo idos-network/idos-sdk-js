@@ -43,12 +43,13 @@ export class idOS {
     nearGrantsOptions,
   }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
-
     this.store = new Store();
-    this.auth = new Auth(kwilWrapper, this.store);
-    this.data = new Data(this);
-    this.enclave = new Enclave(this, container, undefined);
     this.kwilWrapper = kwilWrapper;
+
+    this.auth = new Auth(kwilWrapper, this.store);
+    this.enclave = new Enclave(this, container, undefined);
+    this.data = new Data(kwilWrapper, this.enclave);
+
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
   }
 
