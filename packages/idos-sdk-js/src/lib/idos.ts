@@ -51,7 +51,7 @@ export class idOS {
     this.enclave = new Enclave(this.auth, new IframeEnclave({ container }));
     this.data = new Data(kwilWrapper, this.enclave);
 
-    this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);
+    this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);
   }
 
   static async init(params: InitParams): Promise<idOS> {
