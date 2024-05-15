@@ -5,6 +5,7 @@ import { assertNever } from "../types";
 import { Auth, AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
+import { IframeEnclave } from "./enclave-providers";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
@@ -47,7 +48,7 @@ export class idOS {
     this.kwilWrapper = kwilWrapper;
 
     this.auth = new Auth(kwilWrapper, this.store);
-    this.enclave = new Enclave(this, container, undefined);
+    this.enclave = new Enclave(this.auth, new IframeEnclave({ container }));
     this.data = new Data(kwilWrapper, this.enclave);
 
     this.grants = new Grants(this, evmGrantsOptions, nearGrantsOptions);

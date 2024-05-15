@@ -1,4 +1,4 @@
-import { EnclaveProvider, StoredData } from "./interface";
+import { EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   enclaveHost: any;
