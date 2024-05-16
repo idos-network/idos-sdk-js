@@ -1,0 +1,17 @@
+{
+  "name": "idos-sdk-e2e",
+  "version": "1.0.0",
+  "description": "idOS e2e tests",
+  "main": "index.js",
+  "license": "MIT",
+
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "devDependencies": {
+    "@playwright/test": "^1.40.1",
+    "@types/node": "^20.10.5"
+  }
+}
