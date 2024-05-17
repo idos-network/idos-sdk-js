@@ -39,6 +39,8 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
 
   const { address } = useIdOS();
 
+  if (!address) return null;
+
   return (
     <Modal
       isOpen={isOpen}
