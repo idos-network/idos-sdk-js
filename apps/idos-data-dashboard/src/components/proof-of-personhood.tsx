@@ -21,11 +21,10 @@ type ProfOfPersonhoodProps = {
   onClose: () => void;
 };
 
-const ETH_PROOF_LINK =
-  "https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-eth%3Aread%20verification.wallet-eth.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread";
-
-const NEAR_PROOF_LINK =
-  "https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.wallet-near%3Aread%20verification.wallet-near.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread";
+const fractalProofUrl = (address: string) =>
+  `https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread&method=wallet&currency=${
+    address?.startsWith("0x") ? "eth" : "near"
+  }&ensure_wallet=${address}`;
 
 export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => {
   const isCentered = useBreakpointValue(
@@ -39,7 +38,8 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
   );
 
   const { address } = useIdOS();
-  const PROOF_LINK = address?.startsWith("0x") ? ETH_PROOF_LINK : NEAR_PROOF_LINK;
+
+  if (!address) return null;
 
   return (
     <Modal
@@ -111,7 +111,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
               base: 1,
               lg: "none",
             }}
-            onClick={() => window.location.assign(PROOF_LINK)}
+            onClick={() => window.location.assign(fractalProofUrl(address))}
           >
             Verify with Fractal ID
           </Button>
