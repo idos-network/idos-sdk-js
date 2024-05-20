@@ -1,4 +1,4 @@
-import { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
+import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
   options: Omit<EnclaveOptions, "container" | "url">;
@@ -12,6 +12,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.options = other;
     this.hostUrl = new URL(other.url ?? import.meta.env.VITE_IDOS_ENCLAVE_URL);
     this.iframe = document.createElement("iframe");
+    this.iframe.id = "idos-enclave-iframe";
   }
 
   async load(): Promise<StoredData> {

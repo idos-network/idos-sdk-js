@@ -6,7 +6,7 @@ import { Button } from "../../components/Button";
 import { Collapsible } from "../../components/Collapsible";
 import { Heading } from "../../components/Heading";
 import { Paragraph } from "../../components/Paragraph";
-import { MethodProps } from "./Chooser";
+import type { MethodProps } from "./Chooser";
 
 export interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {
   type: "password" | "webauthn";

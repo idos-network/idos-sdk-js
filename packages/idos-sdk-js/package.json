@@ -58,6 +58,7 @@
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
+    "@synthetixio/synpress": "4.0.0-alpha.7",
     "borsh": "^1.0.0",
     "jsonld": "^8.3.1",
     "jsonld-document-loader": "^2.0.0",

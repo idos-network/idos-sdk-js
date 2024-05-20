@@ -2,58 +2,58 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon"
-    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>" />
+    <meta charset="UTF-8"/>
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>"/>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-    rel="stylesheet" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>idOS Secure Enclave</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link
+            href="https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+            rel="stylesheet"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>idOS Secure Enclave</title>
 
-  <style>
-    button {
-      display: none;
-    }
+    <style>
+        button {
+            display: none;
+        }
 
-    button#unlock::before {
-      content: "🔐 Unlock idOS";
-    }
+        button#unlock::before {
+            content: "🔐 Unlock idOS";
+        }
 
-    button#unlock:disabled {
-      background-color: grey;
-    }
+        button#unlock:disabled {
+            background-color: grey;
+        }
 
-    button#unlock:disabled::before {
-      content: "Unlocking...";
-    }
+        button#unlock:disabled::before {
+            content: "Unlocking...";
+        }
 
-    button#confirm::before {
-      content: "👀 See request";
-    }
+        button#confirm::before {
+            content: "👀 See request";
+        }
 
-    button#confirm:disabled {
-      background-color: grey;
-    }
+        button#confirm:disabled {
+            background-color: grey;
+        }
 
-    button#confirm:disabled::before {
-      content: "Waiting...";
-    }
-  </style>
+        button#confirm:disabled::before {
+            content: "Waiting...";
+        }
+    </style>
 </head>
 
 <body>
-  <div id="container" class="w-screen h-screen">
+<div id="container" class="w-screen h-screen">
     <button id="unlock"
-      class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[43cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"></button>
+            class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[43cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"></button>
     <button id="confirm"
-      class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[43cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"></button>
-  </div>
+            class="w-full h-full px-[5%] py-[2%] bg-[#00ffb9] text-[43cqmin] transition-colors hover:bg-green-300 rounded-lg text-zinc-950 font-medium"></button>
+</div>
 
-  <script type="module" src="/src/main.ts"></script>
+<script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

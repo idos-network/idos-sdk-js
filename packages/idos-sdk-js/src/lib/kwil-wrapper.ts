@@ -1,5 +1,5 @@
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
-import { type ActionBody, type ActionInput } from "@kwilteam/kwil-js/dist/core/action";
+import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 
 export class KwilWrapper {

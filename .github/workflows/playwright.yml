@@ -1,0 +1,39 @@
+name: Playwright Tests
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  
+jobs:
+  e2e:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    defaults:
+        run:
+          working-directory: ./apps/idos-sdk-e2e
+    env:
+      BASE_URL: ${{secrets.IDOS_E2E_BASE_URL}}
+      WALLET_SEED_PHRASE: ${{ secrets.IDOS_E2E_WALLET_SEED_PHRASE }}
+      WALLET_PASSWORD: ${{ secrets.IDOS_E2E_WALLET_PASSWORD }}
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+    - uses: pnpm/action-setup@v2
+      with:
+        node-version: 18
+        working-directory: ./apps/idos-sdk-e2e
+    - name: Install dependencies
+      run: pnpm i
+    - name: Install Playwright
+      run: pnpm playwright install --with-deps chromium
+    - name: Build Synpress cache
+      run: xvfb-run npx synpress tests/wallet-setup
+    - name: Run Playwright tests
+      run: xvfb-run npx playwright test
+    - uses: actions/upload-artifact@v4
+      if: ${{ !cancelled() }}
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 30

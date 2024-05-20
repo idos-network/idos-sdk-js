@@ -73,7 +73,7 @@ const WalletsList = () => {
     const addresses = Object.keys(wallets.data);
     return (
       <>
-        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+        <List id="wallets-list" display="flex" flexDir="column" gap={2.5} flex={1}>
           {addresses.map((address, index) => (
             <ListItem key={`${address}-${index}`}>
               <WalletCard address={address} onDelete={handleDelete} />
@@ -115,6 +115,7 @@ export function Component() {
         {hasProfile ? (
           <HStack>
             <Button
+              id="add-wallet-button"
               colorScheme="green"
               leftIcon={<PlusIcon size={24} />}
               hideBelow="lg"

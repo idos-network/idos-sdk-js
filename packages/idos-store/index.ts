@@ -32,7 +32,8 @@ export class Store {
   }
 
   setRememberDuration(days?: number | string) {
-    const daysNumber = !days || Number.isNaN(Number(days)) ? undefined : parseInt(days.toString());
+    const daysNumber =
+      !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString());
 
     if (!daysNumber) {
       this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);

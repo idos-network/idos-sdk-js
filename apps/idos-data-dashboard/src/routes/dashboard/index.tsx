@@ -99,6 +99,7 @@ const DisconnectButton = () => {
 
   return (
     <Button
+      id="disconnect-wallet-btn"
       colorScheme="green"
       leftIcon={<LogOutIcon size={24} strokeWidth="1.5" />}
       onClick={handleDisconnect}

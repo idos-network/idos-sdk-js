@@ -1,4 +1,4 @@
-import Grant from "./grant";
+import type Grant from "./grant";
 
 export interface GrantChild {
   list(_: Partial<Omit<Grant, "lockedUntil">>): Promise<Grant[]>;

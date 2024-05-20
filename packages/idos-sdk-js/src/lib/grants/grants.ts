@@ -3,10 +3,10 @@ import type { Signer } from "ethers";
 
 import { assertNever } from "../../types";
 import type { Data } from "../data";
-import { EvmGrants, EvmGrantsOptions } from "./evm";
-import Grant from "./grant";
-import { GrantChild } from "./grant-child";
-import { NearGrants, NearGrantsOptions } from "./near";
+import { EvmGrants, type EvmGrantsOptions } from "./evm";
+import type Grant from "./grant";
+import type { GrantChild } from "./grant-child";
+import { NearGrants, type NearGrantsOptions } from "./near";
 
 const SIGNER_TYPES = {
   EVM: EvmGrants,

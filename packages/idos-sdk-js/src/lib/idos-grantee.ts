@@ -5,12 +5,12 @@ import * as BytesCodec from "@stablelib/bytes";
 import * as sha256 from "@stablelib/sha256";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
-import { ethers } from "ethers";
-import * as nearAPI from "near-api-js";
+import type { ethers } from "ethers";
+import type * as nearAPI from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
-import { EvmGrants, EvmGrantsOptions, NearGrantsOptions } from "./grants";
-import { GrantChild } from "./grants/grant-child";
+import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "./grants";
+import type { GrantChild } from "./grants/grant-child";
 import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
 

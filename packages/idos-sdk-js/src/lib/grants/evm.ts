@@ -1,6 +1,6 @@
-import { Contract, Signer, TransactionResponse, ZeroAddress } from "ethers";
+import { Contract, type Signer, type TransactionResponse, ZeroAddress } from "ethers";
 import Grant from "./grant";
-import { GrantChild } from "./grant-child";
+import type { GrantChild } from "./grant-child";
 
 const ZERO_ADDRESS = ZeroAddress;
 const ZERO_DATA_ID = "0";
