@@ -1,4 +1,5 @@
-import { Enclave } from "./enclave";
+// @ts-expect-error Not typed yet
+import { Enclave } from "./lib/enclave";
 import "./styles.css";
 
 const enclaveWindow = window.self;
@@ -8,5 +9,5 @@ if (hasParentWindow) {
   const parentOrigin = new URL(document.referrer).origin;
   new Enclave({ parentOrigin });
 } else {
-  window.location = "https://idos.network";
+  window.location.replace("https://idos.network");
 }

@@ -32,6 +32,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# vite timestamped configs
+vite.config.ts.timestamp-*
+
 # IDE
 .vscode
 .idea

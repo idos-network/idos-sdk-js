@@ -120,6 +120,8 @@ export const Provider = ({ children }: PropsWithChildren) => {
     return <ConnectWallet />;
   }
 
+  console.log(sdk);
+
   if (isLoading || !sdk) {
     return (
       <Center h="100dvh">
