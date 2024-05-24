@@ -273,7 +273,7 @@ export class Enclave {
 
   async #openDialog(intent, message) {
     const width = 600;
-    const height = 400;
+    const height = this.configuration?.mode === "new" ? 600 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
