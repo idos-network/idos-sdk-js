@@ -87,7 +87,6 @@ export function App({ store, enclave }: AppProps) {
         setMethod("password");
         break;
 
-
       case "confirm":
         setConfirm(true);
         setOrigin(requestData.message?.origin);

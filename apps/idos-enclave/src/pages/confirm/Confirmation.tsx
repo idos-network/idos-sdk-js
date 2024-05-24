@@ -30,7 +30,11 @@ export default function Confirmation({ onSuccess, origin, message }: Confirmatio
         <Button onClick={() => onSuccess({ confirmed: true })} className="px-10">
           Accept
         </Button>
-        <Button onClick={() => onSuccess({ confirmed: false })} variant="secondary" className="px-10">
+        <Button
+          onClick={() => onSuccess({ confirmed: false })}
+          variant="secondary"
+          className="px-10"
+        >
           Reject
         </Button>
       </div>

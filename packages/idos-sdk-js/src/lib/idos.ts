@@ -6,11 +6,11 @@ import { Auth, AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
+import { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
-import { EnclaveOptions } from "./enclave-providers/types";
 
 interface InitParams {
   nodeUrl?: string;
@@ -53,8 +53,13 @@ export class idOS {
 
     this.auth = new Auth(kwilWrapper, this.store);
 
-    if (!enclaveOptions && !container) throw new Error("Either `container` or `enclaveOptions` must be provided");
-    this.enclave = new Enclave(this.auth, new IframeEnclave(enclaveOptions ?? { container: container! }));
+    if (!enclaveOptions && !container)
+      throw new Error("Either `container` or `enclaveOptions` must be provided");
+
+    this.enclave = new Enclave(
+      this.auth,
+      new IframeEnclave(enclaveOptions ?? { container: container! }),
+    );
 
     this.data = new Data(kwilWrapper, this.enclave);
 
