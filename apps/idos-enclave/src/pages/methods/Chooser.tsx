@@ -2,24 +2,24 @@ import { Store } from "@idos-network/idos-store";
 import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 import { Paragraph } from "../../components/Paragraph";
-import type { Flow, Method } from "../App";
+import type { Mode, Method } from "../App";
 
 export interface ChooserProps {
-  flow: Flow;
+  mode: Mode;
   setMethod: (method: Method) => void;
 }
 
 export interface MethodProps<K = {}> {
-  flow: Flow;
+  mode: Mode;
   store: Store;
   onSuccess: (result: K) => void;
   onError: (error: Error) => void;
 }
 
-export default function Chooser({ setMethod, flow }: ChooserProps) {
+export default function Chooser({ setMethod, mode }: ChooserProps) {
   return (
-    <div className="flex flex-col space-y-4">
-      {flow === "existing" && (
+    <div className="flex flex-col space-y-4 px-3 md:px-0">
+      {mode === "existing" && (
         <>
           <Heading>Unlock your idOS key</Heading>
 
@@ -29,7 +29,7 @@ export default function Chooser({ setMethod, flow }: ChooserProps) {
         </>
       )}
 
-      {flow === "new" && (
+      {mode === "new" && (
         <>
           <Heading>Create your idOS key</Heading>
 
@@ -43,7 +43,7 @@ export default function Chooser({ setMethod, flow }: ChooserProps) {
         </>
       )}
 
-      <div className="flex flex-row items-center justify-around">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Button onClick={() => setMethod("password")}>Use a password</Button>
         <Button onClick={() => setMethod("passkey")}>Use a passkey</Button>
       </div>

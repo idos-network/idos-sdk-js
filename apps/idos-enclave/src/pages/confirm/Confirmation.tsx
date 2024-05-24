@@ -3,7 +3,7 @@ import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 
 export interface ConfirmationProps {
-  onSuccess: (result: boolean) => void;
+  onSuccess: (result: { confirmed: boolean }) => void;
   origin?: string | null;
   message: string;
 }
@@ -12,7 +12,7 @@ const sanitize = (html: string) => DOMPurify.sanitize(html, { ALLOWED_TAGS: [] }
 
 export default function Confirmation({ onSuccess, origin, message }: ConfirmationProps) {
   return (
-    <div className="flex flex-col space-y-5">
+    <div className="flex flex-col space-y-5 px-3 md:px-0">
       <Heading>Confirmation request</Heading>
 
       {origin && (
@@ -26,11 +26,11 @@ export default function Confirmation({ onSuccess, origin, message }: Confirmatio
         {sanitize(message)}
       </div>
 
-      <div className="flex flex-row items-center justify-around">
-        <Button onClick={() => onSuccess(true)} className="px-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Button onClick={() => onSuccess({ confirmed: true })} className="px-10">
           Accept
         </Button>
-        <Button onClick={() => onSuccess(false)} variant="secondary" className="px-10">
+        <Button onClick={() => onSuccess({ confirmed: false })} variant="secondary" className="px-10">
           Reject
         </Button>
       </div>

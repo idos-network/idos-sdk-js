@@ -6,7 +6,7 @@ import ChooseMethod from "./methods/Chooser";
 import Passkey from "./methods/Passkey";
 import Password from "./methods/Password";
 
-export type Flow = "new" | "existing" | "confirm";
+export type Mode = "new" | "existing" | "confirm";
 export type Method = "password" | "passkey";
 export type Theme = "dark" | "light";
 
@@ -15,15 +15,22 @@ export interface AppProps {
   enclave: Window;
 }
 
+export interface Configuration {
+  mode?: "new" | "existing";
+  theme?: "light" | "dark";
+}
+
 export interface EventData {
-  intent: "passkey" | "password" | "confirm" | "auth" | "create" | "theme";
+  intent: "passkey" | "password" | "confirm" | "auth";
   message: any;
+  configuration: Configuration;
 }
 
 export function App({ store, enclave }: AppProps) {
   const [method, setMethod] = useState<Method | null>(null);
-  const [flow, setFlow] = useState<Flow>("existing");
+  const [mode, setMode] = useState<Mode>("existing");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
+  const [confirm, setConfirm] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
   // Passkey options
@@ -59,7 +66,7 @@ export function App({ store, enclave }: AppProps) {
 
     const { data: requestData, ports } = event;
 
-    if (!["passkey", "password", "confirm", "auth", "theme", "create"].includes(requestData.intent))
+    if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
@@ -80,20 +87,16 @@ export function App({ store, enclave }: AppProps) {
         setMethod("password");
         break;
 
-      case "create":
-        setFlow("new");
-        break;
-
-      case "theme":
-        setTheme((requestData.message as Theme) ?? "light");
-        break;
 
       case "confirm":
-        setFlow("confirm");
+        setConfirm(true);
         setOrigin(requestData.message?.origin);
         setMessage(requestData.message?.message);
         break;
     }
+
+    if (requestData.configuration.mode) setMode(requestData.configuration.mode);
+    if (requestData.configuration.theme) setTheme(requestData.configuration.theme);
   }, []);
 
   const respondToEnclave = useCallback(
@@ -110,7 +113,7 @@ export function App({ store, enclave }: AppProps) {
   const onBeforeUnload = useCallback((e: any) => {
     e.preventDefault();
     e.returnValue = "";
-    respondToEnclave({ error: "closed " });
+    respondToEnclave({ error: "closed" });
   }, []);
 
   useEffect(() => {
@@ -134,23 +137,17 @@ export function App({ store, enclave }: AppProps) {
     store,
     onError,
     onSuccess,
-    flow,
+    mode,
   };
 
   return (
     <>
-      {theme && (
-        <Header
-          goHome={goHome}
-          toggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
-          theme={theme}
-        />
-      )}
+      <Header goHome={goHome} />
       <main className="flex-1 flex justify-center mt-6">
         <div className="w-[30rem] text-center">
-          {flow !== "confirm" && (
+          {!confirm && (
             <>
-              {!method && <ChooseMethod setMethod={setMethod} flow={flow} />}
+              {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
               {method == "password" && <Password {...methodProps} />}
               {method === "passkey" && passkeyType && (
                 <Passkey type={passkeyType} {...methodProps} />
@@ -158,7 +155,7 @@ export function App({ store, enclave }: AppProps) {
             </>
           )}
 
-          {flow === "confirm" && message && (
+          {confirm && message && (
             <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
           )}
         </div>

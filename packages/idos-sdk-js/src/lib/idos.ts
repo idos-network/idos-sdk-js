@@ -10,11 +10,14 @@ import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
+import { EnclaveOptions } from "./enclave-providers/types";
 
 interface InitParams {
   nodeUrl?: string;
   dbId?: string;
-  container: string;
+  /* @deprecated in favor of enclaveOptions */
+  container?: string;
+  enclaveOptions?: EnclaveOptions;
   evmGrantsOptions?: EvmGrantsOptions;
   nearGrantsOptions?: NearGrantsOptions;
 }
@@ -39,6 +42,7 @@ export class idOS {
 
   private constructor({
     container,
+    enclaveOptions,
     kwilWrapper,
     evmGrantsOptions,
     nearGrantsOptions,
@@ -48,7 +52,10 @@ export class idOS {
     this.kwilWrapper = kwilWrapper;
 
     this.auth = new Auth(kwilWrapper, this.store);
-    this.enclave = new Enclave(this.auth, new IframeEnclave({ container }));
+
+    if (!enclaveOptions && !container) throw new Error("Either `container` or `enclaveOptions` must be provided");
+    this.enclave = new Enclave(this.auth, new IframeEnclave(enclaveOptions ?? { container: container! }));
+
     this.data = new Data(kwilWrapper, this.enclave);
 
     this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);

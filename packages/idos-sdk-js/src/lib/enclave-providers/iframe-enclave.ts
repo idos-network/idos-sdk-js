@@ -1,18 +1,23 @@
-import { EnclaveProvider, StoredData } from "./types";
+import { EnclaveProvider, EnclaveOptions, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
   hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
 
+  options: Omit<EnclaveOptions, "container">;
   container: string;
   iframe: HTMLIFrameElement;
 
-  constructor(options: { container: string }) {
-    this.container = options.container;
+  constructor(options: EnclaveOptions) {
+    const { container, ...other } = options;
+    this.container = container;
+    this.options = other;
     this.iframe = document.createElement("iframe");
   }
 
   async load(): Promise<StoredData> {
     await this.#loadEnclave();
+
+    await this.#requestToEnclave({ configure: this.options });
 
     return (await this.#requestToEnclave({ storage: {} })) as StoredData;
   }

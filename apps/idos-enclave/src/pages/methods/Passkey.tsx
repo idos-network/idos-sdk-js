@@ -133,11 +133,11 @@ export default class Passkey extends React.Component<PasskeyProps> {
   }
 
   render() {
-    const { flow } = this.props;
+    const { mode } = this.props;
 
     return (
-      <div className="flex flex-col space-y-4">
-        {flow === "new" && (
+      <div className="flex flex-col space-y-4 px-3 md:px-0">
+        {mode === "new" && (
           <>
             <Heading>Create your idOS key</Heading>
 
@@ -159,7 +159,7 @@ export default class Passkey extends React.Component<PasskeyProps> {
           </>
         )}
 
-        {flow === "existing" && (
+        {mode === "existing" && (
           <>
             <Heading>Unlock your idOS key</Heading>
 

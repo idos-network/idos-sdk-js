@@ -6,7 +6,7 @@ import { Paragraph } from "../../components/Paragraph";
 import { MethodProps } from "./Chooser";
 
 export default function Password({
-  flow,
+  mode,
   onSuccess,
   store,
 }: MethodProps<{ password: string; duration: number }>) {
@@ -70,8 +70,8 @@ export default function Password({
   );
 
   return (
-    <form className="flex flex-col space-y-4" onSubmit={onSubmit}>
-      {flow == "new" && (
+    <form className="flex flex-col space-y-4 px-5 md:px-0" onSubmit={onSubmit}>
+      {mode == "new" && (
         <>
           <Heading>Create your idOS key</Heading>
 
@@ -92,7 +92,7 @@ export default function Password({
         </>
       )}
 
-      {flow == "existing" && (
+      {mode == "existing" && (
         <>
           <Heading>Unlock your idOS key</Heading>
 

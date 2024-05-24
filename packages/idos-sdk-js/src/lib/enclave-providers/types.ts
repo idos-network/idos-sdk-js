@@ -5,6 +5,12 @@ export interface StoredData {
   signerPublicKey?: string;
 }
 
+export interface EnclaveOptions {
+  container: string;
+  theme?: "light" | "dark";
+  mode?: "new" | "existing";
+}
+
 export interface EnclaveProvider {
   load(): Promise<StoredData>;
   ready(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array>;
