@@ -9,6 +9,7 @@ export interface EnclaveOptions {
   container: string;
   theme?: "light" | "dark";
   mode?: "new" | "existing";
+  url?: string;
 }
 
 export interface EnclaveProvider {

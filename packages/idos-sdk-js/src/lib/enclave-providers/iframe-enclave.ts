@@ -1,16 +1,16 @@
 import { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
-  hostUrl = new URL(import.meta.env.VITE_IDOS_ENCLAVE_URL);
-
-  options: Omit<EnclaveOptions, "container">;
+  options: Omit<EnclaveOptions, "container" | "url">;
   container: string;
   iframe: HTMLIFrameElement;
+  hostUrl: URL;
 
   constructor(options: EnclaveOptions) {
     const { container, ...other } = options;
     this.container = container;
     this.options = other;
+    this.hostUrl = new URL(other.url ?? import.meta.env.VITE_IDOS_ENCLAVE_URL);
     this.iframe = document.createElement("iframe");
   }
 
