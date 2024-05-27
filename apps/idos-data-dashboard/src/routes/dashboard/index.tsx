@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Center,
+  Link as ChakraLink,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -13,8 +14,7 @@ import {
   HStack,
   IconButton,
   Image,
-  Link as ChakraLink,
-  LinkProps,
+  type LinkProps,
   List,
   ListItem,
   Text,
@@ -31,7 +31,7 @@ import {
   Wallet2Icon,
 } from "lucide-react";
 import { useEffect } from "react";
-import { NavLink, NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
+import { NavLink, type NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
 import { useIdOS } from "@/core/idos";
@@ -135,7 +135,7 @@ export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Close the sidebar whenever `location` changes.
   useEffect(() => {
     if (isOpen) {
       onClose();

@@ -25,7 +25,10 @@ export class Auth {
     return this.user;
   }
 
-  constructor(public readonly kwilWrapper: KwilWrapper, public readonly store: Store) {}
+  constructor(
+    public readonly kwilWrapper: KwilWrapper,
+    public readonly store: Store,
+  ) {}
 
   forget() {
     this.store.reset();

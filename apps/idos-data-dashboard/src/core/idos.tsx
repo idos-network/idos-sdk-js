@@ -3,7 +3,7 @@ import { Center, Spinner } from "@chakra-ui/react";
 import { idOS } from "@idos-network/idos-sdk";
 import { useQuery } from "@tanstack/react-query";
 import {
-  PropsWithChildren,
+  type PropsWithChildren,
   createContext,
   useCallback,
   useContext,

@@ -25,7 +25,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useFetchGrants, useRevokeGrant } from "../shared";
-import { idOSGrant } from "../types";
+import type { idOSGrant } from "../types";
 
 type GrantsCenterProps = {
   credentialId: string;

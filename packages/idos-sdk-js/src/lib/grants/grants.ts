@@ -128,7 +128,10 @@ export class Grants {
 class ConnectedGrants extends Grants {
   #child: GrantChild;
 
-  constructor(public readonly data: Data, child: GrantChild) {
+  constructor(
+    public readonly data: Data,
+    child: GrantChild,
+  ) {
     super(data);
     this.#child = child;
   }

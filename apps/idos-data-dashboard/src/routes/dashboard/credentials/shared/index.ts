@@ -12,6 +12,7 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   return useQuery({
     queryKey: ["grants", credentialId],
     queryFn: () => sdk.grants.list({ owner }),
+    retry: 1,
     select(grants) {
       if (!credentials || !grants) return [];
 

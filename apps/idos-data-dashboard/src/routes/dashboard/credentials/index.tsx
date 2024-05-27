@@ -10,17 +10,18 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { useState } from "react";
-import { sepolia, useNetwork, useSwitchNetwork } from "wagmi";
+import { useAccount, useSwitchChain } from "wagmi";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
+import { sepolia } from "wagmi/chains";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { DeleteCredential } from "./components/delete-credential";
 import { GrantsCenter } from "./components/grants-center";
-import { idOSCredential } from "./types";
+import type { idOSCredential } from "./types";
 
 const useFetchCredentials = () => {
   const { sdk } = useIdOS();
@@ -56,16 +57,22 @@ const Credentials = () => {
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
   const [credentialToDelete, setCredentialToDelete] = useState<idOSCredential | null>(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { chain } = useNetwork();
-  const { switchNetworkAsync } = useSwitchNetwork();
+  const { chain } = useAccount();
+  const { switchChainAsync } = useSwitchChain();
 
   const handleManageGrants = async (credentialId: string) => {
-    if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
+    if (chain?.id !== sepolia.id)
+      await switchChainAsync?.({
+        chainId: sepolia.id,
+      });
     setCredentialGrantsId(credentialId);
   };
 
   const handleDelete = async (credential: idOSCredential) => {
-    if (chain?.id !== sepolia.id) await switchNetworkAsync?.(sepolia.id);
+    if (chain?.id !== sepolia.id)
+      await switchChainAsync?.({
+        chainId: sepolia.id,
+      });
     setCredentialToDelete(credential);
     onOpen();
   };

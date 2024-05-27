@@ -17,7 +17,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 
 import { DownloadIcon } from "lucide-react";
-import { idOSCredential } from "../types";
+import type { idOSCredential } from "../types";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const { sdk } = useIdOS();
