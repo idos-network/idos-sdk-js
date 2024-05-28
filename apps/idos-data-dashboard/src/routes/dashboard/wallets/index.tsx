@@ -20,7 +20,7 @@ import { useIdOS } from "@/core/idos";
 import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
-import { idOSWallet } from "./types";
+import type { idOSWallet } from "./types";
 
 const useFetchWallets = () => {
   const { sdk } = useIdOS();

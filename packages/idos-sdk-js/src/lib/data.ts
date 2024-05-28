@@ -5,7 +5,10 @@ import type { KwilWrapper } from "./kwil-wrapper";
 /* global crypto */
 
 export class Data {
-  constructor(public readonly kwilWrapper: KwilWrapper, public readonly enclave: Enclave) {}
+  constructor(
+    public readonly kwilWrapper: KwilWrapper,
+    public readonly enclave: Enclave,
+  ) {}
 
   singularize(tableName: string): string {
     return tableName.replace(/s$/, "");

@@ -14,8 +14,8 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { getNearFullAccessPublicKeys } from "@idos-network/idos-sdk";
-import { DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
-import { FormEvent } from "react";
+import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
 import type { idOSWallet } from "../types";

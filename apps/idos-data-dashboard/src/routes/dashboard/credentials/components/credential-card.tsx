@@ -1,7 +1,7 @@
 import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
-import { idOSCredential } from "../types";
+import type { idOSCredential } from "../types";
 
 type CredentialCardProps = {
   credential: idOSCredential;

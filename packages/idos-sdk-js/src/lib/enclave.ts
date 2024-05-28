@@ -6,7 +6,10 @@ import { EnclaveProvider } from "./enclave-providers/types";
 export class Enclave {
   encryptionPublicKey?: Uint8Array;
 
-  constructor(public readonly auth: Auth, public readonly provider: EnclaveProvider) {}
+  constructor(
+    public readonly auth: Auth,
+    public readonly provider: EnclaveProvider,
+  ) {}
 
   async load() {
     await this.provider.load();
