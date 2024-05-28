@@ -1,4 +1,4 @@
-import React from "preact/compat";
+import type React from "preact/compat";
 
 export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";

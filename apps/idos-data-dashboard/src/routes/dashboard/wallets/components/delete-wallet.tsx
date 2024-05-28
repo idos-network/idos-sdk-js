@@ -99,6 +99,7 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
               Cancel
             </Button>
             <Button
+              id={`confirm-delete-wallet-${wallets[0].address}`}
               colorScheme="red"
               ml={3}
               onClick={() => handleDeleteWallet(wallets)}

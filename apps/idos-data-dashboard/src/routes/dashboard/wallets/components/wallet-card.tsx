@@ -18,7 +18,11 @@ export const WalletCard = ({ address, onDelete }: WalletCardProps) => {
           </Text>
         </VStack>
       </HStack>
-      <Button leftIcon={<XIcon size={20} />} onClick={() => onDelete(address)}>
+      <Button
+        id={`delete-wallet-${address}`}
+        leftIcon={<XIcon size={20} />}
+        onClick={() => onDelete(address)}
+      >
         Delete
       </Button>
     </HStack>

@@ -3,7 +3,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as nearAPI from "near-api-js";
 import { Nonce } from "../nonce";
 import Grant from "./grant";
-import { GrantChild } from "./grant-child";
+import type { GrantChild } from "./grant-child";
 
 interface NearContractGrant {
   owner: string;

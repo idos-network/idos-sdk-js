@@ -83,7 +83,15 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
             false
           )}
           {credential.isSuccess ? (
-            <Code overflowX="auto" maxW="100%" p={5} whiteSpace="pre" bg="neutral.950" rounded="xl">
+            <Code
+              id="credential-details"
+              overflowX="auto"
+              maxW="100%"
+              p={5}
+              whiteSpace="pre"
+              bg="neutral.950"
+              rounded="xl"
+            >
               {credential.data ? credential.data.content : "No content to display"}
             </Code>
           ) : (

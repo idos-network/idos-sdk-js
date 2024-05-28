@@ -1,4 +1,4 @@
-import { Store } from "@idos-network/idos-store";
+import type { Store } from "@idos-network/idos-store";
 import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 import { Paragraph } from "../../components/Paragraph";
@@ -44,8 +44,12 @@ export default function Chooser({ setMethod, mode }: ChooserProps) {
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Button onClick={() => setMethod("password")}>Use a password</Button>
-        <Button onClick={() => setMethod("passkey")}>Use a passkey</Button>
+        <Button id="auth-method-password" onClick={() => setMethod("password")}>
+          Use a password
+        </Button>
+        <Button id="auth-method-passkey" onClick={() => setMethod("passkey")}>
+          Use a passkey
+        </Button>
       </div>
     </div>
   );

@@ -167,7 +167,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
     >
       <ModalOverlay />
       <ModalContent bg="neutral.900" rounded="xl">
-        <form onSubmit={handleSubmit}>
+        <form name="add-wallet-form" onSubmit={handleSubmit}>
           <ModalHeader>Insert wallet address</ModalHeader>
           <ModalCloseButton onClick={handleClose} />
           <ModalBody>
@@ -179,7 +179,12 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
             </FormControl>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="green" type="submit" isLoading={addWallet.isPending}>
+            <Button
+              id="add-wallet-form-submit"
+              colorScheme="green"
+              type="submit"
+              isLoading={addWallet.isPending}
+            >
               {addWallet.isError ? "Try again" : "Add wallet"}
             </Button>
           </ModalFooter>

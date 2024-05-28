@@ -93,7 +93,7 @@ const Credentials = () => {
   if (credentials.isSuccess) {
     return (
       <>
-        <List display="flex" flexDir="column" gap={2.5} flex={1}>
+        <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
           {credentials.data.map((credential) => (
             <ListItem key={credential.id}>
               <CredentialCard
