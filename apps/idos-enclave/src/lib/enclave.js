@@ -219,6 +219,10 @@ export class Enclave {
     );
   }
 
+  async configure(mode, theme) {
+    this.configuration = { mode, theme };
+  }
+
   messageParent(message) {
     window.parent.postMessage(message, this.parentOrigin);
   }
@@ -238,6 +242,8 @@ export class Enclave {
           signerAddress,
           signerPublicKey,
           authMethod,
+          mode,
+          theme,
         } = requestData;
 
         const paramBuilder = {
@@ -246,6 +252,7 @@ export class Enclave {
           encrypt: () => [message, receiverPublicKey],
           keys: () => [authMethod],
           reset: () => [],
+          configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
         }[requestName];
 
@@ -265,8 +272,8 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
-    const width = intent === "passkey" ? 450 : 250;
-    const height = intent === "passkey" ? 150 : 350;
+    const width = 600;
+    const height = this.configuration?.mode === "new" ? 600 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -299,7 +306,11 @@ export class Enclave {
         return resolve(result);
       };
 
-      this.dialog.postMessage({ intent, message }, this.dialog.origin, [port2]);
+      this.dialog.postMessage(
+        { intent, message, configuration: this.configuration },
+        this.dialog.origin,
+        [port2],
+      );
     });
   }
 }

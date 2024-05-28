@@ -89,7 +89,9 @@ const connectWallet = {
    *
    */
   const idos = await idOS.init({
-    container: "#idos-container",
+    enclaveOptions: {
+      container: "#idos-container",
+    },
   });
   window.idos = idos;
   window.vc = idOS.verifiableCredentials;
