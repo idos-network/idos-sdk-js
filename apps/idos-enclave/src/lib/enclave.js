@@ -221,6 +221,12 @@ export class Enclave {
 
   async configure(mode, theme) {
     this.configuration = { mode, theme };
+
+    if (mode === "new") {
+      this.unlockButton.classList.add("create");
+    } else {
+      this.unlockButton.classList.remove("create");
+    }
   }
 
   messageParent(message) {
