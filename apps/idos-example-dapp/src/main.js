@@ -226,11 +226,19 @@ const connectWallet = {
           terminal.button(buttonId, "🔏 Acquire access grant", async () => {
             terminal.removeButton(buttonId);
 
+            let timelock =
+              window.prompt(
+                "Please enter the grant timelock in seconds",
+                granteeInfo.lockTimeSpanSeconds,
+              ) || granteeInfo.lockTimeSpanSeconds;
+
+            timelock = Number.isInteger(+timelock) ? timelock : granteeInfo.lockTimeSpanSeconds;
+
             const grantPromise = idos.grants.create(
               "credentials",
               id,
               granteeInfo.grantee,
-              Math.floor(Date.now() / 1000) + granteeInfo.lockTimeSpanSeconds,
+              Math.floor(Date.now() / 1000) + timelock,
               granteeInfo.encryptionPublicKey,
             );
 
