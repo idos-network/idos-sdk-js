@@ -95,7 +95,7 @@ const Credentials = () => {
       <>
         <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
           {credentials.data.map((credential) => (
-            <ListItem key={credential.id}>
+            <ListItem key={credential.id} id={credential.id}>
               <CredentialCard
                 credential={credential}
                 onViewDetails={setCredentialDetalsId}
