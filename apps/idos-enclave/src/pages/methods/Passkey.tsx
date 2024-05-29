@@ -64,61 +64,73 @@ export default class Passkey extends React.Component<PasskeyProps> {
     let credentialId;
     let password;
 
-    const { store } = this.props;
+    const { store, mode } = this.props;
 
     const storedCredentialId = store.get("credential-id");
 
+    const credentialRequestWithoutId = {
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(10)),
+      },
+    };
+
     if (storedCredentialId) {
-      const credentialRequest = {
+      const credentialRequestWithId = {
+        ...credentialRequestWithoutId,
         publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(10)),
+          ...credentialRequestWithoutId.publicKey,
           allowCredentials: [
             {
               type: "public-key" as const,
               id: Base64Codec.decode(storedCredentialId),
             },
           ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required",
-            residentKey: "preferred",
-          },
         },
       };
 
       try {
-        credential = await navigator.credentials.get(credentialRequest);
+        credential = await navigator.credentials.get(credentialRequestWithId);
         // @ts-expect-error Experimental functionality not yet typed
         password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
-        // @ts-expect-error Experimental functionality not yet typed
-        credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-      } catch (e) {}
+      } catch (e) {
+        console.warn(e);
+      }
     } else {
-      const displayName = "idOS User";
-      password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
+      try {
+        credential = await navigator.credentials.get(credentialRequestWithoutId);
+        // @ts-expect-error Experimental functionality not yet typed
+        password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
+      } catch (e) {
+        console.warn(e);
 
-      credential = await navigator.credentials.create({
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(10)),
-          rp: { name: "idOS.network" },
-          user: {
-            id: Utf8Codec.encode(password),
-            displayName,
-            name: displayName,
-          },
-          pubKeyCredParams: [
-            {
-              type: "public-key",
-              alg: -7,
+        if (mode === "new") {
+          const displayName = "idOS User";
+          password = Base64Codec.encode(crypto.getRandomValues(new Uint8Array(32)));
+
+          credential = await navigator.credentials.create({
+            publicKey: {
+              challenge: crypto.getRandomValues(new Uint8Array(10)),
+              rp: { name: "idOS.network" },
+              user: {
+                id: Utf8Codec.encode(password),
+                displayName,
+                name: displayName,
+              },
+              pubKeyCredParams: [
+                {
+                  type: "public-key",
+                  alg: -7,
+                },
+              ],
+              authenticatorSelection: {
+                authenticatorAttachment: "platform",
+                userVerification: "required",
+                residentKey: "preferred",
+              },
             },
-          ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required",
-            residentKey: "preferred",
-          },
-        },
-      });
+          });
+        }
+      }
     }
 
     if (!credential || !password) throw new Error("Failed to create credential");

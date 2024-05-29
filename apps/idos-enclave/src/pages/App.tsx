@@ -129,7 +129,7 @@ export function App({ store, enclave }: AppProps) {
   }, []);
 
   const onError = useCallback((error: any) => {
-    respondToEnclave({ error: error.toSring() });
+    respondToEnclave({ error: error.toString() });
   }, []);
 
   const methodProps = {

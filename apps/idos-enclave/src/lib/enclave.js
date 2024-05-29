@@ -65,7 +65,7 @@ export class Enclave {
     let credentialId;
 
     const getWebAuthnCredential = async (storedCredentialId) => {
-      const credentialRequest = {
+      const credentialRequestWithId = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
           allowCredentials: [
@@ -74,65 +74,67 @@ export class Enclave {
               id: Base64Codec.decode(storedCredentialId),
             },
           ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required",
-            residentKey: "preferred",
-          },
         },
       };
 
-      const credential = await navigator.credentials.get(credentialRequest);
+      const credential = await navigator.credentials.get(credentialRequestWithId);
       password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+
       return { password, credentialId };
     };
 
-    return new Promise((resolve) =>
+    return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        const preferredAuthMethod = this.store.get("preferred-auth-method");
+        const storedCredentialId = this.store.get("credential-id");
 
-        if (preferredAuthMethod === "password") {
-          ({ password, duration } = await this.#openDialog("password"));
-          this.store.set("password", password);
-          this.store.setRememberDuration(duration);
-          return resolve();
-        }
+        if (storedCredentialId) {
+          try {
+            ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
+          } catch (e) {
+            console.warn(e);
+            return reject();
+          }
+        } else {
+          const preferredAuthMethod = this.store.get("preferred-auth-method");
 
-        if (preferredAuthMethod === "webauthn") {
-          const storedCredentialId = this.store.get("credential-id");
-
-          if (storedCredentialId) {
+          if (preferredAuthMethod === "password") {
             try {
-              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
+              ({ password, duration } = await this.#openDialog("password"));
             } catch (e) {
-              ({ password, credentialId } = await this.#openDialog("passkey", {
-                type: "webauthn",
-              }));
+              console.warn(e);
+              return reject();
+            }
+          } else if (preferredAuthMethod === "passkey") {
+            try {
+              ({ password, credentialId } = await this.#openDialog("passkey", { type: "webauthn" }));
+            } catch (e) {
+              console.warn(e);
+              return reject();
             }
           } else {
-            ({ password, credentialId } = await this.#openDialog("passkey", {
-              type: "webauthn",
-            }));
+            try {
+              ({ password, duration, credentialId } = await this.#openDialog("auth"));
+            } catch (e) {
+              console.warn(e);
+              return reject();
+            }
           }
-          this.store.set("credential-id", credentialId);
-          this.store.set("password", password);
-          return resolve();
         }
 
-        ({ password, duration, credentialId } = await this.#openDialog("auth"));
+        this.store.set("password", password);
 
         if (credentialId) {
           this.store.set("credential-id", credentialId);
           this.store.set("preferred-auth-method", "webauthn");
         } else {
           this.store.set("preferred-auth-method", "password");
+          this.store.setRememberDuration(duration);
         }
-        this.store.set("password", password);
-        this.store.setRememberDuration(duration);
-        resolve();
+
+        return password ? resolve() : reject();
       }),
     );
   }
@@ -267,7 +269,7 @@ export class Enclave {
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
-        console.log("catch", error);
+        console.warn("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
