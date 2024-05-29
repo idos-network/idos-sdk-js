@@ -38,10 +38,14 @@ function generateGrantId(grant: idOSGrant): string {
   return [dataId, grantee, owner, lockedUntil].join("-");
 }
 
-function bigintToDate(bi: bigint): string {
-  const milliseconds = Number(bi) * 1000;
+function timelockToDate(timelock: number): string {
+  const milliseconds = timelock * 1000;
 
-  return new Intl.DateTimeFormat(["ban", "id"]).format(new Date(milliseconds));
+  return new Intl.DateTimeFormat(["ban", "id"], {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: true,
+  }).format(new Date(milliseconds));
 }
 
 const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) => {
@@ -91,7 +95,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   <Text isTruncated>{grant.grantee}</Text>
                 </Td>
                 <Td>
-                  <Text>{grant.lockedUntil ? bigintToDate(BigInt(grant.lockedUntil)) : "-"}</Text>
+                  <Text>{grant.lockedUntil ? timelockToDate(grant.lockedUntil) : "-"}</Text>
                 </Td>
                 <Td isNumeric>
                   <Button
@@ -100,8 +104,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     variant="outline"
                     colorScheme="red"
                     isDisabled={Boolean(
-                      grant.lockedUntil &&
-                        BigInt(grant.lockedUntil) < BigInt(Math.floor(Date.now() / 1000)),
+                      grant.lockedUntil && grant.lockedUntil * 1000 >= Date.now(),
                     )}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
