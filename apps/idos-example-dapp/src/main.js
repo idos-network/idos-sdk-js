@@ -232,7 +232,7 @@ const connectWallet = {
                 granteeInfo.lockTimeSpanSeconds,
               ) || granteeInfo.lockTimeSpanSeconds;
 
-            timelock = Number.isInteger(+timelock) ? timelock : granteeInfo.lockTimeSpanSeconds;
+            timelock = Number.isInteger(+timelock) ? +timelock : granteeInfo.lockTimeSpanSeconds;
 
             const grantPromise = idos.grants.create(
               "credentials",
