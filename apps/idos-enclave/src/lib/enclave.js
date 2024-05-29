@@ -297,7 +297,7 @@ export class Enclave {
     const dialogURL = new URL("/dialog.html", window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-    await new Promise((resolve) => this.dialog.addEventListener("load", resolve));
+    await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();

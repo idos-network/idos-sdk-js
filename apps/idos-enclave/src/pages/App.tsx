@@ -119,6 +119,8 @@ export function App({ store, enclave }: AppProps) {
     window.addEventListener("message", messageReceiver);
     window.addEventListener("beforeunload", onBeforeUnload);
 
+    window.dispatchEvent(new Event("ready"));
+
     return () => {
       window.removeEventListener("message", messageReceiver);
     };
