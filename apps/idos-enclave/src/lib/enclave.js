@@ -39,9 +39,8 @@ export class Enclave {
     };
   }
 
-  async keys(authMethod) {
+  async keys() {
     try {
-      if (authMethod) await this.#openDialog("auth");
       await this.ensurePassword();
       await this.ensureKeyPair();
     } catch (e) {
@@ -232,7 +231,6 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          authMethod,
           mode,
           theme,
         } = requestData;
@@ -241,7 +239,7 @@ export class Enclave {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [authMethod],
+          keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
