@@ -109,7 +109,9 @@ export class Enclave {
             }
           } else if (preferredAuthMethod === "passkey") {
             try {
-              ({ password, credentialId } = await this.#openDialog("passkey", { type: "webauthn" }));
+              ({ password, credentialId } = await this.#openDialog("passkey", {
+                type: "webauthn",
+              }));
             } catch (e) {
               console.warn(e);
               return reject();
