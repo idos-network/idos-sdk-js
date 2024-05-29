@@ -20,7 +20,7 @@ export const CredentialCard = ({
     credential.credential_type !== credential.credential_level &&
     ` (${credential.credential_level})`;
   return (
-    <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
+    <Stack id={credential.id} gap={14} p={5} bg="neutral.900" rounded="xl">
       <SimpleGrid columns={[2, 6]} spacing={10}>
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
@@ -60,14 +60,21 @@ export const CredentialCard = ({
             lg: "row",
           }}
         >
-          <Button onClick={() => onViewDetails(credential.id)}>View details</Button>
+          <Button id={`view-details-${credential.id}`} onClick={() => onViewDetails(credential.id)}>
+            View details
+          </Button>
           <Button
+            id={`manage-grants-${credential.id}`}
             leftIcon={<KeyRoundIcon size={16} />}
             onClick={() => onManageGrants(credential.id)}
           >
             Manage grants
           </Button>
-          <Button leftIcon={<XIcon size={16} />} onClick={() => onDelete(credential)}>
+          <Button
+            id={`delete-credential-${credential.id}`}
+            leftIcon={<XIcon size={16} />}
+            onClick={() => onDelete(credential)}
+          >
             Delete
           </Button>
         </ButtonGroup>

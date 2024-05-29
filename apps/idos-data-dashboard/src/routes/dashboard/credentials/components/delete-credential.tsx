@@ -193,6 +193,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
             ) : null}
 
             <Button
+              id={`confirm-delete-credential-${credential.id}`}
               colorScheme="red"
               ml={3}
               onClick={() => handleDeleteCredential(credential)}

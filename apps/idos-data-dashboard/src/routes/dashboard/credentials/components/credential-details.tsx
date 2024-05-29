@@ -69,40 +69,38 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
       <ModalContent bg="neutral.900" rounded="xl">
         <ModalHeader>Credential details</ModalHeader>
         <ModalCloseButton onClick={onClose} />
-        <ModalBody display="flex" alignItems="center">
+        <ModalBody display="flex">
           {credential.isLoading ? (
             <Center flex={1}>
               <Spinner />
             </Center>
-          ) : (
-            false
-          )}
+          ) : null}
+
           {credential.isError ? (
             <Text color="red.500">Something went wrong, please retry.</Text>
-          ) : (
-            false
-          )}
+          ) : null}
+
           {credential.isSuccess ? (
             <Code
               id="credential-details"
               overflowX="auto"
               maxW="100%"
-              p={5}
+              px={5}
+              py={1}
               whiteSpace="pre"
               bg="neutral.950"
               rounded="xl"
             >
               {credential.data ? credential.data.content : "No content to display"}
             </Code>
-          ) : (
-            false
-          )}
+          ) : null}
         </ModalBody>
         <ModalFooter gap={2.5}>
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
           <Button onClick={onClose}>Close</Button>
           {credential.isSuccess ? (
             <Button
+              id={`download-credential-${credential.data?.id}`}
               as="a"
               href={jsonLink}
               colorScheme="green"
