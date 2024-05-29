@@ -40,11 +40,15 @@ export class Enclave {
   }
 
   async keys(authMethod) {
-    if (authMethod) await this.#openDialog("auth");
-    await this.ensurePassword();
-    await this.ensureKeyPair();
-
-    return this.keyPair.publicKey;
+    try {
+      if (authMethod) await this.#openDialog("auth");
+      await this.ensurePassword();
+      await this.ensureKeyPair();
+    } catch (e) {
+      console.warn(e);
+    } finally {
+      return this.keyPair?.publicKey;
+    }
   }
 
   async authWithPassword() {
@@ -89,48 +93,25 @@ export class Enclave {
         this.unlockButton.disabled = true;
 
         const storedCredentialId = this.store.get("credential-id");
+        const preferredAuthMethod = this.store.get("preferred-auth-method");
 
-        if (storedCredentialId) {
-          try {
+        try {
+          if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } catch (e) {
-            console.warn(e);
-            return reject();
-          }
-        } else {
-          const preferredAuthMethod = this.store.get("preferred-auth-method");
-
-          if (preferredAuthMethod === "password") {
-            try {
-              ({ password, duration } = await this.#openDialog("password"));
-            } catch (e) {
-              console.warn(e);
-              return reject();
-            }
-          } else if (preferredAuthMethod === "passkey") {
-            try {
-              ({ password, credentialId } = await this.#openDialog("passkey", {
-                type: "webauthn",
-              }));
-            } catch (e) {
-              console.warn(e);
-              return reject();
-            }
+          } else if (!!preferredAuthMethod) {
+            ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            try {
-              ({ password, duration, credentialId } = await this.#openDialog("auth"));
-            } catch (e) {
-              console.warn(e);
-              return reject();
-            }
+            ({ password, duration, credentialId } = await this.#openDialog("auth"));
           }
+        } catch (e) {
+          return reject(e);
         }
 
         this.store.set("password", password);
 
         if (credentialId) {
           this.store.set("credential-id", credentialId);
-          this.store.set("preferred-auth-method", "webauthn");
+          this.store.set("preferred-auth-method", "passkey");
         } else {
           this.store.set("preferred-auth-method", "password");
           this.store.setRememberDuration(duration);

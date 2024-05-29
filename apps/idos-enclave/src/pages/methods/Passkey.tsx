@@ -25,7 +25,7 @@ export default class Passkey extends React.Component<PasskeyProps> {
         onSuccess(result);
       }
 
-      store.set("preferred-auth-method", "webauthn");
+      store.set("preferred-auth-method", "passkey");
     } catch (e: any) {
       onError(e);
     }
