@@ -71,12 +71,18 @@ const WalletsList = () => {
 
   if (wallets.isSuccess) {
     const addresses = Object.keys(wallets.data);
+    console.log(addresses);
+
     return (
       <>
         <List id="wallets-list" display="flex" flexDir="column" gap={2.5} flex={1}>
-          {addresses.map((address, index) => (
-            <ListItem key={`${address}-${index}`}>
-              <WalletCard address={address} onDelete={handleDelete} />
+          {addresses.map((address) => (
+            <ListItem key={address}>
+              <WalletCard
+                address={address}
+                onDelete={handleDelete}
+                isDisabled={addresses.length === 1}
+              />
             </ListItem>
           ))}
         </List>

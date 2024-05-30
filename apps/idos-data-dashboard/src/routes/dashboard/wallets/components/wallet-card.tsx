@@ -3,10 +3,11 @@ import { XIcon } from "lucide-react";
 
 type WalletCardProps = {
   address: string;
+  isDisabled?: boolean;
   onDelete: (address: string) => void;
 };
 
-export const WalletCard = ({ address, onDelete }: WalletCardProps) => {
+export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) => {
   return (
     <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
       <HStack gap={5}>
@@ -19,6 +20,7 @@ export const WalletCard = ({ address, onDelete }: WalletCardProps) => {
         </VStack>
       </HStack>
       <Button
+        isDisabled={isDisabled}
         id={`delete-wallet-${address}`}
         leftIcon={<XIcon size={20} />}
         onClick={() => onDelete(address)}
