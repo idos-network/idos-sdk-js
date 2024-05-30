@@ -38,10 +38,18 @@ function generateGrantId(grant: idOSGrant): string {
   return [dataId, grantee, owner, lockedUntil].join("-");
 }
 
-function bigintToDate(bi: bigint): string {
-  const milliseconds = Number(bi) * 1000;
+function timelockToMs(timelock: number): number {
+  return timelock * 1000;
+}
 
-  return new Intl.DateTimeFormat(["ban", "id"]).format(new Date(milliseconds));
+function timelockToDate(timelock: number): string {
+  const milliseconds = timelockToMs(timelock);
+
+  return new Intl.DateTimeFormat(["ban", "id"], {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: true,
+  }).format(new Date(milliseconds));
 }
 
 const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) => {
@@ -49,7 +57,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   const queryClient = useQueryClient();
 
   if (grants.length === 0) {
-    return <Text>You have not shared this credential with anyone.</Text>;
+    return <Text id="no-grants">You have not shared this credential with anyone.</Text>;
   }
 
   const onRevoke = (grant: idOSGrant) => {
@@ -91,7 +99,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   <Text isTruncated>{grant.grantee}</Text>
                 </Td>
                 <Td>
-                  <Text>{grant.lockedUntil ? bigintToDate(BigInt(grant.lockedUntil)) : "-"}</Text>
+                  <Text>{grant.lockedUntil ? timelockToDate(grant.lockedUntil) : "-"}</Text>
                 </Td>
                 <Td isNumeric>
                   <Button
@@ -99,10 +107,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     size="sm"
                     variant="outline"
                     colorScheme="red"
-                    isDisabled={Boolean(
-                      grant.lockedUntil &&
-                        BigInt(grant.lockedUntil) < BigInt(Math.floor(Date.now() / 1000)),
-                    )}
+                    isDisabled={timelockToMs(grant.lockedUntil) >= Date.now()}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
                     }
