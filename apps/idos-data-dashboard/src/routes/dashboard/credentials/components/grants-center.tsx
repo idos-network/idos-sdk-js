@@ -38,8 +38,12 @@ function generateGrantId(grant: idOSGrant): string {
   return [dataId, grantee, owner, lockedUntil].join("-");
 }
 
+function timelockToMs(timelock: number): number {
+  return timelock * 1000;
+}
+
 function timelockToDate(timelock: number): string {
-  const milliseconds = timelock * 1000;
+  const milliseconds = timelockToMs(timelock);
 
   return new Intl.DateTimeFormat(["ban", "id"], {
     dateStyle: "short",
@@ -53,7 +57,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   const queryClient = useQueryClient();
 
   if (grants.length === 0) {
-    return <Text>You have not shared this credential with anyone.</Text>;
+    return <Text id="no-grants">You have not shared this credential with anyone.</Text>;
   }
 
   const onRevoke = (grant: idOSGrant) => {
@@ -103,9 +107,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     size="sm"
                     variant="outline"
                     colorScheme="red"
-                    isDisabled={Boolean(
-                      grant.lockedUntil && grant.lockedUntil * 1000 >= Date.now(),
-                    )}
+                    isDisabled={timelockToMs(grant.lockedUntil) >= Date.now()}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
                     }
