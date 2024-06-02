@@ -10,13 +10,13 @@
   "files": ["dist"],
   "exports": {
     ".": {
-      "import": "./dist/idos-sdk.js",
-      "types": "./dist/idos-sdk.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
-    "dev": "vite build --mode development --watch",
-    "build": "vite build",
+    "dev": "dotenvx run --convention=nextjs -- tsup --watch",
+    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -29,23 +29,22 @@
   },
   "peerDependencies": {
     "ethers": "^6.12",
-    "near-api-js": "^3.0.4"
+    "near-api-js": "^3.0"
   },
   "devDependencies": {
+    "@dotenvx/dotenvx": "^1.6.4",
     "@near-js/types": "^0.2.1",
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@synthetixio/synpress": "4.0.0-alpha.7",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
-    "eslint": "^8.52.0",
+    "dotenv": "^16.4.5",
     "jsdom": "^22.1.0",
     "prettier": "^3.0.3",
     "release-it": "^17.0.0",
+    "tsup": "^8.0.2",
     "typescript": "^5.2.2",
-    "vite": "^4.5.0",
-    "vite-plugin-dts": "^3.6.3",
-    "vite-plugin-externalize-deps": "^0.8.0",
     "vitest": "^0.31.4"
   },
   "dependencies": {
@@ -65,12 +64,12 @@
   },
   "clean-package": {
     "replace": {
-      "main": "dist/idos-sdk.js",
-      "types": "dist/idos-sdk.d.ts",
+      "main": "dist/index.js",
+      "types": "dist/index.d.ts",
       "exports": {
         ".": {
-          "types": "./dist/idos-sdk.d.ts",
-          "default": "./dist/idos-sdk.js"
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
         },
         "./package.json": "./package.json"
       }
