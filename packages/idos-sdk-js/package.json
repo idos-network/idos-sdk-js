@@ -6,14 +6,11 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
   "type": "module",
-  "main": "dist/idos-sdk.js",
-  "module": "dist/idos-sdk.umd.cjs",
-  "types": "dist/idos-sdk.d.ts",
+  "main": "src/lib/index.ts",
   "files": ["dist"],
   "exports": {
     ".": {
       "import": "./dist/idos-sdk.js",
-      "require": "./dist/idos-sdk.umd.cjs",
       "types": "./dist/idos-sdk.d.ts"
     }
   },
@@ -27,7 +24,8 @@
     "test:watch": "vitest",
     "release-it": "release-it",
     "prepack": "clean-package",
-    "postpack": "clean-package restore"
+    "postpack": "clean-package restore",
+    "test:build": "publint --strict"
   },
   "peerDependencies": {
     "ethers": "^6.8.0",
@@ -37,6 +35,7 @@
     "@near-js/types": "^0.2.1",
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
+    "@synthetixio/synpress": "4.0.0-alpha.7",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
     "eslint": "^8.52.0",
@@ -59,7 +58,6 @@
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "@synthetixio/synpress": "4.0.0-alpha.7",
     "borsh": "^1.0.0",
     "jsonld": "^8.3.1",
     "jsonld-document-loader": "^2.0.0",
@@ -68,13 +66,11 @@
   "clean-package": {
     "replace": {
       "main": "dist/idos-sdk.js",
-      "module": "dist/idos-sdk.umd.cjs",
       "types": "dist/idos-sdk.d.ts",
       "exports": {
         ".": {
           "types": "./dist/idos-sdk.d.ts",
-          "import": "./dist/idos-sdk.js",
-          "require": "./dist/idos-sdk.umd.cjs"
+          "default": "./dist/idos-sdk.js"
         },
         "./package.json": "./package.json"
       }
