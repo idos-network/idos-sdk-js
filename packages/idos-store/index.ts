@@ -19,8 +19,7 @@ export class Store {
         const result = this.get(key);
         if (result) return decode(result);
       },
-      set: (key: string, value: any, days: string | number) =>
-        this.set.call(this, key, encode(value), days),
+      set: (key: string, value: any) => this.set.call(this, key, encode(value)),
     };
   }
 
