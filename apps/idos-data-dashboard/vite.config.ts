@@ -1,7 +1,6 @@
-import { resolve } from "path";
+import { resolve } from "node:path";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
-import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -24,15 +23,7 @@ export default defineConfig({
       },
     },
   },
-  plugins: [
-    react(),
-    nodePolyfills({
-      include: ["buffer"],
-      globals: {
-        Buffer: true,
-      },
-    }),
-  ],
+  plugins: [react()],
   resolve: {
     dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
     alias: {

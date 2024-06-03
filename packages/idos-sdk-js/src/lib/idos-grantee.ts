@@ -6,7 +6,7 @@ import * as sha256 from "@stablelib/sha256";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { ethers } from "ethers";
-import type * as nearAPI from "near-api-js";
+import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
 import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "./grants";
@@ -20,7 +20,7 @@ export type WalletType = "EVM" | "NEAR";
 
 const kwilNep413Signer =
   (recipient: string) =>
-  (keyPair: nearAPI.KeyPair) =>
+  (keyPair: KeyPair) =>
   async (messageBytes: Uint8Array): Promise<Uint8Array> => {
     const message = Utf8Codec.decode(messageBytes);
     const nonceLength = 32;
@@ -116,7 +116,7 @@ type ChainType = "EVM" | "NEAR";
 
 const buildKwilSignerAndGrantee = (
   chainType: ChainType,
-  granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet,
+  granteeSigner: KeyPair | ethers.Wallet,
 ): [KwilSigner, string] => {
   switch (chainType) {
     case "EVM": {
@@ -124,7 +124,7 @@ const buildKwilSignerAndGrantee = (
       return [new KwilSigner(signer, signer.address), signer.address];
     }
     case "NEAR": {
-      const signer = granteeSigner as nearAPI.utils.key_pair.KeyPair;
+      const signer = granteeSigner as KeyPair;
       const publicKey = signer.getPublicKey().toString();
       return [
         new KwilSigner(
@@ -146,7 +146,7 @@ interface idOSGranteeInitParams {
   chainId?: string;
   dbId?: string;
   chainType: ChainType;
-  granteeSigner: nearAPI.utils.key_pair.KeyPair | ethers.Wallet;
+  granteeSigner: KeyPair | ethers.Wallet;
   granteeOptions?: EvmGrantsOptions | NearGrantsOptions;
 }
 
@@ -179,7 +179,7 @@ export class idOSGrantee {
     chainId?: string;
     dbId?: string;
     chainType: "NEAR";
-    granteeSigner: nearAPI.utils.key_pair.KeyPair;
+    granteeSigner: KeyPair;
     granteeOptions?: NearGrantsOptions;
   }): Promise<idOSGrantee>;
 

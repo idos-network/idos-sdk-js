@@ -1,5 +1,5 @@
 import { idOSGrantee } from "@idos-network/idos-sdk";
-import * as nearAPI from "near-api-js";
+import { KeyPair } from "near-api-js";
 
 /* global crypto */
 //@ts-ignore 🔨 to make it work locally and on Vercel.
@@ -10,7 +10,7 @@ const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const NEAR_GRANTEE_PRIVATE_KEY =
   "ed25519:35pK192Az9znHcMtHK2bGExuZV3QLRk5Ln1EpXpq4bf6FtU5twG4hneMqkzrGhARKdq54LavCFy9sprqemC72ZLs";
 
-const nearGranteeSigner = nearAPI.KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
+const nearGranteeSigner = KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 
 const idosGrantee = await idOSGrantee.init({
   chainType: "NEAR",
@@ -21,7 +21,7 @@ const idosGrantee = await idOSGrantee.init({
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
 const lockTimeSpanSeconds = 3600; // one hour
 
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 export default async function (request: VercelRequest, response: VercelResponse) {
   const requestMethod = request.method as string;
 
