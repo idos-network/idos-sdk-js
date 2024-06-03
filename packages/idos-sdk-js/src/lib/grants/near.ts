@@ -80,7 +80,7 @@ export class NearGrants implements GrantChild {
             NearGrants.contractMethods.createBySignature,
             NearGrants.contractMethods.revokeBySignature,
           ],
-        },
+        } as any, // @todo: fix `useLocalViewExecution` is not in  types.
       ),
       publicKey,
     );

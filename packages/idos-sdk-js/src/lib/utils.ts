@@ -12,14 +12,14 @@ export async function getNearFullAccessPublicKeys(
   const nearConnection = await connect(connectionConfig);
 
   try {
-    const response = await nearConnection.connection.provider.query({
+    const response: any = await nearConnection.connection.provider.query({
       request_type: "view_access_key_list",
       finality: "final",
       account_id: namedAddress,
     });
     return response.keys
-      .filter((element: object) => element.access_key.permission === "FullAccess")
-      ?.map((i) => i.public_key);
+      .filter((element: any) => element.access_key.permission === "FullAccess")
+      ?.map((i: Record<string, string>) => i.public_key);
   } catch {
     // near failed if namedAddress contains uppercase symbols
     return;

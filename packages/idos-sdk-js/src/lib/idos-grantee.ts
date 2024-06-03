@@ -121,7 +121,7 @@ const buildKwilSignerAndGrantee = (
   switch (chainType) {
     case "EVM": {
       const signer = granteeSigner as ethers.Wallet;
-      return [new KwilSigner(signer, signer.address), signer.address];
+      return [new KwilSigner(signer as any, signer.address), signer.address];
     }
     case "NEAR": {
       const signer = granteeSigner as nearAPI.utils.key_pair.KeyPair;

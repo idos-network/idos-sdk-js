@@ -6,20 +6,17 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
   "type": "module",
-  "main": "dist/idos-sdk.js",
-  "module": "dist/idos-sdk.umd.cjs",
-  "types": "dist/idos-sdk.d.ts",
+  "main": "src/lib/index.ts",
   "files": ["dist"],
   "exports": {
     ".": {
-      "import": "./dist/idos-sdk.js",
-      "require": "./dist/idos-sdk.umd.cjs",
-      "types": "./dist/idos-sdk.d.ts"
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
-    "dev": "vite build --watch",
-    "build": "vite build",
+    "dev": "tsup --watch",
+    "build": "tsup",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -36,16 +33,15 @@
   "devDependencies": {
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
+    "@synthetixio/synpress": "4.0.0-alpha.7",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
-    "eslint": "^8.52.0",
+    "dotenv": "^16.4.5",
     "jsdom": "^22.1.0",
     "prettier": "^3.0.3",
     "release-it": "^17.0.0",
+    "tsup": "^8.0.2",
     "typescript": "^5.2.2",
-    "vite": "^4.5.0",
-    "vite-plugin-dts": "^3.6.3",
-    "vite-plugin-externalize-deps": "^0.8.0",
     "vitest": "^0.31.4"
   },
   "dependencies": {
@@ -58,7 +54,6 @@
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "@synthetixio/synpress": "4.0.0-alpha.7",
     "borsh": "^1.0.0",
     "jsonld": "^8.3.1",
     "jsonld-document-loader": "^2.0.0",
@@ -66,14 +61,12 @@
   },
   "clean-package": {
     "replace": {
-      "main": "dist/idos-sdk.js",
-      "module": "dist/idos-sdk.umd.cjs",
-      "types": "dist/idos-sdk.d.ts",
+      "main": "dist/index.js",
+      "types": "dist/index.d.ts",
       "exports": {
         ".": {
-          "types": "./dist/idos-sdk.d.ts",
-          "import": "./dist/idos-sdk.js",
-          "require": "./dist/idos-sdk.umd.cjs"
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
         },
         "./package.json": "./package.json"
       }
