@@ -86,15 +86,12 @@ const DisconnectButton = () => {
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { selector } = useWalletSelector();
-  const idos = useIdOS();
   const queryClient = useQueryClient();
 
   const handleDisconnect = async () => {
     if (isConnected) disconnect();
     if (selector.isSignedIn()) (await selector.wallet()).signOut();
-
     queryClient.removeQueries();
-    await idos.reset();
   };
 
   return (

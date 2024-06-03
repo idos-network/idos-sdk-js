@@ -136,7 +136,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
         address: userAddress,
         publicKey,
         async reset() {
-          await sdk.reset({ enclave: true });
+          await sdk.reset();
         },
       }}
     >
