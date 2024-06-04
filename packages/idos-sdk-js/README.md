@@ -82,7 +82,7 @@ After importing the SDK, you initialize it with a selector string for a DOM node
 
 This container will be used by the SDK to load the idOS secure enclave during initialization. The [`📁 idos-enclave`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-enclave) is a sandboxed browser context, used to safekeep a keyring for cryptographic operations users need to perform. When the enclave requires user interaction, it uses this container to render UI such as the **`🔓 Unlock idOS`** button.
 
-<img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-container-1.png" width="145" />
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-1.png" width="145" />
 
 To avoid surprising your UI, the SDK doesn't make itself visible and sets no CSS properties. Instead, it toggles the `visible` class on this container. This means you retain control over your UI, and need to define what "visible" means, for example:
 
@@ -100,7 +100,7 @@ This barebones setup is enough to get you started, but you can naturally style a
 
 Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp) shows an example of blending this into a UI. It wraps the container and floats it over the page, and animates its opacity when the `visible` class is applied. You can see it below (pulsating forcefully to illustrate the point):
 
-<img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
 ### Using `hasProfile`
 
@@ -129,8 +129,8 @@ Your user's wallet will be triggered when this happens, so you should be mindful
   <td><i>Asking the signer for a public key:</i></td>
   <td><i>Fetching the human ID from idOS:</i></td>
 </tr><tr align="center">
-  <td><img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-sign-1.png" width="250" /></td>
-  <td><img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-sign-2.png" width="250" /></td>
+  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-1.png" width="250" /></td>
+  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-2.png" width="250" /></td>
 </td></tr></table>
 
 The idOS currently supports two classes of signers:
@@ -149,7 +149,7 @@ After the user clicks the **🔓 Unlock idOS** button, a secure dialog opens for
 <table border="0"><tr align="center"><td>
   <i>The unlock dialog</i>
 </td></tr><tr align="center"><td>
-  <img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-auth-dialog.png" width="250" />
+  <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-auth-dialog.png" width="250" />
 </td></tr></table>
 
 If the user chooses **Password**, they'll be prompted to enter it.
@@ -157,7 +157,7 @@ If the user chooses **Password**, they'll be prompted to enter it.
 <table border="0"><tr align="center"><td>
   <i>The password dialog</i>
 </td></tr><tr align="center"><td>
-  <img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-dialog-password.png" width="250" />
+  <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-dialog-password.png" width="250" />
 </td></tr></table>
 
 If they choose **Passkey**, we'll use their platform authenticator (you can learn more about passkeys [here](https://developers.google.com/identity/passkeys)).
@@ -165,7 +165,7 @@ If they choose **Passkey**, we'll use their platform authenticator (you can lear
 <table border="0"><tr align="center"><td>
   <i>A passkey dialog</i>
 </td></tr><tr align="center"><td>
-  <img src="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/assets/readme-dialog-passkey.png" width="250" />
+  <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-dialog-passkey.png" width="250" />
 </td></tr></table>
 
 The selected auth method will not have a bearing on the encryption capabilities.
