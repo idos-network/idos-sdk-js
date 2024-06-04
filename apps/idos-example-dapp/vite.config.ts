@@ -1,12 +1,12 @@
 import type { ServerResponse } from "node:http";
 import getRawBody from "raw-body";
-import { Connect, ViteDevServer, defineConfig } from "vite";
+import { type Connect, type ViteDevServer, defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import evmHandler from "./api/EVM";
 import nearHandler from "./api/NEAR";
 
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import { VercelRequest, type VercelResponse } from "@vercel/node";
 
 const injectRawBody = (req, res, next) => {
   getRawBody(req, {}, (err, string) => {

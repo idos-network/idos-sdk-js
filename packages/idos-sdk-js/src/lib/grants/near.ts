@@ -1,6 +1,6 @@
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
-import * as nearAPI from "near-api-js";
+import { Contract, connect, keyStores, type providers } from "near-api-js";
 import { Nonce } from "../nonce";
 import Grant from "./grant";
 import type { GrantChild } from "./grant-child";
@@ -12,7 +12,7 @@ interface NearContractGrant {
   locked_until: number;
 }
 
-const compact = <T extends Object>(obj: T): Partial<T> => {
+const compact = <T extends Record<string, unknown>>(obj: T): Partial<T> => {
   return Object.fromEntries(Object.entries(obj).filter(([_k, v]) => v)) as Partial<T>;
 };
 
@@ -23,7 +23,7 @@ export interface NearGrantsOptions {
 }
 
 export class NearGrants implements GrantChild {
-  #contract: nearAPI.Contract;
+  #contract: Contract;
   #signer: Wallet;
   #publicKey: string;
 
@@ -40,7 +40,7 @@ export class NearGrants implements GrantChild {
     revokeBySignature: "delete_grant_by_signature",
   } as const;
 
-  private constructor(signer: Wallet, contract: nearAPI.Contract, publicKey: string) {
+  private constructor(signer: Wallet, contract: Contract, publicKey: string) {
     this.#signer = signer;
     this.#contract = contract;
     this.#publicKey = publicKey;
@@ -57,15 +57,15 @@ export class NearGrants implements GrantChild {
     options: NearGrantsOptions;
     publicKey: string;
   }): Promise<NearGrants> {
-    const keylessNearConnection = await nearAPI.connect({
+    const keylessNearConnection = await connect({
       networkId: options.network ?? NearGrants.defaultNetwork,
-      keyStore: new nearAPI.keyStores.BrowserLocalStorageKeyStore(),
+      keyStore: new keyStores.BrowserLocalStorageKeyStore(),
       nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl,
     });
 
     return new NearGrants(
       signer,
-      new nearAPI.Contract(
+      new Contract(
         await keylessNearConnection.account(accountId),
         options.contractId ?? NearGrants.defaultContractId,
         {
@@ -88,7 +88,7 @@ export class NearGrants implements GrantChild {
 
   #result(
     grant: NearContractGrant,
-    transactionResult: nearAPI.providers.FinalExecutionOutcome | undefined,
+    transactionResult: providers.FinalExecutionOutcome | undefined,
   ): { grant: Grant; transactionId: string } {
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
 

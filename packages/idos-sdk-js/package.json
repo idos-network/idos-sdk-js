@@ -34,6 +34,7 @@
     "near-api-js": "^3.0.4"
   },
   "devDependencies": {
+    "@near-js/types": "^0.2.1",
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@vitest/ui": "^0.34.6",
