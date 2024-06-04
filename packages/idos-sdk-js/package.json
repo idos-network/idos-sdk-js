@@ -9,9 +9,7 @@
   "main": "dist/idos-sdk.js",
   "module": "dist/idos-sdk.umd.cjs",
   "types": "dist/idos-sdk.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "exports": {
     ".": {
       "import": "./dist/idos-sdk.js",
