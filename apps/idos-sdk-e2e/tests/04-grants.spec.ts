@@ -66,8 +66,8 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   await (await page.waitForSelector(`#restart-${credentialId}`)).waitForElementState("visible");
 
   // Navigate back and check for the grant creation
-  const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await page.goto(process.env.BASE_URL as string);
+  const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
 
   const revokeButton = page.getByRole("button", { name: "Revoke" }).last();
