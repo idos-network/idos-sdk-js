@@ -5,10 +5,11 @@ interface PipeCodecArgs<T> {
 
 export class Store {
   keyPrefix = "idOS-";
-
+  handler: Storage;
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
 
-  constructor() {
+  constructor(handler = window.localStorage) {
+    this.handler = handler;
     if (this.hasRememberDurationElapsed()) this.reset();
   }
 
@@ -19,8 +20,8 @@ export class Store {
         const result = this.get(key);
         if (result) return decode(result);
       },
-      set: (key: string, value: any, days: string | number) =>
-        this.set.call(this, key, encode(value), days),
+      // biome-ignore lint/suspicious/noExplicitAny: This is fine. We want to allow any value.
+      set: (key: string, value: any) => this.set.call(this, key, encode(value)),
     };
   }
 
@@ -52,8 +53,8 @@ export class Store {
     // If the value doesn't decode right, we're going to assume that somebody messed around with it.
     // The absence of a value means `false` today. So, we're following suit on the reasoning: consider it absent.
     // Furthermore, since this is not really a recoverable situation, we're going to clean up that stored value.
+    let str: string;
 
-    let str;
     try {
       str = JSON.parse(value);
     } catch (error) {
@@ -78,21 +79,21 @@ export class Store {
   }
 
   #getLocalStorage(key: string) {
-    return window.localStorage.getItem(`${this.keyPrefix}${key}`);
+    return this.handler.getItem(`${this.keyPrefix}${key}`);
   }
 
   #setLocalStorage(key: string, value: string) {
-    return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
+    return this.handler.setItem(`${this.keyPrefix}${key}`, value);
   }
 
   #removeLocalStorage(key: string) {
-    return window.localStorage.removeItem(`${this.keyPrefix}${key}`);
+    return this.handler.removeItem(`${this.keyPrefix}${key}`);
   }
 
   reset() {
-    for (const key of Object.keys(window.localStorage)) {
+    for (const key of Object.keys(this.handler)) {
       if (key === "idOS-credential-id") continue;
-      if (key.startsWith(this.keyPrefix)) window.localStorage.removeItem(key);
+      if (key.startsWith(this.keyPrefix)) this.handler.removeItem(key);
     }
   }
 }

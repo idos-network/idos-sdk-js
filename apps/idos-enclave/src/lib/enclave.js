@@ -6,6 +6,8 @@ import nacl from "tweetnacl";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 export class Enclave {
+  unpartitionedStore;
+
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store();
@@ -14,8 +16,10 @@ export class Enclave {
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
 
+    this.store = new Store();
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     const secretKey = storeWithCodec.get("encryption-private-key");
+
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.#listenToRequests();
@@ -29,7 +33,7 @@ export class Enclave {
     this.store.reset();
   }
 
-  storage(humanId, signerAddress, signerPublicKey) {
+  async storage(humanId, signerAddress, signerPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
@@ -60,15 +64,19 @@ export class Enclave {
     return this.keyPair?.publicKey;
   }
 
-  async authWithPassword() {
-    const { password, duration } = await this.#openDialog("password");
-    this.store.set("password", password);
-    this.store.setRememberDuration(duration);
-    return { password, duration };
-  }
-
   async ensurePassword() {
     if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
+    const permission = await navigator.permissions.query({
+      name: "storage-access",
+    });
+
+    if (permission.state === "granted") {
+      if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
+
+      const password = this.unpartitionedStore.get("password");
+
+      if (password) return Promise.resolve;
+    }
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
@@ -99,15 +107,19 @@ export class Enclave {
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
+        if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
+
+        if (this.unpartitionedStore.get("password")) return resolve();
+
         this.unlockButton.disabled = true;
 
-        const storedCredentialId = this.store.get("credential-id");
+        const storedCredentialId = this.unpartitionedStore.get("credential-id");
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (!!preferredAuthMethod) {
+          } else if (preferredAuthMethod) {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth"));
@@ -116,29 +128,33 @@ export class Enclave {
           return reject(e);
         }
 
-        this.store.set("password", password);
+        this.unpartitionedStore.set("password", password);
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
         if (credentialId) {
-          this.store.set("credential-id", credentialId);
+          this.unpartitionedStore.set("credential-id", credentialId);
           this.store.set("preferred-auth-method", "passkey");
         } else {
-          this.store.set("preferred-auth-method", "password");
+          this.unpartitionedStore.set("preferred-auth-method", "password");
           this.store.setRememberDuration(duration);
         }
 
-        return password ? resolve() : reject();
+        if (!password) return reject();
+
+        return resolve();
       }),
     );
   }
 
   async ensureKeyPair() {
-    const password = this.store.get("password");
+    if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
+
+    const password = this.unpartitionedStore.get("password");
     const salt = this.store.get("human-id");
 
-    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    const storeWithCodec = this.unpartitionedStore.pipeCodec(Base64Codec);
 
     const secretKey =
       storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
@@ -314,5 +330,10 @@ export class Enclave {
         [port2],
       );
     });
+  }
+
+  async #initUnpartitionedStore() {
+    const handle = await document.requestStorageAccess({ localStorage: true });
+    this.unpartitionedStore = new Store(handle.localStorage);
   }
 }
