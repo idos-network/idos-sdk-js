@@ -25,7 +25,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   // Get the credential ID that is going to be shared.
   const credentialId = (await list.getByRole("listitem").first().getAttribute("id")) as string;
 
-  await page.goto("https://idos-example-dapp-plaground.vercel.app/");
+  await page.goto("https://idos-example-dapp-playground.vercel.app/");
   await context.clearCookies();
   await page.evaluate(() => window.localStorage.clear());
 
@@ -70,6 +70,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
 
   // Navigate back and check for the grant creation
   await page.goto(process.env.BASE_URL as string);
+  await metamask.confirmSignature();
   const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
 
