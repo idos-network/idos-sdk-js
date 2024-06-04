@@ -41,9 +41,12 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
 
   await page.getByText(credentialId).click();
 
+  // We setup the popupPromise before clicking the button to open the popup.
+  // See https://playwright.dev/docs/pages#handling-popups for more information about how to handle popups.
   const popupPromise = page.waitForEvent("popup");
   const idOSButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
   await idOSButton.click();
+  // Then we await the popupPromise to get the popup page.
   const idOSPopup = await popupPromise;
   await page.waitForTimeout(2000);
   await (await idOSPopup.waitForSelector("#auth-method-password")).click();
