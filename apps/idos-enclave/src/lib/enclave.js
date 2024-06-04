@@ -45,9 +45,8 @@ export class Enclave {
       await this.ensureKeyPair();
     } catch (e) {
       console.warn(e);
-    } finally {
-      return this.keyPair?.publicKey;
     }
+    return this.keyPair?.publicKey;
   }
 
   async authWithPassword() {
