@@ -87,6 +87,7 @@ export class IframeEnclave implements EnclaveProvider {
       "popups-to-escape-sandbox",
       "same-origin",
       "scripts",
+      "storage-access-by-user-activation",
     ].map((toLift) => `allow-${toLift}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
