@@ -1,4 +1,4 @@
-name: Playwright Tests
+name: Playwright Tests (Playground)
 on:
   push:
     branches: [ main ]
@@ -7,6 +7,7 @@ on:
   
 jobs:
   e2e:
+    environment: Playground
     timeout-minutes: 60
     runs-on: ubuntu-latest
     defaults:
@@ -16,6 +17,7 @@ jobs:
       BASE_URL: ${{secrets.IDOS_E2E_BASE_URL}}
       WALLET_SEED_PHRASE: ${{ secrets.IDOS_E2E_WALLET_SEED_PHRASE }}
       WALLET_PASSWORD: ${{ secrets.IDOS_E2E_WALLET_PASSWORD }}
+      GRANTS_TEST_BASE_URL: ${{ secrets.IDOS_E2E_GRANTS_BASE_URL }}
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v2
