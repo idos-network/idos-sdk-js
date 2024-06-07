@@ -1,13 +1,13 @@
-name: Playwright Tests (Playground)
+name: Playwright Tests (Production)
 on:
   push:
-    branches: [ playground ]
+    branches: [ main ]
   pull_request:
-    branches: [ playground ]
+    branches: [ main ]
   
 jobs:
   e2e:
-    environment: Playground
+    environment: Production
     timeout-minutes: 60
     runs-on: ubuntu-latest
     defaults:
