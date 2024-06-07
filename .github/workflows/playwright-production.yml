@@ -18,6 +18,7 @@ jobs:
       WALLET_SEED_PHRASE: ${{ secrets.IDOS_E2E_WALLET_SEED_PHRASE }}
       WALLET_PASSWORD: ${{ secrets.IDOS_E2E_WALLET_PASSWORD }}
       GRANTS_TEST_BASE_URL: ${{ secrets.IDOS_E2E_GRANTS_BASE_URL }}
+      CREDENTIAL_CONTENT: ${{ secrets.IDOS_E2E_CREDENTIAL_CONTENT }}
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v2
