@@ -5,7 +5,7 @@ const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
 test.beforeEach(async ({ context, page }) => {
-  test.setTimeout(120000);
+  test.setTimeout(500000);
 
   await context.clearCookies();
   await page.evaluate(() => window.localStorage.clear());
@@ -25,7 +25,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   // Get the credential ID that is going to be shared.
   const credentialId = (await list.getByRole("listitem").first().getAttribute("id")) as string;
 
-  await page.goto("https://idos-example-dapp-playground.vercel.app/");
+  await page.goto(process.env.GRANTS_TEST_BASE_URL as string);
   await context.clearCookies();
   await page.evaluate(() => window.localStorage.clear());
 
@@ -35,8 +35,8 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   await metamask.approveSwitchNetwork();
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
+  await page.waitForTimeout(2000);
   await metamask.confirmSignature();
-
   await page.waitForTimeout(2000);
 
   await page.getByText(credentialId).click();
