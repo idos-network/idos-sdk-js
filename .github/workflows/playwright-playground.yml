@@ -2,8 +2,6 @@ name: Playwright Tests (Playground)
 on:
   push:
     branches: [ playground ]
-  pull_request:
-    branches: [ playground ]
   
 jobs:
   e2e:
