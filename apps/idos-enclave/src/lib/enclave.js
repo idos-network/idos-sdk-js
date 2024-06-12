@@ -40,12 +40,9 @@ export class Enclave {
   }
 
   async keys() {
-    try {
-      await this.ensurePassword();
-      await this.ensureKeyPair();
-    } catch (e) {
-      console.warn(e);
-    }
+    await this.ensurePassword();
+    await this.ensureKeyPair();
+
     return this.keyPair?.publicKey;
   }
 
