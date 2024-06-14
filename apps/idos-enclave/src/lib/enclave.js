@@ -39,12 +39,11 @@ export class Enclave {
     };
   }
 
-  async keys(authMethod) {
-    if (authMethod) await this.#openDialog("auth");
+  async keys() {
     await this.ensurePassword();
     await this.ensureKeyPair();
 
-    return this.keyPair.publicKey;
+    return this.keyPair?.publicKey;
   }
 
   async authWithPassword() {
@@ -65,7 +64,7 @@ export class Enclave {
     let credentialId;
 
     const getWebAuthnCredential = async (storedCredentialId) => {
-      const credentialRequest = {
+      const credentialRequestWithId = {
         publicKey: {
           challenge: crypto.getRandomValues(new Uint8Array(10)),
           allowCredentials: [
@@ -74,65 +73,46 @@ export class Enclave {
               id: Base64Codec.decode(storedCredentialId),
             },
           ],
-          authenticatorSelection: {
-            authenticatorAttachment: "platform",
-            userVerification: "required",
-            residentKey: "preferred",
-          },
         },
       };
 
-      const credential = await navigator.credentials.get(credentialRequest);
+      const credential = await navigator.credentials.get(credentialRequestWithId);
       password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
       credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
+
       return { password, credentialId };
     };
 
-    return new Promise((resolve) =>
+    return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
+        const storedCredentialId = this.store.get("credential-id");
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
-        if (preferredAuthMethod === "password") {
-          ({ password, duration } = await this.#openDialog("password"));
-          this.store.set("password", password);
-          this.store.setRememberDuration(duration);
-          return resolve();
-        }
-
-        if (preferredAuthMethod === "webauthn") {
-          const storedCredentialId = this.store.get("credential-id");
-
+        try {
           if (storedCredentialId) {
-            try {
-              ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-            } catch (e) {
-              ({ password, credentialId } = await this.#openDialog("passkey", {
-                type: "webauthn",
-              }));
-            }
+            ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
+          } else if (!!preferredAuthMethod) {
+            ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, credentialId } = await this.#openDialog("passkey", {
-              type: "webauthn",
-            }));
+            ({ password, duration, credentialId } = await this.#openDialog("auth"));
           }
-          this.store.set("credential-id", credentialId);
-          this.store.set("password", password);
-          return resolve();
+        } catch (e) {
+          return reject(e);
         }
 
-        ({ password, duration, credentialId } = await this.#openDialog("auth"));
+        this.store.set("password", password);
 
         if (credentialId) {
           this.store.set("credential-id", credentialId);
-          this.store.set("preferred-auth-method", "webauthn");
+          this.store.set("preferred-auth-method", "passkey");
         } else {
           this.store.set("preferred-auth-method", "password");
+          this.store.setRememberDuration(duration);
         }
-        this.store.set("password", password);
-        this.store.setRememberDuration(duration);
-        resolve();
+
+        return password ? resolve() : reject();
       }),
     );
   }
@@ -247,7 +227,6 @@ export class Enclave {
           senderPublicKey,
           signerAddress,
           signerPublicKey,
-          authMethod,
           mode,
           theme,
         } = requestData;
@@ -256,7 +235,7 @@ export class Enclave {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [authMethod],
+          keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
@@ -267,7 +246,7 @@ export class Enclave {
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
-        console.log("catch", error);
+        console.warn("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
@@ -295,7 +274,7 @@ export class Enclave {
     const dialogURL = new URL("/dialog.html", window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-    await new Promise((resolve) => this.dialog.addEventListener("load", resolve));
+    await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();

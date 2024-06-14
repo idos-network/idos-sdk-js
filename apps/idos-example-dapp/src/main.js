@@ -91,6 +91,7 @@ const connectWallet = {
   const idos = await idOS.init({
     enclaveOptions: {
       container: "#idos-container",
+      throwOnUserCancelUnlock: false,
     },
   });
   window.idos = idos;

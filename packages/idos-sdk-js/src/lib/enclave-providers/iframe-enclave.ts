@@ -32,11 +32,16 @@ export class IframeEnclave implements EnclaveProvider {
       storage: { humanId, signerAddress, signerPublicKey },
     })) as StoredData;
 
-    if (encryptionPublicKey) return encryptionPublicKey;
-
-    this.#showEnclave();
-    encryptionPublicKey = (await this.#requestToEnclave({ keys: {} })) as Uint8Array;
-    this.#hideEnclave();
+    while (!encryptionPublicKey) {
+      this.#showEnclave();
+      try {
+        encryptionPublicKey = (await this.#requestToEnclave({ keys: {} })) as Uint8Array;
+      } catch (e) {
+        if (this.options.throwOnUserCancelUnlock) throw e;
+      } finally {
+        this.#hideEnclave();
+      }
+    }
 
     return encryptionPublicKey;
   }

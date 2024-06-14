@@ -10,6 +10,7 @@ export interface EnclaveOptions {
   theme?: "light" | "dark";
   mode?: "new" | "existing";
   url?: string;
+  throwOnUserCancelUnlock?: boolean;
 }
 
 export interface EnclaveProvider {
