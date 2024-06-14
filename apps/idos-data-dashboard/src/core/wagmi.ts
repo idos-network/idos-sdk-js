@@ -2,7 +2,7 @@ import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import type { Account, Client, Transport } from "viem";
-import { useConnectorClient } from "wagmi";
+import { http, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -16,7 +16,15 @@ const metadata = {
 
 export const chains = [mainnet, sepolia] as const;
 
-export const wagmiConfig = defaultWagmiConfig({ chains, projectId, metadata });
+export const wagmiConfig = defaultWagmiConfig({
+  chains,
+  projectId,
+  metadata,
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+  },
+});
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;
