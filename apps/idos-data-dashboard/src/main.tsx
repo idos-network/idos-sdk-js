@@ -27,10 +27,10 @@ createWeb3Modal({ wagmiConfig, projectId });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ChakraBaseProvider theme={theme}>
-        <WalletSelectorContextProvider>
-          <WagmiProvider config={wagmiConfig}>
+    <ChakraBaseProvider theme={theme}>
+      <WalletSelectorContextProvider>
+        <WagmiProvider config={wagmiConfig}>
+          <QueryClientProvider client={queryClient}>
             <IDOSProvider>
               <RouterProvider
                 router={createBrowserRouter([
@@ -66,10 +66,10 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                 ])}
               />
             </IDOSProvider>
-          </WagmiProvider>
-        </WalletSelectorContextProvider>
-      </ChakraBaseProvider>
-      <ReactQueryDevtools buttonPosition="bottom-left" />
-    </QueryClientProvider>
+            <ReactQueryDevtools buttonPosition="bottom-left" />
+          </QueryClientProvider>
+        </WagmiProvider>
+      </WalletSelectorContextProvider>
+    </ChakraBaseProvider>
   </React.StrictMode>,
 );
