@@ -31,7 +31,7 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      records = records.filter((record: any) => !record.original_id)
+      records = records.filter((record: any) => !record.original_id);
     }
 
     if (!filter) {
