@@ -7,9 +7,7 @@
   "license": "MIT",
   "type": "module",
   "main": "src/lib/index.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "exports": {
     ".": {
       "import": "./dist/idos-sdk.js",
