@@ -37,7 +37,6 @@ const useFetchCredentials = () => {
           .map((c) => c.id),
       }));
     },
-    select: (credentials) => credentials.filter((credential) => !credential.original_id),
   });
 };
 
