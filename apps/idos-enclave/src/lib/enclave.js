@@ -9,6 +9,7 @@ export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store();
+    this.authorizedOrigins = JSON.parse(this.store.get("enclave-authorized-origins") ?? "[]");
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
@@ -18,6 +19,10 @@ export class Enclave {
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.#listenToRequests();
+  }
+
+  get isAuthorizedOrigin() {
+    return this.authorizedOrigins.includes(this.parentOrigin);
   }
 
   reset() {
@@ -30,6 +35,15 @@ export class Enclave {
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
+
+    if (!this.isAuthorizedOrigin) {
+      return {
+        humanId: "",
+        encryptionPublicKey: "",
+        signerAddress: "",
+        signerPublicKey: "",
+      };
+    }
 
     return {
       humanId: this.store.get("human-id"),
@@ -54,7 +68,7 @@ export class Enclave {
   }
 
   async ensurePassword() {
-    if (this.store.get("password")) return Promise.resolve;
+    if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
@@ -103,6 +117,9 @@ export class Enclave {
         }
 
         this.store.set("password", password);
+
+        this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+        this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
         if (credentialId) {
           this.store.set("credential-id", credentialId);
