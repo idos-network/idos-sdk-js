@@ -18,7 +18,7 @@ export class Data {
     tableName: string,
     filter?: Partial<T>,
   ): Promise<T[]> {
-    const records = (await this.kwilWrapper.call(
+    let records = (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
       `List your ${tableName} in idOS`,
@@ -28,6 +28,10 @@ export class Data {
       for (const record of records) {
         record.value = await this.enclave.decrypt(record.value);
       }
+    }
+
+    if (tableName === "credentials") {
+      records = records.filter((record: any) => !record.original_id);
     }
 
     if (!filter) {
