@@ -11,7 +11,7 @@ export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
     this.store = new Store();
-    this.authorizedOrigins = JSON.parse(this.store.get("enclave-authorized-origins") ?? "[]");
+    this.authorizedOrigins = [];
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
@@ -34,20 +34,28 @@ export class Enclave {
   }
 
   async storage(humanId, signerAddress, signerPublicKey) {
+    const permission = await navigator.permissions.query({
+      name: "storage-access",
+    });
+
+    if (permission.state === "granted") {
+      if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
+
+      if (!this.isAuthorizedOrigin) {
+        return {
+          humanId: "",
+          encryptionPublicKey: "",
+          signerAddress: "",
+          signerPublicKey: "",
+        };
+      }
+    }
+
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
-
-    if (!this.isAuthorizedOrigin) {
-      return {
-        humanId: "",
-        encryptionPublicKey: "",
-        signerAddress: "",
-        signerPublicKey: "",
-      };
-    }
 
     return {
       humanId: this.store.get("human-id"),
@@ -65,7 +73,6 @@ export class Enclave {
   }
 
   async ensurePassword() {
-    if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
     const permission = await navigator.permissions.query({
       name: "storage-access",
     });
@@ -75,7 +82,7 @@ export class Enclave {
 
       const password = this.unpartitionedStore.get("password");
 
-      if (password) return Promise.resolve;
+      if (password && this.isAuthorizedOrigin) return Promise.resolve;
     }
 
     this.unlockButton.style.display = "block";
@@ -131,7 +138,11 @@ export class Enclave {
         this.unpartitionedStore.set("password", password);
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
+
+        this.unpartitionedStore.set(
+          "enclave-authorized-origins",
+          JSON.stringify(this.authorizedOrigins),
+        );
 
         if (credentialId) {
           this.unpartitionedStore.set("credential-id", credentialId);
@@ -335,5 +346,9 @@ export class Enclave {
   async #initUnpartitionedStore() {
     const handle = await document.requestStorageAccess({ localStorage: true });
     this.unpartitionedStore = new Store(handle.localStorage);
+
+    this.authorizedOrigins = JSON.parse(
+      this.unpartitionedStore.get("enclave-authorized-origins") || "[]",
+    );
   }
 }
