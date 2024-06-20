@@ -203,8 +203,8 @@ importers:
         specifier: ^1.6.8
         version: 1.6.8(debug@4.3.4)
       ethers:
-        specifier: ^6.8.0
-        version: 6.9.1
+        specifier: ^6.12
+        version: 6.12.1
       near-api-js:
         specifier: ^3.0.4
         version: 3.0.4
@@ -276,8 +276,8 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0
       ethers:
-        specifier: ^6.8.0
-        version: 6.8.0
+        specifier: ^6.12
+        version: 6.12.1
       jsonld:
         specifier: ^8.3.1
         version: 8.3.1
@@ -11038,38 +11038,6 @@ packages:
     engines: {node: '>=14.0.0'}
     dependencies:
       '@adraffy/ens-normalize': 1.10.1
-      '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.2
-      '@types/node': 18.15.13
-      aes-js: 4.0.0-beta.5
-      tslib: 2.4.0
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
-  /ethers@6.8.0:
-    resolution: {integrity: sha512-zrFbmQRlraM+cU5mE4CZTLBurZTs2gdp2ld0nG/f3ecBK+x6lZ69KSxBqZ4NjclxwfTxl5LeNufcBbMsTdY53Q==}
-    engines: {node: '>=14.0.0'}
-    dependencies:
-      '@adraffy/ens-normalize': 1.10.0
-      '@noble/curves': 1.2.0
-      '@noble/hashes': 1.3.2
-      '@types/node': 18.15.13
-      aes-js: 4.0.0-beta.5
-      tslib: 2.4.0
-      ws: 8.5.0
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
-    dev: false
-
-  /ethers@6.9.1:
-    resolution: {integrity: sha512-kuV8fGd4/8Gj7wkurbsuUsm1DCG6N5gKGYdw3fnWG/7QGknhy1xtHD7kbkCWQAcbAYmzLCLqCPedS3FYncFkKQ==}
-    engines: {node: '>=14.0.0'}
-    dependencies:
-      '@adraffy/ens-normalize': 1.10.0
       '@noble/curves': 1.2.0
       '@noble/hashes': 1.3.2
       '@types/node': 18.15.13
