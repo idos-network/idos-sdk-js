@@ -77,7 +77,7 @@ export class Enclave {
       name: "storage-access",
     });
 
-    if (permission.state === "granted") {
+    if (permission.state !== "denied") {
       if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
 
       const password = this.unpartitionedStore.get("password");
@@ -116,7 +116,7 @@ export class Enclave {
       this.unlockButton.addEventListener("click", async () => {
         if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
 
-        if (this.unpartitionedStore.get("password")) return resolve();
+        if (this.unpartitionedStore.get("password") && this.isAuthorizedOrigin) return resolve();
 
         this.unlockButton.disabled = true;
 
