@@ -5,11 +5,11 @@ interface PipeCodecArgs<T> {
 
 export class Store {
   keyPrefix = "idOS-";
-  handler: Storage;
+  device: Storage;
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
 
-  constructor(handler = window.localStorage) {
-    this.handler = handler;
+  constructor(device = window.localStorage) {
+    this.device = device;
     if (this.hasRememberDurationElapsed()) this.reset();
   }
 
@@ -79,21 +79,21 @@ export class Store {
   }
 
   #getLocalStorage(key: string) {
-    return this.handler.getItem(`${this.keyPrefix}${key}`);
+    return this.device.getItem(`${this.keyPrefix}${key}`);
   }
 
   #setLocalStorage(key: string, value: string) {
-    return this.handler.setItem(`${this.keyPrefix}${key}`, value);
+    return this.device.setItem(`${this.keyPrefix}${key}`, value);
   }
 
   #removeLocalStorage(key: string) {
-    return this.handler.removeItem(`${this.keyPrefix}${key}`);
+    return this.device.removeItem(`${this.keyPrefix}${key}`);
   }
 
   reset() {
-    for (const key of Object.keys(this.handler)) {
+    for (const key of Object.keys(this.device)) {
       if (key === "idOS-credential-id") continue;
-      if (key.startsWith(this.keyPrefix)) this.handler.removeItem(key);
+      if (key.startsWith(this.keyPrefix)) this.device.removeItem(key);
     }
   }
 }
