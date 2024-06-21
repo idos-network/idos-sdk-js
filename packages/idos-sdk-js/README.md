@@ -21,8 +21,11 @@ Create a container anywhere on your page, and ensure it's displayed when assigne
 div#idos-container {
   display: none;
 }
+
+/* Style this however you like. */
 div#idos-container.visible {
   display: block;
+  width: 160px;
 }
 ```
 
