@@ -21,10 +21,15 @@ type ProfOfPersonhoodProps = {
   onClose: () => void;
 };
 
-const fractalProofUrl = (address: string) =>
-  `https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread&method=wallet&currency=${
+const fractalProofUrl = (address: string) => {
+  const base_fractal_url = "app.fractal.id";
+  const client_id = "er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc";
+  const redirect_uri = encodeURIComponent("https://dashboard.idos.network/success");
+
+  return `https://${base_fractal_url}/authorize?client_id=${client_id}&redirect_uri=${redirect_uri}&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread&method=wallet&currency=${
     address?.startsWith("0x") ? "eth" : "near"
   }&ensure_wallet=${address}`;
+}
 
 export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => {
   const isCentered = useBreakpointValue(
