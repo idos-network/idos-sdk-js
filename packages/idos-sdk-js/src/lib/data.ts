@@ -42,6 +42,16 @@ export class Data {
     return records.filter((record: any) => !record[key] || record[key] === value);
   }
 
+  async listAllCredentials(): Promise<Record<string, string>[]> {
+    const tableName = "credentials";
+    return (await this.kwilWrapper.call(
+      `get_${tableName}`,
+      null,
+      `List your ${tableName} in idOS`,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    )) as any;
+  }
+
   async createMultiple<T extends Record<string, unknown>>(
     tableName: string,
     records: T[],
