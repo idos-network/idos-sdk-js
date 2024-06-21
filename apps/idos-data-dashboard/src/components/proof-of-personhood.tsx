@@ -21,10 +21,19 @@ type ProfOfPersonhoodProps = {
   onClose: () => void;
 };
 
-const fractalProofUrl = (address: string) =>
-  `https://app.fractal.id/authorize?client_id=er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc&redirect_uri=https%3A%2F%2Fdashboard.idos.network%2Fsuccess&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread&method=wallet&currency=${
+const fractalProofUrlBase = import.meta.env.VITE_FRACTAL_PROOF_URL_BASE ?? "app.fractal.id";
+const fractalProofUrlClientId =
+  import.meta.env.VITE_FRACTAL_PROOF_URL_CLIENT_ID ?? "er6XdOOyU_2y8MfKM5pN_fG52l3dVQYIPXBm6Lf4UVc";
+const fractalProofUrlRedirectUri =
+  import.meta.env.VITE_FRACTAL_PROOF_URL_REDIRECT_URI ?? "https://dashboard.idos.network/success";
+
+const fractalProofUrl = (address: string) => {
+  return `https://${fractalProofUrlBase}/authorize?client_id=${fractalProofUrlClientId}&redirect_uri=${encodeURIComponent(
+    fractalProofUrlRedirectUri,
+  )}&response_type=code&scope=contact%3Aread%20verification.uniqueness%3Aread%20verification.uniqueness.details%3Aread%20verification.idos%3Aread%20verification.idos.details%3Aread&method=wallet&currency=${
     address?.startsWith("0x") ? "eth" : "near"
   }&ensure_wallet=${address}`;
+};
 
 export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => {
   const isCentered = useBreakpointValue(
