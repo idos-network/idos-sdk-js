@@ -25,6 +25,7 @@ export class Store {
     };
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: We are fine with `any` here.
   get(key: string): any {
     const value = this.#getLocalStorage(key);
     if (!value) return undefined;
@@ -71,6 +72,7 @@ export class Store {
     return expires < Date.now();
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: We are fine with `any` here.
   set(key: string, value: any) {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
