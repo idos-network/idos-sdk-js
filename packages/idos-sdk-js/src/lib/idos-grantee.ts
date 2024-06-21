@@ -10,6 +10,7 @@ import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { assertNever } from "../types";
 import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "./grants";
+import type Grant from "./grants/grant";
 import type { GrantChild } from "./grants/grant-child";
 import { KwilWrapper } from "./kwil-wrapper";
 import { implicitAddressFromPublicKey } from "./utils";
@@ -281,6 +282,32 @@ export class idOSGrantee {
       credentialCopy.content,
       credentialCopy.encryption_public_key,
     );
+  }
+
+  /**
+   * Returns the list of Access Grants that are present in the network that granteeSigner is connected to.
+   *
+   * If you need to gather AGs from more than one chain, consider instantiating this class once per chain, and do
+   * something like so:
+   * <code>
+   *   const AllIdOSGrantees = [
+   *     await idOSGrantee.init({args: "for", chain: "one"}),
+   *     await idOSGrantee.init({args: "for", chain: "two"}),
+   *   ]
+   *   const allUserAGs = AllIdOSGrantees.flatMap(
+   *    (idOSGrantee) => idOSGrantee.getLocalAccessGrantsFromUserByAddress(address),
+   *   )
+   * </code>
+   *
+   * @param address The user's address.
+   */
+  async getLocalAccessGrantsFromUserByAddress(address: string): Promise<Grant[]> {
+    if (!this.grants) throw new Error("NEAR is not implemented yet");
+
+    return this.grants.list({
+      owner: address,
+      grantee: this.grantee,
+    });
   }
 
   async createBySignature(
