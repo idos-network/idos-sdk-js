@@ -294,9 +294,9 @@ export class idOSGrantee {
    *     await idOSGrantee.init({args: "for", chain: "one"}),
    *     await idOSGrantee.init({args: "for", chain: "two"}),
    *   ]
-   *   const allUserAGs = AllIdOSGrantees.flatMap(
-   *    (idOSGrantee) => idOSGrantee.getLocalAccessGrantsFromUserByAddress(address),
-   *   )
+   *   const allUserAGs = (await Promise.all(allIdOSGrantees.map(
+   *     (idOSGrantee) => idOSGrantee.getLocalAccessGrantsFromUserByAddress(address),
+   *   ))).flat()
    * </code>
    *
    * @param address The user's address.
