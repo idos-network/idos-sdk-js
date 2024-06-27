@@ -52,6 +52,20 @@ export class Data {
     )) as any;
   }
 
+  async listCredentialsFilteredByCountries(countries: string[]) {
+    const credentials = await this.list("credentials");
+
+    const credentialsWithContent = await Promise.all(
+      credentials.map(async (credential) => {
+        return await this.get("credentials", credential.id, false);
+      }),
+    );
+
+    if (!credentialsWithContent.length) return [];
+
+    return this.enclave.filterCredentialsByCountries(credentialsWithContent, countries);
+  }
+
   async createMultiple<T extends Record<string, unknown>>(
     tableName: string,
     records: T[],
@@ -148,6 +162,7 @@ export class Data {
   async get<T extends Record<string, unknown>>(
     tableName: string,
     recordId: string,
+    decrypt = true,
   ): Promise<T | null> {
     if (tableName === "credentials") {
       const records = (await this.kwilWrapper.call(
@@ -160,7 +175,8 @@ export class Data {
 
       if (!record) return null;
 
-      record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+      if (decrypt)
+        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
 
       return record;
     }
