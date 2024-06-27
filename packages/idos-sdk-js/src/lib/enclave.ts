@@ -56,4 +56,8 @@ export class Enclave {
   async reset() {
     return this.provider.reset();
   }
+
+  async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
+    return this.provider.filterCredentialsByCountries?.(credentials, countries);
+  }
 }

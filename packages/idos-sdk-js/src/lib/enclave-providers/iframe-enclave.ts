@@ -75,6 +75,12 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<Uint8Array>;
   }
 
+  async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
+    return this.#requestToEnclave({
+      filterCredentialsByCountries: { credentials, countries },
+    }) as Promise<string[]>;
+  }
+
   async #loadEnclave() {
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
