@@ -45,7 +45,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
   const initialise = useCallback(async () => {
     const signer = await getSigner();
 
-    if (!signer || !userAddress) return;
+    if (!signer || !userAddress || sdk) return;
 
     const _sdk = await idOS.init({
       container: "#idos",
@@ -65,7 +65,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
     }
 
     setSdk(_sdk);
-  }, [getSigner, userAddress]);
+  }, [getSigner, userAddress, sdk]);
 
   useEffect(() => {
     initialise()

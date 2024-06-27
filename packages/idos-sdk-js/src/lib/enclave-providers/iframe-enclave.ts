@@ -1,3 +1,4 @@
+import type { idOSCredential } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -79,6 +80,15 @@ export class IframeEnclave implements EnclaveProvider {
     return this.#requestToEnclave({
       filterCredentialsByCountries: { credentials, countries },
     }) as Promise<string[]>;
+  }
+
+  filterCredentials(
+    credentials: Record<string, string>[],
+    privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },
+  ): Promise<idOSCredential[]> {
+    return this.#requestToEnclave({
+      filterCredentials: { credentials, privateFieldFilters },
+    }) as Promise<idOSCredential[]>;
   }
 
   async #loadEnclave() {
