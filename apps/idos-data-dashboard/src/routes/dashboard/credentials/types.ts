@@ -1,19 +1,5 @@
-type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 
-export type idOSCredential = {
-  credential_type: string;
-  human_id: string;
-  id: string;
-  issuer: string;
-  original_id: string;
-  credential_level: string;
-  credential_status: idOSCredentialStatus;
+export type idOSCredentialWithShares = idOSCredential & {
   shares: string[];
-};
-
-export type idOSGrant = {
-  owner: string;
-  grantee: string;
-  dataId: string;
-  lockedUntil: number;
 };

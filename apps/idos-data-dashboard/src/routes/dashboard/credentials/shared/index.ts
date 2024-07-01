@@ -1,11 +1,13 @@
 import { useIdOS } from "@/core/idos";
+import type { idOSGrant } from "@idos-network/idos-sdk";
 import { type DefaultError, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { idOSCredential, idOSGrant } from "../types";
+
+import type { idOSCredentialWithShares } from "../types";
 
 export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   const { sdk, address, publicKey } = useIdOS();
   const queryClient = useQueryClient();
-  const credentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]);
+  const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
   const owner = address?.includes("0x") ? address : publicKey;
 
@@ -25,7 +27,7 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   });
 };
 
-type Ctx = { previousCredentials: idOSCredential[] };
+type Ctx = { previousCredentials: idOSCredentialWithShares[] };
 
 export const useRevokeGrant = () => {
   const { sdk } = useIdOS();
@@ -36,14 +38,15 @@ export const useRevokeGrant = () => {
       sdk.grants.revoke("credentials", dataId, grantee, dataId, lockedUntil),
     mutationKey: ["revokeGrant"],
     async onMutate(grant) {
-      const previousCredentials = queryClient.getQueryData<idOSCredential[]>(["credentials"]) ?? [];
+      const previousCredentials =
+        queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]) ?? [];
       const index = previousCredentials.findIndex((credential) =>
         credential.shares.includes(grant.dataId),
       );
       const parent = { ...previousCredentials[index] };
       parent.shares = parent.shares.filter((id) => id !== grant.dataId);
       const credentials = Object.assign([], previousCredentials, { [index]: parent });
-      queryClient.setQueryData<idOSCredential[]>(["credentials"], () => credentials);
+      queryClient.setQueryData<idOSCredentialWithShares[]>(["credentials"], () => credentials);
 
       return {
         previousCredentials,
@@ -51,7 +54,10 @@ export const useRevokeGrant = () => {
     },
 
     onError(_, __, ctx) {
-      queryClient.setQueryData<idOSCredential[]>(["credentials"], ctx?.previousCredentials);
+      queryClient.setQueryData<idOSCredentialWithShares[]>(
+        ["credentials"],
+        ctx?.previousCredentials,
+      );
     },
   });
 };

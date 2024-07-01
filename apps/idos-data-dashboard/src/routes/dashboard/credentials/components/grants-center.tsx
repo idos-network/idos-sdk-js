@@ -22,10 +22,10 @@ import {
   VStack,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import type { idOSGrant } from "@idos-network/idos-sdk";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useFetchGrants, useRevokeGrant } from "../shared";
-import type { idOSGrant } from "../types";
 
 type GrantsCenterProps = {
   credentialId: string;

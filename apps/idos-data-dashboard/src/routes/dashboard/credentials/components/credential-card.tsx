@@ -1,13 +1,13 @@
 import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
-import type { idOSCredential } from "../types";
+import type { idOSCredentialWithShares } from "../types";
 
 type CredentialCardProps = {
-  credential: idOSCredential;
+  credential: idOSCredentialWithShares;
   onViewDetails: (credentialId: string) => void;
   onManageGrants: (credentialId: string) => void;
-  onDelete: (credential: idOSCredential) => void;
+  onDelete: (credential: idOSCredentialWithShares) => void;
 };
 
 export const CredentialCard = ({

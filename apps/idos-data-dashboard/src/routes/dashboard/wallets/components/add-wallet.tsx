@@ -13,12 +13,11 @@ import {
   useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
-import { getNearFullAccessPublicKeys } from "@idos-network/idos-sdk";
+import { getNearFullAccessPublicKeys, type idOSWallet } from "@idos-network/idos-sdk";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 
 import { useIdOS } from "@/core/idos";
-import type { idOSWallet } from "../types";
 
 type AddWalletProps = {
   isOpen: boolean;
