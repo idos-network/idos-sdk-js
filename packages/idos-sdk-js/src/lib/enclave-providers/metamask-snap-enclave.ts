@@ -1,16 +1,27 @@
 import type { EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
+  // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
   enclaveHost: any;
   snapId: string;
 
-  constructor(_?: {}) {
+  constructor(_?: Record<string, unknown>) {
+    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
+  }
+  filterCredentialsByCountries(
+    credentials: Record<string, string>[],
+    countries: string[],
+  ): Promise<string[]> {
+    console.log(credentials, countries);
+
+    throw new Error("Method not implemented.");
   }
 
   async load(): Promise<StoredData> {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
+    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     const connected = Object.values(snaps).find((snap: any) => snap.id === this.snapId);
 
     if (!connected)
@@ -40,7 +51,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return encryptionPublicKey;
   }
 
-  invokeSnap(method: string, params: any = {}) {
+  invokeSnap(method: string, params: unknown = {}) {
     return this.enclaveHost.request({
       method: "wallet_invokeSnap",
       params: {
@@ -63,6 +74,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
   }
 
   async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
+    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     const encrypted: any = await this.invokeSnap("encrypt", { message, receiverPublicKey });
 
     return Uint8Array.from(Object.values(encrypted));

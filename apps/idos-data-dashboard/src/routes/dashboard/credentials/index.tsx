@@ -51,17 +51,6 @@ const NoCredentials = () => {
   );
 };
 
-const useFetchCredentialsByCountryFilter = () => {
-  const { sdk } = useIdOS();
-  return useQuery({
-    queryKey: ["credentials-by-country", "UA"],
-    queryFn: async () => {
-      const credentials = await sdk.data.listCredentialsFilteredByCountries(["UA"]);
-      return credentials;
-    },
-  });
-};
-
 const Credentials = () => {
   const credentials = useFetchCredentials();
   const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
@@ -70,9 +59,6 @@ const Credentials = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
-
-  // This is atempt to fetch credentials by country filter
-  useFetchCredentialsByCountryFilter();
 
   const handleManageGrants = async (credentialId: string) => {
     if (chain?.id !== sepolia.id)
