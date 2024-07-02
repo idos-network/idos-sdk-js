@@ -174,7 +174,9 @@ export class Enclave {
     return fullMessage;
   }
 
-  decrypt(fullMessage, senderPublicKey) {
+  async decrypt(fullMessage, senderPublicKey) {
+    if (!this.keyPair) await this.keys();
+
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
     const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
@@ -230,6 +232,28 @@ export class Enclave {
     window.parent.postMessage(message, this.parentOrigin);
   }
 
+  async filterCredentialsByCountries(credentials, countries) {
+    const decrypted = await Promise.all(
+      credentials.map(async (credential) => ({
+        ...credential,
+        content: Utf8Codec.decode(
+          await this.decrypt(
+            Base64Codec.decode(credential.content),
+            Base64Codec.decode(credential.encryption_public_key),
+          ),
+        ),
+      })),
+    );
+
+    return decrypted
+      .filter((credential) => {
+        const content = JSON.parse(credential.content);
+
+        return countries.includes(content.credentialSubject.residential_address_country);
+      })
+      .map((credential) => credential.id);
+  }
+
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -246,6 +270,8 @@ export class Enclave {
           signerPublicKey,
           mode,
           theme,
+          credentials,
+          countries,
         } = requestData;
 
         const paramBuilder = {
@@ -256,6 +282,7 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
+          filterCredentialsByCountries: () => [credentials, countries],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);
