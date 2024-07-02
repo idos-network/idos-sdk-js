@@ -286,7 +286,10 @@ importers:
         version: 2.0.0
       near-api-js:
         specifier: ^3.0.4
-        version: 3.0.4
+        version: 2.1.4
+      tiny-invariant:
+        specifier: ^1.3.3
+        version: 1.3.3
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
@@ -296,7 +299,7 @@ importers:
         version: 0.2.1
       '@near-wallet-selector/core':
         specifier: ^8.7.5
-        version: 8.9.5(near-api-js@3.0.4)
+        version: 8.9.5(near-api-js@2.1.4)
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.0.0)
@@ -5022,6 +5025,24 @@ packages:
       tslib: 2.6.2
     dev: false
 
+  /@near-js/accounts@0.1.4:
+    resolution: {integrity: sha512-zHFmL4OUZ4qHXOE+dDBkYgTNHLWC5RmYUVp9LiuGciO5zFPp7WlxmowJL0QjgXqV1w+dNXq3mgmkfAgYVS8Xjw==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/providers': 0.0.7
+      '@near-js/signers': 0.0.5
+      '@near-js/transactions': 0.2.1
+      '@near-js/types': 0.0.4
+      '@near-js/utils': 0.0.4
+      ajv: 8.11.2
+      ajv-formats: 2.1.1(ajv@8.11.2)
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      depd: 2.0.0
+      near-abi: 0.1.1
+    transitivePeerDependencies:
+      - encoding
+
   /@near-js/accounts@1.0.4:
     resolution: {integrity: sha512-6zgSwq/rQ9ggPOIkGUx9RoEurbJiojqA/axeh6o1G+46GqUBI7SUcDooyVvZjeiOvUPObnTQptDYpbV+XZji8g==}
     dependencies:
@@ -5040,6 +5061,15 @@ packages:
       near-abi: 0.1.1
     transitivePeerDependencies:
       - encoding
+    dev: false
+
+  /@near-js/crypto@0.0.5:
+    resolution: {integrity: sha512-nbQ971iYES5Spiolt+p568gNuZ//HeMHm3qqT3xT+i8ZzgbC//l6oRf48SUVTPAboQ1TJ5dW/NqcxOY0pe7b4g==}
+    dependencies:
+      '@near-js/types': 0.0.4
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      tweetnacl: 1.0.3
 
   /@near-js/crypto@1.2.1:
     resolution: {integrity: sha512-iJOHaGKvdudYfR8nEtRhGlgcTEHeVmxMoT0JVXmuP3peG96v/sSnA03CE6MZBeCC8txKAQOffagxE7oU6hJp9g==}
@@ -5050,24 +5080,60 @@ packages:
       bn.js: 5.2.1
       borsh: 1.0.0
       randombytes: 2.1.0
+    dev: false
+
+  /@near-js/keystores-browser@0.0.5:
+    resolution: {integrity: sha512-mHF3Vcvsr7xnkaM/reOyxtykbE3OWKV6vQzqyTH2tZYT2OTEnj0KhRT9BCFC0Ra67K1zQLbg49Yc/kDCc5qupA==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/keystores': 0.0.5
 
   /@near-js/keystores-browser@0.0.9:
     resolution: {integrity: sha512-JzPj+RHJN2G3CEm/LyfbtZDQy/wxgOlqfh52voqPGijUHg93b27KBqtZShazAgJNkhzRbWcoluWQnd2jL8vF7A==}
     dependencies:
       '@near-js/crypto': 1.2.1
       '@near-js/keystores': 0.0.9
+    dev: false
+
+  /@near-js/keystores-node@0.0.5:
+    resolution: {integrity: sha512-BYmWyGNydfAqi7eYA1Jo8zULL13cxejD2VBr0BBIXx5bJ+BO4TLecsY1xdTBEq06jyWXHa7kV4h8BJzAjvpTLg==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/keystores': 0.0.5
 
   /@near-js/keystores-node@0.0.9:
     resolution: {integrity: sha512-2B9MYz6uIhysG1fhQSjvaPYCM7gM+UAeDchX0J8QRauXIeN8TGzpcdgkdkMUnWNTIdt3Iblh0ZuCs+FY02dTXg==}
     dependencies:
       '@near-js/crypto': 1.2.1
       '@near-js/keystores': 0.0.9
+    dev: false
+
+  /@near-js/keystores@0.0.5:
+    resolution: {integrity: sha512-kxqV+gw/3L8/axe9prhlU+M0hfybkxX54xfI0EEpWP2QiUV+qw+jkKolYIbdk5tdEZrGf9jHawh1yFtwP7APPQ==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/types': 0.0.4
 
   /@near-js/keystores@0.0.9:
     resolution: {integrity: sha512-j8ySgVEcm2Gg6zxkSdadNtPlIqhJZdPGfWWM3tPtEoowNS9snhwZn5NRFPrgmX0+MzpF7E091CRcY90MvRVhsg==}
     dependencies:
       '@near-js/crypto': 1.2.1
       '@near-js/types': 0.0.4
+    dev: false
+
+  /@near-js/providers@0.0.7:
+    resolution: {integrity: sha512-qj16Ey+vSw7lHE85xW+ykYJoLPr4A6Q/TsfpwhJLS6zBInSC6sKVqPO1L8bK4VA/yB7V7JJPor9UVCWgRXdNEA==}
+    dependencies:
+      '@near-js/transactions': 0.2.1
+      '@near-js/types': 0.0.4
+      '@near-js/utils': 0.0.4
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      http-errors: 1.7.2
+    optionalDependencies:
+      node-fetch: 2.7.0
+    transitivePeerDependencies:
+      - encoding
 
   /@near-js/providers@0.1.1:
     resolution: {integrity: sha512-0M/Vz2Ac34ShKVoe2ftVJ5Qg4eSbEqNXDbCDOdVj/2qbLWZa7Wpe+me5ei4TMY2ZhGdawhgJUPrYwdJzOCyf8w==}
@@ -5082,6 +5148,14 @@ packages:
       node-fetch: 2.6.7
     transitivePeerDependencies:
       - encoding
+    dev: false
+
+  /@near-js/signers@0.0.5:
+    resolution: {integrity: sha512-XJjYYatehxHakHa7WAoiQ8uIBSWBR2EnO4GzlIe8qpWL+LoH4t68MSezC1HwT546y9YHIvePjwDrBeYk8mg20w==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/keystores': 0.0.5
+      js-sha256: 0.9.0
 
   /@near-js/signers@0.1.1:
     resolution: {integrity: sha512-focJgs04dBUfawMnyGg3yIjaMawuVz2OeLRKC4t5IQDmO4PLfdIraEuwgS7tckMq3GdrJ7nqkwkpSNYpdt7I5Q==}
@@ -5089,6 +5163,18 @@ packages:
       '@near-js/crypto': 1.2.1
       '@near-js/keystores': 0.0.9
       '@noble/hashes': 1.3.3
+    dev: false
+
+  /@near-js/transactions@0.2.1:
+    resolution: {integrity: sha512-V9tXzkICDPruSxihKXkBhUgsI4uvW7TwXlnZS2GZpPsFFiIUeGrso0wo4uiQwB6miFA5q6fKaAtQa4F2v1s+zg==}
+    dependencies:
+      '@near-js/crypto': 0.0.5
+      '@near-js/signers': 0.0.5
+      '@near-js/types': 0.0.4
+      '@near-js/utils': 0.0.4
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      js-sha256: 0.9.0
 
   /@near-js/transactions@1.1.2:
     resolution: {integrity: sha512-AqYA56ncwgrWjIu+bNaWjTPRZb0O+SfpWIP7U+1FKNKxNYMCtkt6zp7SlQeZn743shKVq9qMzA9+ous/KCb0QQ==}
@@ -5100,6 +5186,7 @@ packages:
       '@noble/hashes': 1.3.3
       bn.js: 5.2.1
       borsh: 1.0.0
+    dev: false
 
   /@near-js/types@0.0.4:
     resolution: {integrity: sha512-8TTMbLMnmyG06R5YKWuS/qFG1tOA3/9lX4NgBqQPsvaWmDsa+D+QwOkrEHDegped0ZHQwcjAXjKML1S1TyGYKg==}
@@ -5110,6 +5197,14 @@ packages:
     resolution: {integrity: sha512-YygQEGMdFe6d2e/6dtNZer9paH396XeAdIKEhY/RPXDUnjDdfiDQ5DK4mM130sEeID2bAH9X1LQ+7vXGRjvyWw==}
     dev: true
 
+  /@near-js/utils@0.0.4:
+    resolution: {integrity: sha512-mPUEPJbTCMicGitjEGvQqOe8AS7O4KkRCxqd0xuE/X6gXF1jz1pYMZn4lNUeUz2C84YnVSGLAM0o9zcN6Y4hiA==}
+    dependencies:
+      '@near-js/types': 0.0.4
+      bn.js: 5.2.1
+      depd: 2.0.0
+      mustache: 4.0.0
+
   /@near-js/utils@0.1.0:
     resolution: {integrity: sha512-kOVAXmJzaC8ElJD3RLEoBuqOK+d5s7jc0JkvhyEtbuEmXYHHAy9Q17/YkDcX9tyr01L85iOt66z0cODqzgtQwA==}
     dependencies:
@@ -5118,6 +5213,22 @@ packages:
       bs58: 4.0.0
       depd: 2.0.0
       mustache: 4.0.0
+    dev: false
+
+  /@near-js/wallet-account@0.0.7:
+    resolution: {integrity: sha512-tmRyieG/wHmuNkg/WGFyKD6iH6atHPbY0rZ5OjOIiteuhZEPgp+z8OBpiQ4qumTa63q46aj/QVSQL0J3+JmBfw==}
+    dependencies:
+      '@near-js/accounts': 0.1.4
+      '@near-js/crypto': 0.0.5
+      '@near-js/keystores': 0.0.5
+      '@near-js/signers': 0.0.5
+      '@near-js/transactions': 0.2.1
+      '@near-js/types': 0.0.4
+      '@near-js/utils': 0.0.4
+      bn.js: 5.2.1
+      borsh: 0.7.0
+    transitivePeerDependencies:
+      - encoding
 
   /@near-js/wallet-account@1.1.1:
     resolution: {integrity: sha512-NnoJKtogBQ7Qz+AP+LdF70BP8Az6UXQori7OjPqJLMo73bn6lh5Ywvegwd1EB7ZEVe4BRt9+f9QkbU5M8ANfAw==}
@@ -5133,6 +5244,7 @@ packages:
       borsh: 1.0.0
     transitivePeerDependencies:
       - encoding
+    dev: false
 
   /@near-wallet-selector/core@8.7.0(near-api-js@3.0.4):
     resolution: {integrity: sha512-H1Mc0xyWsy5Vjscn8gjK8y0X1wG5EBH9VuVQ+mFOtdyt8y+7Pttf/0dD91oAIwCo7Pu/ryPukcr6IGAz1R05cA==}
@@ -5146,7 +5258,7 @@ packages:
       rxjs: 7.8.1
     dev: false
 
-  /@near-wallet-selector/core@8.9.5(near-api-js@3.0.4):
+  /@near-wallet-selector/core@8.9.5(near-api-js@2.1.4):
     resolution: {integrity: sha512-wJiCL8M7z6tkNMY5H4n63/SZCmlW0Z15H6R1biWgpRuMDlVjhQOzxrmQggb1jbK4nYkzXyARNKyPh2gcRUuS+w==}
     peerDependencies:
       near-api-js: ^1.0.0 || ^2.0.0
@@ -5154,7 +5266,7 @@ packages:
       borsh: 0.7.0
       events: 3.3.0
       js-sha256: 0.9.0
-      near-api-js: 3.0.4
+      near-api-js: 2.1.4
       rxjs: 7.8.1
     dev: true
 
@@ -6769,7 +6881,7 @@ packages:
       '@depay/web3-mock': 14.17.0
       '@playwright/test': 1.44.1
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.44.1)
-      viem: 2.9.9(typescript@5.2.2)
+      viem: 2.9.9
     transitivePeerDependencies:
       - bufferutil
       - typescript
@@ -8231,7 +8343,6 @@ packages:
         optional: true
     dependencies:
       typescript: 5.4.5
-    dev: false
 
   /abort-controller@3.0.0:
     resolution: {integrity: sha512-h8lQ8tacZYnR3vNQTgibj+tODHI5/+l06Au2Pcriv/Gmet0eaj4TwWH41sO9wnHDiQsEj19q0drzdWdeAHtweg==}
@@ -8733,6 +8844,7 @@ packages:
     deprecated: use 3.0.0 instead, safe-buffer has been merged and release for compatability
     dependencies:
       safe-buffer: 5.2.1
+    dev: false
 
   /base-x@3.0.9:
     resolution: {integrity: sha512-H7JU6iBHTal1gp56aKoaa//YUxEaAOUiydvrV/pILqIHXTtqxSkATOnDA2u+jZ/61sD+L/412+7kzXRtWukhpQ==}
@@ -8843,6 +8955,7 @@ packages:
 
   /borsh@1.0.0:
     resolution: {integrity: sha512-fSVWzzemnyfF89EPwlUNsrS5swF5CrtiN4e+h0/lLf4dz2he4L3ndM20PS9wj7ICSkXJe/TQUHdaPTq15b1mNQ==}
+    dev: false
 
   /bowser@2.11.0:
     resolution: {integrity: sha512-AlcaJBi/pqqJBIQ8U9Mcpc9i8Aqxn88Skv5d+xBX006BY5u8N3mGLHa5Lgppa7L/HfwgwLgZ6NYs+Ag6uUmJRA==}
@@ -8976,6 +9089,7 @@ packages:
     resolution: {integrity: sha512-/jcGuUuSebyxwLLfKrbKnCJttxRf9PM51EnHTwmFKBxl4z1SGkoAhrfd6uZKE0dcjQTfm6XzTP8DPr1tzE4KIw==}
     dependencies:
       base-x: 2.0.6
+    dev: false
 
   /bs58@4.0.1:
     resolution: {integrity: sha512-Ok3Wdf5vOIlBrgCvTq96gBkJw+JUEzdBgyaza5HLtPm7yTHkjRy8+JzNyHF7BHa0bNWOQIp3m5YF0nnFcOIKLw==}
@@ -9170,6 +9284,9 @@ packages:
   /canonicalize@1.0.8:
     resolution: {integrity: sha512-0CNTVCLZggSh7bc5VkX5WWPWO+cyZbNd07IHIsSXLia/eAq+r836hgk+8BKoEh7949Mda87VUOitx5OddVj64A==}
     dev: false
+
+  /capability@0.2.5:
+    resolution: {integrity: sha512-rsJZYVCgXd08sPqwmaIqjAd5SUTfonV0z/gDJ8D6cN8wQphky1kkAYEqQ+hmDxTw7UihvBfjUVUSY+DBEe44jg==}
 
   /chai@4.3.10:
     resolution: {integrity: sha512-0UXG04VuVbruMUYbJ6JctvH0YnC/4q3/AkT18q4NaITo91CUm0liMS9VqzT9vZhVQ/1eqPanMWjBM+Juhfb/9g==}
@@ -10353,6 +10470,13 @@ packages:
     resolution: {integrity: sha512-7dFHNmqeFSEt2ZBsCriorKnn3Z2pj+fd9kmI6QoWw4//DL+icEBfc0U7qJCisqrTsKTjw4fNFy2pW9OqStD84g==}
     dependencies:
       is-arrayish: 0.2.1
+
+  /error-polyfill@0.1.3:
+    resolution: {integrity: sha512-XHJk60ufE+TG/ydwp4lilOog549iiQF2OAPhkk9DdiYWMrltz5yhDz/xnKuenNwP7gy3dsibssO5QpVhkrSzzg==}
+    dependencies:
+      capability: 0.2.5
+      o3: 1.0.3
+      u3: 0.1.1
 
   /error-stack-parser@2.1.4:
     resolution: {integrity: sha512-Sk5V6wVazPhq5MhpO+AUxJn5x7XSXGl1R93Vn7i+zS15KDVxQijejNCrz8340/2bgLBjR9GtEG8ZVKONDjcqGQ==}
@@ -13342,6 +13466,7 @@ packages:
 
   /lru_map@0.4.1:
     resolution: {integrity: sha512-I+lBvqMMFfqaV8CJCISjI3wbjmwVu/VyOoU7+qtu9d7ioW5klMgsTTiUOUp+DJvfTTzKXoPbyC6YfgkNcyPSOg==}
+    dev: false
 
   /lucide-react@0.299.0(react@18.3.1):
     resolution: {integrity: sha512-59MiDzDzFI/efHhb4n0vGdXelMNwou7JlAFvVS4boA1G/7aYU7garPciYo73CODzkhrhz0JOgdtSTPSe5dMrlQ==}
@@ -13896,6 +14021,33 @@ packages:
     dependencies:
       '@types/json-schema': 7.0.13
 
+  /near-api-js@2.1.4:
+    resolution: {integrity: sha512-e1XicyvJvQMtu7qrG8oWyAdjHJJCoy+cvbW6h2Dky4yj7vC85omQz/x7IgKl71VhzDj2/TGUwjTVESp6NSe75A==}
+    dependencies:
+      '@near-js/accounts': 0.1.4
+      '@near-js/crypto': 0.0.5
+      '@near-js/keystores': 0.0.5
+      '@near-js/keystores-browser': 0.0.5
+      '@near-js/keystores-node': 0.0.5
+      '@near-js/providers': 0.0.7
+      '@near-js/signers': 0.0.5
+      '@near-js/transactions': 0.2.1
+      '@near-js/types': 0.0.4
+      '@near-js/utils': 0.0.4
+      '@near-js/wallet-account': 0.0.7
+      ajv: 8.11.2
+      ajv-formats: 2.1.1(ajv@8.11.2)
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      depd: 2.0.0
+      error-polyfill: 0.1.3
+      http-errors: 1.7.2
+      near-abi: 0.1.1
+      node-fetch: 2.7.0
+      tweetnacl: 1.0.3
+    transitivePeerDependencies:
+      - encoding
+
   /near-api-js@3.0.4:
     resolution: {integrity: sha512-qKWjnugoB7kSFhzZ5GXyH/eABspCQYWBmWnM4hpV5ctnQBt89LqgEu9yD1z4sa89MvUu8BuCxwb1m00BE8iofg==}
     dependencies:
@@ -13921,6 +14073,7 @@ packages:
       node-fetch: 2.6.7
     transitivePeerDependencies:
       - encoding
+    dev: false
 
   /negotiator@0.6.3:
     resolution: {integrity: sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg==}
@@ -13997,6 +14150,7 @@ packages:
         optional: true
     dependencies:
       whatwg-url: 5.0.0
+    dev: false
 
   /node-fetch@2.6.9:
     resolution: {integrity: sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==}
@@ -14157,6 +14311,11 @@ packages:
   /nwsapi@2.2.10:
     resolution: {integrity: sha512-QK0sRs7MKv0tKe1+5uZIQk/C8XGza4DAnztJG8iD+TpJIORARrCxczA738awHrZoHeTjSSoHqao2teO0dC/gFQ==}
     dev: true
+
+  /o3@1.0.3:
+    resolution: {integrity: sha512-f+4n+vC6s4ysy7YO7O2gslWZBUu8Qj2i2OUJOvjRxQva7jVjYjB29jrr9NCjmxZQR0gzrOcv1RnqoYOeMs5VRQ==}
+    dependencies:
+      capability: 0.2.5
 
   /ob1@0.80.9:
     resolution: {integrity: sha512-v9yOxowkZbxWhKOaaTyLjIm1aLy4ebMNcSn4NYJKOAI/Qv+SkfEfszpLr2GIxsccmb2Y2HA9qtsqiIJ80ucpVA==}
@@ -16830,7 +16989,6 @@ packages:
 
   /tweetnacl@1.0.3:
     resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
-    dev: false
 
   /type-check@0.4.0:
     resolution: {integrity: sha512-XleUoc9uwGXqjWwXaUTZAmzMcFZ5858QA2vvx1Ur5xIcixXIP+8LnFDgRplU30us6teqdlskFfu+ae4K79Ooew==}
@@ -16933,6 +17091,9 @@ packages:
     resolution: {integrity: sha512-vcI4UpRgg81oIRUFwR0WSIHKt11nJ7SAVlYNIu+QpqeyXP+gpQJy/Z4+F0aGxSE4MqwjyXvW/TzgkLAx2AGHwQ==}
     engines: {node: '>=14.17'}
     hasBin: true
+
+  /u3@0.1.1:
+    resolution: {integrity: sha512-+J5D5ir763y+Am/QY6hXNRlwljIeRMZMGs0cT6qqZVVzzT3X3nFPXVyPOFRMOR4kupB0T8JnCdpWdp6Q/iXn3w==}
 
   /ufo@1.3.1:
     resolution: {integrity: sha512-uY/99gMLIOlJPwATcMVYfqDSxUR9//AUcgZMzwfSTJPDKzA1S8mX4VLqa+fiAtveraQUBCz4FFcwVZBGbwBXIw==}
@@ -17364,6 +17525,28 @@ packages:
       - utf-8-validate
       - zod
     dev: false
+
+  /viem@2.9.9:
+    resolution: {integrity: sha512-SUIHBL6M5IIlqDCMEQwAAvHzeglaM4FEqM6bCI+srLXtFYmrpV4tWhnpobQRNwh4f7HIksmKLLZ+cytv8FfnJQ==}
+    peerDependencies:
+      typescript: '>=5.0.4'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+    dependencies:
+      '@adraffy/ens-normalize': 1.10.0
+      '@noble/curves': 1.2.0
+      '@noble/hashes': 1.3.2
+      '@scure/bip32': 1.3.2
+      '@scure/bip39': 1.2.1
+      abitype: 1.0.0(typescript@5.4.5)
+      isows: 1.0.3(ws@8.13.0)
+      ws: 8.13.0
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+    dev: true
 
   /viem@2.9.9(typescript@5.2.2):
     resolution: {integrity: sha512-SUIHBL6M5IIlqDCMEQwAAvHzeglaM4FEqM6bCI+srLXtFYmrpV4tWhnpobQRNwh4f7HIksmKLLZ+cytv8FfnJQ==}
