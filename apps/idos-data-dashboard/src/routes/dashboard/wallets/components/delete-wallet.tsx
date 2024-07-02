@@ -10,10 +10,9 @@ import {
   Button,
   useToast,
 } from "@chakra-ui/react";
+import type { idOSWallet } from "@idos-network/idos-sdk";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-
-import type { idOSWallet } from "../types";
 
 type DeleteWalletProps = {
   isOpen: boolean;

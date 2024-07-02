@@ -14,10 +14,9 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useQuery } from "@tanstack/react-query";
-
 import { DownloadIcon } from "lucide-react";
-import type { idOSCredential } from "../types";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const { sdk } = useIdOS();
@@ -25,7 +24,7 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
   return useQuery({
     queryKey: ["credential_details", credentialId],
     queryFn: ({ queryKey: [, credentialId] }) =>
-      sdk.data.get<idOSCredential & { content: string }>("credentials", credentialId),
+      sdk.data.get<idOSCredential>("credentials", credentialId),
   });
 };
 
@@ -91,7 +90,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
               bg="neutral.950"
               rounded="xl"
             >
-              {credential.data ? credential.data.content : "No content to display"}
+              {credential.data?.content ? credential.data.content : "No content to display"}
             </Code>
           ) : null}
         </ModalBody>

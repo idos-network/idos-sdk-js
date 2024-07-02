@@ -13,6 +13,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk";
 import {
   type DefaultError,
   useMutation,
@@ -22,7 +23,6 @@ import {
 import { useRef } from "react";
 
 import { useFetchGrants, useRevokeGrants } from "../shared";
-import type { idOSCredential, idOSGrant } from "../types";
 
 type DeleteCredentialProps = {
   isOpen: boolean;

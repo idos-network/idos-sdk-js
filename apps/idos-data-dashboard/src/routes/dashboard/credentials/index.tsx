@@ -21,7 +21,7 @@ import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { DeleteCredential } from "./components/delete-credential";
 import { GrantsCenter } from "./components/grants-center";
-import type { idOSCredential } from "./types";
+import type { idOSCredentialWithShares } from "./types";
 
 const useFetchCredentials = () => {
   const { sdk } = useIdOS();
@@ -35,7 +35,7 @@ const useFetchCredentials = () => {
         shares: credentials
           .filter((_credential) => _credential.original_id === credential.id)
           .map((c) => c.id),
-      })) as idOSCredential[]; // @todo: remove once we have more type safety in the SDK.
+      })) as idOSCredentialWithShares[]; // @todo: remove once we have more type safety in the SDK.
     },
     select: (credentials) => credentials.filter((credential) => !credential.original_id),
   });
@@ -55,7 +55,9 @@ const Credentials = () => {
   const credentials = useFetchCredentials();
   const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
-  const [credentialToDelete, setCredentialToDelete] = useState<idOSCredential | null>(null);
+  const [credentialToDelete, setCredentialToDelete] = useState<idOSCredentialWithShares | null>(
+    null,
+  );
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { chain } = useAccount();
   const { switchChainAsync } = useSwitchChain();
@@ -68,7 +70,7 @@ const Credentials = () => {
     setCredentialGrantsId(credentialId);
   };
 
-  const handleDelete = async (credential: idOSCredential) => {
+  const handleDelete = async (credential: idOSCredentialWithShares) => {
     if (chain?.id !== sepolia.id)
       await switchChainAsync?.({
         chainId: sepolia.id,
