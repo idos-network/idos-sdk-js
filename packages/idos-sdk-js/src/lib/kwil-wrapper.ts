@@ -92,9 +92,9 @@ export class KwilWrapper {
     return payload;
   }
 
-  async call(
+  async call<T>(
     actionName: string,
-    actionInputs: Record<string, any> | null,
+    actionInputs: Record<string, string> | null,
     description?: string,
     useSigner = true,
   ) {
@@ -104,12 +104,12 @@ export class KwilWrapper {
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
-    return res.data?.result;
+    return res.data?.result as T;
   }
 
-  async execute(
+  async execute<T>(
     actionName: string,
-    actionInputs: Record<string, unknown>[],
+    actionInputs: Partial<T>,
     description?: string,
     synchronous?: boolean,
   ) {
@@ -117,7 +117,7 @@ export class KwilWrapper {
 
     const action = await this.buildAction(actionName, actionInputs, description);
     const res = await this.client.execute(action, this.signer, synchronous);
-    return res.data?.tx_hash;
+    return res.data?.tx_hash as T;
   }
 
   async getHumanId(): Promise<string | null> {
