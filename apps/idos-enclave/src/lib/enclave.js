@@ -77,6 +77,8 @@ export class Enclave {
       name: "storage-access",
     });
 
+    console.log(permission.state);
+
     if (permission.state !== "denied") {
       if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
 
