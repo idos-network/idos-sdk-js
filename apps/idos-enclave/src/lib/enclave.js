@@ -116,7 +116,7 @@ export class Enclave {
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
-        if (!this.unpartitionedStore) await this.#initUnpartitionedStore();
+        await this.#initUnpartitionedStore();
 
         if (this.unpartitionedStore.get("password") && this.isAuthorizedOrigin) return resolve();
 
