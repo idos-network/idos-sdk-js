@@ -192,6 +192,18 @@ const connectWallet = {
   // We'll need this later on to request grants.
   const granteeInfo = await terminal.wait("awaiting server data", client.getInfo(chosenWallet));
 
+  if (chosenFlow.credentialsFilteredByCountry) {
+    const filteredCredentials =
+      cache.get("credentials-filtered-by-country") ||
+      idos.data.listCredentialsFilteredByCountries(["UA"]);
+    terminal
+      .h1("eyes", "User's credential ID's filtered by country (UA)")
+      .wait("awaiting signature", filteredCredentials);
+
+    terminal.table(await filteredCredentials, ["id"]);
+    cache.set("credentials-filtered-by-country", await filteredCredentials);
+  }
+
   if (chosenFlow.credentials) {
     // TODO: Why is this showing me the copies that belong to AGs? :x
     // https://github.com/idos-network/idos-schema/pull/36
