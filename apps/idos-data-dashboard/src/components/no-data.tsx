@@ -5,8 +5,8 @@ import { ProfOfPersonhood } from "./proof-of-personhood";
 
 export type NoDataProps = {
   title: string;
-  subtitle: string;
-  cta: string;
+  subtitle?: string;
+  cta?: string;
 };
 
 export const NoData = ({ title, subtitle, cta }: NoDataProps) => {
@@ -17,14 +17,21 @@ export const NoData = ({ title, subtitle, cta }: NoDataProps) => {
       <Heading fontSize="2xl" fontWeight="medium">
         {title}
       </Heading>
-      <Text color="neutral.600" fontSize="2xl">
-        {subtitle}
-      </Text>
-      <Box>
-        <Button colorScheme="green" leftIcon={<PlusIcon size={24} />} onClick={onOpen}>
-          {cta}
-        </Button>
-      </Box>
+
+      {subtitle ? (
+        <Text color="neutral.600" fontSize="2xl">
+          {subtitle}
+        </Text>
+      ) : null}
+
+      {cta ? (
+        <Box>
+          <Button colorScheme="green" leftIcon={<PlusIcon size={24} />} onClick={onOpen}>
+            {cta}
+          </Button>
+        </Box>
+      ) : null}
+
       <ProfOfPersonhood isOpen={isOpen} onClose={onClose} />
     </Stack>
   );
