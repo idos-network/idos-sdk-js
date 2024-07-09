@@ -254,6 +254,57 @@ export class Enclave {
       .map((credential) => credential.id);
   }
 
+  async filterCredentials(credentials, privateFieldFilters) {
+    const filterCredentials = (credentials, privateFieldFilters) => {
+      function findValueByKey(obj, key) {
+        if (obj[key]) {
+          return obj[key];
+        }
+
+        for (const prop in obj) {
+          if (obj[prop] && typeof obj[prop] === "object") {
+            const result = findValueByKey(obj[prop], key);
+
+            if (result !== undefined) {
+              return result;
+            }
+          }
+        }
+
+        return undefined;
+      }
+
+      const filterByKeys = (content, keys, filterCriteria, include = true) => {
+        for (const key of keys) {
+          const matchedValue = findValueByKey(content, key);
+          const isMatch = filterCriteria[key].includes(matchedValue);
+          if (include && !isMatch) {
+            return false;
+          }
+          if (!include && isMatch) {
+            return false;
+          }
+        }
+        return true;
+      };
+
+      const positiveMatchesKeys = Object.keys(privateFieldFilters.pick);
+      const omitKeys = Object.keys(privateFieldFilters.omit);
+
+      const matches = credentials.filter((credential) => {
+        const content = JSON.parse(credential.content);
+        return filterByKeys(content, positiveMatchesKeys, privateFieldFilters.pick, true);
+      });
+
+      return matches.filter((match) => {
+        const content = JSON.parse(match.content);
+        return filterByKeys(content, omitKeys, privateFieldFilters.omit, false);
+      });
+    };
+
+    return filterCredentials(credentials, privateFieldFilters);
+  }
+
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -283,6 +334,7 @@ export class Enclave {
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
+          filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

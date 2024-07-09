@@ -10,6 +10,14 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
+
+  filterCredentials(
+    credentials: Record<string, string>[],
+    privateFieldFilters: { select: Record<string, string>; reject: Record<string, string> },
+  ): Promise<string[]> {
+    throw new Error("Method not implemented.");
+  }
+
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],

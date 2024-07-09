@@ -63,7 +63,7 @@ export class idOS {
 
     this.data = new Data(kwilWrapper, this.enclave);
 
-    this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions);
+    this.grants = new Grants(this.data, evmGrantsOptions, nearGrantsOptions, this.enclave);
   }
 
   static async init(params: InitParams): Promise<idOS> {
