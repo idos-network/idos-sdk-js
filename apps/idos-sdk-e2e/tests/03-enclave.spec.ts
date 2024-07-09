@@ -14,7 +14,7 @@ test.beforeEach(async ({ context, page }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-test("should decrypt a  credential successfully", async ({
+test("should decrypt a credential successfully", async ({
   context,
   page,
   metamaskPage,
@@ -40,4 +40,41 @@ test("should decrypt a  credential successfully", async ({
 
   const code = page.locator("#credential-details");
   await expect(code).toHaveText(credentialContent);
+});
+
+const FILTERED_CREDENTIAL_ID = "5e901d3a-da38-47fd-9eb2-323fbd2c8254";
+
+test("should filter credentials by country successfully", async ({
+  context,
+  page,
+  metamaskPage,
+  extensionId,
+}) => {
+  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+  await page.goto("/e2e/credential-filtering");
+
+  await page.getByRole("button", { name: "Connect a wallet" }).click();
+  await page.getByRole("button", { name: "Metamask" }).click();
+  await metamask.switchAccount("Account 1");
+  await metamask.connectToDapp(["Account 1"]);
+  await page.waitForTimeout(2000);
+  await metamask.confirmSignature();
+
+  const popupPromise = page.waitForEvent("popup");
+
+  const idOSButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
+  await idOSButton.click();
+  const idOSPopup = await popupPromise;
+  await page.waitForTimeout(2000);
+  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
+  const passwordInput = idOSPopup.locator("#idos-password-input");
+  await passwordInput.fill("qwerty");
+  await idOSPopup.getByRole("button", { name: "Unlock" }).click();
+
+  const list = page.locator("#credentials-list");
+
+  await expect(list.getByRole("listitem")).toHaveCount(1);
+  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
+    `ID: ${FILTERED_CREDENTIAL_ID}`,
+  );
 });
