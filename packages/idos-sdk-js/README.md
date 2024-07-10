@@ -119,7 +119,7 @@ const hasProfile = await idos.hasProfile(signer.address) // true if there is an 
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
-All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavour to remember or learn two things:
+All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavor to remember or learn two things:
 
 1. a public key for this signer;
 2. the idOS human ID of the user controlling this signer.
