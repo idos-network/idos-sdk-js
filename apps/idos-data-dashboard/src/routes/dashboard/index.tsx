@@ -251,7 +251,7 @@ export function Component() {
         <Button
           as={ChakraLink}
           isExternal
-          href="https://drive.google.com/file/d/1M1VtwQmxXVGYMWcbY8CX42liCjcbSyuS/view?usp=drive_link"
+          href="https://drive.google.com/file/d/1CypYsXx--xCT05cjEbYE4TCT9ymF698r/view?usp=drive_link"
           target="_blank"
           color="green.200"
           display="inline-flex"
