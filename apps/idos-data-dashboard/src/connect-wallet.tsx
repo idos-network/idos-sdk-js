@@ -90,7 +90,7 @@ export const ConnectWallet = () => {
       </VStack>
       <Link
         isExternal
-        href="https://drive.google.com/file/d/1M1VtwQmxXVGYMWcbY8CX42liCjcbSyuS/view?usp=drive_link"
+        href="https://drive.google.com/file/d/1CypYsXx--xCT05cjEbYE4TCT9ymF698r/view?usp=drive_link"
         target="_blank"
         pos="fixed"
         right={5}
