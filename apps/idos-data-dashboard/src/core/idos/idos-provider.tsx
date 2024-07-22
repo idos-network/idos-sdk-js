@@ -1,48 +1,12 @@
-import { ConnectWallet } from "@/connect-wallet";
 import { Center, Spinner } from "@chakra-ui/react";
 import { idOS } from "@idos-network/idos-sdk";
-import { useQuery } from "@tanstack/react-query";
-import {
-  type PropsWithChildren,
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { type PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
-import { useWalletSelector } from "./near";
-import { useEthersSigner } from "./wagmi";
-
-type idOSContextValue = {
-  sdk: idOS;
-  address: string | undefined;
-  hasProfile: boolean;
-  publicKey: string | undefined;
-  reset: () => Promise<void>;
-};
-
-const idOSContext = createContext<idOSContextValue | null>(null);
-
-export const useIdOS = () => {
-  const idos = useContext(idOSContext);
-
-  if (!idos) {
-    throw new Error("idOS is not initialized");
-  }
-
-  return idos;
-};
-
-export const useFetchIdOSProfile = () => {
-  const { sdk } = useIdOS();
-  return useQuery({
-    queryKey: ["idos-profile"],
-    queryFn: () => sdk.auth.currentUser,
-  });
-};
+import { ConnectWallet } from "@/connect-wallet";
+import { useWalletSelector } from "../near";
+import { useEthersSigner } from "../wagmi";
+import { idOSContext } from "./idos-context";
 
 export const Provider = ({ children }: PropsWithChildren) => {
   const [isLoading, setIsLoading] = useState(true);
