@@ -16,7 +16,7 @@ const useFetchFilteredCredentials = () => {
 };
 
 export function Component() {
-  const credentials = useFetchFilteredCredentials();
+  const credentialIds = useFetchFilteredCredentials();
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -41,15 +41,15 @@ export function Component() {
         </Heading>
       </HStack>
 
-      {credentials.isFetching ? <DataLoading /> : null}
+      {credentialIds.isFetching ? <DataLoading /> : null}
 
-      {credentials.isError ? <DataError onRetry={credentials.refetch} /> : null}
+      {credentialIds.isError ? <DataError onRetry={credentialIds.refetch} /> : null}
 
-      {credentials.isSuccess ? (
+      {credentialIds.isSuccess ? (
         <>
-          {credentials.data.length > 0 ? (
+          {credentialIds.data.length > 0 ? (
             <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
-              {credentials.data.map((credential) => (
+              {credentialIds.data.map((credential) => (
                 <ListItem key={credential} id={credential}>
                   <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
                     <Text>ID: {credential}</Text>
