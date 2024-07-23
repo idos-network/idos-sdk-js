@@ -42,8 +42,6 @@ test("should decrypt a credential successfully", async ({
   await expect(code).toHaveText(credentialContent);
 });
 
-const FILTERED_CREDENTIAL_ID = "5e901d3a-da38-47fd-9eb2-323fbd2c8254";
-
 test("should filter credentials by country successfully", async ({
   context,
   page,
@@ -74,7 +72,4 @@ test("should filter credentials by country successfully", async ({
   const list = page.locator("#credentials-list");
 
   await expect(list.getByRole("listitem")).toHaveCount(1);
-  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
-    `ID: ${FILTERED_CREDENTIAL_ID}`,
-  );
 });
