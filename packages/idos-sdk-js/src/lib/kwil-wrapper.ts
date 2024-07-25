@@ -81,6 +81,9 @@ export class KwilWrapper {
 
     if (inputs) {
       for (const input of inputs) {
+        if (!input || (input && Object.keys(input).length === 0)) {
+          continue;
+        }
         const actionInput = new KwilUtils.ActionInput();
         for (const key in input) {
           actionInput.put(`$${key}`, input[key]);
@@ -94,6 +97,7 @@ export class KwilWrapper {
 
   async call(
     actionName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     actionInputs: Record<string, any> | null,
     description?: string,
     useSigner = true,
@@ -121,12 +125,14 @@ export class KwilWrapper {
   }
 
   async getHumanId(): Promise<string | null> {
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
 
     return result[0]?.human_id || null;
   }
 
   async hasProfile(address: string): Promise<boolean> {
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     const result = (await this.call("has_profile", { address }, undefined, false)) as any;
 
     return !!result[0]?.has_profile;
