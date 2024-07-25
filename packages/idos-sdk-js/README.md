@@ -29,12 +29,12 @@ div#idos-container.visible {
 }
 ```
 
-Import the SDK and initialize it with a selector for the container:
+Import the SDK and initialize it with a selector for the enclave container:
 
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idOS.init({ container: "#idos-container" });
+const idos = await idOS.init({ enclaveOptions: { container: "#idos-container"} });
 ```
 
 Connect your user's wallet and use its signer to complete the setup.
@@ -74,7 +74,7 @@ const isValid = await idOS.verifiableCredentials
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idos.init({ container: "#idos-container" });
+const idos = await idos.init({ enclaveOptions: { container: "#idos-container" } }) ;
 ```
 
 After importing the SDK, you initialize it with a selector string for a DOM node. Make sure to add it to your page:

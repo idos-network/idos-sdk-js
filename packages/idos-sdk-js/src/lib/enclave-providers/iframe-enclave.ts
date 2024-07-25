@@ -7,10 +7,10 @@ export class IframeEnclave implements EnclaveProvider {
   hostUrl: URL;
 
   constructor(options: EnclaveOptions) {
-    const { container, ...other } = options;
+    const { container, ...enclaveOptions } = options;
     this.container = container;
-    this.options = other;
-    this.hostUrl = new URL(other.url ?? import.meta.env.VITE_IDOS_ENCLAVE_URL);
+    this.options = enclaveOptions;
+    this.hostUrl = new URL(enclaveOptions.url ?? import.meta.env.VITE_IDOS_ENCLAVE_URL);
     this.iframe = document.createElement("iframe");
     this.iframe.id = "idos-enclave-iframe";
   }
@@ -34,6 +34,7 @@ export class IframeEnclave implements EnclaveProvider {
 
     while (!encryptionPublicKey) {
       this.#showEnclave();
+
       try {
         encryptionPublicKey = (await this.#requestToEnclave({ keys: {} })) as Uint8Array;
       } catch (e) {
@@ -132,7 +133,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
-  async #requestToEnclave(request: any) {
+  async #requestToEnclave(request: unknown) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
