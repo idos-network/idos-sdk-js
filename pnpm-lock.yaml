@@ -12,7 +12,7 @@ importers:
         specifier: 1.8.3
         version: 1.8.3
       lefthook:
-        specifier: ^1.7.7
+        specifier: ^1.7.5
         version: 1.7.7
       turbo:
         specifier: ^2.0.9
