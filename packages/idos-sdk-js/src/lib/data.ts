@@ -122,7 +122,7 @@ export class Data {
 
     const inputs: string[] = ((await this.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)
-      .inputs.map((input: string) => input.substring(1));
+      .parameters.map((input: string) => input.substring(1));
 
     const recordKeys = Object.keys(record);
 
