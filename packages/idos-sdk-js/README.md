@@ -267,6 +267,27 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
+
+### Filtering credentials
+
+`filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
+A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched.
+
+```js
+const entries = await idos.enclave.filterCredentials(credentials, {
+  pick: {
+    "credentialSubject.identification_document_country": "DE"
+  },
+  omit: {
+    "credentialSubject.identification_document_type": "passport",
+  },
+});
+
+`entries` would be a list of credentials where the `"credentialSubject.identification_document_country"` matches `DE`
+and `"credentialSubject.identification_document_type"` is not of type "passport".
+
+```
+
 ### Access Grants
 
 Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
@@ -317,7 +338,25 @@ await idos.grants.list({
   dataId,
   grantee,
 });
-```
+
+// Share a credential that matches the filtering criteria. 
+sdk.grants.shareMatchingEntry(
+  "credentials",
+  {
+    credential_level: "basic",
+    credential_type: "kyc",
+  },
+  {
+    pick: {
+      "credentialSubject.identification_document_country": "DE",
+    },
+    omit: {},
+  },
+  address as string,
+  0,
+  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
+  ),
+});
 
 > [!TIP]
 > See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
