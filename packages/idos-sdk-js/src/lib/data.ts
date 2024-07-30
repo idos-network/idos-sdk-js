@@ -55,11 +55,13 @@ export class Data {
   async listCredentialsFilteredByCountries(countries: string[]) {
     const credentials = await this.list("credentials");
 
-    const credentialsWithContent = await Promise.all(
-      credentials.map(async (credential) => {
-        return await this.get("credentials", credential.id, false);
-      }),
-    );
+    const credentialsWithContent = (
+      await Promise.all(
+        credentials.map(async (credential) => {
+          return await this.get("credentials", credential.id as string, false);
+        }),
+      )
+    ).filter((o) => o !== null) as Record<string, string>[];
 
     if (!credentialsWithContent.length) return [];
 
@@ -254,13 +256,14 @@ export class Data {
 
   async update<T extends Record<string, unknown>>(
     tableName: string,
-    record: T,
+    recordLike: T,
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
     if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
 
-    let receiverPublicKey;
+    let receiverPublicKey: string | undefined;
+    const record: any = recordLike;
 
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
@@ -269,7 +272,7 @@ export class Data {
     }
 
     if (tableName === "attributes") {
-      (record as any).value = await this.enclave.encrypt((record as any).value);
+      record.value = await this.enclave.encrypt(record.value);
     }
 
     await this.kwilWrapper.execute(

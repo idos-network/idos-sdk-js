@@ -70,7 +70,7 @@ export class KwilWrapper {
     description?: string,
   ) {
     const payload: ActionBody = {
-      action: actionName,
+      name: actionName,
       dbid: this.dbId,
       inputs: [],
     };
