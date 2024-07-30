@@ -80,7 +80,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
 });
 
 test("should revoke a grant successfully", async ({ context, page, metamaskPage, extensionId }) => {
-  await page.waitForTimeout(70000);
+  await page.waitForTimeout(5000);
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).click();
@@ -97,8 +97,10 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
 
   const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
-
   await metamask.approveSwitchNetwork();
+  await page.reload();
+  await manageGrantsButton.click();
+
   const revokeButton = page.getByRole("button", { name: "Revoke" }).last();
   await revokeButton.click();
 
