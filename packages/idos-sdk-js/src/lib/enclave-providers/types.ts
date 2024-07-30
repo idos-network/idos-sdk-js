@@ -1,3 +1,5 @@
+import type { idOSCredential } from "../types";
+
 export interface StoredData {
   encryptionPublicKey?: Uint8Array;
   humanId?: string;
@@ -26,4 +28,12 @@ export interface EnclaveProvider {
     credentials: Record<string, string>[],
     countries: string[],
   ): Promise<string[]>;
+
+  filterCredentials(
+    credentials: Record<string, string>[],
+    privateFieldFilters: {
+      pick: Record<string, string>;
+      omit: Record<string, string>;
+    },
+  ): Promise<idOSCredential[]>;
 }

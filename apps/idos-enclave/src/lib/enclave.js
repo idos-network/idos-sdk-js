@@ -1,6 +1,7 @@
 import { Store } from "@idos-network/idos-store";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
+import { every, get, negate } from "lodash-es";
 import nacl from "tweetnacl";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
@@ -107,7 +108,7 @@ export class Enclave {
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (!!preferredAuthMethod) {
+          } else if (preferredAuthMethod) {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth"));
@@ -248,10 +249,36 @@ export class Enclave {
     return decrypted
       .filter((credential) => {
         const content = JSON.parse(credential.content);
-
         return countries.includes(content.credentialSubject.residential_address_country);
       })
       .map((credential) => credential.id);
+  }
+
+  async filterCredentials(credentials, privateFieldFilters) {
+    const matchCriteria = (content, criteria) =>
+      every(Object.entries(criteria), ([path, targetSet]) =>
+        targetSet.includes(get(content, path)),
+      );
+
+    const decrypted = await Promise.all(
+      credentials.map(async (credential) => ({
+        ...credential,
+        content: Utf8Codec.decode(
+          await this.decrypt(
+            Base64Codec.decode(credential.content),
+            Base64Codec.decode(credential.encryption_public_key),
+          ),
+        ),
+      })),
+    );
+
+    return decrypted
+      .map((credential) => ({
+        ...credential,
+        content: JSON.parse(credential.content),
+      }))
+      .filter(({ content }) => matchCriteria(content, privateFieldFilters.pick))
+      .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
   #listenToRequests() {
@@ -272,6 +299,7 @@ export class Enclave {
           theme,
           credentials,
           countries,
+          privateFieldFilters,
         } = requestData;
 
         const paramBuilder = {
@@ -283,6 +311,7 @@ export class Enclave {
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
+          filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

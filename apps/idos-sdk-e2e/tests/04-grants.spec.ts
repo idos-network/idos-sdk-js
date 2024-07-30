@@ -80,7 +80,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
 });
 
 test("should revoke a grant successfully", async ({ context, page, metamaskPage, extensionId }) => {
-  await page.waitForTimeout(70000);
+  await page.waitForTimeout(5000);
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).click();
@@ -97,8 +97,10 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
 
   const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
-
   await metamask.approveSwitchNetwork();
+  await page.reload();
+  await manageGrantsButton.click();
+
   const revokeButton = page.getByRole("button", { name: "Revoke" }).last();
   await revokeButton.click();
 
@@ -109,4 +111,49 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
   await page.waitForSelector("#no-grants");
   await expect(revokeButton).not.toBeVisible();
   await expect(page.locator(`#grants-for-${credentialId}`)).not.toBeVisible();
+});
+
+test("should share a matching credential successfully", async ({
+  context,
+  page,
+  metamaskPage,
+  extensionId,
+}) => {
+  await page.goto("/e2e/credential-filtering");
+  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+  await page.getByRole("button", { name: "Connect a wallet" }).click();
+  await page.getByRole("button", { name: "Metamask" }).click();
+  await metamask.switchAccount("Account 1");
+  await metamask.connectToDapp(["Account 1"]);
+  await page.waitForTimeout(3000);
+  await metamask.confirmSignature();
+  await page.waitForTimeout(3000);
+  const popupPromise = page.waitForEvent("popup");
+
+  const switchChainBtn = page.locator("#switch-chain-button");
+  await switchChainBtn.click();
+  await metamask.approveSwitchNetwork();
+  await page.waitForTimeout(3000);
+
+  await page.reload();
+
+  const shareBtn = page.locator("#share-matching-credential-button");
+  await shareBtn.click();
+
+  const idOSButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
+  await idOSButton.click();
+  const idOSPopup = await popupPromise;
+  await page.waitForTimeout(2000);
+  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
+  const passwordInput = idOSPopup.locator("#idos-password-input");
+  await passwordInput.fill("qwerty");
+  await idOSPopup.getByRole("button", { name: "Unlock" }).click();
+
+  await page.waitForTimeout(3000);
+  await metamask.confirmSignature();
+  await page.waitForTimeout(3000);
+  await metamask.confirmTransaction();
+  await page.waitForTimeout(3000);
+  await (await page.waitForSelector("#transaction")).waitForElementState("visible");
+  await expect(page.locator("#transaction-id")).toBeVisible();
 });

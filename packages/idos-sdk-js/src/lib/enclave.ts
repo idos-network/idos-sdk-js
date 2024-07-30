@@ -2,6 +2,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
+import type { idOSCredential } from "./types";
 
 export class Enclave {
   encryptionPublicKey?: Uint8Array;
@@ -60,5 +61,17 @@ export class Enclave {
   async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
     if (!this.encryptionPublicKey) await this.ready();
     return await this.provider.filterCredentialsByCountries(credentials, countries);
+  }
+
+  async filterCredentials(
+    credentials: Record<string, string>[],
+    privateFieldFilters: {
+      pick: Record<string, string>;
+      omit: Record<string, string>;
+    },
+  ): Promise<idOSCredential[]> {
+    if (!this.encryptionPublicKey) await this.ready();
+
+    return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 }

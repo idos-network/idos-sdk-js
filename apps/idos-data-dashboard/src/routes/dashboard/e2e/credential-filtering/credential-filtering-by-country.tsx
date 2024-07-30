@@ -10,7 +10,7 @@ const useFetchFilteredCredentials = () => {
   const { sdk } = useIdOS();
 
   return useQuery({
-    queryKey: ["e2e-credential-filtering"],
+    queryKey: ["e2e-credential-filtering-by-country"],
     queryFn: () => sdk.data.listCredentialsFilteredByCountries(["DE"]),
   });
 };
@@ -65,4 +65,4 @@ export function Component() {
     </VStack>
   );
 }
-Component.displayName = "e2e_CredentialFiltering";
+Component.displayName = "e2e_CredentialFilteringByCountry";

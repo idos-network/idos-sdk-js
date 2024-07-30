@@ -49,7 +49,7 @@ test("should filter credentials by country successfully", async ({
   extensionId,
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-  await page.goto("/e2e/credential-filtering");
+  await page.goto("e2e/credential-filtering-by-country");
 
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).click();

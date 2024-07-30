@@ -66,8 +66,18 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             element: <Outlet />,
                             children: [
                               {
+                                path: "credential-filtering-by-country",
+                                lazy: () =>
+                                  import(
+                                    "@/routes/dashboard/e2e/credential-filtering/credential-filtering-by-country"
+                                  ),
+                              },
+                              {
                                 path: "credential-filtering",
-                                lazy: () => import("@/routes/dashboard/e2e/credential-filtering"),
+                                lazy: () =>
+                                  import(
+                                    "@/routes/dashboard/e2e/credential-filtering/credential-filtering"
+                                  ),
                               },
                             ],
                           },

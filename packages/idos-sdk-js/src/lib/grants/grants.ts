@@ -3,6 +3,8 @@ import type { Signer } from "ethers";
 
 import { assertNever } from "../../types";
 import type { Data } from "../data";
+import type { Enclave } from "../enclave";
+import type { idOSCredential } from "../types";
 import { EvmGrants, type EvmGrantsOptions } from "./evm";
 import type Grant from "./grant";
 import type { GrantChild } from "./grant-child";
@@ -39,6 +41,7 @@ export class Grants {
 
   constructor(
     public readonly data: Data,
+    public readonly enclave: Enclave,
     evmGrantsOptions: EvmGrantsOptions = {},
     nearGrantsOptions: NearGrantsOptions = {},
   ) {
@@ -91,7 +94,7 @@ export class Grants {
         child = assertNever(type, `Unexpected signer type: ${type}`);
     }
 
-    return new ConnectedGrants(this.data, child);
+    return new ConnectedGrants(this.data, this.enclave, child);
   }
 
   async list(
@@ -123,6 +126,20 @@ export class Grants {
   ): Promise<{ grant: Grant; transactionId: string }> {
     throw new Error("Call idOS.setSigner first.");
   }
+
+  async shareMatchingEntry(
+    _tableName: string,
+    _publicFields: Partial<idOSCredential>,
+    _privateFieldFilters: {
+      pick: Record<string, string>;
+      omit: Record<string, string>;
+    },
+    _address: string,
+    _lockedUntil: number,
+    _receiverPublicKey: string,
+  ): Promise<{ grant: Grant; transactionId: string }> {
+    throw new Error("Call idOS.setSigner first.");
+  }
 }
 
 class ConnectedGrants extends Grants {
@@ -130,9 +147,10 @@ class ConnectedGrants extends Grants {
 
   constructor(
     public readonly data: Data,
+    public readonly enclave: Enclave,
     child: GrantChild,
   ) {
-    super(data);
+    super(data, enclave);
     this.#child = child;
   }
 
@@ -167,6 +185,56 @@ class ConnectedGrants extends Grants {
       grantee: address,
       dataId: share.id,
       lockedUntil: lockedUntil,
+    });
+  }
+
+  async shareMatchingEntry(
+    tableName: string,
+    publicFields: Partial<idOSCredential>,
+    privateFieldFilters: {
+      pick: Record<string, string>;
+      omit: Record<string, string>;
+    },
+    address: string,
+    lockedUntil: number,
+    receiverPublicKey: string,
+  ): Promise<{ grant: Grant; transactionId: string }> {
+    const allEntries = (await this.data.list(tableName)) as idOSCredential[];
+
+    const filteredEntries = allEntries.filter((entry) => {
+      const keys = Object.keys(publicFields) as (keyof idOSCredential)[];
+      for (const key of keys) {
+        if (entry[key] !== publicFields[key]) return false;
+      }
+      return true;
+    });
+
+    const filteredEntriesWithContent = await Promise.all(
+      filteredEntries.map(async (credential) => {
+        const fullCredential = await this.data.get(
+          "credentials",
+          (credential as unknown as idOSCredential).id,
+          false,
+        );
+        return fullCredential;
+      }),
+    );
+
+    if (!filteredEntriesWithContent.length) throw new Error("No matching credentials to share");
+
+    const eligibleEntries = await this.enclave.filterCredentials(
+      filteredEntriesWithContent as Record<string, string>[],
+      privateFieldFilters,
+    );
+    if (!eligibleEntries.length) throw new Error("No matching credentials");
+
+    const selectedEntry = eligibleEntries[0];
+    const { id: dataId } = await this.data.share(tableName, selectedEntry.id, receiverPublicKey);
+
+    return await this.#child.create({
+      grantee: address,
+      dataId,
+      lockedUntil,
     });
   }
 
