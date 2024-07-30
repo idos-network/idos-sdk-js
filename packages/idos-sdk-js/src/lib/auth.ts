@@ -53,7 +53,7 @@ export class Auth {
 
     this.kwilWrapper.setSigner({
       accountId: currentAddress,
-      signer,
+      signer: signer as any,
       signatureType: "secp256k1_ep",
     });
 

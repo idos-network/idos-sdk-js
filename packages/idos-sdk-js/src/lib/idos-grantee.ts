@@ -122,7 +122,7 @@ const buildKwilSignerAndGrantee = (
   switch (chainType) {
     case "EVM": {
       const signer = granteeSigner as ethers.Wallet;
-      return [new KwilSigner(signer, signer.address), signer.address];
+      return [new KwilSigner(signer as any, signer.address), signer.address];
     }
     case "NEAR": {
       const signer = granteeSigner as KeyPair;
@@ -262,7 +262,7 @@ export class idOSGrantee {
     return (
       (await this.nodeKwil.call(
         {
-          action: "get_credential_shared",
+          name: "get_credential_shared",
           dbid: this.dbId,
           inputs: [{ $id: dataId }],
         },

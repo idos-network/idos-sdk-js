@@ -56,7 +56,7 @@ describe("kwil-wrapper", () => {
     const payload = await kwilWrapper.buildAction("do something", null);
 
     expect(payload).toEqual({
-      action: "do something",
+      name: "do something",
       dbid: kwilWrapper.dbId,
       inputs: [],
     });
@@ -70,7 +70,7 @@ describe("kwil-wrapper", () => {
     actionInput.put("$key_2", "value_2");
 
     expect(payload).toEqual({
-      action: "do something",
+      name: "do something",
       dbid: kwilWrapper.dbId,
       description: "*some description*",
       inputs: [actionInput],

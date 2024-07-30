@@ -25,7 +25,7 @@ const idosGrantee = await idOSGrantee.init({
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
 const lockTimeSpanSeconds = 3600; // one hour
 
-import { VercelRequest, VercelResponse } from "@vercel/node";
+import type { VercelRequest, VercelResponse } from "@vercel/node";
 export default async function (request: VercelRequest, response: VercelResponse) {
   const requestMethod = request.method as string;
 
