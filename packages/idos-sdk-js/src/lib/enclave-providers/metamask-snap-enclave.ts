@@ -15,6 +15,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     credentials: Record<string, string>[],
     privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },
   ): Promise<idOSCredential[]> {
+    console.log(credentials, privateFieldFilters);
     throw new Error("Method not implemented.");
   }
 
