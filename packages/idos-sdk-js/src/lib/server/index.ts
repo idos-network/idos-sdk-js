@@ -5,7 +5,7 @@ import { KeyPair } from "near-api-js";
 import type Grant from "../grants/grant";
 import { idOSGrantee } from "../idos-grantee";
 
-export async function idOSNode(
+export async function idOSServer(
   chainType: "EVM" | "NEAR",
   privateKey: string,
   encryptionSecretKey: string,
@@ -36,15 +36,10 @@ export async function idOSNode(
       throw new Error(`Unexpected chainType: ${chainType}`);
   }
 
-  const listGrants = async (args: Partial<Omit<Grant, "lockedUntil">>) => {
-    console.log(args);
-
-    return grantee.grants?.list(args);
-  };
-
-  const fetchSharedCredentialFromIdos = async (dataId: string) => {
-    return grantee.fetchSharedCredentialFromIdos(dataId);
-  };
+  const listGrants = async (args: Partial<Omit<Grant, "lockedUntil">>) =>
+    grantee.grants?.list(args);
+  const fetchSharedCredentialFromIdos = async (dataId: string) =>
+    grantee.fetchSharedCredentialFromIdos(dataId);
 
   return {
     listGrants,

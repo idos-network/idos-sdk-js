@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import { type Grant, idOSNode } from "@idos-network/idos-sdk";
+import { type Grant, idOSServer } from "@idos-network/idos-sdk";
 import { ZeroAddress } from "ethers";
 import { Hono } from "hono";
 import type { FC } from "hono/jsx";
@@ -27,7 +27,7 @@ const GrantsList: FC<{ grants?: Grant[] }> = (props: {
 };
 
 async function start() {
-  const idOS = await idOSNode("EVM", EVM_GRANTEE_PRIVATE_KEY, ENCRYPTION_SECRET_KEY, EVM_NODE_URL);
+  const idOS = await idOSServer("EVM", EVM_GRANTEE_PRIVATE_KEY, ENCRYPTION_SECRET_KEY, EVM_NODE_URL);
 
   app.get("/", async (c) => {
     const grants = await idOS.listGrants({
