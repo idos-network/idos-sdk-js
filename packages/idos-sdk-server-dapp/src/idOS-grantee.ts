@@ -8,16 +8,17 @@ import * as BorshCodec from "borsh";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-import { assertNever } from "../../types.ts";
-import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "../grants";
-import type { GrantChild } from "../grants/grant-child.ts";
-import type Grant from "../grants/grant.ts";
-import { KwilWrapper } from "../kwil-wrapper.ts";
-import { implicitAddressFromPublicKey } from "../utils.ts";
 
-/* global crypto */
-
-export type WalletType = "EVM" | "NEAR";
+import {
+  EvmGrants,
+  type EvmGrantsOptions,
+  type NearGrantsOptions,
+} from "../../idos-sdk-js/src/lib/grants";
+import type { GrantChild } from "../../idos-sdk-js/src/lib/grants/grant-child.ts";
+import type Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
+import { KwilWrapper } from "../../idos-sdk-js/src/lib/kwil-wrapper.ts";
+import { implicitAddressFromPublicKey } from "../../idos-sdk-js/src/lib/utils.ts";
+import { assertNever } from "../../idos-sdk-js/src/types.ts";
 
 const kwilNep413Signer =
   (recipient: string) =>
@@ -197,12 +198,12 @@ export class idOSGrantee {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
     chainId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
       throwError("Can't discover chainId. You must pass it explicitly.");
 
     dbId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
       throwError("Can't discover dbId. You must pass it explicitly.");
 
@@ -215,7 +216,8 @@ export class idOSGrantee {
       case "EVM": {
         const signer = granteeSigner as ethers.Wallet;
         grants = await EvmGrants.init({
-          signer,
+          // biome-ignore lint/suspicious/noExplicitAny: TBD.
+          signer: signer as any,
           options: (granteeOptions ?? {}) as EvmGrantsOptions,
         });
         break;

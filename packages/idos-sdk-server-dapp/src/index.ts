@@ -2,14 +2,14 @@ import { ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
 
-import type Grant from "../grants/grant";
-import { idOSGrantee } from "./idos-grantee.ts";
+import type { Grant } from "../../idos-sdk-js";
+import { idOSGrantee } from "./idOS-grantee.ts";
 
-export async function idOSServer(
+export async function idOS(
   chainType: "EVM" | "NEAR",
   privateKey: string,
   encryptionSecretKey: string,
-  nodeUrl?: string,
+  nodeUrl: string,
 ) {
   let grantee: idOSGrantee;
 
@@ -20,6 +20,7 @@ export async function idOSServer(
         chainType,
         granteeSigner: signer,
         encryptionSecret: encryptionSecretKey,
+        nodeUrl,
       });
       break;
     }
@@ -29,6 +30,7 @@ export async function idOSServer(
         chainType,
         granteeSigner: signer,
         encryptionSecret: privateKey,
+        nodeUrl,
       });
       break;
     }
