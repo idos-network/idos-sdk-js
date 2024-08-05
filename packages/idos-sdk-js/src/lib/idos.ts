@@ -15,9 +15,7 @@ import verifiableCredentials from "./verifiable-credentials";
 interface InitParams {
   nodeUrl?: string;
   dbId?: string;
-  /* @deprecated in favor of enclaveOptions */
-  container?: string;
-  enclaveOptions?: EnclaveOptions;
+  enclaveOptions: EnclaveOptions;
   evmGrantsOptions?: EvmGrantsOptions;
   nearGrantsOptions?: NearGrantsOptions;
 }
@@ -41,7 +39,6 @@ export class idOS {
   store: Store;
 
   private constructor({
-    container,
     enclaveOptions,
     kwilWrapper,
     evmGrantsOptions,
@@ -53,12 +50,11 @@ export class idOS {
 
     this.auth = new Auth(kwilWrapper, this.store);
 
-    if (!enclaveOptions && !container)
-      throw new Error("Either `container` or `enclaveOptions` must be provided");
+    if (!enclaveOptions.container) throw new Error("`enclaveOptions.container` must be provided");
 
     this.enclave = new Enclave(
       this.auth,
-      new IframeEnclave(enclaveOptions ?? { container: container! }),
+      new IframeEnclave({ container: enclaveOptions.container }),
     );
 
     this.data = new Data(kwilWrapper, this.enclave);
