@@ -8,12 +8,12 @@ import * as BorshCodec from "borsh";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-import { assertNever } from "../types";
-import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "./grants";
-import type Grant from "./grants/grant";
-import type { GrantChild } from "./grants/grant-child";
-import { KwilWrapper } from "./kwil-wrapper";
-import { implicitAddressFromPublicKey } from "./utils";
+import { assertNever } from "../../types.ts";
+import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "../grants";
+import type { GrantChild } from "../grants/grant-child.ts";
+import type Grant from "../grants/grant.ts";
+import { KwilWrapper } from "../kwil-wrapper.ts";
+import { implicitAddressFromPublicKey } from "../utils.ts";
 
 /* global crypto */
 
@@ -38,7 +38,7 @@ const kwilNep413Signer =
 
     const tag = 2147484061; // 2**31 + 413
 
-    const { signature } = await keyPair.sign(
+    const { signature } = keyPair.sign(
       sha256.hash(
         BytesCodec.concat(
           BorshCodec.serialize("u32", tag),
@@ -122,6 +122,7 @@ const buildKwilSignerAndGrantee = (
   switch (chainType) {
     case "EVM": {
       const signer = granteeSigner as ethers.Wallet;
+      // biome-ignore lint/suspicious/noExplicitAny: TBD.
       return [new KwilSigner(signer as any, signer.address), signer.address];
     }
     case "NEAR": {
@@ -209,7 +210,7 @@ export class idOSGrantee {
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
 
-    let grants;
+    let grants: EvmGrants | undefined;
     switch (chainType) {
       case "EVM": {
         const signer = granteeSigner as ethers.Wallet;

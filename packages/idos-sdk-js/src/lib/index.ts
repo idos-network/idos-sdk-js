@@ -1,5 +1,5 @@
 export * from "./idos";
-export * from "./idos-grantee";
+export * from "./server/idos-grantee.ts";
 export { default as Grant } from "./grants/grant";
 export * from "./enclave-providers/types";
 export * from "./enclave-providers";
