@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.12.0",
+    "@idos-network/idos-sdk-server-dapp": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "ethers": "^6.13.1",
     "hono": "^4.5.3"
