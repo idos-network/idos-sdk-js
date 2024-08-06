@@ -4,3 +4,4 @@ export * from "./enclave-providers/types";
 export * from "./enclave-providers";
 export * from "./utils";
 export * from "./types";
+export * from "./grants";
