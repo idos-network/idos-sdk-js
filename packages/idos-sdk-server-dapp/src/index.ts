@@ -20,7 +20,6 @@ export async function idOS(
         chainType,
         granteeSigner: signer,
         encryptionSecret: encryptionSecretKey,
-        nodeUrl,
       });
       break;
     }
@@ -30,7 +29,6 @@ export async function idOS(
         chainType,
         granteeSigner: signer,
         encryptionSecret: privateKey,
-        nodeUrl,
       });
       break;
     }
