@@ -9,3 +9,32 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and 
 pnpm add @idos-network/idos-sdk-server-dapp ethers near-api-js
 ```
 
+## Quickstart.
+
+Import the SDK and initialize it:
+
+```js
+import { idOS } from "@idos-network/idos-sdk";
+
+export const sdk = await idOS(...options);
+```
+
+
+### Listing grants.
+
+```js
+import {sdk} from './idOS'
+
+const grants = await sdk.listGrants({
+  owner: ""0x0000000000000000000000000000000000000000"
+})
+```
+
+### Fetching a shared credential.
+
+```js
+import {sdk} from './idOS'
+
+const grants = await sdk.fetchSharedCredential('ID')
+```
+
