@@ -8,7 +8,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@idos-network/idos-sdk": "workspace:*"
+    "@idos-network/idos-sdk-server-dapp": "workspace:*"
   },
   "peerDependencies": {
     "ethers": "^6.12",

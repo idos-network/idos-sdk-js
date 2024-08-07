@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
+    "@idos-network/idos-sdk-server-dapp": "workspace:*",
     "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
