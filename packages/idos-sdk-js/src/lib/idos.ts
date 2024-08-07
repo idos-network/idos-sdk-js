@@ -58,6 +58,7 @@ export class idOS {
 
     this.enclave = new Enclave(
       this.auth,
+      // biome-ignore lint/style/noNonNullAssertion: TBD.
       new IframeEnclave(enclaveOptions ?? { container: container! }),
     );
 
