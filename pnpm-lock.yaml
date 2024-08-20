@@ -419,9 +419,6 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.6.4
         version: 1.6.4
-      '@idos-network/idos-sdk':
-        specifier: ^0.3.1
-        version: 0.3.1(bufferutil@4.0.8)(ethers@6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))(near-api-js@3.0.4)(utf-8-validate@5.0.10)(web-streams-polyfill@3.2.1)
       '@near-js/types':
         specifier: ^0.2.1
         version: 0.2.1
@@ -2788,12 +2785,6 @@ packages:
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
-
-  '@idos-network/idos-sdk@0.3.1':
-    resolution: {integrity: sha512-FXjMRuWtue2lwmZxLq+UrO0+XGRKSg0ZVsIO4xxI9W/5ysrihrxvxn+CdXwiYVqSociPM3xahAHLXYV9gGVliA==}
-    peerDependencies:
-      ethers: ^6.12
-      near-api-js: ^3.0.4
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -12832,29 +12823,6 @@ snapshots:
   '@hono/node-server@1.12.0': {}
 
   '@iarna/toml@2.2.5': {}
-
-  '@idos-network/idos-sdk@0.3.1(bufferutil@4.0.8)(ethers@6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))(near-api-js@3.0.4)(utf-8-validate@5.0.10)(web-streams-polyfill@3.2.1)':
-    dependencies:
-      '@digitalbazaar/ed25519-signature-2020': 5.2.0(web-streams-polyfill@3.2.1)
-      '@digitalbazaar/ed25519-verification-key-2020': 4.1.0
-      '@digitalbazaar/vc': 6.0.2(web-streams-polyfill@3.2.1)
-      '@kwilteam/kwil-js': 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@stablelib/base64': 1.0.1
-      '@stablelib/binary': 1.0.1
-      '@stablelib/bytes': 1.0.1
-      '@stablelib/sha256': 1.0.1
-      '@stablelib/utf8': 1.0.1
-      borsh: 1.0.0
-      ethers: 6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      jsonld: 8.3.1(web-streams-polyfill@3.2.1)
-      jsonld-document-loader: 2.0.0
-      near-api-js: 3.0.4
-      tweetnacl: 1.0.3
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - utf-8-validate
-      - web-streams-polyfill
 
   '@isaacs/cliui@8.0.2':
     dependencies:
