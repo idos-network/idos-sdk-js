@@ -5,3 +5,4 @@ export * from "./enclave-providers";
 export * from "./utils";
 export * from "./types";
 export * from "./grants";
+export * from "./kwil-wrapper";

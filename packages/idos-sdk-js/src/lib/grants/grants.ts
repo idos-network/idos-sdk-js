@@ -1,10 +1,10 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
-import { assertNever } from "../../types";
 import type { Data } from "../data";
 import type { Enclave } from "../enclave";
 import type { idOSCredential } from "../types";
+import { assertNever } from "../utils";
 import { EvmGrants, type EvmGrantsOptions } from "./evm";
 import type Grant from "./grant";
 import type { GrantChild } from "./grant-child";
@@ -74,7 +74,7 @@ export class Grants {
     accountId?: string;
     publicKey?: string;
   }): Promise<ConnectedGrants> {
-    let child;
+    let child: EvmGrants | NearGrants | never;
 
     switch (type) {
       case "EVM":

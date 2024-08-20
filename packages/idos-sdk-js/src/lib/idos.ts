@@ -1,7 +1,6 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 import { Store } from "../../../idos-store";
-import { assertNever } from "../types";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
@@ -10,6 +9,7 @@ import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
+import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
 
 interface InitParams {

@@ -12,13 +12,13 @@ import nacl from "tweetnacl";
 import {
   EvmGrants,
   type EvmGrantsOptions,
+  type Grant,
+  type GrantChild,
+  KwilWrapper,
   type NearGrantsOptions,
-} from "../../idos-sdk-js/src/lib/grants";
-import type { GrantChild } from "../../idos-sdk-js/src/lib/grants/grant-child.ts";
-import type Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
-import { KwilWrapper } from "../../idos-sdk-js/src/lib/kwil-wrapper.ts";
-import { implicitAddressFromPublicKey } from "../../idos-sdk-js/src/lib/utils.ts";
-import { assertNever } from "../../idos-sdk-js/src/types.ts";
+  assertNever,
+  implicitAddressFromPublicKey,
+} from "../../idos-sdk-js";
 
 const kwilNep413Signer =
   (recipient: string) =>
