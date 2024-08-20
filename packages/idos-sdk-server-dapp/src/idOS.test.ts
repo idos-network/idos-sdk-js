@@ -8,7 +8,7 @@ const EVM_NODE_URL = "https://ethereum-sepolia.publicnode.com";
 
 describe("idOS Server dApp SDK", () => {
   it("should initialise properly", async () => {
-    const instance = await idOS(
+    const instance = await idOS.init(
       "EVM",
       EVM_GRANTEE_PRIVATE_KEY,
       ENCRYPTION_SECRET_KEY,
