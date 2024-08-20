@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { idOS } from "./idOS.ts";
+import { idOS } from "./idOS";
 
 const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const EVM_GRANTEE_PRIVATE_KEY =
