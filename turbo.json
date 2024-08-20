@@ -13,6 +13,8 @@
     "clean": {},
     "format": {},
     "lint": {},
-    "test": {}
+    "test": {
+      "dependsOn": ["@idos-network/idos-sdk#build"]
+    }
   }
 }
