@@ -31,3 +31,7 @@ export function implicitAddressFromPublicKey(publicKey: string) {
   const implicitAddress = toBeHex(decodeBase58(key_without_prefix));
   return implicitAddress;
 }
+
+export const assertNever = (_: never, msg: string): never => {
+  throw new Error(msg);
+};

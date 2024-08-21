@@ -8,16 +8,16 @@ import * as BorshCodec from "borsh";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-import { assertNever } from "../types";
-import { EvmGrants, type EvmGrantsOptions, type NearGrantsOptions } from "./grants";
-import type Grant from "./grants/grant";
-import type { GrantChild } from "./grants/grant-child";
-import { KwilWrapper } from "./kwil-wrapper";
-import { implicitAddressFromPublicKey } from "./utils";
 
-/* global crypto */
-
-export type WalletType = "EVM" | "NEAR";
+import {
+  EvmGrants,
+  type EvmGrantsOptions,
+  type NearGrantsOptions,
+} from "../../idos-sdk-js/src/lib/grants";
+import type { GrantChild } from "../../idos-sdk-js/src/lib/grants/grant-child.ts";
+import type Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
+import { KwilWrapper } from "../../idos-sdk-js/src/lib/kwil-wrapper.ts";
+import { assertNever, implicitAddressFromPublicKey } from "../../idos-sdk-js/src/lib/utils.ts";
 
 const kwilNep413Signer =
   (recipient: string) =>
@@ -38,7 +38,7 @@ const kwilNep413Signer =
 
     const tag = 2147484061; // 2**31 + 413
 
-    const { signature } = await keyPair.sign(
+    const { signature } = keyPair.sign(
       sha256.hash(
         BytesCodec.concat(
           BorshCodec.serialize("u32", tag),
@@ -122,6 +122,7 @@ const buildKwilSignerAndGrantee = (
   switch (chainType) {
     case "EVM": {
       const signer = granteeSigner as ethers.Wallet;
+      // biome-ignore lint/suspicious/noExplicitAny: TBD.
       return [new KwilSigner(signer as any, signer.address), signer.address];
     }
     case "NEAR": {
@@ -196,12 +197,12 @@ export class idOSGrantee {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
     chainId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
       throwError("Can't discover chainId. You must pass it explicitly.");
 
     dbId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I wanna let it fall to throwError.
+      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
       throwError("Can't discover dbId. You must pass it explicitly.");
 
@@ -209,12 +210,13 @@ export class idOSGrantee {
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
 
-    let grants;
+    let grants: EvmGrants | undefined;
     switch (chainType) {
       case "EVM": {
         const signer = granteeSigner as ethers.Wallet;
         grants = await EvmGrants.init({
-          signer,
+          // biome-ignore lint/suspicious/noExplicitAny: TBD.
+          signer: signer as any,
           options: (granteeOptions ?? {}) as EvmGrantsOptions,
         });
         break;
