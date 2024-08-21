@@ -74,4 +74,8 @@ export class Enclave {
 
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
+
+  async comparePublicKeys(encryptionPublicKey: string, idOSPublicKey: string) {
+    return this.provider.comparePublicKeys(encryptionPublicKey, idOSPublicKey);
+  }
 }

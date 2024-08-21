@@ -23,6 +23,7 @@ export interface EnclaveProvider {
   confirm(message: string): Promise<boolean>;
   encrypt(message: Uint8Array, receiverPublicKey?: Uint8Array): Promise<Uint8Array>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
+  comparePublicKeys(key1: string, key2?: string): Promise<boolean>;
 
   filterCredentialsByCountries(
     credentials: Record<string, string>[],

@@ -93,4 +93,8 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
 
     return Uint8Array.from(Object.values(decrypted));
   }
+
+  async comparePublicKeys(encryptionPublicKey: string, idOSPublicKey: string) {
+    return this.invokeSnap("comparePublicKeys", { encryptionPublicKey, idOSPublicKey });
+  }
 }

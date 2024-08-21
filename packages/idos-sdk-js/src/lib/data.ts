@@ -177,8 +177,24 @@ export class Data {
 
       if (!record) return null;
 
-      if (decrypt)
-        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+      if (decrypt) {
+        try {
+          record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+        } catch (e) {
+          // We fetch the current public key of the idOS user and ask the enclave to run a comparison.
+          const currentPublicKey = await this.getHumanCurrentPublicKey(record.human_id);
+          const match = await this.enclave.comparePublicKeys(
+            record.encryption_public_key,
+            currentPublicKey,
+          );
+
+          if (!match) {
+            throw new Error(
+              "The public key of the enclave does not match the public key of the idOS user.",
+            );
+          }
+        }
+      }
 
       return record;
     }
@@ -320,5 +336,9 @@ export class Data {
 
   async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
     return await this.delete(tableName, recordId);
+  }
+
+  async getHumanCurrentPublicKey(humanId: string): Promise<string> {
+    return Promise.resolve(`fake-public-key_${humanId}`);
   }
 }

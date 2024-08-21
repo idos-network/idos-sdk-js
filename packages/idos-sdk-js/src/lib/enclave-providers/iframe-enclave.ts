@@ -155,4 +155,10 @@ export class IframeEnclave implements EnclaveProvider {
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
     });
   }
+
+  async comparePublicKeys(encryptionPublicKey: string, idOSPublicKey: string) {
+    return this.#requestToEnclave({
+      comparePublicKeys: { encryptionPublicKey, idOSPublicKey },
+    }) as Promise<boolean>;
+  }
 }

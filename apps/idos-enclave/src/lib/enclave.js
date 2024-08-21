@@ -281,6 +281,10 @@ export class Enclave {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
+  async comparePublicKeys(key1, key2) {
+    return Promise.resolve(key1 === key2);
+  }
+
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -300,6 +304,8 @@ export class Enclave {
           credentials,
           countries,
           privateFieldFilters,
+          encryptionPublicKey,
+          idOSPublicKey,
         } = requestData;
 
         const paramBuilder = {
@@ -312,6 +318,7 @@ export class Enclave {
           storage: () => [humanId, signerAddress, signerPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
+          comparePublicKeys: () => [encryptionPublicKey, idOSPublicKey],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);
