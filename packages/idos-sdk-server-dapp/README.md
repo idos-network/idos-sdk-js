@@ -26,7 +26,7 @@ export const sdk = await idOS.init(...options);
 import {sdk} from './idOS'
 
 const grants = await sdk.listGrants({
-  owner: ""0x0000000000000000000000000000000000000000"
+  owner: "0x0000000000000000000000000000000000000000"
 })
 ```
 
