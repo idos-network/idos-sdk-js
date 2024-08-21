@@ -74,7 +74,7 @@ export class Grants {
     accountId?: string;
     publicKey?: string;
   }): Promise<ConnectedGrants> {
-    let child: EvmGrants | NearGrants | never;
+    let child: EvmGrants | NearGrants;
 
     switch (type) {
       case "EVM":

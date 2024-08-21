@@ -27,7 +27,7 @@ const GrantsList: FC<{ grants?: Grant[] }> = (props: {
 };
 
 async function start() {
-  const idos = await idOS("EVM", EVM_GRANTEE_PRIVATE_KEY, ENCRYPTION_SECRET_KEY, EVM_NODE_URL);
+  const idos = await idOS.init("EVM", EVM_GRANTEE_PRIVATE_KEY, ENCRYPTION_SECRET_KEY, EVM_NODE_URL);
 
   app.get("/", async (c) => {
     const grants = await idos.listGrants({
