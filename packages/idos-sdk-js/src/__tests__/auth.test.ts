@@ -7,6 +7,7 @@ import { TestKwilClient } from "./kwil-wrapper.test";
 
 let auth: Auth;
 const humanId = "human-id";
+const currentUserPublicKey = "<PUBLIC_KEY>";
 
 describe("auth", () => {
   beforeEach(() => {
@@ -33,6 +34,7 @@ describe("auth", () => {
 
     expect(auth.currentUser).toEqual({
       humanId,
+      currentUserPublicKey,
       address,
     });
   });
