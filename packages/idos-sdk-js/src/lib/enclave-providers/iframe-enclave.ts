@@ -28,6 +28,7 @@ export class IframeEnclave implements EnclaveProvider {
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
+    currentUserPublicKey?: string,
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: { humanId, signerAddress, signerPublicKey },
@@ -36,7 +37,9 @@ export class IframeEnclave implements EnclaveProvider {
     while (!encryptionPublicKey) {
       this.#showEnclave();
       try {
-        encryptionPublicKey = (await this.#requestToEnclave({ keys: {} })) as Uint8Array;
+        encryptionPublicKey = (await this.#requestToEnclave({
+          keys: { currentUserPublicKey },
+        })) as Uint8Array;
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;
       } finally {
@@ -154,11 +157,5 @@ export class IframeEnclave implements EnclaveProvider {
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
     });
-  }
-
-  async comparePublicKeys(encryptionPublicKey: string, idOSPublicKey: string) {
-    return this.#requestToEnclave({
-      comparePublicKeys: { encryptionPublicKey, idOSPublicKey },
-    }) as Promise<boolean>;
   }
 }

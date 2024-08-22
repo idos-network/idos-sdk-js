@@ -12,6 +12,7 @@ export interface ChooserProps {
 export interface MethodProps<K = {}> {
   mode: Mode;
   store: Store;
+  currentUserPublicKey: string | null;
   onSuccess: (result: K) => void;
   onError: (error: Error) => void;
 }

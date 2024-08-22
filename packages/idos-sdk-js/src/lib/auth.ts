@@ -15,6 +15,7 @@ export interface AuthUser {
   humanId: string | null;
   address: string;
   publicKey?: string;
+  currentUserPublicKey?: string;
 }
 
 export class Auth {
@@ -59,6 +60,7 @@ export class Auth {
 
     this.user = {
       humanId: await this.kwilWrapper.getHumanId(),
+      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).currentPublicKey,
       address: currentAddress,
     };
   }
@@ -190,6 +192,7 @@ export class Auth {
 
     this.user = {
       humanId: await this.kwilWrapper.getHumanId(),
+      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).currentPublicKey,
       address: currentAddress,
       publicKey,
     };

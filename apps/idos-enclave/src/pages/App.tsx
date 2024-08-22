@@ -39,6 +39,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [currentUserPublicKey, setCurrentUserPublicKey] = useState<string | null>(null);
 
   /**
    * Theme chooser.
@@ -63,6 +64,8 @@ export function App({ store, enclave }: AppProps) {
    */
   const messageReceiver = useCallback((event: MessageEvent<EventData>) => {
     if (event.source !== enclave) return;
+
+    setCurrentUserPublicKey(event.data.message.currentUserPublicKey);
 
     const { data: requestData, ports } = event;
 
@@ -139,6 +142,7 @@ export function App({ store, enclave }: AppProps) {
     onError,
     onSuccess,
     mode,
+    currentUserPublicKey,
   };
 
   return (
@@ -149,7 +153,7 @@ export function App({ store, enclave }: AppProps) {
           {!confirm && (
             <>
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
-              {method == "password" && <Password {...methodProps} />}
+              {method === "password" && <Password {...methodProps} />}
               {method === "passkey" && passkeyType && (
                 <Passkey type={passkeyType} {...methodProps} />
               )}

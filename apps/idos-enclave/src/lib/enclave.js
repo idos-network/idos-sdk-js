@@ -54,8 +54,8 @@ export class Enclave {
     };
   }
 
-  async keys() {
-    await this.ensurePassword();
+  async keys(currentUserPublicKey) {
+    await this.ensurePassword(currentUserPublicKey);
     await this.ensureKeyPair();
 
     return this.keyPair?.publicKey;
@@ -68,7 +68,7 @@ export class Enclave {
     return { password, duration };
   }
 
-  async ensurePassword() {
+  async ensurePassword(currentUserPublicKey) {
     if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
 
     this.unlockButton.style.display = "block";
@@ -111,7 +111,9 @@ export class Enclave {
           } else if (preferredAuthMethod) {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("auth"));
+            ({ password, duration, credentialId } = await this.#openDialog("auth", {
+              currentUserPublicKey,
+            }));
           }
         } catch (e) {
           return reject(e);
@@ -281,10 +283,6 @@ export class Enclave {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
-  async comparePublicKeys(key1, key2) {
-    return Promise.resolve(key1 === key2);
-  }
-
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -304,21 +302,19 @@ export class Enclave {
           credentials,
           countries,
           privateFieldFilters,
-          encryptionPublicKey,
-          idOSPublicKey,
+          currentUserPublicKey,
         } = requestData;
 
         const paramBuilder = {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [],
+          keys: () => [currentUserPublicKey],
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
-          comparePublicKeys: () => [encryptionPublicKey, idOSPublicKey],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

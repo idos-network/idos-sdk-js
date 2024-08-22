@@ -19,11 +19,16 @@ export class Enclave {
   async ready(): Promise<Uint8Array> {
     if (this.encryptionPublicKey) return this.encryptionPublicKey;
 
-    const { humanId, address, publicKey } = this.auth.currentUser;
+    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
-    this.encryptionPublicKey = await this.provider.ready(humanId, address, publicKey);
+    this.encryptionPublicKey = await this.provider.ready(
+      humanId,
+      address,
+      publicKey,
+      currentUserPublicKey,
+    );
 
     return this.encryptionPublicKey;
   }
@@ -73,9 +78,5 @@ export class Enclave {
     if (!this.encryptionPublicKey) await this.ready();
 
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
-  }
-
-  async comparePublicKeys(encryptionPublicKey: string, idOSPublicKey: string) {
-    return this.provider.comparePublicKeys(encryptionPublicKey, idOSPublicKey);
   }
 }

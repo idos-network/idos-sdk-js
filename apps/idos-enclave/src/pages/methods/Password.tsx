@@ -1,43 +1,66 @@
+import { decode, encode } from "@stablelib/base64";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import nacl from "tweetnacl";
 import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 import { Input } from "../../components/Input";
 import { Paragraph } from "../../components/Paragraph";
+import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation.js";
 import type { MethodProps } from "./Chooser";
 
 export default function Password({
   mode,
   onSuccess,
   store,
+  currentUserPublicKey,
 }: MethodProps<{ password: string; duration: number }>) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);
   const passwordInput = useRef<{ focus: () => void }>(null);
+  const [error, setError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  async function derivePublicKeyFromPassword(password: string) {
+    const salt = store.get("human-id");
+    const secretKey = await idOSKeyDerivation({ password, salt });
+    const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+    return encode(keyPair.publicKey);
+  }
 
   useEffect(() => {
     passwordInput.current?.focus();
   }, [passwordInput]);
 
   const onSubmit = useCallback(
-    (e: Event) => {
+    async (e: Event) => {
       e.preventDefault();
       e.stopPropagation();
+      setIsLoading(true);
+
+      const derivedPK = await derivePublicKeyFromPassword(password);
+      if (derivedPK !== currentUserPublicKey) {
+        setError(true);
+        setIsLoading(false);
+        return;
+      }
 
       store.set("preferred-auth-method", "password");
-
       onSuccess({ password, duration });
     },
     [password, duration],
   );
 
   const passwordField = (
-    <Input
-      id="idos-password-input"
-      ref={passwordInput}
-      type="password"
-      required={true}
-      onInput={(e) => setPassword(e.currentTarget.value)}
-    />
+    <div class="flex flex-col gap-1">
+      <Input
+        id="idos-password-input"
+        ref={passwordInput}
+        type="password"
+        required={true}
+        onInput={(e) => setPassword(e.currentTarget.value)}
+      />
+      {error ? <p class="text-red-500 text-left tex-sm font-semibold">Invalid password.</p> : null}
+    </div>
   );
 
   const durationField = (
@@ -72,7 +95,7 @@ export default function Password({
 
   return (
     <form className="flex flex-col space-y-4 px-5 md:px-0" onSubmit={onSubmit}>
-      {mode == "new" && (
+      {mode === "new" && (
         <>
           <Heading>Create your idOS key</Heading>
 
@@ -93,7 +116,7 @@ export default function Password({
         </>
       )}
 
-      {mode == "existing" && (
+      {mode === "existing" && (
         <>
           <Heading>Unlock your idOS key</Heading>
 
@@ -103,7 +126,13 @@ export default function Password({
 
           {durationField}
 
-          <Button type="submit">Unlock</Button>
+          <Button
+            type="submit"
+            className="disabled:opacity-50 disabled:pointer-events-none"
+            disabled={isLoading}
+          >
+            {isLoading ? "Unlocking..." : "Unlock"}
+          </Button>
         </>
       )}
     </form>

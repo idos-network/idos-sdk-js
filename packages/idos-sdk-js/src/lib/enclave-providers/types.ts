@@ -17,13 +17,18 @@ export interface EnclaveOptions {
 
 export interface EnclaveProvider {
   load(): Promise<StoredData>;
-  ready(humanId?: string, signerAddress?: string, signerPublicKey?: string): Promise<Uint8Array>;
+
+  ready(
+    humanId?: string,
+    signerAddress?: string,
+    signerPublicKey?: string,
+    currentUserPublicKey?: string,
+  ): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   encrypt(message: Uint8Array, receiverPublicKey?: Uint8Array): Promise<Uint8Array>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-  comparePublicKeys(key1: string, key2?: string): Promise<boolean>;
 
   filterCredentialsByCountries(
     credentials: Record<string, string>[],

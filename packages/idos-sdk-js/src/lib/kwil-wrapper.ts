@@ -131,6 +131,16 @@ export class KwilWrapper {
     return result[0]?.human_id || null;
   }
 
+  async getHumanProfile(): Promise<{
+    humanId: string | null;
+    currentPublicKey: string;
+  }> {
+    return Promise.resolve({
+      humanId: await this.getHumanId(),
+      currentPublicKey: "<PUBLIC_KEY>",
+    });
+  }
+
   async hasProfile(address: string): Promise<boolean> {
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     const result = (await this.call("has_profile", { address }, undefined, false)) as any;
