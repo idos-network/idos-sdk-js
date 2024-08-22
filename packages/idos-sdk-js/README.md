@@ -340,7 +340,7 @@ await idos.grants.list({
 });
 
 // Share a credential that matches the filtering criteria. 
-sdk.grants.shareMatchingEntry(
+await sdk.grants.shareMatchingEntry(
   "credentials",
   {
     credential_level: "basic",
@@ -357,6 +357,7 @@ sdk.grants.shareMatchingEntry(
   "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
   ),
 });
+```
 
 > [!TIP]
 > See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
