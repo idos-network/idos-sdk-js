@@ -43,7 +43,7 @@ export default function Password({
         setIsLoading(false);
         return;
       }
-
+      setError(false);
       store.set("preferred-auth-method", "password");
       onSuccess({ password, duration });
     },
