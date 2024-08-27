@@ -16,7 +16,7 @@ export default function Password({
   humanId,
 }: MethodProps<{ password: string; duration: number }> & {
   encryptionPublicKey: string;
-  humanId: string;
+  humanId: string | null;
 }) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);

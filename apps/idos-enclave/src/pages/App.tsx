@@ -34,10 +34,7 @@ export function App({ store, enclave }: AppProps) {
   const [confirm, setConfirm] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
-  // Passkey options
-  const [passkeyType, setPasskeyType] = useState<"password" | "webauthn" | null>("webauthn");
-
-  // Confirm options
+  // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
@@ -84,7 +81,6 @@ export function App({ store, enclave }: AppProps) {
 
       case "passkey":
         setMethod("passkey");
-        if (requestData.message?.type) setPasskeyType(requestData.message.type);
         break;
 
       case "password":
@@ -152,6 +148,7 @@ export function App({ store, enclave }: AppProps) {
         <div className="w-[30rem] text-center">
           {!confirm && (
             <>
+
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
               {method === "password" && (
@@ -162,15 +159,15 @@ export function App({ store, enclave }: AppProps) {
                 />
               )}
 
-              {method === "passkey" && passkeyType && (
-                <Passkey type={passkeyType} {...methodProps} />
+              {method === "passkey" && (
+                <Passkey {...methodProps} />
               )}
             </>
           )}
 
-          {confirm && message && (
+          {confirm && message ? (
             <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
-          )}
+          ) : null}
         </div>
       </main>
     </>
