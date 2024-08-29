@@ -320,8 +320,4 @@ export class Data {
   async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
     return await this.delete(tableName, recordId);
   }
-
-  async getHumanCurrentPublicKey(humanId: string): Promise<string> {
-    return Promise.resolve(`fake-public-key_${humanId}`);
-  }
 }

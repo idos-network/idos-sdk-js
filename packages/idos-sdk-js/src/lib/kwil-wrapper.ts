@@ -1,6 +1,7 @@
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
+import type { idOSHuman } from "./types";
 
 export class KwilWrapper {
   static defaults = {
@@ -131,14 +132,9 @@ export class KwilWrapper {
     return result[0]?.human_id || null;
   }
 
-  async getHumanProfile(): Promise<{
-    humanId: string | null;
-    currentPublicKey: string;
-  }> {
-    return Promise.resolve({
-      humanId: await this.getHumanId(),
-      currentPublicKey: "<PUBLIC_KEY>",
-    });
+  async getHumanProfile(): Promise<idOSHuman> {
+    const [human] = (await this.call("get_human", null)) as unknown as [idOSHuman];
+    return human;
   }
 
   async hasProfile(address: string): Promise<boolean> {

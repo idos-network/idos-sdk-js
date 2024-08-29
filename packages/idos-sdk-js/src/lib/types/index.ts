@@ -2,6 +2,7 @@ type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | 
 
 export type idOSHuman = {
   id: string;
+  current_public_key: string;
 };
 
 export type idOSCredential = {

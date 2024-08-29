@@ -60,7 +60,7 @@ export class Auth {
 
     this.user = {
       humanId: await this.kwilWrapper.getHumanId(),
-      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).currentPublicKey,
+      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).current_public_key,
       address: currentAddress,
     };
   }
@@ -192,7 +192,7 @@ export class Auth {
 
     this.user = {
       humanId: await this.kwilWrapper.getHumanId(),
-      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).currentPublicKey,
+      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).current_public_key,
       address: currentAddress,
       publicKey,
     };
