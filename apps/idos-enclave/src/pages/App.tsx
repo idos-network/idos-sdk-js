@@ -143,7 +143,7 @@ export function App({ store, enclave }: AppProps) {
     mode,
   };
 
-  if (method === "password") Object.assign(methodProps, currentUserPublicKey);
+  if (method === "password") Object.assign(methodProps, { currentUserPublicKey });
 
   return (
     <>
