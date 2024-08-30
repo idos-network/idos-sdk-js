@@ -65,8 +65,6 @@ export function App({ store, enclave }: AppProps) {
   const messageReceiver = useCallback((event: MessageEvent<EventData>) => {
     if (event.source !== enclave) return;
 
-    setCurrentUserPublicKey(event.data.message.currentUserPublicKey);
-
     const { data: requestData, ports } = event;
 
     if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
@@ -77,6 +75,7 @@ export function App({ store, enclave }: AppProps) {
     switch (requestData.intent) {
       case "auth":
         setMethod(null);
+        setCurrentUserPublicKey(event.data.message.currentUserPublicKey);
         break;
 
       case "passkey":
@@ -142,8 +141,9 @@ export function App({ store, enclave }: AppProps) {
     onError,
     onSuccess,
     mode,
-    currentUserPublicKey,
   };
+
+  if (method === "password") Object.assign(methodProps, currentUserPublicKey);
 
   return (
     <>

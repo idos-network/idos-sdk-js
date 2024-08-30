@@ -44,6 +44,7 @@ export default function Password({
         return;
       }
       setError(false);
+      setIsLoading(false);
       store.set("preferred-auth-method", "password");
       onSuccess({ password, duration });
     },
