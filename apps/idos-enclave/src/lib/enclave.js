@@ -178,7 +178,7 @@ export class Enclave {
   }
 
   async decrypt(fullMessage, senderPublicKey) {
-    if (!this.keyPair) await this.keys(senderPublicKey);
+    if (!this.keyPair) await this.keys();
 
     const nonce = fullMessage.slice(0, nacl.box.nonceLength);
     const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);

@@ -54,13 +54,16 @@ export class Auth {
 
     this.kwilWrapper.setSigner({
       accountId: currentAddress,
+      // biome-ignore lint/suspicious/noExplicitAny: TBF.
       signer: signer as any,
       signatureType: "secp256k1_ep",
     });
 
+    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+
     this.user = {
-      humanId: await this.kwilWrapper.getHumanId(),
-      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).current_public_key,
+      humanId: id,
+      currentUserPublicKey: current_public_key,
       address: currentAddress,
     };
   }
@@ -190,9 +193,11 @@ export class Auth {
       signatureType: "nep413",
     });
 
+    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+
     this.user = {
-      humanId: await this.kwilWrapper.getHumanId(),
-      currentUserPublicKey: (await this.kwilWrapper.getHumanProfile()).current_public_key,
+      humanId: id,
+      currentUserPublicKey: current_public_key,
       address: currentAddress,
       publicKey,
     };

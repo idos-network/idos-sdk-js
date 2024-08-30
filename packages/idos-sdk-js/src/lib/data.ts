@@ -205,6 +205,8 @@ export class Data {
 
       const record = records.find((r: { id: string }) => r.id === recordId);
 
+      if (!record) return null;
+
       record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
 
       return record;

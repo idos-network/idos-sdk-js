@@ -1,4 +1,4 @@
-import { decode, encode } from "@stablelib/base64";
+import * as Base64Codec from "@stablelib/base64";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import nacl from "tweetnacl";
 import { Button } from "../../components/Button";
@@ -24,7 +24,7 @@ export default function Password({
     const salt = store.get("human-id");
     const secretKey = await idOSKeyDerivation({ password, salt });
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-    return encode(keyPair.publicKey);
+    return Base64Codec.encode(keyPair.publicKey);
   }
 
   useEffect(() => {

@@ -125,6 +125,11 @@ export class KwilWrapper {
     return res.data?.tx_hash;
   }
 
+  /**
+   * @deprecated
+   *
+   * Use {@link KwilWrapper.getHumanProfile} instead.
+   */
   async getHumanId(): Promise<string | null> {
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
