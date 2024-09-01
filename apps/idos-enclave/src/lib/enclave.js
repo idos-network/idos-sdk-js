@@ -54,8 +54,8 @@ export class Enclave {
     };
   }
 
-  async keys(currentUserPublicKey) {
-    await this.ensurePassword(currentUserPublicKey);
+  async keys(expectedUserEncryptionPublicKey) {
+    await this.ensurePassword(expectedUserEncryptionPublicKey);
     await this.ensureKeyPair();
 
     return this.keyPair?.publicKey;
@@ -68,7 +68,7 @@ export class Enclave {
     return { password, duration };
   }
 
-  async ensurePassword(currentUserPublicKey) {
+  async ensurePassword(expectedUserEncryptionPublicKey) {
     if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
 
     this.unlockButton.style.display = "block";
@@ -112,7 +112,7 @@ export class Enclave {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth", {
-              currentUserPublicKey,
+              expectedUserEncryptionPublicKey,
             }));
           }
         } catch (e) {
