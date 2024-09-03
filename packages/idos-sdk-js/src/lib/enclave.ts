@@ -47,6 +47,8 @@ export class Enclave {
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {
     if (!this.encryptionPublicKey) await this.ready();
 
+    console.log({ senderPublicKey });
+
     return Utf8Codec.decode(
       await this.provider.decrypt(
         Base64Codec.decode(message),

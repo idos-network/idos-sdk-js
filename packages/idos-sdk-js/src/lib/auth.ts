@@ -6,6 +6,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 
+import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
@@ -54,8 +55,7 @@ export class Auth {
 
     this.kwilWrapper.setSigner({
       accountId: currentAddress,
-      // biome-ignore lint/suspicious/noExplicitAny: TBF.
-      signer: signer as any,
+      signer: signer as EthSigner,
       signatureType: "secp256k1_ep",
     });
 
