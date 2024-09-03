@@ -9,10 +9,9 @@ export interface ChooserProps {
   setMethod: (method: Method) => void;
 }
 
-export interface MethodProps<K = {}> {
+export interface MethodProps<K = Record<string, unknown>> {
   mode: Mode;
   store: Store;
-  currentUserPublicKey?: string | null;
   onSuccess: (result: K) => void;
   onError: (error: Error) => void;
 }
@@ -44,7 +43,7 @@ export default function Chooser({ setMethod, mode }: ChooserProps) {
         </>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-password" onClick={() => setMethod("password")}>
           Use a password
         </Button>

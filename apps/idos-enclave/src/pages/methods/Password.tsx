@@ -13,7 +13,7 @@ export default function Password({
   onSuccess,
   store,
   currentUserPublicKey,
-}: MethodProps<{ password: string; duration: number }>) {
+}: MethodProps<{ password: string; duration: number }> & { currentUserPublicKey: string }) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);
   const passwordInput = useRef<{ focus: () => void }>(null);
