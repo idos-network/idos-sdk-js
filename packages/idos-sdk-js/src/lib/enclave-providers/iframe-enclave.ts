@@ -38,7 +38,7 @@ export class IframeEnclave implements EnclaveProvider {
       this.#showEnclave();
       try {
         encryptionPublicKey = (await this.#requestToEnclave({
-          keys: { },
+          keys: {},
         })) as Uint8Array;
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;

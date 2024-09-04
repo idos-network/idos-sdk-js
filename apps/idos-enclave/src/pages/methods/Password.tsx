@@ -5,7 +5,7 @@ import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 import { Input } from "../../components/Input";
 import { Paragraph } from "../../components/Paragraph";
-import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
+import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation.js";
 import type { MethodProps } from "./Chooser";
 
 export default function Password({
@@ -37,11 +37,13 @@ export default function Password({
       e.stopPropagation();
       setIsLoading(true);
 
-      const derivedPK = await derivePublicKeyFromPassword(password);
-      if (derivedPK !== encryptionPublicKey) {
-        setError(true);
-        setIsLoading(false);
-        return;
+      if (encryptionPublicKey) {
+        const derivedPK = await derivePublicKeyFromPassword(password);
+        if (derivedPK !== encryptionPublicKey) {
+          setError(true);
+          setIsLoading(false);
+          return;
+        }
       }
       setError(false);
       setIsLoading(false);
@@ -59,8 +61,8 @@ export default function Password({
         type="password"
         required={true}
         onInput={(e) => {
-            setError(false);
-            setPassword(e.currentTarget.value)
+          setError(false);
+          setPassword(e.currentTarget.value);
         }}
       />
       {error ? <p class="text-red-500 text-left tex-sm font-semibold">Invalid password.</p> : null}
