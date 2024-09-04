@@ -28,17 +28,17 @@ export class IframeEnclave implements EnclaveProvider {
     humanId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
-    currentUserPublicKey?: string,
+    expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey },
+      storage: { humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey },
     })) as StoredData;
 
     while (!encryptionPublicKey) {
       this.#showEnclave();
       try {
         encryptionPublicKey = (await this.#requestToEnclave({
-          keys: { currentUserPublicKey },
+          keys: { },
         })) as Uint8Array;
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;

@@ -30,12 +30,13 @@ export class Enclave {
     this.store.reset();
   }
 
-  storage(humanId, signerAddress, signerPublicKey) {
+  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
 
     if (!this.isAuthorizedOrigin) {
       return {
@@ -54,8 +55,8 @@ export class Enclave {
     };
   }
 
-  async keys(expectedUserEncryptionPublicKey) {
-    await this.ensurePassword(expectedUserEncryptionPublicKey);
+  async keys() {
+    await this.ensurePassword();
     await this.ensureKeyPair();
 
     return this.keyPair?.publicKey;
@@ -68,7 +69,7 @@ export class Enclave {
     return { password, duration };
   }
 
-  async ensurePassword(expectedUserEncryptionPublicKey) {
+  async ensurePassword() {
     if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
 
     this.unlockButton.style.display = "block";
@@ -112,7 +113,7 @@ export class Enclave {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth", {
-              expectedUserEncryptionPublicKey,
+              expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
             }));
           }
         } catch (e) {
@@ -302,17 +303,17 @@ export class Enclave {
           credentials,
           countries,
           privateFieldFilters,
-          currentUserPublicKey,
+          expectedUserEncryptionPublicKey,
         } = requestData;
 
         const paramBuilder = {
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [currentUserPublicKey],
+          keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [humanId, signerAddress, signerPublicKey],
+          storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];
