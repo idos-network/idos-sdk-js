@@ -12,8 +12,8 @@ export default function Password({
   mode,
   onSuccess,
   store,
-  currentUserPublicKey,
-}: MethodProps<{ password: string; duration: number }> & { currentUserPublicKey: string }) {
+  encryptionPublicKey,
+}: MethodProps<{ password: string; duration: number }> & { encryptionPublicKey: string }) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);
   const passwordInput = useRef<{ focus: () => void }>(null);
@@ -38,7 +38,7 @@ export default function Password({
       setIsLoading(true);
 
       const derivedPK = await derivePublicKeyFromPassword(password);
-      if (derivedPK !== currentUserPublicKey) {
+      if (derivedPK !== encryptionPublicKey) {
         setError(true);
         setIsLoading(false);
         return;

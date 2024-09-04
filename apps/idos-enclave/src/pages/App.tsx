@@ -40,7 +40,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [currentUserPublicKey, setCurrentUserPublicKey] = useState<string>("");
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
 
   /**
    * Theme chooser.
@@ -76,7 +76,7 @@ export function App({ store, enclave }: AppProps) {
     switch (requestData.intent) {
       case "auth":
         setMethod(null);
-        setCurrentUserPublicKey(event.data.message.currentUserPublicKey);
+        setEncryptionUserPublicKey(event.data.message.expectedUserEncryptionPublicKey);
         break;
 
       case "passkey":
@@ -152,7 +152,7 @@ export function App({ store, enclave }: AppProps) {
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
               {method === "password" && (
-                <Password {...methodProps} currentUserPublicKey={currentUserPublicKey} />
+                <Password {...methodProps} encryptionPublicKey={encryptionPublicKey} />
               )}
 
               {method === "passkey" && passkeyType && (
