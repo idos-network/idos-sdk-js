@@ -13,7 +13,8 @@ export default function Password({
   onSuccess,
   store,
   encryptionPublicKey,
-}: MethodProps<{ password: string; duration: number }> & { encryptionPublicKey: string }) {
+  humanId,
+}: MethodProps<{ password: string; duration: number }> & { encryptionPublicKey: string; humanId:string }) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);
   const passwordInput = useRef<{ focus: () => void }>(null);
@@ -21,7 +22,7 @@ export default function Password({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function derivePublicKeyFromPassword(password: string) {
-    const salt = store.get("human-id");
+      const salt = humanId;
     const secretKey = await idOSKeyDerivation({ password, salt });
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return Base64Codec.encode(keyPair.publicKey);
