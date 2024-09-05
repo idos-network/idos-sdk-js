@@ -177,8 +177,9 @@ export class Data {
 
       if (!record) return null;
 
-      if (decrypt)
+      if (decrypt) {
         record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+      }
 
       return record;
     }

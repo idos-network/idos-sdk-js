@@ -6,6 +6,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 
+import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
@@ -15,6 +16,7 @@ export interface AuthUser {
   humanId: string | null;
   address: string;
   publicKey?: string;
+  currentUserPublicKey?: string;
 }
 
 export class Auth {
@@ -53,12 +55,15 @@ export class Auth {
 
     this.kwilWrapper.setSigner({
       accountId: currentAddress,
-      signer: signer as any,
+      signer: signer as EthSigner,
       signatureType: "secp256k1_ep",
     });
 
+    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+
     this.user = {
-      humanId: await this.kwilWrapper.getHumanId(),
+      humanId: id,
+      currentUserPublicKey: current_public_key,
       address: currentAddress,
     };
   }
@@ -188,8 +193,11 @@ export class Auth {
       signatureType: "nep413",
     });
 
+    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+
     this.user = {
-      humanId: await this.kwilWrapper.getHumanId(),
+      humanId: id,
+      currentUserPublicKey: current_public_key,
       address: currentAddress,
       publicKey,
     };

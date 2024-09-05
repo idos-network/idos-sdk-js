@@ -22,7 +22,8 @@ export interface Configuration {
 
 export interface EventData {
   intent: "passkey" | "password" | "confirm" | "auth";
-  message: any;
+  // biome-ignore lint/suspicious/noExplicitAny: The message will be a bit hard to narrow. Using `any` is fine in this case.
+  message: Record<string, any>;
   configuration: Configuration;
 }
 
@@ -39,6 +40,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
 
   /**
    * Theme chooser.
@@ -74,13 +76,12 @@ export function App({ store, enclave }: AppProps) {
     switch (requestData.intent) {
       case "auth":
         setMethod(null);
+        setEncryptionUserPublicKey(event.data.message.expectedUserEncryptionPublicKey);
         break;
 
       case "passkey":
         setMethod("passkey");
-        if (requestData.message?.type) {
-          setPasskeyType(requestData.message.type);
-        }
+        if (requestData.message?.type) setPasskeyType(requestData.message.type);
         break;
 
       case "password":
@@ -99,7 +100,7 @@ export function App({ store, enclave }: AppProps) {
   }, []);
 
   const respondToEnclave = useCallback(
-    (data: any) => {
+    (data: unknown) => {
       if (responsePort.current) {
         responsePort.current.postMessage(data);
         window.removeEventListener("beforeunload", onBeforeUnload);
@@ -109,9 +110,9 @@ export function App({ store, enclave }: AppProps) {
     [responsePort],
   );
 
-  const onBeforeUnload = useCallback((e: any) => {
-    e.preventDefault();
-    e.returnValue = "";
+  const onBeforeUnload = useCallback((event: BeforeUnloadEvent) => {
+    event.preventDefault();
+    event.returnValue = "";
     respondToEnclave({ error: "closed" });
   }, []);
 
@@ -126,12 +127,12 @@ export function App({ store, enclave }: AppProps) {
     };
   }, []);
 
-  const onSuccess = useCallback((result: any) => {
+  const onSuccess = useCallback((result: unknown) => {
     respondToEnclave({ result });
   }, []);
 
-  const onError = useCallback((error: any) => {
-    respondToEnclave({ error: error.toString() });
+  const onError = useCallback((error: unknown) => {
+    respondToEnclave({ error: (error as Error).toString() });
   }, []);
 
   const methodProps = {
@@ -149,7 +150,11 @@ export function App({ store, enclave }: AppProps) {
           {!confirm && (
             <>
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
-              {method == "password" && <Password {...methodProps} />}
+
+              {method === "password" && (
+                <Password {...methodProps} encryptionPublicKey={encryptionPublicKey} />
+              )}
+
               {method === "passkey" && passkeyType && (
                 <Passkey type={passkeyType} {...methodProps} />
               )}

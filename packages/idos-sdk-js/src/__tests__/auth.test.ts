@@ -7,12 +7,17 @@ import { TestKwilClient } from "./kwil-wrapper.test";
 
 let auth: Auth;
 const humanId = "human-id";
+const currentUserPublicKey = "<PUBLIC_KEY>";
 
 describe("auth", () => {
   beforeEach(() => {
     auth = new Auth(new KwilWrapper(new TestKwilClient()), new Store());
 
     auth.kwilWrapper.getHumanId = vi.fn().mockResolvedValue("human-id");
+    auth.kwilWrapper.getHumanProfile = vi.fn().mockResolvedValue({
+      current_public_key: currentUserPublicKey,
+      id: humanId,
+    });
     auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);
   });
 
@@ -33,6 +38,7 @@ describe("auth", () => {
 
     expect(auth.currentUser).toEqual({
       humanId,
+      currentUserPublicKey,
       address,
     });
   });

@@ -1,6 +1,7 @@
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
+import type { idOSHuman } from "./types";
 
 export class KwilWrapper {
   static defaults = {
@@ -124,11 +125,21 @@ export class KwilWrapper {
     return res.data?.tx_hash;
   }
 
+  /**
+   * @deprecated
+   *
+   * Use {@link KwilWrapper.getHumanProfile} instead.
+   */
   async getHumanId(): Promise<string | null> {
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
 
     return result[0]?.human_id || null;
+  }
+
+  async getHumanProfile(): Promise<idOSHuman> {
+    const [human] = (await this.call("get_human", null)) as unknown as [idOSHuman];
+    return human;
   }
 
   async hasProfile(address: string): Promise<boolean> {

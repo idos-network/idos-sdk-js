@@ -11,6 +11,7 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
+  Stack,
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
@@ -76,7 +77,10 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
           ) : null}
 
           {credential.isError ? (
-            <Text color="red.500">Something went wrong, please retry.</Text>
+            <Stack>
+              <Text color="red.500">Unable to fetch credential details.</Text>
+              <Text color="red.500">{credential.error.message}</Text>
+            </Stack>
           ) : null}
 
           {credential.isSuccess ? (

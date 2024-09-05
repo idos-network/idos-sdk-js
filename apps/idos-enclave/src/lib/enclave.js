@@ -30,12 +30,13 @@ export class Enclave {
     this.store.reset();
   }
 
-  storage(humanId, signerAddress, signerPublicKey) {
+  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
 
     if (!this.isAuthorizedOrigin) {
       return {
@@ -111,7 +112,9 @@ export class Enclave {
           } else if (preferredAuthMethod) {
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("auth"));
+            ({ password, duration, credentialId } = await this.#openDialog("auth", {
+              expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+            }));
           }
         } catch (e) {
           return reject(e);
@@ -300,6 +303,7 @@ export class Enclave {
           credentials,
           countries,
           privateFieldFilters,
+          expectedUserEncryptionPublicKey,
         } = requestData;
 
         const paramBuilder = {
@@ -309,7 +313,7 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [humanId, signerAddress, signerPublicKey],
+          storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];

@@ -89,9 +89,12 @@ const connectWallet = {
    *
    */
   const idos = await idOS.init({
+    nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+    dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
     enclaveOptions: {
       container: "#idos-container",
       throwOnUserCancelUnlock: false,
+      url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
     },
   });
   window.idos = idos;
