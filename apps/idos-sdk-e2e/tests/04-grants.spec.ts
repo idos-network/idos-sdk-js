@@ -23,7 +23,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   const list = page.locator("#credentials-list");
 
   // Get the credential ID that is going to be shared.
-  const credentialId = (await list.getByRole("listitem").first().getAttribute("id")) as string;
+  const credentialId = (await list.getByRole("listitem").last().getAttribute("id")) as string;
 
   await page.goto(process.env.GRANTS_TEST_BASE_URL as string);
   await context.clearCookies();
@@ -101,7 +101,7 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
   await page.reload();
   await manageGrantsButton.click();
 
-  const revokeButton = page.getByRole("button", { name: "Revoke" }).last();
+  const revokeButton = page.getByRole("button", { name: "Revoke" }).first();
   await revokeButton.click();
 
   await page.waitForTimeout(3000);
