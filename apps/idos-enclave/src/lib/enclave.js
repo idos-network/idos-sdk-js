@@ -348,7 +348,10 @@ export class Enclave {
       .map((feat) => feat.join("="))
       .join(",");
 
-    const dialogURL = new URL("/dialog.html", window.location.origin);
+    const dialogURL = new URL(
+      `/dialog.html?humanId=${this.store.get("human-id")}`,
+      window.location.origin,
+    );
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
     await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));

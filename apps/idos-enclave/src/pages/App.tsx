@@ -41,6 +41,9 @@ export function App({ store, enclave }: AppProps) {
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
+  const [humanId] = useState<string | null>(
+    new URLSearchParams(window.location.search).get("humanId"),
+  );
 
   /**
    * Theme chooser.
@@ -152,7 +155,11 @@ export function App({ store, enclave }: AppProps) {
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
               {method === "password" && (
-                <Password {...methodProps} encryptionPublicKey={encryptionPublicKey} />
+                <Password
+                  {...methodProps}
+                  encryptionPublicKey={encryptionPublicKey}
+                  humanId={humanId}
+                />
               )}
 
               {method === "passkey" && passkeyType && (
