@@ -4,6 +4,8 @@ import basicSetup from "./wallet-setup/basic.setup";
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
+const credentialId = process.env.CREDENTIAL_ID as string;
+
 test.beforeEach(async ({ context, page }) => {
   test.setTimeout(500000);
 
@@ -21,9 +23,6 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   await metamask.confirmSignature();
 
   const list = page.locator("#credentials-list");
-
-  // Get the credential ID that is going to be shared.
-  const credentialId = (await list.getByRole("listitem").last().getAttribute("id")) as string;
 
   await page.goto(process.env.GRANTS_TEST_BASE_URL as string);
   await context.clearCookies();
@@ -80,7 +79,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
 });
 
 test("should revoke a grant successfully", async ({ context, page, metamaskPage, extensionId }) => {
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(50000);
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).click();
@@ -91,9 +90,6 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
   await metamask.confirmSignature();
 
   const list = page.locator("#credentials-list");
-
-  // Get the credential ID that was shared.
-  const credentialId = (await list.getByRole("listitem").first().getAttribute("id")) as string;
 
   const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
