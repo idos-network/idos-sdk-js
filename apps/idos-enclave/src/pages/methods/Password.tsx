@@ -25,7 +25,7 @@ export default function Password({
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   async function derivePublicKeyFromPassword(password: string) {
-    const salt = humanId;
+    const salt = store.get('human-id') || humanId;
     const secretKey = await idOSKeyDerivation({ password, salt });
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return Base64Codec.encode(keyPair.publicKey);
