@@ -2,7 +2,7 @@ name: Playwright Tests (Production)
 on:
   push:
     branches: [ main ]
-  
+
 jobs:
   e2e:
     environment: Production
@@ -17,6 +17,7 @@ jobs:
       WALLET_PASSWORD: ${{ secrets.IDOS_E2E_WALLET_PASSWORD }}
       GRANTS_TEST_BASE_URL: ${{ secrets.IDOS_E2E_GRANTS_BASE_URL }}
       CREDENTIAL_CONTENT: ${{ secrets.IDOS_E2E_CREDENTIAL_CONTENT }}
+      CREDENTIAL_ID: ${{ secrets.IDOS_E2E_CREDENTIAL_ID }}
     steps:
     - uses: actions/checkout@v4
     - uses: pnpm/action-setup@v2
