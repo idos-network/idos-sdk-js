@@ -4,8 +4,6 @@ import basicSetup from "./wallet-setup/basic.setup";
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
-const credentialId = process.env.CREDENTIAL_ID as string;
-
 test.beforeEach(async ({ context, page }) => {
   test.setTimeout(500000);
 
@@ -38,6 +36,7 @@ test("should create a grant successfully", async ({ context, page, metamaskPage,
   await metamask.confirmSignature();
   await page.waitForTimeout(2000);
 
+  const credentialId = process.env.CREDENTIAL_ID as string;
   await page.getByText(credentialId).click();
 
   // We setup the popupPromise before clicking the button to open the popup.
@@ -90,7 +89,7 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
   await metamask.confirmSignature();
 
   const list = page.locator("#credentials-list");
-
+  const credentialId = process.env.CREDENTIAL_ID as string;
   const manageGrantsButton = page.locator(`#manage-grants-${credentialId}`);
   await manageGrantsButton.click();
   await metamask.approveSwitchNetwork();
