@@ -14,10 +14,10 @@ export function Collapsible({ title, Icon, children }: CollapsibleProps) {
   const toggle = () => setOpen(!open);
 
   return (
-    <div className="flex flex-col border-2 border-green-400 rounded-md p-3 ml-2 mr-2">
-      <div className="flex flex-row cursor-pointer" onClick={toggle}>
+    <div className="mr-2 ml-2 flex flex-col rounded-md border-2 border-green-400 p-3">
+      <div className="flex cursor-pointer flex-row" onClick={toggle}>
         {Icon && <Icon className="h-7 w-7" />}
-        <span className="flex-1 text-left px-2 text-lg font-medium">{title}</span>
+        <span className="flex-1 px-2 text-left font-medium text-lg">{title}</span>
         <ArrowIcon className="h-7 w-7" />
       </div>
       <div className={`${open ? "block" : "hidden"} text-left mt-3 flex flex-col space-y-4`}>

@@ -27,4 +27,5 @@ export function Button({ variant, class: _class, className, ...props }: ButtonPr
       className={button({ variant, class: _class, className })}
       {...props}
     />
+  );
 }
