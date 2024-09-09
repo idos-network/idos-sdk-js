@@ -1,6 +1,21 @@
 import { encode } from "@stablelib/utf8";
 import { scrypt } from "scrypt-js";
 
+/*
+ * normalizePassword
+ *    Unicode normalization of input strigs
+ *    NFKC: compatibility decomposition followed by canonical composition
+ * validateSalt
+ *    UUID v4 format (idOS human IDs)
+ * n, r, p
+ *    CPU/RAM cost (higher = costlier)
+ *    n: iteration count
+ *    r: block size
+ *    p: parallelistm factor
+ * dkLen
+ *    length of derived key (bytes)
+ */
+
 const latestVersion = 0.1;
 const allowedVersions = [0, 0.1];
 
