@@ -148,7 +148,6 @@ export function App({ store, enclave }: AppProps) {
         <div className="w-[30rem] text-center">
           {!confirm && (
             <>
-
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
               {method === "password" && (
@@ -159,9 +158,7 @@ export function App({ store, enclave }: AppProps) {
                 />
               )}
 
-              {method === "passkey" && (
-                <Passkey {...methodProps} />
-              )}
+              {method === "passkey" && <Passkey {...methodProps} />}
             </>
           )}
 
