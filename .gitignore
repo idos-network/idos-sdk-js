@@ -38,6 +38,7 @@ vite.config.ts.timestamp-*
 # IDE
 .vscode
 .idea
+.zed
 
 # Playwright
 playwright-report
