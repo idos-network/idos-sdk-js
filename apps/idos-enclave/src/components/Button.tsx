@@ -1,22 +1,31 @@
-import type React from "preact/compat";
+import {
+  Button as HeadlessButton,
+  type ButtonProps as HeadlessButtonProps,
+} from "@headlessui/react";
+import { type VariantProps, tv } from "tailwind-variants";
 
-export interface ButtonProps extends React.HTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary";
-}
+const button = tv({
+  base: "inline-flex place-content-center items-center rounded-md px-6 py-3 font-semibold text-neutral-950 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2",
+  variants: {
+    variant: {
+      primary: "bg-green-200 hover:bg-green-400 focus:ring-green-400",
+      secondary: "bg-slate-200 hover:bg-slate-400 focus:ring-slate-400",
+    },
+  },
+  defaultVariants: {
+    variant: "primary",
+  },
+});
 
-export function Button({ variant = "primary", children, className, ...others }: ButtonProps) {
-  let variantStyle = "bg-green-200 hover:bg-green-400";
+type BaseVariants = VariantProps<typeof button>;
+interface ButtonProps extends HeadlessButtonProps, BaseVariants {}
 
-  if (variant === "secondary") {
-    variantStyle = "bg-slate-200 hover:bg-slate-400";
-  }
-
+export function Button({ variant, class: _class, className, ...props }: ButtonProps) {
   return (
-    <button
-      className={`rounded-md px-5 py-3 font-semibold transition text-neutral-950 ${variantStyle} ${className}`}
-      {...others}
-    >
-      {children}
-    </button>
+    <HeadlessButton
+      // @ts-ignore: there is a missmatch between what `preact` types for `class` and what `tailwind-variants` expects.
+      className={button({ variant, class: _class, className })}
+      {...props}
+    />
   );
 }
