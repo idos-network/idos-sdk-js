@@ -1,10 +1,10 @@
 import * as Base64Codec from "@stablelib/base64";
 import { useCallback, useState } from "preact/hooks";
 import nacl from "tweetnacl";
-import { Button } from "../../components/button";
-import { Heading } from "../../components/heading";
-import { Paragraph } from "../../components/paragraph";
-import { TextField } from "../../components/text-field";
+import { Button } from "../../components/ui/button";
+import { Heading } from "../../components/ui/heading";
+import { Paragraph } from "../../components/ui/paragraph";
+import { TextField } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import type { MethodProps } from "./Chooser";
 
