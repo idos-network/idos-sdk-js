@@ -5,7 +5,7 @@ import { Button } from "../../components/Button";
 import { Heading } from "../../components/Heading";
 import { Input } from "../../components/Input";
 import { Paragraph } from "../../components/Paragraph";
-import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation.js";
+import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import type { MethodProps } from "./Chooser";
 
 export default function Password({
