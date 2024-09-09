@@ -23,4 +23,3 @@ export function Heading({ as: Component = "h1", class: _class, className, ...res
       {...rest}
     />
   );
-}
