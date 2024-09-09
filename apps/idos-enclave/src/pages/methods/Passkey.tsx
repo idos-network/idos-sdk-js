@@ -3,9 +3,9 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import React from "preact/compat";
 import { Collapsible } from "../../components/Collapsible";
+import { Button } from "../../components/button";
 import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/paragraph";
-import { Button } from "../../components/button";
 import type { MethodProps } from "./Chooser";
 
 export interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {
