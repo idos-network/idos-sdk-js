@@ -1,7 +1,7 @@
 import type { Store } from "@idos-network/idos-store";
-import { Button } from "../../components/button";
-import { Heading } from "../../components/Heading";
+import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/Paragraph";
+import { Button } from "../../components/button";
 import type { Method, Mode } from "../App";
 
 export interface ChooserProps {

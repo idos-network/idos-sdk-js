@@ -2,10 +2,10 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import React from "preact/compat";
-import { Button } from "../../components/button";
 import { Collapsible } from "../../components/Collapsible";
-import { Heading } from "../../components/Heading";
+import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/Paragraph";
+import { Button } from "../../components/button";
 import type { MethodProps } from "./Chooser";
 
 export interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {

@@ -1,6 +1,6 @@
 import DOMPurify from "dompurify";
+import { Heading } from "../../components/heading";
 import { Button } from "../../components/button";
-import { Heading } from "../../components/Heading";
 
 export interface ConfirmationProps {
   onSuccess: (result: { confirmed: boolean }) => void;
