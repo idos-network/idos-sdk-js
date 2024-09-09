@@ -5,6 +5,7 @@ import Confirmation from "./confirm/Confirmation";
 import ChooseMethod from "./methods/Chooser";
 import Passkey from "./methods/Passkey";
 import { PasswordForm } from "./methods/Password";
+import { PasswordOrKeyBackup } from "./recovery/PasswordOrKeyBackup";
 
 export type Mode = "new" | "existing" | "confirm";
 export type Method = "password" | "passkey";
@@ -20,18 +21,29 @@ export interface Configuration {
   theme?: "light" | "dark";
 }
 
+type AllowedIntent = "passkey" | "password" | "confirm" | "auth" | "backupPasswordOrSecret";
+
 export interface EventData {
-  intent: "passkey" | "password" | "confirm" | "auth";
+  intent: AllowedIntent;
   // biome-ignore lint/suspicious/noExplicitAny: The message will be a bit hard to narrow. Using `any` is fine in this case.
   message: Record<string, any>;
   configuration: Configuration;
 }
+
+const allowedIntents: AllowedIntent[] = [
+  "passkey",
+  "password",
+  "confirm",
+  "auth",
+  "backupPasswordOrSecret",
+];
 
 export function App({ store, enclave }: AppProps) {
   const [method, setMethod] = useState<Method | null>(null);
   const [mode, setMode] = useState<Mode>("existing");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const [confirm, setConfirm] = useState<boolean>(false);
+  const [recover, setRecover] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
   // Confirm options.
@@ -68,7 +80,7 @@ export function App({ store, enclave }: AppProps) {
 
     const { data: requestData, ports } = event;
 
-    if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
+    if (!allowedIntents.includes(requestData.intent))
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
@@ -91,6 +103,10 @@ export function App({ store, enclave }: AppProps) {
         setConfirm(true);
         setOrigin(requestData.message?.origin);
         setMessage(requestData.message?.message);
+        break;
+
+      case "backupPasswordOrSecret":
+        setRecover(true);
         break;
     }
 
@@ -146,20 +162,24 @@ export function App({ store, enclave }: AppProps) {
       <Header goHome={goHome} />
       <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
-          {!confirm && (
-            <>
-              {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
+          {recover ? (
+            <PasswordOrKeyBackup store={store} />
+          ) : (
+            !confirm && (
+              <>
+                {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
-              {method === "password" && (
-                <PasswordForm
-                  {...methodProps}
-                  encryptionPublicKey={encryptionPublicKey}
-                  humanId={humanId}
-                />
-              )}
+                {method === "password" && (
+                  <PasswordForm
+                    {...methodProps}
+                    encryptionPublicKey={encryptionPublicKey}
+                    humanId={humanId}
+                  />
+                )}
 
-              {method === "passkey" && <Passkey {...methodProps} />}
-            </>
+                {method === "passkey" && <Passkey {...methodProps} />}
+              </>
+            )
           )}
 
           {confirm && message && (

@@ -1,0 +1,130 @@
+import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import type { Store } from "@idos-network/idos-store";
+import { useSignal } from "@preact/signals";
+import type { JSX } from "preact/compat";
+import { Button } from "../../components/ui/button";
+import { Heading } from "../../components/ui/heading";
+import { Paragraph } from "../../components/ui/paragraph";
+
+function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
+  const clicked = useSignal(false);
+
+  const handleClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+    clicked.value = true;
+    props.onClick?.(event);
+    setTimeout(() => {
+      clicked.value = false;
+    }, 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      class="text-green-500 transition-colors hover:text-green-700"
+      {...props}
+      onClick={handleClick}
+    >
+      {clicked.value ? (
+        <CheckIcon class="h-6 w-6 text-green-700" />
+      ) : (
+        <ClipboardIcon class="h-6 w-6" />
+      )}
+    </button>
+  );
+}
+
+function ReadonlyInput(props: JSX.HTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      type="text"
+      readOnly
+      class="flex-1 border-0 bg-transparent font-semibold outline-none ring-0 focus:outline-none focus:ring-0"
+      {...props}
+    />
+  );
+}
+
+function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      class="flex items-center justify-between gap-5 rounded-md border-2 border-green-400 px-2 py-1"
+      {...props}
+    />
+  );
+}
+
+interface PasswordAndSecretRevealProps {
+  password: string;
+  secret: string;
+  onCancel: () => void;
+}
+
+function PasswordAndSecretReveal({ password, secret, onCancel }: PasswordAndSecretRevealProps) {
+  const handleCopyToClipboard = async (value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch (error) {
+      console.error("Failed to copy to clipboard", error);
+    }
+  };
+
+  return (
+    <div class="flex flex-col gap-4 text-left">
+      <div class="flex flex-col gap-1">
+        <Paragraph>Your password is:</Paragraph>
+        <ReadonlyField>
+          <ReadonlyInput value={password} />
+          <ClipboardCopyButton onClick={() => handleCopyToClipboard(password)} />
+        </ReadonlyField>
+      </div>
+      <div class="flex flex-col gap-1">
+        <Paragraph>Your secret key is:</Paragraph>
+        <ReadonlyField>
+          <ReadonlyInput value={secret} />
+          <ClipboardCopyButton onClick={() => handleCopyToClipboard(secret)} />
+        </ReadonlyField>
+      </div>
+      <Button onClick={onCancel}>Go back</Button>
+    </div>
+  );
+}
+
+export function PasswordOrKeyBackup({ store }: { store: Store }) {
+  const reveal = useSignal(false);
+
+  const password = store.get("password");
+  const secret = store.get("encryption-private-key");
+
+  const handleReveal = () => {
+    reveal.value = !reveal.value;
+  };
+
+  const handleDownload = () => {
+    const content = `Password: ${password}\nSecret: ${secret}`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "idOS_credentials.txt";
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  if (reveal.value) {
+    return <PasswordAndSecretReveal {...{ password, secret }} onCancel={handleReveal} />;
+  }
+
+  return (
+    <div class="flex flex-col gap-5">
+      <Heading>Back up your password or secret key</Heading>
+      <Button onClick={handleReveal}>Reveal password / secret key</Button>
+      <Button onClick={handleDownload}>Download password / secret key</Button>
+    </div>
+  );
+}

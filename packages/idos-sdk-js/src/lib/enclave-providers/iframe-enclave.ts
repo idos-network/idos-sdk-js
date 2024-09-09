@@ -145,6 +145,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
   async #requestToEnclave(request: any) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
@@ -157,5 +158,11 @@ export class IframeEnclave implements EnclaveProvider {
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
     });
+  }
+
+  async backupPasswordOrSecret(): Promise<string> {
+    return this.#requestToEnclave({
+      backupPasswordOrSecret: {},
+    }) as Promise<string>;
   }
 }

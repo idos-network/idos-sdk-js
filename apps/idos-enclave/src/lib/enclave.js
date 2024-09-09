@@ -284,6 +284,10 @@ export class Enclave {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
+  async backupPasswordOrSecret() {
+    return this.#openDialog("backupPasswordOrSecret");
+  }
+
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -316,6 +320,7 @@ export class Enclave {
           storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
+          backupPasswordOrSecret: () => [],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

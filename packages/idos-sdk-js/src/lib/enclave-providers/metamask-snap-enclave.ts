@@ -93,4 +93,8 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
 
     return Uint8Array.from(Object.values(decrypted));
   }
+
+  async backupPasswordOrSecret(): Promise<string> {
+    throw new Error("Method not implemented.");
+  }
 }

@@ -42,4 +42,6 @@ export interface EnclaveProvider {
       omit: Record<string, string>;
     },
   ): Promise<idOSCredential[]>;
+
+  backupPasswordOrSecret(): Promise<string>;
 }

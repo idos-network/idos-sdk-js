@@ -76,7 +76,11 @@ export class Enclave {
     },
   ): Promise<idOSCredential[]> {
     if (!this.encryptionPublicKey) await this.ready();
-
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
+  }
+
+  async backupPasswordOrSecret() {
+    if (!this.encryptionPublicKey) await this.ready();
+    return this.provider.backupPasswordOrSecret();
   }
 }
