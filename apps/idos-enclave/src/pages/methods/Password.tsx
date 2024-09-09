@@ -1,7 +1,7 @@
 import * as Base64Codec from "@stablelib/base64";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import nacl from "tweetnacl";
-import { Button } from "../../components/Button";
+import { Button } from "../../components/button";
 import { Heading } from "../../components/Heading";
 import { Input } from "../../components/Input";
 import { Paragraph } from "../../components/Paragraph";

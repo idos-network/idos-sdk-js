@@ -2,7 +2,7 @@ import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import React from "preact/compat";
-import { Button } from "../../components/Button";
+import { Button } from "../../components/button";
 import { Collapsible } from "../../components/Collapsible";
 import { Heading } from "../../components/Heading";
 import { Paragraph } from "../../components/Paragraph";

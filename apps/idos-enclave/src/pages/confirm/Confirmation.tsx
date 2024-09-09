@@ -1,5 +1,5 @@
 import DOMPurify from "dompurify";
-import { Button } from "../../components/Button";
+import { Button } from "../../components/button";
 import { Heading } from "../../components/Heading";
 
 export interface ConfirmationProps {
