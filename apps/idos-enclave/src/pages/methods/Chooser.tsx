@@ -1,6 +1,6 @@
 import type { Store } from "@idos-network/idos-store";
 import { Heading } from "../../components/heading";
-import { Paragraph } from "../../components/Paragraph";
+import { Paragraph } from "../../components/paragraph";
 import { Button } from "../../components/button";
 import type { Method, Mode } from "../App";
 

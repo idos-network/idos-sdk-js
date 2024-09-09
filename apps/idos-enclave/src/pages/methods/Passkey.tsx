@@ -4,7 +4,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import React from "preact/compat";
 import { Collapsible } from "../../components/Collapsible";
 import { Heading } from "../../components/heading";
-import { Paragraph } from "../../components/Paragraph";
+import { Paragraph } from "../../components/paragraph";
 import { Button } from "../../components/button";
 import type { MethodProps } from "./Chooser";
 

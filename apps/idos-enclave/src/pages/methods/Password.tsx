@@ -3,7 +3,7 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import nacl from "tweetnacl";
 import { Heading } from "../../components/heading";
 import { Input } from "../../components/Input";
-import { Paragraph } from "../../components/Paragraph";
+import { Paragraph } from "../../components/paragraph";
 import { Button } from "../../components/button";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation.js";
 import type { MethodProps } from "./Chooser";
