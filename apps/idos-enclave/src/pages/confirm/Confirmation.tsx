@@ -18,15 +18,15 @@ export default function Confirmation({ onSuccess, origin, message }: Confirmatio
       {origin && (
         <div className="text-sm">
           from:
-          <span className="text-sm font-semibold ml-2">{sanitize(origin)}</span>
+          <span className="ml-2 font-semibold text-sm">{sanitize(origin)}</span>
         </div>
       )}
 
-      <div className="flex flex-col border-2 border-green-400 rounded-md p-5 font-semibold">
+      <div className="flex flex-col rounded-md border-2 border-green-400 p-5 font-semibold">
         {sanitize(message)}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button onClick={() => onSuccess({ confirmed: true })} className="px-10">
           Accept
         </Button>

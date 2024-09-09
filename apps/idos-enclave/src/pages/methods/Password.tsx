@@ -64,31 +64,31 @@ export default function Password({
           setPassword(e.currentTarget.value);
         }}
       />
-      {error ? <p class="text-red-500 text-left tex-sm font-semibold">Invalid password.</p> : null}
+      {error ? <p class="tex-sm text-left font-semibold text-red-500">Invalid password.</p> : null}
     </div>
   );
 
   const durationField = (
     <div className="flex flex-col">
-      <p className="font-semibold text-left">Remember for:</p>
-      <div class="flex items-center mt-2 gap-x-6">
-        <label className="gap-x-2 flex items-center cursor-pointer">
+      <p className="text-left font-semibold">Remember for:</p>
+      <div class="mt-2 flex items-center gap-x-6">
+        <label className="flex cursor-pointer items-center gap-x-2">
           <input
             type="radio"
             name="duration"
             value="7"
-            class="form-radio text-green-400 cursor-pointer"
+            class="form-radio cursor-pointer text-green-400"
             checked={duration === 7}
             onInput={() => setDuration(7)}
           />
           <span>1 week</span>
         </label>
-        <label className="gap-x-2 flex items-center cursor-pointer">
+        <label className="flex cursor-pointer items-center gap-x-2">
           <input
             type="radio"
             name="duration"
             value="30"
-            class="form-radio text-green-400 cursor-pointer"
+            class="form-radio cursor-pointer text-green-400"
             checked={duration === 30}
             onInput={() => setDuration(30)}
           />
@@ -133,7 +133,7 @@ export default function Password({
 
           <Button
             type="submit"
-            className="disabled:opacity-50 disabled:pointer-events-none"
+            className="disabled:pointer-events-none disabled:opacity-50"
             disabled={isLoading}
           >
             {isLoading ? "Unlocking..." : "Unlock"}
