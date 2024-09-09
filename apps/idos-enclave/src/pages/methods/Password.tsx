@@ -1,8 +1,8 @@
 import * as Base64Codec from "@stablelib/base64";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useState } from "preact/hooks";
 import nacl from "tweetnacl";
 import { Heading } from "../../components/heading";
-import { Input } from "../../components/Input";
+import { TextField } from "../../components/text-field";
 import { Paragraph } from "../../components/paragraph";
 import { Button } from "../../components/button";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation.js";
@@ -20,7 +20,6 @@ export default function Password({
 }) {
   const [password, setPassword] = useState("");
   const [duration, setDuration] = useState(7);
-  const passwordInput = useRef<{ focus: () => void }>(null);
   const [error, setError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
@@ -30,10 +29,6 @@ export default function Password({
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return Base64Codec.encode(keyPair.publicKey);
   }
-
-  useEffect(() => {
-    passwordInput.current?.focus();
-  }, [passwordInput]);
 
   const onSubmit = useCallback(
     async (e: Event) => {
@@ -59,9 +54,9 @@ export default function Password({
 
   const passwordField = (
     <div class="flex flex-col gap-1">
-      <Input
+      <TextField
         id="idos-password-input"
-        ref={passwordInput}
+        autoFocus
         type="password"
         required={true}
         onInput={(e) => {
