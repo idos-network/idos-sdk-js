@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronRightIcon,
+  CogIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
   LogOutIcon,
@@ -180,9 +181,15 @@ export function Component() {
                   </ListItemLink>
                 </ListItem>
               </List>
-              <Box mt="auto">
+              <VStack mt="auto" gap={5} alignItems="stretch">
+                <List display="flex" flex={1} flexDir="column" gap={1.5}>
+                  <ListItemLink to="/settings">
+                    <CogIcon size={24} strokeWidth="1" />
+                    <Text as="span">Settings</Text>
+                  </ListItemLink>
+                </List>
                 <DisconnectButton />
-              </Box>
+              </VStack>
             </VStack>
           </VStack>
         </VStack>
