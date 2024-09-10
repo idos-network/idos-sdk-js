@@ -162,9 +162,9 @@ export function App({ store, enclave }: AppProps) {
             </>
           )}
 
-          {confirm && message ? (
+          {confirm && message && (
             <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
-          ) : null}
+          )}
         </div>
       </main>
     </>
