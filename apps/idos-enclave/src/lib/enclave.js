@@ -1,10 +1,10 @@
 import { Store } from "@idos-network/idos-store";
 import * as Base64Codec from "@stablelib/base64";
+import { randomBytes } from "@stablelib/random";
 import * as Utf8Codec from "@stablelib/utf8";
 import { every, get, negate, values } from "lodash-es";
 import nacl from "tweetnacl";
-import { randomBytes } from "@stablelib/random";
-import {fromUintToString} from "./format"
+import { fromUintToString } from "./format";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
@@ -32,7 +32,7 @@ export class Enclave {
     this.store.reset();
   }
 
-  updateStore(key,value){
+  updateStore(key, value) {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
@@ -64,16 +64,16 @@ export class Enclave {
     };
   }
   // variables that are used in encalve and should be preserved in user attributes
-  getSavableAttributes(){
-    const storedLitCipherText = this.store.get("lit-ciphertext")
-    const storedLitEncryptHash = this.store.get("lit-dataToEncryptHash")
+  getSavableAttributes() {
+    const storedLitCipherText = this.store.get("lit-ciphertext");
+    const storedLitEncryptHash = this.store.get("lit-dataToEncryptHash");
 
     const attributesToStore = [
-      { key: 'lit-ciphertext', value: storedLitCipherText },
-      { key: 'lit-dataToEncryptHash', value: storedLitEncryptHash },
+      { key: "lit-ciphertext", value: storedLitCipherText },
+      { key: "lit-dataToEncryptHash", value: storedLitEncryptHash },
     ];
-    
-    return attributesToStore
+
+    return attributesToStore;
   }
 
   async keys() {
@@ -129,7 +129,8 @@ export class Enclave {
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (preferredAuthMethod) { // in case of previous auth heppened
+          } else if (preferredAuthMethod) {
+            // in case of previous auth heppened
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth", {
@@ -148,8 +149,7 @@ export class Enclave {
         if (credentialId) {
           this.store.set("credential-id", credentialId);
           this.store.set("preferred-auth-method", "passkey");
-        }  
-        else {
+        } else {
           this.store.set("preferred-auth-method", preferredAuthMethod || "password");
           this.store.setRememberDuration(duration);
         }
@@ -159,15 +159,15 @@ export class Enclave {
     );
   }
 
-  static async generateRandomeKey(){
+  static async generateRandomeKey() {
     const randomPassword = randomBytes(32); // 32 bytes for password
     const password = fromUintToString(randomPassword);
-    
-    return idOSKeyDerivation({ password, salt:crypto.randomUUID() })
+
+    return idOSKeyDerivation({ password, salt: crypto.randomUUID() });
   }
 
-
-  async ensureKeyPair() { // always called
+  async ensureKeyPair() {
+    // always called
     const password = this.store.get("password");
     const salt = this.store.get("human-id");
     const storeWithCodec = this.store.pipeCodec(Base64Codec); // string to array of values
@@ -333,12 +333,11 @@ export class Enclave {
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
           key,
-          value
+          value,
         } = requestData;
 
-
         const paramBuilder = {
-          getSavableAttributes:()=> [],
+          getSavableAttributes: () => [],
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
@@ -346,7 +345,7 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
-          updateStore:()=> [key,value],
+          updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];

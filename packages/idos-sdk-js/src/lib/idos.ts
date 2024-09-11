@@ -3,7 +3,7 @@ import type { Signer } from "ethers";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
-import type { Attribute } from '../lib/types'
+import type { Attribute } from "../lib/types";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";

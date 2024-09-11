@@ -20,10 +20,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
   }
 
   async getSavableAttributes(): Promise<unknown> {
-    return this.invokeSnap("getSavableAttributes")
+    return this.invokeSnap("getSavableAttributes");
   }
   updateStore(key: string, value: any): Promise<void> {
-    return this.invokeSnap("updateStore",{key,value})
+    return this.invokeSnap("updateStore", { key, value });
   }
 
   filterCredentialsByCountries(

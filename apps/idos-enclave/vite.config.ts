@@ -4,10 +4,10 @@ import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 
 export default defineConfig({
-    define:{
-      global:{}
-    },
-    build: {
+  define: {
+    global: {},
+  },
+  build: {
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),

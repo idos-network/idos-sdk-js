@@ -24,7 +24,8 @@ export class Data {
       `List your ${tableName} in idOS`,
     )) as any;
 
-    if (tableName === "attributes") { // remove the need to encrypt-decrypt attributes cuz we're using for public user info
+    if (tableName === "attributes") {
+      // remove the need to encrypt-decrypt attributes cuz we're using for public user info
       // for (const record of records) {
       //   record.value = await this.enclave.decrypt(record.value);
       // }

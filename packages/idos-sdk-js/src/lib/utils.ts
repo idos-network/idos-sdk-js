@@ -36,10 +36,7 @@ export const assertNever = (_: never, msg: string): never => {
   throw new Error(msg);
 };
 
-function on<Payload = any>(
-  eventType: string,
-  listener: (detail: { detail: Payload }) => void
-) {
+function on<Payload = any>(eventType: string, listener: (detail: { detail: Payload }) => void) {
   document.addEventListener(eventType, (detail) => listener(detail as any));
 }
 
