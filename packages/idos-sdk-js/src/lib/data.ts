@@ -24,13 +24,6 @@ export class Data {
       `List your ${tableName} in idOS`,
     )) as any;
 
-    if (tableName === "attributes") {
-      // remove the need to encrypt-decrypt attributes cuz we're using for public user info
-      // for (const record of records) {
-      //   record.value = await this.enclave.decrypt(record.value);
-      // }
-    }
-
     if (tableName === "credentials") {
       records = records.filter((record: any) => !record.original_id);
     }
@@ -98,17 +91,6 @@ export class Data {
       }
     }
 
-    if (tableName === "attributes") {
-      // receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
-      // for (const record of records) {
-      //   (record as any).value = await this.enclave.encrypt(
-      //     (record as any).value as string,
-      //     receiverPublicKey,
-      //   );
-      //   (record as any).encryption_public_key = receiverPublicKey;
-      // }
-    }
-
     const newRecords = records.map((record) => ({
       id: crypto.randomUUID(),
       ...record,
@@ -150,15 +132,6 @@ export class Data {
         (record as any).content as string,
         receiverPublicKey,
       );
-      (record as any).encryption_public_key = receiverPublicKey;
-    }
-
-    if (tableName === "attributes") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
-      // (record as any).value = await this.enclave.encrypt(
-      //   (record as any).value as string,
-      //   receiverPublicKey,
-      // );
       (record as any).encryption_public_key = receiverPublicKey;
     }
 
@@ -282,10 +255,6 @@ export class Data {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       record.encryption_public_key = receiverPublicKey;
       record.content = await this.enclave.encrypt(record.content, receiverPublicKey);
-    }
-
-    if (tableName === "attributes") {
-      // record.value = await this.enclave.encrypt(record.value);
     }
 
     await this.kwilWrapper.execute(
