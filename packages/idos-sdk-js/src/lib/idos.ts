@@ -3,14 +3,20 @@ import type { Signer } from "ethers";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
+import type { Attribute } from '../lib/types'
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
-import { assertNever } from "./utils";
+import { assertNever, eventSetup } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
+
+const hasLitKeyAndValue = (record: { key: string; value: string }) =>
+  (record?.key as string).includes("lit-") && !!record.value;
+
+const litAttributesLength = 2;
 
 interface InitParams {
   nodeUrl?: string;
@@ -64,7 +70,76 @@ export class idOS {
 
     this.data = new Data(kwilWrapper, this.enclave);
 
+    eventSetup.on("request-to-enclave", async (ev) => {
+      const actionsRequireAuth = ["decrypt", "encrypt"];
+      const requireAuth = actionsRequireAuth.some((key) => key in ev.detail.request);
+      if (!requireAuth) return;
+      this.checkLitAttributes();
+    });
+
+    eventSetup.on("signer-is-set", () => {
+      this.updateEnclaveWallets();
+      this.updateEnclaveLitVariables();
+    });
+
     this.grants = new Grants(this.data, this.enclave, evmGrantsOptions, nearGrantsOptions);
+  }
+
+  async updateEnclaveLitVariables() {
+    let userAttributes = (await this.data.list("attributes")) as Attribute[];
+    userAttributes = userAttributes.filter((attr) => attr.attribute_key.includes("lit-"));
+    if (userAttributes.length !== litAttributesLength) return;
+    userAttributes.forEach((attr) => {
+      this.updateStore(attr.attribute_key, attr.value);
+    });
+  }
+
+  async checkLitAttributes() {
+    const userAttrs = (await this.data.list("attributes")) || [];
+    const savableAttributes = (await this.enclave.getSavableAttributes()) || [];
+
+    const filteredUserAttributes = userAttrs
+      .map((attr) => ({ ...attr, key: attr.attribute_key }))
+      .filter(hasLitKeyAndValue);
+
+    const litSavableAttributes = savableAttributes.filter(hasLitKeyAndValue);
+
+    // in case cipher text and hash were updated (re-encryption happened) => user attributes should be updated
+    if (filteredUserAttributes.length === litSavableAttributes.length) {
+      for (const savableAttribute of litSavableAttributes) {
+        const userAttr = filteredUserAttributes.find(
+          (attr) => attr.attribute_key === savableAttribute.key,
+        );
+        if (!userAttr) return;
+        if (userAttr.value !== savableAttribute.value)
+          await this.data.update("attributes", { ...userAttr, value: savableAttribute.value });
+      }
+      return;
+    }
+
+    // in case of no user attributes that include lit info (create user lit attributes)
+    if (!filteredUserAttributes.length) {
+      const attributesToSave = savableAttributes.map((attr) => {
+        return {
+          attribute_key: attr.key,
+          value: attr.value,
+        };
+      });
+      return this.data.createMultiple("attributes", attributesToSave);
+    }
+  }
+
+  async updateStore(key: string, value: any) {
+    this.enclave.updateStore(key, value);
+  }
+
+  async updateEnclaveWallets() {
+    const wallets = await this.data.list("wallets");
+    const addresses = wallets.map((userWallet) => (userWallet as { address: "" }).address);
+
+    if (!Array.isArray(addresses))
+      throw new Error("error happened while constructing addresses array!");
+    this.updateStore("new-user-wallets", addresses);
   }
 
   static async init(params: InitParams): Promise<idOS> {
@@ -94,7 +169,7 @@ export class idOS {
         // biome-ignore lint/style/noNonNullAssertion: we put it there when we're using NEAR.
         publicKey: currentUser.publicKey!,
       });
-
+      eventSetup.trigger("signer-is-set");
       return currentUser;
     }
 
@@ -102,7 +177,7 @@ export class idOS {
       await this.auth.setEvmSigner(signer as Signer);
       const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({ type, signer: signer as Signer });
-
+      eventSetup.trigger("signer-is-set");
       return currentUser;
     }
 

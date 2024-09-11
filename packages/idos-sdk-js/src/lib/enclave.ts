@@ -32,6 +32,9 @@ export class Enclave {
 
     return this.encryptionPublicKey;
   }
+  async updateStore(key: string, value: unknown) {
+    this.provider.updateStore(key, value);
+  }
 
   async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
     if (!this.encryptionPublicKey) await this.ready();
@@ -53,6 +56,11 @@ export class Enclave {
         senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey),
       ),
     );
+  }
+
+  // sends back encalve's variables that need to be stored in user attributes
+  getSavableAttributes() {
+    return this.provider.getSavableAttributes();
   }
 
   async confirm(message: string) {

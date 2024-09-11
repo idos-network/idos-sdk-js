@@ -1,6 +1,6 @@
 import type { idOSCredential } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
-
+import {eventSetup} from '../../../src/lib/'
 export class IframeEnclave implements EnclaveProvider {
   options: Omit<EnclaveOptions, "container" | "url">;
   container: string;
@@ -16,11 +16,20 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
+  async getSavableAttributes(){
+    await this.#loadEnclave();
+    const res =  await this.#requestToEnclave({ getSavableAttributes: {} });
+    return res
+  }
+
+  async updateStore(key: string, value: any): Promise<void> {
+    await this.#requestToEnclave({ updateStore:{ key, value}} )
+  }
+
   async load(): Promise<StoredData> {
     await this.#loadEnclave();
 
     await this.#requestToEnclave({ configure: this.options });
-
     return (await this.#requestToEnclave({ storage: {} })) as StoredData;
   }
 
@@ -149,9 +158,10 @@ export class IframeEnclave implements EnclaveProvider {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
-      port1.onmessage = ({ data }) => {
+      port1.onmessage = ({ data }) => { 
         port1.close();
         data.error ? reject(data.error) : resolve(data.result);
+        eventSetup.trigger("request-to-enclave",{data, request})
       };
 
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.

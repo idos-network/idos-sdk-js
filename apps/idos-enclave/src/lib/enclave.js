@@ -1,8 +1,10 @@
 import { Store } from "@idos-network/idos-store";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { every, get, negate } from "lodash-es";
+import { every, get, negate, values } from "lodash-es";
 import nacl from "tweetnacl";
+import { randomBytes } from "@stablelib/random";
+import {fromUintToString} from "./format"
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
@@ -30,6 +32,13 @@ export class Enclave {
     this.store.reset();
   }
 
+  updateStore(key,value){
+    if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
+    if (!value) return;
+
+    this.store.set(key, value);
+  }
+
   storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
@@ -53,6 +62,18 @@ export class Enclave {
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
     };
+  }
+  // variables that are used in encalve and should be preserved in user attributes
+  getSavableAttributes(){
+    const storedLitCipherText = this.store.get("lit-ciphertext")
+    const storedLitEncryptHash = this.store.get("lit-dataToEncryptHash")
+
+    const attributesToStore = [
+      { key: 'lit-ciphertext', value: storedLitCipherText },
+      { key: 'lit-dataToEncryptHash', value: storedLitEncryptHash },
+    ];
+    
+    return attributesToStore
   }
 
   async keys() {
@@ -105,11 +126,10 @@ export class Enclave {
 
         const storedCredentialId = this.store.get("credential-id");
         const preferredAuthMethod = this.store.get("preferred-auth-method");
-
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (preferredAuthMethod) {
+          } else if (preferredAuthMethod) { // in case of previous auth heppened
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth", {
@@ -128,8 +148,9 @@ export class Enclave {
         if (credentialId) {
           this.store.set("credential-id", credentialId);
           this.store.set("preferred-auth-method", "passkey");
-        } else {
-          this.store.set("preferred-auth-method", "password");
+        }  
+        else {
+          this.store.set("preferred-auth-method", preferredAuthMethod || "password");
           this.store.setRememberDuration(duration);
         }
 
@@ -138,18 +159,25 @@ export class Enclave {
     );
   }
 
-  async ensureKeyPair() {
+  static async generateRandomeKey(){
+    const randomPassword = randomBytes(32); // 32 bytes for password
+    const password = fromUintToString(randomPassword);
+    
+    return idOSKeyDerivation({ password, salt:crypto.randomUUID() })
+  }
+
+
+  async ensureKeyPair() { // always called
     const password = this.store.get("password");
     const salt = this.store.get("human-id");
-
-    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    const storeWithCodec = this.store.pipeCodec(Base64Codec); // string to array of values
 
     const secretKey =
       storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
 
-    this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+    this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey); // secret key is same as keyPair.secret key
 
-    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
+    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey); // from array of valuse to string
     storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
@@ -304,9 +332,13 @@ export class Enclave {
           countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
+          key,
+          value
         } = requestData;
 
+
         const paramBuilder = {
+          getSavableAttributes:()=> [],
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
@@ -314,6 +346,7 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
+          updateStore:()=> [key,value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
         }[requestName];
