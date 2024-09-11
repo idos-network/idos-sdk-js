@@ -4,7 +4,7 @@ import { randomBytes } from "@stablelib/random";
 import * as Utf8Codec from "@stablelib/utf8";
 import { every, get, negate, values } from "lodash-es";
 import nacl from "tweetnacl";
-import { fromUintToString } from "./format";
+import { encode as fromUintToString } from "@stablelib/base64";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
