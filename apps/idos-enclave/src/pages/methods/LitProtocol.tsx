@@ -1,15 +1,14 @@
-import { difference } from "lodash-es";
 import React, { useEffect, useMemo, useState } from "preact/compat";
+import { difference } from "lodash-es";
+import { encode as fromUintToString } from "@stablelib/base64";
 import { Paragraph } from "../../components/Paragraph";
 //@ts-ignore
 import { Enclave } from "../../lib/enclave";
 //@ts-ignore
-import { base64ToUint8Array, fromUintToString } from "../../lib/format";
-//@ts-ignore
 import { Lit } from "../../lib/lit";
 import type { MethodProps } from "./Chooser";
 
-type LoadingMsg = "initialziingLit" | "generatingKey" | "storingKey" | "retrivingKey";
+type LoadingMsg = "initializingLit" | "generatingKey" | "storingKey" | "retrievingKey";
 
 export interface StorableData<T = string> {
   key: string;
@@ -17,9 +16,9 @@ export interface StorableData<T = string> {
 }
 
 const loadingMsgSrc: Record<LoadingMsg, string> = {
-  initialziingLit: "Initializing Lit protocol...",
+  initializingLit: "Initializing Lit protocol...",
   generatingKey: "Generating a key for you...",
-  retrivingKey: "Retriving stored key...",
+  retrievingKey: "Retriving stored key...",
   storingKey: "Storing the generated key...",
 } as const;
 
@@ -38,7 +37,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
   };
 
   const retriveLitKey = async (prevUserWallets = [], newUserWallets = [], walletsChanged) => {
-    startLoading("retrivingKey");
+    startLoading("retrievingKey");
     const key = await litInstance.decrypt(ciphertext, dataToEncryptHash, prevUserWallets);
 
     if (walletsChanged) {
@@ -55,7 +54,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
     onSuccess({ password: key });
   };
 
-  const createAndStoreKey = async (userWallets: string[]): Promise<StorableData[]> => {
+  const createAndStoreKey = async (userWallets: string[]) => {
     try {
       startLoading("generatingKey");
       const randomKey = await Enclave.generateRandomeKey(); // Uint8Array(32)
@@ -70,11 +69,6 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
       updateStoredCipherAndHash(ciphertext, dataToEncryptHash);
 
       onSuccess({ password: keyAsString });
-
-      return [
-        { key: "lit-ciphertext", value: ciphertext },
-        { key: "lit-dataToEncryptHash", value: dataToEncryptHash },
-      ];
     } catch (error) {
       console.error({ error });
     }
@@ -103,7 +97,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!litInstance) return;
-    setLoadingProperty("initialziingLit");
+    setLoadingProperty("initializingLit");
     litInstance.connect().then(getOrStoreLitKey);
   }, [litInstance]);
 
