@@ -19,6 +19,13 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("Method not implemented.");
   }
 
+  async getSavableAttributes(): Promise<unknown> {
+    return this.invokeSnap("getSavableAttributes")
+  }
+  updateStore(key: string, value: any): Promise<void> {
+    return this.invokeSnap("updateStore",{key,value})
+  }
+
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],
