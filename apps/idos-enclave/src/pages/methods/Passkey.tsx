@@ -9,7 +9,7 @@ import { Paragraph } from "../../components/Paragraph";
 import type { MethodProps } from "./Chooser";
 
 export interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {
-  type: "password" | "webauthn";
+  type: "password" | "webauthn" | "lit";
 }
 
 export default class Passkey extends React.Component<PasskeyProps> {

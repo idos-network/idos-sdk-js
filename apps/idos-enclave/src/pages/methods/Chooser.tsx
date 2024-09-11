@@ -50,6 +50,9 @@ export default function Chooser({ setMethod, mode }: ChooserProps) {
         <Button id="auth-method-passkey" onClick={() => setMethod("passkey")}>
           Use a passkey
         </Button>
+        <Button id="auth-method-passkey" onClick={() => setMethod("lit")}>
+          Use lit protocol
+        </Button>
       </div>
     </div>
   );

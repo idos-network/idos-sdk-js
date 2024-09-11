@@ -3,11 +3,12 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import { Header } from "./Header";
 import Confirmation from "./confirm/Confirmation";
 import ChooseMethod from "./methods/Chooser";
+import LitProtocol from "./methods/LitProtocol";
 import Passkey from "./methods/Passkey";
 import Password from "./methods/Password";
 
 export type Mode = "new" | "existing" | "confirm";
-export type Method = "password" | "passkey";
+export type Method = "password" | "passkey" | "lit";
 export type Theme = "dark" | "light";
 
 export interface AppProps {
@@ -71,7 +72,7 @@ export function App({ store, enclave }: AppProps) {
 
     const { data: requestData, ports } = event;
 
-    if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
+    if (!["passkey", "password", "confirm", "auth", "lit"].includes(requestData.intent))
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
@@ -165,6 +166,7 @@ export function App({ store, enclave }: AppProps) {
               {method === "passkey" && passkeyType && (
                 <Passkey type={passkeyType} {...methodProps} />
               )}
+              {method === "lit" && passkeyType && <LitProtocol {...methodProps} />}
             </>
           )}
 
