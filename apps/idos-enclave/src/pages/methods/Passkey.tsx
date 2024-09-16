@@ -1,15 +1,50 @@
-import { QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
+import { ArrowDownIcon, ArrowUpIcon, QuestionMarkCircleIcon } from "@heroicons/react/20/solid";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { useCallback } from "preact/hooks";
 
-import { Collapsible } from "../../components/ui/Collapsible";
 import { Button } from "../../components/ui/button";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "../../components/ui/disclosure";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import type { MethodProps } from "./Chooser";
 
-export interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {}
+function ArrowIcon({ open }: { open: boolean }) {
+  return open ? <ArrowUpIcon class="h-7 w-7" /> : <ArrowDownIcon class="h-7 w-7" />;
+}
+
+function PasskeyHint() {
+  return (
+    <Disclosure>
+      {({ open }) => (
+        <>
+          <DisclosureButton>
+            <div class="flex items-center gap-2">
+              <QuestionMarkCircleIcon class="h-7 w-7" />
+              <Paragraph>What is a passkey?</Paragraph>
+            </div>
+            <ArrowIcon open={open} />
+          </DisclosureButton>
+          <DisclosurePanel>
+            <div class="flex flex-col gap-5 p-1 text-left">
+              <Paragraph>
+                A passkey is an encrypted digital key you create using your fingerprint, face, or
+                screen lock.
+              </Paragraph>
+
+              <Paragraph>
+                With passkeys, you don't need to remember complex passwords. They are saved to your
+                password manager, so you can sign in on other devices.
+              </Paragraph>
+            </div>
+          </DisclosurePanel>
+        </>
+      )}
+    </Disclosure>
+  );
+}
+
+interface PasskeyProps extends MethodProps<{ password: string; credentialId?: string }> {}
 
 const Passkey = ({ onSuccess, onError, store, mode }: PasskeyProps) => {
   const getExistingCredentialById = useCallback(async (credentialId?: string) => {
@@ -124,16 +159,7 @@ const Passkey = ({ onSuccess, onError, store, mode }: PasskeyProps) => {
           <Heading>Create your idOS key</Heading>
           <Paragraph>Please click the button below to create an idOS passkey.</Paragraph>
           <Button onClick={getPasskey}>Create passkey</Button>
-          <Collapsible title="What is a passkey?" Icon={QuestionMarkCircleIcon}>
-            <Paragraph>
-              A passkey is an encrypted digital key you create using your fingerprint, face, or
-              screen lock.
-            </Paragraph>
-            <Paragraph>
-              With passkeys, you don't need to remember complex passwords. They are saved to your
-              password manager, so you can sign in on other devices.
-            </Paragraph>
-          </Collapsible>
+          <PasskeyHint />
         </>
       )}
       {mode === "existing" && (
