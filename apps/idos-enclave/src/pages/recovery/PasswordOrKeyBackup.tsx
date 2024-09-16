@@ -1,7 +1,9 @@
 import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import { useSignal } from "@preact/signals";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import type { JSX } from "preact/compat";
+
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
@@ -89,6 +91,102 @@ function PasswordAndSecretReveal({ password, secret, onCancel }: PasswordAndSecr
   );
 }
 
+interface GoogleDocsStoreProps {
+  password: string;
+  secret: string;
+}
+
+function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
+  const status = useSignal<"idle" | "pending" | "success" | "error">("idle");
+  const documentId = useSignal("");
+
+  const handleGoogleDocsStore = useGoogleLogin({
+    onSuccess: async ({ access_token }) => {
+      status.value = "pending";
+      try {
+        const response = await fetch("https://docs.googleapis.com/v1/documents", {
+          method: "POST",
+          headers: new Headers({
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({
+            title: "idOS Credentials",
+          }),
+        });
+
+        const body = await response.json();
+        documentId.value = body.documentId;
+
+        await fetch(`https://docs.googleapis.com/v1/documents/${documentId.value}:batchUpdate`, {
+          method: "POST",
+          headers: new Headers({
+            Authorization: `Bearer ${access_token}`,
+            "Content-Type": "application/json",
+          }),
+          body: JSON.stringify({
+            requests: [
+              {
+                insertText: {
+                  location: {
+                    index: 1,
+                  },
+                  text: "\n",
+                },
+              },
+              {
+                insertText: {
+                  location: {
+                    index: 1,
+                  },
+                  text: `\nidOS Secret: ${secret}\n`,
+                },
+              },
+              {
+                insertText: {
+                  location: {
+                    index: 2,
+                  },
+                  text: `\nidOS Password: ${password}\n`,
+                },
+              },
+            ],
+          }),
+        });
+
+        status.value = "success";
+      } catch (error) {
+        status.value = "error";
+        throw new Error("Failed to store credentials on Google Drive");
+      }
+    },
+    prompt: "consent",
+    scope: "https://www.googleapis.com/auth/drive.file",
+  });
+
+  return (
+    <div class="flex flex-col gap-2">
+      <Button onClick={() => handleGoogleDocsStore()} disabled={status.value === "pending"}>
+        {status.value === "pending" ? "Storing..." : "Store securely on Google Drive"}
+      </Button>
+      {status.value === "success" ? (
+        <Paragraph>
+          Your credentials have been successfully stored. You can access them{" "}
+          <a
+            href={`https://docs.google.com/document/d/${documentId.value}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-green-500 hover:underline"
+          >
+            here
+          </a>
+          .
+        </Paragraph>
+      ) : null}
+    </div>
+  );
+}
+
 export function PasswordOrKeyBackup({ store }: { store: Store }) {
   const reveal = useSignal(false);
 
@@ -125,6 +223,9 @@ export function PasswordOrKeyBackup({ store }: { store: Store }) {
       <Heading>Back up your password or secret key</Heading>
       <Button onClick={handleReveal}>Reveal password / secret key</Button>
       <Button onClick={handleDownload}>Download password / secret key</Button>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <GoogleDocsStore {...{ password, secret }} />
+      </GoogleOAuthProvider>
     </div>
   );
 }
