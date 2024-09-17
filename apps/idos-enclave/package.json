@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@idos-network/idos-store": "workspace:*",
+    "@idos-network/idos-sdk": "workspace:*",
     "@lit-protocol/auth-helpers": "6.4.10",
     "@lit-protocol/constants": "6.4.10",
     "@lit-protocol/lit-node-client": "6.4.10",

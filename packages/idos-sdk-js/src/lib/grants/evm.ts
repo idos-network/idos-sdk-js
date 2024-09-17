@@ -1,4 +1,4 @@
-import { Contract, type Signer, type TransactionResponse, ZeroAddress } from "ethers";
+import { Contract, type Signer, type TransactionResponse, ZeroAddress } from "ethers-v6";
 import Grant from "./grant";
 import type { GrantChild } from "./grant-child";
 

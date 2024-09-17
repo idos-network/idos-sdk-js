@@ -16,5 +16,10 @@
     "turbo": "^2.0.9"
   },
   "name": "idos-sdk-js",
-  "packageManager": "pnpm@9.6.0"
+  "packageManager": "pnpm@9.6.0",
+  "pnpm": {
+    "patchedDependencies": {
+      "@kwilteam/kwil-js@0.7.1": "patches/@kwilteam__kwil-js@0.7.1.patch"
+    }
+  }
 }

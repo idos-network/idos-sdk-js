@@ -1,5 +1,5 @@
 import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
-import { BrowserProvider, JsonRpcSigner } from "ethers";
+import { BrowserProvider, JsonRpcSigner } from "ethers-v6";
 import { useMemo } from "react";
 import type { Account, Client, Transport } from "viem";
 import { http, useConnectorClient } from "wagmi";

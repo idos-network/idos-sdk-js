@@ -1,5 +1,5 @@
 import { Utils, WebKwil } from "@kwilteam/kwil-js";
-import { Wallet } from "ethers";
+import { Wallet } from "ethers-v6";
 import { implicitAddressFromPublicKey } from "src/lib";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test } from "vitest";
@@ -8,6 +8,7 @@ const kwilProvider = "kwil-provider";
 const chainId = "chain-id";
 const dbId = "db-id";
 
+// biome-ignore lint/suspicious/noExportsInTest: re-use TestKwilClient class
 export class TestKwilClient extends WebKwil {
   constructor() {
     super({ kwilProvider, chainId });

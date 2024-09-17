@@ -1,5 +1,5 @@
 import type { AccessKeyList } from "@near-js/types";
-import { decodeBase58, toBeHex } from "ethers";
+import { decodeBase58, toBeHex } from "ethers-v6";
 import { connect } from "near-api-js";
 
 export async function getNearFullAccessPublicKeys(

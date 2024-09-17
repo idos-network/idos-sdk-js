@@ -1,4 +1,4 @@
-import { Wallet } from "ethers";
+import { Wallet } from "ethers-v6";
 import { Auth } from "src/lib/auth";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test, vi } from "vitest";

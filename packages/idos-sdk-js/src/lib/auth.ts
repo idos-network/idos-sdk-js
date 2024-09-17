@@ -4,7 +4,7 @@ import * as BinaryCodec from "@stablelib/binary";
 import * as BytesCodec from "@stablelib/bytes";
 import * as Utf8Codec from "@stablelib/utf8";
 import * as BorshCodec from "borsh";
-import type { Signer } from "ethers";
+import type { Signer } from "ethers-v6";
 
 import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
@@ -88,7 +88,7 @@ export class Auth {
       wallet.signMessage = async ({
         message,
         recipient,
-      }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
+      }: SignMessageParams): Promise<SignedMessage & { nonce?: Buffer; message?: string }> => {
         if (error) return Promise.reject();
 
         const lastMessage = this.store.get("sign-last-message");
@@ -159,6 +159,7 @@ export class Auth {
         recipient,
         nonce: nonceSuggestion,
       }))!;
+      console.log({ nonceSuggestion });
 
       const nep413BorschSchema = {
         struct: {

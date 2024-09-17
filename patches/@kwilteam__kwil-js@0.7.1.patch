@@ -1,0 +1,38 @@
+diff --git a/dist/index.js b/dist/index.js
+index 5bfeae5bc5b059bfedd2563793a0a3518fd3ed1a..74b900e2eb38acaf3314a2c2070979632a9e1cc4 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -2,6 +2,7 @@
+ var __importDefault = (this && this.__importDefault) || function (mod) {
+     return (mod && mod.__esModule) ? mod : { "default": mod };
+ };
++
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.Client = exports.Utils = exports.KwilSigner = exports.WebKwil = exports.NodeKwil = void 0;
+ const nodeKwil_1 = require("./client/node/nodeKwil");
+diff --git a/dist/utils/keys.js b/dist/utils/keys.js
+index bc6f1a4a84a4766e894f3fd6c3076c7280543990..137ae8abbff5837adef405f6b1bc1fb3bc5c576e 100644
+--- a/dist/utils/keys.js
++++ b/dist/utils/keys.js
+@@ -1,7 +1,7 @@
+ "use strict";
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.ecrRecoverPubKey = exports.recoverSecp256k1PubKey = exports.nearB58ToHex = exports.isNearPubKey = void 0;
+-const ethers_1 = require("ethers");
++const ethers_1 = require("ethers-v6");
+ const base58_1 = require("./base58");
+ const serial_1 = require("./serial");
+ const signature_1 = require("../core/signature");
+diff --git a/dist/utils/rlp.js b/dist/utils/rlp.js
+index 25d4fac32a3f29cdeb8455102040c80125c70b28..5893575deaa5e04ccfce59efdab61eff439e39fc 100644
+--- a/dist/utils/rlp.js
++++ b/dist/utils/rlp.js
+@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.kwilDecode = exports.kwilEncode = void 0;
+ const bytes_1 = require("./bytes");
+ const serial_1 = require("./serial");
+-const ethers_1 = require("ethers");
++const ethers_1 = require("ethers-v6");
+ const enums_1 = require("../core/enums");
+ function _objToNestedArray(input) {
+     if (Array.isArray(input) && !(input instanceof Uint8Array)) {

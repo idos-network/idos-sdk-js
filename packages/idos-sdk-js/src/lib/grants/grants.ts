@@ -1,5 +1,5 @@
 import type { Wallet } from "@near-wallet-selector/core";
-import type { Signer } from "ethers";
+import type { Signer } from "ethers-v6";
 
 import type { Data } from "../data";
 import type { Enclave } from "../enclave";
