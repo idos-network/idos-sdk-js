@@ -160,7 +160,6 @@ export class Auth {
         recipient,
         nonce: nonceSuggestion,
       }))!;
-      console.log({ nonceSuggestion });
 
       const nep413BorschSchema = {
         struct: {

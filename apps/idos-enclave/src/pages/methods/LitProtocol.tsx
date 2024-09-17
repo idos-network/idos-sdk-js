@@ -35,8 +35,6 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
     store.set("lit-data-to-encrypt-hash", dataHash);
   };
 
-  // const checkEncryption
-
   // biome-ignore lint/style/useDefaultParameterLast: <explanation>
   const retriveLitKey = async (
     prevUserWallets = [],
@@ -69,11 +67,10 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
 
       startLoading("storingKey");
 
-      const encryptionResult = await litInstance.encrypt(keyAsString, userWallets);
-      if (!encryptionResult?.ciphertext)
+      const encryptionResult = await litInstance.encrypt("752@Hi-idos" || keyAsString, userWallets);
+      if (!encryptionResult?.ciphertext || !encryptionResult?.dataToEncryptHash)
         throw new Error("Error happend while encrypting your key!");
       const { ciphertext, dataToEncryptHash } = encryptionResult;
-      if (!ciphertext || !dataToEncryptHash) throw new Error("Error at lit encryption process");
 
       // here u should ask the user to store these varaiable as attributes (also check if they're already stored)
       updateStoredCipherAndHash(ciphertext, dataToEncryptHash);
@@ -90,10 +87,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
     const userWallets = store.get("user-wallets") || [];
     const newUserWallets = store.get("new-user-wallets");
 
-    const hasDiff =
-      (newUserWallets.length !== userWallets.length ||
-        !!difference(userWallets, newUserWallets).length) &&
-      !!userWallets.length;
+    const hasDiff = !!userWallets.length && !!difference(userWallets, newUserWallets).length;
 
     store.set("user-wallets", newUserWallets);
 
