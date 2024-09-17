@@ -390,6 +390,9 @@ importers:
       '@vitest/ui':
         specifier: ^0.34.6
         version: 0.34.7(vitest@0.31.4)
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
