@@ -1,10 +1,10 @@
 import { Store } from "@idos-network/idos-store";
 import * as Base64Codec from "@stablelib/base64";
+import { encode as fromUintToString } from "@stablelib/base64";
 import { randomBytes } from "@stablelib/random";
 import * as Utf8Codec from "@stablelib/utf8";
 import { every, get, negate, values } from "lodash-es";
 import nacl from "tweetnacl";
-import { encode as fromUintToString } from "@stablelib/base64";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
@@ -33,9 +33,6 @@ export class Enclave {
   }
 
   updateStore(key, value) {
-    if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
-    if (!value) return;
-
     this.store.set(key, value);
   }
 
@@ -63,14 +60,14 @@ export class Enclave {
       signerPublicKey: this.store.get("signer-public-key"),
     };
   }
-  // variables that are used in encalve and should be preserved in user attributes
-  getSavableAttributes() {
-    const storedLitCipherText = this.store.get("lit-ciphertext");
-    const storedLitEncryptHash = this.store.get("lit-dataToEncryptHash");
+  // variables that are used in enclave and should be preserved in user attributes
+  getStorableAttributes() {
+    const storedLitCipherText = this.store.get("lit-cipher-text");
+    const storedLitEncryptHash = this.store.get("lit-data-to-encrypt-hash");
 
     const attributesToStore = [
-      { key: "lit-ciphertext", value: storedLitCipherText },
-      { key: "lit-dataToEncryptHash", value: storedLitEncryptHash },
+      { key: "lit-cipher-text", value: storedLitCipherText },
+      { key: "lit-data-to-encrypt-hash", value: storedLitEncryptHash },
     ];
 
     return attributesToStore;
@@ -130,7 +127,6 @@ export class Enclave {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
           } else if (preferredAuthMethod) {
-            // in case of previous auth heppened
             ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
             ({ password, duration, credentialId } = await this.#openDialog("auth", {
@@ -150,7 +146,7 @@ export class Enclave {
           this.store.set("credential-id", credentialId);
           this.store.set("preferred-auth-method", "passkey");
         } else {
-          this.store.set("preferred-auth-method", preferredAuthMethod || "password");
+          this.store.set("preferred-auth-method", "password");
           this.store.setRememberDuration(duration);
         }
 
@@ -160,10 +156,10 @@ export class Enclave {
   }
 
   static async generateRandomeKey() {
-    const randomPassword = randomBytes(32); // 32 bytes for password
-    const password = fromUintToString(randomPassword);
+    const randomBytes = crypto.getRandomValues(new Uint8Array(32)); // 32 bytes for password
+    const randomString = fromUintToString(randomBytes);
 
-    return idOSKeyDerivation({ password, salt: crypto.randomUUID() });
+    return idOSKeyDerivation({ password: randomString, salt: crypto.randomUUID() });
   }
 
   async ensureKeyPair() {
@@ -337,7 +333,7 @@ export class Enclave {
         } = requestData;
 
         const paramBuilder = {
-          getSavableAttributes: () => [],
+          getStorableAttributes: () => [],
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],

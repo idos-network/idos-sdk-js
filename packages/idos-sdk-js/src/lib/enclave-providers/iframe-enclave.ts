@@ -16,13 +16,16 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async getSavableAttributes() {
+  async getStorableAttributes() {
     await this.#loadEnclave();
-    const res = await this.#requestToEnclave({ getSavableAttributes: {} });
+    const res = (await this.#requestToEnclave({ getStorableAttributes: {} })) as {
+      key: string;
+      value: string;
+    }[];
     return res;
   }
 
-  async updateStore(key: string, value: any): Promise<void> {
+  async updateStore(key: string, value: unknown): Promise<void> {
     await this.#requestToEnclave({ updateStore: { key, value } });
   }
 
@@ -154,7 +157,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
-  async #requestToEnclave(request: any) {
+  async #requestToEnclave(request: unknown) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 

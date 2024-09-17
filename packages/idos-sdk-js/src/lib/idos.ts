@@ -1,5 +1,5 @@
 import type { Wallet } from "@near-wallet-selector/core";
-import type { Signer } from "ethers";
+import type { Signer } from "ethers-v6";
 import { Store } from "../../../idos-store";
 import type { Attribute } from "../lib/types";
 import { Auth, type AuthUser } from "./auth";
@@ -10,13 +10,9 @@ import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
+import { Lit } from "./lit.ts";
 import { assertNever, eventSetup } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
-
-const hasLitKeyAndValue = (record: { key: string; value: string }) =>
-  (record?.key as string).includes("lit-") && !!record.value;
-
-const litAttributesLength = 2;
 
 interface InitParams {
   nodeUrl?: string;
@@ -78,31 +74,25 @@ export class idOS {
     });
 
     eventSetup.on("signer-is-set", () => {
-      this.updateEnclaveWallets();
-      this.updateEnclaveLitVariables();
+      Lit.updateEnclaveWallets(this.data, this.enclave);
+      Lit.updateEnclaveLitVariables(this.data, this.enclave);
     });
 
     this.grants = new Grants(this.data, this.enclave, evmGrantsOptions, nearGrantsOptions);
   }
 
-  async updateEnclaveLitVariables() {
-    let userAttributes = (await this.data.list("attributes")) as Attribute[];
-    userAttributes = userAttributes.filter((attr) => attr.attribute_key.includes("lit-"));
-    if (userAttributes.length !== litAttributesLength) return;
-    userAttributes.forEach((attr) => {
-      this.updateStore(attr.attribute_key, attr.value);
-    });
-  }
-
   async checkLitAttributes() {
-    const userAttrs = (await this.data.list("attributes")) || [];
-    const savableAttributes = (await this.enclave.getSavableAttributes()) || [];
+    const userAttrs: Attribute[] = (await this.data.list("attributes")) || [];
+    const savableAttributes = (await this.enclave.getStorableAttributes()) || [];
 
-    const filteredUserAttributes = userAttrs
-      .map((attr) => ({ ...attr, key: attr.attribute_key }))
-      .filter(hasLitKeyAndValue);
+    const hasLitKey = (attr: Attribute | (typeof savableAttributes)[number]) => {
+      if ("key" in attr) return attr.key.includes("lit-");
 
-    const litSavableAttributes = savableAttributes.filter(hasLitKeyAndValue);
+      return attr.attribute_key.includes("lit-");
+    };
+
+    const filteredUserAttributes = userAttrs.filter(hasLitKey);
+    const litSavableAttributes = savableAttributes.filter(hasLitKey);
 
     // in case cipher text and hash were updated (re-encryption happened) => user attributes should be updated
     if (filteredUserAttributes.length === litSavableAttributes.length) {
@@ -129,7 +119,7 @@ export class idOS {
     }
   }
 
-  async updateStore(key: string, value: any) {
+  async updateStore(key: string, value: unknown) {
     this.enclave.updateStore(key, value);
   }
 

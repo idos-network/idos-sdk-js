@@ -58,9 +58,9 @@ export class Enclave {
     );
   }
 
-  // sends back encalve's variables that need to be stored in user attributes
-  getSavableAttributes() {
-    return this.provider.getSavableAttributes();
+  // sends back enclave's variables that need to be stored in user attributes
+  getStorableAttributes() {
+    return this.provider.getStorableAttributes();
   }
 
   async confirm(message: string) {
