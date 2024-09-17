@@ -64,10 +64,12 @@ export class Enclave {
   getStorableAttributes() {
     const storedLitCipherText = this.store.get("lit-cipher-text");
     const storedLitEncryptHash = this.store.get("lit-data-to-encrypt-hash");
+    const storedLitAccessControls = this.store.get("lit-access-control");
 
     const attributesToStore = [
       { key: "lit-cipher-text", value: storedLitCipherText },
       { key: "lit-data-to-encrypt-hash", value: storedLitEncryptHash },
+      { key: "lit-access-control", value: storedLitAccessControls },
     ];
 
     return attributesToStore;

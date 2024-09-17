@@ -15,7 +15,7 @@ import {
 import type { Store } from "../../../idos-store";
 import type { Attribute } from "./types";
 
-const litAttributesLength = 2;
+const litAttributesLength = 3;
 
 declare type UserWallet = {
   address: string;
@@ -40,7 +40,7 @@ function insertBetween<T, S>(arr: T[], objToInsert: S): (T | S)[] {
   }, []);
 }
 
-const createAccessControlCondition = (walletAddresses: string[] = []) => {
+export const createAccessControlCondition = (walletAddresses: string[] = []) => {
   const seprator = { operator: "or" };
 
   const withoutOperators = walletAddresses.map((walletAddress) => ({
@@ -68,6 +68,18 @@ export class Lit {
     this.store = store;
   }
 
+  storeAccessControls = (userWallets: string[]) => {
+    if (!userWallets.length) throw new Error("a valid user wallets array should be passed");
+    const accessControls = createAccessControlCondition(userWallets);
+    this.store.set("lit-access-control", accessControls);
+  };
+
+  getAccessControls = (walletAddresses: string[]): string[] => {
+    return (
+      this.store.get("lit-access-control") || createAccessControlCondition(walletAddresses) || []
+    );
+  };
+
   static async updateEnclaveWallets(data: Data, enclave: Enclave) {
     const wallets: UserWallet[] = await data.list("wallets");
     const addresses = wallets.map((userWallet) => userWallet.address);
@@ -81,9 +93,16 @@ export class Lit {
     let userAttributes = (await data.list("attributes")) as Attribute[];
     userAttributes = userAttributes.filter((attr) => attr.attribute_key.includes("lit-"));
     if (userAttributes.length !== litAttributesLength) return;
+    const prepareValueToStore = (value: string) => {
+      try {
+        if (JSON.parse(value)) return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    };
     // biome-ignore lint/complexity/noForEach: <explanation>
     userAttributes.forEach((attr) => {
-      enclave.updateStore(attr.attribute_key, attr.value);
+      enclave.updateStore(attr.attribute_key, prepareValueToStore(attr.value));
     });
   }
 
@@ -111,6 +130,8 @@ export class Lit {
   ): Promise<EncryptResponse | undefined> {
     try {
       const accessControlConditions = createAccessControlCondition(walletAddresses);
+      this.storeAccessControls(walletAddresses);
+
       const response = await LitJsSdk.encryptString(
         { dataToEncrypt, accessControlConditions },
         // biome-ignore lint/style/noNonNullAssertion: TBD
@@ -156,18 +177,23 @@ export class Lit {
   }
 
   async decrypt(ciphertext: string, dataToEncryptHash: string, walletAddresses: string[] = []) {
-    const accessControlConditions = createAccessControlCondition(walletAddresses);
-    const sessionSigs = await this.getSessionSigs();
-    return LitJsSdk.decryptToString(
-      {
-        accessControlConditions,
-        ciphertext,
-        dataToEncryptHash,
-        sessionSigs,
-        chain: "ethereum",
-      },
-      // biome-ignore lint/style/noNonNullAssertion: TBD
-      this.client!,
-    );
+    try {
+      const accessControlConditions = this.getAccessControls(walletAddresses);
+      const sessionSigs = await this.getSessionSigs();
+      return LitJsSdk.decryptToString(
+        {
+          accessControlConditions,
+          ciphertext,
+          dataToEncryptHash,
+          sessionSigs,
+          chain: "ethereum",
+        },
+        // biome-ignore lint/style/noNonNullAssertion: TBD
+        this.client!,
+      );
+    } catch (error) {
+      console.log("error in decrypt");
+      console.error(error);
+    }
   }
 }

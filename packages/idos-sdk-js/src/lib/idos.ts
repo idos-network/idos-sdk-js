@@ -13,6 +13,7 @@ import { KwilWrapper } from "./kwil-wrapper";
 import { Lit } from "./lit.ts";
 import { assertNever, eventSetup } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
+import { differenceWith, isEqual } from "lodash-es";
 
 interface InitParams {
   nodeUrl?: string;
@@ -91,32 +92,49 @@ export class idOS {
       return attr.attribute_key.includes("lit-");
     };
 
+    const prepareValueSetter = (value: unknown): string =>
+      Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+    const prepareValueGetter = (value: string): unknown => {
+      try {
+        if (JSON.parse(value)) return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    };
+
     const filteredUserAttributes = userAttrs.filter(hasLitKey);
     const litSavableAttributes = savableAttributes.filter(hasLitKey);
+    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
 
-    // in case cipher text and hash were updated (re-encryption happened) => user attributes should be updated
-    if (filteredUserAttributes.length === litSavableAttributes.length) {
-      for (const savableAttribute of litSavableAttributes) {
-        const userAttr = filteredUserAttributes.find(
-          (attr) => attr.attribute_key === savableAttribute.key,
-        );
-        if (!userAttr) return;
-        if (userAttr.value !== savableAttribute.value)
-          await this.data.update("attributes", { ...userAttr, value: savableAttribute.value });
+    const attributeToCreate: Omit<Attribute, "id">[] = [];
+    // Case 1: Update user attributes if re-encryption happened
+    for (const savableAttribute of litSavableAttributes) {
+      const userAttr = userAttrMap.get(savableAttribute.key);
+
+      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
+      if (!userAttributeValue) return;
+
+      // Update if it exists and has a different value
+      if (userAttributeValue !== savableAttribute.value) {
+        // in case attribute value was an array. then it's stored as sinegle string in user attributes. so we compare between strings
+        if (
+          Array.isArray(userAttributeValue) &&
+          !differenceWith(userAttributeValue, savableAttribute.value, isEqual).length
+        )
+          return;
+
+        await this.data.update("attributes", { ...userAttr, value: savableAttribute.value });
       }
-      return;
-    }
 
-    // in case of no user attributes that include lit info (create user lit attributes)
-    if (!filteredUserAttributes.length) {
-      const attributesToSave = savableAttributes.map((attr) => {
-        return {
-          attribute_key: attr.key,
-          value: attr.value,
-        };
-      });
-      return this.data.createMultiple("attributes", attributesToSave);
+      // Create if the attribute doesn't exist in userAttrs
+      if (!userAttr)
+        attributeToCreate.push({
+          attribute_key: savableAttribute.key,
+          value: prepareValueSetter(savableAttribute.value),
+        });
     }
+    if (attributeToCreate.length) this.data.createMultiple("attributes", attributeToCreate);
   }
 
   async updateStore(key: string, value: unknown) {
