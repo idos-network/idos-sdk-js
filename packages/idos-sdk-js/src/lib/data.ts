@@ -114,7 +114,7 @@ export class Data {
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
 
-    let receiverPublicKey;
+    let receiverPublicKey: string | null = null;
 
     const inputs: string[] = ((await this.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)
