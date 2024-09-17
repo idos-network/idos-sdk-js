@@ -144,7 +144,7 @@ export function App({ store, enclave }: AppProps) {
   return (
     <>
       <Header goHome={goHome} />
-      <main className="flex-1 flex justify-center mt-6">
+      <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
           {!confirm && (
             <>
