@@ -112,7 +112,7 @@ export class NearGrants implements GrantChild {
     const { nonce = nonceSuggestion, signature: b64Signature } = (await (
       this.#signer.signMessage as (
         _: SignMessageParams,
-      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
+      ) => Promise<SignedMessage & { nonce?: Buffer }>
     )({
       message,
       recipient,
@@ -219,7 +219,7 @@ export class NearGrants implements GrantChild {
     lockedUntil,
     signature,
     nonce,
-  }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
+  }: Grant & { signature: Uint8Array; nonce: Buffer; wait?: boolean }): Promise<{
     grant: Grant;
     transactionId: string;
   }> {
@@ -319,7 +319,7 @@ export class NearGrants implements GrantChild {
     lockedUntil,
     signature,
     nonce,
-  }: Grant & { signature: Uint8Array; nonce: Uint8Array; wait?: boolean }): Promise<{
+  }: Grant & { signature: Uint8Array; nonce: Buffer; wait?: boolean }): Promise<{
     grant: Grant;
     transactionId: string;
   }> {
