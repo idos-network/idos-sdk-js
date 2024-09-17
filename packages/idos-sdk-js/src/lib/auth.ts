@@ -88,7 +88,7 @@ export class Auth {
       wallet.signMessage = async ({
         message,
         recipient,
-      }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array; message?: string }> => {
+      }: SignMessageParams): Promise<SignedMessage & { nonce?: Buffer; message?: string }> => {
         if (error) return Promise.reject();
 
         const lastMessage = this.store.get("sign-last-message");
