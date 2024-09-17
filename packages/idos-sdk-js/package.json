@@ -28,8 +28,8 @@
     "test:build": "publint --strict"
   },
   "peerDependencies": {
-    "ethers": "^6.12",
-    "near-api-js": "^3.0"
+    "ethers": "6.12",
+    "near-api-js": "3.0"
   },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
@@ -52,15 +52,22 @@
     "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
     "@digitalbazaar/vc": "^6.0.2",
     "@kwilteam/kwil-js": "0.7.1",
+    "@lit-protocol/auth-helpers": "^6.4.10",
+    "@lit-protocol/constants": "^6.5.0",
+    "@lit-protocol/lit-node-client": "^6.4.10",
+    "@lit-protocol/types": "^6.5.0",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
+    "ethers": "npm:ethers@5.7.1",
+    "ethers-v6": "npm:ethers@6.12.0",
     "jsonld": "^8.3.1",
     "jsonld-document-loader": "^2.0.0",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "yup": "^1.4.0"
   },
   "clean-package": {
     "replace": {

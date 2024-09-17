@@ -1,6 +1,10 @@
 import { LitNetwork } from "@lit-protocol/constants";
+import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types"; // Import types explicitly
+import type { Data } from "./data";
+import type { Enclave } from "./enclave";
+
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
-import { ethers } from "ethers";
+import { ethers } from "ethers-v6";
 
 import {
   LitAbility,
@@ -8,9 +12,24 @@ import {
   createSiweMessage,
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
+import type { Store } from "../../../idos-store";
+import type { Attribute } from "./types";
 
-function insertBetween(arr, objToInsert) {
-  return arr.reduce((acc, curr, index) => {
+const litAttributesLength = 2;
+
+declare type UserWallet = {
+  address: string;
+};
+
+declare global {
+  interface Window {
+    ethereum: {
+      request: (args: { method: string; params?: unknown[] }) => Promise<unknown>;
+    };
+  }
+}
+function insertBetween<T, S>(arr: T[], objToInsert: S): (T | S)[] {
+  return arr.reduce((acc: (T | S)[], curr: T, index: number) => {
     acc.push(curr);
 
     if (index < arr.length - 1) {
@@ -21,7 +40,7 @@ function insertBetween(arr, objToInsert) {
   }, []);
 }
 
-const createAccessControlCondition = (walletAddresses = []) => {
+const createAccessControlCondition = (walletAddresses: string[] = []) => {
   const seprator = { operator: "or" };
 
   const withoutOperators = walletAddresses.map((walletAddress) => ({
@@ -41,11 +60,31 @@ const createAccessControlCondition = (walletAddresses = []) => {
 };
 
 export class Lit {
-  chain;
-  client;
-  constructor(chain, store) {
+  chain: string;
+  store;
+  client: LitJsSdk.LitNodeClient | null = null;
+  constructor(chain: string, store: Store) {
     this.chain = chain;
     this.store = store;
+  }
+
+  static async updateEnclaveWallets(data: Data, enclave: Enclave) {
+    const wallets: UserWallet[] = await data.list("wallets");
+    const addresses = wallets.map((userWallet) => userWallet.address);
+
+    if (!Array.isArray(addresses))
+      throw new Error("error happened while constructing addresses array!");
+    enclave.updateStore("new-user-wallets", addresses);
+  }
+
+  static async updateEnclaveLitVariables(data: Data, enclave: Enclave) {
+    let userAttributes = (await data.list("attributes")) as Attribute[];
+    userAttributes = userAttributes.filter((attr) => attr.attribute_key.includes("lit-"));
+    if (userAttributes.length !== litAttributesLength) return;
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    userAttributes.forEach((attr) => {
+      enclave.updateStore(attr.attribute_key, attr.value);
+    });
   }
 
   async getSigner() {
@@ -55,7 +94,7 @@ export class Lit {
   }
 
   async connect() {
-    const client = new LitJsSdk.LitNodeClient({
+    const client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
       alertWhenUnauthorized: false,
       litNetwork: LitNetwork.DatilDev,
       debug: true,
@@ -66,12 +105,16 @@ export class Lit {
     return client;
   }
 
-  async encrypt(dataToEncrypt, walletAddresses = []) {
+  async encrypt(
+    dataToEncrypt: string,
+    walletAddresses: string[] = [],
+  ): Promise<EncryptResponse | undefined> {
     try {
       const accessControlConditions = createAccessControlCondition(walletAddresses);
       const response = await LitJsSdk.encryptString(
         { dataToEncrypt, accessControlConditions },
-        this.client,
+        // biome-ignore lint/style/noNonNullAssertion: TBD
+        this.client!,
       );
       return response;
     } catch (error) {
@@ -79,10 +122,11 @@ export class Lit {
     }
   }
 
-  async getSessionSigs() {
+  async getSessionSigs(): Promise<SessionSigsMap | undefined> {
     const signer = await this.getSigner();
     const address = await signer.getAddress();
-    const sessionSignatures = await this.client.getSessionSigs({
+    // biome-ignore lint/style/noNonNullAssertion: TBD
+    const sessionSignatures = await this.client?.getSessionSigs({
       chain: this.chain,
       resourceAbilityRequests: [
         {
@@ -96,7 +140,8 @@ export class Lit {
           expiration,
           resources: resourceAbilityRequests,
           walletAddress: address,
-          nonce: await this.client.getLatestBlockhash(),
+          // biome-ignore lint/style/noNonNullAssertion: TBD
+          nonce: await this.client?.getLatestBlockhash()!,
           litNodeClient: this.client,
         });
 
@@ -110,7 +155,7 @@ export class Lit {
     return sessionSignatures;
   }
 
-  async decrypt(ciphertext, dataToEncryptHash, walletAddresses = []) {
+  async decrypt(ciphertext: string, dataToEncryptHash: string, walletAddresses: string[] = []) {
     const accessControlConditions = createAccessControlCondition(walletAddresses);
     const sessionSigs = await this.getSessionSigs();
     return LitJsSdk.decryptToString(
@@ -121,7 +166,8 @@ export class Lit {
         sessionSigs,
         chain: "ethereum",
       },
-      this.client,
+      // biome-ignore lint/style/noNonNullAssertion: TBD
+      this.client!,
     );
   }
 }
