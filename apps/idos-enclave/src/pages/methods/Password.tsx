@@ -8,6 +8,7 @@ import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import type { MethodProps } from "./Chooser";
+
 interface PasswordFieldProps extends TextFieldProps {
   hasError?: boolean;
 }
