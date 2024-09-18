@@ -161,7 +161,6 @@ export function App({ store, enclave }: AppProps) {
 
               {method === "passkey" && <Passkey {...methodProps} />}
               {method === "lit" && <LitProtocol {...methodProps} />}
-
             </>
           )}
 

@@ -2,7 +2,7 @@ import { Lit } from "@idos-network/idos-sdk";
 import { encode as fromUintToString } from "@stablelib/base64";
 import { difference } from "lodash-es";
 import React, { useEffect, useMemo, useState } from "preact/compat";
-import { Paragraph } from "../../components/Paragraph";
+import { Paragraph } from "../../components/ui/paragraph";
 //@ts-ignore
 import { Enclave } from "../../lib/enclave";
 import type { MethodProps } from "./Chooser";
@@ -56,7 +56,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
       updateStoredCipherAndHash(ciphertext, dataToEncryptHash);
     }
     if (!key) throw new Error("error happened while decrypting user password");
-    onSuccess({ password: "752@Hi-idos" || key });
+    onSuccess({ password: key });
   };
 
   const createAndStoreKey = async (userWallets: string[]) => {
@@ -67,7 +67,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
 
       startLoading("storingKey");
 
-      const encryptionResult = await litInstance.encrypt("752@Hi-idos" || keyAsString, userWallets);
+      const encryptionResult = await litInstance.encrypt(keyAsString, userWallets);
       if (!encryptionResult?.ciphertext || !encryptionResult?.dataToEncryptHash)
         throw new Error("Error happend while encrypting your key!");
       const { ciphertext, dataToEncryptHash } = encryptionResult;
@@ -75,7 +75,7 @@ export default function LitProtocol({ onSuccess, store }: MethodProps) {
       // here u should ask the user to store these varaiable as attributes (also check if they're already stored)
       updateStoredCipherAndHash(ciphertext, dataToEncryptHash);
 
-      onSuccess({ password: "752@Hi-idos" || keyAsString });
+      onSuccess({ password: keyAsString });
     } catch (error) {
       console.error({ error });
     }
