@@ -1,4 +1,4 @@
-import { useSignal } from "@preact/signals";
+import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
 
@@ -9,15 +9,25 @@ import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import type { MethodProps } from "./Chooser";
 
-interface PasswordFieldProps extends TextFieldProps {
-  hasError?: boolean;
+interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
+  hasError?: Signal<boolean>;
+  password: Signal<string>;
 }
 
-function PasswordField({ hasError, ...props }: PasswordFieldProps) {
+function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
   return (
     <div class="flex flex-col gap-1">
-      <TextField id="idos-password-input" autoFocus type="password" required={true} {...props} />
-      {hasError ? (
+      <TextField
+        id="idos-password-input"
+        autoFocus
+        type="password"
+        required={true}
+        onInput={(e) => {
+          password.value = (e.target as HTMLInputElement).value;
+        }}
+        {...props}
+      />
+      {hasError?.value ? (
         <p class="tex-sm text-left font-semibold text-red-500">Invalid password.</p>
       ) : null}
     </div>
@@ -25,11 +35,10 @@ function PasswordField({ hasError, ...props }: PasswordFieldProps) {
 }
 
 interface DurationFieldProps {
-  duration: number;
-  onInput: (value: number) => void;
+  duration: Signal<number>;
 }
 
-function DurationField({ duration, onInput }: DurationFieldProps) {
+function DurationField({ duration }: DurationFieldProps) {
   return (
     <div className="flex flex-col">
       <p className="text-left font-semibold">Remember for:</p>
@@ -40,9 +49,9 @@ function DurationField({ duration, onInput }: DurationFieldProps) {
             name="duration"
             value="7"
             class="form-radio cursor-pointer text-green-400 focus:ring-green-500"
-            checked={duration === 7}
+            checked={duration.value === 7}
             onInput={() => {
-              onInput(7);
+              duration.value = 7;
             }}
           />
           <span>1 week</span>
@@ -53,9 +62,9 @@ function DurationField({ duration, onInput }: DurationFieldProps) {
             name="duration"
             value="30"
             class="form-radio cursor-pointer text-green-400 focus:ring-green-500"
-            checked={duration === 30}
+            checked={duration.value === 30}
             onInput={() => {
-              onInput(30);
+              duration.value = 30;
             }}
           />
           <span>1 month</span>
@@ -117,21 +126,9 @@ export function PasswordForm({
             Please choose a secure password, store it safely, and enter it below:
           </Paragraph>
 
-          <PasswordField
-            value={password}
-            hasError={hasError.value}
-            onInput={(e) => {
-              hasError.value = false;
-              password.value = e.currentTarget.value;
-            }}
-          />
+          <PasswordField password={password} hasError={hasError} />
 
-          <DurationField
-            duration={duration.value}
-            onInput={(value) => {
-              duration.value = value;
-            }}
-          />
+          <DurationField duration={duration} />
 
           <Paragraph>
             This password is the key to your idOS data. Be careful not to lose it: you'll need it
@@ -146,21 +143,9 @@ export function PasswordForm({
 
           <Paragraph>Please enter your idOS password below:</Paragraph>
 
-          <PasswordField
-            value={password}
-            hasError={hasError.value}
-            onInput={(e) => {
-              hasError.value = false;
-              password.value = e.currentTarget.value;
-            }}
-          />
+          <PasswordField password={password} hasError={hasError} />
 
-          <DurationField
-            duration={duration.value}
-            onInput={(value) => {
-              duration.value = value;
-            }}
-          />
+          <DurationField duration={duration} />
 
           <Button
             type="submit"
