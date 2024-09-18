@@ -147,11 +147,7 @@ export function PasswordForm({
 
           <DurationField duration={duration} />
 
-          <Button
-            type="submit"
-            className="disabled:pointer-events-none disabled:opacity-50"
-            disabled={isLoading.value}
-          >
+          <Button type="submit" disabled={isLoading.value}>
             {isLoading.value ? "Unlocking..." : "Unlock"}
           </Button>
         </>
