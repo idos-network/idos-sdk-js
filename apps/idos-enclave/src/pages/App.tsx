@@ -35,10 +35,7 @@ export function App({ store, enclave }: AppProps) {
   const [confirm, setConfirm] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
-  // Passkey options
-  const [passkeyType, setPasskeyType] = useState<"password" | "webauthn" | null>("webauthn");
-
-  // Confirm options
+  // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
@@ -85,7 +82,6 @@ export function App({ store, enclave }: AppProps) {
 
       case "passkey":
         setMethod("passkey");
-        if (requestData.message?.type) setPasskeyType(requestData.message.type);
         break;
 
       case "password":
@@ -149,7 +145,7 @@ export function App({ store, enclave }: AppProps) {
   return (
     <>
       <Header goHome={goHome} />
-      <main className="flex-1 flex justify-center mt-6">
+      <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
           {!confirm && (
             <>
@@ -163,10 +159,9 @@ export function App({ store, enclave }: AppProps) {
                 />
               )}
 
-              {method === "passkey" && passkeyType && (
-                <Passkey type={passkeyType} {...methodProps} />
-              )}
-              {method === "lit" && passkeyType && <LitProtocol {...methodProps} />}
+              {method === "passkey" && <Passkey {...methodProps} />}
+              {method === "lit" && <LitProtocol {...methodProps} />}
+
             </>
           )}
 
