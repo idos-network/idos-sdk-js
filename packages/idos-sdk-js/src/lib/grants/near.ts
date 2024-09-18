@@ -1,10 +1,10 @@
+import { Buffer } from "buffer";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
 import { Contract, connect, keyStores, type providers } from "near-api-js";
 import { Nonce } from "../nonce";
 import Grant from "./grant";
 import type { GrantChild } from "./grant-child";
-import { Buffer } from "buffer";
 
 interface NearContractGrant {
   owner: string;
