@@ -6,9 +6,9 @@ const textField = tv({
 });
 
 type TextFieldVariants = VariantProps<typeof textField>;
-interface TextFielProps extends InputProps, TextFieldVariants {}
+export interface TextFieldProps extends InputProps, TextFieldVariants {}
 
-export function TextField({ class: class_, className, ...props }: TextFielProps) {
+export function TextField({ class: class_, className, ...props }: TextFieldProps) {
   return (
     <Input
       className={textField({

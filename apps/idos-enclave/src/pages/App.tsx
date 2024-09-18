@@ -4,7 +4,7 @@ import { Header } from "./Header";
 import Confirmation from "./confirm/Confirmation";
 import ChooseMethod from "./methods/Chooser";
 import Passkey from "./methods/Passkey";
-import Password from "./methods/Password";
+import { PasswordForm } from "./methods/Password";
 
 export type Mode = "new" | "existing" | "confirm";
 export type Method = "password" | "passkey";
@@ -151,7 +151,7 @@ export function App({ store, enclave }: AppProps) {
               {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
 
               {method === "password" && (
-                <Password
+                <PasswordForm
                   {...methodProps}
                   encryptionPublicKey={encryptionPublicKey}
                   humanId={humanId}
