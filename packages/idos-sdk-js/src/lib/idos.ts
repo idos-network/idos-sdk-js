@@ -85,7 +85,6 @@ export class idOS {
   async checkLitAttributes() {
     const userAttrs: Attribute[] = (await this.data.list("attributes")) || [];
     const savableAttributes = (await this.enclave.getStorableAttributes()) || [];
-
     const hasLitKey = (attr: Attribute | (typeof savableAttributes)[number]) => {
       if ("key" in attr) return attr.key.includes("lit-");
 
@@ -113,10 +112,9 @@ export class idOS {
       const userAttr = userAttrMap.get(savableAttribute.key);
 
       const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
-      if (!userAttributeValue) return;
 
       // Update if it exists and has a different value
-      if (userAttributeValue !== savableAttribute.value) {
+      if (userAttributeValue && userAttributeValue !== savableAttribute.value) {
         // in case attribute value was an array. then it's stored as sinegle string in user attributes. so we compare between strings
         if (
           Array.isArray(userAttributeValue) &&
