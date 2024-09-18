@@ -5,6 +5,7 @@ import type { Enclave } from "./enclave";
 
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { ethers } from "ethers-v6";
+import { differenceWith, isEqual } from "lodash-es";
 
 import {
   LitAbility,
@@ -13,9 +14,32 @@ import {
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
 import type { Store } from "../../../idos-store";
-import type { Attribute } from "./types";
+import type { IdOSAttribute } from "./types";
+import { eventSetup } from "./utils";
+
+declare type StorableAttribute = {
+  key: string;
+  value: string;
+};
 
 const litAttributesLength = 3;
+
+const hasLitKey = (attr: IdOSAttribute | StorableAttribute) => {
+  if ("key" in attr) return attr.key.includes("lit-");
+
+  return attr.attribute_key.includes("lit-");
+};
+
+const prepareValueSetter = (value: unknown): string =>
+  Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+const prepareValueGetter = (value: string): unknown => {
+  try {
+    if (JSON.parse(value)) return JSON.parse(value);
+  } catch (error) {
+    return value;
+  }
+};
 
 declare type UserWallet = {
   address: string;
@@ -60,12 +84,74 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
 };
 
 export class Lit {
-  chain: string;
-  store;
   client: LitJsSdk.LitNodeClient | null = null;
-  constructor(chain: string, store: Store) {
+  chain: string;
+  store: Store;
+  data: Data | null = null;
+  enclave: Enclave | null = null;
+
+  constructor(chain: string, store: Store, data?: Data, enclave?: Enclave) {
     this.chain = chain;
     this.store = store;
+
+    this.data = data ?? null;
+    this.enclave = enclave ?? null;
+  }
+
+  addLitEventsListeners() {
+    const { data, enclave } = this;
+    if (!data || !enclave) return;
+
+    eventSetup.on("request-to-enclave", async (ev) => {
+      const actionsRequireAuth = ["decrypt", "encrypt"];
+      const requireAuth = actionsRequireAuth.some((key) => key in ev.detail.request);
+      if (!requireAuth) return;
+      this.checkLitAttributes();
+    });
+
+    eventSetup.on("signer-is-set", () => {
+      Lit.updateEnclaveWallets(data, enclave);
+      Lit.updateEnclaveLitVariables(data, enclave);
+    });
+  }
+  async checkLitAttributes() {
+    const { data, enclave } = this;
+    if (!data || !enclave) return;
+
+    const userAttrs: IdOSAttribute[] = (await data.list("attributes")) || [];
+    const storableAttributes = (await enclave.getStorableAttributes()) || [];
+
+    const filteredUserAttributes = userAttrs.filter(hasLitKey);
+    const litSavableAttributes = storableAttributes.filter(hasLitKey);
+    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
+
+    const attributeToCreate: Omit<IdOSAttribute, "id">[] = [];
+    // Case 1: Update user attributes if re-encryption happened
+    for (const storableAttribute of litSavableAttributes) {
+      const userAttr = userAttrMap.get(storableAttribute.key);
+
+      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
+
+      // Update if it exists and has a different value
+      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
+        // in case attribute value was an array. then it's stored as sinegle string in user attributes. so we compare between strings
+        if (
+          Array.isArray(userAttributeValue) &&
+          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
+        )
+          return;
+
+        await data.update("attributes", { ...userAttr, value: storableAttribute.value });
+      }
+
+      // Create if the attribute doesn't exist in userAttrs
+      if (!userAttr)
+        attributeToCreate.push({
+          attribute_key: storableAttribute.key,
+          value: prepareValueSetter(storableAttribute.value),
+        });
+    }
+    if (attributeToCreate.length) data.createMultiple("attributes", attributeToCreate);
   }
 
   storeAccessControls = (userWallets: string[]) => {
@@ -90,7 +176,7 @@ export class Lit {
   }
 
   static async updateEnclaveLitVariables(data: Data, enclave: Enclave) {
-    let userAttributes = (await data.list("attributes")) as Attribute[];
+    let userAttributes = (await data.list("attributes")) as IdOSAttribute[];
     userAttributes = userAttributes.filter((attr) => attr.attribute_key.includes("lit-"));
     if (userAttributes.length !== litAttributesLength) return;
     const prepareValueToStore = (value: string) => {
