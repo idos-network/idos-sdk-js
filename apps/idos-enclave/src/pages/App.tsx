@@ -43,7 +43,7 @@ export function App({ store, enclave }: AppProps) {
   const [mode, setMode] = useState<Mode>("existing");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const [confirm, setConfirm] = useState<boolean>(false);
-  const [recover, setRecover] = useState<boolean>(false);
+  const [backup, setBackup] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
   // Confirm options.
@@ -106,7 +106,7 @@ export function App({ store, enclave }: AppProps) {
         break;
 
       case "backupPasswordOrSecret":
-        setRecover(true);
+        setBackup(true);
         break;
     }
 
@@ -162,7 +162,7 @@ export function App({ store, enclave }: AppProps) {
       <Header goHome={goHome} />
       <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
-          {recover ? (
+          {backup ? (
             <PasswordOrKeyBackup store={store} />
           ) : (
             !confirm && (
