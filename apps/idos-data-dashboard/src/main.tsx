@@ -56,10 +56,16 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             },
                           },
                           {
+                            path: "/settings",
+                            lazy: () => import("@/routes/dashboard/settings"),
+                            handle: {
+                              crumb: () => "Settings",
+                            },
+                          },
+                          {
                             path: "/success",
                             element: <Navigate to="/" />,
                           },
-
                           // temporary route setup for testing purposes of the SDK.
                           {
                             path: "/e2e",
