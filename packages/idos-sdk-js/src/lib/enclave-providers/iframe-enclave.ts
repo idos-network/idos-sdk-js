@@ -19,9 +19,9 @@ export class IframeEnclave implements EnclaveProvider {
   async load(): Promise<StoredData> {
     await this.#loadEnclave();
 
-    await this.#requestToEnclave({ configure: this.options });
+    await this.#requestToEnclave({ type: "enclave:configure", payload: { ...this.options } });
 
-    return (await this.#requestToEnclave({ storage: {} })) as StoredData;
+    return (await this.#requestToEnclave({ type: "storage:get" })) as StoredData;
   }
 
   async ready(
@@ -30,15 +30,20 @@ export class IframeEnclave implements EnclaveProvider {
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
+    await this.#requestToEnclave({
+      type: "storage:set",
+      payload: { humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey },
+    });
+
     let { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey },
+      type: "public-key:get",
     })) as StoredData;
 
     while (!encryptionPublicKey) {
       this.#showEnclave();
       try {
         encryptionPublicKey = (await this.#requestToEnclave({
-          keys: {},
+          type: "keypair:get",
         })) as Uint8Array;
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;
@@ -122,7 +127,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.allow = permissionsPolicies.join("; ");
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
-    this.iframe.src = this.hostUrl.toString();
+    this.iframe.src = `${this.hostUrl}/embed.html`;
     for (const [k, v] of Object.entries(styles)) {
       this.iframe.style.setProperty(k, v);
     }
@@ -145,6 +150,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: We will use any for now.
   async #requestToEnclave(request: any) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();

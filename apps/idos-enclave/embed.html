@@ -1,8 +1,8 @@
 <!doctype html>
-<html lang="en" class="w-full h-full">
+<html lang="en">
 
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>" />
 
@@ -15,10 +15,9 @@
   <title>idOS Secure Enclave</title>
 </head>
 
-<body class="h-full w-full bg-neutral-50 text-neutral-950 dark:bg-neutral-950 dark:text-neutral-50">
-  <div id="app" class="flex flex-col w-full h-full"></div>
-
-  <script type="module" src="/src/main.tsx"></script>
+<body>
+  <div id="root" class="h-dvh w-screen"></div>
+  <script type="module" src="/src/embed.tsx"></script>
 </body>
 
 </html>
