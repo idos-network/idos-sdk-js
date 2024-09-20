@@ -4,6 +4,7 @@ import { useSearch } from "wouter-preact";
 import { LinkButton } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
+import { PasswordForm } from "../../pages/methods/Password";
 
 type AuthMethod = "password" | "passkey" | undefined;
 
@@ -25,7 +26,7 @@ function AuthMethodSelector() {
 function AuthMethodRenderer({ method }: { method: AuthMethod }) {
   switch (method) {
     case "password":
-      return <Paragraph>Password</Paragraph>;
+      return <PasswordForm />;
     case "passkey":
       return <Paragraph>Passkey</Paragraph>;
     default:
