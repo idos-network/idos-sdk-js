@@ -109,7 +109,7 @@ export class Enclave extends Component<EnclaveProps> {
 
     const dialog = window.open(url, "idos-dialog", popupConfig);
 
-    if (!dialog) throw new Error("Failed to open dialog");
+    if (!dialog) throw new Error("Failed to open idOS Enclave dialog");
 
     await new Promise((resolve) => dialog.addEventListener("ready", resolve, { once: true }));
 
@@ -123,7 +123,7 @@ export class Enclave extends Component<EnclaveProps> {
         () => {
           channel.port1.close();
           this.uiStatus.value = "idle";
-          reject(new Error("Enclave dialog closed by user"));
+          reject(new Error("idOS Enclave dialog closed by user"));
         },
         { signal: abortController.signal },
       );
