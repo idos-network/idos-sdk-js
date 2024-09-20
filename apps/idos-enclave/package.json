@@ -35,9 +35,11 @@
     "dompurify": "^3.0.6",
     "lodash-es": "^4.17.21",
     "preact": "^10.19.6",
+    "query-string": "^9.1.0",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^0.2.1",
     "tweetnacl": "^1.0.3",
-    "web-bip39": "^0.0.3"
+    "web-bip39": "^0.0.3",
+    "wouter-preact": "^3.3.5"
   }
 }

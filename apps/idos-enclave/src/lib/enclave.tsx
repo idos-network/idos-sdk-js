@@ -86,9 +86,8 @@ export class Enclave extends Component<EnclaveProps> {
     const preferredAuthMethod: "passkey" | "password" = this.store.get("preferred-auth-method");
     const humanId = this.store.get("human-id");
 
-    const url = new URL("/dialog.html", window.location.origin);
+    const url = new URL(`${window.location.origin}/auth`, window.location.origin);
 
-    url.searchParams.set("mode", "auth");
     url.searchParams.set("humanId", humanId);
 
     if (preferredAuthMethod) url.searchParams.set("method", preferredAuthMethod);
@@ -111,7 +110,9 @@ export class Enclave extends Component<EnclaveProps> {
 
     if (!dialog) throw new Error("Failed to open idOS Enclave dialog");
 
-    await new Promise((resolve) => dialog.addEventListener("ready", resolve, { once: true }));
+    await new Promise((resolve) =>
+      dialog.addEventListener("secure-enclave:ready", resolve, { once: true }),
+    );
 
     const abortController = new AbortController();
 
