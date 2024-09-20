@@ -26,6 +26,24 @@ export class Enclave {
     return this.authorizedOrigins.includes(this.parentOrigin);
   }
 
+  updateStore(key, value) {
+    this.store.set(key, value);
+  }
+
+  getStorableAttributes() {
+    const storedLitCipherText = this.store.get("lit-cipher-text");
+    const storedLitEncryptHash = this.store.get("lit-data-to-encrypt-hash");
+    const storedLitAccessControls = this.store.get("lit-access-control");
+
+    const attributesToStore = [
+      { key: "lit-cipher-text", value: storedLitCipherText },
+      { key: "lit-data-to-encrypt-hash", value: storedLitEncryptHash },
+      { key: "lit-access-control", value: storedLitAccessControls },
+    ];
+
+    return attributesToStore;
+  }
+
   reset() {
     this.store.reset();
   }
@@ -312,12 +330,14 @@ export class Enclave {
 
         const paramBuilder = {
           confirm: () => [message],
+          getStorableAttributes: () => [],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
+          updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],

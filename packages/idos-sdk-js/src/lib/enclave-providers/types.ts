@@ -26,6 +26,8 @@ export interface EnclaveProvider {
   ): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;
+  updateStore(key: string, value: unknown): Promise<void>;
+  getStorableAttributes(): Promise<{ key: string; value: string }[]>;
   confirm(message: string): Promise<boolean>;
   encrypt(message: Uint8Array, receiverPublicKey?: Uint8Array): Promise<Uint8Array>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;

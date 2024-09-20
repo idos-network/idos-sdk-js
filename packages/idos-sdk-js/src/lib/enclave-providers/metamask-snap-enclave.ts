@@ -18,7 +18,12 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     console.log(credentials, privateFieldFilters);
     throw new Error("Method not implemented.");
   }
-
+  updateStore(key: string, value: unknown): Promise<void> {
+    return this.invokeSnap("updateStore", { key, value });
+  }
+  getStorableAttributes(): Promise<{ key: string; value: string }[]> {
+    return this.invokeSnap("getStorableAttributes");
+  }
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],

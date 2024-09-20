@@ -1,5 +1,6 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
+import { differenceWith, isEqual } from "lodash-es";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
@@ -9,6 +10,7 @@ import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
+import type { IdOSAttribute, StorableAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
 
@@ -77,6 +79,61 @@ export class idOS {
     await idos.enclave.load();
 
     return idos;
+  }
+
+  async handleStorableAttributes(attributes: StorableAttribute[]) {
+    console.log({ attributes });
+
+    const hasLitKey = (attr: IdOSAttribute | StorableAttribute) => {
+      if ("key" in attr) return attr.key.includes("lit-");
+      return attr.attribute_key.includes("lit-");
+    };
+
+    const prepareValueSetter = (value: unknown): string =>
+      Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+    const prepareValueGetter = (value: string): unknown => {
+      try {
+        if (JSON.parse(value)) return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    };
+
+    const userAttrs: IdOSAttribute[] = (await this.data.list("attributes")) || [];
+    const storableAttributes = (await this.enclave.getStorableAttributes()) || [];
+
+    const filteredUserAttributes = userAttrs.filter(hasLitKey);
+    const litSavableAttributes = storableAttributes.filter(hasLitKey);
+    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
+
+    const attributeToCreate: Omit<IdOSAttribute, "id">[] = [];
+    // Case 1: Update user attributes if re-encryption happened
+    for (const storableAttribute of litSavableAttributes) {
+      const userAttr = userAttrMap.get(storableAttribute.key);
+
+      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
+
+      // Update if it exists and has a different value
+      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
+        // in case attribute value was an array. then it's stored as sinegle string in user attributes. so we compare between strings
+        if (
+          Array.isArray(userAttributeValue) &&
+          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
+        )
+          return;
+
+        await this.data.update("attributes", { ...userAttr, value: storableAttribute.value });
+      }
+
+      // Create if the attribute doesn't exist in userAttrs
+      if (!userAttr)
+        attributeToCreate.push({
+          attribute_key: storableAttribute.key,
+          value: prepareValueSetter(storableAttribute.value),
+        });
+    }
+    if (attributeToCreate.length) this.data.createMultiple("attributes", attributeToCreate);
   }
 
   async setSigner(type: "NEAR", signer: Wallet): Promise<AuthUser>;
