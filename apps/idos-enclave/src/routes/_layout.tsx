@@ -16,7 +16,9 @@ export function Layout({ children }: PropsWithChildren) {
   return (
     <>
       <Header />
-      <main class="mx-auto max-w-screen-sm p-6">{children}</main>
+      <main class="mx-auto max-w-screen-md p-6">
+        <div class="mx-auto w-[30rem]">{children}</div>
+      </main>
     </>
   );
 }

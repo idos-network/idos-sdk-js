@@ -118,7 +118,7 @@ export function PasswordForm({
   };
 
   return (
-    <form className="flex flex-col space-y-4 px-5 md:px-0" onSubmit={onSubmit}>
+    <form className="flex flex-col gap-4 text-center" onSubmit={onSubmit}>
       {mode === "new" ? (
         <>
           <Heading>Create your idOS key</Heading>
