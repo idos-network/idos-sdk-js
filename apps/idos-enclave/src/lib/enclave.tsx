@@ -113,9 +113,23 @@ export class Enclave extends Component<EnclaveProps> {
 
     await new Promise((resolve) => dialog.addEventListener("ready", resolve, { once: true }));
 
+    const abortController = new AbortController();
+
     return new Promise((resolve, reject) => {
       const channel = new MessageChannel();
+
+      dialog.addEventListener(
+        "beforeunload",
+        () => {
+          channel.port1.close();
+          this.uiStatus.value = "idle";
+          reject(new Error("Enclave dialog closed by user"));
+        },
+        { signal: abortController.signal },
+      );
+
       channel.port1.onmessage = ({ data: { error, result } }) => {
+        abortController.abort();
         channel.port1.close();
         dialog.close();
 
