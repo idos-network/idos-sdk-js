@@ -39,8 +39,6 @@ export class IframeEnclave implements EnclaveProvider {
       type: "public-key:get",
     })) as StoredData;
 
-    console.log("encryptionPublicKey", encryptionPublicKey);
-
     while (!encryptionPublicKey) {
       this.#showEnclave();
       try {
@@ -84,7 +82,8 @@ export class IframeEnclave implements EnclaveProvider {
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
     return this.#requestToEnclave({
-      decrypt: { fullMessage: message, senderPublicKey },
+      type: "decrypt",
+      payload: { message, senderPublicKey },
     }) as Promise<Uint8Array>;
   }
 

@@ -14,4 +14,5 @@ export type MessageEventDataType =
   | "storage:get"
   | "storage:set"
   | "keypair:get"
-  | "public-key:get";
+  | "public-key:get"
+  | "decrypt";

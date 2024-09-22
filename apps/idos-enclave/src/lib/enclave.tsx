@@ -12,7 +12,7 @@ import { idOSKeyDerivation } from "./idOSKeyDerivation";
 interface EnclaveMessageEventData {
   target?: string;
   type: MessageEventDataType;
-  payload: Record<string, string>;
+  payload: Record<string, unknown>;
 }
 
 function Spinner() {
@@ -81,6 +81,10 @@ export class Enclave extends Component<EnclaveProps> {
 
   constructor(props: EnclaveProps) {
     super(props);
+    const secretKey = this.store.get("encryption-private-key");
+
+    if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(base64Decode(secretKey));
+
     this.listenToRequests();
   }
 
@@ -194,59 +198,6 @@ export class Enclave extends Component<EnclaveProps> {
     this.userEncryptionPublicKey = values.expectedUserEncryptionPublicKey;
   }
 
-  private listenToRequests() {
-    window.addEventListener("message", async (event: MessageEvent<EnclaveMessageEventData>) => {
-      if (event.origin !== this.props.parentOrigin || event.data.target === "metamask-inpage")
-        return;
-
-      this.messagePort.value = event.ports[0];
-
-      const type = event.data.type;
-
-      switch (type) {
-        case "secure-enclave:load": {
-          this.configure(event.data.payload as Configuration);
-          this.messagePort.value.postMessage({
-            type,
-          });
-          break;
-        }
-        case "storage:get": {
-          const values = this.getStoredValues();
-          this.messagePort.value.postMessage({ type, result: values });
-          break;
-        }
-        case "storage:set": {
-          this.storeValues(event.data.payload);
-          const values = this.getStoredValues();
-          this.messagePort.value.postMessage({ type, result: values });
-          break;
-        }
-        case "public-key:get": {
-          const { encryptionPublicKey } = this.getStoredValues();
-          console.log("encryptionPublicKey", encryptionPublicKey);
-          this.messagePort.value.postMessage({
-            type,
-            result: { encryptionPublicKey },
-          });
-          break;
-        }
-        case "keypair:get": {
-          const unsubscribe = this.publicKeySignal.subscribe((publicKey) => {
-            if (publicKey && this.messagePort.value) {
-              this.messagePort.value.postMessage({
-                type,
-                result: { publicKey },
-              });
-              unsubscribe();
-            }
-          });
-          break;
-        }
-      }
-    });
-  }
-
   private async deriveKeyPairFromPassword(password: string) {
     const salt = this.store.get("human-id");
     const storeWithCodec = this.store.pipeCodec({
@@ -280,6 +231,81 @@ export class Enclave extends Component<EnclaveProps> {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  private async decrypt(message: Uint8Array, senderPublicKey: Uint8Array) {
+    if (!this.keyPair) throw new Error("Unable to decrypt. No secret key found.");
+
+    const nonce = message.slice(0, nacl.box.nonceLength);
+    const slicedMessage = message.slice(nacl.box.nonceLength, message.length);
+    const result = nacl.box.open(slicedMessage, nonce, senderPublicKey, this.keyPair.secretKey);
+
+    if (result === null) throw new Error("Failed to decrypt message");
+
+    return result;
+  }
+
+  private listenToRequests() {
+    window.addEventListener("message", async (event: MessageEvent<EnclaveMessageEventData>) => {
+      if (event.origin !== this.props.parentOrigin || event.data.target === "metamask-inpage")
+        return;
+
+      this.messagePort.value = event.ports[0];
+
+      const type = event.data.type;
+
+      switch (type) {
+        case "secure-enclave:load": {
+          this.configure(event.data.payload as Configuration);
+          this.messagePort.value.postMessage({
+            type,
+          });
+          break;
+        }
+        case "storage:get": {
+          const values = this.getStoredValues();
+          this.messagePort.value.postMessage({ type, result: values });
+          break;
+        }
+        case "storage:set": {
+          this.storeValues(event.data.payload as Record<string, string>);
+          const values = this.getStoredValues();
+          this.messagePort.value.postMessage({ type, result: values });
+          break;
+        }
+        case "public-key:get": {
+          const { encryptionPublicKey } = this.getStoredValues();
+          this.messagePort.value.postMessage({
+            type,
+            result: { encryptionPublicKey },
+          });
+          break;
+        }
+        case "keypair:get": {
+          const unsubscribe = this.publicKeySignal.subscribe((publicKey) => {
+            if (publicKey && this.messagePort.value) {
+              this.messagePort.value.postMessage({
+                type,
+                result: { publicKey },
+              });
+              unsubscribe();
+            }
+          });
+          break;
+        }
+        case "decrypt": {
+          const result = await this.decrypt(
+            event.data.payload.message as Uint8Array,
+            event.data.payload.senderPublicKey as Uint8Array,
+          );
+          this.messagePort.value.postMessage({
+            type,
+            result,
+          });
+          break;
+        }
+      }
+    });
   }
 
   render() {
