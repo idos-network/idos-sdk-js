@@ -76,15 +76,15 @@ export class Enclave extends Component<EnclaveProps> {
   private readonly uiConfig = signal<Configuration>({
     mode: "existing",
   });
-  private readonly uiStatus = signal<"idle" | "pending">("idle");
-  private readonly enclaveLauncher = signal("");
+  private readonly uiStatusSignal = signal<"idle" | "pending">("idle");
+  private readonly publicKeySignal = signal<Uint8Array>();
 
   constructor(props: EnclaveProps) {
     super(props);
     this.listenToRequests();
   }
 
-  async launchEnclaveAppAuth() {
+  private async launchEnclaveAppAuth() {
     const preferredAuthMethod: AuthMethod = this.store.get("preferred-auth-method");
     const humanId = this.store.get("human-id");
 
@@ -130,7 +130,7 @@ export class Enclave extends Component<EnclaveProps> {
         "beforeunload",
         () => {
           channel.port1.close();
-          this.uiStatus.value = "idle";
+          this.uiStatusSignal.value = "idle";
 
           reject(new Error("idOS Enclave dialog closed by user"));
         },
@@ -163,14 +163,14 @@ export class Enclave extends Component<EnclaveProps> {
   }
 
   private getStoredValues() {
-    if (!this.isAuthorizedOrigin.value) {
-      return {
-        humanId: "",
-        encryptionPublicKey: "",
-        signerAddress: "",
-        signerPublicKey: "",
-      };
-    }
+    // if (!this.isAuthorizedOrigin.value) {
+    //   return {
+    //     humanId: "",
+    //     encryptionPublicKey: "",
+    //     signerAddress: "",
+    //     signerPublicKey: "",
+    //   };
+    // }
 
     const storeWithCodec = this.store.pipeCodec({
       // biome-ignore lint/suspicious/noExplicitAny: Fix later types in idOS-store
@@ -224,6 +224,7 @@ export class Enclave extends Component<EnclaveProps> {
         }
         case "public-key:get": {
           const { encryptionPublicKey } = this.getStoredValues();
+          console.log("encryptionPublicKey", encryptionPublicKey);
           this.messagePort.value.postMessage({
             type,
             result: { encryptionPublicKey },
@@ -231,11 +232,11 @@ export class Enclave extends Component<EnclaveProps> {
           break;
         }
         case "keypair:get": {
-          const unsubscribe = this.enclaveLauncher.subscribe((value) => {
-            if (value && this.messagePort.value) {
+          const unsubscribe = this.publicKeySignal.subscribe((publicKey) => {
+            if (publicKey && this.messagePort.value) {
               this.messagePort.value.postMessage({
                 type,
-                result: {},
+                result: { publicKey },
               });
               unsubscribe();
             }
@@ -268,16 +269,14 @@ export class Enclave extends Component<EnclaveProps> {
 
   private async handleAuth() {
     try {
-      this.uiStatus.value = "pending";
+      this.uiStatusSignal.value = "pending";
       const { password, duration } = await this.launchEnclaveAppAuth();
 
       this.store.setRememberDuration(duration);
       this.store.set("password", password);
       this.store.set("preferred-auth-method", "password");
 
-      const publicKey = await this.deriveKeyPairFromPassword(password);
-
-      console.log(publicKey);
+      this.publicKeySignal.value = await this.deriveKeyPairFromPassword(password);
     } catch (error) {
       console.error(error);
     }
@@ -290,13 +289,13 @@ export class Enclave extends Component<EnclaveProps> {
           <Button
             id="unlock"
             onClick={() => this.handleAuth()}
-            isLoading={this.uiStatus.value === "pending"}
+            isLoading={this.uiStatusSignal.value === "pending"}
           >
             <LockClosedIcon class="h-5 w-5" />
             Unlock idOS
           </Button>
         ) : (
-          <Button id="confirm" isLoading={this.uiStatus.value === "pending"}>
+          <Button id="confirm" isLoading={this.uiStatusSignal.value === "pending"}>
             <EyeIcon class="h-5 w-5" /> See request
           </Button>
         )}
