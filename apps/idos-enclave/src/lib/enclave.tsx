@@ -3,12 +3,15 @@ import { Store } from "@idos-network/idos-store";
 import { computed, signal } from "@preact/signals";
 import { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
 import { Component, type ComponentProps } from "preact";
+import nacl from "tweetnacl";
 
 import type { Configuration } from "../pages/App";
+import type { AuthMethod } from "../types";
+import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 interface EnclaveMessageEventData {
   target?: string;
-  type: "enclave:configure" | "storage:get" | "storage:set" | "keypair:get" | "public-key:get";
+  type: "enclave:load" | "storage:get" | "storage:set" | "keypair:get" | "public-key:get";
   payload: Record<string, string>;
 }
 
@@ -58,6 +61,7 @@ interface EnclaveProps {
 
 export class Enclave extends Component<EnclaveProps> {
   private userEncryptionPublicKey = "";
+  private keyPair: nacl.BoxKeyPair | null = null;
   private readonly parentOrigin = new URL(document.referrer).origin;
   private readonly store = new Store();
 
@@ -81,16 +85,19 @@ export class Enclave extends Component<EnclaveProps> {
   }
 
   async launchEnclaveAppAuth() {
-    this.uiStatus.value = "pending";
-
-    const preferredAuthMethod: "passkey" | "password" = this.store.get("preferred-auth-method");
+    const preferredAuthMethod: AuthMethod = this.store.get("preferred-auth-method");
     const humanId = this.store.get("human-id");
 
     const url = new URL(`${window.location.origin}/auth`, window.location.origin);
 
+    url.searchParams.set("mode", this.uiConfig.value.mode ?? "existing");
+
     url.searchParams.set("humanId", humanId);
 
     if (preferredAuthMethod) url.searchParams.set("method", preferredAuthMethod);
+
+    if (preferredAuthMethod === "password")
+      url.searchParams.set("pubKey", this.userEncryptionPublicKey);
 
     const width = 600;
     const height = this.uiConfig.value.mode === "new" ? 600 : 400;
@@ -106,7 +113,7 @@ export class Enclave extends Component<EnclaveProps> {
       .map((feat) => feat.join("="))
       .join(",");
 
-    const dialog = window.open(url, "idos-dialog", popupConfig);
+    const dialog = window.open(url, "idOS-dialog", popupConfig);
 
     if (!dialog) throw new Error("Failed to open idOS Enclave dialog");
 
@@ -116,7 +123,7 @@ export class Enclave extends Component<EnclaveProps> {
 
     const abortController = new AbortController();
 
-    return new Promise((resolve, reject) => {
+    return new Promise<{ password: string; duration: number }>((resolve, reject) => {
       const channel = new MessageChannel();
 
       dialog.addEventListener(
@@ -124,6 +131,7 @@ export class Enclave extends Component<EnclaveProps> {
         () => {
           channel.port1.close();
           this.uiStatus.value = "idle";
+
           reject(new Error("idOS Enclave dialog closed by user"));
         },
         { signal: abortController.signal },
@@ -139,7 +147,14 @@ export class Enclave extends Component<EnclaveProps> {
         return resolve(result);
       };
 
-      // @todo: send needed messages to dialog.
+      dialog.postMessage(
+        {
+          type: "enclave:load",
+          payload: this.uiConfig.value,
+        },
+        dialog.origin,
+        [channel.port2],
+      );
     });
   }
 
@@ -189,7 +204,7 @@ export class Enclave extends Component<EnclaveProps> {
       const type = event.data.type;
 
       switch (type) {
-        case "enclave:configure": {
+        case "enclave:load": {
           this.configure(event.data.payload as Configuration);
           this.messagePort.value.postMessage({
             type,
@@ -231,13 +246,50 @@ export class Enclave extends Component<EnclaveProps> {
     });
   }
 
+  private async deriveKeyPairFromPassword(password: string) {
+    const salt = this.store.get("human-id");
+    const storeWithCodec = this.store.pipeCodec({
+      // biome-ignore lint/suspicious/noExplicitAny: @todo: fix types in idOS-store
+      encode: base64Encode as any,
+      // biome-ignore lint/suspicious/noExplicitAny: @todo: fix types in idOS-store
+      decode: base64Decode as any,
+    });
+
+    const secretKey =
+      storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
+
+    this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
+    storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
+    storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
+
+    return this.keyPair.publicKey;
+  }
+
+  private async handleAuth() {
+    try {
+      this.uiStatus.value = "pending";
+      const { password, duration } = await this.launchEnclaveAppAuth();
+
+      this.store.setRememberDuration(duration);
+      this.store.set("password", password);
+      this.store.set("preferred-auth-method", "password");
+
+      const publicKey = await this.deriveKeyPairFromPassword(password);
+
+      console.log(publicKey);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
   render() {
     return (
       <div class="flex h-dvh flex-col place-content-center items-center gap-5">
         {this.uiConfig.value?.mode === "existing" ? (
           <Button
             id="unlock"
-            onClick={() => this.launchEnclaveAppAuth()}
+            onClick={() => this.handleAuth()}
             isLoading={this.uiStatus.value === "pending"}
           >
             <LockClosedIcon class="h-5 w-5" />

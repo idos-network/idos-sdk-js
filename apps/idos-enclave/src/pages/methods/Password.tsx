@@ -7,6 +7,10 @@ import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
+import { idOSStore } from "../../lib/store";
+import { useParsedSearchParams } from "../../lib/use-parsed-search-params";
+import { useMessageChannel } from "../../message-listener.provider";
+import type { UiMode } from "../../types";
 import type { MethodProps } from "./Chooser";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
@@ -74,23 +78,16 @@ function DurationField({ duration }: DurationFieldProps) {
   );
 }
 
-export function PasswordForm({
-  mode,
-  onSuccess,
-  store,
-  encryptionPublicKey,
-  humanId,
-}: MethodProps<{ password: string; duration: number }> & {
-  encryptionPublicKey: string;
-  humanId: string | null;
-}) {
+export function PasswordForm() {
+  const channel = useMessageChannel();
+  const { humanId, pubKey: encryptionPublicKey, mode } = useParsedSearchParams();
   const password = useSignal("");
   const duration = useSignal(7);
   const hasError = useSignal(false);
   const isLoading = useSignal(false);
 
   async function derivePublicKeyFromPassword(password: string) {
-    const salt = store.get("human-id") || humanId;
+    const salt = idOSStore.get("human-id") || humanId;
     const secretKey = await idOSKeyDerivation({ password, salt });
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
@@ -112,9 +109,14 @@ export function PasswordForm({
 
     hasError.value = false;
     isLoading.value = false;
-    store.set("preferred-auth-method", "password");
 
-    onSuccess({ password: password.value, duration: duration.value });
+    channel.postMessage({
+      type: "secure-enclave:auth",
+      result: {
+        password: password.value,
+        duration: duration.value,
+      },
+    });
   };
 
   return (

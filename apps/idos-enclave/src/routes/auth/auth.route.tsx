@@ -1,12 +1,8 @@
-import queryString from "query-string";
-import { useSearch } from "wouter-preact";
-
 import { LinkButton } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
+import { useParsedSearchParams } from "../../lib/use-parsed-search-params";
 import { PasswordForm } from "../../pages/methods/Password";
-
-type AuthMethod = "password" | "passkey" | undefined;
 
 function AuthMethodSelector() {
   return (
@@ -23,7 +19,9 @@ function AuthMethodSelector() {
   );
 }
 
-function AuthMethodRenderer({ method }: { method: AuthMethod }) {
+function AuthMethodRenderer() {
+  const { method } = useParsedSearchParams();
+
   switch (method) {
     case "password":
       return <PasswordForm />;
@@ -35,7 +33,5 @@ function AuthMethodRenderer({ method }: { method: AuthMethod }) {
 }
 
 export function AuthRoute() {
-  const searchparams = queryString.parse(useSearch()) as { humanId: string; method: AuthMethod };
-
-  return <AuthMethodRenderer method={searchparams.method} />;
+  return <AuthMethodRenderer />;
 }
