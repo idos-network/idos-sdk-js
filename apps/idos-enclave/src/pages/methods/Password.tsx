@@ -10,8 +10,6 @@ import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import { idOSStore } from "../../lib/store";
 import { useParsedSearchParams } from "../../lib/use-parsed-search-params";
 import { useMessageChannel } from "../../message-listener.provider";
-import type { UiMode } from "../../types";
-import type { MethodProps } from "./Chooser";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;

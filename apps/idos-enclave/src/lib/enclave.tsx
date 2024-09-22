@@ -6,12 +6,12 @@ import { Component, type ComponentProps } from "preact";
 import nacl from "tweetnacl";
 
 import type { Configuration } from "../pages/App";
-import type { AuthMethod } from "../types";
+import type { AuthMethod, MessageEventDataType } from "../types";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 interface EnclaveMessageEventData {
   target?: string;
-  type: "enclave:load" | "storage:get" | "storage:set" | "keypair:get" | "public-key:get";
+  type: MessageEventDataType;
   payload: Record<string, string>;
 }
 
@@ -149,7 +149,7 @@ export class Enclave extends Component<EnclaveProps> {
 
       dialog.postMessage(
         {
-          type: "enclave:load",
+          type: "secure-enclave:load",
           payload: this.uiConfig.value,
         },
         dialog.origin,
@@ -204,7 +204,7 @@ export class Enclave extends Component<EnclaveProps> {
       const type = event.data.type;
 
       switch (type) {
-        case "enclave:load": {
+        case "secure-enclave:load": {
           this.configure(event.data.payload as Configuration);
           this.messagePort.value.postMessage({
             type,

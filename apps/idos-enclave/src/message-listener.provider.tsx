@@ -1,10 +1,9 @@
 import { signal } from "@preact/signals";
 import { createContext } from "preact";
 import { useContext } from "preact/hooks";
+import type { MessageEventDataType } from "./types";
 
-type EventType = "enclave:load";
-
-const allowedEvents: EventType[] = ["enclave:load"];
+const allowedEvents: MessageEventDataType[] = ["secure-enclave:load"];
 
 export function createMessageListener() {
   const messagePort = signal<MessagePort>();

@@ -7,3 +7,11 @@ export interface ParsedSearchParams {
   mode: UiMode;
   pubKey: string;
 }
+
+export type MessageEventDataType =
+  | "secure-enclave:load"
+  | "secure-enclave:auth"
+  | "storage:get"
+  | "storage:set"
+  | "keypair:get"
+  | "public-key:get";

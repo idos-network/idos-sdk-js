@@ -19,7 +19,7 @@ export class IframeEnclave implements EnclaveProvider {
   async load(): Promise<StoredData> {
     await this.#loadEnclave();
 
-    await this.#requestToEnclave({ type: "enclave:load", payload: { ...this.options } });
+    await this.#requestToEnclave({ type: "secure-enclave:load", payload: { ...this.options } });
 
     return (await this.#requestToEnclave({ type: "storage:get" })) as StoredData;
   }
