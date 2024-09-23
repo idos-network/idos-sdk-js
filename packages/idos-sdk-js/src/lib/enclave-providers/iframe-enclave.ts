@@ -160,9 +160,28 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
-  async backupPasswordOrSecret(): Promise<string> {
-    return this.#requestToEnclave({
+  async backupPasswordOrSecret(): Promise<void> {
+    const abortController = new AbortController();
+
+    window.addEventListener(
+      "message",
+      (event) => {
+        if (event.data.type !== "idOS:store") return;
+        // @todo: handle storing values in the idOS attributes
+        event.ports[0].postMessage({
+          result: {
+            type: "idOS:store",
+            status: "success",
+          },
+        });
+        event.ports[0].close();
+        abortController.abort();
+      },
+      { signal: abortController.signal },
+    );
+
+    await this.#requestToEnclave({
       backupPasswordOrSecret: {},
-    }) as Promise<string>;
+    });
   }
 }

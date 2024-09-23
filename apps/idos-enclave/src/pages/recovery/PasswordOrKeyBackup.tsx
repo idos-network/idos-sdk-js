@@ -187,7 +187,10 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
   );
 }
 
-export function PasswordOrKeyBackup({ store }: { store: Store }) {
+export function PasswordOrKeyBackup({
+  store,
+  onSuccess,
+}: { store: Store; onSuccess: (result: unknown) => void }) {
   const reveal = useSignal(false);
 
   const password = store.get("password");
@@ -214,6 +217,19 @@ export function PasswordOrKeyBackup({ store }: { store: Store }) {
     URL.revokeObjectURL(url);
   };
 
+  const handleidOSStore = async () => {
+    // @todo: perform encryption with Lit.
+    // @todo: store encrypted data in local storage.
+
+    onSuccess({
+      type: "idOS:store",
+      status: "pending",
+      payload: {
+        cipher: crypto.randomUUID(),
+      },
+    });
+  };
+
   if (reveal.value) {
     return <PasswordAndSecretReveal {...{ password, secret }} onCancel={handleReveal} />;
   }
@@ -226,6 +242,7 @@ export function PasswordOrKeyBackup({ store }: { store: Store }) {
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <GoogleDocsStore {...{ password, secret }} />
       </GoogleOAuthProvider>
+      <Button onClick={handleidOSStore}>Store securely on the idOS</Button>
     </div>
   );
 }

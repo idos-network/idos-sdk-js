@@ -163,7 +163,7 @@ export function App({ store, enclave }: AppProps) {
       <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
           {backup ? (
-            <PasswordOrKeyBackup store={store} />
+            <PasswordOrKeyBackup store={store} onSuccess={onSuccess} />
           ) : (
             !confirm && (
               <>

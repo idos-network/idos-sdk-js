@@ -338,6 +338,22 @@ export class Enclave {
     });
   }
 
+  async handleidOSStore(payload) {
+    return new Promise((resolve, reject) => {
+      const { port1, port2 } = new MessageChannel();
+      port1.onmessage = async ({ data: { error, result } }) => {
+        if (error) return reject(error);
+
+        if (result.type === "idOS:store" && result.status === "success") {
+          resolve(result);
+          port1.close();
+        }
+      };
+
+      window.parent.postMessage({ type: "idOS:store", payload }, this.parentOrigin, [port2]);
+    });
+  }
+
   async #openDialog(intent, message) {
     const width = 600;
     const height = this.configuration?.mode === "new" ? 600 : 400;
@@ -363,7 +379,11 @@ export class Enclave {
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-      port1.onmessage = ({ data: { error, result } }) => {
+      port1.onmessage = async ({ data: { error, result } }) => {
+        if (result.type === "idOS:store" && result.status === "pending") {
+          result = await this.handleidOSStore(result.payload);
+        }
+
         port1.close();
         this.dialog.close();
 
