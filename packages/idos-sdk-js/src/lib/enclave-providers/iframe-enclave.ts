@@ -170,8 +170,10 @@ export class IframeEnclave implements EnclaveProvider {
     window.addEventListener(
       "message",
       (event) => {
-        if (event.data.type !== "idOS:store") return;
+        if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
+
         // @todo: handle storing values in the idOS attributes
+
         event.ports[0].postMessage({
           result: {
             type: "idOS:store",
