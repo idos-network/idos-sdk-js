@@ -8,7 +8,8 @@ import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
 import type { MethodProps } from "./Chooser";
-
+import { Lit } from "../../lib/lit";
+import { useMemo } from "preact/hooks";
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
   password: Signal<string>;
@@ -84,6 +85,8 @@ export function PasswordForm({
   encryptionPublicKey: string;
   humanId: string | null;
 }) {
+  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
+
   const password = useSignal("");
   const duration = useSignal(7);
   const hasError = useSignal(false);
@@ -96,7 +99,34 @@ export function PasswordForm({
     return encode(keyPair.publicKey);
   }
 
+  const encryptUserPassword = async (passwordToEncrypt: string) => {
+    try {
+      // encrypting user's password
+      const response = await litInstance.encrypt(passwordToEncrypt);
+      
+      if (!response) return;
+      const { ciphertext, dataToEncryptHash } = response;
+
+      // storing lit variables (will be used to recover that text) into enclave store
+      store.set("lit-cipher-text", ciphertext);
+      store.set("lit-data-to-encrypt-hash", dataToEncryptHash);
+
+      return response
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const retrivePassword = async () => {
+      const ciphertext = store.get("lit-cipher-text");
+      const dataToEncryptHash = store.get("lit-data-to-encrypt-hash");
+      const retrivedPassword = await litInstance.decrypt(ciphertext,dataToEncryptHash);
+      return retrivedPassword
+  };
+  
   const onSubmit = async (e: Event) => {
+    const ciphertext = store.get("lit-cipher-text");
+
     e.preventDefault();
     e.stopPropagation();
     isLoading.value = true;
@@ -108,6 +138,12 @@ export function PasswordForm({
         isLoading.value = false;
         return;
       }
+    }
+    if(!ciphertext){
+      await encryptUserPassword(password.value);
+    }
+    else{
+      const retrivedPassword = await retrivePassword()
     }
 
     hasError.value = false;
