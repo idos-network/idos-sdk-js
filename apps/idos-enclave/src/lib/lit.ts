@@ -3,8 +3,7 @@ import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types"; // I
 import type { IdOSAttribute } from "./../../../../packages/idos-sdk-js/src/lib/types/index";
 
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
-import { ethers } from "ethers-v6";
-import { differenceWith, isEqual } from "lodash-es";
+import { ethers } from "ethers";
 
 // import { eventSetup } from "./utils";
 import type { Store } from "@idos-network/idos-store";
@@ -98,74 +97,6 @@ export class Lit {
     this.enclave = enclave ?? null;
   }
 
-  addLitEventsListeners() {
-    const { data, enclave } = this;
-    if (!data || !enclave) return;
-
-    // eventSetup.on("request-to-enclave", async (ev) => {
-    //   const actionsRequireAuth = ["decrypt", "encrypt"];
-    //   const requireAuth = actionsRequireAuth.some((key) => key in ev.detail.request);
-    //   if (!requireAuth) return;
-    //   this.checkLitAttributes();
-    // });
-
-    // eventSetup.on("signer-is-set", () => {
-    //   Lit.updateEnclaveWallets(data, enclave);
-    //   Lit.updateEnclaveLitVariables(data, enclave); => what updateh LS of enclave
-    // });
-  }
-  async checkLitAttributes() {
-    const { data, enclave } = this;
-    if (!data || !enclave) return;
-
-    const userAttrs: IdOSAttribute[] = (await data.list("attributes")) || [];
-    const storableAttributes = (await enclave.getStorableAttributes()) || [];
-
-    const filteredUserAttributes = userAttrs.filter(hasLitKey);
-    const litSavableAttributes = storableAttributes.filter(hasLitKey);
-    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
-
-    const attributeToCreate: Omit<IdOSAttribute, "id">[] = [];
-    // Case 1: Update user attributes if re-encryption happened
-    for (const storableAttribute of litSavableAttributes) {
-      const userAttr = userAttrMap.get(storableAttribute.key);
-
-      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
-
-      // Update if it exists and has a different value
-      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
-        // in case attribute value was an array. then it's stored as sinegle string in user attributes. so we compare between strings
-        if (
-          Array.isArray(userAttributeValue) &&
-          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
-        )
-          return;
-
-        await data.update("attributes", { ...userAttr, value: storableAttribute.value });
-      }
-
-      // Create if the attribute doesn't exist in userAttrs
-      if (!userAttr)
-        attributeToCreate.push({
-          attribute_key: storableAttribute.key,
-          value: prepareValueSetter(storableAttribute.value),
-        });
-    }
-    if (attributeToCreate.length) data.createMultiple("attributes", attributeToCreate);
-  }
-
-  storeAccessControls = (userWallets: string[]) => {
-    if (!userWallets.length) throw new Error("a valid user wallets array should be passed");
-    const accessControls = createAccessControlCondition(userWallets);
-    this.store.set("lit-access-control", accessControls);
-  };
-
-  getAccessControls = (walletAddresses: string[]): string[] => {
-    return (
-      this.store.get("lit-access-control") || createAccessControlCondition(walletAddresses) || []
-    );
-  };
-
   static async updateEnclaveWallets(data: Data, enclave: Enclave) {
     const wallets: UserWallet[] = await data.list("wallets");
     const addresses = wallets.map((userWallet) => userWallet.address);
@@ -192,8 +123,20 @@ export class Lit {
     });
   }
 
+  storeAccessControls = (userWallets: string[]) => {
+    if (!userWallets.length) throw new Error("a valid user wallets array should be passed");
+    const accessControls = createAccessControlCondition(userWallets);
+    this.store.set("lit-access-control", accessControls);
+  };
+
+  getAccessControls = (walletAddresses: string[]): string[] => {
+    return (
+      this.store.get("lit-access-control") || createAccessControlCondition(walletAddresses) || []
+    );
+  };
+
   async getSigner() {
-    const provider = new ethers.BrowserProvider(window.ethereum);
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = await provider.getSigner();
     return signer;
   }

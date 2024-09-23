@@ -143,14 +143,12 @@ export function PasswordForm({
       await encryptUserPassword(password.value);
     } else {
       const retrivedPassword = await retrivePassword();
-      console.log({retrivedPassword});
-      
+      console.log({ retrivedPassword });
     }
 
     hasError.value = false;
     isLoading.value = false;
     store.set("preferred-auth-method", "password");
-
     onSuccess({ password: password.value, duration: duration.value });
   };
 

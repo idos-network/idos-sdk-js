@@ -67,7 +67,7 @@ export class Data {
     records: T[],
     synchronous?: boolean,
   ) {
-    let receiverPublicKey:string|null = null;
+    let receiverPublicKey: string | null = null;
 
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
@@ -103,7 +103,7 @@ export class Data {
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
 
-    let receiverPublicKey:string|null = null;
+    let receiverPublicKey: string | null = null;
 
     const inputs: string[] = ((await this.kwilWrapper.schema) as any).data.actions
       .find((action: any) => action.name === name)

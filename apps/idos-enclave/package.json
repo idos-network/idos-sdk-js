@@ -32,7 +32,6 @@
     "@lit-protocol/lit-node-client": "^6.4.10",
     "@lit-protocol/types": "^6.5.0",
     "ethers": "npm:ethers@5.7.1",
-    "ethers-v6": "npm:ethers@6.12.0",
     "@headlessui/react": "^2.1.8",
     "@idos-network/idos-store": "workspace:*",
     "@preact/signals": "^1.3.0",
