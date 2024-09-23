@@ -2,11 +2,12 @@ import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import type { JSX } from "preact/compat";
+import { type JSX, useMemo } from "preact/compat";
 
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
+import { Lit } from "../../lib/lit";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);
@@ -192,6 +193,7 @@ export function PasswordOrKeyBackup({
   onSuccess,
 }: { store: Store; onSuccess: (result: unknown) => void }) {
   const reveal = useSignal(false);
+  const litInstance = useMemo(() => new Lit("ethereum", store), []);
 
   const password = store.get("password");
   const secret = store.get("encryption-private-key");
@@ -220,12 +222,15 @@ export function PasswordOrKeyBackup({
   const handleidOSStore = async () => {
     // @todo: perform encryption with Lit.
     // @todo: store encrypted data in local storage.
+    const password = store.get("password");
+    if (!password) throw new Error("no string was passed to encrypt");
+    const encryptionResponse = await litInstance.encrypt(password);
 
     onSuccess({
       type: "idOS:store",
       status: "pending",
       payload: {
-        cipher: crypto.randomUUID(),
+        ...encryptionResponse,
       },
     });
   };
