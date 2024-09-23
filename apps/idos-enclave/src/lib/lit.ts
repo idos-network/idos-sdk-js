@@ -1,48 +1,30 @@
-import { LitNetwork } from "@lit-protocol/constants";
+type StorableAttribute = {
+  key: string;
+  value: string;
+};
+
+type UserWallet = {
+  address: string;
+};
+
+import type { Store } from "@idos-network/idos-store";
 import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types"; // Import types explicitly
+import type { Data } from "../../../../packages/idos-sdk-js/src/lib/data";
+import type { Enclave } from "../../../../packages/idos-sdk-js/src/lib/enclave";
 import type { IdOSAttribute } from "./../../../../packages/idos-sdk-js/src/lib/types/index";
 
+import { LitNetwork } from "@lit-protocol/constants";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import { ethers } from "ethers";
 
-// import { eventSetup } from "./utils";
-import type { Store } from "@idos-network/idos-store";
 import {
   LitAbility,
   LitAccessControlConditionResource,
   createSiweMessage,
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
-import type { Data } from "../../../../packages/idos-sdk-js/src/lib/data";
-import type { Enclave } from "../../../../packages/idos-sdk-js/src/lib/enclave";
-
-declare type StorableAttribute = {
-  key: string;
-  value: string;
-};
 
 const litAttributesLength = 3;
-
-const hasLitKey = (attr: IdOSAttribute | StorableAttribute) => {
-  if ("key" in attr) return attr.key.includes("lit-");
-
-  return attr.attribute_key.includes("lit-");
-};
-
-const prepareValueSetter = (value: unknown): string =>
-  Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
-
-const prepareValueGetter = (value: string): unknown => {
-  try {
-    if (JSON.parse(value)) return JSON.parse(value);
-  } catch (error) {
-    return value;
-  }
-};
-
-declare type UserWallet = {
-  address: string;
-};
 
 declare global {
   interface Window {
