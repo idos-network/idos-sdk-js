@@ -82,6 +82,7 @@ export class idOS {
   }
 
   async handleStorableAttributes(attributes: StorableAttribute[]) {
+    console.log({attributes});
     const hasLitKey = (attr: IdOSAttribute | StorableAttribute) => {
       if ("key" in attr) return attr.key.includes("lit-");
       return attr.attribute_key.includes("lit-");

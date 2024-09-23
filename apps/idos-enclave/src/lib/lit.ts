@@ -199,7 +199,7 @@ export class Lit {
   }
 
   async connect() {
-    if(this.client?.connectedNodes.size) return
+    if (this.client?.connectedNodes.size) return;
     const client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
       alertWhenUnauthorized: false,
       litNetwork: LitNetwork.DatilDev,
@@ -216,7 +216,7 @@ export class Lit {
     walletAddresses = ["0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42"], // TODO: remove once find a way to pass wallets from sdk to enclave
   ): Promise<EncryptResponse | undefined> {
     try {
-      await this.connect()
+      await this.connect();
       const accessControlConditions = createAccessControlCondition([
         "0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42",
       ]);
@@ -268,7 +268,7 @@ export class Lit {
 
   async decrypt(ciphertext: string, dataToEncryptHash: string, walletAddresses: string[] = []) {
     try {
-      await this.connect()
+      await this.connect();
       const accessControlConditions = this.getAccessControls(walletAddresses);
       const sessionSigs = await this.getSessionSigs();
       return LitJsSdk.decryptToString(

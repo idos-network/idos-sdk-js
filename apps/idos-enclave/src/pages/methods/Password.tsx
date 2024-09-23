@@ -2,14 +2,14 @@ import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
 
+import { useMemo } from "preact/hooks";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
-import type { MethodProps } from "./Chooser";
 import { Lit } from "../../lib/lit";
-import { useMemo } from "preact/hooks";
+import type { MethodProps } from "./Chooser";
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
   password: Signal<string>;
@@ -103,7 +103,7 @@ export function PasswordForm({
     try {
       // encrypting user's password
       const response = await litInstance.encrypt(passwordToEncrypt);
-      
+
       if (!response) return;
       const { ciphertext, dataToEncryptHash } = response;
 
@@ -111,19 +111,19 @@ export function PasswordForm({
       store.set("lit-cipher-text", ciphertext);
       store.set("lit-data-to-encrypt-hash", dataToEncryptHash);
 
-      return response
+      return response;
     } catch (error) {
       console.error(error);
     }
   };
 
   const retrivePassword = async () => {
-      const ciphertext = store.get("lit-cipher-text");
-      const dataToEncryptHash = store.get("lit-data-to-encrypt-hash");
-      const retrivedPassword = await litInstance.decrypt(ciphertext,dataToEncryptHash);
-      return retrivedPassword
+    const ciphertext = store.get("lit-cipher-text");
+    const dataToEncryptHash = store.get("lit-data-to-encrypt-hash");
+    const retrivedPassword = await litInstance.decrypt(ciphertext, dataToEncryptHash);
+    return retrivedPassword;
   };
-  
+
   const onSubmit = async (e: Event) => {
     const ciphertext = store.get("lit-cipher-text");
 
@@ -139,11 +139,12 @@ export function PasswordForm({
         return;
       }
     }
-    if(!ciphertext){
+    if (!ciphertext) {
       await encryptUserPassword(password.value);
-    }
-    else{
-      const retrivedPassword = await retrivePassword()
+    } else {
+      const retrivedPassword = await retrivePassword();
+      console.log({retrivedPassword});
+      
     }
 
     hasError.value = false;
