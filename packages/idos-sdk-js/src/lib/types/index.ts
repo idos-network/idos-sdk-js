@@ -5,6 +5,17 @@ export type idOSHuman = {
   current_public_key: string;
 };
 
+export type IdOSAttribute = {
+  id: string;
+  value: string;
+  attribute_key: string;
+};
+
+export type StorableAttribute = {
+  key: string;
+  value: string;
+};
+
 export type idOSCredential = {
   id: string;
   human_id: string;

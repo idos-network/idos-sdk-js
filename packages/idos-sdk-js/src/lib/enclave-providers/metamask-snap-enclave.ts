@@ -77,6 +77,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return this.invokeSnap("reset");
   }
 
+  updateStore(key: string, value: unknown): Promise<void> {
+    return this.invokeSnap("updateStore", { key, value });
+  }
+
   async confirm(message: string): Promise<boolean> {
     return this.invokeSnap("confirm", { message });
   }
