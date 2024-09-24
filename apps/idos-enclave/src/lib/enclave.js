@@ -357,7 +357,8 @@ export class Enclave {
 
   async #openDialog(intent, message) {
     const width = 600;
-    const height = this.configuration?.mode === "new" ? 600 : 400;
+    const height =
+      this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -389,6 +390,15 @@ export class Enclave {
 
         if (result.type === "idOS:store" && result.status === "pending") {
           result = await this.handleidOSStore(result.payload);
+
+          return this.dialog.postMessage(
+            {
+              intent: "backupPasswordOrSecret",
+              message: { status: "done" },
+              configuration: this.configuration,
+            },
+            this.dialog.origin,
+          );
         }
 
         port1.close();

@@ -191,8 +191,9 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
 
 export function PasswordOrKeyBackup({
   store,
+  backupStatus,
   onSuccess,
-}: { store: Store; onSuccess: (result: unknown) => void }) {
+}: { store: Store; backupStatus: "done" | "pending"; onSuccess: (result: unknown) => void }) {
   const reveal = useSignal(false);
   const status = useSignal<"idle" | "pending">("idle");
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
@@ -259,6 +260,11 @@ export function PasswordOrKeyBackup({
       <Button onClick={storeWithLit} disabled={status.value === "pending"}>
         {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
       </Button>
+      {backupStatus === "done" ? (
+        <Paragraph>
+          Your credentials have been successfully stored. You can close this window now.
+        </Paragraph>
+      ) : null}
     </div>
   );
 }

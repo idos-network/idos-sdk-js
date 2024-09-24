@@ -53,6 +53,7 @@ export function App({ store, enclave }: AppProps) {
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
+  const [backupStatus, setBackupStatus] = useState<"pending" | "success">("pending");
 
   /**
    * Theme chooser.
@@ -107,6 +108,7 @@ export function App({ store, enclave }: AppProps) {
 
       case "backupPasswordOrSecret":
         setBackup(true);
+        setBackupStatus(requestData.message?.status);
         break;
     }
 
@@ -163,7 +165,7 @@ export function App({ store, enclave }: AppProps) {
       <main className="mt-6 flex flex-1 justify-center">
         <div className="w-[30rem] text-center">
           {backup ? (
-            <PasswordOrKeyBackup store={store} onSuccess={onSuccess} />
+            <PasswordOrKeyBackup store={store} onSuccess={onSuccess} backupStatus={backupStatus} />
           ) : (
             !confirm && (
               <>
