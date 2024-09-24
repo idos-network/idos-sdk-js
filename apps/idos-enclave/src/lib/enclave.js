@@ -381,18 +381,18 @@ export class Enclave {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = async ({ data: { error, result } }) => {
+        if (error) {
+          this.unlockButton.disabled = false;
+          this.confirmButton.disabled = false;
+          return reject(error);
+        }
+
         if (result.type === "idOS:store" && result.status === "pending") {
           result = await this.handleidOSStore(result.payload);
         }
 
         port1.close();
         this.dialog.close();
-
-        if (error) {
-          this.unlockButton.disabled = false;
-          this.confirmButton.disabled = false;
-          return reject(error);
-        }
 
         return resolve(result);
       };
