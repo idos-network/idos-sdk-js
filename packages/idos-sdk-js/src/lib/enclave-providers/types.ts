@@ -1,4 +1,4 @@
-import type { idOSCredential } from "../types";
+import type { BackupPasswordInfo, idOSCredential } from "../types";
 
 export interface StoredData {
   encryptionPublicKey?: Uint8Array;
@@ -44,5 +44,7 @@ export interface EnclaveProvider {
     },
   ): Promise<idOSCredential[]>;
 
-  backupPasswordOrSecret(callbackFn: (data: unknown) => Promise<void>): Promise<void>;
+  backupPasswordOrSecret(
+    callbackFn: (response: BackupPasswordInfo) => Promise<void>,
+  ): Promise<void>;
 }

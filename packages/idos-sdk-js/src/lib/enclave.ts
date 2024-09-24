@@ -2,7 +2,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
-import type { idOSCredential } from "./types";
+import type { BackupPasswordInfo, idOSCredential } from "./types";
 
 export class Enclave {
   encryptionPublicKey?: Uint8Array;
@@ -83,7 +83,7 @@ export class Enclave {
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
-  async backupPasswordOrSecret(callbackFn: (data: unknown) => Promise<void>) {
+  async backupPasswordOrSecret(callbackFn: (resposen: BackupPasswordInfo) => Promise<void>) {
     if (!this.encryptionPublicKey) await this.ready();
     return this.provider.backupPasswordOrSecret(callbackFn);
   }

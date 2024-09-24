@@ -1,4 +1,4 @@
-import type { idOSCredential } from "../types";
+import type { BackupPasswordInfo, idOSCredential } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -164,7 +164,9 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
-  async backupPasswordOrSecret(backupFn: (data: unknown) => Promise<void>): Promise<void> {
+  async backupPasswordOrSecret(
+    backupFn: (data: BackupPasswordInfo) => Promise<void>,
+  ): Promise<void> {
     const abortController = new AbortController();
 
     window.addEventListener(

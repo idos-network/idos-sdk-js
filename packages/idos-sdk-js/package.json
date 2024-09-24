@@ -34,6 +34,7 @@
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
     "@near-js/types": "^0.2.1",
+    "@types/lodash-es": "^4.17.12",
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@synthetixio/synpress": "4.0.0-alpha.7",
@@ -50,6 +51,7 @@
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
+    "lodash-es": "^4.17.21",
     "@digitalbazaar/vc": "^6.0.2",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",

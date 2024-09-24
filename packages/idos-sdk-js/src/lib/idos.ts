@@ -1,5 +1,6 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
+import { differenceWith, isEqual } from "lodash-es";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
@@ -9,6 +10,7 @@ import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
+import type { StorableAttribute, idOSHumanAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
 
@@ -76,6 +78,8 @@ export class idOS {
     });
     await idos.enclave.load();
 
+    (window as any).sdk = idos;
+
     return idos;
   }
 
@@ -122,11 +126,97 @@ export class idOS {
     return this.kwilWrapper.kwilProvider;
   }
 
-  backupPasswordOrSecret() {
-    return this.enclave.backupPasswordOrSecret(async (data: unknown) => {
-      // @todo: implement the actual storage of the data in the attributes table.
-      // this.data.createMultiple("attributes", data as Record<string, string>[]);
-      console.log(data);
+  filterLitAttributes(userAttrs: idOSHumanAttribute[], storableAttributes: StorableAttribute[]) {
+    const hasLitKey = (attr: idOSHumanAttribute | StorableAttribute) =>
+      "key" in attr ? attr.key.includes("lit-") : attr.attribute_key.includes("lit-");
+
+    return {
+      filteredUserAttributes: userAttrs.filter(hasLitKey),
+      litSavableAttributes: storableAttributes.filter(hasLitKey),
+    };
+  }
+
+  async updateAttributesIfNeeded(
+    filteredUserAttributes: idOSHumanAttribute[],
+    litSavableAttributes: StorableAttribute[],
+  ) {
+    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
+    const attributeToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
+
+    const prepareValueSetter = (value: unknown): string =>
+      Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+    const prepareValueGetter = (value: string): unknown => {
+      try {
+        if (JSON.parse(value)) return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    };
+
+    for (const storableAttribute of litSavableAttributes) {
+      const userAttr = userAttrMap.get(storableAttribute.key);
+      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
+
+      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
+        if (
+          Array.isArray(userAttributeValue) &&
+          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
+        )
+          return;
+        await this.data.update("attributes", { ...userAttr, value: storableAttribute.value });
+      }
+
+      if (!userAttr) {
+        attributeToCreate.push({
+          attribute_key: storableAttribute.key,
+          value: prepareValueSetter(storableAttribute.value),
+        });
+      }
+    }
+
+    if (attributeToCreate.length) {
+      console.log({ attributeToCreate });
+      this.data.createMultiple("attributes", attributeToCreate);
+    }
+  }
+
+  formStorableAttributes(
+    ciphertext: string,
+    dataToEncryptHash: string,
+    accessControlConditions: string[],
+  ): StorableAttribute[] {
+    const dataArr = [ciphertext, dataToEncryptHash, accessControlConditions];
+    const storableAttrs = ["lit-cipher-text", "lit-data-to-encrypt-hash", "lit-access-control"].map(
+      (key, index) => {
+        return { key, value: dataArr[index] };
+      },
+    );
+    return storableAttrs;
+  }
+
+  async backupPasswordOrSecret() {
+    return this.enclave.backupPasswordOrSecret(async (event) => {
+      const {
+        data: {
+          payload: { accessControlConditions, passwordCiphers },
+        },
+      } = event;
+      const { ciphertext, dataToEncryptHash } = passwordCiphers;
+
+      const storableAttributes = this.formStorableAttributes(
+        ciphertext,
+        dataToEncryptHash,
+        accessControlConditions,
+      );
+      const userAttrs: idOSHumanAttribute[] = (await this.data.list("attributes")) || [];
+
+      const { filteredUserAttributes, litSavableAttributes } = this.filterLitAttributes(
+        userAttrs,
+        storableAttributes,
+      );
+
+      await this.updateAttributesIfNeeded(filteredUserAttributes, litSavableAttributes);
     });
   }
 }

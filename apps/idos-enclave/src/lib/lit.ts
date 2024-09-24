@@ -66,7 +66,7 @@ export class Lit {
     this.store.set("lit-access-control", accessControls);
   };
 
-  getAccessControls = (walletAddresses: string[]): string[] => {
+  getAccessControls = (walletAddresses?: string[]): string[] => {
     return (
       this.store.get("lit-access-control") || createAccessControlCondition(walletAddresses) || []
     );
