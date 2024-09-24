@@ -345,6 +345,9 @@ importers:
       jsonld-document-loader:
         specifier: ^2.0.0
         version: 2.0.0
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
       near-api-js:
         specifier: ^3.0
         version: 3.0.4
@@ -367,6 +370,9 @@ importers:
       '@synthetixio/synpress':
         specifier: 4.0.0-alpha.7
         version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)(utf-8-validate@5.0.10)(zod@3.22.4)
+      '@types/lodash-es':
+        specifier: ^4.17.12
+        version: 4.17.12
       '@vitest/ui':
         specifier: ^0.34.6
         version: 0.34.6(vitest@0.31.4)
