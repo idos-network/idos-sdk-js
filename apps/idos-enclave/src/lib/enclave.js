@@ -35,7 +35,7 @@ export class Enclave {
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
-    if (litAttrs.length > 0) {
+    if (litAttrs && litAttrs.length > 0) {
       console.log("litAttrs", litAttrs);
       // @todo: store litAttrs in local storage.
     }
