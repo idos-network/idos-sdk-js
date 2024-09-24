@@ -30,10 +30,15 @@ export class Enclave {
     this.store.reset();
   }
 
-  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
+  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey, litAttrs) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
+
+    if (litAttrs.length > 0) {
+      console.log("litAttrs", litAttrs);
+      // @todo: store litAttrs in local storage.
+    }
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -317,7 +322,13 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
+          storage: () => [
+            humanId,
+            signerAddress,
+            signerPublicKey,
+            expectedUserEncryptionPublicKey,
+            litAttrs,
+          ],
           updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],

@@ -21,8 +21,6 @@ export class Enclave {
 
     const { humanId, address, publicKey, currentUserPublicKey, litAttrs } = this.auth.currentUser;
 
-    console.log("litAttrs", litAttrs);
-
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
     this.encryptionPublicKey = await this.provider.ready(
@@ -30,6 +28,7 @@ export class Enclave {
       address,
       publicKey,
       currentUserPublicKey,
+      litAttrs,
     );
 
     return this.encryptionPublicKey;
@@ -85,7 +84,7 @@ export class Enclave {
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
-  async backupPasswordOrSecret(callbackFn: (resposen: BackupPasswordInfo) => Promise<void>) {
+  async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
     if (!this.encryptionPublicKey) await this.ready();
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
