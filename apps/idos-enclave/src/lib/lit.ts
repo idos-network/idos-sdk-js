@@ -1,28 +1,14 @@
-type StorableAttribute = {
-  key: string;
-  value: string;
-};
-
-type UserWallet = {
-  address: string;
-};
-
 import type { Store } from "@idos-network/idos-store";
-import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types"; // Import types explicitly
-import type { Data } from "../../../../packages/idos-sdk-js/src/lib/data";
-import type { Enclave } from "../../../../packages/idos-sdk-js/src/lib/enclave";
-import type { IdOSAttribute } from "./../../../../packages/idos-sdk-js/src/lib/types/index";
-
-import { LitNetwork } from "@lit-protocol/constants";
-import * as LitJsSdk from "@lit-protocol/lit-node-client";
-import { ethers } from "ethers";
-
 import {
   LitAbility,
   LitAccessControlConditionResource,
   createSiweMessage,
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
+import { LitNetwork } from "@lit-protocol/constants";
+import * as LitJsSdk from "@lit-protocol/lit-node-client";
+import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types";
+import { ethers } from "ethers";
 
 declare global {
   interface Window {
@@ -63,19 +49,16 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
 };
 
 export class Lit {
-  client: LitJsSdk.LitNodeClient | null = null;
-  chain: string;
-  store: Store;
-  data: Data | null = null;
-  enclave: Enclave | null = null;
+  client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
+    alertWhenUnauthorized: false,
+    litNetwork: LitNetwork.DatilDev,
+    debug: true,
+  });
 
-  constructor(chain: string, store: Store, data?: Data, enclave?: Enclave) {
-    this.chain = chain;
-    this.store = store;
-
-    this.data = data ?? null;
-    this.enclave = enclave ?? null;
-  }
+  constructor(
+    private readonly chain: string,
+    private readonly store: Store,
+  ) {}
 
   storeAccessControls = (userWallets: string[]) => {
     if (!userWallets.length) throw new Error("a valid user wallets array should be passed");
@@ -91,39 +74,32 @@ export class Lit {
 
   async getSigner() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = await provider.getSigner();
+    const signer = provider.getSigner();
     return signer;
   }
 
   async connect() {
-    if (this.client?.connectedNodes.size) return;
-    const client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
-      alertWhenUnauthorized: false,
-      litNetwork: LitNetwork.DatilDev,
-      debug: true,
-    });
-    await client.disconnect();
-    await client.connect();
-    this.client = client;
-    return client;
+    if (this.client.connectedNodes.size) return;
+    await this.client.disconnect();
+    await this.client.connect();
   }
 
   async encrypt(
     dataToEncrypt: string,
-    walletAddresses = ["0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42"], // TODO: remove once find a way to pass wallets from sdk to enclave
+    walletAddresses: string[], // TODO: remove once find a way to pass wallets from sdk to enclave
   ): Promise<EncryptResponse | undefined> {
     try {
       await this.connect();
-      const accessControlConditions = createAccessControlCondition([
-        "0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42",
-      ]);
+      const accessControlConditions = createAccessControlCondition(walletAddresses);
       this.storeAccessControls(walletAddresses);
+
       const response = await LitJsSdk.encryptString(
         { dataToEncrypt, accessControlConditions },
-        // biome-ignore lint/style/noNonNullAssertion: TBD
-        this.client!,
+        this.client,
       );
-      if (!response?.ciphertext) throw new Error("Error happened at string encryption");
+
+      if (!response?.ciphertext) throw new Error("Error happened while encrypting data.");
+
       return response;
     } catch (error) {
       console.error(error);
@@ -133,7 +109,6 @@ export class Lit {
   async getSessionSigs(): Promise<SessionSigsMap | undefined> {
     const signer = await this.getSigner();
     const address = await signer.getAddress();
-    // biome-ignore lint/style/noNonNullAssertion: TBD
     const sessionSignatures = await this.client?.getSessionSigs({
       chain: this.chain,
       resourceAbilityRequests: [
@@ -148,8 +123,7 @@ export class Lit {
           expiration,
           resources: resourceAbilityRequests,
           walletAddress: address,
-          // biome-ignore lint/style/noNonNullAssertion: TBD
-          nonce: await this.client?.getLatestBlockhash()!,
+          nonce: await this.client.getLatestBlockhash(),
           litNodeClient: this.client,
         });
 
@@ -176,8 +150,7 @@ export class Lit {
           sessionSigs,
           chain: "ethereum",
         },
-        // biome-ignore lint/style/noNonNullAssertion: TBD
-        this.client!,
+        this.client,
       );
     } catch (error) {
       console.log("error in decrypt");

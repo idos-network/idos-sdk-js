@@ -2,6 +2,7 @@ import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import { ethers } from "ethers";
 import { type JSX, useMemo } from "preact/compat";
 
 import { Button } from "../../components/ui/button";
@@ -193,7 +194,8 @@ export function PasswordOrKeyBackup({
   onSuccess,
 }: { store: Store; onSuccess: (result: unknown) => void }) {
   const reveal = useSignal(false);
-  const litInstance = useMemo(() => new Lit("ethereum", store), []);
+  const status = useSignal<"idle" | "pending">("idle");
+  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
 
   const password = store.get("password");
   const secret = store.get("encryption-private-key");
@@ -219,18 +221,25 @@ export function PasswordOrKeyBackup({
     URL.revokeObjectURL(url);
   };
 
-  const handleidOSStore = async () => {
-    // @todo: perform encryption with Lit.
-    // @todo: store encrypted data in local storage.
-    const password = store.get("password");
-    if (!password) throw new Error("no string was passed to encrypt");
-    const encryptionResponse = await litInstance.encrypt(password);
+  const storeWithLit = async () => {
+    status.value = "pending";
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const address = await signer.getAddress();
+
+    const passwordCiphers = await litInstance.encrypt(password, [address]);
+    const secretCiphers = await litInstance.encrypt(secret, [address]);
+
+    status.value = "idle";
+
+    // @todo: store ciphers in local storage.
 
     onSuccess({
       type: "idOS:store",
       status: "pending",
       payload: {
-        ...encryptionResponse,
+        passwordCiphers,
+        secretCiphers,
       },
     });
   };
@@ -247,7 +256,9 @@ export function PasswordOrKeyBackup({
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <GoogleDocsStore {...{ password, secret }} />
       </GoogleOAuthProvider>
-      <Button onClick={handleidOSStore}>Store securely on the idOS</Button>
+      <Button onClick={storeWithLit} disabled={status.value === "pending"}>
+        {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
+      </Button>
     </div>
   );
 }
