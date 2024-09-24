@@ -83,8 +83,8 @@ export class Enclave {
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
-  async backupPasswordOrSecret() {
+  async backupPasswordOrSecret(callbackFn: (data: unknown) => Promise<void>) {
     if (!this.encryptionPublicKey) await this.ready();
-    return this.provider.backupPasswordOrSecret();
+    return this.provider.backupPasswordOrSecret(callbackFn);
   }
 }

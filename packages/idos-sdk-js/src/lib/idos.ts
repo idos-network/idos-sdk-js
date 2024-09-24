@@ -121,4 +121,12 @@ export class idOS {
   get nodeUrl(): string {
     return this.kwilWrapper.kwilProvider;
   }
+
+  backupPasswordOrSecret() {
+    return this.enclave.backupPasswordOrSecret(async (data: unknown) => {
+      // @todo: implement the actual storage of the data in the attributes table.
+      // this.data.createMultiple("attributes", data as Record<string, string>[]);
+      console.log(data);
+    });
+  }
 }

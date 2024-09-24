@@ -48,7 +48,7 @@ export function Component() {
             <Button
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
-              onClick={() => sdk?.enclave.backupPasswordOrSecret()}
+              onClick={() => sdk?.backupPasswordOrSecret()}
             >
               Protect your account
             </Button>
