@@ -313,6 +313,7 @@ export class Enclave {
           countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
+          litAttrs,
         } = requestData;
 
         const paramBuilder = {
