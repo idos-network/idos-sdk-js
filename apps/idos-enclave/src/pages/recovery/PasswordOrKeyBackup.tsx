@@ -1,4 +1,4 @@
-import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ClipboardIcon, EyeIcon } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
@@ -6,6 +6,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { ethers } from "ethers";
 import { type JSX, useMemo } from "preact/compat";
 
+import { EyeSlashIcon } from "@heroicons/react/20/solid";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
@@ -38,6 +39,30 @@ function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   );
 }
 
+function RevealButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
+  const clicked = useSignal(false);
+
+  const handleClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+    clicked.value = !clicked.value;
+    props.onClick?.(event);
+  };
+
+  return (
+    <button
+      type="button"
+      class="text-green-500 transition-colors hover:text-green-700"
+      {...props}
+      onClick={handleClick}
+    >
+      {clicked.value ? (
+        <EyeSlashIcon class="h-6 w-6 text-green-700" />
+      ) : (
+        <EyeIcon class="h-6 w-6" />
+      )}
+    </button>
+  );
+}
+
 function ReadonlyInput(props: JSX.HTMLAttributes<HTMLInputElement>) {
   return (
     <input
@@ -65,6 +90,9 @@ interface PasswordAndSecretRevealProps {
 }
 
 function PasswordAndSecretReveal({ password, secret, onCancel }: PasswordAndSecretRevealProps) {
+  const revealPassword = useSignal(false);
+  const revealSecret = useSignal(false);
+
   const handleCopyToClipboard = async (value: string) => {
     try {
       await navigator.clipboard.writeText(value);
@@ -78,15 +106,29 @@ function PasswordAndSecretReveal({ password, secret, onCancel }: PasswordAndSecr
       <div class="flex flex-col gap-1">
         <Paragraph>Your password is:</Paragraph>
         <ReadonlyField>
-          <ReadonlyInput value={password} />
-          <ClipboardCopyButton onClick={() => handleCopyToClipboard(password)} />
+          <ReadonlyInput type={revealPassword.value ? "text" : "password"} value={password} />
+          <div className="flex items-center gap-2">
+            <RevealButton
+              onClick={() => {
+                revealPassword.value = !revealPassword.value;
+              }}
+            />
+            <ClipboardCopyButton onClick={() => handleCopyToClipboard(password)} />
+          </div>
         </ReadonlyField>
       </div>
       <div class="flex flex-col gap-1">
         <Paragraph>Your secret key is:</Paragraph>
         <ReadonlyField>
-          <ReadonlyInput value={secret} />
-          <ClipboardCopyButton onClick={() => handleCopyToClipboard(secret)} />
+          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
+          <div className="flex items-center gap-2">
+            <RevealButton
+              onClick={() => {
+                revealSecret.value = !revealSecret.value;
+              }}
+            />
+            <ClipboardCopyButton onClick={() => handleCopyToClipboard(secret)} />
+          </div>
         </ReadonlyField>
       </div>
       <Button onClick={onCancel}>Go back</Button>
