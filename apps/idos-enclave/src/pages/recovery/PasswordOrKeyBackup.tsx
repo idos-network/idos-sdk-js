@@ -1,5 +1,6 @@
 import { CheckIcon, ClipboardIcon } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
+import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import { ethers } from "ethers";
@@ -221,6 +222,13 @@ export function PasswordOrKeyBackup({
     URL.revokeObjectURL(url);
   };
 
+  const storeLitCiphers = async (cipherInfo: EncryptResponse) => {
+    const { ciphertext, dataToEncryptHash } = cipherInfo;
+    // accessControlConditions already been stored
+    store.set("lit-cipher-text", ciphertext);
+    store.set("lit-data-to-encrypt-hash", dataToEncryptHash);
+  };
+
   const storeWithLit = async () => {
     status.value = "pending";
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -229,10 +237,12 @@ export function PasswordOrKeyBackup({
 
     const passwordCiphers = await litInstance.encrypt(password, [address]);
     const secretCiphers = await litInstance.encrypt(secret, [address]);
+    const accessControlConditions = litInstance.getAccessControls();
 
     status.value = "idle";
 
-    // @todo: store ciphers in local storage.
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    storeLitCiphers(passwordCiphers!);
 
     onSuccess({
       type: "idOS:store",
@@ -240,6 +250,7 @@ export function PasswordOrKeyBackup({
       payload: {
         passwordCiphers,
         secretCiphers,
+        accessControlConditions,
       },
     });
   };
