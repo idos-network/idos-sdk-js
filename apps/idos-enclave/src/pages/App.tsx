@@ -53,7 +53,7 @@ export function App({ store, enclave }: AppProps) {
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
-  const [backupStatus, setBackupStatus] = useState<"pending" | "success">("pending");
+  const [backupStatus, setBackupStatus] = useState<"pending" | "success" | "failure">("pending");
 
   /**
    * Theme chooser.

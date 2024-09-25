@@ -30,15 +30,29 @@ export class Enclave {
     this.store.reset();
   }
 
+  safeParse(string) {
+    try {
+      const parsed = JSON.parse(string);
+      return parsed;
+    } catch (error) {
+      return string;
+    }
+  }
+
+  handlstoreableAttributes(storableAttributes) {
+    if (!Array.isArray(storableAttributes) || !storableAttributes.length) return;
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    storableAttributes.forEach((attr) => {
+      this.store.set(attr.attribute_key, this.safeParse(attr.value));
+    });
+  }
+
   storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey, litAttrs) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
-    if (litAttrs && litAttrs.length > 0) {
-      console.log("litAttrs", litAttrs);
-      // @todo: store litAttrs in local storage.
-    }
+    this.handlstoreableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -357,7 +371,7 @@ export class Enclave {
       port1.onmessage = async ({ data: { error, result } }) => {
         if (error) return reject(error);
 
-        if (result.type === "idOS:store" && result.status === "success") {
+        if (result.type === "idOS:store") {
           resolve(result);
           port1.close();
         }
@@ -406,7 +420,7 @@ export class Enclave {
           return this.dialog.postMessage(
             {
               intent: "backupPasswordOrSecret",
-              message: { status: "done" },
+              message: { status: result.status },
               configuration: this.configuration,
             },
             this.dialog.origin,

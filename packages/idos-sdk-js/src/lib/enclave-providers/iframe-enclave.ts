@@ -182,12 +182,19 @@ export class IframeEnclave implements EnclaveProvider {
         if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
 
         // @todo: handle storing values in the idOS attributes
-        await backupFn(event);
+        let status = "";
+        
+        try {
+          status = "success";
+          await backupFn(event);
+        } catch (error) {
+          status = "failure";
+        }
 
         event.ports[0].postMessage({
           result: {
             type: "idOS:store",
-            status: "success",
+            status,
           },
         });
         event.ports[0].close();

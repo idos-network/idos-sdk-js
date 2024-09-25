@@ -177,7 +177,7 @@ export class idOS {
 
     if (attributeToCreate.length) {
       console.log({ attributeToCreate });
-      this.data.createMultiple("attributes", attributeToCreate);
+      await this.data.createMultiple("attributes", attributeToCreate, true);
     }
   }
 
