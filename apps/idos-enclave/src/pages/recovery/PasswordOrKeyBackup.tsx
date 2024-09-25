@@ -243,12 +243,17 @@ export function PasswordOrKeyBackup({
   const password = store.get("password");
   const secretKey = store.get("encryption-private-key");
 
+  const passwordOrSecretKey: "password" | "secret key" =
+    authMethod === "password" ? "password" : "secret key";
+
+  const secret = passwordOrSecretKey === "password" ? password : secretKey;
+
   const handleReveal = () => {
     reveal.value = !reveal.value;
   };
 
   const handleDownload = () => {
-    const content = `Password: ${password}\nSecret: ${secretKey}`;
+    const content = `idOS ${passwordOrSecretKey}: ${secret}\n`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -305,11 +310,6 @@ export function PasswordOrKeyBackup({
 
   const hideStoreWithLit = backupStatus === "success" && !!litCipher;
 
-  const passwordOrSecretKey: "password" | "secret key" =
-    authMethod === "password" ? "password" : "secret key";
-
-  const secret = passwordOrSecretKey === "password" ? password : secretKey;
-
   if (reveal.value) {
     return (
       <PasswordOrSecretReveal
@@ -322,9 +322,9 @@ export function PasswordOrKeyBackup({
 
   return (
     <div class="flex flex-col gap-5">
-      <Button onClick={handleDownload}>Download password / secret key</Button>
       <Heading>Create a backup of your idOS password or secret key.</Heading>
       <Button onClick={handleReveal}>Reveal up your {passwordOrSecretKey}</Button>
+      <Button onClick={handleDownload}>Download {passwordOrSecretKey}</Button>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <GoogleDocsStore {...{ password, secret: secretKey }} />
       </GoogleOAuthProvider>
