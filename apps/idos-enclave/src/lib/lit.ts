@@ -137,10 +137,10 @@ export class Lit {
     return sessionSignatures;
   }
 
-  async decrypt(ciphertext: string, dataToEncryptHash: string, walletAddresses: string[] = []) {
+  async decrypt(ciphertext: string, dataToEncryptHash: string, accessControls?: unknown[]) {
     try {
       await this.connect();
-      const accessControlConditions = this.getAccessControls(walletAddresses);
+      const accessControlConditions = accessControls || this.getAccessControls();
       const sessionSigs = await this.getSessionSigs();
       return LitJsSdk.decryptToString(
         {
