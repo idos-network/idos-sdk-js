@@ -156,21 +156,23 @@ export function PasswordForm({
           <Paragraph>Please enter your idOS password below:</Paragraph>
 
           <PasswordField password={password} hasError={hasError} />
+
           <div className="flex items-center justify-between">
             <DurationField duration={duration} />
-            {!!litCipher && (
-              <span
-                onClick={restorePassword}
-                className="cursor-pointer text-green-500 hover:underline"
-              >
-                Forgot your password?
-              </span>
-            )}
           </div>
 
           <Button type="submit" disabled={isLoading.value}>
             {isLoading.value ? "Unlocking..." : "Unlock"}
           </Button>
+          {!!litCipher && (
+            <button
+              type="button"
+              onClick={restorePassword}
+              className="cursor-pointer font-semibold text-green-600 text-sm hover:underline"
+            >
+              Forgot your password? If you used Lit, click here to recover.
+            </button>
+          )}
         </>
       )}
     </form>
