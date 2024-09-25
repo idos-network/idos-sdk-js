@@ -90,6 +90,7 @@ export function PasswordForm({
   const password = useSignal("");
   const duration = useSignal(7);
   const hasError = useSignal(false);
+  const recovering = useSignal(false);
   const isLoading = useSignal(false);
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
   const litCipher = store.get("lit-cipher-text");
@@ -104,7 +105,9 @@ export function PasswordForm({
   const restorePassword = async () => {
     const litDataHash = store.get("lit-data-to-encrypt-hash");
     const litAccessControls = store.get("lit-access-control");
+    recovering.value = true;
     const decryptedPassword = await litInstance.decrypt(litCipher, litDataHash, litAccessControls);
+    recovering.value = false;
     password.value = decryptedPassword || "";
   };
 
@@ -168,9 +171,12 @@ export function PasswordForm({
             <button
               type="button"
               onClick={restorePassword}
+              disabled={recovering.value}
               className="cursor-pointer font-semibold text-green-600 text-sm hover:underline"
             >
-              Forgot your password? If you used Lit, click here to recover.
+              {!recovering.value
+                ? "Forgot your password? If you used Lit, click here to recover."
+                : "Recovering..."}
             </button>
           )}
         </>

@@ -263,7 +263,11 @@ export function PasswordOrKeyBackup({
   store,
   backupStatus,
   onSuccess,
-}: { store: Store; backupStatus: "done" | "pending"; onSuccess: (result: unknown) => void }) {
+}: {
+  store: Store;
+  backupStatus: "done" | "pending" | "success";
+  onSuccess: (result: unknown) => void;
+}) {
   const reveal = useSignal(false);
   const status = useSignal<"idle" | "pending">("idle");
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
@@ -326,10 +330,12 @@ export function PasswordOrKeyBackup({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (["failure", "done"].includes(backupStatus)) status.value = "idle";
+    if (["failure", "done", "success"].includes(backupStatus)) {
+      status.value = "idle";
+    }
   }, [backupStatus]);
 
-  const hideStoreWithLit = backupStatus === "done" && !!litCipher;
+  const hideStoreWithLit = backupStatus === "success" && !!litCipher;
 
   if (reveal.value) {
     return (
