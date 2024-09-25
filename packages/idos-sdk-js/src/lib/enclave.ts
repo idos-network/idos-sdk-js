@@ -2,7 +2,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
-import type { idOSCredential } from "./types";
+import type { BackupPasswordInfo, idOSCredential } from "./types";
 
 export class Enclave {
   encryptionPublicKey?: Uint8Array;
@@ -19,15 +19,18 @@ export class Enclave {
   async ready(): Promise<Uint8Array> {
     if (this.encryptionPublicKey) return this.encryptionPublicKey;
 
-    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
+    const { humanId, address, publicKey, currentUserPublicKey, litAttrs } = this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
+
+    await this.provider.store("litAttrs", JSON.stringify(litAttrs));
 
     this.encryptionPublicKey = await this.provider.ready(
       humanId,
       address,
       publicKey,
       currentUserPublicKey,
+      litAttrs,
     );
 
     return this.encryptionPublicKey;
@@ -63,6 +66,10 @@ export class Enclave {
     return this.provider.reset();
   }
 
+  async updateStore(key: string, value: unknown) {
+    this.provider.updateStore(key, value);
+  }
+
   async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
     if (!this.encryptionPublicKey) await this.ready();
     return await this.provider.filterCredentialsByCountries(credentials, countries);
@@ -79,8 +86,8 @@ export class Enclave {
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
-  async backupPasswordOrSecret() {
+  async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
     if (!this.encryptionPublicKey) await this.ready();
-    return this.provider.backupPasswordOrSecret();
+    return this.provider.backupPasswordOrSecret(callbackFn);
   }
 }

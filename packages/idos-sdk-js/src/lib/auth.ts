@@ -10,6 +10,7 @@ import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
+import type { idOSHumanAttribute } from "./types";
 import { implicitAddressFromPublicKey } from "./utils";
 
 export interface AuthUser {
@@ -17,6 +18,7 @@ export interface AuthUser {
   address: string;
   publicKey?: string;
   currentUserPublicKey?: string;
+  litAttrs: idOSHumanAttribute[];
 }
 
 export class Auth {
@@ -60,11 +62,13 @@ export class Auth {
     });
 
     const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const litAttrs = await this.kwilWrapper.getLitAttrs();
 
     this.user = {
       humanId: id,
       currentUserPublicKey: current_public_key,
       address: currentAddress,
+      litAttrs,
     };
   }
 
@@ -194,12 +198,14 @@ export class Auth {
     });
 
     const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const litAttrs = await this.kwilWrapper.getLitAttrs();
 
     this.user = {
       humanId: id,
       currentUserPublicKey: current_public_key,
       address: currentAddress,
       publicKey,
+      litAttrs,
     };
   }
 }

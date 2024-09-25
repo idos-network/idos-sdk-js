@@ -1,4 +1,4 @@
-import type { idOSCredential } from "../types";
+import type { BackupPasswordInfo, idOSCredential, idOSHumanAttribute } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -29,9 +29,16 @@ export class IframeEnclave implements EnclaveProvider {
     signerAddress?: string,
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
+    litAttrs?: idOSHumanAttribute[],
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey },
+      storage: {
+        humanId,
+        signerAddress,
+        signerPublicKey,
+        expectedUserEncryptionPublicKey,
+        litAttrs,
+      },
     })) as StoredData;
 
     while (!encryptionPublicKey) {
@@ -56,6 +63,10 @@ export class IframeEnclave implements EnclaveProvider {
 
   async reset(): Promise<void> {
     this.#requestToEnclave({ reset: {} });
+  }
+
+  async updateStore(key: string, value: unknown): Promise<void> {
+    await this.#requestToEnclave({ updateStore: { key, value } });
   }
 
   async confirm(message: string): Promise<boolean> {
@@ -160,9 +171,39 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
-  async backupPasswordOrSecret(): Promise<string> {
-    return this.#requestToEnclave({
+  async backupPasswordOrSecret(
+    backupFn: (data: BackupPasswordInfo) => Promise<void>,
+  ): Promise<void> {
+    const abortController = new AbortController();
+
+    window.addEventListener(
+      "message",
+      async (event) => {
+        if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
+
+        let status = "";
+
+        try {
+          status = "success";
+          await backupFn(event);
+        } catch (error) {
+          status = "failure";
+        }
+
+        event.ports[0].postMessage({
+          result: {
+            type: "idOS:store",
+            status,
+          },
+        });
+        event.ports[0].close();
+        abortController.abort();
+      },
+      { signal: abortController.signal },
+    );
+
+    await this.#requestToEnclave({
       backupPasswordOrSecret: {},
-    }) as Promise<string>;
+    });
   }
 }

@@ -77,6 +77,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return this.invokeSnap("reset");
   }
 
+  updateStore(key: string, value: unknown): Promise<void> {
+    return this.invokeSnap("updateStore", { key, value });
+  }
+
   async confirm(message: string): Promise<boolean> {
     return this.invokeSnap("confirm", { message });
   }
@@ -94,7 +98,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return Uint8Array.from(Object.values(decrypted));
   }
 
-  async backupPasswordOrSecret(): Promise<string> {
+  async backupPasswordOrSecret(): Promise<void> {
     throw new Error("Method not implemented.");
   }
 }

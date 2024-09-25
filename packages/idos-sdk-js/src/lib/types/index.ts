@@ -5,6 +5,20 @@ export type idOSHuman = {
   current_public_key: string;
 };
 
+export type StorableAttribute = {
+  key: string;
+  value: string | string[];
+};
+
+export type BackupPasswordInfo = {
+  data: {
+    payload: {
+      accessControlConditions: string[];
+      passwordCiphers: { ciphertext: string; dataToEncryptHash: string };
+    };
+  };
+};
+
 export type idOSCredential = {
   id: string;
   human_id: string;
