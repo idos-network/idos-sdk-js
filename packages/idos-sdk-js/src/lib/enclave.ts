@@ -23,6 +23,8 @@ export class Enclave {
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
+    await this.provider.store("litAttrs", JSON.stringify(litAttrs));
+
     this.encryptionPublicKey = await this.provider.ready(
       humanId,
       address,
