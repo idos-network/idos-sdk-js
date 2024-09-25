@@ -130,11 +130,11 @@ function PasswordOrSecretReveal({ secret, onCancel, authMethod }: PasswordOrSecr
 }
 
 interface GoogleDocsStoreProps {
-  password: string;
+  authMethod: "password" | "secret key";
   secret: string;
 }
 
-function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
+function GoogleDocsStore({ authMethod, secret }: GoogleDocsStoreProps) {
   const status = useSignal<"idle" | "pending" | "success" | "error">("idle");
   const documentId = useSignal("");
 
@@ -177,15 +177,7 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
                   location: {
                     index: 1,
                   },
-                  text: `\nidOS Secret: ${secret}\n`,
-                },
-              },
-              {
-                insertText: {
-                  location: {
-                    index: 2,
-                  },
-                  text: `\nidOS Password: ${password}\n`,
+                  text: `\nidOS ${authMethod}: ${secret}\n`,
                 },
               },
             ],
@@ -205,20 +197,20 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
   return (
     <div class="flex flex-col gap-2">
       <Button onClick={() => handleGoogleDocsStore()} disabled={status.value === "pending"}>
-        {status.value === "pending" ? "Storing..." : "Store securely on Google Drive"}
+        {status.value === "pending" ? "Saving..." : "Save in Google Drive"}
       </Button>
       {status.value === "success" ? (
         <Paragraph>
-          Your credentials have been successfully stored. You can access them{" "}
+          Your {authMethod} has been successfully saved to Google Drive.{" "}
           <a
             href={`https://docs.google.com/document/d/${documentId.value}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-green-500 hover:underline"
+            className="text-green-600 underline underline-offset-2"
           >
-            here
-          </a>
-          .
+            Click here
+          </a>{" "}
+          to see the document.
         </Paragraph>
       ) : null}
     </div>
@@ -326,7 +318,7 @@ export function PasswordOrKeyBackup({
       <Button onClick={handleReveal}>Reveal up your {passwordOrSecretKey}</Button>
       <Button onClick={handleDownload}>Download {passwordOrSecretKey}</Button>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <GoogleDocsStore {...{ password, secret: secretKey }} />
+        <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
       </GoogleOAuthProvider>
       {!hideStoreWithLit && (
         <Button onClick={storeWithLit} disabled={status.value === "pending"}>
