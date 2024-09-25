@@ -83,23 +83,16 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-interface PasswordAndSecretRevealProps {
-  password: string;
+interface PasswordOrSecretRevealProps {
+  authMethod: "password" | "secret key";
   secret: string;
-  onCancel: () => void;
   store: Store;
-  litInstance: Lit;
+  onCancel: () => void;
 }
 
-function PasswordAndSecretReveal({
-  password,
-  secret,
-  onCancel,
-  litInstance,
-  store,
-}: PasswordAndSecretRevealProps) {
-  const revealPassword = useSignal(false);
+function PasswordOrSecretReveal({ secret, onCancel, authMethod }: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
+  const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
   const handleCopyToClipboard = async (value: string) => {
     try {
@@ -109,43 +102,25 @@ function PasswordAndSecretReveal({
     }
   };
 
-  const handleLitRetrival = async () => {
-    const litCipher = store.get("lit-cipher-text");
-    const litDataHash = store.get("lit-data-to-encrypt-hash");
-    const litAccessControls = store.get("lit-access-control");
-
-    if (!litCipher) return;
-    const password = await litInstance.decrypt(litCipher, litDataHash, litAccessControls);
-    alert(`your password is ${password}`);
-  };
-
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your password is:</Paragraph>
-        <ReadonlyField>
-          <ReadonlyInput type={revealPassword.value ? "text" : "password"} value={password} />
-          <div className="flex items-center gap-2">
-            <RevealButton
-              onClick={() => {
-                revealPassword.value = !revealPassword.value;
-              }}
-            />
-            <ClipboardCopyButton onClick={() => handleCopyToClipboard(password)} />
-          </div>
-        </ReadonlyField>
-      </div>
-      <div class="flex flex-col gap-1">
-        <Paragraph>Your secret key is:</Paragraph>
+        <Paragraph>Your {authMethod} is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
           <div className="flex items-center gap-2">
             <RevealButton
+              aria-label={revealButtonLabel}
+              title={revealButtonLabel}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
-            <ClipboardCopyButton onClick={() => handleCopyToClipboard(secret)} />
+            <ClipboardCopyButton
+              aria-label="Copy"
+              title="Copy"
+              onClick={() => handleCopyToClipboard(secret)}
+            />
           </div>
         </ReadonlyField>
       </div>
@@ -264,15 +239,16 @@ export function PasswordOrKeyBackup({
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
   const litCipher = store.get("lit-cipher-text");
 
+  const authMethod: "passkey" | "password" = store.get("preferred-auth-method");
   const password = store.get("password");
-  const secret = store.get("encryption-private-key");
+  const secretKey = store.get("encryption-private-key");
 
   const handleReveal = () => {
     reveal.value = !reveal.value;
   };
 
   const handleDownload = () => {
-    const content = `Password: ${password}\nSecret: ${secret}`;
+    const content = `Password: ${password}\nSecret: ${secretKey}`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -303,7 +279,7 @@ export function PasswordOrKeyBackup({
     const address = await signer.getAddress();
 
     const passwordCiphers = await litInstance.encrypt(password, [address]);
-    const secretCiphers = await litInstance.encrypt(secret, [address]);
+    const secretCiphers = await litInstance.encrypt(secretKey, [address]);
     const accessControlConditions = litInstance.getAccessControls();
 
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
@@ -320,7 +296,7 @@ export function PasswordOrKeyBackup({
     });
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We depend only on backupStatus.
   useEffect(() => {
     if (["failure", "done", "success"].includes(backupStatus)) {
       status.value = "idle";
@@ -329,24 +305,28 @@ export function PasswordOrKeyBackup({
 
   const hideStoreWithLit = backupStatus === "success" && !!litCipher;
 
+  const passwordOrSecretKey: "password" | "secret key" =
+    authMethod === "password" ? "password" : "secret key";
+
+  const secret = passwordOrSecretKey === "password" ? password : secretKey;
+
   if (reveal.value) {
     return (
-      <PasswordAndSecretReveal
-        {...{ password, secret }}
+      <PasswordOrSecretReveal
+        {...{ secret, authMethod: passwordOrSecretKey }}
         onCancel={handleReveal}
         store={store}
-        litInstance={litInstance}
       />
     );
   }
 
   return (
     <div class="flex flex-col gap-5">
-      <Heading>Back up your password or secret key</Heading>
-      <Button onClick={handleReveal}>Reveal password / secret key</Button>
       <Button onClick={handleDownload}>Download password / secret key</Button>
+      <Heading>Create a backup of your idOS password or secret key.</Heading>
+      <Button onClick={handleReveal}>Reveal up your {passwordOrSecretKey}</Button>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <GoogleDocsStore {...{ password, secret }} />
+        <GoogleDocsStore {...{ password, secret: secretKey }} />
       </GoogleOAuthProvider>
       {!hideStoreWithLit && (
         <Button onClick={storeWithLit} disabled={status.value === "pending"}>
