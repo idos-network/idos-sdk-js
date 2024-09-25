@@ -149,15 +149,6 @@ function PasswordAndSecretReveal({
           </div>
         </ReadonlyField>
       </div>
-      <div class="flex flex-col gap-1">
-        <Paragraph>recover using Lit:</Paragraph>
-        <ReadonlyField>
-          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
-          <div className="flex items-center gap-2">
-            <RevealButton onClick={handleLitRetrival} />
-          </div>
-        </ReadonlyField>
-      </div>
       <Button onClick={onCancel}>Go back</Button>
     </div>
   );
@@ -265,7 +256,7 @@ export function PasswordOrKeyBackup({
   onSuccess,
 }: {
   store: Store;
-  backupStatus: "done" | "pending" | "success";
+  backupStatus: "done" | "pending" | "success" | "failure";
   onSuccess: (result: unknown) => void;
 }) {
   const reveal = useSignal(false);
@@ -362,7 +353,7 @@ export function PasswordOrKeyBackup({
           {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
         </Button>
       )}
-      {backupStatus === "done" ? (
+      {backupStatus === "success" ? (
         <Paragraph>
           Your credentials have been successfully stored. You can close this window now.
         </Paragraph>
