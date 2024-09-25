@@ -183,7 +183,7 @@ export class IframeEnclave implements EnclaveProvider {
 
         // @todo: handle storing values in the idOS attributes
         let status = "";
-        
+
         try {
           status = "success";
           await backupFn(event);

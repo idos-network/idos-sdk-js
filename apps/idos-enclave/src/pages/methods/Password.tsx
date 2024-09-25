@@ -2,11 +2,13 @@ import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
 
+import { useMemo } from "preact/hooks";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
+import { Lit } from "../../lib/lit";
 import type { MethodProps } from "./Chooser";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
@@ -22,6 +24,7 @@ function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
         autoFocus
         type="password"
         required={true}
+        value={password.value}
         onInput={(e) => {
           password.value = (e.target as HTMLInputElement).value;
         }}
@@ -88,6 +91,8 @@ export function PasswordForm({
   const duration = useSignal(7);
   const hasError = useSignal(false);
   const isLoading = useSignal(false);
+  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
+  const litCipher = store.get("lit-cipher-text");
 
   async function derivePublicKeyFromPassword(password: string) {
     const salt = store.get("human-id") || humanId;
@@ -95,6 +100,13 @@ export function PasswordForm({
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
   }
+
+  const restorePassword = async () => {
+    const litDataHash = store.get("lit-data-to-encrypt-hash");
+    const litAccessControls = store.get("lit-access-control");
+    const decryptedPassword = await litInstance.decrypt(litCipher, litDataHash, litAccessControls);
+    password.value = decryptedPassword || "";
+  };
 
   const onSubmit = async (e: Event) => {
     e.preventDefault();
@@ -144,8 +156,17 @@ export function PasswordForm({
           <Paragraph>Please enter your idOS password below:</Paragraph>
 
           <PasswordField password={password} hasError={hasError} />
-
-          <DurationField duration={duration} />
+          <div className="flex items-center justify-between">
+            <DurationField duration={duration} />
+            {!!litCipher && (
+              <span
+                onClick={restorePassword}
+                className="cursor-pointer text-green-500 hover:underline"
+              >
+                Forgot your password?
+              </span>
+            )}
+          </div>
 
           <Button type="submit" disabled={isLoading.value}>
             {isLoading.value ? "Unlocking..." : "Unlock"}
