@@ -181,7 +181,6 @@ export class IframeEnclave implements EnclaveProvider {
       async (event) => {
         if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
 
-        // @todo: handle storing values in the idOS attributes
         let status = "";
 
         try {
