@@ -174,9 +174,7 @@ export function PasswordForm({
               disabled={recovering.value}
               className="cursor-pointer font-semibold text-green-600 text-sm hover:underline"
             >
-              {!recovering.value
-                ? "Forgot your password? If you used Lit, click here to recover."
-                : "Recovering..."}
+              {!recovering.value ? "Forgot your password? Click here to recover." : "Recovering..."}
             </button>
           )}
         </>
