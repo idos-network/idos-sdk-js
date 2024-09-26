@@ -275,7 +275,6 @@ export function PasswordOrKeyBackup({
       userWallets = userWallets.map((wallet: { address: string }) => wallet.address);
 
       const passwordCiphers = await litInstance.encrypt(password, userWallets);
-      const secretCiphers = await litInstance.encrypt(secretKey, userWallets);
       const accessControlConditions = litInstance.getAccessControls(userWallets);
       // biome-ignore lint/style/noNonNullAssertion: <explanation>
       storeLitCiphers(passwordCiphers!);
@@ -285,7 +284,6 @@ export function PasswordOrKeyBackup({
         status: "pending",
         payload: {
           passwordCiphers,
-          secretCiphers,
           accessControlConditions,
         },
       });
