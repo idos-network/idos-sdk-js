@@ -249,12 +249,18 @@ export function Component() {
               </ListItem>
             </List>
           </DrawerBody>
-          <DrawerFooter justifyContent="start">
+          <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
+            <List display="flex" flex={1} flexDir="column" gap={1.5}>
+              <ListItemLink to="/settings">
+                <CogIcon size={24} strokeWidth="1" />
+                <Text as="span">Settings</Text>
+              </ListItemLink>
+            </List>
             <DisconnectButton />
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <Flex pos="fixed" right={5} bottom={5} gap="2">
+      <Flex pos="fixed" right={5} bottom={5} gap="2" bg="neutral.900" p={5} rounded="lg">
         <Button
           as={ChakraLink}
           isExternal
