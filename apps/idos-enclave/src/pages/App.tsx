@@ -223,7 +223,7 @@ export function App({ store, enclave }: AppProps) {
           isRecoveryMode.value = false;
         }}
       >
-        <PasswordOrKeyRecovery />
+        <PasswordOrKeyRecovery onSuccess={onSuccess} />
       </Layout>
     );
   }
