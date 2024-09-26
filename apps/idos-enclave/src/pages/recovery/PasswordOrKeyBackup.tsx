@@ -1,4 +1,9 @@
-import { CheckIcon, ClipboardIcon, EyeIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownCircleIcon,
+  CheckIcon,
+  ClipboardIcon,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
@@ -63,6 +68,33 @@ function RevealButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   );
 }
 
+function DownloadButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
+  const clicked = useSignal(false);
+
+  const handleClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+    clicked.value = true;
+    props.onClick?.(event);
+    setTimeout(() => {
+      clicked.value = false;
+    }, 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      class="text-green-500 transition-colors hover:text-green-700"
+      {...props}
+      onClick={handleClick}
+    >
+      {clicked.value ? (
+        <CheckIcon class="h-6 w-6 text-green-700" />
+      ) : (
+        <ArrowDownCircleIcon class="h-6 w-6" />
+      )}
+    </button>
+  );
+}
+
 function ReadonlyInput(props: JSX.HTMLAttributes<HTMLInputElement>) {
   return (
     <input
@@ -86,20 +118,36 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 interface PasswordOrSecretRevealProps {
   authMethod: "password" | "secret key";
   secret: string;
-  store: Store;
   onCancel: () => void;
 }
 
-function PasswordOrSecretReveal({ secret, onCancel, authMethod }: PasswordOrSecretRevealProps) {
+function PasswordOrSecretReveal({ authMethod, secret, onCancel }: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
-  const handleCopyToClipboard = async (value: string) => {
+  const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(secret);
     } catch (error) {
       console.error("Failed to copy to clipboard", error);
     }
+  };
+
+  const handleDownload = () => {
+    const content = `idOS ${authMethod}: ${secret}\n`;
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "idOS_credentials.txt";
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -110,16 +158,21 @@ function PasswordOrSecretReveal({ secret, onCancel, authMethod }: PasswordOrSecr
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
           <div className="flex items-center gap-2">
             <RevealButton
-              aria-label={revealButtonLabel}
-              title={revealButtonLabel}
+              aria-label={`${revealButtonLabel} ${authMethod}`}
+              title={`${revealButtonLabel} ${authMethod}`}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
             <ClipboardCopyButton
-              aria-label="Copy"
-              title="Copy"
-              onClick={() => handleCopyToClipboard(secret)}
+              aria-label={`Copy ${authMethod}`}
+              title={`Copy ${authMethod}`}
+              onClick={handleCopyToClipboard}
+            />
+            <DownloadButton
+              aria-label={`Download ${authMethod}`}
+              title={`Download ${authMethod}`}
+              onClick={handleDownload}
             />
           </div>
         </ReadonlyField>
@@ -240,25 +293,8 @@ export function PasswordOrKeyBackup({
 
   const secret = passwordOrSecretKey === "password" ? password : secretKey;
 
-  const handleReveal = () => {
+  const toggleReveal = () => {
     reveal.value = !reveal.value;
-  };
-
-  const handleDownload = () => {
-    const content = `idOS ${passwordOrSecretKey}: ${secret}\n`;
-
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "idOS_credentials.txt";
-
-    document.body.appendChild(link);
-    link.click();
-
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const storeLitCiphers = async (cipherInfo: EncryptResponse) => {
@@ -306,8 +342,7 @@ export function PasswordOrKeyBackup({
     return (
       <PasswordOrSecretReveal
         {...{ secret, authMethod: passwordOrSecretKey }}
-        onCancel={handleReveal}
-        store={store}
+        onCancel={toggleReveal}
       />
     );
   }
@@ -315,8 +350,7 @@ export function PasswordOrKeyBackup({
   return (
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
-      <Button onClick={handleReveal}>Reveal up your {passwordOrSecretKey}</Button>
-      <Button onClick={handleDownload}>Download {passwordOrSecretKey}</Button>
+      <Button onClick={toggleReveal}>Reveal up your {passwordOrSecretKey}</Button>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
       </GoogleOAuthProvider>
