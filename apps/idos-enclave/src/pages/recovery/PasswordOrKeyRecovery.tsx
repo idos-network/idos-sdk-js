@@ -164,14 +164,15 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
       >
         Recover Google Drive Backup
       </Button>
-      <Button
-        disabled={!litCiphertext}
-        onClick={() => {
-          recoveryMode.value = "lit";
-        }}
-      >
-        Recover using Lit Protocol
-      </Button>
+      {!!litCiphertext && (
+        <Button
+          onClick={() => {
+            recoveryMode.value = "lit";
+          }}
+        >
+          Recover using Lit Protocol
+        </Button>
+      )}
     </div>
   );
 }
