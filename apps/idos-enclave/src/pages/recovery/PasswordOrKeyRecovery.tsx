@@ -106,6 +106,7 @@ export interface PasswordOrKeyRecoveryProps {
 
 export function PasswordOrKeyRecovery({ onSuccess }: PasswordOrKeyRecoveryProps) {
   const recoveryMode = useSignal<"google" | "lit">();
+  const enableGoogleRecovery = false;
 
   if (recoveryMode.value === "google") {
     return <GoogleDriveRecoveryMethod onSuccess={onSuccess} />;
@@ -114,13 +115,17 @@ export function PasswordOrKeyRecovery({ onSuccess }: PasswordOrKeyRecoveryProps)
   return (
     <div class="flex flex-col gap-4">
       <Heading>Forgot your password or secret key?</Heading>
-      <Button
-        onClick={() => {
-          recoveryMode.value = "google";
-        }}
-      >
-        Recover Google Drive Backup
-      </Button>
+
+      {enableGoogleRecovery ? (
+        <Button
+          onClick={() => {
+            recoveryMode.value = "google";
+          }}
+        >
+          Recover Google Drive Backup
+        </Button>
+      ) : null}
+
       <Button
         onClick={() => {
           recoveryMode.value = "lit";
