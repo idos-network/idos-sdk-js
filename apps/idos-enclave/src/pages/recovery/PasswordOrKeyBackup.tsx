@@ -269,28 +269,30 @@ export function PasswordOrKeyBackup({
   };
 
   const storeWithLit = async () => {
-    status.value = "pending";
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress();
+    try {
+      status.value = "pending";
+      let userWallets = store.get("new-user-wallets") || [];
+      userWallets = userWallets.map((wallet: { address: string }) => wallet.address);
 
-    const passwordCiphers = await litInstance.encrypt(password, [address]);
-    const secretCiphers = await litInstance.encrypt(secretKey, [address]);
-    const accessControlConditions = litInstance.getAccessControls();
+      const passwordCiphers = await litInstance.encrypt(password, userWallets);
+      const secretCiphers = await litInstance.encrypt(secretKey, userWallets);
+      const accessControlConditions = litInstance.getAccessControls(userWallets);
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      storeLitCiphers(passwordCiphers!);
 
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    storeLitCiphers(passwordCiphers!);
-
-    onSuccess({
-      type: "idOS:store",
-      status: "pending",
-      payload: {
-        passwordCiphers,
-        secretCiphers,
-        accessControlConditions,
-      },
-    });
+      onSuccess({
+        type: "idOS:store",
+        status: "pending",
+        payload: {
+          passwordCiphers,
+          secretCiphers,
+          accessControlConditions,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+      
+    }
   };
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: We depend only on backupStatus.

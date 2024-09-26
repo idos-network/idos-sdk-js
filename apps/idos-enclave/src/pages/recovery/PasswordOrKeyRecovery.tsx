@@ -1,9 +1,12 @@
 import { useSignal } from "@preact/signals";
 
+import type { Store } from "@idos-network/idos-store";
+import { useMemo } from "preact/hooks";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField } from "../../components/ui/text-field";
+import { Lit, getAllowedWalletAddresses } from "../../lib/lit";
 
 function GoogleDriveRecoveryMethod({
   onSuccess,
@@ -84,14 +87,71 @@ function GoogleDriveRecoveryMethod({
   );
 }
 
+function LitProtocolRecoveryMethod({ store, onSuccess }: PasswordOrKeyRecoveryProps) {
+  const loading = useSignal(false);
+  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
+  const walletAddresses = useMemo(
+    () => getAllowedWalletAddresses(store.get("lit-access-control") || []),
+    [store],
+  );
+
+  const getLitStorage = () => {
+    const ciphertext = store.get("lit-cipher-text");
+    const dataToEncryptHash = store.get("lit-data-to-encrypt-hash");
+    return { ciphertext, dataToEncryptHash };
+  };
+
+  const handleRecovery = async () => {
+    try {
+      loading.value = true;
+      const { ciphertext, dataToEncryptHash } = await getLitStorage();
+      const password = await litInstance.decrypt(ciphertext, dataToEncryptHash);
+      if (!password) throw new Error("Failed to recover password");
+      onSuccess({ password });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return (
+    <div class="flex flex-col gap-4">
+      <Paragraph class="text-left">
+        Get your idOS Credentials using Lit Protocol. A wallet signature is required to recover your
+        passowrd.
+      </Paragraph>
+      <Paragraph class="text-left text-sm">
+        Please Sign the message using one of the following wallets:
+        <ul className="list-disc mt-3">
+          {walletAddresses.map((wallet) => (
+            <li key={wallet}>{wallet}</li>
+          ))}
+        </ul>
+      </Paragraph>
+      <Button onClick={handleRecovery} disabled={loading.value}>
+        {loading.value ? "Recovering..." : "Recover"}
+      </Button>
+    </div>
+  );
+}
+
 export interface PasswordOrKeyRecoveryProps {
   onSuccess: ({ password }: { password: string }) => void;
+  store: Store;
 }
-export function PasswordOrKeyRecovery({ onSuccess }: PasswordOrKeyRecoveryProps) {
-  const recoveryMode = useSignal<"google" | "lit">();
 
-  if (recoveryMode.value === "google") {
-    return <GoogleDriveRecoveryMethod onSuccess={onSuccess} />;
+export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecoveryProps) {
+  const recoveryMode = useSignal<"google" | "lit">();
+  const litCiphertext = store.get("lit-cipher-text");
+
+  const renderSrc: Record<string, React.ReactNode> = {
+    google: <GoogleDriveRecoveryMethod onSuccess={onSuccess} />,
+    lit: <LitProtocolRecoveryMethod store={store} onSuccess={onSuccess} />,
+  };
+
+  if (recoveryMode.value) {
+    return renderSrc[recoveryMode.value] as React.ReactNode;
   }
 
   return (
@@ -105,6 +165,7 @@ export function PasswordOrKeyRecovery({ onSuccess }: PasswordOrKeyRecoveryProps)
         Recover Google Drive Backup
       </Button>
       <Button
+        disabled={!litCiphertext}
         onClick={() => {
           recoveryMode.value = "lit";
         }}

@@ -29,6 +29,19 @@ function insertBetween<T, S>(arr: T[], objToInsert: S): (T | S)[] {
   }, []);
 }
 
+interface AccessControlCondition {
+  conditionType: string;
+  returnValueTest: {
+    value: string;
+  };
+}
+
+export function getAllowedWalletAddresses(data: AccessControlCondition[]) {
+  return data
+    .filter((item) => item.conditionType === "evmBasic") // Filter only objects with conditionType "evmBasic"
+    .map((item) => item.returnValueTest.value); // Extract the wallet addresses
+}
+
 export const createAccessControlCondition = (walletAddresses: string[] = []) => {
   const seprator = { operator: "or" };
 
@@ -51,7 +64,7 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
 export class Lit {
   client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
     alertWhenUnauthorized: false,
-    litNetwork: LitNetwork.DatilDev,
+    litNetwork: LitNetwork.DatilDev, // TODO: change to Datil on PROD
     debug: true,
   });
 
