@@ -291,7 +291,7 @@ export function PasswordOrKeyBackup({
   const passwordOrSecretKey: "password" | "secret key" =
     authMethod === "password" ? "password" : "secret key";
 
-  const secret = passwordOrSecretKey === "password" ? password : secretKey;
+  const secret = password;
 
   const toggleReveal = () => {
     reveal.value = !reveal.value;
