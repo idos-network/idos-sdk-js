@@ -291,7 +291,6 @@ export function PasswordOrKeyBackup({
       });
     } catch (error) {
       console.error(error);
-      
     }
   };
 
