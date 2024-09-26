@@ -1,4 +1,4 @@
-import type { BackupPasswordInfo, idOSCredential, idOSHumanAttribute } from "../types";
+import type { BackupPasswordInfo, idOSCredential, idOSHumanAttribute, userWallet } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -30,6 +30,7 @@ export class IframeEnclave implements EnclaveProvider {
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
     litAttrs?: idOSHumanAttribute[],
+    userWallets?: userWallet[],
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
@@ -38,6 +39,7 @@ export class IframeEnclave implements EnclaveProvider {
         signerPublicKey,
         expectedUserEncryptionPublicKey,
         litAttrs,
+        userWallets,
       },
     })) as StoredData;
 

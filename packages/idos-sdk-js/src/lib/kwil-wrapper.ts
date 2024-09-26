@@ -1,7 +1,7 @@
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
-import type { idOSHuman, idOSHumanAttribute } from "./types";
+import type { idOSHuman, idOSHumanAttribute, userWallet } from "./types";
 
 export class KwilWrapper {
   static defaults = {
@@ -152,5 +152,9 @@ export class KwilWrapper {
   async getLitAttrs() {
     const attrs = (await this.call("get_attributes", null)) as unknown as idOSHumanAttribute[];
     return attrs.filter((attr) => attr.attribute_key.startsWith("lit-"));
+  }
+
+  async getUserWallets() {
+    return (await this.call("get_wallets", null)) as unknown as userWallet[];
   }
 }

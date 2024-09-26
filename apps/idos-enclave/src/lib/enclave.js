@@ -47,12 +47,29 @@ export class Enclave {
     });
   }
 
-  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey, litAttrs) {
+  storage(
+    humanId,
+    signerAddress,
+    signerPublicKey,
+    expectedUserEncryptionPublicKey,
+    litAttrs,
+    userWallets,
+  ) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
+    const safeLitAttrs = Array.isArray(litAttrs)
+      ? litAttrs
+      : typeof litAttrs === "string"
+        ? JSON.parse(litAttrs)
+        : [];
 
-    this.handlstoreableAttributes(litAttrs);
+    const litAttrsWithWallets = [
+      ...safeLitAttrs,
+      { attribute_key: "new-user-wallets", value: userWallets },
+    ];
+
+    this.handlstoreableAttributes(litAttrsWithWallets);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -328,6 +345,7 @@ export class Enclave {
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
           litAttrs,
+          userWallets,
         } = requestData;
 
         const paramBuilder = {
@@ -343,6 +361,7 @@ export class Enclave {
             signerPublicKey,
             expectedUserEncryptionPublicKey,
             litAttrs,
+            userWallets,
           ],
           updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
