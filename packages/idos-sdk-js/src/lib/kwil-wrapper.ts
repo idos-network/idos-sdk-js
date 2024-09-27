@@ -157,4 +157,8 @@ export class KwilWrapper {
   async getUserWallets() {
     return (await this.call("get_wallets", null)) as unknown as UserWallet[];
   }
+  async getEvmUserWallets() {
+    const userWallets = (await this.getUserWallets()) as unknown as UserWallet[];
+    return userWallets.filter((wallet) => wallet.wallet_type === "EVM");
+  }
 }
