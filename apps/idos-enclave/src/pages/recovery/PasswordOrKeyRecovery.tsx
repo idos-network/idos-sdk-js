@@ -150,6 +150,12 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
     }
   };
 
+  const handleUnlock = async () => {
+    onSuccess({
+      password: passwordSignal.value,
+    });
+  };
+
   return (
     <div class="flex flex-col gap-4">
       <Paragraph class="text-left">
@@ -170,6 +176,7 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
           <Button onClick={handleCreatePasskey} disabled={loading.value}>
             Create a passkey
           </Button>
+          <Button onClick={handleUnlock}>Unlock</Button>
         </>
       ) : (
         <Button onClick={handleRecovery} disabled={loading.value}>
