@@ -133,8 +133,6 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
       if (!password) throw new Error("Failed to recover password");
 
       passwordSignal.value = password;
-
-      onSuccess({ password });
     } catch (error) {
       console.error(error);
     } finally {
@@ -144,7 +142,6 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
 
   const handleCreatePasskey = async () => {
     const credential = await createNewCredential(passwordSignal.value);
-
     if (credential) {
       onSuccess({
         credentialId: credential.credentialId,
