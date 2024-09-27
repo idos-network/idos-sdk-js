@@ -102,7 +102,9 @@ function GoogleDriveRecoveryMethod({ onSuccess }: GoogleDriveRecoveryMethodProps
   );
 }
 
-function LitProtocolRecoveryMethod({ store, onSuccess }: PasswordOrKeyRecoveryProps) {
+export interface LitProtocolRecoveryMethodProps extends PasswordOrKeyRecoveryProps {}
+
+function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMethodProps) {
   const loading = useSignal(false);
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
   const walletAddresses = useMemo(
@@ -159,26 +161,29 @@ export interface PasswordOrKeyRecoveryProps {
 export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecoveryProps) {
   const recoveryMode = useSignal<"google" | "lit">();
   const litCiphertext = store.get("lit-cipher-text");
+  const enableGoogleRecovery = false;
 
-  const renderSrc: Record<string, React.ReactNode> = {
-    google: <GoogleDriveRecoveryMethod onSuccess={onSuccess} />,
-    lit: <LitProtocolRecoveryMethod store={store} onSuccess={onSuccess} />,
-  };
+  if (recoveryMode.value === "google") {
+    return <GoogleDriveRecoveryMethod onSuccess={onSuccess} />;
+  }
 
-  if (recoveryMode.value) {
-    return renderSrc[recoveryMode.value] as React.ReactNode;
+  if (recoveryMode.value === "lit") {
+    return <LitProtocolRecoveryMethod store={store} onSuccess={onSuccess} />;
   }
 
   return (
     <div class="flex flex-col gap-4">
       <Heading>Forgot your password or secret key?</Heading>
-      {/* <Button
-        onClick={() => {
-          recoveryMode.value = "google";
-        }}
-      >
-        Recover Google Drive Backup
-      </Button> */}
+      {enableGoogleRecovery ? (
+        <Button
+          onClick={() => {
+            recoveryMode.value = "google";
+          }}
+        >
+          Recover Google Drive Backup
+        </Button>
+      ) : null}
+
       {!!litCiphertext && (
         <Button
           onClick={() => {
