@@ -1,6 +1,6 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
-import { differenceWith, isEqual } from "lodash-es";
+import { isEqual } from "lodash-es";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
@@ -78,8 +78,6 @@ export class idOS {
     });
     await idos.enclave.load();
 
-    (window as any).sdk = idos;
-
     return idos;
   }
 
@@ -137,8 +135,8 @@ export class idOS {
   }
 
   async updateAttributesIfNeeded(
-    filteredUserAttributes: idOSHumanAttribute[],
-    litSavableAttributes: StorableAttribute[],
+    filteredUserAttributes: idOSHumanAttribute[], // arrays here are not safe (it's a string)
+    litSavableAttributes: StorableAttribute[], // arrays here are safe (it's a real array)
   ) {
     const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
     const attributeToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
@@ -154,16 +152,31 @@ export class idOS {
       }
     };
 
+    const safeParse = (text: string) => {
+      try {
+        const parsed = JSON.parse(text);
+        return parsed;
+      } catch (error) {
+        return text;
+      }
+    };
+
     for (const storableAttribute of litSavableAttributes) {
       const userAttr = userAttrMap.get(storableAttribute.key);
-      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
+      const userAttributeValue =
+        (userAttr && (prepareValueGetter(userAttr.value) as boolean | string)) || "";
 
       if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
-        if (
-          Array.isArray(userAttributeValue) &&
-          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
-        )
+        const isArray = Array.isArray(safeParse(userAttributeValue as string));
+        if (isArray) {
+          const isEqualArr = isEqual(userAttributeValue, storableAttribute.value);
+          if (isEqualArr) return;
+          await this.data.update("attributes", {
+            ...userAttr,
+            value: prepareValueSetter(storableAttribute.value),
+          });
           return;
+        }
         await this.data.update("attributes", { ...userAttr, value: storableAttribute.value });
       }
 
@@ -175,9 +188,8 @@ export class idOS {
       }
     }
 
-    if (attributeToCreate.length) {
+    if (attributeToCreate.length)
       await this.data.createMultiple("attributes", attributeToCreate, true);
-    }
   }
 
   formStorableAttributes(
