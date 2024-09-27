@@ -123,7 +123,7 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: PasswordOrKeyRecoveryPr
       </Paragraph>
       <Paragraph class="text-left text-sm">
         Please Sign the message using one of the following wallets:
-        <ul className="list-disc mt-3">
+        <ul className="mt-3 list-disc">
           {walletAddresses.map((wallet) => (
             <li key={wallet}>{wallet}</li>
           ))}
@@ -157,13 +157,13 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
   return (
     <div class="flex flex-col gap-4">
       <Heading>Forgot your password or secret key?</Heading>
-      <Button
+      {/* <Button
         onClick={() => {
           recoveryMode.value = "google";
         }}
       >
         Recover Google Drive Backup
-      </Button>
+      </Button> */}
       {!!litCiphertext && (
         <Button
           onClick={() => {
