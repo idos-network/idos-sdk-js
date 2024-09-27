@@ -64,7 +64,7 @@ export class Auth {
 
     const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
     const litAttrs = await this.kwilWrapper.getLitAttrs();
-    const userWallets = await this.kwilWrapper.getUserWallets();
+    const userWallets = await this.kwilWrapper.getEvmUserWallets();
 
     this.user = {
       humanId: id,
