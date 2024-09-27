@@ -1,4 +1,4 @@
-import type { BackupPasswordInfo, idOSCredential, idOSHumanAttribute, userWallet } from "../types";
+import type { BackupPasswordInfo, UserWallet, idOSCredential, idOSHumanAttribute } from "../types";
 
 export interface StoredData {
   encryptionPublicKey?: Uint8Array;
@@ -24,7 +24,7 @@ export interface EnclaveProvider {
     signerPublicKey?: string,
     currentUserPublicKey?: string,
     litAttrs?: idOSHumanAttribute[],
-    userWallets?: userWallet[],
+    userWallets?: UserWallet[],
   ): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;

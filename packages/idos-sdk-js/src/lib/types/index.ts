@@ -55,7 +55,7 @@ export type idOSHumanAttribute = {
   value: string;
 };
 
-export type userWallet = {
+export type UserWallet = {
   id: string;
   human_id: string;
   wallet_id: string;

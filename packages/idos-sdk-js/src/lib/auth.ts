@@ -10,7 +10,7 @@ import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
-import type { idOSHumanAttribute, userWallet } from "./types";
+import type { UserWallet, idOSHumanAttribute } from "./types";
 import { implicitAddressFromPublicKey } from "./utils";
 
 export interface AuthUser {
@@ -19,7 +19,7 @@ export interface AuthUser {
   publicKey?: string;
   currentUserPublicKey?: string;
   litAttrs: idOSHumanAttribute[];
-  userWallets: userWallet[];
+  userWallets: UserWallet[];
 }
 
 export class Auth {
