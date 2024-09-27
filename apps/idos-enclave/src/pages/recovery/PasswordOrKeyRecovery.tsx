@@ -8,6 +8,7 @@ import { Paragraph } from "../../components/ui/paragraph";
 import { TextField } from "../../components/ui/text-field";
 import { Lit, getAllowedWalletAddresses } from "../../lib/lit";
 import { createNewCredential } from "../../lib/webauthn";
+import { PasswordOrSecretReveal } from "./PasswordOrKeyBackup";
 
 interface GoogleDriveRecoveryMethodProps {
   onSuccess: ({ credentialId, password }: { credentialId?: string; password: string }) => void;
@@ -102,7 +103,10 @@ function GoogleDriveRecoveryMethod({ onSuccess }: GoogleDriveRecoveryMethodProps
   );
 }
 
-export interface LitProtocolRecoveryMethodProps extends PasswordOrKeyRecoveryProps {}
+export interface LitProtocolRecoveryMethodProps {
+  store: Store;
+  onSuccess: ({ credentialId, password }: { credentialId?: string; password: string }) => void;
+}
 
 function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMethodProps) {
   const loading = useSignal(false);
@@ -111,6 +115,8 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
     () => getAllowedWalletAddresses(store.get("lit-access-control") || []),
     [store],
   );
+
+  const passwordSignal = useSignal("");
 
   const getLitStorage = () => {
     const ciphertext = store.get("lit-cipher-text");
@@ -121,9 +127,13 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
   const handleRecovery = async () => {
     try {
       loading.value = true;
-      const { ciphertext, dataToEncryptHash } = await getLitStorage();
+      const { ciphertext, dataToEncryptHash } = getLitStorage();
       const password = await litInstance.decrypt(ciphertext, dataToEncryptHash);
+
       if (!password) throw new Error("Failed to recover password");
+
+      passwordSignal.value = password;
+
       onSuccess({ password });
     } catch (error) {
       console.error(error);
@@ -132,23 +142,43 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
     }
   };
 
+  const handleCreatePasskey = async () => {
+    const credential = await createNewCredential(passwordSignal.value);
+
+    if (credential) {
+      onSuccess({
+        credentialId: credential.credentialId,
+        password: credential.password,
+      });
+    }
+  };
+
   return (
     <div class="flex flex-col gap-4">
       <Paragraph class="text-left">
         Get your idOS Credentials using Lit Protocol. A wallet signature is required to recover your
-        passowrd.
+        password.
       </Paragraph>
       <Paragraph class="text-left text-sm">
-        Please Sign the message using one of the following wallets:
+        Please sign the message using one of the following wallets:
         <ul className="mt-3 list-disc">
           {walletAddresses.map((wallet) => (
             <li key={wallet}>{wallet}</li>
           ))}
         </ul>
       </Paragraph>
-      <Button onClick={handleRecovery} disabled={loading.value}>
-        {loading.value ? "Recovering..." : "Recover"}
-      </Button>
+      {passwordSignal.value ? (
+        <>
+          <PasswordOrSecretReveal authMethod="secret key" secret={passwordSignal.value} />
+          <Button onClick={handleCreatePasskey} disabled={loading.value}>
+            Create a passkey
+          </Button>
+        </>
+      ) : (
+        <Button onClick={handleRecovery} disabled={loading.value}>
+          {loading.value ? "Recovering..." : "Recover"}
+        </Button>
+      )}
     </div>
   );
 }
@@ -173,7 +203,7 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
 
   return (
     <div class="flex flex-col gap-4">
-      <Heading>Forgot your password or secret key?</Heading>
+      <Heading>Forgot?</Heading>
       {enableGoogleRecovery ? (
         <Button
           onClick={() => {

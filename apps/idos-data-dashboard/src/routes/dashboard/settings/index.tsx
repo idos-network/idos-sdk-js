@@ -29,7 +29,7 @@ export function Component() {
       </HStack>
       <Stack direction="column" gap={2.5}>
         <Heading as="h2" size="md">
-          Password & security
+          Back up your password or secret key
         </Heading>
         <Box p={5} bg="neutral.900" rounded="xl">
           <Stack
@@ -44,13 +44,13 @@ export function Component() {
             }}
             spacing={5}
           >
-            <Text>Protect your account access. Securely store your password and secret key.</Text>
+            <Text>Create a backup of your idOS password or secret key.</Text>
             <Button
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
               onClick={() => sdk?.backupPasswordOrSecret()}
             >
-              Protect your account
+              Back up your idOS key
             </Button>
           </Stack>
         </Box>

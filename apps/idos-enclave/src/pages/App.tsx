@@ -239,7 +239,7 @@ export function App({ store, enclave }: AppProps) {
           }}
           class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
         >
-          Forgot your password or secret key?
+          Forgot?
         </button>
       </div>
     </Layout>

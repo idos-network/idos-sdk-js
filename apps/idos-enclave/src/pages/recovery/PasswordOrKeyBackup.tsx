@@ -8,10 +8,10 @@ import type { Store } from "@idos-network/idos-store";
 import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { ethers } from "ethers";
+
 import { type JSX, useEffect, useMemo } from "preact/compat";
 
-import { EyeSlashIcon } from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
@@ -118,10 +118,14 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 interface PasswordOrSecretRevealProps {
   authMethod: "password" | "secret key";
   secret: string;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
-function PasswordOrSecretReveal({ authMethod, secret, onCancel }: PasswordOrSecretRevealProps) {
+export function PasswordOrSecretReveal({
+  authMethod,
+  secret,
+  onCancel,
+}: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
@@ -177,7 +181,7 @@ function PasswordOrSecretReveal({ authMethod, secret, onCancel }: PasswordOrSecr
           </div>
         </ReadonlyField>
       </div>
-      <Button onClick={onCancel}>Go back</Button>
+      {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
     </div>
   );
 }
@@ -286,8 +290,6 @@ export function PasswordOrKeyBackup({
 
   const authMethod: "passkey" | "password" = store.get("preferred-auth-method");
   const password = store.get("password");
-  const secretKey = store.get("encryption-private-key");
-
   const passwordOrSecretKey: "password" | "secret key" =
     authMethod === "password" ? "password" : "secret key";
 
@@ -346,21 +348,33 @@ export function PasswordOrKeyBackup({
     );
   }
 
+  const enableGoogleRecovery = false;
+
   return (
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
-      <Button onClick={toggleReveal}>Reveal up your {passwordOrSecretKey}</Button>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
-      </GoogleOAuthProvider>
+      <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
+      {enableGoogleRecovery ? (
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+          <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
+        </GoogleOAuthProvider>
+      ) : null}
+
       {!hideStoreWithLit && (
         <Button onClick={storeWithLit} disabled={status.value === "pending"}>
-          {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
+          {status.value === "pending" ? (
+            "Storing..."
+          ) : (
+            <span class="inline-flex items-center">
+              Encrypt with Lit (<ExclamationTriangleIcon class="h-5 w-5" />
+              devnet beta)
+            </span>
+          )}
         </Button>
       )}
       {backupStatus === "success" ? (
         <Paragraph>
-          Your credentials have been successfully stored. You can close this window now.
+          Your {passwordOrSecretKey} has been encrypted and safely stored in your idOS.
         </Paragraph>
       ) : null}
     </div>
