@@ -44,7 +44,7 @@ export function Component() {
             }}
             spacing={5}
           >
-            <Text>Create a backup of your idOS password or secret key.</Text>
+            <Text>Create a backup of your idOS password or secret key</Text>
             <Button
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
