@@ -226,18 +226,13 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
           Recover Google Drive Backup
         </Button>
       ) : null}
-
-      {litCiphertext ? (
-        <Button
-          onClick={() => {
-            recoveryMode.value = "lit";
-          }}
-        >
-          Recover using Lit Protocol
-        </Button>
-      ) : (
-        <Paragraph>Sorry, you have no password or key backups that we know of.</Paragraph>
-      )}
+      <Button
+        onClick={() => {
+          recoveryMode.value = "lit";
+        }}
+      >
+        Recover using Lit Protocol
+      </Button>
     </div>
   );
 }

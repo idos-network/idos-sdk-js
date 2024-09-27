@@ -208,6 +208,7 @@ export class idOS {
         dataToEncryptHash,
         accessControlConditions,
       );
+
       const userAttrs: idOSHumanAttribute[] = (await this.data.list("attributes")) || [];
 
       const { filteredUserAttributes, litSavableAttributes } = this.filterLitAttributes(

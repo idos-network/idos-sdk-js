@@ -228,23 +228,20 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  const litCiphertext = store.get("lit-cipher-text");
-
   return (
     <Layout onHeaderClick={resetMethod}>
       <div class="flex flex-col gap-4">
         <ChooseMethod setMethod={setMethod} mode={mode} />
-        {litCiphertext ? (
-          <button
-            type="button"
-            onClick={() => {
-              isRecoveryMode.value = true;
-            }}
-            class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
-          >
-            Forgot?
-          </button>
-        ) : null}
+
+        <button
+          type="button"
+          onClick={() => {
+            isRecoveryMode.value = true;
+          }}
+          class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
+        >
+          Forgot?
+        </button>
       </div>
     </Layout>
   );

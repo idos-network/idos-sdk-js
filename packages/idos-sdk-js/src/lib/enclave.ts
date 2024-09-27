@@ -17,21 +17,23 @@ export class Enclave {
   }
 
   async ready(): Promise<Uint8Array> {
+    const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
+    const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();
+
+    await this.provider.store("litAttrs", JSON.stringify(litAttrs));
+    await this.provider.store("userWallets", JSON.stringify(userWallets));
+
     if (this.encryptionPublicKey) return this.encryptionPublicKey;
 
-    const { humanId, address, publicKey, currentUserPublicKey, litAttrs, userWallets } =
-      this.auth.currentUser;
+    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
-    await this.provider.store("litAttrs", JSON.stringify(litAttrs));
     this.encryptionPublicKey = await this.provider.ready(
       humanId,
       address,
       publicKey,
       currentUserPublicKey,
-      litAttrs,
-      userWallets,
     );
 
     return this.encryptionPublicKey;
@@ -89,6 +91,7 @@ export class Enclave {
 
   async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
     if (!this.encryptionPublicKey) await this.ready();
+
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
 }
