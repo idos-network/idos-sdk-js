@@ -7,17 +7,32 @@ import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField } from "../../components/ui/text-field";
 import { Lit, getAllowedWalletAddresses } from "../../lib/lit";
+import { createNewCredential } from "../../lib/webauthn";
 
-function GoogleDriveRecoveryMethod({
-  onSuccess,
-}: { onSuccess: ({ password }: { password: string }) => void }) {
+interface GoogleDriveRecoveryMethodProps {
+  onSuccess: ({ credentialId, password }: { credentialId?: string; password: string }) => void;
+}
+
+function GoogleDriveRecoveryMethod({ onSuccess }: GoogleDriveRecoveryMethodProps) {
   const recoveryMethod = useSignal<"password" | "secret">("password");
   const secret = useSignal<string>("");
   const passwordOrSecretKeyLabel = recoveryMethod.value === "password" ? "password" : "secret key";
 
-  const handleSubmit = (event: Event) => {
+  const handleSubmit = async (event: Event) => {
     event.preventDefault();
-    onSuccess({ password: secret.value });
+
+    if (recoveryMethod.value === "password") {
+      return onSuccess({ password: secret.value });
+    }
+
+    const credential = await createNewCredential(secret.value);
+
+    if (credential) {
+      onSuccess({
+        credentialId: credential.credentialId,
+        password: credential.password,
+      });
+    }
   };
 
   return (
