@@ -20,6 +20,7 @@ describe("auth", () => {
     });
     auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);
     auth.kwilWrapper.getLitAttrs = vi.fn().mockResolvedValue([]);
+    auth.kwilWrapper.getUserWallets = vi.fn().mockResolvedValue([]);
   });
 
   test("should create a new instance of Auth", () => {
@@ -42,6 +43,7 @@ describe("auth", () => {
       currentUserPublicKey,
       address,
       litAttrs: [],
+      userWallets: [],
     });
   });
 });

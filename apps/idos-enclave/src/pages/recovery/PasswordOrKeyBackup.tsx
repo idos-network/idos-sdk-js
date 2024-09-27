@@ -1,12 +1,17 @@
-import { CheckIcon, ClipboardIcon, EyeIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownCircleIcon,
+  CheckIcon,
+  ClipboardIcon,
+  EyeIcon,
+} from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/idos-store";
 import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
-import { ethers } from "ethers";
+
 import { type JSX, useEffect, useMemo } from "preact/compat";
 
-import { EyeSlashIcon } from "@heroicons/react/20/solid";
+import { ExclamationTriangleIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
@@ -63,6 +68,33 @@ function RevealButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   );
 }
 
+function DownloadButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
+  const clicked = useSignal(false);
+
+  const handleClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
+    clicked.value = true;
+    props.onClick?.(event);
+    setTimeout(() => {
+      clicked.value = false;
+    }, 2000);
+  };
+
+  return (
+    <button
+      type="button"
+      class="text-green-500 transition-colors hover:text-green-700"
+      {...props}
+      onClick={handleClick}
+    >
+      {clicked.value ? (
+        <CheckIcon class="h-6 w-6 text-green-700" />
+      ) : (
+        <ArrowDownCircleIcon class="h-6 w-6" />
+      )}
+    </button>
+  );
+}
+
 function ReadonlyInput(props: JSX.HTMLAttributes<HTMLInputElement>) {
   return (
     <input
@@ -83,83 +115,83 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-interface PasswordAndSecretRevealProps {
-  password: string;
+interface PasswordOrSecretRevealProps {
+  authMethod: "password" | "secret key";
   secret: string;
-  onCancel: () => void;
-  store: Store;
-  litInstance: Lit;
+  onCancel?: () => void;
 }
 
-function PasswordAndSecretReveal({
-  password,
+export function PasswordOrSecretReveal({
+  authMethod,
   secret,
   onCancel,
-  litInstance,
-  store,
-}: PasswordAndSecretRevealProps) {
-  const revealPassword = useSignal(false);
+}: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
+  const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
-  const handleCopyToClipboard = async (value: string) => {
+  const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(secret);
     } catch (error) {
       console.error("Failed to copy to clipboard", error);
     }
   };
 
-  const handleLitRetrival = async () => {
-    const litCipher = store.get("lit-cipher-text");
-    const litDataHash = store.get("lit-data-to-encrypt-hash");
-    const litAccessControls = store.get("lit-access-control");
+  const handleDownload = () => {
+    const content = `idOS ${authMethod}: ${secret}\n`;
 
-    if (!litCipher) return;
-    const password = await litInstance.decrypt(litCipher, litDataHash, litAccessControls);
-    alert(`your password is ${password}`);
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "idOS_credentials.txt";
+
+    document.body.appendChild(link);
+    link.click();
+
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your password is:</Paragraph>
-        <ReadonlyField>
-          <ReadonlyInput type={revealPassword.value ? "text" : "password"} value={password} />
-          <div className="flex items-center gap-2">
-            <RevealButton
-              onClick={() => {
-                revealPassword.value = !revealPassword.value;
-              }}
-            />
-            <ClipboardCopyButton onClick={() => handleCopyToClipboard(password)} />
-          </div>
-        </ReadonlyField>
-      </div>
-      <div class="flex flex-col gap-1">
-        <Paragraph>Your secret key is:</Paragraph>
+        <Paragraph>Your {authMethod} is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
           <div className="flex items-center gap-2">
             <RevealButton
+              aria-label={`${revealButtonLabel} ${authMethod}`}
+              title={`${revealButtonLabel} ${authMethod}`}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
-            <ClipboardCopyButton onClick={() => handleCopyToClipboard(secret)} />
+            <ClipboardCopyButton
+              aria-label={`Copy ${authMethod}`}
+              title={`Copy ${authMethod}`}
+              onClick={handleCopyToClipboard}
+            />
+            <DownloadButton
+              aria-label={`Download ${authMethod}`}
+              title={`Download ${authMethod}`}
+              onClick={handleDownload}
+            />
           </div>
         </ReadonlyField>
       </div>
-      <Button onClick={onCancel}>Go back</Button>
+      {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
     </div>
   );
 }
 
 interface GoogleDocsStoreProps {
-  password: string;
+  authMethod: "password" | "secret key";
   secret: string;
 }
 
-function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
+function GoogleDocsStore({ authMethod, secret }: GoogleDocsStoreProps) {
   const status = useSignal<"idle" | "pending" | "success" | "error">("idle");
   const documentId = useSignal("");
 
@@ -202,15 +234,7 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
                   location: {
                     index: 1,
                   },
-                  text: `\nidOS Secret: ${secret}\n`,
-                },
-              },
-              {
-                insertText: {
-                  location: {
-                    index: 2,
-                  },
-                  text: `\nidOS Password: ${password}\n`,
+                  text: `\nidOS ${authMethod}: ${secret}\n`,
                 },
               },
             ],
@@ -230,20 +254,20 @@ function GoogleDocsStore({ password, secret }: GoogleDocsStoreProps) {
   return (
     <div class="flex flex-col gap-2">
       <Button onClick={() => handleGoogleDocsStore()} disabled={status.value === "pending"}>
-        {status.value === "pending" ? "Storing..." : "Store securely on Google Drive"}
+        {status.value === "pending" ? "Saving..." : "Save in Google Drive"}
       </Button>
       {status.value === "success" ? (
         <Paragraph>
-          Your credentials have been successfully stored. You can access them{" "}
+          Your {authMethod} has been successfully saved to Google Drive.{" "}
           <a
             href={`https://docs.google.com/document/d/${documentId.value}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-green-500 hover:underline"
+            className="text-green-600 underline underline-offset-2"
           >
-            here
-          </a>
-          .
+            Click here
+          </a>{" "}
+          to see the document.
         </Paragraph>
       ) : null}
     </div>
@@ -264,28 +288,15 @@ export function PasswordOrKeyBackup({
   const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
   const litCipher = store.get("lit-cipher-text");
 
+  const authMethod: "passkey" | "password" = store.get("preferred-auth-method");
   const password = store.get("password");
-  const secret = store.get("encryption-private-key");
+  const passwordOrSecretKey: "password" | "secret key" =
+    authMethod === "password" ? "password" : "secret key";
 
-  const handleReveal = () => {
+  const secret = password;
+
+  const toggleReveal = () => {
     reveal.value = !reveal.value;
-  };
-
-  const handleDownload = () => {
-    const content = `Password: ${password}\nSecret: ${secret}`;
-
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "idOS_credentials.txt";
-
-    document.body.appendChild(link);
-    link.click();
-
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
   };
 
   const storeLitCiphers = async (cipherInfo: EncryptResponse) => {
@@ -296,31 +307,30 @@ export function PasswordOrKeyBackup({
   };
 
   const storeWithLit = async () => {
-    status.value = "pending";
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    const signer = provider.getSigner();
-    const address = await signer.getAddress();
+    try {
+      status.value = "pending";
+      let userWallets = store.get("new-user-wallets") || [];
+      userWallets = userWallets.map((wallet: { address: string }) => wallet.address);
 
-    const passwordCiphers = await litInstance.encrypt(password, [address]);
-    const secretCiphers = await litInstance.encrypt(secret, [address]);
-    const accessControlConditions = litInstance.getAccessControls();
+      const passwordCiphers = await litInstance.encrypt(password, userWallets);
+      const accessControlConditions = litInstance.getAccessControls(userWallets);
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      storeLitCiphers(passwordCiphers!);
 
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    storeLitCiphers(passwordCiphers!);
-
-    onSuccess({
-      type: "idOS:store",
-      status: "pending",
-      payload: {
-        passwordCiphers,
-        secretCiphers,
-        accessControlConditions,
-      },
-    });
+      onSuccess({
+        type: "idOS:store",
+        status: "pending",
+        payload: {
+          passwordCiphers,
+          accessControlConditions,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We depend only on backupStatus.
   useEffect(() => {
     if (["failure", "done", "success"].includes(backupStatus)) {
       status.value = "idle";
@@ -331,31 +341,40 @@ export function PasswordOrKeyBackup({
 
   if (reveal.value) {
     return (
-      <PasswordAndSecretReveal
-        {...{ password, secret }}
-        onCancel={handleReveal}
-        store={store}
-        litInstance={litInstance}
+      <PasswordOrSecretReveal
+        {...{ secret, authMethod: passwordOrSecretKey }}
+        onCancel={toggleReveal}
       />
     );
   }
 
+  const enableGoogleRecovery = false;
+
   return (
     <div class="flex flex-col gap-5">
-      <Heading>Back up your password or secret key</Heading>
-      <Button onClick={handleReveal}>Reveal password / secret key</Button>
-      <Button onClick={handleDownload}>Download password / secret key</Button>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <GoogleDocsStore {...{ password, secret }} />
-      </GoogleOAuthProvider>
+      <Heading>Create a backup of your idOS password or secret key.</Heading>
+      <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
+      {enableGoogleRecovery ? (
+        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+          <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
+        </GoogleOAuthProvider>
+      ) : null}
+
       {!hideStoreWithLit && (
         <Button onClick={storeWithLit} disabled={status.value === "pending"}>
-          {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
+          {status.value === "pending" ? (
+            "Storing..."
+          ) : (
+            <span class="inline-flex items-center">
+              Encrypt with Lit (<ExclamationTriangleIcon class="h-5 w-5" />
+              devnet beta)
+            </span>
+          )}
         </Button>
       )}
       {backupStatus === "success" ? (
         <Paragraph>
-          Your credentials have been successfully stored. You can close this window now.
+          Your {passwordOrSecretKey} has been encrypted and safely stored in your idOS.
         </Paragraph>
       ) : null}
     </div>

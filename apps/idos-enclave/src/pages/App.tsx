@@ -1,11 +1,15 @@
 import type { Store } from "@idos-network/idos-store";
+import { useSignal } from "@preact/signals";
+import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+
 import { Header } from "./Header";
 import Confirmation from "./confirm/Confirmation";
 import ChooseMethod from "./methods/Chooser";
 import Passkey from "./methods/Passkey";
 import { PasswordForm } from "./methods/Password";
 import { PasswordOrKeyBackup } from "./recovery/PasswordOrKeyBackup";
+import { PasswordOrKeyRecovery } from "./recovery/PasswordOrKeyRecovery";
 
 export type Mode = "new" | "existing" | "confirm";
 export type Method = "password" | "passkey";
@@ -38,12 +42,22 @@ const allowedIntents: AllowedIntent[] = [
   "backupPasswordOrSecret",
 ];
 
+function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?: () => void }>) {
+  return (
+    <div>
+      <Header onClick={onHeaderClick} />
+      <main className="mt-6 flex flex-1 justify-center">
+        <div className="w-[30rem] text-center">{children}</div>
+      </main>
+    </div>
+  );
+}
+
 export function App({ store, enclave }: AppProps) {
   const [method, setMethod] = useState<Method | null>(null);
   const [mode, setMode] = useState<Mode>("existing");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const [confirm, setConfirm] = useState<boolean>(false);
-  const [backup, setBackup] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
   // Confirm options.
@@ -53,7 +67,10 @@ export function App({ store, enclave }: AppProps) {
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
-  const [backupStatus, setBackupStatus] = useState<"pending" | "success" | "failure">("pending");
+
+  const isRecoveryMode = useSignal(false);
+  const isBackupMode = useSignal(false);
+  const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
 
   /**
    * Theme chooser.
@@ -71,7 +88,7 @@ export function App({ store, enclave }: AppProps) {
     }
   }, [theme]);
 
-  const goHome = useCallback(() => setMethod(null), []);
+  const resetMethod = useCallback(() => setMethod(null), []);
 
   /**
    * Window message receiver.
@@ -107,8 +124,8 @@ export function App({ store, enclave }: AppProps) {
         break;
 
       case "backupPasswordOrSecret":
-        setBackup(true);
-        setBackupStatus(requestData.message?.status);
+        isBackupMode.value = true;
+        backupStatus.value = requestData.message?.status;
         break;
     }
 
@@ -159,36 +176,72 @@ export function App({ store, enclave }: AppProps) {
     mode,
   };
 
+  if (confirm && message) {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
+      </Layout>
+    );
+  }
+
+  if (method === "password") {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <PasswordForm
+          {...methodProps}
+          encryptionPublicKey={encryptionPublicKey}
+          humanId={humanId}
+        />
+      </Layout>
+    );
+  }
+
+  if (method === "passkey") {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <Passkey {...methodProps} />
+      </Layout>
+    );
+  }
+
+  if (isBackupMode.value) {
+    return (
+      <Layout>
+        <PasswordOrKeyBackup
+          store={store}
+          onSuccess={onSuccess}
+          backupStatus={backupStatus.value}
+        />
+      </Layout>
+    );
+  }
+
+  if (isRecoveryMode.value) {
+    return (
+      <Layout
+        onHeaderClick={() => {
+          isRecoveryMode.value = false;
+        }}
+      >
+        <PasswordOrKeyRecovery onSuccess={onSuccess} store={store} />
+      </Layout>
+    );
+  }
+
   return (
-    <>
-      <Header goHome={goHome} />
-      <main className="mt-6 flex flex-1 justify-center">
-        <div className="w-[30rem] text-center">
-          {backup ? (
-            <PasswordOrKeyBackup store={store} onSuccess={onSuccess} backupStatus={backupStatus} />
-          ) : (
-            !confirm && (
-              <>
-                {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
-
-                {method === "password" && (
-                  <PasswordForm
-                    {...methodProps}
-                    encryptionPublicKey={encryptionPublicKey}
-                    humanId={humanId}
-                  />
-                )}
-
-                {method === "passkey" && <Passkey {...methodProps} />}
-              </>
-            )
-          )}
-
-          {confirm && message && (
-            <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
-          )}
-        </div>
-      </main>
-    </>
+    <Layout onHeaderClick={resetMethod}>
+      <div class="flex flex-col gap-4">
+        <ChooseMethod setMethod={setMethod} mode={mode} />
+        <button
+          type="button"
+          onClick={() => {
+            isRecoveryMode.value = true;
+          }}
+          class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
+        >
+          Forgot?
+        </button>
+      </div>
+    </Layout>
   );
 }
