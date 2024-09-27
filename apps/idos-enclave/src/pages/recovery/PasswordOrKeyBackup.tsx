@@ -355,7 +355,7 @@ export function PasswordOrKeyBackup({
       </GoogleOAuthProvider>
       {!hideStoreWithLit && (
         <Button onClick={storeWithLit} disabled={status.value === "pending"}>
-          {status.value === "pending" ? "Storing..." : "Store securely on the idOS"}
+          {status.value === "pending" ? "Storing..." : "Encrypt with Lit"}
         </Button>
       )}
       {backupStatus === "success" ? (
