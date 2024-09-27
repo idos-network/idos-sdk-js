@@ -191,7 +191,7 @@ export interface PasswordOrKeyRecoveryProps {
 export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecoveryProps) {
   const recoveryMode = useSignal<"google" | "lit">();
   const litCiphertext = store.get("lit-cipher-text");
-  const enableGoogleRecovery = true;
+  const enableGoogleRecovery = false;
 
   if (recoveryMode.value === "google") {
     return <GoogleDriveRecoveryMethod onSuccess={onSuccess} />;
