@@ -134,6 +134,8 @@ export class Lit {
       authNeededCallback: async ({ uri, expiration, resourceAbilityRequests }) => {
         const toSign = await createSiweMessage({
           uri,
+          domain: window.location.host,
+          statement: "Sign in with Lit Protocol",
           expiration,
           resources: resourceAbilityRequests,
           walletAddress: address,
