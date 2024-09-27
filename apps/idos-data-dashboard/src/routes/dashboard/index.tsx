@@ -31,7 +31,7 @@ import {
   MenuIcon,
   Wallet2Icon,
 } from "lucide-react";
-import { useEffect, useId } from "react";
+import { useEffect } from "react";
 import { NavLink, type NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
