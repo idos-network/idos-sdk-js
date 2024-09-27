@@ -211,7 +211,7 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
         </Button>
       ) : null}
 
-      {!!litCiphertext && (
+      {litCiphertext ? (
         <Button
           onClick={() => {
             recoveryMode.value = "lit";
@@ -219,6 +219,8 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
         >
           Recover using Lit Protocol
         </Button>
+      ) : (
+        <Paragraph>Sorry, you have no password or key backups that we know of.</Paragraph>
       )}
     </div>
   );
