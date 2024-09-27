@@ -228,13 +228,11 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  const litCiphertext = store.get("lit-cipher-text");
-
   return (
     <Layout onHeaderClick={resetMethod}>
       <div class="flex flex-col gap-4">
         <ChooseMethod setMethod={setMethod} mode={mode} />
-        {litCiphertext ? (
+        {method !== "new" ? (
           <button
             type="button"
             onClick={() => {
