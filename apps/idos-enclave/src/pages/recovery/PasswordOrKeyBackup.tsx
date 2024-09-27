@@ -118,10 +118,14 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 interface PasswordOrSecretRevealProps {
   authMethod: "password" | "secret key";
   secret: string;
-  onCancel: () => void;
+  onCancel?: () => void;
 }
 
-function PasswordOrSecretReveal({ authMethod, secret, onCancel }: PasswordOrSecretRevealProps) {
+export function PasswordOrSecretReveal({
+  authMethod,
+  secret,
+  onCancel,
+}: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
@@ -177,7 +181,7 @@ function PasswordOrSecretReveal({ authMethod, secret, onCancel }: PasswordOrSecr
           </div>
         </ReadonlyField>
       </div>
-      <Button onClick={onCancel}>Go back</Button>
+      {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
     </div>
   );
 }
