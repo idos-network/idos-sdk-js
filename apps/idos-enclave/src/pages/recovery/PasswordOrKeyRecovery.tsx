@@ -136,10 +136,10 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
     <div class="flex flex-col gap-4">
       <Paragraph class="text-left">
         Get your idOS Credentials using Lit Protocol. A wallet signature is required to recover your
-        passowrd.
+        password.
       </Paragraph>
       <Paragraph class="text-left text-sm">
-        Please Sign the message using one of the following wallets:
+        Please sign the message using one of the following wallets:
         <ul className="mt-3 list-disc">
           {walletAddresses.map((wallet) => (
             <li key={wallet}>{wallet}</li>
@@ -173,7 +173,7 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
 
   return (
     <div class="flex flex-col gap-4">
-      <Heading>Forgot your password or secret key?</Heading>
+      <Heading>Forgot?</Heading>
       {enableGoogleRecovery ? (
         <Button
           onClick={() => {
