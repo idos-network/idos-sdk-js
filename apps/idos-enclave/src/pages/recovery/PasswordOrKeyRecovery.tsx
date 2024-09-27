@@ -173,10 +173,19 @@ function LitProtocolRecoveryMethod({ store, onSuccess }: LitProtocolRecoveryMeth
       {passwordSignal.value ? (
         <>
           <PasswordOrSecretReveal authMethod="secret key" secret={passwordSignal.value} />
-          <Button onClick={handleCreatePasskey} disabled={loading.value}>
-            Create a passkey
-          </Button>
-          <Button onClick={handleUnlock}>Unlock</Button>
+          <div className="flex items-stretch gap-4">
+            <Button class="flex-1" onClick={handleUnlock}>
+              Unlock
+            </Button>
+            <Button
+              class="flex-1"
+              onClick={handleCreatePasskey}
+              variant="secondary"
+              disabled={loading.value}
+            >
+              Create a passkey
+            </Button>
+          </div>
         </>
       ) : (
         <Button onClick={handleRecovery} disabled={loading.value}>
