@@ -64,7 +64,7 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
 export class Lit {
   client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
     alertWhenUnauthorized: false,
-    litNetwork: import.meta.env.MODE === "production" ? LitNetwork.Datil : LitNetwork.DatilDev,
+    litNetwork: LitNetwork.DatilDev,
     debug: true,
   });
 
