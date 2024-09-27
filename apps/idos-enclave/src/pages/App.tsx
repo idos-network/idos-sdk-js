@@ -1,10 +1,15 @@
 import type { Store } from "@idos-network/idos-store";
+import { useSignal } from "@preact/signals";
+import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+
 import { Header } from "./Header";
 import Confirmation from "./confirm/Confirmation";
 import ChooseMethod from "./methods/Chooser";
 import Passkey from "./methods/Passkey";
 import { PasswordForm } from "./methods/Password";
+import { PasswordOrKeyBackup } from "./recovery/PasswordOrKeyBackup";
+import { PasswordOrKeyRecovery } from "./recovery/PasswordOrKeyRecovery";
 
 export type Mode = "new" | "existing" | "confirm";
 export type Method = "password" | "passkey";
@@ -20,11 +25,32 @@ export interface Configuration {
   theme?: "light" | "dark";
 }
 
+type AllowedIntent = "passkey" | "password" | "confirm" | "auth" | "backupPasswordOrSecret";
+
 export interface EventData {
-  intent: "passkey" | "password" | "confirm" | "auth";
+  intent: AllowedIntent;
   // biome-ignore lint/suspicious/noExplicitAny: The message will be a bit hard to narrow. Using `any` is fine in this case.
   message: Record<string, any>;
   configuration: Configuration;
+}
+
+const allowedIntents: AllowedIntent[] = [
+  "passkey",
+  "password",
+  "confirm",
+  "auth",
+  "backupPasswordOrSecret",
+];
+
+function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?: () => void }>) {
+  return (
+    <div>
+      <Header onClick={onHeaderClick} />
+      <main className="mt-6 flex flex-1 justify-center">
+        <div className="w-[30rem] text-center">{children}</div>
+      </main>
+    </div>
+  );
 }
 
 export function App({ store, enclave }: AppProps) {
@@ -42,6 +68,10 @@ export function App({ store, enclave }: AppProps) {
     new URLSearchParams(window.location.search).get("humanId"),
   );
 
+  const isRecoveryMode = useSignal(false);
+  const isBackupMode = useSignal(false);
+  const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
+
   /**
    * Theme chooser.
    */
@@ -58,7 +88,7 @@ export function App({ store, enclave }: AppProps) {
     }
   }, [theme]);
 
-  const goHome = useCallback(() => setMethod(null), []);
+  const resetMethod = useCallback(() => setMethod(null), []);
 
   /**
    * Window message receiver.
@@ -68,7 +98,7 @@ export function App({ store, enclave }: AppProps) {
 
     const { data: requestData, ports } = event;
 
-    if (!["passkey", "password", "confirm", "auth"].includes(requestData.intent))
+    if (!allowedIntents.includes(requestData.intent))
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
@@ -91,6 +121,11 @@ export function App({ store, enclave }: AppProps) {
         setConfirm(true);
         setOrigin(requestData.message?.origin);
         setMessage(requestData.message?.message);
+        break;
+
+      case "backupPasswordOrSecret":
+        isBackupMode.value = true;
+        backupStatus.value = requestData.message?.status;
         break;
     }
 
@@ -141,32 +176,76 @@ export function App({ store, enclave }: AppProps) {
     mode,
   };
 
+  if (confirm && message) {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
+      </Layout>
+    );
+  }
+
+  if (method === "password") {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <PasswordForm
+          {...methodProps}
+          encryptionPublicKey={encryptionPublicKey}
+          humanId={humanId}
+        />
+      </Layout>
+    );
+  }
+
+  if (method === "passkey") {
+    return (
+      <Layout onHeaderClick={resetMethod}>
+        <Passkey {...methodProps} />
+      </Layout>
+    );
+  }
+
+  if (isBackupMode.value) {
+    return (
+      <Layout>
+        <PasswordOrKeyBackup
+          store={store}
+          onSuccess={onSuccess}
+          backupStatus={backupStatus.value}
+        />
+      </Layout>
+    );
+  }
+
+  if (isRecoveryMode.value) {
+    return (
+      <Layout
+        onHeaderClick={() => {
+          isRecoveryMode.value = false;
+        }}
+      >
+        <PasswordOrKeyRecovery onSuccess={onSuccess} store={store} />
+      </Layout>
+    );
+  }
+
+  const litCiphertext = store.get("lit-cipher-text");
+
   return (
-    <>
-      <Header goHome={goHome} />
-      <main className="mt-6 flex flex-1 justify-center">
-        <div className="w-[30rem] text-center">
-          {!confirm && (
-            <>
-              {!method && <ChooseMethod setMethod={setMethod} mode={mode} />}
-
-              {method === "password" && (
-                <PasswordForm
-                  {...methodProps}
-                  encryptionPublicKey={encryptionPublicKey}
-                  humanId={humanId}
-                />
-              )}
-
-              {method === "passkey" && <Passkey {...methodProps} />}
-            </>
-          )}
-
-          {confirm && message && (
-            <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
-          )}
-        </div>
-      </main>
-    </>
+    <Layout onHeaderClick={resetMethod}>
+      <div class="flex flex-col gap-4">
+        <ChooseMethod setMethod={setMethod} mode={mode} />
+        {litCiphertext ? (
+          <button
+            type="button"
+            onClick={() => {
+              isRecoveryMode.value = true;
+            }}
+            class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
+          >
+            Forgot?
+          </button>
+        ) : null}
+      </div>
+    </Layout>
   );
 }

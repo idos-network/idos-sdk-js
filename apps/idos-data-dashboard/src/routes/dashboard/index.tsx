@@ -24,6 +24,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronRightIcon,
+  CogIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
   LogOutIcon,
@@ -132,6 +133,7 @@ const Breadcrumbs = () => {
 export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
+  const { hasProfile } = useIdOS();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Close the sidebar whenever `location` changes.
   useEffect(() => {
@@ -180,9 +182,17 @@ export function Component() {
                   </ListItemLink>
                 </ListItem>
               </List>
-              <Box mt="auto">
+              <VStack mt="auto" gap={5} alignItems="stretch">
+                {hasProfile ? (
+                  <List display="flex" flex={1} flexDir="column" gap={1.5}>
+                    <ListItemLink to="/settings">
+                      <CogIcon size={24} strokeWidth="1" />
+                      <Text as="span">Settings</Text>
+                    </ListItemLink>
+                  </List>
+                ) : null}
                 <DisconnectButton />
-              </Box>
+              </VStack>
             </VStack>
           </VStack>
         </VStack>
@@ -242,12 +252,21 @@ export function Component() {
               </ListItem>
             </List>
           </DrawerBody>
-          <DrawerFooter justifyContent="start">
+          <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
+            {hasProfile ? (
+              <List display="flex" flex={1} flexDir="column" gap={1.5}>
+                <ListItemLink to="/settings">
+                  <CogIcon size={24} strokeWidth="1" />
+                  <Text as="span">Settings</Text>
+                </ListItemLink>
+              </List>
+            ) : null}
+
             <DisconnectButton />
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <Flex pos="fixed" right={5} bottom={5} gap="2">
+      <Flex pos="fixed" right={5} bottom={5} gap="2" bg="neutral.900" p={5} rounded="lg">
         <Button
           as={ChakraLink}
           isExternal

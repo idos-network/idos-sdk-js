@@ -1,4 +1,4 @@
-import type { idOSCredential } from "../types";
+import type { BackupPasswordInfo, UserWallet, idOSCredential, idOSHumanAttribute } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -29,9 +29,18 @@ export class IframeEnclave implements EnclaveProvider {
     signerAddress?: string,
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
+    litAttrs?: idOSHumanAttribute[],
+    userWallets?: UserWallet[],
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
-      storage: { humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey },
+      storage: {
+        humanId,
+        signerAddress,
+        signerPublicKey,
+        expectedUserEncryptionPublicKey,
+        litAttrs,
+        userWallets,
+      },
     })) as StoredData;
 
     while (!encryptionPublicKey) {
@@ -56,6 +65,10 @@ export class IframeEnclave implements EnclaveProvider {
 
   async reset(): Promise<void> {
     this.#requestToEnclave({ reset: {} });
+  }
+
+  async updateStore(key: string, value: unknown): Promise<void> {
+    await this.#requestToEnclave({ updateStore: { key, value } });
   }
 
   async confirm(message: string): Promise<boolean> {
@@ -145,6 +158,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
   async #requestToEnclave(request: any) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
@@ -156,6 +170,42 @@ export class IframeEnclave implements EnclaveProvider {
 
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
+    });
+  }
+
+  async backupPasswordOrSecret(
+    backupFn: (data: BackupPasswordInfo) => Promise<void>,
+  ): Promise<void> {
+    const abortController = new AbortController();
+
+    window.addEventListener(
+      "message",
+      async (event) => {
+        if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
+
+        let status = "";
+
+        try {
+          status = "success";
+          await backupFn(event);
+        } catch (error) {
+          status = "failure";
+        }
+
+        event.ports[0].postMessage({
+          result: {
+            type: "idOS:store",
+            status,
+          },
+        });
+        event.ports[0].close();
+        abortController.abort();
+      },
+      { signal: abortController.signal },
+    );
+
+    await this.#requestToEnclave({
+      backupPasswordOrSecret: {},
     });
   }
 }

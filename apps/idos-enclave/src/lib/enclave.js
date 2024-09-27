@@ -30,10 +30,46 @@ export class Enclave {
     this.store.reset();
   }
 
-  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
+  safeParse(string) {
+    try {
+      const parsed = JSON.parse(string);
+      return parsed;
+    } catch (error) {
+      return string;
+    }
+  }
+
+  handlstoreableAttributes(storableAttributes) {
+    if (!Array.isArray(storableAttributes) || !storableAttributes.length) return;
+    // biome-ignore lint/complexity/noForEach: <explanation>
+    storableAttributes.forEach((attr) => {
+      this.store.set(attr.attribute_key, this.safeParse(attr.value));
+    });
+  }
+
+  storage(
+    humanId,
+    signerAddress,
+    signerPublicKey,
+    expectedUserEncryptionPublicKey,
+    litAttrs,
+    userWallets,
+  ) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
+    const safeLitAttrs = Array.isArray(litAttrs)
+      ? litAttrs
+      : typeof litAttrs === "string"
+        ? JSON.parse(litAttrs)
+        : [];
+
+    const litAttrsWithWallets = [
+      ...safeLitAttrs,
+      { attribute_key: "new-user-wallets", value: userWallets },
+    ];
+
+    this.handlstoreableAttributes(litAttrsWithWallets);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -284,6 +320,10 @@ export class Enclave {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
+  async backupPasswordOrSecret() {
+    return this.#openDialog("backupPasswordOrSecret");
+  }
+
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
@@ -304,6 +344,8 @@ export class Enclave {
           countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
+          litAttrs,
+          userWallets,
         } = requestData;
 
         const paramBuilder = {
@@ -313,9 +355,18 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
+          storage: () => [
+            humanId,
+            signerAddress,
+            signerPublicKey,
+            expectedUserEncryptionPublicKey,
+            litAttrs,
+            userWallets,
+          ],
+          updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
+          backupPasswordOrSecret: () => [],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);
@@ -333,9 +384,26 @@ export class Enclave {
     });
   }
 
+  async handleidOSStore(payload) {
+    return new Promise((resolve, reject) => {
+      const { port1, port2 } = new MessageChannel();
+      port1.onmessage = async ({ data: { error, result } }) => {
+        if (error) return reject(error);
+
+        if (result.type === "idOS:store") {
+          resolve(result);
+          port1.close();
+        }
+      };
+
+      window.parent.postMessage({ type: "idOS:store", payload }, this.parentOrigin, [port2]);
+    });
+  }
+
   async #openDialog(intent, message) {
     const width = 600;
-    const height = this.configuration?.mode === "new" ? 600 : 400;
+    const height =
+      this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -358,15 +426,28 @@ export class Enclave {
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
-      port1.onmessage = ({ data: { error, result } }) => {
-        port1.close();
-        this.dialog.close();
-
+      port1.onmessage = async ({ data: { error, result } }) => {
         if (error) {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
           return reject(error);
         }
+
+        if (result.type === "idOS:store" && result.status === "pending") {
+          result = await this.handleidOSStore(result.payload);
+
+          return this.dialog.postMessage(
+            {
+              intent: "backupPasswordOrSecret",
+              message: { status: result.status },
+              configuration: this.configuration,
+            },
+            this.dialog.origin,
+          );
+        }
+
+        port1.close();
+        this.dialog.close();
 
         return resolve(result);
       };
