@@ -19,18 +19,19 @@ export class Enclave {
   async ready(): Promise<Uint8Array> {
     if (this.encryptionPublicKey) return this.encryptionPublicKey;
 
-    const { humanId, address, publicKey, currentUserPublicKey, litAttrs } = this.auth.currentUser;
+    const { humanId, address, publicKey, currentUserPublicKey, litAttrs, userWallets } =
+      this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
     await this.provider.store("litAttrs", JSON.stringify(litAttrs));
-
     this.encryptionPublicKey = await this.provider.ready(
       humanId,
       address,
       publicKey,
       currentUserPublicKey,
       litAttrs,
+      userWallets,
     );
 
     return this.encryptionPublicKey;

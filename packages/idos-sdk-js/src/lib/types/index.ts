@@ -54,3 +54,14 @@ export type idOSHumanAttribute = {
   attribute_key: string;
   value: string;
 };
+
+export type UserWallet = {
+  id: string;
+  human_id: string;
+  wallet_id: string;
+  wallet_type: string;
+  public_key: string;
+  signature: string;
+  inserter: string;
+  message: string;
+};
