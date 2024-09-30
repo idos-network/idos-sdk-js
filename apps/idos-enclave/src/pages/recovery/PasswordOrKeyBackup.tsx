@@ -349,6 +349,13 @@ export function PasswordOrKeyBackup({
   }
 
   const enableGoogleRecovery = false;
+  const resultMsgSrc = {
+    failure: "error happened while updating your attributes, please try again",
+    success: `Your ${passwordOrSecretKey} has been encrypted and safely stored in your idOS.`,
+  };
+
+  // @ts-ignore
+  const resultMsg = resultMsgSrc?.[backupStatus] || "";
 
   return (
     <div class="flex flex-col gap-5">
@@ -372,11 +379,7 @@ export function PasswordOrKeyBackup({
           )}
         </Button>
       )}
-      {backupStatus === "success" ? (
-        <Paragraph>
-          Your {passwordOrSecretKey} has been encrypted and safely stored in your idOS.
-        </Paragraph>
-      ) : null}
+      {resultMsg ? <Paragraph>{resultMsg}</Paragraph> : null}
     </div>
   );
 }
