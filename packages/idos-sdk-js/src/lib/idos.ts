@@ -136,63 +136,72 @@ export class idOS {
       litSavableAttributes: storableAttributes.filter(hasLitKey),
     };
   }
-
   async updateAttributesIfNeeded(
-    filteredUserAttributes: idOSHumanAttribute[], // arrays here are not safe (it's a string)
-    litSavableAttributes: StorableAttribute[], // arrays here are safe (it's a real array)
+    filteredUserAttributes: idOSHumanAttribute[], // Arrays here are not safe (it's a string)
+    litSavableAttributes: StorableAttribute[], // Arrays here are safe (it's a real array)
   ) {
-    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
-    const attributeToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
-
-    const prepareValueSetter = (value: unknown): string =>
-      Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
-
-    const prepareValueGetter = (value: string): unknown => {
+    // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+    return new Promise(async (res, rej) => {
       try {
-        if (JSON.parse(value)) return JSON.parse(value);
-      } catch (error) {
-        return value;
-      }
-    };
+        const userAttrMap = new Map(
+          filteredUserAttributes.map((attr) => [attr.attribute_key, attr]),
+        );
+        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
 
-    const safeParse = (text: string) => {
-      try {
-        const parsed = JSON.parse(text);
-        return parsed;
-      } catch (error) {
-        return text;
-      }
-    };
+        // Helper function to safely parse JSON strings
+        const safeParse = (text: string) => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return text;
+          }
+        };
 
-    for (const storableAttribute of litSavableAttributes) {
-      const userAttr = userAttrMap.get(storableAttribute.key);
-      const userAttributeValue =
-        (userAttr && (prepareValueGetter(userAttr.value) as boolean | string)) || "";
+        // for a safe cooldown for consequent kwill update calls
+        const wait = (ms = 1000) =>
+          new Promise((res) =>
+            setTimeout(() => {
+              res(null);
+            }, ms),
+          );
 
-      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
-        const isArray = Array.isArray(safeParse(userAttributeValue as string));
-        if (isArray) {
-          const isEqualArr = isEqual(userAttributeValue, storableAttribute.value);
-          if (isEqualArr) return;
-          await this.data.update("attributes", {
-            ...userAttr,
-            value: prepareValueSetter(storableAttribute.value),
-          });
-          return;
+        // Helper function to prepare a value for storage
+        const prepareValueSetter = (value: unknown): string =>
+          Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+        // Loop through savable attributes and handle updates/creation sequentially
+        for (const storableAttribute of litSavableAttributes) {
+          const userAttr = userAttrMap.get(storableAttribute.key);
+          const userAttributeValue = userAttr ? safeParse(userAttr.value as string) : undefined;
+
+          const needsUpdate =
+            userAttributeValue && !isEqual(userAttributeValue, storableAttribute.value);
+
+          if (userAttr) {
+            if (needsUpdate) {
+              const updatedValue = prepareValueSetter(storableAttribute.value);
+              await this.data.update("attributes", { ...userAttr, value: updatedValue });
+              await wait();
+            }
+          } else {
+            // Prepare attributes to create if not found
+            attributesToCreate.push({
+              attribute_key: storableAttribute.key,
+              value: prepareValueSetter(storableAttribute.value),
+            });
+          }
         }
-        await this.data.update("attributes", { ...userAttr, value: storableAttribute.value });
-      }
 
-      if (!userAttr) {
-        attributeToCreate.push({
-          attribute_key: storableAttribute.key,
-          value: prepareValueSetter(storableAttribute.value),
-        });
-      }
-    }
+        // Create new attributes if any are missing
+        if (attributesToCreate.length)
+          await this.data.createMultiple("attributes", attributesToCreate);
 
-    if (attributeToCreate.length)
-      await this.data.createMultiple("attributes", attributeToCreate, true);
+        res(null);
+      } catch (error) {
+        console.log({ error });
+        rej(error);
+      }
+    });
   }
 
   formStorableAttributes(
