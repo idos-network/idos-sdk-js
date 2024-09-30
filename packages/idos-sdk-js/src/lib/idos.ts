@@ -78,6 +78,9 @@ export class idOS {
     });
     await idos.enclave.load();
 
+    // @ts-ignore
+    window.sdk = idos;
+
     return idos;
   }
 
@@ -227,7 +230,6 @@ export class idOS {
         userAttrs,
         storableAttributes,
       );
-
       await this.updateAttributesIfNeeded(filteredUserAttributes, litSavableAttributes);
     });
   }

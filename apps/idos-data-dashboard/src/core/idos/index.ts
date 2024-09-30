@@ -10,7 +10,6 @@ export const useIdOS = () => {
   if (!idos) {
     throw new Error("idOS is not initialized");
   }
-  //@ts-ignore
-  (window as any).idos = idos;
+
   return idos;
 };
