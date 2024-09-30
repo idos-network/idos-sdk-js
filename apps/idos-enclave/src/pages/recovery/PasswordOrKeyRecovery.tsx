@@ -226,7 +226,6 @@ export function PasswordOrKeyRecovery({ onSuccess, store }: PasswordOrKeyRecover
           Recover Google Drive Backup
         </Button>
       ) : null}
-
       {litCiphertext ? (
         <Button
           onClick={() => {
