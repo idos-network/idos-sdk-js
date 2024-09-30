@@ -1,0 +1,78 @@
+{
+  "name": "@idos-network/issuer-sdk-js",
+  "description": "Issuer JavaScript SDK",
+  "version": "0.0.1",
+  "homepage": "https://idos.network",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "license": "MIT",
+  "type": "module",
+  "main": "src/lib/index.ts",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "dev": "dotenvx run --convention=nextjs -- tsup --watch",
+    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
+    "lint": "biome check --apply ./src",
+    "format": "biome format --write .",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest",
+    "release-it": "release-it",
+    "prepack": "clean-package",
+    "postpack": "clean-package restore",
+    "test:build": "publint --strict"
+  },
+  "peerDependencies": {
+    "ethers": "^6.12",
+    "near-api-js": "^3.0"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "^1.6.4",
+    "@release-it/keep-a-changelog": "^5.0.0",
+    "@synthetixio/synpress": "4.0.0-alpha.7",
+    "@vitest/ui": "^0.34.6",
+    "clean-package": "^2.2.0",
+    "dotenv": "^16.4.5",
+    "jsdom": "^22.1.0",
+    "prettier": "^3.0.3",
+    "release-it": "^17.0.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.2.2",
+    "vitest": "^0.31.4"
+  },
+  "dependencies": {
+    "@idos-network/idos-sdk": "workspace:*",
+    "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
+    "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
+    "lodash-es": "^4.17.21",
+    "@digitalbazaar/vc": "^6.0.2",
+    "@kwilteam/kwil-js": "0.7.1",
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/binary": "^1.0.1",
+    "@stablelib/bytes": "^1.0.1",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/utf8": "^1.0.1",
+    "borsh": "^1.0.0",
+    "jsonld": "^8.3.1",
+    "jsonld-document-loader": "^2.0.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "clean-package": {
+    "replace": {
+      "main": "dist/index.js",
+      "types": "dist/index.d.ts",
+      "exports": {
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
+        },
+        "./package.json": "./package.json"
+      }
+    }
+  }
+}

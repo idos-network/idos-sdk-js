@@ -485,6 +485,97 @@ importers:
 
   packages/idos-store: {}
 
+  packages/issuer-sdk-js:
+    dependencies:
+      '@digitalbazaar/ed25519-signature-2020':
+        specifier: ^5.2.0
+        version: 5.2.0(web-streams-polyfill@3.2.1)
+      '@digitalbazaar/ed25519-verification-key-2020':
+        specifier: ^4.1.0
+        version: 4.1.0
+      '@digitalbazaar/vc':
+        specifier: ^6.0.2
+        version: 6.0.2(web-streams-polyfill@3.2.1)
+      '@idos-network/idos-sdk':
+        specifier: workspace:*
+        version: link:../idos-sdk-js
+      '@kwilteam/kwil-js':
+        specifier: 0.7.1
+        version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/binary':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/bytes':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/sha256':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
+      borsh:
+        specifier: ^1.0.0
+        version: 1.0.0
+      ethers:
+        specifier: ^6.12
+        version: 6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jsonld:
+        specifier: ^8.3.1
+        version: 8.3.1(web-streams-polyfill@3.2.1)
+      jsonld-document-loader:
+        specifier: ^2.0.0
+        version: 2.0.0
+      lodash-es:
+        specifier: ^4.17.21
+        version: 4.17.21
+      near-api-js:
+        specifier: ^3.0
+        version: 3.0.4
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
+    devDependencies:
+      '@dotenvx/dotenvx':
+        specifier: ^1.6.4
+        version: 1.6.4
+      '@release-it/keep-a-changelog':
+        specifier: ^5.0.0
+        version: 5.0.0(release-it@17.0.0(typescript@5.5.4))
+      '@synthetixio/synpress':
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3)(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)
+      '@vitest/ui':
+        specifier: ^0.34.6
+        version: 0.34.6(vitest@0.31.4)
+      clean-package:
+        specifier: ^2.2.0
+        version: 2.2.0
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
+      jsdom:
+        specifier: ^22.1.0
+        version: 22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      prettier:
+        specifier: ^3.0.3
+        version: 3.0.3
+      release-it:
+        specifier: ^17.0.0
+        version: 17.0.0(typescript@5.5.4)
+      tsup:
+        specifier: ^8.0.2
+        version: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.5.4
+      vitest:
+        specifier: ^0.31.4
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3)
+
   packages/types: {}
 
 packages:
@@ -6471,6 +6562,7 @@ packages:
   fstream@1.0.12:
     resolution: {integrity: sha512-WvJ193OHa0GHPEL+AycEJgxvBEwyfRkN1vhjca23OaPVMCaLCXTd5qAu82AjTcgP1UJmytkOKb63Ypde7raDIg==}
     engines: {node: '>=0.6'}
+    deprecated: This package is no longer supported.
 
   function-bind@1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
@@ -6565,9 +6657,11 @@ packages:
 
   glob@7.1.6:
     resolution: {integrity: sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   global-dirs@3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -8849,6 +8943,7 @@ packages:
 
   rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
@@ -15490,6 +15585,18 @@ snapshots:
       - utf-8-validate
       - zod
 
+  '@synthetixio/ethereum-wallet-mock@0.0.1-alpha.7(@playwright/test@1.45.3)(bufferutil@4.0.8)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)':
+    dependencies:
+      '@depay/web3-mock': 14.17.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@playwright/test': 1.45.3
+      '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.45.3)
+      viem: 2.9.9(bufferutil@4.0.8)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+      - zod
+
   '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.5.4)':
     dependencies:
       axios: 1.6.7
@@ -15525,6 +15632,29 @@ snapshots:
       playwright-core: 1.45.3
       progress: 2.0.3
       tsup: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
+      unzipper: 0.10.14
+      zod: 3.22.4
+    transitivePeerDependencies:
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - debug
+      - postcss
+      - supports-color
+      - ts-node
+      - typescript
+
+  '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)':
+    dependencies:
+      axios: 1.6.7
+      chalk: 5.3.0
+      commander: 12.0.0
+      esbuild: 0.20.0
+      fs-extra: 11.2.0
+      glob: 10.3.10
+      gradient-string: 2.0.2
+      playwright-core: 1.45.3
+      progress: 2.0.3
+      tsup: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -15584,6 +15714,26 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@synthetixio/synpress-metamask@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3)(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@playwright/test': 1.45.3
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
+      '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.45.3)
+      '@viem/anvil': 0.0.7(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      fs-extra: 11.2.0
+      zod: 3.22.4
+    transitivePeerDependencies:
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - bufferutil
+      - debug
+      - playwright-core
+      - postcss
+      - supports-color
+      - ts-node
+      - typescript
+      - utf-8-validate
+
   '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)':
     dependencies:
       '@playwright/test': 1.44.1
@@ -15611,6 +15761,26 @@ snapshots:
       '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.45.3)
       '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - '@microsoft/api-extractor'
+      - '@swc/core'
+      - bufferutil
+      - debug
+      - playwright-core
+      - postcss
+      - supports-color
+      - ts-node
+      - typescript
+      - utf-8-validate
+      - zod
+
+  '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3)(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)':
+    dependencies:
+      '@playwright/test': 1.45.3
+      '@synthetixio/ethereum-wallet-mock': 0.0.1-alpha.7(@playwright/test@1.45.3)(bufferutil@4.0.8)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.22.4)
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
+      '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.45.3)
+      '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3)(@playwright/test@1.45.3)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
       - '@swc/core'
