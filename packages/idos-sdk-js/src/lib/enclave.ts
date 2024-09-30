@@ -90,7 +90,7 @@ export class Enclave {
   }
 
   async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
-    if (!this.encryptionPublicKey) await this.ready();
+    await this.ready();
 
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
