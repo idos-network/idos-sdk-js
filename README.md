@@ -16,7 +16,7 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and 
 pnpm add @idos-network/idos-sdk ethers near-api-js
 ```
 
-## Quickstart
+## 10,000 foot view
 
 ```js
 import { idOS } from "@idos-network/idos-sdk";
@@ -34,6 +34,8 @@ await idos.setSigner("EVM", signer);
 await idos.data.list("credentials").then(console.log);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```
+
+More details on https://github.com/idos-network/idos-sdk-js/blob/main/packages/idos-sdk-js#quickstart
 
 ## Support
 
