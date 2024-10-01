@@ -185,6 +185,7 @@ export class IframeEnclave implements EnclaveProvider {
         try {
           status = "success";
           await backupFn(event);
+          this.#hideEnclave();
         } catch (error) {
           status = "failure";
           this.#hideEnclave();
