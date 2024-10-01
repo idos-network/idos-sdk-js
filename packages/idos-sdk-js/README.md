@@ -57,14 +57,16 @@ const isValid = await idOS.verifiableCredentials
   .catch((e) => false);
 ```
 
-> [!NOTE]
+> 🛈 Note
+> 
 > For more examples and data queries, see:
 >
 > - the [quick reference](#quick-reference) below
 > - [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp) for a simple implementation
 > - [`📁 idos-data-dashboard`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-data-dashboard) for a thorough example
 
-> [!TIP]
+> 💡 Tip
+> 
 > Need support? Please follow [this process](https://github.com/idos-network/.github/blob/main/profile/README.md).
 
 ## Diving deeper
@@ -359,7 +361,8 @@ await sdk.grants.shareMatchingEntry(
 });
 ```
 
-> [!TIP]
+> 💡 Tip
+> 
 > See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
 
 ### Delegated Access Grants
@@ -368,7 +371,8 @@ A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant b
 
 The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
 
-> [!CAUTION]
+> 🛑 Caution
+> 
 > This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
 
 This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
