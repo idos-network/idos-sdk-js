@@ -24,8 +24,8 @@ export class Enclave {
     const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
     const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();
 
-    await this.provider.store("litAttrs", JSON.stringify(litAttrs));
-    await this.provider.store("userWallets", JSON.stringify(userWallets));
+    await this.provider.updateStore("litAttrs", litAttrs);
+    await this.provider.updateStore("new-user-wallets", userWallets);
 
     if (this.encryptionPublicKey) return this.encryptionPublicKey;
 
@@ -90,7 +90,7 @@ export class Enclave {
   }
 
   async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
-    if (!this.encryptionPublicKey) await this.ready();
+    await this.ready();
 
     return this.provider.backupPasswordOrSecret(callbackFn);
   }

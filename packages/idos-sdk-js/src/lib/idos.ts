@@ -1,6 +1,6 @@
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
-import { differenceWith, isEqual } from "lodash-es";
+import { isEqual } from "lodash-es";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
@@ -78,8 +78,6 @@ export class idOS {
     });
     await idos.enclave.load();
 
-    (window as any).sdk = idos;
-
     return idos;
   }
 
@@ -135,49 +133,73 @@ export class idOS {
       litSavableAttributes: storableAttributes.filter(hasLitKey),
     };
   }
-
   async updateAttributesIfNeeded(
-    filteredUserAttributes: idOSHumanAttribute[],
-    litSavableAttributes: StorableAttribute[],
-  ) {
-    const userAttrMap = new Map(filteredUserAttributes.map((attr) => [attr.attribute_key, attr]));
-    const attributeToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
-
-    const prepareValueSetter = (value: unknown): string =>
-      Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
-
-    const prepareValueGetter = (value: string): unknown => {
+    filteredUserAttributes: idOSHumanAttribute[], // Arrays here are not safe (it's a string)
+    litSavableAttributes: StorableAttribute[], // Arrays here are safe (it's a real array)
+  ): Promise<void> {
+    // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+    return new Promise(async (res, rej) => {
       try {
-        if (JSON.parse(value)) return JSON.parse(value);
+        const userAttrMap = new Map(
+          filteredUserAttributes.map((attr) => [attr.attribute_key, attr]),
+        );
+        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
+
+        // Helper function to safely parse JSON strings
+        const safeParse = (text: string) => {
+          try {
+            return JSON.parse(text);
+          } catch {
+            return text;
+          }
+        };
+
+        // for a safe cooldown for consequent kwill update calls
+        const wait = (
+          ms = 1000, // TODO: find another way to handle sequential updating
+        ) =>
+          new Promise((res) =>
+            setTimeout(() => {
+              res(null);
+            }, ms),
+          );
+
+        // Helper function to prepare a value for storage
+        const prepareValueSetter = (value: unknown): string =>
+          Array.isArray(value) ? JSON.stringify(value) : typeof value === "string" ? value : "";
+
+        // Loop through savable attributes and handle updates/creation sequentially
+        for (const storableAttribute of litSavableAttributes) {
+          const userAttr = userAttrMap.get(storableAttribute.key);
+          const userAttributeValue = userAttr ? safeParse(userAttr.value as string) : undefined;
+
+          const needsUpdate =
+            userAttributeValue && !isEqual(userAttributeValue, storableAttribute.value);
+
+          if (userAttr) {
+            if (needsUpdate) {
+              const updatedValue = prepareValueSetter(storableAttribute.value);
+              await this.data.update("attributes", { ...userAttr, value: updatedValue });
+              await wait();
+            }
+          } else {
+            // Prepare attributes to create if not found
+            attributesToCreate.push({
+              attribute_key: storableAttribute.key,
+              value: prepareValueSetter(storableAttribute.value),
+            });
+          }
+        }
+
+        // Create new attributes if any are missing
+        if (attributesToCreate.length)
+          await this.data.createMultiple("attributes", attributesToCreate);
+
+        res();
       } catch (error) {
-        return value;
+        rej(error);
       }
-    };
-
-    for (const storableAttribute of litSavableAttributes) {
-      const userAttr = userAttrMap.get(storableAttribute.key);
-      const userAttributeValue = userAttr && prepareValueGetter(userAttr.value);
-
-      if (userAttributeValue && userAttributeValue !== storableAttribute.value) {
-        if (
-          Array.isArray(userAttributeValue) &&
-          !differenceWith(userAttributeValue, storableAttribute.value, isEqual).length
-        )
-          return;
-        await this.data.update("attributes", { ...userAttr, value: storableAttribute.value });
-      }
-
-      if (!userAttr) {
-        attributeToCreate.push({
-          attribute_key: storableAttribute.key,
-          value: prepareValueSetter(storableAttribute.value),
-        });
-      }
-    }
-
-    if (attributeToCreate.length) {
-      await this.data.createMultiple("attributes", attributeToCreate, true);
-    }
+    });
   }
 
   formStorableAttributes(
@@ -215,7 +237,6 @@ export class idOS {
         userAttrs,
         storableAttributes,
       );
-
       await this.updateAttributesIfNeeded(filteredUserAttributes, litSavableAttributes);
     });
   }

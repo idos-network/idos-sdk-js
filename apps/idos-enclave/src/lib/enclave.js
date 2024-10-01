@@ -14,6 +14,7 @@ export class Enclave {
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
+    this.backupButton = document.querySelector("button#backup");
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     const secretKey = storeWithCodec.get("encryption-private-key");
@@ -47,29 +48,13 @@ export class Enclave {
     });
   }
 
-  storage(
-    humanId,
-    signerAddress,
-    signerPublicKey,
-    expectedUserEncryptionPublicKey,
-    litAttrs,
-    userWallets,
-  ) {
+  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
-    const safeLitAttrs = Array.isArray(litAttrs)
-      ? litAttrs
-      : typeof litAttrs === "string"
-        ? JSON.parse(litAttrs)
-        : [];
 
-    const litAttrsWithWallets = [
-      ...safeLitAttrs,
-      { attribute_key: "new-user-wallets", value: userWallets },
-    ];
-
-    this.handlstoreableAttributes(litAttrsWithWallets);
+    const litAttrs = this.store.get("litAttrs");
+    this.handlstoreableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -321,7 +306,19 @@ export class Enclave {
   }
 
   async backupPasswordOrSecret() {
-    return this.#openDialog("backupPasswordOrSecret");
+    this.backupButton.style.display = "block";
+    this.backupButton.disabled = false;
+    return new Promise((resolve, reject) => {
+      this.backupButton.addEventListener("click", async () => {
+        try {
+          this.backupButton.disabled = true;
+          await this.#openDialog("backupPasswordOrSecret");
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      });
+    });
   }
 
   #listenToRequests() {
@@ -346,6 +343,8 @@ export class Enclave {
           expectedUserEncryptionPublicKey,
           litAttrs,
           userWallets,
+          key,
+          value,
         } = requestData;
 
         const paramBuilder = {
@@ -382,6 +381,10 @@ export class Enclave {
         event.ports[0].close();
       }
     });
+  }
+
+  updateStore(key, value) {
+    this.store.set(key, value);
   }
 
   async handleidOSStore(payload) {
@@ -430,6 +433,7 @@ export class Enclave {
         if (error) {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
+          this.backupButton.disabled = false;
           return reject(error);
         }
 

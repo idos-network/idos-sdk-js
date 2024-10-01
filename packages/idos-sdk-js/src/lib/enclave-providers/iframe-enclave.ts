@@ -1,4 +1,4 @@
-import type { BackupPasswordInfo, UserWallet, idOSCredential, idOSHumanAttribute } from "../types";
+import type { BackupPasswordInfo, idOSCredential } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -29,8 +29,6 @@ export class IframeEnclave implements EnclaveProvider {
     signerAddress?: string,
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
-    litAttrs?: idOSHumanAttribute[],
-    userWallets?: UserWallet[],
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
@@ -38,8 +36,6 @@ export class IframeEnclave implements EnclaveProvider {
         signerAddress,
         signerPublicKey,
         expectedUserEncryptionPublicKey,
-        litAttrs,
-        userWallets,
       },
     })) as StoredData;
 
@@ -177,6 +173,7 @@ export class IframeEnclave implements EnclaveProvider {
     backupFn: (data: BackupPasswordInfo) => Promise<void>,
   ): Promise<void> {
     const abortController = new AbortController();
+    this.#showEnclave();
 
     window.addEventListener(
       "message",
@@ -188,8 +185,10 @@ export class IframeEnclave implements EnclaveProvider {
         try {
           status = "success";
           await backupFn(event);
+          this.#hideEnclave();
         } catch (error) {
           status = "failure";
+          this.#hideEnclave();
         }
 
         event.ports[0].postMessage({
@@ -204,8 +203,13 @@ export class IframeEnclave implements EnclaveProvider {
       { signal: abortController.signal },
     );
 
-    await this.#requestToEnclave({
-      backupPasswordOrSecret: {},
-    });
+    try {
+      await this.#requestToEnclave({
+        backupPasswordOrSecret: {},
+      });
+      this.#hideEnclave();
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
