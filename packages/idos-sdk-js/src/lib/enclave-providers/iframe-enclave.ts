@@ -173,6 +173,7 @@ export class IframeEnclave implements EnclaveProvider {
     backupFn: (data: BackupPasswordInfo) => Promise<void>,
   ): Promise<void> {
     const abortController = new AbortController();
+    this.#showEnclave();
 
     window.addEventListener(
       "message",
@@ -186,6 +187,7 @@ export class IframeEnclave implements EnclaveProvider {
           await backupFn(event);
         } catch (error) {
           status = "failure";
+          this.#hideEnclave();
         }
 
         event.ports[0].postMessage({
@@ -200,8 +202,13 @@ export class IframeEnclave implements EnclaveProvider {
       { signal: abortController.signal },
     );
 
-    await this.#requestToEnclave({
-      backupPasswordOrSecret: {},
-    });
+    try {
+      await this.#requestToEnclave({
+        backupPasswordOrSecret: {},
+      });
+      this.#hideEnclave();
+    } catch (error) {
+    } finally {
+    }
   }
 }
