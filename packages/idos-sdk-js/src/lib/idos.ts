@@ -78,9 +78,6 @@ export class idOS {
     });
     await idos.enclave.load();
 
-    // @ts-ignore
-    window.sdk = idos;
-
     return idos;
   }
 
@@ -139,7 +136,7 @@ export class idOS {
   async updateAttributesIfNeeded(
     filteredUserAttributes: idOSHumanAttribute[], // Arrays here are not safe (it's a string)
     litSavableAttributes: StorableAttribute[], // Arrays here are safe (it's a real array)
-  ) {
+  ): Promise<void> {
     // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
     return new Promise(async (res, rej) => {
       try {
@@ -158,7 +155,9 @@ export class idOS {
         };
 
         // for a safe cooldown for consequent kwill update calls
-        const wait = (ms = 1000) =>
+        const wait = (
+          ms = 1000, // TODO: find another way to handle sequential updating
+        ) =>
           new Promise((res) =>
             setTimeout(() => {
               res(null);
@@ -196,9 +195,8 @@ export class idOS {
         if (attributesToCreate.length)
           await this.data.createMultiple("attributes", attributesToCreate);
 
-        res(null);
+        res();
       } catch (error) {
-        console.log({ error });
         rej(error);
       }
     });

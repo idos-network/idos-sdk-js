@@ -208,7 +208,7 @@ export class IframeEnclave implements EnclaveProvider {
       });
       this.#hideEnclave();
     } catch (error) {
-    } finally {
+      console.error(error);
     }
   }
 }

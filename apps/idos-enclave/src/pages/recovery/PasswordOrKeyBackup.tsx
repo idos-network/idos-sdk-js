@@ -349,12 +349,11 @@ export function PasswordOrKeyBackup({
   }
 
   const enableGoogleRecovery = false;
-  const resultMsgSrc = {
+  const resultMsgSrc: Record<string, string> = {
     failure: "error happened while updating your attributes, please try again",
     success: `Your ${passwordOrSecretKey} has been encrypted and safely stored in your idOS.`,
   };
 
-  // @ts-ignore
   const resultMsg = resultMsgSrc?.[backupStatus] || "";
 
   return (

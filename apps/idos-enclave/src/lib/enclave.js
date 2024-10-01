@@ -308,14 +308,14 @@ export class Enclave {
   async backupPasswordOrSecret() {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
-    return new Promise((resolve, rejecet) => {
+    return new Promise((resolve, reject) => {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
           await this.#openDialog("backupPasswordOrSecret");
           resolve();
         } catch (error) {
-          rejecet(error);
+          reject(error);
         }
       });
     });
