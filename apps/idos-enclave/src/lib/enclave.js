@@ -14,6 +14,7 @@ export class Enclave {
 
     this.unlockButton = document.querySelector("button#unlock");
     this.confirmButton = document.querySelector("button#confirm");
+    this.backupButton = document.querySelector("button#backup");
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     const secretKey = storeWithCodec.get("encryption-private-key");
@@ -321,7 +322,16 @@ export class Enclave {
   }
 
   async backupPasswordOrSecret() {
-    return this.#openDialog("backupPasswordOrSecret");
+    this.backupButton.style.display = "block";
+    this.backupButton.disabled = false;
+
+    return new Promise((resolve, reject) => {
+      this.backupButton.addEventListener("click", async () => {
+        this.backupButton.disabled = true;
+        const { status } = await this.#openDialog("backupPasswordOrSecret");
+        resolve(status);
+      });
+    });
   }
 
   #listenToRequests() {

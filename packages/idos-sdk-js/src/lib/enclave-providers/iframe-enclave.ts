@@ -204,8 +204,17 @@ export class IframeEnclave implements EnclaveProvider {
       { signal: abortController.signal },
     );
 
-    await this.#requestToEnclave({
-      backupPasswordOrSecret: {},
-    });
+    this.#showEnclave();
+
+    try {
+      await this.#requestToEnclave({
+        backupPasswordOrSecret: {},
+      });
+    } catch (error) {
+      console.error(error);
+      this.#hideEnclave();
+    } finally {
+      // @todo: hide enclave
+    }
   }
 }
