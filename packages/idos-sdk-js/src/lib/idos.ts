@@ -1,3 +1,4 @@
+import type { idOSHumanAttribute } from "@idos-network/idos-sdk-types";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 import { isEqual } from "lodash-es";
@@ -10,7 +11,7 @@ import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
-import type { StorableAttribute, idOSHumanAttribute } from "./types";
+import type { StorableAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
 
@@ -231,7 +232,8 @@ export class idOS {
         accessControlConditions,
       );
 
-      const userAttrs: idOSHumanAttribute[] = (await this.data.list("attributes")) || [];
+      const userAttrs = ((await this.data.list("attributes")) ||
+        []) as unknown as idOSHumanAttribute[];
 
       const { filteredUserAttributes, litSavableAttributes } = this.filterLitAttributes(
         userAttrs,

@@ -1,9 +1,9 @@
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
 import type { Data } from "../data";
 import type { Enclave } from "../enclave";
-import type { idOSCredential } from "../types";
 import { assertNever } from "../utils";
 import { EvmGrants, type EvmGrantsOptions } from "./evm";
 import type Grant from "./grant";
@@ -199,7 +199,7 @@ class ConnectedGrants extends Grants {
     lockedUntil: number,
     receiverPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    const allEntries = (await this.data.list(tableName)) as idOSCredential[];
+    const allEntries = (await this.data.list(tableName)) as unknown as idOSCredential[];
 
     const filteredEntries = allEntries.filter((entry) => {
       const keys = Object.keys(publicFields) as (keyof idOSCredential)[];
