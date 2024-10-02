@@ -3,16 +3,7 @@ import { Wallet } from "ethers";
 import { implicitAddressFromPublicKey } from "src/lib";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test } from "vitest";
-
-const kwilProvider = "kwil-provider";
-const chainId = "chain-id";
-const dbId = "db-id";
-
-class TestKwilClient extends WebKwil {
-  constructor() {
-    super({ kwilProvider, chainId });
-  }
-}
+import { TestKwilClient, dbId, kwilProvider } from "./test-kwil-client";
 
 let kwilWrapper: KwilWrapper;
 
@@ -28,6 +19,7 @@ describe("kwil-wrapper", () => {
   });
 
   test("should set a `secp256k1_ep` signer", async () => {
+    // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const signer: any = Wallet.createRandom();
 
     await kwilWrapper.setSigner({

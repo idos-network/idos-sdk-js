@@ -3,7 +3,7 @@ import { Auth } from "src/lib/auth";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Store } from "../../../idos-store";
-import { TestKwilClient } from "./kwil-wrapper.test";
+import { TestKwilClient } from "./test-kwil-client";
 
 let auth: Auth;
 const humanId = "human-id";
