@@ -154,14 +154,6 @@ class ConnectedGrants extends Grants {
     this.#child = child;
   }
 
-  async connect(_args: {
-    type: SignerType;
-    signer: Wallet | Signer;
-    accountId?: string;
-  }): Promise<ConnectedGrants> {
-    throw new Error("Can't re-connect");
-  }
-
   async list(
     args: {
       owner?: string;
