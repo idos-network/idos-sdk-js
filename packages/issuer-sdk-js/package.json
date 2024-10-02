@@ -26,7 +26,6 @@
     "postpack": "clean-package restore",
     "test:build": "publint --strict"
   },
-  "peerDependencies": {},
   "devDependencies": {
     "@release-it/keep-a-changelog": "^5.0.0",
     "clean-package": "^2.2.0",
@@ -36,7 +35,9 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
-    "@idos-network/idos-sdk-types": "workspace:*"
+    "@idos-network/idos-sdk-types": "workspace:*",
+    "@kwilteam/kwil-js": "0.7.1",
+    "ethers": "^6.13.3"
   },
   "clean-package": {
     "replace": {
