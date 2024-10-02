@@ -1,5 +1,4 @@
-export class idOSIssuer {
-  constructor() {
-    console.log("idOS Issuer SDK initialised");
-  }
+export function createIssuer() {
+  console.log("Issuer SDK initialised");
+  return true;
 }
