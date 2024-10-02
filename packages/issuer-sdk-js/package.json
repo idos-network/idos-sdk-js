@@ -35,7 +35,9 @@
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@idos-network/idos-sdk-types": "workspace:*"
+  },
   "clean-package": {
     "replace": {
       "main": "dist/index.js",

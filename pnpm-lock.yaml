@@ -486,6 +486,10 @@ importers:
   packages/idos-store: {}
 
   packages/issuer-sdk-js:
+    dependencies:
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
     devDependencies:
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
