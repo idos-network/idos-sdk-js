@@ -1,4 +1,5 @@
-import type { BackupPasswordInfo, idOSCredential } from "../types";
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { BackupPasswordInfo } from "../types";
 import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {

@@ -4,6 +4,9 @@ import type { KwilWrapper } from "./kwil-wrapper";
 
 /* global crypto */
 
+// biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
+type AnyRecord = Record<string, any>;
+
 export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
@@ -14,10 +17,7 @@ export class Data {
     return tableName.replace(/s$/, "");
   }
 
-  async list<T extends Record<string, unknown>>(
-    tableName: string,
-    filter?: Partial<T>,
-  ): Promise<T[]> {
+  async list<T extends AnyRecord>(tableName: string, filter?: Partial<T>): Promise<T[]> {
     let records = (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
@@ -33,7 +33,7 @@ export class Data {
     }
 
     const [key, value] = Object.entries(filter)[0];
-    return records.filter((record: any) => !record[key] || record[key] === value);
+    return records.filter((record: AnyRecord) => !record[key] || record[key] === value);
   }
 
   async listAllCredentials(): Promise<Record<string, string>[]> {
@@ -62,12 +62,12 @@ export class Data {
     return this.enclave.filterCredentialsByCountries(credentialsWithContent, countries);
   }
 
-  async createMultiple<T extends Record<string, unknown>>(
+  async createMultiple<T extends AnyRecord>(
     tableName: string,
     records: T[],
     synchronous?: boolean,
   ) {
-    let receiverPublicKey;
+    let receiverPublicKey: string | undefined;
 
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
@@ -94,7 +94,7 @@ export class Data {
     return newRecords;
   }
 
-  async create<T extends Record<string, unknown>>(
+  async create<T extends AnyRecord>(
     tableName: string,
     record: T,
     synchronous?: boolean,
@@ -103,10 +103,10 @@ export class Data {
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
 
-    let receiverPublicKey;
+    let receiverPublicKey: string | undefined;
 
-    const inputs: string[] = ((await this.kwilWrapper.schema) as any).data.actions
-      .find((action: any) => action.name === name)
+    const inputs: string[] = ((await this.kwilWrapper.schema) as AnyRecord).data.actions
+      .find((action: AnyRecord) => action.name === name)
       .parameters.map((input: string) => input.substring(1));
 
     const recordKeys = Object.keys(record);
@@ -117,11 +117,11 @@ export class Data {
 
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
-      (record as any).content = await this.enclave.encrypt(
-        (record as any).content as string,
+      (record as AnyRecord).content = await this.enclave.encrypt(
+        (record as AnyRecord).content as string,
         receiverPublicKey,
       );
-      (record as any).encryption_public_key = receiverPublicKey;
+      (record as AnyRecord).encryption_public_key = receiverPublicKey;
     }
 
     const newRecord = { id: crypto.randomUUID(), ...record };
@@ -135,7 +135,7 @@ export class Data {
     return newRecord;
   }
 
-  async get<T extends Record<string, unknown>>(
+  async get<T extends AnyRecord>(
     tableName: string,
     recordId: string,
     decrypt = true,
@@ -145,6 +145,7 @@ export class Data {
         "get_credential_owned",
         { id: recordId },
         "Get your credential in idOS",
+        // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
       const record = records.find((r: { id: string }) => r.id === recordId);
@@ -166,15 +167,13 @@ export class Data {
     return record || null;
   }
 
-  async getShared<T extends Record<string, unknown>>(
-    tableName: string,
-    recordId: string,
-  ): Promise<T | null> {
+  async getShared<T extends AnyRecord>(tableName: string, recordId: string): Promise<T | null> {
     if (tableName === "credentials") {
       const records = (await this.kwilWrapper.call(
         "get_credential_shared",
         { id: recordId },
         "Get credential shared with you in idOS",
+        // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
       const record = records.find((r: { id: string }) => r.id === recordId);
@@ -229,7 +228,7 @@ export class Data {
     return record;
   }
 
-  async update<T extends Record<string, unknown>>(
+  async update<T extends AnyRecord>(
     tableName: string,
     recordLike: T,
     description?: string,
@@ -238,6 +237,7 @@ export class Data {
     if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
 
     let receiverPublicKey: string | undefined;
+    // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const record: any = recordLike;
 
     if (tableName === "credentials") {

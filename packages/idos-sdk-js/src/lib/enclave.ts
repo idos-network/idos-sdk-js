@@ -1,8 +1,9 @@
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
-import type { BackupPasswordInfo, idOSCredential } from "./types";
+import type { BackupPasswordInfo } from "./types";
 
 export class Enclave {
   encryptionPublicKey?: Uint8Array;

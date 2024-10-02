@@ -1,7 +1,7 @@
+import type { idOSHuman, idOSHumanAttribute, idOSWallet } from "@idos-network/idos-sdk-types";
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
-import type { idOSHuman, idOSHumanAttribute, idOSWallet } from "./types";
 
 export class KwilWrapper {
   static defaults = {

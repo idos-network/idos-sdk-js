@@ -358,6 +358,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.6.4
         version: 1.6.4
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
       '@near-js/types':
         specifier: ^0.2.1
         version: 0.2.1
@@ -481,6 +484,8 @@ importers:
         version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3)
 
   packages/idos-store: {}
+
+  packages/types: {}
 
 packages:
 
