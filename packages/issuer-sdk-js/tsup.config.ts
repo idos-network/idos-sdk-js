@@ -1,4 +1,3 @@
-import { config } from "@dotenvx/dotenvx";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -7,7 +6,6 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   dts: true,
-  env: config().parsed,
   format: ["esm"],
   outDir: "./dist",
 });
