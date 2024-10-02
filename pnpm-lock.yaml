@@ -402,7 +402,7 @@ importers:
         version: 5.2.2
       vitest:
         specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3)
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0)(playwright@1.45.3)(terser@5.31.3)
 
   packages/idos-sdk-server-dapp:
     dependencies:
@@ -481,9 +481,34 @@ importers:
         version: 5.5.4
       vitest:
         specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3)
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0)(playwright@1.45.3)(terser@5.31.3)
 
   packages/idos-store: {}
+
+  packages/issuer-sdk-js:
+    dependencies:
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
+    devDependencies:
+      '@release-it/keep-a-changelog':
+        specifier: ^5.0.0
+        version: 5.0.0(release-it@17.0.0(typescript@5.5.4))
+      clean-package:
+        specifier: ^2.2.0
+        version: 2.2.0
+      release-it:
+        specifier: ^17.0.0
+        version: 17.0.0(typescript@5.5.4)
+      tsup:
+        specifier: ^8.0.2
+        version: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
+      typescript:
+        specifier: ^5.2.2
+        version: 5.5.4
+      vitest:
+        specifier: ^0.31.4
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0)(playwright@1.45.3)(terser@5.31.3)
 
   packages/types: {}
 
@@ -6471,6 +6496,7 @@ packages:
   fstream@1.0.12:
     resolution: {integrity: sha512-WvJ193OHa0GHPEL+AycEJgxvBEwyfRkN1vhjca23OaPVMCaLCXTd5qAu82AjTcgP1UJmytkOKb63Ypde7raDIg==}
     engines: {node: '>=0.6'}
+    deprecated: This package is no longer supported.
 
   function-bind@1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
@@ -6565,9 +6591,11 @@ packages:
 
   glob@7.1.6:
     resolution: {integrity: sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   global-dirs@3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -8849,6 +8877,7 @@ packages:
 
   rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
@@ -14065,24 +14094,6 @@ snapshots:
       - '@types/node'
     optional: true
 
-  '@microsoft/api-extractor@7.38.3':
-    dependencies:
-      '@microsoft/api-extractor-model': 7.28.2(@types/node@20.14.12)
-      '@microsoft/tsdoc': 0.14.2
-      '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.61.0(@types/node@20.14.12)
-      '@rushstack/rig-package': 0.5.1
-      '@rushstack/ts-command-line': 4.17.1
-      colors: 1.2.5
-      lodash: 4.17.21
-      resolve: 1.22.8
-      semver: 7.5.4
-      source-map: 0.6.1
-      typescript: 5.0.4
-    transitivePeerDependencies:
-      - '@types/node'
-    optional: true
-
   '@microsoft/api-extractor@7.38.3(@types/node@20.10.5)':
     dependencies:
       '@microsoft/api-extractor-model': 7.28.2(@types/node@20.10.5)
@@ -15926,7 +15937,7 @@ snapshots:
       pathe: 1.1.1
       picocolors: 1.0.0
       sirv: 2.0.3
-      vitest: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3)
+      vitest: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0)(playwright@1.45.3)(terser@5.31.3)
 
   '@vitest/utils@0.31.4':
     dependencies:
@@ -22508,7 +22519,7 @@ snapshots:
       sucrase: 3.34.0
       tree-kill: 1.2.2
     optionalDependencies:
-      '@microsoft/api-extractor': 7.38.3
+      '@microsoft/api-extractor': 7.38.3(@types/node@20.14.12)
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
       postcss: 8.4.40
       typescript: 5.5.4
@@ -23031,7 +23042,7 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.31.3
 
-  vitest@0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.45.3)(terser@5.31.3):
+  vitest@0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.6)(jsdom@22.1.0)(playwright@1.45.3)(terser@5.31.3):
     dependencies:
       '@types/chai': 4.3.9
       '@types/chai-subset': 1.3.4
