@@ -1,0 +1,426 @@
+diff --git a/package.json b/package.json
+index c061f5881561e77492d76850e6dad73423a741c3..73aebfb40f20ac9bf15645a56330348ce66641e6 100644
+--- a/package.json
++++ b/package.json
+@@ -55,7 +55,8 @@
+     "bip174": "^2.1.1",
+     "bs58check": "^3.0.1",
+     "typeforce": "^1.11.3",
+-    "varuint-bitcoin": "^1.1.2"
++    "varuint-bitcoin": "^1.1.2",
++    "buffer":"6.0.3"
+   },
+   "devDependencies": {
+     "@types/bs58": "^4.0.0",
+diff --git a/src/address.js b/src/address.js
+index ad3ceeb1a564ad76e5f63786e204cbda15d8fcbb..f542ebed5d03d42775c197618aa784b88cb5468c 100644
+--- a/src/address.js
++++ b/src/address.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.toOutputScript =
+   exports.fromOutputScript =
+diff --git a/src/bip66.js b/src/bip66.js
+index 0070f998c721e589435e77fff6b6bea2e51048fe..74eec3ab0a39bff4133cf97665388597c7d49abd 100644
+--- a/src/bip66.js
++++ b/src/bip66.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ // Reference https://github.com/bitcoin/bips/blob/master/bip-0066.mediawiki
+ // Format: 0x30 [total-length] 0x02 [R-length] [R] 0x02 [S-length] [S]
+ // NOTE: SIGHASH byte ignored AND restricted, truncate before use
+diff --git a/src/block.js b/src/block.js
+index 2c130c3bc1b73ead443f00a192cf85d3c7292139..efb7de0bcc1abcc936aedd8689421ee68f598820 100644
+--- a/src/block.js
++++ b/src/block.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.Block = void 0;
+ const bufferutils_1 = require('./bufferutils');
+diff --git a/src/bufferutils.js b/src/bufferutils.js
+index cf11f02b466fb6630450b5fcebaf9d72c73144e1..6e60f5fca57f3aea6ac1056b4aad4703912fd2b9 100644
+--- a/src/bufferutils.js
++++ b/src/bufferutils.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.BufferReader =
+   exports.BufferWriter =
+diff --git a/src/crypto.js b/src/crypto.js
+index a7a5936d97c672a1b9df3fb6ac9d51055755a7e6..6095cf770c04ea18e18e49ea7dc0b7ab5c905410 100644
+--- a/src/crypto.js
++++ b/src/crypto.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.taggedHash =
+   exports.TAGGED_HASH_PREFIXES =
+diff --git a/src/ecc_lib.js b/src/ecc_lib.js
+index 22202da98a9f7a7dccac223439181ba1d2b9b749..eb841f70bd62abf4b34f0b4b9e68b7e2c509aa1c 100644
+--- a/src/ecc_lib.js
++++ b/src/ecc_lib.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.getEccLib = exports.initEccLib = void 0;
+ const _ECCLIB_CACHE = {};
+diff --git a/src/index.js b/src/index.js
+index c742ceef66ef1c20bbb0f6c9ebcf07d93deffcc7..99b0b90303c62b255ef6e87cf81a7d3699d010cd 100644
+--- a/src/index.js
++++ b/src/index.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.initEccLib =
+   exports.Transaction =
+diff --git a/src/merkle.js b/src/merkle.js
+index c326c53afb67d2b0e26efa40e8b9a81805d3a31e..e7f3d5e58d704973d7c6deaeb41af52a42bd4a9a 100644
+--- a/src/merkle.js
++++ b/src/merkle.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.fastMerkleRoot = void 0;
+ /**
+diff --git a/src/networks.js b/src/networks.js
+index 75cdf30cc4e01e19c0f86ea852f9ced6b4e9650b..71b474a75cc11aa5b441705196e7f077b2ad0e07 100644
+--- a/src/networks.js
++++ b/src/networks.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ // https://en.bitcoin.it/wiki/List_of_address_prefixes
+ // Dogecoin BIP32 is a proposed standard: https://bitcointalk.org/index.php?topic=409731
+ Object.defineProperty(exports, '__esModule', { value: true });
+diff --git a/src/ops.js b/src/ops.js
+index 7853ad0f0302f092718ba2407b219641e0154fbe..23f45befbc5b49cf3f1b6706411d3fd2b8bb8dc0 100644
+--- a/src/ops.js
++++ b/src/ops.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.REVERSE_OPS = exports.OPS = void 0;
+ const OPS = {
+diff --git a/src/payments/bip341.js b/src/payments/bip341.js
+index 926af6bf2127f34db60f6e44ad3ea2f91d6088d2..eed0ac2d414aead01b8b270b5c10ea5206eaa896 100644
+--- a/src/payments/bip341.js
++++ b/src/payments/bip341.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.tweakKey =
+   exports.tapTweakHash =
+@@ -83,8 +84,8 @@ function tapleafHash(leaf) {
+   const version = leaf.version || exports.LEAF_VERSION_TAPSCRIPT;
+   return bcrypto.taggedHash(
+     'TapLeaf',
+-    buffer_1.Buffer.concat([
+-      buffer_1.Buffer.from([version]),
++    Buffer.concat([
++      Buffer.from([version]),
+       serializeScript(leaf.output),
+     ]),
+   );
+@@ -93,12 +94,12 @@ exports.tapleafHash = tapleafHash;
+ function tapTweakHash(pubKey, h) {
+   return bcrypto.taggedHash(
+     'TapTweak',
+-    buffer_1.Buffer.concat(h ? [pubKey, h] : [pubKey]),
++    Buffer.concat(h ? [pubKey, h] : [pubKey]),
+   );
+ }
+ exports.tapTweakHash = tapTweakHash;
+ function tweakKey(pubKey, h) {
+-  if (!buffer_1.Buffer.isBuffer(pubKey)) return null;
++  if (!Buffer.isBuffer(pubKey)) return null;
+   if (pubKey.length !== 32) return null;
+   if (h && h.length !== 32) return null;
+   const tweakHash = tapTweakHash(pubKey, h);
+@@ -106,16 +107,16 @@ function tweakKey(pubKey, h) {
+   if (!res || res.xOnlyPubkey === null) return null;
+   return {
+     parity: res.parity,
+-    x: buffer_1.Buffer.from(res.xOnlyPubkey),
++    x: Buffer.from(res.xOnlyPubkey),
+   };
+ }
+ exports.tweakKey = tweakKey;
+ function tapBranchHash(a, b) {
+-  return bcrypto.taggedHash('TapBranch', buffer_1.Buffer.concat([a, b]));
++  return bcrypto.taggedHash('TapBranch', Buffer.concat([a, b]));
+ }
+ function serializeScript(s) {
+   const varintLen = bufferutils_1.varuint.encodingLength(s.length);
+-  const buffer = buffer_1.Buffer.allocUnsafe(varintLen); // better
++  const buffer = Buffer.allocUnsafe(varintLen); // better
+   bufferutils_1.varuint.encode(s.length, buffer);
+-  return buffer_1.Buffer.concat([buffer, s]);
++  return Buffer.concat([buffer, s]);
+ }
+diff --git a/src/payments/embed.js b/src/payments/embed.js
+index 92bbb572f96327de0737b4eb06728ce891f1b454..f07a0ab36cb01ee1d9b735c8fd8a093994b92f34 100644
+--- a/src/payments/embed.js
++++ b/src/payments/embed.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2data = void 0;
+ const networks_1 = require('../networks');
+diff --git a/src/payments/index.js b/src/payments/index.js
+index f820ddeee8aa53ebe2ddaaecb625e46bf71dcabc..50e4040ce5646eeee5ac51a3de1bd2da1d0bd0ec 100644
+--- a/src/payments/index.js
++++ b/src/payments/index.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2tr =
+   exports.p2wsh =
+diff --git a/src/payments/lazy.js b/src/payments/lazy.js
+index e620c72a9b5cbd9692af89dae555418ba9e3dce9..47d1ce1f8ec71d745ff878e117dcceb6f2181668 100644
+--- a/src/payments/lazy.js
++++ b/src/payments/lazy.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.value = exports.prop = void 0;
+ function prop(object, name, f) {
+diff --git a/src/payments/p2ms.js b/src/payments/p2ms.js
+index dfa0c8dd70994170d0589c8957477876a211da55..5817e56471b9a5582957c065437e11938c7daafd 100644
+--- a/src/payments/p2ms.js
++++ b/src/payments/p2ms.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2ms = void 0;
+ const networks_1 = require('../networks');
+diff --git a/src/payments/p2pk.js b/src/payments/p2pk.js
+index cd6702f53e09d5502e59f09aff348ee3b496d69e..8e4597eac31db45d2ba30835ec2fb69ed8daf939 100644
+--- a/src/payments/p2pk.js
++++ b/src/payments/p2pk.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2pk = void 0;
+ const networks_1 = require('../networks');
+diff --git a/src/payments/p2pkh.js b/src/payments/p2pkh.js
+index bc35e878e6459f503a3522658c62d99921fac62b..3efffb7e371ef9f3c7db6975f095a102f10b77b9 100644
+--- a/src/payments/p2pkh.js
++++ b/src/payments/p2pkh.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2pkh = void 0;
+ const bcrypto = require('../crypto');
+diff --git a/src/payments/p2sh.js b/src/payments/p2sh.js
+index 1386966beb1e85fbbb7d03a964e742491157d1b9..622927abc49c27b0c7283ebbc095a06fd21a77f8 100644
+--- a/src/payments/p2sh.js
++++ b/src/payments/p2sh.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2sh = void 0;
+ const bcrypto = require('../crypto');
+diff --git a/src/payments/p2tr.js b/src/payments/p2tr.js
+index 33fedb46453040d72aedc7a87cef8a65be2e13cc..3a2a15cf544d047894fef5e763329507c4411839 100644
+--- a/src/payments/p2tr.js
++++ b/src/payments/p2tr.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2tr = void 0;
+ const buffer_1 = require('buffer');
+@@ -162,9 +163,9 @@ function p2tr(a, opts) {
+       if (!path) return;
+       const outputKey = (0, bip341_1.tweakKey)(a.internalPubkey, hashTree.hash);
+       if (!outputKey) return;
+-      const controlBock = buffer_1.Buffer.concat(
++      const controlBock = Buffer.concat(
+         [
+-          buffer_1.Buffer.from([o.redeemVersion | outputKey.parity]),
++          Buffer.from([o.redeemVersion | outputKey.parity]),
+           a.internalPubkey,
+         ].concat(path),
+       );
+@@ -174,7 +175,7 @@ function p2tr(a, opts) {
+   });
+   // extended validation
+   if (opts.validate) {
+-    let pubkey = buffer_1.Buffer.from([]);
++    let pubkey = Buffer.from([]);
+     if (a.address) {
+       if (network && network.bech32 !== _address().prefix)
+         throw new TypeError('Invalid prefix or Network mismatch');
+diff --git a/src/payments/p2wpkh.js b/src/payments/p2wpkh.js
+index 1c6073e9bd77fb0866ef8a07a29fb32fea80bf18..5f6d162e6f711e67a4dc6ce5f7d1deb478581c30 100644
+--- a/src/payments/p2wpkh.js
++++ b/src/payments/p2wpkh.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2wpkh = void 0;
+ const bcrypto = require('../crypto');
+diff --git a/src/payments/p2wsh.js b/src/payments/p2wsh.js
+index a3422e50ae13aafbe9bad6c3c2397f114f535d75..cd0b01854f13b37ccf8f002ce58eed697b3c3b41 100644
+--- a/src/payments/p2wsh.js
++++ b/src/payments/p2wsh.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.p2wsh = void 0;
+ const bcrypto = require('../crypto');
+diff --git a/src/psbt/bip371.js b/src/psbt/bip371.js
+index 2b53171e00fda9f8a9cc9b3a7b3a7a20efcae55a..f8ca0ac590224b91b6441b512a8c608c8fd47836 100644
+--- a/src/psbt/bip371.js
++++ b/src/psbt/bip371.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.checkTaprootInputForSigs =
+   exports.tapTreeFromList =
+diff --git a/src/psbt/psbtutils.js b/src/psbt/psbtutils.js
+index ea5f1d719be0fde1b54333b703d406d68cdce926..fddef32d5e7a5f45572c0f773423088b49b286e4 100644
+--- a/src/psbt/psbtutils.js
++++ b/src/psbt/psbtutils.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.signatureBlocksAction =
+   exports.checkInputForSig =
+diff --git a/src/psbt.js b/src/psbt.js
+index b071f374f9d9b2a0bb6f4385550ace3166ea16f8..9d9e822947138588284da40b99ff3446ffdccb91 100644
+--- a/src/psbt.js
++++ b/src/psbt.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.Psbt = void 0;
+ const bip174_1 = require('bip174');
+diff --git a/src/push_data.js b/src/push_data.js
+index 2d3683769ab551c1b55331552173aca263b031bf..fac00890c98fe23b0d3fc1f2234dcbeddedc1685 100644
+--- a/src/push_data.js
++++ b/src/push_data.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.decode = exports.encode = exports.encodingLength = void 0;
+ const ops_1 = require('./ops');
+diff --git a/src/script.js b/src/script.js
+index c95f0cc678535c9ee94a77e5fce45e4a3bc09dea..ec6a5b0518f129abb8cf34592bb30cc7f5b904b3 100644
+--- a/src/script.js
++++ b/src/script.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.signature =
+   exports.number =
+diff --git a/src/script_number.js b/src/script_number.js
+index 2691b41e63e9d26dcfb86c9e706af4d4d6ef82cc..0bef0e91c6083c24c182a2824be2711031192b52 100644
+--- a/src/script_number.js
++++ b/src/script_number.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.encode = exports.decode = void 0;
+ /**
+diff --git a/src/script_signature.js b/src/script_signature.js
+index 61624b6307b4317a8bc81f979f64c3c886099538..390b0905c74ce0195ace9bd01daf60c80f4c800e 100644
+--- a/src/script_signature.js
++++ b/src/script_signature.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.encode = exports.decode = void 0;
+ const bip66 = require('./bip66');
+diff --git a/src/transaction.js b/src/transaction.js
+index 2b74f3788730241e6095072750874bb89c595029..00ccb5dff112d573f7377b2c4cb7e715759aa559 100644
+--- a/src/transaction.js
++++ b/src/transaction.js
+@@ -1,4 +1,5 @@
+ 'use strict';
++
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.Transaction = void 0;
+ const bufferutils_1 = require('./bufferutils');
+diff --git a/src/types.js b/src/types.js
+index bcebef356406b058898de2adc7cdead1ae5af19c..2aef4876b6744f4a7212866102e5543a39d2d28f 100644
+--- a/src/types.js
++++ b/src/types.js
+@@ -1,4 +1,9 @@
+ 'use strict';
++console.log('HELLO');
++
++var Buffer = require('buffer/').Buffer  // note: the trailing slash is important!
++global.Buffer = Buffer;
++globalThis.Buffer = Buffer
+ Object.defineProperty(exports, '__esModule', { value: true });
+ exports.oneOf =
+   exports.Null =
+@@ -25,10 +30,9 @@ exports.oneOf =
+   exports.stacksEqual =
+   exports.typeforce =
+     void 0;
+-const buffer_1 = require('buffer');
+ exports.typeforce = require('typeforce');
+-const ZERO32 = buffer_1.Buffer.alloc(32, 0);
+-const EC_P = buffer_1.Buffer.from(
++const ZERO32 = Buffer.alloc(32, 0);
++const EC_P = Buffer.from(
+   'fffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f',
+   'hex',
+ );
+@@ -51,7 +55,7 @@ exports.stacksEqual = stacksEqual;
+  * @returns True if the value is a valid elliptic curve point, false otherwise.
+  */
+ function isPoint(p) {
+-  if (!buffer_1.Buffer.isBuffer(p)) return false;
++  if (!Buffer.isBuffer(p)) return false;
+   if (p.length < 33) return false;
+   const t = p[0];
+   const x = p.slice(1, 33);
+@@ -75,7 +79,7 @@ exports.Satoshi = Satoshi;
+ exports.TAPLEAF_VERSION_MASK = 0xfe;
+ function isTapleaf(o) {
+   if (!o || !('output' in o)) return false;
+-  if (!buffer_1.Buffer.isBuffer(o.output)) return false;
++  if (!Buffer.isBuffer(o.output)) return false;
+   if (o.version !== undefined)
+     return (o.version & exports.TAPLEAF_VERSION_MASK) === o.version;
+   return true;
+@@ -94,7 +98,7 @@ exports.Number = exports.typeforce.Number;
+ exports.Array = exports.typeforce.Array;
+ exports.Boolean = exports.typeforce.Boolean;
+ exports.String = exports.typeforce.String;
+-exports.Buffer = exports.typeforce.Buffer;
++exports.Buffer = Buffer;
+ exports.Hex = exports.typeforce.Hex;
+ exports.maybe = exports.typeforce.maybe;
+ exports.tuple = exports.typeforce.tuple;

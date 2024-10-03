@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  bitcoinjs-lib@6.1.6:
+    hash: 25u2g2eaphhwk64vhlgiv2hrzu
+    path: patches/bitcoinjs-lib@6.1.6.patch
+
 importers:
 
   .:
@@ -154,6 +159,9 @@ importers:
       '@lit-protocol/constants':
         specifier: ^6.5.0
         version: 6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/contracts-sdk':
+        specifier: ^6.8.0
+        version: 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
       '@lit-protocol/lit-node-client':
         specifier: ^6.4.10
         version: 6.5.3(bufferutil@4.0.8)(react@18.3.1)(typescript@5.4.5)(utf-8-validate@5.0.10)
@@ -172,6 +180,9 @@ importers:
       '@stablelib/utf8':
         specifier: ^1.0.1
         version: 1.0.1
+      buffer:
+        specifier: ^6.0.3
+        version: 6.0.3
       dompurify:
         specifier: ^3.0.6
         version: 3.0.6
@@ -2982,8 +2993,14 @@ packages:
   '@lit-protocol/constants@6.5.3':
     resolution: {integrity: sha512-XJ+bXzsjte7V8xs0jRmG+vTRqWRtejPCDuFhtpVBY0Up+2XUsYKeatIRqnYJVlr1OBuVGJ+ZOersvopyZIWsNQ==}
 
+  '@lit-protocol/constants@6.8.0':
+    resolution: {integrity: sha512-/S1gTme8AaRRVqlLfhD3jsfwBxRyeCz3jQ8akRdEMNpWVL9ryrDBAG++lpW8Uc17Gp8ZR/YxsV4ShMJwb8uB2w==}
+
   '@lit-protocol/contracts-sdk@6.5.3':
     resolution: {integrity: sha512-pxw53JVImW6i6Y4aXY51pIcakWWPf445qJbcOtNbUDDFsIFGpHEYeq1ISSp1oIjEcjmWPsnilsBC2IrDLy1ckg==}
+
+  '@lit-protocol/contracts-sdk@6.8.0':
+    resolution: {integrity: sha512-q+da9MZ3FVT/sk4qmFJXxQNvuskAwSTfCPBR50zWP8G+fnYEeXsuUNR3hApey7DmG70H6PuKzsOo9OU+vEtOcg==}
 
   '@lit-protocol/contracts@0.0.63':
     resolution: {integrity: sha512-CAorNt72ybIY/g//dDeR837izNGuYQR99XwPSK2X2AJ6c+aZX1kdXCrOnxsbY40BzFrOk/dIFo+ymJ9E3qh48w==}
@@ -3011,11 +3028,17 @@ packages:
   '@lit-protocol/logger@6.5.3':
     resolution: {integrity: sha512-54rA5Z86Si+U+6gs54A13VDpDFE1ABFyzbXXdbxcKdfh5t2eAZ0aNEEdhICK+e69z8Y0hnElW+FHJozq0KYLxw==}
 
+  '@lit-protocol/logger@6.8.0':
+    resolution: {integrity: sha512-lyurRTnAntqImRGa6XZ0l53VjyqYZwBmJ04qZ7dZa0EWCccXH5PYmW38Qt2YsMvVfxKelldFcrhmfaTQzBl2Ag==}
+
   '@lit-protocol/misc-browser@6.5.3':
     resolution: {integrity: sha512-lJvCRgYFmRbd9/RAANkHhZXB1IOp6G6pMTLwGagOlxFCRGelGVW3IavqBXQ/eafxcvFTLjL0hakmx+qZMcg37Q==}
 
   '@lit-protocol/misc@6.5.3':
     resolution: {integrity: sha512-qH/h3Mfrq/4VCxQ2YaI+8CxM5k1sYp3kGF2FcJ6anmpJ3kIejoF0N/djUOpMSExv6oDuxaAsOuLWIcxWiZ5HCw==}
+
+  '@lit-protocol/misc@6.8.0':
+    resolution: {integrity: sha512-g+r96LLynJHFD7bTorupjzCvnuRQrfWrxNtnB0+jZh9DgYk3a8O8OqhIURpJFhZfJJXcH/6yVJ14ZAPSWcybGA==}
 
   '@lit-protocol/nacl@6.5.3':
     resolution: {integrity: sha512-UAU4YSZ0DMSkD0PFdtIWe4RodegdsvBA53Dp4cF4TJgO6kqQcHXJ9rHO3tktTrvprCWOQiPkAt//yyQIoKkQQQ==}
@@ -3025,6 +3048,9 @@ packages:
 
   '@lit-protocol/types@6.5.3':
     resolution: {integrity: sha512-QFwBxU4FcHs93oK56EO22lE6eVOPcI/7kXwu7esJo/LfETjfAfmP8/9s4cQAIYGsoiCeuHj3PLj8z7E3J/ZBlg==}
+
+  '@lit-protocol/types@6.8.0':
+    resolution: {integrity: sha512-g5JT7u1yC5tp6Xdo8RXiPK6LEl4aVvRq9uKAt0S3RqxymadrLdx7BYXyfmYsgOxP2GpD6eFYAmsLuW2t/z6wTA==}
 
   '@lit-protocol/uint8arrays@6.5.3':
     resolution: {integrity: sha512-edJe9Q7vfyXk3V2Xmjl5p+OaI6XqRjDVw51610MD3vtA4kSJPL7iccD6vRq6Y/qY824cdCcG3JPaSjqMtW5ySA==}
@@ -4528,7 +4554,6 @@ packages:
 
   '@walletconnect/sign-client@2.9.2':
     resolution: {integrity: sha512-anRwnXKlR08lYllFMEarS01hp1gr6Q9XUgvacr749hoaC/AwGVlxYFdM8+MyYr3ozlA+2i599kjbK/mAebqdXg==}
-    deprecated: Reliability and performance greatly improved - please see https://github.com/WalletConnect/walletconnect-monorepo/releases
 
   '@walletconnect/time@1.0.2':
     resolution: {integrity: sha512-uzdd9woDcJ1AaBZRhqy5rNC9laqWGErfc4dxA9a87mPdKOgWMD85mcFo9dIYIts/Jwocfwn07EC6EzclKubk/g==}
@@ -6496,7 +6521,6 @@ packages:
   fstream@1.0.12:
     resolution: {integrity: sha512-WvJ193OHa0GHPEL+AycEJgxvBEwyfRkN1vhjca23OaPVMCaLCXTd5qAu82AjTcgP1UJmytkOKb63Ypde7raDIg==}
     engines: {node: '>=0.6'}
-    deprecated: This package is no longer supported.
 
   function-bind@1.1.1:
     resolution: {integrity: sha512-yIovAzMX49sF8Yl58fSCWJ5svSLuaibPxXQJFLmBObTuCr0Mf1KiPopGM9NiFjiYBCbfaa2Fh6breQ6ANVTI0A==}
@@ -6591,11 +6615,9 @@ packages:
 
   glob@7.1.6:
     resolution: {integrity: sha512-LwaxwyZ72Lk7vZINtNNrywX0ZuLyStrdDtabefZKAY5ZGJhVtgdznluResxNmPitE0SAO+O26sWTHeKSI2wMBA==}
-    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
 
   global-dirs@3.0.1:
     resolution: {integrity: sha512-NBcGGFbBA9s1VzD41QXDG+3++t9Mn5t1FpLdhESY6oKY4gYTFpX4wO3sqGUa0Srjtbfj3szX0RnemmrVRUdULA==}
@@ -8877,7 +8899,6 @@ packages:
 
   rimraf@2.6.3:
     resolution: {integrity: sha512-mwqeW5XsA2qAejG46gYdENaxXjx9onRNCfn7L0duuP4hCuTIi/QO7PDK07KJfp1d+izWPrzEJDcSqBa0OZQriA==}
-    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
@@ -13503,6 +13524,21 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@lit-protocol/constants@6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abstract-provider': 5.7.0
+      '@lit-protocol/accs-schemas': 0.0.12
+      '@lit-protocol/contracts': 0.0.63(typescript@5.4.5)
+      '@lit-protocol/types': 6.8.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jszip: 3.10.1
+      siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      tslib: 1.14.1
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
   '@lit-protocol/contracts-sdk@6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@cosmjs/amino': 0.30.1
@@ -13519,7 +13555,7 @@ snapshots:
       '@lit-protocol/misc': 6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
       '@lit-protocol/types': 6.5.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       ajv: 8.17.1
-      bitcoinjs-lib: 6.1.6
+      bitcoinjs-lib: 6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu)
       ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       jose: 4.15.9
       jszip: 3.10.1
@@ -13528,6 +13564,35 @@ snapshots:
       siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
       tslib: 1.14.1
       uint8arrays: 4.0.10
+      util: 0.12.5
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
+  '@lit-protocol/contracts-sdk@6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@cosmjs/amino': 0.30.1
+      '@cosmjs/crypto': 0.30.1
+      '@cosmjs/encoding': 0.30.1
+      '@ethersproject/abi': 5.7.0
+      '@ethersproject/abstract-provider': 5.7.0
+      '@ethersproject/contracts': 5.7.0
+      '@ethersproject/providers': 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@lit-protocol/accs-schemas': 0.0.12
+      '@lit-protocol/constants': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/contracts': 0.0.63(typescript@5.4.5)
+      '@lit-protocol/logger': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/misc': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/types': 6.8.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      ajv: 8.17.1
+      bitcoinjs-lib: 6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu)
+      ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jose: 4.15.9
+      jszip: 3.10.1
+      process: 0.11.10
+      siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      tslib: 1.14.1
       util: 0.12.5
     transitivePeerDependencies:
       - bufferutil
@@ -13562,7 +13627,7 @@ snapshots:
       '@lit-protocol/types': 6.5.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@lit-protocol/uint8arrays': 6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
       ajv: 8.17.1
-      bitcoinjs-lib: 6.1.6
+      bitcoinjs-lib: 6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu)
       bs58: 5.0.0
       cross-fetch: 3.1.4
       date-and-time: 2.4.3
@@ -13679,7 +13744,7 @@ snapshots:
       '@lit-protocol/types': 6.5.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@lit-protocol/uint8arrays': 6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
       ajv: 8.17.1
-      bitcoinjs-lib: 6.1.6
+      bitcoinjs-lib: 6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu)
       bs58: 5.0.0
       cross-fetch: 3.1.4
       date-and-time: 2.4.3
@@ -13736,7 +13801,7 @@ snapshots:
       '@walletconnect/ethereum-provider': 2.9.2(@walletconnect/modal@2.6.1(react@18.3.1))(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@walletconnect/modal': 2.6.1(react@18.3.1)
       ajv: 8.17.1
-      bitcoinjs-lib: 6.1.6
+      bitcoinjs-lib: 6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu)
       bs58: 5.0.0
       cross-fetch: 3.1.4
       date-and-time: 2.4.3
@@ -13792,6 +13857,22 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@lit-protocol/logger@6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abstract-provider': 5.7.0
+      '@lit-protocol/accs-schemas': 0.0.12
+      '@lit-protocol/constants': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/contracts': 0.0.63(typescript@5.4.5)
+      '@lit-protocol/types': 6.8.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jszip: 3.10.1
+      siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      tslib: 1.14.1
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
   '@lit-protocol/misc-browser@6.5.3(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
@@ -13832,6 +13913,27 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@lit-protocol/misc@6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abstract-provider': 5.7.0
+      '@ethersproject/contracts': 5.7.0
+      '@ethersproject/providers': 5.7.2(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@lit-protocol/accs-schemas': 0.0.12
+      '@lit-protocol/constants': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/contracts': 0.0.63(typescript@5.4.5)
+      '@lit-protocol/logger': 6.8.0(bufferutil@4.0.8)(typescript@5.4.5)(utf-8-validate@5.0.10)
+      '@lit-protocol/types': 6.8.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      ajv: 8.17.1
+      ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jszip: 3.10.1
+      siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      tslib: 1.14.1
+      util: 0.12.5
+    transitivePeerDependencies:
+      - bufferutil
+      - typescript
+      - utf-8-validate
+
   '@lit-protocol/nacl@6.5.3':
     dependencies:
       tslib: 1.14.1
@@ -13842,6 +13944,18 @@ snapshots:
       tslib: 1.14.1
 
   '@lit-protocol/types@6.5.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@ethersproject/abstract-provider': 5.7.0
+      '@lit-protocol/accs-schemas': 0.0.12
+      ethers: 5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jszip: 3.10.1
+      siwe: 2.3.2(ethers@5.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10))
+      tslib: 1.14.1
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@lit-protocol/types@6.8.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
     dependencies:
       '@ethersproject/abstract-provider': 5.7.0
       '@lit-protocol/accs-schemas': 0.0.12
@@ -17181,7 +17295,7 @@ snapshots:
 
   bip174@2.1.1: {}
 
-  bitcoinjs-lib@6.1.6:
+  bitcoinjs-lib@6.1.6(patch_hash=25u2g2eaphhwk64vhlgiv2hrzu):
     dependencies:
       '@noble/hashes': 1.4.0
       bech32: 2.0.0
