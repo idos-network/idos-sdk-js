@@ -29,7 +29,8 @@
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
     "@near-wallet-selector/my-near-wallet": "^8.7.0",
     "@near-wallet-selector/nightly": "^8.7.0",
-    "axios": "^1.6.8"
+    "axios": "^1.6.8",
+    "buffer": "4"
   },
   "peerDependencies": {
     "ethers": "^6.12",
