@@ -426,7 +426,7 @@ export class EvmGrants implements GrantChild {
     const owner = await this.signer.getAddress();
     const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
-    let transaction;
+    let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.insertGrant(
         grantee,
@@ -461,7 +461,7 @@ export class EvmGrants implements GrantChild {
   }> {
     const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
-    let transaction;
+    let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.insertGrantBySignature(
         owner,
@@ -492,7 +492,7 @@ export class EvmGrants implements GrantChild {
     const owner = await this.signer.getAddress();
     const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
-    let transaction;
+    let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.deleteGrant(
         grantee,
@@ -528,7 +528,7 @@ export class EvmGrants implements GrantChild {
   }> {
     const grant: Grant = { owner, grantee, dataId, lockedUntil };
 
-    let transaction;
+    let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.deleteGrantBySignature(
         owner,
