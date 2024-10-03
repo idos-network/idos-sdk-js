@@ -5,11 +5,15 @@ import {
   createSiweMessage,
   generateAuthSig,
 } from "@lit-protocol/auth-helpers";
-import { LitNetwork } from "@lit-protocol/constants";
+import { LIT_RPC, LitNetwork } from "@lit-protocol/constants";
+import { LitContracts } from "@lit-protocol/contracts-sdk";
 import * as LitJsSdk from "@lit-protocol/lit-node-client";
 import type { EncryptResponse, SessionSigsMap } from "@lit-protocol/types";
 import { ethers } from "ethers";
+import { switchNetwork } from "./chains";
 
+// @ts-ignore
+window.switchNetwork = switchNetwork;
 declare global {
   interface Window {
     ethereum: {
@@ -64,9 +68,10 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
 export class Lit {
   client: LitJsSdk.LitNodeClient = new LitJsSdk.LitNodeClient({
     alertWhenUnauthorized: false,
-    litNetwork: LitNetwork.DatilDev,
+    litNetwork: LitNetwork.DatilTest,
     debug: true,
   });
+  contractClient: LitContracts = new LitContracts();
 
   constructor(
     private readonly chain: string,
@@ -85,12 +90,56 @@ export class Lit {
     );
   };
 
+  async connectContractClient() {
+    const signer = await this.getChronicalSigner();
+    console.log({ signer });
+
+    const litContractClient = new LitContracts({
+      signer,
+      network: LitNetwork.DatilTest,
+    });
+    await litContractClient.connect();
+    this.contractClient = litContractClient;
+  }
+
+  async mintCredit() {
+    await this.connectContractClient();
+    return this.contractClient.mintCapacityCreditsNFT({
+      requestsPerKilosecond: 80,
+      // requestsPerDay: 14400,
+      // requestsPerSecond: 10,
+      daysUntilUTCMidnightExpiration: 1,
+    });
+  }
+
+  async getChronicalSigner() {
+    await window.ethereum.request({
+      method: "wallet_addEthereumChain",
+      params: [
+        {
+          chainId: ethers.utils.hexValue(175188), // Replace with Chronicle Yellowstone chainId in hex
+          chainName: "Chronicle Yellowstone",
+          nativeCurrency: {
+            name: "tstLPX",
+            symbol: "tstLPX",
+            decimals: 18,
+          },
+          rpcUrls: [LIT_RPC.CHRONICLE_YELLOWSTONE],
+        },
+      ],
+    });
+    const signer = await this.getSigner();
+    return signer;
+  }
+
   async getSigner() {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     const signer = provider.getSigner();
     return signer;
   }
+
+  async getLitClientSigner() {}
 
   async connect() {
     if (this.client.connectedNodes.size) return;
@@ -123,6 +172,9 @@ export class Lit {
   async getSessionSigs(): Promise<SessionSigsMap | undefined> {
     const signer = await this.getSigner();
     const address = await signer.getAddress();
+    const { capacityDelegationAuthSig } = await this.client.createCapacityDelegationAuthSig({
+      dAppOwnerWallet: signer, // signer should be the owner of the nft
+    });
     const sessionSignatures = await this.client?.getSessionSigs({
       chain: this.chain,
       resourceAbilityRequests: [
