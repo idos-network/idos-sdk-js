@@ -1,7 +1,7 @@
-import { KwilSigner, NodeKwil, Utils } from "@kwilteam/kwil-js";
+import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createHumanProfile, createIssuerConfig } from "./index";
+import { createIssuerConfig } from "./index";
 
 // Mock the @kwilteam/kwil-js module
 vi.mock("@kwilteam/kwil-js", () => {
