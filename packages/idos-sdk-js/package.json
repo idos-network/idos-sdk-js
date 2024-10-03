@@ -38,7 +38,6 @@
     "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@synthetixio/synpress": "4.0.0-alpha.7",
-    "@types/lodash-es": "^4.17.12",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
     "dotenv": "^16.4.5",
