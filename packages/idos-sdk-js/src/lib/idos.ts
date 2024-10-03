@@ -32,8 +32,6 @@ export class idOS {
   static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
 
-  static profileProviders = [import.meta.env.VITE_FRACTAL_ID_URL];
-
   static verifiableCredentials = verifiableCredentials;
 
   auth: Auth;

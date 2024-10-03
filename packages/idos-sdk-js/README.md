@@ -232,11 +232,11 @@ if (humanId) {
 
 You can also use `idos.hasProfile(signer.address)` before `setSigner` for a check that won't require a signature.
 
-If your user does not have an idOS profile, you can send them to Fractal ID for them to get one, by redirecting them to the first URL in `idOS.profileProviders`. By using that URL, you agree to [Fractal ID's Terms of Service](https://web.fractal.id/wp-content/uploads/2023/11/Onboarding-link.pdf).
+If your user does not have an idOS profile, you'll have to first redirect them to your credential provider. Here's an example:
 
 ```js
 if (!idos.hasProfile(signer.address))
-  window.location = idOS.profileProviders[0];
+  window.location = "https://kyc-provider.example.com/enroll";
 ```
 
 ### Credentials
