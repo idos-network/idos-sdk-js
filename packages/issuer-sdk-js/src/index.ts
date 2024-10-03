@@ -1,6 +1,7 @@
 import { KwilSigner, NodeKwil, Utils } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
 import invariant from "tiny-invariant";
+
 interface CreateIssuerConfigParams {
   nodeUrl: string;
   privateKey: string;
