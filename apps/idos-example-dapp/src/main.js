@@ -132,7 +132,7 @@ const connectWallet = {
     terminal
       .h1("pleading", `No idOS profile found for ${address}`)
       .h2("Need an idOS profile?")
-      .log(`Get one at <a href="${idOS.profileProviders[0]}">Fractal ID</a>`)
+      .log(`Get one at <a href="${import.meta.env.VITE_FRACTAL_ID_URL}">Fractal ID</a>`)
       .h2("Already have one?")
       .log("Please connect with the right address")
       .status("done", "Done");
