@@ -1,38 +1,60 @@
 import { KwilSigner, NodeKwil, Utils } from "@kwilteam/kwil-js";
-import { JsonRpcProvider, Wallet } from "ethers";
-
-interface CreateProfileReqParams {
-  human_id: string;
-  wallet_id: string;
-  address: string;
-  public_key: string;
-  message: string;
-  signature: string;
+import type { Wallet } from "ethers";
+import invariant from "tiny-invariant";
+interface CreateIssuerConfigParams {
+  nodeUrl: string;
+  privateKey: string;
+  signer: Wallet;
+  chainId?: string;
+  dbId?: string;
 }
 
-// Dummy values for now.
-const PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-const DB_ID = "0x1234567890123456789012345678901234567890";
-
-export async function createProfile(params: CreateProfileReqParams) {
-  const kwil = new NodeKwil({
-    kwilProvider: "",
+export async function createIssuerConfig(params: CreateIssuerConfigParams) {
+  const _kwil = new NodeKwil({
+    kwilProvider: params.nodeUrl,
     chainId: "",
   });
 
-  const wallet = new Wallet(PRIVATE_KEY, new JsonRpcProvider("<idOS_NODE_URL>"));
+  const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
+  const dbid =
+    params.dbId ||
+    (await _kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid;
 
-  const response = await kwil.execute(
+  invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
+  invariant(dbid, "Can't discover `dbId`. You must pass it explicitly.");
+
+  const kwilClient = new NodeKwil({
+    kwilProvider: params.nodeUrl,
+    chainId,
+  });
+
+  const signer = new KwilSigner(params.signer, params.signer.address);
+
+  return { chainId, dbid, kwilClient, signer };
+}
+
+type CreateIssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
+
+interface CreateProfileReqParams {
+  id: string;
+  current_public_key: string;
+}
+
+export async function createHumanProfile(
+  { dbid, kwilClient, signer }: CreateIssuerConfig,
+  params: CreateProfileReqParams,
+) {
+  const response = await kwilClient.execute(
     {
       name: "add_human_as_inserter",
-      dbid: DB_ID,
+      dbid,
       inputs: [
         Utils.ActionInput.fromObject(
           Object.fromEntries(Object.entries(params).map(([key, value]) => [`$${key}`, value])),
         ),
       ],
     },
-    new KwilSigner(wallet, wallet.address),
+    signer,
     true,
   );
 

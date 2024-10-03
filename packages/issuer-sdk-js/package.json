@@ -37,7 +37,8 @@
   "dependencies": {
     "@idos-network/idos-sdk-types": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
-    "ethers": "^6.13.3"
+    "ethers": "^6.13.3",
+    "tiny-invariant": "^1.3.3"
   },
   "clean-package": {
     "replace": {
