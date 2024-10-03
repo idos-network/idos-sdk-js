@@ -1,7 +1,7 @@
 import type { idOSHumanAttribute } from "@idos-network/idos-sdk-types";
 import type { Wallet } from "@near-wallet-selector/core";
+import { isEqual } from "es-toolkit";
 import type { Signer } from "ethers";
-import { isEqual } from "lodash-es";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
