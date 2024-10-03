@@ -1,5 +1,6 @@
 import type { AccessKeyList } from "@near-js/types";
-import { decodeBase58, toBeHex } from "ethers";
+import { encode as encodeHex } from "@stablelib/hex";
+import bs58 from "bs58";
 import type { connect as connectT } from "near-api-js";
 
 export async function getNearFullAccessPublicKeys(
@@ -35,7 +36,7 @@ export async function getNearFullAccessPublicKeys(
 
 export function implicitAddressFromPublicKey(publicKey: string) {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  const implicitAddress = toBeHex(decodeBase58(key_without_prefix));
+  const implicitAddress = encodeHex(bs58.decode(key_without_prefix));
   return implicitAddress;
 }
 

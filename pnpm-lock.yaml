@@ -327,6 +327,9 @@ importers:
       '@stablelib/bytes':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stablelib/hex':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@stablelib/sha256':
         specifier: ^1.0.1
         version: 1.0.1
@@ -339,6 +342,9 @@ importers:
       es-toolkit:
         specifier: ^1.23.0
         version: 1.23.0
+      bs58:
+        specifier: ^6.0.0
+        version: 6.0.0
       ethers:
         specifier: ^6.12
         version: 6.12.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -4034,6 +4040,9 @@ packages:
   '@stablelib/hash@1.0.1':
     resolution: {integrity: sha512-eTPJc/stDkdtOcrNMZ6mcMK1e6yBbqRBaNW55XA1jU8w/7QdnCF0CmMmOD1m7VSkBR44PWrMHU2l6r8YEQHMgg==}
 
+  '@stablelib/hex@2.0.0':
+    resolution: {integrity: sha512-0KmOhGmOUHuaeWu+DXs/7RPA5OCh0G38VRZA/tIUvh/evupmIobS199C1VXKSjTP2qeXvbcMYcAeICHIS1MRvw==}
+
   '@stablelib/hkdf@1.0.1':
     resolution: {integrity: sha512-SBEHYE16ZXlHuaW5RcGk533YlBj4grMeg5TooN80W3NpcHRtLZLLXvKyX0qcRFxf+BGDobJLnwkvgEwHIDBR6g==}
 
@@ -4968,6 +4977,9 @@ packages:
   base-x@4.0.0:
     resolution: {integrity: sha512-FuwxlW4H5kh37X/oW59pwTzzTKRzfrrQwhmyspRM7swOEZcHtDZSCt45U6oKgtuFE+WYPblePMVIPR4RZrh/hw==}
 
+  base-x@5.0.0:
+    resolution: {integrity: sha512-sMW3VGSX1QWVFA6l8U62MLKz29rRfpTlYdCqLdpLo1/Yd4zZwSbnUaDfciIAowAqvq7YFnWq9hrhdg1KYgc1lQ==}
+
   base58-universal@2.0.0:
     resolution: {integrity: sha512-BgkgF8zVLOAygszG4W8NkLm7iXrw80VYAOcedrzANrIhS14+4W6zVqjyGTFUBM/FpqkHUt8aAYd4DbBBfn3zKg==}
     engines: {node: '>=14'}
@@ -5120,6 +5132,9 @@ packages:
 
   bs58@5.0.0:
     resolution: {integrity: sha512-r+ihvQJvahgYT50JD05dyJNKlmmSlMoOGwn1lCcEzanPglg7TxYjioQUYehQ9mAR/+hOSd2jRc/Z2y5UxBymvQ==}
+
+  bs58@6.0.0:
+    resolution: {integrity: sha512-PD0wEnEYg6ijszw/u8s+iI3H17cTymlrwkKhDhPZq+Sokl3AU4htyBFTjAeNAlCCmg0f53g6ih3jATyCKftTfw==}
 
   bs58check@3.0.1:
     resolution: {integrity: sha512-hjuuJvoWEybo7Hn/0xOrczQKKEKD63WguEjlhLExYs2wUBcebDC1jDNK17eEAD2lYfw82d5ASC1d7K3SWszjaQ==}
@@ -15368,6 +15383,8 @@ snapshots:
 
   '@stablelib/hash@1.0.1': {}
 
+  '@stablelib/hex@2.0.0': {}
+
   '@stablelib/hkdf@1.0.1':
     dependencies:
       '@stablelib/hash': 1.0.1
@@ -17156,6 +17173,8 @@ snapshots:
 
   base-x@4.0.0: {}
 
+  base-x@5.0.0: {}
+
   base58-universal@2.0.0: {}
 
   base64-js@1.5.1: {}
@@ -17345,6 +17364,10 @@ snapshots:
   bs58@5.0.0:
     dependencies:
       base-x: 4.0.0
+
+  bs58@6.0.0:
+    dependencies:
+      base-x: 5.0.0
 
   bs58check@3.0.1:
     dependencies:

@@ -66,6 +66,7 @@ export default defineConfig({
     target: "esnext",
     rollupOptions: {
       manualChunks: {
+        ethers: ["ethers"],
         "near-api-js": ["near-api-js"],
       },
     },
