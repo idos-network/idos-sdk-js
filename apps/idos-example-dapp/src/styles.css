@@ -291,7 +291,7 @@ code.display .table .td {
 }
 
 code.display .table .tr > .td:not(:first-child)::before {
-  content: "·";
+  content: "";
   display: inline-flex;
   justify-content: center;
   width: 2em;
