@@ -31,6 +31,11 @@
     "ethers": "^6.12",
     "near-api-js": "^3.0"
   },
+  "peerDependenciesMeta": {
+    "near-api-js": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
     "@idos-network/idos-sdk-types": "workspace:*",
