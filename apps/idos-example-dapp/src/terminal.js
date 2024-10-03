@@ -98,29 +98,15 @@ export class Terminal {
         <div class="tbody">
         ${wrappedItems
           .map((item) => keys.map((key) => [key, item[key]]))
-          .reduce(
-            (row, values) =>
-              row +
-              `
-            <div class="tr">
-              ${values.reduce(
-                (row, [key, value]) =>
-                  row +
-                  `
-                <div class="td">
-                  ${
-                    handlers?.[key]
-                      ? `<a onclick="terminalHandlers['${handlerId}']['${key}']('${value}')">${value}</a>`
-                      : value
-                  }
-                </div>
-              `,
-                "",
-              )}
-            </div>
-          `,
-            "",
-          )}
+          .reduce((rows, values) => {
+            const row = `<div class="tr">${values.reduce((cells, [key, value]) => {
+              const cell = handlers?.[key]
+                ? `<a onclick="terminalHandlers['${handlerId}']['${key}']('${value}')">${value}</a>`
+                : value;
+              return `${cells}<div class="td">${cell}</div>`;
+            }, "")}</div>`;
+            return `${rows}${row}`;
+          }, "")}
         </div>
       </div>
     `);
