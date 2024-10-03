@@ -80,7 +80,8 @@ export class NearGrants implements GrantChild {
             NearGrants.contractMethods.createBySignature,
             NearGrants.contractMethods.revokeBySignature,
           ],
-        } as any, // @todo: fix `useLocalViewExecution` is not in  types.
+          // biome-ignore lint/suspicious/noExplicitAny: fix `useLocalViewExecution` is not in  types.
+        } as any,
       ),
       publicKey,
     );
@@ -88,7 +89,7 @@ export class NearGrants implements GrantChild {
 
   #result(
     grant: NearContractGrant,
-    transactionResult: providers.FinalExecutionOutcome | undefined,
+    transactionResult?: providers.FinalExecutionOutcome,
   ): { grant: Grant; transactionId: string } {
     if (!transactionResult) throw new Error("Unexpected absent transactionResult");
 
@@ -233,7 +234,7 @@ export class NearGrants implements GrantChild {
       locked_until,
     };
 
-    let transactionResult;
+    let transactionResult: providers.FinalExecutionOutcome | undefined;
     try {
       transactionResult =
         (await this.#signer.signAndSendTransaction({
@@ -333,7 +334,7 @@ export class NearGrants implements GrantChild {
       locked_until,
     };
 
-    let transactionResult;
+    let transactionResult: providers.FinalExecutionOutcome | undefined;
     try {
       transactionResult =
         (await this.#signer.signAndSendTransaction({
