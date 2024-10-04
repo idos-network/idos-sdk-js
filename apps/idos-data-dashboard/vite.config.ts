@@ -19,7 +19,7 @@ export default defineConfig({
             "@emotion/styled",
             "framer-motion",
           ],
-          web3: ["wagmi", "viem"],
+          web3: ["wagmi", "viem", "ethers", "near-api-js"],
         },
       },
     },
