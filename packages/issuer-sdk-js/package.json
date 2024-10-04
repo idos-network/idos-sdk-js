@@ -7,16 +7,30 @@
   "license": "MIT",
   "type": "module",
   "main": "src/index.ts",
-  "files": ["dist"],
+  "files": [
+    "dist/**",
+    "!dist/**/*.tsbuildinfo",
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.test-d.ts"
+  ],
   "exports": {
     ".": {
       "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/types/index.d.ts"
+    },
+    "./create-issuer-config": {
+      "import": "./dist/create-issuer-config.js",
+      "types": "./dist/types/create-issuer-config.d.ts"
+    },
+    "./human": {
+      "import": "./dist/human.js",
+      "types": "./dist/types/human.d.ts"
     }
   },
   "scripts": {
-    "dev": "tsup --watch",
-    "build": "tsup",
+    "dev": "tsc --watch",
+    "build": "tsc --project tsconfig.build.json --outDir ./dist --declaration --declarationMap --declarationDir ./dist/types",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -30,7 +44,6 @@
     "@release-it/keep-a-changelog": "^5.0.0",
     "clean-package": "^2.2.0",
     "release-it": "^17.0.0",
-    "tsup": "^8.0.2",
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },

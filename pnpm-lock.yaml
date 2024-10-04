@@ -29,6 +29,9 @@ importers:
       '@idos-network/idos-sdk-server-dapp':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-server-dapp
+      '@idos-network/issuer-sdk-js':
+        specifier: workspace:*
+        version: link:../../packages/issuer-sdk-js
       ethers:
         specifier: ^6.13.1
         version: 6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -512,9 +515,6 @@ importers:
       release-it:
         specifier: ^17.0.0
         version: 17.0.0(typescript@5.5.4)
-      tsup:
-        specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
