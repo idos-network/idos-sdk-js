@@ -37,7 +37,16 @@ import { idOS } from "@idos-network/idos-sdk";
 const idos = await idOS.init({ container: "#idos-container" });
 ```
 
-Connect your user's wallet and use its signer to complete the setup.
+Get your user's address and confirm they have an idOS profile. If not, redirect them to your Issuer.
+
+```js
+const hasProfile = await this.kwilWrapper.hasProfile(signer.address);
+if (!hasProfile) {
+  window.location = "https://kyc-provider.example.com/enroll";
+}
+```
+
+Connect your user's signer to complete the setup.
 
 ```js
 await idos.setSigner("EVM", signer); // e.g. ethers.Signer
