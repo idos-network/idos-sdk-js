@@ -1,4 +1,2 @@
-export function createIssuer() {
-  console.log("Issuer SDK initialised");
-  return true;
-}
+export * from "./create-issuer-config";
+export * from "./human";
