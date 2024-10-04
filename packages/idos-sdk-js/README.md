@@ -111,7 +111,7 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 You can check if your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
 
-```
+```js
 const hasProfile = await idos.hasProfile(signer.address) // true if there is an idOS profile associated with the passed adddress
 ```
 
