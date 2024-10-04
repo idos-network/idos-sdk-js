@@ -10,13 +10,13 @@
   "files": ["dist"],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/idos-sdk-js/src/lib/index.js",
+      "types": "./dist/idos-sdk-js/src/lib/index.d.ts"
     }
   },
   "scripts": {
-    "dev": "dotenvx run --convention=nextjs -- tsup --watch",
-    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
+    "dev": "dotenvx run --convention=nextjs -- tsc --watch",
+    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsc",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -52,7 +52,6 @@
     "jsdom": "^22.1.0",
     "prettier": "^3.0.3",
     "release-it": "^17.0.0",
-    "tsup": "^8.0.2",
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },

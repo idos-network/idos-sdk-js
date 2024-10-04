@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import * as vc from "@digitalbazaar/vc";
@@ -37,6 +38,20 @@ const buildSignatures = async (methods, signatureBuilders) => {
   return result;
 };
 
+export interface VerifyOptions {
+  allowedSigners?;
+  allowedIssuers?;
+  signatureBuilders?;
+  documentLoader?;
+}
+
+export interface MinimalCredential {
+  proof: {
+    proofPurpose: string;
+  };
+  issuer: string;
+}
+
 /**
  * Verify the given `credential` has a valid proof.
  *
@@ -55,15 +70,21 @@ const buildSignatures = async (methods, signatureBuilders) => {
  *
  * @returns {true} `true` on success. Otherwise, throws an Error describing the problem.
  */
-export const verify = async (credential, options = {}) => {
+export const verify = async (
+  credential: MinimalCredential | string,
+  options: VerifyOptions = {},
+): Promise<true> => {
   let { allowedSigners, allowedIssuers, signatureBuilders, documentLoader } = options;
   if (!signatureBuilders) signatureBuilders = knownSignatureBuilders;
   if (!allowedIssuers) allowedIssuers = [FRACTAL_ISSUER];
   if (!documentLoader) documentLoader = defaultLoader;
 
-  if (typeof credential === "string" || credential instanceof String) {
+  if (typeof credential === "string") {
+    // biome-ignore lint/style/noParameterAssign: it's not that confusing here.
     credential = JSON.parse(credential);
   }
+  if (typeof credential !== "object")
+    throw new Error("Credential was JSON.parsed, but it's still a string.");
 
   const proof = credential.proof;
   if (!proof) throw new Error("This function is only supports embedded proofs.");
