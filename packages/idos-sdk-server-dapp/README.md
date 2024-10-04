@@ -38,4 +38,3 @@ import {sdk} from './idOS'
 
 const grants = await sdk.fetchSharedCredential('ID')
 ```
-
