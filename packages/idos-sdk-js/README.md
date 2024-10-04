@@ -342,7 +342,7 @@ await idos.grants.list({
 });
 
 // Share a credential that matches the filtering criteria.
-await sdk.grants.shareMatchingEntry(
+await idos.grants.shareMatchingEntry(
   "credentials",
   {
     credential_level: "basic",
