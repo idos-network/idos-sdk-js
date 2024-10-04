@@ -31,7 +31,8 @@ const idos = await idOS.init({ container: "#idos-container" });
 await idos.setSigner("EVM", signer);
 
 // Overview of user's credentials
-await idos.data.list("credentials").then(console.log);
+const credentials = await idos.data.list("credentials");
+console.log(credentials);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```
 
