@@ -1,6 +1,6 @@
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import * as Base64Codec from "@stablelib/base64";
-import { Contract, connect, keyStores, type providers } from "near-api-js";
+import type { Contract, connect, keyStores, providers } from "near-api-js";
 import { Nonce } from "../nonce";
 import Grant from "./grant";
 import type { GrantChild } from "./grant-child";
@@ -57,15 +57,27 @@ export class NearGrants implements GrantChild {
     options: NearGrantsOptions;
     publicKey: string;
   }): Promise<NearGrants> {
-    const keylessNearConnection = await connect({
+    let near_api: {
+      Contract: typeof Contract;
+      connect: typeof connect;
+      keyStores: typeof keyStores;
+    };
+    try {
+      const { Contract, connect, keyStores } = await import("near-api-js");
+      near_api = { Contract, connect, keyStores };
+    } catch (e) {
+      throw new Error("Can't load near-api-js");
+    }
+
+    const keylessNearConnection = await near_api.connect({
       networkId: options.network ?? NearGrants.defaultNetwork,
-      keyStore: new keyStores.BrowserLocalStorageKeyStore(),
+      keyStore: new near_api.keyStores.BrowserLocalStorageKeyStore(),
       nodeUrl: options.rpcUrl ?? NearGrants.defaultRpcUrl,
     });
 
     return new NearGrants(
       signer,
-      new Contract(
+      new near_api.Contract(
         await keylessNearConnection.account(accountId),
         options.contractId ?? NearGrants.defaultContractId,
         {

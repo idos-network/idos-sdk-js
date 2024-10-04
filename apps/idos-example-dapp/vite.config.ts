@@ -64,6 +64,12 @@ const devBackendPlugin = () => ({
 export default defineConfig({
   build: {
     target: "esnext",
+    rollupOptions: {
+      manualChunks: {
+        ethers: ["ethers"],
+        "near-api-js": ["near-api-js"],
+      },
+    },
   },
   plugins: [
     nodePolyfills({

@@ -31,6 +31,14 @@
     "ethers": "^6.12",
     "near-api-js": "^3.0"
   },
+  "peerDependenciesMeta": {
+    "ethers": {
+      "optional": true
+    },
+    "near-api-js": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@dotenvx/dotenvx": "^1.6.4",
     "@idos-network/idos-sdk-types": "workspace:*",
@@ -56,10 +64,12 @@
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
+    "@stablelib/hex": "^2.0.0",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
     "es-toolkit": "^1.23.0",
+    "bs58": "^6.0.0",
     "jsonld": "^8.3.1",
     "jsonld-document-loader": "^2.0.0",
     "tweetnacl": "^1.0.3"

@@ -1,10 +1,18 @@
 import type { AccessKeyList } from "@near-js/types";
-import { decodeBase58, toBeHex } from "ethers";
-import { connect } from "near-api-js";
+import { encode as encodeHex } from "@stablelib/hex";
+import bs58 from "bs58";
+import type { connect as connectT } from "near-api-js";
 
 export async function getNearFullAccessPublicKeys(
   namedAddress: string,
 ): Promise<string[] | undefined> {
+  let connect: typeof connectT;
+  try {
+    connect = (await import("near-api-js")).connect;
+  } catch (e) {
+    throw new Error("Can't load near-api-js");
+  }
+
   const connectionConfig = {
     networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
     nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
@@ -28,7 +36,7 @@ export async function getNearFullAccessPublicKeys(
 
 export function implicitAddressFromPublicKey(publicKey: string) {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  const implicitAddress = toBeHex(decodeBase58(key_without_prefix));
+  const implicitAddress = encodeHex(bs58.decode(key_without_prefix));
   return implicitAddress;
 }
 

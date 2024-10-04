@@ -1,8 +1,9 @@
-import { Contract, type Signer, type TransactionResponse, ZeroAddress } from "ethers";
+import type { Contract, Signer, TransactionResponse, ethers as ethersT } from "ethers";
 import Grant from "./grant";
 import type { GrantChild } from "./grant-child";
 
-const ZERO_ADDRESS = ZeroAddress;
+// Inlined from Ethers to make it easier to make the package optional.
+const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ZERO_DATA_ID = "0";
 const ZERO_TIMELOCK = 0;
 
@@ -374,9 +375,16 @@ export class EvmGrants implements GrantChild {
     signer,
     options,
   }: { signer: Signer; options: EvmGrantsOptions }): Promise<EvmGrants> {
+    let ethers: typeof ethersT;
+    try {
+      ethers = await import("ethers");
+    } catch (cause) {
+      throw new Error("Can't load ethers", { cause });
+    }
+
     return new EvmGrants(
       signer,
-      new Contract(
+      new ethers.Contract(
         options.contractAddress ?? EvmGrants.#defaultContractAddress,
         EvmGrants.#abi,
         signer,
