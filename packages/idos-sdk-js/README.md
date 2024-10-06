@@ -114,6 +114,8 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
+The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate procress of getting this minutiae right, we implemented it in the SDK.
+
 ### Using `hasProfile`
 
 You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
