@@ -40,7 +40,7 @@ const idos = await idOS.init({ container: "#idos-container" });
 Get your user's address and confirm they have an idOS profile. If not, redirect them to your Issuer.
 
 ```js
-const hasProfile = await this.kwilWrapper.hasProfile(signer.address);
+const hasProfile = await idos.hasProfile(address);
 if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
 
@@ -119,7 +119,13 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
 
 ```js
-const hasProfile = await idos.hasProfile(signer.address);
+const hasProfile = await idos.hasProfile(address);
+```
+
+If your user does not have an idOS profile, you'll have to first redirect them to your credential provider. Here's an example:
+
+```js
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
 
 ### The `setSigner` flow and supported wallets
@@ -195,20 +201,17 @@ idos = await idOS.init({ container: "css selector" });
 ### EVM signer setup
 
 ```js
+const CHAIN_TYPE = "EVM";
 const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
 const address = await signer.getAddress();
-
-const hasProfile = await idos.hasProfile(address);
-if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
-
-const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
 ### NEAR signer setup
 
 ```js
+const CHAIN_TYPE = "NEAR";
 const {
   defaultContractId: contractId,
   contractMethods: methodNames,
@@ -230,11 +233,14 @@ const selector = await setupWalletSelector({
 
 const signer = selector.wallet();
 const address = (await signer.getAccounts())[0].accountId
+```
 
+### Profile checking and `setSigner`
+
+```js
 const hasProfile = await idos.hasProfile(address);
 if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
-
-const { humanId } = await idos.setSigner("NEAR", signer);
+const { humanId } = await idos.setSigner(CHAIN_TYPE, signer);
 ```
 
 ### Credentials
