@@ -41,9 +41,7 @@ Get your user's address and confirm they have an idOS profile. If not, redirect 
 
 ```js
 const hasProfile = await this.kwilWrapper.hasProfile(signer.address);
-if (!hasProfile) {
-  window.location = "https://kyc-provider.example.com/enroll";
-}
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
 
 Connect your user's signer to complete the setup.
@@ -118,10 +116,10 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 ### Using `hasProfile`
 
-You can check if your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
+You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
 
 ```js
-const hasProfile = await idos.hasProfile(signer.address) // true if there is an idOS profile associated with the passed adddress
+const hasProfile = await idos.hasProfile(signer.address);
 ```
 
 ### The `setSigner` flow and supported wallets
@@ -130,7 +128,7 @@ const hasProfile = await idos.hasProfile(signer.address) // true if there is an 
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
-All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavour to remember or learn two things:
+Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `setSigner` process, the SDK will endeavour to remember or learn two things:
 
 1. a public key for this signer;
 2. the idOS human ID of the user controlling this signer.
@@ -200,6 +198,10 @@ idos = await idOS.init({ container: "css selector" });
 const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
+const address = await signer.getAddress();
+
+const hasProfile = await idos.hasProfile(address);
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
@@ -227,25 +229,12 @@ const selector = await setupWalletSelector({
   }));
 
 const signer = selector.wallet();
+const address = (await signer.getAccounts())[0].accountId
+
+const hasProfile = await idos.hasProfile(address);
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 
 const { humanId } = await idos.setSigner("NEAR", signer);
-```
-
-### idOS profile
-
-```js
-if (humanId) {
-  /* user has an idOS profile */
-}
-```
-
-You can also use `idos.hasProfile(signer.address)` before `setSigner` for a check that won't require a signature.
-
-If your user does not have an idOS profile, you'll have to first redirect them to your credential provider. Here's an example:
-
-```js
-if (!idos.hasProfile(signer.address))
-  window.location = "https://kyc-provider.example.com/enroll";
 ```
 
 ### Credentials
