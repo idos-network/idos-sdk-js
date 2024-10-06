@@ -270,8 +270,8 @@ await idos.data.delete("attributes", id);
 
 ### Filtering credentials
 
-`filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
-A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched.
+`idos.enclave.filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
+A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched. `pick` requires the path to have the provided value, `omit` requires the path to not have the provided value.
 
 ```js
 const entries = await idos.enclave.filterCredentials(credentials, {
@@ -282,11 +282,16 @@ const entries = await idos.enclave.filterCredentials(credentials, {
     "credentialSubject.identification_document_type": "passport",
   },
 });
-
-`entries` would be a list of credentials where the `"credentialSubject.identification_document_country"` matches `DE`
-and `"credentialSubject.identification_document_type"` is not of type "passport".
-
 ```
+
+`entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"`
+and `"credentialSubject.identification_document_type"` is not `"passport"`.
+
+You can also use `idos.grants.shareMatchingEntry`, a helper function that:
+- Gets all the user's credentials
+- Can filter by public fields
+- Calls `idos.enclave.filterCredentials`
+- Calls `idos.grants.create` with the first matching credential
 
 ### Access Grants
 
