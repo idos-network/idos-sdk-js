@@ -34,7 +34,7 @@ Import the SDK and initialize it with a selector for the container:
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idOS.init({ container: "#idos-container" });
+const idos = await idOS.init({enclaveOptions: {container: "#idos-container"}});
 ```
 
 Get your user's address and confirm they have an idOS profile. If not, redirect them to your Issuer.
@@ -83,7 +83,7 @@ const isValid = await idOS.verifiableCredentials
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idos.init({ container: "#idos-container" });
+const idos = await idOS.init({enclaveOptions: {container: "#idos-container"}});
 ```
 
 After importing the SDK, you initialize it with a selector string for a DOM node. Make sure to add it to your page:
@@ -129,8 +129,8 @@ Here's an example of using the playground network:
 
 ```js
 const idos = await idos.init({
-  container: "#idos-container",
   nodeUrl: "https://nodes.playground.idos.network",
+  enclaveOptions: {container: "#idos-container"},
 });
 ```
 
@@ -149,7 +149,7 @@ In order for the SDK to know which access grants contract to use, we need to pro
 The default values come from the [.env] file the SDK is build with. Assuming that file is available as a gloab `env` object, here are the default values for each options object:
 ```js
 const idos = await idos.init({
-  container: "#idos-container",
+  enclaveOptions: {container: "#idos-container"},
   evmGrantsOptions: {
     contractAddress: env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS,
     chainId: env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID,
@@ -306,7 +306,7 @@ This is especially relevant for dApps who want to subsidise the cost of transact
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-idos = await idOS.init({ container: "css selector" });
+const idos = await idOS.init({ enclaveOptions: {container: "css selector"} });
 ```
 
 ### EVM signer setup
