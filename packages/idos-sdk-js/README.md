@@ -118,9 +118,10 @@ The main reason the SDK controls this HTML element is to remove the burden of op
 
 ### Other initialization options
 
-The container is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
+The enclaveOptions's container is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
 
 #### `nodeUrl`
+
 The most obvious one is to which network to connect: production, or playground. These can be found, respectively, at:
 - https://nodes.idos.network (default)
 - https://nodes.playground.idos.network
@@ -147,6 +148,7 @@ This is only relevant if you use `idos.grants.*` methods.
 In order for the SDK to know which access grants contract to use, we need to provide `evmGrantsOptions` or `nearGrantsOptions`, depending on which network the dApp is deployed on.
 
 The default values come from the [.env] file the SDK is build with. Assuming that file is available as a gloab `env` object, here are the default values for each options object:
+
 ```js
 const idos = await idos.init({
   enclaveOptions: {container: "#idos-container"},
