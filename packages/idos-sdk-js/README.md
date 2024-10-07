@@ -116,6 +116,56 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate procress of getting this minutiae right, we implemented it in the SDK.
 
+### Other initialization options
+
+The container is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
+
+#### `nodeUrl`
+The most obvious one is to which network to connect: production, or playground. These can be found, respectively, at:
+- https://nodes.idos.network (default)
+- https://nodes.playground.idos.network
+
+Here's an example of using the playground network:
+
+```js
+const idos = await idos.init({
+  container: "#idos-container",
+  nodeUrl: "https://nodes.playground.idos.network",
+});
+```
+
+#### `dbId`
+
+This concept is very internal to the idOS nodes, and the right value gets automatically disovered during initialization.
+
+Unless you know what you're doing (e.g., deploying a new idOS network with a Kwil schema that's not called `idos`), omit this field.
+
+#### Grant options (`evmGrantsOptions` and `nearGrantsOptions`)
+
+This is only relevant if you use `idos.grants.*` methods.
+
+In order for the SDK to know which access grants contract to use, we need to provide `evmGrantsOptions` or `nearGrantsOptions`, depending on which network the dApp is deployed on.
+
+The default values come from the [.env] file the SDK is build with. Assuming that file is available as a gloab `env` object, here are the default values for each options object:
+```js
+const idos = await idos.init({
+  container: "#idos-container",
+  evmGrantsOptions: {
+    contractAddress: env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS,
+    chainId: env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID,
+  },
+  nearGrantsOptions: {
+    network: env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
+    contractId: env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+    rpcUrl: env.VITE_IDOS_NEAR_DEFAULT_RPC_URL;
+  },
+});
+```
+
+You can take a look at what each environment uses by consulting their schemas:
+- [schema.production.kf](https://github.com/idos-network/idos-schema/blob/main/schema.production.kf)
+- [schema.playground.kf](https://github.com/idos-network/idos-schema/blob/main/schema.playground.kf)
+
 ### Using `hasProfile`
 
 You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
