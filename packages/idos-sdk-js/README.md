@@ -166,6 +166,15 @@ You can take a look at what each environment uses by consulting their schemas:
 - [schema.production.kf](https://github.com/idos-network/idos-schema/blob/main/schema.production.kf)
 - [schema.playground.kf](https://github.com/idos-network/idos-schema/blob/main/schema.playground.kf)
 
+#### `enclaveOptions`
+
+So far, we've only used `container` from `enclaveOptions`. There are a few more fields that you can set:
+
+- `theme?: "light" | "dark"`: Forces a specific theme for the enclave pop-up. By default, this is discovered through the media query `prefers-color-scheme`.
+- `mode?: "new" | "existing"`: Forces a specific verbiage to be shown on the enclave pop-up. The default is `existing`, but issuers can set it to `new` to show messages that are more helful for new users. Unless you're an issuer, this should not be supplied.
+- `url?: string`: URL of the enclave pop-up. Unless you're developing your own enclave, this should not be supplied.
+- `throwOnUserCancelUnlock?: boolean`: Controls the SDK's reaction to the user closing the enclave pop-up. The default, `false`, keeps the **🔓 Unlock idOS** button visible so the user can click it again and finish the unlocking process. If this value is `true`, the SDK will hide the button and raise whatever error it got from the enclave pop-up.
+
 ### Using `hasProfile`
 
 You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
