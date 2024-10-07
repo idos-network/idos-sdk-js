@@ -190,6 +190,65 @@ If they choose **Passkey**, we'll use their platform authenticator (you can lear
 
 The selected auth method will not have a bearing on the encryption capabilities.
 
+### Filtering credentials
+
+`idos.enclave.filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
+A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched. `pick` requires the path to have the provided value, `omit` requires the path to not have the provided value.
+
+```js
+const entries = await idos.enclave.filterCredentials(credentials, {
+  pick: {
+    "credentialSubject.identification_document_country": "DE"
+  },
+  omit: {
+    "credentialSubject.identification_document_type": "passport",
+  },
+});
+```
+
+`entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"`
+and `"credentialSubject.identification_document_type"` is not `"passport"`.
+
+You can also use `idos.grants.shareMatchingEntry`, a helper function that:
+- Gets all the user's credentials
+- Can filter by public fields
+- Calls `idos.enclave.filterCredentials`
+- Calls `idos.grants.create` with the first matching credential
+
+### Access Grants
+
+Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
+
+This is achived by combining two mechanisms:
+
+- On idOS,by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
+- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
+
+The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
+
+An Access Grant record consists of the following values:
+
+- `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
+- `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
+- `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
+- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
+
+> 💡 Tip
+>
+> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
+
+### Delegated Access Grants
+
+A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+
+The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
+
+> 🛑 Caution
+>
+> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
+
+This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
+
 ## Quick reference
 
 ### Importing and initializing
@@ -275,50 +334,6 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
-
-### Filtering credentials
-
-`idos.enclave.filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
-A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched. `pick` requires the path to have the provided value, `omit` requires the path to not have the provided value.
-
-```js
-const entries = await idos.enclave.filterCredentials(credentials, {
-  pick: {
-    "credentialSubject.identification_document_country": "DE"
-  },
-  omit: {
-    "credentialSubject.identification_document_type": "passport",
-  },
-});
-```
-
-`entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"`
-and `"credentialSubject.identification_document_type"` is not `"passport"`.
-
-You can also use `idos.grants.shareMatchingEntry`, a helper function that:
-- Gets all the user's credentials
-- Can filter by public fields
-- Calls `idos.enclave.filterCredentials`
-- Calls `idos.grants.create` with the first matching credential
-
-### Access Grants
-
-Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
-
-This is achived by combining two mechanisms:
-
-- On idOS,by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
-- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
-
-The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
-
-An Access Grant record consists of the following values:
-
-- `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
-- `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
-- `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
-- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
-
 ### Access Grant creation / revocation / list
 
 Here's some example code of creating, revoking and listing Access Grants.
@@ -372,23 +387,7 @@ await idos.grants.shareMatchingEntry(
 });
 ```
 
-> 💡 Tip
->
-> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
-
-### Delegated Access Grants
-
-A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
-
-The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
-
-> 🛑 Caution
->
-> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
-
-This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
-
-### Creating a dAG on EVM:
+### Creating a dAG on EVM
 
 ```js
 /*
