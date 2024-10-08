@@ -27,9 +27,9 @@
       "import": "./dist/human.js",
       "types": "./dist/types/human.d.ts"
     },
-    "./credentilas": {
-      "import": "./dist/credentilas.js",
-      "types": "./dist/types/credentilas.d.ts"
+    "./credentials": {
+      "import": "./dist/credentials.js",
+      "types": "./dist/types/credentials.d.ts"
     }
   },
   "scripts": {
