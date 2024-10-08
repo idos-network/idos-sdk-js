@@ -499,12 +499,21 @@ importers:
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
       ethers:
         specifier: ^6.13.3
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
     devDependencies:
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0

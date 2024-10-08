@@ -13,7 +13,7 @@ export interface idOSCredential {
   credential_type: string;
   credential_level: string;
   credential_status: idOSCredentialStatus;
-  content?: string;
+  content: string;
   encryption_public_key: string;
 }
 
