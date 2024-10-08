@@ -2,7 +2,6 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import type { CreateIssuerConfig } from "./create-issuer-config";
 import { encrypt } from "./crypto";
 import { createActionInput } from "./internal";
-import { inputValidation } from "./validation";
 
 export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "original_id"> {}
 
@@ -16,8 +15,6 @@ export async function upsertCredential(
 ) {
   let encryptedContent: string;
   const id = crypto.randomUUID();
-
-  inputValidation(params, secretKey);
 
   try {
     encryptedContent = await encryptContent(

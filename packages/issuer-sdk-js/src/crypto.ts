@@ -4,12 +4,24 @@ import nacl from "tweetnacl";
 
 export async function encrypt(message: string, encryptionPublicKey: string, secretKey: string) {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const encrypted = nacl.box(
-    utf8Codec.encode(message),
-    nonce,
-    base64.decode(encryptionPublicKey),
-    base64.decode(secretKey),
-  );
+  const encodedMsg = utf8Codec.encode(message);
+  const decodedEncryptionPublicKey = base64.decode(encryptionPublicKey);
+  const decodedSecretKey = base64.decode(secretKey);
+
+  const encrypted = nacl.box(encodedMsg, nonce, decodedEncryptionPublicKey, decodedSecretKey);
+
+  if (encrypted === null)
+    throw Error(
+      `Couldn't encrypt. ${JSON.stringify(
+        {
+          message: base64.encode(encodedMsg),
+          nonce: base64.encode(nonce),
+          receiverPublicKey: base64.encode(decodedEncryptionPublicKey),
+        },
+        null,
+        2,
+      )}`,
+    );
 
   const fullMessage = new Uint8Array(nonce.length + encrypted.length);
   fullMessage.set(nonce, 0);
