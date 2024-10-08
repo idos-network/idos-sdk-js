@@ -1,13 +1,8 @@
-import type { CreateCredentialReqParams } from "./credentilas";
+import invariant from "tiny-invariant";
+import type { CreateCredentialReqParams } from "./credentials";
 
 export const inputValidation = (params: CreateCredentialReqParams, secretKey: string) => {
-  if (!params.content) {
-    throw new Error("Content is required to create a credential.");
-  }
-  if (!params.encryption_public_key) {
-    throw new Error("Encryption public key is required.");
-  }
-  if (!secretKey) {
-    throw new Error("Secret key is required.");
-  }
+  invariant(params.content, "Content is required to create a credential.");
+  invariant(params.encryption_public_key, "Encryption public key is required.");
+  invariant(secretKey, "Secret key is required.");
 };
