@@ -19,6 +19,12 @@ export interface AuthUser {
   currentUserPublicKey?: string;
 }
 
+export class NoProfile extends Error {
+  constructor() {
+    super("Signer's address is not known to idOS.");
+  }
+}
+
 export class Auth {
   private user?: AuthUser;
 
@@ -42,6 +48,8 @@ export class Auth {
 
   async setEvmSigner(signer: Signer) {
     const currentAddress = await signer.getAddress();
+
+    if (!(await this.kwilWrapper.hasProfile(currentAddress))) throw new NoProfile();
 
     const storedAddress = this.store.get("signer-address");
 
@@ -72,6 +80,8 @@ export class Auth {
     if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
     const currentAddress = (await wallet.getAccounts())[0].accountId;
+
+    if (!(await this.kwilWrapper.hasProfile(currentAddress))) throw new NoProfile();
 
     if (wallet.id === "my-near-wallet") {
       const { accountId, signature, publicKey, error } = Object.fromEntries(

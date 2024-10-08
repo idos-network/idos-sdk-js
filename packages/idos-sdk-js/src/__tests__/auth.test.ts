@@ -1,5 +1,5 @@
 import { Wallet } from "ethers";
-import { Auth } from "src/lib/auth";
+import { Auth, NoProfile } from "src/lib/auth";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { Store } from "../../../idos-store";
@@ -19,6 +19,7 @@ describe("auth", () => {
       id: humanId,
     });
     auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);
+    auth.kwilWrapper.hasProfile = vi.fn().mockResolvedValue(true);
   });
 
   test("should create a new instance of Auth", () => {
@@ -40,6 +41,16 @@ describe("auth", () => {
       humanId,
       currentUserPublicKey,
       address,
+    });
+  });
+
+  describe("with an unknown user", () => {
+    test("should raise NoProfile", async () => {
+      auth.kwilWrapper.hasProfile = vi.fn().mockResolvedValueOnce(false);
+
+      const signer = Wallet.createRandom();
+
+      expect(() => auth.setEvmSigner(signer)).rejects.toThrowError(NoProfile);
     });
   });
 });
