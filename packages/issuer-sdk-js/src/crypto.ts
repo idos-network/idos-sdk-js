@@ -1,22 +1,22 @@
 import * as base64 from "@stablelib/base64";
-import * as utf8Codec from "@stablelib/utf8";
 import nacl from "tweetnacl";
 
-export async function encrypt(message: string, encryptionPublicKey: string, secretKey: string) {
+export async function encrypt(
+  message: Uint8Array,
+  encryptionPublicKey: Uint8Array,
+  secretKey: Uint8Array,
+) {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const encodedMsg = utf8Codec.encode(message);
-  const decodedEncryptionPublicKey = base64.decode(encryptionPublicKey);
-  const decodedSecretKey = base64.decode(secretKey);
 
-  const encrypted = nacl.box(encodedMsg, nonce, decodedEncryptionPublicKey, decodedSecretKey);
+  const encrypted = nacl.box(message, nonce, encryptionPublicKey, secretKey);
 
   if (encrypted === null)
     throw Error(
       `Couldn't encrypt. ${JSON.stringify(
         {
-          message: base64.encode(encodedMsg),
+          message: base64.encode(message),
           nonce: base64.encode(nonce),
-          receiverPublicKey: base64.encode(decodedEncryptionPublicKey),
+          receiverPublicKey: base64.encode(encryptionPublicKey),
         },
         null,
         2,
