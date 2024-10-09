@@ -34,6 +34,7 @@
     "@lit-protocol/types": "^6.5.0",
     "@headlessui/react": "^2.1.8",
     "@idos-network/idos-store": "workspace:*",
+    "@idos-network/crypto-sdk-js": "workspace:*",
     "@preact/signals": "^1.3.0",
     "@react-oauth/google": "^0.12.1",
     "@stablelib/base64": "^1.0.1",

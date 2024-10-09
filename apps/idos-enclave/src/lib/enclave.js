@@ -3,7 +3,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { every, get, negate } from "lodash-es";
 import nacl from "tweetnacl";
-
+import { decrypt } from "@idos-network/crypto-sdk-js";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 export class Enclave {
@@ -202,25 +202,26 @@ export class Enclave {
   async decrypt(fullMessage, senderPublicKey) {
     if (!this.keyPair) await this.keys();
 
-    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
+    const decrypted = decrypt(fullMessage, senderPublicKey, this.keyPair.secretKey);
+    // const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+    // const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+    // const result = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
 
-    if (decrypted === null) {
-      throw Error(
-        `Couldn't decrypt. ${JSON.stringify(
-          {
-            fullMessage: Base64Codec.encode(fullMessage),
-            message: Base64Codec.encode(message),
-            nonce: Base64Codec.encode(nonce),
-            senderPublicKey: Base64Codec.encode(senderPublicKey),
-            localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
-          },
-          null,
-          2,
-        )}`,
-      );
-    }
+    // if (decrypted === null) {
+    //   throw Error(
+    //     `Couldn't decrypt. ${JSON.stringify(
+    //       {
+    //         fullMessage: Base64Codec.encode(fullMessage),
+    //         message: Base64Codec.encode(message),
+    //         nonce: Base64Codec.encode(nonce),
+    //         senderPublicKey: Base64Codec.encode(senderPublicKey),
+    //         localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
+    //       },
+    //       null,
+    //       2,
+    //     )}`,
+    //   );
+    // }
 
     return decrypted;
   }
