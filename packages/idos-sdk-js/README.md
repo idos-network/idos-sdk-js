@@ -282,7 +282,7 @@ Acquiring an Access Grant assures a dApp that they'll have a copy of the user's 
 
 This is achived by combining two mechanisms:
 
-- On idOS,by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
+- On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
 - On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
 
 The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
