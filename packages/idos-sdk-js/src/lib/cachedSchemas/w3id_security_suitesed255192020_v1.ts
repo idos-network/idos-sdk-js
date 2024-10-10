@@ -89,5 +89,46 @@ export default {
         },
       },
     },
+    Revocation: {
+      "@id": "https://w3id.org/security#Revocation",
+      "@context": {
+        "@protected": true,
+        id: "@id",
+        type: "@type",
+        revokedCredentialId: {
+          "@id": "https://w3id.org/security#revokedCredentialId",
+          "@type": "@id",
+        },
+        newStatus: {
+          "@id": "https://w3id.org/security#newStatus",
+          "@type": "http://www.w3.org/2001/XMLSchema#string",
+        },
+        proof: {
+          "@id": "https://w3id.org/security#proof",
+          "@type": "@id",
+          "@context": {
+            "@protected": true,
+            id: "@id",
+            type: "@type",
+            created: {
+              "@id": "http://purl.org/dc/terms/created",
+              "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
+            },
+            verificationMethod: {
+              "@id": "https://w3id.org/security#verificationMethod",
+              "@type": "@id",
+            },
+            proofPurpose: {
+              "@id": "https://w3id.org/security#proofPurpose",
+              "@type": "@vocab",
+            },
+            proofValue: {
+              "@id": "https://w3id.org/security#proofValue",
+              "@type": "https://w3id.org/security#multibase",
+            },
+          },
+        },
+      },
+    },
   },
 };
