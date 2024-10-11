@@ -114,11 +114,11 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
-The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate procress of getting this minutiae right, we implemented it in the SDK.
+The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked by the browser because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate procress of getting these details right, we implemented it in the SDK.
 
 ### Other initialization options
 
-The enclaveOptions's container is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
+The `enclaveOptions`'s `container` is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
 
 #### `nodeUrl`
 
@@ -147,7 +147,7 @@ This is only relevant if you use `idos.grants.*` methods.
 
 In order for the SDK to know which access grants contract to use, we need to provide `evmGrantsOptions` or `nearGrantsOptions`, depending on which network the dApp is deployed on.
 
-The default values come from the [.env] file the SDK is build with. Assuming that file is available as a gloab `env` object, here are the default values for each options object:
+The default values come from the [.env](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/.env) file the SDK is built with. Assuming that file is available as a global `env` object, here are the default values for each options object:
 
 ```js
 const idos = await idos.init({
@@ -221,7 +221,7 @@ The idOS currently supports two classes of signers:
 
 ### Unlocking the idOS enclave
 
-Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
+Credential contents stored in the idOS are encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
 
 Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
 
