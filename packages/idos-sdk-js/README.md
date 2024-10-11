@@ -197,22 +197,23 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
-Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `setSigner` process, the SDK will endeavour to remember or learn two things:
+Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. Your user's wallet might need to be triggered, so you should be mindful of when in your user's journey you call this method.
 
-1. a public key for this signer;
-2. the idOS human ID of the user controlling this signer.
+When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In With Ethereum](https://eips.ethereum.org/EIPS/eip-4361) (SIWE) messgage for authentication, and make a call to get some basic information about the user.
 
-The SDK first attempts to recall both from local storage and from the secure enclave. If it can't, it will engage with the signer. In this scenario, the SDK first requests a signed message from which it can extract the public key. Finally, it performs the first idOS query: asking it for the ID of the user controlling the signer.
+> 🛈 Note for NEAR
+>
+> Because idOS thinks in terms of signing keys, but NEAR thinks in terms of accounts that can be controlled by multiple signing keys, the SDK needs to discover the signing key that's currently being used. This requires a signed message from the user.
+>
+> Here's an example of what that looks like with Meteor:
+> <!-- TODO: Replace with an absolute URL pointing at main after merge -->
+> <img src="./assets/readme-sign-near.png" width="250" />
 
-Your user's wallet will be triggered when this happens, so you should be mindful of when in your user's journey you call this method. Here's how these requests appear in MetaMask.
+Here's an example of what signing a SIWE message looks like with Metamask:
+<!-- TODO: Replace with an absolute URL pointing at main after merge -->
+<img src="./assets/readme-sign-siwe.png" width="250" />
 
-<table border="0"><tr align="center">
-  <td><i>Asking the signer for a public key:</i></td>
-  <td><i>Fetching the human ID from idOS:</i></td>
-</tr><tr align="center">
-  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-1.png" width="250" /></td>
-  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-2.png" width="250" /></td>
-</td></tr></table>
+During this whole process, the SDK tries to use the browser's local storage to remember this signer's address (and public key, for NEAR signers) to avoid repeating this process unless necessary.
 
 The idOS currently supports two classes of signers:
 
