@@ -58,6 +58,10 @@ export async function upsertCredential(
 export function createRevocationDocument(credentialId: string): idOSRevocationDocument {
   return {
     id: credentialId,
+    revokedCredentialId: "",
+    newStatus: "revoked",
+    verificationMethod: "",
+    proof: {},
   };
 }
 
@@ -83,40 +87,4 @@ export async function revokeIssuedCredential(
   );
 
   return response.data?.tx_hash;
-}
-
-/**
- * Leaving this here for now to get the full picture.
- * The passed `credentialId` is the `id` extracted from the credential content.
- * This function should be extracted to the dApp SDK / Client SDK as it should be used outside the context of the Issuer SDK.
- */
-export async function isCredentialRevoked(
-  { dbid, kwilClient, signer }: CreateIssuerConfig,
-  credentialId: string,
-) {
-  const response = await kwilClient.call(
-    {
-      name: "get_revocation_documents",
-      dbid,
-      inputs: [createActionInput({ revokedCredentialId: credentialId })],
-    },
-    signer,
-  );
-
-  // We need to cast to unknown first to avoid type errors.
-  const revocationDocuments = response.data?.result as unknown as idOSRevocationDocument[];
-
-  /**
-   * Check each revocation document:
-   * 1. Check if the credential id matches
-   * 2. Check if the new status is revoked
-   * 3. @todo: Check if the verification method is correct
-   * 4. @todo: Check if the `proof` field is valid
-   */
-  return revocationDocuments.some(
-    (document) => document.revokedCredentialId === credentialId && document.newStatus === "revoked",
-    // Add additional checks here when implemented:
-    // && isVerificationMethodCorrect(document.verificationMethod)
-    // && isProofValid(document.proof)
-  );
 }
