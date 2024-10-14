@@ -292,4 +292,16 @@ export class Data {
   async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
     return await this.delete(tableName, recordId);
   }
+
+  async addWriteGrant(grantee: string) {
+    return await this.kwilWrapper.execute(
+      "add_write_grant",
+      [
+        {
+          grantee,
+        },
+      ],
+      `Grant ${grantee} write access to your idOS credentials`,
+    );
+  }
 }

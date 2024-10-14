@@ -42,8 +42,8 @@ describe("createIssuerConfig", () => {
     );
     const params = {
       nodeUrl: "http://mock-node-url",
-      secretKey: "mock-private-key",
       signer: mockWallet,
+      secretKey: "mock-secret-key",
     };
 
     const result = await createIssuerConfig(params);
