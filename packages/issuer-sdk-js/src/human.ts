@@ -9,18 +9,19 @@ interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
 async function createHumanProfile(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
   params: CreateProfileReqParams,
-) {
-  const response = await kwilClient.execute(
+): Promise<idOSHuman> {
+  const payload = ensureEntityId(params);
+  await kwilClient.execute(
     {
       name: "add_human_as_inserter",
       dbid,
-      inputs: [createActionInput(ensureEntityId(params))],
+      inputs: [createActionInput(payload)],
     },
     signer,
     true,
   );
 
-  return response.data?.tx_hash;
+  return payload;
 }
 
 interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
@@ -30,18 +31,19 @@ interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
 async function upsertWallet(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
   params: UpsertWalletReqParams,
-) {
-  const response = await kwilClient.execute(
+): Promise<idOSWallet> {
+  const payload = ensureEntityId(params);
+  await kwilClient.execute(
     {
       name: "upsert_wallet_as_inserter",
       dbid,
-      inputs: [createActionInput(ensureEntityId(params))],
+      inputs: [createActionInput(payload)],
     },
     signer,
     true,
   );
 
-  return response.data?.tx_hash;
+  return payload;
 }
 
 export async function createHuman(
@@ -57,7 +59,7 @@ export async function createHuman(
     id: human_id,
   };
 
-  const human_tx_hash = await createHumanProfile(config, humanReqParams);
+  const humanResponse = await createHumanProfile(config, humanReqParams);
 
   const walletReqParams = {
     ...wallet,
@@ -65,20 +67,8 @@ export async function createHuman(
     id: wallet_id,
   };
 
-  const wallet_tx_hash = await upsertWallet(config, walletReqParams);
+  const walletResponse = await upsertWallet(config, walletReqParams);
 
-  return [
-    {
-      tx_hash: human_tx_hash,
-      data: {
-        ...humanReqParams,
-      },
-    },
-    {
-      tx_hash: wallet_tx_hash,
-      data: {
-        ...walletReqParams,
-      },
-    },
-  ];
+  // @todo: I am not sure if this is the best way to return the response. Need to think about it.
+  return [humanResponse, walletResponse];
 }
