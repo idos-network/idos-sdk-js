@@ -1,6 +1,6 @@
 import { Utils } from "@kwilteam/kwil-js";
 
-export async function ensureEntityId<T extends { id?: string }>(entity: T): Promise<T> {
+export function ensureEntityId<T extends { id?: string }>(entity: T): { id: string } & T {
   return {
     ...entity,
     id: entity.id ?? crypto.randomUUID(),
