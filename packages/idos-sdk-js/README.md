@@ -220,6 +220,61 @@ The idOS currently supports two classes of signers:
 - Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
 - NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
 
+### Exploring the user's data
+
+Now that we're succefully authenticated on idOS, we can now perform operations on user data. The entities that a user controls are:
+
+- **Wallets**: the wallets that the user has declared as being able to control their idOS profile.
+- **Credentials**: the credentials of a user. Their contents are encrypted (for the user's encryption key), but it also has some public fields for inspection.
+- **Attributes**: free form key-value entries. You can use this to store public attribute about the user.
+
+All of these can be created, retrieved, updated, or deleted. The only notable exceptions is deleting shared credentials with timelocks still active (more on this when we explain Access Grants).
+
+Here's an example of listing a user's credentials:
+```js
+const credentials = await idos.data.list("credentials");
+console.log(credentials);
+// [{ id: "4f4d...", issuer: "FractalID", type: "human" }, ...]
+```
+
+### Decrypting the user credential content
+
+> 🛑 Caution
+>
+> This is only meant to be used on admin-like dApps (like https://dashboard.idos.network/).
+>
+> If the user hasn't granted you an Access Grant, the user hasn't consented to you getting a copy of the data. We'll be covering Access Grant in a following section.
+>
+> For now, please use idOS responsably and respect the user's will and data sovereignty. In order to protect the user, we're planning on changing how this admin-like access works in the near future, so please don't rely on it.
+
+Today, as a shortcut, we decrypt the credential's content on `get`:
+```js
+const { content } = await idos.data.get("credentials", credentials[0].id);
+```
+
+The manual version on this shortcut looks like this:
+```js
+const credential = await idos.data.get(
+  "credentials",
+  credentials[0].id,
+  false, // `false` here means "don't ask the user to decrypt the contents"
+);
+
+const content = await idos.enclave.decrypt(
+  credential.content,
+  credential.encryption_public_key,
+)
+```
+
+This call needs to operate with the user's encryption key. This is a responsability of the Enclave, which we'll explain in the next section.
+
+Now you have access to the decrypted credential contents. If it's a [W3C Verifiable Credential](https://www.w3.org/TR/vc-data-model-2.0/), you can check it's authenticity with:
+```js
+await idOS.verifiableCredentials.verify(content)
+```
+
+This function always returns `true` or raises an Error detailing what went wrong with the verification process.
+
 ### Unlocking the idOS enclave
 
 Credential contents stored in the idOS are encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
