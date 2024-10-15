@@ -1,8 +1,10 @@
 import type { idOSHuman, idOSWallet } from "@idos-network/idos-sdk-types";
 import type { CreateIssuerConfig } from "./create-issuer-config";
-import { createActionInput } from "./internal";
+import { createActionInput, ensureEntityId } from "./internal";
 
-interface CreateProfileReqParams extends idOSHuman {}
+interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
+  id?: string;
+}
 
 async function createHumanProfile(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
@@ -12,7 +14,7 @@ async function createHumanProfile(
     {
       name: "add_human_as_inserter",
       dbid,
-      inputs: [createActionInput(params)],
+      inputs: [createActionInput(ensureEntityId(params))],
     },
     signer,
     true,
@@ -21,7 +23,9 @@ async function createHumanProfile(
   return response.data?.tx_hash;
 }
 
-interface UpsertWalletReqParams extends idOSWallet {}
+interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
+  id?: string;
+}
 
 async function upsertWallet(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
@@ -31,7 +35,7 @@ async function upsertWallet(
     {
       name: "upsert_wallet_as_inserter",
       dbid,
-      inputs: [createActionInput(params)],
+      inputs: [createActionInput(ensureEntityId(params))],
     },
     signer,
     true,
@@ -42,14 +46,14 @@ async function upsertWallet(
 
 export async function createHuman(
   config: CreateIssuerConfig,
-  current_public_key: string,
-  wallet: Omit<UpsertWalletReqParams, "id" | "human_id">,
+  human: CreateProfileReqParams,
+  wallet: Omit<UpsertWalletReqParams, "human_id">,
 ) {
-  const human_id = crypto.randomUUID();
-  const wallet_id = crypto.randomUUID();
+  const human_id = human.id ?? crypto.randomUUID();
+  const wallet_id = wallet.id ?? crypto.randomUUID();
 
   const humanReqParams = {
-    current_public_key,
+    ...human,
     id: human_id,
   };
 
