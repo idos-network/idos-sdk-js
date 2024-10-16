@@ -1,10 +1,15 @@
 {
   "name": "@idos-network/kwil-nep413-signer",
   "private": true,
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.ts",
+  "version": "0.0.1",
+  "description": "idOS Kwil Nep413 Signer",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "types": "./dist/types/index.d.ts"
+  },
   "scripts": {
+    "build": "tsc --project tsconfig.build.json",
     "format": "biome format --write .",
     "lint": "biome check --apply ."
   },
@@ -18,5 +23,8 @@
     "borsh": "^1.0.0",
     "bs58": "^6.0.0",
     "near-api-js": "^3.0.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
   }
 }
