@@ -1,59 +1,65 @@
 import type { idOSHuman, idOSWallet } from "@idos-network/idos-sdk-types";
 import type { CreateIssuerConfig } from "./create-issuer-config";
-import { createActionInput } from "./internal";
+import { createActionInput, ensureEntityId } from "./internal";
 
-interface CreateProfileReqParams extends idOSHuman {}
+interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
+  id?: string;
+}
 
 async function createHumanProfile(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
   params: CreateProfileReqParams,
-) {
-  const response = await kwilClient.execute(
+): Promise<idOSHuman> {
+  const payload = ensureEntityId(params);
+  await kwilClient.execute(
     {
       name: "add_human_as_inserter",
       dbid,
-      inputs: [createActionInput(params)],
+      inputs: [createActionInput(payload)],
     },
     signer,
     true,
   );
 
-  return response.data?.tx_hash;
+  return payload;
 }
 
-interface UpsertWalletReqParams extends idOSWallet {}
+interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
+  id?: string;
+}
 
 async function upsertWallet(
   { dbid, kwilClient, signer }: CreateIssuerConfig,
   params: UpsertWalletReqParams,
-) {
-  const response = await kwilClient.execute(
+): Promise<idOSWallet> {
+  const payload = ensureEntityId(params);
+  await kwilClient.execute(
     {
       name: "upsert_wallet_as_inserter",
       dbid,
-      inputs: [createActionInput(params)],
+      inputs: [createActionInput(payload)],
     },
     signer,
     true,
   );
 
-  return response.data?.tx_hash;
+  return payload;
 }
 
 export async function createHuman(
   config: CreateIssuerConfig,
-  current_public_key: string,
-  wallet: Omit<UpsertWalletReqParams, "id" | "human_id">,
+  human: CreateProfileReqParams,
+  wallet: Omit<UpsertWalletReqParams, "human_id">,
 ) {
-  const human_id = crypto.randomUUID();
-  const wallet_id = crypto.randomUUID();
+  const human_id = human.id ?? crypto.randomUUID();
+  const wallet_id = wallet.id ?? crypto.randomUUID();
 
   const humanReqParams = {
-    current_public_key,
+    ...human,
     id: human_id,
   };
 
-  const human_tx_hash = await createHumanProfile(config, humanReqParams);
+  const humanResponse = await createHumanProfile(config, humanReqParams);
 
   const walletReqParams = {
     ...wallet,
@@ -61,20 +67,8 @@ export async function createHuman(
     id: wallet_id,
   };
 
-  const wallet_tx_hash = await upsertWallet(config, walletReqParams);
+  const walletResponse = await upsertWallet(config, walletReqParams);
 
-  return [
-    {
-      tx_hash: human_tx_hash,
-      data: {
-        ...humanReqParams,
-      },
-    },
-    {
-      tx_hash: wallet_tx_hash,
-      data: {
-        ...walletReqParams,
-      },
-    },
-  ];
+  // @todo: I am not sure if this is the best way to return the response. Need to think about it.
+  return [humanResponse, walletResponse];
 }

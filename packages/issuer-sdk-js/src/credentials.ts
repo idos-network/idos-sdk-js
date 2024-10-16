@@ -3,10 +3,12 @@ import * as base64 from "@stablelib/base64";
 import * as utf8Codec from "@stablelib/utf8";
 import type { CreateIssuerConfig } from "./create-issuer-config";
 import { encrypt } from "./crypto";
-import { createActionInput } from "./internal";
+import { createActionInput, ensureEntityId } from "./internal";
 import { Revoker, createRevokationDoc } from "./revoker";
 
-export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "original_id"> {}
+export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "original_id"> {
+  id?: string;
+}
 
 const encryptContent = (content: string, secretKey: string, encryptionPublicKey: string) => {
   const endodedContent = utf8Codec.encode(content);
@@ -21,7 +23,6 @@ export async function upsertCredential(
   params: CreateCredentialReqParams,
 ) {
   let encryptedContent: string;
-  const id = crypto.randomUUID();
 
   try {
     encryptedContent = await encryptContent(
@@ -38,11 +39,12 @@ export async function upsertCredential(
       name: "upsert_credential_as_inserter",
       dbid,
       inputs: [
-        createActionInput({
-          ...params,
-          id,
-          content: encryptedContent,
-        }),
+        createActionInput(
+          ensureEntityId({
+            ...params,
+            content: encryptedContent,
+          }),
+        ),
       ],
     },
     signer,
