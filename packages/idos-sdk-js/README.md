@@ -522,7 +522,7 @@ Here's some example code of creating, revoking and listing Access Grants.
 
 ```js
 // Decide on the credential you want to create an Access Grant for
-const credentialId = credential.id;
+const credentialId = credentials[0].id;
 
 // Share a credential by creating an access grant
 const { grant } = await idos.grants.create(
@@ -562,11 +562,10 @@ await idos.grants.shareMatchingEntry(
     },
     omit: {},
   },
-  address as string,
-  0,
-  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
-  ),
-});
+  grantee,
+  0, // timelock
+  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=", // receiverPublicKey
+);
 ```
 
 ### Creating a dAG on EVM
@@ -577,7 +576,7 @@ await idos.grants.shareMatchingEntry(
  */
 
 // Create a share (duplicate) in the idOS and get its id:
-const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);)
+const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);
 
 // Get a message that needs to be signed by the user:
 const message = await idos.grants.messageForCreateBySignature({
@@ -585,7 +584,7 @@ const message = await idos.grants.messageForCreateBySignature({
   grantee,
   dataId,
   lockedUntil
-})
+});
 
 // The dApp should ask the user to sign this message:
 const { signature } = await wallet.signMessage({ message, recipient, nonce });
@@ -605,7 +604,7 @@ const idosGrantee = await idOSGrantee.init({
 
 // Create the dAG
 await idosGrantee.createBySignature({
-  // These values need to be the same you used to generate the singed message
+  // These values need to be the same you used to generate the signed message
   owner,
   grantee,
   dataId,
@@ -620,13 +619,13 @@ await idosGrantee.createBySignature({
 Create an `.env.local` file in the root folder of the SDK package and add the needed environment variables (you can reference .env.production for the variable names).
 
 Run:
-```
+```bash
 pnpm dev
 ```
 This will run a dev server with watch mode that will rebuild every time any of the source files are changed.
 
 You can also create a production build by running the following command in the root folder of the SDK package:
-```
+```bash
 pnpm build
 ```
 This will create a PRODUCTION build of the SDK using the `.env.production` file.
