@@ -4,6 +4,7 @@ import * as utf8Codec from "@stablelib/utf8";
 import type { CreateIssuerConfig } from "./create-issuer-config";
 import { encrypt } from "./crypto";
 import { createActionInput } from "./internal";
+import { Revoker, createRevokationDoc } from "./revoker";
 
 export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "original_id"> {}
 
@@ -51,40 +52,30 @@ export async function upsertCredential(
   return response.data?.tx_hash;
 }
 
-/**
- * This is a dummy implementation for now.
- * Once we have defined the revocation document interface, we should update this function accordingly.
- */
-export function createRevocationDocument(credentialId: string): idOSRevocationDocument {
-  return {
-    id: credentialId,
-    revokedCredentialId: "",
-    newStatus: "revoked",
-    verificationMethod: "",
-    proof: {},
-  };
-}
-
-/**
- * This is a dummy implementation for now.
- * Once we have defined the kwil action, we should update this function accordingly.
- * Also, we don't know yet, should we pass the revocation document as a parameter or create it internally.
- */
 export async function revokeIssuedCredential(
-  { dbid, kwilClient, signer }: CreateIssuerConfig,
+  { dbid, kwilClient, signer, revokationSigningKeys }: CreateIssuerConfig,
   credentialId: string,
-  revocationDocument = createRevocationDocument(credentialId),
 ) {
-  const response = await kwilClient.execute(
-    {
-      // @todo: update the name once we have defined the kwil action.
-      name: "insert_revocation_document",
-      dbid,
-      inputs: [createActionInput(revocationDocument)],
-    },
-    signer,
-    true,
-  );
+  const revoker = await Revoker.init({
+    ...revokationSigningKeys,
+  });
 
-  return response.data?.tx_hash;
+  console.log({ dbid, kwilClient, signer }); // log added for build success purposes
+
+  const revokationCredential = createRevokationDoc(credentialId);
+  await revoker.generateVcProof(revokationCredential);
+  const isVerified = await revoker.verifySignedCred(revokationCredential);
+
+  // const response = await kwilClient.execute(
+  //   {
+  //     name: "insert_revocation_document",
+  //     dbid,
+  //     inputs: [createActionInput(revocationDocument)],
+  //   },
+  //   signer,
+  //   true,
+  // );
+
+  return { revokationCredential, isVerified };
+  // return response.data?.tx_hash;
 }
