@@ -1,6 +1,7 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
 import invariant from "tiny-invariant";
+import { RevokerKeys } from "./revoker";
 
 export interface CreateIssuerConfigParams {
   nodeUrl: string;
@@ -8,6 +9,7 @@ export interface CreateIssuerConfigParams {
   signer: Wallet;
   chainId?: string;
   dbId?: string;
+  revokationSigningKeys: RevokerKeys;
 }
 
 export async function createIssuerConfig(params: CreateIssuerConfigParams) {
@@ -31,7 +33,14 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
 
   const signer = new KwilSigner(params.signer, params.signer.address);
 
-  return { chainId, dbid, kwilClient, signer, secretKey: params.secretKey };
+  return {
+    chainId,
+    dbid,
+    kwilClient,
+    signer,
+    secretKey: params.secretKey,
+    revokationSigningKeys: params.revokationSigningKeys,
+  };
 }
 
 export type CreateIssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;

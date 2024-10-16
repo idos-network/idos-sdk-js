@@ -493,12 +493,15 @@ importers:
 
   packages/issuer-sdk-js:
     dependencies:
-      '@digitalbazaar/ed25519-signature-2020':
-        specifier: ^5.2.0
-        version: 5.2.0(web-streams-polyfill@3.2.1)
-      '@digitalbazaar/ed25519-verification-key-2020':
-        specifier: ^4.1.0
-        version: 4.1.0
+      '@digitalbazaar/credentials-context':
+        specifier: ^3.1.0
+        version: 3.1.0
+      '@digitalbazaar/ed25519-signature-2018':
+        specifier: ^4.0.0
+        version: 4.0.0
+      '@digitalbazaar/ed25519-verification-key-2018':
+        specifier: ^4.0.0
+        version: 4.0.0
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
@@ -511,15 +514,15 @@ importers:
       '@stablelib/utf8':
         specifier: ^1.0.1
         version: 1.0.1
-      crypto-ld:
-        specifier: ^7.0.0
-        version: 7.0.0
+      base58-universal:
+        specifier: ^2.0.0
+        version: 2.0.0
       ethers:
         specifier: ^6.13.3
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      jsonld-document-loader:
-        specifier: ^2.0.0
-        version: 2.0.0
+      jsonld-signatures:
+        specifier: ^11.3.1
+        version: 11.3.1
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
@@ -1969,8 +1972,19 @@ packages:
     resolution: {integrity: sha512-0WCIpHqGUTPmOb5l3iN+4wCY+P3nHnGWd3uyWB+Wrt5DygS6MWI2b50gwtSCgYUCfgmEv9KlRuCnHDC4TDKCeA==}
     engines: {node: '>=16'}
 
+  '@digitalbazaar/credentials-context@3.1.0':
+    resolution: {integrity: sha512-VKflyFbcid6xH3FJMrd8U9DeCjbYXa2aO3l8yy7MzP6O/0v0EZTV56hMfJT5fN6TSVtQmShv2R3oPCFqFbc2Tg==}
+
+  '@digitalbazaar/ed25519-signature-2018@4.0.0':
+    resolution: {integrity: sha512-G8/3wA6SSTAmKuVUZP/BtqCe5ShjQTzL0e3xaeq2h6uK3rBlQfKaKZPhvYL7MGqpiCjSMdRFwRnnE+uhhrKIrg==}
+    engines: {node: '>=14'}
+
   '@digitalbazaar/ed25519-signature-2020@5.2.0':
     resolution: {integrity: sha512-1PCU+tgnPTNZSLiSYMt8MHw5Sfq+icIEga292yOFHjUjkCL+Nr+Avy3+4trKaeWC1pcfBsx/szlNMT/b7ugqBw==}
+    engines: {node: '>=14'}
+
+  '@digitalbazaar/ed25519-verification-key-2018@4.0.0':
+    resolution: {integrity: sha512-65O08XDDJYZVeQJ86fd7ClZLzMwQsJ0zQpLhvzjE9LRGrD0BPwWFrC/vNW3XTYzzvNwbP7ipFomF95JgGLzabQ==}
     engines: {node: '>=14'}
 
   '@digitalbazaar/ed25519-verification-key-2020@4.1.0':
@@ -1980,6 +1994,10 @@ packages:
   '@digitalbazaar/http-client@3.4.1':
     resolution: {integrity: sha512-Ahk1N+s7urkgj7WvvUND5f8GiWEPfUw0D41hdElaqLgu8wZScI8gdI0q+qWw5N1d35x7GCRH2uk9mi+Uzo9M3g==}
     engines: {node: '>=14.0'}
+
+  '@digitalbazaar/jws-linked-data-signature@3.0.0':
+    resolution: {integrity: sha512-OE0LIwXeF3P8GZKphXb7jLqgUFMnDtbKZQCOqfMysUUIg2f4CLZIEbYbzZEP3cAE/MLoubIxl81QeGRyZ71ICg==}
+    engines: {node: '>=14'}
 
   '@digitalbazaar/security-context@1.0.1':
     resolution: {integrity: sha512-0WZa6tPiTZZF8leBtQgYAfXQePFQp2z5ivpCEN/iZguYYZ0TB9qRmWtan5XH6mNFuusHtMcyIzAcReyE6rZPhA==}
@@ -7380,6 +7398,10 @@ packages:
     resolution: {integrity: sha512-RNaHTEeRrX0jWeidPCwxMq/E/Ze94zFyEZz/v267ObbCHQlXhPO7GtkY6N5PSHQfQhZPXa8NlMBg5LiDF4dNbA==}
     engines: {node: '>=14'}
 
+  jsonld-signatures@11.3.1:
+    resolution: {integrity: sha512-qMtvIHrEjDNe7zWwISxHblnGEcQNEkrQr61yK2XVRKk5JQWJtic607GZIf41Uf847f4irdditawGKbMRCXghdQ==}
+    engines: {node: '>=18'}
+
   jsonld@8.3.1:
     resolution: {integrity: sha512-tYfKpWL56meSJCHS91Ph0+EUThHZOZ8bKuboME4998SF+Kkukp2PhCPdRCvA7tsGUKr9FvSoyIRqJPuImBcBuA==}
     engines: {node: '>=14'}
@@ -8668,6 +8690,10 @@ packages:
   rdf-canonize@3.4.0:
     resolution: {integrity: sha512-fUeWjrkOO0t1rg7B2fdyDTvngj+9RlUyL92vOdiB7c0FPguWVsniIMjEtHH+meLBO9rzkUlUzBVXgWrjI8P9LA==}
     engines: {node: '>=12'}
+
+  rdf-canonize@4.0.1:
+    resolution: {integrity: sha512-B5ynHt4sasbUafzrvYI2GFARgeFcD8Sx9yXPbg7gEyT2EH76rlCv84kyO6tnxzVbxUN/uJDbK1S/MXh+DsnuTA==}
+    engines: {node: '>=18'}
 
   react-clientside-effect@1.2.6:
     resolution: {integrity: sha512-XGGGRQAKY+q25Lz9a/4EPqom7WRjz3z9R2k4jhVKA/puQFH/5Nt27vFZYql4m4NVNdUvX8PS3O7r/Zzm7cjUlg==}
@@ -12493,6 +12519,20 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@digitalbazaar/credentials-context@3.1.0': {}
+
+  '@digitalbazaar/ed25519-signature-2018@4.0.0':
+    dependencies:
+      '@digitalbazaar/ed25519-verification-key-2018': 4.0.0
+      '@digitalbazaar/ed25519-verification-key-2020': 4.1.0
+      '@digitalbazaar/jws-linked-data-signature': 3.0.0
+      base58-universal: 2.0.0
+      ed25519-signature-2018-context: 1.1.0
+      ed25519-signature-2020-context: 1.1.0
+      jsonld: 8.3.1(web-streams-polyfill@3.2.1)
+    transitivePeerDependencies:
+      - web-streams-polyfill
+
   '@digitalbazaar/ed25519-signature-2020@5.2.0(web-streams-polyfill@3.2.1)':
     dependencies:
       '@digitalbazaar/ed25519-verification-key-2020': 4.1.0
@@ -12502,6 +12542,12 @@ snapshots:
       jsonld-signatures: 11.2.1(web-streams-polyfill@3.2.1)
     transitivePeerDependencies:
       - web-streams-polyfill
+
+  '@digitalbazaar/ed25519-verification-key-2018@4.0.0':
+    dependencies:
+      '@noble/ed25519': 1.7.3
+      base58-universal: 2.0.0
+      crypto-ld: 7.0.0
 
   '@digitalbazaar/ed25519-verification-key-2020@4.1.0':
     dependencies:
@@ -12515,6 +12561,13 @@ snapshots:
       ky: 0.33.3
       ky-universal: 0.11.0(ky@0.33.3)(web-streams-polyfill@3.2.1)
       undici: 5.27.0
+    transitivePeerDependencies:
+      - web-streams-polyfill
+
+  '@digitalbazaar/jws-linked-data-signature@3.0.0':
+    dependencies:
+      base64url-universal: 2.0.0
+      jsonld-signatures: 11.3.1
     transitivePeerDependencies:
       - web-streams-polyfill
 
@@ -19914,6 +19967,15 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
+  jsonld-signatures@11.3.1:
+    dependencies:
+      '@digitalbazaar/security-context': 1.0.1
+      jsonld: 8.3.1(web-streams-polyfill@3.2.1)
+      rdf-canonize: 4.0.1
+      serialize-error: 8.1.0
+    transitivePeerDependencies:
+      - web-streams-polyfill
+
   jsonld@8.3.1(web-streams-polyfill@3.2.1):
     dependencies:
       '@digitalbazaar/http-client': 3.4.1(web-streams-polyfill@3.2.1)
@@ -21334,6 +21396,10 @@ snapshots:
       strip-json-comments: 2.0.1
 
   rdf-canonize@3.4.0:
+    dependencies:
+      setimmediate: 1.0.5
+
+  rdf-canonize@4.0.1:
     dependencies:
       setimmediate: 1.0.5
 
