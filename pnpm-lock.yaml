@@ -318,6 +318,9 @@ importers:
       '@digitalbazaar/vc':
         specifier: ^6.0.2
         version: 6.0.2(web-streams-polyfill@3.2.1)
+      '@idos-network/issuer-sdk-js':
+        specifier: workspace:*
+        version: link:../issuer-sdk-js
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -501,7 +504,7 @@ importers:
         version: 3.1.0
       '@digitalbazaar/ed25519-signature-2018':
         specifier: ^4.0.0
-        version: 4.1.0(web-streams-polyfill@3.2.1)
+        version: 4.1.0
       '@digitalbazaar/ed25519-verification-key-2018':
         specifier: ^4.0.0
         version: 4.0.0
@@ -528,7 +531,7 @@ importers:
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       jsonld-signatures:
         specifier: ^11.3.1
-        version: 11.3.1(web-streams-polyfill@3.2.1)
+        version: 11.3.1
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
@@ -12565,15 +12568,15 @@ snapshots:
 
   '@digitalbazaar/credentials-context@3.1.0': {}
 
-  '@digitalbazaar/ed25519-signature-2018@4.1.0(web-streams-polyfill@3.2.1)':
+  '@digitalbazaar/ed25519-signature-2018@4.1.0':
     dependencies:
       '@digitalbazaar/ed25519-verification-key-2018': 4.0.0
       '@digitalbazaar/ed25519-verification-key-2020': 4.2.0
-      '@digitalbazaar/jws-linked-data-signature': 3.0.0(web-streams-polyfill@3.2.1)
+      '@digitalbazaar/jws-linked-data-signature': 3.0.0
       base58-universal: 2.0.0
       ed25519-signature-2018-context: 1.1.0
       ed25519-signature-2020-context: 1.1.0
-      jsonld: 8.3.2(web-streams-polyfill@3.2.1)
+      jsonld: 8.3.2
     transitivePeerDependencies:
       - web-streams-polyfill
 
@@ -12615,10 +12618,10 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  '@digitalbazaar/jws-linked-data-signature@3.0.0(web-streams-polyfill@3.2.1)':
+  '@digitalbazaar/jws-linked-data-signature@3.0.0':
     dependencies:
       base64url-universal: 2.0.0
-      jsonld-signatures: 11.3.1(web-streams-polyfill@3.2.1)
+      jsonld-signatures: 11.3.1
     transitivePeerDependencies:
       - web-streams-polyfill
 
@@ -14252,24 +14255,6 @@ snapshots:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
       '@rushstack/node-core-library': 3.61.0(@types/node@20.14.12)
-    transitivePeerDependencies:
-      - '@types/node'
-    optional: true
-
-  '@microsoft/api-extractor@7.38.3':
-    dependencies:
-      '@microsoft/api-extractor-model': 7.28.2(@types/node@20.14.12)
-      '@microsoft/tsdoc': 0.14.2
-      '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.61.0(@types/node@20.14.12)
-      '@rushstack/rig-package': 0.5.1
-      '@rushstack/ts-command-line': 4.17.1
-      colors: 1.2.5
-      lodash: 4.17.21
-      resolve: 1.22.8
-      semver: 7.5.4
-      source-map: 0.6.1
-      typescript: 5.0.4
     transitivePeerDependencies:
       - '@types/node'
     optional: true
@@ -20068,7 +20053,7 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  jsonld-signatures@11.3.1(web-streams-polyfill@3.2.1):
+  jsonld-signatures@11.3.1:
     dependencies:
       '@digitalbazaar/security-context': 1.0.1
       jsonld: 8.3.1(web-streams-polyfill@3.2.1)
@@ -20086,7 +20071,7 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  jsonld@8.3.2(web-streams-polyfill@3.2.1):
+  jsonld@8.3.2:
     dependencies:
       '@digitalbazaar/http-client': 3.4.1(web-streams-polyfill@3.2.1)
       canonicalize: 1.0.8
@@ -22744,7 +22729,7 @@ snapshots:
       sucrase: 3.34.0
       tree-kill: 1.2.2
     optionalDependencies:
-      '@microsoft/api-extractor': 7.38.3
+      '@microsoft/api-extractor': 7.38.3(@types/node@20.14.12)
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
       postcss: 8.4.40
       typescript: 5.5.4

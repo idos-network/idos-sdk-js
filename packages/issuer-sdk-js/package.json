@@ -31,9 +31,9 @@
       "import": "./dist/credentials.js",
       "types": "./dist/types/credentials.d.ts"
     },
-    "./revocation-manager": {
-      "import": "./dist/revocation-manager.js",
-      "types": "./dist/types/revocation-manager.d.ts"
+    "./revoker": {
+      "import": "./dist/revoker.js",
+      "types": "./dist/types/revoker.d.ts"
     }
   },
   "scripts": {

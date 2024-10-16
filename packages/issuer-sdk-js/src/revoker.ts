@@ -2,8 +2,8 @@
 import { Ed25519Signature2018 } from "@digitalbazaar/ed25519-signature-2018";
 import { Ed25519VerificationKey2018 } from "@digitalbazaar/ed25519-verification-key-2018";
 import * as vc from "@digitalbazaar/vc";
-import { assertionController } from "./vc/assertionController.js";
-import { documentLoader, remoteDocuments } from "./vc/doc-loader.js";
+import { assertionController } from "./vc/assertionController";
+import { documentLoader, remoteDocuments } from "./vc/doc-loader";
 
 export type RevokerKeys = {
   privateKey: string;
@@ -87,3 +87,5 @@ export const createRevokationDoc = (credentialId) => ({
     id: `did:${crypto.randomUUID()}`,
   },
 });
+
+export type RevokationDoc = ReturnType<typeof createRevokationDoc>;
