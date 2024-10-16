@@ -1,7 +1,7 @@
 // @ts-nocheck
-import { validContexts } from "../cachedSchemas/schema.js";
-import jsigs from "jsonld-signatures";
 import * as vc from "@digitalbazaar/vc";
+import jsigs from "jsonld-signatures";
+import { validContexts } from "../cachedSchemas/schema.js";
 import { MultiLoader } from "./MultiLoader.js";
 
 export const remoteDocuments = new Map();

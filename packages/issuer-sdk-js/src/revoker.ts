@@ -1,8 +1,8 @@
 // @ts-nocheck
-import { Ed25519VerificationKey2018 } from "@digitalbazaar/ed25519-verification-key-2018";
 import { Ed25519Signature2018 } from "@digitalbazaar/ed25519-signature-2018";
-import { assertionController } from "./vc/assertionController.js";
+import { Ed25519VerificationKey2018 } from "@digitalbazaar/ed25519-verification-key-2018";
 import * as vc from "@digitalbazaar/vc";
+import { assertionController } from "./vc/assertionController.js";
 import { documentLoader, remoteDocuments } from "./vc/doc-loader.js";
 
 export type RevokerKeys = {

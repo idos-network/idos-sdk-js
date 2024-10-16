@@ -1,7 +1,7 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
 import invariant from "tiny-invariant";
-import { RevokerKeys } from "./revoker";
+import type { RevokerKeys } from "./revoker";
 
 export interface CreateIssuerConfigParams {
   nodeUrl: string;

@@ -1,4 +1,4 @@
-import type { idOSCredential, idOSRevocationDocument } from "@idos-network/idos-sdk-types";
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import * as base64 from "@stablelib/base64";
 import * as utf8Codec from "@stablelib/utf8";
 import type { CreateIssuerConfig } from "./create-issuer-config";
