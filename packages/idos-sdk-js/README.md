@@ -594,11 +594,18 @@ const { signature } = await wallet.signMessage({ message, recipient, nonce });
  *
  * !! NOT IMPLEMENTED FOR NEAR YET !!
  */
+import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { ethers } from "ethers";
+
+const granteeSigner = new ethers.Wallet(
+  process.env.EVM_GRANTEE_PRIVATE_KEY,
+  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
+);
 
 // Initialise the idOSGrantee
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
-  granteeSigner: evmGranteeSigner,
+  granteeSigner,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY
 });
 
