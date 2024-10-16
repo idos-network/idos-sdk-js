@@ -307,7 +307,63 @@ If they choose **Passkey**, we'll use their platform authenticator (you can lear
 
 The selected auth method will not have a bearing on the encryption capabilities.
 
+### Intermission: who are you?
+
+Like mentioned before, in order to lawfully obtain a copy of the user's credentials, the user must grant you an Access Grant. We'll expand on that concept next, but first you need to have some preparation measures in place.
+
+There are two things that a dApp needs to have setup:
+- A `grantee`: a key for a chain account you control. It's used both to identify you as the recipient of an Access Grant and to authenticate you when making calls to idOS nodes. On EVM chains, this is an EOA (Externally-Owned Account, controlled by anyone with its private key), and on NEAR this is a full access public key. For now, the idOS doesn't support having contract wallets as grantees.
+- An `encryptionPublicKey`: a key you control that'll be used to decrypt credential contents shared with you. This should be a [nacl.box.keyPair](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair).
+
+
+> 🛑 Caution
+>
+> Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
+
+### Access Grants
+
+An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dApp), access to the record identified by `dataId`, and I understand I won't be able to revoke said access before `lockedUntil` has passed. The contents of `dataId` are a copy of the credential/attribute that has its contents encrypted to the encryption key provided (by the dApp) during its creation.
+
+By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user's data (either a credential or an attribute) until the UNIX timestamp on `lockedUntil` has passed. This is especially relevant to be able to fulfill compliance obligations.
+
+This is achived by combining two mechanisms:
+
+- On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is what's called `dataId`.
+- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
+
+The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage. Here's an example of what that looks like:
+
+```js
+// These don't necessarily have to come from a server, but it's the typical setup.
+const {
+  encryptionPublicKey,
+  lockTimeSpanSeconds,
+  grantee,
+} = await yourBackendService.getInfo();
+
+const { grant: { dataId } } = await idos.grants.create(
+  "credentials",
+  credentials[0].id,
+  grantee,
+  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds,
+  encryptionPublicKey,
+);
+```
+
+> 💡 Tip
+>
+> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
+
+To avoid any doubts, let's go over the Access Grant fields:
+
+- `owner`: on EVM chains this is a wallet address the user controls, and on NEAR this is a full access public key from an account the user controls.
+- `grantee`: on EVM chains this is the dApp's grantee address (like explained in the previous section), and on NEAR this is a full access public key.
+- `dataId`: the `id` of the record copy (either a credential or an attribute) that is going to be shared.
+- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. Any timestamp in the past, notably "0", means it's revocable at any time.
+
 ### Filtering credentials
+
+One common problem about credentials is: if the dApp can only access a credential's contents after it has an Access Grant for it, how does the dApp know which credential will fulfill its compliance needs?
 
 `idos.enclave.filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
 A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched. `pick` requires the path to have the provided value, `omit` requires the path to not have the provided value.
@@ -323,8 +379,7 @@ const entries = await idos.enclave.filterCredentials(credentials, {
 });
 ```
 
-`entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"`
-and `"credentialSubject.identification_document_type"` is not `"passport"`.
+In this example, `entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"` and `"credentialSubject.identification_document_type"` is not `"passport"`.
 
 You can also use `idos.grants.shareMatchingEntry`, a helper function that:
 - Gets all the user's credentials
@@ -332,39 +387,49 @@ You can also use `idos.grants.shareMatchingEntry`, a helper function that:
 - Calls `idos.enclave.filterCredentials`
 - Calls `idos.grants.create` with the first matching credential
 
-### Access Grants
+Here's an example similar to the previous one, but that also filters a couple of public fields:
 
-Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
+```js
+await idos.grants.shareMatchingEntry(
+  "credentials",
+  {
+    crential_level: "basic",
+    credential_type: "kyc",
+  },
+  {
+    pick: {
+      "credentialSubject.identification_document_country": "DE"
+    },
+    omit: {
+      "credentialSubject.identification_document_type": "passport",
+    },
+  },
+  grantee,
+  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds, // timelock
+  encryptionPublicKey,
+);
+```
 
-This is achived by combining two mechanisms:
 
-- On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
-- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
-
-The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
-
-An Access Grant record consists of the following values:
-
-- `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
-- `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
-- `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
-- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
 
 > 💡 Tip
 >
-> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
 
 ### Delegated Access Grants
 
-A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
 
-The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
+Here's a diagram comparing the two cases side-by-side:
+
+<img src="./assets/readme-ag-vs-dag.png" />
+
+This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+
+The message building function is exposed as `idos.grants.messageForCreateBySignature`. Submitting the resulting message and its user signature is exposed as `idosGrantee.createBySignature`.
 
 > 🛑 Caution
 >
 > This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
-
-This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
 
 ## Quick reference
 
