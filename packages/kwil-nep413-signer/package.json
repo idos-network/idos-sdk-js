@@ -1,0 +1,22 @@
+{
+  "name": "@idos-network/kwil-nep413-signer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.ts",
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome check --apply ."
+  },
+  "dependencies": {
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/binary": "^1.0.1",
+    "@stablelib/bytes": "^1.0.1",
+    "@stablelib/hex": "^2.0.0",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/utf8": "^1.0.1",
+    "borsh": "^1.0.0",
+    "bs58": "^6.0.0",
+    "near-api-js": "^3.0.4"
+  }
+}
