@@ -4,6 +4,7 @@ import * as utf8Codec from "@stablelib/utf8";
 import type { CreateIssuerConfig } from "./create-issuer-config";
 import { encrypt } from "./crypto";
 import { createActionInput, ensureEntityId } from "./internal";
+import { Revoker, createRevokationDoc } from "./revoker";
 
 export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "original_id"> {
   id?: string;
@@ -51,4 +52,32 @@ export async function upsertCredential(
   );
 
   return response.data?.tx_hash;
+}
+
+export async function revokeIssuedCredential(
+  { dbid, kwilClient, signer, revokationSigningKeys }: CreateIssuerConfig,
+  credentialId: string,
+) {
+  const revoker = await Revoker.init({
+    ...revokationSigningKeys,
+  });
+
+  console.log({ dbid, kwilClient, signer }); // log added for build success purposes
+
+  const revokationCredential = createRevokationDoc(credentialId);
+  await revoker.generateVcProof(revokationCredential);
+  const isVerified = await revoker.verifySignedCred(revokationCredential);
+
+  // const response = await kwilClient.execute(
+  //   {
+  //     name: "insert_revocation_document",
+  //     dbid,
+  //     inputs: [createActionInput(revocationDocument)],
+  //   },
+  //   signer,
+  //   true,
+  // );
+
+  return { revokationCredential, isVerified };
+  // return response.data?.tx_hash;
 }

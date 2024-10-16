@@ -4,6 +4,7 @@ import { isEqual } from "es-toolkit";
 import type { Signer } from "ethers";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
+import credentialRevocation from "./credential-revocation";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
@@ -33,6 +34,7 @@ export class idOS {
   static kwil = KwilWrapper.defaults;
 
   static verifiableCredentials = verifiableCredentials;
+  static credentialRevocation = credentialRevocation;
 
   auth: Auth;
   data: Data;

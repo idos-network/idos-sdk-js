@@ -40,3 +40,12 @@ export interface idOSHumanAttribute {
   attribute_key: string;
   value: string;
 }
+
+export interface idOSRevocationDocument {
+  // @todo: define the interface
+  id: string;
+  revokedCredentialId: string;
+  newStatus: "revoked";
+  verificationMethod: string;
+  proof: object;
+}
