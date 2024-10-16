@@ -34,7 +34,7 @@ importers:
         version: link:../../packages/issuer-sdk-js
       ethers:
         specifier: ^6.13.1
-        version: 6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       hono:
         specifier: ^4.5.3
         version: 4.5.3
@@ -501,7 +501,7 @@ importers:
         version: 3.1.0
       '@digitalbazaar/ed25519-signature-2018':
         specifier: ^4.0.0
-        version: 4.0.0
+        version: 4.1.0(web-streams-polyfill@3.2.1)
       '@digitalbazaar/ed25519-verification-key-2018':
         specifier: ^4.0.0
         version: 4.0.0
@@ -528,7 +528,7 @@ importers:
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       jsonld-signatures:
         specifier: ^11.3.1
-        version: 11.3.1
+        version: 11.3.1(web-streams-polyfill@3.2.1)
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
@@ -2011,8 +2011,8 @@ packages:
   '@digitalbazaar/credentials-context@3.1.0':
     resolution: {integrity: sha512-VKflyFbcid6xH3FJMrd8U9DeCjbYXa2aO3l8yy7MzP6O/0v0EZTV56hMfJT5fN6TSVtQmShv2R3oPCFqFbc2Tg==}
 
-  '@digitalbazaar/ed25519-signature-2018@4.0.0':
-    resolution: {integrity: sha512-G8/3wA6SSTAmKuVUZP/BtqCe5ShjQTzL0e3xaeq2h6uK3rBlQfKaKZPhvYL7MGqpiCjSMdRFwRnnE+uhhrKIrg==}
+  '@digitalbazaar/ed25519-signature-2018@4.1.0':
+    resolution: {integrity: sha512-YGcZ10x/EPdrQDTtNe8gHqv1vBU6GvldzmgdwUzufg6ku4Jbpea3m7ADptiQObgsvcsEZazogUgsMZCGbIgvvg==}
     engines: {node: '>=14'}
 
   '@digitalbazaar/ed25519-signature-2020@5.2.0':
@@ -2025,6 +2025,10 @@ packages:
 
   '@digitalbazaar/ed25519-verification-key-2020@4.1.0':
     resolution: {integrity: sha512-8Dr8rVfX9v6ADIgTsfmXy4uSi2f9b4i8/kV1u35i0617T05TcPqZLYp+aAN7xhwt1JX3oYywC87UJbN8dWkfLA==}
+    engines: {node: '>=14'}
+
+  '@digitalbazaar/ed25519-verification-key-2020@4.2.0':
+    resolution: {integrity: sha512-urEVTYkt+uYD8GjdoS6gkm2sKBich1hqx42b6vvUOmNgF0agZ95JlUjiJXEx+VOwu7WSjJSnEBph2Qatkrk1CA==}
     engines: {node: '>=14'}
 
   '@digitalbazaar/http-client@3.4.1':
@@ -7442,6 +7446,10 @@ packages:
     resolution: {integrity: sha512-tYfKpWL56meSJCHS91Ph0+EUThHZOZ8bKuboME4998SF+Kkukp2PhCPdRCvA7tsGUKr9FvSoyIRqJPuImBcBuA==}
     engines: {node: '>=14'}
 
+  jsonld@8.3.2:
+    resolution: {integrity: sha512-MwBbq95szLwt8eVQ1Bcfwmgju/Y5P2GdtlHE2ncyfuYjIdEhluUVyj1eudacf1mOkWIoS9GpDBTECqhmq7EOaA==}
+    engines: {node: '>=14'}
+
   jssha@3.3.1:
     resolution: {integrity: sha512-VCMZj12FCFMQYcFLPRm/0lOBbLi8uM2BhXPTqw3U4YAfs4AZfiApOoBLoN8cQE60Z50m1MYMTQVCfgF/KaCVhQ==}
 
@@ -12557,15 +12565,15 @@ snapshots:
 
   '@digitalbazaar/credentials-context@3.1.0': {}
 
-  '@digitalbazaar/ed25519-signature-2018@4.0.0':
+  '@digitalbazaar/ed25519-signature-2018@4.1.0(web-streams-polyfill@3.2.1)':
     dependencies:
       '@digitalbazaar/ed25519-verification-key-2018': 4.0.0
-      '@digitalbazaar/ed25519-verification-key-2020': 4.1.0
-      '@digitalbazaar/jws-linked-data-signature': 3.0.0
+      '@digitalbazaar/ed25519-verification-key-2020': 4.2.0
+      '@digitalbazaar/jws-linked-data-signature': 3.0.0(web-streams-polyfill@3.2.1)
       base58-universal: 2.0.0
       ed25519-signature-2018-context: 1.1.0
       ed25519-signature-2020-context: 1.1.0
-      jsonld: 8.3.1(web-streams-polyfill@3.2.1)
+      jsonld: 8.3.2(web-streams-polyfill@3.2.1)
     transitivePeerDependencies:
       - web-streams-polyfill
 
@@ -12592,6 +12600,13 @@ snapshots:
       base64url-universal: 2.0.0
       crypto-ld: 7.0.0
 
+  '@digitalbazaar/ed25519-verification-key-2020@4.2.0':
+    dependencies:
+      '@noble/ed25519': 1.7.3
+      base58-universal: 2.0.0
+      base64url-universal: 2.0.0
+      crypto-ld: 7.0.0
+
   '@digitalbazaar/http-client@3.4.1(web-streams-polyfill@3.2.1)':
     dependencies:
       ky: 0.33.3
@@ -12600,10 +12615,10 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  '@digitalbazaar/jws-linked-data-signature@3.0.0':
+  '@digitalbazaar/jws-linked-data-signature@3.0.0(web-streams-polyfill@3.2.1)':
     dependencies:
       base64url-universal: 2.0.0
-      jsonld-signatures: 11.3.1
+      jsonld-signatures: 11.3.1(web-streams-polyfill@3.2.1)
     transitivePeerDependencies:
       - web-streams-polyfill
 
@@ -14232,8 +14247,6 @@ snapshots:
       - '@types/node'
     optional: true
 
-<<<<<<< HEAD
-=======
   '@microsoft/api-extractor-model@7.28.2(@types/node@20.14.12)':
     dependencies:
       '@microsoft/tsdoc': 0.14.2
@@ -14261,13 +14274,30 @@ snapshots:
       - '@types/node'
     optional: true
 
->>>>>>> 9cb708e1afd168b5b00236c480b078aff27444b2
   '@microsoft/api-extractor@7.38.3(@types/node@20.10.5)':
     dependencies:
       '@microsoft/api-extractor-model': 7.28.2(@types/node@20.10.5)
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
       '@rushstack/node-core-library': 3.61.0(@types/node@20.10.5)
+      '@rushstack/rig-package': 0.5.1
+      '@rushstack/ts-command-line': 4.17.1
+      colors: 1.2.5
+      lodash: 4.17.21
+      resolve: 1.22.8
+      semver: 7.5.4
+      source-map: 0.6.1
+      typescript: 5.0.4
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
+  '@microsoft/api-extractor@7.38.3(@types/node@20.14.12)':
+    dependencies:
+      '@microsoft/api-extractor-model': 7.28.2(@types/node@20.14.12)
+      '@microsoft/tsdoc': 0.14.2
+      '@microsoft/tsdoc-config': 0.16.2
+      '@rushstack/node-core-library': 3.61.0(@types/node@20.14.12)
       '@rushstack/rig-package': 0.5.1
       '@rushstack/ts-command-line': 4.17.1
       colors: 1.2.5
@@ -15380,6 +15410,19 @@ snapshots:
       z-schema: 5.0.5
     optionalDependencies:
       '@types/node': 20.10.5
+    optional: true
+
+  '@rushstack/node-core-library@3.61.0(@types/node@20.14.12)':
+    dependencies:
+      colors: 1.2.5
+      fs-extra: 7.0.1
+      import-lazy: 4.0.0
+      jju: 1.4.0
+      resolve: 1.22.8
+      semver: 7.5.4
+      z-schema: 5.0.5
+    optionalDependencies:
+      '@types/node': 20.14.12
     optional: true
 
   '@rushstack/rig-package@0.5.1':
@@ -20025,7 +20068,7 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  jsonld-signatures@11.3.1:
+  jsonld-signatures@11.3.1(web-streams-polyfill@3.2.1):
     dependencies:
       '@digitalbazaar/security-context': 1.0.1
       jsonld: 8.3.1(web-streams-polyfill@3.2.1)
@@ -20035,6 +20078,15 @@ snapshots:
       - web-streams-polyfill
 
   jsonld@8.3.1(web-streams-polyfill@3.2.1):
+    dependencies:
+      '@digitalbazaar/http-client': 3.4.1(web-streams-polyfill@3.2.1)
+      canonicalize: 1.0.8
+      lru-cache: 6.0.0
+      rdf-canonize: 3.4.0
+    transitivePeerDependencies:
+      - web-streams-polyfill
+
+  jsonld@8.3.2(web-streams-polyfill@3.2.1):
     dependencies:
       '@digitalbazaar/http-client': 3.4.1(web-streams-polyfill@3.2.1)
       canonicalize: 1.0.8
@@ -21232,9 +21284,6 @@ snapshots:
       postcss: 8.4.38
       ts-node: 10.9.1(@types/node@20.14.12)(typescript@5.4.5)
 
-<<<<<<< HEAD
-  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.2.2)):
-=======
   postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)):
     dependencies:
       lilconfig: 2.1.0
@@ -21242,15 +21291,6 @@ snapshots:
     optionalDependencies:
       postcss: 8.4.40
       ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)
-
-  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4)):
->>>>>>> 9cb708e1afd168b5b00236c480b078aff27444b2
-    dependencies:
-      lilconfig: 2.1.0
-      yaml: 2.3.2
-    optionalDependencies:
-      postcss: 8.4.40
-      ts-node: 10.9.1(@swc/core@1.7.1)(typescript@5.5.4)
 
   postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4)):
     dependencies:
@@ -22565,9 +22605,6 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
 
-<<<<<<< HEAD
-  ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.2.2):
-=======
   ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
@@ -22583,27 +22620,6 @@ snapshots:
       diff: 4.0.2
       make-error: 1.3.6
       typescript: 5.2.2
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    optionalDependencies:
-      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
-    optional: true
-
-  ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4):
->>>>>>> 9cb708e1afd168b5b00236c480b078aff27444b2
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.5.4
       v8-compile-cache-lib: 3.0.1
       yn: 3.1.1
     optionalDependencies:
@@ -22686,9 +22702,6 @@ snapshots:
       - supports-color
       - ts-node
 
-<<<<<<< HEAD
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.2.2))(typescript@5.2.2):
-=======
   tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
@@ -22715,7 +22728,6 @@ snapshots:
       - ts-node
 
   tsup@8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4):
->>>>>>> 9cb708e1afd168b5b00236c480b078aff27444b2
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -22732,32 +22744,7 @@ snapshots:
       sucrase: 3.34.0
       tree-kill: 1.2.2
     optionalDependencies:
-      '@microsoft/api-extractor': 7.38.3(@types/node@20.10.5)
-      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
-      postcss: 8.4.40
-      typescript: 5.5.4
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4):
-    dependencies:
-      bundle-require: 4.1.0(esbuild@0.19.12)
-      cac: 6.7.14
-      chokidar: 3.6.0
-      debug: 4.3.5
-      esbuild: 0.19.12
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))
-      resolve-from: 5.0.0
-      rollup: 4.19.0
-      source-map: 0.8.0-beta.0
-      sucrase: 3.34.0
-      tree-kill: 1.2.2
-    optionalDependencies:
-      '@microsoft/api-extractor': 7.38.3(@types/node@20.10.5)
+      '@microsoft/api-extractor': 7.38.3
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
       postcss: 8.4.40
       typescript: 5.5.4
