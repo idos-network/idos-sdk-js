@@ -7,11 +7,11 @@ import * as BorshCodec from "borsh";
 import bs58 from "bs58";
 import type { KeyPair } from "near-api-js";
 
-export function implicitAddressFromPublicKey(publicKey: string) {
+export const implicitAddressFromPublicKey = (publicKey: string) => {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
   const implicitAddress = encodeHex(bs58.decode(key_without_prefix));
   return implicitAddress;
-}
+};
 
 export const kwilNep413Signer =
   (recipient: string) =>

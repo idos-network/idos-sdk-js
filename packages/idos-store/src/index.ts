@@ -19,10 +19,11 @@ export class Store {
         const result = this.get(key);
         if (result) return decode(result);
       },
+      // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here
       set: (key: string, value: any) => this.set.call(this, key, encode(value)),
     };
   }
-
+  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here
   get(key: string): any {
     const value = this.#getLocalStorage(key);
     if (!value) return undefined;
@@ -52,7 +53,7 @@ export class Store {
     // The absence of a value means `false` today. So, we're following suit on the reasoning: consider it absent.
     // Furthermore, since this is not really a recoverable situation, we're going to clean up that stored value.
 
-    let str;
+    let str: string;
     try {
       str = JSON.parse(value);
     } catch (error) {
@@ -69,6 +70,7 @@ export class Store {
     return expires < Date.now();
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here
   set(key: string, value: any) {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
