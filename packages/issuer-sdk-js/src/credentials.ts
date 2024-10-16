@@ -1,7 +1,7 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import * as base64 from "@stablelib/base64";
 import * as utf8Codec from "@stablelib/utf8";
-import type { CreateIssuerConfig } from "./create-issuer-config";
+import type { IssuerConfig } from "./create-issuer-config";
 import { encrypt } from "./crypto";
 import { createActionInput, ensureEntityId } from "./internal";
 
@@ -18,7 +18,7 @@ const encryptContent = (content: string, secretKey: string, encryptionPublicKey:
 };
 
 export async function upsertCredential(
-  { dbid, kwilClient, signer, secretKey }: CreateIssuerConfig,
+  { dbid, kwilClient, signer, secretKey }: IssuerConfig,
   params: CreateCredentialReqParams,
 ) {
   let encryptedContent: string;

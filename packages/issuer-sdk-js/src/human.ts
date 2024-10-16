@@ -1,5 +1,5 @@
 import type { idOSHuman, idOSWallet } from "@idos-network/idos-sdk-types";
-import type { CreateIssuerConfig } from "./create-issuer-config";
+import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, ensureEntityId } from "./internal";
 
 interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
@@ -7,7 +7,7 @@ interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
 }
 
 async function createHumanProfile(
-  { dbid, kwilClient, signer }: CreateIssuerConfig,
+  { dbid, kwilClient, signer }: IssuerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSHuman> {
   const payload = ensureEntityId(params);
@@ -29,7 +29,7 @@ interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
 }
 
 async function upsertWallet(
-  { dbid, kwilClient, signer }: CreateIssuerConfig,
+  { dbid, kwilClient, signer }: IssuerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
   const payload = ensureEntityId(params);
@@ -47,7 +47,7 @@ async function upsertWallet(
 }
 
 export async function createHuman(
-  config: CreateIssuerConfig,
+  config: IssuerConfig,
   human: CreateProfileReqParams,
   wallet: Omit<UpsertWalletReqParams, "human_id">,
 ) {

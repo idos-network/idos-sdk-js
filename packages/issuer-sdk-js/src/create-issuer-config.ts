@@ -1,13 +1,31 @@
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import type { Wallet } from "ethers";
+import { Wallet } from "ethers";
+import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
 
 export interface CreateIssuerConfigParams {
   nodeUrl: string;
   secretKey: string;
-  signer: Wallet;
+  signer: Wallet | KeyPair;
   chainId?: string;
   dbId?: string;
+}
+
+function createKwilSigner(signer: Wallet | KeyPair): KwilSigner {
+  if (signer instanceof Wallet) {
+    return new KwilSigner(signer, signer.address);
+  }
+
+  if (signer instanceof KeyPair) {
+    return new KwilSigner(
+      kwilNep413Signer("idos-issuer")(signer),
+      implicitAddressFromPublicKey(signer.getPublicKey().toString()),
+      "nep413",
+    );
+  }
+
+  throw new Error("Invalid signer type");
 }
 
 export async function createIssuerConfig(params: CreateIssuerConfigParams) {
@@ -29,9 +47,9 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
     chainId,
   });
 
-  const signer = new KwilSigner(params.signer, params.signer.address);
+  const signer = createKwilSigner(params.signer);
 
   return { chainId, dbid, kwilClient, signer, secretKey: params.secretKey };
 }
 
-export type CreateIssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
+export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;

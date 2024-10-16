@@ -34,7 +34,7 @@ importers:
         version: link:../../packages/issuer-sdk-js
       ethers:
         specifier: ^6.13.1
-        version: 6.13.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       hono:
         specifier: ^4.5.3
         version: 4.5.3
@@ -499,6 +499,9 @@ importers:
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
+      '@idos-network/kwil-nep413-signer':
+        specifier: workspace:*
+        version: link:../kwil-nep413-signer
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -511,6 +514,9 @@ importers:
       ethers:
         specifier: ^6.13.3
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      near-api-js:
+        specifier: ^3.0.4
+        version: 3.0.4
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
