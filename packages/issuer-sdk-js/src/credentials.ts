@@ -55,29 +55,26 @@ export async function upsertCredential(
 }
 
 export async function revokeIssuedCredential(
-  { dbid, kwilClient, signer, revokationSigningKeys }: CreateIssuerConfig,
+  { dbid, kwilClient, signer, revokationSigningKeys }: IssuerConfig,
   credentialId: string,
 ) {
   const revoker = await Revoker.init({
     ...revokationSigningKeys,
   });
 
-  console.log({ dbid, kwilClient, signer }); // log added for build success purposes
-
   const revokationCredential = createRevokationDoc(credentialId);
   await revoker.generateVcProof(revokationCredential);
-  const isVerified = await revoker.verifySignedCred(revokationCredential);
 
-  // const response = await kwilClient.execute(
-  //   {
-  //     name: "insert_revocation_document",
-  //     dbid,
-  //     inputs: [createActionInput(revocationDocument)],
-  //   },
-  //   signer,
-  //   true,
-  // );
+  // @todo make sure it's the right method name to call
+  const response = await kwilClient.execute(
+    {
+      name: "insert_revocation_document",
+      dbid,
+      inputs: [createActionInput(revokationCredential)],
+    },
+    signer,
+    true,
+  );
 
-  return { revokationCredential, isVerified };
-  // return response.data?.tx_hash;
+  return response.data?.tx_hash;
 }
