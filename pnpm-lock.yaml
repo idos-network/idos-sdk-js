@@ -514,6 +514,9 @@ importers:
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
+      '@idos-network/kwil-nep413-signer':
+        specifier: workspace:*
+        version: link:../kwil-nep413-signer
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -529,9 +532,15 @@ importers:
       ethers:
         specifier: ^6.13.3
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+<<<<<<< HEAD
       jsonld-signatures:
         specifier: ^11.3.1
         version: 11.3.1
+=======
+      near-api-js:
+        specifier: ^3.0.4
+        version: 3.0.4
+>>>>>>> def4208e3d1171a20edaff1c1ddcb0395ebd57d5
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3

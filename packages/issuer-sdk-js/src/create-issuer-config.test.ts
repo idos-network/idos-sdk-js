@@ -1,5 +1,5 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import type { Wallet } from "ethers";
+import { Wallet } from "ethers";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createIssuerConfig } from "./index";
 
@@ -37,10 +37,12 @@ describe("createIssuerConfig", () => {
   });
 
   it("should correctly initialize and return config", async () => {
-    const mockWallet = { address: "mock-address" } as Wallet;
+    const mockWallet = new Wallet(
+      "dcdda6663be8dfa23d0e54a31ff6fddba2fdf8a1f0eae985c59857031e6da169",
+    );
     const params = {
       nodeUrl: "http://mock-node-url",
-      privateKey: "mock-private-key",
+      secretKey: "mock-private-key",
       signer: mockWallet,
     };
 
@@ -61,14 +63,14 @@ describe("createIssuerConfig", () => {
     expect(mockListDatabases).toHaveBeenCalled();
 
     // Check if KwilSigner was initialized correctly
-    expect(KwilSigner).toHaveBeenCalledWith(mockWallet, "mock-address");
-
+    expect(KwilSigner).toHaveBeenCalledWith(mockWallet, mockWallet.address);
     // Check the returned config
     expect(result).toEqual({
       chainId: "mock-chain-id",
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
       signer: expect.any(Object),
+      secretKey: params.secretKey,
     });
   });
 });
