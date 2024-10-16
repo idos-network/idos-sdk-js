@@ -59,6 +59,7 @@
     "@digitalbazaar/credentials-context": "^3.1.0",
     "@digitalbazaar/ed25519-signature-2018": "^4.0.0",
     "@digitalbazaar/ed25519-verification-key-2018": "^4.0.0",
+    "@digitalbazaar/vc": "^6.0.2",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
