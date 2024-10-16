@@ -502,6 +502,9 @@ importers:
       '@digitalbazaar/ed25519-verification-key-2018':
         specifier: ^4.0.0
         version: 4.0.0
+      '@digitalbazaar/vc':
+        specifier: ^6.0.2
+        version: 6.0.2(web-streams-polyfill@3.2.1)
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
