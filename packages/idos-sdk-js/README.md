@@ -171,9 +171,7 @@ const idos = await idos.init({
 });
 ```
 
-You can take a look at what each environment uses by consulting their schemas:
-- [schema.production.kf](https://github.com/idos-network/idos-schema/blob/main/schema.production.kf)
-- [schema.playground.kf](https://github.com/idos-network/idos-schema/blob/main/schema.playground.kf)
+You can take a look at the current contract deployments on [github.com/idos-network/idos-access-grants](https://github.com/idos-network/idos-access-grants/blob/master/README.md#deployments).
 
 #### `enclaveOptions`
 
