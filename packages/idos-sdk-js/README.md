@@ -114,7 +114,7 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
-The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked by the browser because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate procress of getting these details right, we implemented it in the SDK.
+The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked by the browser because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate process of getting these details right, we implemented it in the SDK.
 
 ### Other initialization options
 
@@ -173,7 +173,7 @@ You can take a look at what each environment uses by consulting their schemas:
 So far, we've only used `container` from `enclaveOptions`. There are a few more fields that you can set:
 
 - `theme?: "light" | "dark"`: Forces a specific theme for the enclave pop-up. By default, this is discovered through the media query `prefers-color-scheme`.
-- `mode?: "new" | "existing"`: Forces a specific verbiage to be shown on the enclave pop-up. The default is `existing`, but issuers can set it to `new` to show messages that are more helful for new users. Unless you're an issuer, this should not be supplied.
+- `mode?: "new" | "existing"`: Forces a specific verbiage to be shown on the enclave pop-up. The default is `existing`, but issuers can set it to `new` to show messages that are more helpful for new users. Unless you're an issuer, this should not be supplied.
 - `url?: string`: URL of the enclave pop-up. Unless you're developing your own enclave, this should not be supplied.
 - `throwOnUserCancelUnlock?: boolean`: Controls the SDK's reaction to the user closing the enclave pop-up. The default, `false`, keeps the **🔓 Unlock idOS** button visible so the user can click it again and finish the unlocking process. If this value is `true`, the SDK will hide the button and raise whatever error it got from the enclave pop-up.
 
@@ -199,7 +199,7 @@ const { humanId } = await idos.setSigner("EVM", signer);
 
 Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. Your user's wallet might need to be triggered, so you should be mindful of when in your user's journey you call this method.
 
-When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In With Ethereum](https://eips.ethereum.org/EIPS/eip-4361) (SIWE) messgage for authentication, and make a call to get some basic information about the user.
+When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In With Ethereum](https://eips.ethereum.org/EIPS/eip-4361) (SIWE) message for authentication, and make a call to get some basic information about the user.
 
 > 🛈 Note for NEAR
 >
@@ -222,7 +222,7 @@ The idOS currently supports two classes of signers:
 
 ### Exploring the user's data
 
-Now that we're succefully authenticated on idOS, we can now perform operations on user data. The entities that a user controls are:
+Now that we're successfully authenticated on idOS, we can now perform operations on user data. The entities that a user controls are:
 
 - **Wallets**: the wallets that the user has declared as being able to control their idOS profile.
 - **Credentials**: the credentials of a user. Their contents are encrypted (for the user's encryption key), but it also has some public fields for inspection.
@@ -245,7 +245,7 @@ console.log(credentials);
 >
 > If the user hasn't granted you an Access Grant, the user hasn't consented to you getting a copy of the data. We'll be covering Access Grant in a following section.
 >
-> For now, please use idOS responsably and respect the user's will and data sovereignty. In order to protect the user, we're planning on changing how this admin-like access works in the near future, so please don't rely on it.
+> For now, please use idOS responsibly and respect the user's will and data sovereignty. In order to protect the user, we're planning on changing how this admin-like access works in the near future, so please don't rely on it.
 
 Today, as a shortcut, we decrypt the credential's content on `get`:
 ```js
@@ -266,7 +266,7 @@ const content = await idos.enclave.decrypt(
 )
 ```
 
-This call needs to operate with the user's encryption key. This is a responsability of the Enclave, which we'll explain in the next section.
+This call needs to operate with the user's encryption key. This is a responsibility of the Enclave, which we'll explain in the next section.
 
 Now you have access to the decrypted credential contents. If it's a [W3C Verifiable Credential](https://www.w3.org/TR/vc-data-model-2.0/), you can check it's authenticity with:
 ```js
@@ -326,7 +326,7 @@ An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dAp
 
 By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user's data (either a credential or an attribute) until the UNIX timestamp on `lockedUntil` has passed. This is especially relevant to be able to fulfill compliance obligations.
 
-This is achived by combining two mechanisms:
+This is achieved by combining two mechanisms:
 
 - On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is what's called `dataId`.
 - On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
@@ -393,7 +393,7 @@ Here's an example similar to the previous one, but that also filters a couple of
 await idos.grants.shareMatchingEntry(
   "credentials",
   {
-    crential_level: "basic",
+    credential_level: "basic",
     credential_type: "kyc",
   },
   {
@@ -429,13 +429,13 @@ if (!ags.length) {
 
 ### Delegated Access Grants
 
-A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
+A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is especially relevant for dApps who want to subsidize the cost of transaction necessary to create an AG.
 
 Here's a diagram comparing the two cases side-by-side:
 
 <img src="./assets/readme-ag-vs-dag.png" />
 
-This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+This is accomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
 
 The message building function is exposed as `idos.grants.messageForCreateBySignature`. Submitting the resulting message and its user signature is exposed as `idosGrantee.createBySignature`.
 
@@ -614,7 +614,7 @@ const granteeSigner = new ethers.Wallet(
   new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
 );
 
-// Initialise the idOSGrantee
+// Initialize the idOSGrantee
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
   granteeSigner,
