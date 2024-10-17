@@ -9,6 +9,13 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and 
 pnpm add @idos-network/idos-sdk ethers near-api-js
 ```
 
+Only add `ethers` or `near-api-js` in accordance with the chains your dApp uses.
+
+
+> 💡 Tip
+>
+> If you use `near-api-js`, make sure you have a `Buffer` polyfill. See https://github.com/near/near-api-js/issues/757.
+
 ## Quickstart
 
 Create a container anywhere on your page, and ensure it's displayed when assigned the `visible` class.
