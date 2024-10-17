@@ -417,22 +417,39 @@ await idos.grants.shareMatchingEntry(
 );
 ```
 
-### Checking Access Grant presence
+### Checking Access Grant contents
 
-For typical dApps, they'll only ever need a single credential for the user. In order to check if the respective Access Grant is still in place, you should call:
+By now, we have used the idOS to secure a copy of the data we need to operate.
+
+If you wish to consult it, you'll need to use the `grantee` and [`nacl.box.keyPair`](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair) we've prepared before. Because these are secret, we need call some code in a private place (i.e., a backend, or maybe scripts you run locally).
+
+Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-server-dapp) for an EVM grantee:
 
 ```js
-const ags = await idos.grants.list({
-  owner: userAddress,
-  grantee,
-})
+import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { ethers } from "ethers";
 
-if (!ags.length) {
-  // You need to acquire an Access Grant.
-} else {
-  // You can let the user through! 🎉
-}
+const granteeSigner = new ethers.Wallet(
+  process.env.EVM_GRANTEE_PRIVATE_KEY,
+  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
+);
+
+const idosGrantee = await idOSGrantee.init({
+  chainType: "EVM",
+  granteeSigner,
+  encryptionSecret: process.env.ENCRYPTION_SECRET_KEY,
+});
+
+// This assumes we got `dataId` (from a request body, a script argument, etc).
+const contents = await idosGrantee.getSharedCredentialContentDecrypted(dataId);
 ```
+
+> 💡 Tip
+>
+> See a working example backend on [idos-example-dapp/api](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp/api). It has two flavors:
+>
+> - [EVM](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/EVM.ts)
+> - [NEAR](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/NEAR.ts)
 
 ### Delegated Access Grants
 
