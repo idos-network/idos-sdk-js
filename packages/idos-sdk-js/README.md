@@ -9,6 +9,13 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and 
 pnpm add @idos-network/idos-sdk ethers near-api-js
 ```
 
+Only add `ethers` or `near-api-js` in accordance with the chains your dApp uses.
+
+
+> 💡 Tip
+>
+> If you use `near-api-js`, make sure you have a `Buffer` polyfill. See https://github.com/near/near-api-js/issues/757.
+
 ## Quickstart
 
 Create a container anywhere on your page, and ensure it's displayed when assigned the `visible` class.
@@ -34,10 +41,17 @@ Import the SDK and initialize it with a selector for the container:
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idOS.init({ container: "#idos-container" });
+const idos = await idOS.init({enclaveOptions: {container: "#idos-container"}});
 ```
 
-Connect your user's wallet and use its signer to complete the setup.
+Get your user's address and confirm they have an idOS profile. If not, redirect them to your Issuer.
+
+```js
+const hasProfile = await idos.hasProfile(address);
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
+```
+
+Connect your user's signer to complete the setup.
 
 ```js
 await idos.setSigner("EVM", signer); // e.g. ethers.Signer
@@ -76,7 +90,7 @@ const isValid = await idOS.verifiableCredentials
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-const idos = await idos.init({ container: "#idos-container" });
+const idos = await idOS.init({enclaveOptions: {container: "#idos-container"}});
 ```
 
 After importing the SDK, you initialize it with a selector string for a DOM node. Make sure to add it to your page:
@@ -107,12 +121,81 @@ Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
+The main reason the SDK controls this HTML element is to remove the burden of opening up a new top-level window without being blocked by the browser because it was identified as an unwanted pop-up. Since all SDK users would need to go through the delicate process of getting these details right, we implemented it in the SDK.
+
+### Other initialization options
+
+The `enclaveOptions`'s `container` is the only required option, but there are a few other aspects of the SDK you're able to control during initialization.
+
+#### `nodeUrl`
+
+The most obvious one is to which network to connect: production, or playground. These can be found, respectively, at:
+- https://nodes.idos.network (default)
+- https://nodes.playground.idos.network
+
+Here's an example of using the playground network:
+
+```js
+const idos = await idos.init({
+  nodeUrl: "https://nodes.playground.idos.network",
+  enclaveOptions: {container: "#idos-container"},
+});
+```
+
+#### `dbId`
+
+This concept is very internal to the idOS nodes, and the right value gets automatically discovered during initialization.
+
+Unless you know what you're doing (e.g., deploying a new idOS network with a Kwil schema that's not called `idos`), omit this field.
+
+#### Grant options (`evmGrantsOptions` and `nearGrantsOptions`)
+
+This is only relevant if you use `idos.grants.*` methods.
+
+In order for the SDK to know which access grants contract to use, we need to provide `evmGrantsOptions` or `nearGrantsOptions`, depending on which network the dApp is deployed on.
+
+The default values come from the [.env](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/.env) file the SDK is built with. Assuming that file is available as a global `env` object, here are the default values for each options object:
+
+```js
+const idos = await idos.init({
+  enclaveOptions: {container: "#idos-container"},
+  evmGrantsOptions: {
+    contractAddress: env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS,
+    chainId: env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID,
+  },
+  nearGrantsOptions: {
+    network: env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
+    contractId: env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+    rpcUrl: env.VITE_IDOS_NEAR_DEFAULT_RPC_URL;
+  },
+});
+```
+
+You can take a look at what each environment uses by consulting their schemas:
+- [schema.production.kf](https://github.com/idos-network/idos-schema/blob/main/schema.production.kf)
+- [schema.playground.kf](https://github.com/idos-network/idos-schema/blob/main/schema.playground.kf)
+
+#### `enclaveOptions`
+
+So far, we've only used `container` from `enclaveOptions`. There are a few more fields that you can set:
+
+- `theme?: "light" | "dark"`: Forces a specific theme for the enclave pop-up. By default, this is discovered through the media query `prefers-color-scheme`.
+- `mode?: "new" | "existing"`: Forces a specific verbiage to be shown on the enclave pop-up. The default is `existing`, but issuers can set it to `new` to show messages that are more helpful for new users. Unless you're an issuer, this should not be supplied.
+- `url?: string`: URL of the enclave pop-up. Unless you're developing your own enclave, this should not be supplied.
+- `throwOnUserCancelUnlock?: boolean`: Controls the SDK's reaction to the user closing the enclave pop-up. The default, `false`, keeps the **🔓 Unlock idOS** button visible so the user can click it again and finish the unlocking process. If this value is `true`, the SDK will hide the button and raise whatever error it got from the enclave pop-up.
+
 ### Using `hasProfile`
 
-You can check if your user has an idOS profile using await `idos.hasProfile(address)`. This can be done without a signature, unlike the `setSigner` flow described below, making your UX simpler for new users:
+You can check if your user has an idOS profile associated with their address by using `await idos.hasProfile(address)`. This can be done without a signature, and confirms that calls to `setSigner` should succeed.
 
+```js
+const hasProfile = await idos.hasProfile(address);
 ```
-const hasProfile = await idos.hasProfile(signer.address) // true if there is an idOS profile associated with the passed adddress
+
+If your user does not have an idOS profile, you'll have to first redirect them to your credential provider. Here's an example:
+
+```js
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
 
 ### The `setSigner` flow and supported wallets
@@ -121,31 +204,87 @@ const hasProfile = await idos.hasProfile(signer.address) // true if there is an 
 const { humanId } = await idos.setSigner("EVM", signer);
 ```
 
-All queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. During the `.setSigner` process, the SDK will endeavour to remember or learn two things:
+Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. Your user's wallet might need to be triggered, so you should be mindful of when in your user's journey you call this method.
 
-1. a public key for this signer;
-2. the idOS human ID of the user controlling this signer.
+When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In With Ethereum](https://eips.ethereum.org/EIPS/eip-4361) (SIWE) message for authentication, and make a call to get some basic information about the user.
 
-The SDK first attempts to recall both from local storage and from the secure enclave. If it can't, it will engage with the signer. In this scenario, the SDK first requests a signed message from which it can extract the public key. Finally, it performs the first idOS query: asking it for the ID of the user controlling the signer.
+> 🛈 Note for NEAR
+>
+> Because idOS thinks in terms of signing keys, but NEAR thinks in terms of accounts that can be controlled by multiple signing keys, the SDK needs to discover the signing key that's currently being used. This requires a signed message from the user.
+>
+> Here's an example of what that looks like with Meteor:
+> <!-- TODO: Replace with an absolute URL pointing at main after merge -->
+> <img src="./assets/readme-sign-near.png" width="250" />
 
-Your user's wallet will be triggered when this happens, so you should be mindful of when in your user's journey you call this method. Here's how these requests appear in MetaMask.
+Here's an example of what signing a SIWE message looks like with Metamask:
+<!-- TODO: Replace with an absolute URL pointing at main after merge -->
+<img src="./assets/readme-sign-siwe.png" width="250" />
 
-<table border="0"><tr align="center">
-  <td><i>Asking the signer for a public key:</i></td>
-  <td><i>Fetching the human ID from idOS:</i></td>
-</tr><tr align="center">
-  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-1.png" width="250" /></td>
-  <td><img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-2.png" width="250" /></td>
-</td></tr></table>
+During this whole process, the SDK tries to use the browser's local storage to remember this signer's address (and public key, for NEAR signers) to avoid repeating this process unless necessary.
 
 The idOS currently supports two classes of signers:
 
 - Ethereum/EVM wallets (like MetaMask or Trust Wallet) producing [EIP-191](https://eips.ethereum.org/EIPS/eip-191) `secp256k1` signatures (aka `personal_sign`)
 - NEAR/NVM wallets (like MyNearWallet or Meteor) producing [NEP-413](https://github.com/near/NEPs/blob/master/neps/nep-0413.md) `ed25519` signatures (aka `signMessage`)
 
+### Exploring the user's data
+
+Now that we're successfully authenticated on idOS, we can now perform operations on user data. The entities that a user controls are:
+
+- **Wallets**: the wallets that the user has declared as being able to control their idOS profile.
+- **Credentials**: the credentials of a user. Their contents are encrypted (for the user's encryption key), but it also has some public fields for inspection.
+- **Attributes**: free form key-value entries. You can use this to store public attribute about the user.
+
+All of these can be created, retrieved, updated, or deleted. The only notable exceptions is deleting shared credentials with timelocks still active (more on this when we explain Access Grants).
+
+Here's an example of listing a user's credentials:
+```js
+const credentials = await idos.data.list("credentials");
+console.log(credentials);
+// [{ id: "4f4d...", issuer: "FractalID", type: "human" }, ...]
+```
+
+### Decrypting the user credential content
+
+> 🛑 Caution
+>
+> This is only meant to be used on admin-like dApps (like https://dashboard.idos.network/).
+>
+> If the user hasn't granted you an Access Grant, the user hasn't consented to you getting a copy of the data. We'll be covering Access Grant in a following section.
+>
+> For now, please use idOS responsibly and respect the user's will and data sovereignty. In order to protect the user, we're planning on changing how this admin-like access works in the near future, so please don't rely on it.
+
+Today, as a shortcut, we decrypt the credential's content on `get`:
+```js
+const { content } = await idos.data.get("credentials", credentials[0].id);
+```
+
+The manual version on this shortcut looks like this:
+```js
+const credential = await idos.data.get(
+  "credentials",
+  credentials[0].id,
+  false, // `false` here means "don't ask the user to decrypt the contents"
+);
+
+const content = await idos.enclave.decrypt(
+  credential.content,
+  credential.encryption_public_key,
+)
+```
+
+This call needs to operate with the user's encryption key. This is a responsibility of the Enclave, which we'll explain in the next section.
+
+Now you have access to the decrypted credential contents. If it's a [W3C Verifiable Credential](https://www.w3.org/TR/vc-data-model-2.0/), you can check it's authenticity with:
+```js
+await idOS.verifiableCredentials.verify(content)
+```
+
+This function always returns `true` or raises an Error detailing what went wrong with the verification process.
+
 ### Unlocking the idOS enclave
 
-Most data stored in the idOS is encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
+Credential contents stored in the idOS are encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
 
 Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
 
@@ -175,6 +314,159 @@ If they choose **Passkey**, we'll use their platform authenticator (you can lear
 
 The selected auth method will not have a bearing on the encryption capabilities.
 
+### Intermission: who are you?
+
+Like mentioned before, in order to lawfully obtain a copy of the user's credentials, the user must grant you an Access Grant. We'll expand on that concept next, but first you need to have some preparation measures in place.
+
+There are two things that a dApp needs to have setup:
+- A `grantee`: a key for a chain account you control. It's used both to identify you as the recipient of an Access Grant and to authenticate you when making calls to idOS nodes. On EVM chains, this is an EOA (Externally-Owned Account, controlled by anyone with its private key), and on NEAR this is a full access public key. For now, the idOS doesn't support having contract wallets as grantees.
+- An `encryptionPublicKey`: a key you control that'll be used to decrypt credential contents shared with you. This should be a [nacl.box.keyPair](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair).
+
+
+> 🛑 Caution
+>
+> Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
+
+### Access Grants
+
+An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dApp), access to the record identified by `dataId`, and I understand I won't be able to revoke said access before `lockedUntil` has passed. The contents of `dataId` are a copy of the credential/attribute that has its contents encrypted to the encryption key provided (by the dApp) during its creation.
+
+By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user's data (either a credential or an attribute) until the UNIX timestamp on `lockedUntil` has passed. This is especially relevant to be able to fulfill compliance obligations.
+
+This is achieved by combining two mechanisms:
+
+- On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is what's called `dataId`.
+- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
+
+The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage. Here's an example of what that looks like:
+
+```js
+// These don't necessarily have to come from a server, but it's the typical setup.
+const {
+  encryptionPublicKey,
+  lockTimeSpanSeconds,
+  grantee,
+} = await yourBackendService.getInfo();
+
+const { grant: { dataId } } = await idos.grants.create(
+  "credentials",
+  credentials[0].id,
+  grantee,
+  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds,
+  encryptionPublicKey,
+);
+```
+
+> 💡 Tip
+>
+> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
+
+To avoid any doubts, let's go over the Access Grant fields:
+
+- `owner`: on EVM chains this is a wallet address the user controls, and on NEAR this is a full access public key from an account the user controls.
+- `grantee`: on EVM chains this is the dApp's grantee address (like explained in the previous section), and on NEAR this is a full access public key.
+- `dataId`: the `id` of the record copy (either a credential or an attribute) that is going to be shared.
+- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. Any timestamp in the past, notably "0", means it's revocable at any time.
+
+### Filtering credentials
+
+One common problem about credentials is: if the dApp can only access a credential's contents after it has an Access Grant for it, how does the dApp know which credential will fulfill its compliance needs?
+
+`idos.enclave.filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
+A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched. `pick` requires the path to have the provided value, `omit` requires the path to not have the provided value.
+
+```js
+const entries = await idos.enclave.filterCredentials(credentials, {
+  pick: {
+    "credentialSubject.identification_document_country": "DE"
+  },
+  omit: {
+    "credentialSubject.identification_document_type": "passport",
+  },
+});
+```
+
+In this example, `entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"` and `"credentialSubject.identification_document_type"` is not `"passport"`.
+
+You can also use `idos.grants.shareMatchingEntry`, a helper function that:
+- Gets all the user's credentials
+- Can filter by public fields
+- Calls `idos.enclave.filterCredentials`
+- Calls `idos.grants.create` with the first matching credential
+
+Here's an example similar to the previous one, but that also filters a couple of public fields:
+
+```js
+await idos.grants.shareMatchingEntry(
+  "credentials",
+  {
+    credential_level: "basic",
+    credential_type: "kyc",
+  },
+  {
+    pick: {
+      "credentialSubject.identification_document_country": "DE"
+    },
+    omit: {
+      "credentialSubject.identification_document_type": "passport",
+    },
+  },
+  grantee,
+  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds, // timelock
+  encryptionPublicKey,
+);
+```
+
+### Checking Access Grant contents
+
+By now, we have used the idOS to secure a copy of the data we need to operate.
+
+If you wish to consult it, you'll need to use the `grantee` and [`nacl.box.keyPair`](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair) we've prepared before. Because these are secret, we need call some code in a private place (i.e., a backend, or maybe scripts you run locally).
+
+Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-server-dapp) for an EVM grantee:
+
+```js
+import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { ethers } from "ethers";
+
+const granteeSigner = new ethers.Wallet(
+  process.env.EVM_GRANTEE_PRIVATE_KEY,
+  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
+);
+
+const idosGrantee = await idOSGrantee.init({
+  chainType: "EVM",
+  granteeSigner,
+  encryptionSecret: process.env.ENCRYPTION_SECRET_KEY,
+});
+
+// This assumes we got `dataId` (from a request body, a script argument, etc).
+const contents = await idosGrantee.getSharedCredentialContentDecrypted(dataId);
+```
+
+> 💡 Tip
+>
+> See a working example backend on [idos-example-dapp/api](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp/api). It has two flavors:
+>
+> - [EVM](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/EVM.ts)
+> - [NEAR](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/NEAR.ts)
+
+### Delegated Access Grants
+
+A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is especially relevant for dApps who want to subsidize the cost of transaction necessary to create an AG.
+
+Here's a diagram comparing the two cases side-by-side:
+
+<img src="./assets/readme-ag-vs-dag.png" />
+
+This is accomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
+
+The message building function is exposed as `idos.grants.messageForCreateBySignature`. Submitting the resulting message and its user signature is exposed as `idosGrantee.createBySignature`.
+
+> 🛑 Caution
+>
+> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
+
 ## Quick reference
 
 ### Importing and initializing
@@ -182,22 +474,23 @@ The selected auth method will not have a bearing on the encryption capabilities.
 ```js
 import { idOS } from "@idos-network/idos-sdk";
 
-idos = await idOS.init({ container: "css selector" });
+const idos = await idOS.init({ enclaveOptions: {container: "css selector"} });
 ```
 
 ### EVM signer setup
 
 ```js
+const CHAIN_TYPE = "EVM";
 const provider = new ethers.BrowserProvider(window.ethereum);
 await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
-
-const { humanId } = await idos.setSigner("EVM", signer);
+const address = await signer.getAddress();
 ```
 
 ### NEAR signer setup
 
 ```js
+const CHAIN_TYPE = "NEAR";
 const {
   defaultContractId: contractId,
   contractMethods: methodNames,
@@ -218,25 +511,15 @@ const selector = await setupWalletSelector({
   }));
 
 const signer = selector.wallet();
-
-const { humanId } = await idos.setSigner("NEAR", signer);
+const address = (await signer.getAccounts())[0].accountId
 ```
 
-### idOS profile
+### Profile checking and `setSigner`
 
 ```js
-if (humanId) {
-  /* user has an idOS profile */
-}
-```
-
-You can also use `idos.hasProfile(signer.address)` before `setSigner` for a check that won't require a signature.
-
-If your user does not have an idOS profile, you'll have to first redirect them to your credential provider. Here's an example:
-
-```js
-if (!idos.hasProfile(signer.address))
-  window.location = "https://kyc-provider.example.com/enroll";
+const hasProfile = await idos.hasProfile(address);
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
+const { humanId } = await idos.setSigner(CHAIN_TYPE, signer);
 ```
 
 ### Credentials
@@ -269,52 +552,13 @@ await idos.data.update("attributes", { id, value: "1000" });
 await idos.data.delete("attributes", id);
 ```
 
-
-### Filtering credentials
-
-`filterCredentials` is a function that allows you to ask the user's enclave to filter all the user's credentials to only return the ones your dApp is interested in asking an Access Grant for.
-A filtering criteria for `pick` and `omit` should be passed. This should be the paths of the private fields by which a credential should be matched.
-
-```js
-const entries = await idos.enclave.filterCredentials(credentials, {
-  pick: {
-    "credentialSubject.identification_document_country": "DE"
-  },
-  omit: {
-    "credentialSubject.identification_document_type": "passport",
-  },
-});
-
-`entries` would be a list of credentials where the `"credentialSubject.identification_document_country"` matches `DE`
-and `"credentialSubject.identification_document_type"` is not of type "passport".
-
-```
-
-### Access Grants
-
-Acquiring an Access Grant assures a dApp that they'll have a copy of the user's data (either a credential or an attribute) until `lockedUntil` UNIX timestamp has passed. This is especially relevant to be able to fulfill compliance obligations.
-
-This is achived by combining two mechanisms:
-
-- On idOS,by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is commonly called `dataId`.
-- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
-
-The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage.
-
-An Access Grant record consists of the following values:
-
-- `owner`: the grant owner (in ETH chain this is the owners wallet address, for Near this is the owners full access public key).
-- `grantee`: the grant grantee (in ETH chain this is the grantee wallet address, for Near this is the grantee full access public key).
-- `dataId`: the `id` of the duplicated record (i.e credential) that is going to be shared.
-- `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. "0" means it's revocable at any time.
-
 ### Access Grant creation / revocation / list
 
 Here's some example code of creating, revoking and listing Access Grants.
 
 ```js
 // Decide on the credential you want to create an Access Grant for
-const credentialId = credential.id;
+const credentialId = credentials[0].id;
 
 // Share a credential by creating an access grant
 const { grant } = await idos.grants.create(
@@ -354,30 +598,13 @@ await idos.grants.shareMatchingEntry(
     },
     omit: {},
   },
-  address as string,
-  0,
-  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
-  ),
-});
+  grantee,
+  0, // timelock
+  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=", // receiverPublicKey
+);
 ```
 
-> 💡 Tip
->
-> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
-
-### Delegated Access Grants
-
-A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant by somebody else other than the user. This is acomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
-
-The message building is exposed as the `idos.grants.messageForCreateBySignature`. Submitting the resulting messages and its user signature is exposed as `idosGrantee.createBySignature`.
-
-> 🛑 Caution
->
-> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
-
-This is especially relevant for dApps who want to subsidise the cost of transaction necessary to create an AG.
-
-### Creating a dAG on EVM:
+### Creating a dAG on EVM
 
 ```js
 /*
@@ -385,7 +612,7 @@ This is especially relevant for dApps who want to subsidise the cost of transact
  */
 
 // Create a share (duplicate) in the idOS and get its id:
-const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);)
+const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);
 
 // Get a message that needs to be signed by the user:
 const message = await idos.grants.messageForCreateBySignature({
@@ -393,7 +620,7 @@ const message = await idos.grants.messageForCreateBySignature({
   grantee,
   dataId,
   lockedUntil
-})
+});
 
 // The dApp should ask the user to sign this message:
 const { signature } = await wallet.signMessage({ message, recipient, nonce });
@@ -403,17 +630,24 @@ const { signature } = await wallet.signMessage({ message, recipient, nonce });
  *
  * !! NOT IMPLEMENTED FOR NEAR YET !!
  */
+import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { ethers } from "ethers";
 
-// Initialise the idOSGrantee
+const granteeSigner = new ethers.Wallet(
+  process.env.EVM_GRANTEE_PRIVATE_KEY,
+  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
+);
+
+// Initialize the idOSGrantee
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
-  granteeSigner: evmGranteeSigner,
+  granteeSigner,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY
 });
 
 // Create the dAG
 await idosGrantee.createBySignature({
-  // These values need to be the same you used to generate the singed message
+  // These values need to be the same you used to generate the signed message
   owner,
   grantee,
   dataId,
@@ -428,13 +662,13 @@ await idosGrantee.createBySignature({
 Create an `.env.local` file in the root folder of the SDK package and add the needed environment variables (you can reference .env.production for the variable names).
 
 Run:
-```
+```bash
 pnpm dev
 ```
 This will run a dev server with watch mode that will rebuild every time any of the source files are changed.
 
 You can also create a production build by running the following command in the root folder of the SDK package:
-```
+```bash
 pnpm build
 ```
 This will create a PRODUCTION build of the SDK using the `.env.production` file.
