@@ -410,10 +410,22 @@ await idos.grants.shareMatchingEntry(
 );
 ```
 
+### Checking Access Grant presence
 
+For typical dApps, they'll only ever need a single credential for the user. In order to check if the respective Access Grant is still in place, you should call:
 
-> 💡 Tip
->
+```js
+const ags = await idos.grants.list({
+  owner: userAddress,
+  grantee,
+})
+
+if (!ags.length) {
+  // You need to acquire an Access Grant.
+} else {
+  // You can let the user through! 🎉
+}
+```
 
 ### Delegated Access Grants
 
