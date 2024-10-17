@@ -457,7 +457,7 @@ A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant b
 
 Here's a diagram comparing the two cases side-by-side:
 
-<img src="/assets/readme-ag-vs-dag.png" />
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-ag-vs-dag.png" />
 
 This is accomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
 
