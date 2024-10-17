@@ -213,12 +213,12 @@ When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In 
 > Because idOS thinks in terms of signing keys, but NEAR thinks in terms of accounts that can be controlled by multiple signing keys, the SDK needs to discover the signing key that's currently being used. This requires a signed message from the user.
 >
 > Here's an example of what that looks like with Meteor:
-> <!-- TODO: Replace with an absolute URL pointing at main after merge -->
-> <img src="./assets/readme-sign-near.png" width="250" />
+> 
+> <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-near.png" width="250" />
 
 Here's an example of what signing a SIWE message looks like with Metamask:
-<!-- TODO: Replace with an absolute URL pointing at main after merge -->
-<img src="./assets/readme-sign-siwe.png" width="250" />
+
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-siwe.png" width="250" />
 
 During this whole process, the SDK tries to use the browser's local storage to remember this signer's address (and public key, for NEAR signers) to avoid repeating this process unless necessary.
 
@@ -457,7 +457,7 @@ A delegated Access Grant (dAG) is a way of creating / revoking an Access Grant b
 
 Here's a diagram comparing the two cases side-by-side:
 
-<img src="./assets/readme-ag-vs-dag.png" />
+<img src="/assets/readme-ag-vs-dag.png" />
 
 This is accomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
 
