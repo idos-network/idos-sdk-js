@@ -657,16 +657,17 @@ await idosGrantee.createBySignature({
 
 ## Developing the SDK locally
 
-Create an `.env.local` file in the root folder of the SDK package and add the needed environment variables (you can reference .env.production for the variable names).
+Create an `.env.development.local` file in the root folder of the SDK package and add the needed environment variables (you can reference `.env` for the variable names).
+The SDK will use these variables for the development environment.
 
 Run:
 ```bash
 pnpm dev
 ```
-This will run a dev server with watch mode that will rebuild every time any of the source files are changed.
+This will run the compiler in watch mode that will rebuild every time any of the source files are changed.
 
 You can also create a production build by running the following command in the root folder of the SDK package:
 ```bash
 pnpm build
 ```
-This will create a PRODUCTION build of the SDK using the `.env.production` file.
+This will create a PRODUCTION build of the SDK using the `.env` file.
