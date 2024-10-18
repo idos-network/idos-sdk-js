@@ -5,7 +5,7 @@
 ## Installation
 
 Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with pnpm or the equivalent of your package manager of choice:
-```
+```bash
 pnpm add @idos-network/idos-sdk ethers near-api-js
 ```
 
@@ -71,7 +71,7 @@ const isValid = await idOS.verifiableCredentials
   .catch((e) => false);
 ```
 
-> 🛈 Note
+> 💡 Tip
 >
 > For more examples and data queries, see:
 >
@@ -79,9 +79,9 @@ const isValid = await idOS.verifiableCredentials
 > - [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp) for a simple implementation
 > - [`📁 idos-data-dashboard`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-data-dashboard) for a thorough example
 
-> 💡 Tip
+> 🛟 Help available
 >
-> Need support? Please follow [this process](https://github.com/idos-network/.github/blob/main/profile/README.md).
+> Would you benefit from support or clarification from our team? Please follow [our support process](https://github.com/idos-network/.github/blob/main/profile/README.md).
 
 ## Diving deeper
 
@@ -206,12 +206,12 @@ Besides `hasProfile`, all other queries to idOS nodes require a valid signature.
 
 When called, `setSigner` will try to connect to the idOS nodes, sign a [Sign-In With Ethereum](https://eips.ethereum.org/EIPS/eip-4361) (SIWE) message for authentication, and make a call to get some basic information about the user.
 
-> 🛈 Note for NEAR
+> 🛈 Note about NEAR
 >
 > Because idOS thinks in terms of signing keys, but NEAR thinks in terms of accounts that can be controlled by multiple signing keys, the SDK needs to discover the signing key that's currently being used. This requires a signed message from the user.
 >
 > Here's an example of what that looks like with Meteor:
-> 
+>
 > <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-sign-near.png" width="250" />
 
 Here's an example of what signing a SIWE message looks like with Metamask:
@@ -244,7 +244,7 @@ console.log(credentials);
 
 ### Decrypting the user credential content
 
-> 🛑 Caution
+> ⚠️ Warning
 >
 > This is only meant to be used on admin-like dApps (like https://dashboard.idos.network/).
 >
@@ -321,7 +321,7 @@ There are two things that a dApp needs to have setup:
 - An `encryptionPublicKey`: a key you control that'll be used to decrypt credential contents shared with you. This should be a [nacl.box.keyPair](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair).
 
 
-> 🛑 Caution
+> 🛑 DANGER 🛑
 >
 > Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
 
@@ -461,7 +461,7 @@ This is accomplished by getting the user's signature a specific message, generat
 
 The message building function is exposed as `idos.grants.messageForCreateBySignature`. Submitting the resulting message and its user signature is exposed as `idosGrantee.createBySignature`.
 
-> 🛑 Caution
+> ⚠️ Notice
 >
 > This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
 
@@ -626,7 +626,7 @@ const { signature } = await wallet.signMessage({ message, recipient, nonce });
 /*
  * Server side.
  *
- * !! NOT IMPLEMENTED FOR NEAR YET !!
+ * ⚠️ Notice: Not implemented for NEAR yet.
  */
 import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
 import { ethers } from "ethers";
