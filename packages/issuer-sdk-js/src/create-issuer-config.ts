@@ -6,7 +6,7 @@ import invariant from "tiny-invariant";
 
 export interface CreateIssuerConfigParams {
   nodeUrl: string;
-  secretKey: string;
+  encryptionSecret: string;
   signer: Wallet | KeyPair;
   chainId?: string;
   dbId?: string;
@@ -49,7 +49,7 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
 
   const signer = createKwilSigner(params.signer);
 
-  return { chainId, dbid, kwilClient, signer, secretKey: params.secretKey };
+  return { chainId, dbid, kwilClient, signer, encryptionSecret: params.encryptionSecret };
 }
 
 export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;

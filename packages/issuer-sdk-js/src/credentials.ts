@@ -9,10 +9,10 @@ export interface CreateCredentialReqParams extends Omit<idOSCredential, "id" | "
 }
 type CredentialReqParams = Omit<idOSCredential, "original_id">;
 
-const encryptContent = (content: string, secretKey: string, encryptionPublicKey: string) => {
+const encryptContent = (content: string, encryptionSecret: string, encryptionPublicKey: string) => {
   const endodedContent = utf8Codec.encode(content);
   const decodedEncryptionPublicKey = base64.decode(encryptionPublicKey);
-  const decodedSecretKey = base64.decode(secretKey);
+  const decodedSecretKey = base64.decode(encryptionSecret);
 
   try {
     return encrypt(endodedContent, decodedEncryptionPublicKey, decodedSecretKey);
@@ -24,12 +24,12 @@ const encryptContent = (content: string, secretKey: string, encryptionPublicKey:
 export interface CreateCredentialPermissionedReqParams extends CredentialReqParams {}
 
 export async function createtCredentialPermissioned(
-  { dbid, kwilClient, secretKey, signer }: IssuerConfig,
+  { dbid, kwilClient, encryptionSecret, signer }: IssuerConfig,
   params: CreateCredentialPermissionedReqParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
     params.content,
-    secretKey,
+    encryptionSecret,
     params.encryption_public_key,
   );
 
@@ -53,12 +53,12 @@ export async function createtCredentialPermissioned(
 export interface createCredentialByGrantReqParams extends CredentialReqParams {}
 
 export async function createCredentialByGrant(
-  { dbid, kwilClient, secretKey, signer }: IssuerConfig,
+  { dbid, kwilClient, encryptionSecret, signer }: IssuerConfig,
   params: createCredentialByGrantReqParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
     params.content,
-    secretKey,
+    encryptionSecret,
     params.encryption_public_key,
   );
 
@@ -84,12 +84,12 @@ export interface ShareCredentialByGrantReqParams extends CredentialReqParams {
   original_credential_id: string;
 }
 export async function shareCredentialByGrant(
-  { dbid, kwilClient, secretKey, signer }: IssuerConfig,
+  { dbid, kwilClient, encryptionSecret, signer }: IssuerConfig,
   params: ShareCredentialByGrantReqParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
     params.content,
-    secretKey,
+    encryptionSecret,
     params.encryption_public_key,
   );
 
