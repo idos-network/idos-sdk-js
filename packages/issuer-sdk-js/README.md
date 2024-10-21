@@ -104,7 +104,8 @@ In this case, the ``createtCredentialPermissioned`` function is used to write th
 
 Example:
 
-```import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
+```js
+import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
