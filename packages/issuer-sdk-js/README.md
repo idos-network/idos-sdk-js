@@ -54,12 +54,19 @@ const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 
 ## Writing credentials.
 
-In order to write a credential to idOS, first, the issuer needs to get permission from the user to write to his profile. This is done by creating a "Write Grant" using our client sdk `@idos-network/idos-sdk`:
+In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: either through a permissioned approach or by using a write grant. Below are the two methods for writing credentials.
+
+#### 1. Using Write Grant
+The first method involves getting permission from the user via a Write Grant. This grants the issuer the ability to write to the user’s profile. To do this, you must first create a Write Grant using the idOS SDK.
+
+Example:
+<div >
+ you can create a write grant by calling the  <a href="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants">addWriteGrant</a>
+</div>
 
 ```
 import { idOS } from "@idos-network/idos-sdk-js";
 
-// Please refer to the `@idos-network/idos-sdk-js` README for initialisation instructions.
 const sdk = await idOS.init(...);
 
 const granteeAddress = "0x0"; // The address of the grantee.
@@ -89,6 +96,27 @@ This will create a credential in the idOS for the given grantee address.
 <div style="background-color: #ffffcc; border-left: 6px solid #ffeb3b; padding: 10px;">
   <strong>Important:</strong>The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 </div>
+
+#### 2. Using Permissioned Credential Creation
+The second method allows the issuer to create a credential without a Write Grant by having a permissioned approach. This method assumes the issuer already has direct permission to write the credential.
+
+In this case, the ``createtCredentialPermissioned`` function is used to write the credential with necessary encryption.
+
+Example:
+
+```import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
+import issuerConfig from "./issuer-config.js";
+
+const credential = {
+  id: crypto.randomUUID(),
+  content: "CREDENTIAL_CONTENT", // The credential content to be encrypted.
+  encryption_public_key: "ENCRYPTION_PUBLIC_KEY", // The recipient's public key.
+  // Other credential params
+};
+
+const credentialResult = await createtCredentialPermissioned(issuerConfig, credential);```
+```
+This method directly writes the credential to the idOS, assuming the issuer has the necessary permissions.
 
 ## Developing the SDK locally
 
