@@ -13,7 +13,7 @@ pnpm add @idos-network/idos-issuer-sdk-js
 ## Setting up
 
 Create an issuer config with your secret key. This config will be used to interact with the idOS.
-```
+```js
 import { createIssuerConfig } from "@idos-network/idos-issuer-sdk-js";
 import { Wallet } from "ethers";
 
@@ -30,8 +30,9 @@ const issuerConfig = await createIssuerConfig({
 In order to create a human profile in idOS, you need to have a wallet associated with the human and a public key for the human.
 Passing ids are optional and will be auto-generated if not provided.
 
-```
+```js
 // createHumanDemo.js
+
 import { createHuman } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
@@ -85,7 +86,7 @@ The first method involves getting permission from the user via a Write Grant. Th
 Example:
 you can create a write grant by calling the  <a href="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants">addWriteGrant</a>
 
-```
+```js
 import { idOS } from "@idos-network/idos-sdk-js";
 
 const sdk = await idOS.init(...);
@@ -97,7 +98,7 @@ await sdk.data.addWriteGrant(granteeAddress);
 ```
 This will create a write grant in the idOS for the given grantee address. Now, the issuer can create a credential:
 
-```
+```js
 import { createCredentialByGrant } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
@@ -124,7 +125,8 @@ In this case, the ``createtCredentialPermissioned`` function is used to write th
 
 Example:
 
-```import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
+```js
+import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
