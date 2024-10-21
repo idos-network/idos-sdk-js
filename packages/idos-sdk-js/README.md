@@ -334,9 +334,7 @@ In the idOS ecosystem, a Write Grant is a permission issued by a user that allow
 - Data Privacy: The issuer does not have direct access to the user’s profile data; instead, they are allowed to write encrypted data to the profile.
 
 
-<div >
-you can create a write grant by calling the  <a>addWriteGrant</a>
-</div>
+you can create a write grant by calling the  ``addWriteGrant``
 
 ```
 import { idOS } from "@idos-network/idos-sdk-js";

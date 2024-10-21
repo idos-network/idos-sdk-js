@@ -10,7 +10,7 @@ pnpm add @idos-network/idos-issuer-sdk-js
 ```
 
 
-## Quickstart
+## Setting up
 
 Create an issuer config with your secret key. This config will be used to interact with the idOS.
 ```
@@ -20,9 +20,9 @@ import { Wallet } from "ethers";
 const wallet = new Wallet("YOUR_PRIVATE_KEY");
 
 const issuerConfig = await createIssuerConfig({
-  nodeUrl: "https://node.url",
+  nodeUrl: "https://nodes.idos.network/", // or nodes.playground.idos.network
   secretKey: "YOUR_SECRET_KEY",
-  signer: wallet // Or use a KeyPair from near-api-js
+  signer: wallet
 });
 ```
 ### Creating a human profile.
@@ -31,16 +31,39 @@ In order to create a human profile in idOS, you need to have a wallet associated
 Passing ids are optional and will be auto-generated if not provided.
 
 ```
+// createHumanDemo.js
 import { createHuman } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
+/**
+ * Represents a human profile in the idOS system.
+ * 
+ * @typedef {Object} Human
+ * @property {string} current_public_key - The public key derived from the user's keypair, used to encrypt credentials content.
+ */
+
 const human = {
-  id: crypto.randomUUID(),
   current_public_key: "DERIVED_PUBLIC_KEY",
 }
 
+/**
+ * Represents the payload for a wallet associated with a human profile.
+ * 
+ * @typedef {Object} WalletPayload
+ * @property {string} address - The wallet address (e.g., an Ethereum address).
+ * @property {string} wallet_type - The type of wallet, e.g., "EVM", "NEAR".
+ * @property {string} message - The message that was signed by the user.
+ * @property {string} signature - The derived signature for the message, created with the user's private key.
+ * @property {string} public_key - The public key derived from the user's keypair.
+ */
+
+/**
+ * The wallet payload object representing a wallet associated with the human profile.
+ * 
+ * @type {WalletPayload}
+ */
+
 const walletPayload = {
-  id: crypto.randomUUID(),
   address: "0x0",
   wallet_type: "EVM",
   message: "SIGN_MESSAGE",
@@ -48,7 +71,7 @@ const walletPayload = {
   public_key: "DERIVED_PUBLIC_KEY",   
 }
 
-// Will return a tuple with the human and the wallet associated to the human.
+// Will return a tuple with the human profile first then the wallet associated to the human.
 const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload); 
 ```
 
@@ -56,13 +79,11 @@ const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: either through a permissioned approach or by using a write grant. Below are the two methods for writing credentials.
 
-#### 1. Using Write Grant
+#### Using Write Grant
 The first method involves getting permission from the user via a Write Grant. This grants the issuer the ability to write to the user’s profile. To do this, you must first create a Write Grant using the idOS SDK.
 
 Example:
-<div >
- you can create a write grant by calling the  <a href="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants">addWriteGrant</a>
-</div>
+you can create a write grant by calling the  <a href="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants">addWriteGrant</a>
 
 ```
 import { idOS } from "@idos-network/idos-sdk-js";
@@ -81,7 +102,6 @@ import { createCredentialByGrant } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  id: crypto.randomUUID(),
   content: "CREDENTIAL_CONTENT", // The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
   encryption_public_key: "ENCRYPTION_PUBLIC_KEY", // The public key of the recipient.
   // Other credential params
@@ -97,7 +117,7 @@ This will create a credential in the idOS for the given grantee address.
   <strong>Important:</strong>The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 </div>
 
-#### 2. Using Permissioned Credential Creation
+#### Using Permissioned Credential Creation
 The second method allows the issuer to create a credential without a Write Grant by having a permissioned approach. This method assumes the issuer already has direct permission to write the credential.
 
 In this case, the ``createtCredentialPermissioned`` function is used to write the credential with necessary encryption.
@@ -108,7 +128,6 @@ Example:
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  id: crypto.randomUUID(),
   content: "CREDENTIAL_CONTENT", // The credential content to be encrypted.
   encryption_public_key: "ENCRYPTION_PUBLIC_KEY", // The recipient's public key.
   // Other credential params
