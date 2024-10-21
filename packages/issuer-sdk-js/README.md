@@ -39,7 +39,7 @@ const human = {
   current_public_key: "DERIVED_PUBLIC_KEY",
 }
 
-const wallet = {
+const walletPayload = {
   id: crypto.randomUUID(),
   address: "0x0",
   wallet_type: "EVM",
@@ -48,12 +48,13 @@ const wallet = {
   public_key: "DERIVED_PUBLIC_KEY",   
 }
 
-const human = await createHuman(issuerConfig, human, wallet);
+// Will return a tuple with the human and the wallet associated to the human.
+const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload); 
 ```
 
 ## Writing credentials.
 
-First, the issuer needs to get permission from the user to write to his profile. This is done by creating a write grant using our client sdk `@idos-network/idos-sdk-js`:
+In order to write a credential to idOS, first, the issuer needs to get permission from the user to write to his profile. This is done by creating a "Write Grant" using our client sdk `@idos-network/idos-sdk`:
 
 ```
 import { idOS } from "@idos-network/idos-sdk-js";
@@ -84,6 +85,7 @@ const credential = await createCredentialByGrant(issuerConfig, credential);
 ```
 
 This will create a credential in the idOS for the given grantee address.
+
 <div style="background-color: #ffffcc; border-left: 6px solid #ffeb3b; padding: 10px;">
   <strong>Important:</strong>The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 </div>
@@ -94,7 +96,7 @@ Run:
 ```
 pnpm dev
 ```
-This will run a dev server with watch mode that will rebuild every time any of the source files are changed.
+This will start the compiler in watch mode that will rebuild every time any of the source files are changed.
 
 You can also create a production build by running the following command in the root folder of the SDK package:
 ```
