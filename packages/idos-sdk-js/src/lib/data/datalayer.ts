@@ -1,4 +1,4 @@
-import type { KwilWrapper } from "./kwil-wrapper";
+import type { KwilWrapper } from "../kwil-wrapper";
 
 export class DataLayer<T extends { id: string }> {
   constructor(

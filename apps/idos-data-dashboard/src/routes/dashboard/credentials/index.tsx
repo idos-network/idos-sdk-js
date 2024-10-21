@@ -29,13 +29,13 @@ const useFetchCredentials = () => {
   return useQuery({
     queryKey: ["credentials"],
     queryFn: async () => {
-      const credentials = await sdk.data.listAllCredentials();
+      const credentials = await sdk.data.credentials.listAll();
       return credentials.map((credential) => ({
         ...credential,
         shares: credentials
           .filter((_credential) => _credential.original_id === credential.id)
           .map((c) => c.id),
-      })) as idOSCredentialWithShares[]; // @todo: remove once we have more type safety in the SDK.
+      }));
     },
     select: (credentials) => credentials.filter((credential) => !credential.original_id),
   });

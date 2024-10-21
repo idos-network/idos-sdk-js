@@ -1,8 +1,8 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { encode } from "@stablelib/base64";
+import type { Enclave } from "../enclave";
+import type { KwilWrapper } from "../kwil-wrapper";
 import { DataLayer } from "./datalayer";
-import type { Enclave } from "./enclave";
-import type { KwilWrapper } from "./kwil-wrapper";
 
 export class CredentialDataLayer extends DataLayer<idOSCredential> {
   constructor(
