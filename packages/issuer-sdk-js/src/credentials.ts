@@ -23,7 +23,7 @@ const encryptContent = (content: string, secretKey: string, encryptionPublicKey:
 
 export interface CreateCredentialPermissionedReqParams extends CredentialReqParams {}
 
-export async function createtCredentialPermissioned(
+export async function createCredentialPermissioned(
   { dbid, kwilClient, secretKey, signer }: IssuerConfig,
   params: CreateCredentialPermissionedReqParams,
 ): Promise<idOSCredential> {
