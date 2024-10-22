@@ -67,6 +67,13 @@
     "ethers": "^6.13.3",
     "near-api-js": "^3.0.4"
   },
+  "typesVersions": {
+    "*": {
+      "create-issuer-config": ["./dist/create-issuer-config.d.ts"],
+      "human": ["./dist/human.d.ts"],
+      "credentials": ["./dist/credentials.d.ts"]
+    }
+  },
   "clean-package": {
     "replace": {
       "./package.json": "./package.json"
