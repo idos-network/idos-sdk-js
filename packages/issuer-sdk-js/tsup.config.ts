@@ -10,7 +10,6 @@ export default defineConfig({
   splitting: false,
   sourcemap: true,
   clean: true,
-  dts: true,
   format: ["esm"],
   outDir: "./dist",
   bundle: true,

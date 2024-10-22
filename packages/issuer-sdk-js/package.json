@@ -18,19 +18,19 @@
   ],
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
+      "types": "./src/index.ts",
       "import": "./dist/index.js"
     },
     "./create-issuer-config": {
-      "types": "./dist/create-issuer-config.d.ts",
+      "types": "./src/create-issuer-config.ts",
       "import": "./dist/create-issuer-config.js"
     },
     "./human": {
-      "types": "./dist/human.d.ts",
+      "types": "./src/human.ts",
       "import": "./dist/human.js"
     },
     "./credentials": {
-      "types": "./dist/credentials.d.ts",
+      "types": "./src/credentials.ts",
       "import": "./dist/credentials.js"
     }
   },
@@ -66,13 +66,6 @@
   "peerDependencies": {
     "ethers": "^6.13.3",
     "near-api-js": "^3.0.4"
-  },
-  "typesVersions": {
-    "*": {
-      "create-issuer-config": ["./dist/create-issuer-config.d.ts"],
-      "human": ["./dist/human.d.ts"],
-      "credentials": ["./dist/credentials.d.ts"]
-    }
   },
   "clean-package": {
     "replace": {
