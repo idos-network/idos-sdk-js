@@ -53,8 +53,6 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
-    "@idos-network/idos-sdk-types": "workspace:*",
-    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
