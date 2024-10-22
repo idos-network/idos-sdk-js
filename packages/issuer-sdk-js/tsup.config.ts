@@ -8,4 +8,5 @@ export default defineConfig({
   dts: true,
   format: ["esm"],
   outDir: "./dist",
+  noExternal: ["@idos-network/idos-sdk-types", "@idos-network/kwil-nep413-signer"],
 });
