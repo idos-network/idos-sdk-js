@@ -2,7 +2,7 @@ import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { Wallet } from "ethers";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer";
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
 export interface CreateIssuerConfigParams {
   nodeUrl: string;
