@@ -3,6 +3,7 @@
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.1",
   "homepage": "https://idos.network",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/idos-network/idos-sdk-js.git"
