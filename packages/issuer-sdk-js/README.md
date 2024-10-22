@@ -14,6 +14,7 @@ pnpm add @idos-network/idos-issuer-sdk-js
 
 Create an issuer config with your secret key. This config will be used to interact with the idOS.
 ```js
+// issuer-config.js
 import { createIssuerConfig } from "@idos-network/idos-issuer-sdk-js";
 import { Wallet } from "ethers";
 
@@ -21,7 +22,7 @@ const wallet = new Wallet("YOUR_PRIVATE_KEY");
 
 const issuerConfig = await createIssuerConfig({
   nodeUrl: "https://nodes.idos.network/", // or nodes.playground.idos.network
-  secretKey: "YOUR_SECRET_KEY",
+  encryptionSecret: "YOUR_SECRET_KEY",
   signer: wallet
 });
 ```
@@ -67,9 +68,9 @@ const human = {
 const walletPayload = {
   address: "0x0",
   wallet_type: "EVM",
-  message: "SIGN_MESSAGE",
-  signature: "DERIVED_SIGNATURE",
-  public_key: "DERIVED_PUBLIC_KEY",   
+  message: "app wants you to sign this message...",
+  signature: "0x3fda8a9fef767d974ceb481d606587b17c29a23a0999e94d16c07628b33bad341cf808a1c0eae84406709f8153096f845942d22bb53ca84faaaabc9b35b87d6c1c",
+  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",   
 }
 
 // Will return a tuple with the human profile first then the wallet associated to the human.
@@ -91,10 +92,10 @@ import { idOS } from "@idos-network/idos-sdk-js";
 
 const sdk = await idOS.init(...);
 
-const granteeAddress = "0x0"; // The address of the grantee.
+const issuerAddress = "0x0"; // The address of the grantee (in this case it's the Issuer's address).
 
 // Create a write grant.
-await sdk.data.addWriteGrant(granteeAddress);
+await sdk.data.addWriteGrant(issuerAddress);
 ```
 This will create a write grant in the idOS for the given grantee address. Now, the issuer can create a credential:
 
@@ -103,10 +104,12 @@ import { createCredentialByGrant } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  content: "CREDENTIAL_CONTENT", // The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
-  encryption_public_key: "ENCRYPTION_PUBLIC_KEY", // The public key of the recipient.
-  // Other credential params
-  ...
+  credential_level: "huamn";
+  credential_type: "human";
+  credential_status: "pending"; // has also types of "contacted" | "approved" | "rejected" | "expired"
+  issuer: "ISSUER_NAME"
+  content: "VERIFIABLE_CREDENTIAL_CONTENT"; // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
+  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY";
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);
@@ -114,14 +117,15 @@ const credential = await createCredentialByGrant(issuerConfig, credential);
 
 This will create a credential in the idOS for the given grantee address.
 
-<div style="background-color: #ffffcc; border-left: 6px solid #ffeb3b; padding: 10px;">
-  <strong>Important:</strong>The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
-</div>
+
+> ⚠️ Notice
+>
+> The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 
 #### Using Permissioned Credential Creation
 The second method allows the issuer to create a credential without a Write Grant by having a permissioned approach. This method assumes the issuer already has direct permission to write the credential.
 
-In this case, the ``createtCredentialPermissioned`` function is used to write the credential with necessary encryption.
+In this case, the `createtCredentialPermissioned` function is used to write the credential with necessary encryption.
 
 Example:
 
@@ -130,10 +134,13 @@ import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js"
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  content: "CREDENTIAL_CONTENT", // The credential content to be encrypted.
-  encryption_public_key: "ENCRYPTION_PUBLIC_KEY", // The recipient's public key.
-  // Other credential params
-};
+  credential_level: "huamn";
+  credential_type: "human";
+  credential_status: "pending"; // has also types of "contacted" | "approved" | "rejected" | "expired"
+  issuer: "ISSUER_NAME"
+  content: "VERIFIABLE_CREDENTIAL_CONTENT"; // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
+  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY";
+}
 
 const credentialResult = await createtCredentialPermissioned(issuerConfig, credential);```
 ```
