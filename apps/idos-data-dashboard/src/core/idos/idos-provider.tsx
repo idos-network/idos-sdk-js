@@ -55,6 +55,8 @@ export const Provider = ({ children }: PropsWithChildren) => {
         url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
       },
     });
+    //@ts-ignore
+    window._sdk = _sdk;
 
     const profile = await _sdk.hasProfile(userAddress);
     setHasProfile(profile);
