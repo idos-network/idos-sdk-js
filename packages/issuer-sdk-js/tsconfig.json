@@ -16,5 +16,6 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "."
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts"],
+  "references": [{ "path": "../types" }, { "path": "../kwil-nep413-signer" }]
 }

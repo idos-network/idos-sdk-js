@@ -18,19 +18,19 @@
   ],
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
     "./create-issuer-config": {
-      "types": "./src/create-issuer-config.ts",
+      "types": "./dist/create-issuer-config.d.ts",
       "import": "./dist/create-issuer-config.js"
     },
     "./human": {
-      "types": "./src/human.ts",
+      "types": "./dist/human.d.ts",
       "import": "./dist/human.js"
     },
     "./credentials": {
-      "types": "./src/credentials.ts",
+      "types": "./dist/credentials.d.ts",
       "import": "./dist/credentials.js"
     }
   },
@@ -47,7 +47,6 @@
     "test:build": "pnpx publint --strict"
   },
   "devDependencies": {
-    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "clean-package": "^2.2.0",
@@ -57,6 +56,7 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
+    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",

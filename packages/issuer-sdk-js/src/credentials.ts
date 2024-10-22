@@ -3,7 +3,6 @@ import * as utf8Codec from "@stablelib/utf8";
 import type { idOSCredential } from "../../types";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, encrypt, ensureEntityId } from "./internal";
-import type { idOSCredential } from "./types";
 
 // Base interface for credential parameters
 interface BaseCredentialParams extends Omit<idOSCredential, "id" | "original_id"> {

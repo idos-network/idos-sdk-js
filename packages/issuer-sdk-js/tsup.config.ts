@@ -6,7 +6,6 @@ export default defineConfig({
     "./src/create-issuer-config.ts",
     "./src/human.ts",
     "./src/credentials.ts",
-    "./src/types.ts",
   ],
   splitting: false,
   sourcemap: true,
@@ -14,5 +13,6 @@ export default defineConfig({
   format: ["esm"],
   outDir: "./dist",
   bundle: true,
+  dts: true,
   noExternal: ["@idos-network/kwil-nep413-signer", "@idos-network/idos-sdk-types"],
 });

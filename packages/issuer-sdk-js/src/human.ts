@@ -1,6 +1,6 @@
+import type { idOSHuman, idOSWallet } from "./../../types";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, ensureEntityId } from "./internal";
-import type { idOSHuman, idOSWallet } from "./types";
 
 export interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
   id?: string;
