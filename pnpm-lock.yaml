@@ -496,9 +496,6 @@ importers:
 
   packages/issuer-sdk-js:
     dependencies:
-      '@idos-network/idos-sdk-types':
-        specifier: workspace:*
-        version: link:../types
       '@idos-network/kwil-nep413-signer':
         specifier: workspace:*
         version: link:../kwil-nep413-signer
@@ -524,6 +521,9 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.0.0(typescript@5.5.4))
