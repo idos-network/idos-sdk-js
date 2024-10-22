@@ -63,6 +63,7 @@
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
   },
+  "bundleDependencies": ["@idos-network/idos-sdk-types", "@idos-network/kwil-nep413-signer"],
   "clean-package": {
     "replace": {
       "main": "dist/index.js",
