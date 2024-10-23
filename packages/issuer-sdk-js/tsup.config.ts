@@ -14,4 +14,5 @@ export default defineConfig({
   outDir: "./dist",
   bundle: true,
   dts: true,
+  noExternal: ["@idos-network/kwil-nep413-signer", "@idos-network/idos-sdk-types"],
 });
