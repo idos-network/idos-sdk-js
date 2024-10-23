@@ -1,5 +1,6 @@
 import { Center, Spinner } from "@chakra-ui/react";
 import { idOS as idOSSDK } from "@idos-network/idos-sdk";
+import type { Wallet, WalletModuleFactory } from "@near-wallet-selector/core";
 import type { AccountState, WalletSelector } from "@near-wallet-selector/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
@@ -37,8 +38,10 @@ export const WalletSelectorContextProvider: React.FC<{
   const initialize = useCallback(async () => {
     const _selector = await setupWalletSelector({
       network: import.meta.env.DEV ? "testnet" : "mainnet",
-      debug: true,
-      modules: [setupMeteorWallet(), setupHereWallet()],
+      modules: [
+        setupMeteorWallet() as WalletModuleFactory<Wallet>,
+        setupHereWallet() as WalletModuleFactory<Wallet>,
+      ],
     });
 
     const _modal = setupModal(_selector, {
