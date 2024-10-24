@@ -2,17 +2,18 @@
 
 [![NPM](https://img.shields.io/npm/v/@idos-network/issuer-sdk-js?logo=npm)](https://www.npmjs.com/package/@idos-network/idos-issuer-sdk-js) ![License](https://img.shields.io/badge/license-MIT-blue?&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxwYXRoIGQ9Ik0xNiAxNmwzLTggMy4wMDEgOEE1LjAwMiA1LjAwMiAwIDAxMTYgMTZ6Ij48L3BhdGg+IDxwYXRoIGQ9Ik0yIDE2bDMtOCAzLjAwMSA4QTUuMDAyIDUuMDAyIDAgMDEyIDE2eiI+PC9wYXRoPiA8cGF0aCBkPSJNNyAyMWgxMCI+PC9wYXRoPiA8cGF0aCBkPSJNMTIgM3YxOCI+PC9wYXRoPiA8cGF0aCBkPSJNMyA3aDJjMiAwIDUtMSA3LTIgMiAxIDUgMiA3IDJoMiI+PC9wYXRoPiA8L2c+PC9zdmc+Cg==)
 
-## Installation
+## Installing
 
 Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-issuer-sdk-js) and its dependencies with pnpm or the equivalent of your package manager of choice:
-```
+
+```bash
 pnpm add @idos-network/idos-issuer-sdk-js
 ```
-
 
 ## Setting up
 
 Create an issuer config with your secret key. This config will be used to interact with the idOS.
+
 ```js
 // issuer-config.js
 import { createIssuerConfig } from "@idos-network/idos-issuer-sdk-js";
@@ -26,7 +27,8 @@ const issuerConfig = await createIssuerConfig({
   signer: wallet
 });
 ```
-### Creating a human profile.
+
+## Creating a human profile
 
 In order to create a human profile in idOS, you need to have a wallet associated with the human and a public key for the human.
 Passing ids are optional and will be auto-generated if not provided.
@@ -77,15 +79,14 @@ const walletPayload = {
 const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 ```
 
-## Writing credentials.
+## Writing credentials
 
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Write Grants, or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
-#### Using Write Grant
+### Using Write Grants
 The first method involves getting permission from the user via a Write Grant. This grants the issuer the ability to write to the user’s profile. To do this, you must first create a Write Grant using the idOS SDK.
 
-Example:
-you can create a write grant by calling the  <a href="https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants">addWriteGrant</a>
+Here's an example of creating a write grant, by calling the [addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
 
 ```js
 import { idOS } from "@idos-network/idos-sdk-js";
@@ -97,6 +98,7 @@ const issuerAddress = "0x0"; // The address of the grantee (in this case it's th
 // Create a write grant.
 await sdk.data.addWriteGrant(issuerAddress);
 ```
+
 This will create a write grant in the idOS for the given grantee address. Now, the issuer can create a credential:
 
 ```js
@@ -104,12 +106,12 @@ import { createCredentialByGrant } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  credential_level: "huamn";
-  credential_type: "human";
-  credential_status: "pending"; // has also types of "contacted" | "approved" | "rejected" | "expired"
-  issuer: "ISSUER_NAME"
-  content: "VERIFIABLE_CREDENTIAL_CONTENT"; // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
-  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY";
+  credential_level: "human",
+  credential_type: "human",
+  credential_status: "pending", // has also types of "contacted" | "approved" | "rejected" | "expired"
+  issuer: "ISSUER_NAME",
+  content: "VERIFIABLE_CREDENTIAL_CONTENT", // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
+  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY",
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);
@@ -122,39 +124,42 @@ This will create a credential in the idOS for the given grantee address.
 >
 > The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 
-#### Using Permissioned Credential Creation
+### Using Permissioned Credential Creation
 The second method allows the issuer to create a credential without a Write Grant by having a permissioned approach. This method assumes the issuer already has direct permission to write the credential.
 
-In this case, the `createtCredentialPermissioned` function is used to write the credential with necessary encryption.
+In this case, the `createCredentialPermissioned` function is used to write the credential with necessary encryption.
 
 Example:
 
 ```js
-import { createtCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
+import { createCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  credential_level: "huamn";
-  credential_type: "human";
-  credential_status: "pending"; // has also types of "contacted" | "approved" | "rejected" | "expired"
-  issuer: "ISSUER_NAME"
-  content: "VERIFIABLE_CREDENTIAL_CONTENT"; // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
-  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY";
+  credential_level: "human",
+  credential_type: "human",
+  credential_status: "pending", // has also types of "contacted" | "approved" | "rejected" | "expired"
+  issuer: "ISSUER_NAME",
+  content: "VERIFIABLE_CREDENTIAL_CONTENT", // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
+  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY",
 }
 
-const credentialResult = await createtCredentialPermissioned(issuerConfig, credential);```
+const credentialResult = await createCredentialPermissioned(issuerConfig, credential);
 ```
+
 This method directly writes the credential to the idOS, assuming the issuer has the necessary permissions.
 
 ## Developing the SDK locally
 
 Run:
-```
+```bash
 pnpm dev
 ```
+
 This will start the compiler in watch mode that will rebuild every time any of the source files are changed.
 
 You can also create a production build by running the following command in the root folder of the SDK package:
-```
+
+```bash
 pnpm build
 ```
