@@ -42,15 +42,13 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "release-it": "release-it",
-    "prepack": "clean-package",
-    "postpack": "clean-package restore",
     "test:build": "pnpx publint --strict"
   },
   "devDependencies": {
-    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
+    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
-    "clean-package": "^2.2.0",
+    "@types/node": "^22.7.9",
     "release-it": "^17.0.0",
     "tsup": "^8.0.2",
     "typescript": "^5.2.2",
@@ -66,10 +64,5 @@
   "peerDependencies": {
     "ethers": "^6.13.3",
     "near-api-js": "^3.0.4"
-  },
-  "clean-package": {
-    "replace": {
-      "./package.json": "./package.json"
-    }
   }
 }
