@@ -1,7 +1,7 @@
 import { Utils } from "@kwilteam/kwil-js";
 import * as base64 from "@stablelib/base64";
 import { encode } from "@stablelib/utf8";
-import { scrypt } from "scrypt-js";
+import scryptJs from "scrypt-js";
 import nacl from "tweetnacl";
 
 export function ensureEntityId<T extends { id?: string }>(entity: T): { id: string } & T {
@@ -105,5 +105,5 @@ export const idOSKeyDerivation = async ({
   const passwordBytes = encode(password);
   const saltBytes = encode(salt);
 
-  return scrypt(passwordBytes, saltBytes, n, r, p, dkLen);
+  return scryptJs.scrypt(passwordBytes, saltBytes, n, r, p, dkLen);
 };
