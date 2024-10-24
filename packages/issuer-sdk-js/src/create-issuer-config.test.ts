@@ -43,7 +43,7 @@ describe("createIssuerConfig", () => {
     const params = {
       nodeUrl: "http://mock-node-url",
       signer: mockWallet,
-      secretKey: "mock-secret-key",
+      encryptionSecret: "mock-secret-key",
     };
 
     const result = await createIssuerConfig(params);
@@ -70,7 +70,7 @@ describe("createIssuerConfig", () => {
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
       signer: expect.any(Object),
-      secretKey: params.secretKey,
+      encryptionSecret: params.encryptionSecret,
     });
   });
 });
