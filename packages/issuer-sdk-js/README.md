@@ -22,7 +22,7 @@ const wallet = new Wallet("YOUR_PRIVATE_KEY");
 
 const issuerConfig = await createIssuerConfig({
   nodeUrl: "https://nodes.idos.network/", // or nodes.playground.idos.network
-  encryptionSecret: "YOUR_SECRET_KEY",
+  encryptionSecret: "YOUR_ENCRYPTION_SECRET_KEY",
   signer: wallet
 });
 ```
@@ -79,7 +79,7 @@ const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 
 ## Writing credentials.
 
-In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: either through a permissioned approach or by using a write grant. Below are the two methods for writing credentials.
+In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Write Grants, or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
 #### Using Write Grant
 The first method involves getting permission from the user via a Write Grant. This grants the issuer the ability to write to the user’s profile. To do this, you must first create a Write Grant using the idOS SDK.
