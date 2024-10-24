@@ -57,6 +57,7 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
+    "scrypt-js": "^3.0.1",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
