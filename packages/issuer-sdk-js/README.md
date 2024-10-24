@@ -10,6 +10,10 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-issuer-sd
 pnpm add @idos-network/idos-issuer-sdk-js
 ```
 
+## Before you start
+
+When using this package, you're going to need to be familiar with how a dApp works with the idOS. Make sure you read [idos-sdk-js's README](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#readme) before you proceed.
+
 ## Setting up
 
 Create an issuer config with your secret key. This config will be used to interact with the idOS.
@@ -84,34 +88,55 @@ const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Write Grants, or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
 ### Using Write Grants
-The first method involves getting permission from the user via a Write Grant. This grants the issuer the ability to write to the user’s profile. To do this, you must first create a Write Grant using the idOS SDK.
+The first method involves getting permission from the user via a Write Grant.
 
-Here's an example of creating a write grant, by calling the [addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
+A Write Grant is a permission given by the user that allows a specific grantee to perform a few operations on their behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile.
+
+To do this, you must first create a Write Grant using the idOS SDK. Here's an example of creating a write grant, by calling the [data.addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
 
 ```js
+/*
+ * Client side.
+ */
 import { idOS } from "@idos-network/idos-sdk-js";
 
-const sdk = await idOS.init(...);
+// Arguments are described on idos-sdk-js's README. Be sure to read it.
+const idos = await idOS.init(...);
 
-const issuerAddress = "0x0"; // The address of the grantee (in this case it's the Issuer's address).
+// This is a placeholder for your signer's address. You could get it from
+// some endpoint you expose. But, to keep it simple, we're using a constant.
+const ISSUER_SIGNER_ADDRESS = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 
-// Create a write grant.
-await sdk.data.addWriteGrant(issuerAddress);
+// The user is going to grant you,
+await idos.data.addWriteGrant(ISSUER_SIGNER_ADDRESS);
 ```
 
-This will create a write grant in the idOS for the given grantee address. Now, the issuer can create a credential:
+Now that the user has created a Write Grant for us, the issuer, we can create a credential for the user:
 
 ```js
-import { createCredentialByGrant } from "@idos-network/idos-issuer-sdk-js";
+import { createCredentialByGrant, encryptionPublicKey } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  credential_level: "human",
+  // These three fields are public and are designed to assist dApps that rely
+  // on your credentials with selecting the appropriate credential when
+  // acquiring an Access Grant.
+  //
+  // You should decide on what's the most helpful content they can have. These
+  // three are just an example.
   credential_type: "human",
-  credential_status: "pending", // has also types of "contacted" | "approved" | "rejected" | "expired"
-  issuer: "ISSUER_NAME",
-  content: "VERIFIABLE_CREDENTIAL_CONTENT", // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
-  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY",
+  credential_level: "human",
+  credential_status: "approved",
+
+  // This is a string decided by you. Be sure to always use the same one to
+  // make yourself discoverable by dApps.
+  issuer: "MyCoolIssuer",
+
+  // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
+  // `createCredentialByGrant` will encrypt this for us.
+  content: "VERIFIABLE_CREDENTIAL_CONTENT",
+
+  encryption_public_key: encryptionPublicKey(issuerConfig),
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);

@@ -325,28 +325,6 @@ There are two things that a dApp needs to have setup:
 >
 > Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
 
-### Write Grants
-In the idOS ecosystem, a Write Grant is a permission issued by a user that allows an issuer (or another entity) to create or update credentials on their profile. This is a crucial security feature in idOS, ensuring that only authorized parties can write or modify data in a user’s profile.
-
-#### How Write Grants Work
- - User Authorization: A user grants permission to an issuer to write data to their profile. This is done by creating a Write Grant through the idOS platform.
-- Granular Control: Users can provide write access to specific entities and define how long that access is valid (for example, granting access to a credential issuer for a limited time or a specific purpose).
-- Data Privacy: The issuer does not have direct access to the user’s profile data; instead, they are allowed to write encrypted data to the profile.
-
-
-you can create a write grant by calling the  ``addWriteGrant``
-
-```
-import { idOS } from "@idos-network/idos-sdk-js";
-
-const sdk = await idOS.init(...);
-
-const granteeAddress = "0x0"; // The address of the grantee.
-
-// Create a write grant.
-await sdk.data.addWriteGrant(granteeAddress);
-```
-
 ### Access Grants
 
 An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dApp), access to the record identified by `dataId`, and I understand I won't be able to revoke said access before `lockedUntil` has passed. The contents of `dataId` are a copy of the credential/attribute that has its contents encrypted to the encryption key provided (by the dApp) during its creation.
