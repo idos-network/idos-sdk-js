@@ -1,9 +1,20 @@
+import * as Base64Codec from "@stablelib/base64";
+import nacl from "tweetnacl";
 import type { idOSHuman, idOSWallet } from "../../types";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, ensureEntityId } from "./internal";
+import { createActionInput, ensureEntityId, idOSKeyDerivation } from "./internal";
 
 interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
   id?: string;
+}
+
+export async function derivePublicKeyFromPassword({
+  password,
+  humanId,
+}: { password: string; humanId: string }): Promise<string> {
+  const secretKey = await idOSKeyDerivation({ password, salt: humanId });
+  const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+  return Base64Codec.encode(keyPair.publicKey);
 }
 
 async function createHumanProfile(
