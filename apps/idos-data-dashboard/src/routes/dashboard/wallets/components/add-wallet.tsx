@@ -24,22 +24,19 @@ type AddWalletProps = {
   onClose: () => void;
 };
 
-const createWalletFactory = ({
-  address,
-  public_key,
-}: { address: string; public_key?: string }) => ({
-  address,
-  public_key,
-  message: "",
-  signature: "",
-});
+const createWalletFactory = ({ address, public_key }: { address: string; public_key?: string }) =>
+  ({
+    address,
+    public_key,
+    message: "",
+    signature: "",
+  }) as idOSWallet;
 
 const useAddWalletMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
   return useMutation<
-    // biome-ignore lint/suspicious/noExplicitAny: Will need to be fixed in the future.
     any,
     DefaultError,
     { address: string; publicKeys: string[] },
@@ -48,9 +45,9 @@ const useAddWalletMutation = () => {
     mutationFn: async ({ address, publicKeys }) => {
       const payload = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
 
-      if (payload.length > 0) return await sdk.data.createMultiple("wallets", payload, true);
+      if (payload.length > 0) return await sdk.data.wallets.createMultiple(payload, true);
 
-      return await sdk.data.create("wallets", createWalletFactory({ address }), true);
+      return await sdk.data.wallets.create(createWalletFactory({ address }), true);
     },
 
     onMutate: async ({ address, publicKeys }) => {

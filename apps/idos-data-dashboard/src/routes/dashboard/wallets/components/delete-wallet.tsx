@@ -28,8 +28,7 @@ const useDeleteWalletMutation = () => {
 
   return useMutation<{ id: string }[], DefaultError, idOSWallet[], Ctx>({
     mutationFn: (wallets) =>
-      sdk.data.deleteMultiple(
-        "wallets",
+      sdk.data.wallets.deleteMultiple(
         wallets.map((wallet) => wallet.id),
         "Delete wallet from idOS",
         true,

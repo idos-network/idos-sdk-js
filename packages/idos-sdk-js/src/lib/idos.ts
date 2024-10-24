@@ -5,6 +5,9 @@ import type { Signer } from "ethers";
 import { Store } from "../../../idos-store";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
+import { AttributeDataLayer } from "./data/attribute";
+import { CredentialDataLayer } from "./data/credential";
+import { WalletDataLayer } from "./data/wallet";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
@@ -63,7 +66,13 @@ export class idOS {
       new IframeEnclave(enclaveOptions ?? { container: container! }),
     );
 
-    this.data = new Data(kwilWrapper, this.enclave);
+    this.data = new Data(
+      kwilWrapper,
+      this.enclave,
+      new AttributeDataLayer(this.enclave, kwilWrapper),
+      new CredentialDataLayer(this.enclave, kwilWrapper),
+      new WalletDataLayer(this.enclave, kwilWrapper),
+    );
 
     this.grants = new Grants(this.data, this.enclave, evmGrantsOptions, nearGrantsOptions);
   }

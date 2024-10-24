@@ -27,7 +27,7 @@ const useFetchWallets = () => {
 
   return useQuery({
     queryKey: ["wallets"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName),
+    queryFn: () => sdk.data.wallets.list(),
     select: (data) => Object.groupBy(data, (wallet) => wallet.address),
   });
 };

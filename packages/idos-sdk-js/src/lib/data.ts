@@ -1,4 +1,7 @@
 import * as Base64Codec from "@stablelib/base64";
+import type { AttributeDataLayer } from "./data/attribute";
+import type { CredentialDataLayer } from "./data/credential";
+import type { WalletDataLayer } from "./data/wallet";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
 
@@ -11,6 +14,9 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
+    public readonly attributes: AttributeDataLayer,
+    public readonly credentials: CredentialDataLayer,
+    public readonly wallets: WalletDataLayer,
   ) {}
 
   singularize(tableName: string): string {
