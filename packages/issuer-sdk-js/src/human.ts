@@ -46,10 +46,12 @@ async function upsertWallet(
   return payload;
 }
 
+export interface CreateWalletReqParams extends Omit<UpsertWalletReqParams, "human_id"> {}
+
 export async function createHuman(
   config: IssuerConfig,
   human: CreateProfileReqParams,
-  wallet: Omit<UpsertWalletReqParams, "human_id">,
+  wallet: CreateWalletReqParams,
 ) {
   const human_id = human.id ?? crypto.randomUUID();
   const wallet_id = wallet.id ?? crypto.randomUUID();
