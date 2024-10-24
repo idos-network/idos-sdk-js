@@ -33,3 +33,4 @@ jobs:
 
       - name: Release
         run: pnpx pkg-pr-new publish --pnpm './packages/issuer-sdk-js' './packages/idos-sdk-js'
+        
