@@ -39,7 +39,7 @@ import issuerConfig from "./issuer-config.js";
 
 /**
  * Represents a human profile in the idOS system.
- * 
+ *
  * @typedef {Object} Human
  * @property {string} current_public_key - The public key derived from the user's keypair, used to encrypt credentials content.
  */
@@ -50,7 +50,7 @@ const human = {
 
 /**
  * Represents the payload for a wallet associated with a human profile.
- * 
+ *
  * @typedef {Object} WalletPayload
  * @property {string} address - The wallet address (e.g., an Ethereum address).
  * @property {string} wallet_type - The type of wallet, e.g., "EVM", "NEAR".
@@ -61,7 +61,7 @@ const human = {
 
 /**
  * The wallet payload object representing a wallet associated with the human profile.
- * 
+ *
  * @type {WalletPayload}
  */
 
@@ -70,11 +70,11 @@ const walletPayload = {
   wallet_type: "EVM",
   message: "app wants you to sign this message...",
   signature: "0x3fda8a9fef767d974ceb481d606587b17c29a23a0999e94d16c07628b33bad341cf808a1c0eae84406709f8153096f845942d22bb53ca84faaaabc9b35b87d6c1c",
-  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",   
+  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
 }
 
 // Will return a tuple with the human profile first then the wallet associated to the human.
-const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload); 
+const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 ```
 
 ## Writing credentials.
