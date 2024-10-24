@@ -298,7 +298,7 @@ export class Data {
       "add_write_grant",
       [
         {
-          grantee,
+          wg_grantee: grantee,
         },
       ],
       `Grant ${grantee} write access to your idOS credentials`,
