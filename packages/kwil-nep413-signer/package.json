@@ -5,11 +5,10 @@
   "description": "idOS Kwil Nep413 Signer",
   "type": "module",
   "exports": {
-    "import": "./dist/index.js",
-    "types": "./dist/types/index.d.ts"
+    "types": "./src/types/index.ts",
+    "import": "./src/index.ts"
   },
   "scripts": {
-    "build": "tsc --project tsconfig.build.json",
     "format": "biome format --write .",
     "lint": "biome check --apply ."
   },

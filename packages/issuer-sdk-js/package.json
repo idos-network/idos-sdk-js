@@ -3,10 +3,12 @@
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.1",
   "homepage": "https://idos.network",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "license": "MIT",
   "type": "module",
-  "main": "src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/idos-network/idos-sdk-js.git"
+  },
+  "license": "MIT",
   "files": [
     "dist/**",
     "!dist/**/*.tsbuildinfo",
@@ -16,25 +18,25 @@
   ],
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
     },
     "./create-issuer-config": {
-      "import": "./dist/create-issuer-config.js",
-      "types": "./dist/types/create-issuer-config.d.ts"
+      "types": "./dist/create-issuer-config.d.ts",
+      "import": "./dist/create-issuer-config.js"
     },
     "./human": {
-      "import": "./dist/human.js",
-      "types": "./dist/types/human.d.ts"
+      "types": "./dist/human.d.ts",
+      "import": "./dist/human.js"
     },
     "./credentials": {
-      "import": "./dist/credentials.js",
-      "types": "./dist/types/credentials.d.ts"
+      "types": "./dist/credentials.d.ts",
+      "import": "./dist/credentials.js"
     }
   },
   "scripts": {
-    "dev": "tsc --watch",
-    "build": "tsc --project tsconfig.build.json --outDir ./dist --declaration --declarationMap --declarationDir ./dist/types",
+    "dev": "tsup --watch",
+    "build": "tsup --config tsup.config.ts",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
     "test": "vitest run",
@@ -42,49 +44,32 @@
     "release-it": "release-it",
     "prepack": "clean-package",
     "postpack": "clean-package restore",
-    "test:build": "publint --strict"
+    "test:build": "pnpx publint --strict"
   },
   "devDependencies": {
+    "@idos-network/kwil-nep413-signer": "workspace:*",
+    "@idos-network/idos-sdk-types": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "clean-package": "^2.2.0",
     "release-it": "^17.0.0",
+    "tsup": "^8.0.2",
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },
   "dependencies": {
-    "@idos-network/idos-sdk-types": "workspace:*",
-    "@idos-network/kwil-nep413-signer": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "ethers": "^6.13.3",
-    "near-api-js": "^3.0.4",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
   },
+  "peerDependencies": {
+    "ethers": "^6.13.3",
+    "near-api-js": "^3.0.4"
+  },
   "clean-package": {
     "replace": {
-      "main": "dist/index.js",
-      "types": "dist/types/index.d.ts",
-      "exports": {
-        ".": {
-          "import": "./dist/index.js",
-          "types": "./dist/types/index.d.ts"
-        },
-        "./create-issuer-config": {
-          "import": "./dist/create-issuer-config.js",
-          "types": "./dist/types/create-issuer-config.d.ts"
-        },
-        "./human": {
-          "import": "./dist/human.js",
-          "types": "./dist/types/human.d.ts"
-        },
-        "./credentials": {
-          "import": "./dist/credentials.js",
-          "types": "./dist/types/credentials.d.ts"
-        },
-        "./package.json": "./package.json"
-      }
+      "./package.json": "./package.json"
     }
   }
 }
