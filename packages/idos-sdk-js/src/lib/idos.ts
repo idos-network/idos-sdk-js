@@ -54,10 +54,7 @@ export class idOS {
     if (!enclaveOptions || !enclaveOptions.container)
       throw new Error("`enclaveOptions.container` must be provided");
 
-    this.enclave = new Enclave(
-      this.auth,
-      new IframeEnclave({ container: enclaveOptions.container }),
-    );
+    this.enclave = new Enclave(this.auth, new IframeEnclave(enclaveOptions));
 
     this.data = new Data(kwilWrapper, this.enclave);
 
