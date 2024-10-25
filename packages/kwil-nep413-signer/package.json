@@ -5,7 +5,7 @@
   "description": "idOS Kwil Nep413 Signer",
   "type": "module",
   "exports": {
-    "types": "./src/types/index.ts",
+    "types": "./src/index.ts",
     "import": "./src/index.ts"
   },
   "scripts": {
