@@ -97,7 +97,6 @@ export class Enclave {
   }
 
   async discoverUserEncryptionKey() {
-    const result = await this.provider.discoverUserEncryptionKey();
-    return result;
+    return this.provider.discoverUserEncryptionKey();
   }
 }

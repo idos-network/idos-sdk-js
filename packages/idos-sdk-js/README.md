@@ -520,16 +520,6 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 const { humanId } = await idos.setSigner(CHAIN_TYPE, signer);
 ```
 
-### Discovering Human's Encryption Key
-
-```js
-const { encryptionPublicKey, humanId } = await idos.discoverEncryptionKey();
-console.log("Encryption Public Key:", encryptionPublicKey);
-console.log("Human ID:", humanId);
-
-// As an Issuer you should use discoverEncryptionKey method to assist users with their profile setup process.
-```
-
 ### Credentials
 
 ```js

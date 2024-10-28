@@ -242,7 +242,6 @@ export class idOS {
   }
 
   async discoverEncryptionKey() {
-    const response = await this.enclave.discoverUserEncryptionKey();
-    return response;
+    return this.enclave.discoverUserEncryptionKey();
   }
 }
