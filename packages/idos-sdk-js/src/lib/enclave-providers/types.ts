@@ -36,7 +36,7 @@ export interface EnclaveProvider {
   updateStore(key: string, value: unknown): Promise<void>;
   encrypt(message: Uint8Array, receiverPublicKey?: Uint8Array): Promise<Uint8Array>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-  discoverUserEncryptionKey():Promise<DiscoverEncryptionKeyResponse>;
+  discoverUserEncryptionKey(): Promise<DiscoverEncryptionKeyResponse>;
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],
