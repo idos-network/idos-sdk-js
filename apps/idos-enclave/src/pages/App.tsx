@@ -25,7 +25,13 @@ export interface Configuration {
   theme?: "light" | "dark";
 }
 
-type AllowedIntent = "passkey" | "password" | "confirm" | "auth" | "backupPasswordOrSecret" | "discoverPublicKey";
+type AllowedIntent =
+  | "passkey"
+  | "password"
+  | "confirm"
+  | "auth"
+  | "backupPasswordOrSecret"
+  | "discoverPublicKey";
 
 export interface EventData {
   intent: AllowedIntent;
@@ -40,7 +46,7 @@ const allowedIntents: AllowedIntent[] = [
   "confirm",
   "auth",
   "backupPasswordOrSecret",
-  "discoverPublicKey"
+  "discoverPublicKey",
 ];
 
 function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?: () => void }>) {
