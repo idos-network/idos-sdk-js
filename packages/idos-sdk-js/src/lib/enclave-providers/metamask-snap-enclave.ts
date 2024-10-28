@@ -1,5 +1,5 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import type { EnclaveProvider, StoredData } from "./types";
+import type { DiscoverEncryptionKeyResponse, EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
@@ -16,6 +16,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },
   ): Promise<idOSCredential[]> {
     console.log(credentials, privateFieldFilters);
+    throw new Error("Method not implemented.");
+  }
+
+  async discoverUserEncryptionKey(): Promise<DiscoverEncryptionKeyResponse> {
     throw new Error("Method not implemented.");
   }
 

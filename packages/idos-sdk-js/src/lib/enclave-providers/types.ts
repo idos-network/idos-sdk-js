@@ -8,6 +8,11 @@ export interface StoredData {
   signerPublicKey?: string;
 }
 
+export interface DiscoverEncryptionKeyResponse {
+  humanId: string;
+  encryptionPublicKey: string;
+}
+
 export interface EnclaveOptions {
   container: string;
   theme?: "light" | "dark";
@@ -31,7 +36,7 @@ export interface EnclaveProvider {
   updateStore(key: string, value: unknown): Promise<void>;
   encrypt(message: Uint8Array, receiverPublicKey?: Uint8Array): Promise<Uint8Array>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-
+  discoverUserEncryptionKey():Promise<DiscoverEncryptionKeyResponse>;
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],

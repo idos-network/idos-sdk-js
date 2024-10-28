@@ -95,4 +95,9 @@ export class Enclave {
 
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
+
+  async discoverUserEncryptionKey(){
+    const result = await this.provider.discoverUserEncryptionKey();
+    return result;
+  }
 }

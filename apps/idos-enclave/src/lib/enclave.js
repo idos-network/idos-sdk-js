@@ -305,6 +305,24 @@ export class Enclave {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
   }
 
+  async discoverUserEncryptionKey() {
+    // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+    return new Promise(async (resolve, reject) => {
+      try {
+        const { password } = await this.#openDialog("discoverPublicKey");
+        const humanId = crypto.randomUUID();
+        const secretKey = await idOSKeyDerivation({ password, salt: humanId });
+
+        const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
+        const encryptionPublicKey = Base64Codec.encode(keyPair.publicKey);
+        resolve({ encryptionPublicKey, humanId });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+
   async backupPasswordOrSecret() {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
@@ -366,6 +384,7 @@ export class Enclave {
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
+          discoverUserEncryptionKey: () => [],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

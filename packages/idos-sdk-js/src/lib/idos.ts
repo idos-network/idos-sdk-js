@@ -240,4 +240,9 @@ export class idOS {
       await this.updateAttributesIfNeeded(filteredUserAttributes, litSavableAttributes);
     });
   }
+
+  async discoverEncryptionKey() {
+    const response = await this.enclave.discoverUserEncryptionKey();
+    return response;
+  }
 }

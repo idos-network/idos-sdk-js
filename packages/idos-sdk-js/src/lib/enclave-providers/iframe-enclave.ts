@@ -1,6 +1,11 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import type { BackupPasswordInfo } from "../types";
-import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
+import type {
+  DiscoverEncryptionKeyResponse,
+  EnclaveOptions,
+  EnclaveProvider,
+  StoredData,
+} from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
   options: Omit<EnclaveOptions, "container" | "url">;
@@ -212,5 +217,13 @@ export class IframeEnclave implements EnclaveProvider {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async discoverUserEncryptionKey(): Promise<DiscoverEncryptionKeyResponse> {
+    const response = await this.#requestToEnclave({
+      discoverUserEncryptionKey: {}, // we can pass humanId here
+    });
+    this.#hideEnclave();
+    return response as DiscoverEncryptionKeyResponse;
   }
 }

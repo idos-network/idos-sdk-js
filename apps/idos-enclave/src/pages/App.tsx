@@ -55,7 +55,7 @@ function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?:
 
 export function App({ store, enclave }: AppProps) {
   const [method, setMethod] = useState<Method | null>(null);
-  const [mode, setMode] = useState<Mode>("existing");
+  const [mode, setMode] = useState<Mode>(store.get("human-id") ? "existing" : "new");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const [confirm, setConfirm] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
@@ -232,7 +232,7 @@ export function App({ store, enclave }: AppProps) {
     <Layout onHeaderClick={resetMethod}>
       <div class="flex flex-col gap-4">
         <ChooseMethod setMethod={setMethod} mode={mode} />
-        {method !== "new" ? (
+        {mode !== "new" ? (
           <button
             type="button"
             onClick={() => {
