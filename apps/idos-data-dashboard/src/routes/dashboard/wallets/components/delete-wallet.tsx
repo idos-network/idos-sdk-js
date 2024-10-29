@@ -1,5 +1,4 @@
 import { useIdOS } from "@/core/idos";
-import { useWalletSelector } from "@/core/near";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -14,7 +13,6 @@ import {
 import type { idOSWallet } from "@idos-network/idos-sdk";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-import { useAccount } from "wagmi";
 
 type DeleteWalletProps = {
   isOpen: boolean;
