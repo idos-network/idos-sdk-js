@@ -18,6 +18,8 @@ import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 
+import { useWalletSelector } from "@/core/near";
+import { useAccount } from "wagmi";
 import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
@@ -46,6 +48,12 @@ const WalletsList = () => {
   const wallets = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [walletsToDelete, setWalletToDelete] = useState<idOSWallet[] | undefined>([]);
+  const { address: ethAddress } = useAccount();
+  const { accounts } = useWalletSelector();
+
+  const nearAddress = accounts?.[0]?.accountId;
+
+  const address = ethAddress || nearAddress;
 
   const handleDelete = (address: string) => {
     const walletsToDelete = wallets.data?.[address];
@@ -75,12 +83,12 @@ const WalletsList = () => {
     return (
       <>
         <List id="wallets-list" display="flex" flexDir="column" gap={2.5} flex={1}>
-          {addresses.map((address) => (
-            <ListItem key={address}>
+          {addresses.map((walletAddress) => (
+            <ListItem key={walletAddress}>
               <WalletCard
-                address={address}
+                address={walletAddress}
                 onDelete={handleDelete}
-                isDisabled={addresses.length === 1}
+                isDisabled={address?.toLowerCase() === walletAddress.toLowerCase()}
               />
             </ListItem>
           ))}
