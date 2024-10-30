@@ -84,6 +84,7 @@ export class Data {
       id: crypto.randomUUID(),
       ...record,
     }));
+    // TODO: creds2: What should I do here?
     await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,
       newRecords,
@@ -124,6 +125,7 @@ export class Data {
       (record as AnyRecord).encryption_public_key = receiverPublicKey;
     }
 
+    // TODO: creds2: What should I do here?
     const newRecord = { id: crypto.randomUUID(), ...record };
     await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,

@@ -1,7 +1,7 @@
 import * as base64 from "@stablelib/base64";
 import * as utf8Codec from "@stablelib/utf8";
-import type { idOSCredential } from "../../types";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { idOSCredential, idOSCredential2 } from "../../types";
+import type { IssuerConfig, IssuerConfig2 } from "./create-issuer-config";
 import { createActionInput, encrypt, ensureEntityId } from "./internal";
 
 // Base interface for credential parameters
@@ -50,6 +50,38 @@ export async function createCredentialPermissioned(
   };
 }
 
+type CreateCredential2 = {
+  id?: string;
+  human_id: string;
+  issuer: string;
+  content: string;
+  encryption_public_key: string;
+  public_notes: string;
+  public_notes_signature: string;
+  broader_signature: string;
+};
+export async function createCredentialPermissioned2(
+  { dbid, kwilClient, signer }: IssuerConfig2,
+  params: CreateCredential2,
+): Promise<idOSCredential2> {
+  const payload = ensureEntityId(params);
+
+  await kwilClient.execute(
+    {
+      name: "upsert_credential_as_inserter2",
+      dbid,
+      inputs: [createActionInput(payload)],
+    },
+    signer,
+    true,
+  );
+
+  return {
+    ...payload,
+    original_id: "",
+  };
+}
+
 interface CreateCredentialByGrantParams extends BaseCredentialParams {}
 
 export async function createCredentialByGrant(
@@ -66,6 +98,26 @@ export async function createCredentialByGrant(
   await kwilClient.execute(
     {
       name: "add_credential_by_write_grant",
+      dbid,
+      inputs: [createActionInput(payload)],
+    },
+    signer,
+    true,
+  );
+
+  return {
+    ...payload,
+    original_id: "",
+  };
+}
+export async function createCredentialByGrant2(
+  { dbid, kwilClient, signer }: IssuerConfig2,
+  params: CreateCredential2,
+): Promise<idOSCredential2> {
+  const payload = ensureEntityId(params);
+  await kwilClient.execute(
+    {
+      name: "add_credential_by_write_grant2",
       dbid,
       inputs: [createActionInput(payload)],
     },
@@ -96,6 +148,7 @@ export async function shareCredentialByGrant(
   );
 
   const payload = { ...ensureEntityId(params), content: encryptedContent };
+  // TODO: creds2: What should I do here?
   await kwilClient.execute(
     {
       name: "share_credential_by_write_grant",

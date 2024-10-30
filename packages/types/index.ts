@@ -17,6 +17,18 @@ export interface idOSCredential {
   encryption_public_key: string;
 }
 
+export interface idOSCredential2 {
+  id: string;
+  original_id: string;
+  human_id: string;
+  issuer: string;
+  encryption_public_key: string;
+  public_notes: string;
+  content: string;
+  public_notes_signature: string;
+  broader_signature: string;
+}
+
 export interface idOSGrant {
   owner: string;
   grantee: string;
