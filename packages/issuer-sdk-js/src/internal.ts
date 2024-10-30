@@ -1,5 +1,5 @@
 import { Utils } from "@kwilteam/kwil-js";
-import * as base64 from "@stablelib/base64";
+import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
 
 export function ensureEntityId<T extends { id?: string }>(entity: T): { id: string } & T {
@@ -17,22 +17,21 @@ export function createActionInput(params: Record<string, any>): Utils.ActionInpu
   return Utils.ActionInput.fromObject(prefixedObject);
 }
 
-export async function encrypt(
+export function encryptContent(
   message: Uint8Array,
-  encryptionPublicKey: Uint8Array,
-  secretKey: Uint8Array,
-) {
+  receiverPublicKey: Uint8Array,
+  issuerSecretKey: Uint8Array,
+): string {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-
-  const encrypted = nacl.box(message, nonce, encryptionPublicKey, secretKey);
+  const encrypted = nacl.box(message, nonce, receiverPublicKey, issuerSecretKey);
 
   if (encrypted === null)
     throw Error(
       `Couldn't encrypt. ${JSON.stringify(
         {
-          message: base64.encode(message),
-          nonce: base64.encode(nonce),
-          receiverPublicKey: base64.encode(encryptionPublicKey),
+          message: Base64Codec.encode(message),
+          nonce: Base64Codec.encode(nonce),
+          receiverPublicKey: Base64Codec.encode(receiverPublicKey),
         },
         null,
         2,
@@ -42,5 +41,6 @@ export async function encrypt(
   const fullMessage = new Uint8Array(nonce.length + encrypted.length);
   fullMessage.set(nonce, 0);
   fullMessage.set(encrypted, nonce.length);
-  return base64.encode(fullMessage);
+
+  return Base64Codec.encode(fullMessage);
 }
