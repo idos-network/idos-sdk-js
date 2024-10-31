@@ -220,9 +220,12 @@ export class IframeEnclave implements EnclaveProvider {
     }
   }
 
-  async discoverUserEncryptionKey(): Promise<DiscoverEncryptionKeyResponse> {
-    const humanId = crypto.randomUUID();
+  async discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse> {
+    if (this.options.mode !== "new")
+      throw new Error("You can only call discoverUserEncryptionKey when mode is 'new'.");
+
     const encryptionPublicKey = await this.ready(humanId);
+
     return {
       humanId,
       encryptionPublicKey: Base64Codec.encode(encryptionPublicKey as Uint8Array),

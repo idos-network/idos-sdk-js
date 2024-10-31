@@ -25,13 +25,7 @@ export interface Configuration {
   theme?: "light" | "dark";
 }
 
-type AllowedIntent =
-  | "passkey"
-  | "password"
-  | "confirm"
-  | "auth"
-  | "backupPasswordOrSecret"
-  | "discoverPublicKey";
+type AllowedIntent = "passkey" | "password" | "confirm" | "auth" | "backupPasswordOrSecret";
 
 export interface EventData {
   intent: AllowedIntent;
@@ -46,7 +40,6 @@ const allowedIntents: AllowedIntent[] = [
   "confirm",
   "auth",
   "backupPasswordOrSecret",
-  "discoverPublicKey",
 ];
 
 function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?: () => void }>) {
@@ -62,7 +55,7 @@ function Layout({ onHeaderClick, children }: PropsWithChildren<{ onHeaderClick?:
 
 export function App({ store, enclave }: AppProps) {
   const [method, setMethod] = useState<Method | null>(null);
-  const [mode, setMode] = useState<Mode>(store.get("human-id") ? "existing" : "new");
+  const [mode, setMode] = useState<Mode>("existing");
   const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const [confirm, setConfirm] = useState<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
@@ -70,7 +63,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string | undefined>();
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );

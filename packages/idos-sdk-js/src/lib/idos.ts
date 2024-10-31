@@ -241,7 +241,7 @@ export class idOS {
     });
   }
 
-  async discoverEncryptionKey() {
-    return this.enclave.discoverUserEncryptionKey();
+  async discoverEncryptionKey(humanId: string) {
+    return this.enclave.discoverUserEncryptionKey(humanId);
   }
 }
