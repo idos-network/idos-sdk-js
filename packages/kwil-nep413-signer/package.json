@@ -5,8 +5,8 @@
   "description": "idOS Kwil Nep413 Signer",
   "type": "module",
   "exports": {
-    "import": "./dist/index.js",
-    "types": "./dist/types/index.d.ts"
+    "types": "./dist/types/index.d.ts",
+    "import": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc --project tsconfig.build.json",

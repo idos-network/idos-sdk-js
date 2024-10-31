@@ -73,7 +73,7 @@ export default defineConfig({
   },
   plugins: [
     nodePolyfills({
-      include: ["buffer"],
+      include: ["buffer", "crypto"],
       globals: {
         Buffer: true,
       },
