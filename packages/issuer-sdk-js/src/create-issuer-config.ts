@@ -2,8 +2,6 @@ import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { Wallet } from "ethers";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
-import nacl from "tweetnacl";
-import * as base64 from "@stablelib/base64";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
 export interface CreateIssuerConfigParams {
@@ -52,14 +50,6 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
   const signer = createKwilSigner(params.signer);
 
   return { chainId, dbid, kwilClient, signer, encryptionSecret: params.encryptionSecret };
-}
-
-// TODO(pkoch): Is this a good idea? I don't wanna tell the user to do all of this,
-// but this function totally smells.
-export function encryptionPublicKey({ encryptionSecret }: IssuerConfig): string {
-  const decodedKey = base64.decode(encryptionSecret)
-  const keyPair = nacl.box.keyPair.fromSecretKey(decodedKey);
-  return base64.encode(keyPair.publicKey);
 }
 
 export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
