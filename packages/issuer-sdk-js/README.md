@@ -68,93 +68,23 @@ Once the public key is derived, you can create the human profile in idOS by pass
 import { createHuman } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
-/**
- * Represents a human profile in the idOS system.
- *
- * @typedef {Object} Human
- * @property {string} id - The human id.
- * @property {string} current_public_key - The public key derived from the user's keypair, used to encrypt credentials content.
- */
-
 const human = {
   id: USER_HUMAN_ID,
+  //  The public key derived from the user's keypair, used to encrypt credentials content.
   current_public_key: DERIVED_PUBLIC_KEY,
 }
 
-/**
- * Represents the payload for a wallet associated with a human profile.
- *
- * @typedef {Object} WalletPayload
- * @property {string} address - The wallet address (e.g., an Ethereum address).
- * @property {string} wallet_type - The type of wallet, e.g., "EVM", "NEAR".
- * @property {string} message - The message that was signed by the user.
- * @property {string} signature - The derived signature for the message, created with the user's private key.
- * @property {string} public_key - The public key derived from the user's keypair.
- */
-
-/**
- * The wallet payload object representing a wallet associated with the human profile.
- *
- * @type {WalletPayload}
- */
-
 const walletPayload = {
-  address: "0x0",
-  wallet_type: "EVM",
-  message: "app wants you to sign this message...",
-  signature: "0x3fda8a9fef767d974ceb481d606587b17c29a23a0999e94d16c07628b33bad341cf808a1c0eae84406709f8153096f845942d22bb53ca84faaaabc9b35b87d6c1c",
-  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
+  address: "0x0", // The wallet address (e.g., an Ethereum address).
+  wallet_type: "EVM", // The type of wallet, e.g., "EVM", "NEAR".
+  message: "app wants you to sign this message...", // The message that was signed by the user.
+  signature: "0x3fda8a9fef767d974ceb481d606587b17c...", // The derived signature for the message, created with the user's private key.
+  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",// The public key derived from the user's keypair.
 }
 
 // Will return a tuple with the human profile first then the wallet associated to the human.
 const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 ```
-<!--
-```js
-// createHumanDemo.js
-
-import { createHuman } from "@idos-network/idos-issuer-sdk-js";
-import issuerConfig from "./issuer-config.js";
-
-/**
- * Represents a human profile in the idOS system.
- *
- * @typedef {Object} Human
- * @property {string} current_public_key - The public key derived from the user's keypair, used to encrypt credentials content.
- */
-
-const human = {
-  current_public_key: "DERIVED_PUBLIC_KEY",
-}
-
-/**
- * Represents the payload for a wallet associated with a human profile.
- *
- * @typedef {Object} WalletPayload
- * @property {string} address - The wallet address (e.g., an Ethereum address).
- * @property {string} wallet_type - The type of wallet, e.g., "EVM", "NEAR".
- * @property {string} message - The message that was signed by the user.
- * @property {string} signature - The derived signature for the message, created with the user's private key.
- * @property {string} public_key - The public key derived from the user's keypair.
- */
-
-/**
- * The wallet payload object representing a wallet associated with the human profile.
- *
- * @type {WalletPayload}
- */
-
-const walletPayload = {
-  address: "0x0",
-  wallet_type: "EVM",
-  message: "app wants you to sign this message...",
-  signature: "0x3fda8a9fef767d974ceb481d606587b17c29a23a0999e94d16c07628b33bad341cf808a1c0eae84406709f8153096f845942d22bb53ca84faaaabc9b35b87d6c1c",
-  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
-}
-
-// Will return a tuple with the human profile first then the wallet associated to the human.
-const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
-``` -->
 
 ## Writing credentials
 
