@@ -34,9 +34,82 @@ const issuerConfig = await createIssuerConfig({
 
 ## Creating a human profile
 
-In order to create a human profile in idOS, you need to have a wallet associated with the human and a public key for the human.
-Passing ids are optional and will be auto-generated if not provided.
+To create a human profile in idOS, you need:
 
+#### Step 1: Deriving the Public Key
+
+Use the `discoverUserEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content. This is accessible through the `idos` object.
+
+```javascript
+/*
+ * Client side.
+ */
+import { idOS } from "@idos-network/idos-sdk";
+const USER_HUMAN_ID = "USER_HUMAN_ID";
+
+async function derivePublicKey() {
+  // Arguments are described on idos-sdk-js's README. Be sure to read it.
+  const idos = await idOS.init(...);
+
+  // Discover user encryption key
+  const { encryptionPublicKey: DERIVED_PUBLIC_KEY } = await idos.enclave.provider.discoverUserEncryptionKey(USER_HUMAN_ID);
+
+  return DERIVED_PUBLIC_KEY;
+}
+```
+
+
+#### Step 2: Creating a Human Profile
+Once the public key is derived, you can create the human profile in idOS by passing it to the `createHuman` function alongside with human id.
+
+```javascript
+// createHumanDemo.js (Server side.)
+
+import { createHuman } from "@idos-network/idos-issuer-sdk-js";
+import issuerConfig from "./issuer-config.js";
+
+/**
+ * Represents a human profile in the idOS system.
+ *
+ * @typedef {Object} Human
+ * @property {string} id - The human id.
+ * @property {string} current_public_key - The public key derived from the user's keypair, used to encrypt credentials content.
+ */
+
+const human = {
+  id: USER_HUMAN_ID,
+  current_public_key: DERIVED_PUBLIC_KEY,
+}
+
+/**
+ * Represents the payload for a wallet associated with a human profile.
+ *
+ * @typedef {Object} WalletPayload
+ * @property {string} address - The wallet address (e.g., an Ethereum address).
+ * @property {string} wallet_type - The type of wallet, e.g., "EVM", "NEAR".
+ * @property {string} message - The message that was signed by the user.
+ * @property {string} signature - The derived signature for the message, created with the user's private key.
+ * @property {string} public_key - The public key derived from the user's keypair.
+ */
+
+/**
+ * The wallet payload object representing a wallet associated with the human profile.
+ *
+ * @type {WalletPayload}
+ */
+
+const walletPayload = {
+  address: "0x0",
+  wallet_type: "EVM",
+  message: "app wants you to sign this message...",
+  signature: "0x3fda8a9fef767d974ceb481d606587b17c29a23a0999e94d16c07628b33bad341cf808a1c0eae84406709f8153096f845942d22bb53ca84faaaabc9b35b87d6c1c",
+  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
+}
+
+// Will return a tuple with the human profile first then the wallet associated to the human.
+const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
+```
+<!--
 ```js
 // createHumanDemo.js
 
@@ -81,7 +154,7 @@ const walletPayload = {
 
 // Will return a tuple with the human profile first then the wallet associated to the human.
 const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
-```
+``` -->
 
 ## Writing credentials
 
@@ -132,11 +205,18 @@ const credential = {
   // make yourself discoverable by dApps.
   issuer: "MyCoolIssuer",
 
-  // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
-  // `createCredentialByGrant` will encrypt this for us.
+  // user id of the human who is creating the credential.
+  human_id: USER_HUMAN_ID,
+
+  // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
+  // `createCredentialByGrant` will encrypt this for us. using the Issuer's secret encryption key. along with the user's public encryption key.
   content: "VERIFIABLE_CREDENTIAL_CONTENT",
 
-  encryption_public_key: encryptionPublicKey(issuerConfig),
+  // The public encryption key of the issuer.
+  encryption_public_key: issuerConfig.issuerPublicEncryptionKey,
+
+  // The public encryption key of the user who is creating the credential.
+  userEncryptionPublicKey: DERIVED_PUBLIC_KEY
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);
