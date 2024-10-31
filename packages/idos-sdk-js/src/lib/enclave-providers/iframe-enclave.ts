@@ -228,7 +228,7 @@ export class IframeEnclave implements EnclaveProvider {
 
     return {
       humanId,
-      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey as Uint8Array),
+      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
     };
   }
 }
