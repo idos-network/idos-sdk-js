@@ -1,36 +1,30 @@
-import * as base64 from "@stablelib/base64";
-import * as utf8Codec from "@stablelib/utf8";
+import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
 import type { idOSCredential } from "../../types";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, encrypt, ensureEntityId } from "./internal";
+import { createActionInput, encryptContent, ensureEntityId } from "./internal";
 
 // Base interface for credential parameters
 interface BaseCredentialParams extends Omit<idOSCredential, "id" | "original_id"> {
   id?: string;
 }
 
-const encryptContent = (content: string, secretKey: string, encryptionPublicKey: string) => {
-  const endodedContent = utf8Codec.encode(content);
-  const decodedEncryptionPublicKey = base64.decode(encryptionPublicKey);
-  const decodedSecretKey = base64.decode(secretKey);
+interface HasUserEncryptionPublicKey {
+  userEncryptionPublicKey: string;
+}
 
-  try {
-    return encrypt(endodedContent, decodedEncryptionPublicKey, decodedSecretKey);
-  } catch (error) {
-    throw new Error(`Encryption failed: ${(error as Error).message}`);
-  }
-};
-
-interface CreateCredentialPermissionedParams extends BaseCredentialParams {}
+interface CreateCredentialPermissionedParams
+  extends BaseCredentialParams,
+    HasUserEncryptionPublicKey {}
 
 export async function createCredentialPermissioned(
   { dbid, kwilClient, secretKey, signer }: IssuerConfig,
   params: CreateCredentialPermissionedParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
-    params.content,
-    secretKey,
-    params.encryption_public_key,
+    Utf8Codec.encode(params.content),
+    Base64Codec.decode(params.userEncryptionPublicKey),
+    Base64Codec.decode(secretKey),
   );
 
   const payload = { ...ensureEntityId(params), content: encryptedContent };
@@ -50,16 +44,16 @@ export async function createCredentialPermissioned(
   };
 }
 
-interface CreateCredentialByGrantParams extends BaseCredentialParams {}
+interface CreateCredentialByGrantParams extends BaseCredentialParams, HasUserEncryptionPublicKey {}
 
 export async function createCredentialByGrant(
   { dbid, kwilClient, secretKey, signer }: IssuerConfig,
   params: CreateCredentialByGrantParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
-    params.content,
-    secretKey,
-    params.encryption_public_key,
+    Utf8Codec.encode(params.content),
+    Base64Codec.decode(params.userEncryptionPublicKey),
+    Base64Codec.decode(secretKey),
   );
 
   const payload = { ...ensureEntityId(params), content: encryptedContent };
@@ -79,7 +73,7 @@ export async function createCredentialByGrant(
   };
 }
 
-interface ShareCredentialByGrantParams extends BaseCredentialParams {
+interface ShareCredentialByGrantParams extends BaseCredentialParams, HasUserEncryptionPublicKey {
   grantee: string;
   locked_until: number;
   original_credential_id: string;
@@ -90,9 +84,9 @@ export async function shareCredentialByGrant(
   params: ShareCredentialByGrantParams,
 ): Promise<idOSCredential> {
   const encryptedContent = await encryptContent(
-    params.content,
-    secretKey,
-    params.encryption_public_key,
+    Utf8Codec.encode(params.content),
+    Base64Codec.decode(params.userEncryptionPublicKey),
+    Base64Codec.decode(secretKey),
   );
 
   const payload = { ...ensureEntityId(params), content: encryptedContent };

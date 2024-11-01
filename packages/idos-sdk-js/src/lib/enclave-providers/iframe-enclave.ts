@@ -1,6 +1,12 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import * as Base64Codec from "@stablelib/base64";
 import type { BackupPasswordInfo } from "../types";
-import type { EnclaveOptions, EnclaveProvider, StoredData } from "./types";
+import type {
+  DiscoverEncryptionKeyResponse,
+  EnclaveOptions,
+  EnclaveProvider,
+  StoredData,
+} from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
   options: Omit<EnclaveOptions, "container" | "url">;
@@ -212,5 +218,17 @@ export class IframeEnclave implements EnclaveProvider {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  async discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse> {
+    if (this.options.mode !== "new")
+      throw new Error("You can only call discoverUserEncryptionKey when mode is 'new'.");
+
+    const encryptionPublicKey = await this.ready(humanId);
+
+    return {
+      humanId,
+      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
+    };
   }
 }
