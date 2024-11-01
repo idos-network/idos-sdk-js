@@ -240,4 +240,8 @@ export class idOS {
       await this.updateAttributesIfNeeded(filteredUserAttributes, litSavableAttributes);
     });
   }
+
+  async discoverEncryptionKey(humanId: string) {
+    return this.enclave.discoverUserEncryptionKey(humanId);
+  }
 }

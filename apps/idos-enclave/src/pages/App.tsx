@@ -63,7 +63,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string | undefined>();
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
@@ -232,7 +232,7 @@ export function App({ store, enclave }: AppProps) {
     <Layout onHeaderClick={resetMethod}>
       <div class="flex flex-col gap-4">
         <ChooseMethod setMethod={setMethod} mode={mode} />
-        {method !== "new" ? (
+        {mode !== "new" ? (
           <button
             type="button"
             onClick={() => {
