@@ -20,6 +20,11 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
         </VStack>
       </HStack>
       <Tooltip
+        hasArrow
+        bg="neutral.500"
+        px={2}
+        py={0.5}
+        rounded="md"
         isDisabled={!isDisabled}
         label="Please connect another wallet to delete this one"
         placement="auto"
