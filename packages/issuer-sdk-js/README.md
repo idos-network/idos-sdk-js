@@ -56,7 +56,7 @@ Use the `discoverUserEncryptionKey` function to derive a public key for the huma
  * Client side.
  */
 import { idOS } from "@idos-network/idos-sdk";
-const USER_HUMAN_ID = "USER_HUMAN_ID";
+const USER_HUMAN_ID = crypto.randomUUID();
 
 async function derivePublicKey() {
   // Arguments are described on idos-sdk-js's README. Be sure to read it.
