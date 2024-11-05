@@ -43,7 +43,9 @@ To create a human profile in idOS, you need:
 
 Below is a diagram showing the key steps in the human creation process:
 
-![Human Creation Process](./assets/create-human.png)
+#### Human Creation Process
+<img src="./assets/add_user.drawio.svg" alt="Human Creation Process" width="100%">
+
 
 #### Step 1: Deriving the Public Key
 
