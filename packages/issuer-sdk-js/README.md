@@ -26,7 +26,9 @@ import { Wallet } from "ethers";
 const wallet = new Wallet("YOUR_PRIVATE_KEY");
 
 const issuerConfig = await createIssuerConfig({
-  nodeUrl: "https://nodes.idos.network/", // or nodes.playground.idos.network
+  // To use a non-prod environment, pass in "nodes.playground.idos.network".
+  nodeUrl: "https://nodes.idos.network/",
+  // For `nacl.box.open`. 32 random bytes, base64 encoded.
   encryptionSecret: "YOUR_ENCRYPTION_SECRET_KEY",
   signer: wallet
 });
@@ -34,66 +36,92 @@ const issuerConfig = await createIssuerConfig({
 
 ## Creating a human profile
 
+This procedure can only be done by a Permissioned Issuer. Get in touch with us at engineering@idos.network if you're interested in being one.
+
 To create a human profile in idOS, you need:
 1. **A wallet address** associated with the human.
 2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
 
-
-## Process Overview
-
-Below is a diagram showing the key steps in the human creation process:
-
-#### Human Creation Process
-<img src="./assets/add_user.drawio.svg" alt="Human Creation Process" width="100%">
+### Human Creation Process
+<img src="./assets/add-user.drawio.svg" alt="Human Creation Process" width="100%">
 
 
-#### Step 1: Deriving the Public Key
+#### Step 1: Decide on a human id
 
-Use the `discoverUserEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content. This is accessible through the `idos` object.
+Deciding on a human id for a user is an issuer decision. You can use whichever you want, as long as it's an [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
+
+```js
+// Server side
+
+const humanId = crypto.randomUUID();
+
+// Remember it on your database
+session.user.update({ humanId })
+
+// Return it to the front-end to be used in the next step
+return { humanId }
+```
+
+#### Step 2: Derive the Public Key
+
+Use the `idos.discoverEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
 
 ```javascript
-/*
- * Client side.
- */
+// Client side
+
 import { idOS } from "@idos-network/idos-sdk";
-const USER_HUMAN_ID = crypto.randomUUID();
 
-async function derivePublicKey() {
-  // Arguments are described on idos-sdk-js's README. Be sure to read it.
-  const idos = await idOS.init(...);
+// Arguments are described on idos-sdk-js's README. Be sure to read it.
+const idos = await idOS.init(...);
 
-  // Discover user encryption key
-  const { encryptionPublicKey: DERIVED_PUBLIC_KEY } = await idos.enclave.provider.discoverUserEncryptionKey(USER_HUMAN_ID);
+// Get humanId associated with this user from your server
+const { humanId } = await yourServer.getIdosInformation();
 
-  return DERIVED_PUBLIC_KEY;
-}
+// Discover user encryption key
+const { encryptionPublicKey } = await idos.discoverEncryptionKey(humanId);
+
+// Report it back to your server
+await yourServer.reportIdosEncryptionPublicKey(encryptionPublicKey);
 ```
 
 
-#### Step 2: Creating a Human Profile
-Once the public key is derived, you can create the human profile in idOS by passing it to the `createHuman` function alongside with human id.
+#### Step 3: Creating a Human Profile
+Once the public key is derived, you can create the human profile in idOS by passing it to the `createHuman` function alongside with human id and the wallet the user's going to use to drive their idOS profile.
 
 ```javascript
-// createHumanDemo.js (Server side.)
+// Server side
 
 import { createHuman } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
+// Get this from the user's request, and remember it
+const currentPublicKey = request.params['userEncryptionPublicKey']
+session.user.currentPublicKey = currentPublicKey
+
+// Get the stored human id
+const humanId = session.user.humanId
+
+// Build the human object
 const human = {
-  id: USER_HUMAN_ID,
-  //  The public key derived from the user's keypair, used to encrypt credentials content.
-  current_public_key: DERIVED_PUBLIC_KEY,
+  id: humanId,
+  current_public_key: currentPublicKey,
 }
 
+// Build the wallet object
 const walletPayload = {
-  address: "0x0", // The wallet address (e.g., an Ethereum address).
-  wallet_type: "EVM", // The type of wallet, e.g., "EVM", "NEAR".
-  message: "app wants you to sign this message...", // The message that was signed by the user.
-  signature: "0x3fda8a9fef767d974ceb481d606587b17c...", // The derived signature for the message, created with the user's private key.
-  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",// The public key derived from the user's keypair.
+  // The user's wallet address (e.g., an Ethereum address)
+  address: "0x0",
+  // The type of user wallet (e.g., "EVM", "NEAR")
+  wallet_type: "EVM",
+  // The message that was signed by the address
+  message: "app wants you to sign this message...",
+  // The derived signature for the message, created with the user wallet
+  signature: "0x3fda8a9fef767d974ceb481d606587b17c...",
+  // The user wallet's public key
+  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
 }
 
-// Will return a tuple with the human profile first then the wallet associated to the human.
+// Create the user on idOS nodes, and get some information back.
 const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
 ```
 
@@ -106,12 +134,11 @@ The first method involves getting permission from the user via a Write Grant.
 
 A Write Grant is a permission given by the user that allows a specific grantee to perform a few operations on their behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile.
 
-To do this, you must first create a Write Grant using the idOS SDK. Here's an example of creating a write grant, by calling the [data.addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
+To do this, you must first create a Write Grant using the idOS SDK. Here's an example of creating a write grant, by calling the [idos.data.addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
 
 ```js
-/*
- * Client side.
- */
+// Client side
+
 import { idOS } from "@idos-network/idos-sdk-js";
 
 // Arguments are described on idos-sdk-js's README. Be sure to read it.
@@ -121,13 +148,15 @@ const idos = await idOS.init(...);
 // some endpoint you expose. But, to keep it simple, we're using a constant.
 const ISSUER_SIGNER_ADDRESS = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 
-// The user is going to grant you,
+// Ask the user for a Write Grant
 await idos.data.addWriteGrant(ISSUER_SIGNER_ADDRESS);
 ```
 
 Now that the user has created a Write Grant for us, the issuer, we can create a credential for the user:
 
 ```js
+// Server side
+
 import { createCredentialByGrant, encryptionPublicKey } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
@@ -147,17 +176,17 @@ const credential = {
   issuer: "MyCoolIssuer",
 
   // user id of the human who is creating the credential.
-  human_id: USER_HUMAN_ID,
+  human_id: session.user.humanId,
 
   // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
-  // `createCredentialByGrant` will encrypt this for us. using the Issuer's secret encryption key. along with the user's public encryption key.
+  // `createCredentialByGrant` will encrypt this for us, using the Issuer's secret encryption key, along with the user's public encryption key.
   content: "VERIFIABLE_CREDENTIAL_CONTENT",
 
   // The public encryption key of the issuer.
   encryption_public_key: issuerConfig.issuerPublicEncryptionKey,
 
   // The public encryption key of the user who is creating the credential.
-  userEncryptionPublicKey: DERIVED_PUBLIC_KEY
+  userEncryptionPublicKey: session.user.userEncryptionPublicKey,
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);
@@ -171,29 +200,31 @@ This will create a credential in the idOS for the given grantee address.
 > The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
 
 ### Using Permissioned Credential Creation
-The second method allows the issuer to create a credential without a Write Grant by having a permissioned approach. This method assumes the issuer already has direct permission to write the credential.
+The second method allows the issuer, by virtue of being a Permissioned Issuer, to create a credential without a Write Grant. Get in touch with us at engineering@idos.network if you're interested in being one.
 
-In this case, the `createCredentialPermissioned` function is used to write the credential with necessary encryption.
+For this method, use the `createCredentialPermissioned` function to write the credential with the necessary encryption.
 
 Example:
 
 ```js
+// Server side
+
 import { createCredentialPermissioned } from "@idos-network/idos-issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
+// See the previous example for more details on these fields
 const credential = {
   credential_level: "human",
   credential_type: "human",
-  credential_status: "pending", // has also types of "contacted" | "approved" | "rejected" | "expired"
+  credential_status: "pending",
   issuer: "ISSUER_NAME",
-  content: "VERIFIABLE_CREDENTIAL_CONTENT", // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/
-  encryption_public_key: "ISSUER_ENCRYPTION_PUBLIC_KEY",
+  content: "VERIFIABLE_CREDENTIAL_CONTENT",
+  human_id: session.user.humanId,
+  encryption_public_key: issuerConfig.issuerPublicEncryptionKey,
 }
 
-const credentialResult = await createCredentialPermissioned(issuerConfig, credential);
+await createCredentialPermissioned(issuerConfig, credential);
 ```
-
-This method directly writes the credential to the idOS, assuming the issuer has the necessary permissions.
 
 ## Developing the SDK locally
 
