@@ -119,21 +119,25 @@ export class NearGrants implements GrantChild {
   async #sign(
     message: string,
     recipient: string,
-    nonceSuggestion: Buffer = Buffer.from(new Nonce(32).bytes),
+    nonceSuggestion: Uint8Array = new Nonce(32).bytes,
   ) {
     // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
-    const { nonce = nonceSuggestion, signature: b64Signature } = (await (
+    const { nonce, signature: b64Signature } = (await (
       this.#signer.signMessage as (
         _: SignMessageParams,
       ) => Promise<SignedMessage & { nonce?: Uint8Array }>
     )({
       message,
       recipient,
-      nonce: nonceSuggestion,
+      nonce: Buffer.from(nonceSuggestion),
     }))!;
-    const signature = Base64Codec.decode(b64Signature);
 
-    return { signature, nonce };
+    if (!nonce) throw new Error("signMessage is expected to return a nonce, but it didn't");
+
+    return {
+      signature: Base64Codec.decode(b64Signature),
+      nonce,
+    };
   }
 
   async list({
