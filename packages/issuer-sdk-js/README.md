@@ -35,7 +35,7 @@ const issuerConfig = await createIssuerConfig({
 ## Creating a human profile
 
 To create a human profile in idOS, you need:
-1. **A wallet** associated with the human.
+1. **A wallet address** associated with the human.
 2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
 
 
