@@ -1,4 +1,4 @@
-import { Button, HStack, Image, Text, VStack } from "@chakra-ui/react";
+import { Button, HStack, Image, Text, Tooltip, VStack } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
 
 type WalletCardProps = {
@@ -19,14 +19,25 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
           </Text>
         </VStack>
       </HStack>
-      <Button
-        isDisabled={isDisabled}
-        id={`delete-wallet-${address}`}
-        leftIcon={<XIcon size={20} />}
-        onClick={() => onDelete(address)}
+      <Tooltip
+        hasArrow
+        bg="neutral.500"
+        px={2}
+        py={0.5}
+        rounded="md"
+        isDisabled={!isDisabled}
+        label="Please connect another wallet to delete this one"
+        placement="auto"
       >
-        Delete
-      </Button>
+        <Button
+          isDisabled={isDisabled}
+          id={`delete-wallet-${address}`}
+          leftIcon={<XIcon size={20} />}
+          onClick={() => onDelete(address)}
+        >
+          Delete
+        </Button>
+      </Tooltip>
     </HStack>
   );
 };
