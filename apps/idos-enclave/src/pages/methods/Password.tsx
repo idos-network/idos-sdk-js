@@ -84,7 +84,7 @@ export function PasswordForm({
   encryptionPublicKey,
   humanId,
 }: MethodProps<{ password: string; duration: number }> & {
-  encryptionPublicKey: string;
+  encryptionPublicKey?: string;
   humanId: string | null;
 }) {
   const password = useSignal("");
