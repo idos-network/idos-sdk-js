@@ -18,34 +18,6 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3
 
-  apps/idos-backend-demo-app:
-    dependencies:
-      '@hono/node-server':
-        specifier: ^1.12.0
-        version: 1.12.0
-      '@idos-network/idos-sdk':
-        specifier: workspace:*
-        version: link:../../packages/idos-sdk-js
-      '@idos-network/idos-sdk-server-dapp':
-        specifier: workspace:*
-        version: link:../../packages/idos-sdk-server-dapp
-      '@idos-network/issuer-sdk-js':
-        specifier: workspace:*
-        version: link:../../packages/issuer-sdk-js
-      ethers:
-        specifier: ^6.13.1
-        version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      hono:
-        specifier: ^4.5.3
-        version: 4.5.3
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.17
-        version: 20.14.12
-      tsx:
-        specifier: ^4.7.1
-        version: 4.16.5
-
   apps/idos-data-dashboard:
     dependencies:
       '@chakra-ui/react':
@@ -189,7 +161,7 @@ importers:
         version: 3.0.1
       tailwind-variants:
         specifier: ^0.2.1
-        version: 0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))
+        version: 0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
@@ -205,7 +177,7 @@ importers:
         version: 2.8.2(@babel/core@7.24.6)(preact@10.22.0)(vite@5.2.11(@types/node@22.7.9)(terser@5.31.3))
       '@tailwindcss/forms':
         specifier: ^0.5.6
-        version: 0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))
+        version: 0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))
       '@types/dompurify':
         specifier: 3.0.5
         version: 3.0.5
@@ -223,7 +195,7 @@ importers:
         version: 8.4.31
       tailwindcss:
         specifier: ^3.4.1
-        version: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
+        version: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -237,7 +209,47 @@ importers:
         specifier: ^1.16.0
         version: 1.16.0(vite@5.2.11(@types/node@22.7.9)(terser@5.31.3))
 
-  apps/idos-example-dapp:
+  apps/idos-sdk-e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: '1.44'
+        version: 1.44.1
+      '@synthetixio/synpress':
+        specifier: 4.0.0-alpha.7
+        version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)
+      '@types/node':
+        specifier: ^20.10.5
+        version: 20.10.5
+
+  examples/idos-backend-demo-app:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.12.0
+        version: 1.12.0
+      '@idos-network/idos-sdk':
+        specifier: workspace:*
+        version: link:../../packages/idos-sdk-js
+      '@idos-network/idos-sdk-server-dapp':
+        specifier: workspace:*
+        version: link:../../packages/idos-sdk-server-dapp
+      '@idos-network/issuer-sdk-js':
+        specifier: workspace:*
+        version: link:../../packages/issuer-sdk-js
+      ethers:
+        specifier: ^6.13.1
+        version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      hono:
+        specifier: ^4.5.3
+        version: 4.5.3
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.14.12
+      tsx:
+        specifier: ^4.7.1
+        version: 4.16.5
+
+  examples/idos-example-dapp:
     dependencies:
       '@idos-network/idos-sdk':
         specifier: workspace:*
@@ -247,13 +259,13 @@ importers:
         version: link:../../packages/idos-sdk-server-dapp
       '@near-wallet-selector/core':
         specifier: ^8.7.0
-        version: 8.7.0(near-api-js@3.0.4)
+        version: 8.9.10(near-api-js@3.0.4)
       '@near-wallet-selector/here-wallet':
         specifier: ^8.7.0
-        version: 8.7.0(borsh@1.0.0)(near-api-js@3.0.4)
+        version: 8.9.10(borsh@1.0.0)(near-api-js@3.0.4)
       '@near-wallet-selector/meteor-wallet':
         specifier: ^8.7.0
-        version: 8.7.0(near-api-js@3.0.4)
+        version: 8.9.10(near-api-js@3.0.4)
       '@near-wallet-selector/modal-ui-js':
         specifier: ^8.7.0
         version: 8.7.0(near-api-js@3.0.4)
@@ -265,47 +277,35 @@ importers:
         version: 8.7.0(near-api-js@3.0.4)
       axios:
         specifier: ^1.6.8
-        version: 1.6.8(debug@4.3.4)
+        version: 1.7.2
       ethers:
         specifier: ^6.12
-        version: 6.12.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       near-api-js:
         specifier: ^3.0.4
         version: 3.0.4
     devDependencies:
       '@types/node':
         specifier: ^20.10.5
-        version: 20.10.5
+        version: 20.14.12
       '@vercel/node':
         specifier: ^3.0.26
-        version: 3.0.26(@swc/core@1.7.1)
+        version: 3.0.26(@swc/core@1.7.1(@swc/helpers@0.5.13))
       raw-body:
         specifier: ^2.5.2
         version: 2.5.2
       typescript:
         specifier: ^5.0.2
-        version: 5.2.2
+        version: 5.6.3
       vite:
         specifier: ^4.4.5
-        version: 4.4.9(@types/node@20.10.5)(terser@5.31.3)
+        version: 4.5.0(@types/node@20.14.12)(terser@5.31.3)
       vite-plugin-mkcert:
         specifier: ^1.16.0
-        version: 1.16.0(vite@4.4.9(@types/node@20.10.5)(terser@5.31.3))
+        version: 1.17.5(vite@4.5.0(@types/node@20.14.12)(terser@5.31.3))
       vite-plugin-node-polyfills:
         specifier: ^0.12.0
-        version: 0.12.0(rollup@3.29.4)(vite@4.4.9(@types/node@20.10.5)(terser@5.31.3))
-
-  apps/idos-sdk-e2e:
-    devDependencies:
-      '@playwright/test':
-        specifier: '1.44'
-        version: 1.44.1
-      '@synthetixio/synpress':
-        specifier: 4.0.0-alpha.7
-        version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)
-      '@types/node':
-        specifier: ^20.10.5
-        version: 20.10.5
+        version: 0.12.0(rollup@3.29.4)(vite@4.5.0(@types/node@20.14.12)(terser@5.31.3))
 
   packages/idos-sdk-js:
     dependencies:
@@ -399,7 +399,7 @@ importers:
         version: 17.0.0(typescript@5.2.2)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
@@ -481,7 +481,7 @@ importers:
         version: 17.0.0(typescript@5.5.4)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -532,7 +532,7 @@ importers:
         version: 17.0.0(typescript@5.5.4)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -2934,13 +2934,6 @@ packages:
       react: ^18
       react-dom: ^18
 
-  '@here-wallet/core@1.5.1':
-    resolution: {integrity: sha512-gCzB27k0QfviyJQUhxqX3kAH3g3mRHb6B5RJdUhX9tTsLlPW6AMV/PJiYBudPCt0EeyeyU4i8kEh223ACHXOjw==}
-    peerDependencies:
-      bn.js: 5.2.1
-      borsh: 0.7.0
-      near-api-js: ^2.1.1
-
   '@here-wallet/core@1.6.6':
     resolution: {integrity: sha512-avh/PRNl3CbgrcbqIezVrNPAa4fqKvonl/mguSoUAfTwfA5jWnfq81Udd8QzOAIzBIGx5gSabzEkh9CRDH7yDA==}
     peerDependencies:
@@ -3196,11 +3189,6 @@ packages:
     resolution: {integrity: sha512-g2REf+xSt0OZfMoNNdC4+/Yy8eP3KUqvIArel54XRFKPoXbHI6+YjFfrLtfykWBjffOp7DTfIc3Kvk5TLfuiyg==}
     engines: {node: '>=16.0.0'}
 
-  '@meteorwallet/sdk@0.8.0':
-    resolution: {integrity: sha512-C0x9/20t+lCMUlKSPSAbPUWjz8Ls59NwWnz/qSJM5B4qCXN3OSCcrqmpbJpSVa2wCHFhK/HuOqaKlMCr0XsQ0w==}
-    peerDependencies:
-      near-api-js: ^0.44.2 || ^1.0.0
-
   '@meteorwallet/sdk@1.0.9':
     resolution: {integrity: sha512-frJM+rwmx18MCVsfHn0O8oaJfB41BqaXW6cyhZ3EtMw3b87DUJyfSuJi9K0HQl7oGG0+wvMZOKRBVVcMiZzoDg==}
     peerDependencies:
@@ -3290,18 +3278,8 @@ packages:
     peerDependencies:
       near-api-js: ^1.0.0 || ^2.0.0
 
-  '@near-wallet-selector/here-wallet@8.7.0':
-    resolution: {integrity: sha512-t7GfF0ZSzAK7bukHiC5H10wSB/mrBUaM2XyrjhpfQ37gnOFKGj1h3NQRwKCk8oCNpEPUxzf+h4lY49Plu1WkBg==}
-    peerDependencies:
-      near-api-js: ^1.0.0 || ^2.0.0
-
   '@near-wallet-selector/here-wallet@8.9.10':
     resolution: {integrity: sha512-LhVb8gfHTxa4ALtjzDkhIImcM+r7lqcj03OEEu7sQHXDnTgRSTXwqE47Y0CLlczCIY445K9ZCRqsEbm2noUGww==}
-    peerDependencies:
-      near-api-js: ^1.0.0 || ^2.0.0
-
-  '@near-wallet-selector/meteor-wallet@8.7.0':
-    resolution: {integrity: sha512-2uuxdQC79PhNqu2L8xzGRiYqeNEp/bW1tcniCyP4O/lJ9TwidTaHcqQIDqSrFFPSdN6c9OnZL9ZkLnciZq9IgQ==}
     peerDependencies:
       near-api-js: ^1.0.0 || ^2.0.0
 
@@ -4749,26 +4727,12 @@ packages:
     resolution: {integrity: sha512-k+iyHEuPgSw6SbuDpGQM+06HQUa04DZ3o+F6CSzXMvvI5KMvnaEqXe+YVe555R9nn6GPt404fos4wcgpw12SDA==}
     engines: {node: '>=0.4.0'}
 
-  acorn-walk@8.3.2:
-    resolution: {integrity: sha512-cjkyv4OtNCIeqhHrfS81QWXoCBPExR/J62oyEqepVw8WaQeSqpW2uhuLPh1m9eWhDuOo/jUXVTlifvesOWp/4A==}
-    engines: {node: '>=0.4.0'}
-
   acorn-walk@8.3.3:
     resolution: {integrity: sha512-MxXdReSRhGO7VlFe1bRG/oI7/mdLV9B9JJT0N8vZOhF7gFRR5l3M8W9G8JxmKV+JC5mGqJ0QvqfSOLsCPa4nUw==}
     engines: {node: '>=0.4.0'}
 
   acorn@8.10.0:
     resolution: {integrity: sha512-F0SAmZ8iUtS//m8DmCTA0jlh6TDKkHQyK6xc6V4KDTyZKA9dnvX9/3sRTVQrWm79glUAZbnmmNcdYwUIHWVybw==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-
-  acorn@8.11.2:
-    resolution: {integrity: sha512-nc0Axzp/0FILLEVsm4fNwLCwMttvhEI263QtVPQcbpfZZ3ts0hLsZGOpE6czNlid7CJ9MlyH8reXkpsf3YUY4w==}
-    engines: {node: '>=0.4.0'}
-    hasBin: true
-
-  acorn@8.11.3:
-    resolution: {integrity: sha512-Y9rRfJG5jcKOE0CLisYbojUjIrIEE7AGMzA/Sm4BslANhbS+cDMpgBdcPT91oJ7OuJ9hYJBx59RjbhxVnrF8Xg==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -7955,11 +7919,6 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
-  nanoid@3.3.4:
-    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
-    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
-    hasBin: true
-
   nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -8060,10 +8019,6 @@ packages:
     resolution: {integrity: sha512-dPEtOeMvF9VMcYV/1Wb8CPoVAXtp6MKMlcbAt4ddqmGqUJ6fQZFXkNZNkNlfevtNkGtaSoXf/vNNNSvgrdXwtA==}
     engines: {node: '>= 6.13.0'}
 
-  node-gyp-build@4.7.1:
-    resolution: {integrity: sha512-wTSrZ+8lsRRa3I3H8Xr65dLWSgCvY2l4AOnaeKdPA9TB/WYMPaTcrzf3rXvFoVvjKNVnu0CcWSx54qq9GKRUYg==}
-    hasBin: true
-
   node-gyp-build@4.8.1:
     resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
     hasBin: true
@@ -8155,10 +8110,6 @@ packages:
 
   object-inspect@1.13.2:
     resolution: {integrity: sha512-IRZSRuzJiynemAXPYtPe5BoI/RESNYR7TYm50MC5Mqbd3Jmw5y790sErYw3V6SryFJD64b74qQQs9wn5Bg/k3g==}
-    engines: {node: '>= 0.4'}
-
-  object-is@1.1.5:
-    resolution: {integrity: sha512-3cyDsyHgtmi7I7DfSSI2LDp6SK2lwvtbg0p0R1e0RvTqF5ceGx+K2dfSjm1bKDMVCFEDAQvy+o8c6a7VujOddw==}
     engines: {node: '>= 0.4'}
 
   object-is@1.1.6:
@@ -8989,11 +8940,6 @@ packages:
     peerDependenciesMeta:
       rollup:
         optional: true
-
-  rollup@3.29.2:
-    resolution: {integrity: sha512-CJouHoZ27v6siztc21eEQGo0kIcE5D1gVPA571ez0mMYb25LGYGKnVNXpEj5MGlepmDWGXNjDB5q7uNiPHC11A==}
-    engines: {node: '>=14.18.0', npm: '>=8.0.0'}
-    hasBin: true
 
   rollup@3.29.4:
     resolution: {integrity: sha512-oWzmBZwvYrU0iJHtDmhsm662rC15FRXmcjCk1xD771dFDx5jJ02ufAQQTn0etB2emNk4J9EZg/yWKpsn9BWGRw==}
@@ -10097,34 +10043,6 @@ packages:
     resolution: {integrity: sha512-xZfpD81aNhwEbIjccEiy8Q/hDdnlYqBSeEaUMIukOpGHuMaz65jqrC2lmnF/FXnliovISy2L1n92da0JOvk36A==}
     peerDependencies:
       vite: ^2.0.0 || ^3.0.0 || ^4.0.0
-
-  vite@4.4.9:
-    resolution: {integrity: sha512-2mbUn2LlUmNASWwSCNSJ/EG2HuSRTnVNaydp6vMCm5VIqJsjMfbIWtbH2kDuwUVW5mMUKKZvGPX/rqeqVvv1XA==}
-    engines: {node: ^14.18.0 || >=16.0.0}
-    hasBin: true
-    peerDependencies:
-      '@types/node': '>= 14'
-      less: '*'
-      lightningcss: ^1.21.0
-      sass: '*'
-      stylus: '*'
-      sugarss: '*'
-      terser: ^5.4.0
-    peerDependenciesMeta:
-      '@types/node':
-        optional: true
-      less:
-        optional: true
-      lightningcss:
-        optional: true
-      sass:
-        optional: true
-      stylus:
-        optional: true
-      sugarss:
-        optional: true
-      terser:
-        optional: true
 
   vite@4.5.0:
     resolution: {integrity: sha512-ulr8rNLA6rkyFAlVWw2q5YJ91v098AFQ2R0PRFwPzREXOUJQPtFUG0t+/ZikhaOCDqFoDhN6/v8Sq0o4araFAw==}
@@ -13376,14 +13294,6 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  '@here-wallet/core@1.5.1(bn.js@5.2.1)(borsh@1.0.0)(near-api-js@3.0.4)':
-    dependencies:
-      bn.js: 5.2.1
-      borsh: 1.0.0
-      near-api-js: 3.0.4
-      sha1: 1.1.1
-      uuid4: 2.0.3
-
   '@here-wallet/core@1.6.6(bn.js@5.2.1)(borsh@1.0.0)':
     dependencies:
       bn.js: 5.2.1
@@ -13989,7 +13899,7 @@ snapshots:
       nopt: 5.0.0
       npmlog: 5.0.1
       rimraf: 3.0.2
-      semver: 7.5.4
+      semver: 7.6.3
       tar: 6.2.1
     transitivePeerDependencies:
       - encoding
@@ -14164,12 +14074,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@meteorwallet/sdk@0.8.0(near-api-js@3.0.4)':
-    dependencies:
-      nanoid: 3.3.4
-      near-api-js: 3.0.4
-      query-string: 7.1.3
-
   '@meteorwallet/sdk@1.0.9(near-api-js@3.0.4)':
     dependencies:
       borsh: 0.7.0
@@ -14200,24 +14104,6 @@ snapshots:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
       '@rushstack/node-core-library': 3.61.0(@types/node@22.7.9)
-    transitivePeerDependencies:
-      - '@types/node'
-    optional: true
-
-  '@microsoft/api-extractor@7.38.3':
-    dependencies:
-      '@microsoft/api-extractor-model': 7.28.2(@types/node@22.7.9)
-      '@microsoft/tsdoc': 0.14.2
-      '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 3.61.0(@types/node@22.7.9)
-      '@rushstack/rig-package': 0.5.1
-      '@rushstack/ts-command-line': 4.17.1
-      colors: 1.2.5
-      lodash: 4.17.21
-      resolve: 1.22.8
-      semver: 7.5.4
-      source-map: 0.6.1
-      typescript: 5.0.4
     transitivePeerDependencies:
       - '@types/node'
     optional: true
@@ -14447,15 +14333,6 @@ snapshots:
       near-api-js: 3.0.4
       rxjs: 7.8.1
 
-  '@near-wallet-selector/here-wallet@8.7.0(borsh@1.0.0)(near-api-js@3.0.4)':
-    dependencies:
-      '@here-wallet/core': 1.5.1(bn.js@5.2.1)(borsh@1.0.0)(near-api-js@3.0.4)
-      '@near-wallet-selector/core': 8.7.0(near-api-js@3.0.4)
-      bn.js: 5.2.1
-      near-api-js: 3.0.4
-    transitivePeerDependencies:
-      - borsh
-
   '@near-wallet-selector/here-wallet@8.9.10(borsh@1.0.0)(near-api-js@3.0.4)':
     dependencies:
       '@here-wallet/core': 1.6.6(bn.js@5.2.1)(borsh@1.0.0)
@@ -14465,13 +14342,6 @@ snapshots:
     transitivePeerDependencies:
       - borsh
       - encoding
-
-  '@near-wallet-selector/meteor-wallet@8.7.0(near-api-js@3.0.4)':
-    dependencies:
-      '@meteorwallet/sdk': 0.8.0(near-api-js@3.0.4)
-      '@near-wallet-selector/core': 8.7.0(near-api-js@3.0.4)
-      '@near-wallet-selector/wallet-utils': 8.7.0(near-api-js@3.0.4)
-      near-api-js: 3.0.4
 
   '@near-wallet-selector/meteor-wallet@8.9.10(near-api-js@3.0.4)':
     dependencies:
@@ -15650,7 +15520,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)':
+  '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)':
     dependencies:
       axios: 1.6.7
       chalk: 5.3.0
@@ -15661,7 +15531,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.45.3
       progress: 2.0.3
-      tsup: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(postcss@8.4.40)(typescript@5.6.3)
+      tsup: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(typescript@5.6.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -15677,10 +15547,10 @@ snapshots:
     dependencies:
       '@playwright/test': 1.44.1
 
-  '@synthetixio/synpress-metamask@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)':
+  '@synthetixio/synpress-metamask@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@playwright/test': 1.44.1
-      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.44.1)
       '@viem/anvil': 0.0.7(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       fs-extra: 11.2.0
@@ -15697,13 +15567,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)':
+  '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)':
     dependencies:
       '@playwright/test': 1.44.1
       '@synthetixio/ethereum-wallet-mock': 0.0.1-alpha.7(@playwright/test@1.44.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.22.4)
-      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.44.1)
-      '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)
+      '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.40)(typescript@5.6.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
       - '@swc/core'
@@ -15721,10 +15591,10 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tailwindcss/forms@0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))':
+  '@tailwindcss/forms@0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))':
     dependencies:
       mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
+      tailwindcss: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
 
   '@tanstack/query-core@5.51.9': {}
 
@@ -15903,21 +15773,21 @@ snapshots:
     dependencies:
       '@mapbox/node-pre-gyp': 1.0.11
       '@rollup/pluginutils': 4.2.1
-      acorn: 8.11.2
-      acorn-import-attributes: 1.9.5(acorn@8.11.2)
+      acorn: 8.12.1
+      acorn-import-attributes: 1.9.5(acorn@8.12.1)
       async-sema: 3.1.1
       bindings: 1.5.0
       estree-walker: 2.0.2
       glob: 7.2.3
       graceful-fs: 4.2.11
-      micromatch: 4.0.5
-      node-gyp-build: 4.7.1
+      micromatch: 4.0.7
+      node-gyp-build: 4.8.1
       resolve-from: 5.0.0
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  '@vercel/node@3.0.26(@swc/core@1.7.1)':
+  '@vercel/node@3.0.26(@swc/core@1.7.1(@swc/helpers@0.5.13))':
     dependencies:
       '@edge-runtime/node-utils': 2.3.0
       '@edge-runtime/primitives': 4.1.0
@@ -15936,7 +15806,7 @@ snapshots:
       node-fetch: 2.6.9
       path-to-regexp: 6.2.1
       ts-morph: 12.0.0
-      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@14.18.33)(typescript@4.9.5)
+      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@14.18.33)(typescript@4.9.5)
       typescript: 4.9.5
       undici: 5.26.5
     transitivePeerDependencies:
@@ -16902,23 +16772,17 @@ snapshots:
       mime-types: 2.1.35
       negotiator: 0.6.3
 
-  acorn-import-attributes@1.9.5(acorn@8.11.2):
+  acorn-import-attributes@1.9.5(acorn@8.12.1):
     dependencies:
-      acorn: 8.11.2
+      acorn: 8.12.1
 
   acorn-walk@8.2.0: {}
-
-  acorn-walk@8.3.2: {}
 
   acorn-walk@8.3.3:
     dependencies:
       acorn: 8.12.1
 
   acorn@8.10.0: {}
-
-  acorn@8.11.2: {}
-
-  acorn@8.11.3: {}
 
   acorn@8.12.1: {}
 
@@ -17082,10 +16946,10 @@ snapshots:
 
   assert@2.1.0:
     dependencies:
-      call-bind: 1.0.2
+      call-bind: 1.0.7
       is-nan: 1.3.2
-      object-is: 1.1.5
-      object.assign: 4.1.4
+      object-is: 1.1.6
+      object.assign: 4.1.5
       util: 0.12.5
 
   assertion-error@1.1.0: {}
@@ -17142,14 +17006,14 @@ snapshots:
 
   axios@0.27.2:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.4)
+      follow-redirects: 1.15.6
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
   axios@1.6.7:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.4)
+      follow-redirects: 1.15.6
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -17158,6 +17022,14 @@ snapshots:
   axios@1.6.8(debug@4.3.4):
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.7.2:
+    dependencies:
+      follow-redirects: 1.15.6
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -17341,7 +17213,7 @@ snapshots:
 
   browser-resolve@2.0.0:
     dependencies:
-      resolve: 1.22.6
+      resolve: 1.22.8
 
   browserify-aes@1.2.0:
     dependencies:
@@ -18958,6 +18830,8 @@ snapshots:
     dependencies:
       tslib: 2.6.3
 
+  follow-redirects@1.15.6: {}
+
   follow-redirects@1.15.6(debug@4.3.4):
     optionalDependencies:
       debug: 4.3.4
@@ -19396,7 +19270,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.6(debug@4.3.4)
+      follow-redirects: 1.15.6
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -19617,7 +19491,7 @@ snapshots:
 
   is-nan@1.3.2:
     dependencies:
-      call-bind: 1.0.2
+      call-bind: 1.0.7
       define-properties: 1.2.1
 
   is-negative-zero@2.0.2: {}
@@ -20254,7 +20128,7 @@ snapshots:
 
   magic-string@0.27.0:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.4.15
+      '@jridgewell/sourcemap-codec': 1.5.0
 
   magic-string@0.30.10:
     dependencies:
@@ -20595,8 +20469,6 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
-  nanoid@3.3.4: {}
-
   nanoid@3.3.6: {}
 
   nanoid@3.3.7: {}
@@ -20684,8 +20556,6 @@ snapshots:
       formdata-polyfill: 4.0.10
 
   node-forge@1.3.1: {}
-
-  node-gyp-build@4.7.1: {}
 
   node-gyp-build@4.8.1: {}
 
@@ -20789,11 +20659,6 @@ snapshots:
   object-inspect@1.13.1: {}
 
   object-inspect@1.13.2: {}
-
-  object-is@1.1.5:
-    dependencies:
-      call-bind: 1.0.2
-      define-properties: 1.2.1
 
   object-is@1.1.6:
     dependencies:
@@ -21157,37 +21022,36 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.38
 
-  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)):
+  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.38
-      ts-node: 10.9.1(@types/node@22.7.9)(typescript@5.4.5)
+      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)
 
-  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)):
+  postcss-load-config@4.0.1(postcss@8.4.40):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.40
-      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)
 
-  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)):
+  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.40
-      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)
+      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2)
 
-  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4)):
+  postcss-load-config@4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.40
-      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)
+      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4)
 
   postcss-nested@6.0.1(postcss@8.4.38):
     dependencies:
@@ -21342,7 +21206,7 @@ snapshots:
 
   qs@6.11.2:
     dependencies:
-      side-channel: 1.0.4
+      side-channel: 1.0.6
 
   query-string@7.1.3:
     dependencies:
@@ -21790,10 +21654,6 @@ snapshots:
       yargs: 17.7.2
     optionalDependencies:
       rollup: 4.19.0
-
-  rollup@3.29.2:
-    optionalDependencies:
-      fsevents: 2.3.3
 
   rollup@3.29.4:
     optionalDependencies:
@@ -22303,12 +22163,12 @@ snapshots:
 
   tailwind-merge@2.5.2: {}
 
-  tailwind-variants@0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))):
+  tailwind-variants@0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))):
     dependencies:
       tailwind-merge: 2.5.2
-      tailwindcss: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
+      tailwindcss: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
 
-  tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)):
+  tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -22327,7 +22187,7 @@ snapshots:
       postcss: 8.4.38
       postcss-import: 15.1.0(postcss@8.4.38)
       postcss-js: 4.0.1(postcss@8.4.38)
-      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
+      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
       postcss-nested: 6.0.1(postcss@8.4.38)
       postcss-selector-parser: 6.0.13
       resolve: 1.22.8
@@ -22353,7 +22213,7 @@ snapshots:
   terser@5.20.0:
     dependencies:
       '@jridgewell/source-map': 0.3.5
-      acorn: 8.11.3
+      acorn: 8.12.1
       commander: 2.20.3
       source-map-support: 0.5.21
 
@@ -22470,7 +22330,7 @@ snapshots:
       '@ts-morph/common': 0.11.1
       code-block-writer: 10.1.1
 
-  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@14.18.33)(typescript@4.9.5):
+  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@14.18.33)(typescript@4.9.5):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -22478,8 +22338,8 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 14.18.33
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
       arg: 4.1.3
       create-require: 1.1.1
       diff: 4.0.2
@@ -22490,7 +22350,7 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
 
-  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2):
+  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -22498,8 +22358,8 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 20.14.12
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
       arg: 4.1.3
       create-require: 1.1.1
       diff: 4.0.2
@@ -22511,7 +22371,7 @@ snapshots:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
     optional: true
 
-  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4):
+  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -22519,8 +22379,29 @@ snapshots:
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
       '@types/node': 22.7.9
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.4.5
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
+    optional: true
+
+  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.7.9
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
       arg: 4.1.3
       create-require: 1.1.1
       diff: 4.0.2
@@ -22530,25 +22411,6 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
-    optional: true
-
-  ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 22.7.9
-      acorn: 8.11.2
-      acorn-walk: 8.3.2
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.4.5
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
     optional: true
 
   ts-toolbelt@6.15.5: {}
@@ -22563,7 +22425,7 @@ snapshots:
 
   tslib@2.6.3: {}
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(postcss@8.4.40)(typescript@5.6.3):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(typescript@5.6.3):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -22573,7 +22435,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))
+      postcss-load-config: 4.0.1(postcss@8.4.40)
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -22588,7 +22450,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -22598,7 +22460,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))
+      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -22613,7 +22475,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -22623,7 +22485,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))
+      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -22631,31 +22493,6 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       '@microsoft/api-extractor': 7.38.3(@types/node@22.7.9)
-      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
-      postcss: 8.4.40
-      typescript: 5.5.4
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4):
-    dependencies:
-      bundle-require: 4.1.0(esbuild@0.19.12)
-      cac: 6.7.14
-      chokidar: 3.6.0
-      debug: 4.3.5
-      esbuild: 0.19.12
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.40)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))
-      resolve-from: 5.0.0
-      rollup: 4.19.0
-      source-map: 0.8.0-beta.0
-      sucrase: 3.34.0
-      tree-kill: 1.2.2
-    optionalDependencies:
-      '@microsoft/api-extractor': 7.38.3
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
       postcss: 8.4.40
       typescript: 5.5.4
@@ -23083,17 +22920,6 @@ snapshots:
       pathe: 0.2.0
       vite: 5.2.11(@types/node@22.7.9)(terser@5.31.3)
 
-  vite-plugin-mkcert@1.16.0(vite@4.4.9(@types/node@20.10.5)(terser@5.31.3)):
-    dependencies:
-      '@octokit/rest': 19.0.13
-      axios: 1.6.8(debug@4.3.4)
-      debug: 4.3.4
-      picocolors: 1.0.1
-      vite: 4.4.9(@types/node@20.10.5)(terser@5.31.3)
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-
   vite-plugin-mkcert@1.16.0(vite@5.2.11(@types/node@22.7.9)(terser@5.31.3)):
     dependencies:
       '@octokit/rest': 19.0.13
@@ -23103,6 +22929,16 @@ snapshots:
       vite: 5.2.11(@types/node@22.7.9)(terser@5.31.3)
     transitivePeerDependencies:
       - encoding
+      - supports-color
+
+  vite-plugin-mkcert@1.17.5(vite@4.5.0(@types/node@20.14.12)(terser@5.31.3)):
+    dependencies:
+      '@octokit/rest': 20.1.1
+      axios: 1.7.2(debug@4.3.5)
+      debug: 4.3.5
+      picocolors: 1.0.1
+      vite: 4.5.0(@types/node@20.14.12)(terser@5.31.3)
+    transitivePeerDependencies:
       - supports-color
 
   vite-plugin-mkcert@1.17.5(vite@5.3.5(@types/node@20.14.12)(terser@5.31.3)):
@@ -23115,30 +22951,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  vite-plugin-node-polyfills@0.12.0(rollup@3.29.4)(vite@4.4.9(@types/node@20.10.5)(terser@5.31.3)):
+  vite-plugin-node-polyfills@0.12.0(rollup@3.29.4)(vite@4.5.0(@types/node@20.14.12)(terser@5.31.3)):
     dependencies:
       '@rollup/plugin-inject': 5.0.3(rollup@3.29.4)
       buffer-polyfill: buffer@6.0.3
       node-stdlib-browser: 1.2.0
       process: 0.11.10
-      vite: 4.4.9(@types/node@20.10.5)(terser@5.31.3)
+      vite: 4.5.0(@types/node@20.14.12)(terser@5.31.3)
     transitivePeerDependencies:
       - rollup
-
-  vite@4.4.9(@types/node@20.10.5)(terser@5.31.3):
-    dependencies:
-      esbuild: 0.18.20
-      postcss: 8.4.31
-      rollup: 3.29.2
-    optionalDependencies:
-      '@types/node': 20.10.5
-      fsevents: 2.3.3
-      terser: 5.31.3
 
   vite@4.5.0(@types/node@20.14.12)(terser@5.31.3):
     dependencies:
       esbuild: 0.18.20
-      postcss: 8.4.31
+      postcss: 8.4.40
       rollup: 3.29.4
     optionalDependencies:
       '@types/node': 20.14.12
