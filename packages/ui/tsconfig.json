@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "ESNext", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "Bundler",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
+}

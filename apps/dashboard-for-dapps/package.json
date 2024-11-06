@@ -1,0 +1,41 @@
+{
+  "name": "dashboard-for-dapps",
+  "description": "A Dashboard / CRM for dApps",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "check": "biome check --write .",
+    "format": "biome format --write .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.0.2",
+    "@idos-network/idos-sdk": "workspace:*",
+    "@idos-network/ui-kit": "workspace:*",
+    "@tanstack/react-query": "^5.59.16",
+    "@tanstack/react-router": "^1.77.8",
+    "@uidotdev/usehooks": "^2.4.1",
+    "ethers": "^6.13.4",
+    "match-sorter": "^7.0.0",
+    "next-themes": "^0.4.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "viem": "2.x",
+    "wagmi": "^2.12.25"
+  },
+  "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.59.16",
+    "@tanstack/router-devtools": "^1.77.8",
+    "@tanstack/router-plugin": "^1.77.7",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "globals": "^15.11.0",
+    "typescript": "~5.6.2",
+    "vite": "^5.4.10"
+  }
+}
