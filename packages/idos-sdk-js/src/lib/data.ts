@@ -80,11 +80,15 @@ export class Data {
       }
     }
 
+    // TODO: creds2: What should I do here?
+    if (tableName === "credential2s") {
+      // TODO: creds2: Maybe add human_id?
+    }
+
     const newRecords = records.map((record) => ({
       id: crypto.randomUUID(),
       ...record,
     }));
-    // TODO: creds2: What should I do here?
     await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,
       newRecords,
@@ -95,11 +99,11 @@ export class Data {
     return newRecords;
   }
 
-  async create<T extends AnyRecord>(
+  async create<T extends { id: string }>(
     tableName: string,
-    record: T,
+    record: Omit<T, "id">,
     synchronous?: boolean,
-  ): Promise<T & { id: string }> {
+  ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
@@ -117,7 +121,7 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
       (record as AnyRecord).content = await this.enclave.encrypt(
         (record as AnyRecord).content as string,
         receiverPublicKey,
@@ -126,6 +130,10 @@ export class Data {
     }
 
     // TODO: creds2: What should I do here?
+    if (tableName === "credential2s") {
+      // TODO: creds2: Maybe add human_id?
+    }
+
     const newRecord = { id: crypto.randomUUID(), ...record };
     await this.kwilWrapper.execute(
       `add_${this.singularize(tableName)}`,

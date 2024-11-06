@@ -257,9 +257,15 @@ importers:
       '@idos-network/idos-sdk-server-dapp':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-server-dapp
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../../packages/types
       '@idos-network/issuer-sdk-js':
         specifier: workspace:*
         version: link:../../packages/issuer-sdk-js
+      '@kwilteam/kwil-js':
+        specifier: 0.7.1
+        version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@near-wallet-selector/core':
         specifier: ^8.7.0
         version: 8.9.10(near-api-js@3.0.4)

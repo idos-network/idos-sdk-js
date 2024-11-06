@@ -127,40 +127,22 @@ import { createIssuerConfig2 } from "@idos-network/issuer-sdk-js/create-issuer-c
 import {
   createCredentialByGrant2,
   createCredentialPermissioned2,
+  shareCredentialByGrant2,
 } from "@idos-network/issuer-sdk-js/credentials";
-import { Wallet } from "ethers";
 
 export const inserterIssuerPermissioned = async (
   issuer: IssuerResult,
   inserterAuthenticationSecretKey: Uint8Array,
 ) => {
-  // TODO: creds2: This is not an EVM wallet, it's an ed25519 key. How do I tell that to Kwill?
-  const issuerAuthenticationWallet = new Wallet(HexCodec.encode(inserterAuthenticationSecretKey));
+  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
+    inserterAuthenticationSecretKey,
+  );
 
   if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
   const issuerConfig = await createIssuerConfig2({
     nodeUrl: process.env.IDOS_NODE_URL,
     signer: issuerAuthenticationWallet,
   });
-
-  // Here's how it looked like in the old model
-  //
-  // const createdCredential = createCredentialPermissioned(issuerConfig, {
-  //   issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
-  //   encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
-  //
-  //   human_id: issuer.humanId,
-  //
-  //   credential_type: "derp", // Extra
-  //   credential_level: "derp", // Extra
-  //   credential_status: "approved", // Extra
-  //
-  //   content: Base64Codec.encode(issuer.w3cVc), // THIS IS WRONG because it'll be tried to be encrypted again.
-  //
-  //   publicNotes: issuer.publicNotes, // Missing
-  //   publicNotesSignature: issuer.publicNotesSignature, // Missing
-  //   broaderSignature: issuer.broaderSignature, // Missing
-  // });
 
   return createCredentialPermissioned2(issuerConfig, {
     issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
@@ -177,8 +159,9 @@ export const inserterIssuerWriteGrant = async (
   issuer: IssuerResult,
   inserterAuthenticationSecretKey: Uint8Array,
 ) => {
-  // TODO: creds2: This is not an EVM wallet, it's an ed25519 key. How do I tell that to Kwill?
-  const issuerAuthenticationWallet = new Wallet(HexCodec.encode(inserterAuthenticationSecretKey));
+  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
+    inserterAuthenticationSecretKey,
+  );
 
   if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
   const issuerConfig = await createIssuerConfig2({
@@ -197,15 +180,21 @@ export const inserterIssuerWriteGrant = async (
   });
 };
 
-import { idOS } from "@idos-network/idos-sdk";
-export const inserterHuman = async (issuer: IssuerResult) => {
-  const idos = await idOS.init({});
-  // biome-ignore lint/suspicious/noExplicitAny: Let's pretend this was correctly initialized
-  const { humanId } = await idos.setSigner("EVM", {} as any);
+export const inserterIssuerWriteGrantShare = async (
+  issuer: IssuerResult,
+  inserterAuthenticationSecretKey: Uint8Array,
+) => {
+  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
+    inserterAuthenticationSecretKey,
+  );
 
-  if (humanId !== issuer.humanId) throw new Error("This credential is not for me!");
+  if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
+  const issuerConfig = await createIssuerConfig2({
+    nodeUrl: process.env.IDOS_NODE_URL,
+    signer: issuerAuthenticationWallet,
+  });
 
-  return idos.data.create("credential2s", {
+  return shareCredentialByGrant2(issuerConfig, {
     issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
     encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
     human_id: issuer.humanId,
@@ -213,5 +202,26 @@ export const inserterHuman = async (issuer: IssuerResult) => {
     public_notes: JSON.stringify(issuer.publicNotes),
     public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
     broader_signature: Base64Codec.encode(issuer.broaderSignature),
+    grantee: "", // TODO: creds2: where do I come from?
+    locked_until: 0, // TODO: creds2: where do I come from?
+    original_credential_id: "", // TODO: creds2: where do I come from?
+  });
+};
+
+import { idOS } from "@idos-network/idos-sdk";
+import type { idOSCredential2 } from "@idos-network/idos-sdk-types";
+export const inserterHuman = async (issuer: IssuerResult) => {
+  const idos = await idOS.init({ enclaveOptions: { container: "" } });
+  // biome-ignore lint/suspicious/noExplicitAny: Let's pretend this was correctly initialized
+  await idos.setSigner("EVM", {} as any);
+
+  return idos.data.create<Omit<idOSCredential2, "original_id" | "human_id">>("credential2s", {
+    issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
+    encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
+    content: Base64Codec.encode(issuer.w3cVc),
+    public_notes: JSON.stringify(issuer.publicNotes),
+    public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
+    broader_signature: Base64Codec.encode(issuer.broaderSignature),
+    // TODO: creds2: Maybe add human_id?
   });
 };
