@@ -6,7 +6,7 @@
     "incremental": false,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": ["ES2022", "ESNext", "DOM", "DOM.Iterable"],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "Bundler",
