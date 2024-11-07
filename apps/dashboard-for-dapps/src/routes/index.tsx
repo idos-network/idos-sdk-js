@@ -18,7 +18,7 @@ const useFetchGrants = () => {
     queryKey: ["grants"],
     queryFn: () =>
       idOS.grants.list({
-        owner: address,
+        grantee: address,
       }),
     select: (data) =>
       data.map((grant) => ({
