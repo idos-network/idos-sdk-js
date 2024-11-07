@@ -76,7 +76,7 @@ const isValid = await idOS.verifiableCredentials
 > For more examples and data queries, see:
 >
 > - the [quick reference](#quick-reference) below
-> - [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp) for a simple implementation
+> - [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/examples/idos-example-dapp) for a simple implementation
 > - [`📁 idos-data-dashboard`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-data-dashboard) for a thorough example
 
 > 🛟 Help available
@@ -117,7 +117,7 @@ To avoid surprising your UI, the SDK doesn't make itself visible and sets no CSS
 
 This barebones setup is enough to get you started, but you can naturally style and animate the container as you like, for example within a toast component.
 
-Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp) shows an example of blending this into a UI. It wraps the container and floats it over the page, and animates its opacity when the `visible` class is applied. You can see it below (pulsating forcefully to illustrate the point):
+Our [`📁 idos-example-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/examples/idos-example-dapp) shows an example of blending this into a UI. It wraps the container and floats it over the page, and animates its opacity when the `visible` class is applied. You can see it below (pulsating forcefully to illustrate the point):
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-container-2.gif" />
 
@@ -357,7 +357,7 @@ const { grant: { dataId } } = await idos.grants.create(
 
 > 💡 Tip
 >
-> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp)
+> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/examples/idos-example-dapp)
 
 To avoid any doubts, let's go over the Access Grant fields:
 
@@ -444,10 +444,10 @@ const contents = await idosGrantee.getSharedCredentialContentDecrypted(dataId);
 
 > 💡 Tip
 >
-> See a working example backend on [idos-example-dapp/api](https://github.com/idos-network/idos-sdk-js/tree/main/apps/idos-example-dapp/api). It has two flavors:
+> See a working example backend on [idos-example-dapp/api](https://github.com/idos-network/idos-sdk-js/tree/main/examples/idos-example-dapp/api). It has two flavors:
 >
-> - [EVM](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/EVM.ts)
-> - [NEAR](https://github.com/idos-network/idos-sdk-js/blob/main/apps/idos-example-dapp/api/NEAR.ts)
+> - [EVM](https://github.com/idos-network/idos-sdk-js/blob/main/examples/idos-example-dapp/api/EVM.ts)
+> - [NEAR](https://github.com/idos-network/idos-sdk-js/blob/main/examples/idos-example-dapp/api/NEAR.ts)
 
 ### Delegated Access Grants
 
