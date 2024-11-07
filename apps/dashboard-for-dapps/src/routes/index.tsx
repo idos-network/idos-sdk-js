@@ -23,10 +23,13 @@ const useFetchGrants = () => {
     select: (data) =>
       data.map((grant) => ({
         ...grant,
-        lockedUntil: Intl.DateTimeFormat("en-US", {
-          dateStyle: "full",
-          timeStyle: "short",
-        }).format(grant.lockedUntil * 1000),
+        lockedUntil:
+          grant.lockedUntil === 0
+            ? "Unlocked"
+            : Intl.DateTimeFormat("en-US", {
+                dateStyle: "full",
+                timeStyle: "short",
+              }).format(grant.lockedUntil * 1000),
       })),
   });
 };
