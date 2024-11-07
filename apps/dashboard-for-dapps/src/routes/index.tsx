@@ -1,13 +1,21 @@
 import { Center, Container, Spinner, Stack, Text } from "@chakra-ui/react";
-import { Button, DataListItem, DataListRoot, EmptyState } from "@idos-network/ui-kit";
+import { Button, DataListItem, DataListRoot, EmptyState, SearchField } from "@idos-network/ui-kit";
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useDebounce } from "@uidotdev/usehooks";
+import { matchSorter } from "match-sorter";
 import { useAccount } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
+import { useMemo } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  validateSearch: (search): { filter?: string } => {
+    return {
+      filter: (search.filter as string) ?? undefined,
+    };
+  },
 });
 
 const useFetchGrants = () => {
@@ -120,7 +128,28 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 }
 
 function Index() {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { filter = "" } = Route.useSearch();
+  const debouncedSearchTerm = useDebounce(filter, 300);
   const grants = useFetchGrants();
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const search = e.target.value;
+    navigate({
+      search: {
+        filter: search,
+      },
+    });
+  };
+
+  const results = useMemo(() => {
+    if (!grants.data) return [];
+    if (!debouncedSearchTerm) return grants.data;
+
+    return matchSorter(grants.data, debouncedSearchTerm, {
+      keys: ["dataId", "owner", "grantee", "lockedUntil"],
+    });
+  }, [debouncedSearchTerm, grants.data]);
 
   return (
     <Container h="100%">
@@ -131,7 +160,31 @@ function Index() {
             <Text>Fetching grants...</Text>
           </Center>
         ) : (
-          <SearchResults results={grants.data ?? []} />
+          <Stack gap="4">
+            <Stack
+              flexDir={{
+                base: "column",
+                md: "row",
+              }}
+              gap="4"
+              alignSelf={{ md: "flex-end" }}
+              w={{
+                base: "full",
+                md: "md",
+              }}
+            >
+              <SearchField
+                value={filter}
+                onChange={handleSearchChange}
+                onClear={() =>
+                  navigate({
+                    search: {},
+                  })
+                }
+              />
+            </Stack>
+            <SearchResults results={results} />
+          </Stack>
         )}
       </Stack>
     </Container>

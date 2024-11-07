@@ -9,7 +9,8 @@
     "./color-mode": "./src/components/color-mode.tsx",
     "./empty-state": "./src/components/empty-state.tsx",
     "./data-list": "./src/components/data-list.tsx",
-    "./provider": "./src/components/provider.tsx"
+    "./provider": "./src/components/provider.tsx",
+    "./search-field": "./src/components/search-field.tsx"
   },
   "scripts": {
     "lint": "biome check --apply ./src",
