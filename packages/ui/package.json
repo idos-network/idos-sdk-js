@@ -7,6 +7,8 @@
     ".": "./src/components/index.ts",
     "./button": "./src/components/button.tsx",
     "./color-mode": "./src/components/color-mode.tsx",
+    "./empty-state": "./src/components/empty-state.tsx",
+    "./data-list": "./src/components/data-list.tsx",
     "./provider": "./src/components/provider.tsx"
   },
   "scripts": {
