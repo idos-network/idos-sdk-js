@@ -29,6 +29,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ChakraBaseProvider theme={theme}>
       <WalletSelectorContextProvider>
+        {/* @ts-expect-error: TODO: fix wagmi types */}
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
             <IDOSProvider>
