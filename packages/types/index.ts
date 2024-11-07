@@ -21,7 +21,7 @@ export interface idOSCredential2 {
   id: string;
   human_id: string;
   issuer: string;
-  original_id: string;
+  original_id?: string;
   public_notes: string;
   public_notes_signature: string;
   broader_signature: string;

@@ -70,20 +70,6 @@ const makePublicNotes = (plaintextW3cVc: ReturnType<typeof makeW3cCredential>): 
   return { credentialId: plaintextW3cVc.id, riskScore: 4 };
 };
 
-interface IssuerResult {
-  w3cVc: Uint8Array;
-
-  publicNotes: object;
-  publicNotesSignature: Uint8Array;
-
-  broaderSignature: Uint8Array;
-
-  issuerAuthenticationPublicKey: Uint8Array;
-  issuerEncryptionPublicKey: Uint8Array;
-
-  humanId: string;
-}
-
 export const issuer = (
   idvData: IdvDataResult,
   humanId: string,
@@ -91,96 +77,101 @@ export const issuer = (
   issuerEncryptionSecretKey: Uint8Array,
   issuerAttestationSecretKey: Uint8Array,
   issuerAuthenticationSecretKey: Uint8Array,
-): IssuerResult => {
-  const plaintextW3cVc = makeW3cCredential(idvData, issuerAttestationSecretKey);
+): InsertableIdosCredential2 => {
+  const plaintextContent = makeW3cCredential(idvData, issuerAttestationSecretKey);
+  const publicNotes = makePublicNotes(plaintextContent);
 
-  const w3cVc = encrypt(
-    toBytes(plaintextW3cVc),
+  return buildInsertableIdosCredential2(
     issuerEncryptionSecretKey,
+    issuerAuthenticationSecretKey,
+    humanId,
+    JSON.stringify(publicNotes),
+    toBytes(plaintextContent),
     receiverEncryptionPublicKey,
   );
+};
 
-  const publicNotes = makePublicNotes(plaintextW3cVc);
-  const publicNotesSignature = nacl.sign(toBytes(publicNotes), issuerAuthenticationSecretKey);
+// TODO: creds2: this type and function should probably end up on the SDK.
+type InsertableIdosCredential2 = Omit<idOSCredential2, "id" | "original_id">;
+export const buildInsertableIdosCredential2 = (
+  issuerEncryptionSecretKey: Uint8Array,
+  issuerAuthenticationSecretKey: Uint8Array,
+  humanId: string,
+  publicNotes: string,
+  plaintextContent: Uint8Array,
+  receiverEncryptionPublicKey: Uint8Array,
+): InsertableIdosCredential2 => {
+  const content = encrypt(plaintextContent, issuerEncryptionSecretKey, receiverEncryptionPublicKey);
+  const publicNotesSignature = nacl.sign(
+    Utf8Codec.encode(publicNotes),
+    issuerAuthenticationSecretKey,
+  );
 
   return {
-    humanId,
+    human_id: humanId,
+    content: Base64Codec.encode(content),
 
-    w3cVc,
+    public_notes: publicNotes,
+    public_notes_signature: Base64Codec.encode(publicNotesSignature),
 
-    publicNotes,
-    publicNotesSignature,
-
-    broaderSignature: nacl.sign(
-      Uint8Array.from([...publicNotesSignature, ...w3cVc]),
-      issuerAuthenticationSecretKey,
+    broader_signature: Base64Codec.encode(
+      nacl.sign(
+        Uint8Array.from([...publicNotesSignature, ...content]),
+        issuerAuthenticationSecretKey,
+      ),
     ),
 
-    issuerAuthenticationPublicKey: nacl.sign.keyPair.fromSecretKey(issuerAuthenticationSecretKey)
-      .publicKey,
-    issuerEncryptionPublicKey: nacl.sign.keyPair.fromSecretKey(issuerEncryptionSecretKey).publicKey,
+    issuer: Base64Codec.encode(
+      nacl.sign.keyPair.fromSecretKey(issuerAuthenticationSecretKey).publicKey,
+    ),
+    encryption_public_key: Base64Codec.encode(
+      nacl.sign.keyPair.fromSecretKey(issuerEncryptionSecretKey).publicKey,
+    ),
   };
 };
 
 // ---
-import { createIssuerConfig2 } from "@idos-network/issuer-sdk-js/create-issuer-config";
+import {
+  type IssuerConfig2,
+  createIssuerConfig2,
+} from "@idos-network/issuer-sdk-js/create-issuer-config";
 import {
   createCredentialByGrant2,
   createCredentialPermissioned2,
   shareCredentialByGrant2,
 } from "@idos-network/issuer-sdk-js/credentials";
 
-export const inserterIssuerPermissioned = async (
-  issuer: IssuerResult,
-  inserterAuthenticationSecretKey: Uint8Array,
-) => {
+const issuerConfigBuild = (inserterAuthenticationSecretKey: Uint8Array): Promise<IssuerConfig2> => {
   const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
     inserterAuthenticationSecretKey,
   );
 
   if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
-  const issuerConfig = await createIssuerConfig2({
+  return createIssuerConfig2({
     nodeUrl: process.env.IDOS_NODE_URL,
     signer: issuerAuthenticationWallet,
   });
-
-  return createCredentialPermissioned2(issuerConfig, {
-    issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
-    human_id: issuer.humanId,
-    content: Base64Codec.encode(issuer.w3cVc),
-    public_notes: JSON.stringify(issuer.publicNotes),
-    public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
-    broader_signature: Base64Codec.encode(issuer.broaderSignature),
-  });
 };
 
-export const inserterIssuerWriteGrant = async (
-  issuer: IssuerResult,
+export const inserter_Issuer_Permissioned = async (
+  credential: InsertableIdosCredential2,
   inserterAuthenticationSecretKey: Uint8Array,
 ) => {
-  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
-    inserterAuthenticationSecretKey,
-  );
+  const issuerConfig = await issuerConfigBuild(inserterAuthenticationSecretKey);
 
-  if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
-  const issuerConfig = await createIssuerConfig2({
-    nodeUrl: process.env.IDOS_NODE_URL,
-    signer: issuerAuthenticationWallet,
-  });
-
-  return createCredentialByGrant2(issuerConfig, {
-    issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
-    human_id: issuer.humanId,
-    content: Base64Codec.encode(issuer.w3cVc),
-    public_notes: JSON.stringify(issuer.publicNotes),
-    public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
-    broader_signature: Base64Codec.encode(issuer.broaderSignature),
-  });
+  return createCredentialPermissioned2(issuerConfig, credential);
 };
 
-export const inserterIssuerWriteGrantShare = async (
+export const inserter_Issuer_WriteGrant = async (
+  credential: InsertableIdosCredential2,
+  inserterAuthenticationSecretKey: Uint8Array,
+) => {
+  const issuerConfig = await issuerConfigBuild(inserterAuthenticationSecretKey);
+
+  return createCredentialByGrant2(issuerConfig, credential);
+};
+
+export const inserter_Issuer_WriteGrant_Share = async (
   idvData: IdvDataResult,
   humanId: string,
   inserterAuthenticationSecretKey: Uint8Array,
@@ -192,72 +183,45 @@ export const inserterIssuerWriteGrantShare = async (
   issuerAttestationSecretKey: Uint8Array,
   issuerAuthenticationSecretKey: Uint8Array,
 ) => {
-  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
-    inserterAuthenticationSecretKey,
-  );
+  const issuerConfig = await issuerConfigBuild(inserterAuthenticationSecretKey);
 
-  if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
-  const issuerConfig = await createIssuerConfig2({
-    nodeUrl: process.env.IDOS_NODE_URL,
-    signer: issuerAuthenticationWallet,
-  });
+  const plaintextContent = makeW3cCredential(idvData, issuerAttestationSecretKey);
+  const publicNotes = makePublicNotes(plaintextContent);
 
-  const issuerDataOriginal = issuer(
-    idvData,
-    humanId,
-    userEncryptionPublicKey,
-    issuerEncryptionSecretKey,
-    issuerAttestationSecretKey,
-    issuerAuthenticationSecretKey,
-  );
-
-  const credential: idOSCredential2 = await createCredentialByGrant2(issuerConfig, {
-    issuer: Base64Codec.encode(issuerDataOriginal.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(issuerDataOriginal.issuerEncryptionPublicKey),
-    human_id: issuerDataOriginal.humanId,
-    content: Base64Codec.encode(issuerDataOriginal.w3cVc),
-    public_notes: JSON.stringify(issuerDataOriginal.publicNotes),
-    public_notes_signature: Base64Codec.encode(issuerDataOriginal.publicNotesSignature),
-    broader_signature: Base64Codec.encode(issuerDataOriginal.broaderSignature),
-  });
-
-  const dataForSharedCredential = issuer(
-    idvData,
-    humanId,
-    granteeEncryptionPublicKey,
-    issuerEncryptionSecretKey,
-    issuerAttestationSecretKey,
-    issuerAuthenticationSecretKey,
+  const credential: idOSCredential2 = await createCredentialByGrant2(
+    issuerConfig,
+    buildInsertableIdosCredential2(
+      issuerEncryptionSecretKey,
+      issuerAuthenticationSecretKey,
+      humanId,
+      JSON.stringify(publicNotes),
+      toBytes(plaintextContent),
+      userEncryptionPublicKey, // Notice this is for the user.
+    ),
   );
 
   return shareCredentialByGrant2(issuerConfig, {
-    issuer: Base64Codec.encode(dataForSharedCredential.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(dataForSharedCredential.issuerEncryptionPublicKey),
-    human_id: dataForSharedCredential.humanId,
-    content: Base64Codec.encode(dataForSharedCredential.w3cVc),
-    public_notes: JSON.stringify(dataForSharedCredential.publicNotes),
-    public_notes_signature: Base64Codec.encode(dataForSharedCredential.publicNotesSignature),
-    broader_signature: Base64Codec.encode(dataForSharedCredential.broaderSignature),
+    ...buildInsertableIdosCredential2(
+      issuerEncryptionSecretKey,
+      issuerAuthenticationSecretKey,
+      humanId,
+      "", // No public notes: they're always empty for shares.
+      toBytes(plaintextContent), // Same content as before.
+      granteeEncryptionPublicKey, // Notice this is for the grantee, not the user.
+    ),
+    original_credential_id: credential.id,
     grantee,
     locked_until,
-    original_credential_id: credential.id,
   });
 };
 
 import { idOS } from "@idos-network/idos-sdk";
 import type { idOSCredential2 } from "@idos-network/idos-sdk-types";
-export const inserterHuman = async (issuer: IssuerResult) => {
+
+export const inserter_Human = async (credential: InsertableIdosCredential2) => {
   const idos = await idOS.init({ enclaveOptions: { container: "" } });
   // biome-ignore lint/suspicious/noExplicitAny: Let's pretend this was correctly initialized
   await idos.setSigner("EVM", {} as any);
 
-  return idos.data.create<Omit<idOSCredential2, "original_id" | "human_id">>("credential2s", {
-    issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
-    content: Base64Codec.encode(issuer.w3cVc),
-    public_notes: JSON.stringify(issuer.publicNotes),
-    public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
-    broader_signature: Base64Codec.encode(issuer.broaderSignature),
-    // TODO: creds2: Maybe add human_id?
-  });
+  return idos.data.create<idOSCredential2>("credential2s", credential);
 };

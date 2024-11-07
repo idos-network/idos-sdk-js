@@ -80,9 +80,8 @@ export class Data {
       }
     }
 
-    // TODO: creds2: What should I do here?
     if (tableName === "credential2s") {
-      // TODO: creds2: Maybe add human_id?
+      // TODO: creds2: buildInsertableIdosCredential2
     }
 
     const newRecords = records.map((record) => ({
@@ -129,9 +128,8 @@ export class Data {
       (record as AnyRecord).encryption_public_key = receiverPublicKey;
     }
 
-    // TODO: creds2: What should I do here?
     if (tableName === "credential2s") {
-      // TODO: creds2: Maybe add human_id?
+      // TODO: creds2: buildInsertableIdosCredential2
     }
 
     const newRecord = { id: crypto.randomUUID(), ...record };
@@ -256,6 +254,10 @@ export class Data {
       record.content = await this.enclave.encrypt(record.content, receiverPublicKey);
     }
 
+    if (tableName === "credential2s") {
+      // TODO: creds2: buildInsertableIdosCredential2
+    }
+
     await this.kwilWrapper.execute(
       `edit_${this.singularize(tableName)}`,
       [record],
@@ -281,6 +283,10 @@ export class Data {
     if (tableName === "credentials") {
       record.content = await this.enclave.encrypt(record.content as string, receiverPublicKey);
       record.encryption_public_key = encPublicKey;
+    }
+
+    if (tableName === "credential2s") {
+      // TODO: creds2: buildInsertableIdosCredential2
     }
 
     const id = crypto.randomUUID();

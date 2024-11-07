@@ -170,8 +170,9 @@ export async function shareCredentialByGrant2(
 ): Promise<idOSCredential2> {
   const payload = ensureEntityId(params);
 
-  // TODO: creds2: What should I do here?
-  // TODO: creds2: We need to recypher the copy contents.
+  if (params.public_notes !== "")
+    throw new Error("shared credentials cannot have public_notes, it must be an empty string");
+
   await kwilClient.execute(
     {
       name: "share_credential_by_write_grant2",
