@@ -87,7 +87,7 @@ interface IssuerResult {
 export const issuer = (
   idvData: IdvDataResult,
   humanId: string,
-  userEncryptionPublicKey: Uint8Array,
+  receiverEncryptionPublicKey: Uint8Array,
   issuerEncryptionSecretKey: Uint8Array,
   issuerAttestationSecretKey: Uint8Array,
   issuerAuthenticationSecretKey: Uint8Array,
@@ -97,7 +97,7 @@ export const issuer = (
   const w3cVc = encrypt(
     toBytes(plaintextW3cVc),
     issuerEncryptionSecretKey,
-    userEncryptionPublicKey,
+    receiverEncryptionPublicKey,
   );
 
   const publicNotes = makePublicNotes(plaintextW3cVc);
@@ -181,8 +181,16 @@ export const inserterIssuerWriteGrant = async (
 };
 
 export const inserterIssuerWriteGrantShare = async (
-  issuer: IssuerResult,
+  idvData: IdvDataResult,
+  humanId: string,
   inserterAuthenticationSecretKey: Uint8Array,
+  locked_until: number,
+  grantee: string,
+  userEncryptionPublicKey: Uint8Array,
+  granteeEncryptionPublicKey: Uint8Array,
+  issuerEncryptionSecretKey: Uint8Array,
+  issuerAttestationSecretKey: Uint8Array,
+  issuerAuthenticationSecretKey: Uint8Array,
 ) => {
   const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
     inserterAuthenticationSecretKey,
@@ -194,17 +202,45 @@ export const inserterIssuerWriteGrantShare = async (
     signer: issuerAuthenticationWallet,
   });
 
+  const issuerDataOriginal = issuer(
+    idvData,
+    humanId,
+    userEncryptionPublicKey,
+    issuerEncryptionSecretKey,
+    issuerAttestationSecretKey,
+    issuerAuthenticationSecretKey,
+  );
+
+  const credential: idOSCredential2 = await createCredentialByGrant2(issuerConfig, {
+    issuer: Base64Codec.encode(issuerDataOriginal.issuerAuthenticationPublicKey),
+    encryption_public_key: Base64Codec.encode(issuerDataOriginal.issuerEncryptionPublicKey),
+    human_id: issuerDataOriginal.humanId,
+    content: Base64Codec.encode(issuerDataOriginal.w3cVc),
+    public_notes: JSON.stringify(issuerDataOriginal.publicNotes),
+    public_notes_signature: Base64Codec.encode(issuerDataOriginal.publicNotesSignature),
+    broader_signature: Base64Codec.encode(issuerDataOriginal.broaderSignature),
+  });
+
+  const dataForSharedCredential = issuer(
+    idvData,
+    humanId,
+    granteeEncryptionPublicKey,
+    issuerEncryptionSecretKey,
+    issuerAttestationSecretKey,
+    issuerAuthenticationSecretKey,
+  );
+
   return shareCredentialByGrant2(issuerConfig, {
-    issuer: Base64Codec.encode(issuer.issuerAuthenticationPublicKey),
-    encryption_public_key: Base64Codec.encode(issuer.issuerEncryptionPublicKey),
-    human_id: issuer.humanId,
-    content: Base64Codec.encode(issuer.w3cVc),
-    public_notes: JSON.stringify(issuer.publicNotes),
-    public_notes_signature: Base64Codec.encode(issuer.publicNotesSignature),
-    broader_signature: Base64Codec.encode(issuer.broaderSignature),
-    grantee: "", // TODO: creds2: where do I come from?
-    locked_until: 0, // TODO: creds2: where do I come from?
-    original_credential_id: "", // TODO: creds2: where do I come from?
+    issuer: Base64Codec.encode(dataForSharedCredential.issuerAuthenticationPublicKey),
+    encryption_public_key: Base64Codec.encode(dataForSharedCredential.issuerEncryptionPublicKey),
+    human_id: dataForSharedCredential.humanId,
+    content: Base64Codec.encode(dataForSharedCredential.w3cVc),
+    public_notes: JSON.stringify(dataForSharedCredential.publicNotes),
+    public_notes_signature: Base64Codec.encode(dataForSharedCredential.publicNotesSignature),
+    broader_signature: Base64Codec.encode(dataForSharedCredential.broaderSignature),
+    grantee,
+    locked_until,
+    original_credential_id: credential.id,
   });
 };
 
