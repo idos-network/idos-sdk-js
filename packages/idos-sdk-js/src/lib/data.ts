@@ -1,11 +1,17 @@
+import type { idOSCredential2 } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
+import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
+import { Nonce } from "./nonce";
 
 /* global crypto */
 
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
 type AnyRecord = Record<string, any>;
+
+type InsertableIdosCredential2 = Omit<idOSCredential2, "id" | "original_id">;
 
 export class Data {
   constructor(
@@ -81,7 +87,18 @@ export class Data {
     }
 
     if (tableName === "credential2s") {
-      // TODO: creds2: buildInsertableIdosCredential2
+      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      for (const record of records) {
+        Object.assign(
+          record,
+          await this.#buildInsertableIdosCredential2(
+            record.human_id,
+            record.public_notes,
+            record.content,
+            receiverPublicKey, // Encryption
+          ),
+        );
+      }
     }
 
     const newRecords = records.map((record) => ({
@@ -129,7 +146,16 @@ export class Data {
     }
 
     if (tableName === "credential2s") {
-      // TODO: creds2: buildInsertableIdosCredential2
+      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential2(
+          (record as AnyRecord).human_id,
+          (record as AnyRecord).public_notes,
+          (record as AnyRecord).content,
+          receiverPublicKey, // Encryption
+        ),
+      );
     }
 
     const newRecord = { id: crypto.randomUUID(), ...record };
@@ -255,7 +281,16 @@ export class Data {
     }
 
     if (tableName === "credential2s") {
-      // TODO: creds2: buildInsertableIdosCredential2
+      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential2(
+          record.human_id,
+          record.public_notes,
+          record.content,
+          receiverPublicKey, // Encryption
+        ),
+      );
     }
 
     await this.kwilWrapper.execute(
@@ -286,7 +321,15 @@ export class Data {
     }
 
     if (tableName === "credential2s") {
-      // TODO: creds2: buildInsertableIdosCredential2
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential2(
+          record.human_id,
+          record.public_notes,
+          record.content,
+          receiverPublicKey, // Encryption
+        ),
+      );
     }
 
     const id = crypto.randomUUID();
@@ -320,4 +363,44 @@ export class Data {
       `Grant ${grantee} write access to your idOS credentials`,
     );
   }
+
+  async #buildInsertableIdosCredential2(
+    humanId: string,
+    publicNotes: string,
+    plaintextContent: string,
+    receiverEncryptionPublicKey: string,
+  ): Promise<InsertableIdosCredential2> {
+    const issuerAuthenticationSecretKey: Uint8Array = new Nonce(nacl.sign.secretKeyLength).bytes;
+
+    const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
+    const publicNotesSignature = nacl.sign(
+      Utf8Codec.encode(publicNotes),
+      issuerAuthenticationSecretKey,
+    );
+
+    return {
+      human_id: humanId,
+      content,
+
+      public_notes: publicNotes,
+      public_notes_signature: Base64Codec.encode(publicNotesSignature),
+
+      broader_signature: Base64Codec.encode(
+        nacl.sign(
+          Uint8Array.from([...publicNotesSignature, ...Base64Codec.decode(content)]),
+          issuerAuthenticationSecretKey,
+        ),
+      ),
+
+      issuer: Base64Codec.encode(
+        nacl.sign.keyPair.fromSecretKey(issuerAuthenticationSecretKey).publicKey,
+      ),
+      encryption_public_key: present(this.enclave.auth.currentUser.currentUserPublicKey),
+    };
+  }
 }
+
+const present = <T>(obj: T | undefined | null): T => {
+  if (!obj) throw new Error("Unexpected absence");
+  return obj;
+};

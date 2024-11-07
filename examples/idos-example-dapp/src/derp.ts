@@ -91,7 +91,7 @@ export const issuer = (
   );
 };
 
-// TODO: creds2: this type and function should probably end up on the SDK.
+// TODO: creds2: I should move this to inside the issuer SDK.
 type InsertableIdosCredential2 = Omit<idOSCredential2, "id" | "original_id">;
 export const buildInsertableIdosCredential2 = (
   issuerEncryptionSecretKey: Uint8Array,
@@ -205,7 +205,7 @@ export const inserter_Issuer_WriteGrant_Share = async (
       issuerEncryptionSecretKey,
       issuerAuthenticationSecretKey,
       humanId,
-      "", // No public notes: they're always empty for shares.
+      "", // No public notes: they must be empty for shares.
       toBytes(plaintextContent), // Same content as before.
       granteeEncryptionPublicKey, // Notice this is for the grantee, not the user.
     ),
