@@ -1,4 +1,4 @@
-import { Center, Code, Container, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Center, Container, HStack, Image, Spinner, Stack, Text } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
@@ -22,7 +22,7 @@ import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDebounce, useToggle } from "@uidotdev/usehooks";
+import { useDebounce, useLocalStorage, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
@@ -143,11 +143,12 @@ function CredentialDetails({
 }: { content: string; open: boolean; toggle: (value?: boolean) => void }) {
   if (!content) return null;
 
+  const parsedContent = JSON.parse(content);
+
   return (
     <DialogRoot
       open={open}
       placement="center"
-      size="lg"
       onOpenChange={() => {
         toggle(false);
       }}
@@ -157,9 +158,53 @@ function CredentialDetails({
           <DialogTitle>Credential details</DialogTitle>
         </DialogHeader>
         <DialogBody>
-          <Code color="green.500" padding="4" w="full" overflow="auto">
-            <pre>{content}</pre>
-          </Code>
+          <Stack>
+            <DataListRoot orientation="horizontal" divideY="1px">
+              <DataListItem
+                pt="4"
+                grow
+                label="Full name"
+                value={parsedContent.credentialSubject.full_name}
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Date of birth"
+                value={parsedContent.credentialSubject.date_of_birth}
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Residential address country"
+                value={parsedContent.credentialSubject.residential_address_country}
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Identification document country"
+                value={parsedContent.credentialSubject.identification_document_country}
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Identification document type"
+                value={parsedContent.credentialSubject.identification_document_type.toLocaleUpperCase()}
+              />
+
+              <DataListItem
+                pt="4"
+                grow
+                label="Identification document number"
+                value={parsedContent.credentialSubject.identification_document_number}
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Email"
+                value={parsedContent.credentialSubject.emails[0].address}
+              />
+            </DataListRoot>
+          </Stack>
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
@@ -173,25 +218,49 @@ function CredentialDetails({
 }
 
 function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
-  const [id, setId] = useState("");
-  const [open, toggle] = useToggle();
-  const [openDetails, toggleDetails] = useToggle();
-  const credential = useFetchCredential(id);
+  const [credentialId, setCredentialId] = useState("");
+  const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
+  const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [content, setContent] = useState("");
+  const credential = useFetchCredential(credentialId);
+  const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
 
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
-  const onKeySubmit = async (secretKey: string) => {
+  const handleOpenCredentialDetails = async () => {
     if (!credential.data) return;
+
+    if (!secretKey) {
+      toggleSecretKeyPrompt();
+      return;
+    }
+
     const content = await decrypt(
       credential.data.content,
       credential.data.encryption_public_key,
       secretKey,
     );
     setContent(content);
-    toggleDetails();
+    toggleCredentialDetails();
+  };
+
+  const onKeySubmit = async (secretKey: string) => {
+    if (!credential.data) return;
+
+    const content = await decrypt(
+      credential.data.content,
+      credential.data.encryption_public_key,
+      secretKey,
+    );
+    setSecretKey(secretKey);
+    setContent(content);
+    toggleCredentialDetails();
+  };
+
+  const handlePrefetchCredential = (id: string) => {
+    setCredentialId(id);
   };
 
   return (
@@ -263,18 +332,20 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             alignSelf={{
               md: "flex-end",
             }}
-            loading={credential.isFetching}
-            onClick={() => {
-              setId(grant.dataId);
-              toggle();
-            }}
+            onMouseEnter={() => handlePrefetchCredential(grant.dataId)}
+            onClick={() => handleOpenCredentialDetails()}
           >
             Credential details
           </Button>
         </Stack>
       ))}
-      <SecretKeyPrompt {...{ open, toggle, onSubmit: onKeySubmit }} />
-      <CredentialDetails content={content} open={openDetails} toggle={toggleDetails} />
+      <SecretKeyPrompt
+        {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
+      />
+
+      <CredentialDetails
+        {...{ content, open: openCredentialDetails, toggle: toggleCredentialDetails }}
+      />
     </>
   );
 }
