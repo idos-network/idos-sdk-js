@@ -1,4 +1,4 @@
-import { Center, Code, Container, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Center, Code, Container, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
@@ -15,6 +15,7 @@ import {
   EmptyState,
   Field,
   PasswordInput,
+  RefreshButton,
   SearchField,
 } from "@idos-network/ui-kit";
 import * as Base64Codec from "@stablelib/base64";
@@ -312,11 +313,7 @@ function Index() {
           </Center>
         ) : (
           <Stack gap="4">
-            <Stack
-              flexDir={{
-                base: "column",
-                md: "row",
-              }}
+            <HStack
               gap="4"
               alignSelf={{ md: "flex-end" }}
               w={{
@@ -333,7 +330,14 @@ function Index() {
                   })
                 }
               />
-            </Stack>
+              <RefreshButton
+                aria-label="Refresh grants list"
+                title="Refresh grants list"
+                variant="subtle"
+                colorPalette="gray"
+                onClick={() => grants.refetch()}
+              />
+            </HStack>
             <SearchResults results={results} />
           </Stack>
         )}
