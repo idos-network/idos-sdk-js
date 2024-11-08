@@ -167,7 +167,11 @@ export class Data {
     return record || null;
   }
 
-  async getShared<T extends AnyRecord>(tableName: string, recordId: string): Promise<T | null> {
+  async getShared<T extends AnyRecord>(
+    tableName: string,
+    recordId: string,
+    decrypt = true,
+  ): Promise<T | null> {
     if (tableName === "credentials") {
       const records = (await this.kwilWrapper.call(
         "get_credential_shared",
@@ -180,7 +184,9 @@ export class Data {
 
       if (!record) return null;
 
-      record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+      if (decrypt) {
+        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+      }
 
       return record;
     }

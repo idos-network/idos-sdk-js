@@ -7,8 +7,12 @@
     ".": "./src/components/index.ts",
     "./button": "./src/components/button.tsx",
     "./color-mode": "./src/components/color-mode.tsx",
+    "./close-button": "./src/components/close-button.tsx",
+    "./dialog": "./src/components/dialog.tsx",
     "./empty-state": "./src/components/empty-state.tsx",
+    "./field": "./src/components/field.tsx",
     "./data-list": "./src/components/data-list.tsx",
+    "./password-input": "./src/components/password-input.tsx",
     "./provider": "./src/components/provider.tsx",
     "./search-field": "./src/components/search-field.tsx"
   },
