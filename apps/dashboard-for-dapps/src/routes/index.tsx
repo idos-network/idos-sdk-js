@@ -1,13 +1,13 @@
 import { Center, Container, Spinner, Stack, Text } from "@chakra-ui/react";
 import { Button, DataListItem, DataListRoot, EmptyState, SearchField } from "@idos-network/ui-kit";
-import { useQuery } from "@tanstack/react-query";
+import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useAccount } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -41,10 +41,20 @@ const useFetchGrants = () => {
       })),
   });
 };
-
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
 
+const useFetchCredential = (id: string) => {
+  const idOS = useIdOS();
+  return useQuery({
+    queryKey: ["credential-details", id],
+    queryFn: id ? () => idOS.data.getShared("credentials", id, false) : skipToken,
+  });
+};
+
 function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
+  const [id, setId] = useState("");
+  const credential = useFetchCredential(id);
+
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
@@ -117,6 +127,9 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
           <Button
             alignSelf={{
               md: "flex-end",
+            }}
+            onClick={() => {
+              setId(grant.dataId);
             }}
           >
             Credential details
