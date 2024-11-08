@@ -186,6 +186,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             alignSelf={{
               md: "flex-end",
             }}
+            loading={credential.isFetching}
             onClick={() => {
               setId(grant.dataId);
               toggle();
