@@ -1,5 +1,7 @@
 import { ThemeProvider } from "@idos-network/ui-kit";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -14,7 +16,18 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      staleTime: Number.POSITIVE_INFINITY,
+    },
+  },
+});
+
+const persister = createSyncStoragePersister({
+  storage: window.localStorage,
+});
 
 const router = createRouter({
   routeTree,
@@ -37,11 +50,11 @@ declare module "@tanstack/react-router" {
 createRoot(root).render(
   <StrictMode>
     <WagmiProvider config={getConfig()}>
-      <QueryClientProvider client={queryClient}>
+      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ThemeProvider forcedTheme="dark">
           <RouterProvider router={router} />
         </ThemeProvider>
-      </QueryClientProvider>
+      </PersistQueryClientProvider>
     </WagmiProvider>
   </StrictMode>,
 );

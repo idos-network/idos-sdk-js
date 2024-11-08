@@ -14,6 +14,7 @@
     "./data-list": "./src/components/data-list.tsx",
     "./password-input": "./src/components/password-input.tsx",
     "./provider": "./src/components/provider.tsx",
+    "./refresh-button": "./src/components/refresh-button.tsx",
     "./search-field": "./src/components/search-field.tsx"
   },
   "scripts": {

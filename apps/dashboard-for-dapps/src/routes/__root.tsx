@@ -10,14 +10,15 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import { Button } from "@idos-network/ui-kit";
-import type { QueryClient } from "@tanstack/react-query";
+import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Link, Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 
 import { Provider } from "@/idOS.provider";
+import { useEffect } from "react";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -54,6 +55,18 @@ function ConnectWallet() {
 function RootComponent() {
   const { disconnect } = useDisconnect();
   const { isConnected } = useAccount();
+
+  const queryClient = useQueryClient();
+  const navigate = useNavigate({ from: Route.fullPath });
+
+  useEffect(() => {
+    if (!isConnected) {
+      queryClient.clear();
+      navigate({
+        search: {},
+      });
+    }
+  }, [isConnected, queryClient, navigate]);
 
   if (!isConnected) {
     return <ConnectWallet />;
