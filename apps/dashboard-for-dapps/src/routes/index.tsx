@@ -1,13 +1,29 @@
 import { Center, Container, Spinner, Stack, Text } from "@chakra-ui/react";
-import { Button, DataListItem, DataListRoot, EmptyState, SearchField } from "@idos-network/ui-kit";
+import {
+  Button,
+  DataListItem,
+  DataListRoot,
+  DialogActionTrigger,
+  DialogBody,
+  DialogCloseTrigger,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogRoot,
+  DialogTitle,
+  EmptyState,
+  Field,
+  PasswordInput,
+  SearchField,
+} from "@idos-network/ui-kit";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDebounce } from "@uidotdev/usehooks";
+import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useAccount } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -51,8 +67,50 @@ const useFetchCredential = (id: string) => {
   });
 };
 
+function SecretKeyPrompt({
+  open,
+  toggle,
+}: {
+  open: boolean;
+  toggle: (value?: boolean) => void;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+
+  return (
+    <DialogRoot
+      open={open}
+      placement="center"
+      onOpenChange={() => {
+        toggle(false);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Enter your secret key</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <Stack gap="4">
+            <Field label="Secret key:">
+              <PasswordInput ref={ref} />
+            </Field>
+          </Stack>
+        </DialogBody>
+        <DialogFooter>
+          <DialogActionTrigger asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogActionTrigger>
+          <Button>Save</Button>
+        </DialogFooter>
+        <DialogCloseTrigger />
+      </DialogContent>
+    </DialogRoot>
+  );
+}
+
 function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
   const [id, setId] = useState("");
+  const [open, toggle] = useToggle();
+
   const credential = useFetchCredential(id);
 
   if (!results.length) {
@@ -130,12 +188,14 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             }}
             onClick={() => {
               setId(grant.dataId);
+              toggle();
             }}
           >
             Credential details
           </Button>
         </Stack>
       ))}
+      <SecretKeyPrompt {...{ open, toggle }} />
     </>
   );
 }
