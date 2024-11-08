@@ -24,11 +24,11 @@ import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
+import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
 import { useAccount } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
-import { useMemo, useRef, useState } from "react";
 
 export const Route = createFileRoute("/")({
   component: Index,
