@@ -1,4 +1,5 @@
-import { Center, Container, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Center, Code, Container, Spinner, Stack, Text } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
   DataListItem,
@@ -16,10 +17,13 @@ import {
   PasswordInput,
   SearchField,
 } from "@idos-network/ui-kit";
+import * as Base64Codec from "@stablelib/base64";
+import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
+import nacl from "tweetnacl";
 import { useAccount } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
@@ -63,18 +67,42 @@ const useFetchCredential = (id: string) => {
   const idOS = useIdOS();
   return useQuery({
     queryKey: ["credential-details", id],
-    queryFn: id ? () => idOS.data.getShared("credentials", id, false) : skipToken,
+    queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
   });
 };
+
+async function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
+  const fullMessage = Base64Codec.decode(b64FullMessage);
+  const senderPublicKey = Base64Codec.decode(b64SenderPublicKey);
+
+  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+
+  const decrypted = nacl.box.open(message, nonce, senderPublicKey, Base64Codec.decode(secretKey));
+
+  if (decrypted == null) {
+    return "";
+  }
+
+  return Utf8Codec.decode(decrypted);
+}
 
 function SecretKeyPrompt({
   open,
   toggle,
+  onSubmit,
 }: {
   open: boolean;
   toggle: (value?: boolean) => void;
+  onSubmit: (key: string) => void;
 }) {
   const ref = useRef<HTMLInputElement>(null);
+  const [key, setKey] = useState("");
+
+  const handleSave = () => {
+    onSubmit(key);
+    toggle(false);
+  };
 
   return (
     <DialogRoot
@@ -91,7 +119,7 @@ function SecretKeyPrompt({
         <DialogBody>
           <Stack gap="4">
             <Field label="Secret key:">
-              <PasswordInput ref={ref} />
+              <PasswordInput ref={ref} onChange={(e) => setKey(e.target.value)} />
             </Field>
           </Stack>
         </DialogBody>
@@ -99,7 +127,43 @@ function SecretKeyPrompt({
           <DialogActionTrigger asChild>
             <Button variant="outline">Cancel</Button>
           </DialogActionTrigger>
-          <Button>Save</Button>
+          <Button onClick={handleSave}>Save</Button>
+        </DialogFooter>
+        <DialogCloseTrigger />
+      </DialogContent>
+    </DialogRoot>
+  );
+}
+
+function CredentialDetails({
+  content,
+  open,
+  toggle,
+}: { content: string; open: boolean; toggle: (value?: boolean) => void }) {
+  if (!content) return null;
+
+  return (
+    <DialogRoot
+      open={open}
+      placement="center"
+      size="lg"
+      onOpenChange={() => {
+        toggle(false);
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Credential details</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <Code color="green.500" padding="4" w="full" overflow="auto">
+            <pre>{content}</pre>
+          </Code>
+        </DialogBody>
+        <DialogFooter>
+          <DialogActionTrigger asChild>
+            <Button variant="outline">Close</Button>
+          </DialogActionTrigger>
         </DialogFooter>
         <DialogCloseTrigger />
       </DialogContent>
@@ -110,12 +174,24 @@ function SecretKeyPrompt({
 function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
   const [id, setId] = useState("");
   const [open, toggle] = useToggle();
-
+  const [openDetails, toggleDetails] = useToggle();
   const credential = useFetchCredential(id);
+  const [content, setContent] = useState("");
 
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
+
+  const onKeySubmit = async (secretKey: string) => {
+    if (!credential.data) return;
+    const content = await decrypt(
+      credential.data.content,
+      credential.data.encryption_public_key,
+      secretKey,
+    );
+    setContent(content);
+    toggleDetails();
+  };
 
   return (
     <>
@@ -196,7 +272,8 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
           </Button>
         </Stack>
       ))}
-      <SecretKeyPrompt {...{ open, toggle }} />
+      <SecretKeyPrompt {...{ open, toggle, onSubmit: onKeySubmit }} />
+      <CredentialDetails content={content} open={openDetails} toggle={toggleDetails} />
     </>
   );
 }

@@ -29,6 +29,12 @@ importers:
       '@idos-network/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@tanstack/react-query':
         specifier: ^5.59.16
         version: 5.59.20(react@18.3.1)
@@ -56,6 +62,9 @@ importers:
       react-icons:
         specifier: ^5.3.0
         version: 5.3.0(react@18.3.1)
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
       viem:
         specifier: 2.x
         version: 2.18.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -350,7 +359,7 @@ importers:
         version: 8.7.0(near-api-js@3.0.4)
       axios:
         specifier: ^1.6.8
-        version: 1.7.2(debug@4.3.5)
+        version: 1.7.2
       ethers:
         specifier: ^6.12
         version: 6.13.3(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -20143,14 +20152,14 @@ snapshots:
 
   axios@0.27.2:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
   axios@1.6.7:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -20159,6 +20168,14 @@ snapshots:
   axios@1.6.8(debug@4.3.4):
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.7.2:
+    dependencies:
+      follow-redirects: 1.15.6
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -22035,6 +22052,8 @@ snapshots:
     dependencies:
       tabbable: 6.2.0
 
+  follow-redirects@1.15.6: {}
+
   follow-redirects@1.15.6(debug@4.3.4):
     optionalDependencies:
       debug: 4.3.4
@@ -22479,7 +22498,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -24261,6 +24280,13 @@ snapshots:
       postcss: 8.4.38
       ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)
 
+  postcss-load-config@4.0.1(postcss@8.4.47):
+    dependencies:
+      lilconfig: 2.1.0
+      yaml: 2.3.2
+    optionalDependencies:
+      postcss: 8.4.47
+
   postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2)):
     dependencies:
       lilconfig: 2.1.0
@@ -25766,7 +25792,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))
+      postcss-load-config: 4.0.1(postcss@8.4.47)
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
