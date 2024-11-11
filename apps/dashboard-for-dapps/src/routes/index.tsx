@@ -1,4 +1,4 @@
-import { Center, Container, HStack, Image, Spinner, Stack, Text } from "@chakra-ui/react";
+import { Center, Container, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
