@@ -1,11 +1,13 @@
 import * as Base64Codec from "@stablelib/base64";
-import * as HexCodec from "@stablelib/hex";
 import * as Utf8Codec from "@stablelib/utf8";
+import { flow } from "es-toolkit";
 import nacl from "tweetnacl";
 
 // utils
 type JsonArg = Parameters<typeof JSON.stringify>[0];
 const toBytes = (obj: JsonArg): Uint8Array => Utf8Codec.encode(JSON.stringify(obj));
+
+const flowValue = (value, ...funcs) => flow(...funcs)(value);
 
 const decrypt = (
   fullMessage: Uint8Array,
@@ -149,15 +151,14 @@ const assertCredentialDecryptedContent = (
   actualContentEncrypted: string,
   receiverEncryptionSecretKey: Uint8Array,
 ) => {
-  const content = JSON.parse(
-    Utf8Codec.decode(
-      decrypt(
-        Base64Codec.decode(actualContentEncrypted),
-        issuerEncryptionPublicKey,
-        receiverEncryptionSecretKey,
-      ),
-    ),
+  const content = flowValue(
+    actualContentEncrypted,
+    Base64Codec.decode,
+    (_) => decrypt(_, issuerEncryptionPublicKey, receiverEncryptionSecretKey),
+    Utf8Codec.decode,
+    JSON.parse,
   );
+
   if (JSON.stringify(content.credentialSubject) !== JSON.stringify(expectedCredentialSubject))
     throw new Error("didn't get back the same");
 };
