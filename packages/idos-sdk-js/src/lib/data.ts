@@ -4,7 +4,6 @@ import * as Utf8Codec from "@stablelib/utf8";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
-import { Nonce } from "./nonce";
 
 /* global crypto */
 
@@ -375,7 +374,7 @@ export class Data {
     plaintextContent: string,
     receiverEncryptionPublicKey: string,
   ): Promise<InsertableIdosCredential2> {
-    const issuerAuthenticationSecretKey: Uint8Array = new Nonce(nacl.sign.secretKeyLength).bytes;
+    const issuerAuthenticationSecretKey: Uint8Array = nacl.sign.keyPair().secretKey;
 
     const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
     const publicNotesSignature = nacl.sign.detached(
