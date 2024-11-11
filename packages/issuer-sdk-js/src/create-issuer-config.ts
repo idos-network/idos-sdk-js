@@ -43,7 +43,11 @@ function createKwilSigner(signer: SignerType): KwilSigner {
     );
   }
 
-  throw new Error("Invalid signer type");
+  // Force the check that signer is never.
+  // If these lines start complaining, that means we're missing an `if` above.
+  return ((_: never) => {
+    throw new Error("Invalid signer type");
+  })(signer);
 }
 
 export async function createIssuerConfig(params: CreateIssuerConfigParams) {
