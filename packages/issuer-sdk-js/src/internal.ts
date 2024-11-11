@@ -2,6 +2,9 @@ import { Utils } from "@kwilteam/kwil-js";
 import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
 
+// TODO: creds2: why do I need this? :x
+import * as crypto from "node:crypto";
+
 export function ensureEntityId<T extends { id?: string }>(entity: T): { id: string } & T {
   return {
     ...entity,

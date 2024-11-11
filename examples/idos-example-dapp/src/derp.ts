@@ -43,10 +43,24 @@ const encrypt = (
   return fullMessage;
 };
 
+const decrypt = (
+  fullMessage: Uint8Array,
+  senderPublicKey: Uint8Array,
+  receiverSecretKey: Uint8Array,
+) => {
+  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+  const decrypted = nacl.box.open(message, nonce, senderPublicKey, receiverSecretKey);
+
+  if (decrypted === null) throw Error(`Couldn't decrypt.`);
+
+  return decrypted;
+};
+
 const fakeProof = (payload: object, issuerAttestationSecretKey: Uint8Array) => {
   // nacl.sign is not the right thing to call, but it's enough for us to show that
   // the wires add up.
-  return nacl.sign(toBytes(payload), issuerAttestationSecretKey);
+  return Base64Codec.encode(nacl.sign.detached(toBytes(payload), issuerAttestationSecretKey));
 };
 
 const attestW3cProof = <T extends object>(payload: T, issuerAttestationSecretKey: Uint8Array) => {
@@ -102,7 +116,7 @@ export const buildInsertableIdosCredential2 = (
   receiverEncryptionPublicKey: Uint8Array,
 ): InsertableIdosCredential2 => {
   const content = encrypt(plaintextContent, issuerEncryptionSecretKey, receiverEncryptionPublicKey);
-  const publicNotesSignature = nacl.sign(
+  const publicNotesSignature = nacl.sign.detached(
     Utf8Codec.encode(publicNotes),
     issuerAuthenticationSecretKey,
   );
@@ -115,7 +129,7 @@ export const buildInsertableIdosCredential2 = (
     public_notes_signature: Base64Codec.encode(publicNotesSignature),
 
     broader_signature: Base64Codec.encode(
-      nacl.sign(
+      nacl.sign.detached(
         Uint8Array.from([...publicNotesSignature, ...content]),
         issuerAuthenticationSecretKey,
       ),
@@ -125,7 +139,7 @@ export const buildInsertableIdosCredential2 = (
       nacl.sign.keyPair.fromSecretKey(issuerAuthenticationSecretKey).publicKey,
     ),
     encryption_public_key: Base64Codec.encode(
-      nacl.sign.keyPair.fromSecretKey(issuerEncryptionSecretKey).publicKey,
+      nacl.box.keyPair.fromSecretKey(issuerEncryptionSecretKey).publicKey,
     ),
   };
 };
@@ -142,16 +156,43 @@ import {
 } from "@idos-network/issuer-sdk-js/credentials";
 
 const issuerConfigBuild = (inserterAuthenticationSecretKey: Uint8Array): Promise<IssuerConfig2> => {
-  const issuerAuthenticationWallet = nacl.sign.keyPair.fromSecretKey(
+  const issuerAuthenticationKeypair = nacl.sign.keyPair.fromSecretKey(
     inserterAuthenticationSecretKey,
   );
 
   if (!process.env.IDOS_NODE_URL) throw new Error("Missing IDOS_NODE_URL");
   return createIssuerConfig2({
     nodeUrl: process.env.IDOS_NODE_URL,
-    signer: issuerAuthenticationWallet,
+    signer: issuerAuthenticationKeypair,
   });
 };
+
+const humanId = "bf8709ce-9dfc-11ef-a188-047c16570806";
+const userEncryptionSecretKey = Base64Codec.decode("nIvx0jPbA8d83rL+I7Vs1B/Fp6pndGtXOX4GDmlEkSQ=");
+const userEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(userEncryptionSecretKey).publicKey;
+const thirdPartyEncryptionSecretKey = Base64Codec.decode(
+  "2u5dLWF8nDLTAt7bgeVUsRw7h4IazpLMYLVN5nmARHc=",
+);
+const thirdPartyEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
+  thirdPartyEncryptionSecretKey,
+).publicKey;
+const _thirdPartyAuthenticationSecretKey = Base64Codec.decode(
+  "USuwbCHE3W6fjXjCbO2nhVy9FzGxu50eb8WjX0/WkE53GwJHyqL0FJ2RlLj1R/dGU6C3kEHb42IGAE90h/V3nQ==",
+);
+const thirdPartyAuthenticationPublicKey = nacl.sign.keyPair.fromSecretKey(
+  _thirdPartyAuthenticationSecretKey,
+).publicKey;
+const issuerEncryptionSecretKey = Base64Codec.decode(
+  "an+BxujIwAkhxZeakZ+xYkATzBzBo3LMlPDfuuOZ7UU=",
+);
+const issuerEncryptionPublicKey =
+  nacl.box.keyPair.fromSecretKey(issuerEncryptionSecretKey).publicKey;
+const issuerAttestationSecretKey = Base64Codec.decode(
+  "EDCS5ZjMAfLXHu2KDkmnNt6GMYRppQRboXUZO0+mIuLw9vnMMzDinxfhfrKpbixDIKpmcwEqBpiNPucSa3mHyA==",
+);
+const issuerAuthenticationSecretKey = Base64Codec.decode(
+  "61TOYtmsLHxDqLNRuDsMFJdo4j9FFESkWFIFfBlxZPFzyPPuLS9svU3RX5JsYL18oHzomPKpNuKCsvXrPzc1Ow==",
+);
 
 export const inserter_Issuer_Permissioned = async (
   credential: InsertableIdosCredential2,
@@ -162,6 +203,35 @@ export const inserter_Issuer_Permissioned = async (
   return createCredentialPermissioned2(issuerConfig, credential);
 };
 
+const test__inserter_Issuer_Permissioned = async () => {
+  process.env.IDOS_NODE_URL = "http://localhost:8484";
+
+  const result = await inserter_Issuer_Permissioned(
+    issuer(
+      idvData(),
+      humanId,
+      userEncryptionPublicKey,
+      issuerEncryptionSecretKey,
+      issuerAttestationSecretKey,
+      issuerAuthenticationSecretKey,
+    ),
+    issuerAuthenticationSecretKey,
+  );
+  const content = JSON.parse(
+    Utf8Codec.decode(
+      decrypt(
+        Base64Codec.decode(result.content),
+        issuerEncryptionPublicKey,
+        userEncryptionSecretKey,
+      ),
+    ),
+  );
+
+  if (JSON.stringify(content.credentialSubject) !== JSON.stringify(idvData()))
+    throw new Error("didn't get back the same");
+};
+//await test__inserter_Issuer_Permissioned()
+
 export const inserter_Issuer_WriteGrant = async (
   credential: InsertableIdosCredential2,
   inserterAuthenticationSecretKey: Uint8Array,
@@ -170,6 +240,35 @@ export const inserter_Issuer_WriteGrant = async (
 
   return createCredentialByGrant2(issuerConfig, credential);
 };
+
+const test__inserter_Issuer_WriteGrant = async () => {
+  process.env.IDOS_NODE_URL = "http://localhost:8484";
+
+  const result = await inserter_Issuer_WriteGrant(
+    issuer(
+      idvData(),
+      humanId,
+      userEncryptionPublicKey,
+      issuerEncryptionSecretKey,
+      issuerAttestationSecretKey,
+      issuerAuthenticationSecretKey,
+    ),
+    issuerAuthenticationSecretKey,
+  );
+  const content = JSON.parse(
+    Utf8Codec.decode(
+      decrypt(
+        Base64Codec.decode(result.content),
+        issuerEncryptionPublicKey,
+        userEncryptionSecretKey,
+      ),
+    ),
+  );
+
+  if (JSON.stringify(content.credentialSubject) !== JSON.stringify(idvData()))
+    throw new Error("didn't get back the same");
+};
+//await test__inserter_Issuer_WriteGrant()
 
 export const inserter_Issuer_WriteGrant_Share = async (
   idvData: IdvDataResult,
@@ -214,6 +313,37 @@ export const inserter_Issuer_WriteGrant_Share = async (
     locked_until,
   });
 };
+
+const test__inserter_Issuer_WriteGrant_Share = async () => {
+  process.env.IDOS_NODE_URL = "http://localhost:8484";
+
+  const result = await inserter_Issuer_WriteGrant_Share(
+    idvData(),
+    humanId,
+    issuerAuthenticationSecretKey,
+    0, //locked_until,
+    HexCodec.encode(thirdPartyAuthenticationPublicKey, true), // grantee,
+    userEncryptionPublicKey,
+    thirdPartyEncryptionPublicKey,
+    issuerEncryptionSecretKey,
+    issuerAttestationSecretKey,
+    issuerAuthenticationSecretKey,
+  );
+  console.log(result);
+  const content = JSON.parse(
+    Utf8Codec.decode(
+      decrypt(
+        Base64Codec.decode(result.content),
+        issuerEncryptionPublicKey,
+        userEncryptionSecretKey,
+      ),
+    ),
+  );
+
+  if (JSON.stringify(content.credentialSubject) !== JSON.stringify(idvData()))
+    throw new Error("didn't get back the same");
+};
+// await test__inserter_Issuer_WriteGrant_Share()
 
 import { idOS } from "@idos-network/idos-sdk";
 import type { idOSCredential2 } from "@idos-network/idos-sdk-types";

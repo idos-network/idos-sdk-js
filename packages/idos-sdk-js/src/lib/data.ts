@@ -28,9 +28,11 @@ export class Data {
       `get_${tableName}`,
       null,
       `List your ${tableName} in idOS`,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
 
     if (tableName === "credentials") {
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       records = records.filter((record: any) => !record.original_id);
     }
 
@@ -78,10 +80,13 @@ export class Data {
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       for (const record of records) {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         (record as any).content = await this.enclave.encrypt(
+          // biome-ignore lint/suspicious/noExplicitAny: <explanation>
           (record as any).content as string,
           receiverPublicKey,
         );
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
         (record as any).encryption_public_key = receiverPublicKey;
       }
     }
@@ -373,7 +378,7 @@ export class Data {
     const issuerAuthenticationSecretKey: Uint8Array = new Nonce(nacl.sign.secretKeyLength).bytes;
 
     const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
-    const publicNotesSignature = nacl.sign(
+    const publicNotesSignature = nacl.sign.detached(
       Utf8Codec.encode(publicNotes),
       issuerAuthenticationSecretKey,
     );
@@ -386,7 +391,7 @@ export class Data {
       public_notes_signature: Base64Codec.encode(publicNotesSignature),
 
       broader_signature: Base64Codec.encode(
-        nacl.sign(
+        nacl.sign.detached(
           Uint8Array.from([...publicNotesSignature, ...Base64Codec.decode(content)]),
           issuerAuthenticationSecretKey,
         ),
