@@ -15,10 +15,13 @@ export interface CreateIssuerConfigParams {
   dbId?: string;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: How am I expect to do type narrowing without `any`s? :x
-const isNaclSignKeyPair = (o: any): o is nacl.SignKeyPair =>
+const isNaclSignKeyPair = (o: unknown): o is nacl.SignKeyPair =>
+  o !== null &&
+  typeof o === "object" &&
+  "publicKey" in o &&
   o.publicKey instanceof Uint8Array &&
   o.publicKey.length === nacl.sign.publicKeyLength &&
+  "secretKey" in o &&
   o.secretKey instanceof Uint8Array &&
   o.secretKey.length === nacl.sign.secretKeyLength;
 
