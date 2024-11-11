@@ -329,13 +329,13 @@ const test__inserter_Issuer_WriteGrant_Share = async () => {
     issuerAttestationSecretKey,
     issuerAuthenticationSecretKey,
   );
-  console.log(result);
+
   const content = JSON.parse(
     Utf8Codec.decode(
       decrypt(
         Base64Codec.decode(result.content),
         issuerEncryptionPublicKey,
-        userEncryptionSecretKey,
+        thirdPartyEncryptionSecretKey,
       ),
     ),
   );
