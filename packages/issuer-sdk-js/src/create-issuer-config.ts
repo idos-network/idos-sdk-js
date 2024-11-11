@@ -72,13 +72,16 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
 
 export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
 
-export interface CreateIssuerConfigParams2 {
+export type CreateIssuerConfigParams2 = {
   nodeUrl: string;
-  signer: SignerType;
+  signer: nacl.SignKeyPair;
+  encrypter: nacl.BoxKeyPair;
   chainId?: string;
   dbId?: string;
-}
-export async function createIssuerConfig2(params: CreateIssuerConfigParams2) {
+};
+export async function createIssuerConfig2(
+  params: CreateIssuerConfigParams2,
+): Promise<IssuerConfig2> {
   const _kwil = new NodeKwil({
     kwilProvider: params.nodeUrl,
     chainId: "",
@@ -92,14 +95,24 @@ export async function createIssuerConfig2(params: CreateIssuerConfigParams2) {
   invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
   invariant(dbid, "Can't discover `dbId`. You must pass it explicitly.");
 
-  const kwilClient = new NodeKwil({
-    kwilProvider: params.nodeUrl,
+  return {
     chainId,
-  });
-
-  const signer = createKwilSigner(params.signer);
-
-  return { chainId, dbid, kwilClient, signer };
+    dbid,
+    kwilClient: new NodeKwil({
+      kwilProvider: params.nodeUrl,
+      chainId,
+    }),
+    kwilSigner: createKwilSigner(params.signer),
+    signer: params.signer,
+    encrypter: params.encrypter,
+  };
 }
 
-export type IssuerConfig2 = Awaited<ReturnType<typeof createIssuerConfig2>>;
+export interface IssuerConfig2 {
+  chainId: string;
+  dbid: string;
+  kwilClient: NodeKwil;
+  signer: nacl.SignKeyPair;
+  kwilSigner: KwilSigner;
+  encrypter: nacl.SignKeyPair;
+}
