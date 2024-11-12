@@ -1,4 +1,14 @@
-import { Center, Container, HStack, Spinner, Stack, Text } from "@chakra-ui/react";
+import {
+  Center,
+  Container,
+  DrawerBody,
+  DrawerTitle,
+  HStack,
+  List,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
@@ -12,6 +22,13 @@ import {
   DialogHeader,
   DialogRoot,
   DialogTitle,
+  DrawerActionTrigger,
+  DrawerBackdrop,
+  DrawerCloseTrigger,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerRoot,
   EmptyState,
   Field,
   PasswordInput,
@@ -146,18 +163,20 @@ function CredentialDetails({
   const parsedContent = JSON.parse(content);
 
   return (
-    <DialogRoot
+    <DrawerRoot
       open={open}
-      placement="center"
+      placement="end"
+      size="xl"
       onOpenChange={() => {
         toggle(false);
       }}
     >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Credential details</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
+      <DrawerBackdrop />
+      <DrawerContent offset={{ base: "0", md: "5" }}>
+        <DrawerHeader>
+          <DrawerTitle>Credential details</DrawerTitle>
+        </DrawerHeader>
+        <DrawerBody>
           <Stack>
             <DataListRoot orientation="horizontal" divideY="1px">
               <DataListItem
@@ -200,20 +219,71 @@ function CredentialDetails({
               <DataListItem
                 pt="4"
                 grow
-                label="Email"
-                value={parsedContent.credentialSubject.emails[0].address}
+                label="Emails"
+                alignItems={{
+                  base: "flex-start",
+                  md: "center",
+                }}
+                flexDir={{
+                  base: "column",
+                  md: "row",
+                }}
+                value={
+                  <List.Root align="center" gap="2">
+                    {parsedContent.credentialSubject.emails.map(
+                      ({ address, verified }: { address: string; verified: boolean }) => (
+                        <List.Item key={address} alignItems="center" display="inline-flex">
+                          {address}
+                          {verified ? " (verified)" : ""}
+                        </List.Item>
+                      ),
+                    )}
+                  </List.Root>
+                }
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Wallets"
+                alignItems={{
+                  base: "flex-start",
+                  md: "center",
+                }}
+                flexDir={{
+                  base: "column",
+                  md: "row",
+                }}
+                value={
+                  <List.Root align="center" gap="2">
+                    {parsedContent.credentialSubject.wallets.map(
+                      ({
+                        address,
+                        currency,
+                      }: { address: string; currency: string; verified: boolean }) => (
+                        <List.Item
+                          key={address}
+                          display="inline-flex"
+                          alignItems="center"
+                          textTransform="uppercase"
+                        >
+                          {address} ({currency})
+                        </List.Item>
+                      ),
+                    )}
+                  </List.Root>
+                }
               />
             </DataListRoot>
           </Stack>
-        </DialogBody>
-        <DialogFooter>
-          <DialogActionTrigger asChild>
+        </DrawerBody>
+        <DrawerFooter>
+          <DrawerActionTrigger asChild>
             <Button variant="outline">Close</Button>
-          </DialogActionTrigger>
-        </DialogFooter>
-        <DialogCloseTrigger />
-      </DialogContent>
-    </DialogRoot>
+          </DrawerActionTrigger>
+        </DrawerFooter>
+        <DrawerCloseTrigger />
+      </DrawerContent>
+    </DrawerRoot>
   );
 }
 
@@ -332,7 +402,8 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             alignSelf={{
               md: "flex-end",
             }}
-            onMouseEnter={() => handlePrefetchCredential(grant.dataId)}
+            onPointerEnter={() => handlePrefetchCredential(grant.dataId)}
+            onFocus={() => handlePrefetchCredential(grant.dataId)}
             onClick={() => handleOpenCredentialDetails()}
           >
             Credential details
