@@ -197,6 +197,10 @@ function openImageInNewTab(base64Image: string) {
   }
 }
 
+function changeCase(str: string) {
+  return str.replace(/_/g, " ");
+}
+
 function CredentialDetails({
   content,
   open,
@@ -205,6 +209,19 @@ function CredentialDetails({
   if (!content) return null;
 
   const parsedContent = JSON.parse(content);
+
+  const subject = Object.entries(parsedContent.credentialSubject).filter(
+    ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
+  ) as [string, string][];
+
+  const emails = parsedContent.credentialSubject.emails;
+  const wallets = parsedContent.credentialSubject.wallets;
+  const files = (
+    Object.entries(parsedContent.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
+      string,
+      string,
+    ][]
+  ).map(([key, value]) => [key, transformBase85Image(value)]);
 
   return (
     <DrawerRoot
@@ -223,47 +240,20 @@ function CredentialDetails({
         <DrawerBody>
           <Stack>
             <DataListRoot orientation="horizontal" divideY="1px">
-              <DataListItem
-                pt="4"
-                grow
-                label="Full name"
-                value={parsedContent.credentialSubject.full_name}
-              />
-              <DataListItem
-                pt="4"
-                grow
-                label="Date of birth"
-                value={parsedContent.credentialSubject.date_of_birth}
-              />
-              <DataListItem
-                pt="4"
-                grow
-                label="Residential address country"
-                value={parsedContent.credentialSubject.residential_address_country}
-              />
-              <DataListItem
-                pt="4"
-                grow
-                label="Identification document country"
-                value={parsedContent.credentialSubject.identification_document_country}
-              />
-              <DataListItem
-                pt="4"
-                grow
-                label="Identification document type"
-                value={parsedContent.credentialSubject.identification_document_type.toLocaleUpperCase()}
-              />
+              {subject.map(([key, value]) => (
+                <DataListItem
+                  key={key}
+                  pt="4"
+                  grow
+                  textTransform="uppercase"
+                  label={changeCase(key)}
+                  value={value}
+                />
+              ))}
 
               <DataListItem
                 pt="4"
                 grow
-                label="Identification document number"
-                value={parsedContent.credentialSubject.identification_document_number}
-              />
-              <DataListItem
-                pt="4"
-                grow
-                label="Emails"
                 alignItems={{
                   base: "flex-start",
                   md: "center",
@@ -272,23 +262,22 @@ function CredentialDetails({
                   base: "column",
                   md: "row",
                 }}
+                textTransform="uppercase"
+                label="EMAILS"
                 value={
                   <List.Root align="center" gap="2">
-                    {parsedContent.credentialSubject.emails.map(
-                      ({ address, verified }: { address: string; verified: boolean }) => (
-                        <List.Item key={address} alignItems="center" display="inline-flex">
-                          {address}
-                          {verified ? " (verified)" : ""}
-                        </List.Item>
-                      ),
-                    )}
+                    {emails.map(({ address, verified }: { address: string; verified: boolean }) => (
+                      <List.Item key={address} alignItems="center" display="inline-flex">
+                        {address}
+                        {verified ? " (verified)" : ""}
+                      </List.Item>
+                    ))}
                   </List.Root>
                 }
               />
               <DataListItem
                 pt="4"
                 grow
-                label="Wallets"
                 alignItems={{
                   base: "flex-start",
                   md: "center",
@@ -297,9 +286,11 @@ function CredentialDetails({
                   base: "column",
                   md: "row",
                 }}
+                textTransform="uppercase"
+                label="WALLETS"
                 value={
                   <List.Root align="center" gap="2">
-                    {parsedContent.credentialSubject.wallets.map(
+                    {wallets.map(
                       ({
                         address,
                         currency,
@@ -320,36 +311,38 @@ function CredentialDetails({
               <DataListItem
                 pt="4"
                 grow
-                label="Attachments"
                 alignItems="start"
                 flexDir="column"
+                label="FILES"
                 value={
-                  <List.Root variant="plain" display="flex" flexDirection="row" gap="4">
-                    <List.Item
-                      role="button"
-                      transition="transform 0.2s"
-                      cursor="pointer"
-                      _hover={{ transform: "scale(1.02)" }}
-                      onClick={() =>
-                        openImageInNewTab(
-                          transformBase85Image(
-                            parsedContent.credentialSubject.identification_document_front_file,
-                          ),
-                        )
-                      }
-                    >
-                      <Image
-                        src={transformBase85Image(
-                          parsedContent.credentialSubject.identification_document_front_file,
-                        )}
-                        alt="Identification document front"
-                        rounded="md"
-                        loading="lazy"
-                        width="120px"
-                        height="120px"
-                        title="Click to open in full size"
-                      />
-                    </List.Item>
+                  <List.Root
+                    variant="plain"
+                    display="flex"
+                    flexDirection="row"
+                    gap="4"
+                    overflowX="auto"
+                  >
+                    {files.map(([key, value]) => (
+                      <List.Item
+                        flexShrink="0"
+                        key={key}
+                        role="button"
+                        transition="transform 0.2s"
+                        cursor="pointer"
+                        _hover={{ transform: "scale(1.02)" }}
+                        onClick={() => openImageInNewTab(value)}
+                      >
+                        <Image
+                          src={value}
+                          alt="Identification document front"
+                          rounded="md"
+                          loading="lazy"
+                          width="120px"
+                          height="120px"
+                          title="Click to open the image in full size"
+                        />
+                      </List.Item>
+                    ))}
                   </List.Root>
                 }
               />
