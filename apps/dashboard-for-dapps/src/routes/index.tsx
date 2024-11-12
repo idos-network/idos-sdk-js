@@ -4,6 +4,7 @@ import {
   DrawerBody,
   DrawerTitle,
   HStack,
+  Image,
   List,
   Spinner,
   Stack,
@@ -40,6 +41,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useLocalStorage, useToggle } from "@uidotdev/usehooks";
+import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
@@ -55,6 +57,14 @@ export const Route = createFileRoute("/")({
     };
   },
 });
+
+function transformBase85Image(src: string) {
+  const prefix = "data:image/jpeg;base85,";
+
+  return `data:image/png;base64,${Base64Codec.encode(
+    ascii85.decode(src.substring(prefix.length)),
+  )}`;
+}
 
 const useFetchGrants = () => {
   const idOS = useIdOS();
@@ -151,6 +161,40 @@ function SecretKeyPrompt({
       </DialogContent>
     </DialogRoot>
   );
+}
+
+function openImageInNewTab(base64Image: string) {
+  const newWindow = window.open();
+
+  if (newWindow) {
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>Document Image</title>
+          <style>
+            body {
+              margin: 0;
+              padding: 0;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              min-height: 100vh;
+              background: #000;
+            }
+            img {
+              max-width: 100%;
+              max-height: 100vh;
+              object-fit: contain;
+            }
+          </style>
+        </head>
+        <body>
+          <img src="${base64Image}" alt="Document Image">
+        </body>
+      </html>
+    `);
+    newWindow.document.close();
+  }
 }
 
 function CredentialDetails({
@@ -270,6 +314,42 @@ function CredentialDetails({
                         </List.Item>
                       ),
                     )}
+                  </List.Root>
+                }
+              />
+              <DataListItem
+                pt="4"
+                grow
+                label="Attachments"
+                alignItems="start"
+                flexDir="column"
+                value={
+                  <List.Root variant="plain" display="flex" flexDirection="row" gap="4">
+                    <List.Item
+                      role="button"
+                      transition="transform 0.2s"
+                      cursor="pointer"
+                      _hover={{ transform: "scale(1.02)" }}
+                      onClick={() =>
+                        openImageInNewTab(
+                          transformBase85Image(
+                            parsedContent.credentialSubject.identification_document_front_file,
+                          ),
+                        )
+                      }
+                    >
+                      <Image
+                        src={transformBase85Image(
+                          parsedContent.credentialSubject.identification_document_front_file,
+                        )}
+                        alt="Identification document front"
+                        rounded="md"
+                        loading="lazy"
+                        width="120px"
+                        height="120px"
+                        title="Click to open in full size"
+                      />
+                    </List.Item>
                   </List.Root>
                 }
               />

@@ -50,6 +50,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      ascii85:
+        specifier: ^1.0.2
+        version: 1.0.2
       ethers:
         specifier: ^6.13.4
         version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -105,6 +108,9 @@ importers:
       vite:
         specifier: ^5.4.10
         version: 5.4.10(@types/node@22.7.9)(terser@5.31.3)
+      vite-plugin-node-polyfills:
+        specifier: ^0.12.0
+        version: 0.12.0(rollup@3.29.4)(vite@5.4.10(@types/node@22.7.9)(terser@5.31.3))
 
   apps/idos-data-dashboard:
     dependencies:
@@ -5924,6 +5930,10 @@ packages:
 
   asap@2.0.6:
     resolution: {integrity: sha512-BSHWgDSAiKs50o2Re8ppvp3seVHXSRM44cdSsT9FfNEUUZLOGWVCsiWaRPWM1Znn+mqZ1OfVZ3z3DWEzSp7hRA==}
+
+  ascii85@1.0.2:
+    resolution: {integrity: sha512-kliwItQL8aueLy2XwGDRc6U4FLrZuSKvc3NYhaTnUEsl8JjjkvMNYJ2WmBoZnUYMEz6nvZ9yGhruoufaVcNAnw==}
+    engines: {node: '>=0.12'}
 
   asn1.js@5.4.1:
     resolution: {integrity: sha512-+I//4cYPccV8LdmBLiX8CYvf9Sp3vQsrqu2QNXRcrbiWvcx/UdlFiqUJJzxRQxgsZmvhXhn4cSKeSmoFjVdupA==}
@@ -16770,7 +16780,7 @@ snapshots:
 
   '@rollup/pluginutils@5.0.5(rollup@3.29.4)':
     dependencies:
-      '@types/estree': 1.0.5
+      '@types/estree': 1.0.6
       estree-walker: 2.0.2
       picomatch: 2.3.1
     optionalDependencies:
@@ -20116,6 +20126,8 @@ snapshots:
 
   asap@2.0.6: {}
 
+  ascii85@1.0.2: {}
+
   asn1.js@5.4.1:
     dependencies:
       bn.js: 4.12.0
@@ -20436,7 +20448,7 @@ snapshots:
       browserify-rsa: 4.1.0
       create-hash: 1.2.0
       create-hmac: 1.1.7
-      elliptic: 6.5.6
+      elliptic: 6.6.0
       inherits: 2.0.4
       parse-asn1: 5.1.6
       readable-stream: 3.6.2
@@ -20928,7 +20940,7 @@ snapshots:
   create-ecdh@4.0.4:
     dependencies:
       bn.js: 4.12.0
-      elliptic: 6.5.6
+      elliptic: 6.6.0
 
   create-hash@1.2.0:
     dependencies:
@@ -22688,7 +22700,7 @@ snapshots:
 
   is-boolean-object@1.1.2:
     dependencies:
-      call-bind: 1.0.5
+      call-bind: 1.0.7
       has-tostringtag: 1.0.0
 
   is-callable@1.2.7: {}
@@ -25140,7 +25152,7 @@ snapshots:
 
   secp256k1@5.0.0:
     dependencies:
-      elliptic: 6.5.6
+      elliptic: 6.6.0
       node-addon-api: 5.1.0
       node-gyp-build: 4.8.1
 
@@ -25263,7 +25275,7 @@ snapshots:
 
   side-channel@1.0.4:
     dependencies:
-      call-bind: 1.0.2
+      call-bind: 1.0.7
       get-intrinsic: 1.2.1
       object-inspect: 1.12.3
 
@@ -26391,6 +26403,16 @@ snapshots:
       node-stdlib-browser: 1.2.0
       process: 0.11.10
       vite: 4.5.0(@types/node@20.14.12)(terser@5.31.3)
+    transitivePeerDependencies:
+      - rollup
+
+  vite-plugin-node-polyfills@0.12.0(rollup@3.29.4)(vite@5.4.10(@types/node@22.7.9)(terser@5.31.3)):
+    dependencies:
+      '@rollup/plugin-inject': 5.0.3(rollup@3.29.4)
+      buffer-polyfill: buffer@6.0.3
+      node-stdlib-browser: 1.2.0
+      process: 0.11.10
+      vite: 5.4.10(@types/node@22.7.9)(terser@5.31.3)
     transitivePeerDependencies:
       - rollup
 
