@@ -8,6 +8,7 @@
     "./button": "./src/components/button.tsx",
     "./color-mode": "./src/components/color-mode.tsx",
     "./close-button": "./src/components/close-button.tsx",
+    "./drawer": "./src/components/drawer.tsx",
     "./dialog": "./src/components/dialog.tsx",
     "./empty-state": "./src/components/empty-state.tsx",
     "./field": "./src/components/field.tsx",
