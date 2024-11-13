@@ -374,12 +374,12 @@ export class Data {
     plaintextContent: string,
     receiverEncryptionPublicKey: string,
   ): Promise<InsertableIdosCredential2> {
-    const issuerAuthenticationSecretKey: Uint8Array = nacl.sign.keyPair().secretKey;
+    const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
     const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
     const publicNotesSignature = nacl.sign.detached(
       Utf8Codec.encode(publicNotes),
-      issuerAuthenticationSecretKey,
+      issuerAuthenticationKeyPair.secretKey,
     );
 
     return {
@@ -392,13 +392,11 @@ export class Data {
       broader_signature: Base64Codec.encode(
         nacl.sign.detached(
           Uint8Array.from([...publicNotesSignature, ...Base64Codec.decode(content)]),
-          issuerAuthenticationSecretKey,
+          issuerAuthenticationKeyPair.secretKey,
         ),
       ),
 
-      issuer: Base64Codec.encode(
-        nacl.sign.keyPair.fromSecretKey(issuerAuthenticationSecretKey).publicKey,
-      ),
+      issuer: Base64Codec.encode(issuerAuthenticationKeyPair.publicKey),
       encryption_public_key: present(this.enclave.auth.currentUser.currentUserPublicKey),
     };
   }
