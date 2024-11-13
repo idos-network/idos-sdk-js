@@ -1,5 +1,6 @@
 import type { idOSCredential, idOSCredential2 } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
+import * as HexCodec from "@stablelib/hex";
 import * as Utf8Codec from "@stablelib/utf8";
 import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
@@ -45,7 +46,7 @@ export const buildInsertableIdosCredential2 = (
       ),
     ),
 
-    issuer: Base64Codec.encode(issuerConfig.signer.publicKey),
+    issuer: HexCodec.encode(issuerConfig.signer.publicKey, true),
     encryption_public_key: Base64Codec.encode(issuerConfig.encrypter.publicKey),
   };
 };

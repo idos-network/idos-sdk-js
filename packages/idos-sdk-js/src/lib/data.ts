@@ -1,5 +1,6 @@
 import type { idOSCredential2 } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
+import * as HexCodec from "@stablelib/hex";
 import * as Utf8Codec from "@stablelib/utf8";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
@@ -396,7 +397,7 @@ export class Data {
         ),
       ),
 
-      issuer: Base64Codec.encode(issuerAuthenticationKeyPair.publicKey),
+      issuer: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
       encryption_public_key: present(this.enclave.auth.currentUser.currentUserPublicKey),
     };
   }
