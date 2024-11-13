@@ -4,17 +4,21 @@ import type { idOSCredential } from "../../types";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, encryptContent, ensureEntityId } from "./internal";
 
-// Base interface for credential parameters
+/**
+ * Interface for BaseCredentialParams.
+ *
+ * `id` could be provided manually, but it is randomly generated internally.
+ * `encryption_public_key` is **excluded** because it is derived internally
+ * from the issuer's secret key and should not be provided manually.
+ *
+ */
 interface BaseCredentialParams
   extends Omit<idOSCredential, "id" | "original_id" | "encryption_public_key"> {
   id?: string;
-}
-
-interface HasEncryptionPublicKey {
   userEncryptionPublicKey: string;
 }
 
-interface CreateCredentialPermissionedParams extends BaseCredentialParams, HasEncryptionPublicKey {}
+interface CreateCredentialPermissionedParams extends BaseCredentialParams {}
 
 export async function createCredentialPermissioned(
   { dbid, kwilClient, keyPair, signer }: IssuerConfig,
@@ -47,7 +51,7 @@ export async function createCredentialPermissioned(
   };
 }
 
-interface CreateCredentialByGrantParams extends BaseCredentialParams, HasEncryptionPublicKey {}
+interface CreateCredentialByGrantParams extends BaseCredentialParams {}
 
 export async function createCredentialByGrant(
   { dbid, kwilClient, keyPair, signer }: IssuerConfig,
@@ -80,7 +84,7 @@ export async function createCredentialByGrant(
   };
 }
 
-interface ShareCredentialByGrantParams extends BaseCredentialParams, HasEncryptionPublicKey {
+interface ShareCredentialByGrantParams extends BaseCredentialParams {
   grantee: string;
   locked_until: number;
   original_credential_id: string;

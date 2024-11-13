@@ -182,9 +182,6 @@ const credential = {
   // `createCredentialByGrant` will encrypt this for us, using the Issuer's secret encryption key, along with the user's public encryption key.
   content: "VERIFIABLE_CREDENTIAL_CONTENT",
 
-  // The public encryption key of the issuer.
-  encryption_public_key: issuerConfig.issuerPublicEncryptionKey,
-
   // The public encryption key of the user who is creating the credential.
   userEncryptionPublicKey: session.user.userEncryptionPublicKey,
 }
@@ -220,7 +217,7 @@ const credential = {
   issuer: "ISSUER_NAME",
   content: "VERIFIABLE_CREDENTIAL_CONTENT",
   human_id: session.user.humanId,
-  encryption_public_key: issuerConfig.issuerPublicEncryptionKey,
+  userEncryptionPublicKey: session.user.userEncryptionPublicKey,
 }
 
 await createCredentialPermissioned(issuerConfig, credential);
