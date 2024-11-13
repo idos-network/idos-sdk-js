@@ -74,7 +74,9 @@ describe("createIssuerConfig", () => {
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
       signer: expect.any(Object),
-      keyPair: nacl.box.keyPair.fromSecretKey(Base64Codec.decode(params.encryptionSecret)),
+      encryptionKeyPair: nacl.box.keyPair.fromSecretKey(
+        Base64Codec.decode(params.encryptionSecret),
+      ),
     });
   });
 });

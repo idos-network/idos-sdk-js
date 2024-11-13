@@ -50,10 +50,10 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
   });
 
   const signer = createKwilSigner(params.signer);
-  const secretKey = Base64Codec.decode(params.encryptionSecret);
-  const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+  const encryptionSecretKey = Base64Codec.decode(params.encryptionSecret);
+  const encryptionKeyPair = nacl.box.keyPair.fromSecretKey(encryptionSecretKey);
 
-  return { chainId, dbid, kwilClient, signer, keyPair };
+  return { chainId, dbid, kwilClient, signer, encryptionKeyPair };
 }
 
 export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
