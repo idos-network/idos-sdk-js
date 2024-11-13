@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
   DataListItem,
@@ -38,12 +38,12 @@ import {
 } from "@idos-network/ui-kit";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { skipToken, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useLocalStorage, useToggle } from "@uidotdev/usehooks";
 import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
 import { useAccount } from "wagmi";
 
@@ -91,12 +91,8 @@ const useFetchGrants = () => {
 };
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
 
-const useFetchCredential = (id: string) => {
-  const idOS = useIdOS();
-  return useQuery({
-    queryKey: ["credential-details", id],
-    queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
-  });
+const getSharedCredential = (id: string, idOS: idOS) => {
+  return idOS.data.getShared<idOSCredential>("credentials", id, false);
 };
 
 async function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
@@ -361,50 +357,48 @@ function CredentialDetails({
 }
 
 function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
+  const idOS = useIdOS();
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [content, setContent] = useState("");
-  const credential = useFetchCredential(credentialId);
+  const [loading, setLoading] = useState(false);
   const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
 
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
-  const handleOpenCredentialDetails = async () => {
-    if (!credential.data) return;
+  const handleOpenCredentialDetails = useCallback(
+    async (secretKey: string) => {
+      const _credential = await getSharedCredential(credentialId, idOS);
+      if (!_credential) return;
 
-    if (!secretKey) {
-      toggleSecretKeyPrompt();
-      return;
-    }
+      const content = await decrypt(
+        _credential.content,
+        _credential.encryption_public_key,
+        secretKey,
+      );
+      setSecretKey(secretKey);
+      setContent(content);
+      toggleCredentialDetails();
+    },
+    [credentialId, !!idOS],
+  );
 
-    const content = await decrypt(
-      credential.data.content,
-      credential.data.encryption_public_key,
-      secretKey,
-    );
-    setContent(content);
-    toggleCredentialDetails();
-  };
-
-  const onKeySubmit = async (secretKey: string) => {
-    if (!credential.data) return;
-
-    const content = await decrypt(
-      credential.data.content,
-      credential.data.encryption_public_key,
-      secretKey,
-    );
-    setSecretKey(secretKey);
-    setContent(content);
-    toggleCredentialDetails();
-  };
-
-  const handlePrefetchCredential = (id: string) => {
-    setCredentialId(id);
-  };
+  const onKeySubmit = useCallback(
+    async (secretKey: string) => {
+      try {
+        setLoading(true);
+        await handleOpenCredentialDetails(secretKey);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [handleOpenCredentialDetails],
+  );
 
   return (
     <>
@@ -475,16 +469,22 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             alignSelf={{
               md: "flex-end",
             }}
-            onPointerEnter={() => handlePrefetchCredential(grant.dataId)}
-            onFocus={() => handlePrefetchCredential(grant.dataId)}
-            onClick={() => handleOpenCredentialDetails()}
+            onMouseEnter={() => setCredentialId(grant.dataId)}
+            onClick={() => {
+              secretKey ? onKeySubmit(secretKey) : toggleSecretKeyPrompt();
+            }}
+            disabled={loading}
           >
-            Credential details
+            {loading ? "Unlocking credential..." : "Credential details"}
           </Button>
         </Stack>
       ))}
       <SecretKeyPrompt
-        {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
+        {...{
+          open: openSecretKeyPrompt,
+          toggle: toggleSecretKeyPrompt,
+          onSubmit: onKeySubmit,
+        }}
       />
 
       <CredentialDetails
