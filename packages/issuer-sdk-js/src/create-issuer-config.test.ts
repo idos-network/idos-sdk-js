@@ -42,7 +42,7 @@ describe("createIssuerConfig", () => {
     const mockWallet = new Wallet(
       "dcdda6663be8dfa23d0e54a31ff6fddba2fdf8a1f0eae985c59857031e6da169",
     );
-    const mockSecretKey = nacl.randomBytes(32);
+    const mockSecretKey = nacl.box.keyPair().secretKey;
 
     const params = {
       nodeUrl: "http://mock-node-url",
