@@ -40,9 +40,11 @@ export const getIdvData = (): IdvDataResult => {
   };
 };
 
+const issuerCredentialId = "something that makes sense for a VC";
+
 const makeW3cCredential = (idvData: object, issuerAttestationSecretKey: Uint8Array) => {
   const protoW3cVc = {
-    id: "something that makes sense for a VC",
+    id: issuerCredentialId,
     context: ["etc"],
     credentialSubject: idvData,
   };
@@ -56,7 +58,7 @@ const makeW3cCredential = (idvData: object, issuerAttestationSecretKey: Uint8Arr
 };
 
 const makePublicNotes = (plaintextW3cVc: ReturnType<typeof makeW3cCredential>): object => {
-  return { credentialId: plaintextW3cVc.id, riskScore: 4 };
+  return { id: plaintextW3cVc.id, riskScore: 4 };
 };
 
 export const issuer_makeUserCredential = (
@@ -66,6 +68,9 @@ export const issuer_makeUserCredential = (
   issuerAttestationSecretKey: Uint8Array,
 ) => {
   const plaintextContent = makeW3cCredential(idvData, issuerAttestationSecretKey);
+
+  // TODO: creds2: revocations: the issuer shouldn't have to care about building public notes.
+  // They might decide they want control over this, but that's not the common case we're gonna support.
   const publicNotes = makePublicNotes(plaintextContent);
 
   return {
@@ -106,6 +111,7 @@ import {
 import {
   createCredentialByGrant2,
   createCredentialPermissioned2,
+  editCredential2,
   shareCredentialByGrant2,
 } from "@idos-network/issuer-sdk-js/credentials";
 
@@ -221,4 +227,23 @@ await (async () => {
   assertCredentialDecryptedContent(getIdvData(), result.content, _thirdPartyEncryptionSecretKey);
 
   console.log("✅ shareCredentialByGrant2");
+})();
+
+await (async () => {
+  const issuerConfig = await issuerConfigBuild();
+  const credential = issuer_makeUserCredential(
+    getIdvData(),
+    humanId,
+    userEncryptionPublicKey,
+    issuerAttestationSecretKey,
+  );
+
+  await createCredentialPermissioned2(issuerConfig, credential);
+
+  await editCredential2(issuerConfig, {
+    publicNotesId: issuerCredentialId,
+    publicNotes: '{"herp": "derp"}',
+  });
+
+  console.log("✅ editCredential2");
 })();

@@ -7,6 +7,24 @@ import nacl from "tweetnacl";
 import type { IssuerConfig, IssuerConfig2 } from "./create-issuer-config";
 import { createActionInput, encryptContent, ensureEntityId } from "./internal";
 
+type UpdatablePublicNotes = {
+  publicNotes: string;
+};
+export const buildUpdatablePublicNotes = (
+  issuerConfig: IssuerConfig2,
+  { publicNotes }: UpdatablePublicNotes,
+) => {
+  const publicNotesSignature = nacl.sign.detached(
+    Utf8Codec.encode(publicNotes),
+    issuerConfig.signer.secretKey,
+  );
+
+  return {
+    public_notes: publicNotes,
+    public_notes_signature: Base64Codec.encode(publicNotesSignature),
+  };
+};
+
 export type InsertableIdosCredential2 = Omit<idOSCredential2, "id" | "original_id"> & {
   id?: idOSCredential2["id"];
 };
@@ -27,21 +45,21 @@ export const buildInsertableIdosCredential2 = (
   const content = Base64Codec.decode(
     encryptContent(plaintextContent, receiverEncryptionPublicKey, issuerConfig.encrypter.secretKey),
   );
-  const publicNotesSignature = nacl.sign.detached(
-    Utf8Codec.encode(publicNotes),
-    issuerConfig.signer.secretKey,
-  );
+
+  const { public_notes, public_notes_signature } = buildUpdatablePublicNotes(issuerConfig, {
+    publicNotes,
+  });
 
   return {
     human_id: humanId,
     content: Base64Codec.encode(content),
 
-    public_notes: publicNotes,
-    public_notes_signature: Base64Codec.encode(publicNotesSignature),
+    public_notes,
+    public_notes_signature,
 
     broader_signature: Base64Codec.encode(
       nacl.sign.detached(
-        Uint8Array.from([...publicNotesSignature, ...content]),
+        Uint8Array.from([...Base64Codec.decode(public_notes_signature), ...content]),
         issuerConfig.signer.secretKey,
       ),
     ),
@@ -245,4 +263,33 @@ export async function shareCredentialByGrant2(
     ...omit(payload, Object.keys(extraEntries) as (keyof typeof extraEntries)[]),
     original_id: payload.original_credential_id,
   };
+}
+
+type EditCredentialAsIssuerParams2 = {
+  publicNotesId: string;
+  publicNotes: string;
+};
+export async function editCredential2(
+  issuer_config: IssuerConfig2,
+  { publicNotesId, publicNotes }: EditCredentialAsIssuerParams2,
+) {
+  const { dbid, kwilClient, kwilSigner } = issuer_config;
+  const payload = {
+    public_notes_id: publicNotesId,
+    ...buildUpdatablePublicNotes(issuer_config, {
+      publicNotes,
+    }),
+  };
+
+  const result = await kwilClient.execute(
+    {
+      name: "edit_public_notes_as_issuer",
+      dbid,
+      inputs: [createActionInput(payload)],
+    },
+    kwilSigner,
+    true,
+  );
+
+  return result;
 }
