@@ -1,7 +1,9 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
+import * as Base64Codec from "@stablelib/base64";
 import { Wallet } from "ethers";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
+import nacl from "tweetnacl";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
 export interface CreateIssuerConfigParams {
@@ -48,8 +50,10 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
   });
 
   const signer = createKwilSigner(params.signer);
+  const encryptionSecretKey = Base64Codec.decode(params.encryptionSecret);
+  const encryptionKeyPair = nacl.box.keyPair.fromSecretKey(encryptionSecretKey);
 
-  return { chainId, dbid, kwilClient, signer, encryptionSecret: params.encryptionSecret };
+  return { chainId, dbid, kwilClient, signer, encryptionKeyPair };
 }
 
 export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
