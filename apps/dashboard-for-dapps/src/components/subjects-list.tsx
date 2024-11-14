@@ -1,7 +1,6 @@
 import { openImageInNewTab, transformBase85Image } from "@/utils/imgs";
 import { Image, List } from "@chakra-ui/react";
 import { DataListItem, DataListRoot } from "@idos-network/ui-kit";
-import React from "react";
 
 const safeParse = (content: string) => {
   try {
