@@ -1,4 +1,8 @@
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
+import * as HexCodec from "@stablelib/hex";
+import * as Utf8Codec from "@stablelib/utf8";
+import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
 
@@ -6,6 +10,8 @@ import type { KwilWrapper } from "./kwil-wrapper";
 
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
 type AnyRecord = Record<string, any>;
+
+type InsertableIdosCredential = Omit<idOSCredential, "id" | "original_id">;
 
 export class Data {
   constructor(
@@ -22,9 +28,11 @@ export class Data {
       `get_${tableName}`,
       null,
       `List your ${tableName} in idOS`,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
 
     if (tableName === "credentials") {
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       records = records.filter((record: any) => !record.original_id);
     }
 
@@ -72,11 +80,15 @@ export class Data {
     if (tableName === "credentials") {
       receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       for (const record of records) {
-        (record as any).content = await this.enclave.encrypt(
-          (record as any).content as string,
-          receiverPublicKey,
+        Object.assign(
+          record,
+          await this.#buildInsertableIdosCredential(
+            record.human_id,
+            record.public_notes,
+            record.content,
+            receiverPublicKey, // Encryption
+          ),
         );
-        (record as any).encryption_public_key = receiverPublicKey;
       }
     }
 
@@ -94,11 +106,11 @@ export class Data {
     return newRecords;
   }
 
-  async create<T extends AnyRecord>(
+  async create<T extends { id: string }>(
     tableName: string,
-    record: T,
+    record: Omit<T, "id">,
     synchronous?: boolean,
-  ): Promise<T & { id: string }> {
+  ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
@@ -116,12 +128,16 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
-      (record as AnyRecord).content = await this.enclave.encrypt(
-        (record as AnyRecord).content as string,
-        receiverPublicKey,
+      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential(
+          (record as AnyRecord).human_id,
+          (record as AnyRecord).public_notes,
+          (record as AnyRecord).content,
+          receiverPublicKey, // Encryption
+        ),
       );
-      (record as AnyRecord).encryption_public_key = receiverPublicKey;
     }
 
     const newRecord = { id: crypto.randomUUID(), ...record };
@@ -247,9 +263,16 @@ export class Data {
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
-      record.encryption_public_key = receiverPublicKey;
-      record.content = await this.enclave.encrypt(record.content, receiverPublicKey);
+      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential(
+          record.human_id,
+          record.public_notes,
+          record.content,
+          receiverPublicKey, // Encryption
+        ),
+      );
     }
 
     await this.kwilWrapper.execute(
@@ -267,16 +290,21 @@ export class Data {
     recordId: string,
     receiverPublicKey: string,
   ): Promise<{ id: string }> {
-    const encPublicKey = Base64Codec.encode(await this.enclave.ready());
-
     const name = this.singularize(tableName);
 
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     const record = (await this.get(tableName, recordId)) as any;
 
     if (tableName === "credentials") {
-      record.content = await this.enclave.encrypt(record.content as string, receiverPublicKey);
-      record.encryption_public_key = encPublicKey;
+      Object.assign(
+        record,
+        await this.#buildInsertableIdosCredential(
+          record.human_id,
+          record.public_notes,
+          record.content,
+          receiverPublicKey, // Encryption
+        ),
+      );
     }
 
     const id = crypto.randomUUID();
@@ -310,4 +338,42 @@ export class Data {
       `Grant ${grantee} write access to your idOS credentials`,
     );
   }
+
+  async #buildInsertableIdosCredential(
+    humanId: string,
+    publicNotes: string,
+    plaintextContent: string,
+    receiverEncryptionPublicKey: string,
+  ): Promise<InsertableIdosCredential> {
+    const issuerAuthenticationKeyPair = nacl.sign.keyPair();
+
+    const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
+    const publicNotesSignature = nacl.sign.detached(
+      Utf8Codec.encode(publicNotes),
+      issuerAuthenticationKeyPair.secretKey,
+    );
+
+    return {
+      human_id: humanId,
+      content,
+
+      public_notes: publicNotes,
+      public_notes_signature: Base64Codec.encode(publicNotesSignature),
+
+      broader_signature: Base64Codec.encode(
+        nacl.sign.detached(
+          Uint8Array.from([...publicNotesSignature, ...Base64Codec.decode(content)]),
+          issuerAuthenticationKeyPair.secretKey,
+        ),
+      ),
+
+      issuer: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
+      encryption_public_key: present(this.enclave.auth.currentUser.currentUserPublicKey),
+    };
+  }
 }
+
+const present = <T>(obj: T | undefined | null): T => {
+  if (!obj) throw new Error("Unexpected absence");
+  return obj;
+};

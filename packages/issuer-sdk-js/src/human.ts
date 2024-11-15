@@ -7,7 +7,7 @@ export interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
 }
 
 async function createHumanProfile(
-  { dbid, kwilClient, signer }: IssuerConfig,
+  { dbid, kwilClient, kwilSigner }: IssuerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSHuman> {
   const payload = ensureEntityId(params);
@@ -17,7 +17,7 @@ async function createHumanProfile(
       dbid,
       inputs: [createActionInput(payload)],
     },
-    signer,
+    kwilSigner,
     true,
   );
 
@@ -29,7 +29,7 @@ export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
 }
 
 async function upsertWallet(
-  { dbid, kwilClient, signer }: IssuerConfig,
+  { dbid, kwilClient, kwilSigner }: IssuerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
   const payload = ensureEntityId(params);
@@ -39,7 +39,7 @@ async function upsertWallet(
       dbid,
       inputs: [createActionInput(payload)],
     },
-    signer,
+    kwilSigner,
     true,
   );
 
