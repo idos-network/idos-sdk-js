@@ -9,10 +9,10 @@ export interface idOSCredential {
   id: string;
   human_id: string;
   issuer: string;
-  original_id: string;
-  credential_type: string;
-  credential_level: string;
-  credential_status: idOSCredentialStatus;
+  original_id?: string;
+  public_notes: string;
+  public_notes_signature: string;
+  broader_signature: string;
   content: string;
   encryption_public_key: string;
 }

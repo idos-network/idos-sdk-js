@@ -23,16 +23,24 @@
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/idos-sdk-server-dapp": "workspace:*",
+    "@idos-network/idos-sdk-types": "workspace:*",
+    "@idos-network/issuer-sdk-js": "workspace:*",
+    "@kwilteam/kwil-js": "0.7.1",
     "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
     "@near-wallet-selector/my-near-wallet": "^8.7.0",
     "@near-wallet-selector/nightly": "^8.7.0",
-    "axios": "^1.6.8"
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/hex": "^2.0.0",
+    "@stablelib/utf8": "^1.0.1",
+    "axios": "^1.6.8",
+    "es-toolkit": "^1.23.0",
+    "tweetnacl": "^1.0.3"
   },
   "peerDependencies": {
-    "ethers": "^6.13.4",
+    "ethers": "^6.13",
     "near-api-js": "^3.0.4"
   }
 }

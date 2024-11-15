@@ -20,10 +20,10 @@ export function createActionInput(params: Record<string, any>): Utils.ActionInpu
 export function encryptContent(
   message: Uint8Array,
   receiverPublicKey: Uint8Array,
-  issuerSecretKey: Uint8Array,
+  senderSecretKey: Uint8Array,
 ): string {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const encrypted = nacl.box(message, nonce, receiverPublicKey, issuerSecretKey);
+  const encrypted = nacl.box(message, nonce, receiverPublicKey, senderSecretKey);
 
   if (encrypted === null)
     throw Error(
