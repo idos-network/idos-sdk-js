@@ -9,7 +9,7 @@
     "@idos-network/idos-sdk-server-dapp": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
-    "ethers": "^6.13.1",
+    "ethers": "^6.13.4",
     "hono": "^4.5.3"
   },
   "devDependencies": {
