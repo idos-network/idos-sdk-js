@@ -284,7 +284,7 @@ This function always returns `true` or raises an Error detailing what went wrong
 
 Credential contents stored in the idOS are encrypted such that only its owner (your user) can make sense of it. Since key management is neither a common nor an expectable practice among non-technical folks, this key is derived from the user's password/passkey. The key derivation process is handled by the idOS secure enclave to enable users to perform [authenticated asymmetric ECC encryption / decryption](https://cryptobook.nakov.com/asymmetric-key-ciphers/elliptic-curve-cryptography-ecc#curve25519-x25519-and-ed25519).
 
-Since the SDK does have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving. This happens transparently when you use the SDK to read encrypted data from the idOS.
+Since the SDK does not have access to this key, it delegates decryption workloads to the enclave when responding to data requests involving encryption/decryption. This happens transparently when you use the SDK to read encrypted data from the idOS.
 
 After the user clicks the **🔓 Unlock idOS** button, a secure dialog opens for the user to choose their preferred unlocking method.
 
