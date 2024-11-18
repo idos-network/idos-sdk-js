@@ -29,6 +29,18 @@ importers:
       '@idos-network/ui-kit':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@near-wallet-selector/core':
+        specifier: ^8.9.10
+        version: 8.9.10(near-api-js@3.0.4)
+      '@near-wallet-selector/here-wallet':
+        specifier: ^8.9.10
+        version: 8.9.10(borsh@1.0.0)(near-api-js@3.0.4)
+      '@near-wallet-selector/meteor-wallet':
+        specifier: ^8.9.10
+        version: 8.9.10(near-api-js@3.0.4)
+      '@near-wallet-selector/modal-ui':
+        specifier: ^8.9.10
+        version: 8.9.10(near-api-js@3.0.4)
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -50,6 +62,9 @@ importers:
       '@uidotdev/usehooks':
         specifier: ^2.4.1
         version: 2.4.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@web3modal/wagmi':
+        specifier: ^4.2.3
+        version: 4.2.3(wrztslgqrgfzkhvaarcirj5gjy)
       ascii85:
         specifier: ^1.0.2
         version: 1.0.2
@@ -255,7 +270,7 @@ importers:
         version: 3.0.1
       tailwind-variants:
         specifier: ^0.2.1
-        version: 0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))
+        version: 0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
@@ -271,7 +286,7 @@ importers:
         version: 2.8.2(@babel/core@7.24.6)(preact@10.22.0)(vite@5.2.11(@types/node@22.7.9)(terser@5.31.3))
       '@tailwindcss/forms':
         specifier: ^0.5.6
-        version: 0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))
+        version: 0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))
       '@types/dompurify':
         specifier: 3.0.5
         version: 3.0.5
@@ -289,7 +304,7 @@ importers:
         version: 8.4.31
       tailwindcss:
         specifier: ^3.4.1
-        version: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
+        version: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
       typescript:
         specifier: ^5.2.2
         version: 5.4.5
@@ -310,7 +325,7 @@ importers:
         version: 1.44.1
       '@synthetixio/synpress':
         specifier: 4.0.0-alpha.7
-        version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
+        version: 4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
       '@types/node':
         specifier: ^20.10.5
         version: 20.10.5
@@ -384,7 +399,7 @@ importers:
         version: 20.14.12
       '@vercel/node':
         specifier: ^3.0.26
-        version: 3.0.26(@swc/core@1.7.1(@swc/helpers@0.5.13))
+        version: 3.0.26(@swc/core@1.7.1)
       raw-body:
         specifier: ^2.5.2
         version: 2.5.2
@@ -493,7 +508,7 @@ importers:
         version: 17.0.0(typescript@5.2.2)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2)
       typescript:
         specifier: ^5.2.2
         version: 5.2.2
@@ -575,7 +590,7 @@ importers:
         version: 17.0.0(typescript@5.5.4)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4)
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -626,7 +641,7 @@ importers:
         version: 17.0.0(typescript@5.5.4)
       tsup:
         specifier: ^8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
+        version: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4)
       typescript:
         specifier: ^5.2.2
         version: 5.5.4
@@ -15709,6 +15724,15 @@ snapshots:
       near-api-js: 3.0.4
       query-string: 7.1.3
 
+  '@microsoft/api-extractor-model@7.28.2':
+    dependencies:
+      '@microsoft/tsdoc': 0.14.2
+      '@microsoft/tsdoc-config': 0.16.2
+      '@rushstack/node-core-library': 3.61.0(@types/node@22.7.9)
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
   '@microsoft/api-extractor-model@7.28.2(@types/node@20.10.5)':
     dependencies:
       '@microsoft/tsdoc': 0.14.2
@@ -15732,6 +15756,24 @@ snapshots:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
       '@rushstack/node-core-library': 3.61.0(@types/node@22.7.9)
+    transitivePeerDependencies:
+      - '@types/node'
+    optional: true
+
+  '@microsoft/api-extractor@7.38.3':
+    dependencies:
+      '@microsoft/api-extractor-model': 7.28.2
+      '@microsoft/tsdoc': 0.14.2
+      '@microsoft/tsdoc-config': 0.16.2
+      '@rushstack/node-core-library': 3.61.0(@types/node@22.7.9)
+      '@rushstack/rig-package': 0.5.1
+      '@rushstack/ts-command-line': 4.17.1
+      colors: 1.2.5
+      lodash: 4.17.21
+      resolve: 1.22.8
+      semver: 7.5.4
+      source-map: 0.6.1
+      typescript: 5.0.4
     transitivePeerDependencies:
       - '@types/node'
     optional: true
@@ -17241,7 +17283,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)':
+  '@synthetixio/synpress-cache@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)':
     dependencies:
       axios: 1.6.7
       chalk: 5.3.0
@@ -17252,7 +17294,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.45.3
       progress: 2.0.3
-      tsup: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(typescript@5.6.3)
+      tsup: 8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(postcss@8.4.47)(typescript@5.6.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -17268,10 +17310,10 @@ snapshots:
     dependencies:
       '@playwright/test': 1.44.1
 
-  '@synthetixio/synpress-metamask@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)':
+  '@synthetixio/synpress-metamask@0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@playwright/test': 1.44.1
-      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.44.1)
       '@viem/anvil': 0.0.7(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       fs-extra: 11.2.0
@@ -17288,13 +17330,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)':
+  '@synthetixio/synpress@4.0.0-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)':
     dependencies:
       '@playwright/test': 1.44.1
       '@synthetixio/ethereum-wallet-mock': 0.0.1-alpha.7(@playwright/test@1.44.1)(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
-      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)
+      '@synthetixio/synpress-cache': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)
       '@synthetixio/synpress-core': 0.0.1-alpha.7(@playwright/test@1.44.1)
-      '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1(@swc/helpers@0.5.13))(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)
+      '@synthetixio/synpress-metamask': 0.0.1-alpha.7(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@playwright/test@1.44.1)(@swc/core@1.7.1)(bufferutil@4.0.8)(playwright-core@1.45.3)(postcss@8.4.47)(typescript@5.6.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@microsoft/api-extractor'
       - '@swc/core'
@@ -17312,10 +17354,10 @@ snapshots:
     dependencies:
       defer-to-connect: 2.0.1
 
-  '@tailwindcss/forms@0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)))':
+  '@tailwindcss/forms@0.5.6(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)))':
     dependencies:
       mini-svg-data-uri: 1.4.4
-      tailwindcss: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
+      tailwindcss: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
 
   '@tanstack/history@1.61.1': {}
 
@@ -17646,7 +17688,7 @@ snapshots:
       - encoding
       - supports-color
 
-  '@vercel/node@3.0.26(@swc/core@1.7.1(@swc/helpers@0.5.13))':
+  '@vercel/node@3.0.26(@swc/core@1.7.1)':
     dependencies:
       '@edge-runtime/node-utils': 2.3.0
       '@edge-runtime/primitives': 4.1.0
@@ -17665,7 +17707,7 @@ snapshots:
       node-fetch: 2.6.9
       path-to-regexp: 6.2.1
       ts-morph: 12.0.0
-      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@14.18.33)(typescript@4.9.5)
+      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@14.18.33)(typescript@4.9.5)
       typescript: 4.9.5
       undici: 5.26.5
     transitivePeerDependencies:
@@ -18036,6 +18078,39 @@ snapshots:
     dependencies:
       tslib: 1.14.1
 
+  '@walletconnect/ethereum-provider@2.13.0(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@walletconnect/jsonrpc-http-connection': 1.0.8
+      '@walletconnect/jsonrpc-provider': 1.0.14
+      '@walletconnect/jsonrpc-types': 1.0.4
+      '@walletconnect/jsonrpc-utils': 1.0.8
+      '@walletconnect/modal': 2.6.2(@types/react@18.3.12)(react@18.3.1)
+      '@walletconnect/sign-client': 2.13.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/types': 2.13.0
+      '@walletconnect/universal-provider': 2.13.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      '@walletconnect/utils': 2.13.0
+      events: 3.3.0
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - bufferutil
+      - encoding
+      - ioredis
+      - react
+      - uWebSockets.js
+      - utf-8-validate
+
   '@walletconnect/ethereum-provider@2.13.0(@types/react@18.3.3)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)':
     dependencies:
       '@walletconnect/jsonrpc-http-connection': 1.0.8
@@ -18273,6 +18348,13 @@ snapshots:
     transitivePeerDependencies:
       - react
 
+  '@walletconnect/modal-core@2.6.2(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      valtio: 1.11.2(@types/react@18.3.12)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+      - react
+
   '@walletconnect/modal-core@2.6.2(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       valtio: 1.11.2(@types/react@18.3.3)(react@18.3.1)
@@ -18301,6 +18383,16 @@ snapshots:
       motion: 10.16.2
       qrcode: 1.5.3
     transitivePeerDependencies:
+      - react
+
+  '@walletconnect/modal-ui@2.6.2(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@walletconnect/modal-core': 2.6.2(@types/react@18.3.12)(react@18.3.1)
+      lit: 2.8.0
+      motion: 10.16.2
+      qrcode: 1.5.3
+    transitivePeerDependencies:
+      - '@types/react'
       - react
 
   '@walletconnect/modal-ui@2.6.2(@types/react@18.3.3)(react@18.3.1)':
@@ -18338,6 +18430,14 @@ snapshots:
       '@walletconnect/modal-core': 2.6.1(react@18.3.1)
       '@walletconnect/modal-ui': 2.6.1(react@18.3.1)
     transitivePeerDependencies:
+      - react
+
+  '@walletconnect/modal@2.6.2(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@walletconnect/modal-core': 2.6.2(@types/react@18.3.12)(react@18.3.1)
+      '@walletconnect/modal-ui': 2.6.2(@types/react@18.3.12)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
       - react
 
   '@walletconnect/modal@2.6.2(@types/react@18.3.3)(react@18.3.1)':
@@ -18807,6 +18907,15 @@ snapshots:
       bignumber.js: 9.1.2
       dayjs: 1.11.10
 
+  '@web3modal/core@4.2.3(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@web3modal/common': 4.2.3
+      '@web3modal/wallet': 4.2.3
+      valtio: 1.11.2(@types/react@18.3.12)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+      - react
+
   '@web3modal/core@4.2.3(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       '@web3modal/common': 4.2.3
@@ -18819,6 +18928,29 @@ snapshots:
   '@web3modal/polyfills@4.2.3':
     dependencies:
       buffer: 6.0.3
+
+  '@web3modal/scaffold-react@4.2.3(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+    dependencies:
+      '@web3modal/scaffold': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+    optionalDependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - ioredis
+      - uWebSockets.js
 
   '@web3modal/scaffold-react@4.2.3(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
@@ -18843,6 +18975,15 @@ snapshots:
       - ioredis
       - uWebSockets.js
 
+  '@web3modal/scaffold-utils@4.2.3(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@web3modal/core': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/polyfills': 4.2.3
+      valtio: 1.11.2(@types/react@18.3.12)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@types/react'
+      - react
+
   '@web3modal/scaffold-utils@4.2.3(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       '@web3modal/core': 4.2.3(@types/react@18.3.3)(react@18.3.1)
@@ -18852,9 +18993,56 @@ snapshots:
       - '@types/react'
       - react
 
+  '@web3modal/scaffold-vue@4.2.3(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@web3modal/scaffold': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - ioredis
+      - react
+      - uWebSockets.js
+
   '@web3modal/scaffold-vue@4.2.3(@types/react@18.3.3)(react@18.3.1)':
     dependencies:
       '@web3modal/scaffold': 4.2.3(@types/react@18.3.3)(react@18.3.1)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - ioredis
+      - react
+      - uWebSockets.js
+
+  '@web3modal/scaffold@4.2.3(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@web3modal/common': 4.2.3
+      '@web3modal/core': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/siwe': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/ui': 4.2.3
+      '@web3modal/wallet': 4.2.3
+      lit: 3.1.0
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -18881,6 +19069,31 @@ snapshots:
       '@web3modal/ui': 4.2.3
       '@web3modal/wallet': 4.2.3
       lit: 3.1.0
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - ioredis
+      - react
+      - uWebSockets.js
+
+  '@web3modal/siwe@4.2.3(@types/react@18.3.12)(react@18.3.1)':
+    dependencies:
+      '@walletconnect/utils': 2.12.0
+      '@web3modal/core': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/scaffold-utils': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      lit: 3.1.0
+      valtio: 1.11.2(@types/react@18.3.12)(react@18.3.1)
     transitivePeerDependencies:
       - '@azure/app-configuration'
       - '@azure/cosmos'
@@ -18941,6 +19154,41 @@ snapshots:
       '@web3modal/scaffold-vue': 4.2.3(@types/react@18.3.3)(react@18.3.1)
       '@web3modal/siwe': 4.2.3(@types/react@18.3.3)(react@18.3.1)
       viem: 2.18.0(bufferutil@4.0.8)(typescript@5.5.4)(utf-8-validate@5.0.10)(zod@3.23.8)
+    optionalDependencies:
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/kv'
+      - bufferutil
+      - encoding
+      - ioredis
+      - uWebSockets.js
+      - utf-8-validate
+
+  '@web3modal/wagmi@4.2.3(wrztslgqrgfzkhvaarcirj5gjy)':
+    dependencies:
+      '@wagmi/connectors': 5.3.4(@types/react@18.3.12)(@wagmi/core@2.14.2(@tanstack/query-core@5.59.20)(@types/react@18.3.12)(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.18.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)))(bufferutil@4.0.8)(react-dom@18.3.1(react@18.3.1))(react-native@0.74.3(@babel/core@7.26.0)(@babel/preset-env@7.24.8(@babel/core@7.26.0))(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10))(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.18.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))(zod@3.23.8)
+      '@wagmi/core': 2.14.2(@tanstack/query-core@5.59.20)(@types/react@18.3.12)(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.2.0(react@18.3.1))(viem@2.18.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8))
+      '@walletconnect/ethereum-provider': 2.13.0(@types/react@18.3.12)(bufferutil@4.0.8)(react@18.3.1)(utf-8-validate@5.0.10)
+      '@web3modal/polyfills': 4.2.3
+      '@web3modal/scaffold': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/scaffold-react': 4.2.3(@types/react@18.3.12)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@web3modal/scaffold-utils': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/scaffold-vue': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      '@web3modal/siwe': 4.2.3(@types/react@18.3.12)(react@18.3.1)
+      viem: 2.18.0(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
     optionalDependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -20197,14 +20445,14 @@ snapshots:
 
   axios@0.27.2:
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
   axios@1.6.7:
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -20220,7 +20468,7 @@ snapshots:
 
   axios@1.7.2:
     dependencies:
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
@@ -22097,8 +22345,6 @@ snapshots:
     dependencies:
       tabbable: 6.2.0
 
-  follow-redirects@1.15.6: {}
-
   follow-redirects@1.15.6(debug@4.3.4):
     optionalDependencies:
       debug: 4.3.4
@@ -22543,7 +22789,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.6
+      follow-redirects: 1.15.6(debug@4.3.4)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
@@ -24317,36 +24563,37 @@ snapshots:
       camelcase-css: 2.0.1
       postcss: 8.4.38
 
-  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)):
+  postcss-load-config@4.0.1(postcss@8.4.38)(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.38
-      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)
+      ts-node: 10.9.1(@types/node@22.7.9)(typescript@5.4.5)
 
-  postcss-load-config@4.0.1(postcss@8.4.47):
+  postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.47
+      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2)
 
-  postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2)):
+  postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.47
-      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2)
+      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)
 
-  postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4)):
+  postcss-load-config@4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4)):
     dependencies:
       lilconfig: 2.1.0
       yaml: 2.3.2
     optionalDependencies:
       postcss: 8.4.47
-      ts-node: 10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4)
+      ts-node: 10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4)
 
   postcss-nested@6.0.1(postcss@8.4.38):
     dependencies:
@@ -25561,12 +25808,12 @@ snapshots:
 
   tailwind-merge@2.5.2: {}
 
-  tailwind-variants@0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))):
+  tailwind-variants@0.2.1(tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))):
     dependencies:
       tailwind-merge: 2.5.2
-      tailwindcss: 3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
+      tailwindcss: 3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
 
-  tailwindcss@3.4.1(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5)):
+  tailwindcss@3.4.1(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5)):
     dependencies:
       '@alloc/quick-lru': 5.2.0
       arg: 5.0.2
@@ -25585,7 +25832,7 @@ snapshots:
       postcss: 8.4.38
       postcss-import: 15.1.0(postcss@8.4.38)
       postcss-js: 4.0.1(postcss@8.4.38)
-      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5))
+      postcss-load-config: 4.0.1(postcss@8.4.38)(ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5))
       postcss-nested: 6.0.1(postcss@8.4.38)
       postcss-selector-parser: 6.0.13
       resolve: 1.22.8
@@ -25730,7 +25977,7 @@ snapshots:
       '@ts-morph/common': 0.11.1
       code-block-writer: 10.1.1
 
-  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@14.18.33)(typescript@4.9.5):
+  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@14.18.33)(typescript@4.9.5):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -25750,7 +25997,7 @@ snapshots:
     optionalDependencies:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
 
-  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2):
+  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -25771,28 +26018,7 @@ snapshots:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
     optional: true
 
-  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.4.5):
-    dependencies:
-      '@cspotcode/source-map-support': 0.8.1
-      '@tsconfig/node10': 1.0.11
-      '@tsconfig/node12': 1.0.11
-      '@tsconfig/node14': 1.0.3
-      '@tsconfig/node16': 1.0.4
-      '@types/node': 22.7.9
-      acorn: 8.14.0
-      acorn-walk: 8.3.3
-      arg: 4.1.3
-      create-require: 1.1.1
-      diff: 4.0.2
-      make-error: 1.3.6
-      typescript: 5.4.5
-      v8-compile-cache-lib: 3.0.1
-      yn: 3.1.1
-    optionalDependencies:
-      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
-    optional: true
-
-  ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4):
+  ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
@@ -25813,6 +26039,25 @@ snapshots:
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
     optional: true
 
+  ts-node@10.9.1(@types/node@22.7.9)(typescript@5.4.5):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.7.9
+      acorn: 8.14.0
+      acorn-walk: 8.3.3
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.4.5
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
   ts-toolbelt@6.15.5: {}
 
   tslib@1.14.1: {}
@@ -25827,7 +26072,7 @@ snapshots:
 
   tslib@2.7.0: {}
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(typescript@5.6.3):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.10.5))(@swc/core@1.7.1)(postcss@8.4.47)(typescript@5.6.3):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -25837,7 +26082,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.47)
+      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -25852,7 +26097,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@20.14.12))(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))(typescript@5.2.2):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -25862,7 +26107,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.2.2))
+      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@20.14.12)(typescript@5.2.2))
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -25877,7 +26122,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1(@swc/helpers@0.5.13))(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4):
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3(@types/node@22.7.9))(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))(typescript@5.5.4):
     dependencies:
       bundle-require: 4.1.0(esbuild@0.19.12)
       cac: 6.7.14
@@ -25887,7 +26132,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@22.7.9)(typescript@5.5.4))
+      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(@types/node@22.7.9)(typescript@5.5.4))
       resolve-from: 5.0.0
       rollup: 4.19.0
       source-map: 0.8.0-beta.0
@@ -25895,6 +26140,31 @@ snapshots:
       tree-kill: 1.2.2
     optionalDependencies:
       '@microsoft/api-extractor': 7.38.3(@types/node@22.7.9)
+      '@swc/core': 1.7.1(@swc/helpers@0.5.13)
+      postcss: 8.4.47
+      typescript: 5.5.4
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+
+  tsup@8.0.2(@microsoft/api-extractor@7.38.3)(@swc/core@1.7.1)(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))(typescript@5.5.4):
+    dependencies:
+      bundle-require: 4.1.0(esbuild@0.19.12)
+      cac: 6.7.14
+      chokidar: 3.6.0
+      debug: 4.3.5
+      esbuild: 0.19.12
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss-load-config: 4.0.1(postcss@8.4.47)(ts-node@10.9.1(@swc/core@1.7.1)(typescript@5.5.4))
+      resolve-from: 5.0.0
+      rollup: 4.19.0
+      source-map: 0.8.0-beta.0
+      sucrase: 3.34.0
+      tree-kill: 1.2.2
+    optionalDependencies:
+      '@microsoft/api-extractor': 7.38.3
       '@swc/core': 1.7.1(@swc/helpers@0.5.13)
       postcss: 8.4.47
       typescript: 5.5.4
