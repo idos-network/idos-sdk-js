@@ -25,6 +25,11 @@ createAppKit({
   networks: [mainnet, sepolia], // for some reason it complains if u set this value to networks
   projectId,
   metadata,
+  features: {
+    allWallets: true,
+    email: false,
+    socials: false,
+  },
 });
 
 export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
