@@ -7,12 +7,12 @@ import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, encryptContent, ensureEntityId } from "./internal";
 
-type UpdatablePublicNotes = {
+type UpdateablePublicNotes = {
   publicNotes: string;
 };
-const buildUpdatablePublicNotes = (
+const buildUpdateablePublicNotes = (
   issuerConfig: IssuerConfig,
-  { publicNotes }: UpdatablePublicNotes,
+  { publicNotes }: UpdateablePublicNotes,
 ) => {
   const publicNotesSignature = nacl.sign.detached(
     Utf8Codec.encode(publicNotes),
@@ -25,10 +25,10 @@ const buildUpdatablePublicNotes = (
   };
 };
 
-type InsertableIdosCredential = Omit<idOSCredential, "id" | "original_id"> & {
+type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
 };
-const buildInsertableIdosCredential = (
+const buildInsertableIDOSCredential = (
   issuerConfig: IssuerConfig,
   {
     humanId,
@@ -41,7 +41,7 @@ const buildInsertableIdosCredential = (
     plaintextContent: Uint8Array;
     receiverEncryptionPublicKey: Uint8Array;
   },
-): InsertableIdosCredential => {
+): InsertableIDOSCredential => {
   const content = Base64Codec.decode(
     encryptContent(
       plaintextContent,
@@ -50,7 +50,7 @@ const buildInsertableIdosCredential = (
     ),
   );
 
-  const { public_notes, public_notes_signature } = buildUpdatablePublicNotes(issuerConfig, {
+  const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
     publicNotes,
   });
 
@@ -82,11 +82,11 @@ type BaseCredentialParams = {
 };
 
 export async function createCredentialPermissioned(
-  issuer_config: IssuerConfig,
+  issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
-  const { dbid, kwilClient, kwilSigner } = issuer_config;
-  const payload = ensureEntityId(buildInsertableIdosCredential(issuer_config, params));
+  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
 
   await kwilClient.execute(
     {
@@ -105,11 +105,11 @@ export async function createCredentialPermissioned(
 }
 
 export async function createCredentialByGrant(
-  issuer_config: IssuerConfig,
+  issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
-  const { dbid, kwilClient, kwilSigner } = issuer_config;
-  const payload = ensureEntityId(buildInsertableIdosCredential(issuer_config, params));
+  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
 
   await kwilClient.execute(
     {
@@ -143,7 +143,7 @@ export async function shareCredentialByGrant(
     original_credential_id: params.originalCredentialId,
   };
   const payload = {
-    ...ensureEntityId(buildInsertableIdosCredential(issuer_config, params)),
+    ...ensureEntityId(buildInsertableIDOSCredential(issuer_config, params)),
     ...extraEntries,
   };
 
@@ -170,13 +170,13 @@ type EditCredentialAsIssuerParams = {
   publicNotes: string;
 };
 export async function editCredential(
-  issuer_config: IssuerConfig,
+  issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
 ) {
-  const { dbid, kwilClient, kwilSigner } = issuer_config;
+  const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = {
     public_notes_id: publicNotesId,
-    ...buildUpdatablePublicNotes(issuer_config, {
+    ...buildUpdateablePublicNotes(issuerConfig, {
       publicNotes,
     }),
   };
