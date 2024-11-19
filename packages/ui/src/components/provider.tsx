@@ -3,17 +3,22 @@ import { ChakraProvider, createSystem, defaultConfig, defineConfig } from "@chak
 import { ColorModeProvider, type ColorModeProviderProps } from "./color-mode";
 
 const config = defineConfig({
+  globalCss: {
+    body: {
+      fontSmooth: "antialiased",
+    },
+  },
   theme: {
     recipes: {
       button: {
         base: {
-          colorPalette: "orange",
+          colorPalette: "green",
         },
         variants: {
           variant: {
             solid: {
-              bg: "colorPalette.200",
-              color: "colorPalette.contrast",
+              bg: "colorPalette.300",
+              color: "colorPalette.950",
               _hover: {
                 bg: "colorPalette.100",
               },
