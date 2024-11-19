@@ -14,6 +14,8 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@reown/appkit": "^1.5.0",
+    "@reown/appkit-adapter-wagmi": "^1.5.0",
     "@idos-network/idos-sdk": "workspace:*",
     "@near-wallet-selector/core": "^8.9.10",
     "@near-wallet-selector/here-wallet": "^8.9.10",
