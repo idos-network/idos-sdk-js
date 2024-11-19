@@ -99,7 +99,7 @@ const useFetchCredential = (id: string) => {
   });
 };
 
-async function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
+function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
   const fullMessage = Base64Codec.decode(b64FullMessage);
   const senderPublicKey = Base64Codec.decode(b64SenderPublicKey);
 
@@ -202,22 +202,27 @@ function changeCase(str: string) {
 }
 
 function CredentialDetails({
-  content,
+  credentialId,
   open,
   toggle,
-}: { content: string; open: boolean; toggle: (value?: boolean) => void }) {
-  if (!content) return null;
+}: { credentialId: string; open: boolean; toggle: (value?: boolean) => void }) {
+  const credential = useFetchCredential(credentialId);
+  const [secretKey] = useLocalStorage("SECRET_KEY", "");
 
-  const parsedContent = JSON.parse(content);
+  if (!credential.data || !secretKey) return null;
 
-  const subject = Object.entries(parsedContent.credentialSubject).filter(
+  const content = JSON.parse(
+    decrypt(credential.data.content, credential.data.encryption_public_key, secretKey),
+  );
+
+  const subject = Object.entries(content.credentialSubject).filter(
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
   ) as [string, string][];
 
-  const emails = parsedContent.credentialSubject.emails;
-  const wallets = parsedContent.credentialSubject.wallets;
+  const emails = content.credentialSubject.emails;
+  const wallets = content.credentialSubject.wallets;
   const files = (
-    Object.entries(parsedContent.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
+    Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
       string,
       string,
     ][]
@@ -364,46 +369,26 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
-  const [content, setContent] = useState("");
-  const credential = useFetchCredential(credentialId);
   const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
 
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
-  const handleOpenCredentialDetails = async () => {
-    if (!credential.data) return;
+  const handleOpenCredentialDetails = async (id: string) => {
+    setCredentialId(id);
 
     if (!secretKey) {
       toggleSecretKeyPrompt();
       return;
     }
 
-    const content = await decrypt(
-      credential.data.content,
-      credential.data.encryption_public_key,
-      secretKey,
-    );
-    setContent(content);
     toggleCredentialDetails();
   };
 
   const onKeySubmit = async (secretKey: string) => {
-    if (!credential.data) return;
-
-    const content = await decrypt(
-      credential.data.content,
-      credential.data.encryption_public_key,
-      secretKey,
-    );
     setSecretKey(secretKey);
-    setContent(content);
     toggleCredentialDetails();
-  };
-
-  const handlePrefetchCredential = (id: string) => {
-    setCredentialId(id);
   };
 
   return (
@@ -475,9 +460,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
             alignSelf={{
               md: "flex-end",
             }}
-            onPointerEnter={() => handlePrefetchCredential(grant.dataId)}
-            onFocus={() => handlePrefetchCredential(grant.dataId)}
-            onClick={() => handleOpenCredentialDetails()}
+            onClick={() => handleOpenCredentialDetails(grant.dataId)}
           >
             Credential details
           </Button>
@@ -488,7 +471,11 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
       />
 
       <CredentialDetails
-        {...{ content, open: openCredentialDetails, toggle: toggleCredentialDetails }}
+        {...{
+          credentialId,
+          open: openCredentialDetails,
+          toggle: toggleCredentialDetails,
+        }}
       />
     </>
   );
