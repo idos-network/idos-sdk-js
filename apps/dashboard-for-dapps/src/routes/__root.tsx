@@ -7,6 +7,7 @@ import {
   Heading,
   Image,
   Text,
+  VStack,
   chakra,
 } from "@chakra-ui/react";
 import { Button } from "@idos-network/ui-kit";
@@ -14,11 +15,12 @@ import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { useAccount, useDisconnect } from "wagmi";
 
+import { useWalletSelector } from "@/contexts/near";
 import { Provider } from "@/idOS.provider";
-import { useEffect } from "react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
+import { useEffect, useMemo } from "react";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -34,27 +36,60 @@ export const Route = createRootRouteWithContext<{
 });
 
 function ConnectWallet() {
-  const { connect, isPending } = useConnect();
+  const { open } = useWeb3Modal();
+  const { modal } = useWalletSelector();
+
   return (
     <Center h="100dvh" flexDirection="column" gap="4">
       <Heading fontSize="xl">Connect your wallet to continue</Heading>
-      <Button
-        loading={isPending}
-        onClick={() =>
-          connect({
-            connector: injected(),
-          })
-        }
+      <VStack
+        align="stretch"
+        minW={{
+          base: "360",
+          lg: 400,
+        }}
+        gap={3}
       >
-        Connect your wallet
-      </Button>
+        <Button size="lg" justifyContent="space-between" onClick={() => open()}>
+          Connect a wallet
+          <Image alt="NEAR logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
+        </Button>
+        <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
+          Connect with NEAR
+          <Image alt="NEAR logo" src="/near.svg" w={10} h={10} />
+        </Button>
+      </VStack>
     </Center>
   );
 }
 
-function RootComponent() {
-  const { disconnect } = useDisconnect();
+const DisconnectButton = () => {
   const { isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { selector } = useWalletSelector();
+  const queryClient = useQueryClient();
+
+  const handleDisconnect = async () => {
+    if (isConnected) disconnect();
+    if (selector.isSignedIn()) (await selector.wallet()).signOut();
+    queryClient.removeQueries();
+  };
+
+  return (
+    <Button id="disconnect-wallet-btn" colorScheme="green" onClick={handleDisconnect}>
+      Disconnect wallet
+    </Button>
+  );
+};
+
+function RootComponent() {
+  const { isConnected: isEthConnected } = useAccount();
+  const { accounts } = useWalletSelector();
+
+  const isConnected = useMemo(
+    () => accounts.length > 0 || isEthConnected,
+    [accounts, isEthConnected],
+  );
 
   const queryClient = useQueryClient();
   const navigate = useNavigate({ from: Route.fullPath });
@@ -83,7 +118,7 @@ function RootComponent() {
                 <Text fontSize="lg">Dashboard for dApps</Text>
               </HStack>
             </Link>
-            {isConnected ? <Button onClick={() => disconnect()}>Disconnect</Button> : null}
+            {isConnected ? <DisconnectButton /> : null}
           </Flex>
         </Container>
       </chakra.header>

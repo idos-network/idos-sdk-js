@@ -6,10 +6,12 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import { useAccount } from "wagmi";
+import { useWalletSelector } from "./contexts/near";
 import { useEthersSigner } from "./wagmi.config";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialised in the provider.
@@ -19,32 +21,53 @@ export const useIdOS = () => useContext(idOSContext);
 export function Provider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
   const initialised = useRef(false);
+  const { accountId, selector } = useWalletSelector();
+  const { address: ethAddress } = useAccount();
+  const ethSigner = useEthersSigner();
 
-  const { address } = useAccount();
-  const signer = useEthersSigner();
+  const userAddress = useMemo(() => accountId ?? ethAddress, [accountId, ethAddress]);
+
+  const getSigner = useCallback(async () => {
+    if (selector.isSignedIn()) {
+      return {
+        type: "NEAR",
+        value: await selector.wallet(),
+      };
+    }
+
+    if (ethSigner) {
+      return {
+        type: "EVM",
+        value: ethSigner,
+      };
+    }
+
+    return null;
+  }, [ethSigner, selector]);
 
   const initialise = useCallback(async () => {
-    if (initialised.current) return;
-
-    if (!signer) return;
-
+    const signer = await getSigner();
+    if (!signer || !userAddress || sdk) return;
     initialised.current = true;
 
     const _instance = await idOS.init({
-      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      nodeUrl: "https://nodes.staging.idos.network",
       enclaveOptions: {
         container: "#idOS-enclave",
+      },
+      evmGrantsOptions: {
+        contractAddress: "0x827310fF816EfD65406a40cb1358cc82Bc2F5cF9",
       },
     });
 
     setSdk(_instance);
-    const _hasProfile = await _instance.hasProfile(address as string);
+    const _hasProfile = await _instance.hasProfile(userAddress as string);
 
-    if (_hasProfile && signer) {
-      // @ts-expect-error - TODO: fix this
-      await _instance.setSigner("EVM", signer);
+    if (_hasProfile && ethSigner) {
+      // @ts-expect-error
+      await _instance.setSigner(signer.type, signer.value);
     }
-  }, [address, signer]);
+  }, [userAddress, getSigner]);
 
   useEffect(() => {
     initialise();
