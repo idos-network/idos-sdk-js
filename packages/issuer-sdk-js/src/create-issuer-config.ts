@@ -5,15 +5,18 @@ import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
-const isNaclSignKeyPair = (o: unknown): o is nacl.SignKeyPair =>
-  o !== null &&
-  typeof o === "object" &&
-  "publicKey" in o &&
-  o.publicKey instanceof Uint8Array &&
-  o.publicKey.length === nacl.sign.publicKeyLength &&
-  "secretKey" in o &&
-  o.secretKey instanceof Uint8Array &&
-  o.secretKey.length === nacl.sign.secretKeyLength;
+function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "publicKey" in object &&
+    object.publicKey instanceof Uint8Array &&
+    object.publicKey.length === nacl.sign.publicKeyLength &&
+    "secretKey" in object &&
+    object.secretKey instanceof Uint8Array &&
+    object.secretKey.length === nacl.sign.secretKeyLength
+  );
+}
 
 type SignerType = Wallet | KeyPair | nacl.SignKeyPair;
 
@@ -38,7 +41,7 @@ function createKwilSigner(signer: SignerType): KwilSigner {
     );
   }
 
-  // Force the check that signer is never.
+  // Force the check that `signer` is never.
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid signer type");
