@@ -11,7 +11,7 @@ import type { KwilWrapper } from "./kwil-wrapper";
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
 type AnyRecord = Record<string, any>;
 
-type InsertableIdosCredential = Omit<idOSCredential, "id" | "original_id">;
+type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id">;
 
 export class Data {
   constructor(
@@ -82,7 +82,7 @@ export class Data {
       for (const record of records) {
         Object.assign(
           record,
-          await this.#buildInsertableIdosCredential(
+          await this.#buildInsertableIDOSCredential(
             record.human_id,
             record.public_notes,
             record.content,
@@ -131,7 +131,7 @@ export class Data {
       receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
       Object.assign(
         record,
-        await this.#buildInsertableIdosCredential(
+        await this.#buildInsertableIDOSCredential(
           (record as AnyRecord).human_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
@@ -266,7 +266,7 @@ export class Data {
       receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
       Object.assign(
         record,
-        await this.#buildInsertableIdosCredential(
+        await this.#buildInsertableIDOSCredential(
           record.human_id,
           record.public_notes,
           record.content,
@@ -298,7 +298,7 @@ export class Data {
     if (tableName === "credentials") {
       Object.assign(
         record,
-        await this.#buildInsertableIdosCredential(
+        await this.#buildInsertableIDOSCredential(
           record.human_id,
           record.public_notes,
           record.content,
@@ -339,12 +339,12 @@ export class Data {
     );
   }
 
-  async #buildInsertableIdosCredential(
+  async #buildInsertableIDOSCredential(
     humanId: string,
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string,
-  ): Promise<InsertableIdosCredential> {
+  ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
     const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
@@ -368,12 +368,13 @@ export class Data {
       ),
 
       issuer: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
-      encryption_public_key: present(this.enclave.auth.currentUser.currentUserPublicKey),
+      encryption_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
     };
   }
 }
 
-const present = <T>(obj: T | undefined | null): T => {
+const isPresent = <T>(obj: T | undefined | null): T => {
+  // @todo: better error message.
   if (!obj) throw new Error("Unexpected absence");
   return obj;
 };
