@@ -1,8 +1,9 @@
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { mainnet, sepolia } from "@reown/appkit/networks";
-import { createAppKit, useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
+import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
-import { useConnectorClient } from "wagmi";
+import { useMemo } from "react";
+import type { Account, Client, Transport } from "viem";
+import { http, useConnectorClient } from "wagmi";
+import { type Chain, mainnet, sepolia } from "wagmi/chains";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -13,38 +14,33 @@ const metadata = {
   icons: ["/idos-dashboard-logo.svg"],
 };
 
-export const networks = [mainnet, sepolia];
+export const chains = [mainnet, sepolia] as const;
 
-export const wagmiAdapter = new WagmiAdapter({
-  networks,
-  projectId,
-});
-
-createAppKit({
-  adapters: [wagmiAdapter],
-  networks: [mainnet, sepolia], // for some reason it complains if u set this value to networks
+export const wagmiConfig = defaultWagmiConfig({
+  // @ts-expect-error - wagmi types are outdated
+  chains,
   projectId,
   metadata,
-  features: {
-    allWallets: true,
-    email: false,
-    socials: false,
+  transports: {
+    // @ts-expect-error - wagmi types are outdated
+    [mainnet.id]: http(),
+    // @ts-expect-error - wagmi types are outdated
+    [sepolia.id]: http(),
   },
 });
 
+export function clientToSigner(client: Client<Transport, Chain, Account>) {
+  const { account, chain, transport } = client;
+  const network = {
+    chainId: chain.id,
+    name: chain.name,
+    ensAddress: chain.contracts?.ensRegistry?.address,
+  };
+  const provider = new BrowserProvider(transport, network);
+  return new JsonRpcSigner(provider, account.address);
+}
+
 export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
   const { data: walletClient } = useConnectorClient({ chainId });
-  const { caipNetwork } = useAppKitNetwork();
-  const { address } = useAppKitAccount();
-  if (!caipNetwork || !walletClient || !address) return;
-
-  const network = {
-    chainId: +caipNetwork?.id,
-    name: caipNetwork?.name,
-    ensAddress: caipNetwork?.contracts?.ensRegistry?.address as string,
-  };
-
-  const provider = new BrowserProvider(walletClient.transport, network);
-  const signer = new JsonRpcSigner(provider, address);
-  return signer;
+  return useMemo(() => (walletClient ? clientToSigner(walletClient) : undefined), [walletClient]);
 }
