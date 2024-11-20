@@ -8,7 +8,7 @@ export interface idOSHuman {
 export interface idOSCredential {
   id: string;
   human_id: string;
-  issuer: string;
+  issuer_auth_public_key: string;
   original_id?: string;
   public_notes: string;
   public_notes_signature: string;
