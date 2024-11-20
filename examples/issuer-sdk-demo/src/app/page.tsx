@@ -30,7 +30,7 @@ export default function Home() {
 
   useEffect(() => {
     async function initialise() {
-      if (!isConnected || !signer || initialised.current) return;
+      if (!signer || initialised.current) return;
 
       initialised.current = true;
 
@@ -55,6 +55,7 @@ export default function Home() {
             },
           });
         } else {
+          // @ts-expect-error
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
           setCredentials(_credentials);
@@ -69,7 +70,7 @@ export default function Home() {
     }
 
     initialise();
-  }, [address, isConnected, signer, setSdk]);
+  }, [signer?.address, setSdk]);
 
   useEffect(() => {
     if (isDisconnected) {
@@ -103,6 +104,7 @@ export default function Home() {
       const _hasProfile = await clientSDK.hasProfile(String(address));
       if (_hasProfile && signer) {
         setHasProfile(_hasProfile);
+        // @ts-expect-error
         await clientSDK.setSigner("EVM", signer);
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_ADDRESS;
 

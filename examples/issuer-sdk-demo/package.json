@@ -13,6 +13,8 @@
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@nextui-org/react": "^2.4.8",
+    "@reown/appkit": "^1.5.0",
+    "@reown/appkit-adapter-wagmi": "^1.5.0",
     "@tanstack/react-query": "5.45.1",
     "ethers": "^6.13.4",
     "framer-motion": "^11.11.9",

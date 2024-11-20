@@ -8,7 +8,7 @@ import { cookieToInitialState } from "wagmi";
 
 import { Providers } from "@/app/providers";
 import { WalletConnector } from "@/components/wallet-connector";
-import { getConfig } from "@/wagmi.config";
+import { wagmiAdapter } from "@/wagmi.config";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout(props: { children: ReactNode }) {
-  const initialState = cookieToInitialState(getConfig(), headers().get("cookie"));
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, headers().get("cookie"));
   return (
     <html lang="en">
       <body className={inter.className}>

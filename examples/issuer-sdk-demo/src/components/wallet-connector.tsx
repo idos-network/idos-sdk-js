@@ -2,12 +2,13 @@
 
 import { useSdkStore } from "@/stores/sdk";
 import { Button } from "@nextui-org/react";
+import { useAppKit } from "@reown/appkit/react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
 
 export function WalletConnector() {
+  const { open } = useAppKit();
   const { isConnected } = useAccount();
-  const { connect, isPending } = useConnect();
+  const { isPending } = useConnect();
   const { disconnect } = useDisconnect();
   const { sdk: clientSDK } = useSdkStore();
 
@@ -26,15 +27,7 @@ export function WalletConnector() {
   }
 
   return (
-    <Button
-      variant="bordered"
-      isLoading={isPending}
-      onClick={() =>
-        connect({
-          connector: injected(),
-        })
-      }
-    >
+    <Button variant="bordered" isLoading={isPending} onClick={() => open()}>
       Connect a wallet
     </Button>
   );

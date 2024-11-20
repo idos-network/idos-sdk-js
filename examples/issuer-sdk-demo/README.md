@@ -11,6 +11,7 @@ A demo application showcasing the "@idos-network/issuer-sdk-js" package.
 
 ```
 NEXT_PUBLIC_IDOS_NETWORK_API_KEY=<your-api-key>
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=<your-wallet-connect-project-id>
 # SDK SECRETS
 NEXT_PUBLIC_KWIL_NODE_URL=<idOS-node-url>
 NEXT_PUBLIC_ISSUER_ADDRESS=<issuer-address>
