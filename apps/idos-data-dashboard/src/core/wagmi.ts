@@ -2,6 +2,7 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit, useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
+import { useMemo } from "react";
 import { useConnectorClient } from "wagmi";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -36,15 +37,17 @@ export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
   const { data: walletClient } = useConnectorClient({ chainId });
   const { caipNetwork } = useAppKitNetwork();
   const { address } = useAppKitAccount();
-  if (!caipNetwork || !walletClient || !address) return;
 
-  const network = {
+  const network = caipNetwork && {
     chainId: +caipNetwork?.id,
     name: caipNetwork?.name,
     ensAddress: caipNetwork?.contracts?.ensRegistry?.address as string,
   };
 
-  const provider = new BrowserProvider(walletClient.transport, network);
-  const signer = new JsonRpcSigner(provider, address);
+  const provider = walletClient && new BrowserProvider(walletClient.transport, network);
+  const signer = useMemo(
+    () => (provider && address ? new JsonRpcSigner(provider, address) : undefined),
+    [provider],
+  );
   return signer;
 }
