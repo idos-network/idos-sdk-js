@@ -14,7 +14,7 @@ test.beforeEach(async ({ context, page }) => {
 test("should create a grant successfully", async ({ context, page, metamaskPage, extensionId }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
+  await page.getByRole("button", { name: "MetaMask installed" }).click();
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
   await page.waitForTimeout(2000);
@@ -81,7 +81,7 @@ test("should revoke a grant successfully", async ({ context, page, metamaskPage,
   await page.waitForTimeout(50000);
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
+  await page.getByRole("button", { name: "MetaMask installed" }).click();
 
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
@@ -117,7 +117,7 @@ test("should share a matching credential successfully", async ({
   await page.goto("/e2e/credential-filtering");
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
+  await page.getByRole("button", { name: "MetaMask installed" }).click();
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
   await page.waitForTimeout(3000);
