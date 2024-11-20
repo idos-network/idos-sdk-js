@@ -1,5 +1,4 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import { Wallet } from "ethers";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
@@ -18,7 +17,7 @@ function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
   );
 }
 
-type SignerType = Wallet | KeyPair | nacl.SignKeyPair;
+type SignerType = KeyPair | nacl.SignKeyPair;
 
 function createKwilSigner(signer: SignerType): KwilSigner {
   if (isNaclSignKeyPair(signer)) {
@@ -27,10 +26,6 @@ function createKwilSigner(signer: SignerType): KwilSigner {
       signer.publicKey,
       "ed25519",
     );
-  }
-
-  if (signer instanceof Wallet) {
-    return new KwilSigner(signer, signer.address);
   }
 
   if (signer instanceof KeyPair) {
@@ -57,13 +52,15 @@ export interface IssuerConfig {
   encryptionKeyPair: nacl.SignKeyPair;
 }
 
-export async function createIssuerConfig(params: {
+type CreateIssuerConfigParams = {
   chainId?: string;
   dbId?: string;
   nodeUrl: string;
   signingKeyPair: nacl.SignKeyPair;
   encryptionKeyPair: nacl.BoxKeyPair;
-}): Promise<IssuerConfig> {
+};
+
+export async function createIssuerConfig(params: CreateIssuerConfigParams): Promise<IssuerConfig> {
   const _kwil = new NodeKwil({
     kwilProvider: params.nodeUrl,
     chainId: "",
