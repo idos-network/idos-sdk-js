@@ -22,7 +22,7 @@ test("should decrypt a credential successfully", async ({
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "MetaMask installed" }).click();
+  await page.getByRole("button", { name: "MetaMask" }).first().click();
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
   await page.waitForTimeout(2000);
@@ -52,7 +52,7 @@ test("should filter credentials by country successfully", async ({
   await page.goto("e2e/credential-filtering-by-country");
 
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "MetaMask installed" }).click();
+  await page.getByRole("button", { name: "MetaMask" }).first().click();
   await metamask.switchAccount("Account 1");
   await metamask.connectToDapp(["Account 1"]);
   await page.waitForTimeout(2000);
