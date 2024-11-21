@@ -58,6 +58,7 @@ export default function Home() {
           // @ts-expect-error: types in the SDK are a bit messy.
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
+          console.log(_instance.auth.currentUser.humanId);
           setCredentials(_credentials);
         }
 
@@ -128,14 +129,9 @@ export default function Home() {
     );
   }
 
-  const addGrantsToIssuer = async () => {
-    return clientSDK.data.addWriteGrant(process.env.NEXT_PUBLIC_ISSUER_ADDRESS as string);
-  };
-
   const handleCreateGrantedCredential = () => {
     startGrantedCredentialRequestTransition(async () => {
       try {
-        await addGrantsToIssuer();
         await createCredentialByWriteGrant(
           String(clientSDK.auth.currentUser.humanId),
           clientSDK.auth.currentUser.currentUserPublicKey as string,
