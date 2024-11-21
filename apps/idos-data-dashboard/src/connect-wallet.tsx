@@ -1,10 +1,10 @@
 import { Box, Button, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
-import { useAppKit } from "@reown/appkit/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { useWalletSelector } from "@/core/near";
 
 export const ConnectWallet = () => {
-  const { open } = useAppKit();
+  const { open } = useWeb3Modal();
   const { modal } = useWalletSelector();
 
   return (
