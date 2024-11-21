@@ -1,14 +1,6 @@
 import { useSdkStore } from "@/stores/sdk";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardFooter,
-  CardHeader,
-  Divider,
-  useDisclosure,
-} from "@nextui-org/react";
+import { useDisclosure } from "@nextui-org/react";
 
 import { revokeCredentialById } from "@/actions";
 import { useState } from "react";
