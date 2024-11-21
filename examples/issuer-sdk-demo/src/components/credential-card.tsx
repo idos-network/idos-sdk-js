@@ -35,7 +35,11 @@ export function CredentialCard({
 
         <div className="inline-flex items-center gap-2">
           <dt className="min-w-32 text-neutral-500">Status:</dt>
-          <dd>{metadata.credential_status}</dd>
+          <dd
+            className={metadata.credential_status === "revoked" ? "text-red-500" : "text-green-500"}
+          >
+            {metadata.credential_status}
+          </dd>
         </div>
         <Divider />
 
