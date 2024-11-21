@@ -1,7 +1,7 @@
 "use client";
 
 import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
-import { Button, Divider, Spinner } from "@nextui-org/react";
+import { Button, Spinner } from "@nextui-org/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
