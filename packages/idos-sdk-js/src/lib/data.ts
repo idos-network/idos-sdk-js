@@ -336,6 +336,7 @@ export class Data {
         },
       ],
       `Grant ${grantee} write access to your idOS credentials`,
+      true,
     );
   }
 
