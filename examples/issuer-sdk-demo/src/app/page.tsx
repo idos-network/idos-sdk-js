@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { createCredentialViaGrantedIssuer, createCredentialViaSuperIssuer } from "@/actions";
+import { createCredentialByPermissionedIssuer, createCredentialByWriteGrant } from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
 import { useSdkStore } from "@/stores/sdk";
@@ -55,6 +55,7 @@ export default function Home() {
             },
           });
         } else {
+          // @ts-expect-error: types in the SDK are a bit messy.
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
           setCredentials(_credentials);
@@ -103,6 +104,7 @@ export default function Home() {
       const _hasProfile = await clientSDK.hasProfile(String(address));
       if (_hasProfile && signer) {
         setHasProfile(_hasProfile);
+        // @ts-expect-error: types in the SDK are a bit messy.
         await clientSDK.setSigner("EVM", signer);
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_ADDRESS;
 
@@ -134,7 +136,7 @@ export default function Home() {
     startGrantedCredentialRequestTransition(async () => {
       try {
         await addGrantsToIssuer();
-        await createCredentialViaGrantedIssuer(
+        await createCredentialByWriteGrant(
           String(clientSDK.auth.currentUser.humanId),
           clientSDK.auth.currentUser.currentUserPublicKey as string,
         );
@@ -146,13 +148,18 @@ export default function Home() {
 
   const handleCreateCredential = () => {
     startCredentialRequestTransition(async () => {
-      await createCredentialViaSuperIssuer(
+      await createCredentialByPermissionedIssuer(
         String(clientSDK.auth.currentUser.humanId),
         clientSDK.auth.currentUser.currentUserPublicKey as string,
       );
       const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
       setCredentials(_credentials);
     });
+  };
+
+  const onCredentialsRefresh = async () => {
+    const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
+    setCredentials(_credentials);
   };
 
   if (isPendingProfileCreation) {
@@ -167,7 +174,7 @@ export default function Home() {
   return (
     <div className="flex h-full flex-col items-center justify-center gap-6">
       <div className="container max-w-screen-sm">
-        <Credentials credentials={credentials} />
+        <Credentials credentials={credentials} onRefresh={onCredentialsRefresh} />
       </div>
       <div className="flex w-full max-w-screen-sm flex-col items-center justify-center gap-6 py-4">
         <p>Request a credential:</p>

@@ -12,20 +12,23 @@ export function CreateProfile({ onSuccess }: { onSuccess: () => void }) {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [loadingMessage, setLoadingMessage] = useState("");
-  const { sdk: idosSdk } = useSdkStore();
+  const { sdk: idOSSDK } = useSdkStore();
 
   const handleSubmit = async () => {
     try {
-      if (!idosSdk) throw new Error("No SDK found");
+      if (!idOSSDK) throw new Error("No SDK found");
       setLoadingMessage("Creating user password...");
       const humanId = crypto.randomUUID();
       const { encryptionPublicKey } =
-        await idosSdk.enclave.provider.discoverUserEncryptionKey(humanId);
+        await idOSSDK.enclave.provider.discoverUserEncryptionKey(humanId);
+
       setLoadingMessage("Signing message on your wallet...");
+
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await signMessageAsync({
         message,
       });
+
       setLoadingMessage("Creating your profile...");
 
       await createProfile(encryptionPublicKey, humanId, {
