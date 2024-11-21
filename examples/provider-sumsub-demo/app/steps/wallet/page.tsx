@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/app/components/Button";
 import Loader from "@/app/components/Loader";
+import Button from "@/app/components/button";
 import { useCurrent } from "@/app/lib/current";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { getCsrfToken, signIn } from "next-auth/react";

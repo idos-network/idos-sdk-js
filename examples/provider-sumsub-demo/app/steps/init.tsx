@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import Loader from "../components/Loader";
+import Loader from "../components/loader";
 import { init } from "../lib/api";
 
 export default function InitScreen() {

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { parse } from "uri-template";
-import Button from "../components/Button";
+import Button from "../components/button";
 
 const LEVELS = ["basic+liveness", "plus+liveness"];
 

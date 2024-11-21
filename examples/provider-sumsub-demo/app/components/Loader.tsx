@@ -1,8 +1,7 @@
 export default function Loader() {
   return (
     <div className="flex h-full items-center justify-center">
-      {/* biome-ignore lint: a11y/useSemanticElements */}
-      <div role="status" className="center">
+      <output className="center">
         <svg
           aria-hidden="true"
           className="h-8 w-8 animate-spin fill-orange-600 text-gray-200 dark:text-gray-600"
@@ -20,7 +19,7 @@ export default function Loader() {
           />
         </svg>
         <span className="sr-only font-bold text-orange-600">Loading...</span>
-      </div>
+      </output>
     </div>
   );
 }

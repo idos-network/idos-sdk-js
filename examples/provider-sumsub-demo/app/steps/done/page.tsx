@@ -1,6 +1,6 @@
 "use client";
 
-import Button from "@/app/components/Button";
+import Button from "@/app/components/button";
 import { useCurrent } from "@/app/lib/current";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";

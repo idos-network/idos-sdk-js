@@ -1,7 +1,7 @@
 "use client";
 
-import Button from "@/app/components/Button";
 import Loader from "@/app/components/Loader";
+import Button from "@/app/components/button";
 import { updateIdosData } from "@/app/lib/api";
 import { useCurrent } from "@/app/lib/current";
 import { useEffect, useState } from "react";
