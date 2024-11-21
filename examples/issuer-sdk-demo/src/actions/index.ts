@@ -72,7 +72,6 @@ export async function createCredentialViaGrantedIssuer(
     credential_level: "human",
     credential_type: "human",
     credential_status: "pending",
-    encryption_public_key: ISSUER_PUBLIC_KEY,
     human_id: humanId,
     issuer: "DEMO ISSUER",
     userEncryptionPublicKey,
@@ -97,7 +96,6 @@ export async function createCredentialViaSuperIssuer(
     credential_level: "human",
     credential_type: "human",
     credential_status: "pending",
-    encryption_public_key: ISSUER_PUBLIC_KEY,
     human_id: humanId,
     issuer: "DEMO ISSUER",
   });
