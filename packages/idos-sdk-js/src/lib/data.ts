@@ -367,7 +367,7 @@ export class Data {
         ),
       ),
 
-      issuer: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
+      issuer_auth_public_key: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
       encryption_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
     };
   }
