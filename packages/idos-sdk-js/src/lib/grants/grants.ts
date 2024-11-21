@@ -221,6 +221,7 @@ class ConnectedGrants extends Grants {
       filteredEntriesWithContent as Record<string, string>[],
       privateFieldFilters,
     );
+
     if (!eligibleEntries.length) throw new Error("No matching credentials");
 
     const selectedEntry = eligibleEntries[0];
