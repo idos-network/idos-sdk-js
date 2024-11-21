@@ -55,13 +55,13 @@ const vcContent = Utf8.encode(
   }),
 );
 
-const publicNotes = JSON.stringify({
+const publicNotes = {
   id: crypto.randomUUID(),
   credential_level: "human",
   credential_type: "human",
   credential_status: "pending",
   issuer: "DEMO ISSUER",
-});
+};
 
 export async function createProfile(
   publicKey: string,
@@ -81,7 +81,7 @@ export async function createCredentialByWriteGrant(
   await createCredentialByGrant(issuer, {
     humanId,
     plaintextContent: vcContent,
-    publicNotes,
+    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
@@ -95,7 +95,7 @@ export async function createCredentialByPermissionedIssuer(
   await createCredentialPermissioned(issuer, {
     humanId,
     plaintextContent: vcContent,
-    publicNotes,
+    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
@@ -103,23 +103,10 @@ export async function createCredentialByPermissionedIssuer(
 export async function revokeCredentialById(id: string) {
   const issuer = await getIssuerConfig();
 
-  const payload = JSON.parse(publicNotes);
-
-  console.dir(
-    {
-      publicNotesId: payload.id,
-      publicNotes: JSON.stringify({
-        ...payload,
-        credential_status: "revoked",
-      }),
-    },
-    { depth: null },
-  );
-
   await editCredential(issuer, {
-    publicNotesId: payload.id,
+    publicNotesId: id,
     publicNotes: JSON.stringify({
-      ...payload,
+      ...publicNotes,
       credential_status: "revoked",
     }),
   });

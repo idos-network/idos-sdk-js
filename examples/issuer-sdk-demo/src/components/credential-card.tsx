@@ -2,9 +2,11 @@ import type { idOSCredential } from "@idos-network/issuer-sdk-js";
 import { Button } from "@nextui-org/react";
 import { Card, CardBody, CardFooter, CardHeader, Divider } from "@nextui-org/react";
 import { CommandIcon } from "lucide-react";
+import { useTransition } from "react";
 
 export function CredentialCard({
   credential,
+
   onRevoke,
   onViewDetails,
 }: {
@@ -12,6 +14,7 @@ export function CredentialCard({
   onRevoke: (id: string) => void;
   onViewDetails: (id: string) => void;
 }) {
+  const [isRevoking, startRevokeTransition] = useTransition();
   const metadata = JSON.parse(credential.public_notes);
 
   return (
@@ -50,9 +53,20 @@ export function CredentialCard({
       </CardBody>
       <Divider />
       <CardFooter className="flex justify-end gap-4">
-        <Button color="danger" variant="flat" onClick={() => onRevoke(credential.id)}>
-          Revoke
-        </Button>
+        {metadata.credential_status !== "revoked" ? (
+          <Button
+            color="danger"
+            variant="flat"
+            isLoading={isRevoking}
+            onClick={() => {
+              startRevokeTransition(() => {
+                onRevoke(metadata.id);
+              });
+            }}
+          >
+            Revoke
+          </Button>
+        ) : null}
         <Button color="primary" variant="solid" onClick={() => onViewDetails(credential.id)}>
           View credential details
         </Button>
