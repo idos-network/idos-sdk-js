@@ -56,6 +56,7 @@ const vcContent = Utf8.encode(
 );
 
 const publicNotes = JSON.stringify({
+  id: crypto.randomUUID(),
   credential_level: "human",
   credential_type: "human",
   credential_status: "pending",
@@ -102,10 +103,23 @@ export async function createCredentialByPermissionedIssuer(
 export async function revokeCredentialById(id: string) {
   const issuer = await getIssuerConfig();
 
+  const payload = JSON.parse(publicNotes);
+
+  console.dir(
+    {
+      publicNotesId: payload.id,
+      publicNotes: JSON.stringify({
+        ...payload,
+        credential_status: "revoked",
+      }),
+    },
+    { depth: null },
+  );
+
   await editCredential(issuer, {
-    publicNotesId: id,
+    publicNotesId: payload.id,
     publicNotes: JSON.stringify({
-      ...JSON.parse(publicNotes),
+      ...payload,
       credential_status: "revoked",
     }),
   });
