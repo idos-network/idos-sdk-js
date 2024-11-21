@@ -94,7 +94,7 @@ const connectWallet = {
     enclaveOptions: {
       container: "#idos-container",
       throwOnUserCancelUnlock: false,
-      url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+      url: "https://localhost:5174",
     },
   });
   window.idos = idos;
@@ -201,7 +201,13 @@ const connectWallet = {
     let credentials = await terminal
       .h1("eyes", "User's credentials")
       .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
-    credentials = credentials.filter((c) => c.original_id === null);
+    credentials = credentials
+      .filter((c) => c.original_id === null)
+      .map((credential) => {
+        const { id, ...rest } = JSON.parse(credential.public_notes);
+        return { ...credential, ...rest };
+      });
+    console.log(credentials);
     cache.set("credentials", credentials);
 
     terminal.table(
