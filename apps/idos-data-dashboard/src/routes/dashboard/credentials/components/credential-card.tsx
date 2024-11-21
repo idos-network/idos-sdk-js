@@ -44,9 +44,7 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Status
           </Text>
-          <Text color={credentialMeta.credential_status === "revoked" ? "red.500" : "green.500"}>
-            {credentialMeta.credential_status}
-          </Text>
+          <Text>{credentialMeta.credential_status}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
