@@ -58,7 +58,6 @@ export default function Home() {
           // @ts-expect-error: types in the SDK are a bit messy.
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
-          console.log(_instance.auth.currentUser.humanId);
           setCredentials(_credentials);
         }
 
