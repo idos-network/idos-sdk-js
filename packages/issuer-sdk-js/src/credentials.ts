@@ -176,9 +176,7 @@ export async function editCredential(
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = {
     public_notes_id: publicNotesId,
-    ...buildUpdateablePublicNotes(issuerConfig, {
-      publicNotes,
-    }),
+    public_notes: publicNotes,
   };
 
   const result = await kwilClient.execute(
