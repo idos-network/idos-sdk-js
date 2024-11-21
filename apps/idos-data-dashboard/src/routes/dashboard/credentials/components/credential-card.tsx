@@ -16,9 +16,12 @@ export const CredentialCard = ({
   onManageGrants,
   onDelete,
 }: CredentialCardProps) => {
+  const credentialMeta = JSON.parse(credential.public_notes);
+
   const credentialLevelDisplay =
-    credential.credential_type !== credential.credential_level &&
-    ` (${credential.credential_level})`;
+    credentialMeta.credential_type !== credentialMeta.credential_level &&
+    ` (${credentialMeta.credential_level})`;
+
   return (
     <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
       <SimpleGrid columns={[2, 6]} spacing={10}>
@@ -27,7 +30,7 @@ export const CredentialCard = ({
             Type
           </Text>
           <Text>
-            {credential.credential_type}
+            {credentialMeta.credential_type}
             {credentialLevelDisplay}
           </Text>
         </GridItem>
@@ -35,13 +38,13 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Issuer
           </Text>
-          <Text>{credential.issuer}</Text>
+          <Text>{credentialMeta.issuer}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
             Status
           </Text>
-          <Text>{credential.credential_status}</Text>
+          <Text>{credentialMeta.credential_status}</Text>
         </GridItem>
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
