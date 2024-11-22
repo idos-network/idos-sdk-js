@@ -106,10 +106,9 @@ export default function Home() {
         setHasProfile(_hasProfile);
         // @ts-expect-error: types in the SDK are a bit messy.
         await clientSDK.setSigner("EVM", signer);
-        const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_ADDRESS;
+        const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
 
-        invariant(issuerAddress, "`NEXT_PUBLIC_ISSUER_ADDRESS` is not set");
-
+        invariant(issuerAddress, "`NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX` is not set");
         await clientSDK.data.addWriteGrant(issuerAddress);
       }
     });
@@ -130,6 +129,13 @@ export default function Home() {
 
   const handleCreateGrantedCredential = () => {
     startGrantedCredentialRequestTransition(async () => {
+      const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
+      const hasWriteGrants = await clientSDK.data.hasWriteGrantGivenTo(issuerAddress);
+
+      if (!hasWriteGrants) {
+        await clientSDK.data.addWriteGrant(issuerAddress);
+      }
+
       try {
         await createCredentialByWriteGrant(
           String(clientSDK.auth.currentUser.humanId),

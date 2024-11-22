@@ -340,6 +340,14 @@ export class Data {
     );
   }
 
+  async hasWriteGrantGivenBy(humanId: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_by", { human_id: humanId });
+  }
+
+  async hasWriteGrantGivenTo(grantee: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_to", { grantee });
+  }
+
   async #buildInsertableIDOSCredential(
     humanId: string,
     publicNotes: string,
