@@ -15,18 +15,18 @@ const useShareMatchingCredential = () => {
       sdk.grants.shareMatchingEntry(
         "credentials",
         {
-          credential_level: "basic",
-          credential_type: "kyc",
+          credential_level: "human",
+          credential_type: "human",
         },
         {
           pick: {
-            "credentialSubject.identification_document_country": "DE",
+            "credentialSubject.id": "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
           },
           omit: {},
         },
-        address as string,
+        "0xd5630e7BCe4B02503F922b9cf7B8612C1d47f0ca",
         0,
-        "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
+        "gU22YJf8Duf4ETr85+c625m2/Ha8Jc0S7xQggUfQGkE=",
       ),
   });
 };
