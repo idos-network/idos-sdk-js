@@ -15,7 +15,7 @@ export interface idOSCredential {
   broader_signature: string;
   content: string;
   encryption_public_key: string;
-  verifiable_credential_id: string;
+  verifiable_credential_id?: string;
 }
 
 export interface idOSGrant {
