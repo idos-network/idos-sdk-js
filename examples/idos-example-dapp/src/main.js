@@ -94,7 +94,6 @@ const connectWallet = {
     enclaveOptions: {
       container: "#idos-container",
       throwOnUserCancelUnlock: false,
-      url: "https://localhost:5174",
     },
   });
   window.idos = idos;
