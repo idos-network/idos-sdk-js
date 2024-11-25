@@ -206,7 +206,7 @@ const connectWallet = {
         const { id, ...rest } = JSON.parse(credential.public_notes);
         return { ...credential, ...rest };
       });
-    console.log(credentials);
+
     cache.set("credentials", credentials);
 
     terminal.table(
