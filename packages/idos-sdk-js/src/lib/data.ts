@@ -300,7 +300,7 @@ export class Data {
         record,
         await this.#buildInsertableIDOSCredential(
           record.human_id,
-          record.public_notes,
+          "",
           record.content,
           receiverPublicKey, // Encryption
         ),
@@ -308,6 +308,7 @@ export class Data {
     }
 
     const id = crypto.randomUUID();
+
     await this.kwilWrapper.execute(
       `share_${name}`,
       [
@@ -318,6 +319,7 @@ export class Data {
         },
       ],
       `Share a ${name} on idOS`,
+      true,
     );
 
     return { id };
