@@ -24,9 +24,9 @@ const useShareMatchingCredential = () => {
           },
           omit: {},
         },
-        "0xd5630e7BCe4B02503F922b9cf7B8612C1d47f0ca",
+        address as string,
         0,
-        "gU22YJf8Duf4ETr85+c625m2/Ha8Jc0S7xQggUfQGkE=",
+        "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
       ),
   });
 };
