@@ -42,12 +42,13 @@ describe("createIssuerConfig", () => {
     const mockWallet = new Wallet(
       "dcdda6663be8dfa23d0e54a31ff6fddba2fdf8a1f0eae985c59857031e6da169",
     );
-    const mockSecretKey = nacl.box.keyPair().secretKey;
+    const mockEncryptionSecretKey = nacl.box.keyPair();
+    const mockSigingSecretKey = nacl.sign.keyPair();
 
     const params = {
+      signingKeyPair: mockSigingSecretKey,
+      encryptionKeyPair: mockEncryptionSecretKey,
       nodeUrl: "http://mock-node-url",
-      signer: mockWallet,
-      encryptionSecret: Base64Codec.encode(mockSecretKey),
     };
 
     const result = await createIssuerConfig(params);
@@ -65,18 +66,23 @@ describe("createIssuerConfig", () => {
     // Check if methods were called
     expect(mockChainInfo).toHaveBeenCalled();
     expect(mockListDatabases).toHaveBeenCalled();
+    console.log({ mockWallet });
 
     // Check if KwilSigner was initialized correctly
-    expect(KwilSigner).toHaveBeenCalledWith(mockWallet, mockWallet.address);
+    expect(KwilSigner).toHaveBeenCalledWith(
+      // found in create-issuer-config.ts line 24
+      expect.any(Function),
+      expect.any(Uint8Array),
+      "ed25519",
+    );
     // Check the returned config
     expect(result).toEqual({
       chainId: "mock-chain-id",
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
-      signer: expect.any(Object),
-      encryptionKeyPair: nacl.box.keyPair.fromSecretKey(
-        Base64Codec.decode(params.encryptionSecret),
-      ),
+      kwilSigner: expect.any(Object),
+      encryptionKeyPair: params.encryptionKeyPair,
+      signingKeyPair: params.signingKeyPair,
     });
   });
 });
