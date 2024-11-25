@@ -62,6 +62,7 @@ export class idOS {
   }
 
   static async init(params: InitParams): Promise<idOS> {
+    if (idOS.initializing) throw new Error("idOS instance already initialized.");
     idOS.initializing = true;
 
     const idos = new idOS({
@@ -109,6 +110,7 @@ export class idOS {
 
   async reset({ enclave = false } = {}): Promise<void> {
     this.store.reset();
+    idOS.initializing = false;
     if (enclave) await this.enclave.reset();
   }
 
