@@ -27,6 +27,7 @@ await provider.send("eth_requestAccounts", []);
 const signer = await provider.getSigner();
 
 // Initialize the SDK
+// Note: `idOS.init` must only be called once; calling it again will throw an error.
 const idos = await idOS.init({enclaveOptions: {container: "#idos-container"}});
 await idos.setSigner("EVM", signer);
 
