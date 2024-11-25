@@ -66,7 +66,6 @@ describe("createIssuerConfig", () => {
     // Check if methods were called
     expect(mockChainInfo).toHaveBeenCalled();
     expect(mockListDatabases).toHaveBeenCalled();
-    console.log({ mockWallet });
 
     // Check if KwilSigner was initialized correctly
     expect(KwilSigner).toHaveBeenCalledWith(
