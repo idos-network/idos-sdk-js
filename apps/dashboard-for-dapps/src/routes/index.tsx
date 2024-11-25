@@ -211,9 +211,8 @@ function CredentialDetails({
 
   if (!credential.data || !secretKey) return null;
 
-  const content = JSON.parse(
-    decrypt(credential.data.content, credential.data.encryption_public_key, secretKey),
-  );
+  const result = decrypt(credential.data.content, credential.data.encryption_public_key, secretKey);
+  const content = JSON.parse(result);
 
   const subject = Object.entries(content.credentialSubject).filter(
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
@@ -313,44 +312,46 @@ function CredentialDetails({
                   </List.Root>
                 }
               />
-              <DataListItem
-                pt="4"
-                grow
-                alignItems="start"
-                flexDir="column"
-                label="FILES"
-                value={
-                  <List.Root
-                    variant="plain"
-                    display="flex"
-                    flexDirection="row"
-                    gap="4"
-                    overflowX="auto"
-                  >
-                    {files.map(([key, value]) => (
-                      <List.Item
-                        flexShrink="0"
-                        key={key}
-                        role="button"
-                        transition="transform 0.2s"
-                        cursor="pointer"
-                        _hover={{ transform: "scale(1.02)" }}
-                        onClick={() => openImageInNewTab(value)}
-                      >
-                        <Image
-                          src={value}
-                          alt="Identification document front"
-                          rounded="md"
-                          loading="lazy"
-                          width="120px"
-                          height="120px"
-                          title="Click to open the image in full size"
-                        />
-                      </List.Item>
-                    ))}
-                  </List.Root>
-                }
-              />
+              {files.length > 0 ? (
+                <DataListItem
+                  pt="4"
+                  grow
+                  alignItems="start"
+                  flexDir="column"
+                  label="FILES"
+                  value={
+                    <List.Root
+                      variant="plain"
+                      display="flex"
+                      flexDirection="row"
+                      gap="4"
+                      overflowX="auto"
+                    >
+                      {files.map(([key, value]) => (
+                        <List.Item
+                          flexShrink="0"
+                          key={key}
+                          role="button"
+                          transition="transform 0.2s"
+                          cursor="pointer"
+                          _hover={{ transform: "scale(1.02)" }}
+                          onClick={() => openImageInNewTab(value)}
+                        >
+                          <Image
+                            src={value}
+                            alt="Identification document front"
+                            rounded="md"
+                            loading="lazy"
+                            width="120px"
+                            height="120px"
+                            title="Click to open the image in full size"
+                          />
+                        </List.Item>
+                      ))}
+                    </List.Root>
+                  }
+                />
+              ) : null}
             </DataListRoot>
           </Stack>
         </DrawerBody>
