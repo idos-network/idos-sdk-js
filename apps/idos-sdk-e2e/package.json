@@ -11,7 +11,11 @@
   "author": "",
   "devDependencies": {
     "@playwright/test": "1.44",
-    "@synthetixio/synpress": "4.0.0-alpha.7",
     "@types/node": "^20.10.5"
+  },
+  "dependencies": {
+    "@synthetixio/synpress": "^4.0.3",
+    "@synthetixio/synpress-cache": "^0.0.4",
+    "@synthetixio/synpress-metamask": "^0.0.4"
   }
 }
