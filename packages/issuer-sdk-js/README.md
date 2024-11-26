@@ -28,9 +28,9 @@ const wallet = new Wallet("YOUR_PRIVATE_KEY");
 const issuerConfig = await createIssuerConfig({
   // To use a non-prod environment, pass in "nodes.playground.idos.network".
   nodeUrl: "https://nodes.idos.network/",
-  // For `nacl.box.open`. 32 random bytes, base64 encoded.
-  encryptionSecret: "YOUR_ENCRYPTION_SECRET_KEY",
-  signer: wallet
+  // The encryption and signing key pairs can be generated using the `nacl` library. You can take a look at https://github.com/idos-network/idos-sdk-js/blob/335dc9b72999393ec25571e3960e6ca108486260/packages/issuer-sdk-js/src/create-issuer-config.ts for an example.
+  encryptionKeyPair: "YOUR_ENCRYPTION_KEY_PAIR",
+  signingKeyPair: "YOUR_SIGNING_KEY_PAIR"
 });
 ```
 
@@ -161,29 +161,25 @@ import { createCredentialByGrant, encryptionPublicKey } from "@idos-network/issu
 import issuerConfig from "./issuer-config.js";
 
 const credential = {
-  // These three fields are public and are designed to assist dApps that rely
-  // on your credentials with selecting the appropriate credential when
-  // acquiring an Access Grant.
-  //
-  // You should decide on what's the most helpful content they can have. These
-  // three are just an example.
-  credential_type: "human",
-  credential_level: "human",
-  credential_status: "approved",
-
-  // This is a string decided by you. Be sure to always use the same one to
-  // make yourself discoverable by dApps.
-  issuer: "MyCoolIssuer",
-
-  // user id of the human who is creating the credential.
-  human_id: session.user.humanId,
-
+  // The user id of the human who is creating the credential.
+  humanId: session.user.humanId,
+  // Fields in the `publicNotes` field are fields that are public and can be used by dApps to select the appropriate credential when acquiring an Access Grant.
+  // You should decide on what's the most helpful content they can have.
+  publicNotes: JSON.stringify({
+    type: "human",
+    level: "human",
+    status: "approved", 
+    
+    // make yourself discoverable by dApps.
+    issuer: "MyCoolIssuer",
+  }),
   // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
   // `createCredentialByGrant` will encrypt this for us, using the Issuer's secret encryption key, along with the user's public encryption key.
-  content: "VERIFIABLE_CREDENTIAL_CONTENT",
-
+  
+  plainTextContent: "VERIFIABLE_CREDENTIAL_CONTENT",
+  
   // The public encryption key of the user who is creating the credential.
-  userEncryptionPublicKey: session.user.userEncryptionPublicKey,
+  receiverEncryptionPublicKey: session.user.userEncryptionPublicKey,
 }
 
 const credential = await createCredentialByGrant(issuerConfig, credential);
@@ -195,6 +191,7 @@ This will create a credential in the idOS for the given grantee address.
 > ⚠️ Notice
 >
 > The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
+
 
 ### Using Permissioned Credential Creation
 The second method allows the issuer, by virtue of being a Permissioned Issuer, to create a credential without a Write Grant. Get in touch with us at engineering@idos.network if you're interested in being one.
@@ -211,17 +208,39 @@ import issuerConfig from "./issuer-config.js";
 
 // See the previous example for more details on these fields
 const credential = {
-  credential_level: "human",
-  credential_type: "human",
-  credential_status: "pending",
-  issuer: "ISSUER_NAME",
+  humanId: session.user.humanId,
+  plainTextContent: "VERIFIABLE_CREDENTIAL_CONTENT",
+  publicNotes: JSON.stringify({
+    type: "human",
+    level: "human",
+    status: "approved", 
+    issuer: "MyCoolIssuer",
+  }),
   content: "VERIFIABLE_CREDENTIAL_CONTENT",
-  human_id: session.user.humanId,
-  userEncryptionPublicKey: session.user.userEncryptionPublicKey,
+  receiverEncryptionPublicKey: session.user.userEncryptionPublicKey,
 }
 
 await createCredentialPermissioned(issuerConfig, credential);
 ```
+
+### Revoking a credential
+A previously created credential can be revoked by the issuer by calling the `editCredential` function. When creating a credential, the `publicNotes` field needs to have an `id` field that will be used to identify the credential to be revoked. Pass this `id` to the `editCredential` function to revoke the credential.
+
+```js
+// Server side
+
+import { editCredential } from "@idos-network/issuer-sdk-js";
+import issuerConfig from "./issuer-config.js";
+
+await editCredential(issuer, {
+    publicNotesId: id, // the `id` of the credential to be revoked that is stored in the `publicNotes` field.
+    publicNotes: JSON.stringify({
+      ...publicNotes,
+      credential_status: "revoked" // updating the credential status to revoked
+    }),
+  });
+```
+
 
 ## Developing the SDK locally
 
