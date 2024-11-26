@@ -202,6 +202,19 @@ const connectWallet = {
       .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
     credentials = credentials
       .filter((c) => c.original_id === null)
+      // @todo: remove once we have successfully migrated to Credentials 2.0.
+      .map((credential) => ({
+        ...credential,
+        public_notes:
+          credential.public_notes ??
+          JSON.stringify({
+            id: credential.id,
+            credential_level: credential.credential_level,
+            credential_status: credential.credential_status,
+            credential_type: credential.credential_type,
+            issuer: credential.issuer,
+          }),
+      }))
       .map((credential) => {
         const { id, ...rest } = JSON.parse(credential.public_notes);
         return { ...credential, ...rest };
