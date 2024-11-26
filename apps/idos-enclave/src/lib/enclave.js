@@ -83,13 +83,6 @@ export class Enclave {
     return this.keyPair?.publicKey;
   }
 
-  async authWithPassword() {
-    const { password, duration } = await this.#openDialog("password");
-    this.store.set("password", password);
-    this.store.setRememberDuration(duration);
-    return { password, duration };
-  }
-
   async ensurePassword() {
     if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
 
