@@ -51,9 +51,9 @@ const useFetchCredentials = () => {
               credential.public_notes ??
               JSON.stringify({
                 id: credential.id,
-                credential_level,
-                credential_status,
-                credential_type,
+                level: credential_level,
+                status: credential_status,
+                type: credential_type,
                 issuer,
               }),
           };
