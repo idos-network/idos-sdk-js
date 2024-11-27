@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/issuer-sdk-js";
 import { Button } from "@nextui-org/react";
 import { Card, CardBody, CardFooter, CardHeader, Divider } from "@nextui-org/react";
 import { CommandIcon } from "lucide-react";
-import { useTransition } from "react";
+import { Fragment, useTransition } from "react";
 
 export function CredentialCard({
   credential,
@@ -15,7 +15,12 @@ export function CredentialCard({
   onViewDetails: (id: string) => void;
 }) {
   const [isRevoking, startRevokeTransition] = useTransition();
-  const metadata = JSON.parse(credential.public_notes);
+  const publicFields = JSON.parse(credential.public_notes);
+  const revocationId = publicFields.id;
+  const issuer = publicFields.issuer ?? "Unknown Issuer";
+  const metadata = Object.entries(publicFields) as [string, string][];
+  const isRevoked =
+    publicFields.status === "revoked" || publicFields.credential_status === "revoked";
 
   return (
     <Card>
@@ -24,43 +29,31 @@ export function CredentialCard({
           <CommandIcon size={24} className="text-neutral-950" />
         </div>
         <div className="flex flex-col">
-          <p className="text-md">{metadata.issuer}</p>
+          <p className="text-md">{issuer}</p>
         </div>
       </CardHeader>
       <Divider />
 
       <CardBody className="flex flex-col gap-4 text-sm">
-        <div className="inline-flex items-center gap-2">
-          <dt className="min-w-32 text-neutral-500">Type:</dt>
-          <dd>{metadata.credential_type}</dd>
-        </div>
-        <Divider />
-
-        <div className="inline-flex items-center gap-2">
-          <dt className="min-w-32 text-neutral-500">Status:</dt>
-          <dd
-            className={metadata.credential_status === "revoked" ? "text-red-500" : "text-green-500"}
-          >
-            {metadata.credential_status}
-          </dd>
-        </div>
-        <Divider />
-
-        <div className="inline-flex items-center gap-2">
-          <dt className="min-w-32 text-neutral-500">Level:</dt>
-          <dd>{metadata.credential_level}</dd>
-        </div>
+        {metadata.map(([key, value]) => (
+          <Fragment key={key}>
+            <div className="inline-flex items-center gap-2">
+              <dt className="min-w-32 text-neutral-500">{key}:</dt>
+              <dd>{value}</dd>
+            </div>
+          </Fragment>
+        ))}
       </CardBody>
       <Divider />
       <CardFooter className="flex justify-end gap-4">
-        {metadata.credential_status !== "revoked" ? (
+        {!isRevoked ? (
           <Button
             color="danger"
             variant="flat"
             isLoading={isRevoking}
             onClick={() => {
               startRevokeTransition(() => {
-                onRevoke(metadata.id);
+                onRevoke(revocationId);
               });
             }}
           >

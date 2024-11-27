@@ -45,17 +45,19 @@ const useFetchCredentials = () => {
           const { credential_level, credential_status, credential_type, issuer } =
             // biome-ignore lint/suspicious/noExplicitAny: // @todo: remove once we have successfully migrated to Credentials 2.0.
             credential as any;
+          const _fields = credential.public_notes ? JSON.parse(credential.public_notes) : {};
+
+          const public_notes = {
+            id: _fields.id ?? credential.id,
+            level: _fields.credential_level ?? credential_level,
+            status: _fields.credential_status ?? credential_status,
+            type: _fields.credential_type ?? credential_type,
+            issuer: _fields.issuer ?? issuer,
+          };
+
           return {
             ...credential,
-            public_notes:
-              credential.public_notes ??
-              JSON.stringify({
-                id: credential.id,
-                level: credential_level,
-                status: credential_status,
-                type: credential_type,
-                issuer,
-              }),
+            public_notes: JSON.stringify(public_notes),
           };
         }),
   });
