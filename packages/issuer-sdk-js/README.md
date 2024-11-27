@@ -72,6 +72,8 @@ Use the `idos.discoverEncryptionKey` function to derive a public key for the hum
 import { idOS } from "@idos-network/idos-sdk-js";
 
 // Arguments are described on idos-sdk-js's README. Be sure to read it.
+// Note: make sure to set mode to "new" since you're creating a new idOS profile
+const initParams = { ...YOUR_IDOS_INIT_PARAMS, mode: "new" };
 const idos = await idOS.init(...);
 
 // Get humanId associated with this user from your server
