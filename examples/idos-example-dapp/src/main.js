@@ -203,16 +203,22 @@ const connectWallet = {
     credentials = credentials
       .filter((c) => c.original_id === null)
       // @todo: remove once we have successfully migrated to Credentials 2.0.
-      .map((credential) => ({
-        ...credential,
-        public_notes: credential.public_notes ?? {
-          id: credential.id,
-          level: credential.credential_level,
-          status: credential.credential_status,
-          type: credential.credential_type,
-          issuer: credential.issuer,
-        },
-      }));
+      .map((credential) => {
+        const { credential_level, credential_status, credential_type, issuer } = credential;
+        const _fields = credential.public_notes ? credential.public_notes : {};
+        const public_notes = {
+          id: _fields.id ?? credential.id,
+          level: _fields.credential_level ?? credential_level,
+          status: _fields.credential_status ?? credential_status,
+          type: _fields.credential_type ?? credential_type,
+          issuer: _fields.issuer ?? issuer,
+        };
+
+        return {
+          ...credential,
+          ...public_notes,
+        };
+      });
 
     cache.set("credentials", credentials);
 
