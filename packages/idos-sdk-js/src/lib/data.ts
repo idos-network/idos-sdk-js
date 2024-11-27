@@ -292,6 +292,7 @@ export class Data {
     tableName: string,
     recordId: string,
     receiverPublicKey: string,
+    synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
 
@@ -328,11 +329,15 @@ export class Data {
     return { id };
   }
 
-  async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
-    return await this.delete(tableName, recordId);
+  async unshare(
+    tableName: string,
+    recordId: string,
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
+    return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(grantee: string) {
+  async addWriteGrant(grantee: string, synchronous?: boolean) {
     return await this.kwilWrapper.execute(
       "add_write_grant",
       [
