@@ -57,9 +57,9 @@ const vcContent = Utf8.encode(
 
 const publicNotes = {
   id: crypto.randomUUID(),
-  credential_level: "human",
-  credential_type: "human",
-  credential_status: "pending",
+  level: "human",
+  type: "human",
+  status: "pending",
   issuer: "DEMO ISSUER",
 };
 
@@ -107,7 +107,7 @@ export async function revokeCredentialById(id: string) {
     publicNotesId: id,
     publicNotes: JSON.stringify({
       ...publicNotes,
-      credential_status: "revoked",
+      status: "revoked",
     }),
   });
 }

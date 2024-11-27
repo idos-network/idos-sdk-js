@@ -19,8 +19,7 @@ export function CredentialCard({
   const revocationId = publicFields.id;
   const issuer = publicFields.issuer ?? "Unknown Issuer";
   const metadata = Object.entries(publicFields) as [string, string][];
-  const isRevoked =
-    publicFields.status === "revoked" || publicFields.credential_status === "revoked";
+  const isRevoked = publicFields.status === "revoked";
 
   return (
     <Card>
@@ -38,7 +37,7 @@ export function CredentialCard({
         {metadata.map(([key, value]) => (
           <Fragment key={key}>
             <div className="inline-flex items-center gap-2">
-              <dt className="min-w-32 text-neutral-500">{key}:</dt>
+              <dt className="min-w-32 text-neutral-500 capitalize">{key}:</dt>
               <dd>{value}</dd>
             </div>
           </Fragment>
