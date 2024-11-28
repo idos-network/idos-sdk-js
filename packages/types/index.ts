@@ -11,11 +11,8 @@ export interface idOSCredential {
   issuer_auth_public_key: string;
   original_id?: string;
   public_notes: string;
-  public_notes_signature: string;
-  broader_signature: string;
   content: string;
   encryption_public_key: string;
-  verifiable_credential_id?: string;
 }
 
 export interface idOSGrant {
