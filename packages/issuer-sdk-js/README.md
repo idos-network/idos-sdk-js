@@ -185,7 +185,7 @@ const credential = {
 const credential = await createCredentialByGrant(issuerConfig, credential);
 ```
 
-This will create a credential in the idOS for the given grantee address.
+This will create a credential in the idOS for the given human id.
 
 
 > ⚠️ Notice
