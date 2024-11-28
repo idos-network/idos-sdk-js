@@ -36,7 +36,7 @@ const useDeleteCredentialMutation = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }, DefaultError, idOSCredential, Ctx>({
+  return useMutation<{ id: string }, DefaultError, { id: string; credential_type: string }, Ctx>({
     mutationFn: ({ id, credential_type }) =>
       sdk.data.delete("credentials", id, `Delete credential ${credential_type} from idOS`, true),
     async onMutate({ id }) {
@@ -112,34 +112,39 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
     }
   };
 
-  const handleDeleteCredential = async (credential: idOSCredential) => {
+  const handleDeleteCredential = async () => {
     await handleRevokeGrants();
-    await deleteCredential.mutateAsync(credential, {
-      onSuccess() {
-        handleClose();
-        toast({
-          title: "Credential successfully removed",
-          description: "Credential has been successfully removed",
-          position: "bottom-right",
-          status: "success",
-        });
+    await deleteCredential.mutateAsync(
+      { id: credential.id, credential_type: meta.type },
+      {
+        onSuccess() {
+          handleClose();
+          toast({
+            title: "Credential successfully removed",
+            description: "Credential has been successfully removed",
+            position: "bottom-right",
+            status: "success",
+          });
+        },
+        onError() {
+          toast({
+            title: "Error while deleting credential",
+            description: "An unexpected error. Please try again.",
+            duration: 3000,
+            position: "bottom-right",
+            status: "error",
+          });
+        },
       },
-      onError() {
-        toast({
-          title: "Error while deleting credential",
-          description: "An unexpected error. Please try again.",
-          duration: 3000,
-          position: "bottom-right",
-          status: "error",
-        });
-      },
-    });
+    );
   };
 
   if (!credential) return null;
 
   const [currentToRevoke] = state;
   const { grantee } = currentToRevoke ?? {};
+
+  const meta = JSON.parse(credential.public_notes);
 
   return (
     <AlertDialog
@@ -172,13 +177,13 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
               </>
             ) : deleteCredential.isPending ? (
               <Text>
-                Deleting credential{" "}
+                Deleting credential of type{" "}
                 <Text as="span" color="green.200" fontWeight="semibold">
-                  {credential.credential_type}
+                  {meta.type}
                 </Text>{" "}
                 from issuer{" "}
                 <Text as="span" color="green.200" fontWeight="semibold">
-                  {credential.issuer}
+                  {meta.issuer}
                 </Text>
               </Text>
             ) : (
@@ -196,7 +201,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
               id={`confirm-delete-credential-${credential.id}`}
               colorScheme="red"
               ml={3}
-              onClick={() => handleDeleteCredential(credential)}
+              onClick={handleDeleteCredential}
               isLoading={revokeGrants.isPending || deleteCredential.isPending}
             >
               {deleteCredential.isError ? "Retry" : "Delete"}

@@ -212,7 +212,7 @@ importers:
   apps/idos-enclave:
     dependencies:
       '@headlessui/react':
-        specifier: ^2.1.8
+        specifier: 2.1.8
         version: 2.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@idos-network/idos-store':
         specifier: workspace:*
@@ -351,6 +351,15 @@ importers:
       '@idos-network/idos-sdk-server-dapp':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-server-dapp
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../../packages/types
+      '@idos-network/issuer-sdk-js':
+        specifier: workspace:*
+        version: link:../../packages/issuer-sdk-js
+      '@kwilteam/kwil-js':
+        specifier: 0.7.1
+        version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@near-wallet-selector/core':
         specifier: ^8.7.0
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
@@ -373,21 +382,33 @@ importers:
         specifier: ^1.6.8
         version: 1.7.2
       ethers:
-        specifier: ^6.13.4
+        specifier: ^6.13
         version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       near-api-js:
         specifier: ^3.0.4
         version: 3.0.4(encoding@0.1.13)
     devDependencies:
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@types/node':
         specifier: ^20.10.5
         version: 20.14.12
       '@vercel/node':
         specifier: ^3.0.26
         version: 3.0.26(@swc/core@1.7.1(@swc/helpers@0.5.13))(encoding@0.1.13)
+      es-toolkit:
+        specifier: ^1.23.0
+        version: 1.23.0
       raw-body:
         specifier: ^2.5.2
         version: 2.5.2
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
       typescript:
         specifier: ^5.0.2
         version: 5.6.3
@@ -412,6 +433,15 @@ importers:
       '@nextui-org/react':
         specifier: ^2.4.8
         version: 2.4.8(@types/react@18.3.12)(framer-motion@11.11.17(@emotion/is-prop-valid@1.3.1)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(tailwindcss@3.4.15(ts-node@10.9.1(@swc/core@1.7.1(@swc/helpers@0.5.13))(@types/node@20.14.12)(typescript@5.6.3)))
+      '@stablelib/base64':
+        specifier: ^1.0.1
+        version: 1.0.1
+      '@stablelib/hex':
+        specifier: ^2.0.0
+        version: 2.0.0
+      '@stablelib/utf8':
+        specifier: ^1.0.1
+        version: 1.0.1
       '@tanstack/react-query':
         specifier: 5.45.1
         version: 5.45.1(react@18.3.1)
@@ -436,6 +466,9 @@ importers:
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
       viem:
         specifier: latest
         version: 2.21.51(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.23.8)
@@ -681,12 +714,15 @@ importers:
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
+      '@stablelib/hex':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@stablelib/utf8':
         specifier: ^1.0.1
         version: 1.0.1
-      ethers:
-        specifier: ^6.13.4
-        version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      es-toolkit:
+        specifier: ^1.23.0
+        version: 1.23.0
       near-api-js:
         specifier: ^3.0.4
         version: 3.0.4(encoding@0.1.13)
@@ -15391,7 +15427,7 @@ snapshots:
       '@noble/hashes': 1.5.0
       clsx: 1.2.1
       eventemitter3: 5.0.1
-      preact: 10.23.1
+      preact: 10.24.3
 
   '@coinbase/wallet-sdk@4.2.3':
     dependencies:
@@ -16428,8 +16464,8 @@ snapshots:
   '@headlessui/react@2.1.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@floating-ui/react': 0.26.24(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@react-aria/focus': 3.18.2(react@18.3.1)
-      '@react-aria/interactions': 3.22.2(react@18.3.1)
+      '@react-aria/focus': 3.18.4(react@18.3.1)
+      '@react-aria/interactions': 3.22.4(react@18.3.1)
       '@tanstack/react-virtual': 3.10.8(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
@@ -17318,7 +17354,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
       '@noble/hashes': 1.5.0
-      '@scure/base': 1.1.7
+      '@scure/base': 1.1.9
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@9.4.0)
       pony-cause: 2.1.11
@@ -17332,7 +17368,7 @@ snapshots:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
       '@noble/hashes': 1.5.0
-      '@scure/base': 1.1.7
+      '@scure/base': 1.1.9
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@9.4.0)
       pony-cause: 2.1.11
@@ -19147,7 +19183,7 @@ snapshots:
 
   '@react-aria/focus@3.18.2(react@18.3.1)':
     dependencies:
-      '@react-aria/interactions': 3.22.2(react@18.3.1)
+      '@react-aria/interactions': 3.22.4(react@18.3.1)
       '@react-aria/utils': 3.25.2(react@18.3.1)
       '@react-types/shared': 3.24.1(react@18.3.1)
       '@swc/helpers': 0.5.13
@@ -19407,9 +19443,9 @@ snapshots:
 
   '@react-aria/selection@3.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
-      '@react-aria/focus': 3.18.2(react@18.3.1)
+      '@react-aria/focus': 3.18.4(react@18.3.1)
       '@react-aria/i18n': 3.11.1(react@18.3.1)
-      '@react-aria/interactions': 3.22.2(react@18.3.1)
+      '@react-aria/interactions': 3.22.4(react@18.3.1)
       '@react-aria/utils': 3.25.2(react@18.3.1)
       '@react-stately/selection': 3.17.0(react@18.3.1)
       '@react-types/shared': 3.24.1(react@18.3.1)
@@ -22090,7 +22126,7 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       tslib: 1.14.1
-      uint8arrays: 3.1.0
+      uint8arrays: 3.1.1
 
   '@walletconnect/safe-json@1.0.2':
     dependencies:
