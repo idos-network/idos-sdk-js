@@ -227,8 +227,6 @@ const connectWallet = {
 
     cache.set("credentials", credentials);
 
-    console.log(credentials);
-
     terminal.table(credentials, Object.keys(credentials[0].public_notes), {
       id: async (id) => {
         const credential = await terminal
