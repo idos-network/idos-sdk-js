@@ -12,9 +12,13 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/utf8": "^1.0.1",
     "@types/node": "^20.10.5",
     "@vercel/node": "^3.0.26",
+    "es-toolkit": "^1.23.0",
     "raw-body": "^2.5.2",
+    "tweetnacl": "^1.0.3",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-mkcert": "^1.16.0",
@@ -32,12 +36,7 @@
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
     "@near-wallet-selector/my-near-wallet": "^8.7.0",
     "@near-wallet-selector/nightly": "^8.7.0",
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/hex": "^2.0.0",
-    "@stablelib/utf8": "^1.0.1",
-    "axios": "^1.6.8",
-    "es-toolkit": "^1.23.0",
-    "tweetnacl": "^1.0.3"
+    "axios": "^1.6.8"
   },
   "peerDependencies": {
     "ethers": "^6.13",
