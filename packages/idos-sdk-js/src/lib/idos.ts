@@ -25,7 +25,6 @@ interface InitParams {
 
 export class idOS {
   static initializing = false;
-  static instance: idOS;
   static near = Grants.near;
   static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
@@ -62,14 +61,12 @@ export class idOS {
   }
 
   static async init(params: InitParams): Promise<idOS> {
-    if (idOS.instance) return idOS.instance;
     idOS.initializing = true;
 
     const idos = new idOS({
       ...params,
       kwilWrapper: await KwilWrapper.init(params),
     });
-    idOS.instance = idos;
     await idos.enclave.load();
 
     return idos;
