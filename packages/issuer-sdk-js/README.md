@@ -21,16 +21,15 @@ Create an issuer config with your secret key. This config will be used to intera
 ```js
 // issuer-config.js
 import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
-import { Wallet } from "ethers";
 
-const wallet = new Wallet("YOUR_PRIVATE_KEY");
+const encryptionKeyPair = nacl.box.keyPair.fromSecretKey(ISSUER_ENCRYPTION_SECRET_KEY);
+const signingKeyPair = nacl.sign.keyPair.fromSecretKey(ISSUER_SIGNING_SECRET_KEY);
 
 const issuerConfig = await createIssuerConfig({
   // To use a non-prod environment, pass in "nodes.playground.idos.network".
   nodeUrl: "https://nodes.idos.network/",
-  // The encryption and signing key pairs can be generated using the `nacl` library. You can take a look at https://github.com/idos-network/idos-sdk-js/blob/335dc9b72999393ec25571e3960e6ca108486260/packages/issuer-sdk-js/src/create-issuer-config.ts for an example.
-  encryptionKeyPair: "YOUR_ENCRYPTION_KEY_PAIR",
-  signingKeyPair: "YOUR_SIGNING_KEY_PAIR"
+  encryptionKeyPair,
+  signingKeyPair,
 });
 ```
 
@@ -142,6 +141,7 @@ To do this, you must first create a Write Grant using the idOS SDK. Here's an ex
 // Client side
 
 import { idOS } from "@idos-network/idos-sdk-js";
+import * as Utf8Codec from "@stablelib/utf8";
 
 // Arguments are described on idos-sdk-js's README. Be sure to read it.
 const idos = await idOS.init(...);
@@ -162,29 +162,61 @@ Now that the user has created a Write Grant for us, the issuer, we can create a 
 import { createCredentialByGrant, encryptionPublicKey } from "@idos-network/issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
-const credential = {
-  // The user id of the human who is creating the credential.
-  humanId: session.user.humanId,
-  // Fields in the `publicNotes` field are fields that are public and can be used by dApps to select the appropriate credential when acquiring an Access Grant.
-  // You should decide on what's the most helpful content they can have.
-  publicNotes: JSON.stringify({
-    type: "human",
-    level: "human",
-    status: "approved", 
-    
-    // make yourself discoverable by dApps.
-    issuer: "MyCoolIssuer",
-  }),
-  // The verifiable credential content should be passed as is see example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
-  // `createCredentialByGrant` will encrypt this for us, using the Issuer's secret encryption key, along with the user's public encryption key.
-  
-  plainTextContent: "VERIFIABLE_CREDENTIAL_CONTENT",
-  
-  // The public encryption key of the user who is creating the credential.
-  receiverEncryptionPublicKey: session.user.userEncryptionPublicKey,
+const publicNotesId = crypto.randomUUID();
+
+const credentialsPublicNotes = {
+  id: publicNotesId,
+  type: "human",
+  level: "human",
+  status: "approved",
+  // make yourself discoverable by dApps.
+  issuer: "MyCoolIssuer",
 }
 
-const credential = await createCredentialByGrant(issuerConfig, credential);
+const credentialContent = JSON.stringify({
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+  ],
+  id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
+  type: ["VerifiableCredential"],
+  issuer: "https://vc-issuers.cool-issuer.id/",
+  level: "human",
+  credentialSubject: {
+    id: "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
+    name: "John Doe",
+    email: "johndoe@example.com",
+    country: "USA",
+  },
+  issuanceDate: "2022-06-01T12:00:00Z",
+  expirationDate: "2022-06-30T12:00:00Z",
+  proof: {
+    type: "Ed25519Signature2020",
+    created: "2022-06-01T12:00:00Z",
+    verificationMethod: "https://vc-issuers.fractal.id/idos/keys/1",
+    proofPurpose: "assertionMethod",
+    proofValue: "z22DAdBQgJXUh69e4y9a7t7n9f6c7m7b8a6v6w5z4x3y2x1w",
+  },
+})
+
+const credentialPayload = {
+  id: crypto.randomUUID(),
+
+  // user id of the human who is creating the credential.
+  human_id: session.user.humanId,
+
+  // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
+  // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.
+  // plaintextContent should be passed as a Uint8Array.
+  plaintextContent: Utf8Codec.encode(credentialContent),
+
+  // The public encryption key of the user who is creating the credential. also passed as a Uint8Array.
+  receiverEncryptionPublicKey: Utf8Codec.encode(session.user.userEncryptionPublicKey),
+
+   // These notes will be publicly disclosed and accessible without needing to decrypt the credential.
+  publicNotes: JSON.stringify(credentialsPublicNotes),
+}
+
+const credential = await createCredentialByGrant(issuerConfig, credentialPayload);
 ```
 
 This will create a credential in the idOS for the given human id.
@@ -209,20 +241,38 @@ import { createCredentialPermissioned } from "@idos-network/issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 // See the previous example for more details on these fields
-const credential = {
-  humanId: session.user.humanId,
-  plainTextContent: "VERIFIABLE_CREDENTIAL_CONTENT",
-  publicNotes: JSON.stringify({
-    type: "human",
-    level: "human",
-    status: "approved", 
-    issuer: "MyCoolIssuer",
-  }),
-  content: "VERIFIABLE_CREDENTIAL_CONTENT",
-  receiverEncryptionPublicKey: session.user.userEncryptionPublicKey,
-}
+await createCredentialPermissioned(issuerConfig, credentialPayload);
+```
 
-await createCredentialPermissioned(issuerConfig, credential);
+## Sharing credentials
+
+The SDK provides issuer to share credentials with other grantees. This function is called `shareCredentialByGrant`.
+```js
+// Server side
+import issuerConfig from "./issuer-config.js";
+
+await shareCredentialByGrant(issuerConfig,{
+  ...credentialPayload,
+  grantee: "GRANTEE_WALLET_ADDRESS",
+  lockedUntil: Math.floor(Date.now() / 1000) + 1000,
+  originalCredentialId: credentialPayload.id,
+});
+```
+## Editing credentials
+
+The `editCredential` function allows issuers to update the public notes associated with a credential in the idOS. This is useful for actions like marking credentials as revoked or updating metadata.
+
+```js
+// Server side
+import issuerConfig from "./issuer-config.js";
+const public_notes_id = crypto.randomUUID();
+await editCredential(issuerConfig, {
+  public_notes_id: publicNotesId,
+  public_notes: JSON.stringify({
+    ...credentialsPublicNotes,
+    credential_status: "revoked",
+  }),
+});
 ```
 
 ### Revoking a credential
