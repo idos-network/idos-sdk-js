@@ -115,7 +115,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const handleDeleteCredential = async () => {
     await handleRevokeGrants();
     await deleteCredential.mutateAsync(
-      { id: credential.id, credential_type: meta.credential_type },
+      { id: credential.id, credential_type: meta.type },
       {
         onSuccess() {
           handleClose();
