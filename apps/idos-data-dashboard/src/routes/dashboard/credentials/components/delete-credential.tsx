@@ -179,7 +179,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
               <Text>
                 Deleting credential of type{" "}
                 <Text as="span" color="green.200" fontWeight="semibold">
-                  {meta.credential_type}
+                  {meta.type}
                 </Text>{" "}
                 from issuer{" "}
                 <Text as="span" color="green.200" fontWeight="semibold">
