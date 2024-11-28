@@ -195,9 +195,9 @@ class ConnectedGrants extends Grants {
 
     const filteredEntries = allEntries.filter((entry) => {
       const keys = Object.keys(publicFields);
+      const meta = JSON.parse(entry.public_notes) as Record<string, string>;
 
       for (const key of keys) {
-        const meta = JSON.parse(entry.public_notes) as Record<string, string>;
         if (meta[key] !== publicFields[key]) return false;
       }
 
