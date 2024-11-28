@@ -210,7 +210,7 @@ const connectWallet = {
             ? JSON.parse(credential.public_notes)
             : credential.public_notes
           : {};
-        const public_notes = {
+        const { id, ...public_notes } = {
           id: _fields.id ?? credential.id,
           level: _fields.level ?? credential_level,
           status: _fields.status ?? credential_status,
@@ -227,7 +227,7 @@ const connectWallet = {
 
     cache.set("credentials", credentials);
 
-    terminal.table(credentials, Object.keys(credentials[0].public_notes), {
+    terminal.table(credentials, ["id", ...Object.keys(credentials[0].public_notes)], {
       id: async (id) => {
         const credential = await terminal
           .detail()

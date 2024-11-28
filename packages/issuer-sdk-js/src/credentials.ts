@@ -27,6 +27,8 @@ const buildUpdateablePublicNotes = (
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
+  public_notes_signature: string;
+  broader_signature: string;
 };
 const buildInsertableIDOSCredential = (
   issuerConfig: IssuerConfig,

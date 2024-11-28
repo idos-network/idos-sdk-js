@@ -11,7 +11,10 @@ import type { KwilWrapper } from "./kwil-wrapper";
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
 type AnyRecord = Record<string, any>;
 
-type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id">;
+type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+  public_notes_signature: string;
+  broader_signature: string;
+};
 
 export class Data {
   constructor(

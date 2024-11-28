@@ -15,8 +15,8 @@ const useShareMatchingCredential = () => {
       sdk.grants.shareMatchingEntry(
         "credentials",
         {
-          credential_level: "human",
-          credential_type: "human",
+          level: "human",
+          type: "human",
         },
         {
           pick: {
