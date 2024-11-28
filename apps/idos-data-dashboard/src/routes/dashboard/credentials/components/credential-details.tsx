@@ -67,7 +67,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
   const meta = credential.data?.public_notes ? JSON.parse(credential.data.public_notes) : {};
 
   const downloadFileName = credential.data?.public_notes
-    ? `${meta.credential_type || "credential"}_${meta.issuer || "unknown"}.json`
+    ? `${meta.type || "credential"}_${meta.issuer || "unknown"}.json`
     : "credential.json";
 
   return (
