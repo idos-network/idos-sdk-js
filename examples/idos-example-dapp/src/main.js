@@ -218,8 +218,6 @@ const connectWallet = {
           issuer: _fields.issuer ?? issuer,
         };
 
-        console.log(_fields);
-
         return {
           ...credential,
           ...public_notes,
