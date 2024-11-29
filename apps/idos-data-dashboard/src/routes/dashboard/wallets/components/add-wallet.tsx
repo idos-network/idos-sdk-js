@@ -48,9 +48,9 @@ const useAddWalletMutation = () => {
     mutationFn: async ({ address, publicKeys }) => {
       const payload = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
 
-      if (payload.length > 0) return await sdk.data.createMultiple("wallets", payload, true);
+      if (payload.length > 0) return await sdk.data.createMultiple("wallets", payload);
 
-      return await sdk.data.create("wallets", createWalletFactory({ address }), true);
+      return await sdk.data.create("wallets", createWalletFactory({ address }));
     },
 
     onMutate: async ({ address, publicKeys }) => {
