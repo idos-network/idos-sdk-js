@@ -323,7 +323,7 @@ export class Data {
         },
       ],
       `Share a ${name} on idOS`,
-      true,
+      synchronous,
     );
 
     return { id };
@@ -346,7 +346,7 @@ export class Data {
         },
       ],
       `Grant ${grantee} write access to your idOS credentials`,
-      true,
+      synchronous,
     );
   }
 
