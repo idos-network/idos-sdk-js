@@ -71,7 +71,7 @@ export class Enclave {
     }
 
     return {
-      humanId: this.store.get("human-id"),
+      humanId: this.humanId ?? this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
