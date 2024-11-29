@@ -32,6 +32,7 @@ const useDeleteWalletMutation = () => {
         "wallets",
         wallets.map((wallet) => wallet.id),
         "Delete wallet from idOS",
+        true,
       ),
     async onMutate(wallets) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });

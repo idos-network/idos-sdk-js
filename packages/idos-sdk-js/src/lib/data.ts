@@ -73,7 +73,11 @@ export class Data {
     return this.enclave.filterCredentialsByCountries(credentialsWithContent, countries);
   }
 
-  async createMultiple<T extends AnyRecord>(tableName: string, records: T[]) {
+  async createMultiple<T extends AnyRecord>(
+    tableName: string,
+    records: T[],
+    synchronous?: boolean,
+  ) {
     let receiverPublicKey: string | undefined;
 
     if (tableName === "credentials") {
@@ -99,6 +103,7 @@ export class Data {
       `add_${this.singularize(tableName)}`,
       newRecords,
       `Create new ${this.singularize(tableName)} in your idOS profile`,
+      synchronous,
     );
 
     return newRecords;
@@ -107,6 +112,7 @@ export class Data {
   async create<T extends { id: string }>(
     tableName: string,
     record: Omit<T, "id">,
+    synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
       tableName === "human_attributes" ? "attributes" : tableName,
@@ -142,6 +148,7 @@ export class Data {
       `add_${this.singularize(tableName)}`,
       [newRecord],
       `Create new ${this.singularize(tableName)} in your idOS profile`,
+      synchronous,
     );
 
     return newRecord;
@@ -216,16 +223,32 @@ export class Data {
     tableName: string,
     recordIds: string[],
     description?: string,
+    synchronous?: boolean,
   ): Promise<{ id: string }[]> {
     const records = recordIds.map((id) => ({ id }));
-    await this.kwilWrapper.execute(`remove_${this.singularize(tableName)}`, records, description);
+    await this.kwilWrapper.execute(
+      `remove_${this.singularize(tableName)}`,
+      records,
+      description,
+      synchronous,
+    );
 
     return records;
   }
 
-  async delete(tableName: string, recordId: string, description?: string): Promise<{ id: string }> {
+  async delete(
+    tableName: string,
+    recordId: string,
+    description?: string,
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
     const record = { id: recordId };
-    await this.kwilWrapper.execute(`remove_${this.singularize(tableName)}`, [record], description);
+    await this.kwilWrapper.execute(
+      `remove_${this.singularize(tableName)}`,
+      [record],
+      description,
+      synchronous,
+    );
 
     return record;
   }
@@ -234,6 +257,7 @@ export class Data {
     tableName: string,
     recordLike: T,
     description?: string,
+    synchronous?: boolean,
   ): Promise<T> {
     if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
 
@@ -254,7 +278,12 @@ export class Data {
       );
     }
 
-    await this.kwilWrapper.execute(`edit_${this.singularize(tableName)}`, [record], description);
+    await this.kwilWrapper.execute(
+      `edit_${this.singularize(tableName)}`,
+      [record],
+      description,
+      synchronous,
+    );
 
     return record;
   }
@@ -263,6 +292,7 @@ export class Data {
     tableName: string,
     recordId: string,
     receiverPublicKey: string,
+    synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
 
@@ -293,16 +323,21 @@ export class Data {
         },
       ],
       `Share a ${name} on idOS`,
+      true,
     );
 
     return { id };
   }
 
-  async unshare(tableName: string, recordId: string): Promise<{ id: string }> {
-    return await this.delete(tableName, recordId, undefined);
+  async unshare(
+    tableName: string,
+    recordId: string,
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
+    return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(grantee: string) {
+  async addWriteGrant(grantee: string, synchronous?: boolean) {
     return await this.kwilWrapper.execute(
       "add_write_grant",
       [
@@ -311,6 +346,7 @@ export class Data {
         },
       ],
       `Grant ${grantee} write access to your idOS credentials`,
+      true,
     );
   }
 
