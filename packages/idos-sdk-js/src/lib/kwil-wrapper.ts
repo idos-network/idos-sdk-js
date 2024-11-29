@@ -116,7 +116,7 @@ export class KwilWrapper {
     actionName: string,
     actionInputs: Record<string, unknown>[],
     description?: string,
-    synchronous?: boolean,
+    synchronous = true,
   ) {
     if (!this.signer) throw new Error("No signer set");
 
