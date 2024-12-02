@@ -114,7 +114,7 @@ export class IframeEnclave implements EnclaveProvider {
     const hasIframe = document.getElementById(this.iframe.id);
     if (hasIframe) {
       console.warn("An Iframe already exists in the container");
-      return new Promise((resolve) => this.iframe.addEventListener("load", resolve));
+      return Promise.resolve();
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
