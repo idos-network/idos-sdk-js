@@ -25,7 +25,6 @@ interface InitParams {
 
 export class idOS {
   static initializing = false;
-
   static near = Grants.near;
   static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
@@ -109,6 +108,7 @@ export class idOS {
 
   async reset({ enclave = false } = {}): Promise<void> {
     this.store.reset();
+    idOS.initializing = false;
     if (enclave) await this.enclave.reset();
   }
 
