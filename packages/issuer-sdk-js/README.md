@@ -165,6 +165,7 @@ import issuerConfig from "./issuer-config.js";
 const publicNotesId = crypto.randomUUID();
 
 const credentialsPublicNotes = {
+  // `id` is required to make `editCredential` work.
   id: publicNotesId,
   type: "human",
   level: "human",
@@ -261,6 +262,12 @@ await shareCredentialByGrant(issuerConfig,{
 ## Editing credentials
 
 The `editCredential` function allows issuers to update the public notes associated with a credential in the idOS. This is useful for actions like marking credentials as revoked or updating metadata.
+
+In order for `editCredential` to work, the credential's `public_notes` field needs to be a valid JSON object with an `id` field, and the `public_notes_id` argument needs to have that value.
+
+> ⚠️ Warning
+>
+> If the new `public_notes` value doesn't have an `id` field, you'll stop being able to edit that credential.
 
 ```js
 // Server side
