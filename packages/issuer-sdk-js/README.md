@@ -277,7 +277,7 @@ await editCredential(issuerConfig, {
   public_notes_id: publicNotesId,
   public_notes: JSON.stringify({
     ...credentialsPublicNotes,
-    credential_status: "revoked",
+    status: "revoked",
   }),
 });
 ```
@@ -295,7 +295,7 @@ await editCredential(issuer, {
     publicNotesId: id, // the `id` of the credential to be revoked that is stored in the `publicNotes` field.
     publicNotes: JSON.stringify({
       ...publicNotes,
-      credential_status: "revoked" // updating the credential status to revoked
+      status: "revoked" // updating the credential status to revoked
     }),
   });
 ```
