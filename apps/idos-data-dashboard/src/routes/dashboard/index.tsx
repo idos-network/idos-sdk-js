@@ -176,7 +176,7 @@ export function Component() {
                   </ListItemLink>
                 </ListItem>
                 <ListItem>
-                  <ListItemLink to="/wallets">
+                  <ListItemLink to="/wallets" data-testid="wallets-link">
                     <Wallet2Icon size={24} strokeWidth="1.5" />
                     <Text as="span">Wallets</Text>
                   </ListItemLink>

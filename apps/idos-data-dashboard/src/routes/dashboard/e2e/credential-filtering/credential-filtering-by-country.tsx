@@ -6,17 +6,20 @@ import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 
-const useFetchFilteredCredentials = () => {
+const useFetchFilteredCredentials = (country: string) => {
   const { sdk } = useIdOS();
 
   return useQuery({
     queryKey: ["e2e-credential-filtering-by-country"],
-    queryFn: () => sdk.data.listCredentialsFilteredByCountries(["DE"]),
+    queryFn: () => sdk.data.listCredentialsFilteredByCountries([country]),
   });
 };
 
 export function Component() {
-  const credentialIds = useFetchFilteredCredentials();
+  const searchParams = new URLSearchParams(document.location.search);
+  const country = searchParams.get("country") || "DE";
+
+  const credentialIds = useFetchFilteredCredentials(country);
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -37,7 +40,7 @@ export function Component() {
             lg: "xx-large",
           }}
         >
-          Credentials filtered by country (DE)
+          Credentials filtered by country {country}
         </Heading>
       </HStack>
 

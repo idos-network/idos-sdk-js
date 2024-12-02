@@ -9,12 +9,20 @@ type WalletCardProps = {
 
 export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) => {
   return (
-    <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
+    <HStack
+      align="center"
+      justify="space-between"
+      gap={5}
+      p={5}
+      bg="neutral.900"
+      rounded="xl"
+      data-testid="wallet-card"
+    >
       <HStack gap={5}>
         <Image src="/idos-dashboard-logo-dark.svg" alt="Wallet image" w={50} h={50} />
         <VStack align="stretch" gap={0} overflow="hidden">
           <Text color="neutral.600">Address</Text>
-          <Text isTruncated maxW={200}>
+          <Text isTruncated maxW={200} data-testid="wallet-address">
             {address}
           </Text>
         </VStack>
