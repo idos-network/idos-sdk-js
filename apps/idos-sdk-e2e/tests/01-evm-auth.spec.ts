@@ -1,5 +1,6 @@
-import { MetaMask, metaMaskFixtures, testWithSynpress } from "@synthetixio/synpress";
-import basicSetup from "./wallet-setup/basic.setup";
+import { testWithSynpress } from "@synthetixio/synpress";
+import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
+import basicSetup from "../test/wallet-setup/wallet-setup.setup";
 
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
@@ -11,37 +12,41 @@ test.beforeEach(async ({ context, page }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-test("should login successfully with an EVM wallet", async ({
-  context,
-  page,
-  metamaskPage,
-  extensionId,
-}) => {
-  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-  await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.connectToDapp(["Pristine"]);
-  await page.waitForTimeout(2000);
-  await expect(page.locator("#disconnect-wallet-btn")).toBeVisible();
-});
+test("should login successfully with an EVM wallet", async ({ context, page, extensionId }) => {
+  const metamask = new MetaMask(context, page, basicSetup.walletPassword, extensionId);
+  await page.goto("/");
 
-test("should set successfully an EVM signer", async ({
-  context,
-  page,
-  metamaskPage,
-  extensionId,
-}) => {
-  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
+  await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.connectToDapp();
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
 
-  const signer = await page.evaluate(() =>
-    JSON.parse(window.localStorage.getItem("idOS-signer-address") ?? ""),
+  await expect(page.locator("#disconnect-wallet-btn")).toBeVisible();
+});
+
+// @ts-ignore
+test("should set successfully an EVM signer", async ({ context, page, extensionId }) => {
+  const metamask = new MetaMask(context, page, basicSetup.walletPassword, extensionId);
+
+  await page.goto("/");
+  await page.getByRole("button", { name: "Connect a wallet" }).click();
+  await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.connectToDapp();
+  await page.waitForTimeout(2000);
+  await metamask.confirmSignature();
+
+  const [connectedWallet] = await page.evaluate(() =>
+    // @ts-ignore for some reason using metamask.getAddress() is not working
+    ethereum.request({
+      method: "eth_accounts",
+      params: [],
+    }),
   );
-  const address = await metamask.getAccountAddress();
-  expect(signer).toEqual(address);
+  const idosSigner = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem("idOS-signer-address")!),
+  );
+  expect(connectedWallet.toLowerCase()).toEqual(idosSigner.toLowerCase());
 });
