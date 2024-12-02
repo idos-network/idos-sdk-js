@@ -1,7 +1,6 @@
 import { ChakraBaseProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { createWeb3Modal } from "@web3modal/wagmi/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
@@ -10,7 +9,7 @@ import { WagmiProvider } from "wagmi";
 import App from "@/app";
 import { Provider as IDOSProvider } from "@/core/idos";
 import { WalletSelectorContextProvider } from "@/core/near";
-import { projectId, wagmiConfig } from "@/core/wagmi";
+import { wagmiAdapter } from "@/core/wagmi";
 import { theme } from "@/theme";
 
 const queryClient = new QueryClient({
@@ -23,14 +22,11 @@ const queryClient = new QueryClient({
   },
 });
 
-createWeb3Modal({ wagmiConfig, projectId });
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <ChakraBaseProvider theme={theme}>
       <WalletSelectorContextProvider>
-        {/* @ts-expect-error: TODO: fix wagmi types */}
-        <WagmiProvider config={wagmiConfig}>
+        <WagmiProvider config={wagmiAdapter.wagmiConfig}>
           <QueryClientProvider client={queryClient}>
             <IDOSProvider>
               <RouterProvider
