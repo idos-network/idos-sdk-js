@@ -84,8 +84,7 @@ export class idOS {
         type,
         accountId: currentUser.address,
         signer: signer as Wallet,
-        // biome-ignore lint/style/noNonNullAssertion: we put it there when we're using NEAR.
-        publicKey: currentUser.publicKey!,
+        nearWalletPublicKey: currentUser.nearWalletPublicKey ?? "",
       });
 
       return currentUser;

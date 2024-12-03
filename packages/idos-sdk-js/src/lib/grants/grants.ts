@@ -55,24 +55,24 @@ export class Grants {
     type,
     signer,
     accountId,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     type: "NEAR";
     signer: Wallet;
     accountId: string;
-    publicKey: string;
+    nearWalletPublicKey: string;
   }): Promise<ConnectedGrants>;
 
   async connect({
     type,
     signer,
     accountId,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     type: SignerType;
     signer: Wallet | Signer;
     accountId?: string;
-    publicKey?: string;
+    nearWalletPublicKey?: string;
   }): Promise<ConnectedGrants> {
     let child: EvmGrants | NearGrants;
 
@@ -82,12 +82,13 @@ export class Grants {
         break;
       case "NEAR":
         if (accountId === undefined) throw new Error("accountId required for NEAR signers");
-        if (publicKey === undefined) throw new Error("publicKey required for NEAR signers");
+        if (nearWalletPublicKey === undefined)
+          throw new Error("publicKey required for NEAR signers");
         child = await NearGrants.init({
           accountId,
           signer: signer as Wallet,
           options: this.nearGrantsOptions,
-          publicKey,
+          nearWalletPublicKey,
         });
         break;
       default:
@@ -169,9 +170,9 @@ class ConnectedGrants extends Grants {
     recordId: string,
     address: string,
     lockedUntil: number,
-    receiverPublicKey: string,
+    granteeEncryptionPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    const share = await this.data.share(tableName, recordId, receiverPublicKey);
+    const share = await this.data.share(tableName, recordId, granteeEncryptionPublicKey);
 
     return await this.#child.create({
       grantee: address,

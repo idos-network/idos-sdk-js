@@ -18,7 +18,12 @@ export class Enclave {
   }
 
   async ready(): Promise<Uint8Array> {
-    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
+    const {
+      humanId,
+      address,
+      nearWalletPublicKey: publicKey,
+      currentUserPublicKey,
+    } = this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 

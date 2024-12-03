@@ -15,7 +15,14 @@ import { implicitAddressFromPublicKey } from "./utils";
 export interface AuthUser {
   humanId: string | null;
   address: string;
-  publicKey?: string;
+  /**
+   * The public key of the wallet that was used to sign the message.
+   * It's only available when the `signer` is a NEAR wallet.
+   */
+  nearWalletPublicKey?: string;
+  /**
+   * The derived public key of the user from the password / passkey.
+   */
   currentUserPublicKey?: string;
 }
 
@@ -209,7 +216,7 @@ export class Auth {
       humanId: id,
       currentUserPublicKey: current_public_key,
       address: currentAddress,
-      publicKey,
+      nearWalletPublicKey: publicKey,
     };
   }
 }

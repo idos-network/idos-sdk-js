@@ -50,12 +50,12 @@ export class NearGrants implements GrantChild {
     accountId,
     signer,
     options,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     accountId: string;
     signer: Wallet;
     options: NearGrantsOptions;
-    publicKey: string;
+    nearWalletPublicKey: string;
   }): Promise<NearGrants> {
     let near_api: {
       Contract: typeof Contract;
@@ -95,7 +95,7 @@ export class NearGrants implements GrantChild {
           // biome-ignore lint/suspicious/noExplicitAny: fix `useLocalViewExecution` is not in  types.
         } as any,
       ),
-      publicKey,
+      nearWalletPublicKey,
     );
   }
 
