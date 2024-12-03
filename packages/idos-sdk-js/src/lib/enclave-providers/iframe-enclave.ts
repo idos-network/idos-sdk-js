@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import * as Base64Codec from "@stablelib/base64";
 import type { BackupPasswordInfo } from "../types";
 import type {
-  DiscoverEncryptionKeyResponse,
+  DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
   StoredData,
@@ -226,9 +226,11 @@ export class IframeEnclave implements EnclaveProvider {
     }
   }
 
-  async discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse> {
+  async discoverUserEncryptionPublicKey(
+    humanId: string,
+  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
     if (this.options.mode !== "new")
-      throw new Error("You can only call discoverUserEncryptionKey when mode is 'new'.");
+      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
 
     const encryptionPublicKey = await this.ready(humanId);
 

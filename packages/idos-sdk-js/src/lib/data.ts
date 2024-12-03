@@ -260,7 +260,7 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
+    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready();
 
     let recipientEncryptionPublicKey: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
