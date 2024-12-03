@@ -78,10 +78,11 @@ export class Data {
     records: T[],
     synchronous?: boolean,
   ) {
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey =
+        recipientEncryptionPublicKey ?? Base64Codec.encode(await this.enclave.ready());
       for (const record of records) {
         Object.assign(
           record,
@@ -89,7 +90,7 @@ export class Data {
             record.human_id,
             record.public_notes,
             record.content,
-            receiverPublicKey, // Encryption
+            recipientEncryptionPublicKey,
           ),
         );
       }
@@ -118,7 +119,7 @@ export class Data {
       tableName === "human_attributes" ? "attributes" : tableName,
     )}`;
 
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
 
     const inputs: string[] = ((await this.kwilWrapper.schema) as AnyRecord).data.actions
       .find((action: AnyRecord) => action.name === name)
@@ -131,14 +132,14 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= Base64Codec.encode(await this.enclave.ready());
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
           (record as AnyRecord).human_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
-          receiverPublicKey, // Encryption
+          recipientEncryptionPublicKey,
         ),
       );
     }
@@ -261,19 +262,19 @@ export class Data {
   ): Promise<T> {
     if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
 
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      receiverPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= Base64Codec.encode(await this.enclave.ready());
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
           record.human_id,
           record.public_notes,
           record.content,
-          receiverPublicKey, // Encryption
+          recipientEncryptionPublicKey,
         ),
       );
     }
@@ -291,7 +292,7 @@ export class Data {
   async share(
     tableName: string,
     recordId: string,
-    receiverPublicKey: string,
+    granteeEncryptionPublicKey: string,
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
@@ -306,7 +307,7 @@ export class Data {
           record.human_id,
           "",
           record.content,
-          receiverPublicKey, // Encryption
+          granteeEncryptionPublicKey,
         ),
       );
     }
@@ -337,15 +338,15 @@ export class Data {
     return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(grantee: string, synchronous?: boolean) {
+  async addWriteGrant(granteeAddress: string, synchronous?: boolean) {
     return await this.kwilWrapper.execute(
       "add_write_grant",
       [
         {
-          wg_grantee: grantee,
+          wg_grantee: granteeAddress,
         },
       ],
-      `Grant ${grantee} write access to your idOS credentials`,
+      `Grant ${granteeAddress} write access to your idOS credentials`,
       synchronous,
     );
   }
@@ -354,8 +355,8 @@ export class Data {
     return await this.kwilWrapper.call("has_write_grant_given_by", { human_id: humanId });
   }
 
-  async hasWriteGrantGivenTo(grantee: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_to", { grantee });
+  async hasWriteGrantGivenTo(granteeAddress: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_to", { grantee: granteeAddress });
   }
 
   async #buildInsertableIDOSCredential(
