@@ -58,23 +58,7 @@ export default function Home() {
           // @ts-expect-error: types in the SDK are a bit messy.
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
-          setCredentials(
-            _credentials.map((credential) => {
-              const fields = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-
-              const public_notes = {
-                id: fields.id,
-                level: fields.level,
-                status: fields.status,
-                type: fields.type,
-                issuer: fields.issuer,
-              };
-              return {
-                ...credential,
-                public_notes: JSON.stringify(public_notes),
-              };
-            }),
-          );
+          setCredentials(_credentials);
         }
 
         setHasProfile(_hasProfile);

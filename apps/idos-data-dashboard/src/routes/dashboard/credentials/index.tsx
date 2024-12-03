@@ -40,23 +40,6 @@ const useFetchCredentials = () => {
     select: (credentials) =>
       credentials
         .filter((credential) => !credential.original_id)
-
-        .map((credential) => {
-          const fields = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-
-          const public_notes = {
-            id: fields.id,
-            level: fields.level,
-            status: fields.status,
-            type: fields.type,
-            issuer: fields.issuer,
-          };
-
-          return {
-            ...credential,
-            public_notes: JSON.stringify(public_notes),
-          };
-        }),
   });
 };
 
