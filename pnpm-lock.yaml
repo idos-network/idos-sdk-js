@@ -633,9 +633,6 @@ importers:
       '@digitalbazaar/vc':
         specifier: ^6.0.2
         version: 6.0.2(web-streams-polyfill@3.2.1)
-      '@idos-network/kwil-nep413-signer':
-        specifier: workspace:*
-        version: link:../kwil-nep413-signer
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -676,6 +673,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.6.4
         version: 1.6.4
+      '@idos-network/kwil-nep413-signer':
+        specifier: workspace:*
+        version: link:../kwil-nep413-signer
       '@near-js/types':
         specifier: ^0.2.1
         version: 0.2.1
