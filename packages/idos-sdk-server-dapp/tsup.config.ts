@@ -10,4 +10,6 @@ export default defineConfig({
   env: config().parsed,
   format: ["esm"],
   outDir: "./dist",
+  bundle: true,
+  noExternal: ["@idos-network/kwil-nep413-signer", "@idos-network/idos-sdk-types"],
 });
