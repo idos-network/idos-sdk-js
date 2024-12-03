@@ -37,9 +37,7 @@ const useFetchCredentials = () => {
           .map((c) => c.id),
       })) as idOSCredentialWithShares[]; // @todo: remove once we have more type safety in the SDK.
     },
-    select: (credentials) =>
-      credentials
-        .filter((credential) => !credential.original_id)
+    select: (credentials) => credentials.filter((credential) => !credential.original_id),
   });
 };
 
