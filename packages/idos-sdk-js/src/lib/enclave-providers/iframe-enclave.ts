@@ -111,6 +111,12 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async #loadEnclave() {
+    const hasIframe = document.getElementById(this.iframe.id);
+    if (hasIframe) {
+      console.warn("An Iframe already exists in the container");
+      return Promise.resolve();
+    }
+
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
 

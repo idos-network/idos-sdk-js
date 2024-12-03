@@ -129,7 +129,7 @@ export class Grants {
 
   async shareMatchingEntry(
     _tableName: string,
-    _publicFields: Partial<idOSCredential>,
+    _publicFields: Record<string, string>,
     _privateFieldFilters: {
       pick: Record<string, string>;
       omit: Record<string, string>;
@@ -182,7 +182,7 @@ class ConnectedGrants extends Grants {
 
   async shareMatchingEntry(
     tableName: string,
-    publicFields: Partial<idOSCredential>,
+    publicFields: Record<string, string>,
     privateFieldFilters: {
       pick: Record<string, string>;
       omit: Record<string, string>;
@@ -194,10 +194,13 @@ class ConnectedGrants extends Grants {
     const allEntries = (await this.data.list(tableName)) as unknown as idOSCredential[];
 
     const filteredEntries = allEntries.filter((entry) => {
-      const keys = Object.keys(publicFields) as (keyof idOSCredential)[];
+      const keys = Object.keys(publicFields);
+      const meta = JSON.parse(entry.public_notes) as Record<string, string>;
+
       for (const key of keys) {
-        if (entry[key] !== publicFields[key]) return false;
+        if (meta[key] !== publicFields[key]) return false;
       }
+
       return true;
     });
 
@@ -218,6 +221,7 @@ class ConnectedGrants extends Grants {
       filteredEntriesWithContent as Record<string, string>[],
       privateFieldFilters,
     );
+
     if (!eligibleEntries.length) throw new Error("No matching credentials");
 
     const selectedEntry = eligibleEntries[0];

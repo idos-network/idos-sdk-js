@@ -54,6 +54,22 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     JSON.stringify(credential.data),
   )}`;
 
+  const credentialContent = credential.data?.content
+    ? (() => {
+        try {
+          return JSON.stringify(JSON.parse(credential.data.content), null, 2);
+        } catch (e) {
+          return credential.data.content;
+        }
+      })()
+    : "No content to display";
+
+  const meta = credential.data?.public_notes ? JSON.parse(credential.data.public_notes) : {};
+
+  const downloadFileName = credential.data?.public_notes
+    ? `${meta.type || "credential"}_${meta.issuer || "unknown"}.json`
+    : "credential.json";
+
   return (
     <Modal
       isOpen={isOpen}
@@ -94,7 +110,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
               bg="neutral.950"
               rounded="xl"
             >
-              {credential.data?.content ? credential.data.content : "No content to display"}
+              {credentialContent}
             </Code>
           ) : null}
         </ModalBody>
@@ -108,7 +124,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
               href={jsonLink}
               colorScheme="green"
               leftIcon={<DownloadIcon />}
-              download={`${credential.data?.credential_type}_${credential.data?.issuer}.json`}
+              download={downloadFileName}
             >
               Download as .json
             </Button>

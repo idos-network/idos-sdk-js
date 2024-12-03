@@ -42,7 +42,7 @@ export default function CredentialContent({
   }, [checkCredentialContent]);
 
   return (
-    <Modal isOpen={isOpen} onOpenChange={onOpenChange}>
+    <Modal isOpen={isOpen} size="2xl" onOpenChange={onOpenChange}>
       <ModalContent>
         {(onClose) => (
           <>
@@ -51,10 +51,8 @@ export default function CredentialContent({
               {isLoadingCredentialContent ? (
                 <Spinner />
               ) : (
-                <Code size="md">
-                  <pre>
-                    <code>{JSON.stringify(content, null, 2)}</code>
-                  </pre>
+                <Code size="lg" className="h-96 overflow-auto">
+                  <pre>{JSON.stringify(content, null, 2)}</pre>
                 </Code>
               )}
             </ModalBody>

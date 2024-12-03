@@ -57,7 +57,9 @@ export class Enclave {
     this.handlstoreableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
+
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
+    this.humanId = humanId;
 
     if (!this.isAuthorizedOrigin) {
       return {
@@ -69,7 +71,7 @@ export class Enclave {
     }
 
     return {
-      humanId: this.store.get("human-id"),
+      humanId: this.humanId ?? this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
@@ -81,13 +83,6 @@ export class Enclave {
     await this.ensureKeyPair();
 
     return this.keyPair?.publicKey;
-  }
-
-  async authWithPassword() {
-    const { password, duration } = await this.#openDialog("password");
-    this.store.set("password", password);
-    this.store.setRememberDuration(duration);
-    return { password, duration };
   }
 
   async ensurePassword() {
@@ -161,7 +156,7 @@ export class Enclave {
 
   async ensureKeyPair() {
     const password = this.store.get("password");
-    const salt = this.store.get("human-id");
+    const salt = this.humanId;
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -404,6 +399,7 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
+    if (!this.humanId) throw new Error("Can't open dialog without humanId");
     const width = 600;
     const height =
       this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
@@ -419,10 +415,7 @@ export class Enclave {
       .map((feat) => feat.join("="))
       .join(",");
 
-    const dialogURL = new URL(
-      `/dialog.html?humanId=${this.store.get("human-id")}`,
-      window.location.origin,
-    );
+    const dialogURL = new URL(`/dialog.html?humanId=${this.humanId}`, window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
     await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));

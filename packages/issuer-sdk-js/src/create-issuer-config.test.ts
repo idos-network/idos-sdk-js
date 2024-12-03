@@ -1,6 +1,5 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import * as Base64Codec from "@stablelib/base64";
-import { Wallet } from "ethers";
+
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createIssuerConfig } from "./index";
@@ -39,15 +38,13 @@ describe("createIssuerConfig", () => {
   });
 
   it("should correctly initialize and return config", async () => {
-    const mockWallet = new Wallet(
-      "dcdda6663be8dfa23d0e54a31ff6fddba2fdf8a1f0eae985c59857031e6da169",
-    );
-    const mockSecretKey = nacl.box.keyPair().secretKey;
+    const signingKeyPair = nacl.sign.keyPair();
+    const encryptionKeyPair = nacl.box.keyPair();
 
     const params = {
       nodeUrl: "http://mock-node-url",
-      signer: mockWallet,
-      encryptionSecret: Base64Codec.encode(mockSecretKey),
+      signingKeyPair,
+      encryptionKeyPair,
     };
 
     const result = await createIssuerConfig(params);
@@ -66,17 +63,14 @@ describe("createIssuerConfig", () => {
     expect(mockChainInfo).toHaveBeenCalled();
     expect(mockListDatabases).toHaveBeenCalled();
 
-    // Check if KwilSigner was initialized correctly
-    expect(KwilSigner).toHaveBeenCalledWith(mockWallet, mockWallet.address);
     // Check the returned config
     expect(result).toEqual({
       chainId: "mock-chain-id",
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
-      signer: expect.any(Object),
-      encryptionKeyPair: nacl.box.keyPair.fromSecretKey(
-        Base64Codec.decode(params.encryptionSecret),
-      ),
+      kwilSigner: expect.any(KwilSigner),
+      encryptionKeyPair: expect.any(Object),
+      signingKeyPair: expect.any(Object),
     });
   });
 });

@@ -8,11 +8,9 @@ export interface idOSHuman {
 export interface idOSCredential {
   id: string;
   human_id: string;
-  issuer: string;
-  original_id: string;
-  credential_type: string;
-  credential_level: string;
-  credential_status: idOSCredentialStatus;
+  issuer_auth_public_key: string;
+  original_id?: string;
+  public_notes: string;
   content: string;
   encryption_public_key: string;
 }

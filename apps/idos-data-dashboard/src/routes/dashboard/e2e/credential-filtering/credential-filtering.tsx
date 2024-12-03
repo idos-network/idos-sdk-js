@@ -15,12 +15,12 @@ const useShareMatchingCredential = () => {
       sdk.grants.shareMatchingEntry(
         "credentials",
         {
-          credential_level: "basic",
-          credential_type: "kyc",
+          level: "human",
+          type: "human",
         },
         {
           pick: {
-            "credentialSubject.identification_document_country": "DE",
+            "credentialSubject.id": "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
           },
           omit: {},
         },

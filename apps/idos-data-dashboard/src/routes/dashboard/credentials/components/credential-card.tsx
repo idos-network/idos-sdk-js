@@ -16,33 +16,23 @@ export const CredentialCard = ({
   onManageGrants,
   onDelete,
 }: CredentialCardProps) => {
-  const credentialLevelDisplay =
-    credential.credential_type !== credential.credential_level &&
-    ` (${credential.credential_level})`;
+  const publicFields = JSON.parse(credential.public_notes);
+
+  const meta = Object.entries(publicFields)
+    .filter(([key]) => key !== "id")
+    .map(([key, value]) => [key, value]) as [string, string][];
+
   return (
     <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
       <SimpleGrid columns={[2, 6]} spacing={10}>
-        <GridItem>
-          <Text mb={5} color="neutral.500" fontSize="sm">
-            Type
-          </Text>
-          <Text>
-            {credential.credential_type}
-            {credentialLevelDisplay}
-          </Text>
-        </GridItem>
-        <GridItem>
-          <Text mb={5} color="neutral.500" fontSize="sm">
-            Issuer
-          </Text>
-          <Text>{credential.issuer}</Text>
-        </GridItem>
-        <GridItem>
-          <Text mb={5} color="neutral.500" fontSize="sm">
-            Status
-          </Text>
-          <Text>{credential.credential_status}</Text>
-        </GridItem>
+        {meta.map(([key, value]) => (
+          <GridItem key={key}>
+            <Text mb={5} color="neutral.500" fontSize="sm" textTransform="capitalize">
+              {key}
+            </Text>
+            <Text>{value}</Text>
+          </GridItem>
+        ))}
         <GridItem>
           <Text mb={5} color="neutral.500" fontSize="sm">
             Shares
