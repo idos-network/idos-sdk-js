@@ -149,7 +149,7 @@ export async function shareCredentialByGrant(
     ...extraEntries,
   };
 
-  if (payload.public_notes !== "")
+  if (!payload.public_notes)
     throw new Error("shared credentials cannot have public_notes, it must be an empty string");
 
   await kwilClient.execute(
