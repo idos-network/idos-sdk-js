@@ -47,7 +47,9 @@ import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
 import { useAccount } from "wagmi";
 
+import GrantsPagination from "@/components/grants-pagination";
 import { useIdOS } from "@/idOS.provider";
+import { mockFetchAccessGrants } from "@/mokc/access-grants";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -66,18 +68,16 @@ function transformBase85Image(src: string) {
   )}`;
 }
 
-const useFetchGrants = () => {
+const useFetchGrants = (page: number) => {
   const idOS = useIdOS();
   const { address } = useAccount();
 
   return useQuery({
-    queryKey: ["grants"],
-    queryFn: () =>
-      idOS.grants.list({
-        grantee: address,
-      }),
-    select: (data) =>
-      data.map((grant) => ({
+    queryKey: ["grants", page],
+    queryFn: () => mockFetchAccessGrants(page, 5),
+    select: (data) => ({
+      ...data,
+      records: data.records.map((grant) => ({
         ...grant,
         lockedUntil:
           grant.lockedUntil === 0
@@ -87,6 +87,7 @@ const useFetchGrants = () => {
                 timeStyle: "short",
               }).format(grant.lockedUntil * 1000),
       })),
+    }),
   });
 };
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
@@ -331,6 +332,7 @@ function CredentialDetails({
                         <List.Item
                           flexShrink="0"
                           key={key}
+                          // biome-ignore lint/a11y/useSemanticElements: <explanation>
                           role="button"
                           transition="transform 0.2s"
                           cursor="pointer"
@@ -366,13 +368,17 @@ function CredentialDetails({
   );
 }
 
-function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
+function SearchResults({
+  results,
+  setPage,
+  page,
+}: { results: GrantsWithFormattedLockedUntil; setPage: (page: number) => void; page: number }) {
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
 
-  if (!results.length) {
+  if (!results.records.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
@@ -394,7 +400,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 
   return (
     <>
-      {results.map((grant) => (
+      {results.records.map((grant) => (
         <Stack key={crypto.randomUUID()} gap="6" bg="gray.900" p="6" rounded="md">
           <DataListRoot orientation="horizontal" divideY="1px">
             <DataListItem
@@ -467,6 +473,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
           </Button>
         </Stack>
       ))}
+      <GrantsPagination count={results.totalRecords} pageSize={5} setPage={setPage} page={page} />
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
@@ -483,10 +490,11 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 }
 
 function Index() {
+  const [page, setPage] = useState<number>(1);
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
-  const grants = useFetchGrants();
+  const grants = useFetchGrants(page);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
@@ -498,12 +506,16 @@ function Index() {
   };
 
   const results = useMemo(() => {
-    if (!grants.data) return [];
+    if (!grants.data) return { records: [], totalRecords: 0 };
     if (!debouncedSearchTerm) return grants.data;
 
-    return matchSorter(grants.data, debouncedSearchTerm, {
+    const sortedRecords = matchSorter(grants.data.records, debouncedSearchTerm, {
       keys: ["dataId", "owner", "grantee", "lockedUntil"],
     });
+    return {
+      records: sortedRecords,
+      totalRecords: grants.data.totalRecords,
+    };
   }, [debouncedSearchTerm, grants.data]);
 
   return (
@@ -541,7 +553,7 @@ function Index() {
                 onClick={() => grants.refetch()}
               />
             </HStack>
-            <SearchResults results={results} />
+            <SearchResults results={results} setPage={setPage} page={page} />
           </Stack>
         )}
       </Stack>
