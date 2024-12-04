@@ -37,7 +37,7 @@ export class IframeEnclave implements EnclaveProvider {
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
-    let { encryptionPublicKey } = (await this.#requestToEnclave({
+    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
         humanId,
         signerAddress,
@@ -46,10 +46,10 @@ export class IframeEnclave implements EnclaveProvider {
       },
     })) as StoredData;
 
-    while (!encryptionPublicKey) {
+    while (!userEncryptionPublicKey) {
       this.#showEnclave();
       try {
-        encryptionPublicKey = (await this.#requestToEnclave({
+        userEncryptionPublicKey = (await this.#requestToEnclave({
           keys: {},
         })) as Uint8Array;
       } catch (e) {
@@ -59,7 +59,7 @@ export class IframeEnclave implements EnclaveProvider {
       }
     }
 
-    return encryptionPublicKey;
+    return userEncryptionPublicKey;
   }
 
   async store(key: string, value: string): Promise<string> {

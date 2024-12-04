@@ -233,7 +233,7 @@ export class idOS {
     });
   }
 
-  async discoverEncryptionKey(humanId: string) {
+  async discoverUserEncryptionPublicKey(humanId: string) {
     return this.enclave.discoverUserEncryptionPublicKey(humanId);
   }
 }
