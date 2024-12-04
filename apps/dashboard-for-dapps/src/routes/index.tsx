@@ -45,7 +45,6 @@ import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
-import { useAccount } from "wagmi";
 
 import GrantsPagination from "@/components/grants-pagination";
 import { useIdOS } from "@/idOS.provider";
@@ -69,9 +68,6 @@ function transformBase85Image(src: string) {
 }
 
 const useFetchGrants = (page: number) => {
-  const idOS = useIdOS();
-  const { address } = useAccount();
-
   return useQuery({
     queryKey: ["grants", page],
     queryFn: () => mockFetchAccessGrants(page, 5),
