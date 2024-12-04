@@ -63,7 +63,7 @@ return { humanId }
 
 #### Step 2: Derive the Public Key
 
-Use the `idos.discoverEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
+Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
 
 ```javascript
 // Client side
