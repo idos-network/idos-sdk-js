@@ -34,8 +34,8 @@ export const useRevokeGrant = () => {
   const queryClient = useQueryClient();
 
   return useMutation<{ transactionId: string }, DefaultError, idOSGrant, Ctx>({
-    mutationFn: ({ grantee, dataId, lockedUntil }: idOSGrant) =>
-      sdk.grants.revoke("credentials", dataId, grantee, dataId, lockedUntil),
+    mutationFn: ({ granteeAddress, dataId, lockedUntil }: idOSGrant) =>
+      sdk.grants.revoke("credentials", dataId, granteeAddress, dataId, lockedUntil),
     mutationKey: ["revokeGrant"],
     async onMutate(grant) {
       const previousCredentials =
