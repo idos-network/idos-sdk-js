@@ -9,11 +9,11 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
-  const owner = address?.includes("0x") ? address : publicKey;
+  const ownerAddress = address?.includes("0x") ? address : publicKey;
 
   return useQuery({
     queryKey: ["grants", credentialId],
-    queryFn: () => sdk.grants.list({ owner }),
+    queryFn: () => sdk.grants.list({ ownerAddress }),
     retry: 1,
     select(grants) {
       if (!credentials || !grants) return [];

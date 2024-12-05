@@ -34,8 +34,8 @@ type GrantsCenterProps = {
 };
 
 function generateGrantId(grant: idOSGrant): string {
-  const { dataId, grantee, owner, lockedUntil } = grant;
-  return [dataId, grantee, owner, lockedUntil].join("-");
+  const { dataId, granteeAddress, ownerAddress, lockedUntil } = grant;
+  return [dataId, granteeAddress, ownerAddress, lockedUntil].join("-");
 }
 
 function timelockToMs(timelock: number): number {
@@ -96,7 +96,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 data-grant={JSON.stringify(grant)}
               >
                 <Td maxW={140}>
-                  <Text isTruncated>{grant.grantee}</Text>
+                  <Text isTruncated>{grant.granteeAddress}</Text>
                 </Td>
                 <Td>
                   <Text>{grant.lockedUntil ? timelockToDate(grant.lockedUntil) : "-"}</Text>
