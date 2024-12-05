@@ -34,14 +34,14 @@ export class IframeEnclave implements EnclaveProvider {
   async ready(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string,
+    signerEncryptionPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
-    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.#requestToEnclave({
+    let { userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
         humanId,
         signerAddress,
-        signerPublicKey,
+        signerEncryptionPublicKey,
         expectedUserEncryptionPublicKey,
       },
     })) as StoredData;
@@ -113,7 +113,7 @@ export class IframeEnclave implements EnclaveProvider {
   async #loadEnclave() {
     const hasIframe = document.getElementById(this.iframe.id);
     if (hasIframe) {
-      console.warn("An Iframe already exists in the container");
+      console.warn("An iframe already exists in the container");
       return Promise.resolve();
     }
 
@@ -232,11 +232,11 @@ export class IframeEnclave implements EnclaveProvider {
     if (this.options.mode !== "new")
       throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
 
-    const encryptionPublicKey = await this.ready(humanId);
+    const userEncryptionPublicKey = await this.ready(humanId);
 
     return {
       humanId,
-      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
+      userEncryptionPublicKey: Base64Codec.encode(userEncryptionPublicKey),
     };
   }
 }
