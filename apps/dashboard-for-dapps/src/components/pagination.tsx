@@ -1,7 +1,12 @@
-import { HStack, PaginationNextTrigger, PaginationPrevTrigger } from "@chakra-ui/react";
-import { PaginationItems, PaginationRoot } from "./ui/pagination";
+import { HStack } from "@chakra-ui/react";
+import {
+  PaginationItems,
+  PaginationNextTrigger,
+  PaginationPrevTrigger,
+  PaginationRoot,
+} from "@idos-network/ui-kit";
 
-export default function GrantsPagination({
+export function Pagination({
   count,
   pageSize,
   page,

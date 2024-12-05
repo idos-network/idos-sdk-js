@@ -46,9 +46,9 @@ import { matchSorter } from "match-sorter";
 import { useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
 
-import GrantsPagination from "@/components/grants-pagination";
+import { Pagination } from "@/components/pagination";
 import { useIdOS } from "@/idOS.provider";
-import { mockFetchAccessGrants } from "@/mokc/access-grants";
+import { mockFetchAccessGrants } from "@/mock/access-grants";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -69,7 +69,7 @@ function transformBase85Image(src: string) {
 
 const useFetchGrants = (page: number) => {
   return useQuery({
-    queryKey: ["grants", page],
+    queryKey: ["grants", { page }],
     queryFn: () => mockFetchAccessGrants(page, 5),
     select: (data) => ({
       ...data,
@@ -469,7 +469,7 @@ function SearchResults({
           </Button>
         </Stack>
       ))}
-      <GrantsPagination count={results.totalRecords} pageSize={5} setPage={setPage} page={page} />
+      <Pagination count={results.totalRecords} pageSize={5} setPage={setPage} page={page} />
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
