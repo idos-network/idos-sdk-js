@@ -156,7 +156,7 @@ export class IframeEnclave implements EnclaveProvider {
 
     container.appendChild(this.iframe);
 
-    return new Promise((resolve) => this.iframe.addEventListener("load", resolve));
+    return new Promise((resolve) => this.iframe.addEventListener("load", () => resolve()));
   }
 
   #showEnclave() {
