@@ -403,8 +403,8 @@ export class EvmGrants implements GrantChild {
   }
 
   async list({
-    owner = ZERO_ADDRESS,
-    grantee = ZERO_ADDRESS,
+    ownerAddress: owner = ZERO_ADDRESS,
+    granteeAddress: grantee = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
     if (owner === ZERO_ADDRESS && grantee === ZERO_ADDRESS)
@@ -414,12 +414,17 @@ export class EvmGrants implements GrantChild {
 
     return grants.map(
       ([owner, grantee, dataId, lockedUntil]: [string, string, string, bigint]) =>
-        new Grant({ owner, grantee, dataId, lockedUntil: Number(lockedUntil) }),
+        new Grant({
+          ownerAddress: owner,
+          granteeAddress: grantee,
+          dataId,
+          lockedUntil: Number(lockedUntil),
+        }),
     );
   }
 
   async create({
-    grantee = ZERO_ADDRESS,
+    granteeAddress = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
     lockedUntil = ZERO_TIMELOCK,
     wait = true,
@@ -427,17 +432,22 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    if (grantee === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
+    if (granteeAddress === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 
-    const owner = await this.signer.getAddress();
-    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+    const ownerAddress = await this.signer.getAddress();
+    const grant: Grant = {
+      ownerAddress,
+      granteeAddress,
+      dataId,
+      lockedUntil,
+    };
 
     let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.insertGrant(
-        grantee,
+        granteeAddress,
         dataId,
         lockedUntil,
       )) as TransactionResponse;
@@ -448,17 +458,22 @@ export class EvmGrants implements GrantChild {
   }
 
   async messageForCreateBySignature({
-    owner,
-    grantee,
+    ownerAddress,
+    granteeAddress,
     dataId,
     lockedUntil,
   }: Grant): Promise<string> {
-    return await this.#contract.insertGrantBySignatureMessage(owner, grantee, dataId, lockedUntil);
+    return await this.#contract.insertGrantBySignatureMessage(
+      ownerAddress,
+      granteeAddress,
+      dataId,
+      lockedUntil,
+    );
   }
 
   async createBySignature({
-    owner,
-    grantee,
+    ownerAddress,
+    granteeAddress,
     dataId,
     lockedUntil,
     signature,
@@ -467,13 +482,13 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+    const grant: Grant = { ownerAddress, granteeAddress, dataId, lockedUntil };
 
     let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.insertGrantBySignature(
-        owner,
-        grantee,
+        ownerAddress,
+        granteeAddress,
         dataId,
         lockedUntil,
         signature,
@@ -485,25 +500,25 @@ export class EvmGrants implements GrantChild {
   }
 
   async revoke({
-    grantee = ZERO_ADDRESS,
+    granteeAddress = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
     lockedUntil = ZERO_TIMELOCK,
     wait = true,
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{
+  }: Omit<Grant, "ownerAddress"> & { wait?: boolean }): Promise<{
     grant: Grant;
     transactionId: string;
   }> {
-    if (grantee === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
+    if (granteeAddress === ZERO_ADDRESS || dataId === ZERO_DATA_ID) {
       throw new Error("Must provide `grantee` and `dataId`");
     }
 
-    const owner = await this.signer.getAddress();
-    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+    const ownerAddress = await this.signer.getAddress();
+    const grant: Grant = { ownerAddress, granteeAddress, dataId, lockedUntil };
 
     let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.deleteGrant(
-        grantee,
+        granteeAddress,
         dataId,
         lockedUntil,
       )) as TransactionResponse;
@@ -515,17 +530,22 @@ export class EvmGrants implements GrantChild {
   }
 
   async messageForRevokeBySignature({
-    owner,
-    grantee,
+    ownerAddress,
+    granteeAddress,
     dataId,
     lockedUntil,
   }: Grant): Promise<string> {
-    return await this.#contract.deleteGrantBySignatureMessage(owner, grantee, dataId, lockedUntil);
+    return await this.#contract.deleteGrantBySignatureMessage(
+      ownerAddress,
+      granteeAddress,
+      dataId,
+      lockedUntil,
+    );
   }
 
   async revokeBySignature({
-    owner,
-    grantee,
+    ownerAddress,
+    granteeAddress,
     dataId,
     lockedUntil,
     signature,
@@ -534,13 +554,13 @@ export class EvmGrants implements GrantChild {
     grant: Grant;
     transactionId: string;
   }> {
-    const grant: Grant = { owner, grantee, dataId, lockedUntil };
+    const grant: Grant = { ownerAddress, granteeAddress, dataId, lockedUntil };
 
     let transaction: TransactionResponse;
     try {
       transaction = (await this.#contract.deleteGrantBySignature(
-        owner,
-        grantee,
+        ownerAddress,
+        granteeAddress,
         dataId,
         lockedUntil,
         signature,

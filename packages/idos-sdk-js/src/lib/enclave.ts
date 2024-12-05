@@ -6,7 +6,7 @@ import type { EnclaveProvider } from "./enclave-providers/types";
 import type { BackupPasswordInfo } from "./types";
 
 export class Enclave {
-  encryptionPublicKey?: Uint8Array;
+  userEncryptionPublicKey?: Uint8Array;
 
   constructor(
     public readonly auth: Auth,
@@ -18,7 +18,8 @@ export class Enclave {
   }
 
   async ready(): Promise<Uint8Array> {
-    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
+    const { humanId, userAddress, nearWalletPublicKey, currentUserPublicKey } =
+      this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
 
@@ -28,36 +29,40 @@ export class Enclave {
     await this.provider.updateStore("litAttrs", litAttrs);
     await this.provider.updateStore("new-user-wallets", userWallets);
 
-    if (this.encryptionPublicKey) return this.encryptionPublicKey;
+    if (this.userEncryptionPublicKey) return this.userEncryptionPublicKey;
 
-    this.encryptionPublicKey = await this.provider.ready(
+    this.userEncryptionPublicKey = await this.provider.ready(
       humanId,
-      address,
-      publicKey,
+      userAddress,
+      nearWalletPublicKey,
       currentUserPublicKey,
     );
 
-    return this.encryptionPublicKey;
+    return this.userEncryptionPublicKey;
   }
 
-  async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
-    if (!this.encryptionPublicKey) await this.ready();
+  async encrypt(message: string, recipientEncryptionPublicKey?: string): Promise<string> {
+    if (!this.userEncryptionPublicKey) await this.ready();
 
     return Base64Codec.encode(
       await this.provider.encrypt(
         Utf8Codec.encode(message),
-        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
+        recipientEncryptionPublicKey === undefined
+          ? undefined
+          : Base64Codec.decode(recipientEncryptionPublicKey),
       ),
     );
   }
 
-  async decrypt(message: string, senderPublicKey?: string): Promise<string> {
-    if (!this.encryptionPublicKey) await this.ready();
+  async decrypt(message: string, senderEncryptionPublicKey?: string): Promise<string> {
+    if (!this.userEncryptionPublicKey) await this.ready();
 
     return Utf8Codec.decode(
       await this.provider.decrypt(
         Base64Codec.decode(message),
-        senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey),
+        senderEncryptionPublicKey === undefined
+          ? undefined
+          : Base64Codec.decode(senderEncryptionPublicKey),
       ),
     );
   }
@@ -75,7 +80,7 @@ export class Enclave {
   }
 
   async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
-    if (!this.encryptionPublicKey) await this.ready();
+    if (!this.userEncryptionPublicKey) await this.ready();
     return await this.provider.filterCredentialsByCountries(credentials, countries);
   }
 
@@ -86,7 +91,7 @@ export class Enclave {
       omit: Record<string, string>;
     },
   ): Promise<idOSCredential[]> {
-    if (!this.encryptionPublicKey) await this.ready();
+    if (!this.userEncryptionPublicKey) await this.ready();
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
@@ -96,7 +101,7 @@ export class Enclave {
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
 
-  async discoverUserEncryptionKey(humanId: string) {
-    return this.provider.discoverUserEncryptionKey(humanId);
+  async discoverUserEncryptionPublicKey(humanId: string) {
+    return this.provider.discoverUserEncryptionPublicKey(humanId);
   }
 }

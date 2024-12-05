@@ -82,10 +82,9 @@ export class idOS {
       const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({
         type,
-        accountId: currentUser.address,
+        accountId: currentUser.userAddress,
         signer: signer as Wallet,
-        // biome-ignore lint/style/noNonNullAssertion: we put it there when we're using NEAR.
-        publicKey: currentUser.publicKey!,
+        nearWalletPublicKey: currentUser.nearWalletPublicKey ?? "",
       });
 
       return currentUser;
@@ -234,7 +233,7 @@ export class idOS {
     });
   }
 
-  async discoverEncryptionKey(humanId: string) {
-    return this.enclave.discoverUserEncryptionKey(humanId);
+  async discoverUserEncryptionPublicKey(humanId: string) {
+    return this.enclave.discoverUserEncryptionPublicKey(humanId);
   }
 }
