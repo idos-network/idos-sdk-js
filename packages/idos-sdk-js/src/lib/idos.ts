@@ -82,7 +82,7 @@ export class idOS {
       const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({
         type,
-        accountId: currentUser.address,
+        accountId: currentUser.userAddress,
         signer: signer as Wallet,
         nearWalletPublicKey: currentUser.nearWalletPublicKey ?? "",
       });
