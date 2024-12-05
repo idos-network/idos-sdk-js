@@ -110,7 +110,7 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<idOSCredential[]>;
   }
 
-  async #loadEnclave() {
+  async #loadEnclave(): Promise<unknown> {
     const container = document.querySelector(this.container);
     const iframeElem = document.getElementById(this.iframe.id);
 
