@@ -16,8 +16,8 @@ export interface idOSCredential {
 }
 
 export interface idOSGrant {
-  owner: string;
-  grantee: string;
+  ownerAddress: string;
+  granteeAddress: string;
   dataId: string;
   lockedUntil: number;
 }
