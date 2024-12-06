@@ -305,7 +305,8 @@ const connectWallet = {
       .h1("eyes", "User's grants to this dApp")
       .wait(
         "awaiting RPC",
-        cache.get("grants") || idos.grants.list({ owner, grantee: granteeInfo.grantee }),
+        cache.get("grants") ||
+          idos.grants.list({ ownerAddress: owner, granteeAddress: granteeInfo.grantee }),
       );
     cache.set("grants", grants);
 
