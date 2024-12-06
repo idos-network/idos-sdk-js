@@ -74,7 +74,7 @@ const useFetchGrants = () => {
     queryKey: ["grants"],
     queryFn: () =>
       idOS.grants.list({
-        grantee: address,
+        granteeAddress: address,
       }),
     select: (data) =>
       data.map((grant) => ({
@@ -331,7 +331,6 @@ function CredentialDetails({
                         <List.Item
                           flexShrink="0"
                           key={key}
-                          role="button"
                           transition="transform 0.2s"
                           cursor="pointer"
                           _hover={{ transform: "scale(1.02)" }}
@@ -424,7 +423,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
               pt="4"
               grow
               label="Owner"
-              value={grant.owner}
+              value={grant.ownerAddress}
               truncate
             />
             <DataListItem
@@ -439,7 +438,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
               pt="4"
               grow
               label="Grantee"
-              value={grant.grantee}
+              value={grant.granteeAddress}
               truncate
             />
             <DataListItem
