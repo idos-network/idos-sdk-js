@@ -110,15 +110,10 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<idOSCredential[]>;
   }
 
-  async #loadEnclave(): Promise<unknown> {
-    const container = document.querySelector(this.container);
-    const iframeElem = document.getElementById(this.iframe.id);
-
-    if (iframeElem) {
-      console.warn("An Iframe already exists in the container");
-      container?.removeChild(iframeElem);
-      return new Promise((resolve) => this.#loadEnclave().then(resolve));
-    }
+  async #loadEnclave(): Promise<void> {
+    const container =
+      document.querySelector(this.container) ||
+      throwNew(Error, `Can't find container with selector ${this.container}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
@@ -152,11 +147,23 @@ export class IframeEnclave implements EnclaveProvider {
       this.iframe.style.setProperty(k, v);
     }
 
-    if (!container) throw new Error(`Can't find container with selector ${this.container}`);
-
+    let el: HTMLElement | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: it's on purpose
+    while ((el = document.getElementById(this.iframe.id))) {
+      console.log("reinstalling idOS iframe...");
+      container.removeChild(el);
+    }
     container.appendChild(this.iframe);
 
-    return new Promise((resolve) => this.iframe.addEventListener("load", resolve));
+    return new Promise((resolve) =>
+      this.iframe.addEventListener(
+        "load",
+        () => {
+          resolve();
+        },
+        { once: true },
+      ),
+    );
   }
 
   #showEnclave() {
@@ -239,4 +246,8 @@ export class IframeEnclave implements EnclaveProvider {
       encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
     };
   }
+}
+
+function throwNew(ErrorClass: ErrorConstructor, ...args: Parameters<ErrorConstructor>): never {
+  throw new ErrorClass(...args);
 }
