@@ -19,10 +19,14 @@ test("should login successfully with an EVM wallet", async ({
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.goto("/");
+
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.connectToDapp(["Pristine"]);
+  await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.connectToDapp();
   await page.waitForTimeout(2000);
+  await metamask.confirmSignature();
+
   await expect(page.locator("#disconnect-wallet-btn")).toBeVisible();
 });
 
@@ -34,10 +38,11 @@ test("should set successfully an EVM signer", async ({
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.goto("/");
+
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
+  await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.connectToDapp();
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
 

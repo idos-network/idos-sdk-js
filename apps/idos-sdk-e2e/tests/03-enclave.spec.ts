@@ -22,24 +22,28 @@ test("should decrypt a credential successfully", async ({
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
+  await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.connectToDapp();
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
-  const popupPromise = page.waitForEvent("popup");
+  await page.waitForTimeout(2000);
+
   await page.getByRole("button", { name: "View details" }).first().click();
-  const idOSButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
+  const idOSButton = await page.frameLocator("#idos-enclave-iframe").locator("#unlock");
   await idOSButton.click();
+  const popupPromise = await page.waitForEvent("popup");
   const idOSPopup = await popupPromise;
   await page.waitForTimeout(2000);
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
-  const passwordInput = idOSPopup.locator("#idos-password-input");
+
+  await idOSPopup.locator("#auth-method-password").click();
+  const passwordInput = await idOSPopup.locator("#idos-password-input");
+
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Unlock" }).click();
 
-  const code = page.locator("#credential-details");
-  await expect(code).toHaveText(credentialContent);
+  const code = await page.locator("#credential-details");
+  expect(code).toHaveText(credentialContent);
 });
 
 test("should filter credentials by country successfully", async ({
@@ -51,21 +55,21 @@ test("should filter credentials by country successfully", async ({
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.goto("e2e/credential-filtering-by-country");
 
-  await page.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
+  await metamask.connectToDapp();
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
+  await page.waitForTimeout(2000);
 
-  const popupPromise = page.waitForEvent("popup");
-
-  const idOSButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
+  await page.getByRole("button", { name: "View details" }).first().click();
+  const idOSButton = await page.frameLocator("#idos-enclave-iframe").locator("#unlock");
   await idOSButton.click();
+  const popupPromise = await page.waitForEvent("popup");
   const idOSPopup = await popupPromise;
   await page.waitForTimeout(2000);
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
-  const passwordInput = idOSPopup.locator("#idos-password-input");
+
+  await idOSPopup.locator("#auth-method-password").click();
+  const passwordInput = await idOSPopup.locator("#idos-password-input");
+
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Unlock" }).click();
 
