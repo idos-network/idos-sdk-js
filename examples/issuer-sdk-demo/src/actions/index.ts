@@ -6,6 +6,7 @@ import {
   createCredentialPermissioned,
   createHuman,
   editCredential,
+  shareCredentialByGrant,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -75,14 +76,26 @@ export async function createProfile(
 export async function createCredentialByWriteGrant(
   humanId: string,
   userEncryptionPublicKey: string,
+  sharedToGrantee = "0x86D603BcE418A44b7F5fBf434a5c4f3215Dc5847",
 ) {
   const issuer = await getIssuerConfig();
 
-  await createCredentialByGrant(issuer, {
+  const credential = {
     humanId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+  };
+
+  const res = await createCredentialByGrant(issuer, credential);
+  if (!sharedToGrantee) return res;
+  await shareCredentialByGrant(issuer, {
+    ...credential,
+    originalCredentialId: res.id,
+    lockedUntil: Math.floor(Date.now() / 1000) + 100,
+    grantee: sharedToGrantee,
+    id: crypto.randomUUID(),
+    publicNotes: "",
   });
 }
 
