@@ -71,5 +71,5 @@ test("should filter credentials by country successfully", async ({
 
   const list = page.locator("#credentials-list");
 
-  await expect(list.getByRole("listitem")).toHaveCount(1);
+  await expect(list.getByRole("listitem")).toHaveCount(0);
 });

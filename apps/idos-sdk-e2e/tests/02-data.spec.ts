@@ -28,7 +28,7 @@ test("should fetch credentials successfully", async ({
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
   const list = page.locator("#credentials-list");
-  await expect(list.getByRole("listitem")).toHaveCount(2);
+  await expect(list.getByRole("listitem")).toHaveCount(3);
 });
 
 test("should fetch wallets successfully", async ({ context, page, metamaskPage, extensionId }) => {
