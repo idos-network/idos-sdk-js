@@ -110,11 +110,14 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<idOSCredential[]>;
   }
 
-  async #loadEnclave() {
-    const hasIframe = document.getElementById(this.iframe.id);
-    if (hasIframe) {
+  async #loadEnclave(): Promise<unknown> {
+    const container = document.querySelector(this.container);
+    const iframeElem = document.getElementById(this.iframe.id);
+
+    if (iframeElem) {
       console.warn("An Iframe already exists in the container");
-      return Promise.resolve();
+      container?.removeChild(iframeElem);
+      return new Promise((resolve) => this.#loadEnclave().then(resolve));
     }
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
@@ -149,7 +152,6 @@ export class IframeEnclave implements EnclaveProvider {
       this.iframe.style.setProperty(k, v);
     }
 
-    const container = document.querySelector(this.container);
     if (!container) throw new Error(`Can't find container with selector ${this.container}`);
 
     container.appendChild(this.iframe);

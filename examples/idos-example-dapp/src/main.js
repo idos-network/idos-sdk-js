@@ -200,30 +200,7 @@ const connectWallet = {
     let credentials = await terminal
       .h1("eyes", "User's credentials")
       .wait("awaiting signature", cache.get("credentials") || idos.data.list("credentials"));
-    credentials = credentials
-      .filter((c) => c.original_id === null)
-      // @todo: remove once we have successfully migrated to Credentials 2.0.
-      .map((credential) => {
-        const { credential_level, credential_status, credential_type, issuer } = credential;
-        const _fields = credential.public_notes
-          ? typeof credential.public_notes === "string"
-            ? JSON.parse(credential.public_notes)
-            : credential.public_notes
-          : {};
-        const { id, ...public_notes } = {
-          id: _fields.id ?? credential.id,
-          level: _fields.level ?? credential_level,
-          status: _fields.status ?? credential_status,
-          type: _fields.type ?? credential_type,
-          issuer: _fields.issuer ?? issuer,
-        };
-
-        return {
-          ...credential,
-          ...public_notes,
-          public_notes,
-        };
-      });
+    credentials = credentials.filter((c) => c.original_id === null);
 
     cache.set("credentials", credentials);
 

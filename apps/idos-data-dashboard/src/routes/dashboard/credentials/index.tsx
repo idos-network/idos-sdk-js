@@ -37,29 +37,7 @@ const useFetchCredentials = () => {
           .map((c) => c.id),
       })) as idOSCredentialWithShares[]; // @todo: remove once we have more type safety in the SDK.
     },
-    select: (credentials) =>
-      credentials
-        .filter((credential) => !credential.original_id)
-
-        .map((credential) => {
-          const { credential_level, credential_status, credential_type, issuer } =
-            // biome-ignore lint/suspicious/noExplicitAny: // @todo: remove once we have successfully migrated to Credentials 2.0.
-            credential as any;
-          const fields = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-
-          const public_notes = {
-            id: fields.id ?? credential.id,
-            level: fields.level ?? credential_level,
-            status: fields.status ?? credential_status,
-            type: fields.type ?? credential_type,
-            issuer: fields.issuer ?? issuer,
-          };
-
-          return {
-            ...credential,
-            public_notes: JSON.stringify(public_notes),
-          };
-        }),
+    select: (credentials) => credentials.filter((credential) => !credential.original_id),
   });
 };
 
