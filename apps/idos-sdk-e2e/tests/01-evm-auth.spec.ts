@@ -42,7 +42,7 @@ test("should set successfully an EVM signer", async ({
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
 
-  await metamask.connectToDapp();
+  await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
 
