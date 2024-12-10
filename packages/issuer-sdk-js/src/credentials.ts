@@ -44,12 +44,9 @@ const buildInsertableIDOSCredential = (
     receiverEncryptionPublicKey: Uint8Array;
   },
 ): InsertableIDOSCredential => {
+  const ephemeralKeyPair = nacl.box.keyPair();
   const content = Base64Codec.decode(
-    encryptContent(
-      plaintextContent,
-      receiverEncryptionPublicKey,
-      issuerConfig.encryptionKeyPair.secretKey,
-    ),
+    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -71,7 +68,7 @@ const buildInsertableIDOSCredential = (
     ),
 
     issuer_auth_public_key: HexCodec.encode(issuerConfig.signingKeyPair.publicKey, true),
-    encryption_public_key: Base64Codec.encode(issuerConfig.encryptionKeyPair.publicKey),
+    encryption_public_key: Base64Codec.encode(ephemeralKeyPair.publicKey),
   };
 };
 

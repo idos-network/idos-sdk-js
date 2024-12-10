@@ -39,12 +39,10 @@ describe("createIssuerConfig", () => {
 
   it("should correctly initialize and return config", async () => {
     const signingKeyPair = nacl.sign.keyPair();
-    const encryptionKeyPair = nacl.box.keyPair();
 
     const params = {
       nodeUrl: "http://mock-node-url",
       signingKeyPair,
-      encryptionKeyPair,
     };
 
     const result = await createIssuerConfig(params);
@@ -69,7 +67,6 @@ describe("createIssuerConfig", () => {
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
       kwilSigner: expect.any(KwilSigner),
-      encryptionKeyPair: expect.any(Object),
       signingKeyPair: expect.any(Object),
     });
   });
