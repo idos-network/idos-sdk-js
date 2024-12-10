@@ -171,7 +171,8 @@ export class Enclave {
 
   encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const encrypted = nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
+    const ephemeralKeyPair = nacl.box.keyPair();
+    const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
 
     if (encrypted === null)
       throw Error(
