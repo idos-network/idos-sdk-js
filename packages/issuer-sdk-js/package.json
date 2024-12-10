@@ -67,6 +67,6 @@
     "tweetnacl": "^1.0.3"
   },
   "peerDependencies": {
-    "near-api-js": "^3.0.4"
+    "near-api-js": "3.0.4"
   }
 }

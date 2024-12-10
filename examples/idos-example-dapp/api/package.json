@@ -12,6 +12,6 @@
   },
   "peerDependencies": {
     "ethers": "^6.12",
-    "near-api-js": "^3.0.4"
+    "near-api-js": "3.0.4"
   }
 }
