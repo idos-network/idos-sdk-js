@@ -40,7 +40,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
     }
 
     return null;
-  }, [ethSigner, selector]);
+  }, [!!ethSigner, selector]);
 
   const initialise = useCallback(async () => {
     const signer = await getSigner();
@@ -55,7 +55,6 @@ export const Provider = ({ children }: PropsWithChildren) => {
         url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
       },
     });
-
     const profile = await _sdk.hasProfile(userAddress);
     setHasProfile(profile);
 
@@ -66,9 +65,8 @@ export const Provider = ({ children }: PropsWithChildren) => {
 
       setPublicKey(_pk);
     }
-
     setSdk(_sdk);
-  }, [getSigner, userAddress, sdk]);
+  }, [getSigner, !!sdk]);
 
   useEffect(() => {
     initialise()
