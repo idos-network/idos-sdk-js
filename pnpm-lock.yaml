@@ -127,16 +127,16 @@ importers:
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
       '@near-wallet-selector/core':
-        specifier: ^8.9.10
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/here-wallet':
-        specifier: ^8.9.10
+        specifier: 8.9.10
         version: 8.9.10(borsh@1.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/meteor-wallet':
-        specifier: ^8.9.10
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/modal-ui':
-        specifier: ^8.9.10
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@tanstack/react-query':
         specifier: ^5.51.11
@@ -157,7 +157,7 @@ importers:
         specifier: ^0.299.0
         version: 0.299.0(react@18.3.1)
       near-api-js:
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
       react:
         specifier: ^18.3.1
@@ -361,22 +361,22 @@ importers:
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@near-wallet-selector/core':
-        specifier: ^8.7.0
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/here-wallet':
-        specifier: ^8.7.0
-        version: 8.9.10(borsh@1.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))
+        specifier: 8.7.0
+        version: 8.7.0(borsh@1.0.0)(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/meteor-wallet':
-        specifier: ^8.7.0
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+        specifier: 8.7.0
+        version: 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/modal-ui-js':
-        specifier: ^8.7.0
+        specifier: 8.7.0
         version: 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/my-near-wallet':
-        specifier: ^8.7.0
+        specifier: 8.7.0
         version: 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/nightly':
-        specifier: ^8.7.0
+        specifier: 8.7.0
         version: 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
       axios:
         specifier: ^1.6.8
@@ -385,7 +385,7 @@ importers:
         specifier: ^6.13
         version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       near-api-js:
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
     devDependencies:
       '@stablelib/base64':
@@ -573,7 +573,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       near-api-js:
-        specifier: ^3.0
+        specifier: '3.0'
         version: 3.0.4(encoding@0.1.13)
       tweetnacl:
         specifier: ^1.0.3
@@ -589,7 +589,7 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@near-wallet-selector/core':
-        specifier: ^8.7.5
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
@@ -664,7 +664,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       near-api-js:
-        specifier: ^3.0
+        specifier: '3.0'
         version: 3.0.4(encoding@0.1.13)
       tweetnacl:
         specifier: ^1.0.3
@@ -680,7 +680,7 @@ importers:
         specifier: ^0.2.1
         version: 0.2.1
       '@near-wallet-selector/core':
-        specifier: ^8.7.5
+        specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
@@ -724,7 +724,7 @@ importers:
         specifier: ^1.23.0
         version: 1.23.0
       near-api-js:
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
       tiny-invariant:
         specifier: ^1.3.3
@@ -785,7 +785,7 @@ importers:
         specifier: ^6.0.0
         version: 6.0.0
       near-api-js:
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
     devDependencies:
       typescript:
@@ -3419,6 +3419,13 @@ packages:
       react: ^18
       react-dom: ^18
 
+  '@here-wallet/core@1.5.1':
+    resolution: {integrity: sha512-gCzB27k0QfviyJQUhxqX3kAH3g3mRHb6B5RJdUhX9tTsLlPW6AMV/PJiYBudPCt0EeyeyU4i8kEh223ACHXOjw==}
+    peerDependencies:
+      bn.js: 5.2.1
+      borsh: 0.7.0
+      near-api-js: ^2.1.1
+
   '@here-wallet/core@1.6.6':
     resolution: {integrity: sha512-avh/PRNl3CbgrcbqIezVrNPAa4fqKvonl/mguSoUAfTwfA5jWnfq81Udd8QzOAIzBIGx5gSabzEkh9CRDH7yDA==}
     peerDependencies:
@@ -3742,6 +3749,11 @@ packages:
     resolution: {integrity: sha512-g2REf+xSt0OZfMoNNdC4+/Yy8eP3KUqvIArel54XRFKPoXbHI6+YjFfrLtfykWBjffOp7DTfIc3Kvk5TLfuiyg==}
     engines: {node: '>=16.0.0'}
 
+  '@meteorwallet/sdk@0.8.0':
+    resolution: {integrity: sha512-C0x9/20t+lCMUlKSPSAbPUWjz8Ls59NwWnz/qSJM5B4qCXN3OSCcrqmpbJpSVa2wCHFhK/HuOqaKlMCr0XsQ0w==}
+    peerDependencies:
+      near-api-js: ^0.44.2 || ^1.0.0
+
   '@meteorwallet/sdk@1.0.9':
     resolution: {integrity: sha512-frJM+rwmx18MCVsfHn0O8oaJfB41BqaXW6cyhZ3EtMw3b87DUJyfSuJi9K0HQl7oGG0+wvMZOKRBVVcMiZzoDg==}
     peerDependencies:
@@ -3831,8 +3843,18 @@ packages:
     peerDependencies:
       near-api-js: ^1.0.0 || ^2.0.0
 
+  '@near-wallet-selector/here-wallet@8.7.0':
+    resolution: {integrity: sha512-t7GfF0ZSzAK7bukHiC5H10wSB/mrBUaM2XyrjhpfQ37gnOFKGj1h3NQRwKCk8oCNpEPUxzf+h4lY49Plu1WkBg==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+
   '@near-wallet-selector/here-wallet@8.9.10':
     resolution: {integrity: sha512-LhVb8gfHTxa4ALtjzDkhIImcM+r7lqcj03OEEu7sQHXDnTgRSTXwqE47Y0CLlczCIY445K9ZCRqsEbm2noUGww==}
+    peerDependencies:
+      near-api-js: ^1.0.0 || ^2.0.0
+
+  '@near-wallet-selector/meteor-wallet@8.7.0':
+    resolution: {integrity: sha512-2uuxdQC79PhNqu2L8xzGRiYqeNEp/bW1tcniCyP4O/lJ9TwidTaHcqQIDqSrFFPSdN6c9OnZL9ZkLnciZq9IgQ==}
     peerDependencies:
       near-api-js: ^1.0.0 || ^2.0.0
 
@@ -10460,6 +10482,11 @@ packages:
   mz@2.7.0:
     resolution: {integrity: sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q==}
 
+  nanoid@3.3.4:
+    resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   nanoid@3.3.6:
     resolution: {integrity: sha512-BGcqMMJuToF7i1rt+2PWSNVnWIkGCU78jBG3RxO/bZlnZPK2Cmi2QaffxGO/2RvWi9sL+FAiRiXMgsyxQ1DIDA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -12309,9 +12336,6 @@ packages:
 
   tslib@2.6.2:
     resolution: {integrity: sha512-AEYxH93jGFPn/a2iVAwW87VuUIkR1FVUKB77NwMF7nBTDkDrrT/Hpt/IrCJ0QXhW27jTBDcf5ZY7w6RiqTMw2Q==}
-
-  tslib@2.6.3:
-    resolution: {integrity: sha512-xNvxJEOUiWPGhUuUdQgAJPKOOJfGnIyKySOc09XkKsgdUV/3E2zvwZYdejjmRgPCgcym1juLH3226yA7sEFJKQ==}
 
   tslib@2.7.0:
     resolution: {integrity: sha512-gLXCKdN1/j47AiHiOkJN69hJmcbGTHI0ImLmbYLHykhgeN0jVGola9yVjFgzCUklsZQMW55o+dW7IXv3RCXDzA==}
@@ -16470,6 +16494,14 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
+  '@here-wallet/core@1.5.1(bn.js@5.2.1)(borsh@1.0.0)(near-api-js@3.0.4(encoding@0.1.13))':
+    dependencies:
+      bn.js: 5.2.1
+      borsh: 1.0.0
+      near-api-js: 3.0.4(encoding@0.1.13)
+      sha1: 1.1.1
+      uuid4: 2.0.3
+
   '@here-wallet/core@1.6.6(bn.js@5.2.1)(borsh@1.0.0)(encoding@0.1.13)':
     dependencies:
       bn.js: 5.2.1
@@ -17377,6 +17409,12 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@meteorwallet/sdk@0.8.0(near-api-js@3.0.4(encoding@0.1.13))':
+    dependencies:
+      nanoid: 3.3.4
+      near-api-js: 3.0.4(encoding@0.1.13)
+      query-string: 7.1.3
+
   '@meteorwallet/sdk@1.0.9(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       borsh: 0.7.0
@@ -17636,6 +17674,15 @@ snapshots:
       near-api-js: 3.0.4(encoding@0.1.13)
       rxjs: 7.8.1
 
+  '@near-wallet-selector/here-wallet@8.7.0(borsh@1.0.0)(near-api-js@3.0.4(encoding@0.1.13))':
+    dependencies:
+      '@here-wallet/core': 1.5.1(bn.js@5.2.1)(borsh@1.0.0)(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/core': 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
+      bn.js: 5.2.1
+      near-api-js: 3.0.4(encoding@0.1.13)
+    transitivePeerDependencies:
+      - borsh
+
   '@near-wallet-selector/here-wallet@8.9.10(borsh@1.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       '@here-wallet/core': 1.6.6(bn.js@5.2.1)(borsh@1.0.0)(encoding@0.1.13)
@@ -17645,6 +17692,13 @@ snapshots:
     transitivePeerDependencies:
       - borsh
       - encoding
+
+  '@near-wallet-selector/meteor-wallet@8.7.0(near-api-js@3.0.4(encoding@0.1.13))':
+    dependencies:
+      '@meteorwallet/sdk': 0.8.0(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/core': 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/wallet-utils': 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
+      near-api-js: 3.0.4(encoding@0.1.13)
 
   '@near-wallet-selector/meteor-wallet@8.9.10(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
@@ -23752,6 +23806,10 @@ snapshots:
     optionalDependencies:
       ajv: 8.11.2
 
+  ajv-formats@2.1.1(ajv@8.17.1):
+    optionalDependencies:
+      ajv: 8.17.1
+
   ajv@6.12.6:
     dependencies:
       fast-deep-equal: 3.1.3
@@ -24619,8 +24677,8 @@ snapshots:
 
   conf@10.2.0:
     dependencies:
-      ajv: 8.11.2
-      ajv-formats: 2.1.1(ajv@8.11.2)
+      ajv: 8.17.1
+      ajv-formats: 2.1.1(ajv@8.17.1)
       atomically: 1.7.0
       debounce-fn: 4.0.0
       dot-prop: 6.0.1
@@ -25105,7 +25163,7 @@ snapshots:
   eciesjs@0.4.7:
     dependencies:
       '@noble/ciphers': 0.5.3
-      '@noble/curves': 1.4.2
+      '@noble/curves': 1.6.0
       '@noble/hashes': 1.4.0
 
   ed25519-signature-2018-context@1.1.0: {}
@@ -27586,6 +27644,8 @@ snapshots:
       object-assign: 4.1.1
       thenify-all: 1.6.0
 
+  nanoid@3.3.4: {}
+
   nanoid@3.3.6: {}
 
   nanoid@3.3.7: {}
@@ -29118,7 +29178,7 @@ snapshots:
 
   rxjs@7.8.1:
     dependencies:
-      tslib: 2.6.3
+      tslib: 2.7.0
 
   safe-array-concat@1.0.1:
     dependencies:
@@ -29910,8 +29970,6 @@ snapshots:
   tslib@2.6.0: {}
 
   tslib@2.6.2: {}
-
-  tslib@2.6.3: {}
 
   tslib@2.7.0: {}
 
@@ -30833,7 +30891,7 @@ snapshots:
 
   webauthn-p256@0.0.5:
     dependencies:
-      '@noble/curves': 1.4.2
+      '@noble/curves': 1.6.0
       '@noble/hashes': 1.4.0
 
   webextension-polyfill@0.10.0: {}
