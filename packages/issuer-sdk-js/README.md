@@ -42,7 +42,7 @@ To create a human profile in idOS, you need:
 2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
 
 ### Human Creation Process
-<img src="./assets/add-user.drawio.svg" alt="Human Creation Process" width="100%">
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/issuer-sdk-js/assets/add-user.drawio.svg" alt="Human Creation Process" width="100%">
 
 
 #### Step 1: Decide on a human id
