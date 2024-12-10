@@ -10,3 +10,5 @@ export * from "./password-input";
 export * from "./provider";
 export * from "./refresh-button";
 export * from "./search-field";
+export * from "./pagination";
+export * from "./link-button";
