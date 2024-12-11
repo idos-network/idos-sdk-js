@@ -110,12 +110,10 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<idOSCredential[]>;
   }
 
-  async #loadEnclave() {
-    const hasIframe = document.getElementById(this.iframe.id);
-    if (hasIframe) {
-      console.warn("An iframe already exists in the container");
-      return Promise.resolve();
-    }
+  async #loadEnclave(): Promise<void> {
+    const container =
+      document.querySelector(this.container) ||
+      throwNew(Error, `Can't find container with selector ${this.container}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
@@ -149,12 +147,23 @@ export class IframeEnclave implements EnclaveProvider {
       this.iframe.style.setProperty(k, v);
     }
 
-    const container = document.querySelector(this.container);
-    if (!container) throw new Error(`Can't find container with selector ${this.container}`);
-
+    let el: HTMLElement | null;
+    // biome-ignore lint/suspicious/noAssignInExpressions: it's on purpose
+    while ((el = document.getElementById(this.iframe.id))) {
+      console.log("reinstalling idOS iframe...");
+      container.removeChild(el);
+    }
     container.appendChild(this.iframe);
 
-    return new Promise((resolve) => this.iframe.addEventListener("load", resolve));
+    return new Promise((resolve) =>
+      this.iframe.addEventListener(
+        "load",
+        () => {
+          resolve();
+        },
+        { once: true },
+      ),
+    );
   }
 
   #showEnclave() {
@@ -239,4 +248,8 @@ export class IframeEnclave implements EnclaveProvider {
       userEncryptionPublicKey: Base64Codec.encode(userEncryptionPublicKey),
     };
   }
+}
+
+function throwNew(ErrorClass: ErrorConstructor, ...args: Parameters<ErrorConstructor>): never {
+  throw new ErrorClass(...args);
 }

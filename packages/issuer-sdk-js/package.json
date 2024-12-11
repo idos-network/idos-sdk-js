@@ -2,6 +2,9 @@
   "name": "@idos-network/issuer-sdk-js",
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://idos.network",
   "type": "module",
   "repository": {

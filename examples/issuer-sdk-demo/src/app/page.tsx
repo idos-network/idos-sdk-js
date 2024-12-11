@@ -58,26 +58,7 @@ export default function Home() {
           // @ts-expect-error: types in the SDK are a bit messy.
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
-          setCredentials(
-            _credentials.map((credential) => {
-              const { credential_level, credential_status, credential_type, issuer } =
-                // biome-ignore lint/suspicious/noExplicitAny: // @todo: remove once we have successfully migrated to Credentials 2.0.
-                credential as any;
-              const fields = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-
-              const public_notes = {
-                id: fields.id ?? credential.id,
-                level: fields.level ?? credential_level,
-                status: fields.status ?? credential_status,
-                type: fields.type ?? credential_type,
-                issuer: fields.issuer ?? issuer,
-              };
-              return {
-                ...credential,
-                public_notes: JSON.stringify(public_notes),
-              };
-            }),
-          );
+          setCredentials(_credentials);
         }
 
         setHasProfile(_hasProfile);
