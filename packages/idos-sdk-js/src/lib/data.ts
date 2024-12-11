@@ -87,7 +87,7 @@ export class Data {
         Object.assign(
           record,
           await this.#buildInsertableIDOSCredential(
-            record.human_id,
+            record.user_id,
             record.public_notes,
             record.content,
             recipientEncryptionPublicKey,
@@ -116,7 +116,7 @@ export class Data {
     synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
-      tableName === "human_attributes" ? "attributes" : tableName,
+      tableName === "user_attributes" ? "attributes" : tableName,
     )}`;
 
     let recipientEncryptionPublicKey: string | undefined;
@@ -136,7 +136,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          (record as AnyRecord).human_id,
+          (record as AnyRecord).user_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
           recipientEncryptionPublicKey,
@@ -173,7 +173,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
-        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+        record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
       return record;
@@ -205,7 +205,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
-        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+        record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
       return record;
@@ -271,7 +271,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           record.public_notes,
           record.content,
           recipientEncryptionPublicKey,
@@ -304,7 +304,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           "",
           record.content,
           granteeEncryptionPublicKey,
@@ -352,7 +352,7 @@ export class Data {
   }
 
   async hasWriteGrantGivenBy(humanId: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_by", { human_id: humanId });
+    return await this.kwilWrapper.call("has_write_grant_given_by", { user_id: humanId });
   }
 
   async hasWriteGrantGivenTo(granteeAddress: string) {
@@ -374,7 +374,7 @@ export class Data {
     );
 
     return {
-      human_id: humanId,
+      user_id: humanId,
       content,
 
       public_notes: publicNotes,
@@ -388,7 +388,7 @@ export class Data {
       ),
 
       issuer_auth_public_key: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
-      encryption_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
+      encryptor_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
     };
   }
 }

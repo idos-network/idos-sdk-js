@@ -105,7 +105,7 @@ const humanId = session.user.humanId
 // Build the human object
 const human = {
   id: humanId,
-  current_public_key: currentPublicKey,
+  current_user_enc_public_key: currentPublicKey,
 }
 
 // Build the wallet object
@@ -203,7 +203,7 @@ const credentialPayload = {
   id: crypto.randomUUID(),
 
   // user id of the human who is creating the credential.
-  human_id: session.user.humanId,
+  user_id: session.user.humanId,
 
   // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
   // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.

@@ -57,7 +57,7 @@ const buildInsertableIDOSCredential = (
   });
 
   return {
-    human_id: humanId,
+    user_id: humanId,
     content: Base64Codec.encode(content),
 
     public_notes,
@@ -71,7 +71,7 @@ const buildInsertableIDOSCredential = (
     ),
 
     issuer_auth_public_key: HexCodec.encode(issuerConfig.signingKeyPair.publicKey, true),
-    encryption_public_key: Base64Codec.encode(issuerConfig.encryptionKeyPair.publicKey),
+    encryptor_public_key: Base64Codec.encode(issuerConfig.encryptionKeyPair.publicKey),
   };
 };
 

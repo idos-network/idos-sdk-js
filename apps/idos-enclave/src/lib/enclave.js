@@ -255,7 +255,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),
@@ -281,7 +281,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),

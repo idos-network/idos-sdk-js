@@ -267,7 +267,7 @@ const credential = await idos.data.get(
 
 const content = await idos.enclave.decrypt(
   credential.content,
-  credential.encryption_public_key,
+  credential.encryptor_public_key,
 )
 ```
 

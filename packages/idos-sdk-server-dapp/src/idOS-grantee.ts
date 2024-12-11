@@ -220,12 +220,12 @@ export class idOSGrantee {
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     const credentialCopy = await this.fetchSharedCredentialFromIdos<{
       content: string;
-      encryption_public_key: string;
+      encryptor_public_key: string;
     }>(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
-      credentialCopy.encryption_public_key,
+      credentialCopy.encryptor_public_key,
     );
   }
 

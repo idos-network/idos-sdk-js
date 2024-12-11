@@ -2,17 +2,17 @@ export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejec
 
 export interface idOSHuman {
   id: string;
-  current_public_key: string;
+  current_user_enc_public_key: string;
 }
 
 export interface idOSCredential {
   id: string;
-  human_id: string;
+  user_id: string;
   issuer_auth_public_key: string;
   original_id?: string;
   public_notes: string;
   content: string;
-  encryption_public_key: string;
+  encryptor_public_key: string;
 }
 
 export interface idOSGrant {
@@ -24,7 +24,7 @@ export interface idOSGrant {
 
 export interface idOSWallet {
   id: string;
-  human_id: string;
+  user_id: string;
   address: string;
   wallet_type: string;
   message: string;
@@ -34,7 +34,7 @@ export interface idOSWallet {
 
 export interface idOSHumanAttribute {
   id: string;
-  human_id: string;
+  user_id: string;
   attribute_key: string;
   value: string;
 }

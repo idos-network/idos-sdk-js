@@ -69,7 +69,7 @@ export async function createProfile(
   wallet: CreateWalletReqParams,
 ) {
   const issuer = await getIssuerConfig();
-  await createHuman(issuer, { id: humanId, current_public_key: publicKey }, wallet);
+  await createHuman(issuer, { id: humanId, current_user_enc_public_key: publicKey }, wallet);
 }
 
 export async function createCredentialByWriteGrant(

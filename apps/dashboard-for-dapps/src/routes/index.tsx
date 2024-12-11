@@ -211,7 +211,7 @@ function CredentialDetails({
 
   if (!credential.data || !secretKey) return null;
 
-  const result = decrypt(credential.data.content, credential.data.encryption_public_key, secretKey);
+  const result = decrypt(credential.data.content, credential.data.encryptor_public_key, secretKey);
   const content = JSON.parse(result);
 
   const subject = Object.entries(content.credentialSubject).filter(

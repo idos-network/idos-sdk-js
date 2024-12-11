@@ -134,7 +134,7 @@ export class idOS {
         const userAttrMap = new Map(
           filteredUserAttributes.map((attr) => [attr.attribute_key, attr]),
         );
-        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
+        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "user_id">[] = [];
 
         // Helper function to safely parse JSON strings
         const safeParse = (text: string) => {
