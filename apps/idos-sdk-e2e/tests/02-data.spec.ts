@@ -24,6 +24,8 @@ test("should fetch credentials successfully", async ({
   await page.goto("/");
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.switchAccount("Pristine");
   await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
@@ -39,6 +41,7 @@ test("should fetch wallets successfully", async ({ context, page, metamaskPage, 
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
 
+  await metamask.switchAccount("Pristine");
   await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
@@ -46,7 +49,9 @@ test("should fetch wallets successfully", async ({ context, page, metamaskPage, 
   const list = page.locator("#wallets-list");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   const address = await metamask.getAccountAddress();
-  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
+
+  const wallet = await list.getByRole("listitem").first().locator("p").last().textContent();
+  await expect(wallet?.toLocaleLowerCase()).toEqual(
     address.toLocaleLowerCase(), // The address is stored in lowercase format in the idOS so we need to normalize the MetaMask address.
   );
 });
@@ -63,6 +68,7 @@ test("should add / delete a wallet successfully", async ({
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
 
+  await metamask.switchAccount("Pristine");
   await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();

@@ -23,6 +23,8 @@ test("should decrypt a credential successfully", async ({
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.switchAccount("Pristine");
   await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
@@ -43,7 +45,7 @@ test("should decrypt a credential successfully", async ({
   await page.waitForTimeout(4000);
 
   const code = await page.locator("#credential-details").textContent();
-  expect(code).toContain("uuid:203490be-fec8-49f9-80d7-fa504a057a0c");
+  expect(code).toContain("uuid:087b9cf0-a968-471d-a4e8-a805a05357ed");
   // uuid:203490be-fec8-49f9-80d7-fa504a057a0c for PROD
   // uuid:087b9cf0-a968-471d-a4e8-a805a05357ed for PLAYGROUND
 });
@@ -58,6 +60,8 @@ test("should filter credentials by country successfully", async ({
 
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
+
+  await metamask.switchAccount("Pristine");
   await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
