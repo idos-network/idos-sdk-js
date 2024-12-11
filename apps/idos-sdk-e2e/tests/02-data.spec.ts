@@ -21,29 +21,37 @@ test("should fetch credentials successfully", async ({
   extensionId,
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+  await page.goto("/");
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
+
+  await metamask.switchAccount("Pristine");
+  await metamask.connectToDapp(["Pristine"]);
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
+
   const list = page.locator("#credentials-list");
-  await expect(list.getByRole("listitem")).toHaveCount(3);
+  await expect(list.getByRole("listitem")).toHaveCount(2);
 });
 
 test("should fetch wallets successfully", async ({ context, page, metamaskPage, extensionId }) => {
   await page.goto("/wallets");
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
-  await page.waitForTimeout(3000);
+
+  await metamask.switchAccount("Pristine");
+  await metamask.connectToDapp(["Pristine"]);
+  await page.waitForTimeout(2000);
   await metamask.confirmSignature();
+
   const list = page.locator("#wallets-list");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   const address = await metamask.getAccountAddress();
-  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
+
+  const wallet = await list.getByRole("listitem").first().locator("p").last().textContent();
+  await expect(wallet?.toLocaleLowerCase()).toEqual(
     address.toLocaleLowerCase(), // The address is stored in lowercase format in the idOS so we need to normalize the MetaMask address.
   );
 });
@@ -54,26 +62,33 @@ test("should add / delete a wallet successfully", async ({
   metamaskPage,
   extensionId,
 }) => {
-  await page.goto("/wallets");
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+  await page.goto("/");
+
   await page.getByRole("button", { name: "Connect a wallet" }).click();
   await page.getByRole("button", { name: "Metamask" }).first().click();
-  await metamask.switchAccount("Account 1");
-  await metamask.connectToDapp(["Account 1"]);
-  await page.waitForTimeout(3000);
+
+  await metamask.switchAccount("Pristine");
+  await metamask.connectToDapp(["Pristine"]);
+  await page.waitForTimeout(2000);
   await metamask.confirmSignature();
+  await page.waitForTimeout(2000);
+
+  await page.goto("/wallets");
+
   // Testing wallet addition
   const addWalletButton = page.locator("#add-wallet-button");
   await addWalletButton.click();
   await page.locator("#address").fill(TEST_WALLET_ADDRESS);
   await page.locator("#add-wallet-form-submit").click();
+  await page.waitForTimeout(3000);
   await metamask.confirmSignature();
-  await page.waitForTimeout(5000);
-  const list = page.locator("#wallets-list");
-  await expect(list.getByRole("listitem")).toHaveCount(2);
+  await page.waitForTimeout(10000);
+  const list = await page.locator("#wallets-list");
 
+  await expect(list.getByRole("listitem")).toHaveCount(2);
   // Testing wallet deletion
-  const deleteButton = list.locator(`#delete-wallet-${TEST_WALLET_ADDRESS}`);
+  const deleteButton = await list.locator(`#delete-wallet-${TEST_WALLET_ADDRESS}`);
   await deleteButton.click();
   await page.locator(`#confirm-delete-wallet-${TEST_WALLET_ADDRESS}`).click();
   await metamask.confirmSignature();
