@@ -366,7 +366,10 @@ export class Data {
   ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
-    const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
+    const { content, encryptorPublicKey } = await this.enclave.encrypt(
+      plaintextContent,
+      receiverEncryptionPublicKey,
+    );
     const publicNotesSignature = nacl.sign.detached(
       Utf8Codec.encode(publicNotes),
       issuerAuthenticationKeyPair.secretKey,
@@ -387,7 +390,7 @@ export class Data {
       ),
 
       issuer_auth_public_key: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
-      encryption_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
+      encryption_public_key: isPresent(encryptorPublicKey),
     };
   }
 }

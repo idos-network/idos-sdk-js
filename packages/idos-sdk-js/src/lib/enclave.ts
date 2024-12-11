@@ -40,15 +40,21 @@ export class Enclave {
     return this.encryptionPublicKey;
   }
 
-  async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
+  async encrypt(
+    message: string,
+    receiverPublicKey?: string,
+  ): Promise<{ content: string; encryptorPublicKey: string }> {
     if (!this.encryptionPublicKey) await this.ready();
 
-    return Base64Codec.encode(
-      await this.provider.encrypt(
-        Utf8Codec.encode(message),
-        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
-      ),
+    const { content, encryptorPublicKey } = await this.provider.encrypt(
+      Utf8Codec.encode(message),
+      receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
     );
+
+    return {
+      content: Base64Codec.encode(content),
+      encryptorPublicKey: Base64Codec.encode(encryptorPublicKey),
+    };
   }
 
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {

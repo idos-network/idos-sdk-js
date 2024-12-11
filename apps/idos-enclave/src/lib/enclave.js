@@ -192,7 +192,7 @@ export class Enclave {
     fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
 
-    return fullMessage;
+    return { content: fullMessage, encryptorPublicKey: ephemeralKeyPair.publicKey };
   }
 
   async decrypt(fullMessage, senderPublicKey) {
