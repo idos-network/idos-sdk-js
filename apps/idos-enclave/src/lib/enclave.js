@@ -125,12 +125,13 @@ export class Enclave {
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (preferredAuthMethod) {
-            ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("auth", {
-              expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-            }));
+            ({ password, duration, credentialId } = await this.#openDialog(
+              preferredAuthMethod || "auth",
+              {
+                expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+              },
+            ));
           }
         } catch (e) {
           return reject(e);
