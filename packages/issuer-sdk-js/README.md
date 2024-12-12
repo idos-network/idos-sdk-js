@@ -22,13 +22,11 @@ Create an issuer config with your secret key. This config will be used to intera
 // issuer-config.js
 import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
 
-const encryptionKeyPair = nacl.box.keyPair.fromSecretKey(ISSUER_ENCRYPTION_SECRET_KEY);
 const signingKeyPair = nacl.sign.keyPair.fromSecretKey(ISSUER_SIGNING_SECRET_KEY);
 
 const issuerConfig = await createIssuerConfig({
   // To use a non-prod environment, pass in "nodes.playground.idos.network".
   nodeUrl: "https://nodes.idos.network/",
-  encryptionKeyPair,
   signingKeyPair,
 });
 ```
