@@ -32,14 +32,14 @@ describe("auth", () => {
 
   test("should set a user from an EVM signer", async () => {
     const signer = Wallet.createRandom();
-    const address = await signer.getAddress();
+    const userAddress = await signer.getAddress();
 
     await auth.setEvmSigner(signer);
 
     expect(auth.currentUser).toEqual({
       humanId,
       currentUserPublicKey,
-      address,
+      userAddress,
     });
   });
 
