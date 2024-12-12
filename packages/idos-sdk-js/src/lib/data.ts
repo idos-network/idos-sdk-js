@@ -343,7 +343,7 @@ export class Data {
       "add_write_grant",
       [
         {
-          wg_grantee: granteeAddress,
+          wg_grantee_wallet_identifier: granteeAddress,
         },
       ],
       `Grant ${granteeAddress} write access to your idOS credentials`,
@@ -356,7 +356,9 @@ export class Data {
   }
 
   async hasWriteGrantGivenTo(granteeAddress: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_to", { grantee: granteeAddress });
+    return await this.kwilWrapper.call("has_write_grant_given_to", {
+      grantee_wallet_identifier: granteeAddress,
+    });
   }
 
   async #buildInsertableIDOSCredential(
