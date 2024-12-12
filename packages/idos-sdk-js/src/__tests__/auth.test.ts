@@ -14,7 +14,7 @@ describe("auth", () => {
     auth = new Auth(new KwilWrapper(new TestKwilClient()), new Store());
 
     auth.kwilWrapper.getHumanProfile = vi.fn().mockResolvedValue({
-      current_user_enc_public_key: currentUserPublicKey,
+      recipient_encryption_public_key: currentUserPublicKey,
       id: humanId,
     });
     auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);

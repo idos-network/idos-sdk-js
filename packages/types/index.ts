@@ -2,7 +2,7 @@ export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejec
 
 export interface idOSHuman {
   id: string;
-  current_user_enc_public_key: string;
+  recipient_encryption_public_key: string;
 }
 
 export interface idOSCredential {

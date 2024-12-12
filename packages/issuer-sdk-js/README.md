@@ -105,7 +105,7 @@ const humanId = session.user.humanId
 // Build the human object
 const human = {
   id: humanId,
-  current_user_enc_public_key: currentPublicKey,
+  recipient_encryption_public_key: currentPublicKey,
 }
 
 // Build the wallet object
