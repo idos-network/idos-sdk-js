@@ -102,11 +102,11 @@ export function App({ store, enclave }: AppProps) {
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
+    setEncryptionUserPublicKey(event.data.message.expectedUserEncryptionPublicKey);
 
     switch (requestData.intent) {
       case "auth":
         setMethod(null);
-        setEncryptionUserPublicKey(event.data.message.expectedUserEncryptionPublicKey);
         break;
 
       case "passkey":
