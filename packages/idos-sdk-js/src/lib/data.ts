@@ -357,7 +357,7 @@ export class Data {
 
   async hasWriteGrantGivenTo(granteeAddress: string) {
     return await this.kwilWrapper.call("has_write_grant_given_to", {
-      grantee_wallet_identifier: granteeAddress,
+      wg_grantee_wallet_identifier: granteeAddress,
     });
   }
 
