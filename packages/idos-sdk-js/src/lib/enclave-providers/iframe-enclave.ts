@@ -1,5 +1,6 @@
+import { base64Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
+
 import type { BackupPasswordInfo } from "../types";
 import type {
   DiscoverEncryptionKeyResponse,
@@ -246,7 +247,7 @@ export class IframeEnclave implements EnclaveProvider {
 
     return {
       humanId,
-      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
+      encryptionPublicKey: base64Encode(encryptionPublicKey),
     };
   }
 }
