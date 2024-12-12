@@ -74,11 +74,11 @@ export class Auth {
       signatureType: "secp256k1_ep",
     });
 
-    const { current_user_enc_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { recipient_encryption_public_key, id } = await this.kwilWrapper.getHumanProfile();
 
     this.user = {
       humanId: id,
-      currentUserPublicKey: current_user_enc_public_key,
+      currentUserPublicKey: recipient_encryption_public_key,
       userAddress: currentAddress,
     };
   }
@@ -210,11 +210,11 @@ export class Auth {
       signatureType: "nep413",
     });
 
-    const { current_user_enc_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { recipient_encryption_public_key, id } = await this.kwilWrapper.getHumanProfile();
 
     this.user = {
       humanId: id,
-      currentUserPublicKey: current_user_enc_public_key,
+      currentUserPublicKey: recipient_encryption_public_key,
       userAddress: currentAddress,
       nearWalletPublicKey: publicKey,
     };
