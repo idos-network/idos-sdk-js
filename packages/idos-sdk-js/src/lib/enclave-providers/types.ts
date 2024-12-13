@@ -34,8 +34,11 @@ export interface EnclaveProvider {
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   updateStore(key: string, value: unknown): Promise<void>;
-  encrypt(message: Uint8Array, recipientEncryptionPublicKey?: Uint8Array): Promise<Uint8Array>;
-  decrypt(message: Uint8Array, senderEncryptionPublicKey?: Uint8Array): Promise<Uint8Array>;
+  encrypt(
+    message: Uint8Array,
+    receiverPublicKey?: Uint8Array,
+  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
+  decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
   discoverUserEncryptionPublicKey(
     humanId: string,
   ): Promise<DiscoverUserEncryptionPublicKeyResponse>;
