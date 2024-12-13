@@ -20,7 +20,6 @@ export async function getIssuerConfig(): Promise<IssuerConfig> {
 
   cachedIssuer = await createIssuerConfig({
     nodeUrl: NODE_URL,
-    encryptionKeyPair: nacl.box.keyPair.fromSecretKey(decode(ENCRYPTION_SECRET_KEY)),
     signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(SIGNING_SECRET_KEY)),
   });
 
