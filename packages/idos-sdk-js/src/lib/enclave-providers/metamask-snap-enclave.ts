@@ -49,12 +49,12 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
   }
 
   async ready(
-    humanId?: string,
+    userId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = JSON.parse(
-      await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey }),
+      await this.invokeSnap("storage", { userId, signerAddress, signerPublicKey }),
     );
 
     encryptionPublicKey ||= await this.invokeSnap("init");

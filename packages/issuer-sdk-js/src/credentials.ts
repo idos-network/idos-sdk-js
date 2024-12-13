@@ -33,12 +33,12 @@ type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
 const buildInsertableIDOSCredential = (
   issuerConfig: IssuerConfig,
   {
-    humanId,
+    userId,
     publicNotes,
     plaintextContent,
     receiverEncryptionPublicKey,
   }: {
-    humanId: string;
+    userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     receiverEncryptionPublicKey: Uint8Array;
@@ -54,7 +54,7 @@ const buildInsertableIDOSCredential = (
   });
 
   return {
-    human_id: humanId,
+    user_id: userId,
     content: Base64Codec.encode(content),
 
     public_notes,
@@ -74,7 +74,7 @@ const buildInsertableIDOSCredential = (
 
 type BaseCredentialParams = {
   id?: string;
-  humanId: string;
+  userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
   receiverEncryptionPublicKey: Uint8Array;

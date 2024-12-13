@@ -4,7 +4,7 @@ import {
   type CreateWalletReqParams,
   createCredentialByGrant,
   createCredentialPermissioned,
-  createHuman,
+  createUser,
   editCredential,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
@@ -65,21 +65,21 @@ const publicNotes = {
 
 export async function createProfile(
   publicKey: string,
-  humanId: string,
+  userId: string,
   wallet: CreateWalletReqParams,
 ) {
   const issuer = await getIssuerConfig();
-  await createHuman(issuer, { id: humanId, current_public_key: publicKey }, wallet);
+  await createUser(issuer, { id: userId, current_public_key: publicKey }, wallet);
 }
 
 export async function createCredentialByWriteGrant(
-  humanId: string,
+  userId: string,
   userEncryptionPublicKey: string,
 ) {
   const issuer = await getIssuerConfig();
 
   await createCredentialByGrant(issuer, {
-    humanId,
+    userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
@@ -87,13 +87,13 @@ export async function createCredentialByWriteGrant(
 }
 
 export async function createCredentialByPermissionedIssuer(
-  humanId: string,
+  userId: string,
   userEncryptionPublicKey: string,
 ) {
   const issuer = await getIssuerConfig();
 
   await createCredentialPermissioned(issuer, {
-    humanId,
+    userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),

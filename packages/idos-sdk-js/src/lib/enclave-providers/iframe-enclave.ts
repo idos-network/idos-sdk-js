@@ -32,14 +32,14 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async ready(
-    humanId?: string,
+    userId?: string,
     signerAddress?: string,
     signerEncryptionPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
     let { userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
-        humanId,
+        userId,
         signerAddress,
         signerEncryptionPublicKey,
         expectedUserEncryptionPublicKey,
@@ -239,15 +239,15 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async discoverUserEncryptionPublicKey(
-    humanId: string,
+    userId: string,
   ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
     if (this.options.mode !== "new")
       throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
 
-    const userEncryptionPublicKey = await this.ready(humanId);
+    const userEncryptionPublicKey = await this.ready(userId);
 
     return {
-      humanId,
+      userId,
       userEncryptionPublicKey: Base64Codec.encode(userEncryptionPublicKey),
     };
   }

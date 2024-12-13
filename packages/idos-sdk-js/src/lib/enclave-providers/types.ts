@@ -3,13 +3,13 @@ import type { BackupPasswordInfo } from "../types";
 
 export interface StoredData {
   userEncryptionPublicKey?: Uint8Array;
-  humanId?: string;
+  userId?: string;
   signerAddress?: string;
   signerEncryptionPublicKey?: string;
 }
 
 export interface DiscoverUserEncryptionPublicKeyResponse {
-  humanId: string;
+  userId: string;
   userEncryptionPublicKey: string;
 }
 
@@ -25,7 +25,7 @@ export interface EnclaveProvider {
   load(): Promise<StoredData>;
 
   ready(
-    humanId?: string,
+    userId?: string,
     signerAddress?: string,
     signerEncryptionPublicKey?: string,
     currentUserEncryptionPublicKey?: string,
@@ -39,9 +39,7 @@ export interface EnclaveProvider {
     receiverPublicKey?: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-  discoverUserEncryptionPublicKey(
-    humanId: string,
-  ): Promise<DiscoverUserEncryptionPublicKeyResponse>;
+  discoverUserEncryptionPublicKey(userId: string): Promise<DiscoverUserEncryptionPublicKeyResponse>;
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],

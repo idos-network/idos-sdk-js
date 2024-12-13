@@ -87,7 +87,7 @@ export class Data {
         Object.assign(
           record,
           await this.#buildInsertableIDOSCredential(
-            record.human_id,
+            record.user_id,
             record.public_notes,
             record.content,
             recipientEncryptionPublicKey,
@@ -116,7 +116,7 @@ export class Data {
     synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
-      tableName === "human_attributes" ? "attributes" : tableName,
+      tableName === "user_attributes" ? "attributes" : tableName,
     )}`;
 
     let recipientEncryptionPublicKey: string | undefined;
@@ -136,7 +136,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          (record as AnyRecord).human_id,
+          (record as AnyRecord).user_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
           recipientEncryptionPublicKey,
@@ -271,7 +271,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           record.public_notes,
           record.content,
           recipientEncryptionPublicKey,
@@ -304,7 +304,7 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           "",
           record.content,
           granteeEncryptionPublicKey,
@@ -351,8 +351,8 @@ export class Data {
     );
   }
 
-  async hasWriteGrantGivenBy(humanId: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_by", { human_id: humanId });
+  async hasWriteGrantGivenBy(userId: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_by", { user_id: userId });
   }
 
   async hasWriteGrantGivenTo(granteeAddress: string) {
@@ -360,7 +360,7 @@ export class Data {
   }
 
   async #buildInsertableIDOSCredential(
-    humanId: string,
+    userId: string,
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string,
@@ -377,7 +377,7 @@ export class Data {
     );
 
     return {
-      human_id: humanId,
+      user_id: userId,
       content,
 
       public_notes: publicNotes,

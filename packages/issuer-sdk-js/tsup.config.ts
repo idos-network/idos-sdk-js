@@ -4,7 +4,7 @@ export default defineConfig({
   entry: [
     "./src/index.ts",
     "./src/create-issuer-config.ts",
-    "./src/human.ts",
+    "./src/user.ts",
     "./src/credentials.ts",
   ],
   splitting: false,

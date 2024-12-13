@@ -18,9 +18,9 @@ export function CreateProfile({ onSuccess }: { onSuccess: () => void }) {
     try {
       if (!idOSSDK) throw new Error("No SDK found");
       setLoadingMessage("Creating user password...");
-      const humanId = crypto.randomUUID();
+      const userId = crypto.randomUUID();
       const { userEncryptionPublicKey } =
-        await idOSSDK.enclave.provider.discoverUserEncryptionPublicKey(humanId);
+        await idOSSDK.enclave.provider.discoverUserEncryptionPublicKey(userId);
 
       setLoadingMessage("Signing message on your wallet...");
 
@@ -31,7 +31,7 @@ export function CreateProfile({ onSuccess }: { onSuccess: () => void }) {
 
       setLoadingMessage("Creating your profile...");
 
-      await createProfile(userEncryptionPublicKey, humanId, {
+      await createProfile(userEncryptionPublicKey, userId, {
         address: address as string,
         signature,
         message,

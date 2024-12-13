@@ -13,7 +13,7 @@ import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
 
 export interface AuthUser {
-  humanId: string | null;
+  userId: string | null;
   userAddress: string;
   /**
    * The public key of the wallet that was used to sign the message.
@@ -74,10 +74,10 @@ export class Auth {
       signatureType: "secp256k1_ep",
     });
 
-    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { current_public_key, id } = await this.kwilWrapper.getUserProfile();
 
     this.user = {
-      humanId: id,
+      userId: id,
       currentUserPublicKey: current_public_key,
       userAddress: currentAddress,
     };
@@ -210,10 +210,10 @@ export class Auth {
       signatureType: "nep413",
     });
 
-    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { current_public_key, id } = await this.kwilWrapper.getUserProfile();
 
     this.user = {
-      humanId: id,
+      userId: id,
       currentUserPublicKey: current_public_key,
       userAddress: currentAddress,
       nearWalletPublicKey: publicKey,

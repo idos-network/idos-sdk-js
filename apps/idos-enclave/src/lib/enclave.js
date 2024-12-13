@@ -48,8 +48,8 @@ export class Enclave {
     });
   }
 
-  storage(humanId, signerAddress, signerEncryptionPublicKey, expectedUserEncryptionPublicKey) {
-    humanId && this.store.set("human-id", humanId);
+  storage(userId, signerAddress, signerEncryptionPublicKey, expectedUserEncryptionPublicKey) {
+    userId && this.store.set("user-id", userId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerEncryptionPublicKey && this.store.set("signer-public-key", signerEncryptionPublicKey);
 
@@ -59,11 +59,11 @@ export class Enclave {
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
-    this.humanId = humanId;
+    this.userId = userId;
 
     if (!this.isAuthorizedOrigin) {
       return {
-        humanId: "",
+        userId: "",
         encryptionPublicKey: "",
         signerAddress: "",
         signerPublicKey: "",
@@ -71,7 +71,8 @@ export class Enclave {
     }
 
     return {
-      humanId: this.humanId ?? this.store.get("human-id"),
+      // TODO Remove human-user migration code.
+      userId: this.userId ?? this.store.get("user-id") ?? this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
@@ -156,7 +157,7 @@ export class Enclave {
 
   async ensureKeyPair() {
     const password = this.store.get("password");
-    const salt = this.humanId;
+    const salt = this.userId;
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -321,7 +322,7 @@ export class Enclave {
         const [requestName, requestData] = Object.entries(event.data).flat();
         const {
           fullMessage,
-          humanId,
+          userId,
           message,
           receiverPublicKey,
           senderPublicKey,
@@ -347,7 +348,7 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [
-            humanId,
+            userId,
             signerAddress,
             signerEncryptionPublicKey,
             expectedUserEncryptionPublicKey,
@@ -396,7 +397,7 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
-    if (!this.humanId) throw new Error("Can't open dialog without humanId");
+    if (!this.userId) throw new Error("Can't open dialog without userId");
     const width = 600;
     const height =
       this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
@@ -412,7 +413,7 @@ export class Enclave {
       .map((feat) => feat.join("="))
       .join(",");
 
-    const dialogURL = new URL(`/dialog.html?humanId=${this.humanId}`, window.location.origin);
+    const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
     await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));

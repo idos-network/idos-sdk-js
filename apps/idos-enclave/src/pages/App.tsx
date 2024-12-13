@@ -64,8 +64,8 @@ export function App({ store, enclave }: AppProps) {
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string | undefined>();
-  const [humanId] = useState<string | null>(
-    new URLSearchParams(window.location.search).get("humanId"),
+  const [userId] = useState<string | null>(
+    new URLSearchParams(window.location.search).get("userId"),
   );
 
   const isRecoveryMode = useSignal(false);
@@ -187,11 +187,7 @@ export function App({ store, enclave }: AppProps) {
   if (method === "password") {
     return (
       <Layout onHeaderClick={resetMethod}>
-        <PasswordForm
-          {...methodProps}
-          encryptionPublicKey={encryptionPublicKey}
-          humanId={humanId}
-        />
+        <PasswordForm {...methodProps} encryptionPublicKey={encryptionPublicKey} userId={userId} />
       </Layout>
     );
   }
