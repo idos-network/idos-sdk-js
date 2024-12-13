@@ -21,6 +21,7 @@ export class Enclave {
     const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
 
     if (!humanId) throw new Error("Can't operate on a user that has no profile.");
+    if (!currentUserPublicKey) throw new Error("Existing users should have public encryption key.");
 
     const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
     const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();

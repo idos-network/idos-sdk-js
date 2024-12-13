@@ -63,7 +63,7 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string | undefined>();
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
   const [humanId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
