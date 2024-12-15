@@ -176,6 +176,11 @@ export function App({ store, enclave }: AppProps) {
     mode,
   };
 
+  useEffect(() => {
+    if (mode === "new" || !responsePort.current) return; // encryptionPublicKey is only set after responsePort is set
+    if (!encryptionPublicKey) onError("can't find a public encryption key for this user");
+  }, [mode, encryptionPublicKey, responsePort.current]);
+
   if (confirm && message) {
     return (
       <Layout onHeaderClick={resetMethod}>
