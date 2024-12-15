@@ -369,7 +369,7 @@ export class Enclave {
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
-        console.warn("catch", error);
+        console.error("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
@@ -428,6 +428,8 @@ export class Enclave {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
+          port1.close();
+          this.dialog.close();
           return reject(error);
         }
 
