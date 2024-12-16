@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
+import { idOS } from "@idos-network/grantee-sdk-js";
 import type { Grant } from "@idos-network/idos-sdk";
-import { idOS } from "@idos-network/idos-sdk-server-dapp";
 import { Hono } from "hono";
 import type { FC } from "hono/jsx";
 const app = new Hono();
