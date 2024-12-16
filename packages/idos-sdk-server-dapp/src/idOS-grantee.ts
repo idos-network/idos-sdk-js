@@ -86,7 +86,7 @@ const buildKwilSignerAndGrantee = (
 };
 
 interface idOSGranteeInitParams {
-  encryptionPrivateKey: string;
+  recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
@@ -109,7 +109,7 @@ export class idOSGrantee {
   grants?: GrantChild;
 
   static async init(_: {
-    encryptionPrivateKey: string;
+    recipientEncryptionPrivateKey: string;
     nodeUrl?: string;
     chainId?: string;
     dbId?: string;
@@ -119,7 +119,7 @@ export class idOSGrantee {
   }): Promise<idOSGrantee>;
 
   static async init(_: {
-    encryptionPrivateKey: string;
+    recipientEncryptionPrivateKey: string;
     nodeUrl?: string;
     chainId?: string;
     dbId?: string;
@@ -129,7 +129,7 @@ export class idOSGrantee {
   }): Promise<idOSGrantee>;
 
   static async init({
-    encryptionPrivateKey,
+    recipientEncryptionPrivateKey: encryptionPrivateKey,
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     chainId,
     dbId,

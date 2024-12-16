@@ -101,8 +101,8 @@ export class idOS {
     return assertNever(type, `Signer type "${type}" not recognized`);
   }
 
-  async hasProfile(user: string): Promise<boolean> {
-    return this.kwilWrapper.hasProfile(user);
+  async hasProfile(userAddress: string): Promise<boolean> {
+    return this.kwilWrapper.hasProfile(userAddress);
   }
 
   async reset({ enclave = false } = {}): Promise<void> {

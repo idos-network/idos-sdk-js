@@ -48,10 +48,10 @@ export class Enclave {
     });
   }
 
-  storage(userId, signerAddress, signerEncryptionPublicKey, expectedUserEncryptionPublicKey) {
+  storage(userId, signerAddress, userEncryptionPublicKey, expectedUserEncryptionPublicKey) {
     userId && this.store.set("user-id", userId);
     signerAddress && this.store.set("signer-address", signerAddress);
-    signerEncryptionPublicKey && this.store.set("signer-public-key", signerEncryptionPublicKey);
+    userEncryptionPublicKey && this.store.set("signer-public-key", userEncryptionPublicKey);
 
     const litAttrs = this.store.get("litAttrs");
     this.handlstoreableAttributes(litAttrs);

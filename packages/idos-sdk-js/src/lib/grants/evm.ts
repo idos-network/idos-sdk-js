@@ -403,20 +403,20 @@ export class EvmGrants implements GrantChild {
   }
 
   async list({
-    ownerAddress: owner = ZERO_ADDRESS,
-    granteeAddress: grantee = ZERO_ADDRESS,
+    ownerAddress = ZERO_ADDRESS,
+    granteeAddress = ZERO_ADDRESS,
     dataId = ZERO_DATA_ID,
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
-    if (owner === ZERO_ADDRESS && grantee === ZERO_ADDRESS)
+    if (ownerAddress === ZERO_ADDRESS && granteeAddress === ZERO_ADDRESS)
       throw new Error("Must provide `owner` and/or `grantee`");
 
-    const grants = await this.#contract.findGrants(owner, grantee, dataId);
+    const grants = await this.#contract.findGrants(ownerAddress, granteeAddress, dataId);
 
     return grants.map(
-      ([owner, grantee, dataId, lockedUntil]: [string, string, string, bigint]) =>
+      ([ownerAddress, granteeAddress, dataId, lockedUntil]: [string, string, string, bigint]) =>
         new Grant({
-          ownerAddress: owner,
-          granteeAddress: grantee,
+          ownerAddress,
+          granteeAddress,
           dataId,
           lockedUntil: Number(lockedUntil),
         }),

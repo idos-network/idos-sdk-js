@@ -77,10 +77,10 @@ const idos = await idOS.init(...);
 const { userId } = await yourServer.getIdosInformation();
 
 // Discover user encryption key
-const { encryptionPublicKey } = await idos.discoverUserEncryptionPublicKey(userId);
+const { userEncryptionPublicKey } = await idos.discoverUserEncryptionPublicKey(userId);
 
 // Report it back to your server
-await yourServer.reportIdosEncryptionPublicKey(encryptionPublicKey);
+await yourServer.reportIdosEncryptionPublicKey(userEncryptionPublicKey);
 ```
 
 

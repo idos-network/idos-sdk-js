@@ -11,7 +11,7 @@ export class idOS {
   static async init(
     chainType: "EVM" | "NEAR",
     authnPrivateKey: string,
-    encryptionPrivateKey: string,
+    recipientEncryptionPrivateKey: string,
     nodeUrl: string,
   ) {
     let grantee: idOSGrantee;
@@ -22,7 +22,7 @@ export class idOS {
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
-          encryptionPrivateKey,
+          recipientEncryptionPrivateKey,
         });
         return new idOS(grantee);
       }
@@ -31,7 +31,7 @@ export class idOS {
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
-          encryptionPrivateKey: authnPrivateKey,
+          recipientEncryptionPrivateKey: authnPrivateKey,
         });
         return new idOS(grantee);
       }

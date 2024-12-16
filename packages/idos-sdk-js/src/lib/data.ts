@@ -292,7 +292,7 @@ export class Data {
   async share(
     tableName: string,
     recordId: string,
-    granteeEncryptionPublicKey: string,
+    granteeRecipientEncryptionPublicKey: string,
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
@@ -307,7 +307,7 @@ export class Data {
           record.user_id,
           "",
           record.content,
-          granteeEncryptionPublicKey,
+          granteeRecipientEncryptionPublicKey,
         ),
       );
     }
