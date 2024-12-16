@@ -1,5 +1,6 @@
+import { base64Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
+
 import type { BackupPasswordInfo } from "../types";
 import type {
   DiscoverEncryptionKeyResponse,
@@ -83,10 +84,13 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
-  async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
+  async encrypt(
+    message: Uint8Array,
+    receiverPublicKey: Uint8Array,
+  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
     return this.#requestToEnclave({
       encrypt: { message, receiverPublicKey },
-    }) as Promise<Uint8Array>;
+    }) as Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
@@ -243,7 +247,7 @@ export class IframeEnclave implements EnclaveProvider {
 
     return {
       humanId,
-      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
+      encryptionPublicKey: base64Encode(encryptionPublicKey),
     };
   }
 }
