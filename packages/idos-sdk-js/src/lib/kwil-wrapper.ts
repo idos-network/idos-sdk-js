@@ -144,7 +144,12 @@ export class KwilWrapper {
 
   async hasProfile(userAddress: string): Promise<boolean> {
     // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const result = (await this.call("has_profile", { address: userAddress }, undefined, false)) as any;
+    const result = (await this.call(
+      "has_profile",
+      { address: userAddress },
+      undefined,
+      false,
+    )) as any;
 
     return !!result[0]?.has_profile;
   }
