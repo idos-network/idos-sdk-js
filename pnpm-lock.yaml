@@ -380,7 +380,7 @@ importers:
         version: 8.7.0(near-api-js@3.0.4(encoding@0.1.13))
       axios:
         specifier: ^1.6.8
-        version: 1.7.2(debug@4.3.5)
+        version: 1.7.2
       ethers:
         specifier: ^6.13
         version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -522,20 +522,8 @@ importers:
         specifier: ^5.0.2
         version: 5.0.10
 
-  packages/idos-sdk-js:
+  packages/codecs:
     dependencies:
-      '@digitalbazaar/ed25519-signature-2020':
-        specifier: ^5.2.0
-        version: 5.2.0(web-streams-polyfill@3.2.1)
-      '@digitalbazaar/ed25519-verification-key-2020':
-        specifier: ^4.1.0
-        version: 4.1.0
-      '@digitalbazaar/vc':
-        specifier: ^6.0.2
-        version: 6.0.2(web-streams-polyfill@3.2.1)
-      '@kwilteam/kwil-js':
-        specifier: 0.7.1
-        version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -557,6 +545,24 @@ importers:
       borsh:
         specifier: ^1.0.0
         version: 1.0.0
+
+  packages/idos-sdk-js:
+    dependencies:
+      '@digitalbazaar/ed25519-signature-2020':
+        specifier: ^5.2.0
+        version: 5.2.0(web-streams-polyfill@3.2.1)
+      '@digitalbazaar/ed25519-verification-key-2020':
+        specifier: ^4.1.0
+        version: 4.1.0
+      '@digitalbazaar/vc':
+        specifier: ^6.0.2
+        version: 6.0.2(web-streams-polyfill@3.2.1)
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
+      '@kwilteam/kwil-js':
+        specifier: 0.7.1
+        version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -708,18 +714,12 @@ importers:
 
   packages/issuer-sdk-js:
     dependencies:
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@stablelib/base64':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/hex':
-        specifier: ^2.0.0
-        version: 2.0.0
-      '@stablelib/utf8':
-        specifier: ^1.0.1
-        version: 1.0.1
       es-toolkit:
         specifier: ^1.23.0
         version: 1.23.0
@@ -17343,8 +17343,8 @@ snapshots:
     dependencies:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
-      '@noble/hashes': 1.5.0
-      '@scure/base': 1.1.9
+      '@noble/hashes': 1.6.1
+      '@scure/base': 1.2.1
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@8.1.1)
       pony-cause: 2.1.11
@@ -17357,8 +17357,8 @@ snapshots:
     dependencies:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
-      '@noble/hashes': 1.5.0
-      '@scure/base': 1.1.9
+      '@noble/hashes': 1.6.1
+      '@scure/base': 1.2.1
       '@types/debug': 4.1.12
       debug: 4.3.5(supports-color@8.1.1)
       pony-cause: 2.1.11
@@ -23962,20 +23962,28 @@ snapshots:
 
   axios@0.27.2:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
     transitivePeerDependencies:
       - debug
 
   axios@1.6.7:
     dependencies:
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
 
   axios@1.6.8(debug@4.3.4):
+    dependencies:
+      follow-redirects: 1.15.6(debug@4.3.4)
+      form-data: 4.0.0
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
+  axios@1.7.2:
     dependencies:
       follow-redirects: 1.15.6(debug@4.3.4)
       form-data: 4.0.0
@@ -26322,7 +26330,7 @@ snapshots:
   http-proxy@1.18.1:
     dependencies:
       eventemitter3: 4.0.7
-      follow-redirects: 1.15.6(debug@4.3.5)
+      follow-redirects: 1.15.6(debug@4.3.4)
       requires-port: 1.0.0
     transitivePeerDependencies:
       - debug
