@@ -88,6 +88,11 @@ export function App({ store, enclave }: AppProps) {
     }
   }, [theme]);
 
+  useEffect(() => {
+    if (mode === "new" || !responsePort.current) return;
+    if (!encryptionPublicKey) onError("Can’t find a public encryption key for this user");
+  }, [mode, encryptionPublicKey, responsePort.current]);
+
   const resetMethod = useCallback(() => setMethod(null), []);
 
   /**
