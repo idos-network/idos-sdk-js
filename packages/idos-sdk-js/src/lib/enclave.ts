@@ -1,6 +1,5 @@
+import { base64Decode, base64Encode, utf8Decode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
 import type { BackupPasswordInfo } from "./types";
@@ -20,7 +19,7 @@ export class Enclave {
   async ready(): Promise<Uint8Array> {
     const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
 
-    if (!humanId) throw new Error("Can't operate on a user that has no profile.");
+    if (!humanId) throw new Error("Can't operate on a `user` that has no profile.");
 
     const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
     const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();
@@ -40,24 +39,30 @@ export class Enclave {
     return this.encryptionPublicKey;
   }
 
-  async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
+  async encrypt(
+    message: string,
+    receiverPublicKey?: string,
+  ): Promise<{ content: string; encryptorPublicKey: string }> {
     if (!this.encryptionPublicKey) await this.ready();
 
-    return Base64Codec.encode(
-      await this.provider.encrypt(
-        Utf8Codec.encode(message),
-        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
-      ),
+    const { content, encryptorPublicKey } = await this.provider.encrypt(
+      utf8Encode(message),
+      receiverPublicKey === undefined ? undefined : base64Decode(receiverPublicKey),
     );
+
+    return {
+      content: base64Encode(content),
+      encryptorPublicKey: base64Encode(encryptorPublicKey),
+    };
   }
 
   async decrypt(message: string, senderPublicKey?: string): Promise<string> {
     if (!this.encryptionPublicKey) await this.ready();
 
-    return Utf8Codec.decode(
+    return utf8Decode(
       await this.provider.decrypt(
-        Base64Codec.decode(message),
-        senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey),
+        base64Decode(message),
+        senderPublicKey === undefined ? undefined : base64Decode(senderPublicKey),
       ),
     );
   }

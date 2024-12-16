@@ -89,11 +89,13 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return this.invokeSnap("confirm", { message });
   }
 
-  async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
-    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
-    const encrypted: any = await this.invokeSnap("encrypt", { message, receiverPublicKey });
+  async encrypt(
+    message: Uint8Array,
+    receiverPublicKey: Uint8Array,
+  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
+    await this.invokeSnap("encrypt", { message, receiverPublicKey });
 
-    return Uint8Array.from(Object.values(encrypted));
+    throw new Error("The Metamask Enclave needs to be updated");
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {

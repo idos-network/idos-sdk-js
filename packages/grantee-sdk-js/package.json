@@ -1,6 +1,6 @@
 {
-  "name": "@idos-network/idos-sdk-server-dapp",
-  "description": "idOS JavaScript Server dApp SDK",
+  "name": "@idos-network/grantee-sdk-js",
+  "description": "idOS Grantee JavaScript SDK",
   "version": "0.0.1",
   "homepage": "https://idos.network",
   "repository": "https://github.com/idos-network/idos-sdk-js",

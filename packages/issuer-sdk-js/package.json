@@ -2,6 +2,9 @@
   "name": "@idos-network/issuer-sdk-js",
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.1",
+  "publishConfig": {
+    "access": "public"
+  },
   "homepage": "https://idos.network",
   "type": "module",
   "repository": {
@@ -55,10 +58,8 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
+    "@idos-network/codecs": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/hex": "^2.0.0",
-    "@stablelib/utf8": "^1.0.1",
     "es-toolkit": "^1.23.0",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
