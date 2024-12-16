@@ -115,7 +115,7 @@ export class Auth {
             nonce,
             message,
             callbackUrl,
-          });
+          } as SignedMessage);
         }
         const callbackUrl = window.location.href;
         const nonce = Buffer.from(new Nonce(32).clampUTF8);
