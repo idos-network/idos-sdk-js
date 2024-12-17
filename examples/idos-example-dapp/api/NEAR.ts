@@ -1,4 +1,4 @@
-import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import { KeyPair } from "near-api-js";
 
 /* global crypto */

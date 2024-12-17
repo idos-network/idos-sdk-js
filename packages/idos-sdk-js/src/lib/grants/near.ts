@@ -1,5 +1,5 @@
+import { base64Decode } from "@idos-network/codecs";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
-import * as Base64Codec from "@stablelib/base64";
 import type { Contract, connect, keyStores, providers } from "near-api-js";
 import { Nonce } from "../nonce";
 import Grant from "./grant";
@@ -135,7 +135,7 @@ export class NearGrants implements GrantChild {
     if (!nonce) throw new Error("signMessage is expected to return a nonce, but it didn't");
 
     return {
-      signature: Base64Codec.decode(b64Signature),
+      signature: base64Decode(b64Signature),
       nonce,
     };
   }

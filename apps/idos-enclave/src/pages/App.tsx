@@ -63,9 +63,9 @@ export function App({ store, enclave }: AppProps) {
   // Confirm options.
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string | undefined>();
+  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
   const [userId] = useState<string | null>(
-    new URLSearchParams(window.location.search).get("userId"),
+    new URLSearchParams(window.location.search).get("humanId"),
   );
 
   const isRecoveryMode = useSignal(false);
@@ -88,6 +88,11 @@ export function App({ store, enclave }: AppProps) {
     }
   }, [theme]);
 
+  useEffect(() => {
+    if (mode === "new" || !responsePort.current) return;
+    if (!encryptionPublicKey) onError("Can’t find a public encryption key for this user");
+  }, [mode, encryptionPublicKey, responsePort.current]);
+
   const resetMethod = useCallback(() => setMethod(null), []);
 
   /**
@@ -102,11 +107,11 @@ export function App({ store, enclave }: AppProps) {
       throw new Error(`Unexpected request from parent: ${requestData.intent}`);
 
     responsePort.current = ports[0];
+    setEncryptionUserPublicKey(requestData.message?.expectedUserEncryptionPublicKey);
 
     switch (requestData.intent) {
       case "auth":
         setMethod(null);
-        setEncryptionUserPublicKey(event.data.message.expectedUserEncryptionPublicKey);
         break;
 
       case "passkey":
@@ -175,6 +180,11 @@ export function App({ store, enclave }: AppProps) {
     onSuccess,
     mode,
   };
+
+  useEffect(() => {
+    if (mode === "new" || !responsePort.current) return; // encryptionPublicKey is only set after responsePort is set
+    if (!encryptionPublicKey) onError("can't find a public encryption key for this user");
+  }, [mode, encryptionPublicKey, responsePort.current]);
 
   if (confirm && message) {
     return (

@@ -1,6 +1,5 @@
+import { base64Decode, base64Encode, utf8Decode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
 import type { BackupPasswordInfo } from "./types";
@@ -48,27 +47,27 @@ export class Enclave {
     if (!this.userEncryptionPublicKey) await this.ready();
 
     const { content, encryptorPublicKey } = await this.provider.encrypt(
-      Utf8Codec.encode(message),
+      utf8Encode(message),
       recipientEncryptionPublicKey === undefined
         ? undefined
-        : Base64Codec.decode(recipientEncryptionPublicKey),
+        : base64Decode(recipientEncryptionPublicKey),
     );
 
     return {
-      content: Base64Codec.encode(content),
-      encryptorPublicKey: Base64Codec.encode(encryptorPublicKey),
+      content: base64Encode(content),
+      encryptorPublicKey: base64Encode(encryptorPublicKey),
     };
   }
 
   async decrypt(message: string, senderEncryptionPublicKey?: string): Promise<string> {
     if (!this.userEncryptionPublicKey) await this.ready();
 
-    return Utf8Codec.decode(
+    return utf8Decode(
       await this.provider.decrypt(
-        Base64Codec.decode(message),
+        base64Decode(message),
         senderEncryptionPublicKey === undefined
           ? undefined
-          : Base64Codec.decode(senderEncryptionPublicKey),
+          : base64Decode(senderEncryptionPublicKey),
       ),
     );
   }

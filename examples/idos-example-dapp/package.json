@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
-    "@idos-network/idos-sdk-server-dapp": "workspace:*",
+    "@idos-network/grantee-sdk-js": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
