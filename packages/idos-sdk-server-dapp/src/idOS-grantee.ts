@@ -129,7 +129,7 @@ export class idOSGrantee {
   }): Promise<idOSGrantee>;
 
   static async init({
-    recipientEncryptionPrivateKey: encryptionPrivateKey,
+    recipientEncryptionPrivateKey,
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     chainId,
     dbId,
@@ -173,7 +173,7 @@ export class idOSGrantee {
     }
 
     return new idOSGrantee(
-      NoncedBox.fromBase64SecretKey(encryptionPrivateKey),
+      NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
       nodeKwil,
       kwilSigner,
       dbId,

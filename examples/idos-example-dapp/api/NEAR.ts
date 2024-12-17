@@ -15,7 +15,7 @@ const nearGranteeSigner = KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 const idosGrantee = await idOSGrantee.init({
   chainType: "NEAR",
   granteeSigner: nearGranteeSigner,
-  encryptionPrivateKey: ENCRYPTION_SECRET_KEY,
+  recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
@@ -38,7 +38,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
   }
 
   const rawBody = request.read();
-  let body;
+  let body: ReturnType<typeof JSON.parse>;
   try {
     body = JSON.parse(rawBody);
   } catch (e) {
