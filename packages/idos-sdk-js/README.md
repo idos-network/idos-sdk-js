@@ -424,7 +424,7 @@ If you wish to consult it, you'll need to use the `grantee` and [`nacl.box.keyPa
 Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-server-dapp) for an EVM grantee:
 
 ```js
-import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import { ethers } from "ethers";
 
 const granteeSigner = new ethers.Wallet(
@@ -628,7 +628,7 @@ const { signature } = await wallet.signMessage({ message, recipient, nonce });
  *
  * ⚠️ Notice: Not implemented for NEAR yet.
  */
-import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import { ethers } from "ethers";
 
 const granteeSigner = new ethers.Wallet(

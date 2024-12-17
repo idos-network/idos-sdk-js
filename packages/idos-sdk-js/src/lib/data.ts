@@ -1,7 +1,5 @@
+import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
-import * as HexCodec from "@stablelib/hex";
-import * as Utf8Codec from "@stablelib/utf8";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
@@ -20,7 +18,7 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
-  ) {}
+  ) { }
 
   singularize(tableName: string): string {
     return tableName.replace(/s$/, "");
@@ -81,8 +79,9 @@ export class Data {
     let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey =
-        recipientEncryptionPublicKey ?? Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+
       for (const record of records) {
         Object.assign(
           record,
@@ -132,7 +131,9 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
@@ -267,7 +268,9 @@ export class Data {
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= Base64Codec.encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
@@ -369,9 +372,12 @@ export class Data {
   ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
-    const content = await this.enclave.encrypt(plaintextContent, receiverEncryptionPublicKey);
+    const { content, encryptorPublicKey } = await this.enclave.encrypt(
+      plaintextContent,
+      receiverEncryptionPublicKey,
+    );
     const publicNotesSignature = nacl.sign.detached(
-      Utf8Codec.encode(publicNotes),
+      utf8Encode(publicNotes),
       issuerAuthenticationKeyPair.secretKey,
     );
 
@@ -380,17 +386,17 @@ export class Data {
       content,
 
       public_notes: publicNotes,
-      public_notes_signature: Base64Codec.encode(publicNotesSignature),
+      public_notes_signature: base64Encode(publicNotesSignature),
 
-      broader_signature: Base64Codec.encode(
+      broader_signature: base64Encode(
         nacl.sign.detached(
-          Uint8Array.from([...publicNotesSignature, ...Base64Codec.decode(content)]),
+          Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
           issuerAuthenticationKeyPair.secretKey,
         ),
       ),
 
-      issuer_auth_public_key: HexCodec.encode(issuerAuthenticationKeyPair.publicKey, true),
-      encryptor_public_key: isPresent(this.enclave.auth.currentUser.currentUserPublicKey),
+      issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
+      encryptor_public_key: isPresent(encryptorPublicKey),
     };
   }
 }

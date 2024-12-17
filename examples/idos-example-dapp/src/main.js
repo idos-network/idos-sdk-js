@@ -204,64 +204,75 @@ const connectWallet = {
 
     cache.set("credentials", credentials);
 
-    terminal.table(credentials, ["id", ...Object.keys(credentials[0].public_notes)], {
-      id: async (id) => {
-        const credential = await terminal
-          .detail()
-          .h1("inspect", `Credential # ${id}`)
-          .wait(
-            "awaiting signature",
-            cache.get(`credential_${id}`) || idos.data.get("credentials", id),
-          );
-        cache.set(`credential_${id}`, credential);
+    const { id, ...fields } = JSON.parse(credentials[0].public_notes);
 
-        await terminal
-          .wait("verifying credential...", idOS.verifiableCredentials.verify(credential.content))
-          .then((_) => terminal.status("done", "Verified"))
-          .catch(terminal.error.bind(terminal));
+    terminal.table(
+      credentials.map((credential) => {
+        return {
+          ...credential,
+          ...fields,
+        };
+      }),
+      ["id", ...Object.keys(fields)],
+      {
+        id: async (id) => {
+          const credential = await terminal
+            .detail()
+            .h1("inspect", `Credential # ${id}`)
+            .wait(
+              "awaiting signature",
+              cache.get(`credential_${id}`) || idos.data.get("credentials", id),
+            );
+          cache.set(`credential_${id}`, credential);
 
-        terminal.h1("eyes", "Content").json(JSON.parse(credential.content));
-        terminal.br();
+          await terminal
+            .wait("verifying credential...", idOS.verifiableCredentials.verify(credential.content))
+            .then((_) => terminal.status("done", "Verified"))
+            .catch(terminal.error.bind(terminal));
 
-        const buttonId = `acquire-access-grant-${id}`;
-        terminal.button(buttonId, "🔏 Acquire access grant", async () => {
-          terminal.removeButton(buttonId);
-
-          let timelock =
-            window.prompt(
-              "Please enter the grant timelock in seconds",
-              granteeInfo.lockTimeSpanSeconds,
-            ) || granteeInfo.lockTimeSpanSeconds;
-
-          timelock = Number.isInteger(+timelock) ? +timelock : granteeInfo.lockTimeSpanSeconds;
-
-          const grantPromise = idos.grants.create(
-            "credentials",
-            id,
-            granteeInfo.grantee,
-            Math.floor(Date.now() / 1000) + timelock,
-            granteeInfo.encryptionPublicKey,
-          );
-
-          try {
-            const result = await terminal.wait("creating access grant...", grantPromise);
-            terminal.status("done", `Created access grant with dataId ${result.grant.dataId}`);
-          } catch (e) {
-            terminal.error(e);
-            return;
-          }
-
-          cache.set("grants", null);
-          terminal.br();
-          terminal.log("Press Restart to see the newly created access grant.");
+          terminal.h1("eyes", "Content").json(JSON.parse(credential.content));
           terminal.br();
 
-          chosenFlow.grants = true;
-          window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
-          terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
-        });
+          const buttonId = `acquire-access-grant-${id}`;
+          terminal.button(buttonId, "🔏 Acquire access grant", async () => {
+            terminal.removeButton(buttonId);
+
+            let timelock =
+              window.prompt(
+                "Please enter the grant timelock in seconds",
+                granteeInfo.lockTimeSpanSeconds,
+              ) || granteeInfo.lockTimeSpanSeconds;
+
+            timelock = Number.isInteger(+timelock) ? +timelock : granteeInfo.lockTimeSpanSeconds;
+
+            const grantPromise = idos.grants.create(
+              "credentials",
+              id,
+              granteeInfo.grantee,
+              Math.floor(Date.now() / 1000) + timelock,
+              granteeInfo.encryptionPublicKey,
+            );
+
+            try {
+              const result = await terminal.wait("creating access grant...", grantPromise);
+              terminal.status("done", `Created access grant with dataId ${result.grant.dataId}`);
+            } catch (e) {
+              terminal.error(e);
+              return;
+            }
+
+            cache.set("grants", null);
+            terminal.br();
+            terminal.log("Press Restart to see the newly created access grant.");
+            terminal.br();
+
+            chosenFlow.grants = true;
+            window.localStorage.setItem("chosen-flow", JSON.stringify(chosenFlow));
+            terminal.button(`restart-${id}`, "Restart", terminal.reloadPage);
+          });
+        },
       },
-    });
+    );
   }
 
   if (chosenFlow.grants) {

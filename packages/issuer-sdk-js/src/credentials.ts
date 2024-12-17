@@ -1,7 +1,5 @@
+import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
-import * as HexCodec from "@stablelib/hex";
-import * as Utf8Codec from "@stablelib/utf8";
 import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
@@ -15,13 +13,13 @@ const buildUpdateablePublicNotes = (
   { publicNotes }: UpdateablePublicNotes,
 ) => {
   const publicNotesSignature = nacl.sign.detached(
-    Utf8Codec.encode(publicNotes),
+    utf8Encode(publicNotes),
     issuerConfig.signingKeyPair.secretKey,
   );
 
   return {
     public_notes: publicNotes,
-    public_notes_signature: Base64Codec.encode(publicNotesSignature),
+    public_notes_signature: base64Encode(publicNotesSignature),
   };
 };
 
@@ -44,12 +42,9 @@ const buildInsertableIDOSCredential = (
     receiverEncryptionPublicKey: Uint8Array;
   },
 ): InsertableIDOSCredential => {
-  const content = Base64Codec.decode(
-    encryptContent(
-      plaintextContent,
-      receiverEncryptionPublicKey,
-      issuerConfig.encryptionKeyPair.secretKey,
-    ),
+  const ephemeralKeyPair = nacl.box.keyPair();
+  const content = base64Decode(
+    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -58,20 +53,20 @@ const buildInsertableIDOSCredential = (
 
   return {
     user_id: humanId,
-    content: Base64Codec.encode(content),
+    content: base64Encode(content),
 
     public_notes,
     public_notes_signature,
 
-    broader_signature: Base64Codec.encode(
+    broader_signature: base64Encode(
       nacl.sign.detached(
-        Uint8Array.from([...Base64Codec.decode(public_notes_signature), ...content]),
+        Uint8Array.from([...base64Decode(public_notes_signature), ...content]),
         issuerConfig.signingKeyPair.secretKey,
       ),
     ),
 
-    issuer_auth_public_key: HexCodec.encode(issuerConfig.signingKeyPair.publicKey, true),
-    encryptor_public_key: Base64Codec.encode(issuerConfig.encryptionKeyPair.publicKey),
+    issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
+    encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
   };
 };
 

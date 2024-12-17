@@ -125,12 +125,13 @@ export class Enclave {
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (preferredAuthMethod) {
-            ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("auth", {
-              expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-            }));
+            ({ password, duration, credentialId } = await this.#openDialog(
+              preferredAuthMethod || "auth",
+              {
+                expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+              },
+            ));
           }
         } catch (e) {
           return reject(e);
@@ -171,7 +172,8 @@ export class Enclave {
 
   encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const encrypted = nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
+    const ephemeralKeyPair = nacl.box.keyPair();
+    const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
 
     if (encrypted === null)
       throw Error(
@@ -191,7 +193,7 @@ export class Enclave {
     fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
 
-    return fullMessage;
+    return { content: fullMessage, encryptorPublicKey: ephemeralKeyPair.publicKey };
   }
 
   async decrypt(fullMessage, senderPublicKey) {
@@ -364,7 +366,7 @@ export class Enclave {
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
-        console.warn("catch", error);
+        console.error("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
@@ -423,6 +425,8 @@ export class Enclave {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
+          port1.close();
+          this.dialog.close();
           return reject(error);
         }
 
