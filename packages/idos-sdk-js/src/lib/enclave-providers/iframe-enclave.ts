@@ -34,14 +34,14 @@ export class IframeEnclave implements EnclaveProvider {
   async ready(
     humanId?: string,
     signerAddress?: string,
-    signerEncryptionPublicKey?: string,
+    signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
     let { userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
         humanId,
         signerAddress,
-        signerEncryptionPublicKey,
+        signerPublicKey,
         expectedUserEncryptionPublicKey,
       },
     })) as StoredData;
