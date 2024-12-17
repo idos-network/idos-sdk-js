@@ -2,10 +2,10 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import type { BackupPasswordInfo } from "../types";
 
 export interface StoredData {
-  userEncryptionPublicKey?: Uint8Array;
+  encryptionPublicKey?: Uint8Array;
   humanId?: string;
   signerAddress?: string;
-  signerEncryptionPublicKey?: string;
+  signerPublicKey?: string;
 }
 
 export interface DiscoverUserEncryptionPublicKeyResponse {
@@ -27,7 +27,7 @@ export interface EnclaveProvider {
   ready(
     humanId?: string,
     signerAddress?: string,
-    signerEncryptionPublicKey?: string,
+    signerPublicKey?: string,
     currentUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
