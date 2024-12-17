@@ -11,9 +11,16 @@
 // Import Routes
 
 import { Route as rootRoute } from "./routes/__root";
+import { Route as CredentialsImport } from "./routes/credentials";
 import { Route as IndexImport } from "./routes/index";
 
 // Create/Update Routes
+
+const CredentialsRoute = CredentialsImport.update({
+  id: "/credentials",
+  path: "/credentials",
+  getParentRoute: () => rootRoute,
+} as any);
 
 const IndexRoute = IndexImport.update({
   id: "/",
@@ -32,6 +39,13 @@ declare module "@tanstack/react-router" {
       preLoaderRoute: typeof IndexImport;
       parentRoute: typeof rootRoute;
     };
+    "/credentials": {
+      id: "/credentials";
+      path: "/credentials";
+      fullPath: "/credentials";
+      preLoaderRoute: typeof CredentialsImport;
+      parentRoute: typeof rootRoute;
+    };
   }
 }
 
@@ -39,32 +53,37 @@ declare module "@tanstack/react-router" {
 
 export interface FileRoutesByFullPath {
   "/": typeof IndexRoute;
+  "/credentials": typeof CredentialsRoute;
 }
 
 export interface FileRoutesByTo {
   "/": typeof IndexRoute;
+  "/credentials": typeof CredentialsRoute;
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute;
   "/": typeof IndexRoute;
+  "/credentials": typeof CredentialsRoute;
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/";
+  fullPaths: "/" | "/credentials";
   fileRoutesByTo: FileRoutesByTo;
-  to: "/";
-  id: "__root__" | "/";
+  to: "/" | "/credentials";
+  id: "__root__" | "/" | "/credentials";
   fileRoutesById: FileRoutesById;
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
+  CredentialsRoute: typeof CredentialsRoute;
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CredentialsRoute: CredentialsRoute,
 };
 
 export const routeTree = rootRoute
@@ -77,11 +96,15 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "__root.tsx",
       "children": [
-        "/"
+        "/",
+        "/credentials"
       ]
     },
     "/": {
       "filePath": "index.tsx"
+    },
+    "/credentials": {
+      "filePath": "credentials.tsx"
     }
   }
 }

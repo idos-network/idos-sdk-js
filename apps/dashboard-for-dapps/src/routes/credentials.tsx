@@ -1,8 +1,6 @@
 import {
   Center,
   Container,
-  DrawerBody,
-  DrawerTitle,
   HStack,
   Image,
   List,
@@ -14,33 +12,32 @@ import {
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import {
   Button,
-  DataListItem,
-  DataListRoot,
   DrawerActionTrigger,
   DrawerBackdrop,
+  DrawerBody,
   DrawerCloseTrigger,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerRoot,
-  EmptyState,
+  DrawerTitle,
   RefreshButton,
   SearchField,
 } from "@idos-network/ui-kit";
-import { skipToken, useQuery } from "@tanstack/react-query";
+import { DataListItem, DataListRoot, EmptyState } from "@idos-network/ui-kit";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
-import { useAccount } from "wagmi";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
-export const Route = createFileRoute("/")({
-  component: Index,
+export const Route = createFileRoute("/credentials")({
+  component: Credentials,
   validateSearch: (search): { filter?: string } => {
     return {
       filter: (search.filter as string) ?? undefined,
@@ -48,52 +45,61 @@ export const Route = createFileRoute("/")({
   },
 });
 
-const useFetchGrants = () => {
+export const useFetchAllCredentials = ({
+  enabled,
+  secretKey,
+}: { enabled: boolean; secretKey: string }) => {
   const idOS = useIdOS();
-  const { address } = useAccount();
 
   return useQuery({
-    queryKey: ["grants"],
-    queryFn: () =>
-      idOS.grants.list({
-        grantee: address,
-      }),
-    select: (data) =>
-      data.map((grant) => ({
-        ...grant,
-        lockedUntil:
-          grant.lockedUntil === 0
-            ? "Unlocked"
-            : Intl.DateTimeFormat("en-US", {
-                dateStyle: "full",
-                timeStyle: "short",
-              }).format(grant.lockedUntil * 1000),
-      })),
-  });
-};
+    queryKey: ["credentials", secretKey],
+    queryFn: async () => {
+      const credentials = await idOS.data.listAllCredentials();
+      const promiseList = credentials.map(async (credential) => {
+        const fullCredential = (await idOS.data.get(
+          "credentials",
+          credential.id,
+          false,
+        )) as idOSCredential;
 
-type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
+        if (!fullCredential) return null;
 
-const useFetchCredential = (id: string) => {
-  const idOS = useIdOS();
-  return useQuery({
-    queryKey: ["credential-details", id],
-    queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
+        try {
+          const decrypted = decrypt(
+            fullCredential.content,
+            fullCredential.encryption_public_key,
+            secretKey,
+          );
+
+          return {
+            ...fullCredential,
+            content: decrypted,
+          };
+        } catch (error) {
+          console.error(`Failed to decrypt/parse credential ${credential.id}:`, error);
+          return {
+            ...fullCredential,
+            content: null,
+          };
+        }
+      });
+
+      const stressPromiseList = Array.from({ length: 300 }, () => promiseList).flat();
+      const results = await Promise.all(stressPromiseList);
+      return results.filter((credential): credential is idOSCredential => credential !== null);
+    },
+    enabled,
   });
 };
 
 function CredentialDetails({
-  credentialId,
+  credential,
   open,
   toggle,
-}: { credentialId: string; open: boolean; toggle: (value?: boolean) => void }) {
-  const credential = useFetchCredential(credentialId);
-  const [secretKey] = useSecretKey();
+}: { credential: idOSCredential | null; open: boolean; toggle: (value?: boolean) => void }) {
+  if (!credential) return null;
 
-  if (!credential.data || !secretKey) return null;
-
-  const result = decrypt(credential.data.content, credential.data.encryption_public_key, secretKey);
-  const content = JSON.parse(result);
+  const content = JSON.parse(credential.content);
 
   const subject = Object.entries(content.credentialSubject).filter(
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
@@ -248,8 +254,8 @@ function CredentialDetails({
   );
 }
 
-function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
-  const [credentialId, setCredentialId] = useState("");
+function SearchResults({ results }: { results: idOSCredential[] }) {
+  const [credential, setCredential] = useState<idOSCredential | null>(null);
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useSecretKey();
@@ -258,8 +264,8 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
-  const handleOpenCredentialDetails = async (id: string) => {
-    setCredentialId(id);
+  const handleOpenCredentialDetails = async (credential: idOSCredential) => {
+    setCredential(credential);
 
     if (!secretKey) {
       toggleSecretKeyPrompt();
@@ -276,86 +282,53 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 
   return (
     <>
-      {results.map((grant) => (
-        <Stack key={crypto.randomUUID()} gap="6" bg="gray.900" p="6" rounded="md">
-          <DataListRoot orientation="horizontal" divideY="1px">
-            <DataListItem
-              alignItems={{
-                base: "flex-start",
-                md: "center",
+      {results.map((credential) => {
+        const publicFields = Object.entries(JSON.parse(credential.public_notes)) as [
+          string,
+          string,
+        ][];
+
+        return (
+          <Stack key={crypto.randomUUID()} gap="6" bg="gray.900" p="6" rounded="md">
+            <DataListRoot orientation="horizontal" divideY="1px">
+              {publicFields.map(([key, value]) => (
+                <DataListItem
+                  key={key}
+                  alignItems={{
+                    base: "flex-start",
+                    md: "center",
+                  }}
+                  flexDir={{
+                    base: "column",
+                    md: "row",
+                  }}
+                  pt="4"
+                  grow
+                  textTransform="uppercase"
+                  label={changeCase(key)}
+                  value={value}
+                  truncate
+                />
+              ))}
+            </DataListRoot>
+            <Button
+              alignSelf={{
+                md: "flex-end",
               }}
-              flexDir={{
-                base: "column",
-                md: "row",
-              }}
-              pt="4"
-              grow
-              label="ID"
-              value={grant.dataId}
-              truncate
-            />
-            <DataListItem
-              alignItems={{
-                base: "flex-start",
-                md: "center",
-              }}
-              flexDir={{
-                base: "column",
-                md: "row",
-              }}
-              pt="4"
-              grow
-              label="Owner"
-              value={grant.owner}
-              truncate
-            />
-            <DataListItem
-              alignItems={{
-                base: "flex-start",
-                md: "center",
-              }}
-              flexDir={{
-                base: "column",
-                md: "row",
-              }}
-              pt="4"
-              grow
-              label="Grantee"
-              value={grant.grantee}
-              truncate
-            />
-            <DataListItem
-              alignItems={{
-                base: "flex-start",
-                md: "center",
-              }}
-              flexDir={{
-                base: "column",
-                md: "row",
-              }}
-              pt="4"
-              grow
-              label="Locked until"
-              value={grant.lockedUntil}
-            />
-          </DataListRoot>
-          <Button
-            alignSelf={{
-              md: "flex-end",
-            }}
-            onClick={() => handleOpenCredentialDetails(grant.dataId)}
-          >
-            Credential details
-          </Button>
-        </Stack>
-      ))}
+              onClick={() => handleOpenCredentialDetails(credential)}
+            >
+              Credential details
+            </Button>
+          </Stack>
+        );
+      })}
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
 
       <CredentialDetails
         {...{
-          credentialId,
+          credential,
           open: openCredentialDetails,
           toggle: toggleCredentialDetails,
         }}
@@ -364,11 +337,12 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
   );
 }
 
-function Index() {
+function Credentials() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
-  const grants = useFetchGrants();
+  const [secretKey] = useSecretKey();
+  const credentials = useFetchAllCredentials({ enabled: !!secretKey, secretKey });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
@@ -380,21 +354,22 @@ function Index() {
   };
 
   const results = useMemo(() => {
-    if (!grants.data) return [];
-    if (!debouncedSearchTerm) return grants.data;
+    if (!credentials.data) return [];
+    if (!debouncedSearchTerm) return credentials.data;
 
-    return matchSorter(grants.data, debouncedSearchTerm, {
-      keys: ["dataId", "owner", "grantee", "lockedUntil"],
+    return matchSorter(credentials.data, debouncedSearchTerm, {
+      keys: ["public_notes", "content"],
+      threshold: matchSorter.rankings.CONTAINS,
     });
-  }, [debouncedSearchTerm, grants.data]);
+  }, [debouncedSearchTerm, credentials.data]);
 
   return (
     <Container h="100%">
       <Stack gap="4" h="100%">
-        {grants.isFetching ? (
+        {credentials.isFetching ? (
           <Center h="100%" flexDirection="column" gap="2">
             <Spinner />
-            <Text>Fetching grants...</Text>
+            <Text>Fetching credentials...</Text>
           </Center>
         ) : (
           <Stack gap="4">
@@ -417,11 +392,11 @@ function Index() {
               />
 
               <RefreshButton
-                aria-label="Refresh grants list"
-                title="Refresh grants list"
+                aria-label="Refresh credentials list"
+                title="Refresh credentials list"
                 variant="subtle"
                 colorPalette="gray"
-                onClick={() => grants.refetch()}
+                onClick={() => credentials.refetch()}
               />
             </HStack>
             <SearchResults results={results} />
