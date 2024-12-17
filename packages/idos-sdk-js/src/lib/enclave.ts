@@ -10,7 +10,7 @@ export class Enclave {
   constructor(
     public readonly auth: Auth,
     public readonly provider: EnclaveProvider,
-  ) { }
+  ) {}
 
   async load() {
     await this.provider.load();
@@ -48,7 +48,9 @@ export class Enclave {
 
     const { content, encryptorPublicKey } = await this.provider.encrypt(
       utf8Encode(message),
-      recipientEncryptionPublicKey === undefined ? undefined : base64Decode(recipientEncryptionPublicKey),
+      recipientEncryptionPublicKey === undefined
+        ? undefined
+        : base64Decode(recipientEncryptionPublicKey),
     );
 
     return {

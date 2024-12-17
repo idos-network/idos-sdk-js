@@ -18,7 +18,7 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
-  ) { }
+  ) {}
 
   singularize(tableName: string): string {
     return tableName.replace(/s$/, "");
@@ -80,7 +80,7 @@ export class Data {
 
     if (tableName === "credentials") {
       recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
-      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
       for (const record of records) {
         Object.assign(
@@ -132,7 +132,7 @@ export class Data {
 
     if (tableName === "credentials") {
       recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
-      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
       Object.assign(
         record,
@@ -269,7 +269,7 @@ export class Data {
 
     if (tableName === "credentials") {
       recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
-      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey")
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
       Object.assign(
         record,
