@@ -1,29 +1,4 @@
 import {
-  Button,
-  DataListItem,
-  DataListRoot,
-  DialogActionTrigger,
-  DialogBody,
-  DialogCloseTrigger,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogRoot,
-  DialogTitle,
-  DrawerActionTrigger,
-  DrawerBackdrop,
-  DrawerCloseTrigger,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerRoot,
-  EmptyState,
-  Field,
-  PasswordInput,
-  RefreshButton,
-  SearchField,
-} from "@/components/ui";
-import {
   Center,
   Container,
   DrawerBody,
@@ -34,20 +9,36 @@ import {
   Spinner,
   Stack,
   Text,
+  chakra,
 } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
+import {
+  Button,
+  DataListItem,
+  DataListRoot,
+  DrawerActionTrigger,
+  DrawerBackdrop,
+  DrawerCloseTrigger,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerRoot,
+  EmptyState,
+  RefreshButton,
+  SearchField,
+} from "@/components/ui";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDebounce, useLocalStorage, useToggle } from "@uidotdev/usehooks";
-import ascii85 from "ascii85";
+import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
-import { useMemo, useRef, useState } from "react";
-import nacl from "tweetnacl";
+import { useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
+import { SecretKeyPrompt } from "@/components/secret-key-prompt";
+import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
+import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -57,14 +48,6 @@ export const Route = createFileRoute("/")({
     };
   },
 });
-
-function transformBase85Image(src: string) {
-  const prefix = "data:image/jpeg;base85,";
-
-  return `data:image/png;base64,${Base64Codec.encode(
-    ascii85.decode(src.substring(prefix.length)),
-  )}`;
-}
 
 const useFetchGrants = () => {
   const idOS = useIdOS();
@@ -89,6 +72,7 @@ const useFetchGrants = () => {
       })),
   });
 };
+
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
 
 const useFetchCredential = (id: string) => {
@@ -99,115 +83,13 @@ const useFetchCredential = (id: string) => {
   });
 };
 
-function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
-  const fullMessage = Base64Codec.decode(b64FullMessage);
-  const senderPublicKey = Base64Codec.decode(b64SenderPublicKey);
-
-  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-
-  const decrypted = nacl.box.open(message, nonce, senderPublicKey, Base64Codec.decode(secretKey));
-
-  if (decrypted == null) {
-    return "";
-  }
-
-  return Utf8Codec.decode(decrypted);
-}
-
-function SecretKeyPrompt({
-  open,
-  toggle,
-  onSubmit,
-}: {
-  open: boolean;
-  toggle: (value?: boolean) => void;
-  onSubmit: (key: string) => void;
-}) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [key, setKey] = useState("");
-
-  const handleSave = () => {
-    onSubmit(key);
-    toggle(false);
-  };
-
-  return (
-    <DialogRoot
-      open={open}
-      placement="center"
-      onOpenChange={() => {
-        toggle(false);
-      }}
-    >
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Enter your secret key</DialogTitle>
-        </DialogHeader>
-        <DialogBody>
-          <Stack gap="4">
-            <Field label="Secret key:">
-              <PasswordInput ref={ref} onChange={(e) => setKey(e.target.value)} />
-            </Field>
-          </Stack>
-        </DialogBody>
-        <DialogFooter>
-          <DialogActionTrigger asChild>
-            <Button variant="outline">Cancel</Button>
-          </DialogActionTrigger>
-          <Button onClick={handleSave}>Save</Button>
-        </DialogFooter>
-        <DialogCloseTrigger />
-      </DialogContent>
-    </DialogRoot>
-  );
-}
-
-function openImageInNewTab(base64Image: string) {
-  const newWindow = window.open();
-
-  if (newWindow) {
-    newWindow.document.write(`
-      <html>
-        <head>
-          <title>Document Image</title>
-          <style>
-            body {
-              margin: 0;
-              padding: 0;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              min-height: 100vh;
-              background: #000;
-            }
-            img {
-              max-width: 100%;
-              max-height: 100vh;
-              object-fit: contain;
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${base64Image}" alt="Document Image">
-        </body>
-      </html>
-    `);
-    newWindow.document.close();
-  }
-}
-
-function changeCase(str: string) {
-  return str.replace(/_/g, " ");
-}
-
 function CredentialDetails({
   credentialId,
   open,
   toggle,
 }: { credentialId: string; open: boolean; toggle: (value?: boolean) => void }) {
   const credential = useFetchCredential(credentialId);
-  const [secretKey] = useLocalStorage("SECRET_KEY", "");
+  const [secretKey] = useSecretKey();
 
   if (!credential.data || !secretKey) return null;
 
@@ -225,7 +107,7 @@ function CredentialDetails({
       string,
       string,
     ][]
-  ).map(([key, value]) => [key, transformBase85Image(value)]);
+  ).map(([key, value]) => [key, value]);
 
   return (
     <DrawerRoot
@@ -336,15 +218,17 @@ function CredentialDetails({
                           _hover={{ transform: "scale(1.02)" }}
                           onClick={() => openImageInNewTab(value)}
                         >
-                          <Image
-                            src={value}
-                            alt="Identification document front"
-                            rounded="md"
-                            loading="lazy"
-                            width="120px"
-                            height="120px"
-                            title="Click to open the image in full size"
-                          />
+                          <chakra.button className="button">
+                            <Image
+                              src={value}
+                              alt="Identification document front"
+                              rounded="md"
+                              loading="lazy"
+                              width="120px"
+                              height="120px"
+                              title="Click to open the image in full size"
+                            />
+                          </chakra.button>
                         </List.Item>
                       ))}
                     </List.Root>
@@ -369,7 +253,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
-  const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
+  const [secretKey, setSecretKey] = useSecretKey();
 
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
@@ -532,6 +416,7 @@ function Index() {
                   })
                 }
               />
+
               <RefreshButton
                 aria-label="Refresh grants list"
                 title="Refresh grants list"
