@@ -31,7 +31,7 @@ export class idOS {
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
-          encryptionPrivateKey: authnPrivateKey,
+          encryptionPrivateKey,
         });
         return new idOS(grantee);
       }
