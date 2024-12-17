@@ -48,10 +48,10 @@ export class Enclave {
     });
   }
 
-  storage(humanId, signerAddress, signerEncryptionPublicKey, expectedUserEncryptionPublicKey) {
+  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
-    signerEncryptionPublicKey && this.store.set("signer-public-key", signerEncryptionPublicKey);
+    signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const litAttrs = this.store.get("litAttrs");
     this.handlstoreableAttributes(litAttrs);
@@ -325,7 +325,7 @@ export class Enclave {
           receiverPublicKey,
           senderPublicKey,
           signerAddress,
-          signerEncryptionPublicKey,
+          signerPublicKey,
           mode,
           theme,
           credentials,
@@ -348,7 +348,7 @@ export class Enclave {
           storage: () => [
             humanId,
             signerAddress,
-            signerEncryptionPublicKey,
+            signerPublicKey,
             expectedUserEncryptionPublicKey,
             litAttrs,
             userWallets,
