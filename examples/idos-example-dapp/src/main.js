@@ -266,13 +266,13 @@ const connectWallet = {
 
   if (chosenFlow.grants) {
     /** @type {string} */
-    let owner;
+    let ownerAddress;
     switch (chosenWallet) {
       case "EVM":
-        owner = address;
+        ownerAddress = address;
         break;
       case "NEAR":
-        owner = idos.auth.currentUser.publicKey;
+        ownerAddress = idos.auth.currentUser.publicKey;
         break;
       default:
         throw new Error("Unreachable");
@@ -283,7 +283,7 @@ const connectWallet = {
       .wait(
         "awaiting RPC",
         cache.get("grants") ||
-          idos.grants.list({ ownerAddress: owner, granteeAddress: granteeInfo.grantee }),
+          idos.grants.list({ ownerAddress, granteeAddress: granteeInfo.grantee }),
       );
     cache.set("grants", grants);
 
