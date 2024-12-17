@@ -52,7 +52,7 @@ const buildInsertableIDOSCredential = (
   });
 
   return {
-    human_id: humanId,
+    user_id: humanId,
     content: base64Encode(content),
 
     public_notes,
@@ -66,7 +66,7 @@ const buildInsertableIDOSCredential = (
     ),
 
     issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
-    encryption_public_key: base64Encode(ephemeralKeyPair.publicKey),
+    encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
   };
 };
 
@@ -125,7 +125,7 @@ export async function createCredentialByGrant(
 }
 
 type ShareCredentialByGrantParams = BaseCredentialParams & {
-  grantee: string;
+  grantee_wallet_identifier: string;
   lockedUntil: number;
   originalCredentialId: string;
 };
@@ -135,7 +135,7 @@ export async function shareCredentialByGrant(
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
-    grantee: params.grantee,
+    grantee_wallet_identifier: params.grantee_wallet_identifier,
     locked_until: params.lockedUntil,
     original_credential_id: params.originalCredentialId,
   };
@@ -143,8 +143,9 @@ export async function shareCredentialByGrant(
     ...ensureEntityId(buildInsertableIDOSCredential(issuer_config, params)),
     ...extraEntries,
   };
+  console.log({ payload });
 
-  if (payload.public_notes !== "")
+  if (payload.public_notes)
     throw new Error("shared credentials cannot have public_notes, it must be an empty string");
 
   await kwilClient.execute(

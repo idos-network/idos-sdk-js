@@ -61,7 +61,7 @@ return { humanId }
 
 #### Step 2: Derive the Public Key
 
-Use the `idos.discoverEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
+Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
 
 ```javascript
 // Client side
@@ -77,7 +77,7 @@ const idos = await idOS.init(...);
 const { humanId } = await yourServer.getIdosInformation();
 
 // Discover user encryption key
-const { encryptionPublicKey } = await idos.discoverEncryptionKey(humanId);
+const { encryptionPublicKey } = await idos.discoverUserEncryptionPublicKey(humanId);
 
 // Report it back to your server
 await yourServer.reportIdosEncryptionPublicKey(encryptionPublicKey);
@@ -103,7 +103,7 @@ const humanId = session.user.humanId
 // Build the human object
 const human = {
   id: humanId,
-  current_public_key: currentPublicKey,
+  recipient_encryption_public_key: currentPublicKey,
 }
 
 // Build the wallet object
@@ -201,7 +201,7 @@ const credentialPayload = {
   id: crypto.randomUUID(),
 
   // user id of the human who is creating the credential.
-  human_id: session.user.humanId,
+  user_id: session.user.humanId,
 
   // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
   // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.

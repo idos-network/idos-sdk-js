@@ -86,7 +86,7 @@ const buildKwilSignerAndGrantee = (
 };
 
 interface idOSGranteeInitParams {
-  encryptionSecret: string;
+  encryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
@@ -109,7 +109,7 @@ export class idOSGrantee {
   grants?: GrantChild;
 
   static async init(_: {
-    encryptionSecret: string;
+    encryptionPrivateKey: string;
     nodeUrl?: string;
     chainId?: string;
     dbId?: string;
@@ -119,7 +119,7 @@ export class idOSGrantee {
   }): Promise<idOSGrantee>;
 
   static async init(_: {
-    encryptionSecret: string;
+    encryptionPrivateKey: string;
     nodeUrl?: string;
     chainId?: string;
     dbId?: string;
@@ -129,7 +129,7 @@ export class idOSGrantee {
   }): Promise<idOSGrantee>;
 
   static async init({
-    encryptionSecret,
+    encryptionPrivateKey,
     nodeUrl = KwilWrapper.defaults.kwilProvider,
     chainId,
     dbId,
@@ -173,7 +173,7 @@ export class idOSGrantee {
     }
 
     return new idOSGrantee(
-      NoncedBox.fromBase64SecretKey(encryptionSecret),
+      NoncedBox.fromBase64SecretKey(encryptionPrivateKey),
       nodeKwil,
       kwilSigner,
       dbId,
@@ -220,12 +220,12 @@ export class idOSGrantee {
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     const credentialCopy = await this.fetchSharedCredentialFromIdos<{
       content: string;
-      encryption_public_key: string;
+      encryptor_public_key: string;
     }>(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
-      credentialCopy.encryption_public_key,
+      credentialCopy.encryptor_public_key,
     );
   }
 
@@ -250,8 +250,8 @@ export class idOSGrantee {
     if (!this.grants) throw new Error("NEAR is not implemented yet");
 
     return this.grants.list({
-      owner: address,
-      grantee: this.grantee,
+      ownerAddress: address,
+      granteeAddress: this.grantee,
     });
   }
 

@@ -15,7 +15,7 @@ const nearGranteeSigner = KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 const idosGrantee = await idOSGrantee.init({
   chainType: "NEAR",
   granteeSigner: nearGranteeSigner,
-  encryptionSecret: ENCRYPTION_SECRET_KEY,
+  encryptionPrivateKey: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;

@@ -208,7 +208,7 @@ function CredentialDetails({
 
   if (!credential.data || !secretKey) return null;
 
-  const result = decrypt(credential.data.content, credential.data.encryption_public_key, secretKey);
+  const result = decrypt(credential.data.content, credential.data.encryptor_public_key, secretKey);
   const content = JSON.parse(result);
 
   const subject = Object.entries(content.credentialSubject).filter(
@@ -328,8 +328,6 @@ function CredentialDetails({
                         <List.Item
                           flexShrink="0"
                           key={key}
-                          // biome-ignore lint/a11y/useSemanticElements: <explanation>
-                          role="button"
                           transition="transform 0.2s"
                           cursor="pointer"
                           _hover={{ transform: "scale(1.02)" }}
@@ -426,7 +424,7 @@ function SearchResults({
               pt="4"
               grow
               label="Owner"
-              value={grant.owner}
+              value={grant.ownerAddress}
               truncate
             />
             <DataListItem
@@ -441,7 +439,7 @@ function SearchResults({
               pt="4"
               grow
               label="Grantee"
-              value={grant.grantee}
+              value={grant.granteeAddress}
               truncate
             />
             <DataListItem

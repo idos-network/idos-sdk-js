@@ -2,15 +2,15 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import type { BackupPasswordInfo } from "../types";
 
 export interface StoredData {
-  encryptionPublicKey?: Uint8Array;
+  userEncryptionPublicKey?: Uint8Array;
   humanId?: string;
   signerAddress?: string;
-  signerPublicKey?: string;
+  signerEncryptionPublicKey?: string;
 }
 
-export interface DiscoverEncryptionKeyResponse {
+export interface DiscoverUserEncryptionPublicKeyResponse {
   humanId: string;
-  encryptionPublicKey: string;
+  userEncryptionPublicKey: string;
 }
 
 export interface EnclaveOptions {
@@ -27,19 +27,18 @@ export interface EnclaveProvider {
   ready(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string,
-    currentUserPublicKey?: string,
+    signerEncryptionPublicKey?: string,
+    currentUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array>;
   store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   updateStore(key: string, value: unknown): Promise<void>;
-  encrypt(
-    message: Uint8Array,
-    receiverPublicKey?: Uint8Array,
-  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
-  decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-  discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse>;
+  encrypt(message: Uint8Array, recipientEncryptionPublicKey?: Uint8Array): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
+  decrypt(message: Uint8Array, senderEncryptionPublicKey?: Uint8Array): Promise<Uint8Array>;
+  discoverUserEncryptionPublicKey(
+    humanId: string,
+  ): Promise<DiscoverUserEncryptionPublicKeyResponse>;
   filterCredentialsByCountries(
     credentials: Record<string, string>[],
     countries: string[],

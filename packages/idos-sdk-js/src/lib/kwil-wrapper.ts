@@ -125,26 +125,14 @@ export class KwilWrapper {
     return res.data?.tx_hash;
   }
 
-  /**
-   * @deprecated
-   *
-   * Use {@link KwilWrapper.getHumanProfile} instead.
-   */
-  async getHumanId(): Promise<string | null> {
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
-
-    return result[0]?.human_id || null;
-  }
-
   async getHumanProfile(): Promise<idOSHuman> {
-    const [human] = (await this.call("get_human", null)) as unknown as [idOSHuman];
+    const [human] = (await this.call("get_user", null)) as unknown as [idOSHuman];
     return human;
   }
 
-  async hasProfile(address: string): Promise<boolean> {
+  async hasProfile(user: string): Promise<boolean> {
     // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const result = (await this.call("has_profile", { address }, undefined, false)) as any;
+    const result = (await this.call("has_profile", { address: user }, undefined, false)) as any;
 
     return !!result[0]?.has_profile;
   }
