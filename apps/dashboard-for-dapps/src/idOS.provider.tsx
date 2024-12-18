@@ -41,7 +41,7 @@ export function Provider({ children }: PropsWithChildren) {
     const _hasProfile = await _instance.hasProfile(address as string);
 
     if (_hasProfile && signer) {
-      // @ts-ignore
+      // @ts-expect-error - TODO: fix this
       await _instance.setSigner("EVM", signer);
     }
   }, [address, signer]);

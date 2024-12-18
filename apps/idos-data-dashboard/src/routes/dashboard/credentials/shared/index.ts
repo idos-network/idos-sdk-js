@@ -9,11 +9,11 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
-  const owner = address?.includes("0x") ? address : publicKey;
+  const ownerAddress = address?.includes("0x") ? address : publicKey;
 
   return useQuery({
     queryKey: ["grants", credentialId],
-    queryFn: () => sdk.grants.list({ owner }),
+    queryFn: () => sdk.grants.list({ ownerAddress }),
     retry: 1,
     select(grants) {
       if (!credentials || !grants) return [];
@@ -34,8 +34,8 @@ export const useRevokeGrant = () => {
   const queryClient = useQueryClient();
 
   return useMutation<{ transactionId: string }, DefaultError, idOSGrant, Ctx>({
-    mutationFn: ({ grantee, dataId, lockedUntil }: idOSGrant) =>
-      sdk.grants.revoke("credentials", dataId, grantee, dataId, lockedUntil),
+    mutationFn: ({ granteeAddress, dataId, lockedUntil }: idOSGrant) =>
+      sdk.grants.revoke("credentials", dataId, granteeAddress, dataId, lockedUntil),
     mutationKey: ["revokeGrant"],
     async onMutate(grant) {
       const previousCredentials =

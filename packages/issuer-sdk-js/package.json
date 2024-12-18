@@ -28,9 +28,9 @@
       "types": "./dist/create-issuer-config.d.ts",
       "import": "./dist/create-issuer-config.js"
     },
-    "./human": {
-      "types": "./dist/human.d.ts",
-      "import": "./dist/human.js"
+    "./user": {
+      "types": "./dist/user.d.ts",
+      "import": "./dist/user.js"
     },
     "./credentials": {
       "types": "./dist/credentials.d.ts",
@@ -65,6 +65,6 @@
     "tweetnacl": "^1.0.3"
   },
   "peerDependencies": {
-    "near-api-js": "3.0.4"
+    "near-api-js": "^3.0.4"
   }
 }

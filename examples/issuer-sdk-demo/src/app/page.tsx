@@ -138,7 +138,7 @@ export default function Home() {
 
       try {
         await createCredentialByWriteGrant(
-          String(clientSDK.auth.currentUser.humanId),
+          String(clientSDK.auth.currentUser.userId),
           clientSDK.auth.currentUser.currentUserPublicKey as string,
         );
         const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
@@ -150,7 +150,7 @@ export default function Home() {
   const handleCreateCredential = () => {
     startCredentialRequestTransition(async () => {
       await createCredentialByPermissionedIssuer(
-        String(clientSDK.auth.currentUser.humanId),
+        String(clientSDK.auth.currentUser.userId),
         clientSDK.auth.currentUser.currentUserPublicKey as string,
       );
       const _credentials = await clientSDK.data.list<idOSCredential>("credentials");

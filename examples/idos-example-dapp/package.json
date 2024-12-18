@@ -30,7 +30,7 @@
     "@idos-network/idos-sdk-types": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
-    "@near-wallet-selector/core": "8.9.10",
+    "@near-wallet-selector/core": "^8.7.0",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
     "@near-wallet-selector/modal-ui-js": "^8.7.0",
@@ -40,6 +40,6 @@
   },
   "peerDependencies": {
     "ethers": "^6.13",
-    "near-api-js": "3.0.4"
+    "near-api-js": "^3.0.4"
   }
 }
