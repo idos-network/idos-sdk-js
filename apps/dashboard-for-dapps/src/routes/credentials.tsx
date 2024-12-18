@@ -4,6 +4,7 @@ import {
   HStack,
   Image,
   List,
+  Show,
   Spinner,
   Stack,
   Text,
@@ -89,8 +90,7 @@ export const useFetchAllCredentials = ({
         }
       });
 
-      const stressPromiseList = Array.from({ length: 500 }, () => promiseList).flat();
-      const results = await Promise.all(stressPromiseList);
+      const results = await Promise.all(promiseList);
       return results.filter((credential): credential is idOSCredential => credential !== null);
     },
     enabled,
@@ -309,7 +309,7 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
         ][];
 
         return (
-          <Stack key={crypto.randomUUID()} gap="6" bg="gray.900" p="6" rounded="md">
+          <Stack key={credential.id} gap="6" bg="gray.900" p="6" rounded="md">
             <DataListRoot orientation="horizontal" divideY="1px">
               {publicFields.map(([key, value]) => (
                 <DataListItem
@@ -343,10 +343,10 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
         );
       })}
 
-      {totalPages > 1 ? (
+      <Show when={totalPages > 1}>
         <Center>
           <PaginationRoot
-            count={totalPages}
+            count={results.length}
             defaultPage={1}
             pageSize={PAGE_SIZE}
             page={page}
@@ -359,7 +359,7 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
             </HStack>
           </PaginationRoot>
         </Center>
-      ) : null}
+      </Show>
 
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
