@@ -14,6 +14,7 @@ import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
+import type Grant from "./grants/grant";
 
 interface InitParams {
   nodeUrl?: string;
@@ -103,6 +104,13 @@ export class idOS {
 
   async hasProfile(user: string): Promise<boolean> {
     return this.kwilWrapper.hasProfile(user);
+  }
+
+  async listGrantedGrants(
+    page: number,
+    size?: number,
+  ): Promise<{ grants: Grant[]; totalCount: number }> {
+    return this.kwilWrapper.getGrantsGranted(page, size);
   }
 
   async reset({ enclave = false } = {}): Promise<void> {
