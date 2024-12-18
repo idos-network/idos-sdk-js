@@ -51,11 +51,9 @@ export const Route = createFileRoute("/credentials")({
   },
 });
 
-export const useFetchAllCredentials = ({
-  enabled,
-  secretKey,
-}: { enabled: boolean; secretKey: string }) => {
+export const useFetchAllCredentials = ({ enabled }: { enabled: boolean }) => {
   const idOS = useIdOS();
+  const [secretKey] = useSecretKey();
 
   return useQuery({
     queryKey: ["credentials", secretKey],
@@ -381,7 +379,7 @@ function Credentials() {
   const { filter = "" } = Route.useSearch();
   const deferredSearchItem = useDeferredValue(filter);
   const [secretKey] = useSecretKey();
-  const credentials = useFetchAllCredentials({ enabled: !!secretKey, secretKey });
+  const credentials = useFetchAllCredentials({ enabled: Boolean(secretKey) });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
