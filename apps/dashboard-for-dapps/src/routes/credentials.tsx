@@ -32,9 +32,9 @@ import {
 import { DataListItem, DataListRoot, EmptyState } from "@idos-network/ui-kit";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDebounce, useToggle } from "@uidotdev/usehooks";
+import { useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import { useSecretKey } from "@/hooks";
@@ -379,7 +379,7 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
 function Credentials() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
-  const debouncedSearchTerm = useDebounce(filter, 300);
+  const deferredSearchItem = useDeferredValue(filter);
   const [secretKey] = useSecretKey();
   const credentials = useFetchAllCredentials({ enabled: !!secretKey, secretKey });
 
@@ -395,13 +395,13 @@ function Credentials() {
 
   const results = useMemo(() => {
     if (!credentials.data) return [];
-    if (!debouncedSearchTerm) return credentials.data;
+    if (!deferredSearchItem) return credentials.data;
 
-    return matchSorter(credentials.data, debouncedSearchTerm, {
+    return matchSorter(credentials.data, deferredSearchItem, {
       keys: ["public_notes", "content"],
       threshold: matchSorter.rankings.CONTAINS,
     });
-  }, [debouncedSearchTerm, credentials.data]);
+  }, [deferredSearchItem, credentials.data]);
 
   return (
     <Container h="100%">
