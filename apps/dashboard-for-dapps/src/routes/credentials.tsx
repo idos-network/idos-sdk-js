@@ -21,6 +21,10 @@ import {
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
+  PaginationItems,
+  PaginationNextTrigger,
+  PaginationPrevTrigger,
+  PaginationRoot,
   RefreshButton,
   SearchField,
 } from "@idos-network/ui-kit";
@@ -38,9 +42,10 @@ import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
 export const Route = createFileRoute("/credentials")({
   component: Credentials,
-  validateSearch: (search): { filter?: string } => {
+  validateSearch: (search): { filter?: string; page?: number } => {
     return {
       filter: (search.filter as string) ?? undefined,
+      page: Number(search.page) || 1,
     };
   },
 });
@@ -255,14 +260,29 @@ function CredentialDetails({
 }
 
 function SearchResults({ results }: { results: idOSCredential[] }) {
+  const navigate = useNavigate({ from: Route.fullPath });
+  const { page = 1 } = Route.useSearch();
   const [credential, setCredential] = useState<idOSCredential | null>(null);
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useSecretKey();
 
+  const PAGE_SIZE = 20;
+  const totalPages = Math.ceil(results.length / PAGE_SIZE);
+  const paginatedResults = results.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   if (!results.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
+
+  const handlePageChange = (newPage: number) => {
+    navigate({
+      search: (prev) => ({
+        ...prev,
+        page: newPage,
+      }),
+    });
+  };
 
   const handleOpenCredentialDetails = async (credential: idOSCredential) => {
     setCredential(credential);
@@ -281,8 +301,8 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
   };
 
   return (
-    <>
-      {results.map((credential) => {
+    <Stack gap="4">
+      {paginatedResults.map((credential) => {
         const publicFields = Object.entries(JSON.parse(credential.public_notes)) as [
           string,
           string,
@@ -322,6 +342,25 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
           </Stack>
         );
       })}
+
+      {totalPages > 1 ? (
+        <Center>
+          <PaginationRoot
+            count={totalPages}
+            defaultPage={1}
+            pageSize={PAGE_SIZE}
+            page={page}
+            onPageChange={(details) => handlePageChange(details.page)}
+          >
+            <HStack>
+              <PaginationPrevTrigger />
+              <PaginationItems />
+              <PaginationNextTrigger />
+            </HStack>
+          </PaginationRoot>
+        </Center>
+      ) : null}
+
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
@@ -333,7 +372,7 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
           toggle: toggleCredentialDetails,
         }}
       />
-    </>
+    </Stack>
   );
 }
 
@@ -349,6 +388,7 @@ function Credentials() {
     navigate({
       search: {
         filter: search,
+        page: 1,
       },
     });
   };
