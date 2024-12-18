@@ -3,7 +3,7 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 
 import type { BackupPasswordInfo } from "../types";
 import type {
-  DiscoverEncryptionKeyResponse,
+  DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
   StoredData,
@@ -35,22 +35,22 @@ export class IframeEnclave implements EnclaveProvider {
   async ready(
     humanId?: string,
     signerAddress?: string,
-    signerPublicKey?: string,
+    signerEncryptionPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
-    let { encryptionPublicKey } = (await this.#requestToEnclave({
+    let { userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
         humanId,
         signerAddress,
-        signerPublicKey,
+        signerEncryptionPublicKey,
         expectedUserEncryptionPublicKey,
       },
     })) as StoredData;
 
-    while (!encryptionPublicKey) {
+    while (!userEncryptionPublicKey) {
       this.#showEnclave();
       try {
-        encryptionPublicKey = (await this.#requestToEnclave({
+        userEncryptionPublicKey = (await this.#requestToEnclave({
           keys: {},
         })) as Uint8Array;
       } catch (e) {
@@ -60,7 +60,7 @@ export class IframeEnclave implements EnclaveProvider {
       }
     }
 
-    return encryptionPublicKey;
+    return userEncryptionPublicKey;
   }
 
   async store(key: string, value: string): Promise<string> {
@@ -239,15 +239,17 @@ export class IframeEnclave implements EnclaveProvider {
     }
   }
 
-  async discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse> {
+  async discoverUserEncryptionPublicKey(
+    humanId: string,
+  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
     if (this.options.mode !== "new")
-      throw new Error("You can only call discoverUserEncryptionKey when mode is 'new'.");
+      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
 
-    const encryptionPublicKey = await this.ready(humanId);
+    const userEncryptionPublicKey = await this.ready(humanId);
 
     return {
       humanId,
-      encryptionPublicKey: base64Encode(encryptionPublicKey),
+      userEncryptionPublicKey: base64Encode(userEncryptionPublicKey),
     };
   }
 }

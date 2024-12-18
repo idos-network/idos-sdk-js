@@ -48,10 +48,10 @@ export class Enclave {
     });
   }
 
-  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
+  storage(humanId, signerAddress, signerEncryptionPublicKey, expectedUserEncryptionPublicKey) {
     humanId && this.store.set("human-id", humanId);
     signerAddress && this.store.set("signer-address", signerAddress);
-    signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
+    signerEncryptionPublicKey && this.store.set("signer-public-key", signerEncryptionPublicKey);
 
     const litAttrs = this.store.get("litAttrs");
     this.handlstoreableAttributes(litAttrs);
@@ -250,10 +250,6 @@ export class Enclave {
     }
   }
 
-  messageParent(message) {
-    window.parent.postMessage(message, this.parentOrigin);
-  }
-
   async filterCredentialsByCountries(credentials, countries) {
     const decrypted = await Promise.all(
       credentials.map(async (credential) => ({
@@ -261,7 +257,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),
@@ -287,7 +283,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),
@@ -331,7 +327,7 @@ export class Enclave {
           receiverPublicKey,
           senderPublicKey,
           signerAddress,
-          signerPublicKey,
+          signerEncryptionPublicKey,
           mode,
           theme,
           credentials,
@@ -354,7 +350,7 @@ export class Enclave {
           storage: () => [
             humanId,
             signerAddress,
-            signerPublicKey,
+            signerEncryptionPublicKey,
             expectedUserEncryptionPublicKey,
             litAttrs,
             userWallets,

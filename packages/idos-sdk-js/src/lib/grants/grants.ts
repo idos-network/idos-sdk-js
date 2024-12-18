@@ -55,24 +55,24 @@ export class Grants {
     type,
     signer,
     accountId,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     type: "NEAR";
     signer: Wallet;
     accountId: string;
-    publicKey: string;
+    nearWalletPublicKey: string;
   }): Promise<ConnectedGrants>;
 
   async connect({
     type,
     signer,
     accountId,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     type: SignerType;
     signer: Wallet | Signer;
     accountId?: string;
-    publicKey?: string;
+    nearWalletPublicKey?: string;
   }): Promise<ConnectedGrants> {
     let child: EvmGrants | NearGrants;
 
@@ -82,12 +82,13 @@ export class Grants {
         break;
       case "NEAR":
         if (accountId === undefined) throw new Error("accountId required for NEAR signers");
-        if (publicKey === undefined) throw new Error("publicKey required for NEAR signers");
+        if (nearWalletPublicKey === undefined)
+          throw new Error("publicKey required for NEAR signers");
         child = await NearGrants.init({
           accountId,
           signer: signer as Wallet,
           options: this.nearGrantsOptions,
-          publicKey,
+          nearWalletPublicKey,
         });
         break;
       default:
@@ -99,8 +100,8 @@ export class Grants {
 
   async list(
     _args: {
-      owner?: string;
-      grantee?: string;
+      ownerAddress?: string;
+      granteeAddress?: string;
       dataId?: string;
     } = {},
   ): Promise<Grant[]> {
@@ -112,19 +113,19 @@ export class Grants {
     _recordId: string,
     _address: string,
     _lockedUntil: number,
-    _receiverPublicKey: string,
+    _receiverEncryptionPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call idOS.setSigner first.");
+    throw new Error("Call `idOS.setSigner` first.");
   }
 
   async revoke(
     _tableName: string,
     _recordId: string,
-    _grantee: string,
+    _granteeAddress: string,
     _dataId: string,
     _lockedUntil: number,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call idOS.setSigner first.");
+    throw new Error("Call `idOS.setSigner` first.");
   }
 
   async shareMatchingEntry(
@@ -134,11 +135,11 @@ export class Grants {
       pick: Record<string, string>;
       omit: Record<string, string>;
     },
-    _address: string,
+    _granteeAddress: string,
     _lockedUntil: number,
-    _receiverPublicKey: string,
+    _receiverEncryptionPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call idOS.setSigner first.");
+    throw new Error("Call `idOS.setSigner` first.");
   }
 }
 
@@ -167,14 +168,14 @@ class ConnectedGrants extends Grants {
   async create(
     tableName: string,
     recordId: string,
-    address: string,
+    granteeAddress: string,
     lockedUntil: number,
-    receiverPublicKey: string,
+    granteeEncryptionPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
-    const share = await this.data.share(tableName, recordId, receiverPublicKey);
+    const share = await this.data.share(tableName, recordId, granteeEncryptionPublicKey);
 
     return await this.#child.create({
-      grantee: address,
+      granteeAddress,
       dataId: share.id,
       lockedUntil: lockedUntil,
     });
@@ -187,9 +188,9 @@ class ConnectedGrants extends Grants {
       pick: Record<string, string>;
       omit: Record<string, string>;
     },
-    address: string,
+    granteeAddress: string,
     lockedUntil: number,
-    receiverPublicKey: string,
+    receiverEncryptionPublicKey: string,
   ): Promise<{ grant: Grant; transactionId: string }> {
     const allEntries = (await this.data.list(tableName)) as unknown as idOSCredential[];
 
@@ -225,10 +226,14 @@ class ConnectedGrants extends Grants {
     if (!eligibleEntries.length) throw new Error("No matching credentials");
 
     const selectedEntry = eligibleEntries[0];
-    const { id: dataId } = await this.data.share(tableName, selectedEntry.id, receiverPublicKey);
+    const { id: dataId } = await this.data.share(
+      tableName,
+      selectedEntry.id,
+      receiverEncryptionPublicKey,
+    );
 
     return await this.#child.create({
-      grantee: address,
+      granteeAddress,
       dataId,
       lockedUntil,
     });
@@ -237,13 +242,13 @@ class ConnectedGrants extends Grants {
   async revoke(
     tableName: string,
     recordId: string,
-    grantee: string,
+    granteeAddress: string,
     dataId: string,
     lockedUntil: number,
   ): Promise<{ grant: Grant; transactionId: string }> {
     await this.data.unshare(tableName, recordId);
 
-    return this.#child.revoke({ grantee, dataId, lockedUntil });
+    return this.#child.revoke({ granteeAddress, dataId, lockedUntil });
   }
 
   async messageForCreateBySignature(grant: Grant) {
