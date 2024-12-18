@@ -60,7 +60,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
     setHasProfile(profile);
 
     if (profile) {
-      // @ts-expect-error
+      // @ts-ignore
       await _sdk.setSigner(signer.type, signer.value);
       const _pk = _sdk.auth.currentUser.publicKey;
 
