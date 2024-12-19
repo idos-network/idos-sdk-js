@@ -49,7 +49,6 @@ export interface IssuerConfig {
   kwilClient: NodeKwil;
   kwilSigner: KwilSigner;
   signingKeyPair: nacl.SignKeyPair;
-  encryptionKeyPair: nacl.SignKeyPair;
 }
 
 type CreateIssuerConfigParams = {
@@ -57,7 +56,6 @@ type CreateIssuerConfigParams = {
   dbId?: string;
   nodeUrl: string;
   signingKeyPair: nacl.SignKeyPair;
-  encryptionKeyPair: nacl.BoxKeyPair;
 };
 
 export async function createIssuerConfig(params: CreateIssuerConfigParams): Promise<IssuerConfig> {
@@ -83,6 +81,5 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
     }),
     kwilSigner: createKwilSigner(params.signingKeyPair),
     signingKeyPair: params.signingKeyPair,
-    encryptionKeyPair: params.encryptionKeyPair,
   };
 }

@@ -1,8 +1,9 @@
+import { base64Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
+
 import type { BackupPasswordInfo } from "../types";
 import type {
-  DiscoverEncryptionKeyResponse,
+  DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
   StoredData,
@@ -32,24 +33,24 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async ready(
-    humanId?: string,
+    userId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
-    let { encryptionPublicKey } = (await this.#requestToEnclave({
+    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.#requestToEnclave({
       storage: {
-        humanId,
+        userId,
         signerAddress,
         signerPublicKey,
         expectedUserEncryptionPublicKey,
       },
     })) as StoredData;
 
-    while (!encryptionPublicKey) {
+    while (!userEncryptionPublicKey) {
       this.#showEnclave();
       try {
-        encryptionPublicKey = (await this.#requestToEnclave({
+        userEncryptionPublicKey = (await this.#requestToEnclave({
           keys: {},
         })) as Uint8Array;
       } catch (e) {
@@ -59,7 +60,7 @@ export class IframeEnclave implements EnclaveProvider {
       }
     }
 
-    return encryptionPublicKey;
+    return userEncryptionPublicKey;
   }
 
   async store(key: string, value: string): Promise<string> {
@@ -83,10 +84,13 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
-  async encrypt(message: Uint8Array, receiverPublicKey: Uint8Array): Promise<Uint8Array> {
+  async encrypt(
+    message: Uint8Array,
+    receiverPublicKey: Uint8Array,
+  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
     return this.#requestToEnclave({
       encrypt: { message, receiverPublicKey },
-    }) as Promise<Uint8Array>;
+    }) as Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
@@ -235,15 +239,17 @@ export class IframeEnclave implements EnclaveProvider {
     }
   }
 
-  async discoverUserEncryptionKey(humanId: string): Promise<DiscoverEncryptionKeyResponse> {
+  async discoverUserEncryptionPublicKey(
+    userId: string,
+  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
     if (this.options.mode !== "new")
-      throw new Error("You can only call discoverUserEncryptionKey when mode is 'new'.");
+      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
 
-    const encryptionPublicKey = await this.ready(humanId);
+    const userEncryptionPublicKey = await this.ready(userId);
 
     return {
-      humanId,
-      encryptionPublicKey: Base64Codec.encode(encryptionPublicKey),
+      userId,
+      userEncryptionPublicKey: base64Encode(userEncryptionPublicKey),
     };
   }
 }

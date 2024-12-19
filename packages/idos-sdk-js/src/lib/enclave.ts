@@ -1,12 +1,11 @@
+import { base64Decode, base64Encode, utf8Decode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
 import type { BackupPasswordInfo } from "./types";
 
 export class Enclave {
-  encryptionPublicKey?: Uint8Array;
+  userEncryptionPublicKey?: Uint8Array;
 
   constructor(
     public readonly auth: Auth,
@@ -18,9 +17,10 @@ export class Enclave {
   }
 
   async ready(): Promise<Uint8Array> {
-    const { humanId, address, publicKey, currentUserPublicKey } = this.auth.currentUser;
+    const { userId, userAddress, nearWalletPublicKey, currentUserPublicKey } =
+      this.auth.currentUser;
 
-    if (!humanId) throw new Error("Can't operate on a user that has no profile.");
+    if (!userId) throw new Error("Can't operate on a user that has no profile.");
 
     const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
     const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();
@@ -28,36 +28,46 @@ export class Enclave {
     await this.provider.updateStore("litAttrs", litAttrs);
     await this.provider.updateStore("new-user-wallets", userWallets);
 
-    if (this.encryptionPublicKey) return this.encryptionPublicKey;
+    if (this.userEncryptionPublicKey) return this.userEncryptionPublicKey;
 
-    this.encryptionPublicKey = await this.provider.ready(
-      humanId,
-      address,
-      publicKey,
+    this.userEncryptionPublicKey = await this.provider.ready(
+      userId,
+      userAddress,
+      nearWalletPublicKey,
       currentUserPublicKey,
     );
 
-    return this.encryptionPublicKey;
+    return this.userEncryptionPublicKey;
   }
 
-  async encrypt(message: string, receiverPublicKey?: string): Promise<string> {
-    if (!this.encryptionPublicKey) await this.ready();
+  async encrypt(
+    message: string,
+    recipientEncryptionPublicKey?: string,
+  ): Promise<{ content: string; encryptorPublicKey: string }> {
+    if (!this.userEncryptionPublicKey) await this.ready();
 
-    return Base64Codec.encode(
-      await this.provider.encrypt(
-        Utf8Codec.encode(message),
-        receiverPublicKey === undefined ? undefined : Base64Codec.decode(receiverPublicKey),
-      ),
+    const { content, encryptorPublicKey } = await this.provider.encrypt(
+      utf8Encode(message),
+      recipientEncryptionPublicKey === undefined
+        ? undefined
+        : base64Decode(recipientEncryptionPublicKey),
     );
+
+    return {
+      content: base64Encode(content),
+      encryptorPublicKey: base64Encode(encryptorPublicKey),
+    };
   }
 
-  async decrypt(message: string, senderPublicKey?: string): Promise<string> {
-    if (!this.encryptionPublicKey) await this.ready();
+  async decrypt(message: string, senderEncryptionPublicKey?: string): Promise<string> {
+    if (!this.userEncryptionPublicKey) await this.ready();
 
-    return Utf8Codec.decode(
+    return utf8Decode(
       await this.provider.decrypt(
-        Base64Codec.decode(message),
-        senderPublicKey === undefined ? undefined : Base64Codec.decode(senderPublicKey),
+        base64Decode(message),
+        senderEncryptionPublicKey === undefined
+          ? undefined
+          : base64Decode(senderEncryptionPublicKey),
       ),
     );
   }
@@ -75,7 +85,7 @@ export class Enclave {
   }
 
   async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
-    if (!this.encryptionPublicKey) await this.ready();
+    if (!this.userEncryptionPublicKey) await this.ready();
     return await this.provider.filterCredentialsByCountries(credentials, countries);
   }
 
@@ -86,7 +96,7 @@ export class Enclave {
       omit: Record<string, string>;
     },
   ): Promise<idOSCredential[]> {
-    if (!this.encryptionPublicKey) await this.ready();
+    if (!this.userEncryptionPublicKey) await this.ready();
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
@@ -96,7 +106,7 @@ export class Enclave {
     return this.provider.backupPasswordOrSecret(callbackFn);
   }
 
-  async discoverUserEncryptionKey(humanId: string) {
-    return this.provider.discoverUserEncryptionKey(humanId);
+  async discoverUserEncryptionPublicKey(userId: string) {
+    return this.provider.discoverUserEncryptionPublicKey(userId);
   }
 }

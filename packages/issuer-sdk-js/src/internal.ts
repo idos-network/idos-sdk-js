@@ -1,5 +1,5 @@
+import { base64Encode } from "@idos-network/codecs";
 import { Utils } from "@kwilteam/kwil-js";
-import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
 
 export function ensureEntityId<T extends { id?: string }>(entity: T): { id: string } & T {
@@ -29,9 +29,9 @@ export function encryptContent(
     throw Error(
       `Couldn't encrypt. ${JSON.stringify(
         {
-          message: Base64Codec.encode(message),
-          nonce: Base64Codec.encode(nonce),
-          receiverPublicKey: Base64Codec.encode(receiverPublicKey),
+          message: base64Encode(message),
+          nonce: base64Encode(nonce),
+          receiverPublicKey: base64Encode(receiverPublicKey),
         },
         null,
         2,
@@ -42,5 +42,5 @@ export function encryptContent(
   fullMessage.set(nonce, 0);
   fullMessage.set(encrypted, nonce.length);
 
-  return Base64Codec.encode(fullMessage);
+  return base64Encode(fullMessage);
 }

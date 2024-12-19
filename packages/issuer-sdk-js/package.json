@@ -28,9 +28,9 @@
       "types": "./dist/create-issuer-config.d.ts",
       "import": "./dist/create-issuer-config.js"
     },
-    "./human": {
-      "types": "./dist/human.d.ts",
-      "import": "./dist/human.js"
+    "./user": {
+      "types": "./dist/user.d.ts",
+      "import": "./dist/user.js"
     },
     "./credentials": {
       "types": "./dist/credentials.d.ts",
@@ -58,10 +58,8 @@
     "vitest": "^0.31.4"
   },
   "dependencies": {
+    "@idos-network/codecs": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/hex": "^2.0.0",
-    "@stablelib/utf8": "^1.0.1",
     "es-toolkit": "^1.23.0",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"

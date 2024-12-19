@@ -48,8 +48,8 @@ export class Enclave {
     });
   }
 
-  storage(humanId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
-    humanId && this.store.set("human-id", humanId);
+  storage(userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
+    userId && this.store.set("user-id", userId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
@@ -59,11 +59,11 @@ export class Enclave {
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
-    this.humanId = humanId;
+    this.userId = userId;
 
     if (!this.isAuthorizedOrigin) {
       return {
-        humanId: "",
+        userId: "",
         encryptionPublicKey: "",
         signerAddress: "",
         signerPublicKey: "",
@@ -71,7 +71,8 @@ export class Enclave {
     }
 
     return {
-      humanId: this.humanId ?? this.store.get("human-id"),
+      // TODO Remove human-user migration code.
+      userId: this.userId ?? this.store.get("user-id") ?? this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
       signerAddress: this.store.get("signer-address"),
       signerPublicKey: this.store.get("signer-public-key"),
@@ -125,12 +126,13 @@ export class Enclave {
         try {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else if (preferredAuthMethod) {
-            ({ password, duration } = await this.#openDialog(preferredAuthMethod));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog("auth", {
-              expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-            }));
+            ({ password, duration, credentialId } = await this.#openDialog(
+              preferredAuthMethod || "auth",
+              {
+                expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+              },
+            ));
           }
         } catch (e) {
           return reject(e);
@@ -156,7 +158,7 @@ export class Enclave {
 
   async ensureKeyPair() {
     const password = this.store.get("password");
-    const salt = this.humanId;
+    const salt = this.userId;
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -171,7 +173,8 @@ export class Enclave {
 
   encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
     const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const encrypted = nacl.box(message, nonce, receiverPublicKey, this.keyPair.secretKey);
+    const ephemeralKeyPair = nacl.box.keyPair();
+    const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
 
     if (encrypted === null)
       throw Error(
@@ -191,7 +194,7 @@ export class Enclave {
     fullMessage.set(nonce, 0);
     fullMessage.set(encrypted, nonce.length);
 
-    return fullMessage;
+    return { content: fullMessage, encryptorPublicKey: ephemeralKeyPair.publicKey };
   }
 
   async decrypt(fullMessage, senderPublicKey) {
@@ -248,10 +251,6 @@ export class Enclave {
     }
   }
 
-  messageParent(message) {
-    window.parent.postMessage(message, this.parentOrigin);
-  }
-
   async filterCredentialsByCountries(credentials, countries) {
     const decrypted = await Promise.all(
       credentials.map(async (credential) => ({
@@ -259,7 +258,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),
@@ -285,7 +284,7 @@ export class Enclave {
         content: Utf8Codec.decode(
           await this.decrypt(
             Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryption_public_key),
+            Base64Codec.decode(credential.encryptor_public_key),
           ),
         ),
       })),
@@ -324,7 +323,7 @@ export class Enclave {
         const [requestName, requestData] = Object.entries(event.data).flat();
         const {
           fullMessage,
-          humanId,
+          userId,
           message,
           receiverPublicKey,
           senderPublicKey,
@@ -350,7 +349,7 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [
-            humanId,
+            userId,
             signerAddress,
             signerPublicKey,
             expectedUserEncryptionPublicKey,
@@ -368,7 +367,7 @@ export class Enclave {
         const response = await this[requestName](...paramBuilder());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
-        console.warn("catch", error);
+        console.error("catch", error);
         event.ports[0].postMessage({ error });
       } finally {
         this.unlockButton.style.display = "none";
@@ -399,7 +398,7 @@ export class Enclave {
   }
 
   async #openDialog(intent, message) {
-    if (!this.humanId) throw new Error("Can't open dialog without humanId");
+    if (!this.userId) throw new Error("Can't open dialog without userId");
     const width = 600;
     const height =
       this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
@@ -415,7 +414,7 @@ export class Enclave {
       .map((feat) => feat.join("="))
       .join(",");
 
-    const dialogURL = new URL(`/dialog.html?humanId=${this.humanId}`, window.location.origin);
+    const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
     await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));
@@ -427,6 +426,8 @@ export class Enclave {
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
+          port1.close();
+          this.dialog.close();
           return reject(error);
         }
 

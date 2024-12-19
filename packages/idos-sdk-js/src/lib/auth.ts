@@ -1,21 +1,30 @@
+import {
+  base64Decode,
+  binaryWriteUint16BE,
+  borshSerialize,
+  bytesConcat,
+  utf8Decode,
+} from "@idos-network/codecs";
+import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
-import * as Base64Codec from "@stablelib/base64";
-import * as BinaryCodec from "@stablelib/binary";
-import * as BytesCodec from "@stablelib/bytes";
-import * as Utf8Codec from "@stablelib/utf8";
-import * as BorshCodec from "borsh";
 import type { Signer } from "ethers";
 
-import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
 
 export interface AuthUser {
-  humanId: string | null;
-  address: string;
-  publicKey?: string;
+  userId: string | null;
+  userAddress: string;
+  /**
+   * The public key of the wallet that was used to sign the message.
+   * It's only available when the `signer` is a NEAR wallet.
+   */
+  nearWalletPublicKey?: string;
+  /**
+   * The derived public key of the user from the password / passkey.
+   */
   currentUserPublicKey?: string;
 }
 
@@ -67,12 +76,12 @@ export class Auth {
       signatureType: "secp256k1_ep",
     });
 
-    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { recipient_encryption_public_key, id } = await this.kwilWrapper.getUserProfile();
 
     this.user = {
-      humanId: id,
-      currentUserPublicKey: current_public_key,
-      address: currentAddress,
+      userId: id,
+      currentUserPublicKey: recipient_encryption_public_key,
+      userAddress: currentAddress,
     };
   }
 
@@ -113,7 +122,7 @@ export class Auth {
             nonce,
             message,
             callbackUrl,
-          });
+          } as SignedMessage);
         }
         const callbackUrl = window.location.href;
         const nonce = Buffer.from(new Nonce(32).clampUTF8);
@@ -149,7 +158,7 @@ export class Auth {
 
     const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
       // biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
-      if (typeof message !== "string") message = Utf8Codec.decode(message);
+      if (typeof message !== "string") message = utf8Decode(message);
       if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
       const nonceSuggestion = Buffer.from(new Nonce(32).bytes);
@@ -188,12 +197,12 @@ export class Auth {
         callbackUrl,
       };
 
-      const nep413BorshPayload = BorshCodec.serialize(nep413BorschSchema, nep413BorshParams);
+      const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
 
-      return BytesCodec.concat(
-        BinaryCodec.writeUint16BE(nep413BorshPayload.length),
+      return bytesConcat(
+        binaryWriteUint16BE(nep413BorshPayload.length),
         nep413BorshPayload,
-        Base64Codec.decode(signature),
+        base64Decode(signature),
       );
     };
 
@@ -203,13 +212,13 @@ export class Auth {
       signatureType: "nep413",
     });
 
-    const { current_public_key, id } = await this.kwilWrapper.getHumanProfile();
+    const { recipient_encryption_public_key, id } = await this.kwilWrapper.getUserProfile();
 
     this.user = {
-      humanId: id,
-      currentUserPublicKey: current_public_key,
-      address: currentAddress,
-      publicKey,
+      userId: id,
+      currentUserPublicKey: recipient_encryption_public_key,
+      userAddress: currentAddress,
+      nearWalletPublicKey: publicKey,
     };
   }
 }

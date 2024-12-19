@@ -6,7 +6,7 @@ import { scrypt } from "scrypt-js";
  *    Unicode normalization of input strigs
  *    NFKC: compatibility decomposition followed by canonical composition
  * validateSalt
- *    UUID v4 format (idOS human IDs)
+ *    UUID v4 format (idOS user IDs)
  * n, r, p
  *    CPU/RAM cost (higher = costlier)
  *    n: iteration count

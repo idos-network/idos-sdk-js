@@ -1,4 +1,4 @@
-import { idOSGrantee } from "@idos-network/idos-sdk-server-dapp";
+import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import { ethers } from "ethers";
 
 /* global crypto */
@@ -19,7 +19,7 @@ const evmGranteeSigner = new ethers.Wallet(
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
   granteeSigner: evmGranteeSigner,
-  encryptionSecret: ENCRYPTION_SECRET_KEY,
+  recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
