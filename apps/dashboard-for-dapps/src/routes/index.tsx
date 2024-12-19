@@ -11,7 +11,16 @@ import {
   Text,
   chakra,
 } from "@chakra-ui/react";
+
 import type { idOSCredential } from "@idos-network/idos-sdk";
+import { skipToken, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useDebounce, useToggle } from "@uidotdev/usehooks";
+import { matchSorter } from "match-sorter";
+import { useMemo, useState } from "react";
+import { useAccount } from "wagmi";
+
+import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
   Button,
   DataListItem,
@@ -27,15 +36,6 @@ import {
   RefreshButton,
   SearchField,
 } from "@/components/ui";
-import type { idOSCredential } from "@idos-network/idos-sdk";
-import { skipToken, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useDebounce, useToggle } from "@uidotdev/usehooks";
-import { matchSorter } from "match-sorter";
-import { useMemo, useState } from "react";
-import { useAccount } from "wagmi";
-
-import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
