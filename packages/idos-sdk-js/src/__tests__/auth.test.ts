@@ -6,17 +6,16 @@ import { Store } from "../../../idos-store";
 import { TestKwilClient } from "./test-kwil-client";
 
 let auth: Auth;
-const humanId = "human-id";
+const userId = "user-id";
 const currentUserPublicKey = "<PUBLIC_KEY>";
 
 describe("auth", () => {
   beforeEach(() => {
     auth = new Auth(new KwilWrapper(new TestKwilClient()), new Store());
 
-    auth.kwilWrapper.getHumanId = vi.fn().mockResolvedValue("human-id");
-    auth.kwilWrapper.getHumanProfile = vi.fn().mockResolvedValue({
-      current_public_key: currentUserPublicKey,
-      id: humanId,
+    auth.kwilWrapper.getUserProfile = vi.fn().mockResolvedValue({
+      recipient_encryption_public_key: currentUserPublicKey,
+      id: userId,
     });
     auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);
     auth.kwilWrapper.hasProfile = vi.fn().mockResolvedValue(true);
@@ -33,14 +32,14 @@ describe("auth", () => {
 
   test("should set a user from an EVM signer", async () => {
     const signer = Wallet.createRandom();
-    const address = await signer.getAddress();
+    const userAddress = await signer.getAddress();
 
     await auth.setEvmSigner(signer);
 
     expect(auth.currentUser).toEqual({
-      humanId,
+      userId,
       currentUserPublicKey,
-      address,
+      userAddress,
     });
   });
 

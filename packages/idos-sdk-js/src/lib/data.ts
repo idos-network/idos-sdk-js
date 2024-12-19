@@ -76,18 +76,19 @@ export class Data {
     records: T[],
     synchronous?: boolean,
   ) {
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      receiverPublicKey = receiverPublicKey ?? base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       for (const record of records) {
         Object.assign(
           record,
           await this.#buildInsertableIDOSCredential(
-            record.human_id,
+            record.user_id,
             record.public_notes,
             record.content,
-            receiverPublicKey, // Encryption
+            recipientEncryptionPublicKey,
           ),
         );
       }
@@ -113,10 +114,10 @@ export class Data {
     synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
     const name = `add_${this.singularize(
-      tableName === "human_attributes" ? "attributes" : tableName,
+      tableName === "user_attributes" ? "attributes" : tableName,
     )}`;
 
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
 
     const inputs: string[] = ((await this.kwilWrapper.schema) as AnyRecord).data.actions
       .find((action: AnyRecord) => action.name === name)
@@ -129,14 +130,15 @@ export class Data {
     }
 
     if (tableName === "credentials") {
-      receiverPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          (record as AnyRecord).human_id,
+          (record as AnyRecord).user_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
-          receiverPublicKey, // Encryption
+          recipientEncryptionPublicKey,
         ),
       );
     }
@@ -170,7 +172,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
-        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+        record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
       return record;
@@ -202,7 +204,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
-        record.content = await this.enclave.decrypt(record.content, record.encryption_public_key);
+        record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
       return record;
@@ -257,21 +259,23 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.enclave.encryptionPublicKey) await this.enclave.ready();
+    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready();
 
-    let receiverPublicKey: string | undefined;
+    let recipientEncryptionPublicKey: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      receiverPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
+
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           record.public_notes,
           record.content,
-          receiverPublicKey, // Encryption
+          recipientEncryptionPublicKey,
         ),
       );
     }
@@ -289,7 +293,7 @@ export class Data {
   async share(
     tableName: string,
     recordId: string,
-    receiverPublicKey: string,
+    granteeRecipientEncryptionPublicKey: string,
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
@@ -301,10 +305,10 @@ export class Data {
       Object.assign(
         record,
         await this.#buildInsertableIDOSCredential(
-          record.human_id,
+          record.user_id,
           "",
           record.content,
-          receiverPublicKey, // Encryption
+          granteeRecipientEncryptionPublicKey,
         ),
       );
     }
@@ -335,34 +339,38 @@ export class Data {
     return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(grantee: string, synchronous?: boolean) {
+  async addWriteGrant(granteeAddress: string, synchronous?: boolean) {
     return await this.kwilWrapper.execute(
       "add_write_grant",
       [
         {
-          wg_grantee: grantee,
+          wg_grantee_wallet_identifier: granteeAddress,
         },
       ],
-      `Grant ${grantee} write access to your idOS credentials`,
+      `Grant ${granteeAddress} write access to your idOS credentials`,
       synchronous,
     );
   }
 
-  async hasWriteGrantGivenBy(humanId: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_by", { human_id: humanId });
+  async hasWriteGrantGivenBy(userId: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_by", { user_id: userId });
   }
 
-  async hasWriteGrantGivenTo(grantee: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_to", { grantee });
+  async hasWriteGrantGivenTo(granteeAddress: string) {
+    return await this.kwilWrapper.call("has_write_grant_given_to", {
+      wg_grantee_wallet_identifier: granteeAddress,
+    });
   }
 
   async #buildInsertableIDOSCredential(
-    humanId: string,
+    userId: string,
     publicNotes: string,
     plaintextContent: string,
-    receiverEncryptionPublicKey: string,
+    receiverEncryptionPublicKey: string | undefined,
   ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
+
+    if (!receiverEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
     const { content, encryptorPublicKey } = await this.enclave.encrypt(
       plaintextContent,
@@ -374,7 +382,7 @@ export class Data {
     );
 
     return {
-      human_id: humanId,
+      user_id: userId,
       content,
 
       public_notes: publicNotes,
@@ -388,7 +396,7 @@ export class Data {
       ),
 
       issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
-      encryption_public_key: isPresent(encryptorPublicKey),
+      encryptor_public_key: isPresent(encryptorPublicKey),
     };
   }
 }

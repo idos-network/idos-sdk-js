@@ -29,7 +29,7 @@
   },
   "peerDependencies": {
     "ethers": "^6.12",
-    "near-api-js": "3.0.4"
+    "near-api-js": "^3.0"
   },
   "peerDependenciesMeta": {
     "ethers": {
@@ -43,7 +43,7 @@
     "@dotenvx/dotenvx": "^1.6.4",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@near-js/types": "^0.2.1",
-    "@near-wallet-selector/core": "8.9.10",
+    "@near-wallet-selector/core": "^8.7.5",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",

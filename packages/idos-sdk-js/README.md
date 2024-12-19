@@ -199,7 +199,7 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ### The `setSigner` flow and supported wallets
 
 ```js
-const { humanId } = await idos.setSigner("EVM", signer);
+const { userId } = await idos.setSigner("EVM", signer);
 ```
 
 Besides `hasProfile`, all other queries to idOS nodes require a valid signature. These are performed by your user's wallet, whose signer must be passed to the SDK via the `setSigner` method. Your user's wallet might need to be triggered, so you should be mindful of when in your user's journey you call this method.
@@ -267,7 +267,7 @@ const credential = await idos.data.get(
 
 const content = await idos.enclave.decrypt(
   credential.content,
-  credential.encryption_public_key,
+  credential.encryptor_public_key,
 )
 ```
 
@@ -517,7 +517,7 @@ const address = (await signer.getAccounts())[0].accountId
 ```js
 const hasProfile = await idos.hasProfile(address);
 if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
-const { humanId } = await idos.setSigner(CHAIN_TYPE, signer);
+const { userId } = await idos.setSigner(CHAIN_TYPE, signer);
 ```
 
 ### Credentials
