@@ -125,7 +125,7 @@ export async function createCredentialByGrant(
 }
 
 type ShareCredentialByGrantParams = BaseCredentialParams & {
-  grantee: string;
+  granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
 };
@@ -135,7 +135,7 @@ export async function shareCredentialByGrant(
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
-    grantee: params.grantee,
+    grantee: params.granteeAddress,
     locked_until: params.lockedUntil,
     original_credential_id: params.originalCredentialId,
   };
@@ -146,6 +146,8 @@ export async function shareCredentialByGrant(
 
   if (payload.public_notes !== "")
     throw new Error("shared credentials cannot have public_notes, it must be an empty string");
+
+  if (!params.granteeAddress) throw new Error("`granteeAddress` is required");
 
   await kwilClient.execute(
     {
