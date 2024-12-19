@@ -82,10 +82,10 @@ export function PasswordForm({
   onSuccess,
   store,
   encryptionPublicKey,
-  humanId,
+  userId,
 }: MethodProps<{ password: string; duration: number }> & {
   encryptionPublicKey?: string;
-  humanId: string | null;
+  userId: string | null;
 }) {
   const password = useSignal("");
   const duration = useSignal(7);
@@ -96,7 +96,8 @@ export function PasswordForm({
   const litCipher = store.get("lit-cipher-text");
 
   async function derivePublicKeyFromPassword(password: string) {
-    const salt = store.get("human-id") || humanId;
+    // TODO Remove human-user migration code.
+    const salt = store.get("user-id") || store.get("human-id") || userId;
     const secretKey = await idOSKeyDerivation({ password, salt });
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);

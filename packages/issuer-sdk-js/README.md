@@ -31,37 +31,37 @@ const issuerConfig = await createIssuerConfig({
 });
 ```
 
-## Creating a human profile
+## Creating a user profile
 
 This procedure can only be done by a Permissioned Issuer. Get in touch with us at engineering@idos.network if you're interested in being one.
 
-To create a human profile in idOS, you need:
-1. **A wallet address** associated with the human.
+To create a user profile in idOS, you need:
+1. **A wallet address** associated with the user.
 2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
 
-### Human Creation Process
-<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/issuer-sdk-js/assets/add-user.drawio.svg" alt="Human Creation Process" width="100%">
+### User Creation Process
+<img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/issuer-sdk-js/assets/add-user.drawio.svg" alt="User Creation Process" width="100%">
 
 
-#### Step 1: Decide on a human id
+#### Step 1: Decide on a user id
 
-Deciding on a human id for a user is an issuer decision. You can use whichever you want, as long as it's an [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
+Deciding on a user id for a user is an issuer decision. You can use whichever you want, as long as it's an [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
 ```js
 // Server side
 
-const humanId = crypto.randomUUID();
+const userId = crypto.randomUUID();
 
 // Remember it on your database
-session.user.update({ humanId })
+session.user.update({ userId })
 
 // Return it to the front-end to be used in the next step
-return { humanId }
+return { userId }
 ```
 
 #### Step 2: Derive the Public Key
 
-Use the `idos.discoverEncryptionKey` function to derive a public key for the human. This key will be used to encrypt and decrypt human's credential content.
+Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
 
 ```javascript
 // Client side
@@ -73,37 +73,37 @@ import { idOS } from "@idos-network/idos-sdk-js";
 const initParams = { ...YOUR_IDOS_INIT_PARAMS, mode: "new" };
 const idos = await idOS.init(...);
 
-// Get humanId associated with this user from your server
-const { humanId } = await yourServer.getIdosInformation();
+// Get userId associated with this user from your server
+const { userId } = await yourServer.getIdosInformation();
 
 // Discover user encryption key
-const { encryptionPublicKey } = await idos.discoverEncryptionKey(humanId);
+const { userEncryptionPublicKey } = await idos.discoverUserEncryptionPublicKey(userId);
 
 // Report it back to your server
-await yourServer.reportIdosEncryptionPublicKey(encryptionPublicKey);
+await yourServer.reportIdosEncryptionPublicKey(userEncryptionPublicKey);
 ```
 
 
-#### Step 3: Creating a Human Profile
-Once the public key is derived, you can create the human profile in idOS by passing it to the `createHuman` function alongside with human id and the wallet the user's going to use to drive their idOS profile.
+#### Step 3: Creating a User Profile
+Once the public key is derived, you can create the user profile in idOS by passing it to the `createUser` function alongside with user id and the wallet the user's going to use to drive their idOS profile.
 
 ```javascript
 // Server side
 
-import { createHuman } from "@idos-network/issuer-sdk-js";
+import { createUser } from "@idos-network/issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 // Get this from the user's request, and remember it
 const currentPublicKey = request.params['userEncryptionPublicKey']
 session.user.currentPublicKey = currentPublicKey
 
-// Get the stored human id
-const humanId = session.user.humanId
+// Get the stored user id
+const userId = session.user.userId
 
-// Build the human object
-const human = {
-  id: humanId,
-  current_public_key: currentPublicKey,
+// Build the user object
+const user = {
+  id: userId,
+  recipient_encryption_public_key: currentPublicKey,
 }
 
 // Build the wallet object
@@ -121,7 +121,7 @@ const walletPayload = {
 }
 
 // Create the user on idOS nodes, and get some information back.
-const [profile, wallet] = await createHuman(issuerConfig, human, walletPayload);
+const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
 ```
 
 ## Writing credentials
@@ -200,8 +200,8 @@ const credentialContent = JSON.stringify({
 const credentialPayload = {
   id: crypto.randomUUID(),
 
-  // user id of the human who is creating the credential.
-  human_id: session.user.humanId,
+  // user id of the user who is creating the credential.
+  user_id: session.user.userId,
 
   // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
   // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.
@@ -218,7 +218,7 @@ const credentialPayload = {
 const credential = await createCredentialByGrant(issuerConfig, credentialPayload);
 ```
 
-This will create a credential in the idOS for the given human id.
+This will create a credential in the idOS for the given user id.
 
 
 > ⚠️ Notice

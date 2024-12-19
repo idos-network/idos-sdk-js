@@ -19,7 +19,7 @@ const evmGranteeSigner = new ethers.Wallet(
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
   granteeSigner: evmGranteeSigner,
-  encryptionSecret: ENCRYPTION_SECRET_KEY,
+  recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;

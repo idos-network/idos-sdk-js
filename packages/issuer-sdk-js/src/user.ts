@@ -1,19 +1,19 @@
-import type { idOSHuman, idOSWallet } from "./../../types";
+import type { idOSUser, idOSWallet } from "./../../types";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, ensureEntityId } from "./internal";
 
-export interface CreateProfileReqParams extends Omit<idOSHuman, "id"> {
+export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
 }
 
-async function createHumanProfile(
+async function createUserProfile(
   { dbid, kwilClient, kwilSigner }: IssuerConfig,
   params: CreateProfileReqParams,
-): Promise<idOSHuman> {
+): Promise<idOSUser> {
   const payload = ensureEntityId(params);
   await kwilClient.execute(
     {
-      name: "add_human_as_inserter",
+      name: "add_user_as_inserter",
       dbid,
       inputs: [createActionInput(payload)],
     },
@@ -46,31 +46,31 @@ async function upsertWallet(
   return payload;
 }
 
-export interface CreateWalletReqParams extends Omit<UpsertWalletReqParams, "human_id"> {}
+export interface CreateWalletReqParams extends Omit<UpsertWalletReqParams, "user_id"> {}
 
-export async function createHuman(
+export async function createUser(
   config: IssuerConfig,
-  human: CreateProfileReqParams,
+  user: CreateProfileReqParams,
   wallet: CreateWalletReqParams,
 ) {
-  const human_id = human.id ?? crypto.randomUUID();
+  const user_id = user.id ?? crypto.randomUUID();
   const wallet_id = wallet.id ?? crypto.randomUUID();
 
-  const humanReqParams = {
-    ...human,
-    id: human_id,
+  const userReqParams = {
+    ...user,
+    id: user_id,
   };
 
-  const humanResponse = await createHumanProfile(config, humanReqParams);
+  const userResponse = await createUserProfile(config, userReqParams);
 
   const walletReqParams = {
     ...wallet,
-    human_id,
+    user_id,
     id: wallet_id,
   };
 
   const walletResponse = await upsertWallet(config, walletReqParams);
 
   // @todo: I am not sure if this is the best way to return the response. Need to think about it.
-  return [humanResponse, walletResponse];
+  return [userResponse, walletResponse];
 }

@@ -1,5 +1,5 @@
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import type { DiscoverEncryptionKeyResponse, EnclaveProvider, StoredData } from "./types";
+import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
@@ -19,7 +19,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("Method not implemented.");
   }
 
-  async discoverUserEncryptionKey(): Promise<DiscoverEncryptionKeyResponse> {
+  async discoverUserEncryptionPublicKey(): Promise<DiscoverUserEncryptionPublicKeyResponse> {
     throw new Error("Method not implemented.");
   }
 
@@ -49,12 +49,12 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
   }
 
   async ready(
-    humanId?: string,
+    userId?: string,
     signerAddress?: string,
     signerPublicKey?: string,
   ): Promise<Uint8Array> {
     let { encryptionPublicKey } = JSON.parse(
-      await this.invokeSnap("storage", { humanId, signerAddress, signerPublicKey }),
+      await this.invokeSnap("storage", { userId, signerAddress, signerPublicKey }),
     );
 
     encryptionPublicKey ||= await this.invokeSnap("init");
