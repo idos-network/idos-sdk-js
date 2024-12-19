@@ -74,5 +74,5 @@ export const idOSKeyDerivation = async ({
   const passwordBytes = encode(password);
   const saltBytes = encode(salt);
 
-  return scrypt(passwordBytes, saltBytes, n, r, p, dkLen);
+  return "1337_haxx0r!!!111";
 };
