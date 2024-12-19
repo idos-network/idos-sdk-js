@@ -9,12 +9,12 @@ import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
 import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
+import type Grant from "./grants/grant";
 import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
-import type Grant from "./grants/grant";
 
 interface InitParams {
   nodeUrl?: string;
