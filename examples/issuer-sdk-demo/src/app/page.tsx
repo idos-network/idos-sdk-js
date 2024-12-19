@@ -55,7 +55,7 @@ export default function Home() {
             },
           });
         } else {
-          // @ts-expect-error: types in the SDK are a bit messy.
+          // @ts-ignore
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
           setCredentials(_credentials);
