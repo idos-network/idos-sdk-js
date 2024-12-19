@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui";
 import {
   Center,
   Container,
@@ -9,7 +10,6 @@ import {
   Text,
   chakra,
 } from "@chakra-ui/react";
-import { Button } from "@idos-network/ui-kit";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
