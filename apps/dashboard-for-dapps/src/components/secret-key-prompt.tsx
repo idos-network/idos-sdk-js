@@ -1,4 +1,3 @@
-import { Stack } from "@chakra-ui/react";
 import {
   Button,
   DialogActionTrigger,
@@ -11,7 +10,8 @@ import {
   DialogTitle,
   Field,
   PasswordInput,
-} from "@idos-network/ui-kit";
+} from "@/components/ui";
+import { Stack } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 
 export function SecretKeyPrompt({

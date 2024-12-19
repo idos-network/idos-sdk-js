@@ -11,8 +11,17 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useToggle } from "@uidotdev/usehooks";
+import { matchSorter } from "match-sorter";
+import { useDeferredValue, useMemo, useState } from "react";
+
+import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
   Button,
+  DataListItem,
+  DataListRoot,
   DrawerActionTrigger,
   DrawerBackdrop,
   DrawerBody,
@@ -22,21 +31,14 @@ import {
   DrawerHeader,
   DrawerRoot,
   DrawerTitle,
+  EmptyState,
   PaginationItems,
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
   RefreshButton,
   SearchField,
-} from "@idos-network/ui-kit";
-import { DataListItem, DataListRoot, EmptyState } from "@idos-network/ui-kit";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useToggle } from "@uidotdev/usehooks";
-import { matchSorter } from "match-sorter";
-import { useDeferredValue, useMemo, useState } from "react";
-
-import { SecretKeyPrompt } from "@/components/secret-key-prompt";
+} from "@/components/ui";
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
@@ -71,7 +73,7 @@ export const useFetchAllCredentials = ({ enabled }: { enabled: boolean }) => {
         try {
           const decrypted = decrypt(
             fullCredential.content,
-            fullCredential.encryption_public_key,
+            fullCredential.encryptor_public_key,
             secretKey,
           );
 
