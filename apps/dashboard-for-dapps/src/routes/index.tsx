@@ -1,17 +1,4 @@
 import {
-  Center,
-  Container,
-  DrawerBody,
-  DrawerTitle,
-  HStack,
-  Image,
-  List,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
-import {
   Button,
   DataListItem,
   DataListRoot,
@@ -35,7 +22,20 @@ import {
   PasswordInput,
   RefreshButton,
   SearchField,
-} from "@idos-network/ui-kit";
+} from "@/components/ui";
+import {
+  Center,
+  Container,
+  DrawerBody,
+  DrawerTitle,
+  HStack,
+  Image,
+  List,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
