@@ -63,7 +63,7 @@ const makePublicNotes = (plaintextW3cVc: ReturnType<typeof makeW3cCredential>): 
 
 export const issuer_makeUserCredential = (
   idvData: IdvDataResult,
-  humanId: string,
+  userId: string,
   receiverEncryptionPublicKey: Uint8Array,
   issuerAttestationSecretKey: Uint8Array,
 ) => {
@@ -74,7 +74,7 @@ export const issuer_makeUserCredential = (
   const publicNotes = makePublicNotes(plaintextContent);
 
   return {
-    humanId,
+    userId,
     publicNotes: JSON.stringify(publicNotes),
     plaintextContent: toBytes(plaintextContent),
     receiverEncryptionPublicKey,
@@ -83,7 +83,7 @@ export const issuer_makeUserCredential = (
 
 export const issuer_makeUserCredentialForSharing = (
   idvData: IdvDataResult,
-  humanId: string,
+  userId: string,
   receiverEncryptionPublicKey: Uint8Array,
   issuerAttestationSecretKey: Uint8Array,
   originalCredentialId: string,
@@ -93,7 +93,7 @@ export const issuer_makeUserCredentialForSharing = (
   const plaintextContent = makeW3cCredential(idvData, issuerAttestationSecretKey);
 
   return {
-    humanId,
+    userId,
     publicNotes: "",
     plaintextContent: toBytes(plaintextContent),
     receiverEncryptionPublicKey,
@@ -115,7 +115,7 @@ import {
   shareCredentialByGrant,
 } from "@idos-network/issuer-sdk-js/credentials";
 
-const humanId = "bf8709ce-9dfc-11ef-a188-047c16570806";
+const userId = "bf8709ce-9dfc-11ef-a188-047c16570806";
 const userEncryptionSecretKey = Base64Codec.decode("nIvx0jPbA8d83rL+I7Vs1B/Fp6pndGtXOX4GDmlEkSQ=");
 const userEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(userEncryptionSecretKey).publicKey;
 const _thirdPartyEncryptionSecretKey = Base64Codec.decode(
@@ -173,7 +173,7 @@ await (async () => {
   const issuerConfig = await issuerConfigBuild();
   const credential = issuer_makeUserCredential(
     getIdvData(),
-    humanId,
+    userId,
     userEncryptionPublicKey,
     issuerAttestationSecretKey,
   );
@@ -189,7 +189,7 @@ await (async () => {
   const issuerConfig = await issuerConfigBuild();
   const credential = issuer_makeUserCredential(
     getIdvData(),
-    humanId,
+    userId,
     userEncryptionPublicKey,
     issuerAttestationSecretKey,
   );
@@ -207,14 +207,14 @@ await (async () => {
     issuerConfig,
     issuer_makeUserCredential(
       getIdvData(),
-      humanId,
+      userId,
       userEncryptionPublicKey,
       issuerAttestationSecretKey,
     ),
   );
   const sharedCredential = issuer_makeUserCredentialForSharing(
     getIdvData(),
-    humanId,
+    userId,
     thirdPartyEncryptionPublicKey,
     issuerAttestationSecretKey,
     insertedCredential.id,
@@ -233,7 +233,7 @@ await (async () => {
   const issuerConfig = await issuerConfigBuild();
   const credential = issuer_makeUserCredential(
     getIdvData(),
-    humanId,
+    userId,
     userEncryptionPublicKey,
     issuerAttestationSecretKey,
   );

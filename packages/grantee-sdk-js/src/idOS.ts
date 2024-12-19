@@ -10,28 +10,28 @@ export class idOS {
 
   static async init(
     chainType: "EVM" | "NEAR",
-    privateKey: string,
-    encryptionSecretKey: string,
+    authPrivateKey: string,
+    recipientEncryptionPrivateKey: string,
     nodeUrl: string,
   ) {
     let grantee: idOSGrantee;
 
     switch (chainType) {
       case "EVM": {
-        const signer = new ethers.Wallet(privateKey, new JsonRpcProvider(nodeUrl));
+        const signer = new ethers.Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
-          encryptionSecret: encryptionSecretKey,
+          recipientEncryptionPrivateKey,
         });
         return new idOS(grantee);
       }
       case "NEAR": {
-        const signer = KeyPair.fromString(privateKey);
+        const signer = KeyPair.fromString(authPrivateKey);
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
-          encryptionSecret: privateKey,
+          recipientEncryptionPrivateKey,
         });
         return new idOS(grantee);
       }

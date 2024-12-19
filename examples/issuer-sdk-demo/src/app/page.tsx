@@ -55,7 +55,7 @@ export default function Home() {
             },
           });
         } else {
-          // @ts-expect-error: types in the SDK are a bit messy.
+          // @ts-ignore
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
           setCredentials(_credentials);
@@ -104,7 +104,7 @@ export default function Home() {
       const _hasProfile = await clientSDK.hasProfile(String(address));
       if (_hasProfile && signer) {
         setHasProfile(_hasProfile);
-        // @ts-expect-error: types in the SDK are a bit messy.
+        // @ts-ignore
         await clientSDK.setSigner("EVM", signer);
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
 
@@ -138,7 +138,7 @@ export default function Home() {
 
       try {
         await createCredentialByWriteGrant(
-          String(clientSDK.auth.currentUser.humanId),
+          String(clientSDK.auth.currentUser.userId),
           clientSDK.auth.currentUser.currentUserPublicKey as string,
         );
         const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
@@ -150,7 +150,7 @@ export default function Home() {
   const handleCreateCredential = () => {
     startCredentialRequestTransition(async () => {
       await createCredentialByPermissionedIssuer(
-        String(clientSDK.auth.currentUser.humanId),
+        String(clientSDK.auth.currentUser.userId),
         clientSDK.auth.currentUser.currentUserPublicKey as string,
       );
       const _credentials = await clientSDK.data.list<idOSCredential>("credentials");

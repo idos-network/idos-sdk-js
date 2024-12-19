@@ -50,12 +50,12 @@ export class NearGrants implements GrantChild {
     accountId,
     signer,
     options,
-    publicKey,
+    nearWalletPublicKey,
   }: {
     accountId: string;
     signer: Wallet;
     options: NearGrantsOptions;
-    publicKey: string;
+    nearWalletPublicKey: string;
   }): Promise<NearGrants> {
     let near_api: {
       Contract: typeof Contract;
@@ -95,7 +95,7 @@ export class NearGrants implements GrantChild {
           // biome-ignore lint/suspicious/noExplicitAny: fix `useLocalViewExecution` is not in  types.
         } as any,
       ),
-      publicKey,
+      nearWalletPublicKey,
     );
   }
 
@@ -107,8 +107,8 @@ export class NearGrants implements GrantChild {
 
     return {
       grant: {
-        owner: grant.owner,
-        grantee: grant.grantee,
+        ownerAddress: grant.owner,
+        granteeAddress: grant.grantee,
         lockedUntil: grant.locked_until,
         dataId: grant.data_id,
       },
@@ -141,8 +141,8 @@ export class NearGrants implements GrantChild {
   }
 
   async list({
-    owner,
-    grantee,
+    ownerAddress: owner,
+    granteeAddress: grantee,
     dataId: data_id,
   }: Partial<Omit<Grant, "lockedUntil">> = {}): Promise<Grant[]> {
     if (!(owner || grantee)) throw new Error("Must provide `owner` and/or `grantee`");
@@ -159,9 +159,11 @@ export class NearGrants implements GrantChild {
     ) => Promise<NearContractGrant[]>;
 
     return (await method(grantsFilter)).map(
-      ({ data_id, locked_until, ...values }) =>
+      ({ data_id, locked_until, owner, grantee, ...values }) =>
         new Grant({
           ...values,
+          ownerAddress: owner,
+          granteeAddress: grantee,
           dataId: data_id,
           lockedUntil: locked_until / 1e6,
         }),
@@ -173,16 +175,19 @@ export class NearGrants implements GrantChild {
   /// NOTE: NEAR is problematic for the current implementation. The only way to create an AG in the contract if to
   /// create an dAG for yourself.
   async create({
-    grantee,
+    granteeAddress,
     dataId,
     lockedUntil,
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
-    const owner = this.#publicKey;
+  }: Omit<Grant, "ownerAddress"> & { wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    const ownerAddress = this.#publicKey;
 
     const recipient = await this.messageRecipient();
     const message = await this.messageForCreateBySignature({
-      owner,
-      grantee,
+      ownerAddress,
+      granteeAddress,
       dataId,
       lockedUntil,
     });
@@ -190,8 +195,8 @@ export class NearGrants implements GrantChild {
     const { nonce, signature } = await this.#sign(message, recipient);
 
     return this.createBySignature({
-      owner,
-      grantee,
+      ownerAddress,
+      granteeAddress,
       dataId,
       lockedUntil,
       signature,
@@ -209,8 +214,8 @@ export class NearGrants implements GrantChild {
   }
 
   async messageForCreateBySignature({
-    owner,
-    grantee,
+    ownerAddress: owner,
+    granteeAddress: grantee,
     dataId: data_id,
     lockedUntil,
   }: Grant): Promise<string> {
@@ -230,8 +235,8 @@ export class NearGrants implements GrantChild {
   }
 
   async createBySignature({
-    owner,
-    grantee,
+    ownerAddress: owner,
+    granteeAddress: grantee,
     dataId: data_id,
     lockedUntil,
     signature,
@@ -282,16 +287,19 @@ export class NearGrants implements GrantChild {
   /// NOTE: NEAR is problematic for the current implementation. The only way to revoke an AG in the contract if to
   /// create an dAG for yourself.
   async revoke({
-    grantee,
+    granteeAddress,
     dataId,
     lockedUntil,
-  }: Omit<Grant, "owner"> & { wait?: boolean }): Promise<{ grant: Grant; transactionId: string }> {
-    const owner = this.#publicKey;
+  }: Omit<Grant, "ownerAddress"> & { wait?: boolean }): Promise<{
+    grant: Grant;
+    transactionId: string;
+  }> {
+    const ownerAddress = this.#publicKey;
 
     const recipient = await this.messageRecipient();
     const message = await this.messageForRevokeBySignature({
-      owner,
-      grantee,
+      ownerAddress,
+      granteeAddress,
       dataId,
       lockedUntil,
     });
@@ -299,8 +307,8 @@ export class NearGrants implements GrantChild {
     const { nonce, signature } = await this.#sign(message, recipient);
 
     return this.revokeBySignature({
-      owner,
-      grantee,
+      ownerAddress,
+      granteeAddress,
       dataId,
       lockedUntil,
       signature,
@@ -309,8 +317,8 @@ export class NearGrants implements GrantChild {
   }
 
   async messageForRevokeBySignature({
-    owner,
-    grantee,
+    ownerAddress: owner,
+    granteeAddress: grantee,
     dataId: data_id,
     lockedUntil,
   }: Grant): Promise<string> {
@@ -330,8 +338,8 @@ export class NearGrants implements GrantChild {
   }
 
   async revokeBySignature({
-    owner,
-    grantee,
+    ownerAddress: owner,
+    granteeAddress: grantee,
     dataId: data_id,
     lockedUntil,
     signature,

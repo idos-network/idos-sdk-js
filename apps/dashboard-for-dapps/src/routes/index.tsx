@@ -1,17 +1,4 @@
 import {
-  Center,
-  Container,
-  DrawerBody,
-  DrawerTitle,
-  HStack,
-  Image,
-  List,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
-import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
-import {
   Button,
   DataListItem,
   DataListRoot,
@@ -35,7 +22,20 @@ import {
   PasswordInput,
   RefreshButton,
   SearchField,
-} from "@idos-network/ui-kit";
+} from "@/components/ui";
+import {
+  Center,
+  Container,
+  DrawerBody,
+  DrawerTitle,
+  HStack,
+  Image,
+  List,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
@@ -69,7 +69,7 @@ function transformBase85Image(src: string) {
 const useFetchGrants = (page: number, idos: idOS) => {
   return useQuery({
     queryKey: ["grants", { page }],
-    queryFn: () => idos.listGrantedGrants(page, 5),
+    queryFn: () => idos.listGrantedGrants(page, 2),
     select: (data) => {
       return {
         records: data.grants.map((grant) => ({
@@ -209,7 +209,7 @@ function CredentialDetails({
 
   if (!credential.data || !secretKey) return null;
 
-  const result = decrypt(credential.data.content, credential.data.encryption_public_key, secretKey);
+  const result = decrypt(credential.data.content, credential.data.encryptor_public_key, secretKey);
   const content = JSON.parse(result);
 
   const subject = Object.entries(content.credentialSubject).filter(
@@ -424,8 +424,8 @@ function SearchResults({
               }}
               pt="4"
               grow
-              label="Owner"
-              value={grant.owner}
+              label="Owner ID"
+              value={grant.ownerHumanId}
               truncate
             />
             <DataListItem
@@ -440,7 +440,7 @@ function SearchResults({
               pt="4"
               grow
               label="Grantee"
-              value={grant.grantee}
+              value={grant.granteeAddress}
               truncate
             />
             <DataListItem
@@ -468,7 +468,7 @@ function SearchResults({
           </Button>
         </Stack>
       ))}
-      <Pagination count={results.totalCount} pageSize={5} setPage={setPage} page={page} />
+      <Pagination count={results.totalCount} pageSize={2} setPage={setPage} page={page} />
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />

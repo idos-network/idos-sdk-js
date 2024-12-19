@@ -1,4 +1,4 @@
-import type { idOSHumanAttribute } from "@idos-network/idos-sdk-types";
+import type { idOSUserAttribute } from "@idos-network/idos-sdk-types";
 import type { Wallet } from "@near-wallet-selector/core";
 import { isEqual } from "es-toolkit";
 import type { Signer } from "ethers";
@@ -102,8 +102,8 @@ export class idOS {
     return assertNever(type, `Signer type "${type}" not recognized`);
   }
 
-  async hasProfile(user: string): Promise<boolean> {
-    return this.kwilWrapper.hasProfile(user);
+  async hasProfile(userAddress: string): Promise<boolean> {
+    return this.kwilWrapper.hasProfile(userAddress);
   }
 
   async listGrantedGrants(
@@ -123,8 +123,8 @@ export class idOS {
     return this.kwilWrapper.kwilProvider;
   }
 
-  filterLitAttributes(userAttrs: idOSHumanAttribute[], storableAttributes: StorableAttribute[]) {
-    const hasLitKey = (attr: idOSHumanAttribute | StorableAttribute) =>
+  filterLitAttributes(userAttrs: idOSUserAttribute[], storableAttributes: StorableAttribute[]) {
+    const hasLitKey = (attr: idOSUserAttribute | StorableAttribute) =>
       "key" in attr ? attr.key.includes("lit-") : attr.attribute_key.includes("lit-");
 
     return {
@@ -133,7 +133,7 @@ export class idOS {
     };
   }
   async updateAttributesIfNeeded(
-    filteredUserAttributes: idOSHumanAttribute[], // Arrays here are not safe (it's a string)
+    filteredUserAttributes: idOSUserAttribute[], // Arrays here are not safe (it's a string)
     litSavableAttributes: StorableAttribute[], // Arrays here are safe (it's a real array)
   ): Promise<void> {
     // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
@@ -142,7 +142,7 @@ export class idOS {
         const userAttrMap = new Map(
           filteredUserAttributes.map((attr) => [attr.attribute_key, attr]),
         );
-        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "user_id">[] = [];
+        const attributesToCreate: Omit<idOSUserAttribute, "id" | "user_id">[] = [];
 
         // Helper function to safely parse JSON strings
         const safeParse = (text: string) => {
@@ -231,7 +231,7 @@ export class idOS {
       );
 
       const userAttrs = ((await this.data.list("attributes")) ||
-        []) as unknown as idOSHumanAttribute[];
+        []) as unknown as idOSUserAttribute[];
 
       const { filteredUserAttributes, litSavableAttributes } = this.filterLitAttributes(
         userAttrs,
@@ -241,7 +241,7 @@ export class idOS {
     });
   }
 
-  async discoverUserEncryptionPublicKey(humanId: string) {
-    return this.enclave.discoverUserEncryptionPublicKey(humanId);
+  async discoverUserEncryptionPublicKey(userId: string) {
+    return this.enclave.discoverUserEncryptionPublicKey(userId);
   }
 }

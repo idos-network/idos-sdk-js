@@ -64,7 +64,7 @@ export function App({ store, enclave }: AppProps) {
   const [origin, setOrigin] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
-  const [humanId] = useState<string | null>(
+  const [userId] = useState<string | null>(
     new URLSearchParams(window.location.search).get("humanId"),
   );
 
@@ -197,11 +197,7 @@ export function App({ store, enclave }: AppProps) {
   if (method === "password") {
     return (
       <Layout onHeaderClick={resetMethod}>
-        <PasswordForm
-          {...methodProps}
-          encryptionPublicKey={encryptionPublicKey}
-          humanId={humanId}
-        />
+        <PasswordForm {...methodProps} encryptionPublicKey={encryptionPublicKey} userId={userId} />
       </Layout>
     );
   }
