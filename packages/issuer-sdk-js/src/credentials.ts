@@ -147,6 +147,8 @@ export async function shareCredentialByGrant(
   if (payload.public_notes !== "")
     throw new Error("shared credentials cannot have public_notes, it must be an empty string");
 
+  if (!params.granteeAddress) throw new Error("`granteeAddress` is required");
+
   await kwilClient.execute(
     {
       name: "share_credential_by_write_grant",
