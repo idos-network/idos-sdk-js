@@ -125,7 +125,7 @@ export async function createCredentialByGrant(
 }
 
 type ShareCredentialByGrantParams = BaseCredentialParams & {
-  grantee: string;
+  granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
 };
@@ -135,7 +135,7 @@ export async function shareCredentialByGrant(
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
-    grantee: params.grantee,
+    grantee_wallet_identifier: params.granteeAddress,
     locked_until: params.lockedUntil,
     original_credential_id: params.originalCredentialId,
   };
