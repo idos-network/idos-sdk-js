@@ -349,34 +349,6 @@ importers:
         specifier: ^5
         version: 5.6.3
 
-  examples/idos-backend-demo-app:
-    dependencies:
-      '@hono/node-server':
-        specifier: ^1.12.0
-        version: 1.13.7(hono@4.6.14)
-      '@idos-network/grantee-sdk-js':
-        specifier: workspace:*
-        version: link:../../packages/grantee-sdk-js
-      '@idos-network/idos-sdk':
-        specifier: workspace:*
-        version: link:../../packages/idos-sdk-js
-      '@idos-network/issuer-sdk-js':
-        specifier: workspace:*
-        version: link:../../packages/issuer-sdk-js
-      ethers:
-        specifier: ^6.13.4
-        version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      hono:
-        specifier: ^4.5.3
-        version: 4.6.14
-    devDependencies:
-      '@types/node':
-        specifier: ^20.11.17
-        version: 20.17.10
-      tsx:
-        specifier: ^4.7.1
-        version: 4.19.2
-
   examples/idos-example-dapp:
     dependencies:
       '@idos-network/grantee-sdk-js':
@@ -2244,12 +2216,6 @@ packages:
     resolution: {integrity: sha512-LMcepvRaS9LYHJGsF0zzmgKCUim/X3N/DQKc4jepAXJ7l8QxJ1PmxJzqplF2Z3FE4PqBAIGyJAQ/w4B5dsqbtQ==}
     peerDependencies:
       react: '>= 16 || ^19.0.0-rc'
-
-  '@hono/node-server@1.13.7':
-    resolution: {integrity: sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==}
-    engines: {node: '>=18.14.1'}
-    peerDependencies:
-      hono: ^4
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -6883,10 +6849,6 @@ packages:
   hoist-non-react-statics@3.3.2:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
 
-  hono@4.6.14:
-    resolution: {integrity: sha512-j4VkyUp2xazGJ8eCCLN1Vm/bxdvm/j5ZuU9AIjLu9vapn2M44p9L3Ktr9Vnb2RN2QtcR/wVjZVMlT5k7GJQgPw==}
-    engines: {node: '>=16.9.0'}
-
   html-encoding-sniffer@3.0.0:
     resolution: {integrity: sha512-oWv4T4yJ52iKrufjnyZPkrN0CH3QnrUqdB6In1g5Fe1mia8GmF36gnfNySxoZtxD5+NmYw1EElVXiBk93UeskA==}
     engines: {node: '>=12'}
@@ -11497,10 +11459,6 @@ snapshots:
   '@heroicons/react@2.2.0(react@19.0.0)':
     dependencies:
       react: 19.0.0
-
-  '@hono/node-server@1.13.7(hono@4.6.14)':
-    dependencies:
-      hono: 4.6.14
 
   '@iarna/toml@2.2.5': {}
 
@@ -19174,8 +19132,6 @@ snapshots:
   hoist-non-react-statics@3.3.2:
     dependencies:
       react-is: 16.13.1
-
-  hono@4.6.14: {}
 
   html-encoding-sniffer@3.0.0:
     dependencies:
