@@ -104,7 +104,7 @@ export default function Home() {
       const _hasProfile = await clientSDK.hasProfile(String(address));
       if (_hasProfile && signer) {
         setHasProfile(_hasProfile);
-        // @ts-expect-error: types in the SDK are a bit messy.
+        // @ts-ignore
         await clientSDK.setSigner("EVM", signer);
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
 
