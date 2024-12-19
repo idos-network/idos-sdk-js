@@ -49,6 +49,8 @@ import nacl from "tweetnacl";
 import { Pagination } from "@/components/pagination";
 import { idOSContext, useIdOS } from "@/idOS.provider";
 
+const RECORDS_PER_PAGE = 5;
+
 export const Route = createFileRoute("/")({
   component: Index,
   validateSearch: (search): { filter?: string } => {
@@ -69,7 +71,7 @@ function transformBase85Image(src: string) {
 const useFetchGrants = (page: number, idos: idOS) => {
   return useQuery({
     queryKey: ["grants", { page }],
-    queryFn: () => idos.listGrantedGrants(page, 2),
+    queryFn: () => idos.listGrantedGrants(page, RECORDS_PER_PAGE),
     select: (data) => {
       return {
         records: data.grants.map((grant) => ({
@@ -468,7 +470,12 @@ function SearchResults({
           </Button>
         </Stack>
       ))}
-      <Pagination count={results.totalCount} pageSize={2} setPage={setPage} page={page} />
+      <Pagination
+        count={results.totalCount}
+        pageSize={RECORDS_PER_PAGE}
+        setPage={setPage}
+        page={page}
+      />
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />

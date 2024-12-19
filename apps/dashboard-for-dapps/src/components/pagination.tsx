@@ -4,7 +4,7 @@ import {
   PaginationNextTrigger,
   PaginationPrevTrigger,
   PaginationRoot,
-} from "@idos-network/ui-kit";
+} from "./ui/pagination";
 
 export function Pagination({
   count,
