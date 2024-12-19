@@ -14,6 +14,7 @@ import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
 import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
+import type Grant from "./grants/grant";
 
 interface InitParams {
   nodeUrl?: string;
@@ -82,10 +83,9 @@ export class idOS {
       const currentUser = this.auth.currentUser;
       this.grants = await this.grants.connect({
         type,
-        accountId: currentUser.address,
+        accountId: currentUser.userAddress,
         signer: signer as Wallet,
-        // biome-ignore lint/style/noNonNullAssertion: we put it there when we're using NEAR.
-        publicKey: currentUser.publicKey!,
+        nearWalletPublicKey: currentUser.nearWalletPublicKey ?? "",
       });
 
       return currentUser;
@@ -102,8 +102,15 @@ export class idOS {
     return assertNever(type, `Signer type "${type}" not recognized`);
   }
 
-  async hasProfile(address: string): Promise<boolean> {
-    return this.kwilWrapper.hasProfile(address);
+  async hasProfile(user: string): Promise<boolean> {
+    return this.kwilWrapper.hasProfile(user);
+  }
+
+  async listGrantedGrants(
+    page: number,
+    size?: number,
+  ): Promise<{ grants: Grant[]; totalCount: number }> {
+    return this.kwilWrapper.getGrantsGranted(page, size);
   }
 
   async reset({ enclave = false } = {}): Promise<void> {
@@ -135,7 +142,7 @@ export class idOS {
         const userAttrMap = new Map(
           filteredUserAttributes.map((attr) => [attr.attribute_key, attr]),
         );
-        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "human_id">[] = [];
+        const attributesToCreate: Omit<idOSHumanAttribute, "id" | "user_id">[] = [];
 
         // Helper function to safely parse JSON strings
         const safeParse = (text: string) => {
@@ -234,7 +241,7 @@ export class idOS {
     });
   }
 
-  async discoverEncryptionKey(humanId: string) {
-    return this.enclave.discoverUserEncryptionKey(humanId);
+  async discoverUserEncryptionPublicKey(humanId: string) {
+    return this.enclave.discoverUserEncryptionPublicKey(humanId);
   }
 }

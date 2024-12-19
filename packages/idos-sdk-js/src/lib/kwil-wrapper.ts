@@ -2,12 +2,14 @@ import type { idOSHuman, idOSHumanAttribute, idOSWallet } from "@idos-network/id
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
+import Grant from "./grants/grant";
 
 export class KwilWrapper {
   static defaults = {
     kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
     chainId: import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
     dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
+    grantsPerPage: 7,
   };
 
   client: WebKwil;
@@ -138,7 +140,7 @@ export class KwilWrapper {
   }
 
   async getHumanProfile(): Promise<idOSHuman> {
-    const [human] = (await this.call("get_human", null)) as unknown as [idOSHuman];
+    const [human] = (await this.call("get_user", null)) as unknown as [idOSHuman];
     return human;
   }
 
@@ -147,6 +149,41 @@ export class KwilWrapper {
     const result = (await this.call("has_profile", { address }, undefined, false)) as any;
 
     return !!result[0]?.has_profile;
+  }
+
+  async customCall(method: string, args: any[]) {
+    return (await this.call(method, args)) as any;
+  }
+
+  async getGrantsGrantedCount(): Promise<number> {
+    const response = (await this.call("get_internal_ag_granted_count", null)) as unknown as {
+      count: number;
+    }[];
+    return response[0].count;
+  }
+
+  async getGrantsGranted(
+    page: number,
+    size = KwilWrapper.defaults.grantsPerPage,
+  ): Promise<{ grants: Grant[]; totalCount: number }> {
+    if (!page) throw new Error("paging starts from 1");
+    const list = (await this.call("get_internal_ag_granted", { page, size })) as any;
+    const totalCount = await this.getGrantsGrantedCount();
+
+    const grants = list.map(
+      (grant: any) =>
+        new Grant({
+          ownerHumanId: grant.ag_owner_user_id,
+          granteeAddress: grant.ag_grantee_wallet_identifier,
+          dataId: grant.data_id,
+          lockedUntil: grant.locked_until,
+          ownerAddress: "",
+        }),
+    );
+    return {
+      grants,
+      totalCount,
+    };
   }
 
   async getLitAttrs() {
