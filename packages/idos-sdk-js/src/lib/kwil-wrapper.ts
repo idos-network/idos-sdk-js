@@ -1,4 +1,4 @@
-import type { idOSHuman, idOSHumanAttribute, idOSWallet } from "@idos-network/idos-sdk-types";
+import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/idos-sdk-types";
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
@@ -125,32 +125,25 @@ export class KwilWrapper {
     return res.data?.tx_hash;
   }
 
-  /**
-   * @deprecated
-   *
-   * Use {@link KwilWrapper.getHumanProfile} instead.
-   */
-  async getHumanId(): Promise<string | null> {
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const result = (await this.call("get_wallet_human_id", {}, "See your idOS profile ID")) as any;
-
-    return result[0]?.human_id || null;
+  async getUserProfile(): Promise<idOSUser> {
+    const [user] = (await this.call("get_user", null)) as unknown as [idOSUser];
+    return user;
   }
 
-  async getHumanProfile(): Promise<idOSHuman> {
-    const [human] = (await this.call("get_human", null)) as unknown as [idOSHuman];
-    return human;
-  }
-
-  async hasProfile(address: string): Promise<boolean> {
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const result = (await this.call("has_profile", { address }, undefined, false)) as any;
+  async hasProfile(userAddress: string): Promise<boolean> {
+    const result = (await this.call(
+      "has_profile",
+      { address: userAddress },
+      undefined,
+      false,
+      // biome-ignore lint/suspicious/noExplicitAny: TBD
+    )) as any;
 
     return !!result[0]?.has_profile;
   }
 
   async getLitAttrs() {
-    const attrs = (await this.call("get_attributes", null)) as unknown as idOSHumanAttribute[];
+    const attrs = (await this.call("get_attributes", null)) as unknown as idOSUserAttribute[];
     return attrs.filter((attr) => attr.attribute_key.startsWith("lit-"));
   }
 

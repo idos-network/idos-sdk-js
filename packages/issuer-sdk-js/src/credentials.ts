@@ -31,12 +31,12 @@ type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
 const buildInsertableIDOSCredential = (
   issuerConfig: IssuerConfig,
   {
-    humanId,
+    userId,
     publicNotes,
     plaintextContent,
     receiverEncryptionPublicKey,
   }: {
-    humanId: string;
+    userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     receiverEncryptionPublicKey: Uint8Array;
@@ -52,7 +52,7 @@ const buildInsertableIDOSCredential = (
   });
 
   return {
-    human_id: humanId,
+    user_id: userId,
     content: base64Encode(content),
 
     public_notes,
@@ -66,13 +66,13 @@ const buildInsertableIDOSCredential = (
     ),
 
     issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
-    encryption_public_key: base64Encode(ephemeralKeyPair.publicKey),
+    encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
   };
 };
 
 type BaseCredentialParams = {
   id?: string;
-  humanId: string;
+  userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
   receiverEncryptionPublicKey: Uint8Array;
@@ -135,7 +135,7 @@ export async function shareCredentialByGrant(
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
-    grantee: params.granteeAddress,
+    grantee_wallet_identifier: params.granteeAddress,
     locked_until: params.lockedUntil,
     original_credential_id: params.originalCredentialId,
   };

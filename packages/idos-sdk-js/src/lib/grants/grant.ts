@@ -1,12 +1,12 @@
 export default class Grant {
-  owner: string;
-  grantee: string;
+  ownerAddress: string;
+  granteeAddress: string;
   dataId: string;
   lockedUntil: number;
 
-  constructor({ owner, grantee, dataId, lockedUntil }: Grant) {
-    this.owner = owner;
-    this.grantee = grantee;
+  constructor({ ownerAddress, granteeAddress, dataId, lockedUntil }: Grant) {
+    this.ownerAddress = ownerAddress;
+    this.granteeAddress = granteeAddress;
     this.dataId = dataId;
     this.lockedUntil = lockedUntil;
   }
