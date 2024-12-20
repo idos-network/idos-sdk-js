@@ -6,6 +6,8 @@ export * from "./dialog";
 export * from "./drawer";
 export * from "./empty-state";
 export * from "./field";
+export * from "./link-button";
+export * from "./pagination";
 export * from "./password-input";
 export * from "./provider";
 export * from "./refresh-button";

@@ -1,5 +1,6 @@
 "use server";
 
+import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
   createCredentialByGrant,
@@ -9,8 +10,52 @@ import {
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
+import { ethers } from "ethers";
 
-import { getIssuerConfig } from "@/issuer.config";
+const generateCredential = (uuid: string, recipientEmail: string, walletAddress: string) => {
+  return Utf8.encode(
+    JSON.stringify({
+      "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
+        "https://w3id.org/security/suites/ed25519-2020/v1",
+      ],
+      id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
+      type: ["VerifiableCredential"],
+      issuer: "https://vc-issuers.fractal.id/idos",
+      level: "human",
+      credentialSubject: {
+        id: `uuid:${uuid}`,
+        wallets: [
+          {
+            currency: "eth",
+            verified: true,
+            address: walletAddress,
+          },
+        ],
+        emails: [
+          {
+            verified: false,
+            address: recipientEmail,
+          },
+        ],
+      },
+      status: "approved",
+      issuanceDate: "2024-07-10T11:11:27Z",
+      approved_at: "2024-07-10T11:11:27Z",
+      proof: {
+        type: "Ed25519Signature2020",
+        created: "2024-07-10T11:11:28Z",
+        verificationMethod:
+          "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
+        proofPurpose: "assertionMethod",
+        "@context": ["https://www.w3.org/ns/credentials/v2"],
+        proofValue:
+          "z4Ud9HMzXu2pFbx8MnFrmxx1aFfRNXE5CVtmVhuHwsdp15MsQGLxvfMrVoUc3FCVbbxKnLwBxd4et8X4ew8qxrcUd",
+      },
+    }),
+  );
+};
 
 const vcContent = Utf8.encode(
   JSON.stringify({
@@ -92,12 +137,19 @@ export async function createCredentialByPermissionedIssuer(
 ) {
   const issuer = await getIssuerConfig();
 
-  await createCredentialPermissioned(issuer, {
-    userId,
-    plaintextContent: vcContent,
-    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
-  });
+  // generate 500 credentials for testing purposes
+  for (let i = 0; i < 500; i++) {
+    await createCredentialPermissioned(issuer, {
+      userId,
+      plaintextContent: generateCredential(
+        crypto.randomUUID(),
+        `demo+${i}@idos.network`,
+        ethers.Wallet.createRandom().address,
+      ),
+      publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+      receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    });
+  }
 }
 
 export async function revokeCredentialById(id: string) {
