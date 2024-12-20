@@ -10,4 +10,6 @@ export default defineConfig({
   env: config().parsed,
   format: ["esm"],
   outDir: "./dist",
+  bundle: true,
+  noExternal: ["@idos-network/codecs"],
 });
