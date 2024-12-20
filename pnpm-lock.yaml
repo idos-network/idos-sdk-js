@@ -645,9 +645,6 @@ importers:
       '@digitalbazaar/vc':
         specifier: ^6.0.2
         version: 6.3.0(web-streams-polyfill@3.3.3)
-      '@idos-network/codecs':
-        specifier: workspace:*
-        version: link:../codecs
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -676,6 +673,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.6.4
         version: 1.31.0
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
@@ -720,9 +720,6 @@ importers:
 
   packages/issuer-sdk-js:
     dependencies:
-      '@idos-network/codecs':
-        specifier: workspace:*
-        version: link:../codecs
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
@@ -739,6 +736,9 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
