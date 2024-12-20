@@ -2,14 +2,13 @@ import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/idos
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
-import Grant from "./grants/grant";
+import Grant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
 
 export class KwilWrapper {
   static defaults = {
     kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
     chainId: import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
     dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
-    grantsPerPage: 7,
   };
 
   client: WebKwil;
@@ -153,7 +152,7 @@ export class KwilWrapper {
 
   async getGrantsGranted(
     page: number,
-    size = KwilWrapper.defaults.grantsPerPage,
+    size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: Grant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
     const list = (await this.call("get_internal_ag_granted", { page, size })) as any;
@@ -162,7 +161,7 @@ export class KwilWrapper {
     const grants = list.map(
       (grant: any) =>
         new Grant({
-          ownerHumanId: grant.ag_owner_user_id,
+          ownerUserId: grant.ag_owner_user_id,
           granteeAddress: grant.ag_grantee_wallet_identifier,
           dataId: grant.data_id,
           lockedUntil: grant.locked_until,

@@ -35,7 +35,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
+import { DEFAULT_RECORDS_PER_PAGE, type idOS, type idOSCredential } from "@idos-network/idos-sdk";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
@@ -48,8 +48,6 @@ import nacl from "tweetnacl";
 
 import { Pagination } from "@/components/pagination";
 import { idOSContext, useIdOS } from "@/idOS.provider";
-
-const RECORDS_PER_PAGE = 5;
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -71,7 +69,7 @@ function transformBase85Image(src: string) {
 const useFetchGrants = (page: number, idos: idOS) => {
   return useQuery({
     queryKey: ["grants", { page }],
-    queryFn: () => idos.listGrantedGrants(page, RECORDS_PER_PAGE),
+    queryFn: () => idos.listGrantedGrants(page, DEFAULT_RECORDS_PER_PAGE),
     select: (data) => {
       return {
         records: data.grants.map((grant) => ({
@@ -427,7 +425,7 @@ function SearchResults({
               pt="4"
               grow
               label="Owner ID"
-              value={grant.ownerHumanId}
+              value={grant.ownerUserId}
               truncate
             />
             <DataListItem
@@ -472,7 +470,7 @@ function SearchResults({
       ))}
       <Pagination
         count={results.totalCount}
-        pageSize={RECORDS_PER_PAGE}
+        pageSize={DEFAULT_RECORDS_PER_PAGE}
         setPage={setPage}
         page={page}
       />
