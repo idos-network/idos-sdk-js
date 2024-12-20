@@ -35,7 +35,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import { DEFAULT_RECORDS_PER_PAGE, type idOS, type idOSCredential } from "@idos-network/idos-sdk";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
@@ -43,11 +43,11 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useLocalStorage, useToggle } from "@uidotdev/usehooks";
 import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
-import { useMemo, useRef, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import nacl from "tweetnacl";
-import { useAccount } from "wagmi";
 
-import { useIdOS } from "@/idOS.provider";
+import { Pagination } from "@/components/pagination";
+import { idOSContext, useIdOS } from "@/idOS.provider";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -66,27 +66,25 @@ function transformBase85Image(src: string) {
   )}`;
 }
 
-const useFetchGrants = () => {
-  const idOS = useIdOS();
-  const { address } = useAccount();
-
+const useFetchGrants = (page: number, idos: idOS) => {
   return useQuery({
-    queryKey: ["grants"],
-    queryFn: () =>
-      idOS.grants.list({
-        granteeAddress: address,
-      }),
-    select: (data) =>
-      data.map((grant) => ({
-        ...grant,
-        lockedUntil:
-          grant.lockedUntil === 0
-            ? "Unlocked"
-            : Intl.DateTimeFormat("en-US", {
-                dateStyle: "full",
-                timeStyle: "short",
-              }).format(grant.lockedUntil * 1000),
-      })),
+    queryKey: ["grants", { page }],
+    queryFn: () => idos.listGrantedGrants(page, DEFAULT_RECORDS_PER_PAGE),
+    select: (data) => {
+      return {
+        records: data.grants.map((grant) => ({
+          ...grant,
+          lockedUntil:
+            grant.lockedUntil === 0
+              ? "Unlocked"
+              : Intl.DateTimeFormat("en-US", {
+                  dateStyle: "full",
+                  timeStyle: "short",
+                }).format(grant.lockedUntil * 1000),
+        })),
+        totalCount: data.totalCount,
+      };
+    },
   });
 };
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
@@ -365,13 +363,17 @@ function CredentialDetails({
   );
 }
 
-function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil }) {
+function SearchResults({
+  results,
+  setPage,
+  page,
+}: { results: GrantsWithFormattedLockedUntil; setPage: (page: number) => void; page: number }) {
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useLocalStorage("SECRET_KEY", "");
 
-  if (!results.length) {
+  if (!results.records.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
   }
 
@@ -393,7 +395,7 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 
   return (
     <>
-      {results.map((grant) => (
+      {results.records.map((grant) => (
         <Stack key={crypto.randomUUID()} gap="6" bg="gray.900" p="6" rounded="md">
           <DataListRoot orientation="horizontal" divideY="1px">
             <DataListItem
@@ -422,8 +424,8 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
               }}
               pt="4"
               grow
-              label="Owner"
-              value={grant.ownerAddress}
+              label="Owner ID"
+              value={grant.ownerUserId}
               truncate
             />
             <DataListItem
@@ -466,6 +468,12 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
           </Button>
         </Stack>
       ))}
+      <Pagination
+        count={results.totalCount}
+        pageSize={DEFAULT_RECORDS_PER_PAGE}
+        setPage={setPage}
+        page={page}
+      />
       <SecretKeyPrompt
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
@@ -482,10 +490,12 @@ function SearchResults({ results }: { results: GrantsWithFormattedLockedUntil })
 }
 
 function Index() {
+  const [page, setPage] = useState<number>(1);
+  const sdk = useContext(idOSContext);
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
-  const grants = useFetchGrants();
+  const grants = useFetchGrants(page, sdk);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
@@ -497,12 +507,16 @@ function Index() {
   };
 
   const results = useMemo(() => {
-    if (!grants.data) return [];
+    if (!grants.data) return { records: [], totalCount: 0 };
     if (!debouncedSearchTerm) return grants.data;
 
-    return matchSorter(grants.data, debouncedSearchTerm, {
+    const sortedRecords = matchSorter(grants.data.records, debouncedSearchTerm, {
       keys: ["dataId", "owner", "grantee", "lockedUntil"],
     });
+    return {
+      records: sortedRecords,
+      totalCount: grants.data.totalCount,
+    };
   }, [debouncedSearchTerm, grants.data]);
 
   return (
@@ -540,7 +554,7 @@ function Index() {
                 onClick={() => grants.refetch()}
               />
             </HStack>
-            <SearchResults results={results} />
+            <SearchResults results={results} setPage={setPage} page={page} />
           </Stack>
         )}
       </Stack>
