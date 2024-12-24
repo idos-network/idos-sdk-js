@@ -18,7 +18,7 @@ import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
-import { useMemo, useState, useContext } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
