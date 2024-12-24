@@ -10,6 +10,7 @@ import {
   Text,
   chakra,
 } from "@chakra-ui/react";
+import { base64Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -42,6 +43,7 @@ import {
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
+import ascii85 from "ascii85";
 
 export const Route = createFileRoute("/credentials")({
   component: Credentials,
@@ -75,12 +77,13 @@ export const useListCredentials = () => {
           credential.id,
           false,
         )) as idOSCredential;
-        return fullCredential;
+        return { ...fullCredential, original_id: credential.original_id };
       });
       const results = await Promise.all(promiseList);
-      return results.filter((credential): credential is idOSCredential => credential !== null);
+      return results.filter((credential) => !!credential);
     },
-    select: (data) => data.filter((credential) => credential.public_notes) ?? [],
+    select: (data) =>
+      data.filter((credential) => credential.public_notes && !credential.original_id) ?? [],
   });
 };
 
@@ -145,6 +148,11 @@ function CredentialDetails({
       string,
     ][]
   ).map(([key, value]) => [key, value]);
+
+  function transformBase85Image(src: string) {
+    const prefix = "data:image/jpeg;base85,";
+    return `data:image/png;base64,${base64Encode(ascii85.decode(src.substring(prefix.length)))}`;
+  }
 
   return (
     <DrawerRoot
@@ -261,12 +269,12 @@ function CredentialDetails({
                             transition="transform 0.2s"
                             cursor="pointer"
                             _hover={{ transform: "scale(1.02)" }}
-                            onClick={() => openImageInNewTab(value)}
+                            onClick={() => openImageInNewTab(transformBase85Image(value))}
                           >
                             <chakra.button className="button">
                               <Image
-                                src={value}
-                                alt="Identification document front"
+                                src={transformBase85Image(value)}
+                                alt="Image from credential"
                                 rounded="md"
                                 loading="lazy"
                                 width="120px"

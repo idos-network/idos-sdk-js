@@ -219,7 +219,7 @@ function CredentialDetails({
                           <chakra.button className="button">
                             <Image
                               src={value}
-                              alt="Identification document front"
+                              alt="Image from credential"
                               rounded="md"
                               loading="lazy"
                               width="120px"
