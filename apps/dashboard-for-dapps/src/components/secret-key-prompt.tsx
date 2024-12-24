@@ -11,24 +11,49 @@ import {
   Field,
   PasswordInput,
 } from "@/components/ui";
-import { Stack } from "@chakra-ui/react";
+import { decrypt } from "@/utils";
+import { Stack, Text } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useRef, useState } from "react";
 
 export function SecretKeyPrompt({
   open,
   toggle,
   onSubmit,
+  credentialSample,
 }: {
   open: boolean;
   toggle: (value?: boolean) => void;
-  onSubmit: (key: string) => void;
+  onSubmit: (key: string, validKey: boolean) => void;
+  credentialSample?: idOSCredential;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [key, setKey] = useState("");
+  const [hasError, setHasError] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const checkForValidity = () => {
+    try {
+      if (!key || !credentialSample) return false;
+      const isValid = decrypt(credentialSample.content, credentialSample.encryptor_public_key, key);
+      return !!isValid;
+    } catch (error) {
+      return false;
+    }
+  };
 
   const handleSave = () => {
-    onSubmit(key);
-    toggle(false);
+    setLoading(true);
+    const isValid = checkForValidity();
+    setHasError(!isValid);
+    setLoading(false);
+    onSubmit(key, isValid);
+    if (isValid) toggle(false);
+  };
+
+  const resetState = () => {
+    setKey("");
+    setHasError(false);
   };
 
   return (
@@ -37,6 +62,7 @@ export function SecretKeyPrompt({
       placement="center"
       onOpenChange={() => {
         toggle(false);
+        resetState();
       }}
     >
       <DialogContent>
@@ -48,13 +74,20 @@ export function SecretKeyPrompt({
             <Field label="Secret key:">
               <PasswordInput ref={ref} onChange={(e) => setKey(e.target.value)} />
             </Field>
+            {hasError && (
+              <Text color="red.500" fontSize="sm" fontWeight="semibold">
+                Can't decrypt credential — please make sure you're using the right encryption key
+              </Text>
+            )}
           </Stack>
         </DialogBody>
         <DialogFooter>
           <DialogActionTrigger asChild>
             <Button variant="outline">Cancel</Button>
           </DialogActionTrigger>
-          <Button onClick={handleSave}>Save</Button>
+          <Button loading={loading} onClick={handleSave}>
+            Save
+          </Button>
         </DialogFooter>
         <DialogCloseTrigger />
       </DialogContent>

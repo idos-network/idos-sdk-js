@@ -53,39 +53,61 @@ export const Route = createFileRoute("/credentials")({
   },
 });
 
-export const useFetchAllCredentials = ({ enabled }: { enabled: boolean }) => {
-  const idOS = useIdOS();
-  const [secretKey] = useSecretKey();
+const safeParse = (json?: string) => {
+  try {
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    return JSON.parse(json!);
+  } catch (e) {
+    return null;
+  }
+};
 
-  return useQuery({
-    queryKey: ["credentials", secretKey],
+export const useListCredentials = () => {
+  const idOS = useIdOS();
+
+  return useQuery<idOSCredential[]>({
+    queryKey: ["credentials-list"],
     queryFn: async () => {
       const credentials = await idOS.data.listAllCredentials();
-      const promiseList = credentials.map(async (credential) => {
+      const promiseList = credentials?.map(async (credential) => {
         const fullCredential = (await idOS.data.get(
           "credentials",
           credential.id,
           false,
         )) as idOSCredential;
+        return fullCredential;
+      });
+      const results = await Promise.all(promiseList);
+      return results.filter((credential): credential is idOSCredential => credential !== null);
+    },
+    select: (data) => data.filter((credential) => credential.public_notes) ?? [],
+  });
+};
 
-        if (!fullCredential) return null;
+export const useDecryptAllCredentials = ({
+  enabled,
+  credentials,
+}: { enabled: boolean; credentials: idOSCredential[] }) => {
+  const [secretKey] = useSecretKey();
+
+  return useQuery({
+    queryKey: ["credentials", secretKey],
+    queryFn: async () => {
+      const promiseList = credentials?.map(async (credential) => {
+        if (!credential) return null;
+        if (!secretKey) return credential;
 
         try {
-          const decrypted = decrypt(
-            fullCredential.content,
-            fullCredential.encryptor_public_key,
-            secretKey,
-          );
+          const decrypted = decrypt(credential.content, credential.encryptor_public_key, secretKey);
 
           return {
-            ...fullCredential,
+            ...credential,
             content: decrypted,
           };
         } catch (error) {
           console.error(`Failed to decrypt/parse credential ${credential.id}:`, error);
           return {
-            ...fullCredential,
-            content: null,
+            ...credential,
           };
         }
       });
@@ -100,18 +122,23 @@ export const useFetchAllCredentials = ({ enabled }: { enabled: boolean }) => {
 function CredentialDetails({
   credential,
   open,
+  setCredential,
   toggle,
-}: { credential: idOSCredential | null; open: boolean; toggle: (value?: boolean) => void }) {
-  if (!credential) return null;
+}: {
+  credential: idOSCredential | null;
+  open: boolean;
+  toggle: (value?: boolean) => void;
+  setCredential: (credential: idOSCredential | null) => void;
+}) {
+  const hasValidContent = safeParse(credential?.content)?.credentialSubject;
+  const content = hasValidContent ? safeParse(credential?.content) : { credentialSubject: {} };
 
-  const content = JSON.parse(credential.content);
-
-  const subject = Object.entries(content.credentialSubject).filter(
+  const subject = Object.entries(content.credentialSubject || {}).filter(
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
   ) as [string, string][];
 
-  const emails = content.credentialSubject.emails;
-  const wallets = content.credentialSubject.wallets;
+  const emails = content.credentialSubject?.emails || [];
+  const wallets = content.credentialSubject?.wallets || [];
   const files = (
     Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
       string,
@@ -126,6 +153,7 @@ function CredentialDetails({
       size="xl"
       onOpenChange={() => {
         toggle(false);
+        setCredential(null);
       }}
     >
       <DrawerBackdrop />
@@ -134,119 +162,127 @@ function CredentialDetails({
           <DrawerTitle>Credential details</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
-          <Stack>
-            <DataListRoot orientation="horizontal" divideY="1px">
-              {subject.map(([key, value]) => (
-                <DataListItem
-                  key={key}
-                  pt="4"
-                  grow
-                  textTransform="uppercase"
-                  label={changeCase(key)}
-                  value={value}
-                />
-              ))}
+          {!hasValidContent ? (
+            <Text color="red.500">
+              Can't decrypt credential — please make sure you're using the right encryption key
+            </Text>
+          ) : (
+            <Stack>
+              <DataListRoot orientation="horizontal" divideY="1px">
+                {subject.map(([key, value]) => (
+                  <DataListItem
+                    key={key}
+                    pt="4"
+                    grow
+                    textTransform="uppercase"
+                    label={changeCase(key)}
+                    value={value}
+                  />
+                ))}
 
-              <DataListItem
-                pt="4"
-                grow
-                alignItems={{
-                  base: "flex-start",
-                  md: "center",
-                }}
-                flexDir={{
-                  base: "column",
-                  md: "row",
-                }}
-                textTransform="uppercase"
-                label="EMAILS"
-                value={
-                  <List.Root align="center" gap="2">
-                    {emails.map(({ address, verified }: { address: string; verified: boolean }) => (
-                      <List.Item key={address} alignItems="center" display="inline-flex">
-                        {address}
-                        {verified ? " (verified)" : ""}
-                      </List.Item>
-                    ))}
-                  </List.Root>
-                }
-              />
-              <DataListItem
-                pt="4"
-                grow
-                alignItems={{
-                  base: "flex-start",
-                  md: "center",
-                }}
-                flexDir={{
-                  base: "column",
-                  md: "row",
-                }}
-                textTransform="uppercase"
-                label="WALLETS"
-                value={
-                  <List.Root align="center" gap="2">
-                    {wallets.map(
-                      ({
-                        address,
-                        currency,
-                      }: { address: string; currency: string; verified: boolean }) => (
-                        <List.Item
-                          key={address}
-                          display="inline-flex"
-                          alignItems="center"
-                          textTransform="uppercase"
-                        >
-                          {address} ({currency})
-                        </List.Item>
-                      ),
-                    )}
-                  </List.Root>
-                }
-              />
-              {files.length > 0 ? (
                 <DataListItem
                   pt="4"
                   grow
-                  alignItems="start"
-                  flexDir="column"
-                  label="FILES"
+                  alignItems={{
+                    base: "flex-start",
+                    md: "center",
+                  }}
+                  flexDir={{
+                    base: "column",
+                    md: "row",
+                  }}
+                  textTransform="uppercase"
+                  label="EMAILS"
                   value={
-                    <List.Root
-                      variant="plain"
-                      display="flex"
-                      flexDirection="row"
-                      gap="4"
-                      overflowX="auto"
-                    >
-                      {files.map(([key, value]) => (
-                        <List.Item
-                          flexShrink="0"
-                          key={key}
-                          transition="transform 0.2s"
-                          cursor="pointer"
-                          _hover={{ transform: "scale(1.02)" }}
-                          onClick={() => openImageInNewTab(value)}
-                        >
-                          <chakra.button className="button">
-                            <Image
-                              src={value}
-                              alt="Identification document front"
-                              rounded="md"
-                              loading="lazy"
-                              width="120px"
-                              height="120px"
-                              title="Click to open the image in full size"
-                            />
-                          </chakra.button>
-                        </List.Item>
-                      ))}
+                    <List.Root align="center" gap="2">
+                      {emails.map(
+                        ({ address, verified }: { address: string; verified: boolean }) => (
+                          <List.Item key={address} alignItems="center" display="inline-flex">
+                            {address}
+                            {verified ? " (verified)" : ""}
+                          </List.Item>
+                        ),
+                      )}
                     </List.Root>
                   }
                 />
-              ) : null}
-            </DataListRoot>
-          </Stack>
+                <DataListItem
+                  pt="4"
+                  grow
+                  alignItems={{
+                    base: "flex-start",
+                    md: "center",
+                  }}
+                  flexDir={{
+                    base: "column",
+                    md: "row",
+                  }}
+                  textTransform="uppercase"
+                  label="WALLETS"
+                  value={
+                    <List.Root align="center" gap="2">
+                      {wallets.map(
+                        ({
+                          address,
+                          currency,
+                        }: { address: string; currency: string; verified: boolean }) => (
+                          <List.Item
+                            key={address}
+                            display="inline-flex"
+                            alignItems="center"
+                            textTransform="uppercase"
+                          >
+                            {address} ({currency})
+                          </List.Item>
+                        ),
+                      )}
+                    </List.Root>
+                  }
+                />
+                {files.length > 0 ? (
+                  <DataListItem
+                    pt="4"
+                    grow
+                    alignItems="start"
+                    flexDir="column"
+                    label="FILES"
+                    value={
+                      <List.Root
+                        variant="plain"
+                        display="flex"
+                        flexDirection="row"
+                        gap="4"
+                        overflowX="auto"
+                      >
+                        {files.map(([key, value]) => (
+                          <List.Item
+                            flexShrink="0"
+                            key={key}
+                            transition="transform 0.2s"
+                            cursor="pointer"
+                            _hover={{ transform: "scale(1.02)" }}
+                            onClick={() => openImageInNewTab(value)}
+                          >
+                            <chakra.button className="button">
+                              <Image
+                                src={value}
+                                alt="Identification document front"
+                                rounded="md"
+                                loading="lazy"
+                                width="120px"
+                                height="120px"
+                                title="Click to open the image in full size"
+                              />
+                            </chakra.button>
+                          </List.Item>
+                        ))}
+                      </List.Root>
+                    }
+                  />
+                ) : null}
+              </DataListRoot>
+            </Stack>
+          )}
         </DrawerBody>
         <DrawerFooter>
           <DrawerActionTrigger asChild>
@@ -259,13 +295,21 @@ function CredentialDetails({
   );
 }
 
-function SearchResults({ results }: { results: idOSCredential[] }) {
+function SearchResults({
+  results,
+  toggleSecretKeyPrompt,
+  toggleCredentialDetails,
+  openCredentialDetails,
+}: {
+  results: idOSCredential[];
+  openCredentialDetails: boolean;
+  toggleSecretKeyPrompt: (open?: boolean) => void;
+  toggleCredentialDetails: (open?: boolean) => void;
+}) {
   const navigate = useNavigate({ from: Route.fullPath });
   const { page = 1 } = Route.useSearch();
   const [credential, setCredential] = useState<idOSCredential | null>(null);
-  const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
-  const [openCredentialDetails, toggleCredentialDetails] = useToggle();
-  const [secretKey, setSecretKey] = useSecretKey();
+  const [secret] = useSecretKey();
 
   const PAGE_SIZE = 20;
   const totalPages = Math.ceil(results.length / PAGE_SIZE);
@@ -284,26 +328,10 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
     });
   };
 
-  const handleOpenCredentialDetails = async (credential: idOSCredential) => {
-    setCredential(credential);
-
-    if (!secretKey) {
-      toggleSecretKeyPrompt();
-      return;
-    }
-
-    toggleCredentialDetails();
-  };
-
-  const onKeySubmit = async (secretKey: string) => {
-    setSecretKey(secretKey);
-    toggleCredentialDetails();
-  };
-
   return (
     <Stack gap="4">
       {paginatedResults.map((credential) => {
-        const publicFields = Object.entries(JSON.parse(credential.public_notes)) as [
+        const publicFields = Object.entries(safeParse(credential.public_notes)) as [
           string,
           string,
         ][];
@@ -335,7 +363,14 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
               alignSelf={{
                 md: "flex-end",
               }}
-              onClick={() => handleOpenCredentialDetails(credential)}
+              onClick={() => {
+                setCredential(credential);
+                if (!secret) {
+                  toggleSecretKeyPrompt();
+                  return;
+                }
+                toggleCredentialDetails();
+              }}
             >
               Credential details
             </Button>
@@ -361,17 +396,16 @@ function SearchResults({ results }: { results: idOSCredential[] }) {
         </Center>
       </Show>
 
-      <SecretKeyPrompt
-        {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
-      />
-
-      <CredentialDetails
-        {...{
-          credential,
-          open: openCredentialDetails,
-          toggle: toggleCredentialDetails,
-        }}
-      />
+      {credential && (
+        <CredentialDetails
+          setCredential={setCredential}
+          {...{
+            credential,
+            open: openCredentialDetails,
+            toggle: toggleCredentialDetails,
+          }}
+        />
+      )}
     </Stack>
   );
 }
@@ -380,8 +414,16 @@ function Credentials() {
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const deferredSearchItem = useDeferredValue(filter);
-  const [secretKey] = useSecretKey();
-  const credentials = useFetchAllCredentials({ enabled: Boolean(secretKey) });
+  const [, setSecretKey] = useSecretKey();
+
+  const credentialsList = useListCredentials();
+  const credentials = useDecryptAllCredentials({
+    enabled: !!credentialsList.data?.length,
+    credentials: credentialsList.data ?? [],
+  });
+
+  const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle(false);
+  const [openCredentialDetails, toggleCredentialDetails] = useToggle();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
@@ -393,11 +435,14 @@ function Credentials() {
     });
   };
 
+  const onKeySubmit = (secretKey: string) => {
+    setSecretKey(secretKey);
+  };
+
   const results = useMemo(() => {
     if (!credentials.data) return [];
     if (!deferredSearchItem) return credentials.data;
-
-    return matchSorter(credentials.data, deferredSearchItem, {
+    return matchSorter(credentials.data || [], deferredSearchItem, {
       keys: ["public_notes", "content"],
       threshold: matchSorter.rankings.CONTAINS,
     });
@@ -406,42 +451,69 @@ function Credentials() {
   return (
     <Container h="100%">
       <Stack gap="4" h="100%">
-        {credentials.isFetching ? (
-          <Center h="100%" flexDirection="column" gap="2">
-            <Spinner />
-            <Text>Fetching credentials...</Text>
-          </Center>
-        ) : (
-          <Stack gap="4">
-            <HStack
-              gap="4"
-              alignSelf={{ md: "flex-end" }}
-              w={{
-                base: "full",
-                md: "md",
-              }}
-            >
-              <SearchField
-                value={filter}
-                onChange={handleSearchChange}
-                onClear={() =>
-                  navigate({
-                    search: {},
-                  })
-                }
-              />
+        {
+          <>
+            {credentialsList.isFetching ? (
+              <Center h="100%" flexDirection="column" gap="2">
+                <Spinner />
+                <Text>Fetching credentials...</Text>
+              </Center>
+            ) : credentials.isFetching ? (
+              <Center h="100%" flexDirection="column" gap="2">
+                <Spinner />
+                <Text>Decrypting credentials...</Text>
+              </Center>
+            ) : (
+              <Stack gap="4">
+                <HStack justifyContent={{ base: "space-between" }}>
+                  <Button onClick={() => setSecretKey("")} variant="subtle" colorPalette="gray">
+                    Reset Secret Key
+                  </Button>
+                  <HStack
+                    gap="4"
+                    alignSelf={{ md: "flex-end" }}
+                    w={{
+                      base: "full",
+                      md: "md",
+                    }}
+                  >
+                    <SearchField
+                      value={filter}
+                      onChange={handleSearchChange}
+                      onClear={() =>
+                        navigate({
+                          search: {},
+                        })
+                      }
+                    />
 
-              <RefreshButton
-                aria-label="Refresh credentials list"
-                title="Refresh credentials list"
-                variant="subtle"
-                colorPalette="gray"
-                onClick={() => credentials.refetch()}
-              />
-            </HStack>
-            <SearchResults results={results} />
-          </Stack>
-        )}
+                    <RefreshButton
+                      aria-label="Refresh credentials list"
+                      title="Refresh credentials list"
+                      variant="subtle"
+                      colorPalette="gray"
+                      onClick={() => credentials.refetch()}
+                    />
+                  </HStack>
+                </HStack>
+                <SearchResults
+                  results={results}
+                  toggleSecretKeyPrompt={toggleSecretKeyPrompt}
+                  openCredentialDetails={openCredentialDetails}
+                  toggleCredentialDetails={toggleCredentialDetails}
+                />
+              </Stack>
+            )}
+            <SecretKeyPrompt
+              credentialSample={results[0]}
+              {...{
+                open: openSecretKeyPrompt,
+                toggle: toggleSecretKeyPrompt,
+                onSubmit: onKeySubmit,
+              }}
+            />
+          </>
+        }
       </Stack>
     </Container>
   );
