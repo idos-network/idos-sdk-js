@@ -137,19 +137,16 @@ export async function createCredentialByPermissionedIssuer(
 ) {
   const issuer = await getIssuerConfig();
 
-  // generate 500 credentials for testing purposes
-  for (let i = 0; i < 500; i++) {
-    await createCredentialPermissioned(issuer, {
-      userId,
-      plaintextContent: generateCredential(
-        crypto.randomUUID(),
-        `demo+${i}@idos.network`,
-        ethers.Wallet.createRandom().address,
-      ),
-      publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-      receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
-    });
-  }
+  await createCredentialPermissioned(issuer, {
+    userId,
+    plaintextContent: generateCredential(
+      crypto.randomUUID(),
+      "demo@idos.network",
+      ethers.Wallet.createRandom().address,
+    ),
+    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+  });
 }
 
 export async function revokeCredentialById(id: string) {
