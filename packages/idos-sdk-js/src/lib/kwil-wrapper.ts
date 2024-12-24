@@ -2,6 +2,7 @@ import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/idos
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
+import Grant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
 
 export class KwilWrapper {
   static defaults = {
@@ -140,6 +141,37 @@ export class KwilWrapper {
     )) as any;
 
     return !!result[0]?.has_profile;
+  }
+
+  async getGrantsGrantedCount(): Promise<number> {
+    const response = (await this.call("get_internal_ag_granted_count", null)) as unknown as {
+      count: number;
+    }[];
+    return response[0].count;
+  }
+
+  async getGrantsGranted(
+    page: number,
+    size = DEFAULT_RECORDS_PER_PAGE,
+  ): Promise<{ grants: Grant[]; totalCount: number }> {
+    if (!page) throw new Error("paging starts from 1");
+    const list = (await this.call("get_internal_ag_granted", { page, size })) as any;
+    const totalCount = await this.getGrantsGrantedCount();
+
+    const grants = list.map(
+      (grant: any) =>
+        new Grant({
+          ownerUserId: grant.ag_owner_user_id,
+          granteeAddress: grant.ag_grantee_wallet_identifier,
+          dataId: grant.data_id,
+          lockedUntil: grant.locked_until,
+          ownerAddress: "",
+        }),
+    );
+    return {
+      grants,
+      totalCount,
+    };
   }
 
   async getLitAttrs() {

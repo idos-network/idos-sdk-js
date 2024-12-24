@@ -1,5 +1,3 @@
-"use client";
-
 import type { ButtonProps, TextProps } from "@chakra-ui/react";
 import {
   Button,
@@ -155,8 +153,10 @@ export const PaginationItems = (props: React.HTMLAttributes<HTMLElement>) => {
       {({ pages }) =>
         pages.map((page, index) => {
           return page.type === "ellipsis" ? (
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             <PaginationEllipsis key={index} index={index} {...props} />
           ) : (
+            // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
             <PaginationItem key={index} type="page" value={page.value} {...props} />
           );
         })
