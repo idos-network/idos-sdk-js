@@ -12,14 +12,11 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import { DEFAULT_RECORDS_PER_PAGE, type idOS, type idOSCredential } from "@idos-network/idos-sdk";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useContext, useMemo, useState } from "react";
-import { useAccount } from "wagmi";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
