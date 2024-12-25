@@ -18,9 +18,7 @@
     "./password-input": "./src/components/password-input.tsx",
     "./provider": "./src/components/provider.tsx",
     "./refresh-button": "./src/components/refresh-button.tsx",
-    "./search-field": "./src/components/search-field.tsx",
-    "./pagination": "./src/components/pagination.tsx",
-    "./link-button": "./src/components/link-button.tsx"
+    "./search-field": "./src/components/search-field.tsx"
   },
   "scripts": {
     "lint": "biome check --apply ./src",
