@@ -52,20 +52,18 @@ const vcTemplate = (email: string, address: string) => ({
   approved_at: new Date().toISOString(),
 });
 
-const appendProof = (vc: Record<string, unknown>) => {
-  return {
-    ...vc,
-    proof: {
-      type: "Ed25519Signature2020",
-      created: new Date().toISOString(),
-      verificationMethod:
-        "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
-      proofPurpose: "assertionMethod",
-      "@context": ["https://www.w3.org/ns/credentials/v2"],
-      proofValue: Base64.encode(nacl.sign.detached(toBytes(vc), issuerAttestationSecretKey)),
-    },
-  };
-};
+const appendProof = (vc: Record<string, unknown>) => ({
+  ...vc,
+  proof: {
+    type: "Ed25519Signature2020",
+    created: new Date().toISOString(),
+    verificationMethod:
+      "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
+    proofPurpose: "assertionMethod",
+    "@context": ["https://www.w3.org/ns/credentials/v2"],
+    proofValue: Base64.encode(nacl.sign.detached(toBytes(vc), issuerAttestationSecretKey)),
+  },
+});
 
 const generateCredential = (email: string, address: string): Uint8Array => {
   const vc = appendProof(vcTemplate(email, address));
