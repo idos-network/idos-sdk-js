@@ -1,5 +1,6 @@
 "use server";
 
+import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
   createCredentialByGrant,
@@ -9,9 +10,8 @@ import {
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
-
-import { getIssuerConfig } from "@/issuer.config";
 import { ethers } from "ethers";
+
 import nacl from "tweetnacl";
 
 type JsonArg = Parameters<typeof JSON.stringify>[0];
