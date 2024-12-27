@@ -44,9 +44,6 @@ if (!chosenWallet) {
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("wallet_switchEthereumChain", [{ chainId: idOS.evm.defaultChainId }]);
-    await provider.send("eth_requestAccounts", []);
-
     const signer = await provider.getSigner();
     return { signer, address: signer.address };
   },
@@ -289,16 +286,12 @@ const connectWallet = {
         throw new Error("Unreachable");
     }
 
-    const grants = await terminal
+    const { grants } = await terminal
       .h1("eyes", "User's grants to this dApp")
-      .wait(
-        "awaiting RPC",
-        cache.get("grants") ||
-          idos.grants.list({ ownerAddress, granteeAddress: granteeInfo.grantee }),
-      );
+      .wait("awaiting RPC", cache.get("grants") || idos.grants.getGrantsOwned());
     cache.set("grants", grants);
 
-    terminal.table(grants, ["owner", "grantee", "dataId", "lockedUntil"], {
+    terminal.table(grants, ["ownerUserId", "granteeAddress", "dataId", "lockedUntil"], {
       dataId: async (dataId) => {
         terminal.detail().h1("inspect", `Access grant for ${dataId}`);
 
