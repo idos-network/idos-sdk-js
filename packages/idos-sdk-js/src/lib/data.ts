@@ -294,6 +294,10 @@ export class Data {
     tableName: string,
     recordId: string,
     granteeRecipientEncryptionPublicKey: string,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
@@ -309,6 +313,7 @@ export class Data {
           "",
           record.content,
           granteeRecipientEncryptionPublicKey,
+          grantInfo,
         ),
       );
     }
@@ -367,6 +372,10 @@ export class Data {
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string | undefined,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
   ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
@@ -380,6 +389,13 @@ export class Data {
       utf8Encode(publicNotes),
       issuerAuthenticationKeyPair.secretKey,
     );
+
+    const grantInfoParam = grantInfo
+      ? {
+          grantee_wallet_identifier: grantInfo.granteeAddress,
+          locked_until: grantInfo.lockedUntil,
+        }
+      : {};
 
     return {
       user_id: userId,
@@ -397,6 +413,7 @@ export class Data {
 
       issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
       encryptor_public_key: isPresent(encryptorPublicKey),
+      ...grantInfoParam,
     };
   }
 }
