@@ -12,93 +12,63 @@ import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
 import { ethers } from "ethers";
 
-const generateCredential = (uuid: string, recipientEmail: string, walletAddress: string) => {
-  return Utf8.encode(
-    JSON.stringify({
-      "@context": [
-        "https://www.w3.org/2018/credentials/v1",
-        "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
-        "https://w3id.org/security/suites/ed25519-2020/v1",
-      ],
-      id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
-      type: ["VerifiableCredential"],
-      issuer: "https://vc-issuers.fractal.id/idos",
-      level: "human",
-      credentialSubject: {
-        id: `uuid:${uuid}`,
-        wallets: [
-          {
-            currency: "eth",
-            verified: true,
-            address: walletAddress,
-          },
-        ],
-        emails: [
-          {
-            verified: false,
-            address: recipientEmail,
-          },
-        ],
-      },
-      status: "approved",
-      issuanceDate: "2024-07-10T11:11:27Z",
-      approved_at: "2024-07-10T11:11:27Z",
-      proof: {
-        type: "Ed25519Signature2020",
-        created: "2024-07-10T11:11:28Z",
-        verificationMethod:
-          "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
-        proofPurpose: "assertionMethod",
-        "@context": ["https://www.w3.org/ns/credentials/v2"],
-        proofValue:
-          "z4Ud9HMzXu2pFbx8MnFrmxx1aFfRNXE5CVtmVhuHwsdp15MsQGLxvfMrVoUc3FCVbbxKnLwBxd4et8X4ew8qxrcUd",
-      },
-    }),
-  );
-};
+import nacl from "tweetnacl";
 
-const vcContent = Utf8.encode(
-  JSON.stringify({
-    "@context": [
-      "https://www.w3.org/2018/credentials/v1",
-      "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
-      "https://w3id.org/security/suites/ed25519-2020/v1",
-    ],
-    id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
-    type: ["VerifiableCredential"],
-    issuer: "https://vc-issuers.fractal.id/idos",
-    level: "human",
-    credentialSubject: {
-      id: "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
-      wallets: [
-        {
-          currency: "eth",
-          verified: true,
-          address: "0x32012817befd5af5121bdd9ebb2b0df786adae2e",
-        },
-      ],
-      emails: [
-        {
-          verified: false,
-          address: "user@idos.network",
-        },
-      ],
-    },
-    status: "approved",
-    issuanceDate: "2024-07-10T11:11:27Z",
-    approved_at: "2024-07-10T11:11:27Z",
-    proof: {
-      type: "Ed25519Signature2020",
-      created: "2024-07-10T11:11:28Z",
-      verificationMethod:
-        "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
-      proofPurpose: "assertionMethod",
-      "@context": ["https://www.w3.org/ns/credentials/v2"],
-      proofValue:
-        "z4Ud9HMzXu2pFbx8MnFrmxx1aFfRNXE5CVtmVhuHwsdp15MsQGLxvfMrVoUc3FCVbbxKnLwBxd4et8X4ew8qxrcUd",
-    },
-  }),
+type JsonArg = Parameters<typeof JSON.stringify>[0];
+const toBytes = (obj: JsonArg): Uint8Array => Utf8.encode(JSON.stringify(obj));
+
+const issuerAttestationSecretKey = Base64.decode(
+  "EDCS5ZjMAfLXHu2KDkmnNt6GMYRppQRboXUZO0+mIuLw9vnMMzDinxfhfrKpbixDIKpmcwEqBpiNPucSa3mHyA==",
 );
+
+const vcTemplate = (email: string, address: string) => ({
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+    "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
+    "https://w3id.org/security/suites/ed25519-2020/v1",
+  ],
+  id: crypto.randomUUID(),
+  type: ["VerifiableCredential"],
+  issuer: "https://vc-issuers.fractal.id/idos",
+  level: "human",
+  credentialSubject: {
+    id: crypto.randomUUID(),
+    wallets: [
+      {
+        currency: "eth",
+        verified: true,
+        address,
+      },
+    ],
+    emails: [
+      {
+        verified: false,
+        address: email,
+      },
+    ],
+  },
+  status: "approved",
+  issuanceDate: new Date().toISOString(),
+  approved_at: new Date().toISOString(),
+});
+
+const appendProof = (vc: Record<string, unknown>) => ({
+  ...vc,
+  proof: {
+    type: "Ed25519Signature2020",
+    created: new Date().toISOString(),
+    verificationMethod:
+      "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
+    proofPurpose: "assertionMethod",
+    "@context": ["https://www.w3.org/ns/credentials/v2"],
+    proofValue: Base64.encode(nacl.sign.detached(toBytes(vc), issuerAttestationSecretKey)),
+  },
+});
+
+const generateCredential = (email: string, address: string): Uint8Array => {
+  const vc = appendProof(vcTemplate(email, address));
+  return toBytes(vc);
+};
 
 const publicNotes = {
   id: crypto.randomUUID(),
@@ -122,6 +92,7 @@ export async function createCredentialByWriteGrant(
   userEncryptionPublicKey: string,
 ) {
   const issuer = await getIssuerConfig();
+  const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
   await createCredentialByGrant(issuer, {
     userId,
@@ -139,11 +110,7 @@ export async function createCredentialByPermissionedIssuer(
 
   await createCredentialPermissioned(issuer, {
     userId,
-    plaintextContent: generateCredential(
-      crypto.randomUUID(),
-      "demo@idos.network",
-      ethers.Wallet.createRandom().address,
-    ),
+    plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
