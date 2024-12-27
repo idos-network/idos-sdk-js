@@ -32,6 +32,7 @@ export class _Grants {
 
   mapToGrant(grant: any): Grant {
     return new Grant({
+      id: grant.id,
       ownerUserId: grant.ag_owner_user_id,
       granteeAddress: grant.ag_grantee_wallet_identifier,
       dataId: grant.data_id,
