@@ -52,7 +52,7 @@ export const Route = createFileRoute("/")({
 const useFetchGrants = (page: number, idos: idOS) => {
   return useQuery({
     queryKey: ["grants", { page }],
-    queryFn: () => idos.listGrantedGrants(page, DEFAULT_RECORDS_PER_PAGE),
+    queryFn: () => idos.grants.listGrantedGrants(page, DEFAULT_RECORDS_PER_PAGE),
     select: (data) => {
       return {
         records: data.grants.map((grant) => ({

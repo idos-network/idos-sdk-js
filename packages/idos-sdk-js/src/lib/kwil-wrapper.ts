@@ -144,7 +144,7 @@ export class KwilWrapper {
   }
 
   async getGrantsGrantedCount(): Promise<number> {
-    const response = (await this.call("get_internal_ag_granted_count", null)) as unknown as {
+    const response = (await this.call("get_access_grants_granted_count", null)) as unknown as {
       count: number;
     }[];
     return response[0].count;
@@ -155,7 +155,7 @@ export class KwilWrapper {
     size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: Grant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
-    const list = (await this.call("get_internal_ag_granted", { page, size })) as any;
+    const list = (await this.call("get_access_grants_granted", { page, size })) as any;
     const totalCount = await this.getGrantsGrantedCount();
 
     const grants = list.map(
