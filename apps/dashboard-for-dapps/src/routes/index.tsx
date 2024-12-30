@@ -305,7 +305,7 @@ function SearchResults({
               pt="4"
               grow
               label="ID"
-              value={grant.dataId}
+              value={grant.id}
               truncate
             />
             <DataListItem
@@ -391,7 +391,6 @@ function Index() {
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
   const grants = useFetchGrants(page, sdk);
-  console.log({ grants });
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;
