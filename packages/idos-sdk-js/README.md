@@ -552,6 +552,28 @@ await idos.data.delete("attributes", id);
 
 ### Access Grant creation / revocation / list
 
+### Creating an Access Grant
+Sharing a credential will create an Access Grant for the passed grantee.
+We're using some variables from `createCredentialByGrant` example. so make sure to check it out at [issuer-sdk-js's README](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#readme)
+```js
+/*
+ * Server side.
+ */
+
+import { shareCredentialByGrant } from "@idos-network/issuer-sdk-js";
+import issuerConfig from "./issuer-config.js";
+
+await shareCredentialByGrant(issuerConfig, {
+  ...credentialPayload,
+  granteeAddress: "GRANTEE_WALLET_ADDRESS",
+  recepientEncryptionPublicKey: new Uint8Array([ /* grantee public encryption key (in bytes) */]),
+  lockedUntil: Math.floor(Date.now() / 1000) + LOCKED_UNTIL_SECONDS,
+  originalCredentialId: credentialPayload.id,
+  publicNotes: "", // make sure to pass an empty string
+})
+
+```
+
 #### Revoke an Existing Access Grant
 
 ```js
@@ -585,27 +607,7 @@ await idos.grants.getGrantsGranted(page, size);
 await idos.grants.hasLockedGrants(grantId);
 ```
 
-### Creating an Access Grant
-Sharing a credential will create an Access Grant for the passed grantee.
-We're using some variables from `createCredentialByGrant` example. so make sure to check it out at [issuer-sdk-js's README](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#readme)
-```js
-/*
- * Server side.
- */
 
-import { shareCredentialByGrant } from "@idos-network/issuer-sdk-js";
-import issuerConfig from "./issuer-config.js";
-
-await shareCredentialByGrant(issuerConfig,{
-  ...credentialPayload,
-  granteeAddress: "GRANTEE_WALLET_ADDRESS",
-  lockedUntil: Math.floor(Date.now() / 1000) + LOCKED_UNTIL_SECONDS,
-  originalCredentialId: credentialPayload.id,
-  recepientEncryptionPublicKey: new Uint8Array([ /* grantee public encryption key (in bytes) */]),
-  publicNotes: "", // make sure to pass an empty string
-})
-
-```
 
 ## Developing the SDK locally
 
