@@ -552,107 +552,59 @@ await idos.data.delete("attributes", id);
 
 ### Access Grant creation / revocation / list
 
-Here's some example code of creating, revoking and listing Access Grants.
+#### Revoke an Existing Access Grant
 
 ```js
-// Decide on the credential you want to create an Access Grant for
-const credentialId = credentials[0].id;
+// Get the grantId of the grant you want to revoke
+const grantId = grants[0].id;
 
-// Share a credential by creating an access grant
-const { grant } = await idos.grants.create(
-  "credential",
-  credentialId,
-  grantee,
-  timelock,
-  receiverPublicKey
-);
-
-// Revoke an access grant
-await idos.grants.revoke(
-  "credentials",
-  credentialId,
-  grantee,
-  dataId,
-  timelock
-);
-
-// List all grants that match a criteria
-await idos.grants.list({
-  owner,
-  dataId,
-  grantee,
-});
-
-// Share a credential that matches the filtering criteria.
-await idos.grants.shareMatchingEntry(
-  "credentials",
-  {
-    credential_level: "basic",
-    credential_type: "kyc",
-  },
-  {
-    pick: {
-      "credentialSubject.identification_document_country": "DE",
-    },
-    omit: {},
-  },
-  grantee,
-  0, // timelock
-  "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=", // receiverPublicKey
-);
+// Revoke the grant
+await idos.grants.revokeGrant(grantId);
 ```
 
-### Creating a dAG on EVM
+
+#### List All Grants You Granted to Other Grantees
 
 ```js
-/*
- * Client side.
- */
+await idos.grants.getGrantsOwned();
+```
 
-// Create a share (duplicate) in the idOS and get its id:
-const { id: dataId } = await idos.data.share(tableName, recordId, receiverPublicKey);
+#### List All Grants Granted to You by Grantors
 
-// Get a message that needs to be signed by the user:
-const message = await idos.grants.messageForCreateBySignature({
-  owner,
-  grantee,
-  dataId,
-  lockedUntil
-});
+```js
+const page = 1; // Page number for pagination
+const size = 10; // Number of grants per page
 
-// The dApp should ask the user to sign this message:
-const { signature } = await wallet.signMessage({ message, recipient, nonce });
+await idos.grants.getGrantsGranted(page, size);
+```
 
+#### Check if a Grant is Still Locked
+
+```js
+// Check if a grant is still locked (i.e., the locked until date has not passed yet)
+await idos.grants.hasLockedGrants(grantId);
+```
+
+### Creating an Access Grant
+Sharing a credential will create an Access Grant for the passed grantee.
+We're using some variables from `createCredentialByGrant` example. so make sure to check it out at [issuer-sdk-js's README](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#readme)
+```js
 /*
  * Server side.
- *
- * ⚠️ Notice: Not implemented for NEAR yet.
  */
-import { idOSGrantee } from "@idos-network/grantee-sdk-js";
-import { ethers } from "ethers";
 
-const granteeSigner = new ethers.Wallet(
-  process.env.EVM_GRANTEE_PRIVATE_KEY,
-  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
-);
+import { shareCredentialByGrant } from "@idos-network/issuer-sdk-js";
+import issuerConfig from "./issuer-config.js";
 
-// Initialize the idOSGrantee
-const idosGrantee = await idOSGrantee.init({
-  chainType: "EVM",
-  granteeSigner,
-  encryptionSecret: process.env.ENCRYPTION_SECRET_KEY
-});
-
-// Create the dAG
-await idosGrantee.createBySignature({
-  // These values need to be the same you used to generate the signed message
-  owner,
-  grantee,
-  dataId,
-  lockedUntil,
-  // This is the signature you got from the user.
-  signature,
+await shareCredentialByGrant(issuerConfig,{
+  ...credentialPayload,
+  granteeAddress: "GRANTEE_WALLET_ADDRESS",
+  lockedUntil: Math.floor(Date.now() / 1000) + LOCKED_UNTIL_SECONDS,
+  originalCredentialId: credentialPayload.id,
+  recepientEncryptionPublicKey: new Uint8Array([ /* grantee public encryption key (in bytes) */]),
+  publicNotes: "", // make sure to pass an empty string
 })
+
 ```
 
 ## Developing the SDK locally
