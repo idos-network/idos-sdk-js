@@ -253,6 +253,7 @@ import issuerConfig from "./issuer-config.js";
 await shareCredentialByGrant(issuerConfig,{
   ...credentialPayload,
   grantee: "GRANTEE_WALLET_ADDRESS",
+  receiverEncryptionPublicKey: new Uint8Array([/* grantee public encryption key (in bytes) */]),
   lockedUntil: Math.floor(Date.now() / 1000) + 1000,
   originalCredentialId: credentialPayload.id,
 });
