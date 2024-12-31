@@ -2,7 +2,6 @@ import { ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
 
-import type { Grant } from "../../idos-sdk-js";
 import { idOSGrantee } from "./idOS-grantee.ts";
 
 export class idOS {
@@ -13,6 +12,7 @@ export class idOS {
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
     nodeUrl: string,
+    dbId: string,
   ) {
     let grantee: idOSGrantee;
 
@@ -23,6 +23,8 @@ export class idOS {
           chainType,
           granteeSigner: signer,
           recipientEncryptionPrivateKey,
+          nodeUrl,
+          dbId,
         });
         return new idOS(grantee);
       }
@@ -32,6 +34,7 @@ export class idOS {
           chainType,
           granteeSigner: signer,
           recipientEncryptionPrivateKey,
+          dbId,
         });
         return new idOS(grantee);
       }
@@ -40,8 +43,8 @@ export class idOS {
     }
   }
 
-  async listGrants(args: Partial<Omit<Grant, "lockedUntil">>) {
-    return this.grantee.grants?.list(args);
+  async listGrants(page: number, size?: number) {
+    return this.grantee.getGrantsGranted(page, size);
   }
 
   async fetchSharedCredential(dataId: string) {

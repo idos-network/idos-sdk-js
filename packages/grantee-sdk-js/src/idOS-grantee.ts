@@ -1,20 +1,16 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
+import { Utils as KwilUtils } from "@kwilteam/kwil-js";
+import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
-
-import {
-  EvmGrants,
-  type EvmGrantsOptions,
-  type NearGrantsOptions,
-} from "../../idos-sdk-js/src/lib/grants";
-import type { GrantChild } from "../../idos-sdk-js/src/lib/grants/grant-child.ts";
-import type Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
+import Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
+import { DEFAULT_RECORDS_PER_PAGE } from "../../idos-sdk-js/src/lib/grants/grant.ts";
 import { KwilWrapper } from "../../idos-sdk-js/src/lib/kwil-wrapper.ts";
 import { assertNever } from "../../idos-sdk-js/src/lib/utils.ts";
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
 export class NoncedBox {
   keyPair: nacl.BoxKeyPair;
@@ -92,7 +88,6 @@ interface idOSGranteeInitParams {
   dbId?: string;
   chainType: ChainType;
   granteeSigner: KeyPair | ethers.Wallet;
-  granteeOptions?: EvmGrantsOptions | NearGrantsOptions;
 }
 
 const throwError = (message: string): never => {
@@ -106,7 +101,6 @@ export class idOSGrantee {
   dbId: string;
   chainType: ChainType;
   address: string;
-  grants?: GrantChild;
 
   static async init(_: {
     recipientEncryptionPrivateKey: string;
@@ -115,7 +109,6 @@ export class idOSGrantee {
     dbId?: string;
     chainType: "EVM";
     granteeSigner: ethers.Wallet;
-    granteeOptions?: EvmGrantsOptions;
   }): Promise<idOSGrantee>;
 
   static async init(_: {
@@ -125,17 +118,15 @@ export class idOSGrantee {
     dbId?: string;
     chainType: "NEAR";
     granteeSigner: KeyPair;
-    granteeOptions?: NearGrantsOptions;
   }): Promise<idOSGrantee>;
 
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = KwilWrapper.defaults.kwilProvider,
-    chainId,
+    chainId = KwilWrapper.defaults.chainId,
     dbId,
     chainType,
     granteeSigner,
-    granteeOptions,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
 
@@ -149,37 +140,27 @@ export class idOSGrantee {
       (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
       throwError("Can't discover dbId. You must pass it explicitly.");
 
+    const kwilWrapper = await KwilWrapper.init({ nodeUrl, dbId });
+
     const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
 
-    let grants: EvmGrants | undefined;
-    switch (chainType) {
-      case "EVM": {
-        const signer = granteeSigner as ethers.Wallet;
-        grants = await EvmGrants.init({
-          // biome-ignore lint/suspicious/noExplicitAny: TBD.
-          signer: signer as any,
-          options: (granteeOptions ?? {}) as EvmGrantsOptions,
-        });
-        break;
-      }
-      case "NEAR": {
-        grants = undefined;
-        break;
-      }
-      default:
-        grants = throwError(`Unknown chainType: ${chainType}`);
-    }
+    kwilWrapper.setSigner({
+      accountId: address,
+      // @ts-ignore
+      signer: granteeSigner,
+      signatureType: chainType === "EVM" ? "secp256k1_ep" : "nep413",
+    });
 
     return new idOSGrantee(
       NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
       nodeKwil,
       kwilSigner,
-      dbId,
+      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      dbId!,
       chainType,
       address,
-      grants,
     );
   }
 
@@ -190,7 +171,6 @@ export class idOSGrantee {
     dbId: string,
     chainType: ChainType,
     address: string,
-    grants: GrantChild | undefined,
   ) {
     this.noncedBox = noncedBox;
     this.nodeKwil = nodeKwil;
@@ -198,23 +178,12 @@ export class idOSGrantee {
     this.dbId = dbId;
     this.chainType = chainType;
     this.address = address;
-    this.grants = grants;
   }
 
   async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
     dataId: string,
   ): Promise<T> {
-    return (
-      (await this.nodeKwil.call(
-        {
-          name: "get_credential_shared",
-          dbid: this.dbId,
-          inputs: [{ $id: dataId }],
-        },
-        this.kwilSigner,
-        // biome-ignore lint/suspicious/noExplicitAny: NodeKwil doesn't have the best type defs.
-      )) as any
-    ).data.result[0] as unknown as T;
+    return (await this.call("get_credential_shared", { id: dataId })) as any;
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -229,46 +198,33 @@ export class idOSGrantee {
     );
   }
 
-  /**
-   * Returns the list of Access Grants that are present in the network that granteeSigner is connected to.
-   *
-   * If you need to gather AGs from more than one chain, consider instantiating this class once per chain, and do
-   * something like so:
-   * <code>
-   *   const AllIdOSGrantees = [
-   *     await idOSGrantee.init({args: "for", chain: "one"}),
-   *     await idOSGrantee.init({args: "for", chain: "two"}),
-   *   ]
-   *   const allUserAGs = (await Promise.all(allIdOSGrantees.map(
-   *     (idOSGrantee) => idOSGrantee.getLocalAccessGrantsFromUserByAddress(address),
-   *   ))).flat()
-   * </code>
-   *
-   * @param address The user's address.
-   */
-  async getLocalAccessGrantsFromUserByAddress(address: string): Promise<Grant[]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
+  async getLocalAccessGrantsFromUserByAddress() {
+    throw new Error("not implemented yet"); // @todo: update alexander to implement this
+  }
+  async getGrantsGrantedCount(): Promise<number> {
+    return this.call("get_access_grants_granted_count", null) as unknown as number;
+  }
 
-    return this.grants.list({
-      ownerAddress: address,
-      granteeAddress: this.grantee,
+  mapToGrant(grant: any): Grant {
+    return new Grant({
+      id: grant.id,
+      ownerUserId: grant.ag_owner_user_id,
+      granteeAddress: grant.ag_grantee_wallet_identifier,
+      dataId: grant.data_id,
+      lockedUntil: grant.locked_until,
     });
   }
-
-  async createBySignature(
-    ...args: Parameters<GrantChild["createBySignature"]>
-  ): ReturnType<GrantChild["createBySignature"]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
-
-    return this.grants.createBySignature(...args);
-  }
-
-  async revokeBySignature(
-    ...args: Parameters<GrantChild["revokeBySignature"]>
-  ): ReturnType<GrantChild["revokeBySignature"]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
-
-    return this.grants.revokeBySignature(...args);
+  async getGrantsGranted(
+    page: number,
+    size = DEFAULT_RECORDS_PER_PAGE,
+  ): Promise<{ grants: Grant[]; totalCount: number }> {
+    const count = await this.getGrantsGrantedCount();
+    let grants = (await this.call("get_access_grants_granted", { page, size })) as any;
+    grants = grants.map(this.mapToGrant);
+    return {
+      grants,
+      totalCount: count,
+    };
   }
 
   get grantee() {
@@ -277,5 +233,52 @@ export class idOSGrantee {
 
   get encryptionPublicKey() {
     return Base64Codec.encode(this.noncedBox.keyPair.publicKey);
+  }
+
+  async buildAction(
+    actionName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
+    inputs: Record<string, any>[] | null | any,
+    description?: string,
+  ) {
+    const payload: ActionBody = {
+      name: actionName,
+      dbid: this.dbId,
+      inputs: [],
+    };
+
+    if (description) {
+      payload.description = `*${description}*`;
+    }
+
+    if (inputs) {
+      for (const input of inputs) {
+        if (!input || (input && Object.keys(input).length === 0)) {
+          continue;
+        }
+        const actionInput = new KwilUtils.ActionInput();
+        for (const key in input) {
+          actionInput.put(`$${key}`, input[key]);
+        }
+        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
+      }
+    }
+
+    return payload;
+  }
+
+  async call(
+    actionName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
+    actionInputs: Record<string, any> | null,
+    description?: string,
+    useSigner = true,
+  ) {
+    if (useSigner && !this.kwilSigner) throw new Error("Call idOS.setSigner first.");
+
+    const action = await this.buildAction(actionName, [actionInputs], description);
+    const res = await this.nodeKwil.call(action, useSigner ? this.kwilSigner : undefined);
+
+    return res.data?.result;
   }
 }
