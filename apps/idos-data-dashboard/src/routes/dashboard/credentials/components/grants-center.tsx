@@ -22,7 +22,7 @@ import {
   VStack,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import type { idOSGrant } from "@idos-network/idos-sdk";
+import type { Grant } from "@idos-network/idos-sdk";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { useFetchGrants, useRevokeGrant } from "../shared";
@@ -33,9 +33,9 @@ type GrantsCenterProps = {
   onClose: () => void;
 };
 
-function generateGrantId(grant: idOSGrant): string {
-  const { dataId, granteeAddress, ownerAddress, lockedUntil } = grant;
-  return [dataId, granteeAddress, ownerAddress, lockedUntil].join("-");
+function generateGrantId(grant: Grant): string {
+  const { dataId, granteeAddress, lockedUntil } = grant;
+  return [dataId, granteeAddress, lockedUntil].join("-");
 }
 
 function timelockToMs(timelock: number): number {
@@ -52,7 +52,7 @@ function timelockToDate(timelock: number): string {
   }).format(new Date(milliseconds));
 }
 
-const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGrant[] }) => {
+const Shares = ({ credentialId, grants }: { credentialId: string; grants: Grant[] }) => {
   const revokeGrant = useRevokeGrant();
   const queryClient = useQueryClient();
 
@@ -60,7 +60,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
     return <Text id="no-grants">You have not shared this credential with anyone.</Text>;
   }
 
-  const onRevoke = (grant: idOSGrant) => {
+  const onRevoke = (grant: Grant) => {
     revokeGrant.mutate(grant, {
       onSuccess() {
         queryClient.invalidateQueries({
