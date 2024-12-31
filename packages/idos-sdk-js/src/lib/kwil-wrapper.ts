@@ -165,7 +165,6 @@ export class KwilWrapper {
           granteeAddress: grant.ag_grantee_wallet_identifier,
           dataId: grant.data_id,
           lockedUntil: grant.locked_until,
-          ownerAddress: "",
         }),
     );
     return {
