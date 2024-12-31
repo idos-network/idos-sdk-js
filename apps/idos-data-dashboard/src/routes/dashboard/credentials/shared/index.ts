@@ -28,7 +28,6 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   });
 };
 
-
 export const useRevokeGrant = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
