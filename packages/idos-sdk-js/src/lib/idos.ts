@@ -8,25 +8,24 @@ import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
-import { type EvmGrantsOptions, type NearGrantsOptions, _Grants } from "./grants";
+import { Grants } from "./grants";
 import type Grant from "./grants/grant";
-import { Grants, type SignerType } from "./grants/grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
 import verifiableCredentials from "./verifiable-credentials";
+
+export type SignerType = "EVM" | "NEAR";
 
 interface InitParams {
   nodeUrl?: string;
   dbId?: string;
   enclaveOptions: EnclaveOptions;
-  evmGrantsOptions?: EvmGrantsOptions;
-  nearGrantsOptions?: NearGrantsOptions;
 }
 
 export class idOS {
   static initializing = false;
-  static near = Grants.near;
-  static evm = Grants.evm;
+  // static near = Grants.near;
+  // static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
 
   static verifiableCredentials = verifiableCredentials;
@@ -35,7 +34,7 @@ export class idOS {
   data: Data;
   enclave: Enclave;
   kwilWrapper: KwilWrapper;
-  grants: _Grants;
+  grants: Grants;
   store: Store;
 
   private constructor({
@@ -57,7 +56,7 @@ export class idOS {
 
     this.data = new Data(kwilWrapper, this.enclave);
 
-    this.grants = new _Grants({ dbId, nodeUrl, kwilWrapper: this.kwilWrapper }); // @todo: remove original Grants class and rename _Grants to Grants
+    this.grants = new Grants({ dbId, nodeUrl, kwilWrapper: this.kwilWrapper });
   }
 
   static async init(params: InitParams): Promise<idOS> {
