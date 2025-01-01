@@ -47,8 +47,10 @@ export function SecretKeyPrompt({
     const isValid = checkForValidity();
     setHasError(!isValid);
     setLoading(false);
-    onSubmit(key, isValid);
-    if (isValid) toggle(false);
+    if (isValid) {
+      onSubmit(key, isValid);
+      toggle(false);
+    }
   };
 
   const resetState = () => {

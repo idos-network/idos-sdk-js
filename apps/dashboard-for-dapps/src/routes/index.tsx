@@ -79,6 +79,7 @@ const useFetchCredential = (id: string) => {
   return useQuery({
     queryKey: ["credential-details", id],
     queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
+    enabled: !!id,
   });
 };
 
@@ -267,6 +268,7 @@ function SearchResults({
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useSecretKey();
+  const credentialSample = useFetchCredential(results.records[0]?.dataId);
 
   if (!results.records.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
@@ -370,6 +372,7 @@ function SearchResults({
         page={page}
       />
       <SecretKeyPrompt
+        credentialSample={credentialSample.data!}
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
 
