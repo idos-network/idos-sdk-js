@@ -286,21 +286,27 @@ const connectWallet = {
         throw new Error("Unreachable");
     }
 
+    const page = 1;
+    const size = 10;
     const { grants } = await terminal
       .h1("eyes", "User's grants to this dApp")
-      .wait("awaiting RPC", cache.get("grants") || idos.grants.getGrantsOwned());
+      .wait("awaiting RPC", idos.grants.getGrantsGranted(page, size));
+
     cache.set("grants", grants);
 
-    terminal.table(grants, ["ownerUserId", "granteeAddress", "dataId", "lockedUntil"], {
+    terminal.table(grants, ["ownerUserId", "dataId", "lockedUntil"], {
       dataId: async (dataId) => {
         terminal.detail().h1("inspect", `Access grant for ${dataId}`);
 
         let content;
         try {
-          content = await terminal.wait(
-            "awaiting server decryption",
-            client.fetchAndDecryptSharedCredential(chosenWallet, dataId),
-          );
+          content = (
+            await terminal.wait(
+              "awaiting server decryption",
+              idos.data.getShared("credentials", dataId),
+            )
+          ).content;
+
           terminal.status("done", "Decrypted");
         } catch (e) {
           terminal.error(e);
