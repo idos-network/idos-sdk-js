@@ -331,38 +331,11 @@ An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dAp
 
 By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user's data (either a credential or an attribute) until the UNIX timestamp on `lockedUntil` has passed. This is especially relevant to be able to fulfill compliance obligations.
 
-This is achieved by combining two mechanisms:
-
-- On idOS, by asking the user to share a credential/attribute, which creates a copy of its current state, encrypted to the `receiverPublicKey` you provide. The id of this copy is what's called `dataId`.
-- On the blockchain you're using, by creating an Access Grant entry in a Smart Contract on the chain you're using.
-
-The combination of doing these two operations is bundled in `idos.grants.create`, and that's the intended API for common usage. Here's an example of what that looks like:
-
-```js
-// These don't necessarily have to come from a server, but it's the typical setup.
-const {
-  encryptionPublicKey,
-  lockTimeSpanSeconds,
-  grantee,
-} = await yourBackendService.getInfo();
-
-const { grant: { dataId } } = await idos.grants.create(
-  "credentials",
-  credentials[0].id,
-  grantee,
-  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds,
-  encryptionPublicKey,
-);
-```
-
-> 💡 Tip
->
-> See a working example [idos-example-dapp](https://github.com/idos-network/idos-sdk-js/tree/main/examples/idos-example-dapp)
 
 To avoid any doubts, let's go over the Access Grant fields:
 
-- `owner`: on EVM chains this is a wallet address the user controls, and on NEAR this is a full access public key from an account the user controls.
-- `grantee`: on EVM chains this is the dApp's grantee address (like explained in the previous section), and on NEAR this is a full access public key.
+- `ownerUserId`: the grant owner idOS id.
+- `granteeAddress`: on EVM chains this is the dApp's grantee address (like explained in the previous section), and on NEAR this is a full access public key.
 - `dataId`: the `id` of the record copy (either a credential or an attribute) that is going to be shared.
 - `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. Any timestamp in the past, notably "0", means it's revocable at any time.
 
@@ -386,35 +359,6 @@ const entries = await idos.enclave.filterCredentials(credentials, {
 
 In this example, `entries` will be a list of credentials where the `"credentialSubject.identification_document_country"` is `"DE"` and `"credentialSubject.identification_document_type"` is not `"passport"`.
 
-You can also use `idos.grants.shareMatchingEntry`, a helper function that:
-- Gets all the user's credentials
-- Can filter by public fields
-- Calls `idos.enclave.filterCredentials`
-- Calls `idos.grants.create` with the first matching credential
-
-Here's an example similar to the previous one, but that also filters a couple of public fields:
-
-```js
-await idos.grants.shareMatchingEntry(
-  "credentials",
-  {
-    credential_level: "basic",
-    credential_type: "kyc",
-  },
-  {
-    pick: {
-      "credentialSubject.identification_document_country": "DE"
-    },
-    omit: {
-      "credentialSubject.identification_document_type": "passport",
-    },
-  },
-  grantee,
-  Math.floor(Date.now() / 1000) + lockTimeSpanSeconds, // timelock
-  encryptionPublicKey,
-);
-```
-
 ### Checking Access Grant contents
 
 By now, we have used the idOS to secure a copy of the data we need to operate.
@@ -425,17 +369,13 @@ Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp
 
 ```js
 import { idOSGrantee } from "@idos-network/grantee-sdk-js";
-import { ethers } from "ethers";
-
-const granteeSigner = new ethers.Wallet(
-  process.env.EVM_GRANTEE_PRIVATE_KEY,
-  new ethers.JsonRpcProvider(process.env.EVM_NODE_URL),
-);
 
 const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
-  granteeSigner,
+  granteeSignerPrivateKey: process.env.EVM_GRANTEE_PRIVATE_KEY,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY,
+  nodeUrl: process.env.EVM_IDOS_NODE_URL,
+  dbId: process.env.EVM_IDOS_DB_ID,
 });
 
 // This assumes we got `dataId` (from a request body, a script argument, etc).
@@ -457,13 +397,7 @@ Here's a diagram comparing the two cases side-by-side:
 
 <img src="https://raw.githubusercontent.com/idos-network/idos-sdk-js/main/packages/idos-sdk-js/assets/readme-ag-vs-dag.png" />
 
-This is accomplished by getting the user's signature a specific message, generated with the contract's `insert_grant_by_signature_message` method, that can then be used to call the contract's `insert_grant_by_signature` method.
-
-The message building function is exposed as `idos.grants.messageForCreateBySignature`. Submitting the resulting message and its user signature is exposed as `idosGrantee.createBySignature`.
-
-> ⚠️ Notice
->
-> This is not implemented for NEAR yet. If you want to use dAGs today, you'll have to call the right contract directly.
+This is accomplished by sharing the user's credential using `shareCredentialByGrant` which is described in detail in this [example](#creating-an-access-grant).
 
 ## Quick reference
 
@@ -527,7 +461,7 @@ const { userId } = await idos.setSigner(CHAIN_TYPE, signer);
 const credentials = await idos.data.list("credentials");
 
 //Get all credentials that match a condition
-const credentials = await idos.data.list("credentials", { issuer: "Fractal ID" };
+const credentials = await idos.data.list("credentials", { issuer: "Fractal ID" });
 
 // Get the credential details
 const { id } = credentials.find(c => c.credential_type === "basic");
