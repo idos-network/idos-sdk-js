@@ -44,7 +44,7 @@ test("should fetch wallets successfully", async ({ context, page, metamaskPage, 
   await expect(list.getByRole("listitem")).toHaveCount(1);
   const address = await metamask.getAccountAddress();
   await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
-    address, // The address is stored in lowercase format in the idOS so we need to normalize the MetaMask address.
+    address,
   );
 });
 
