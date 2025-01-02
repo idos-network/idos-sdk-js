@@ -157,8 +157,7 @@ export class idOSGrantee {
       NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
       nodeKwil,
       kwilSigner,
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
-      dbId!,
+      dbId,
       chainType,
       address,
     );
