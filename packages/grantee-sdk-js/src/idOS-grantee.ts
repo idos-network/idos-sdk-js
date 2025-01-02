@@ -183,7 +183,7 @@ export class idOSGrantee {
   async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
     dataId: string,
   ): Promise<T> {
-    return (await this.call("get_credential_shared", { id: dataId })) as any;
+    return (await this.call("get_credential_shared", { id: dataId })) as unknown as T;
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -205,25 +205,25 @@ export class idOSGrantee {
     return this.call("get_access_grants_granted_count", null) as unknown as number;
   }
 
-  mapToGrant(grant: any): Grant {
-    return new Grant({
-      id: grant.id,
-      ownerUserId: grant.ag_owner_user_id,
-      granteeAddress: grant.ag_grantee_wallet_identifier,
-      dataId: grant.data_id,
-      lockedUntil: grant.locked_until,
-    });
-  }
   async getGrantsGranted(
     page: number,
     size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: Grant[]; totalCount: number }> {
-    const count = await this.getGrantsGrantedCount();
-    let grants = (await this.call("get_access_grants_granted", { page, size })) as any;
-    grants = grants.map(this.mapToGrant);
     return {
-      grants,
-      totalCount: count,
+      grants:
+        // biome-ignore lint/suspicious/noExplicitAny: intermediate type
+        ((await this.call("get_access_grants_granted", { page, size })) as unknown as any[]).map(
+          (grant): Grant => {
+            return new Grant({
+              id: grant.id,
+              ownerUserId: grant.ag_owner_user_id,
+              granteeAddress: grant.ag_grantee_wallet_identifier,
+              dataId: grant.data_id,
+              lockedUntil: grant.locked_until,
+            });
+          },
+        ),
+      totalCount: await this.getGrantsGrantedCount(),
     };
   }
 
@@ -235,12 +235,7 @@ export class idOSGrantee {
     return Base64Codec.encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async buildAction(
-    actionName: string,
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    inputs: Record<string, any>[] | null | any,
-    description?: string,
-  ) {
+  buildAction(actionName: string, inputs: Record<string, unknown> | null, description?: string) {
     const payload: ActionBody = {
       name: actionName,
       dbid: this.dbId,
@@ -252,16 +247,12 @@ export class idOSGrantee {
     }
 
     if (inputs) {
-      for (const input of inputs) {
-        if (!input || (input && Object.keys(input).length === 0)) {
-          continue;
-        }
-        const actionInput = new KwilUtils.ActionInput();
-        for (const key in input) {
-          actionInput.put(`$${key}`, input[key]);
-        }
-        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
+      const actionInput = new KwilUtils.ActionInput();
+      for (const key in inputs) {
+        // biome-ignore lint/suspicious/noExplicitAny: Inputs aren't typed.
+        actionInput.put(`$${key}`, inputs[key] as any);
       }
+      payload.inputs = [actionInput];
     }
 
     return payload;
@@ -269,16 +260,17 @@ export class idOSGrantee {
 
   async call(
     actionName: string,
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    actionInputs: Record<string, any> | null,
+    actionInputs: Record<string, unknown> | null,
     description?: string,
     useSigner = true,
   ) {
     if (useSigner && !this.kwilSigner) throw new Error("Call idOS.setSigner first.");
 
-    const action = await this.buildAction(actionName, [actionInputs], description);
-    const res = await this.nodeKwil.call(action, useSigner ? this.kwilSigner : undefined);
-
-    return res.data?.result;
+    return (
+      await this.nodeKwil.call(
+        this.buildAction(actionName, actionInputs, description),
+        useSigner ? this.kwilSigner : undefined,
+      )
+    ).data?.result;
   }
 }
