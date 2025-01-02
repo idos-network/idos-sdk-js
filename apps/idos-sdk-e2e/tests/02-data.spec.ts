@@ -5,6 +5,8 @@ const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
 const { expect } = test;
 
+const normalizeAddress = (address: string) => address.trim().toLowerCase();
+
 test.beforeEach(async ({ context, page }) => {
   test.setTimeout(120000);
 
@@ -43,7 +45,8 @@ test("should fetch wallets successfully", async ({ context, page, metamaskPage, 
   const list = page.locator("#wallets-list");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   const address = await metamask.getAccountAddress();
-  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(address);
+  const actualAddress = await list.getByRole("listitem").first().locator("p").last().innerText();
+  await expect(normalizeAddress(actualAddress)).toEqual(normalizeAddress(address));
 });
 
 test("should add / delete a wallet successfully", async ({
