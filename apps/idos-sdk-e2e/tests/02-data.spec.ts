@@ -43,9 +43,7 @@ test("should fetch wallets successfully", async ({ context, page, metamaskPage, 
   const list = page.locator("#wallets-list");
   await expect(list.getByRole("listitem")).toHaveCount(1);
   const address = await metamask.getAccountAddress();
-  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(
-    address,
-  );
+  await expect(list.getByRole("listitem").first().locator("p").last()).toHaveText(address);
 });
 
 test("should add / delete a wallet successfully", async ({
