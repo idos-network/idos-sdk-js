@@ -12,7 +12,7 @@ export default async function Home() {
 
   const sdk = await idOS.init("EVM", EVM_GRANTEE_PRIVATE_KEY, ENCRYPTION_SECRET_KEY, EVM_NODE_URL);
   const grants = await sdk.listGrants({
-    owner: OWNER_ADDRESS,
+    ownerAddress: OWNER_ADDRESS,
   });
 
   return (
