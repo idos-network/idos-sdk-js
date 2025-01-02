@@ -461,7 +461,7 @@ function Credentials() {
       keys: ["public_notes", "content"],
       threshold: matchSorter.rankings.CONTAINS,
     });
-  }, [deferredSearchItem, decryptedCredentials.data, credentialsList.data]);
+  }, [deferredSearchItem, decryptedCredentials.data]);
 
   return (
     <Container h="100%">
