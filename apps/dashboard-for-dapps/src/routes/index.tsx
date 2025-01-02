@@ -102,8 +102,9 @@ function CredentialDetails({
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
   ) as [string, string][];
 
-  const emails = content.credentialSubject?.emails || [];
-  const wallets = content.credentialSubject?.wallets || [];
+  const emails: { address: string; verified: boolean }[] = content.credentialSubject?.emails || [];
+  const wallets: { address: string; currency: string; verified: boolean }[] =
+    content.credentialSubject?.wallets || [];
   const files = (
     Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
       string,
@@ -159,14 +160,12 @@ function CredentialDetails({
                   label="EMAILS"
                   value={
                     <List.Root align="center" gap="2">
-                      {emails.map(
-                        ({ address, verified }: { address: string; verified: boolean }) => (
-                          <List.Item key={address} alignItems="center" display="inline-flex">
-                            {address}
-                            {verified ? " (verified)" : ""}
-                          </List.Item>
-                        ),
-                      )}
+                      {emails.map(({ address, verified }) => (
+                        <List.Item key={address} alignItems="center" display="inline-flex">
+                          {address}
+                          {verified ? " (verified)" : ""}
+                        </List.Item>
+                      ))}
                     </List.Root>
                   }
                 />
@@ -185,21 +184,16 @@ function CredentialDetails({
                   label="WALLETS"
                   value={
                     <List.Root align="center" gap="2">
-                      {wallets.map(
-                        ({
-                          address,
-                          currency,
-                        }: { address: string; currency: string; verified: boolean }) => (
-                          <List.Item
-                            key={address}
-                            display="inline-flex"
-                            alignItems="center"
-                            textTransform="uppercase"
-                          >
-                            {address} ({currency})
-                          </List.Item>
-                        ),
-                      )}
+                      {wallets.map(({ address, currency }) => (
+                        <List.Item
+                          key={address}
+                          display="inline-flex"
+                          alignItems="center"
+                          textTransform="uppercase"
+                        >
+                          {address} ({currency})
+                        </List.Item>
+                      ))}
                     </List.Root>
                   }
                 />
@@ -372,7 +366,7 @@ function SearchResults({
         page={page}
       />
       <SecretKeyPrompt
-        credentialSample={credentialSample.data!}
+        credentialSample={credentialSample.data}
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
 

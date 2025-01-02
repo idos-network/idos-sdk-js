@@ -25,7 +25,7 @@ export function SecretKeyPrompt({
   open: boolean;
   toggle: (value?: boolean) => void;
   onSubmit: (key: string, validKey: boolean) => void;
-  credentialSample?: idOSCredential;
+  credentialSample?: idOSCredential | null;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [key, setKey] = useState("");
