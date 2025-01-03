@@ -288,9 +288,13 @@ const connectWallet = {
 
     const page = 1;
     const size = 10;
-    const { grants } = await terminal
+
+    const grants = await terminal
       .h1("eyes", "User's grants to this dApp")
-      .wait("awaiting RPC", idos.grants.getGrantsGranted(page, size));
+      .wait(
+        "awaiting RPC",
+        cache.get("grants") || (await idos.grants.getGrantsGranted(page, size)).grants,
+      );
 
     cache.set("grants", grants);
 
@@ -300,12 +304,10 @@ const connectWallet = {
 
         let content;
         try {
-          content = (
-            await terminal.wait(
-              "awaiting server decryption",
-              idos.data.getShared("credentials", dataId),
-            )
-          ).content;
+          content = await terminal.wait(
+            "awaiting server decryption",
+            client.fetchAndDecryptSharedCredential(chosenWallet, dataId),
+          );
 
           terminal.status("done", "Decrypted");
         } catch (e) {
@@ -317,6 +319,7 @@ const connectWallet = {
       },
     });
   }
-
+  const loadMoreBtn = terminal.button("load-more", "Load More...", () => alert("loading more..."));
+  loadMoreBtn.currentElem.onclick = () => alert("loading more..."); // @todo: remove this later. but it's working for me for now.
   terminal.status("done", "Done");
 })();
