@@ -39,6 +39,7 @@ import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
 import { Pagination } from "@/components/pagination";
 import { idOSContext, useIdOS } from "@/idOS.provider";
+import { safeParse } from "./credentials";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -78,6 +79,7 @@ const useFetchCredential = (id: string) => {
   return useQuery({
     queryKey: ["credential-details", id],
     queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
+    enabled: !!id,
   });
 };
 
@@ -92,14 +94,17 @@ function CredentialDetails({
   if (!credential.data || !secretKey) return null;
 
   const result = decrypt(credential.data.content, credential.data.encryptor_public_key, secretKey);
-  const content = JSON.parse(result);
+
+  const content = result ? safeParse(result) : { credentialSubject: {} };
+  const hasValidContent = !!result;
 
   const subject = Object.entries(content.credentialSubject).filter(
     ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
   ) as [string, string][];
 
-  const emails = content.credentialSubject.emails;
-  const wallets = content.credentialSubject.wallets;
+  const emails: { address: string; verified: boolean }[] = content.credentialSubject?.emails || [];
+  const wallets: { address: string; currency: string; verified: boolean }[] =
+    content.credentialSubject?.wallets || [];
   const files = (
     Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
       string,
@@ -122,63 +127,64 @@ function CredentialDetails({
           <DrawerTitle>Credential details</DrawerTitle>
         </DrawerHeader>
         <DrawerBody>
-          <Stack>
-            <DataListRoot orientation="horizontal" divideY="1px">
-              {subject.map(([key, value]) => (
+          {!hasValidContent ? (
+            <Text color="red.500">
+              Can't decrypt credential — please make sure you're using the right encryption key
+            </Text>
+          ) : (
+            <Stack>
+              <DataListRoot orientation="horizontal" divideY="1px">
+                {subject.map(([key, value]) => (
+                  <DataListItem
+                    key={key}
+                    pt="4"
+                    grow
+                    textTransform="uppercase"
+                    label={changeCase(key)}
+                    value={value}
+                  />
+                ))}
+
                 <DataListItem
-                  key={key}
                   pt="4"
                   grow
+                  alignItems={{
+                    base: "flex-start",
+                    md: "center",
+                  }}
+                  flexDir={{
+                    base: "column",
+                    md: "row",
+                  }}
                   textTransform="uppercase"
-                  label={changeCase(key)}
-                  value={value}
+                  label="EMAILS"
+                  value={
+                    <List.Root align="center" gap="2">
+                      {emails.map(({ address, verified }) => (
+                        <List.Item key={address} alignItems="center" display="inline-flex">
+                          {address}
+                          {verified ? " (verified)" : ""}
+                        </List.Item>
+                      ))}
+                    </List.Root>
+                  }
                 />
-              ))}
-
-              <DataListItem
-                pt="4"
-                grow
-                alignItems={{
-                  base: "flex-start",
-                  md: "center",
-                }}
-                flexDir={{
-                  base: "column",
-                  md: "row",
-                }}
-                textTransform="uppercase"
-                label="EMAILS"
-                value={
-                  <List.Root align="center" gap="2">
-                    {emails.map(({ address, verified }: { address: string; verified: boolean }) => (
-                      <List.Item key={address} alignItems="center" display="inline-flex">
-                        {address}
-                        {verified ? " (verified)" : ""}
-                      </List.Item>
-                    ))}
-                  </List.Root>
-                }
-              />
-              <DataListItem
-                pt="4"
-                grow
-                alignItems={{
-                  base: "flex-start",
-                  md: "center",
-                }}
-                flexDir={{
-                  base: "column",
-                  md: "row",
-                }}
-                textTransform="uppercase"
-                label="WALLETS"
-                value={
-                  <List.Root align="center" gap="2">
-                    {wallets.map(
-                      ({
-                        address,
-                        currency,
-                      }: { address: string; currency: string; verified: boolean }) => (
+                <DataListItem
+                  pt="4"
+                  grow
+                  alignItems={{
+                    base: "flex-start",
+                    md: "center",
+                  }}
+                  flexDir={{
+                    base: "column",
+                    md: "row",
+                  }}
+                  textTransform="uppercase"
+                  label="WALLETS"
+                  value={
+                    <List.Root align="center" gap="2">
+                      {wallets.map(({ address, currency }) => (
                         <List.Item
                           key={address}
                           display="inline-flex"
@@ -187,54 +193,54 @@ function CredentialDetails({
                         >
                           {address} ({currency})
                         </List.Item>
-                      ),
-                    )}
-                  </List.Root>
-                }
-              />
-              {files.length > 0 ? (
-                <DataListItem
-                  pt="4"
-                  grow
-                  alignItems="start"
-                  flexDir="column"
-                  label="FILES"
-                  value={
-                    <List.Root
-                      variant="plain"
-                      display="flex"
-                      flexDirection="row"
-                      gap="4"
-                      overflowX="auto"
-                    >
-                      {files.map(([key, value]) => (
-                        <List.Item
-                          flexShrink="0"
-                          key={key}
-                          transition="transform 0.2s"
-                          cursor="pointer"
-                          _hover={{ transform: "scale(1.02)" }}
-                          onClick={() => openImageInNewTab(value)}
-                        >
-                          <chakra.button className="button">
-                            <Image
-                              src={value}
-                              alt="Image from credential"
-                              rounded="md"
-                              loading="lazy"
-                              width="120px"
-                              height="120px"
-                              title="Click to open the image in full size"
-                            />
-                          </chakra.button>
-                        </List.Item>
                       ))}
                     </List.Root>
                   }
                 />
-              ) : null}
-            </DataListRoot>
-          </Stack>
+                {files.length > 0 ? (
+                  <DataListItem
+                    pt="4"
+                    grow
+                    alignItems="start"
+                    flexDir="column"
+                    label="FILES"
+                    value={
+                      <List.Root
+                        variant="plain"
+                        display="flex"
+                        flexDirection="row"
+                        gap="4"
+                        overflowX="auto"
+                      >
+                        {files.map(([key, value]) => (
+                          <List.Item
+                            flexShrink="0"
+                            key={key}
+                            transition="transform 0.2s"
+                            cursor="pointer"
+                            _hover={{ transform: "scale(1.02)" }}
+                            onClick={() => openImageInNewTab(value)}
+                          >
+                            <chakra.button className="button">
+                              <Image
+                                src={value}
+                                alt="Image from credential"
+                                rounded="md"
+                                loading="lazy"
+                                width="120px"
+                                height="120px"
+                                title="Click to open the image in full size"
+                              />
+                            </chakra.button>
+                          </List.Item>
+                        ))}
+                      </List.Root>
+                    }
+                  />
+                ) : null}
+              </DataListRoot>
+            </Stack>
+          )}
         </DrawerBody>
         <DrawerFooter>
           <DrawerActionTrigger asChild>
@@ -256,6 +262,7 @@ function SearchResults({
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useSecretKey();
+  const credentialSample = useFetchCredential(results.records[0]?.dataId);
 
   if (!results.records.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
@@ -294,7 +301,7 @@ function SearchResults({
               pt="4"
               grow
               label="ID"
-              value={grant.dataId}
+              value={grant.id}
               truncate
             />
             <DataListItem
@@ -359,6 +366,7 @@ function SearchResults({
         page={page}
       />
       <SecretKeyPrompt
+        credentialSample={credentialSample.data}
         {...{ open: openSecretKeyPrompt, toggle: toggleSecretKeyPrompt, onSubmit: onKeySubmit }}
       />
 

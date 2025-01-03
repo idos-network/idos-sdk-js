@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { base64Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
@@ -55,7 +55,7 @@ export const Route = createFileRoute("/credentials")({
   },
 });
 
-const safeParse = (json?: string) => {
+export const safeParse = (json?: string) => {
   try {
     // biome-ignore lint/style/noNonNullAssertion: <explanation>
     return JSON.parse(json!);
@@ -94,7 +94,7 @@ export const useDecryptAllCredentials = ({
   const [secretKey] = useSecretKey();
 
   return useQuery({
-    queryKey: ["credentials", secretKey],
+    queryKey: ["credentials", secretKey, credentials.length],
     queryFn: async () => {
       const promiseList = credentials?.map(async (credential) => {
         if (!credential) return null;
@@ -419,13 +419,15 @@ function SearchResults({
 }
 
 function Credentials() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const deferredSearchItem = useDeferredValue(filter);
   const [, setSecretKey] = useSecretKey();
 
   const credentialsList = useListCredentials();
-  const credentials = useDecryptAllCredentials({
+
+  const decryptedCredentials = useDecryptAllCredentials({
     enabled: !!credentialsList.data?.length,
     credentials: credentialsList.data ?? [],
   });
@@ -443,18 +445,23 @@ function Credentials() {
     });
   };
 
+  const handleRefresh = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["credentials", "credentials-list"] });
+    credentialsList.refetch();
+  };
+
   const onKeySubmit = (secretKey: string) => {
     setSecretKey(secretKey);
   };
 
   const results = useMemo(() => {
-    if (!credentials.data) return [];
-    if (!deferredSearchItem) return credentials.data;
-    return matchSorter(credentials.data || [], deferredSearchItem, {
+    if (!decryptedCredentials.data) return [];
+    if (!deferredSearchItem) return decryptedCredentials.data;
+    return matchSorter(decryptedCredentials.data || [], deferredSearchItem, {
       keys: ["public_notes", "content"],
       threshold: matchSorter.rankings.CONTAINS,
     });
-  }, [deferredSearchItem, credentials.data]);
+  }, [deferredSearchItem, decryptedCredentials.data]);
 
   return (
     <Container h="100%">
@@ -466,7 +473,7 @@ function Credentials() {
                 <Spinner />
                 <Text>Fetching credentials...</Text>
               </Center>
-            ) : credentials.isFetching ? (
+            ) : decryptedCredentials.isFetching ? (
               <Center h="100%" flexDirection="column" gap="2">
                 <Spinner />
                 <Text>Decrypting credentials...</Text>
@@ -500,7 +507,7 @@ function Credentials() {
                       title="Refresh credentials list"
                       variant="subtle"
                       colorPalette="gray"
-                      onClick={() => credentials.refetch()}
+                      onClick={handleRefresh}
                     />
                   </HStack>
                 </HStack>
