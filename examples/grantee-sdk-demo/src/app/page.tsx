@@ -2,9 +2,9 @@ import { idOS } from "@idos-network/grantee-sdk-js";
 
 const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";
 const EVM_GRANTEE_PRIVATE_KEY = process.env.EVM_GRANTEE_PRIVATE_KEY ?? "";
-const OWNER_ADDRESS = process.env.OWNER_ADDRESS;
-const EVM_NODE_URL = "https://nodes.playground.idos.network";
-const dbId = "x2eb42160d1f2414213163901610123089b41d49be7c3d7d7012205e2";
+const OWNER_ADDRESS = process.env.OWNER_ADDRESS ?? "";
+const EVM_NODE_URL = process.env.EVM_NODE_URL ?? "";
+const dbId = process.env.DB_ID ?? "";
 
 export default async function Home() {
   if (!ENCRYPTION_SECRET_KEY) {
@@ -35,7 +35,7 @@ export default async function Home() {
         </thead>
         <tbody>
           {grants.grants.map((grant) => (
-            <tr key={crypto.randomUUID()}>
+            <tr key={grant.dataId}>
               <td>{grant.dataId}</td>
               <td>{grant.ownerUserId}</td>
             </tr>
