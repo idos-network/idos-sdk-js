@@ -1,6 +1,6 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { Utils as KwilUtils } from "@kwilteam/kwil-js";
-import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
+import type { ActionBody } from "@kwilteam/kwil-js/dist/core/action";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import type { ethers } from "ethers";
@@ -113,7 +113,7 @@ export class idOSGrantee {
 
   static async init(_: {
     recipientEncryptionPrivateKey: string;
-    nodeUrl?: string;
+    nodeUrl: string;
     chainId?: string;
     dbId?: string;
     chainType: "NEAR";
@@ -123,7 +123,7 @@ export class idOSGrantee {
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = KwilWrapper.defaults.kwilProvider,
-    chainId = KwilWrapper.defaults.chainId,
+    chainId,
     dbId,
     chainType,
     granteeSigner,
@@ -179,17 +179,18 @@ export class idOSGrantee {
     this.address = address;
   }
 
-  async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
-    dataId: string,
-  ): Promise<T> {
+  async fetchSharedCredentialFromIdos<T>(dataId: string): Promise<T> {
     return (await this.call("get_credential_shared", { id: dataId })) as unknown as T;
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const credentialCopy = await this.fetchSharedCredentialFromIdos<{
-      content: string;
-      encryptor_public_key: string;
-    }>(dataId);
+    const [credentialCopy] =
+      await this.fetchSharedCredentialFromIdos<
+        {
+          content: string;
+          encryptor_public_key: string;
+        }[]
+      >(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,

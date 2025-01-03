@@ -32,9 +32,8 @@ export const useRevokeGrant = () => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id }: Grant) =>
-      sdk.grants.revokeGrant(id || "") as unknown as Promise<{ transactionId: string }>,
+  return useMutation<string | undefined, Error, Grant>({
+    mutationFn: ({ id }: Grant) => sdk.grants.revokeGrant(id || ""),
     mutationKey: ["revokeGrant"],
     async onMutate() {
       await queryClient.invalidateQueries({ queryKey: ["grants"] });

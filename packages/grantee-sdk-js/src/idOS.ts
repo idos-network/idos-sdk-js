@@ -33,6 +33,7 @@ export class idOS {
         grantee = await idOSGrantee.init({
           chainType,
           granteeSigner: signer,
+          nodeUrl,
           recipientEncryptionPrivateKey,
           dbId,
         });
