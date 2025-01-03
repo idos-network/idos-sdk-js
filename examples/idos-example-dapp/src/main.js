@@ -296,7 +296,11 @@ const connectWallet = {
         cache.get("grants") || (await idos.grants.getGrantsGranted(page, size)).grants,
       );
 
+    const grantsCount = cache.get("grants-count") || (await idos.grants.getGrantsGrantedCount());
+    const renderedCount = grants.length > size ? size : grants.length;
+
     cache.set("grants", grants);
+    cache.set("grants-count", grantsCount);
 
     terminal.table(grants, ["ownerUserId", "dataId", "lockedUntil"], {
       dataId: async (dataId) => {
@@ -318,8 +322,7 @@ const connectWallet = {
         terminal.h1("eyes", "Content").json(JSON.parse(content));
       },
     });
+    terminal.h1("", `First ${renderedCount} of ${grantsCount} grants`).json(JSON.parse(content));
   }
-  const loadMoreBtn = terminal.button("load-more", "Load More...", () => alert("loading more..."));
-  loadMoreBtn.currentElem.onclick = () => alert("loading more..."); // @todo: remove this later. but it's working for me for now.
   terminal.status("done", "Done");
 })();
