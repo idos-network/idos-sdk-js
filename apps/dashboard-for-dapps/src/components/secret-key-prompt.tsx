@@ -25,7 +25,7 @@ export function SecretKeyPrompt({
   open: boolean;
   toggle: (value?: boolean) => void;
   onSubmit: (key: string, validKey: boolean) => void;
-  credentialSample?: idOSCredential;
+  credentialSample?: idOSCredential | null;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [key, setKey] = useState("");
@@ -47,8 +47,10 @@ export function SecretKeyPrompt({
     const isValid = checkForValidity();
     setHasError(!isValid);
     setLoading(false);
-    onSubmit(key, isValid);
-    if (isValid) toggle(false);
+    if (isValid) {
+      onSubmit(key, isValid);
+      toggle(false);
+    }
   };
 
   const resetState = () => {
