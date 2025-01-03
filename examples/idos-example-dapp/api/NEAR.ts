@@ -9,6 +9,7 @@ if (!global.crypto) global.crypto = (await import("node:crypto")).default;
 const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const NEAR_GRANTEE_PRIVATE_KEY =
   "ed25519:35pK192Az9znHcMtHK2bGExuZV3QLRk5Ln1EpXpq4bf6FtU5twG4hneMqkzrGhARKdq54LavCFy9sprqemC72ZLs";
+const EVM_NODE_URL = "https://nodes.playground.idos.network";
 
 const nearGranteeSigner = KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 
@@ -16,6 +17,7 @@ const idosGrantee = await idOSGrantee.init({
   chainType: "NEAR",
   granteeSigner: nearGranteeSigner,
   recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
+  nodeUrl: EVM_NODE_URL,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;
