@@ -9,7 +9,7 @@ import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
 import { Grants } from "./grants";
-import type Grant from "./grants/grant";
+import type idOSGrant from "./grants/grant";
 import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
 import verifiableCredentials from "./verifiable-credentials";
@@ -93,7 +93,7 @@ export class idOS {
   async listGrantedGrants(
     page: number,
     size?: number,
-  ): Promise<{ grants: Grant[]; totalCount: number }> {
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return this.kwilWrapper.getGrantsGranted(page, size);
   }
 

@@ -1,5 +1,5 @@
 import type { KwilWrapper } from "../kwil-wrapper";
-import Grant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
+import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
 
 interface InitParams {
   nodeUrl?: string;
@@ -16,7 +16,7 @@ export class Grants {
   async listGrantedGrants(
     page: number,
     size?: number,
-  ): Promise<{ grants: Grant[]; totalCount: number }> {
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return this.getGrantsGranted(page, size);
   }
 
@@ -30,8 +30,8 @@ export class Grants {
     return response[0].count;
   }
 
-  mapToGrant(grant: any): Grant {
-    return new Grant({
+  mapToGrant(grant: any): idOSGrant {
+    return new idOSGrant({
       id: grant.id,
       ownerUserId: grant.ag_owner_user_id,
       granteeAddress: grant.ag_grantee_wallet_identifier,
@@ -40,7 +40,7 @@ export class Grants {
     });
   }
 
-  async getGrantsOwned(): Promise<{ grants: Grant[] }> {
+  async getGrantsOwned(): Promise<{ grants: idOSGrant[] }> {
     const list = (await this.kwilWrapper.call("get_access_grants_owned", null)) as any;
     const grants = list.map(this.mapToGrant);
     return {
@@ -51,7 +51,7 @@ export class Grants {
   async getGrantsGranted(
     page: number,
     size = DEFAULT_RECORDS_PER_PAGE,
-  ): Promise<{ grants: Grant[]; totalCount: number }> {
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
     const list = (await this.kwilWrapper.call("get_access_grants_granted", { page, size })) as any;
     const totalCount = await this.getGrantsGrantedCount();

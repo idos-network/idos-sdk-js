@@ -13,7 +13,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import type { Grant, idOSCredential } from "@idos-network/idos-sdk";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk";
 import {
   type DefaultError,
   useMutation,
@@ -60,10 +60,10 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteCredential = useDeleteCredentialMutation();
-  const revokeGrants = useRevokeGrants();
   const grants = useFetchGrants({
     credentialId: credential.id,
   });
+  const revokeGrants = useRevokeGrants();
   const haaLockedGrant =
     grants.data?.length &&
     grants.data?.find((grant) => timelockToMs(grant.lockedUntil) >= Date.now());
@@ -73,7 +73,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
       mutationKey: ["revokeGrant"],
       status: "pending",
     },
-    select: (mutation) => mutation.state.variables as Grant,
+    select: (mutation) => mutation.state.variables as idOSGrant,
   });
 
   const handleClose = () => {

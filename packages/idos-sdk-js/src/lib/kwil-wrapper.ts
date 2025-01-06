@@ -2,7 +2,7 @@ import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/idos
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
-import Grant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
+import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
 
 export class KwilWrapper {
   static defaults = {
@@ -153,14 +153,14 @@ export class KwilWrapper {
   async getGrantsGranted(
     page: number,
     size = DEFAULT_RECORDS_PER_PAGE,
-  ): Promise<{ grants: Grant[]; totalCount: number }> {
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
     const list = (await this.call("get_access_grants_granted", { page, size })) as any;
     const totalCount = await this.getGrantsGrantedCount();
 
     const grants = list.map(
       (grant: any) =>
-        new Grant({
+        new idOSGrant({
           id: grant.id,
           ownerUserId: grant.ag_owner_user_id,
           granteeAddress: grant.ag_grantee_wallet_identifier,

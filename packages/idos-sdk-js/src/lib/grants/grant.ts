@@ -1,13 +1,13 @@
 export const DEFAULT_RECORDS_PER_PAGE = 7;
 
-export default class Grant {
+export default class idOSGrant {
   id: string;
   ownerUserId: string;
   granteeAddress: string;
   dataId: string;
   lockedUntil: number;
 
-  constructor({ id, ownerUserId, granteeAddress, dataId, lockedUntil }: Grant) {
+  constructor({ id, ownerUserId, granteeAddress, dataId, lockedUntil }: idOSGrant) {
     this.id = id;
     this.ownerUserId = ownerUserId;
     this.granteeAddress = granteeAddress;
