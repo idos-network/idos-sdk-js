@@ -2,12 +2,12 @@ import { idOS } from "@idos-network/grantee-sdk-js";
 
 const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";
 const EVM_GRANTEE_PRIVATE_KEY = process.env.EVM_GRANTEE_PRIVATE_KEY ?? "";
-const OWNER_ADDRESS = process.env.OWNER_ADDRESS ?? "";
-const EVM_NODE_URL = process.env.EVM_NODE_URL ?? "";
+const GRANTEE_ADDRESS = process.env.OWNER_ADDRESS ?? "";
+const NODE_URL = process.env.EVM_NODE_URL ?? "";
 const dbId = process.env.DB_ID ?? "";
 
 export default async function Home() {
-  if (!ENCRYPTION_SECRET_KEY) {
+  if (!ENCRYPTION_SECRET_KEY || !EVM_GRANTEE_PRIVATE_KEY || !GRANTEE_ADDRESS || !NODE_URL) {
     throw new Error("Missing environment variables for Grantee SDK Demo");
   }
 
@@ -15,16 +15,16 @@ export default async function Home() {
     "EVM",
     EVM_GRANTEE_PRIVATE_KEY,
     ENCRYPTION_SECRET_KEY,
-    EVM_NODE_URL,
+    NODE_URL,
     dbId,
   );
-  const grants = await sdk.listGrants(1, 10);
+  const data = (await sdk.listGrants(1, 10)) || [];
 
   return (
     <div className="grid h-dvh place-content-center gap-4">
       <h1 className="font-semibold text-2xl">Grantee SDK Demo</h1>
       <p>
-        Listing grant ID's for owner <span className="font-mono">{OWNER_ADDRESS}</span>:
+        Listing grant ID's for Grantee <span className="font-mono">{GRANTEE_ADDRESS}</span>:
       </p>
       <table className="w-full table-auto">
         <thead>
@@ -34,7 +34,7 @@ export default async function Home() {
           </tr>
         </thead>
         <tbody>
-          {grants.grants.map((grant) => (
+          {data.grants.map((grant) => (
             <tr key={grant.dataId}>
               <td>{grant.dataId}</td>
               <td>{grant.ownerUserId}</td>
