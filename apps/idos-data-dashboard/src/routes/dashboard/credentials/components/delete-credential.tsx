@@ -13,7 +13,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk";
+import type { Grant, idOSCredential } from "@idos-network/idos-sdk";
 import {
   type DefaultError,
   useMutation,
@@ -23,6 +23,7 @@ import {
 import { useRef } from "react";
 
 import { useFetchGrants, useRevokeGrants } from "../shared";
+import { timelockToMs } from "./grants-center";
 
 type DeleteCredentialProps = {
   isOpen: boolean;
@@ -63,13 +64,16 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const grants = useFetchGrants({
     credentialId: credential.id,
   });
+  const haaLockedGrant =
+    grants.data?.length &&
+    grants.data?.find((grant) => timelockToMs(grant.lockedUntil) >= Date.now());
 
   const state = useMutationState({
     filters: {
       mutationKey: ["revokeGrant"],
       status: "pending",
     },
-    select: (mutation) => mutation.state.variables as idOSGrant,
+    select: (mutation) => mutation.state.variables as Grant,
   });
 
   const handleClose = () => {
@@ -113,6 +117,16 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   };
 
   const handleDeleteCredential = async () => {
+    if (haaLockedGrant) {
+      toast({
+        title: "Error while deleting credential",
+        description:
+          "This credential has a locked grant. You can't delete it until the grant locked until date is passed.",
+        position: "bottom-right",
+        status: "error",
+      });
+      return;
+    }
     await handleRevokeGrants();
     await deleteCredential.mutateAsync(
       { id: credential.id, credential_type: meta.type },

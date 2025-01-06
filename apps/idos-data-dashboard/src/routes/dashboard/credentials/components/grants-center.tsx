@@ -38,7 +38,7 @@ function generateGrantId(grant: Grant): string {
   return [dataId, granteeAddress, lockedUntil].join("-");
 }
 
-function timelockToMs(timelock: number): number {
+export function timelockToMs(timelock: number): number {
   return timelock * 1000;
 }
 
