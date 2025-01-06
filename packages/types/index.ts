@@ -14,14 +14,6 @@ export interface idOSCredential {
   content: string;
   encryptor_public_key: string;
 }
-
-export interface idOSGrant {
-  ownerAddress: string;
-  granteeAddress: string;
-  dataId: string;
-  lockedUntil: number;
-}
-
 export interface idOSWallet {
   id: string;
   user_id: string;

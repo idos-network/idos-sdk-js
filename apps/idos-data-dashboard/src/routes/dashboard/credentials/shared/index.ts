@@ -1,5 +1,5 @@
 import { useIdOS } from "@/core/idos";
-import type { Grant, idOSGrant } from "@idos-network/idos-sdk";
+import type { Grant } from "@idos-network/idos-sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { idOSCredentialWithShares } from "../types";
@@ -45,7 +45,7 @@ export const useRevokeGrants = () => {
   const revokeGrant = useRevokeGrant();
 
   return useMutation({
-    mutationFn: async (grants: idOSGrant[]) => {
+    mutationFn: async (grants: Grant[]) => {
       for (const grant of grants) {
         await revokeGrant.mutateAsync(grant, { onError() {} });
       }

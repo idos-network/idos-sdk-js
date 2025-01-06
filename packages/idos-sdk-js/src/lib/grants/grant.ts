@@ -1,8 +1,8 @@
 export const DEFAULT_RECORDS_PER_PAGE = 7;
 
 export default class Grant {
-  ownerUserId?: string;
-  id?: string;
+  id: string;
+  ownerUserId: string;
   granteeAddress: string;
   dataId: string;
   lockedUntil: number;
