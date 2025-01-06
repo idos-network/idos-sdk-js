@@ -1,5 +1,5 @@
 import { useIdOS } from "@/core/idos";
-import type { Grant } from "@idos-network/idos-sdk";
+import type { idOSGrant } from "@idos-network/idos-sdk";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { idOSCredentialWithShares } from "../types";
@@ -28,16 +28,29 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   });
 };
 
-export const useRevokeGrant = () => {
+type Ctx = { previousGrants: idOSGrant[] };
+
+export const useRevokeGrant = (credentialId?: string) => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<string | undefined, Error, Grant>({
-    mutationFn: ({ id }: Grant) => sdk.grants.revokeGrant(id || ""),
+  return useMutation<string | undefined, Error, idOSGrant, Ctx>({
+    mutationFn: ({ id }: idOSGrant) => sdk.grants.revokeGrant(id || ""),
     mutationKey: ["revokeGrant"],
-    async onMutate() {
-      await queryClient.invalidateQueries({ queryKey: ["grants"] });
+    onMutate: async (grant): Promise<Ctx> => {
+      const previousGrants = queryClient.getQueryData<idOSGrant[]>(["grants", credentialId]) || [];
+      queryClient.setQueryData<idOSGrant[]>(
+        ["grants", credentialId],
+        () => previousGrants?.filter((g) => g.id !== grant.id) || [],
+      );
+      return { previousGrants };
     },
+    onError: (_error, _grant, context) => {
+      if (context?.previousGrants) {
+        queryClient.setQueryData(["grants", credentialId], context.previousGrants);
+      }
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["grants"] }),
   });
 };
 
@@ -45,7 +58,7 @@ export const useRevokeGrants = () => {
   const revokeGrant = useRevokeGrant();
 
   return useMutation({
-    mutationFn: async (grants: Grant[]) => {
+    mutationFn: async (grants: idOSGrant[]) => {
       for (const grant of grants) {
         await revokeGrant.mutateAsync(grant, { onError() {} });
       }
