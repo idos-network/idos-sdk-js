@@ -140,18 +140,9 @@ export class idOSGrantee {
       (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
       throwError("Can't discover dbId. You must pass it explicitly.");
 
-    const kwilWrapper = await KwilWrapper.init({ nodeUrl, dbId });
-
     const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
-
-    kwilWrapper.setSigner({
-      accountId: address,
-      // @ts-ignore
-      signer: granteeSigner,
-      signatureType: chainType === "EVM" ? "secp256k1_ep" : "nep413",
-    });
 
     return new idOSGrantee(
       NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
