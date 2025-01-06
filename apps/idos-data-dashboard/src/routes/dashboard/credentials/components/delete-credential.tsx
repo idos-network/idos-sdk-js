@@ -89,27 +89,26 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
         status: "error",
       });
 
-      // @todo: check if u need to revoke credential grants at deletion
-      // await revokeGrants.mutateAsync(grants.data ?? [], {
-      //   onSuccess() {
-      //     toast({
-      //       title: "Grant revocation successful",
-      //       description: "All grants have been successfully revoked. Deleting credential...",
-      //       icon: <Spinner size="sm" />,
-      //       position: "bottom-right",
-      //       status: "success",
-      //     });
-      //   },
-      //   onError() {
-      //     toast({
-      //       title: "Error while revoking grants",
-      //       description: "An unexpected error. Please try again.",
-      //       duration: 3000,
-      //       position: "bottom-right",
-      //       status: "error",
-      //     });
-      //   },
-      // });
+      await revokeGrants.mutateAsync(grants.data ?? [], {
+        onSuccess() {
+          toast({
+            title: "Grant revocation successful",
+            description: "All grants have been successfully revoked. Deleting credential...",
+            icon: <Spinner size="sm" />,
+            position: "bottom-right",
+            status: "success",
+          });
+        },
+        onError() {
+          toast({
+            title: "Error while revoking grants",
+            description: "An unexpected error. Please try again.",
+            duration: 3000,
+            position: "bottom-right",
+            status: "error",
+          });
+        },
+      });
     }
   };
 
