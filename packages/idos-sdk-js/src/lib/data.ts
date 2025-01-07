@@ -367,6 +367,18 @@ export class Data {
     });
   }
 
+  async getCredentialContentSha256Hash(credentialId: string) {
+    const credential = (await this.get("credentials", credentialId, false)) as idOSCredential;
+
+    const encoder = new TextEncoder();
+    const encodedContent = encoder.encode(credential.content);
+    const buffer = await window.crypto.subtle.digest("SHA-256", encodedContent);
+
+    return Array.from(new Uint8Array(buffer))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
   async #buildInsertableIDOSCredential(
     userId: string,
     publicNotes: string,
