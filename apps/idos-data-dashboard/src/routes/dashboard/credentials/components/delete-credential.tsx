@@ -64,7 +64,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
     credentialId: credential.id,
   });
   const revokeGrants = useRevokeGrants();
-  const haaLockedGrant =
+  const hasTimeLock =
     grants.data?.length &&
     grants.data?.find((grant) => timelockToMs(grant.lockedUntil) >= Date.now());
 
@@ -117,7 +117,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   };
 
   const handleDeleteCredential = async () => {
-    if (haaLockedGrant) {
+    if (hasTimeLock) {
       toast({
         title: "Error while deleting credential",
         description:
