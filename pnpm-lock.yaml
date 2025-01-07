@@ -554,45 +554,12 @@ importers:
 
   packages/grantee-sdk-js:
     dependencies:
-      '@digitalbazaar/ed25519-signature-2020':
-        specifier: ^5.2.0
-        version: 5.4.0(web-streams-polyfill@3.3.3)
-      '@digitalbazaar/ed25519-verification-key-2020':
-        specifier: ^4.1.0
-        version: 4.2.0
-      '@digitalbazaar/vc':
-        specifier: ^6.0.2
-        version: 6.3.0(web-streams-polyfill@3.3.3)
       '@kwilteam/kwil-js':
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      '@stablelib/base64':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/binary':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/bytes':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/sha256':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/utf8':
-        specifier: ^1.0.1
-        version: 1.0.2
-      borsh:
-        specifier: ^1.0.0
-        version: 1.0.0
       ethers:
         specifier: ^6.12
         version: 6.13.4(bufferutil@4.0.8)(utf-8-validate@5.0.10)
-      jsonld:
-        specifier: ^8.3.1
-        version: 8.3.2(web-streams-polyfill@3.3.3)
-      jsonld-document-loader:
-        specifier: ^2.0.0
-        version: 2.2.0
       near-api-js:
         specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
@@ -600,24 +567,18 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@dotenvx/dotenvx':
-        specifier: ^1.6.4
-        version: 1.31.0
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
       '@idos-network/kwil-nep413-signer':
         specifier: workspace:*
         version: link:../kwil-nep413-signer
-      '@near-js/types':
-        specifier: ^0.2.1
-        version: 0.2.1
-      '@near-wallet-selector/core':
-        specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.10.0(typescript@5.6.3))
-      '@vitest/ui':
-        specifier: ^0.34.6
-        version: 0.34.7(vitest@0.31.4)
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
@@ -630,9 +591,6 @@ importers:
       typescript:
         specifier: ^5.2.2
         version: 5.6.3
-      vitest:
-        specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.49.1)(terser@5.37.0)
 
   packages/idos-sdk-js:
     dependencies:

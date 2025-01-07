@@ -15,13 +15,10 @@
     }
   },
   "scripts": {
-    "dev": "dotenvx run --convention=nextjs -- tsup --watch --config tsup.config.ts",
-    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup --config tsup.config.ts",
+    "dev": "tsup --watch --config tsup.config.ts",
+    "build": "tsup --config tsup.config.ts",
     "lint": "biome check --apply ./src",
     "format": "biome format --write .",
-    "test": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest",
     "release-it": "release-it",
     "prepack": "clean-package",
     "postpack": "clean-package restore",
@@ -32,31 +29,17 @@
     "near-api-js": "3.0.4"
   },
   "devDependencies": {
-    "@dotenvx/dotenvx": "^1.6.4",
     "@idos-network/kwil-nep413-signer": "workspace:*",
-    "@near-js/types": "^0.2.1",
-    "@near-wallet-selector/core": "8.9.10",
+    "@idos-network/codecs": "workspace:*",
+    "@idos-network/idos-sdk-types": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
-    "@vitest/ui": "^0.34.6",
     "clean-package": "^2.2.0",
     "release-it": "^17.0.0",
     "tsup": "^8.0.2",
-    "typescript": "^5.2.2",
-    "vitest": "^0.31.4"
+    "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
-    "@digitalbazaar/vc": "^6.0.2",
     "@kwilteam/kwil-js": "0.7.1",
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/binary": "^1.0.1",
-    "@stablelib/bytes": "^1.0.1",
-    "@stablelib/sha256": "^1.0.1",
-    "@stablelib/utf8": "^1.0.1",
-    "borsh": "^1.0.0",
-    "jsonld": "^8.3.1",
-    "jsonld-document-loader": "^2.0.0",
     "tweetnacl": "^1.0.3"
   },
   "clean-package": {
