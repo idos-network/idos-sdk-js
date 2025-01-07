@@ -24,8 +24,6 @@ interface InitParams {
 
 export class idOS {
   static initializing = false;
-  // static near = Grants.near;
-  // static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
 
   static verifiableCredentials = verifiableCredentials;

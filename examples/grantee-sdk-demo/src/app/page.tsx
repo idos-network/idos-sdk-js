@@ -24,7 +24,7 @@ export default async function Home() {
     <div className="grid h-dvh place-content-center gap-4">
       <h1 className="font-semibold text-2xl">Grantee SDK Demo</h1>
       <p>
-        Listing grant ID's for Grantee <span className="font-mono">{GRANTEE_ADDRESS}</span>:
+        Listing first 10 grant ID's for Grantee <span className="font-mono">{GRANTEE_ADDRESS}</span>
       </p>
       <table className="w-full table-auto">
         <thead>

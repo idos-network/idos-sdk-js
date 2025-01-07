@@ -302,7 +302,7 @@ const connectWallet = {
     cache.set("grants", grants);
     cache.set("grants-count", grantsCount);
 
-    terminal.table(grants, ["ownerUserId", "dataId", "lockedUntil"], {
+    terminal.table(grants, ["ownerUserId", "dataId", "granteeAddress", "lockedUntil"], {
       dataId: async (dataId) => {
         terminal.detail().h1("inspect", `Access grant for ${dataId}`);
 
