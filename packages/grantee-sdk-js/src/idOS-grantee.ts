@@ -134,12 +134,12 @@ export class idOSGrantee {
     chainId ||=
       // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
-      throwError("Can't discover chainId. You must pass it explicitly.");
+      throwError("Can't discover `chainId`. You must pass it explicitly.");
 
     dbId ||=
       // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
       (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
-      throwError("Can't discover dbId. You must pass it explicitly.");
+      throwError("Can't discover `dbId`. You must pass it explicitly.");
 
     const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
 
