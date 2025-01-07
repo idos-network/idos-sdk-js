@@ -172,7 +172,7 @@ export class idOSGrantee {
   }
 
   async fetchSharedCredentialFromIdos<T>(dataId: string): Promise<T> {
-    return (await this.call("get_credential_shared", { id: dataId })) as unknown as T;
+    return (await this.#call("get_credential_shared", { id: dataId })) as unknown as T;
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -194,14 +194,14 @@ export class idOSGrantee {
     throw new Error("not implemented yet"); // @todo: update alexander to implement this
   }
   async getGrantsGrantedCount(): Promise<number> {
-    return this.call("get_access_grants_granted_count", null) as unknown as number;
+    return this.#call("get_access_grants_granted_count", null) as unknown as number;
   }
 
   async getGrantsGranted(page = 1, size = DEFAULT_RECORDS_PER_PAGE) {
     return {
       grants:
         // biome-ignore lint/suspicious/noExplicitAny: intermediate type
-        ((await this.call("get_access_grants_granted", { page, size })) as unknown as any[]).map(
+        ((await this.#call("get_access_grants_granted", { page, size })) as unknown as any[]).map(
           (grant: idOSGrant) => {
             return {
               id: grant.id,
@@ -224,7 +224,7 @@ export class idOSGrantee {
     return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  buildAction(actionName: string, inputs: Record<string, unknown> | null, description?: string) {
+  #buildAction(actionName: string, inputs: Record<string, unknown> | null, description?: string) {
     const payload: ActionBody = {
       name: actionName,
       dbid: this.dbId,
@@ -247,7 +247,7 @@ export class idOSGrantee {
     return payload;
   }
 
-  async call<T = unknown>(
+  async #call<T = unknown>(
     actionName: string,
     actionInputs: Record<string, unknown> | null,
     description?: string,
@@ -257,7 +257,7 @@ export class idOSGrantee {
 
     return (
       await this.nodeKwil.call(
-        this.buildAction(actionName, actionInputs, description),
+        this.#buildAction(actionName, actionInputs, description),
         useSigner ? this.kwilSigner : undefined,
       )
     ).data?.result as T;
