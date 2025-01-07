@@ -1,5 +1,4 @@
 import { Center, Spinner } from "@chakra-ui/react";
-import { idOS as idOSSDK } from "@idos-network/idos-sdk";
 import type { AccountState, WalletSelector } from "@near-wallet-selector/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
@@ -24,6 +23,8 @@ interface WalletSelectorContextValue {
   accountId: string | null;
 }
 
+const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+
 const WalletSelectorContext = React.createContext<WalletSelectorContextValue | null>(null);
 
 export const WalletSelectorContextProvider: React.FC<{
@@ -42,8 +43,8 @@ export const WalletSelectorContextProvider: React.FC<{
     });
 
     const _modal = setupModal(_selector, {
-      contractId: idOSSDK.near.contractId,
-      methodNames: idOSSDK.near.contractMethods,
+      contractId,
+      methodNames: [],
     });
     const state = _selector.store.getState();
     setAccounts(state.accounts);

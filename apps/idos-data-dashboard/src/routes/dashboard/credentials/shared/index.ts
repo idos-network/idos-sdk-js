@@ -1,6 +1,6 @@
 import { useIdOS } from "@/core/idos";
-import type { Grant, idOSGrant } from "@idos-network/idos-sdk";
-import { type DefaultError, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { idOSGrant } from "@idos-network/idos-sdk";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { idOSCredentialWithShares } from "../types";
 
@@ -28,38 +28,29 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
   });
 };
 
-type Ctx = { previousCredentials: idOSCredentialWithShares[] };
+type Ctx = { previousGrants: idOSGrant[] };
 
-export const useRevokeGrant = () => {
+export const useRevokeGrant = (credentialId?: string) => {
   const { sdk } = useIdOS();
   const queryClient = useQueryClient();
 
-  return useMutation<{ transactionId: string }, DefaultError, Grant, Ctx>({
-    mutationFn: ({ id }: Grant) =>
-      sdk.grants.revokeGrant(id || "") as unknown as Promise<{ transactionId: string }>,
+  return useMutation<string | undefined, Error, idOSGrant, Ctx>({
+    mutationFn: ({ id }: idOSGrant) => sdk.grants.revokeGrant(id || ""),
     mutationKey: ["revokeGrant"],
-    async onMutate(grant) {
-      const previousCredentials =
-        queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]) ?? [];
-      const index = previousCredentials.findIndex((credential) =>
-        credential.shares.includes(grant.dataId),
+    onMutate: async (grant): Promise<Ctx> => {
+      const previousGrants = queryClient.getQueryData<idOSGrant[]>(["grants", credentialId]) || [];
+      queryClient.setQueryData<idOSGrant[]>(
+        ["grants", credentialId],
+        () => previousGrants?.filter((g) => g.id !== grant.id) || [],
       );
-      const parent = { ...previousCredentials[index] };
-      parent.shares = parent.shares.filter((id) => id !== grant.dataId);
-      const credentials = Object.assign([], previousCredentials, { [index]: parent });
-      queryClient.setQueryData<idOSCredentialWithShares[]>(["credentials"], () => credentials);
-
-      return {
-        previousCredentials,
-      };
+      return { previousGrants };
     },
-
-    onError(_, __, ctx) {
-      queryClient.setQueryData<idOSCredentialWithShares[]>(
-        ["credentials"],
-        ctx?.previousCredentials,
-      );
+    onError: (_error, _grant, context) => {
+      if (context?.previousGrants) {
+        queryClient.setQueryData(["grants", credentialId], context.previousGrants);
+      }
     },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["grants"] }),
   });
 };
 

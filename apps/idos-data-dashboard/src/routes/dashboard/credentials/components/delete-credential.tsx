@@ -22,6 +22,7 @@ import {
 } from "@tanstack/react-query";
 import { useRef } from "react";
 
+import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrants } from "../shared";
 
 type DeleteCredentialProps = {
@@ -59,10 +60,13 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteCredential = useDeleteCredentialMutation();
-  const revokeGrants = useRevokeGrants();
   const grants = useFetchGrants({
     credentialId: credential.id,
   });
+  const revokeGrants = useRevokeGrants();
+  const hasTimeLock =
+    grants.data?.length &&
+    grants.data?.find((grant) => timelockToMs(grant.lockedUntil) >= Date.now());
 
   const state = useMutationState({
     filters: {
@@ -74,7 +78,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
 
   const handleClose = () => {
     revokeGrants.reset();
-    deleteCredential.reset();
+    grants.refetch();
     onClose();
   };
 
@@ -113,6 +117,16 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   };
 
   const handleDeleteCredential = async () => {
+    if (hasTimeLock) {
+      toast({
+        title: "Error while deleting credential",
+        description:
+          "This credential has a locked grant. You can't delete it until the grant locked until date is passed.",
+        position: "bottom-right",
+        status: "error",
+      });
+      return;
+    }
     await handleRevokeGrants();
     await deleteCredential.mutateAsync(
       { id: credential.id, credential_type: meta.type },

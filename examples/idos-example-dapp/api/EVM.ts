@@ -9,7 +9,7 @@ if (!global.crypto) global.crypto = (await import("node:crypto")).default;
 const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const EVM_GRANTEE_PRIVATE_KEY =
   "0x515c2fed89c22eaa9d41cfce6e6e454fa0a39353e711d6a99f34b4ecab4b4859";
-const EVM_NODE_URL = "https://ethereum-sepolia.publicnode.com";
+const EVM_NODE_URL = "https://nodes.idos.network";
 
 const evmGranteeSigner = new ethers.Wallet(
   EVM_GRANTEE_PRIVATE_KEY,
@@ -20,6 +20,7 @@ const idosGrantee = await idOSGrantee.init({
   chainType: "EVM",
   granteeSigner: evmGranteeSigner,
   recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
+  nodeUrl: EVM_NODE_URL,
 });
 
 const encryptionPublicKey = idosGrantee.encryptionPublicKey;

@@ -286,12 +286,23 @@ const connectWallet = {
         throw new Error("Unreachable");
     }
 
-    const { grants } = await terminal
-      .h1("eyes", "User's grants to this dApp")
-      .wait("awaiting RPC", cache.get("grants") || idos.grants.getGrantsOwned());
-    cache.set("grants", grants);
+    const page = 1;
+    const size = 10;
 
-    terminal.table(grants, ["ownerUserId", "granteeAddress", "dataId", "lockedUntil"], {
+    const grants = await terminal
+      .h1("eyes", "User's grants to this dApp")
+      .wait(
+        "awaiting RPC",
+        cache.get("grants") || (await idos.grants.getGrantsGranted(page, size)).grants,
+      );
+
+    const grantsCount = cache.get("grants-count") || (await idos.grants.getGrantsGrantedCount());
+    const renderedCount = grants.length > size ? size : grants.length;
+
+    cache.set("grants", grants);
+    cache.set("grants-count", grantsCount);
+
+    terminal.table(grants, ["ownerUserId", "dataId", "granteeAddress", "lockedUntil"], {
       dataId: async (dataId) => {
         terminal.detail().h1("inspect", `Access grant for ${dataId}`);
 
@@ -301,6 +312,7 @@ const connectWallet = {
             "awaiting server decryption",
             client.fetchAndDecryptSharedCredential(chosenWallet, dataId),
           );
+
           terminal.status("done", "Decrypted");
         } catch (e) {
           terminal.error(e);
@@ -310,7 +322,7 @@ const connectWallet = {
         terminal.h1("eyes", "Content").json(JSON.parse(content));
       },
     });
+    terminal.h1("", `First ${renderedCount} of ${grantsCount} grants`).json(JSON.parse(content));
   }
-
   terminal.status("done", "Done");
 })();
