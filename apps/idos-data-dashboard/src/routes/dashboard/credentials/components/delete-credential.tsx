@@ -22,8 +22,8 @@ import {
 } from "@tanstack/react-query";
 import { useRef } from "react";
 
-import { useFetchGrants, useRevokeGrants } from "../shared";
 import { timelockToMs } from "../../utils/time";
+import { useFetchGrants, useRevokeGrants } from "../shared";
 
 type DeleteCredentialProps = {
   isOpen: boolean;

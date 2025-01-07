@@ -24,8 +24,8 @@ import {
 } from "@chakra-ui/react";
 
 import type { idOSGrant } from "@idos-network/idos-sdk";
-import { useFetchGrants, useRevokeGrant } from "../shared";
 import { timelockToMs } from "../../utils/time";
+import { useFetchGrants, useRevokeGrant } from "../shared";
 
 type GrantsCenterProps = {
   credentialId: string;
