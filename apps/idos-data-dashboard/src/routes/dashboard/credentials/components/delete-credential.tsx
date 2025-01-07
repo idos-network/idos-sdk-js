@@ -23,7 +23,7 @@ import {
 import { useRef } from "react";
 
 import { useFetchGrants, useRevokeGrants } from "../shared";
-import { timelockToMs } from "./grants-center";
+import { timelockToMs } from "../../utils/time";
 
 type DeleteCredentialProps = {
   isOpen: boolean;

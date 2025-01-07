@@ -25,6 +25,7 @@ import {
 
 import type { idOSGrant } from "@idos-network/idos-sdk";
 import { useFetchGrants, useRevokeGrant } from "../shared";
+import { timelockToMs } from "../../utils/time";
 
 type GrantsCenterProps = {
   credentialId: string;
@@ -35,10 +36,6 @@ type GrantsCenterProps = {
 function generateGrantId(grant: idOSGrant): string {
   const { dataId, granteeAddress, lockedUntil } = grant;
   return [dataId, granteeAddress, lockedUntil].join("-");
-}
-
-export function timelockToMs(timelock: number): number {
-  return timelock * 1000;
 }
 
 function timelockToDate(timelock: number): string {
