@@ -191,7 +191,7 @@ export class idOSGrantee {
     );
   }
 
-  async getLocalAccessGrantsFromUserByAddress(userAddress: string) {
+  async getLocalAccessGrantsFromUserByAddress() {
     // @todo: update Alexandr to implement this
     throw new Error("Not implemented yet");
   }
