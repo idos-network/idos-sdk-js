@@ -14,8 +14,8 @@ export class Grants {
   }
 
   async listGrantedGrants(
-    page: number,
-    size?: number,
+    page = 1,
+    size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return this.getGrantsGranted(page, size);
   }
