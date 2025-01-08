@@ -1,4 +1,10 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  sha256Hash,
+  utf8Encode,
+} from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
@@ -369,14 +375,8 @@ export class Data {
 
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId, false)) as idOSCredential;
-
-    const encoder = new TextEncoder();
-    const encodedContent = encoder.encode(credential.content);
-    const buffer = await window.crypto.subtle.digest("SHA-256", encodedContent);
-
-    return Array.from(new Uint8Array(buffer))
-      .map((b) => b.toString(16).padStart(2, "0"))
-      .join("");
+    const encodedContent = base64Decode(credential.content);
+    return hexEncode(sha256Hash(encodedContent), true);
   }
 
   async #buildInsertableIDOSCredential(
