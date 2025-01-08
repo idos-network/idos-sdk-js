@@ -296,6 +296,44 @@ export class Data {
     return record;
   }
 
+  // This is the same as `share`, but for credentials only. It doesn't create an AG either for the duplicate.
+  async shareCredential(
+    recordId: string,
+    granteeRecipientEncryptionPublicKey: string,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
+    const credential = (await this.get("credentials", recordId)) as idOSCredential;
+    await this.#buildInsertableIDOSCredential(
+      credential.user_id,
+      "",
+      credential.content,
+      granteeRecipientEncryptionPublicKey,
+      grantInfo,
+    );
+
+    const id = crypto.randomUUID();
+
+    await this.kwilWrapper.execute(
+      // @todo: get the proper action name
+      "<PROPER_ACTION_NAME>",
+      [
+        {
+          original_credential_id: credential.id,
+          ...credential,
+          id,
+        },
+      ],
+      "Share a credential on idOS",
+      synchronous,
+    );
+
+    return { id };
+  }
+
   async share(
     tableName: string,
     recordId: string,
