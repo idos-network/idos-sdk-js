@@ -178,12 +178,12 @@ export class idOSGrantee {
     return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async fetchSharedCredentialFromIdos(dataId: string) {
+  async getSharedCredentialFromIDOS(dataId: string) {
     return await this.#call<[idOSCredential]>("get_credential_shared", { id: dataId });
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const [credentialCopy] = await this.fetchSharedCredentialFromIdos(dataId);
+    const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
@@ -196,11 +196,11 @@ export class idOSGrantee {
     throw new Error("Not implemented yet");
   }
 
-  async getGrantsGrantedCount(): Promise<number> {
+  async getGrantsCount(): Promise<number> {
     return this.#call("get_access_grants_granted_count", null) as unknown as number;
   }
 
-  async getGrantsGranted(page = 1, size = DEFAULT_RECORDS_PER_PAGE) {
+  async getGrants(page = 1, size = DEFAULT_RECORDS_PER_PAGE) {
     return {
       grants: (await this.#call<idOSGrant[]>("get_access_grants_granted", { page, size })).map(
         (grant: idOSGrant) => {
@@ -213,7 +213,7 @@ export class idOSGrantee {
           };
         },
       ),
-      totalCount: await this.getGrantsGrantedCount(),
+      totalCount: await this.getGrantsCount(),
     };
   }
 
