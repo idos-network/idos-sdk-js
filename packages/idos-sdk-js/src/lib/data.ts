@@ -374,7 +374,7 @@ export class Data {
   }
 
   async getCredentialContentSha256Hash(credentialId: string) {
-    const credential = (await this.get("credentials", credentialId, false)) as idOSCredential;
+    const credential = (await this.get("credentials", credentialId)) as idOSCredential;
     const encodedContent = base64Decode(credential.content);
     return hexEncode(sha256Hash(encodedContent), true);
   }
