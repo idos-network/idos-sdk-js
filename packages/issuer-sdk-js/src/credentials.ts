@@ -1,6 +1,7 @@
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
+import { ethers } from "ethers";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, encryptContent, ensureEntityId } from "./internal";
@@ -35,16 +36,21 @@ const buildInsertableIDOSCredential = (
     publicNotes,
     plaintextContent,
     receiverEncryptionPublicKey,
+    senderSecretKey,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     receiverEncryptionPublicKey: Uint8Array;
+    senderSecretKey?: Uint8Array;
   },
 ): InsertableIDOSCredential => {
-  const ephemeralKeyPair = nacl.box.keyPair();
+  const keyPair = senderSecretKey
+    ? nacl.box.keyPair.fromSecretKey(senderSecretKey)
+    : nacl.box.keyPair();
+
   const content = base64Decode(
-    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
+    encryptContent(plaintextContent, receiverEncryptionPublicKey, keyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -66,7 +72,7 @@ const buildInsertableIDOSCredential = (
     ),
 
     issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
-    encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
+    encryptor_public_key: base64Encode(keyPair.publicKey),
   };
 };
 
@@ -76,6 +82,7 @@ type BaseCredentialParams = {
   publicNotes: string;
   plaintextContent: Uint8Array;
   receiverEncryptionPublicKey: Uint8Array;
+  senderSecretKey?: Uint8Array;
 };
 
 export async function createCredentialPermissioned(
@@ -101,6 +108,25 @@ export async function createCredentialPermissioned(
   };
 }
 
+const createIssuerCopy = async (issuerConfig: IssuerConfig, params: BaseCredentialParams) => {
+  const issuerKeyPair = nacl.box.keyPair.fromSecretKey(
+    base64Decode(issuerConfig.issuerEncryptionSecretKey!),
+  );
+
+  const receiverEncryptionPublicKey = issuerKeyPair.publicKey;
+  const issuerWallet = new ethers.Wallet(issuerConfig.issuerWalletPrivateKey);
+
+  await shareCredentialByGrant(issuerConfig, {
+    ...params,
+    originalCredentialId: params.id!,
+    lockedUntil: 0,
+    granteeAddress: issuerWallet.address,
+    receiverEncryptionPublicKey,
+    publicNotes: "",
+    senderSecretKey: issuerKeyPair.secretKey,
+  });
+};
+
 export async function createCredentialByGrant(
   issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
@@ -118,16 +144,31 @@ export async function createCredentialByGrant(
     true,
   );
 
+  await createIssuerCopy(issuerConfig, {
+    ...params,
+    id: payload.id,
+  });
+
   return {
     ...payload,
     original_id: "",
   };
 }
 
+export const findMatchingCredential = async (issuerConfig: IssuerConfig, credentialId: string) => {
+  const { sdk } = issuerConfig;
+  const grants = (await sdk.listGrants(1, 10)).grants || []; // @todo: replace with credential id
+  const decryptedCredential = await sdk.getSharedCredentialContentDecrypted(
+    grants[grants.length - 1].dataId || credentialId,
+  );
+  return decryptedCredential;
+};
+
 type ShareCredentialByGrantParams = BaseCredentialParams & {
   granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
+  credentialHash?: string;
 };
 export async function shareCredentialByGrant(
   issuer_config: IssuerConfig,

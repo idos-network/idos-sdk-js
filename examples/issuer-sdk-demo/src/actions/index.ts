@@ -7,6 +7,7 @@ import {
   createCredentialPermissioned,
   createUser,
   editCredential,
+  findMatchingCredential,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -100,6 +101,12 @@ export async function createCredentialByWriteGrant(
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
+}
+
+export async function findMatchingCredentialRequest(credentialId: string) {
+  const issuer = await getIssuerConfig();
+  const matchingCred = await findMatchingCredential(issuer, credentialId);
+  return matchingCred;
 }
 
 export async function createCredentialByPermissionedIssuer(

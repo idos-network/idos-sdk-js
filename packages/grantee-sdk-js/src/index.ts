@@ -50,6 +50,10 @@ export class idOSGranteeSDK {
   async getSharedCredential(dataId: string) {
     return this.grantee.getSharedCredentialFromIDOS(dataId);
   }
+
+  async getSharedCredentialContentDecrypted(dataId: string) {
+    return this.grantee.getSharedCredentialContentDecrypted(dataId);
+  }
 }
 
 export { idOSGrantee } from "./idOS-grantee";
