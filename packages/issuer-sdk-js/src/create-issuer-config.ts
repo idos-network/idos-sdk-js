@@ -1,4 +1,4 @@
-import { idOS } from "@idos-network/grantee-sdk-js";
+import { idOSGranteeSDK } from "@idos-network/grantee-sdk-js";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
@@ -55,7 +55,7 @@ export interface IssuerConfig extends IssuerSecrets {
   kwilClient: NodeKwil;
   kwilSigner: KwilSigner;
   signingKeyPair: nacl.SignKeyPair;
-  sdk: idOS;
+  sdk: idOSGranteeSDK;
 }
 
 interface CreateIssuerConfigParams extends IssuerSecrets {
@@ -71,7 +71,7 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
     chainId: "",
   });
 
-  const sdk = await idOS.init(
+  const sdk = await idOSGranteeSDK.init(
     "EVM",
     params.issuerWalletPrivateKey,
     params.issuerEncryptionSecretKey,

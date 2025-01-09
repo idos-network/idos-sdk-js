@@ -30,3 +30,11 @@ export interface idOSUserAttribute {
   attribute_key: string;
   value: string;
 }
+
+export interface idOSGrant {
+  id: string;
+  ag_owner_user_id: string;
+  ag_grantee_wallet_identifier: string;
+  data_id: string;
+  locked_until: number;
+}

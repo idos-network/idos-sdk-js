@@ -1,4 +1,4 @@
-import { idOS } from "@idos-network/grantee-sdk-js";
+import { idOSGranteeSDK } from "@idos-network/grantee-sdk-js";
 
 const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";
 const EVM_GRANTEE_PRIVATE_KEY = process.env.EVM_GRANTEE_PRIVATE_KEY ?? "";
@@ -11,7 +11,7 @@ export default async function Home() {
     throw new Error("Missing environment variables for Grantee SDK Demo");
   }
 
-  const sdk = await idOS.init(
+  const sdk = await idOSGranteeSDK.init(
     "EVM",
     EVM_GRANTEE_PRIVATE_KEY,
     ENCRYPTION_SECRET_KEY,
