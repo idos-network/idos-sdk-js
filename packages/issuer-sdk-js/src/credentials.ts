@@ -127,8 +127,16 @@ const createIssuerCopy = async (issuerConfig: IssuerConfig, params: BaseCredenti
   });
 };
 
+// this method will be used by Issuer to validate Other Entities' AGs & By Entity to validate related credential to this grant
 export const checkCredentialValidity = async (issuerConfig: IssuerConfig, grant: idOSGrant) => {
   return issuerConfig.sdk.checkCredentialValidity(grant);
+};
+
+export const insertGrantForEntity = async (
+  issuerConfig: IssuerConfig,
+  grant: idOSGrant,
+) => {
+  // @todo: if grant hash provided by an entity is valid, insert it into idOS grant table
 };
 
 export async function createCredentialByGrant(
