@@ -2,6 +2,7 @@ import {
   base64Decode,
   base64Encode,
   hexEncode,
+  hexEncodeSha256Hash,
   sha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
@@ -212,7 +213,7 @@ export async function createReusableCredential(
 
   // Calculate the hash of the `content` field of the params.
   // This is used to pass the `hash` field when sharing a credential by write grant.
-  const hash = hexEncode(sha256Hash(content), true);
+  const hash = hexEncodeSha256Hash(content);
 
   // Create a credential for the issuer itself.
   await shareCredentialByGrant(issuerConfig, {
