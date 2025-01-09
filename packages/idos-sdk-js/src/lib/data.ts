@@ -318,8 +318,7 @@ export class Data {
     const id = crypto.randomUUID();
 
     await this.kwilWrapper.execute(
-      // @todo: get the proper action name
-      "<PROPER_ACTION_NAME>",
+      "share_credential_without_ag",
       [
         {
           original_credential_id: credential.id,
