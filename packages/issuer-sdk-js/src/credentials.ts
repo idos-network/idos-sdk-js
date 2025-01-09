@@ -132,10 +132,8 @@ export const checkCredentialValidity = async (issuerConfig: IssuerConfig, grant:
   return issuerConfig.sdk.checkCredentialValidity(grant);
 };
 
-export const insertGrantForEntity = async (
-  issuerConfig: IssuerConfig,
-  grant: idOSGrant,
-) => {
+export const insertGrantForEntity = async (issuerConfig: IssuerConfig, grant: idOSGrant) => {
+  console.log({ issuerConfig, grant });
   // @todo: if grant hash provided by an entity is valid, insert it into idOS grant table
 };
 
