@@ -51,4 +51,8 @@ export class idOS {
   async fetchSharedCredential(dataId: string) {
     return this.grantee.fetchSharedCredentialFromIdos(dataId);
   }
+
+  async getSharedCredentialContentDecrypted(dataId: string) {
+    return this.grantee.getSharedCredentialContentDecrypted(dataId);
+  }
 }

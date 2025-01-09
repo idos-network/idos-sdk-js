@@ -1,3 +1,4 @@
+import { idOS } from "@idos-network/grantee-sdk-js";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
@@ -43,26 +44,40 @@ function createKwilSigner(signer: SignerType): KwilSigner {
   })(signer);
 }
 
-export interface IssuerConfig {
+interface IssuerSecrets {
+  issuerWalletPrivateKey: string;
+  issuerEncryptionSecretKey: string;
+}
+
+export interface IssuerConfig extends IssuerSecrets {
   chainId: string;
   dbid: string;
   kwilClient: NodeKwil;
   kwilSigner: KwilSigner;
   signingKeyPair: nacl.SignKeyPair;
+  sdk: idOS;
 }
 
-type CreateIssuerConfigParams = {
+interface CreateIssuerConfigParams extends IssuerSecrets {
   chainId?: string;
   dbId?: string;
   nodeUrl: string;
   signingKeyPair: nacl.SignKeyPair;
-};
+}
 
 export async function createIssuerConfig(params: CreateIssuerConfigParams): Promise<IssuerConfig> {
   const _kwil = new NodeKwil({
     kwilProvider: params.nodeUrl,
     chainId: "",
   });
+
+  const sdk = await idOS.init(
+    "EVM",
+    params.issuerWalletPrivateKey,
+    params.issuerEncryptionSecretKey,
+    params.nodeUrl,
+    params.dbId!,
+  );
 
   const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
   const dbid =
@@ -81,5 +96,8 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
     }),
     kwilSigner: createKwilSigner(params.signingKeyPair),
     signingKeyPair: params.signingKeyPair,
+    issuerEncryptionSecretKey: params.issuerEncryptionSecretKey,
+    issuerWalletPrivateKey: params.issuerWalletPrivateKey,
+    sdk,
   };
 }

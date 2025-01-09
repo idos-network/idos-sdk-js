@@ -6,7 +6,11 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { createCredentialByPermissionedIssuer, createCredentialByWriteGrant } from "@/actions";
+import {
+  createCredentialByPermissionedIssuer,
+  createCredentialByWriteGrant,
+  findMatchingCredentialRequest,
+} from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
 import { useSdkStore } from "@/stores/sdk";
@@ -25,6 +29,7 @@ export default function Home() {
   const [isPendingCreateCredentialRequest, startCredentialRequestTransition] = useTransition();
   const [isPendingGrantedCreateCredentialRequest, startGrantedCredentialRequestTransition] =
     useTransition();
+  const [isPendingMatchingCredentials, startMatchingCredentialsTransition] = useTransition();
 
   const [credentials, setCredentials] = useState<idOSCredential[]>([]);
 
@@ -127,6 +132,13 @@ export default function Home() {
     );
   }
 
+  const handleFindMatchingCredentials = () => {
+    startMatchingCredentialsTransition(async () => {
+      const randomCredentialId = crypto.randomUUID();
+      await findMatchingCredentialRequest(randomCredentialId); // @todo: pass credential id
+    });
+  };
+
   const handleCreateGrantedCredential = () => {
     startGrantedCredentialRequestTransition(async () => {
       const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
@@ -197,6 +209,15 @@ export default function Home() {
             isLoading={isPendingGrantedCreateCredentialRequest}
           >
             Via Write Grant
+          </Button>
+          <Button
+            color="secondary"
+            variant="flat"
+            className="lg:flex-1"
+            onPress={handleFindMatchingCredentials}
+            isLoading={isPendingMatchingCredentials}
+          >
+            Get Last C1.1
           </Button>
         </div>
       </div>
