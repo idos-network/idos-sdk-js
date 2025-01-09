@@ -13,6 +13,7 @@ export interface idOSCredential {
   public_notes: string;
   content: string;
   encryptor_public_key: string;
+  hash?: string;
 }
 export interface idOSWallet {
   id: string;
