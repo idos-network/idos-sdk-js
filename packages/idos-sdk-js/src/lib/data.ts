@@ -306,11 +306,12 @@ export class Data {
     },
     synchronous?: boolean,
   ): Promise<{ id: string }> {
-    const credential = (await this.get("credentials", recordId)) as idOSCredential;
-    await this.#buildInsertableIDOSCredential(
-      credential.user_id,
+    const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
+
+    const insertableCredential = await this.#buildInsertableIDOSCredential(
+      originalCredential.user_id,
       "",
-      credential.content,
+      originalCredential.content,
       granteeRecipientEncryptionPublicKey,
       grantInfo,
     );
@@ -321,8 +322,9 @@ export class Data {
       "share_credential_without_ag",
       [
         {
-          original_credential_id: credential.id,
-          ...credential,
+          original_credential_id: originalCredential.id,
+          ...originalCredential,
+          ...insertableCredential,
           id,
         },
       ],
