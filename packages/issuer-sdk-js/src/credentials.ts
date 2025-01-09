@@ -3,7 +3,6 @@ import {
   base64Encode,
   hexEncode,
   hexEncodeSha256Hash,
-  sha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
