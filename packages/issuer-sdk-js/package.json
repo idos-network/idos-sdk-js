@@ -55,7 +55,7 @@
     "@release-it/keep-a-changelog": "^5.0.0",
     "@types/node": "^22.7.9",
     "release-it": "^17.0.0",
-    "tsup": "^8.0.2",
+    "tsup": "8.0.2",
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },
