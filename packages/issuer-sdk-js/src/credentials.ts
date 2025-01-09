@@ -1,5 +1,5 @@
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
 import { ethers } from "ethers";
 import nacl from "tweetnacl";
@@ -125,6 +125,10 @@ const createIssuerCopy = async (issuerConfig: IssuerConfig, params: BaseCredenti
     publicNotes: "",
     senderSecretKey: issuerKeyPair.secretKey,
   });
+};
+
+export const checkCredentialValidity = async (issuerConfig: IssuerConfig, grant: idOSGrant) => {
+  return issuerConfig.sdk.checkCredentialValidity(grant);
 };
 
 export async function createCredentialByGrant(

@@ -1,4 +1,10 @@
-import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  sha256Hash,
+  utf8Decode,
+} from "@idos-network/codecs";
 import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
@@ -182,13 +188,26 @@ export class idOSGrantee {
     return await this.#call<[idOSCredential]>("get_credential_shared", { id: dataId });
   }
 
+  async decryptCredentialContent(credential: idOSCredential) {
+    return await this.noncedBox.decrypt(credential.content, credential.encryptor_public_key);
+  }
+
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
+    return this.decryptCredentialContent(credentialCopy);
+  }
 
-    return await this.noncedBox.decrypt(
-      credentialCopy.content,
-      credentialCopy.encryptor_public_key,
-    );
+  async hashCredential(credentialContent: string) {
+    const encodedContent = new TextEncoder().encode(credentialContent);
+    return hexEncode(sha256Hash(encodedContent), true);
+  }
+
+  // passed grant is OE2 AG. we need OE1 AG to decrypt the content cuz both of them should have the same data_id
+  async checkCredentialValidity(grant: idOSGrant) {
+    const receivedHash = grant.hash;
+    const decryptedContent = await this.getSharedCredentialContentDecrypted(grant.data_id);
+    const expectedHash = await this.hashCredential(decryptedContent); // this is C1.1 hash
+    return receivedHash === expectedHash;
   }
 
   async getLocalAccessGrantsFromUserByAddress() {

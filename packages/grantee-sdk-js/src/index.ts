@@ -1,3 +1,4 @@
+import type { idOSGrant } from "@idos-network/idos-sdk-types";
 import { ethers } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
@@ -53,6 +54,10 @@ export class idOSGranteeSDK {
 
   async getSharedCredentialContentDecrypted(dataId: string) {
     return this.grantee.getSharedCredentialContentDecrypted(dataId);
+  }
+
+  async checkCredentialValidity(grant: idOSGrant) {
+    return this.grantee.checkCredentialValidity(grant);
   }
 }
 
