@@ -5,10 +5,19 @@ import {
   sha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
+
 import type { KwilWrapper } from "./kwil-wrapper";
+
+interface idOSGrantWithSignature
+  extends Omit<idOSGrant, "id" | "ag_owner_user_id" | "locked_until"> {
+  // This should be signed by the FE i.e using `wagmi`
+  signature: string;
+  ag_owner_wallet_identifier: string;
+  locked_until: 0;
+}
 
 /* global crypto */
 
@@ -296,6 +305,45 @@ export class Data {
     return record;
   }
 
+  // This is the same as `share`, but for credentials only. It doesn't create an AG either for the duplicate.
+  async shareCredential(
+    recordId: string,
+    granteeRecipientEncryptionPublicKey: string,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
+    const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
+
+    const insertableCredential = await this.#buildInsertableIDOSCredential(
+      originalCredential.user_id,
+      "",
+      originalCredential.content,
+      granteeRecipientEncryptionPublicKey,
+      grantInfo,
+    );
+
+    const id = crypto.randomUUID();
+
+    await this.kwilWrapper.execute(
+      "share_credential_without_ag",
+      [
+        {
+          original_credential_id: originalCredential.id,
+          ...originalCredential,
+          ...insertableCredential,
+          id,
+        },
+      ],
+      "Share a credential on idOS",
+      synchronous,
+    );
+
+    return { id };
+  }
+
   async share(
     tableName: string,
     recordId: string,
@@ -375,8 +423,24 @@ export class Data {
 
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
-    const encodedContent = base64Decode(credential.content);
+    const encodedContent = new TextEncoder().encode(credential.content);
     return hexEncode(sha256Hash(encodedContent), true);
+  }
+
+  /**
+   * Transmit a DAG to the given URL.
+   * @param url The URL to transmit the DAG to.
+   * @param payload The DAG to transmit.
+   * @returns The response from the URL.
+   */
+  async transmitDAG(url: string, payload: idOSGrantWithSignature) {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
   }
 
   async #buildInsertableIDOSCredential(

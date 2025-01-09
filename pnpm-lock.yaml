@@ -315,6 +315,25 @@ importers:
         specifier: ^20.10.5
         version: 20.17.10
 
+  apps/passporting-server:
+    dependencies:
+      '@hono/node-server':
+        specifier: ^1.13.7
+        version: 1.13.7(hono@4.6.16)
+      '@idos-network/issuer-sdk-js':
+        specifier: workspace:*
+        version: link:../../packages/issuer-sdk-js
+      hono:
+        specifier: ^4.6.16
+        version: 4.6.16
+    devDependencies:
+      '@types/node':
+        specifier: ^20.11.17
+        version: 20.17.10
+      tsx:
+        specifier: ^4.7.1
+        version: 4.19.2
+
   examples/grantee-sdk-demo:
     dependencies:
       '@idos-network/grantee-sdk-js':
@@ -730,27 +749,6 @@ importers:
 
   packages/kwil-nep413-signer:
     dependencies:
-      '@stablelib/base64':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/binary':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/bytes':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/hex':
-        specifier: ^2.0.0
-        version: 2.0.0
-      '@stablelib/sha256':
-        specifier: ^1.0.1
-        version: 1.0.1
-      '@stablelib/utf8':
-        specifier: ^1.0.1
-        version: 1.0.2
-      borsh:
-        specifier: ^1.0.0
-        version: 1.0.0
       bs58:
         specifier: ^6.0.0
         version: 6.0.0
@@ -758,6 +756,9 @@ importers:
         specifier: 3.0.4
         version: 3.0.4
     devDependencies:
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../codecs
       typescript:
         specifier: ^5.6.3
         version: 5.6.3
@@ -3221,6 +3222,15 @@ packages:
     dependencies:
       react: 18.3.1
     dev: true
+
+  /@hono/node-server@1.13.7(hono@4.6.16):
+    resolution: {integrity: sha512-kTfUMsoloVKtRA2fLiGSd9qBddmru9KadNyhJCwgKBxTiNkaAJEwkVN9KV/rS4HtmmNRtUh6P+YpmjRMl0d9vQ==}
+    engines: {node: '>=18.14.1'}
+    peerDependencies:
+      hono: ^4
+    dependencies:
+      hono: 4.6.16
+    dev: false
 
   /@iarna/toml@2.2.5:
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -13964,6 +13974,11 @@ packages:
     resolution: {integrity: sha512-/gGivxi8JPKWNm/W0jSmzcMPpfpPLc3dY/6GxhX2hQ9iGj3aDfklV4ET7NjKpSinLpJ5vafa9iiGIEZg10SfBw==}
     dependencies:
       react-is: 16.13.1
+    dev: false
+
+  /hono@4.6.16:
+    resolution: {integrity: sha512-iE6xOPwDYlfnZFwk6BfIMMIH4WZm3pPhz6rc1uJM/OPew0pjG5K6p8WTLaMBY1/szF/T0TaEjprMpwn16BA0NQ==}
+    engines: {node: '>=16.9.0'}
     dev: false
 
   /html-encoding-sniffer@3.0.0:
