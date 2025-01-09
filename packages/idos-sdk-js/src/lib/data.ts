@@ -5,10 +5,19 @@ import {
   sha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
+
 import type { KwilWrapper } from "./kwil-wrapper";
+
+interface idOSGrantWithSignature
+  extends Omit<idOSGrant, "id" | "ag_owner_user_id" | "locked_until"> {
+  // This should be signed by the FE i.e using `wagmi`
+  signature: string;
+  ag_owner_wallet_identifier: string;
+  locked_until: 0;
+}
 
 /* global crypto */
 
@@ -377,6 +386,22 @@ export class Data {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
     const encodedContent = new TextEncoder().encode(credential.content);
     return hexEncode(sha256Hash(encodedContent), true);
+  }
+
+  /**
+   * Transmit a DAG to the given URL.
+   * @param url The URL to transmit the DAG to.
+   * @param payload The DAG to transmit.
+   * @returns The response from the URL.
+   */
+  async transmitDAG(url: string, payload: idOSGrantWithSignature) {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
   }
 
   async #buildInsertableIDOSCredential(
