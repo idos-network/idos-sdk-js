@@ -26,16 +26,26 @@ export class KwilActionClient {
     private readonly dbId: string,
   ) {}
 
-  async call<T = unknown>(params: KwilActionReqParams) {
+  /**
+   * Calls an action on the kwil nodes. This similar to `GET` like request.
+   */
+  async call<T = unknown>(params: KwilActionReqParams, signer = this.signer) {
     const action = this.#createAction(params);
-    return this.client.call(action) as T;
+    return this.client.call(action, signer) as T;
   }
 
-  async execute<T = unknown>(params: KwilActionReqParams, signer?: KwilSigner, synchronous = true) {
-    invariant(this.signer, "Signer is not set, you must set it before executing an action");
+  /**
+   * Executes an action on the kwil nodes. This similar to `POST` like request.
+   */
+  async execute<T = unknown>(
+    params: KwilActionReqParams,
+    signer = this.signer,
+    synchronous = true,
+  ) {
+    invariant(signer, "Signer is not set, you must set it before executing an action");
     const action = this.#createAction(params);
 
-    return this.client.execute(action, signer ?? this.signer, synchronous) as T;
+    return this.client.execute(action, signer, synchronous) as T;
   }
 
   /**
@@ -45,6 +55,9 @@ export class KwilActionClient {
     this.signer = signer;
   }
 
+  /**
+   * Creates an action body from the given parameters to be used in the `call` and `execute` methods.
+   */
   #createAction(params: KwilActionReqParams): ActionBody {
     return {
       ...params,
@@ -53,6 +66,9 @@ export class KwilActionClient {
     };
   }
 
+  /**
+   * Creates action inputs from the given parameters that are used in the action body.
+   */
   #createActionInputs(params: Record<string, unknown> = {}): Utils.ActionInput {
     const prefixedEntries = Object.entries(params).map(([key, value]) => [`$${key}`, value]);
     const prefixedObject = Object.fromEntries(prefixedEntries);
