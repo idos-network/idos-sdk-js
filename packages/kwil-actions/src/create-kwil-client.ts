@@ -11,7 +11,8 @@ interface CreateKwilClientParams {
 interface KwilActionReqParams {
   name: string;
   description?: string;
-  inputs?: Record<string, unknown>;
+  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
+  inputs?: Record<string, any>;
 }
 
 /**
