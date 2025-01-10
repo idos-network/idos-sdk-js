@@ -215,6 +215,7 @@ export async function createReusableCredential(
   const hash = hexEncodeSha256Hash(content);
 
   // Create a credential for the issuer itself.
+  // @todo: we need to have a stable (not ephemeral) key pair for the issuer in order to be able to decrypt the credential later.
   await shareCredentialByGrant(issuerConfig, {
     ...params,
     lockedUntil: 0,
