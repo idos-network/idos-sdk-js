@@ -21,6 +21,7 @@ export async function getIssuerConfig(): Promise<IssuerConfig> {
   cachedIssuer = await createIssuerConfig({
     nodeUrl: NODE_URL,
     signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(SIGNING_SECRET_KEY)),
+    encryptionSecretKey: decode(ENCRYPTION_SECRET_KEY),
   });
 
   return cachedIssuer;
