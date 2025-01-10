@@ -32,7 +32,8 @@ export class KwilActionClient {
    */
   async call<T = unknown>(params: KwilActionReqParams, signer = this.signer) {
     const action = this.#createAction(params);
-    return this.client.call(action, signer) as T;
+    const response = await this.client.call(action, signer);
+    return response.data?.result as T;
   }
 
   /**
@@ -45,8 +46,8 @@ export class KwilActionClient {
   ) {
     invariant(signer, "Signer is not set, you must set it before executing an action");
     const action = this.#createAction(params);
-
-    return this.client.execute(action, signer, synchronous) as T;
+    const response = await this.client.execute(action, signer, synchronous);
+    return response.data?.tx_hash as T;
   }
 
   /**
