@@ -98,7 +98,7 @@ export async function createCredentialByWriteGrant(
     userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
 
@@ -112,7 +112,7 @@ export async function createCredentialByPermissionedIssuer(
     userId,
     plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
 

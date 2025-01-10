@@ -1,4 +1,10 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
@@ -34,17 +40,17 @@ const buildInsertableIDOSCredential = (
     userId,
     publicNotes,
     plaintextContent,
-    receiverEncryptionPublicKey,
+    recipientEncryptionPublicKey,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
-    receiverEncryptionPublicKey: Uint8Array;
+    recipientEncryptionPublicKey: Uint8Array;
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
   const content = base64Decode(
-    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
+    encryptContent(plaintextContent, recipientEncryptionPublicKey, ephemeralKeyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -70,13 +76,13 @@ const buildInsertableIDOSCredential = (
   };
 };
 
-type BaseCredentialParams = {
+interface BaseCredentialParams {
   id?: string;
   userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
-  receiverEncryptionPublicKey: Uint8Array;
-};
+  recipientEncryptionPublicKey: Uint8Array;
+}
 
 export async function createCredentialPermissioned(
   issuerConfig: IssuerConfig,
@@ -124,11 +130,12 @@ export async function createCredentialByGrant(
   };
 }
 
-type ShareCredentialByGrantParams = BaseCredentialParams & {
+interface ShareCredentialByGrantParams extends BaseCredentialParams {
   granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
-};
+  hash: string;
+}
 export async function shareCredentialByGrant(
   issuer_config: IssuerConfig,
   params: ShareCredentialByGrantParams,
@@ -164,10 +171,10 @@ export async function shareCredentialByGrant(
   };
 }
 
-type EditCredentialAsIssuerParams = {
+interface EditCredentialAsIssuerParams {
   publicNotesId: string;
   publicNotes: string;
-};
+}
 export async function editCredential(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
@@ -189,4 +196,37 @@ export async function editCredential(
   );
 
   return result;
+}
+
+interface CreateReusableCredentialParams extends BaseCredentialParams {
+  granteeAddress: string;
+}
+export async function createReusableCredential(
+  issuerConfig: IssuerConfig,
+  params: CreateReusableCredentialParams,
+) {
+  const content = params.plaintextContent;
+
+  // Create a credential for the given `recipientEncryptionPublicKey`.
+  const credentialForReceiver = await createCredentialByGrant(issuerConfig, params);
+
+  // Calculate the hash of the `content` field of the params.
+  // This is used to pass the `hash` field when sharing a credential by write grant.
+  const hash = hexEncodeSha256Hash(content);
+
+  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
+  const recipientEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
+    issuerConfig.encryptionSecretKey,
+  ).publicKey;
+
+  // Create a credential for the issuer itself.
+  await shareCredentialByGrant(issuerConfig, {
+    ...params,
+    recipientEncryptionPublicKey,
+    lockedUntil: 0,
+    originalCredentialId: credentialForReceiver.id,
+    hash,
+  });
+
+  return credentialForReceiver;
 }
