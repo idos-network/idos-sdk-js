@@ -1,4 +1,5 @@
 import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import { decryptContent } from "@idos-network/cryptography";
 import {
   type KwilActionClient,
   createNodeKwilClient,
@@ -18,42 +19,19 @@ const assertNever = (_: never, msg: string): never => {
 };
 
 export class NoncedBox {
-  keyPair: nacl.BoxKeyPair;
+  constructor(public readonly keyPair: nacl.BoxKeyPair) {}
 
-  constructor(keyPair: nacl.BoxKeyPair) {
-    this.keyPair = keyPair;
-  }
-
-  static fromBase64SecretKey(secret: string): NoncedBox {
+  static nonceFromBase64SecretKey(secret: string): NoncedBox {
     return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
-  async decrypt(b64FullMessage: string, b64SenderPublicKey: string): Promise<string> {
-    const fullMessage = base64Decode(b64FullMessage);
+  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+    const decodedMessage = base64Decode(b64FullMessage);
     const senderPublicKey = base64Decode(b64SenderPublicKey);
+    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
+    const content = decryptContent(message, senderPublicKey, this.keyPair.secretKey);
 
-    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-
-    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
-
-    if (decrypted == null) {
-      throw Error(
-        `Couldn't decrypt. ${JSON.stringify(
-          {
-            fullMessage: base64Encode(fullMessage),
-            message: base64Encode(message),
-            nonce: base64Encode(nonce),
-            senderPublicKey: base64Encode(senderPublicKey),
-            receiverPublicKey: base64Encode(this.keyPair.publicKey),
-          },
-          null,
-          2,
-        )}`,
-      );
-    }
-
-    return utf8Decode(decrypted);
+    return utf8Decode(content);
   }
 }
 
@@ -132,7 +110,7 @@ export class idOSGrantee {
     kwilClient.setSigner(kwilSigner);
 
     return new idOSGrantee(
-      NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
+      NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
       address,
     );
@@ -156,7 +134,7 @@ export class idOSGrantee {
     return getSharedCredential(this.kwilClient, dataId);
   }
 
-  async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
+  async getSharedCredentialContentDecrypted(dataId: string) {
     const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
@@ -170,7 +148,7 @@ export class idOSGrantee {
     throw new Error("Not implemented yet");
   }
 
-  async getGrantsCount(): Promise<number> {
+  async getGrantsCount() {
     return getGrantsCount(this.kwilClient);
   }
 

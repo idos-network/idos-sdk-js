@@ -598,6 +598,9 @@ importers:
       '@idos-network/codecs':
         specifier: workspace:*
         version: link:../codecs
+      '@idos-network/cryptography':
+        specifier: workspace:*
+        version: link:../cryptography
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
