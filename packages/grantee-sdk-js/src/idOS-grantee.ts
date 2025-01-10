@@ -1,14 +1,18 @@
 import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+import {
+  type KwilActionClient,
+  createNodeKwilClient,
+} from "@idos-network/kwil-actions/create-kwil-client";
+import { getSharedCredential } from "@idos-network/kwil-actions/credentials";
+import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
-import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import { Utils as KwilUtils } from "@kwilteam/kwil-js";
-import type { ActionBody } from "@kwilteam/kwil-js/dist/core/action";
+import { KwilSigner } from "@kwilteam/kwil-js";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 
 const DEFAULT_RECORDS_PER_PAGE = 7;
+
 const assertNever = (_: never, msg: string): never => {
   throw new Error(msg);
 };
@@ -90,18 +94,7 @@ interface idOSGranteeInitParams {
   granteeSigner: KeyPair | ethers.Wallet;
 }
 
-const throwError = (message: string): never => {
-  throw new Error(message);
-};
-
 export class idOSGrantee {
-  noncedBox: NoncedBox;
-  nodeKwil: NodeKwil;
-  kwilSigner: KwilSigner;
-  dbId: string;
-  chainType: ChainType;
-  address: string;
-
   static async init(_: {
     recipientEncryptionPrivateKey: string;
     nodeUrl?: string;
@@ -128,47 +121,28 @@ export class idOSGrantee {
     chainType,
     granteeSigner,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
-    const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
-
-    chainId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
-      (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
-      throwError("Can't discover `chainId`. You must pass it explicitly.");
-
-    dbId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
-      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
-      throwError("Can't discover `dbId`. You must pass it explicitly.");
-
-    const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
+    const kwilClient = await createNodeKwilClient({
+      nodeUrl,
+      chainId,
+      dbId,
+    });
 
     const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
 
+    kwilClient.setSigner(kwilSigner);
+
     return new idOSGrantee(
       NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
-      nodeKwil,
-      kwilSigner,
-      dbId,
-      chainType,
+      kwilClient,
       address,
     );
   }
 
   private constructor(
-    noncedBox: NoncedBox,
-    nodeKwil: NodeKwil,
-    kwilSigner: KwilSigner,
-    dbId: string,
-    chainType: ChainType,
-    address: string,
-  ) {
-    this.noncedBox = noncedBox;
-    this.nodeKwil = nodeKwil;
-    this.kwilSigner = kwilSigner;
-    this.dbId = dbId;
-    this.chainType = chainType;
-    this.address = address;
-  }
+    private readonly noncedBox: NoncedBox,
+    private readonly kwilClient: KwilActionClient,
+    private readonly address: string,
+  ) {}
 
   get grantee() {
     return this.address;
@@ -179,7 +153,7 @@ export class idOSGrantee {
   }
 
   async getSharedCredentialFromIDOS(dataId: string) {
-    return await this.#call<[idOSCredential]>("get_credential_shared", { id: dataId });
+    return getSharedCredential(this.kwilClient, dataId);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -197,59 +171,19 @@ export class idOSGrantee {
   }
 
   async getGrantsCount(): Promise<number> {
-    return this.#call("get_access_grants_granted_count", null) as unknown as number;
+    return getGrantsCount(this.kwilClient);
   }
 
   async getGrants(page = 1, size = DEFAULT_RECORDS_PER_PAGE) {
     return {
-      grants: (await this.#call<idOSGrant[]>("get_access_grants_granted", { page, size })).map(
-        (grant: idOSGrant) => {
-          return {
-            id: grant.id,
-            ownerUserId: grant.ag_owner_user_id,
-            granteeAddress: grant.ag_grantee_wallet_identifier,
-            dataId: grant.data_id,
-            lockedUntil: grant.locked_until,
-          };
-        },
-      ),
+      grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
+        id: grant.id,
+        ownerUserId: grant.ag_owner_user_id,
+        granteeAddress: grant.ag_grantee_wallet_identifier,
+        dataId: grant.data_id,
+        lockedUntil: grant.locked_until,
+      })),
       totalCount: await this.getGrantsCount(),
     };
-  }
-
-  #buildAction(actionName: string, inputs: Record<string, unknown> | null, description?: string) {
-    const payload: ActionBody = {
-      name: actionName,
-      dbid: this.dbId,
-      inputs: [],
-    };
-
-    if (description) {
-      payload.description = `*${description}*`;
-    }
-
-    if (inputs) {
-      const prefixedEntries = Object.entries(inputs).map(([key, value]) => [`$${key}`, value]);
-      const prefixedObject = Object.fromEntries(prefixedEntries);
-      payload.inputs = [KwilUtils.ActionInput.fromObject(prefixedObject)];
-    }
-
-    return payload;
-  }
-
-  async #call<T = unknown>(
-    actionName: string,
-    actionInputs: Record<string, unknown> | null,
-    description?: string,
-    useSigner = true,
-  ): Promise<T> {
-    if (useSigner && !this.kwilSigner) throw new Error("Call `idOS.setSigner` first.");
-
-    return (
-      await this.nodeKwil.call(
-        this.#buildAction(actionName, actionInputs, description),
-        useSigner ? this.kwilSigner : undefined,
-      )
-    ).data?.result as T;
   }
 }

@@ -601,6 +601,9 @@ importers:
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
+      '@idos-network/kwil-actions':
+        specifier: workspace:*
+        version: link:../kwil-actions
       '@idos-network/kwil-nep413-signer':
         specifier: workspace:*
         version: link:../kwil-nep413-signer
@@ -756,6 +759,9 @@ importers:
         specifier: 0.7.1
         version: 0.7.1(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     devDependencies:
+      '@idos-network/idos-sdk-types':
+        specifier: workspace:*
+        version: link:../types
       tiny-invariant:
         specifier: ^1.3.3
         version: 1.3.3

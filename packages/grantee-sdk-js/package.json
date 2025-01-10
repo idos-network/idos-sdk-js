@@ -29,6 +29,7 @@
     "near-api-js": "3.0.4"
   },
   "devDependencies": {
+    "@idos-network/kwil-actions": "workspace:*",
     "@idos-network/kwil-nep413-signer": "workspace:*",
     "@idos-network/codecs": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
