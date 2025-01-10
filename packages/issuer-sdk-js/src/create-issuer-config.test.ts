@@ -39,10 +39,11 @@ describe("createIssuerConfig", () => {
 
   it("should correctly initialize and return config", async () => {
     const signingKeyPair = nacl.sign.keyPair();
-
+    const encryptionSecretKey = signingKeyPair.secretKey;
     const params = {
       nodeUrl: "http://mock-node-url",
       signingKeyPair,
+      encryptionSecretKey,
     };
 
     const result = await createIssuerConfig(params);
@@ -68,6 +69,7 @@ describe("createIssuerConfig", () => {
       kwilClient: expect.any(Object),
       kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),
+      encryptionSecretKey: expect.any(Uint8Array),
     });
   });
 });
