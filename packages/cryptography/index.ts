@@ -1,4 +1,4 @@
-import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import { base64Encode } from "@idos-network/codecs";
 import nacl from "tweetnacl";
 
 /**
@@ -8,7 +8,7 @@ export function encryptContent(
   message: Uint8Array,
   recipientEncryptionPublicKey: Uint8Array,
   senderEncryptionSecretKey: Uint8Array,
-): string {
+) {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
   const encrypted = nacl.box(
     message,
@@ -19,7 +19,7 @@ export function encryptContent(
 
   if (encrypted === null)
     throw Error(
-      `Couldn't encrypt. ${JSON.stringify(
+      `Couldn't encrypt the provided message. ${JSON.stringify(
         {
           message: base64Encode(message),
           nonce: base64Encode(nonce),
@@ -34,7 +34,7 @@ export function encryptContent(
   fullMessage.set(nonce, 0);
   fullMessage.set(encrypted, nonce.length);
 
-  return base64Encode(fullMessage);
+  return fullMessage;
 }
 
 /**
@@ -44,7 +44,7 @@ export function decryptContent(
   message: Uint8Array,
   senderEncryptionPublicKey: Uint8Array,
   recipientEncryptionSecretKey: Uint8Array,
-): string {
+) {
   const nonce = message.slice(0, nacl.box.nonceLength);
 
   const decrypted = nacl.box.open(
@@ -56,7 +56,7 @@ export function decryptContent(
 
   if (decrypted == null) {
     throw Error(
-      `Couldn't decrypt. ${JSON.stringify(
+      `Couldn't decrypt the provided message. ${JSON.stringify(
         {
           message: base64Encode(message),
           nonce: base64Encode(nonce),
@@ -69,5 +69,5 @@ export function decryptContent(
     );
   }
 
-  return utf8Decode(decrypted);
+  return decrypted;
 }
