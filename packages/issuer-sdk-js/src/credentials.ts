@@ -40,17 +40,17 @@ const buildInsertableIDOSCredential = (
     userId,
     publicNotes,
     plaintextContent,
-    receiverEncryptionPublicKey,
+    recipientEncryptionPublicKey,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
-    receiverEncryptionPublicKey: Uint8Array;
+    recipientEncryptionPublicKey: Uint8Array;
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
   const content = base64Decode(
-    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
+    encryptContent(plaintextContent, recipientEncryptionPublicKey, ephemeralKeyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -81,7 +81,7 @@ interface BaseCredentialParams {
   userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
-  receiverEncryptionPublicKey: Uint8Array;
+  recipientEncryptionPublicKey: Uint8Array;
 }
 
 export async function createCredentialPermissioned(
@@ -214,10 +214,15 @@ export async function createReusableCredential(
   // This is used to pass the `hash` field when sharing a credential by write grant.
   const hash = hexEncodeSha256Hash(content);
 
+  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
+  const recipientEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
+    issuerConfig.encryptionSecretKey,
+  ).publicKey;
+
   // Create a credential for the issuer itself.
-  // @todo: we need to have a stable (not ephemeral) key pair for the issuer in order to be able to decrypt the credential later.
   await shareCredentialByGrant(issuerConfig, {
     ...params,
+    recipientEncryptionPublicKey,
     lockedUntil: 0,
     originalCredentialId: credentialForReceiver.id,
     hash,
