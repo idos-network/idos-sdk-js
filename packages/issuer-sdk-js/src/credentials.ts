@@ -207,7 +207,7 @@ export async function createReusableCredential(
 ) {
   const content = params.plaintextContent;
 
-  // Create a credential for the given `receiverEncryptionPublicKey`.
+  // Create a credential for the given `recipientEncryptionPublicKey`.
   const credentialForReceiver = await createCredentialByGrant(issuerConfig, params);
 
   // Calculate the hash of the `content` field of the params.
