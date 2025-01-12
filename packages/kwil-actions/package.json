@@ -20,6 +20,10 @@
       "types": "./src/grants.ts",
       "import": "./src/grants.ts"
     },
+    "./credential": {
+      "types": "./src/credential.ts",
+      "import": "./src/credential.ts"
+    },
     "./user": {
       "types": "./src/user.ts",
       "import": "./src/user.ts"
