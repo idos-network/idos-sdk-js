@@ -1,5 +1,6 @@
 import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
 import { decryptContent } from "@idos-network/cryptography";
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import {
   type KwilActionClient,
   createNodeKwilClient,
@@ -68,11 +69,11 @@ export class idOSGrantee {
     return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async getSharedCredentialFromIDOS(dataId: string) {
+  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential[]> {
     return getSharedCredential(this.kwilClient, dataId);
   }
 
-  async getSharedCredentialContentDecrypted(dataId: string) {
+  async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
@@ -86,7 +87,7 @@ export class idOSGrantee {
     throw new Error("Not implemented yet");
   }
 
-  async getGrantsCount() {
+  async getGrantsCount(): Promise<number> {
     return getGrantsCount(this.kwilClient);
   }
 

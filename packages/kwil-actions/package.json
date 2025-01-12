@@ -7,10 +7,7 @@
   "license": "MIT",
   "type": "module",
   "exports": {
-    "./create-kwil-client": {
-      "types": "./src/create-kwil-client.ts",
-      "import": "./src/create-kwil-client.ts"
-    },
+    "./create-kwil-client": "./src/create-kwil-client.ts",
     "./create-kwil-signer": {
       "types": "./src/create-kwil-signer.ts",
       "import": "./src/create-kwil-signer.ts"
