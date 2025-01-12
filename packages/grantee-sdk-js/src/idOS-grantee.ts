@@ -4,19 +4,12 @@ import {
   type KwilActionClient,
   createNodeKwilClient,
 } from "@idos-network/kwil-actions/create-kwil-client";
+import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
 import { getSharedCredential } from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
-import { KwilSigner } from "@kwilteam/kwil-js";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-
-const DEFAULT_RECORDS_PER_PAGE = 7;
-
-const assertNever = (_: never, msg: string): never => {
-  throw new Error(msg);
-};
 
 export class NoncedBox {
   constructor(public readonly keyPair: nacl.BoxKeyPair) {}
@@ -35,68 +28,20 @@ export class NoncedBox {
   }
 }
 
-type ChainType = "EVM" | "NEAR";
-
-const buildKwilSignerAndGrantee = (
-  chainType: ChainType,
-  granteeSigner: KeyPair | ethers.Wallet,
-): [KwilSigner, string] => {
-  switch (chainType) {
-    case "EVM": {
-      const signer = granteeSigner as ethers.Wallet;
-      return [new KwilSigner(signer, signer.address), signer.address];
-    }
-    case "NEAR": {
-      const signer = granteeSigner as KeyPair;
-      const publicKey = signer.getPublicKey().toString();
-      return [
-        new KwilSigner(
-          kwilNep413Signer("idos-grantee")(signer),
-          implicitAddressFromPublicKey(publicKey),
-          "nep413",
-        ),
-        publicKey,
-      ];
-    }
-    default:
-      return assertNever(chainType, `Unexpected chainType: ${chainType}`);
-  }
-};
-
 interface idOSGranteeInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
-  chainType: ChainType;
   granteeSigner: KeyPair | ethers.Wallet;
 }
 
 export class idOSGrantee {
-  static async init(_: {
-    recipientEncryptionPrivateKey: string;
-    nodeUrl?: string;
-    chainId?: string;
-    dbId?: string;
-    chainType: "EVM";
-    granteeSigner: ethers.Wallet;
-  }): Promise<idOSGrantee>;
-
-  static async init(_: {
-    recipientEncryptionPrivateKey: string;
-    nodeUrl: string;
-    chainId?: string;
-    dbId?: string;
-    chainType: "NEAR";
-    granteeSigner: KeyPair;
-  }): Promise<idOSGrantee>;
-
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
     dbId,
-    chainType,
     granteeSigner,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwilClient = await createNodeKwilClient({
@@ -105,26 +50,19 @@ export class idOSGrantee {
       dbId,
     });
 
-    const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
-
-    kwilClient.setSigner(kwilSigner);
+    const signer = createKwilSigner(granteeSigner);
+    kwilClient.setSigner(signer);
 
     return new idOSGrantee(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
-      address,
     );
   }
 
   private constructor(
     private readonly noncedBox: NoncedBox,
     private readonly kwilClient: KwilActionClient,
-    private readonly address: string,
   ) {}
-
-  get grantee() {
-    return this.address;
-  }
 
   get encryptionPublicKey() {
     return base64Encode(this.noncedBox.keyPair.publicKey);
@@ -152,7 +90,7 @@ export class idOSGrantee {
     return getGrantsCount(this.kwilClient);
   }
 
-  async getGrants(page = 1, size = DEFAULT_RECORDS_PER_PAGE) {
+  async getGrants(page = 1, size = 7) {
     return {
       grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
         id: grant.id,
