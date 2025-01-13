@@ -51,18 +51,20 @@ export class idOSGrantee {
       dbId,
     });
 
-    const signer = createKwilSigner(granteeSigner);
+    const [signer, address] = createKwilSigner(granteeSigner);
     kwilClient.setSigner(signer);
 
     return new idOSGrantee(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
+      address,
     );
   }
 
   private constructor(
     private readonly noncedBox: NoncedBox,
     private readonly kwilClient: KwilActionClient,
+    public readonly address: string,
   ) {}
 
   get encryptionPublicKey() {
