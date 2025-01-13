@@ -16,14 +16,13 @@ const evmGranteeSigner = new ethers.Wallet(
   new ethers.JsonRpcProvider(EVM_NODE_URL),
 );
 
-const idosGrantee = await idOSGrantee.init({
-  chainType: "EVM",
+const idOSGranteeInstance = await idOSGrantee.init({
   granteeSigner: evmGranteeSigner,
   recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
   nodeUrl: EVM_NODE_URL,
 });
 
-const encryptionPublicKey = idosGrantee.encryptionPublicKey;
+const encryptionPublicKey = idOSGranteeInstance.encryptionPublicKey;
 const lockTimeSpanSeconds = 3600; // one hour
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
@@ -34,7 +33,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
     return response.json({
       encryptionPublicKey,
       lockTimeSpanSeconds,
-      grantee: idosGrantee.grantee,
+      grantee: idOSGranteeInstance.address,
     });
   }
 
@@ -55,7 +54,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
 
   const { dataId } = body as { dataId: string };
   try {
-    return response.json(await idosGrantee.getSharedCredentialContentDecrypted(dataId));
+    return response.json(await idOSGranteeInstance.getSharedCredentialContentDecrypted(dataId));
   } catch (e) {
     console.error(e);
     return response.status(500).send(e.toString());
