@@ -11,16 +11,16 @@ const NEAR_GRANTEE_PRIVATE_KEY =
   "ed25519:35pK192Az9znHcMtHK2bGExuZV3QLRk5Ln1EpXpq4bf6FtU5twG4hneMqkzrGhARKdq54LavCFy9sprqemC72ZLs";
 const EVM_NODE_URL = "https://nodes.playground.idos.network";
 
+// Create the KeyPair using the static method
 const nearGranteeSigner = KeyPair.fromString(NEAR_GRANTEE_PRIVATE_KEY);
 
-const idosGrantee = await idOSGrantee.init({
-  chainType: "NEAR",
+const idOSGranteeInstance = await idOSGrantee.init({
   granteeSigner: nearGranteeSigner,
   recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
   nodeUrl: EVM_NODE_URL,
 });
 
-const encryptionPublicKey = idosGrantee.encryptionPublicKey;
+const encryptionPublicKey = idOSGranteeInstance.encryptionPublicKey;
 const lockTimeSpanSeconds = 3600; // one hour
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
@@ -31,7 +31,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
     return response.json({
       encryptionPublicKey,
       lockTimeSpanSeconds,
-      grantee: idosGrantee.grantee,
+      grantee: idOSGranteeInstance.address,
     });
   }
 
@@ -52,7 +52,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
 
   const { dataId } = body as { dataId: string };
   try {
-    return response.json(await idosGrantee.getSharedCredentialContentDecrypted(dataId));
+    return response.json(await idOSGranteeInstance.getSharedCredentialContentDecrypted(dataId));
   } catch (e) {
     console.error(e);
     return response.status(500).send(e.toString());
