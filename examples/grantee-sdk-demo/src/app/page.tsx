@@ -1,9 +1,12 @@
 import { idOSGranteeSDK } from "@idos-network/grantee-sdk-js";
 
-const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";
-const EVM_GRANTEE_PRIVATE_KEY = process.env.EVM_GRANTEE_PRIVATE_KEY ?? "";
-const GRANTEE_ADDRESS = process.env.OWNER_ADDRESS ?? "";
-const NODE_URL = process.env.EVM_NODE_URL ?? "";
+const ENCRYPTION_SECRET_KEY =
+  process.env.ENCRYPTION_SECRET_KEY ?? "j7IppyTqzOfKQ7PuF/lx7HpoDZBbiO2Jrdx1gYN/+8M=";
+const EVM_GRANTEE_PRIVATE_KEY =
+  process.env.EVM_GRANTEE_PRIVATE_KEY ??
+  "625d65aa6e91825b6f31fa90f4ae55ccb2051ff16b0c6574bad89ee98382be32";
+const GRANTEE_ADDRESS = process.env.OWNER_ADDRESS ?? "0x8Bf421D4fe039000981ee77163eF777718af68e3";
+const NODE_URL = process.env.EVM_NODE_URL ?? "https://nodes.playground.idos.network";
 const dbId = process.env.DB_ID ?? "";
 
 export default async function Home() {

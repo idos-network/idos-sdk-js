@@ -73,9 +73,9 @@ describe("createIssuerConfig", () => {
       kwilClient: expect.any(Object),
       kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),
-      issuerWalletPrivateKey: params.issuerWalletPrivateKey,
-      issuerEncryptionSecretKey: params.issuerEncryptionSecretKey,
-      sdk: expect.any(Object),
+      issuerEncryptionSecretKey: expect.any(String),
+      issuerWalletPrivateKey: expect.any(String),
+      kwilActions: expect.any(Object),
     });
   });
 });

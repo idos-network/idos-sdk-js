@@ -9,7 +9,7 @@ import { useAccount } from "wagmi";
 import {
   createCredentialByPermissionedIssuer,
   createCredentialByWriteGrant,
-  findMatchingCredentialRequest,
+  testGrant,
 } from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
@@ -134,8 +134,7 @@ export default function Home() {
 
   const handleFindMatchingCredentials = () => {
     startMatchingCredentialsTransition(async () => {
-      const randomCredentialId = crypto.randomUUID();
-      await findMatchingCredentialRequest(randomCredentialId); // @todo: pass credential id
+      const res = await testGrant(); // @todo: pass credential id
     });
   };
 

@@ -728,12 +728,18 @@ importers:
       '@idos-network/codecs':
         specifier: workspace:*
         version: link:../codecs
+      '@idos-network/cryptography':
+        specifier: workspace:*
+        version: link:../cryptography
       '@idos-network/grantee-sdk-js':
         specifier: workspace:*
         version: link:../grantee-sdk-js
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
+      '@idos-network/kwil-actions':
+        specifier: workspace:*
+        version: link:../kwil-actions
       '@idos-network/kwil-nep413-signer':
         specifier: workspace:*
         version: link:../kwil-nep413-signer

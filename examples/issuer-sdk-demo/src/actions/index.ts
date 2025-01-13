@@ -3,11 +3,11 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
+  checkGrantValidity,
   createCredentialByGrant,
   createCredentialPermissioned,
   createUser,
   editCredential,
-  findMatchingCredential,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -103,11 +103,13 @@ export async function createCredentialByWriteGrant(
   });
 }
 
-export async function findMatchingCredentialRequest(credentialId: string) {
+export const testGrant = async () => {
+  // @todo: pass grant id param
+  const testGrantDataId = "46f5647c-e93d-414b-9a19-3197a8844e51"; // will be provided by OE2
   const issuer = await getIssuerConfig();
-  const matchingCred = await findMatchingCredential(issuer, credentialId);
-  return matchingCred;
-}
+  const isValid = checkGrantValidity(issuer, testGrantDataId, testGrantDataId);
+  return isValid;
+};
 
 export async function createCredentialByPermissionedIssuer(
   userId: string,
