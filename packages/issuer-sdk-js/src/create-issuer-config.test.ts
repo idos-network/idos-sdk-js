@@ -1,5 +1,7 @@
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 
+import { base64Encode } from "@idos-network/codecs";
+import { ethers } from "ethers";
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createIssuerConfig } from "./index";
@@ -42,7 +44,10 @@ describe("createIssuerConfig", () => {
 
     const params = {
       nodeUrl: "http://mock-node-url",
+      dbid: "mock-dbid",
       signingKeyPair,
+      issuerWalletPrivateKey: ethers.Wallet.createRandom().privateKey,
+      issuerEncryptionSecretKey: base64Encode(nacl.box.keyPair().secretKey),
     };
 
     const result = await createIssuerConfig(params);
@@ -68,6 +73,9 @@ describe("createIssuerConfig", () => {
       kwilClient: expect.any(Object),
       kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),
+      issuerEncryptionSecretKey: expect.any(String),
+      issuerWalletPrivateKey: expect.any(String),
+      kwilActions: expect.any(Object),
     });
   });
 });

@@ -3,6 +3,7 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
+  checkGrantValidity,
   createCredentialByGrant,
   createCredentialPermissioned,
   createUser,
@@ -101,6 +102,14 @@ export async function createCredentialByWriteGrant(
     receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
+
+export const testGrant = async () => {
+  // @todo: pass grant id param
+  const testGrantDataId = "46f5647c-e93d-414b-9a19-3197a8844e51"; // will be provided by OE2
+  const issuer = await getIssuerConfig();
+  const isValid = checkGrantValidity(issuer, testGrantDataId, testGrantDataId);
+  return isValid;
+};
 
 export async function createCredentialByPermissionedIssuer(
   userId: string,

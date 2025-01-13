@@ -51,6 +51,8 @@
     "@idos-network/codecs": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@idos-network/kwil-nep413-signer": "workspace:*",
+    "@idos-network/kwil-actions": "workspace:*",
+    "@idos-network/cryptography": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@types/node": "^22.7.9",
     "release-it": "^17.0.0",
@@ -61,6 +63,7 @@
   "dependencies": {
     "@kwilteam/kwil-js": "0.7.1",
     "es-toolkit": "^1.23.0",
+    "ethers": "^6.13.5",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
   },

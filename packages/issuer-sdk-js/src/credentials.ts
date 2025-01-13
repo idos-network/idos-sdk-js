@@ -1,9 +1,18 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  sha256Hash,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/codecs";
+import { encryptContent } from "@idos-network/cryptography";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
+import { ethers } from "ethers";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, encryptContent, ensureEntityId } from "./internal";
+import { createActionInput, ensureEntityId } from "./internal";
 
 type UpdateablePublicNotes = {
   publicNotes: string;
@@ -43,8 +52,11 @@ const buildInsertableIDOSCredential = (
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
-  const content = base64Decode(
-    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
+
+  const content = encryptContent(
+    plaintextContent,
+    receiverEncryptionPublicKey,
+    ephemeralKeyPair.secretKey,
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -101,13 +113,102 @@ export async function createCredentialPermissioned(
   };
 }
 
+export const createIssuerCopy = async (
+  issuerConfig: IssuerConfig,
+  params: BaseCredentialParams & { originalCredentialId: string },
+) => {
+  const issuerKeyPair = nacl.box.keyPair.fromSecretKey(
+    base64Decode(issuerConfig.issuerEncryptionSecretKey),
+  );
+  const { issuerWalletPrivateKey } = issuerConfig;
+
+  await shareCredentialByGrant(issuerConfig, {
+    ...params,
+    lockedUntil: 0,
+    granteeAddress: new ethers.Wallet(issuerWalletPrivateKey).address,
+    receiverEncryptionPublicKey: issuerKeyPair.publicKey,
+    publicNotes: "",
+  });
+};
+
+export const insertGrantForEntity = async () => {
+  // @todo: if grant hash provided by an entity is valid, insert it into idOS grant table
+  throw new Error("Not implemented yet");
+};
+
+const getCredentialByGrantId = async (
+  issuerConfig: IssuerConfig,
+  grantId: string,
+): Promise<idOSCredential> => {
+  const { kwilActions } = issuerConfig;
+  const [relatedCredential] = await kwilActions.call<idOSCredential[]>({
+    name: "get_credential_shared",
+    inputs: {
+      id: grantId,
+    },
+  });
+  return relatedCredential;
+};
+
+const hashCredentialContent = (credentialContent: string) => {
+  const encodedContent = new TextEncoder().encode(credentialContent);
+  return hexEncode(sha256Hash(encodedContent), true);
+};
+
+const decryptContent = (
+  fullMessage: Uint8Array,
+  senderPublicKey: Uint8Array,
+  secretKey: Uint8Array,
+) => {
+  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+  const decrypted = nacl.box.open(message, nonce, senderPublicKey, secretKey);
+
+  if (decrypted === null) {
+    throw Error(
+      `Couldn't decrypt. ${JSON.stringify(
+        {
+          fullMessage: base64Encode(fullMessage),
+          message: base64Encode(message),
+          nonce: base64Encode(nonce),
+          senderPublicKey: base64Encode(senderPublicKey),
+        },
+        null,
+        2,
+      )}`,
+    );
+  }
+
+  return decrypted;
+};
+
+export const checkGrantValidity = async (
+  issuerConfig: IssuerConfig,
+  grantDataId: string,
+  grantHash: string,
+) => {
+  const credential = await getCredentialByGrantId(issuerConfig, grantDataId);
+  // fetch credential original content
+  const decryptedContent = utf8Decode(
+    decryptContent(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+      base64Decode(issuerConfig.issuerEncryptionSecretKey),
+    ),
+  );
+  const hashedContent = hashCredentialContent(decryptedContent as string);
+  return hashedContent === grantHash;
+};
+
 export async function createCredentialByGrant(
   issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
-
+  const issuerKeyPair = nacl.box.keyPair.fromSecretKey(
+    base64Decode(issuerConfig.issuerEncryptionSecretKey),
+  );
   await kwilClient.execute(
     {
       name: "add_credential_by_write_grant",
@@ -117,6 +218,12 @@ export async function createCredentialByGrant(
     kwilSigner,
     true,
   );
+
+  await createIssuerCopy(issuerConfig, {
+    ...params,
+    originalCredentialId: payload.id,
+    receiverEncryptionPublicKey: issuerKeyPair.secretKey,
+  });
 
   return {
     ...payload,
