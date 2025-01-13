@@ -1,0 +1,20 @@
+{
+  "name": "passporting-server",
+  "description": "idOS Passporting Server",
+  "version": "0.1.0",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.13.7",
+    "@idos-network/issuer-sdk-js": "workspace:*",
+    "hono": "^4.6.16"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1"
+  }
+}

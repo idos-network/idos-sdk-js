@@ -41,6 +41,9 @@ if (!chosenWallet) {
   });
 }
 
+const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+const network = import.meta.env.DEV ? "testnet" : "mainnet";
+
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -49,12 +52,6 @@ const connectWallet = {
   },
 
   NEAR: async () => {
-    const {
-      defaultContractId: contractId,
-      contractMethods: methodNames,
-      defaultNetwork: network,
-    } = idOS.near;
-
     const selector = await setupWalletSelector({
       network,
       modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
@@ -62,7 +59,7 @@ const connectWallet = {
 
     !selector.isSignedIn() &&
       (await new Promise((resolve) => {
-        const modal = setupModal(selector, { contractId, methodNames });
+        const modal = setupModal(selector, { contractId, methodNames: [] });
 
         // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
         // We observe that it triggers this callback before it's ready for a
@@ -181,7 +178,7 @@ const connectWallet = {
         if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
           window.open(`https://zapper.xyz/account/${address}`);
         } else if (address.match(/^\w+\.(near|testnet)$/i)) {
-          window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
+          window.open(`https://explorer.${network}.near.org/accounts/${address}`);
         }
       },
     });

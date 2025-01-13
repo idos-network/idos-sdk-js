@@ -148,31 +148,6 @@ This concept is very internal to the idOS nodes, and the right value gets automa
 
 Unless you know what you're doing (e.g., deploying a new idOS network with a Kwil schema that's not called `idos`), omit this field.
 
-#### Grant options (`evmGrantsOptions` and `nearGrantsOptions`)
-
-This is only relevant if you use `idos.grants.*` methods.
-
-In order for the SDK to know which access grants contract to use, we need to provide `evmGrantsOptions` or `nearGrantsOptions`, depending on which network the dApp is deployed on.
-
-The default values come from the [.env](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js/.env) file the SDK is built with. Assuming that file is available as a global `env` object, here are the default values for each options object:
-
-```js
-const idos = await idos.init({
-  enclaveOptions: {container: "#idos-container"},
-  evmGrantsOptions: {
-    contractAddress: env.VITE_IDOS_EVM_DEFAULT_CONTRACT_ADDRESS,
-    chainId: env.VITE_IDOS_EVM_DEFAULT_CHAIN_ID,
-  },
-  nearGrantsOptions: {
-    network: env.VITE_IDOS_NEAR_DEFAULT_NETWORK;
-    contractId: env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
-    rpcUrl: env.VITE_IDOS_NEAR_DEFAULT_RPC_URL;
-  },
-});
-```
-
-You can take a look at the current contract deployments on [github.com/idos-network/idos-access-grants](https://github.com/idos-network/idos-access-grants/blob/master/README.md#deployments).
-
 #### `enclaveOptions`
 
 So far, we've only used `container` from `enclaveOptions`. There are a few more fields that you can set:
@@ -422,12 +397,10 @@ const address = await signer.getAddress();
 ### NEAR signer setup
 
 ```js
+const contractId = process.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+const network = process.env.DEV ? "testnet" : "mainnet";
+
 const CHAIN_TYPE = "NEAR";
-const {
-  defaultContractId: contractId,
-  contractMethods: methodNames,
-  defaultNetwork: network,
-} = idOS.near;
 
 const selector = await setupWalletSelector({
   network,
@@ -436,7 +409,7 @@ const selector = await setupWalletSelector({
 
 !selector.isSignedIn() &&
   (await new Promise((resolve) => {
-    const modal = setupModal(selector, { contractId, methodNames });
+    const modal = setupModal(selector, { contractId, methodNames:[] });
 
     modal.on("onHide", resolve);
     modal.show();

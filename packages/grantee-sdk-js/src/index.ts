@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { Wallet } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
 import { idOSGrantee } from "./idOS-grantee.ts";
@@ -7,6 +7,8 @@ export class idOSGranteeSDK {
   constructor(private readonly grantee: idOSGrantee) {}
 
   static async init(
+    // @todo: not 100% sure if we want to keep this
+    // perhaps it is better to pass the signer directly from the outside
     chainType: "EVM" | "NEAR",
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
@@ -17,20 +19,20 @@ export class idOSGranteeSDK {
 
     switch (chainType) {
       case "EVM": {
-        const signer = new ethers.Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
+        const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
+
         grantee = await idOSGrantee.init({
-          chainType,
           granteeSigner: signer,
           recipientEncryptionPrivateKey,
           nodeUrl,
           dbId,
         });
+
         return new idOSGranteeSDK(grantee);
       }
       case "NEAR": {
         const signer = KeyPair.fromString(authPrivateKey);
         grantee = await idOSGrantee.init({
-          chainType,
           granteeSigner: signer,
           nodeUrl,
           recipientEncryptionPrivateKey,

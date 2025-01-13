@@ -1,0 +1,39 @@
+{
+  "name": "@idos-network/kwil-actions",
+  "version": "0.0.1",
+  "description": "A collection of kwil actions used by idOS SDK's.",
+  "homepage": "https://idos.network",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    "./create-kwil-client": "./src/create-kwil-client.ts",
+    "./create-kwil-signer": {
+      "types": "./src/create-kwil-signer.ts",
+      "import": "./src/create-kwil-signer.ts"
+    },
+    "./credentials": {
+      "types": "./src/credentials.ts",
+      "import": "./src/credentials.ts"
+    },
+    "./grants": {
+      "types": "./src/grants.ts",
+      "import": "./src/grants.ts"
+    },
+    "./user": {
+      "types": "./src/user.ts",
+      "import": "./src/user.ts"
+    }
+  },
+  "dependencies": {
+    "@kwilteam/kwil-js": "0.7.1",
+    "ethers": "^6.13.5",
+    "near-api-js": "3.0.4",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@idos-network/idos-sdk-types": "workspace:*",
+    "@idos-network/kwil-nep413-signer": "workspace:*",
+    "tiny-invariant": "^1.3.3"
+  }
+}
