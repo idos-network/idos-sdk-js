@@ -1,6 +1,6 @@
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner } from "@kwilteam/kwil-js";
-import { Wallet } from "ethers";
+import type { Wallet } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 
@@ -63,8 +63,7 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
       implicitAddressFromPublicKey(signer.getPublicKey().toString()),
     ];
   }
-
-  if (signer instanceof Wallet) {
+  if ("address" in signer) {
     return [new KwilSigner(signer, signer.address), signer.address];
   }
 
@@ -72,5 +71,5 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid `signer` type");
-  })(signer);
+  })(signer as unknown as never);
 }
