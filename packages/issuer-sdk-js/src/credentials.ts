@@ -206,9 +206,6 @@ export async function createCredentialByGrant(
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
-  const issuerKeyPair = nacl.box.keyPair.fromSecretKey(
-    base64Decode(issuerConfig.issuerEncryptionSecretKey),
-  );
   await kwilClient.execute(
     {
       name: "add_credential_by_write_grant",
@@ -222,7 +219,6 @@ export async function createCredentialByGrant(
   await createIssuerCopy(issuerConfig, {
     ...params,
     originalCredentialId: payload.id,
-    receiverEncryptionPublicKey: issuerKeyPair.secretKey,
   });
 
   return {
