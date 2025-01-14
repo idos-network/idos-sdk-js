@@ -107,7 +107,7 @@ export async function createCredentialPermissioned(
   };
 }
 
-export async function createCredentialByGrant(
+export async function createCredentialByWriteGrant(
   issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
@@ -130,15 +130,15 @@ export async function createCredentialByGrant(
   };
 }
 
-interface ShareCredentialByGrantParams extends BaseCredentialParams {
+interface ShareCredentialByWriteGrantParams extends BaseCredentialParams {
   granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
   hash: string;
 }
-export async function shareCredentialByGrant(
+export async function shareCredentialByWriteGrant(
   issuer_config: IssuerConfig,
-  params: ShareCredentialByGrantParams,
+  params: ShareCredentialByWriteGrantParams,
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
@@ -208,7 +208,7 @@ export async function createReusableCredential(
   const content = params.plaintextContent;
 
   // Create a credential for the given `recipientEncryptionPublicKey`.
-  const credentialForReceiver = await createCredentialByGrant(issuerConfig, params);
+  const credentialForReceiver = await createCredentialByWriteGrant(issuerConfig, params);
 
   // Calculate the hash of the `content` field of the params.
   // This is used to pass the `hash` field when sharing a credential by write grant.
@@ -220,7 +220,7 @@ export async function createReusableCredential(
   ).publicKey;
 
   // Create a credential for the issuer itself.
-  await shareCredentialByGrant(issuerConfig, {
+  await shareCredentialByWriteGrant(issuerConfig, {
     ...params,
     recipientEncryptionPublicKey,
     lockedUntil: 0,
