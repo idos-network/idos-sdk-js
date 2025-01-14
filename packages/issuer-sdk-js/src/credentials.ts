@@ -31,6 +31,7 @@ const buildUpdateablePublicNotes = (
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
+  content_hash?: string;
   public_notes_signature: string;
   broader_signature: string;
 };
@@ -41,11 +42,13 @@ const buildInsertableIDOSCredential = (
     publicNotes,
     plaintextContent,
     recipientEncryptionPublicKey,
+    contentHash,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     recipientEncryptionPublicKey: Uint8Array;
+    contentHash?: string;
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
@@ -59,8 +62,8 @@ const buildInsertableIDOSCredential = (
 
   return {
     user_id: userId,
+    content_hash: contentHash,
     content: base64Encode(content),
-
     public_notes,
     public_notes_signature,
 
@@ -134,7 +137,7 @@ interface ShareCredentialByWriteGrantParams extends BaseCredentialParams {
   granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
-  hash: string;
+  contentHash: string;
 }
 export async function shareCredentialByWriteGrant(
   issuer_config: IssuerConfig,
@@ -212,7 +215,7 @@ export async function createReusableCredential(
 
   // Calculate the hash of the `content` field of the params.
   // This is used to pass the `hash` field when sharing a credential by write grant.
-  const hash = hexEncodeSha256Hash(content);
+  const contentHash = hexEncodeSha256Hash(content);
 
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const recipientEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
@@ -225,7 +228,7 @@ export async function createReusableCredential(
     recipientEncryptionPublicKey,
     lockedUntil: 0,
     originalCredentialId: credentialForReceiver.id,
-    hash,
+    contentHash,
   });
 
   return credentialForReceiver;
