@@ -1,4 +1,10 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
@@ -25,6 +31,7 @@ const buildUpdateablePublicNotes = (
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
+  content_hash?: string;
   public_notes_signature: string;
   broader_signature: string;
 };
@@ -34,17 +41,19 @@ const buildInsertableIDOSCredential = (
     userId,
     publicNotes,
     plaintextContent,
-    receiverEncryptionPublicKey,
+    recipientEncryptionPublicKey,
+    contentHash,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
-    receiverEncryptionPublicKey: Uint8Array;
+    recipientEncryptionPublicKey: Uint8Array;
+    contentHash?: string;
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
   const content = base64Decode(
-    encryptContent(plaintextContent, receiverEncryptionPublicKey, ephemeralKeyPair.secretKey),
+    encryptContent(plaintextContent, recipientEncryptionPublicKey, ephemeralKeyPair.secretKey),
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -54,7 +63,7 @@ const buildInsertableIDOSCredential = (
   return {
     user_id: userId,
     content: base64Encode(content),
-
+    content_hash: contentHash,
     public_notes,
     public_notes_signature,
 
@@ -70,13 +79,13 @@ const buildInsertableIDOSCredential = (
   };
 };
 
-type BaseCredentialParams = {
+interface BaseCredentialParams {
   id?: string;
   userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
-  receiverEncryptionPublicKey: Uint8Array;
-};
+  recipientEncryptionPublicKey: Uint8Array;
+}
 
 export async function createCredentialPermissioned(
   issuerConfig: IssuerConfig,
@@ -101,7 +110,7 @@ export async function createCredentialPermissioned(
   };
 }
 
-export async function createCredentialByGrant(
+export async function createCredentialByWriteGrant(
   issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
@@ -124,14 +133,15 @@ export async function createCredentialByGrant(
   };
 }
 
-type ShareCredentialByGrantParams = BaseCredentialParams & {
+interface ShareCredentialByWriteGrantParams extends BaseCredentialParams {
   granteeAddress: string;
   lockedUntil: number;
   originalCredentialId: string;
-};
-export async function shareCredentialByGrant(
+  contentHash: string;
+}
+export async function shareCredentialByWriteGrant(
   issuer_config: IssuerConfig,
-  params: ShareCredentialByGrantParams,
+  params: ShareCredentialByWriteGrantParams,
 ): Promise<idOSCredential> {
   const { dbid, kwilClient, kwilSigner } = issuer_config;
   const extraEntries = {
@@ -164,10 +174,10 @@ export async function shareCredentialByGrant(
   };
 }
 
-type EditCredentialAsIssuerParams = {
+interface EditCredentialAsIssuerParams {
   publicNotesId: string;
   publicNotes: string;
-};
+}
 export async function editCredential(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
@@ -189,4 +199,37 @@ export async function editCredential(
   );
 
   return result;
+}
+
+interface CreateReusableCredentialParams extends BaseCredentialParams {
+  granteeAddress: string;
+}
+export async function createReusableCredential(
+  issuerConfig: IssuerConfig,
+  params: CreateReusableCredentialParams,
+) {
+  const content = params.plaintextContent;
+
+  // Create a credential for the given `recipientEncryptionPublicKey`.
+  const credentialForReceiver = await createCredentialByWriteGrant(issuerConfig, params);
+
+  // Calculate the hash of the `content` field of the params.
+  // This is used to pass the `hash` field when sharing a credential by write grant.
+  const contentHash = hexEncodeSha256Hash(content);
+
+  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
+  const recipientEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
+    issuerConfig.encryptionSecretKey,
+  ).publicKey;
+
+  // Create a credential for the issuer itself.
+  await shareCredentialByWriteGrant(issuerConfig, {
+    ...params,
+    recipientEncryptionPublicKey,
+    lockedUntil: 0,
+    originalCredentialId: credentialForReceiver.id,
+    contentHash,
+  });
+
+  return credentialForReceiver;
 }

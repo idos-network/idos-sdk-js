@@ -21,13 +21,15 @@ Create an issuer config with your secret key. This config will be used to intera
 ```js
 // issuer-config.js
 import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
-
+import * as Base64 from "@stablelib/base64";
 const signingKeyPair = nacl.sign.keyPair.fromSecretKey(ISSUER_SIGNING_SECRET_KEY);
+const encryptionSecretKey = Base64.decode(ISSUER_ENCRYPTION_SECRET_KEY);
 
 const issuerConfig = await createIssuerConfig({
   // To use a non-prod environment, pass in "nodes.playground.idos.network".
   nodeUrl: "https://nodes.idos.network/",
   signingKeyPair,
+  encryptionSecretKey
 });
 ```
 
@@ -209,7 +211,7 @@ const credentialPayload = {
   plaintextContent: Utf8Codec.encode(credentialContent),
 
   // The public encryption key of the user who is creating the credential. also passed as a Uint8Array.
-  receiverEncryptionPublicKey: Utf8Codec.encode(session.user.userEncryptionPublicKey),
+  recipientEncryptionPublicKey: Utf8Codec.encode(session.user.userEncryptionPublicKey),
 
    // These notes will be publicly disclosed and accessible without needing to decrypt the credential.
   publicNotes: JSON.stringify(credentialsPublicNotes),
@@ -253,7 +255,7 @@ import issuerConfig from "./issuer-config.js";
 await shareCredentialByGrant(issuerConfig,{
   ...credentialPayload,
   grantee: "GRANTEE_WALLET_ADDRESS",
-  receiverEncryptionPublicKey: new Uint8Array([/* grantee public encryption key (in bytes) */]),
+  recipientEncryptionPublicKey: new Uint8Array([/* grantee public encryption key (in bytes) */]),
   lockedUntil: Math.floor(Date.now() / 1000) + 1000,
   originalCredentialId: credentialPayload.id,
 });
