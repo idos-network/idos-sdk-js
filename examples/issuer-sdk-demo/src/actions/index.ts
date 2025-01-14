@@ -3,10 +3,10 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
-  createCredentialByGrant,
   createCredentialPermissioned,
   createUser,
   editCredential,
+  createCredentialByWriteGrant as kwilCreateCredentialByWriteGrant,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -94,7 +94,7 @@ export async function createCredentialByWriteGrant(
   const issuer = await getIssuerConfig();
   const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
-  await createCredentialByGrant(issuer, {
+  await kwilCreateCredentialByWriteGrant(issuer, {
     userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),

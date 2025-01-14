@@ -62,8 +62,8 @@ const buildInsertableIDOSCredential = (
 
   return {
     user_id: userId,
-    content_hash: contentHash,
     content: base64Encode(content),
+    content_hash: contentHash,
     public_notes,
     public_notes_signature,
 
