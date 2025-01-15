@@ -1,6 +1,10 @@
 import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
+import { base64Decode } from "@idos-network/codecs";
+import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
 import { Hono } from "hono";
+import { env } from "hono/adapter";
+import nacl from "tweetnacl";
 import z from "zod";
 
 const app = new Hono();
@@ -14,34 +18,49 @@ app.post(
   zValidator(
     "json",
     z.object({
-      data_id: z.string().uuid(),
-      ag_owner_wallet_identifier: z.string(),
-      ag_grantee_wallet_identifier: z.string(),
-      signature: z.string(),
-      locked_until: z.literal(0),
-      hash: z.string(),
+      dag_data_id: z.string().uuid(),
+      dag_owner_wallet_identifier: z.string(),
+      dag_grantee_wallet_identifier: z.string(),
+      dag_signature: z.string(),
+      dag_locked_until: z.number(),
+      dag_content_hash: z.string(),
     }),
   ),
   async (c) => {
-    // Validate the incoming `dAG` payload.
+    const { KWIL_NODE_URL, ISSUER_SIGNING_SECRET_KEY, ISSUER_ENCRYPTION_SECRET_KEY } = env<{
+      KWIL_NODE_URL: string;
+      ISSUER_SIGNING_SECRET_KEY: string;
+      ISSUER_ENCRYPTION_SECRET_KEY: string;
+    }>(c);
+    const issuerConfig = await createIssuerConfig({
+      nodeUrl: KWIL_NODE_URL,
+      signingKeyPair: nacl.sign.keyPair.fromSecretKey(base64Decode(ISSUER_SIGNING_SECRET_KEY)),
+      encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
+    });
+
+    // Validate the incoming `DAG` payload.
     const {
-      data_id,
-      ag_owner_wallet_identifier,
-      ag_grantee_wallet_identifier,
-      signature,
-      locked_until,
-      hash,
+      dag_data_id,
+      dag_owner_wallet_identifier,
+      dag_grantee_wallet_identifier,
+      dag_signature,
+      dag_locked_until,
+      dag_content_hash,
     } = c.req.valid("json");
 
-    // @todo: fetch the associated `Credential` from the idOS by `data_id`.
+    // Transmit the `DAG` to the idOS.
+    await createAccessGrantFromDAG(issuerConfig, {
+      dag_data_id,
+      dag_owner_wallet_identifier,
+      dag_grantee_wallet_identifier,
+      dag_signature,
+      dag_locked_until,
+      dag_content_hash,
+    });
 
-    // @todo: check that the `dAG` matches the hash of the retrieved `Credential`.
-
-    // @todo: transmit the `dAG` to the idOS.
-
-    return c.text(
-      `🚀 ${data_id} ${ag_owner_wallet_identifier} ${ag_grantee_wallet_identifier} ${signature} ${locked_until} ${hash}`,
-    );
+    return c.json({
+      success: true,
+    });
   },
 );
 
