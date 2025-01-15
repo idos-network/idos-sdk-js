@@ -17,10 +17,18 @@ export function createActionInput(params: Record<string, any>): Utils.ActionInpu
   return Utils.ActionInput.fromObject(prefixedObject);
 }
 
-export function encryptContent(message: Uint8Array, receiverPublicKey: Uint8Array): string {
+export function encryptContent(
+  message: Uint8Array,
+  recipientEncryptionPublicKey: Uint8Array,
+  senderEncryptionSecretKey: Uint8Array,
+): string {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const ephemeralKeyPair = nacl.box.keyPair();
-  const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
+  const encrypted = nacl.box(
+    message,
+    nonce,
+    recipientEncryptionPublicKey,
+    senderEncryptionSecretKey,
+  );
 
   if (encrypted === null)
     throw Error(
@@ -28,7 +36,7 @@ export function encryptContent(message: Uint8Array, receiverPublicKey: Uint8Arra
         {
           message: base64Encode(message),
           nonce: base64Encode(nonce),
-          receiverPublicKey: base64Encode(receiverPublicKey),
+          receiverPublicKey: base64Encode(recipientEncryptionPublicKey),
         },
         null,
         2,

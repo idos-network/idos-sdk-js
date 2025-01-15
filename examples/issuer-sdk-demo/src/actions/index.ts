@@ -3,11 +3,10 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
-  checkGrantValidity,
-  createCredentialByGrant,
   createCredentialPermissioned,
   createUser,
   editCredential,
+  createCredentialByWriteGrant as kwilCreateCredentialByWriteGrant,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -95,11 +94,11 @@ export async function createCredentialByWriteGrant(
   const issuer = await getIssuerConfig();
   const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
-  await createCredentialByGrant(issuer, {
+  await kwilCreateCredentialByWriteGrant(issuer, {
     userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
 
@@ -107,8 +106,9 @@ export const testGrant = async () => {
   // @todo: pass grant id param
   const testGrantDataId = "46f5647c-e93d-414b-9a19-3197a8844e51"; // will be provided by OE2
   const issuer = await getIssuerConfig();
-  const isValid = checkGrantValidity(issuer, testGrantDataId, testGrantDataId);
-  return isValid;
+  return false;
+  // const isValid = checkGrantValidity(issuer, testGrantDataId, testGrantDataId);
+  // return isValid;
 };
 
 export async function createCredentialByPermissionedIssuer(
@@ -121,7 +121,7 @@ export async function createCredentialByPermissionedIssuer(
     userId,
     plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    receiverEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
 
