@@ -353,6 +353,26 @@ export class Data {
     };
   }
 
+  async createAcceessGrantSignature(
+    ownerWalletAddress: string,
+    grantInfo: {
+      granteeAddress: string;
+      lockedUntil: number;
+      credentialId: string;
+    },
+  ): Promise<unknown> {
+    const credential = await this.get<idOSCredential>("credentials", grantInfo?.credentialId);
+    const contentHash = this.hashContent(credential?.content!);
+
+    return await this.kwilWrapper.call("dag_message", {
+      dag_owner_wallet_identifier: ownerWalletAddress,
+      dag_grantee_wallet_identifier: grantInfo?.granteeAddress,
+      dag_data_id: credential?.id!,
+      dag_locked_until: grantInfo?.lockedUntil,
+      dag_content_hash: contentHash,
+    });
+  }
+
   async share(
     tableName: string,
     recordId: string,

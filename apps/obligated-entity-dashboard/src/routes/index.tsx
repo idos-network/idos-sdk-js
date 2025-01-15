@@ -33,7 +33,7 @@ import { changeCase, openImageInNewTab } from "@/utils";
 
 import { useIdOS } from "@/idOS.provider";
 import { useToggle } from "@uidotdev/usehooks";
-import { useSignMessage } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -265,6 +265,7 @@ const CredentialCard = ({
   const publicFields = Object.entries(safeParse(credential.public_notes)) as [string, string][];
   const [loading, setLoading] = useState(false);
   const { signMessageAsync } = useSignMessage();
+  const { address: ownerAddress } = useAccount();
 
   const signMessage = async () => {
     const message = `Sign this message to confirm that you want to grant this app access to this credential.\nHere's a unique nonce: ${crypto.randomUUID()}`;
@@ -282,6 +283,13 @@ const CredentialCard = ({
   const handleGrantAccess = async (credentialId: string) => {
     setLoading(true);
     try {
+      const messageToSign = await idos.data.createAcceessGrantSignature(ownerAddress as string, {
+        credentialId,
+        lockedUntil: Math.floor(Date.now() / 1000) + 10,
+        granteeAddress: "0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42",
+      });
+      console.log({ messageToSign }); // @todo: remove log and send signed message to OE1 BE
+
       const signature = await signMessage();
       const accessGrant = await idos.data.shareCredential(
         credentialId,
