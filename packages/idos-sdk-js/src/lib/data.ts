@@ -314,8 +314,11 @@ export class Data {
       lockedUntil: number;
     },
     synchronous?: boolean,
-  ): Promise<{ id: string }> {
+  ): Promise<idOSGrant> {
     const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
+    const hash = await this.hashContent(originalCredential.content);
+
+    const id = crypto.randomUUID();
 
     const insertableCredential = await this.#buildInsertableIDOSCredential(
       originalCredential.user_id,
@@ -325,8 +328,7 @@ export class Data {
       grantInfo,
     );
 
-    const id = crypto.randomUUID();
-
+    // @warning: this action isn't deployed yet comment it before usage
     await this.kwilWrapper.execute(
       "share_credential_without_ag",
       [
@@ -341,7 +343,14 @@ export class Data {
       synchronous,
     );
 
-    return { id };
+    return {
+      id,
+      ag_grantee_wallet_identifier: grantInfo?.granteeAddress!,
+      locked_until: grantInfo?.lockedUntil!,
+      ag_owner_user_id: "",
+      data_id: originalCredential.id!,
+      hash,
+    };
   }
 
   async share(
@@ -421,10 +430,14 @@ export class Data {
     });
   }
 
+  hashContent(content: string) {
+    const encodedContent = new TextEncoder().encode(content);
+    return hexEncode(sha256Hash(encodedContent), true);
+  }
+
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
-    const encodedContent = new TextEncoder().encode(credential.content);
-    return hexEncode(sha256Hash(encodedContent), true);
+    return this.hashContent(credential.content);
   }
 
   /**
