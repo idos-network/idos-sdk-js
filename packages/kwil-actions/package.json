@@ -27,6 +27,10 @@
     "./user": {
       "types": "./src/user.ts",
       "import": "./src/user.ts"
+    },
+    "./wallets": {
+      "types": "./src/wallets.ts",
+      "import": "./src/wallets.ts"
     }
   },
   "dependencies": {
