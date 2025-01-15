@@ -52,8 +52,10 @@ const buildInsertableIDOSCredential = (
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
-  const content = base64Decode(
-    encryptContent(plaintextContent, recipientEncryptionPublicKey, ephemeralKeyPair.secretKey),
+  const content = encryptContent(
+    plaintextContent,
+    recipientEncryptionPublicKey,
+    ephemeralKeyPair.secretKey,
   );
 
   const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
@@ -232,4 +234,37 @@ export async function createReusableCredential(
   });
 
   return credentialForReceiver;
+}
+
+export async function getCredentialIdByContentHash(
+  issuerConfig: IssuerConfig,
+  contentHash: string,
+): Promise<string | null> {
+  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+
+  const response = await kwilClient.call(
+    {
+      name: "get_sibling_credential_id",
+      dbid,
+      inputs: [createActionInput({ content_hash: contentHash })],
+    },
+    kwilSigner,
+  );
+
+  return response?.data?.result as string | null;
+}
+
+export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {
+  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+
+  const response = await kwilClient.call(
+    {
+      name: "get_credential_shared",
+      dbid,
+      inputs: [createActionInput({ id })],
+    },
+    kwilSigner,
+  );
+
+  return response?.data?.result as idOSCredential | null;
 }

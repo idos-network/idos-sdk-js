@@ -35,6 +35,10 @@
     "./credentials": {
       "types": "./dist/credentials.d.ts",
       "import": "./dist/credentials.js"
+    },
+    "./grants": {
+      "types": "./dist/grants.d.ts",
+      "import": "./dist/grants.js"
     }
   },
   "scripts": {
