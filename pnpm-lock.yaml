@@ -320,12 +320,24 @@ importers:
       '@hono/node-server':
         specifier: ^1.13.7
         version: 1.13.7(hono@4.6.16)
+      '@hono/zod-validator':
+        specifier: ^0.4.2
+        version: 0.4.2(hono@4.6.16)(zod@3.24.1)
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../../packages/codecs
       '@idos-network/issuer-sdk-js':
         specifier: workspace:*
         version: link:../../packages/issuer-sdk-js
       hono:
         specifier: ^4.6.16
         version: 4.6.16
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
+      zod:
+        specifier: ^3.24.1
+        version: 3.24.1
     devDependencies:
       '@types/node':
         specifier: ^20.11.17
@@ -2043,6 +2055,12 @@ packages:
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: ^4
+
+  '@hono/zod-validator@0.4.2':
+    resolution: {integrity: sha512-1rrlBg+EpDPhzOV4hT9pxr5+xDVmKuz6YJl+la7VCwK6ass5ldyKm5fD+umJdV2zhHD6jROoCCv8NbTwyfhT0g==}
+    peerDependencies:
+      hono: '>=3.9.0'
+      zod: ^3.19.1
 
   '@iarna/toml@2.2.5':
     resolution: {integrity: sha512-trnsAYxU3xnS1gPHPyU961coFyLkh4gAD/0zQ5mymY4yOZ+CYvsPqUbOFSw0aDM4y0tV7tiFxL/1XfXPNC6IPg==}
@@ -11036,6 +11054,11 @@ snapshots:
   '@hono/node-server@1.13.7(hono@4.6.16)':
     dependencies:
       hono: 4.6.16
+
+  '@hono/zod-validator@0.4.2(hono@4.6.16)(zod@3.24.1)':
+    dependencies:
+      hono: 4.6.16
+      zod: 3.24.1
 
   '@iarna/toml@2.2.5': {}
 
