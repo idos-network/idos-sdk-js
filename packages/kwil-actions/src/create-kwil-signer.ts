@@ -1,6 +1,6 @@
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner } from "@kwilteam/kwil-js";
-import { Wallet } from "ethers";
+import type { Wallet } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 
@@ -64,7 +64,7 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
     ];
   }
 
-  if (signer instanceof Wallet) {
+  if ("address" in signer) {
     return [new KwilSigner(signer, signer.address), signer.address];
   }
 
