@@ -9,9 +9,15 @@
     "test:e2e": "playwright test"
   },
   "author": "",
+  "dependencies": {
+    "@synthetixio/synpress-cache": "^0.0.4",
+    "@synthetixio/synpress-metamask": "^0.0.4"
+  },
   "devDependencies": {
-    "@playwright/test": "1.44",
-    "@synthetixio/synpress": "4.0.0-alpha.7",
+    "@playwright/test": "^1.49.1",
+    "playwright-core": "^1.49.1",
+    "playwright-test-coverage": "^1.2.12",
+    "@synthetixio/synpress": "^4.0.3",
     "@types/node": "^20.10.5"
   }
 }
