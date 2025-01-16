@@ -15,7 +15,7 @@ export function WalletConnector() {
     return (
       <Button
         variant="faded"
-        onClick={() => {
+        onPress={() => {
           disconnect();
           clientSDK?.enclave.reset();
         }}
@@ -29,7 +29,7 @@ export function WalletConnector() {
     <Button
       variant="bordered"
       isLoading={isPending}
-      onClick={() =>
+      onPress={() =>
         connect({
           connector: injected(),
         })

@@ -6,7 +6,11 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
-import { createCredentialByPermissionedIssuer, createCredentialByWriteGrant } from "@/actions";
+import {
+  createCredentialByPermissionedIssuer,
+  createCredentialByWriteGrant,
+  createReusableCredential,
+} from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
 import { useSdkStore } from "@/stores/sdk";
@@ -26,6 +30,9 @@ export default function Home() {
   const [isPendingGrantedCreateCredentialRequest, startGrantedCredentialRequestTransition] =
     useTransition();
 
+  const [isPendingCreateReusableCredentialRequest, startCreateReusableCredentialRequestTransition] =
+    useTransition();
+
   const [credentials, setCredentials] = useState<idOSCredential[]>([]);
 
   useEffect(() => {
@@ -43,6 +50,10 @@ export default function Home() {
             container: "#idOS",
           },
         });
+
+        // TESTING PURPOSES ONLY
+        Object.assign(window, { SDK: _instance });
+
         const _hasProfile = await _instance.hasProfile(String(address));
 
         if (!_hasProfile) {
@@ -158,6 +169,18 @@ export default function Home() {
     });
   };
 
+  const handleCreateReusableCredential = () => {
+    startCreateReusableCredentialRequestTransition(async () => {
+      const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
+
+      await createReusableCredential(
+        String(clientSDK.auth.currentUser.userId),
+        issuerAddress,
+        clientSDK.auth.currentUser.currentUserPublicKey as string,
+      );
+    });
+  };
+
   const onCredentialsRefresh = async () => {
     const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
     setCredentials(_credentials);
@@ -179,11 +202,10 @@ export default function Home() {
       </div>
       <div className="flex w-full max-w-screen-sm flex-col items-center justify-center gap-6 py-4">
         <p>Request a credential:</p>
-        <div className="flex w-full flex-col gap-5 lg:flex-row">
+        <div className="flex w-full flex-col items-stretch gap-5">
           <Button
             color="default"
             variant="faded"
-            className="lg:flex-1"
             onPress={handleCreateCredential}
             isLoading={isPendingCreateCredentialRequest}
           >
@@ -192,11 +214,19 @@ export default function Home() {
           <Button
             color="secondary"
             variant="flat"
-            className="lg:flex-1"
             onPress={handleCreateGrantedCredential}
             isLoading={isPendingGrantedCreateCredentialRequest}
           >
             Via Write Grant
+          </Button>
+
+          <Button
+            color="secondary"
+            variant="flat"
+            onPress={handleCreateReusableCredential}
+            isLoading={isPendingCreateReusableCredentialRequest}
+          >
+            Create a reusable credential (OE1)
           </Button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   createUser,
   editCredential,
   createCredentialByWriteGrant as kwilCreateCredentialByWriteGrant,
+  createReusableCredential as kwilCreateReusableCredential,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -125,5 +126,22 @@ export async function revokeCredentialById(id: string) {
       ...publicNotes,
       status: "revoked",
     }),
+  });
+}
+
+export async function createReusableCredential(
+  userId: string,
+  granteeAddress: string,
+  userEncryptionPublicKey: string,
+) {
+  const issuer = await getIssuerConfig();
+
+  await kwilCreateReusableCredential(issuer, {
+    id: crypto.randomUUID(),
+    userId,
+    plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
+    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+    granteeAddress,
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }
