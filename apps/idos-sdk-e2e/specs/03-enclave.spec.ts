@@ -1,6 +1,6 @@
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
-import basicSetup from "../test/wallet-setup/wallet-setup.setup";
+import basicSetup from "../wallet-setup/basic.setup";
 
 // @todo: This should be created from the sdk instead of relying on hardcoded values.
 const credentialContent = process.env.CREDENTIAL_CONTENT as string;
