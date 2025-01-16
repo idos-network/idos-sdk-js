@@ -13,7 +13,7 @@ export interface idOSCredential {
   public_notes: string;
   content: string;
   encryptor_public_key: string;
-  hash?: string;
+  content_hash?: string;
 }
 export interface idOSWallet {
   id: string;
@@ -38,5 +38,5 @@ export interface idOSGrant {
   ag_grantee_wallet_identifier: string;
   data_id: string;
   locked_until: number;
-  hash?: string;
+  content_hash?: string;
 }

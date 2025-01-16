@@ -1,4 +1,4 @@
-import { base64Encode } from "@idos-network/codecs";
+import { base64Encode, hexEncodeSha256Hash } from "@idos-network/codecs";
 import { Utils } from "@kwilteam/kwil-js";
 import nacl from "tweetnacl";
 
@@ -50,27 +50,23 @@ export function encryptContent(
   return fullMessage;
 }
 
-export function decryptContent(
-  message: Uint8Array,
-  senderEncryptionPublicKey: Uint8Array,
-  recipientEncryptionSecretKey: Uint8Array,
-) {
-  const nonce = message.slice(0, nacl.box.nonceLength);
-
-  const decrypted = nacl.box.open(
-    message.slice(nacl.box.nonceLength, message.length),
-    nonce,
-    senderEncryptionPublicKey,
-    recipientEncryptionSecretKey,
-  );
+export const decryptContent = (
+  fullMessage: Uint8Array,
+  senderPublicKey: Uint8Array,
+  secretKey: Uint8Array,
+) => {
+  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
+  const decrypted = nacl.box.open(message, nonce, senderPublicKey, secretKey);
 
   if (decrypted === null) {
     throw Error(
       `Couldn't decrypt. ${JSON.stringify(
         {
+          fullMessage: base64Encode(fullMessage),
           message: base64Encode(message),
           nonce: base64Encode(nonce),
-          senderEncryptionPublicKey: base64Encode(senderEncryptionPublicKey),
+          senderPublicKey: base64Encode(senderPublicKey),
         },
         null,
         2,
@@ -79,4 +75,9 @@ export function decryptContent(
   }
 
   return decrypted;
+};
+
+export function hashText(credentialContent: string) {
+  const encodedContent = new TextEncoder().encode(credentialContent);
+  return hexEncodeSha256Hash(encodedContent);
 }

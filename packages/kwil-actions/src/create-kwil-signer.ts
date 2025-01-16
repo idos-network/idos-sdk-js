@@ -71,5 +71,5 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid `signer` type");
-  })(signer as unknown as never);
+  })(signer);
 }

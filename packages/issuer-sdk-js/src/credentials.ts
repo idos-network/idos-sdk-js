@@ -3,7 +3,6 @@ import {
   base64Encode,
   hexEncode,
   hexEncodeSha256Hash,
-  sha256Hash,
   utf8Decode,
   utf8Encode,
 } from "@idos-network/codecs";
@@ -11,7 +10,13 @@ import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, encryptContent, ensureEntityId } from "./internal";
+import {
+  createActionInput,
+  decryptContent,
+  encryptContent,
+  ensureEntityId,
+  hashText,
+} from "./internal";
 
 type UpdateablePublicNotes = {
   publicNotes: string;
@@ -114,15 +119,15 @@ export async function createCredentialPermissioned(
   };
 }
 
-export const insertGrantForEntity = async () => {
+export async function insertGrantForEntity() {
   // @todo: if grant hash provided by an entity is valid, insert it into idOS grant table
   throw new Error("Not implemented yet");
-};
+}
 
-const getCredentialByGrantId = async (
+async function getSharedCredentialById(
   issuerConfig: IssuerConfig,
   grantId: string,
-): Promise<idOSCredential> => {
+): Promise<idOSCredential> {
   const { kwilClient, dbid, kwilSigner } = issuerConfig;
 
   const [relatedCredential] = (await kwilClient.call(
@@ -138,46 +143,14 @@ const getCredentialByGrantId = async (
     kwilSigner,
   )) as unknown as idOSCredential[];
   return relatedCredential;
-};
+}
 
-const hashCredentialContent = (credentialContent: string) => {
-  const encodedContent = new TextEncoder().encode(credentialContent);
-  return hexEncode(sha256Hash(encodedContent), true);
-};
-
-const decryptContent = (
-  fullMessage: Uint8Array,
-  senderPublicKey: Uint8Array,
-  secretKey: Uint8Array,
-) => {
-  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-  const decrypted = nacl.box.open(message, nonce, senderPublicKey, secretKey);
-
-  if (decrypted === null) {
-    throw Error(
-      `Couldn't decrypt. ${JSON.stringify(
-        {
-          fullMessage: base64Encode(fullMessage),
-          message: base64Encode(message),
-          nonce: base64Encode(nonce),
-          senderPublicKey: base64Encode(senderPublicKey),
-        },
-        null,
-        2,
-      )}`,
-    );
-  }
-
-  return decrypted;
-};
-
-export const checkGrantValidity = async (
+export async function checkGrantValidity(
   issuerConfig: IssuerConfig,
   grantDataId: string,
   grantHash: string,
-) => {
-  const credential = await getCredentialByGrantId(issuerConfig, grantDataId);
+): Promise<boolean> {
+  const credential = await getSharedCredentialById(issuerConfig, grantDataId);
   // fetch credential original content
   const decryptedContent = utf8Decode(
     decryptContent(
@@ -186,9 +159,9 @@ export const checkGrantValidity = async (
       issuerConfig.encryptionSecretKey,
     ),
   );
-  const hashedContent = hashCredentialContent(decryptedContent as string);
+  const hashedContent = hashText(decryptedContent);
   return hashedContent === grantHash;
-};
+}
 
 export async function createCredentialByWriteGrant(
   issuerConfig: IssuerConfig,
