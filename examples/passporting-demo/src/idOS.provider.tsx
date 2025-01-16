@@ -16,7 +16,7 @@ import { useEthersSigner } from "./wagmi.config";
 export const idOSContext = createContext<idOS>(null!);
 export const useIdOS = () => useContext(idOSContext);
 
-export function Provider({ children }: PropsWithChildren) {
+export function IDOSProvider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
   const initialised = useRef(false);
 

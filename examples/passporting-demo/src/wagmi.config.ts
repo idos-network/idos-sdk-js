@@ -3,20 +3,16 @@ import { useMemo } from "react";
 import type { Account, Client } from "viem";
 import { http, type Config, type Transport, createConfig, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
-import { injected, walletConnect } from "wagmi/connectors";
+import { injected } from "wagmi/connectors";
 
 export const chains = [mainnet, sepolia] as const;
 
 export const injectedConnector = injected();
 
-export const walletConnectConnector = walletConnect({
-  projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID,
-});
-
 export function getConfig() {
   return createConfig({
     chains,
-    connectors: [injectedConnector, walletConnectConnector],
+    connectors: [injectedConnector],
     transports: {
       [mainnet.id]: http(),
       [sepolia.id]: http(),

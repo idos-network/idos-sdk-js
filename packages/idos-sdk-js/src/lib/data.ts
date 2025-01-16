@@ -314,11 +314,8 @@ export class Data {
       lockedUntil: number;
     },
     synchronous?: boolean,
-  ): Promise<idOSGrant> {
+  ): Promise<{ id: string }> {
     const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
-    const hash = await this.hashContent(originalCredential.content);
-
-    const id = crypto.randomUUID();
 
     const insertableCredential = await this.#buildInsertableIDOSCredential(
       originalCredential.user_id,
@@ -328,7 +325,8 @@ export class Data {
       grantInfo,
     );
 
-    // @warning: this action isn't deployed yet comment it before usage
+    const id = crypto.randomUUID();
+
     await this.kwilWrapper.execute(
       "share_credential_without_ag",
       [
@@ -343,34 +341,7 @@ export class Data {
       synchronous,
     );
 
-    return {
-      id,
-      ag_grantee_wallet_identifier: grantInfo?.granteeAddress!,
-      locked_until: grantInfo?.lockedUntil!,
-      ag_owner_user_id: "",
-      data_id: originalCredential.id!,
-      hash,
-    };
-  }
-
-  async getAccessGrantSignatureMsg(
-    ownerWalletAddress: string,
-    grantInfo: {
-      granteeAddress: string;
-      lockedUntil: number;
-      credentialId: string;
-    },
-  ): Promise<unknown> {
-    const credential = await this.get<idOSCredential>("credentials", grantInfo?.credentialId);
-    const contentHash = this.hashContent(credential?.content!);
-
-    return await this.kwilWrapper.call("dag_message", {
-      dag_owner_wallet_identifier: ownerWalletAddress,
-      dag_grantee_wallet_identifier: grantInfo?.granteeAddress,
-      dag_data_id: credential?.id!,
-      dag_locked_until: grantInfo?.lockedUntil,
-      dag_content_hash: contentHash,
-    });
+    return { id };
   }
 
   async share(
@@ -450,14 +421,10 @@ export class Data {
     });
   }
 
-  hashContent(content: string) {
-    const encodedContent = new TextEncoder().encode(content);
-    return hexEncode(sha256Hash(encodedContent), true);
-  }
-
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
-    return this.hashContent(credential.content);
+    const encodedContent = new TextEncoder().encode(credential.content);
+    return hexEncode(sha256Hash(encodedContent), true);
   }
 
   /**

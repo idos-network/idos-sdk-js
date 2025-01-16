@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui";
-import { Provider } from "@/idOS.provider";
-import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 import {
   Center,
   Container,
@@ -9,6 +6,7 @@ import {
   HStack,
   Heading,
   Image,
+  Show,
   Text,
   chakra,
 } from "@chakra-ui/react";
@@ -18,6 +16,10 @@ import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
+
+import { Button } from "@/components/ui";
+import { IDOSProvider } from "@/idOS.provider";
+import { injectedConnector } from "@/wagmi.config";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -37,18 +39,14 @@ function ConnectWallet() {
   return (
     <Center h="100dvh" flexDirection="column" gap="4">
       <Heading fontSize="xl">Connect your wallet to continue</Heading>
-      {isPending ? (
-        <>
-          <Button loading={true}> Waiting wallet </Button>
-        </>
-      ) : (
-        <>
-          <Button onClick={() => connect({ connector: injectedConnector })}>Browser wallet</Button>
-          <Button onClick={() => connect({ connector: walletConnectConnector })}>
-            WalletConnect
-          </Button>
-        </>
-      )}
+      <Button
+        minW={225}
+        loading={isPending}
+        loadingText="Waiting Wallet"
+        onClick={() => connect({ connector: injectedConnector })}
+      >
+        Connect your Browser wallet
+      </Button>
     </Center>
   );
 }
@@ -81,21 +79,21 @@ function RootComponent() {
             <Link to="/">
               <HStack gap="2">
                 <Image src="/logo.svg" alt="idOS" width="10" height="10" />
-                <Text fontSize="lg">OE Dashboard</Text>
+                <Text fontSize="lg">idOS Passporting Demo</Text>
               </HStack>
             </Link>
-            {isConnected ? <Button onClick={() => disconnect()}>Disconnect</Button> : null}
+            <Show when={isConnected}>
+              <Button onClick={() => disconnect()}>Disconnect</Button>
+            </Show>
           </Flex>
         </Container>
       </chakra.header>
       <chakra.main paddingY="6">
-        <Provider>
+        <IDOSProvider>
           <Outlet />
-        </Provider>
+        </IDOSProvider>
       </chakra.main>
-      <chakra.div id="idos-root">
-        <chakra.div id="idOS-enclave" />
-      </chakra.div>
+      <chakra.div id="idOS-enclave" hidden />
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <TanStackRouterDevtools position="bottom-right" />
     </Grid>
