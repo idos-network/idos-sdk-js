@@ -283,7 +283,7 @@ const CredentialCard = ({
   const handleGrantAccess = async (credentialId: string) => {
     setLoading(true);
     try {
-      const messageToSign = await idos.data.createAcceessGrantSignature(ownerAddress as string, {
+      const messageToSign = await idos.data.getAccessGrantSignatureMsg(ownerAddress as string, {
         credentialId,
         lockedUntil: Math.floor(Date.now() / 1000) + 10,
         granteeAddress: "0xeDC73bFC1c4E748b58ea12e7AB920dc4FccE0A42",

@@ -353,7 +353,7 @@ export class Data {
     };
   }
 
-  async createAcceessGrantSignature(
+  async getAccessGrantSignatureMsg(
     ownerWalletAddress: string,
     grantInfo: {
       granteeAddress: string;

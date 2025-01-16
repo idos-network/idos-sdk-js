@@ -1,14 +1,8 @@
-# Dashboard Other Entities
+# Demo Dashboard for Obliged Entities
 
 This dashboard is going to be used by other obligated entities to list users's credentials and grant access to them.
 
-Deployed at <https://dashboard-for-dapps.vercel.app/>.
-
-> 🛑 DANGER 🛑
->
-> This is a very bare-bones application, and it will ask for your encryption secret. This is only suitable for development, and not for production use.
->
-> If you want to use this app for production data, we encourage you to fork it and implement content decryption in a way that's compliant with your threat model.
+Deployed at <https://obligated-entity-dashboard.vercel.app/>.
 
 ## Using a non-browser wallet
 

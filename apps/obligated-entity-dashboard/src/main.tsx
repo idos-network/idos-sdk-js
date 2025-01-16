@@ -1,6 +1,4 @@
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
-import { QueryClient } from "@tanstack/react-query";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -25,10 +23,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const persister = createSyncStoragePersister({
-  storage: window.localStorage,
-});
-
 const router = createRouter({
   routeTree,
   context: {
@@ -50,11 +44,11 @@ declare module "@tanstack/react-router" {
 createRoot(root).render(
   <StrictMode>
     <WagmiProvider config={getConfig()}>
-      <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+      <QueryClientProvider client={queryClient}>
         <ThemeProvider forcedTheme="dark">
           <RouterProvider router={router} />
         </ThemeProvider>
-      </PersistQueryClientProvider>
+      </QueryClientProvider>
     </WagmiProvider>
   </StrictMode>,
 );

@@ -1,22 +1,3 @@
-import { base64Decode, utf8Decode } from "@idos-network/codecs";
-import nacl from "tweetnacl";
-
-export function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
-  const fullMessage = base64Decode(b64FullMessage);
-  const senderPublicKey = base64Decode(b64SenderPublicKey);
-
-  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-
-  const decrypted = nacl.box.open(message, nonce, senderPublicKey, base64Decode(secretKey));
-
-  if (decrypted == null) {
-    return "";
-  }
-
-  return utf8Decode(decrypted);
-}
-
 export function openImageInNewTab(base64Image: string) {
   const newWindow = window.open();
 

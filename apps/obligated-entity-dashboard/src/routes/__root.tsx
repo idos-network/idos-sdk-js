@@ -81,7 +81,7 @@ function RootComponent() {
             <Link to="/">
               <HStack gap="2">
                 <Image src="/logo.svg" alt="idOS" width="10" height="10" />
-                <Text fontSize="lg">OE2 Dashboard</Text>
+                <Text fontSize="lg">OE Dashboard</Text>
               </HStack>
             </Link>
             {isConnected ? <Button onClick={() => disconnect()}>Disconnect</Button> : null}
