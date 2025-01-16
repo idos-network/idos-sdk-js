@@ -227,6 +227,7 @@ export async function createReusableCredential(
   // Create a credential for the issuer itself.
   await shareCredentialByWriteGrant(issuerConfig, {
     ...params,
+    publicNotes: "",
     recipientEncryptionPublicKey,
     lockedUntil: 0,
     originalCredentialId: credentialForReceiver.id,
