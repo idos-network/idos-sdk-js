@@ -21,9 +21,15 @@ export class NoncedBox {
 
   async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
     const decodedMessage = base64Decode(b64FullMessage);
-    const senderPublicKey = base64Decode(b64SenderPublicKey);
+    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
     const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
-    const content = decryptContent(message, senderPublicKey, this.keyPair.secretKey);
+    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
+    const content = decryptContent(
+      message,
+      nonce,
+      senderEncryptionPublicKey,
+      this.keyPair.secretKey,
+    );
 
     return utf8Decode(content);
   }
