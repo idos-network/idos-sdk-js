@@ -1,3 +1,4 @@
+import { bs58Encode } from "@idos-network/codecs";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
@@ -49,7 +50,7 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
         signer.publicKey,
         "ed25519",
       ),
-      implicitAddressFromPublicKey(signer.publicKey.toString()),
+      implicitAddressFromPublicKey(bs58Encode(signer.publicKey)),
     ];
   }
 

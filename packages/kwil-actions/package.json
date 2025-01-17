@@ -40,6 +40,7 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@idos-network/codecs": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@idos-network/kwil-nep413-signer": "workspace:*",
     "tiny-invariant": "^1.3.3"
