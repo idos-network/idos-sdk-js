@@ -449,8 +449,8 @@ export class Data {
     });
   }
 
-  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<`0x${string}`> {
-    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as `0x${string}`;
+  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
+    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as string;
   }
 
   async #buildInsertableIDOSCredential(
