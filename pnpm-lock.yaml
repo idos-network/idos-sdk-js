@@ -361,6 +361,9 @@ importers:
 
   examples/grantee-sdk-demo:
     dependencies:
+      '@idos-network/codecs':
+        specifier: workspace:*
+        version: link:../../packages/codecs
       '@idos-network/grantee-sdk-js':
         specifier: workspace:*
         version: link:../../packages/grantee-sdk-js
@@ -373,6 +376,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.0.0(react@19.0.0)
+      tweetnacl:
+        specifier: ^1.0.3
+        version: 1.0.3
     devDependencies:
       '@types/node':
         specifier: ^20
@@ -15973,7 +15979,7 @@ snapshots:
       '@walletconnect/safe-json': 1.0.2
       '@walletconnect/time': 1.0.2
       tslib: 1.14.1
-      uint8arrays: 3.1.1
+      uint8arrays: 3.1.0
 
   '@walletconnect/safe-json@1.0.2':
     dependencies:
