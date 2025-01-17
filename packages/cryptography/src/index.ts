@@ -42,11 +42,10 @@ export function encryptContent(
  */
 export function decryptContent(
   message: Uint8Array,
+  nonce: Uint8Array,
   senderEncryptionPublicKey: Uint8Array,
   recipientEncryptionSecretKey: Uint8Array,
 ) {
-  const nonce = message.slice(0, nacl.box.nonceLength);
-
   const decrypted = nacl.box.open(
     message,
     nonce,

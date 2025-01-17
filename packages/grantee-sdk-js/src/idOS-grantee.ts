@@ -1,4 +1,5 @@
 import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import { decryptContent } from "@idos-network/cryptography";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import {
   type KwilActionClient,
@@ -18,6 +19,21 @@ export class NoncedBox {
     return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
+  async experimental_decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+    const decodedMessage = base64Decode(b64FullMessage);
+    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
+    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
+    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
+    const content = decryptContent(
+      message,
+      nonce,
+      senderEncryptionPublicKey,
+      this.keyPair.secretKey,
+    );
+
+    return utf8Decode(content);
+  }
+
   async decrypt(fullMessage: string, senderPublicKey: string) {
     const b64FullMessage = base64Decode(fullMessage);
     const b64SenderPublicKey = base64Decode(senderPublicKey);
@@ -26,6 +42,7 @@ export class NoncedBox {
     const message = b64FullMessage.slice(nacl.box.nonceLength, b64FullMessage.length);
     const decrypted = nacl.box.open(message, nonce, b64SenderPublicKey, this.keyPair.secretKey);
 
+    // biome-ignore lint/style/noNonNullAssertion: for testing purposes
     return utf8Decode(decrypted!);
   }
 }
