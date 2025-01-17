@@ -19,7 +19,7 @@ export class NoncedBox {
     return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
-  async experimental_decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
     const decodedMessage = base64Decode(b64FullMessage);
     const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
     const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
@@ -32,18 +32,6 @@ export class NoncedBox {
     );
 
     return utf8Decode(content);
-  }
-
-  async decrypt(fullMessage: string, senderPublicKey: string) {
-    const b64FullMessage = base64Decode(fullMessage);
-    const b64SenderPublicKey = base64Decode(senderPublicKey);
-
-    const nonce = b64FullMessage.slice(0, nacl.box.nonceLength);
-    const message = b64FullMessage.slice(nacl.box.nonceLength, b64FullMessage.length);
-    const decrypted = nacl.box.open(message, nonce, b64SenderPublicKey, this.keyPair.secretKey);
-
-    // biome-ignore lint/style/noNonNullAssertion: for testing purposes
-    return utf8Decode(decrypted!);
   }
 }
 
