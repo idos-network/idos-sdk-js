@@ -37,7 +37,8 @@
     "@kwilteam/kwil-js": "0.7.1",
     "ethers": "^6.13.5",
     "near-api-js": "3.0.4",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "bs58": "^6.0.0"
   },
   "devDependencies": {
     "@idos-network/idos-sdk-types": "workspace:*",
