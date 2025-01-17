@@ -10,7 +10,7 @@ import { getSharedCredential } from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
-import nacl from "tweetnacl";
+import nacl, { type SignKeyPair } from "tweetnacl";
 
 export class NoncedBox {
   constructor(public readonly keyPair: nacl.BoxKeyPair) {}
@@ -34,7 +34,7 @@ interface idOSGranteeInitParams {
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
-  granteeSigner: KeyPair | ethers.Wallet;
+  granteeSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
 export class idOSGrantee {
