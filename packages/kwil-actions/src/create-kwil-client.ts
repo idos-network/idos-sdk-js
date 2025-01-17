@@ -64,17 +64,18 @@ export class KwilActionClient {
     return {
       ...params,
       dbid: this.dbId,
-      inputs: params.inputs ? [this.#createActionInputs(params.inputs)] : [],
+      inputs: this.#createActionInputs(params.inputs),
     };
   }
 
   /**
    * Creates action inputs from the given parameters that are used in the action body.
    */
-  #createActionInputs(params: Record<string, unknown> = {}): Utils.ActionInput {
+  #createActionInputs(params: Record<string, unknown> = {}): Utils.ActionInput[] {
+    if (!Object.keys(params).length) return [];
     const prefixedEntries = Object.entries(params).map(([key, value]) => [`$${key}`, value]);
     const prefixedObject = Object.fromEntries(prefixedEntries);
-    return Utils.ActionInput.fromObject(prefixedObject);
+    return [Utils.ActionInput.fromObject(prefixedObject)];
   }
 }
 
