@@ -11,12 +11,18 @@ import type { Enclave } from "./enclave";
 
 import type { KwilWrapper } from "./kwil-wrapper";
 
-interface idOSGrantWithSignature
-  extends Omit<idOSGrant, "id" | "ag_owner_user_id" | "locked_until"> {
+interface idOSGrantWithSignature extends Omit<idOSGrant, "id" | "ag_owner_user_id"> {
   // This should be signed by the FE i.e using `wagmi`
   signature: string;
   ag_owner_wallet_identifier: string;
-  locked_until: 0;
+}
+
+interface idOSDAGSignatureRequest {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
 }
 
 /* global crypto */
@@ -443,11 +449,16 @@ export class Data {
     });
   }
 
+  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<`0x${string}`> {
+    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as `0x${string}`;
+  }
+
   async #buildInsertableIDOSCredential(
     userId: string,
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string | undefined,
+    // @todo: use plain argument instead of object
     grantInfo?: {
       granteeAddress: string;
       lockedUntil: number;
