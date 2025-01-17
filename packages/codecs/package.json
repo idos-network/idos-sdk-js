@@ -6,7 +6,7 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "license": "MIT",
   "type": "module",
-  "main": "index.ts",
+  "main": "./src/index.ts",
   "dependencies": {
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
