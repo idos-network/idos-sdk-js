@@ -64,7 +64,7 @@ export class KwilActionClient {
     return {
       ...params,
       dbid: this.dbId,
-      inputs: [this.#createActionInputs(params.inputs)],
+      inputs: params.inputs ? [this.#createActionInputs(params.inputs)] : [],
     };
   }
 
