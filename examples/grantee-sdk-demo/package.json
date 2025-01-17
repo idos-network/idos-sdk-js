@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/codecs": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "next": "15.1.2",

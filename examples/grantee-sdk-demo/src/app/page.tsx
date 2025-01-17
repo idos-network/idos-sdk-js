@@ -1,6 +1,6 @@
+import { base64Decode } from "@idos-network/codecs";
 import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import nacl from "tweetnacl";
-import { base64Decode } from "../../../../packages/codecs";
 
 const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";
 const GRANTEE_ADDRESS = process.env.OWNER_ADDRESS ?? "";
