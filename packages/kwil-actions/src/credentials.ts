@@ -13,7 +13,7 @@ interface CreateCredentialParams {
 }
 
 /**
- * Returns the shared idOS Cedential for the given `dataId`.
+ * Returns the shared idOS Credential for the given `dataId`.
  */
 export async function getSharedCredential(kwilClient: KwilActionClient, id: string) {
   return kwilClient.call<idOSCredential[]>({

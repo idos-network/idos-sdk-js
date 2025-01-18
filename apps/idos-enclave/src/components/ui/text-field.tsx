@@ -12,7 +12,7 @@ export function TextField({ class: class_, className, ...props }: TextFieldProps
   return (
     <Input
       className={textField({
-        // @ts-ignore: there is a missmatch between what `preact` types for `class` and what `tailwind-variants` expects.
+        // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
         class: class_,
         // @ts-ignore
         className,
