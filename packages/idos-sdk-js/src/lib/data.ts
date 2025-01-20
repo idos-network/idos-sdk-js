@@ -15,6 +15,7 @@ interface idOSGrantWithSignature extends Omit<idOSGrant, "id" | "ag_owner_user_i
   // This should be signed by the FE i.e using `wagmi`
   signature: string;
   ag_owner_wallet_identifier: string;
+  content_hash: string;
 }
 
 interface idOSDAGSignatureRequest {
