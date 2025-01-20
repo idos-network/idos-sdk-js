@@ -8,7 +8,7 @@ import { Button, DataListItem, DataListRoot } from "@/components/ui";
 import { useIdOS } from "@/idOS.provider";
 import { useAccount, useSignMessage } from "wagmi";
 
-const CREDENTIAL_ID = "fe50ec7f-433d-4552-b2e4-d35882fb42fd"; // idOS credential of Alice issued by OE1
+const CREDENTIAL_ID = "5c9e2818-a975-4d15-afad-ea896be39579";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -42,7 +42,7 @@ function MatchingCredential() {
     const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.data.id);
     const lockedUntil = 0;
 
-    await idOS.data.shareCredential(
+    const { id } = await idOS.data.shareCredential(
       credential.data.id,
       import.meta.env.VITE_GRANTEE_ENCRYPTION_PUBLIC_KEY,
       {
@@ -55,7 +55,7 @@ function MatchingCredential() {
     const dag = {
       dag_owner_wallet_identifier: address as string,
       dag_grantee_wallet_identifier: import.meta.env.VITE_GRANTEE_IDENTIFIER_PUBLIC_KEY,
-      dag_data_id: credential.data.id,
+      dag_data_id: id,
       dag_locked_until: lockedUntil,
       dag_content_hash: contentHash,
     };
