@@ -2,19 +2,22 @@ import {
   base64Decode,
   base64Encode,
   hexEncode,
-  sha256Hash,
+  hexEncodeSha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 
 import type { KwilWrapper } from "./kwil-wrapper";
 
-interface idOSGrantWithSignature extends Omit<idOSGrant, "id" | "ag_owner_user_id"> {
-  // This should be signed by the FE i.e using `wagmi`
-  signature: string;
-  ag_owner_wallet_identifier: string;
+interface idOSDAGWithSignature {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+  dag_signature: string;
 }
 
 interface idOSDAGSignatureRequest {
@@ -429,8 +432,7 @@ export class Data {
 
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
-    const encodedContent = new TextEncoder().encode(credential.content);
-    return hexEncode(sha256Hash(encodedContent), true);
+    return hexEncodeSha256Hash(utf8Encode(credential.content));
   }
 
   /**
@@ -439,7 +441,7 @@ export class Data {
    * @param payload The DAG to transmit.
    * @returns The response from the URL.
    */
-  async transmitDAG(url: string, payload: idOSGrantWithSignature) {
+  async transmitDAG(url: string, payload: idOSDAGWithSignature) {
     return fetch(url, {
       method: "POST",
       headers: {
@@ -450,7 +452,10 @@ export class Data {
   }
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
-    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as string;
+    const response = await this.kwilWrapper.call("dag_message", dag);
+    // biome-ignore lint/suspicious/noExplicitAny: will change to a proper name later.
+    const message = response?.[0]?.["?column?" as any] as string;
+    return message;
   }
 
   async #buildInsertableIDOSCredential(

@@ -252,7 +252,8 @@ export async function getCredentialIdByContentHash(
     kwilSigner,
   );
 
-  return response?.data?.result as string | null;
+  // @todo: update to use proper field key. `id` is a better name as we return the credential id in this action.
+  return (response.data?.result?.[0] as unknown as { col0: string }).col0;
 }
 
 export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {
@@ -267,5 +268,5 @@ export async function getSharedCredential(issuerConfig: IssuerConfig, id: string
     kwilSigner,
   );
 
-  return response?.data?.result as idOSCredential | null;
+  return response?.data?.result?.[0] as unknown as idOSCredential | null;
 }

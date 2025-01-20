@@ -88,12 +88,20 @@ function RootComponent() {
           </Flex>
         </Container>
       </chakra.header>
-      <chakra.main paddingY="6">
+      <chakra.main padding="6">
         <IDOSProvider>
           <Outlet />
         </IDOSProvider>
       </chakra.main>
-      <chakra.div id="idOS-enclave" hidden />
+      <chakra.div
+        id="idOS-enclave"
+        css={{
+          display: "none",
+          "&.visible": {
+            display: "flex",
+          },
+        }}
+      />
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <TanStackRouterDevtools position="bottom-right" />
     </Grid>
