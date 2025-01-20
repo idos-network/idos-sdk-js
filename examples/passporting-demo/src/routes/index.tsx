@@ -54,7 +54,7 @@ function MatchingCredential() {
     // Create the DAG payload
     const dag = {
       dag_owner_wallet_identifier: address as string,
-      dag_grantee_wallet_identifier: import.meta.env.VITE_GRANTEE_ADDRESS,
+      dag_grantee_wallet_identifier: import.meta.env.VITE_GRANTEE_IDENTIFIER_PUBLIC_KEY,
       dag_data_id: credential.data.id,
       dag_locked_until: lockedUntil,
       dag_content_hash: contentHash,
@@ -68,12 +68,8 @@ function MatchingCredential() {
 
     // Transmit the DAG to the given URL
     await idOS.data.transmitDAG(import.meta.env.VITE_OE_URL, {
-      ag_owner_wallet_identifier: address as string,
-      ag_grantee_wallet_identifier: import.meta.env.VITE_GRANTEE_ADDRESS,
-      locked_until: lockedUntil,
-      data_id: credential.data.id,
-      signature,
-      content_hash: contentHash,
+      ...dag,
+      dag_signature: signature,
     });
   };
 
