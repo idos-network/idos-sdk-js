@@ -15,7 +15,7 @@ export function Heading({ as: Component = "h1", class: _class, className, ...res
   return (
     <Component
       className={heading({
-        // @ts-ignore: there is a missmatch between what `preact` types for `class` and what `tailwind-variants` expects.
+        // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
         class: _class,
         // @ts-ignore
         className,
