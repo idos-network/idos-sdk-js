@@ -5,17 +5,19 @@ import {
   sha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
 
 import type { KwilWrapper } from "./kwil-wrapper";
 
-interface idOSGrantWithSignature extends Omit<idOSGrant, "id" | "ag_owner_user_id"> {
-  // This should be signed by the FE i.e using `wagmi`
-  signature: string;
-  ag_owner_wallet_identifier: string;
-  content_hash: string;
+interface idOSDAGWithSignature {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+  dag_signature: string;
 }
 
 interface idOSDAGSignatureRequest {
@@ -440,7 +442,7 @@ export class Data {
    * @param payload The DAG to transmit.
    * @returns The response from the URL.
    */
-  async transmitDAG(url: string, payload: idOSGrantWithSignature) {
+  async transmitDAG(url: string, payload: idOSDAGWithSignature) {
     return fetch(url, {
       method: "POST",
       headers: {
