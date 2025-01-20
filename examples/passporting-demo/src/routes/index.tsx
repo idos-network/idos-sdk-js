@@ -1,5 +1,6 @@
 import { Box, Center, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import { hexEncodeSha256Hash } from "@idos-network/codecs";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Suspense } from "react";
@@ -36,6 +37,30 @@ function MatchingCredential() {
     JSON.parse(credential.data?.public_notes ?? "{}") as Record<string, string>,
   ).filter(([key]) => key !== "id");
 
+  const handleGrantInsertion = async (): Promise<idOSGrant & { hash: string }> => {
+    // @todo: preback this once it's tested.
+    // await idOS.data.transmitDAG(import.meta.env.VITE_OE_URL, {
+    //   ...dag,
+    //   dag_signature: signature,
+    // });
+    return {
+      id: "fe50ec7f-433d-4552-b2e4-d35882fb42fd",
+      ownerUserId: "8ae2e633-26af-4097-a99b-9c3bb268cfa0",
+      granteeAddress: "b1115801ea37364102d0ecddd355c0465293af6efb5f7391c6b4b8065475af4e",
+      dataId: "b45940da-a418-4810-969f-cb31e3021cc6",
+      lockedUntil: 0,
+      hash: "0x",
+    };
+  };
+
+  const fetchCredentialById = async (grant: idOSGrant): Promise<idOSCredential | null> =>
+    await idOS.data.getShared("credential", grant.id);
+
+  const hashContent = (content: string) => {
+    const encodedContent = new TextEncoder().encode(content);
+    return hexEncodeSha256Hash(encodedContent);
+  };
+
   const handleCredentialDuplicateProcess = async () => {
     if (!credential.data) return;
 
@@ -71,6 +96,12 @@ function MatchingCredential() {
       ...dag,
       dag_signature: signature,
     });
+
+    const grant = await handleGrantInsertion();
+    const credentialCopy = await fetchCredentialById(grant);
+    const credentialHash = hashContent(credentialCopy?.content ?? "");
+    const isValidCredential = credentialHash === grant.hash;
+    if (!isValidCredential) throw new Error("Invalid Credential");
   };
 
   return (
