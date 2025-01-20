@@ -452,7 +452,10 @@ export class Data {
   }
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
-    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as string;
+    const response = await this.kwilWrapper.call("dag_message", dag);
+    // biome-ignore lint/suspicious/noExplicitAny: will change to a proper name later.
+    const message = response?.[0]?.["?column?" as any] as string;
+    return message;
   }
 
   async #buildInsertableIDOSCredential(
