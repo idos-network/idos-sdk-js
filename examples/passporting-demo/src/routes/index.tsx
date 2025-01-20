@@ -8,7 +8,7 @@ import { Button, DataListItem, DataListRoot } from "@/components/ui";
 import { useIdOS } from "@/idOS.provider";
 import { useAccount, useSignMessage } from "wagmi";
 
-const CREDENTIAL_ID = "fe50ec7f-433d-4552-b2e4-d35882fb42fd";
+const CREDENTIAL_ID = "fe50ec7f-433d-4552-b2e4-d35882fb42fd"; // idOS credential of Alice issued by OE1
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -73,6 +73,7 @@ function MatchingCredential() {
       locked_until: lockedUntil,
       data_id: credential.data.id,
       signature,
+      content_hash: contentHash,
     });
   };
 
