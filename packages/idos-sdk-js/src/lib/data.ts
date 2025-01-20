@@ -2,7 +2,7 @@ import {
   base64Decode,
   base64Encode,
   hexEncode,
-  sha256Hash,
+  hexEncodeSha256Hash,
   utf8Encode,
 } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
@@ -432,8 +432,7 @@ export class Data {
 
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
-    const encodedContent = new TextEncoder().encode(credential.content);
-    return hexEncode(sha256Hash(encodedContent), true);
+    return hexEncodeSha256Hash(utf8Encode(credential.content));
   }
 
   /**
@@ -453,7 +452,10 @@ export class Data {
   }
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
-    return (await this.kwilWrapper.call("dag_message", [{ dag }])) as string;
+    const response = await this.kwilWrapper.call("dag_message", dag);
+    // biome-ignore lint/suspicious/noExplicitAny: will change to a proper name later.
+    const message = response?.[0]?.["?column?" as any] as string;
+    return message;
   }
 
   async #buildInsertableIDOSCredential(

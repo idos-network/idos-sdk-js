@@ -4,10 +4,13 @@ import { base64Decode } from "@idos-network/codecs";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
+import { cors } from "hono/cors";
 import nacl from "tweetnacl";
 import z from "zod";
 
 const app = new Hono();
+
+app.use("*", cors());
 
 app.get("/", (c) => {
   return c.text("🚀");
