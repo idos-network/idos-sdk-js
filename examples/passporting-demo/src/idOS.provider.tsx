@@ -31,7 +31,7 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     initialised.current = true;
 
     const _instance = await idOS.init({
-      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      nodeUrl: import.meta.env.VITE_KWIL_NODE_URL,
       enclaveOptions: {
         container: "#idOS-enclave",
         url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
