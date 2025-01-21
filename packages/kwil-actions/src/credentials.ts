@@ -88,7 +88,7 @@ export interface GetGrantByCredentialIdParams {
   credential_id: string;
 }
 
-export async function getGrantByCredentialId(
+export async function getAccessGrantsForCredential(
   kwilClient: KwilActionClient,
   params: GetGrantByCredentialIdParams,
 ) {
