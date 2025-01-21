@@ -452,9 +452,10 @@ export class Data {
   }
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
-    const response = await this.kwilWrapper.call("dag_message", dag);
-    // biome-ignore lint/suspicious/noExplicitAny: will change to a proper name later.
-    const message = response?.[0]?.["?column?" as any] as string;
+    const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
+      { message: string },
+    ];
+    const message = response?.[0]?.message;
     return message;
   }
 
