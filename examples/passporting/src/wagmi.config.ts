@@ -1,18 +1,26 @@
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
-import type { Account, Client } from "viem";
-import { http, type Config, type Transport, createConfig, useConnectorClient } from "wagmi";
-import { type Chain, mainnet, sepolia } from "wagmi/chains";
+import type { Account, Chain, Client } from "viem";
+import {
+  http,
+  type Config,
+  type Transport,
+  cookieStorage,
+  createConfig,
+  createStorage,
+  useConnectorClient,
+} from "wagmi";
+import { mainnet, sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
-
-export const chains = [mainnet, sepolia] as const;
-
-export const injectedConnector = injected();
 
 export function getConfig() {
   return createConfig({
-    chains,
-    connectors: [injectedConnector],
+    chains: [mainnet, sepolia],
+    connectors: [injected()],
+    storage: createStorage({
+      storage: cookieStorage,
+    }),
+    ssr: true,
     transports: {
       [mainnet.id]: http(),
       [sepolia.id]: http(),

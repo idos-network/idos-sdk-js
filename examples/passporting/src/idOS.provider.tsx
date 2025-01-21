@@ -1,4 +1,6 @@
-import { Center, Spinner, Text } from "@chakra-ui/react";
+"use clent";
+
+import { CircularProgress } from "@heroui/react";
 import { idOS } from "@idos-network/idos-sdk";
 import {
   type PropsWithChildren,
@@ -10,7 +12,9 @@ import {
   useState,
 } from "react";
 import { useAccount } from "wagmi";
-import { useEthersSigner } from "./wagmi.config";
+
+import { useEthersSigner } from "@/wagmi.config";
+import { WalletConnector } from "./components/wallet-connector";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialised in the provider.
 export const idOSContext = createContext<idOS>(null!);
@@ -19,7 +23,6 @@ export const useIdOS = () => useContext(idOSContext);
 export function IDOSProvider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
   const initialised = useRef(false);
-
   const { address } = useAccount();
   const signer = useEthersSigner();
 
@@ -31,10 +34,9 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     initialised.current = true;
 
     const _instance = await idOS.init({
-      nodeUrl: import.meta.env.VITE_KWIL_NODE_URL,
+      nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL,
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
       },
     });
 
@@ -51,12 +53,12 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     initialise();
   }, [initialise]);
 
-  if (!sdk) {
+  if (!sdk || !signer) {
     return (
-      <Center h="100%" flexDirection="column" gap="2">
-        <Spinner />
-        <Text>Initialising idOS...</Text>
-      </Center>
+      <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
+        <CircularProgress aria-label="Initialising idOS..." />
+        <p>Initialising idOS...</p>
+      </div>
     );
   }
 

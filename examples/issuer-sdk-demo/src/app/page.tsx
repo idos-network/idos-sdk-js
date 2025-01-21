@@ -1,7 +1,7 @@
 "use client";
 
+import { Button, Spinner } from "@heroui/react";
 import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
-import { Button, Spinner } from "@nextui-org/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
