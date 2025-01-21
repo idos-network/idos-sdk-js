@@ -21,13 +21,13 @@ export async function createAccessGrantFromDAG(
   const credentialId = await getCredentialIdByContentHash(issuerConfig, params.dag_content_hash);
 
   if (!credentialId) {
-    throw new Error("Credential not found");
+    throw new Error("idOSCredential not found");
   }
 
   const credential = await getSharedCredential(issuerConfig, credentialId);
 
   if (!credential) {
-    throw new Error("Credential not found");
+    throw new Error("idOSCredential not found");
   }
 
   const plaintextContent = decryptContent(
@@ -41,7 +41,7 @@ export async function createAccessGrantFromDAG(
 
   // Check if the content hash matches the content hash in the credential
   if (contentHash !== params.dag_content_hash) {
-    throw new Error("hash mismatch between DAG and idOSCredential content");
+    throw new Error("Hash mismatch between DAG and idOSCredential content");
   }
 
   const result = await kwilClient.execute(

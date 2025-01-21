@@ -2,6 +2,7 @@ import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
 import { base64Decode, hexEncode } from "@idos-network/codecs";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
+import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
@@ -48,18 +49,52 @@ app.post(
       dag_content_hash,
     } = c.req.valid("json");
 
+    const bearer = c.req.header("Authorization")?.split(" ")[1];
+
+    // @todo: additional logic to validate that the token is valid.
+
+    if (!bearer) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Unauthorized request",
+          },
+        },
+        401,
+      );
+    }
+
     // Transmit the `DAG` to the idOS.
-    await createAccessGrantFromDAG(issuerConfig, {
-      dag_data_id,
-      dag_owner_wallet_identifier,
-      dag_grantee_wallet_identifier,
-      dag_signature,
-      dag_locked_until,
-      dag_content_hash,
-    });
+    const [error, response] = await goTry(() =>
+      createAccessGrantFromDAG(issuerConfig, {
+        dag_data_id,
+        dag_owner_wallet_identifier,
+        dag_grantee_wallet_identifier,
+        dag_signature,
+        dag_locked_until,
+        dag_content_hash,
+      }),
+    );
+
+    if (error) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            cause: error.cause,
+            message: error.message,
+          },
+        },
+        400,
+      );
+    }
 
     return c.json({
       success: true,
+      data: {
+        dag_data_id,
+      },
     });
   },
 );
