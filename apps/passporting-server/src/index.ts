@@ -1,16 +1,13 @@
 import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
-import { base64Decode } from "@idos-network/codecs";
+import { base64Decode, hexEncode } from "@idos-network/codecs";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
-import { cors } from "hono/cors";
 import nacl from "tweetnacl";
 import z from "zod";
 
 const app = new Hono();
-
-app.use("*", cors());
 
 app.get("/", (c) => {
   return c.text("🚀");
