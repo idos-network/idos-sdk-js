@@ -8,7 +8,7 @@ import { Button, DataListItem, DataListRoot } from "@/components/ui";
 import { useIdOS } from "@/idOS.provider";
 import { useAccount, useSignMessage } from "wagmi";
 
-const CREDENTIAL_ID = "5c9e2818-a975-4d15-afad-ea896be39579";
+const CREDENTIAL_ID = "8a60ff91-3fba-46b8-87f5-536d58bf025b";
 
 export const Route = createFileRoute("/")({
   component: Index,
