@@ -229,7 +229,7 @@ export async function createReusableCredential(
     ...params,
     publicNotes: "",
     recipientEncryptionPublicKey,
-    lockedUntil: 0,
+    lockedUntil: Math.floor(Date.now() / 1000) + 10,
     originalCredentialId: credentialForReceiver.id,
     contentHash,
   });

@@ -71,6 +71,8 @@ export default function Home() {
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
           setCredentials(_credentials);
         }
+        // @ts-ignore
+        window.sdk = _instance;
 
         setHasProfile(_hasProfile);
         setSdk(_instance);
@@ -225,6 +227,7 @@ export default function Home() {
             variant="flat"
             onPress={handleCreateReusableCredential}
             isLoading={isPendingCreateReusableCredentialRequest}
+            id="create-reusable-credential"
           >
             Create a reusable credential (OE1)
           </Button>
