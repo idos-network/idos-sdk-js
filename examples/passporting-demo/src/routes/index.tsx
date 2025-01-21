@@ -2,7 +2,7 @@ import { Box, Center, Heading, Spinner, Text, VStack } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
 import { Button, DataListItem, DataListRoot } from "@/components/ui";
 import { useIdOS } from "@/idOS.provider";
@@ -31,6 +31,7 @@ function MatchingCredential() {
   const idOS = useIdOS();
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
+  const [isPending, setIsPending] = useState(false);
 
   const publicNotes = Object.entries(
     JSON.parse(credential.data?.public_notes ?? "{}") as Record<string, string>,
@@ -39,6 +40,8 @@ function MatchingCredential() {
   const handleCredentialDuplicateProcess = async () => {
     if (!credential.data) return;
 
+    setIsPending(true);
+
     const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.data.id);
     const lockedUntil = 0;
 
@@ -46,7 +49,7 @@ function MatchingCredential() {
       credential.data.id,
       import.meta.env.VITE_GRANTEE_ENCRYPTION_PUBLIC_KEY,
       {
-        granteeAddress: import.meta.env.VITE_GRANTEE_ADDRESS,
+        granteeAddress: import.meta.env.VITE_GRANTEE_IDENTIFIER_PUBLIC_KEY,
         lockedUntil: 0,
       },
     );
@@ -71,6 +74,8 @@ function MatchingCredential() {
       ...dag,
       dag_signature: signature,
     });
+
+    setIsPending(false);
   };
 
   return (
@@ -124,7 +129,13 @@ function MatchingCredential() {
           </Text>
           <Text color="green.500">Click the button below to start the process.</Text>
         </Box>
-        <Button onClick={handleCredentialDuplicateProcess}>Request credential duplicate</Button>
+        <Button
+          onClick={handleCredentialDuplicateProcess}
+          loading={isPending}
+          loadingText="Requesting credential duplicate"
+        >
+          Request credential duplicate
+        </Button>
       </VStack>
     </VStack>
   );
