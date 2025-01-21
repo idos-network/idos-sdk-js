@@ -57,7 +57,7 @@ export default function CredentialContent({
               )}
             </ModalBody>
             <ModalFooter>
-              <Button color="danger" variant="light" onPress={onClose}>
+              <Button color="danger" variant="light" onPress={onClose} id="close">
                 Close
               </Button>
             </ModalFooter>
