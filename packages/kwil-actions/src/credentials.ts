@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 interface CreateCredentialParams {
@@ -76,6 +76,24 @@ export async function shareCredentialByWriteGrant(
 ) {
   return kwilClient.execute({
     name: "share_credential_by_write_grant",
+    inputs: params,
+  });
+}
+
+/**
+ * Returns the Grant that gave access to the given `credentialId`.
+ */
+
+export interface GetGrantByCredentialIdParams {
+  credential_id: string;
+}
+
+export async function getGrantByCredentialId(
+  kwilClient: KwilActionClient,
+  params: GetGrantByCredentialIdParams,
+) {
+  return kwilClient.call<idOSGrant>({
+    name: "get_access_grants_for_credential",
     inputs: params,
   });
 }

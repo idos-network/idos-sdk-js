@@ -1,12 +1,21 @@
-import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncodeSha256Hash,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/codecs";
 import { decryptContent } from "@idos-network/cryptography";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import {
   type KwilActionClient,
   createNodeKwilClient,
 } from "@idos-network/kwil-actions/create-kwil-client";
 import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
-import { getSharedCredential } from "@idos-network/kwil-actions/credentials";
+import {
+  getGrantByCredentialId,
+  getSharedCredential,
+} from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
@@ -97,6 +106,22 @@ export class idOSGrantee {
 
   async getGrantsCount(): Promise<number> {
     return getGrantsCount(this.kwilClient);
+  }
+
+  async fetchCredentialGrant(credentialId: string): Promise<idOSGrant> {
+    if (!credentialId) throw new Error("Missing credentialId");
+    const params = { credential_id: credentialId };
+    const grant = await getGrantByCredentialId(this.kwilClient, params);
+    if (!grant) throw new Error("Grant not found");
+    return grant;
+  }
+
+  async isValidCredential(credentialId: string) {
+    const grant = await this.fetchCredentialGrant(credentialId);
+    const credentialContent = await this.getSharedCredentialContentDecrypted(grant.data_id);
+    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
+    if (contentHash !== grant.hash) throw new Error("Hash mismatch between credential and grant");
+    return true;
   }
 
   async getGrants(page = 1, size = 7) {
