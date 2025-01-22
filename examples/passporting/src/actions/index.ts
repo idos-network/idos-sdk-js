@@ -23,8 +23,7 @@ export async function invokePassportingService(payload: {
 
   // get credential by it's id
   credential = await getCredentialByGrant(credentialId!);
-  const isValidCred = await validateCredentialByAG(credentialId!);
-  if (credential) return { credential, isValidCred };
+  if (credential) return credential;
 
   // Call the passporting service to transmit the DAG
   const response = await fetch(serviceUrl, {
@@ -40,8 +39,8 @@ export async function invokePassportingService(payload: {
   if (response.success === false) throw new Error(response.error.message);
   credential = getCredentialByGrant(response.dag_data_id);
 
-  const isValid = await validateCredentialByAG(payload.dag_data_id);
-  if (!isValid) throw new Error("Credential is not valid");
+  const isValidCredential = await validateCredentialByAG(payload.dag_data_id);
+  if (!isValidCredential) throw new Error("Credential is not valid");
 
   return credential;
 }

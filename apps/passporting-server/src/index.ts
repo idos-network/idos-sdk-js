@@ -89,13 +89,15 @@ app.post(
         400,
       );
     }
-
-    return c.json({
-      success: true,
-      data: {
-        dag_data_id,
+    return c.json(
+      {
+        success: true,
+        data: {
+          dag_data_id,
+        },
       },
-    });
+      201,
+    );
   },
 );
 
