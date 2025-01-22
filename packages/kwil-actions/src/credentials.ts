@@ -80,19 +80,18 @@ export async function shareCredentialByWriteGrant(
   });
 }
 
-/**
- * Returns the Grant that gave access to the given `credentialId`.
- */
-
-export interface GetGrantByCredentialIdParams {
+export interface GetAccessGrantByCredentialIdParams {
   credential_id: string;
 }
 
+/**
+ * Returns a list of matching idOSGrants that associated with the given `credentialId`.
+ */
 export async function getAccessGrantsForCredential(
   kwilClient: KwilActionClient,
-  params: GetGrantByCredentialIdParams,
+  params: GetAccessGrantByCredentialIdParams,
 ) {
-  return kwilClient.call<idOSGrant>({
+  return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_for_credential",
     inputs: params,
   });

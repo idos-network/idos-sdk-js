@@ -108,21 +108,27 @@ export class idOSGrantee {
     return getGrantsCount(this.kwilClient);
   }
 
-  async fetchCredentialGrant(credentialId: string): Promise<idOSGrant> {
-    if (!credentialId) throw new Error("Missing credentialId");
+  async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
     const params = { credential_id: credentialId };
-    const grant = await getAccessGrantsForCredential(this.kwilClient, params);
-    if (!grant) throw new Error("Grant not found");
-    return grant;
+    const accessGrants = await getAccessGrantsForCredential(this.kwilClient, params);
+
+    return accessGrants[0];
   }
 
-  async isValidCredential(credentialId: string) {
-    const grant = await this.fetchCredentialGrant(credentialId);
-    const credentialContent = await this.getSharedCredentialContentDecrypted(grant.data_id);
+  async validateCredentialByAG(credentialId: string) {
+    const accessGrant = await this.getCredentialAccessGrant(credentialId);
+    const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
     const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
-    if (contentHash !== grant.hash)
-      throw new Error("Hash mismatch between idOSCredential content and idOSGrant content hash");
-    return true;
+
+    return contentHash === accessGrant.hash;
+  }
+
+  async getReusableCredentialCompliantly(_credentialId: string) {
+    // @todo: implement this:
+    // retrieve and decrypt the credential
+    // ensure the AG they used was inserted by a known OE
+    // check that the hashes match between the credential content and the AG
+    // return the credential
   }
 
   async getGrants(page = 1, size = 7) {
