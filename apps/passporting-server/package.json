@@ -13,7 +13,9 @@
     "@hono/zod-validator": "^0.4.2",
     "@idos-network/codecs": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
+    "go-try": "^3.0.2",
     "hono": "^4.6.16",
+    "safe-await": "^2.0.0",
     "tweetnacl": "^1.0.3",
     "zod": "^3.24.1"
   },
