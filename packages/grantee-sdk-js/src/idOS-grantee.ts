@@ -1,12 +1,21 @@
-import { base64Decode, base64Encode, utf8Decode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncodeSha256Hash,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/codecs";
 import { decryptContent } from "@idos-network/cryptography";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
 import {
   type KwilActionClient,
   createNodeKwilClient,
 } from "@idos-network/kwil-actions/create-kwil-client";
 import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
-import { getSharedCredential } from "@idos-network/kwil-actions/credentials";
+import {
+  getAccessGrantsForCredential,
+  getSharedCredential,
+} from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
@@ -97,6 +106,29 @@ export class idOSGrantee {
 
   async getGrantsCount(): Promise<number> {
     return getGrantsCount(this.kwilClient);
+  }
+
+  async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
+    const params = { credential_id: credentialId };
+    const accessGrants = await getAccessGrantsForCredential(this.kwilClient, params);
+
+    return accessGrants[0];
+  }
+
+  async validateCredentialByAG(credentialId: string) {
+    const accessGrant = await this.getCredentialAccessGrant(credentialId);
+    const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
+    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
+
+    return contentHash === accessGrant.hash;
+  }
+
+  async getReusableCredentialCompliantly(_credentialId: string) {
+    // @todo: implement this:
+    // retrieve and decrypt the credential
+    // ensure the AG they used was inserted by a known OE
+    // check that the hashes match between the credential content and the AG
+    // return the credential
   }
 
   async getGrants(page = 1, size = 7) {
