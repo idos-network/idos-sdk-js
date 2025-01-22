@@ -28,11 +28,34 @@ app.post(
     }),
   ),
   async (c) => {
-    const { KWIL_NODE_URL, ISSUER_SIGNING_SECRET_KEY, ISSUER_ENCRYPTION_SECRET_KEY } = env<{
+    const {
+      KWIL_NODE_URL,
+      ISSUER_SIGNING_SECRET_KEY,
+      ISSUER_ENCRYPTION_SECRET_KEY,
+      CLIENT_SECRETS,
+    } = env<{
       KWIL_NODE_URL: string;
       ISSUER_SIGNING_SECRET_KEY: string;
       ISSUER_ENCRYPTION_SECRET_KEY: string;
+      CLIENT_SECRETS: string;
     }>(c);
+
+    const bearer = c.req.header("Authorization")?.split(" ")[1];
+
+    // @todo: additional logic to validate that the token is valid.
+    // This is just a very basic validation of the token that assumes that we have a list of valid tokens.
+    if (!bearer || !CLIENT_SECRETS.split(",").includes(bearer)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Unauthorized request",
+          },
+        },
+        401,
+      );
+    }
+
     const issuerConfig = await createIssuerConfig({
       nodeUrl: KWIL_NODE_URL,
       signingKeyPair: nacl.sign.keyPair.fromSecretKey(base64Decode(ISSUER_SIGNING_SECRET_KEY)),
@@ -48,22 +71,6 @@ app.post(
       dag_locked_until,
       dag_content_hash,
     } = c.req.valid("json");
-
-    const bearer = c.req.header("Authorization")?.split(" ")[1];
-
-    // @todo: additional logic to validate that the token is valid.
-
-    if (!bearer) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: "Unauthorized request",
-          },
-        },
-        401,
-      );
-    }
 
     // Transmit the `DAG` to the idOS.
     const [error, response] = await goTry(() =>
