@@ -43,17 +43,17 @@ function MatchingCredential() {
       const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.data.id);
       const lockedUntil = 0;
 
-      const granteeIdentifierPublicKey = process.env.NEXT_PUBLIC_GRANTEE_IDENTIFIER_PUBLIC_KEY;
+      const granteeSigningPublicKey = process.env.NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY;
       const granteeEncryptionPublicKey = process.env.NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY;
 
-      invariant(granteeIdentifierPublicKey, "NEXT_PUBLIC_GRANTEE_IDENTIFIER_PUBLIC_KEY is not set");
+      invariant(granteeSigningPublicKey, "NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY is not set");
       invariant(granteeEncryptionPublicKey, "NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY is not set");
 
       const { id } = await idOS.data.shareCredential(
         credential.data.id,
         granteeEncryptionPublicKey,
         {
-          granteeAddress: granteeIdentifierPublicKey,
+          granteeAddress: granteeSigningPublicKey,
           lockedUntil: 0,
         },
       );
@@ -61,7 +61,7 @@ function MatchingCredential() {
       // Create the DAG payload
       const dag = {
         dag_owner_wallet_identifier: address as string,
-        dag_grantee_wallet_identifier: granteeIdentifierPublicKey,
+        dag_grantee_wallet_identifier: granteeSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
         dag_content_hash: contentHash,
