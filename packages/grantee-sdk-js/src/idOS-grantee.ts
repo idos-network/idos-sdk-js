@@ -14,6 +14,7 @@ import {
 import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
 import {
   getAccessGrantsForCredential,
+  getCredentialIdByContentHash,
   getSharedCredential,
 } from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
@@ -99,6 +100,10 @@ export class idOSGrantee {
     );
   }
 
+  async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
+    return getCredentialIdByContentHash(this.kwilClient, contentHash);
+  }
+
   async getLocalAccessGrantsFromUserByAddress() {
     // @todo: update Alexandr to implement this
     throw new Error("Not implemented yet");
@@ -120,7 +125,7 @@ export class idOSGrantee {
     const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
     const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
 
-    return contentHash === accessGrant.hash;
+    return contentHash === accessGrant.content_hash;
   }
 
   async getReusableCredentialCompliantly(_credentialId: string) {
@@ -139,6 +144,7 @@ export class idOSGrantee {
         granteeAddress: grant.ag_grantee_wallet_identifier,
         dataId: grant.data_id,
         lockedUntil: grant.locked_until,
+        hash: grant.content_hash,
       })),
       totalCount: await this.getGrantsCount(),
     };

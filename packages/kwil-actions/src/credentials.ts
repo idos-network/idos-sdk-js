@@ -29,10 +29,12 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  return kwilClient.call<string>({
-    name: "get_credential_id_by_content_hash",
+  const result = await kwilClient.call<string>({
+    name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
+  if (!result.length) throw new Error("No credential found");
+  return (result[0] as unknown as { id: string }).id;
 }
 
 /**

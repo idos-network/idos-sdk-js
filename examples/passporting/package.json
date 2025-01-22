@@ -13,6 +13,8 @@
   "dependencies": {
     "@heroui/react": "2.6.14",
     "@idos-network/idos-sdk": "workspace:*",
+    "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/codecs": "workspace:*",
     "@tanstack/react-query": "5.45.1",
     "ethers": "^6.13.4",
     "next": "14.2.4",
