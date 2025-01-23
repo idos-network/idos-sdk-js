@@ -6,7 +6,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts"
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
@@ -15,12 +16,12 @@
     "@idos-network/issuer-sdk-js": "workspace:*",
     "go-try": "^3.0.2",
     "hono": "^4.6.16",
-    "safe-await": "^2.0.0",
     "tweetnacl": "^1.0.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
-    "tsx": "^4.7.1"
+    "tsx": "^4.7.1",
+    "typescript": "^5.7.3"
   }
 }
