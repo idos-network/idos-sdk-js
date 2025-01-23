@@ -33,7 +33,6 @@ export async function getCredentialIdByContentHash(
     name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
-  if (!result.length) throw new Error("No credential found");
   return (result[0] as unknown as { id: string }).id;
 }
 

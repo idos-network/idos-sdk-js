@@ -7,7 +7,7 @@ import { Suspense, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { invokePassportingService } from "@/actions";
+import { hasReusableCredential, invokePassportingService } from "@/actions";
 import { useIdOS } from "@/idOS.provider";
 
 const useFetchCredential = (id: string) => {
@@ -19,6 +19,20 @@ const useFetchCredential = (id: string) => {
   });
 };
 
+const getReusableCredentialId = (credential: idOSCredential) => {
+  const idOS = useIdOS();
+
+  return useSuspenseQuery<idOSCredential | null>({
+    queryKey: ["reusable-credential", credential?.id],
+    queryFn: async () => {
+      if (!credential) return null;
+      const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.id);
+      const reusableCredential = await hasReusableCredential(contentHash);
+      return reusableCredential;
+    },
+  });
+};
+
 const CREDENTIAL_ID = process.env.NEXT_PUBLIC_DUMMY_CREDENTIAL_ID;
 
 function MatchingCredential() {
@@ -27,6 +41,7 @@ function MatchingCredential() {
   // That can be done by searching the `public_notes` field for values like `type=human` etc.
   invariant(CREDENTIAL_ID, "NEXT_PUBLIC_DUMMY_CREDENTIAL_ID is not set");
   const credential = useFetchCredential(CREDENTIAL_ID);
+  const reusableCredential = getReusableCredentialId(credential.data!);
   const idOS = useIdOS();
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
@@ -73,17 +88,30 @@ function MatchingCredential() {
       // Sign the message
       const signature = await signMessageAsync({ message });
 
-      await invokePassportingService({
+      const result = await invokePassportingService({
         ...dag,
         dag_signature: signature,
       });
+      if (result) reusableCredential.refetch();
     });
   };
+
+  if (credential.isFetching)
+    return <h3 className="font-semibold text-2xl">Loading Credential...</h3>;
+
+  if (!credential.data)
+    return (
+      <h3 className="font-semibold text-2xl">No Matching Credential Found for provided ID :(</h3>
+    );
 
   return (
     <div className="flex flex-col gap-6">
       <h3 className="font-semibold text-2xl">
-        We have found a matching credential that we can reuse:
+        We have found a{" "}
+        {reusableCredential.data
+          ? "a reusable credential"
+          : "matching credential that we can reuse"}
+        :
       </h3>
       <div className="flex flex-col items-stretch gap-4 rounded-md border border-neutral-700 bg-neutral-900 p-6">
         <dl className="flex flex-col items-stretch gap-4">
@@ -98,15 +126,19 @@ function MatchingCredential() {
           ))}
         </dl>
       </div>
-      <div>
-        <p className="text-green-500 text-sm">
-          In order to proceed, we need to request an encrypted duplicate of this credential.
-        </p>
-        <p className="text-green-500 text-sm">Click the button below to start the process:</p>
-      </div>
-      <Button onPress={handleCredentialDuplicateProcess} isLoading={isPending}>
-        {isPending ? "Requesting credential duplicate..." : "Request credential duplicate"}
-      </Button>
+      {!reusableCredential.data && (
+        <>
+          <div>
+            <p className="text-green-500 text-sm">
+              In order to proceed, we need to request an encrypted duplicate of this credential.
+            </p>
+            <p className="text-green-500 text-sm">Click the button below to start the process:</p>
+          </div>
+          <Button onPress={handleCredentialDuplicateProcess} isLoading={isPending}>
+            {isPending ? "Requesting credential duplicate..." : "Request credential duplicate"}
+          </Button>
+        </>
+      )}
     </div>
   );
 }

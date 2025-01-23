@@ -94,6 +94,7 @@ app.post(
         success: true,
         data: {
           dag_data_id,
+          dag_content_hash,
         },
       },
       201,

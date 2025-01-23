@@ -128,12 +128,23 @@ export class idOSGrantee {
     return contentHash === accessGrant.content_hash;
   }
 
-  async getReusableCredentialCompliantly(_credentialId: string) {
-    // @todo: implement this:
-    // retrieve and decrypt the credential
-    // ensure the AG they used was inserted by a known OE
-    // check that the hashes match between the credential content and the AG
-    // return the credential
+  async checkForValidIssuer(issuerPublicKey: string) {
+    // @todo: implement this later
+    if (!issuerPublicKey) throw new Error("Issuer public key is required");
+    return true;
+  }
+
+  async getReusableCredentialCompliantly(credentialHash: string): Promise<idOSCredential | null> {
+    const credentialId = await this.getCredentialIdByContentHash(credentialHash);
+    if (!credentialId) return null;
+
+    const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
+    const validIssuer = await this.checkForValidIssuer(credential.issuer_auth_public_key);
+    if (!validIssuer) throw new Error("Issuer is not valid");
+
+    const isValidCredential = await this.validateCredentialByAG(credentialId);
+    if (!isValidCredential) throw new Error("Credential is not valid");
+    return credential;
   }
 
   async getGrants(page = 1, size = 7) {
