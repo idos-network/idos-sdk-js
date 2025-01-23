@@ -2,7 +2,7 @@
 
 import { Button, CircularProgress } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { Suspense, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
@@ -19,7 +19,7 @@ const useFetchCredential = (id: string) => {
   });
 };
 
-const getReusableCredentialId = (credential: idOSCredential) => {
+const useReusableCredentialId = (credential: idOSCredential) => {
   const idOS = useIdOS();
 
   return useSuspenseQuery<idOSCredential | null>({
@@ -33,7 +33,9 @@ const getReusableCredentialId = (credential: idOSCredential) => {
   });
 };
 
-const CREDENTIAL_ID = process.env.NEXT_PUBLIC_DUMMY_CREDENTIAL_ID;
+const CREDENTIAL_ID =
+  new URLSearchParams(window.location.search).get("cred_id") ||
+  process.env.NEXT_PUBLIC_DUMMY_CREDENTIAL_ID;
 
 function MatchingCredential() {
   // We assume that the credential that we need has the hardcoded `id`.
@@ -41,11 +43,12 @@ function MatchingCredential() {
   // That can be done by searching the `public_notes` field for values like `type=human` etc.
   invariant(CREDENTIAL_ID, "NEXT_PUBLIC_DUMMY_CREDENTIAL_ID is not set");
   const credential = useFetchCredential(CREDENTIAL_ID);
-  const reusableCredential = getReusableCredentialId(credential.data!);
+  const reusableCredential = useReusableCredentialId(credential.data!);
   const idOS = useIdOS();
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [isPending, startTransition] = useTransition();
+  const queryClient = useQueryClient();
 
   const publicNotes = Object.entries(
     JSON.parse(credential.data?.public_notes ?? "{}") as Record<string, string>,
@@ -88,11 +91,14 @@ function MatchingCredential() {
       // Sign the message
       const signature = await signMessageAsync({ message });
 
-      const result = await invokePassportingService({
+      await invokePassportingService({
         ...dag,
         dag_signature: signature,
       });
-      if (result) reusableCredential.refetch();
+      await queryClient.invalidateQueries({
+        queryKey: ["reusable-credential", credential.data?.id],
+      });
+      await reusableCredential.refetch();
     });
   };
 
@@ -134,7 +140,11 @@ function MatchingCredential() {
             </p>
             <p className="text-green-500 text-sm">Click the button below to start the process:</p>
           </div>
-          <Button onPress={handleCredentialDuplicateProcess} isLoading={isPending}>
+          <Button
+            onPress={handleCredentialDuplicateProcess}
+            isLoading={isPending}
+            id="request-duplicate"
+          >
             {isPending ? "Requesting credential duplicate..." : "Request credential duplicate"}
           </Button>
         </>

@@ -10,7 +10,6 @@ export async function invokePassportingService(payload: {
   dag_content_hash: string;
   dag_signature: string;
 }) {
-  const granteeSdk = await createGranteeSdkInstance();
   const serviceUrl = process.env.PASSPORTING_SERVICE_URL;
   const serviceApiKey = process.env.PASSPORTING_SERVICE_API_KEY;
 
@@ -26,11 +25,8 @@ export async function invokePassportingService(payload: {
       "Content-Type": "application/json",
     },
   }).then((res) => res.json());
-
   // POST DAG creation
   if (response.success === false) throw new Error(response.error.message);
-  const credential = granteeSdk.getReusableCredentialCompliantly(response.dag_content_hash);
-  return credential;
 }
 
 export const hasReusableCredential = async (credentialHash: string) => {
