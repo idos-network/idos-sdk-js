@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
-import { base64Decode, hexEncode } from "@idos-network/codecs";
+import { base64Decode } from "@idos-network/codecs";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
 import { goTry } from "go-try";
 import { Hono } from "hono";
