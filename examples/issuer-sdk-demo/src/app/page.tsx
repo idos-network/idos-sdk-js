@@ -224,6 +224,7 @@ export default function Home() {
           </Button>
 
           <Button
+            id="create-reusable-credential"
             color="secondary"
             variant="flat"
             onPress={handleCreateReusableCredential}
