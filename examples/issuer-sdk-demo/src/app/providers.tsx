@@ -1,6 +1,6 @@
 "use client";
 
-import { NextUIProvider } from "@nextui-org/react";
+import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
@@ -15,10 +15,10 @@ export function Providers(props: {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <NextUIProvider>
+    <HeroUIProvider>
       <WagmiProvider config={config} initialState={props.initialState}>
         <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
       </WagmiProvider>
-    </NextUIProvider>
+    </HeroUIProvider>
   );
 }

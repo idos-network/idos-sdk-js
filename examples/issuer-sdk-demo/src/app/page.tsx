@@ -1,7 +1,7 @@
 "use client";
 
+import { Button, Spinner } from "@heroui/react";
 import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
-import { Button, Spinner } from "@nextui-org/react";
 import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
@@ -69,6 +69,7 @@ export default function Home() {
           // @ts-ignore
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
+          console.log("credentials", _credentials);
           setCredentials(_credentials);
         }
         // @ts-ignore

@@ -243,17 +243,16 @@ export async function getCredentialIdByContentHash(
 ): Promise<string | null> {
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
 
-  const response = await kwilClient.call(
+  const response = (await kwilClient.call(
     {
       name: "get_sibling_credential_id",
       dbid,
       inputs: [createActionInput({ content_hash: contentHash })],
     },
     kwilSigner,
-  );
+  )) as unknown as { data: { result: [{ id: string }] } };
 
-  // @todo: update to use proper field key. `id` is a better name as we return the credential id in this action.
-  return (response.data?.result?.[0] as unknown as { col0: string }).col0;
+  return response.data?.result?.[0]?.id ?? null;
 }
 
 export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {
