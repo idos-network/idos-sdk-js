@@ -115,20 +115,28 @@ export class idOSGrantee {
     return accessGrants[0];
   }
 
-  async validateCredentialByAG(credentialId: string) {
+  async getReusableCredentialCompliantly(credentialId: string) {
+    // retrieve and decrypt the credential
+    const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
+
+    // retrieve the related access grant
     const accessGrant = await this.getCredentialAccessGrant(credentialId);
-    const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
+
+    // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
+
+    // check that the hashes match between the credential content and the AG
+    const credentialContent = await this.noncedBox.decrypt(
+      credential.content,
+      credential.encryptor_public_key,
+    );
+
     const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
 
-    return contentHash === accessGrant.hash;
-  }
+    if (contentHash !== accessGrant.content_hash) {
+      throw new Error("Credential content hash does not match the access grant hash");
+    }
 
-  async getReusableCredentialCompliantly(_credentialId: string) {
-    // @todo: implement this:
-    // retrieve and decrypt the credential
-    // ensure the AG they used was inserted by a known OE
-    // check that the hashes match between the credential content and the AG
-    // return the credential
+    return credential;
   }
 
   async getGrants(page = 1, size = 7) {
