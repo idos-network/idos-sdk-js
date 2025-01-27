@@ -205,14 +205,6 @@ export const hasReusableCredential = async (credentialHash: string) => {
 - [@tanstack/react-query](https://tanstack.com/query)
 - [Wagmi](https://wagmi.sh/)
 
-### Running the Demo
-
-1. Set up the environment variables in a `.env` file.
-2. Start the app and interact with the demo:
-   ```bash
-   pnpm dev
-   ```
-
 ### License
 
 This project is licensed under the MIT License.
