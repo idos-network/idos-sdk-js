@@ -69,7 +69,6 @@ export default function Home() {
           // @ts-ignore
           await _instance.setSigner("EVM", signer);
           const _credentials = await _instance.data.list<idOSCredential>("credentials");
-          console.log("credentials", _credentials);
           setCredentials(_credentials);
         }
 
