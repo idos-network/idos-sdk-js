@@ -19,11 +19,16 @@ export function createActionInput(params: Record<string, any>): Utils.ActionInpu
 
 export function encryptContent(
   message: Uint8Array,
-  receiverPublicKey: Uint8Array,
-  senderSecretKey: Uint8Array,
-): string {
+  recipientEncryptionPublicKey: Uint8Array,
+  senderEncryptionSecretKey: Uint8Array,
+) {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
-  const encrypted = nacl.box(message, nonce, receiverPublicKey, senderSecretKey);
+  const encrypted = nacl.box(
+    message,
+    nonce,
+    recipientEncryptionPublicKey,
+    senderEncryptionSecretKey,
+  );
 
   if (encrypted === null)
     throw Error(
@@ -31,7 +36,7 @@ export function encryptContent(
         {
           message: base64Encode(message),
           nonce: base64Encode(nonce),
-          receiverPublicKey: base64Encode(receiverPublicKey),
+          receiverPublicKey: base64Encode(recipientEncryptionPublicKey),
         },
         null,
         2,
@@ -42,5 +47,36 @@ export function encryptContent(
   fullMessage.set(nonce, 0);
   fullMessage.set(encrypted, nonce.length);
 
-  return base64Encode(fullMessage);
+  return fullMessage;
+}
+
+export function decryptContent(
+  message: Uint8Array,
+  senderEncryptionPublicKey: Uint8Array,
+  recipientEncryptionSecretKey: Uint8Array,
+) {
+  const nonce = message.slice(0, nacl.box.nonceLength);
+
+  const decrypted = nacl.box.open(
+    message.slice(nacl.box.nonceLength, message.length),
+    nonce,
+    senderEncryptionPublicKey,
+    recipientEncryptionSecretKey,
+  );
+
+  if (decrypted === null) {
+    throw Error(
+      `Couldn't decrypt. ${JSON.stringify(
+        {
+          message: base64Encode(message),
+          nonce: base64Encode(nonce),
+          senderEncryptionPublicKey: base64Encode(senderEncryptionPublicKey),
+        },
+        null,
+        2,
+      )}`,
+    );
+  }
+
+  return decrypted;
 }

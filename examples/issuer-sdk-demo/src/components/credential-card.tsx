@@ -1,6 +1,6 @@
+import { Button } from "@heroui/react";
+import { Card, CardBody, CardFooter, CardHeader, Divider } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/issuer-sdk-js";
-import { Button } from "@nextui-org/react";
-import { Card, CardBody, CardFooter, CardHeader, Divider } from "@nextui-org/react";
 import { CommandIcon } from "lucide-react";
 import { Fragment, useTransition } from "react";
 
@@ -15,7 +15,7 @@ export function CredentialCard({
   onViewDetails: (id: string) => void;
 }) {
   const [isRevoking, startRevokeTransition] = useTransition();
-  const publicFields = JSON.parse(credential.public_notes);
+  const publicFields = JSON.parse(credential.public_notes || "{}");
   const revocationId = publicFields.id;
   const issuer = publicFields.issuer ?? "Unknown Issuer";
   const metadata = Object.entries(publicFields) as [string, string][];
@@ -50,7 +50,7 @@ export function CredentialCard({
             color="danger"
             variant="flat"
             isLoading={isRevoking}
-            onClick={() => {
+            onPress={() => {
               startRevokeTransition(() => {
                 onRevoke(revocationId);
               });
@@ -59,7 +59,7 @@ export function CredentialCard({
             Revoke
           </Button>
         ) : null}
-        <Button color="primary" variant="solid" onClick={() => onViewDetails(credential.id)}>
+        <Button color="primary" variant="solid" onPress={() => onViewDetails(credential.id)}>
           View credential details
         </Button>
       </CardFooter>

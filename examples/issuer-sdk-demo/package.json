@@ -12,7 +12,7 @@
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
-    "@nextui-org/react": "^2.4.8",
+    "@heroui/react": "2.6.14",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/hex": "^2.0.0",
     "@stablelib/utf8": "^1.0.1",

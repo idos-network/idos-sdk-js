@@ -1,8 +1,32 @@
-import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/codecs";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncode,
+  hexEncodeSha256Hash,
+  utf8Encode,
+} from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
+
 import type { KwilWrapper } from "./kwil-wrapper";
+
+interface idOSDAGWithSignature {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+  dag_signature: string;
+}
+
+interface idOSDAGSignatureRequest {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+}
 
 /* global crypto */
 
@@ -290,10 +314,53 @@ export class Data {
     return record;
   }
 
+  // This is the same as `share`, but for credentials only. It doesn't create an AG either for the duplicate.
+  async shareCredential(
+    recordId: string,
+    granteeRecipientEncryptionPublicKey: string,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
+    synchronous?: boolean,
+  ): Promise<{ id: string }> {
+    const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
+
+    const insertableCredential = await this.#buildInsertableIDOSCredential(
+      originalCredential.user_id,
+      "",
+      originalCredential.content,
+      granteeRecipientEncryptionPublicKey,
+      grantInfo,
+    );
+
+    const id = crypto.randomUUID();
+
+    await this.kwilWrapper.execute(
+      "share_credential_without_ag",
+      [
+        {
+          original_credential_id: originalCredential.id,
+          ...originalCredential,
+          ...insertableCredential,
+          id,
+        },
+      ],
+      "Share a credential on idOS",
+      synchronous,
+    );
+
+    return { id };
+  }
+
   async share(
     tableName: string,
     recordId: string,
     granteeRecipientEncryptionPublicKey: string,
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
     synchronous?: boolean,
   ): Promise<{ id: string }> {
     const name = this.singularize(tableName);
@@ -309,6 +376,7 @@ export class Data {
           "",
           record.content,
           granteeRecipientEncryptionPublicKey,
+          grantInfo,
         ),
       );
     }
@@ -362,11 +430,45 @@ export class Data {
     });
   }
 
+  async getCredentialContentSha256Hash(credentialId: string) {
+    const credential = (await this.get("credentials", credentialId)) as idOSCredential;
+    return hexEncodeSha256Hash(utf8Encode(credential.content));
+  }
+
+  /**
+   * Transmit a DAG to the given URL.
+   * @param url The URL to transmit the DAG to.
+   * @param payload The DAG to transmit.
+   * @returns The response from the URL.
+   */
+  async transmitDAG(url: string, payload: idOSDAGWithSignature) {
+    return fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
+    const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
+      { message: string },
+    ];
+    const message = response?.[0]?.message;
+    return message;
+  }
+
   async #buildInsertableIDOSCredential(
     userId: string,
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string | undefined,
+    // @todo: use plain argument instead of object
+    grantInfo?: {
+      granteeAddress: string;
+      lockedUntil: number;
+    },
   ): Promise<InsertableIDOSCredential> {
     const issuerAuthenticationKeyPair = nacl.sign.keyPair();
 
@@ -380,6 +482,13 @@ export class Data {
       utf8Encode(publicNotes),
       issuerAuthenticationKeyPair.secretKey,
     );
+
+    const grantInfoParam = grantInfo
+      ? {
+          grantee_wallet_identifier: grantInfo.granteeAddress,
+          locked_until: grantInfo.lockedUntil,
+        }
+      : {};
 
     return {
       user_id: userId,
@@ -397,6 +506,7 @@ export class Data {
 
       issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
       encryptor_public_key: isPresent(encryptorPublicKey),
+      ...grantInfoParam,
     };
   }
 }

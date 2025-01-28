@@ -23,7 +23,7 @@ interface ButtonProps extends HeadlessButtonProps, BaseVariants {}
 export function Button({ variant, class: _class, className, ...props }: ButtonProps) {
   return (
     <HeadlessButton
-      // @ts-ignore: there is a missmatch between what `preact` types for `class` and what `tailwind-variants` expects.
+      // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
       className={button({ variant, class: _class, className })}
       {...props}
     />

@@ -1,261 +1,76 @@
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import type { Wallet } from "@near-wallet-selector/core";
-import type { Signer } from "ethers";
+import type { KwilWrapper } from "../kwil-wrapper";
+import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
 
-import type { Data } from "../data";
-import type { Enclave } from "../enclave";
-import { assertNever } from "../utils";
-import { EvmGrants, type EvmGrantsOptions } from "./evm";
-import type Grant from "./grant";
-import type { GrantChild } from "./grant-child";
-import { NearGrants, type NearGrantsOptions } from "./near";
-
-const SIGNER_TYPES = {
-  EVM: EvmGrants,
-  NEAR: NearGrants,
-} as const;
-
-export type SignerType = keyof typeof SIGNER_TYPES;
-
-export class Grants {
-  static SIGNER_TYPES = SIGNER_TYPES;
-  static evm = {
-    defaultChainId: EvmGrants.defaultChainId,
-  };
-  static near = {
-    /**
-     * @deprecated Use {@link Grants.methodNames} instead.
-     */
-    contractMethods: Object.values(NearGrants.contractMethods),
-    methodNames: Object.values(NearGrants.contractMethods),
-    /**
-     * @deprecated Use {@link Grants.contractId } instead.
-     */
-    defaultContractId: NearGrants.defaultContractId,
-    contractId: NearGrants.defaultContractId,
-    defaultNetwork: NearGrants.defaultNetwork,
-  };
-
-  evmGrantsOptions: EvmGrantsOptions;
-  nearGrantsOptions: NearGrantsOptions;
-
-  constructor(
-    public readonly data: Data,
-    public readonly enclave: Enclave,
-    evmGrantsOptions: EvmGrantsOptions = {},
-    nearGrantsOptions: NearGrantsOptions = {},
-  ) {
-    this.evmGrantsOptions = evmGrantsOptions;
-    this.nearGrantsOptions = nearGrantsOptions;
-  }
-
-  async connect({ type, signer }: { type: "EVM"; signer: Signer }): Promise<ConnectedGrants>;
-
-  async connect({
-    type,
-    signer,
-    accountId,
-    nearWalletPublicKey,
-  }: {
-    type: "NEAR";
-    signer: Wallet;
-    accountId: string;
-    nearWalletPublicKey: string;
-  }): Promise<ConnectedGrants>;
-
-  async connect({
-    type,
-    signer,
-    accountId,
-    nearWalletPublicKey,
-  }: {
-    type: SignerType;
-    signer: Wallet | Signer;
-    accountId?: string;
-    nearWalletPublicKey?: string;
-  }): Promise<ConnectedGrants> {
-    let child: EvmGrants | NearGrants;
-
-    switch (type) {
-      case "EVM":
-        child = await EvmGrants.init({ signer: signer as Signer, options: this.evmGrantsOptions });
-        break;
-      case "NEAR":
-        if (accountId === undefined) throw new Error("accountId required for NEAR signers");
-        if (nearWalletPublicKey === undefined)
-          throw new Error("publicKey required for NEAR signers");
-        child = await NearGrants.init({
-          accountId,
-          signer: signer as Wallet,
-          options: this.nearGrantsOptions,
-          nearWalletPublicKey,
-        });
-        break;
-      default:
-        child = assertNever(type, `Unexpected signer type: ${type}`);
-    }
-
-    return new ConnectedGrants(this.data, this.enclave, child);
-  }
-
-  async list(
-    _args: {
-      ownerAddress?: string;
-      granteeAddress?: string;
-      dataId?: string;
-    } = {},
-  ): Promise<Grant[]> {
-    throw new Error("Call idOS.setSigner first.");
-  }
-
-  async create(
-    _tableName: string,
-    _recordId: string,
-    _address: string,
-    _lockedUntil: number,
-    _receiverEncryptionPublicKey: string,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call `idOS.setSigner` first.");
-  }
-
-  async revoke(
-    _tableName: string,
-    _recordId: string,
-    _granteeAddress: string,
-    _dataId: string,
-    _lockedUntil: number,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call `idOS.setSigner` first.");
-  }
-
-  async shareMatchingEntry(
-    _tableName: string,
-    _publicFields: Record<string, string>,
-    _privateFieldFilters: {
-      pick: Record<string, string>;
-      omit: Record<string, string>;
-    },
-    _granteeAddress: string,
-    _lockedUntil: number,
-    _receiverEncryptionPublicKey: string,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    throw new Error("Call `idOS.setSigner` first.");
-  }
+interface InitParams {
+  nodeUrl?: string;
+  dbId?: string;
 }
 
-class ConnectedGrants extends Grants {
-  #child: GrantChild;
+export class Grants {
+  kwilWrapper: KwilWrapper;
 
-  constructor(
-    public readonly data: Data,
-    public readonly enclave: Enclave,
-    child: GrantChild,
-  ) {
-    super(data, enclave);
-    this.#child = child;
+  constructor(params: InitParams & { kwilWrapper: KwilWrapper }) {
+    this.kwilWrapper = params.kwilWrapper;
   }
 
-  async list(
-    args: {
-      owner?: string;
-      grantee?: string;
-      dataId?: string;
-    } = {},
-  ): Promise<Grant[]> {
-    return this.#child.list(args);
+  async listGrantedGrants(
+    page = 1,
+    size = DEFAULT_RECORDS_PER_PAGE,
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
+    return this.getGrantsGranted(page, size);
   }
 
-  async create(
-    tableName: string,
-    recordId: string,
-    granteeAddress: string,
-    lockedUntil: number,
-    granteeEncryptionPublicKey: string,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    const share = await this.data.share(tableName, recordId, granteeEncryptionPublicKey);
+  async getGrantsGrantedCount(): Promise<number> {
+    const response = (await this.kwilWrapper.call(
+      "get_access_grants_granted_count",
+      null,
+    )) as unknown as {
+      count: number;
+    }[];
+    return response[0].count;
+  }
 
-    return await this.#child.create({
-      granteeAddress,
-      dataId: share.id,
-      lockedUntil: lockedUntil,
+  mapToGrant(grant: any): idOSGrant {
+    return new idOSGrant({
+      id: grant.id,
+      ownerUserId: grant.ag_owner_user_id,
+      granteeAddress: grant.ag_grantee_wallet_identifier,
+      dataId: grant.data_id,
+      lockedUntil: grant.locked_until,
     });
   }
 
-  async shareMatchingEntry(
-    tableName: string,
-    publicFields: Record<string, string>,
-    privateFieldFilters: {
-      pick: Record<string, string>;
-      omit: Record<string, string>;
-    },
-    granteeAddress: string,
-    lockedUntil: number,
-    receiverEncryptionPublicKey: string,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    const allEntries = (await this.data.list(tableName)) as unknown as idOSCredential[];
-
-    const filteredEntries = allEntries.filter((entry) => {
-      const keys = Object.keys(publicFields);
-      const meta = JSON.parse(entry.public_notes) as Record<string, string>;
-
-      for (const key of keys) {
-        if (meta[key] !== publicFields[key]) return false;
-      }
-
-      return true;
-    });
-
-    const filteredEntriesWithContent = await Promise.all(
-      filteredEntries.map(async (credential) => {
-        const fullCredential = await this.data.get(
-          "credentials",
-          (credential as unknown as idOSCredential).id,
-          false,
-        );
-        return fullCredential;
-      }),
-    );
-
-    if (!filteredEntriesWithContent.length) throw new Error("No matching credentials to share");
-
-    const eligibleEntries = await this.enclave.filterCredentials(
-      filteredEntriesWithContent as Record<string, string>[],
-      privateFieldFilters,
-    );
-
-    if (!eligibleEntries.length) throw new Error("No matching credentials");
-
-    const selectedEntry = eligibleEntries[0];
-    const { id: dataId } = await this.data.share(
-      tableName,
-      selectedEntry.id,
-      receiverEncryptionPublicKey,
-    );
-
-    return await this.#child.create({
-      granteeAddress,
-      dataId,
-      lockedUntil,
-    });
+  async getGrantsOwned(): Promise<{ grants: idOSGrant[] }> {
+    const list = (await this.kwilWrapper.call("get_access_grants_owned", null)) as any;
+    const grants = list.map(this.mapToGrant);
+    return {
+      grants,
+    };
   }
 
-  async revoke(
-    tableName: string,
-    recordId: string,
-    granteeAddress: string,
-    dataId: string,
-    lockedUntil: number,
-  ): Promise<{ grant: Grant; transactionId: string }> {
-    await this.data.unshare(tableName, recordId);
+  async getGrantsGranted(
+    page: number,
+    size = DEFAULT_RECORDS_PER_PAGE,
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
+    if (!page) throw new Error("paging starts from 1");
+    const list = (await this.kwilWrapper.call("get_access_grants_granted", { page, size })) as any;
+    const totalCount = await this.getGrantsGrantedCount();
 
-    return this.#child.revoke({ granteeAddress, dataId, lockedUntil });
+    const grants = list.map(this.mapToGrant);
+    return {
+      grants,
+      totalCount,
+    };
   }
 
-  async messageForCreateBySignature(grant: Grant) {
-    return this.#child.messageForCreateBySignature(grant);
+  async revokeGrant(grantId: string) {
+    return this.kwilWrapper.execute("revoke_access_grant", [{ id: grantId }]);
   }
 
-  async messageForRevokeBySignature(grant: Grant) {
-    return this.#child.messageForRevokeBySignature(grant);
+  async hasLockedGrants(credentialId: string) {
+    const result = (await this.kwilWrapper.call("has_locked_access_grants", {
+      id: credentialId,
+    })) as unknown as [{ has: boolean }];
+    return result[0]?.has;
   }
 }

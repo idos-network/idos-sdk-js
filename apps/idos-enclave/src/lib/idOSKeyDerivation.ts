@@ -3,7 +3,7 @@ import { scrypt } from "scrypt-js";
 
 /*
  * normalizePassword
- *    Unicode normalization of input strigs
+ *    Unicode normalization of input strings
  *    NFKC: compatibility decomposition followed by canonical composition
  * validateSalt
  *    UUID v4 format (idOS user IDs)

@@ -1,33 +1,30 @@
-import { Button, ButtonGroup, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react";
+import { Button, ButtonGroup, HStack, Heading, Stack, VStack } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { sepolia } from "viem/chains";
 import { useSwitchChain } from "wagmi";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
-import { useIdOS } from "@/core/idos";
 
 const useShareMatchingCredential = () => {
-  const { address, sdk } = useIdOS();
-
   return useMutation({
-    mutationFn: () =>
-      sdk.grants.shareMatchingEntry(
-        "credentials",
-        {
-          level: "human",
-          type: "human",
-        },
-        {
-          pick: {
-            "credentialSubject.id": "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
-          },
-          omit: {},
-        },
-        address as string,
-        0,
-        "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
-      ),
+    mutationFn: () => Promise.resolve(), // @todo: re-implement this with new Grants update
+    // sdk.grants.shareMatchingEntry(
+    //   "credentials",
+    //   {
+    //     level: "human",
+    //     type: "human",
+    //   },
+    //   {
+    //     pick: {
+    //       "credentialSubject.id": "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
+    //     },
+    //     omit: {},
+    //   },
+    //   address as string,
+    //   0,
+    //   "zleIscgvb3usjyVqR4OweNM2oXwmzADJVO3g7byuGk8=",
+    // ),
   });
 };
 
@@ -86,7 +83,8 @@ export function Component() {
       ) : null}
       {share.isSuccess ? (
         <Stack id="transaction" gap={14} p={5} bg="neutral.900" rounded="xl">
-          <Text id="transaction-id">Transaction ID: {share.data.transactionId}</Text>
+          {/* @todo: Add transaction ID to the UI */}
+          {/* <Text id="transaction-id">Transaction ID: {share.data.transactionId}</Text> */}
         </Stack>
       ) : null}
     </VStack>

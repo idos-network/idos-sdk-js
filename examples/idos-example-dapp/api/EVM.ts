@@ -9,20 +9,20 @@ if (!global.crypto) global.crypto = (await import("node:crypto")).default;
 const ENCRYPTION_SECRET_KEY = "2bu7SyMToRAuFn01/oqU3fx9ZHo9GKugQhQYmDuBXzg=";
 const EVM_GRANTEE_PRIVATE_KEY =
   "0x515c2fed89c22eaa9d41cfce6e6e454fa0a39353e711d6a99f34b4ecab4b4859";
-const EVM_NODE_URL = "https://ethereum-sepolia.publicnode.com";
+const EVM_NODE_URL = "https://nodes.idos.network";
 
 const evmGranteeSigner = new ethers.Wallet(
   EVM_GRANTEE_PRIVATE_KEY,
   new ethers.JsonRpcProvider(EVM_NODE_URL),
 );
 
-const idosGrantee = await idOSGrantee.init({
-  chainType: "EVM",
+const idOSGranteeInstance = await idOSGrantee.init({
   granteeSigner: evmGranteeSigner,
   recipientEncryptionPrivateKey: ENCRYPTION_SECRET_KEY,
+  nodeUrl: EVM_NODE_URL,
 });
 
-const encryptionPublicKey = idosGrantee.encryptionPublicKey;
+const encryptionPublicKey = idOSGranteeInstance.encryptionPublicKey;
 const lockTimeSpanSeconds = 3600; // one hour
 
 import type { VercelRequest, VercelResponse } from "@vercel/node";
@@ -33,7 +33,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
     return response.json({
       encryptionPublicKey,
       lockTimeSpanSeconds,
-      grantee: idosGrantee.grantee,
+      grantee: idOSGranteeInstance.address,
     });
   }
 
@@ -54,7 +54,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
 
   const { dataId } = body as { dataId: string };
   try {
-    return response.json(await idosGrantee.getSharedCredentialContentDecrypted(dataId));
+    return response.json(await idOSGranteeInstance.getSharedCredentialContentDecrypted(dataId));
   } catch (e) {
     console.error(e);
     return response.status(500).send(e.toString());

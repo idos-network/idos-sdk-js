@@ -1,6 +1,6 @@
 import { useSdkStore } from "@/stores/sdk";
+import { useDisclosure } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import { useDisclosure } from "@nextui-org/react";
 
 import { revokeCredentialById } from "@/actions";
 import { useState } from "react";

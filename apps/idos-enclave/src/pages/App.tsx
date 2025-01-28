@@ -65,7 +65,7 @@ export function App({ store, enclave }: AppProps) {
   const [message, setMessage] = useState<string | null>(null);
   const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
   const [userId] = useState<string | null>(
-    new URLSearchParams(window.location.search).get("humanId"),
+    new URLSearchParams(window.location.search).get("userId"),
   );
 
   const isRecoveryMode = useSignal(false);

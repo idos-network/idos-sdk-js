@@ -8,10 +8,10 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@idos-network/idos-sdk-server-dapp": "workspace:*"
+    "@idos-network/grantee-sdk-js": "workspace:*"
   },
   "peerDependencies": {
-    "ethers": "^6.12",
+    "ethers": "^6.13.5",
     "near-api-js": "3.0.4"
   }
 }

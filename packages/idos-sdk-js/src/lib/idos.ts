@@ -8,25 +8,22 @@ import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { IframeEnclave } from "./enclave-providers";
 import type { EnclaveOptions } from "./enclave-providers/types";
-import type { EvmGrantsOptions, NearGrantsOptions } from "./grants";
-import { Grants, type SignerType } from "./grants/grants";
+import { Grants } from "./grants";
+import type idOSGrant from "./grants/grant";
 import { KwilWrapper } from "./kwil-wrapper";
 import type { StorableAttribute } from "./types";
-import { assertNever } from "./utils";
 import verifiableCredentials from "./verifiable-credentials";
+
+export type SignerType = "EVM" | "NEAR";
 
 interface InitParams {
   nodeUrl?: string;
   dbId?: string;
   enclaveOptions: EnclaveOptions;
-  evmGrantsOptions?: EvmGrantsOptions;
-  nearGrantsOptions?: NearGrantsOptions;
 }
 
 export class idOS {
   static initializing = false;
-  static near = Grants.near;
-  static evm = Grants.evm;
   static kwil = KwilWrapper.defaults;
 
   static verifiableCredentials = verifiableCredentials;
@@ -41,8 +38,8 @@ export class idOS {
   private constructor({
     enclaveOptions,
     kwilWrapper,
-    evmGrantsOptions,
-    nearGrantsOptions,
+    dbId,
+    nodeUrl,
   }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
     this.store = new Store();
@@ -57,7 +54,7 @@ export class idOS {
 
     this.data = new Data(kwilWrapper, this.enclave);
 
-    this.grants = new Grants(this.data, this.enclave, evmGrantsOptions, nearGrantsOptions);
+    this.grants = new Grants({ dbId, nodeUrl, kwilWrapper: this.kwilWrapper });
   }
 
   static async init(params: InitParams): Promise<idOS> {
@@ -77,32 +74,25 @@ export class idOS {
   async setSigner(type: "EVM", signer: Signer): Promise<AuthUser>;
 
   async setSigner(type: SignerType, signer: Wallet | Signer): Promise<AuthUser> {
-    if (type === "NEAR") {
-      await this.auth.setNearSigner(signer as Wallet);
-      const currentUser = this.auth.currentUser;
-      this.grants = await this.grants.connect({
-        type,
-        accountId: currentUser.userAddress,
-        signer: signer as Wallet,
-        nearWalletPublicKey: currentUser.nearWalletPublicKey ?? "",
-      });
+    const recognizedTypes = ["NEAR", "EVM"];
+    if (!recognizedTypes.includes(type)) throw new Error(`Signer type "${type}" not recognized`);
 
-      return currentUser;
-    }
+    type === "EVM" && (await this.auth.setEvmSigner(signer as Signer));
+    type === "NEAR" && (await this.auth.setNearSigner(signer as Wallet));
 
-    if (type === "EVM") {
-      await this.auth.setEvmSigner(signer as Signer);
-      const currentUser = this.auth.currentUser;
-      this.grants = await this.grants.connect({ type, signer: signer as Signer });
-
-      return currentUser;
-    }
-
-    return assertNever(type, `Signer type "${type}" not recognized`);
+    const currentUser = this.auth.currentUser;
+    return currentUser;
   }
 
   async hasProfile(userAddress: string): Promise<boolean> {
     return this.kwilWrapper.hasProfile(userAddress);
+  }
+
+  async listGrantedGrants(
+    page: number,
+    size?: number,
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
+    return this.kwilWrapper.getGrantsGranted(page, size);
   }
 
   async reset({ enclave = false } = {}): Promise<void> {

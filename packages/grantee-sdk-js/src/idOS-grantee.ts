@@ -1,227 +1,97 @@
-import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncodeSha256Hash,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/codecs";
+import { decryptContent } from "@idos-network/cryptography";
+import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+import {
+  type KwilActionClient,
+  createNodeKwilClient,
+} from "@idos-network/kwil-actions/create-kwil-client";
+import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
+import {
+  getAccessGrantsForCredential,
+  getSharedCredential,
+} from "@idos-network/kwil-actions/credentials";
+import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
-import nacl from "tweetnacl";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
-
-import {
-  EvmGrants,
-  type EvmGrantsOptions,
-  type NearGrantsOptions,
-} from "../../idos-sdk-js/src/lib/grants";
-import type { GrantChild } from "../../idos-sdk-js/src/lib/grants/grant-child.ts";
-import type Grant from "../../idos-sdk-js/src/lib/grants/grant.ts";
-import { KwilWrapper } from "../../idos-sdk-js/src/lib/kwil-wrapper.ts";
-import { assertNever } from "../../idos-sdk-js/src/lib/utils.ts";
+import nacl, { type SignKeyPair } from "tweetnacl";
 
 export class NoncedBox {
-  keyPair: nacl.BoxKeyPair;
+  constructor(public readonly keyPair: nacl.BoxKeyPair) {}
 
-  constructor(keyPair: nacl.BoxKeyPair) {
-    this.keyPair = keyPair;
+  static nonceFromBase64SecretKey(secret: string): NoncedBox {
+    return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
-  static fromBase64SecretKey(secret: string): NoncedBox {
-    return new NoncedBox(nacl.box.keyPair.fromSecretKey(Base64Codec.decode(secret)));
-  }
+  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+    const decodedMessage = base64Decode(b64FullMessage);
+    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
+    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
+    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
+    const content = decryptContent(
+      message,
+      nonce,
+      senderEncryptionPublicKey,
+      this.keyPair.secretKey,
+    );
 
-  async decrypt(b64FullMessage: string, b64SenderPublicKey: string): Promise<string> {
-    const fullMessage = Base64Codec.decode(b64FullMessage);
-    const senderPublicKey = Base64Codec.decode(b64SenderPublicKey);
-
-    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-
-    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
-
-    if (decrypted == null) {
-      throw Error(
-        `Couldn't decrypt. ${JSON.stringify(
-          {
-            fullMessage: Base64Codec.encode(fullMessage),
-            message: Base64Codec.encode(message),
-            nonce: Base64Codec.encode(nonce),
-            senderPublicKey: Base64Codec.encode(senderPublicKey),
-            receiverPublicKey: Base64Codec.encode(this.keyPair.publicKey),
-          },
-          null,
-          2,
-        )}`,
-      );
-    }
-
-    return Utf8Codec.decode(decrypted);
+    return utf8Decode(content);
   }
 }
-
-type ChainType = "EVM" | "NEAR";
-
-const buildKwilSignerAndGrantee = (
-  chainType: ChainType,
-  granteeSigner: KeyPair | ethers.Wallet,
-): [KwilSigner, string] => {
-  switch (chainType) {
-    case "EVM": {
-      const signer = granteeSigner as ethers.Wallet;
-      // biome-ignore lint/suspicious/noExplicitAny: TBD.
-      return [new KwilSigner(signer as any, signer.address), signer.address];
-    }
-    case "NEAR": {
-      const signer = granteeSigner as KeyPair;
-      const publicKey = signer.getPublicKey().toString();
-      return [
-        new KwilSigner(
-          kwilNep413Signer("idos-grantee")(signer),
-          implicitAddressFromPublicKey(publicKey),
-          "nep413",
-        ),
-        publicKey,
-      ];
-    }
-    default:
-      return assertNever(chainType, `Unexpected chainType: ${chainType}`);
-  }
-};
 
 interface idOSGranteeInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
-  chainType: ChainType;
-  granteeSigner: KeyPair | ethers.Wallet;
-  granteeOptions?: EvmGrantsOptions | NearGrantsOptions;
+  granteeSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
-const throwError = (message: string): never => {
-  throw new Error(message);
-};
-
 export class idOSGrantee {
-  noncedBox: NoncedBox;
-  nodeKwil: NodeKwil;
-  kwilSigner: KwilSigner;
-  dbId: string;
-  chainType: ChainType;
-  address: string;
-  grants?: GrantChild;
-
-  static async init(_: {
-    recipientEncryptionPrivateKey: string;
-    nodeUrl?: string;
-    chainId?: string;
-    dbId?: string;
-    chainType: "EVM";
-    granteeSigner: ethers.Wallet;
-    granteeOptions?: EvmGrantsOptions;
-  }): Promise<idOSGrantee>;
-
-  static async init(_: {
-    recipientEncryptionPrivateKey: string;
-    nodeUrl?: string;
-    chainId?: string;
-    dbId?: string;
-    chainType: "NEAR";
-    granteeSigner: KeyPair;
-    granteeOptions?: NearGrantsOptions;
-  }): Promise<idOSGrantee>;
-
   static async init({
     recipientEncryptionPrivateKey,
-    nodeUrl = KwilWrapper.defaults.kwilProvider,
+    nodeUrl = "https://nodes.idos.network",
     chainId,
     dbId,
-    chainType,
     granteeSigner,
-    granteeOptions,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
-    const kwil = new NodeKwil({ kwilProvider: nodeUrl, chainId: "" });
+    const kwilClient = await createNodeKwilClient({
+      nodeUrl,
+      chainId,
+      dbId,
+    });
 
-    chainId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
-      (await kwil.chainInfo({ disableWarning: true })).data?.chain_id! ||
-      throwError("Can't discover chainId. You must pass it explicitly.");
-
-    dbId ||=
-      // biome-ignore lint/style/noNonNullAssertion: I want to let it fall to throwError.
-      (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid! ||
-      throwError("Can't discover dbId. You must pass it explicitly.");
-
-    const nodeKwil = new NodeKwil({ kwilProvider: nodeUrl, chainId });
-
-    const [kwilSigner, address] = buildKwilSignerAndGrantee(chainType, granteeSigner);
-
-    let grants: EvmGrants | undefined;
-    switch (chainType) {
-      case "EVM": {
-        const signer = granteeSigner as ethers.Wallet;
-        grants = await EvmGrants.init({
-          // biome-ignore lint/suspicious/noExplicitAny: TBD.
-          signer: signer as any,
-          options: (granteeOptions ?? {}) as EvmGrantsOptions,
-        });
-        break;
-      }
-      case "NEAR": {
-        grants = undefined;
-        break;
-      }
-      default:
-        grants = throwError(`Unknown chainType: ${chainType}`);
-    }
+    const [signer, address] = createKwilSigner(granteeSigner);
+    kwilClient.setSigner(signer);
 
     return new idOSGrantee(
-      NoncedBox.fromBase64SecretKey(recipientEncryptionPrivateKey),
-      nodeKwil,
-      kwilSigner,
-      dbId,
-      chainType,
+      NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
+      kwilClient,
       address,
-      grants,
     );
   }
 
   private constructor(
-    noncedBox: NoncedBox,
-    nodeKwil: NodeKwil,
-    kwilSigner: KwilSigner,
-    dbId: string,
-    chainType: ChainType,
-    address: string,
-    grants: GrantChild | undefined,
-  ) {
-    this.noncedBox = noncedBox;
-    this.nodeKwil = nodeKwil;
-    this.kwilSigner = kwilSigner;
-    this.dbId = dbId;
-    this.chainType = chainType;
-    this.address = address;
-    this.grants = grants;
+    private readonly noncedBox: NoncedBox,
+    private readonly kwilClient: KwilActionClient,
+    public readonly address: string,
+  ) {}
+
+  get encryptionPublicKey() {
+    return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async fetchSharedCredentialFromIdos<T extends Record<string, unknown>>(
-    dataId: string,
-  ): Promise<T> {
-    return (
-      (await this.nodeKwil.call(
-        {
-          name: "get_credential_shared",
-          dbid: this.dbId,
-          inputs: [{ $id: dataId }],
-        },
-        this.kwilSigner,
-        // biome-ignore lint/suspicious/noExplicitAny: NodeKwil doesn't have the best type defs.
-      )) as any
-    ).data.result[0] as unknown as T;
+  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential[]> {
+    return getSharedCredential(this.kwilClient, dataId);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const credentialCopy = await this.fetchSharedCredentialFromIdos<{
-      content: string;
-      encryptor_public_key: string;
-    }>(dataId);
+    const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
@@ -229,53 +99,48 @@ export class idOSGrantee {
     );
   }
 
-  /**
-   * Returns the list of Access Grants that are present in the network that granteeSigner is connected to.
-   *
-   * If you need to gather AGs from more than one chain, consider instantiating this class once per chain, and do
-   * something like so:
-   * <code>
-   *   const AllIdOSGrantees = [
-   *     await idOSGrantee.init({args: "for", chain: "one"}),
-   *     await idOSGrantee.init({args: "for", chain: "two"}),
-   *   ]
-   *   const allUserAGs = (await Promise.all(allIdOSGrantees.map(
-   *     (idOSGrantee) => idOSGrantee.getLocalAccessGrantsFromUserByAddress(address),
-   *   ))).flat()
-   * </code>
-   *
-   * @param address The user's address.
-   */
-  async getLocalAccessGrantsFromUserByAddress(address: string): Promise<Grant[]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
-
-    return this.grants.list({
-      ownerAddress: address,
-      granteeAddress: this.grantee,
-    });
+  async getLocalAccessGrantsFromUserByAddress() {
+    // @todo: update Alexandr to implement this
+    throw new Error("Not implemented yet");
   }
 
-  async createBySignature(
-    ...args: Parameters<GrantChild["createBySignature"]>
-  ): ReturnType<GrantChild["createBySignature"]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
-
-    return this.grants.createBySignature(...args);
+  async getGrantsCount(): Promise<number> {
+    return getGrantsCount(this.kwilClient);
   }
 
-  async revokeBySignature(
-    ...args: Parameters<GrantChild["revokeBySignature"]>
-  ): ReturnType<GrantChild["revokeBySignature"]> {
-    if (!this.grants) throw new Error("NEAR is not implemented yet");
+  async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
+    const params = { credential_id: credentialId };
+    const accessGrants = await getAccessGrantsForCredential(this.kwilClient, params);
 
-    return this.grants.revokeBySignature(...args);
+    return accessGrants[0];
   }
 
-  get grantee() {
-    return this.address;
+  async validateCredentialByAG(credentialId: string) {
+    const accessGrant = await this.getCredentialAccessGrant(credentialId);
+    const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
+    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
+
+    return contentHash === accessGrant.hash;
   }
 
-  get encryptionPublicKey() {
-    return Base64Codec.encode(this.noncedBox.keyPair.publicKey);
+  async getReusableCredentialCompliantly(_credentialId: string) {
+    // @todo: implement this:
+    // retrieve and decrypt the credential
+    // ensure the AG they used was inserted by a known OE
+    // check that the hashes match between the credential content and the AG
+    // return the credential
+  }
+
+  async getGrants(page = 1, size = 7) {
+    return {
+      grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
+        id: grant.id,
+        ownerUserId: grant.ag_owner_user_id,
+        granteeAddress: grant.ag_grantee_wallet_identifier,
+        dataId: grant.data_id,
+        lockedUntil: grant.locked_until,
+      })),
+      totalCount: await this.getGrantsCount(),
+    };
   }
 }

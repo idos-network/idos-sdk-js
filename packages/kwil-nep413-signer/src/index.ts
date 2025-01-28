@@ -1,15 +1,17 @@
-import * as BinaryCodec from "@stablelib/binary";
-import * as BytesCodec from "@stablelib/bytes";
-import { encode as encodeHex } from "@stablelib/hex";
-import * as sha256 from "@stablelib/sha256";
-import * as Utf8Codec from "@stablelib/utf8";
-import * as BorshCodec from "borsh";
+import {
+  binaryWriteUint16BE,
+  borshSerialize,
+  bytesConcat,
+  hexEncode,
+  sha256Hash,
+  utf8Decode,
+} from "@idos-network/codecs";
 import bs58 from "bs58";
 import type { KeyPair } from "near-api-js";
 
 export const implicitAddressFromPublicKey = (publicKey: string) => {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  const implicitAddress = encodeHex(bs58.decode(key_without_prefix));
+  const implicitAddress = hexEncode(bs58.decode(key_without_prefix));
   return implicitAddress;
 };
 
@@ -17,7 +19,7 @@ export const kwilNep413Signer =
   (recipient: string) =>
   (keyPair: KeyPair) =>
   async (messageBytes: Uint8Array): Promise<Uint8Array> => {
-    const message = Utf8Codec.decode(messageBytes);
+    const message = utf8Decode(messageBytes);
     const nonceLength = 32;
     const nonce = crypto.getRandomValues(new Uint8Array(nonceLength));
 
@@ -33,10 +35,10 @@ export const kwilNep413Signer =
     const tag = 2147484061; // 2**31 + 413
 
     const { signature } = keyPair.sign(
-      sha256.hash(
-        BytesCodec.concat(
-          BorshCodec.serialize("u32", tag),
-          BorshCodec.serialize(nep413BorschSchema, { message, nonce, recipient }),
+      sha256Hash(
+        bytesConcat(
+          borshSerialize("u32", tag),
+          borshSerialize(nep413BorschSchema, { message, nonce, recipient }),
         ),
       ),
     );
@@ -55,13 +57,10 @@ export const kwilNep413Signer =
       recipient,
     };
 
-    const kwilNep413BorshPayload = BorshCodec.serialize(
-      kwilNep413BorschSchema,
-      kwilNep413BorshParams,
-    );
+    const kwilNep413BorshPayload = borshSerialize(kwilNep413BorschSchema, kwilNep413BorshParams);
 
-    return BytesCodec.concat(
-      BinaryCodec.writeUint16BE(kwilNep413BorshPayload.length),
+    return bytesConcat(
+      binaryWriteUint16BE(kwilNep413BorshPayload.length),
       kwilNep413BorshPayload,
       signature,
     );

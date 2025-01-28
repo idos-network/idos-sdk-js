@@ -8,7 +8,7 @@ import {
   ModalFooter,
   ModalHeader,
   Spinner,
-} from "@nextui-org/react";
+} from "@heroui/react";
 import React, { useCallback, useEffect, useState, useTransition } from "react";
 
 export default function CredentialContent({

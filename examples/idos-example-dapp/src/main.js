@@ -41,23 +41,17 @@ if (!chosenWallet) {
   });
 }
 
+const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+const network = import.meta.env.DEV ? "testnet" : "mainnet";
+
 const connectWallet = {
   EVM: async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("wallet_switchEthereumChain", [{ chainId: idOS.evm.defaultChainId }]);
-    await provider.send("eth_requestAccounts", []);
-
     const signer = await provider.getSigner();
     return { signer, address: signer.address };
   },
 
   NEAR: async () => {
-    const {
-      defaultContractId: contractId,
-      contractMethods: methodNames,
-      defaultNetwork: network,
-    } = idOS.near;
-
     const selector = await setupWalletSelector({
       network,
       modules: [setupHereWallet(), setupMeteorWallet(), setupMyNearWallet(), setupNightly()],
@@ -65,7 +59,7 @@ const connectWallet = {
 
     !selector.isSignedIn() &&
       (await new Promise((resolve) => {
-        const modal = setupModal(selector, { contractId, methodNames });
+        const modal = setupModal(selector, { contractId, methodNames: [] });
 
         // NOTE: `setTimeout` gives Meteor's extension a chance to breathe.
         // We observe that it triggers this callback before it's ready for a
@@ -184,7 +178,7 @@ const connectWallet = {
         if (address.match(/^0x[0-9A-Fa-f]{40}$/i)) {
           window.open(`https://zapper.xyz/account/${address}`);
         } else if (address.match(/^\w+\.(near|testnet)$/i)) {
-          window.open(`https://explorer.${idOS.near.defaultNetwork}.near.org/accounts/${address}`);
+          window.open(`https://explorer.${network}.near.org/accounts/${address}`);
         }
       },
     });
@@ -289,16 +283,23 @@ const connectWallet = {
         throw new Error("Unreachable");
     }
 
+    const page = 1;
+    const size = 10;
+
     const grants = await terminal
       .h1("eyes", "User's grants to this dApp")
       .wait(
         "awaiting RPC",
-        cache.get("grants") ||
-          idos.grants.list({ ownerAddress, granteeAddress: granteeInfo.grantee }),
+        cache.get("grants") || (await idos.grants.getGrantsGranted(page, size)).grants,
       );
-    cache.set("grants", grants);
 
-    terminal.table(grants, ["owner", "grantee", "dataId", "lockedUntil"], {
+    const grantsCount = cache.get("grants-count") || (await idos.grants.getGrantsGrantedCount());
+    const renderedCount = grants.length > size ? size : grants.length;
+
+    cache.set("grants", grants);
+    cache.set("grants-count", grantsCount);
+
+    terminal.table(grants, ["ownerUserId", "dataId", "granteeAddress", "lockedUntil"], {
       dataId: async (dataId) => {
         terminal.detail().h1("inspect", `Access grant for ${dataId}`);
 
@@ -308,6 +309,7 @@ const connectWallet = {
             "awaiting server decryption",
             client.fetchAndDecryptSharedCredential(chosenWallet, dataId),
           );
+
           terminal.status("done", "Decrypted");
         } catch (e) {
           terminal.error(e);
@@ -317,7 +319,7 @@ const connectWallet = {
         terminal.h1("eyes", "Content").json(JSON.parse(content));
       },
     });
+    terminal.h1("", `First ${renderedCount} of ${grantsCount} grants`).json(JSON.parse(content));
   }
-
   terminal.status("done", "Done");
 })();

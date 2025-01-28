@@ -34,6 +34,7 @@ export function Provider({ children }: PropsWithChildren) {
       nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
       enclaveOptions: {
         container: "#idOS-enclave",
+        url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
       },
     });
 

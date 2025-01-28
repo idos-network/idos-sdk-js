@@ -11,7 +11,7 @@ export function Paragraph({ class: _class, className, ...rest }: ParagraphProps)
   return (
     <p
       className={text({
-        // @ts-ignore: there is a missmatch between what `preact` types for `class` and what `tailwind-variants` expects.
+        // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
         class: _class,
         // @ts-ignore
         className,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSdkStore } from "@/stores/sdk";
-import { Button } from "@nextui-org/react";
+import { Button } from "@heroui/react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
 
@@ -15,7 +15,7 @@ export function WalletConnector() {
     return (
       <Button
         variant="faded"
-        onClick={() => {
+        onPress={() => {
           disconnect();
           clientSDK?.enclave.reset();
         }}
@@ -29,7 +29,7 @@ export function WalletConnector() {
     <Button
       variant="bordered"
       isLoading={isPending}
-      onClick={() =>
+      onPress={() =>
         connect({
           connector: injected(),
         })
