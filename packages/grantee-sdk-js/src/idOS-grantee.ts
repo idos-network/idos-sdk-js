@@ -116,16 +116,9 @@ export class idOSGrantee {
     return accessGrants[0];
   }
 
-  async getCredentialSharedByUser(userId: string) {
+  async getCredentialsSharedByUser(userId: string) {
     const credentials = await getCredentialsSharedByUser(this.kwilClient, userId);
-    const match = credentials[0];
-
-    // @todo: find the matching credential by searching the `public_notes` of the credential.
-    if (!match) {
-      return null;
-    }
-
-    return this.getReusableCredentialCompliantly(match.id);
+    return credentials;
   }
 
   async getReusableCredentialCompliantly(credentialId: string) {

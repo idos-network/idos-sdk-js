@@ -4,9 +4,26 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   const userId = (await params).userId;
 
   const grantee = await idOSGrantee();
-  const credential = await grantee.getCredentialSharedByUser(userId);
+  const credentials = await grantee.getCredentialsSharedByUser(userId);
 
-  return new Response(JSON.stringify(credential), {
+  if (!credentials.length) {
+    return new Response(JSON.stringify(null), {
+      status: 200,
+    });
+  }
+
+  const match = credentials.find((credential) => {
+    const publicNotes = JSON.parse(credential.public_notes ?? "{}");
+    return publicNotes.type === "PASSPORTING_DEMO";
+  });
+
+  if (!match) {
+    return new Response(JSON.stringify(null), {
+      status: 200,
+    });
+  }
+
+  return new Response(JSON.stringify(match), {
     status: 200,
   });
 }

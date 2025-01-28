@@ -2,7 +2,7 @@
 
 import { Button } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
-import { skipToken, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
@@ -11,12 +11,17 @@ import { useIdOS } from "@/idOS.provider";
 
 import { CredentialCard } from "./credential-card";
 
-const useFetchCredential = (id: string) => {
+const useFetchMatchingCredential = () => {
   const idOS = useIdOS();
 
   return useSuspenseQuery({
-    queryKey: ["credential-details", id],
-    queryFn: id ? () => idOS.data.get<idOSCredential>("credentials", id, false) : skipToken,
+    queryKey: ["matching-credential"],
+    queryFn: () => idOS.data.listAllCredentials(),
+    select: (credentials) => {
+      return credentials.find((credential) => {
+        return credential.public_notes?.includes("PASSPORTING_DEMO");
+      }) as unknown as idOSCredential;
+    },
   });
 };
 
@@ -28,8 +33,6 @@ export const useFetchSharedCredentialFromUser = () => {
       fetch(`/api/shared-credential/${idOS.auth.currentUser.userId}`).then((res) => res.json()),
   });
 };
-
-const CREDENTIAL_ID = process.env.NEXT_PUBLIC_DUMMY_CREDENTIAL_ID;
 
 function useShareCredential() {
   const { address } = useAccount();
@@ -76,21 +79,19 @@ function useShareCredential() {
 }
 
 export function MatchingCredential() {
-  // We assume that the credential that we need has the hardcoded `id`.
-  // In real life, we need to list all the credentials and find the one that we need.
-  // That can be done by searching the `public_notes` field for values like `type=human` etc.
-  invariant(CREDENTIAL_ID, "NEXT_PUBLIC_DUMMY_CREDENTIAL_ID is not set");
-
-  const credential = useFetchCredential(CREDENTIAL_ID);
+  const matchingCredential = useFetchMatchingCredential();
   const sharedCredentialFromUser = useFetchSharedCredentialFromUser();
-
   const shareCredential = useShareCredential();
 
   const handleCredentialDuplicateProcess = () => {
-    if (!credential.data) return;
+    if (!matchingCredential.data) return;
 
-    shareCredential.mutate(credential.data.id);
+    shareCredential.mutate(matchingCredential.data.id);
   };
+
+  if (!matchingCredential.data) {
+    return <div>No matching credential found</div>;
+  }
 
   if (sharedCredentialFromUser.data) {
     return (
@@ -108,7 +109,7 @@ export function MatchingCredential() {
       <h3 className="font-semibold text-2xl">
         We have found a matching credential that we can reuse:
       </h3>
-      <CredentialCard credential={credential.data as idOSCredential} />
+      <CredentialCard credential={matchingCredential.data as idOSCredential} />
       <div>
         <p className="text-green-500 text-sm">
           In order to proceed, we need to request an encrypted duplicate of this credential.

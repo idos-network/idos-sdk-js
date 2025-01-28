@@ -3,11 +3,11 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
+  createCredentialByWriteGrant as _сreateCredentialByWriteGrant,
+  createReusableCredential as _сreateReusableCredential,
   createCredentialPermissioned,
   createUser,
   editCredential,
-  createCredentialByWriteGrant as kwilCreateCredentialByWriteGrant,
-  createReusableCredential as kwilCreateReusableCredential,
 } from "@idos-network/issuer-sdk-js";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
@@ -95,7 +95,7 @@ export async function createCredentialByWriteGrant(
   const issuer = await getIssuerConfig();
   const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
-  await kwilCreateCredentialByWriteGrant(issuer, {
+  await _сreateCredentialByWriteGrant(issuer, {
     userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
@@ -136,11 +136,15 @@ export async function createReusableCredential(
 ) {
   const issuer = await getIssuerConfig();
 
-  await kwilCreateReusableCredential(issuer, {
+  await _сreateReusableCredential(issuer, {
     id: crypto.randomUUID(),
     userId,
     plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
-    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+    publicNotes: JSON.stringify({
+      ...publicNotes,
+      id: crypto.randomUUID(),
+      type: "PASSPORTING_DEMO",
+    }),
     granteeAddress,
     recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
