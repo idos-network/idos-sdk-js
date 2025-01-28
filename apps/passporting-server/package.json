@@ -6,8 +6,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/server.node.ts",
-    "start:node": "tsx src/server.node.ts"
+    "dev": "node --watch src/server.node.js",
+    "start:node": "node src/server.node.js"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",

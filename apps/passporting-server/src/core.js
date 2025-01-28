@@ -32,12 +32,7 @@ app.post(
       ISSUER_SIGNING_SECRET_KEY,
       ISSUER_ENCRYPTION_SECRET_KEY,
       CLIENT_SECRETS,
-    } = env<{
-      KWIL_NODE_URL: string;
-      ISSUER_SIGNING_SECRET_KEY: string;
-      ISSUER_ENCRYPTION_SECRET_KEY: string;
-      CLIENT_SECRETS: string;
-    }>(c);
+    } = env(c);
 
     const bearer = c.req.header("Authorization")?.split(" ")[1];
 
