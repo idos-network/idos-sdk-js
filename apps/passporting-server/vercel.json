@@ -7,7 +7,7 @@
   ],
   "builds": [
     {
-      "src": "apps/passporting-server/api/index.ts",
+      "src": "./api/index.ts",
       "use": "@vercel/node"
     }
   ]
