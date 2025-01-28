@@ -9,9 +9,10 @@
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
-    "rootDir": "./src",
-    "moduleResolution": "node"
+    "rootDir": ".",
+    "moduleResolution": "NodeNext",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
   },
-  "exclude": ["node_modules"],
-  "references": [{ "path": "../../packages/codecs" }]
+  "exclude": ["node_modules"]
 }
