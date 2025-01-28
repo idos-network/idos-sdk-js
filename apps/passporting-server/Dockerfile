@@ -54,4 +54,4 @@ RUN chown -R hono:nodejs /workspace
 USER hono
 EXPOSE 3000
 
-CMD ["pnpm", "--filter=passporting-server", "start"]
+CMD ["pnpm", "--filter=passporting-server", "start:node"]

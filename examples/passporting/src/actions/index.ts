@@ -2,6 +2,8 @@
 
 import invariant from "tiny-invariant";
 
+import { idOSGrantee } from "@/grantee.config";
+
 export async function invokePassportingService(payload: {
   dag_owner_wallet_identifier: string;
   dag_grantee_wallet_identifier: string;
@@ -25,4 +27,16 @@ export async function invokePassportingService(payload: {
       "Content-Type": "application/json",
     },
   });
+
+  const result = await response.json();
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  const grantee = await idOSGrantee();
+  const credential = await grantee.getReusableCredentialCompliantly(payload.dag_data_id);
+  // @todo: handle errors when the prior method fails.
+
+  return credential;
 }
