@@ -1,5 +1,5 @@
 import { serve } from "@hono/node-server";
-import app from "./core";
+import app from "./core.js";
 
 const port = 3000;
 
