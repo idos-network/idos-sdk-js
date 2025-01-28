@@ -1,6 +1,6 @@
 # Dashboard for dApps / Issuers
 
-This dashboard enabled both dApps and Issuers to inspect the data they have access to on idOS.
+This dashboard enables both dApps and Issuers to inspect the data they have access to on idOS.
 
 Deployed at <https://dashboard-for-dapps.vercel.app/>.
 
