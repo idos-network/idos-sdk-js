@@ -1,12 +1,12 @@
-import { serve } from "@hono/node-server";
 import { zValidator } from "@hono/zod-validator";
 import { base64Decode } from "@idos-network/codecs";
-import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
+import { createAccessGrantFromDAG } from "@idos-network/issuer-sdk-js";
+import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
-import z from "zod";
+import { z } from "zod";
 
 const app = new Hono();
 
@@ -106,11 +106,4 @@ app.post(
   },
 );
 
-const port = 3000;
-
-console.log(`Server is running on http://localhost:${port}`);
-
-serve({
-  fetch: app.fetch,
-  port,
-});
+export default app;

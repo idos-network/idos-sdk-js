@@ -6,8 +6,9 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "start": "tsx src/index.ts"
+    "dev": "tsx watch src/server.node.ts",
+    "start": "tsx src/server.vercel.ts",
+    "start:node": "tsx src/server.node.ts"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.7",
