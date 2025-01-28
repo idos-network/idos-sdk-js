@@ -115,3 +115,13 @@ export async function editCredentialAsIssuer(
     inputs: params,
   });
 }
+
+/**
+ * Returns a list of idOSCredentials that have been shared with the given `userId`.
+ */
+export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, userId: string) {
+  return kwilClient.call<idOSCredential[]>({
+    name: "get_credentials_shared_by_user",
+    inputs: { user_id: userId },
+  });
+}

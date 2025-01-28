@@ -14,6 +14,7 @@ import {
 import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
 import {
   getAccessGrantsForCredential,
+  getCredentialsSharedByUser,
   getSharedCredential,
 } from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
@@ -115,20 +116,30 @@ export class idOSGrantee {
     return accessGrants[0];
   }
 
-  async validateCredentialByAG(credentialId: string) {
-    const accessGrant = await this.getCredentialAccessGrant(credentialId);
-    const credentialContent = await this.getSharedCredentialContentDecrypted(accessGrant.data_id);
-    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
-
-    return contentHash === accessGrant.hash;
+  async getCredentialsSharedByUser(userId: string) {
+    const credentials = await getCredentialsSharedByUser(this.kwilClient, userId);
+    return credentials;
   }
 
-  async getReusableCredentialCompliantly(_credentialId: string) {
-    // @todo: implement this:
-    // retrieve and decrypt the credential
-    // ensure the AG they used was inserted by a known OE
-    // check that the hashes match between the credential content and the AG
-    // return the credential
+  async getReusableCredentialCompliantly(credentialId: string) {
+    const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
+
+    const accessGrant = await this.getCredentialAccessGrant(credentialId);
+
+    // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
+
+    const credentialContent = await this.noncedBox.decrypt(
+      credential.content,
+      credential.encryptor_public_key,
+    );
+
+    const contentHash = hexEncodeSha256Hash(utf8Encode(credentialContent));
+
+    if (contentHash !== accessGrant.content_hash) {
+      throw new Error("Credential content hash does not match the access grant hash");
+    }
+
+    return credential;
   }
 
   async getGrants(page = 1, size = 7) {
