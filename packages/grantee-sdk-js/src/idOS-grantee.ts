@@ -14,6 +14,7 @@ import {
 import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
 import {
   getAccessGrantsForCredential,
+  getCredentialsSharedByUser,
   getSharedCredential,
 } from "@idos-network/kwil-actions/credentials";
 import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
@@ -115,16 +116,24 @@ export class idOSGrantee {
     return accessGrants[0];
   }
 
+  async getCredentialSharedByUser(userId: string) {
+    const credentials = await getCredentialsSharedByUser(this.kwilClient, userId);
+    const match = credentials[0];
+
+    if (!match) {
+      return null;
+    }
+
+    return this.getReusableCredentialCompliantly(match.id);
+  }
+
   async getReusableCredentialCompliantly(credentialId: string) {
-    // retrieve and decrypt the credential
     const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
 
-    // retrieve the related access grant
     const accessGrant = await this.getCredentialAccessGrant(credentialId);
 
     // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
 
-    // check that the hashes match between the credential content and the AG
     const credentialContent = await this.noncedBox.decrypt(
       credential.content,
       credential.encryptor_public_key,
