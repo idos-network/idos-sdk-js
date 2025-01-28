@@ -1,10 +1,4 @@
 import { handle } from "@hono/node-server/vercel";
-import { Hono } from "hono";
-
-const app = new Hono();
-
-app.get("/", (c) => {
-  return c.json({ message: "🚀" });
-});
+import app from "../src/core.ts";
 
 export default handle(app);

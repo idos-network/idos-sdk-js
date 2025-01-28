@@ -4,5 +4,11 @@
       "source": "/(.*)",
       "destination": "/api"
     }
+  ],
+  "builds": [
+    {
+      "src": "apps/passporting-server/api/index.ts",
+      "use": "@vercel/node"
+    }
   ]
 }
