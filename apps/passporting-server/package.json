@@ -7,7 +7,6 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/server.node.ts",
-    "start": "tsx src/server.vercel.ts",
     "start:node": "tsx src/server.node.ts"
   },
   "dependencies": {

@@ -10,7 +10,7 @@
     "jsxImportSource": "hono/jsx",
     "outDir": "./dist",
     "rootDir": "./src",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "node"
   },
   "exclude": ["node_modules"],
   "references": [{ "path": "../../packages/codecs" }]
