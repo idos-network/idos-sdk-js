@@ -1,8 +1,8 @@
 "use server";
 
-import { idOSGrantee } from "@/grantee.config";
-
 import invariant from "tiny-invariant";
+
+import { idOSGrantee } from "@/grantee.config";
 
 export async function invokePassportingService(payload: {
   dag_owner_wallet_identifier: string;

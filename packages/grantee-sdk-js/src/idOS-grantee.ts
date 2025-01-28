@@ -120,6 +120,7 @@ export class idOSGrantee {
     const credentials = await getCredentialsSharedByUser(this.kwilClient, userId);
     const match = credentials[0];
 
+    // @todo: find the matching credential by searching the `public_notes` of the credential.
     if (!match) {
       return null;
     }
