@@ -1,5 +1,11 @@
 import { handle } from "@hono/node-server/vercel";
-import app from "../src/core";
+import { Hono } from "hono";
+
+const app = new Hono();
+
+app.get("/", (c) => {
+  return c.json({ message: "🚀" });
+});
 
 const handler = handle(app);
 
