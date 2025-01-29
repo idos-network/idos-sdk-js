@@ -9,6 +9,8 @@ const dbId = process.env.DB_ID ?? "";
 const SIGNING_SECRET_KEY = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? "";
 
 export default async function Home() {
+  if (process.env.NEXT_IS_EXPORT_WORKER === "true") return null;
+
   if (!ENCRYPTION_SECRET_KEY || !GRANTEE_ADDRESS || !NODE_URL) {
     throw new Error("Missing environment variables for Grantee SDK Demo");
   }
