@@ -18,9 +18,11 @@ const useFetchMatchingCredential = () => {
     queryKey: ["matching-credential"],
     queryFn: () => idOS.data.listAllCredentials(),
     select: (credentials) => {
-      return credentials.find((credential) => {
-        return credential.public_notes?.includes("PASSPORTING_DEMO");
-      }) as unknown as idOSCredential;
+      const credential = credentials.find((credential) => {
+        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
+        return publicNotes.type === "PASSPORTING_DEMO" && !!publicNotes.date;
+      });
+      return credential;
     },
   });
 };
@@ -90,7 +92,7 @@ export function MatchingCredential() {
   };
 
   if (!matchingCredential.data) {
-    return <div>No matching credential found</div>;
+    return <h3>No matching credential found</h3>;
   }
 
   if (sharedCredentialFromUser.data) {
