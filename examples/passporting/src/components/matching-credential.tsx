@@ -22,7 +22,7 @@ const useFetchMatchingCredential = () => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "PASSPORTING_DEMO" && !!publicNotes.date;
       });
-      return credential;
+      return credential as unknown as idOSCredential;
     },
   });
 };
