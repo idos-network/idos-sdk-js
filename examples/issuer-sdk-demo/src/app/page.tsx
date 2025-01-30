@@ -228,7 +228,6 @@ export default function Home() {
             variant="flat"
             onPress={handleCreateReusableCredential}
             isLoading={isPendingCreateReusableCredentialRequest}
-            id="create-reusable-credential"
           >
             Create a reusable credential (OE1)
           </Button>
