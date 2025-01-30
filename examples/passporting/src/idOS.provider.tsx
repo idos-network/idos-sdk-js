@@ -1,6 +1,6 @@
 "use clent";
 
-import { CircularProgress } from "@heroui/react";
+import { Button, CircularProgress, Link } from "@heroui/react";
 import { idOS } from "@idos-network/idos-sdk";
 import {
   type PropsWithChildren,
@@ -11,10 +11,10 @@ import {
   useRef,
   useState,
 } from "react";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useEthersSigner } from "@/wagmi.config";
-import { WalletConnector } from "./components/wallet-connector";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialised in the provider.
 export const idOSContext = createContext<idOS>(null!);
@@ -26,6 +26,7 @@ export function IDOSProvider({ children }: PropsWithChildren) {
   const initialised = useRef(false);
   const { address } = useAccount();
   const signer = useEthersSigner();
+  const [hasProfile, setHasProfile] = useState(false);
 
   const initialise = useCallback(async () => {
     if (initialised.current) return;
@@ -47,6 +48,7 @@ export function IDOSProvider({ children }: PropsWithChildren) {
       // @ts-ignore
       await _instance.setSigner("EVM", signer);
       setSdk(_instance);
+      setHasProfile(true);
     }
     setInitializing(false);
   }, [address, signer]);
@@ -64,22 +66,20 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     );
   }
 
-  if (!sdk) {
+  if (!hasProfile || !sdk) {
+    const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
+    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+
     return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
-        <p>
-          No idOS profile found for this address. please create one{" "}
-          <a
-            href="https://issuer-sdk-demo.vercel.app/"
-            className="text-blue-200"
-            target="_blank"
-            rel="noreferrer"
-          >
-            here
-          </a>
-        </p>
+      <div className="flex h-dvh flex-col items-center justify-center gap-4">
+        <h1 className="font-semibold text-2xl">No idOS profile found for this address 😔</h1>
+        <p>Click the button below to create one:</p>
+        <Button as={Link} href={issuerUrl} className="fit-content" target="_blank" rel="noreferrer">
+          Create an idOS profile
+        </Button>
       </div>
     );
   }
+
   return <idOSContext.Provider value={sdk}>{children}</idOSContext.Provider>;
 }
