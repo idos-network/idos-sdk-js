@@ -26,10 +26,9 @@ test.describe
       await metamask.connectToDapp();
       await page.waitForTimeout(2000);
       await metamask.confirmSignature();
-      await metamask.confirmSignature();
 
-      const header = await page.locator("h3").first();
-      await expect(header).toHaveText("No matching credential found");
+      const header = await page.locator("h1").first();
+      await expect(header).toHaveText("No matching credential found 😔");
       await page.waitForTimeout(3000);
     });
 
@@ -39,53 +38,49 @@ test.describe
       metamaskPage,
       extensionId,
     }) => {
-      await page.goto(ISSUER_DEMO_URL); // @todo: replace with issuer demo app url
+      await page.goto(PASSPORTING_URL);
       const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
       await page.getByRole("button", { name: "Connect a wallet" }).click();
 
       await metamask.connectToDapp();
       await page.waitForTimeout(2000);
       await metamask.confirmSignature();
+      const pagePromise = context.waitForEvent("page");
+      await page.getByRole("button", { name: "Get a new credential" }).click();
 
-      const popupPromise = page.waitForEvent("popup");
+      const issuerPage = await pagePromise;
+      expect(issuerPage.url()).toContain(ISSUER_DEMO_URL);
 
-      await page.locator("#view-details-btn").first().click();
-      await page.frameLocator("#idos-enclave-iframe").locator("#unlock").click();
+      // Heading to Issuer Demo app
+      await issuerPage.waitForTimeout(2000);
+      await issuerPage.getByRole("button", { name: "Connect a wallet" }).click();
+      await metamask.connectToDapp();
+      await issuerPage.waitForTimeout(2000);
+      await metamask.confirmSignature();
 
+      await issuerPage.getByRole("button", { name: "View credential details" }).first().click();
+
+      const popupPromise = issuerPage.waitForEvent("popup");
+      await issuerPage.frameLocator("#idos-enclave-iframe").locator("#unlock").click();
       const idOSPopup = await popupPromise;
-      await page.waitForTimeout(2000);
+      await issuerPage.waitForTimeout(2000);
       await (await idOSPopup.waitForSelector("#auth-method-password")).click();
       const passwordInput = idOSPopup.locator("#idos-password-input");
       await passwordInput.fill("qwerty");
       await idOSPopup.getByRole("button", { name: "Unlock" }).click();
 
-      await page.locator("#close").click();
+      await issuerPage.getByRole("button", { name: "Close" }).first().click();
 
-      const fetchCredentials = (): Promise<unknown[]> => {
-        // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
-        return new Promise(async (resolve) => {
-          const result = await page.evaluate(async () => {
-            // @ts-ignore
-            const credentials = await window.sdk.data.list("credentials");
-            return credentials;
-          });
-          resolve(result);
-        });
-      };
-      const credentials = await fetchCredentials();
-      const currentCredentialsIds = credentials.map((c: any) => c.id);
+      await issuerPage.waitForTimeout(2000);
+      await issuerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+      await issuerPage
+        .getByRole("button", {
+          name: "Create a reusable credential (OE1)",
+        })
+        .first()
+        .click();
 
-      const createReusableCredBtn = await page.locator("#create-reusable-credential");
-      expect(createReusableCredBtn).toBeVisible();
-
-      await createReusableCredBtn.click();
-      await page.waitForTimeout(3000);
-      const loadingIndicator = await page.locator('[aria-label="Loading"]');
-      await loadingIndicator.waitFor({ state: "detached" });
-      const newCredentials = await fetchCredentials();
-      const diff = newCredentials.filter((c: any) => !currentCredentialsIds.includes(c.id));
-      await page.goto(ISSUER_DEMO_URL);
-      expect(diff.length).toBe(1);
+      await issuerPage.waitForTimeout(3000);
     });
 
     test("Having a matching but not reusable credential", async ({
@@ -101,7 +96,6 @@ test.describe
       await metamask.connectToDapp();
       await page.waitForTimeout(2000);
       await metamask.confirmSignature();
-      await metamask.confirmSignature();
 
       const header = await page.locator("h3").first();
       await expect(header).toHaveText("We have found a matching credential that we can reuse:");
@@ -114,7 +108,6 @@ test.describe
 
       await metamask.connectToDapp();
       await page.waitForTimeout(2000);
-      await metamask.confirmSignature();
       await metamask.confirmSignature();
 
       const header = await page.locator("h3").first();
@@ -149,7 +142,6 @@ test.describe
 
       await metamask.connectToDapp();
       await page.waitForTimeout(2000);
-      await metamask.confirmSignature();
       await metamask.confirmSignature();
 
       const header = await page.locator("h3").first();

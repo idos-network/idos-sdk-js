@@ -46,7 +46,7 @@ export function CredentialCard({
       </CardBody>
       <Divider />
       <CardFooter className="flex justify-end gap-4">
-        {!isRevoked ? (
+        {!isRevoked && !!metadata.length ? (
           <Button
             color="danger"
             variant="flat"
