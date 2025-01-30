@@ -306,7 +306,9 @@ export class Enclave {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
-          await this.#openDialog("backupPasswordOrSecret");
+          await this.#openDialog("backupPasswordOrSecret", {
+            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+          });
           resolve();
         } catch (error) {
           reject(error);
@@ -427,7 +429,7 @@ export class Enclave {
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
           port1.close();
-          this.dialog.close();
+          // this.dialog.close();
           return reject(error);
         }
 
