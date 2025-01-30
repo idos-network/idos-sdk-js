@@ -37,7 +37,7 @@ export default function RootLayout(props: { children: ReactNode }) {
         </Providers>
         <div
           id="idOS-enclave"
-          className="group -translate-x-1/2 -translate-y-1/2 absolute bottom-[10%] left-1/2 z-[10000] flex w-[200px] flex-col items-center justify-center overflow-hidden rounded-md bg-neutral-950 opacity-0 transition-opacity duration-150 ease-in [&.visible]:opacity-100"
+          className="group -translate-x-1/2 -translate-y-1/2 absolute bottom-[0%] left-1/2 z-[10000] flex w-[200px] flex-col items-center justify-center overflow-hidden rounded-md bg-neutral-950 opacity-0 transition-opacity duration-150 ease-in [&.visible]:opacity-100"
         />
       </body>
     </html>

@@ -144,6 +144,7 @@ export async function createReusableCredential(
       ...publicNotes,
       id: crypto.randomUUID(),
       type: "PASSPORTING_DEMO",
+      date: new Date().toISOString(),
     }),
     granteeAddress,
     recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
