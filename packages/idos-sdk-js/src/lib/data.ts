@@ -337,7 +337,7 @@ export class Data {
     const id = crypto.randomUUID();
 
     await this.kwilWrapper.execute(
-      "share_credential_without_ag",
+      "create_credential_copy",
       [
         {
           original_credential_id: originalCredential.id,

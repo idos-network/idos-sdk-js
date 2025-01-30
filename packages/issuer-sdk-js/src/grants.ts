@@ -46,7 +46,7 @@ export async function createAccessGrantFromDAG(
 
   const result = await kwilClient.execute(
     {
-      name: "create_access_grant_by_dag",
+      name: "create_ag_by_dag_for_copy",
       dbid,
       inputs: [createActionInput(params)],
     },

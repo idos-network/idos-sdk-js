@@ -37,7 +37,7 @@ export async function createAccessGrantByDag(
   params: CreateAccessGrantByDAGParams,
 ) {
   return kwilClient.execute({
-    name: "create_access_grant_by_dag",
+    name: "create_ag_by_dag_for_copy",
     inputs: params,
   });
 }
