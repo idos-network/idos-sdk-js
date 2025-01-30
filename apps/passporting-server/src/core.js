@@ -1,6 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
-import { base64Decode } from "@idos-network/codecs";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js";
+import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -32,12 +32,7 @@ app.post(
       ISSUER_SIGNING_SECRET_KEY,
       ISSUER_ENCRYPTION_SECRET_KEY,
       CLIENT_SECRETS,
-    } = env<{
-      KWIL_NODE_URL: string;
-      ISSUER_SIGNING_SECRET_KEY: string;
-      ISSUER_ENCRYPTION_SECRET_KEY: string;
-      CLIENT_SECRETS: string;
-    }>(c);
+    } = env(c);
 
     const bearer = c.req.header("Authorization")?.split(" ")[1];
 
@@ -57,8 +52,8 @@ app.post(
 
     const issuerConfig = await createIssuerConfig({
       nodeUrl: KWIL_NODE_URL,
-      signingKeyPair: nacl.sign.keyPair.fromSecretKey(base64Decode(ISSUER_SIGNING_SECRET_KEY)),
-      encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
+      signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
+      encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
 
     // Validate the incoming `DAG` payload.

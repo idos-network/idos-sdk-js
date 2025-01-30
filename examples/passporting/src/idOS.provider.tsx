@@ -22,6 +22,7 @@ export const useIdOS = () => useContext(idOSContext);
 
 export function IDOSProvider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
+  const [initializing, setInitializing] = useState(true);
   const initialised = useRef(false);
   const { address } = useAccount();
   const signer = useEthersSigner();
@@ -40,20 +41,21 @@ export function IDOSProvider({ children }: PropsWithChildren) {
       },
     });
 
-    setSdk(_instance);
     const _hasProfile = await _instance.hasProfile(address as string);
 
     if (_hasProfile && signer) {
       // @ts-ignore
       await _instance.setSigner("EVM", signer);
+      setSdk(_instance);
     }
+    setInitializing(false);
   }, [address, signer]);
 
   useEffect(() => {
     initialise();
   }, [initialise]);
 
-  if (!sdk || !signer) {
+  if (initializing) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
         <CircularProgress aria-label="Initialising idOS..." />
@@ -62,5 +64,22 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     );
   }
 
+  if (!sdk) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
+        <p>
+          No idOS profile found for this address. please create one{" "}
+          <a
+            href="https://issuer-sdk-demo.vercel.app/"
+            className="text-blue-200"
+            target="_blank"
+            rel="noreferrer"
+          >
+            here
+          </a>
+        </p>
+      </div>
+    );
+  }
   return <idOSContext.Provider value={sdk}>{children}</idOSContext.Provider>;
 }

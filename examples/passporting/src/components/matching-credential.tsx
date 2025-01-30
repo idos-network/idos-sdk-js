@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
+import { Button, Link } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
@@ -92,7 +92,21 @@ export function MatchingCredential() {
   };
 
   if (!matchingCredential.data) {
-    return <h3>No matching credential found</h3>;
+    const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
+    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+
+    return (
+      <div className="flex flex-col items-center gap-4">
+        <h1 className="font-semibold text-2xl">No matching credential found 😔</h1>
+        <p className="text-sm">
+          We couldn't find a matching credential in your idOS account. Click the button bellow to
+          get a new credential that we can reuse:
+        </p>
+        <Button as={Link} className="w-fit" href={issuerUrl} target="_blank">
+          Get a new credential
+        </Button>
+      </div>
+    );
   }
 
   if (sharedCredentialFromUser.data) {

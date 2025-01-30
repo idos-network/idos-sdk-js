@@ -3,8 +3,8 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
-  createCredentialByWriteGrant as _сreateCredentialByWriteGrant,
-  createReusableCredential as _сreateReusableCredential,
+  createCredentialByWriteGrant as _createCredentialByWriteGrant,
+  createReusableCredential as _createReusableCredential,
   createCredentialPermissioned,
   createUser,
   editCredential,
@@ -95,7 +95,7 @@ export async function createCredentialByWriteGrant(
   const issuer = await getIssuerConfig();
   const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
-  await _сreateCredentialByWriteGrant(issuer, {
+  await _createCredentialByWriteGrant(issuer, {
     userId,
     plaintextContent: vcContent,
     publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
@@ -136,7 +136,7 @@ export async function createReusableCredential(
 ) {
   const issuer = await getIssuerConfig();
 
-  await _сreateReusableCredential(issuer, {
+  await _createReusableCredential(issuer, {
     id: crypto.randomUUID(),
     userId,
     plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
