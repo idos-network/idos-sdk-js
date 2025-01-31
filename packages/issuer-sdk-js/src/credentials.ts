@@ -180,6 +180,7 @@ export async function editCredential(
 
 interface CreateReusableCredentialParams extends BaseCredentialParams {
   granteeAddress: string;
+  lockedUntil?: number;
 }
 export async function createReusableCredential(
   issuerConfig: IssuerConfig,
@@ -204,7 +205,7 @@ export async function createReusableCredential(
     ...params,
     publicNotes: "",
     recipientEncryptionPublicKey,
-    lockedUntil: 0,
+    lockedUntil: params.lockedUntil || 0,
     originalCredentialId: credentialForReceiver.id,
     contentHash,
   });

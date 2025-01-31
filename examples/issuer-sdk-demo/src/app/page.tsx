@@ -72,6 +72,8 @@ export default function Home() {
           console.log("credentials", _credentials);
           setCredentials(_credentials);
         }
+        // @ts-ignore
+        window.sdk = _instance;
 
         setHasProfile(_hasProfile);
         setSdk(_instance);
@@ -222,6 +224,7 @@ export default function Home() {
           </Button>
 
           <Button
+            id="create-reusable-credential"
             color="secondary"
             variant="flat"
             onPress={handleCreateReusableCredential}

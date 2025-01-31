@@ -35,7 +35,7 @@ export function Credentials({
   };
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4" id="credentials-list">
       {credentials.map((item) => (
         <CredentialCard
           key={item.id}

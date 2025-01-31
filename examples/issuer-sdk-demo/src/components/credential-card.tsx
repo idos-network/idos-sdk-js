@@ -22,7 +22,8 @@ export function CredentialCard({
   const isRevoked = publicFields.status === "revoked";
 
   return (
-    <Card>
+    // biome-ignore lint/a11y/useSemanticElements: <explanation>
+    <Card role="listitem">
       <CardHeader className="flex gap-3">
         <div className="inline-flex items-center justify-center rounded-lg bg-gray-200 p-2">
           <CommandIcon size={24} className="text-neutral-950" />
@@ -45,7 +46,7 @@ export function CredentialCard({
       </CardBody>
       <Divider />
       <CardFooter className="flex justify-end gap-4">
-        {!isRevoked ? (
+        {!isRevoked && !!metadata.length ? (
           <Button
             color="danger"
             variant="flat"
@@ -59,7 +60,12 @@ export function CredentialCard({
             Revoke
           </Button>
         ) : null}
-        <Button color="primary" variant="solid" onPress={() => onViewDetails(credential.id)}>
+        <Button
+          color="primary"
+          variant="solid"
+          onPress={() => onViewDetails(credential.id)}
+          id="view-details-btn"
+        >
           View credential details
         </Button>
       </CardFooter>
