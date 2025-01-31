@@ -1,25 +1,19 @@
+import { createUser as kwilCreateUser } from "@idos-network/kwil-actions/user";
+import { upsertWalletAsInserter as kwilUpsertWalletAsInserter } from "@idos-network/kwil-actions/wallets";
 import type { idOSUser, idOSWallet } from "./../../types";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, ensureEntityId } from "./internal";
+import { ensureEntityId } from "./internal";
 
 export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
 }
 
 async function createUserProfile(
-  { dbid, kwilClient, kwilSigner }: IssuerConfig,
+  { kwilClient }: IssuerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSUser> {
   const payload = ensureEntityId(params);
-  await kwilClient.execute(
-    {
-      name: "add_user_as_inserter",
-      dbid,
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await kwilCreateUser(kwilClient, payload);
 
   return payload;
 }
@@ -29,19 +23,11 @@ export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
 }
 
 async function upsertWallet(
-  { dbid, kwilClient, kwilSigner }: IssuerConfig,
+  { kwilClient }: IssuerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
   const payload = ensureEntityId(params);
-  await kwilClient.execute(
-    {
-      name: "upsert_wallet_as_inserter",
-      dbid,
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await kwilUpsertWalletAsInserter(kwilClient, payload);
 
   return payload;
 }
