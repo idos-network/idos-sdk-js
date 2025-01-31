@@ -35,7 +35,7 @@ interface CreateAccessGrantByDAGParams {
 export async function createAccessGrantByDag(
   kwilClient: KwilActionClient,
   params: CreateAccessGrantByDAGParams,
-) {
+): Promise<{ data: { tx_hash: string } }> {
   return kwilClient.execute({
     name: "create_ag_by_dag_for_copy",
     inputs: params,

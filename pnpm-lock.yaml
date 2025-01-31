@@ -849,6 +849,9 @@ importers:
       es-toolkit:
         specifier: ^1.23.0
         version: 1.30.1
+      ethers:
+        specifier: ^6.13.5
+        version: 6.13.5(bufferutil@4.0.8)(utf-8-validate@5.0.10)
       near-api-js:
         specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
@@ -865,6 +868,9 @@ importers:
       '@idos-network/idos-sdk-types':
         specifier: workspace:*
         version: link:../types
+      '@idos-network/kwil-actions':
+        specifier: workspace:*
+        version: link:../kwil-actions
       '@idos-network/kwil-nep413-signer':
         specifier: workspace:*
         version: link:../kwil-nep413-signer
@@ -10879,7 +10885,7 @@ snapshots:
 
   '@coinbase/wallet-sdk@4.2.3':
     dependencies:
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       clsx: 1.2.1
       eventemitter3: 5.0.1
       preact: 10.25.2
@@ -10896,7 +10902,7 @@ snapshots:
       '@cosmjs/encoding': 0.30.1
       '@cosmjs/math': 0.30.1
       '@cosmjs/utils': 0.30.1
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       bn.js: 5.2.1
       elliptic: 6.6.1
       libsodium-wrappers: 0.7.15
@@ -14570,7 +14576,7 @@ snapshots:
     dependencies:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       '@scure/base': 1.2.1
       '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@8.1.1)
@@ -14584,7 +14590,7 @@ snapshots:
     dependencies:
       '@ethereumjs/tx': 4.2.0
       '@metamask/superstruct': 3.1.0
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       '@scure/base': 1.2.1
       '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@8.1.1)
@@ -17177,7 +17183,7 @@ snapshots:
 
   '@spruceid/siwe-parser@2.1.2':
     dependencies:
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       apg-js: 4.4.0
       uri-js: 4.4.1
       valid-url: 1.0.9
@@ -19771,7 +19777,7 @@ snapshots:
 
   bitcoinjs-lib@6.1.7:
     dependencies:
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       bech32: 2.0.0
       bip174: 2.1.1
       bs58check: 3.0.1
@@ -19904,7 +19910,7 @@ snapshots:
 
   bs58check@3.0.1:
     dependencies:
-      '@noble/hashes': 1.6.1
+      '@noble/hashes': 1.7.1
       bs58: 5.0.0
 
   buffer-from@1.1.2: {}
@@ -20538,8 +20544,8 @@ snapshots:
     dependencies:
       '@ecies/ciphers': 0.2.2(@noble/ciphers@1.1.3)
       '@noble/ciphers': 1.1.3
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
 
   ed25519-signature-2020-context@1.1.0: {}
 
@@ -22612,8 +22618,8 @@ snapshots:
   ox@0.1.2(typescript@5.6.3)(zod@3.24.1):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
       '@scure/bip32': 1.6.0
       '@scure/bip39': 1.5.0
       abitype: 1.0.7(typescript@5.6.3)(zod@3.24.1)
@@ -24842,8 +24848,8 @@ snapshots:
 
   webauthn-p256@0.0.10:
     dependencies:
-      '@noble/curves': 1.7.0
-      '@noble/hashes': 1.6.1
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
 
   webextension-polyfill@0.10.0: {}
 

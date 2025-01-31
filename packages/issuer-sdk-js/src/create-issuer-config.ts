@@ -1,53 +1,16 @@
-import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import { KeyPair } from "near-api-js";
+import {
+  type KwilActionClient,
+  createNodeKwilClient,
+} from "@idos-network/kwil-actions/create-kwil-client";
+import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
+import { NodeKwil } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
-import nacl from "tweetnacl";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
-
-function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
-  return (
-    object !== null &&
-    typeof object === "object" &&
-    "publicKey" in object &&
-    object.publicKey instanceof Uint8Array &&
-    object.publicKey.length === nacl.sign.publicKeyLength &&
-    "secretKey" in object &&
-    object.secretKey instanceof Uint8Array &&
-    object.secretKey.length === nacl.sign.secretKeyLength
-  );
-}
-
-type SignerType = KeyPair | nacl.SignKeyPair;
-
-function createKwilSigner(signer: SignerType): KwilSigner {
-  if (isNaclSignKeyPair(signer)) {
-    return new KwilSigner(
-      async (msg: Uint8Array) => nacl.sign.detached(msg, signer.secretKey),
-      signer.publicKey,
-      "ed25519",
-    );
-  }
-
-  if (signer instanceof KeyPair) {
-    return new KwilSigner(
-      kwilNep413Signer("idos-issuer")(signer),
-      implicitAddressFromPublicKey(signer.getPublicKey().toString()),
-      "nep413",
-    );
-  }
-
-  // Force the check that `signer` is never.
-  // If these lines start complaining, that means we're missing an `if` above.
-  return ((_: never) => {
-    throw new Error("Invalid signer type");
-  })(signer);
-}
+import type nacl from "tweetnacl";
 
 export interface IssuerConfig {
   chainId: string;
   dbid: string;
-  kwilClient: NodeKwil;
-  kwilSigner: KwilSigner;
+  kwilClient: KwilActionClient;
   signingKeyPair: nacl.SignKeyPair;
   encryptionSecretKey: Uint8Array;
 }
@@ -67,21 +30,26 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
   });
 
   const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
-  const dbid =
+  const dbId =
     params.dbId ||
     (await _kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid;
 
   invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
-  invariant(dbid, "Can't discover `dbId`. You must pass it explicitly.");
+  invariant(dbId, "Can't discover `dbId`. You must pass it explicitly.");
+
+  const kwilClient = await createNodeKwilClient({
+    nodeUrl: params.nodeUrl,
+    chainId,
+    dbId,
+  });
+
+  const [kwilSigner] = createKwilSigner(params.signingKeyPair);
+  kwilClient.setSigner(kwilSigner);
 
   return {
     chainId,
-    dbid,
-    kwilClient: new NodeKwil({
-      kwilProvider: params.nodeUrl,
-      chainId,
-    }),
-    kwilSigner: createKwilSigner(params.signingKeyPair),
+    dbid: dbId,
+    kwilClient,
     signingKeyPair: params.signingKeyPair,
     encryptionSecretKey: params.encryptionSecretKey,
   };

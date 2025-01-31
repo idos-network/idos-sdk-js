@@ -28,9 +28,9 @@ export async function getSharedCredential(kwilClient: KwilActionClient, id: stri
 export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
-) {
-  return kwilClient.call<string>({
-    name: "get_credential_id_by_content_hash",
+): Promise<[{ id: string }]> {
+  return kwilClient.call({
+    name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
 }
@@ -43,7 +43,7 @@ export async function createCredentialByWriteGrant(
   params: CreateCredentialParams,
 ) {
   return kwilClient.execute({
-    name: "create_credential_by_write_grant",
+    name: "add_credential_by_write_grant",
     inputs: params,
   });
 }
