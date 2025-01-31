@@ -67,7 +67,6 @@ describe("createIssuerConfig", () => {
       chainId: "mock-chain-id",
       dbid: "mock-dbid",
       kwilClient: expect.any(Object),
-      kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),
       encryptionSecretKey: expect.any(Uint8Array),
     });
