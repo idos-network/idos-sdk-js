@@ -419,6 +419,37 @@ const signer = selector.wallet();
 const address = (await signer.getAccounts())[0].accountId
 ```
 
+### Inserting a DAG
+Inserting a DAG requires the following steps:
+1. Request a message to sign that will be used in the DAG payload
+2. Create the DAG payload
+3. Sign the DAG payload
+4. Insert the DAG payload
+
+```js
+const contentHash = await idOS.data.getCredentialContentSha256Hash(credentialId);
+
+const { id } = await idOS.data.shareCredential(
+  credentialId,
+  granteeEncryptionPublicKey,
+  {
+    granteeAddress: granteeSigningPublicKey,
+    lockedUntil: 0,
+  },
+);
+
+// Create the DAG payload
+const dag = {
+  dag_owner_wallet_identifier: ownerAddress,
+  dag_grantee_wallet_identifier: granteeSigningPublicKey,
+  dag_data_id: id,
+  dag_locked_until: lockedUntil,
+  dag_content_hash: contentHash,
+};
+// Request a message to sign that will be used in the DAG payload
+const message: string = await idOS.data.requestDAGSignature(dag);
+```
+
 ### Profile checking and `setSigner`
 
 ```js
