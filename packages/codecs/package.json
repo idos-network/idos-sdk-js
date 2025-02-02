@@ -8,13 +8,13 @@
   "type": "module",
   "main": "./src/index.ts",
   "dependencies": {
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/binary": "^1.0.1",
-    "@stablelib/bytes": "^1.0.1",
-    "@stablelib/hex": "^2.0.0",
-    "@stablelib/sha256": "^1.0.1",
-    "@stablelib/utf8": "^1.0.1",
-    "bs58": "^6.0.0",
-    "borsh": "^1.0.0"
+    "@stablelib/base64": "catalog:",
+    "@stablelib/binary": "catalog:",
+    "@stablelib/bytes": "catalog:",
+    "@stablelib/hex": "catalog:",
+    "@stablelib/sha256": "catalog:",
+    "@stablelib/utf8": "catalog:",
+    "bs58": "catalog:",
+    "borsh": "catalog:"
   }
 }

@@ -12,31 +12,31 @@
     "format": "biome format --write ."
   },
   "devDependencies": {
-    "@stablelib/base64": "^1.0.1",
-    "@stablelib/utf8": "^1.0.1",
+    "@stablelib/base64": "catalog:",
+    "@stablelib/utf8": "catalog:",
     "@types/node": "^20.10.5",
-    "@vercel/node": "^3.0.26",
-    "es-toolkit": "^1.23.0",
-    "raw-body": "^2.5.2",
-    "tweetnacl": "^1.0.3",
+    "@vercel/node": "catalog:",
+    "es-toolkit": "catalog:",
+    "raw-body": "catalog:",
+    "tweetnacl": "catalog:",
     "typescript": "^5.0.2",
     "vite": "^4.4.5",
     "vite-plugin-mkcert": "^1.16.0",
-    "vite-plugin-node-polyfills": "^0.12.0"
+    "vite-plugin-node-polyfills": "catalog:"
   },
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/grantee-sdk-js": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
-    "@kwilteam/kwil-js": "0.7.1",
-    "@near-wallet-selector/core": "8.9.10",
+    "@kwilteam/kwil-js": "catalog:",
+    "@near-wallet-selector/core": "catalog:",
     "@near-wallet-selector/here-wallet": "^8.7.0",
     "@near-wallet-selector/meteor-wallet": "^8.7.0",
-    "@near-wallet-selector/modal-ui-js": "^8.7.0",
-    "@near-wallet-selector/my-near-wallet": "^8.7.0",
-    "@near-wallet-selector/nightly": "^8.7.0",
-    "axios": "^1.6.8"
+    "@near-wallet-selector/modal-ui-js": "catalog:",
+    "@near-wallet-selector/my-near-wallet": "catalog:",
+    "@near-wallet-selector/nightly": "catalog:",
+    "axios": "catalog:"
   },
   "peerDependencies": {
     "ethers": "^6.13",

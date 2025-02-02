@@ -10,18 +10,18 @@
     "start:node": "node src/server.node.js"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
-    "@hono/zod-validator": "^0.4.2",
+    "@hono/node-server": "catalog:",
+    "@hono/zod-validator": "catalog:",
     "@idos-network/issuer-sdk-js": "workspace:*",
-    "@stablelib/base64": "^1.0.1",
-    "go-try": "^3.0.2",
-    "hono": "^4.6.16",
-    "tweetnacl": "^1.0.3",
-    "zod": "^3.24.1"
+    "@stablelib/base64": "catalog:",
+    "go-try": "catalog:",
+    "hono": "catalog:",
+    "tweetnacl": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
-    "tsx": "^4.7.1",
+    "tsx": "catalog:",
     "typescript": "^5.7.3"
   }
 }
