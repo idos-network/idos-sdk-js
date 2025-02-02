@@ -14,8 +14,8 @@
     "lint": "biome check --apply ."
   },
   "dependencies": {
-    "bs58": "^6.0.0",
-    "near-api-js": "3.0.4"
+    "bs58": "catalog:",
+    "near-api-js": "catalog:"
   },
   "devDependencies": {
     "@idos-network/codecs": "workspace:*",

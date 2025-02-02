@@ -10,14 +10,14 @@
   },
   "author": "",
   "dependencies": {
-    "@synthetixio/synpress-cache": "^0.0.4",
-    "@synthetixio/synpress-metamask": "^0.0.4"
+    "@synthetixio/synpress-cache": "catalog:",
+    "@synthetixio/synpress-metamask": "catalog:"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
-    "playwright-core": "^1.49.1",
-    "playwright-test-coverage": "^1.2.12",
-    "@synthetixio/synpress": "^4.0.3",
+    "playwright-core": "catalog:",
+    "playwright-test-coverage": "catalog:",
+    "@synthetixio/synpress": "catalog:",
     "@types/node": "^20.10.5"
   }
 }

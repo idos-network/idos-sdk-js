@@ -34,15 +34,15 @@
     "@idos-network/codecs": "workspace:*",
     "@idos-network/cryptography": "workspace:*",
     "@idos-network/idos-sdk-types": "workspace:*",
-    "@release-it/keep-a-changelog": "^5.0.0",
-    "clean-package": "^2.2.0",
-    "release-it": "^17.0.0",
-    "tsup": "8.0.2",
+    "@release-it/keep-a-changelog": "catalog:",
+    "clean-package": "catalog:",
+    "release-it": "catalog:",
+    "tsup": "catalog:",
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@kwilteam/kwil-js": "0.7.1",
-    "tweetnacl": "^1.0.3"
+    "@kwilteam/kwil-js": "catalog:",
+    "tweetnacl": "catalog:"
   },
   "clean-package": {
     "replace": {

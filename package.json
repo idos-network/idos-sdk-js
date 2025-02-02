@@ -11,9 +11,9 @@
     "postinstall": "lefthook install"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "lefthook": "1.7.5",
-    "turbo": "^2.3.3"
+    "@biomejs/biome": "catalog:",
+    "lefthook": "catalog:",
+    "turbo": "catalog:"
   },
   "name": "idos-sdk-js",
   "packageManager": "pnpm@9.6.0"
