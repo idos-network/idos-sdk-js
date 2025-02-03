@@ -1,4 +1,4 @@
-import { iconVariants, type IconProps } from "./profile";
+import { type IconProps, iconVariants } from "./profile";
 
 const DisconnectedIcon = ({ size = "sm" }: IconProps) => {
   return (

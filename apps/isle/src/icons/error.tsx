@@ -1,4 +1,4 @@
-import { iconVariants, type IconProps } from "./profile";
+import { type IconProps, iconVariants } from "./profile";
 
 export default function ErrorIcon({ size = "sm" }: IconProps) {
   return (
