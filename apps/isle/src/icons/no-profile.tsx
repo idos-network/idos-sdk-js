@@ -1,5 +1,5 @@
-import ProfileStatus, { type IconProps } from "./profile-status";
+import ProfileIcon, { type IconProps } from "./profile";
 
 export default function NoProfile(props: IconProps) {
-  return <ProfileStatus fill="#7A7A7A" {...props} />;
+  return <ProfileIcon {...props} />;
 }

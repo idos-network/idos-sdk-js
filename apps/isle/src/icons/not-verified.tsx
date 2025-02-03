@@ -1,5 +1,5 @@
-import ProfileStatus, { type IconProps } from "./profile-status";
+import ProfileIcon, { type IconProps } from "./profile";
 
 export default function NotVerified(props: IconProps) {
-  return <ProfileStatus fill="#E23636" {...props} />;
+  return <ProfileIcon variant="error" {...props} />;
 }

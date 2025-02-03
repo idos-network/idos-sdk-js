@@ -1,11 +1,9 @@
-import type { IconProps } from "./profile-status";
+import { iconVariants, type IconProps } from "./profile";
 
 export default function ErrorIcon({ size = "sm" }: IconProps) {
-  const width = size === "sm" ? 26 : 30;
   return (
     <svg
-      width={width}
-      height={width}
+      className={iconVariants({ size })}
       viewBox="0 0 26 26"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"

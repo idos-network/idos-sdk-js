@@ -16,6 +16,22 @@
   }
 }
 
+@theme {
+  /* colors */
+  --bg: #15191e;
+  --fg: #ffffff;
+  --border: #2d2f33;
+  /* font sizes */
+  --text-xs: 13px;
+  --text-sm: 14px;
+  /* line-heights */
+  --leading-sm: 15.7px;
+  --leading-md: 20px;
+  /* breakpoints  */
+  --breakpoint-sm: 15rem;
+  --breakpoint-md: 20rem;
+}
+
 @layer base {
   *,
   ::after,

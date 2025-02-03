@@ -1,11 +1,9 @@
-import type { IconProps } from "./profile-status";
+import { iconVariants, type IconProps } from "./profile";
 
-const Disconnected = ({ size = "sm" }: IconProps) => {
-  const width = size === "sm" ? 26 : 30;
+const DisconnectedIcon = ({ size = "sm" }: IconProps) => {
   return (
     <svg
-      width={width}
-      height={width}
+      className={iconVariants({ size })}
       viewBox="0 0 26 26"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
@@ -22,4 +20,4 @@ const Disconnected = ({ size = "sm" }: IconProps) => {
   );
 };
 
-export default Disconnected;
+export default DisconnectedIcon;
