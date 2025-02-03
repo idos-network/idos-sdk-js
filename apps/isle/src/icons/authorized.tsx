@@ -1,7 +1,7 @@
 import { type IconProps, icon } from "./icon";
 
 export function AuthorizedIcon({
-  ariaLabel = "Access Granted icon",
+  ariaLabel = "Authorized icon",
   class: _class,
   size,
   ...props
