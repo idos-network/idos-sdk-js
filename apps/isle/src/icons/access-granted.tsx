@@ -1,4 +1,4 @@
-import { IconProps } from "./profile-status";
+import type { IconProps } from "./profile-status";
 
 const AccessGranted = ({ size }: IconProps) => {
   const width = size === "sm" ? 26 : 30;

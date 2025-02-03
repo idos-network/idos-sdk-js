@@ -3,7 +3,13 @@ import type { IconProps } from "./profile-status";
 const Disconnected = ({ size = "sm" }: IconProps) => {
   const width = size === "sm" ? 26 : 30;
   return (
-    <svg width={width} height={width} viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg
+      width={width}
+      height={width}
+      viewBox="0 0 26 26"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
       <path
         d="M15.0591 13.5548L8.44568 19.9345H20.2507C20.2507 16.7904 18.0229 14.1666 15.0591 13.5548Z"
         fill="#7A7A7A"
