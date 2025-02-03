@@ -1,8 +1,8 @@
-import type { SVGProps } from "react";
+import type { JSX } from "preact";
 import { type VariantProps, tv } from "tailwind-variants";
 
 export const icon = tv({
-  base: "h-6 w-6",
+  base: "",
   variants: {
     size: {
       default: "h-6 w-6",
@@ -15,6 +15,7 @@ export const icon = tv({
 });
 
 type BaseVariants = VariantProps<typeof icon>;
-export interface IconProps extends SVGProps<SVGSVGElement>, BaseVariants {
+
+export interface IconProps extends JSX.SVGAttributes<SVGSVGElement>, BaseVariants {
   ariaLabel?: string;
 }
