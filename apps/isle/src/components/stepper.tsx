@@ -1,19 +1,20 @@
-import { cn as _cn, tv } from "tailwind-variants";
+import type { ComponentChildren } from "preact";
+import { type CnOptions, type VariantProps, cn as _cn, tv } from "tailwind-variants";
 
-const cn = (...args: any) => _cn(args)({ twMerge: true });
+const cn = (...args: CnOptions) => _cn(args)({ twMerge: true });
 
-const stepCircleVariants = tv({
+const stepper = tv({
   slots: {
     outerCircle: "relative h-6 w-6 rounded-full",
     innerCircle: "-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-2 w-2 rounded-full",
   },
   variants: {
     active: {
-      on: {
+      true: {
         outerCircle: "bg-emerald-900",
         innerCircle: "bg-teal-400",
       },
-      off: {
+      false: {
         outerCircle: "bg-neutral-800",
         innerCircle: "bg-neutral-500",
       },
@@ -21,15 +22,13 @@ const stepCircleVariants = tv({
   },
 });
 
-export interface StepCircleProps {
-  active: boolean;
-}
+export interface StepCircleProps extends VariantProps<typeof stepper> {}
 
 const StepCircle = ({ active }: StepCircleProps) => {
-  const { outerCircle, innerCircle } = stepCircleVariants({ active: active ? "on" : "off" });
+  const { outerCircle, innerCircle } = stepper({ active });
   return (
-    <div className={outerCircle()}>
-      <div className={innerCircle()} />
+    <div class={outerCircle()}>
+      <div class={innerCircle()} />
     </div>
   );
 };
@@ -38,7 +37,7 @@ interface Step {
   index?: number;
   title: string;
   description: string;
-  render: React.ReactNode;
+  render: ComponentChildren;
 }
 
 interface StepperProps {
@@ -56,12 +55,12 @@ export function Stepper({
   return (
     <>
       {currentStep && (
-        <div className="my-6 flex w-full justify-center">
-          <h2 className="text-center font-semibold text-lg leading-md">{currentStep.title}</h2>
+        <div class="my-6 flex w-full justify-center">
+          <h2 class="text-center font-semibold text-lg">{currentStep.title}</h2>
         </div>
       )}
       <div
-        className={cn(
+        class={cn(
           "relative mx-auto flex max-w-[206px] items-start gap-5.5",
           currentStep ? "flex-row justify-between" : "flex-col",
         )}
@@ -69,7 +68,7 @@ export function Stepper({
         <div
           className={cn(
             "absolute",
-            currentStep ? "top-[12px] left-0 min-h-[1px] w-full" : "left-[12px] h-full min-w-[1px]",
+            currentStep ? "top-3 left-0 min-h-px w-full" : "left-3 h-full min-w-px",
             "bg-neutral-500",
           )}
         />
@@ -77,7 +76,7 @@ export function Stepper({
           <div key={step.index} className="flex items-center gap-2">
             <StepCircle active={activeIndex >= index} />
             {!currentStep && (
-              <span className="text-center font-semibold text-black text-sm leading-none dark:text-neutral-50">
+              <span class="text-center font-semibold text-black text-sm dark:text-neutral-50">
                 {step.title}
               </span>
             )}
