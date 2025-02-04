@@ -3,9 +3,11 @@ import { tv } from "tailwind-variants";
 export interface IconProps {
   variant?: "primary" | "error" | "warning" | "success";
   size?: "sm" | "lg";
+  className?: string;
 }
 
 export const iconVariants = tv({
+  base: "min-w-6.5 min-h-6.5",
   variants: {
     size: {
       sm: "w-6.5 h-6.5",
