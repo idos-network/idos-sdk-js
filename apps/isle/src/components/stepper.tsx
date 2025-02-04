@@ -34,11 +34,11 @@ interface Step {
 }
 
 export function Stepper({
-  index = -1, // stepper starts with index -1 to hide the title
+  index: activeIndex = -1, // stepper starts with index -1 to hide the title
   steps,
 }: { steps: Step[]; index: number }) {
   // showing the current step will hide the stepper general title and make the stepper horizontal
-  const currentStep = steps[index];
+  const currentStep = steps[activeIndex];
 
   return (
     <>
@@ -55,7 +55,7 @@ export function Stepper({
         />
         {steps.map((step, index) => (
           <div key={step.index} className="flex items-center gap-2">
-            <StepCircle active={!index} />
+            <StepCircle active={activeIndex >= index} />
             {!currentStep && (
               <span className="text-center font-semibold text-black text-sm leading-none dark:text-neutral-50">
                 {step.title}
