@@ -1,4 +1,4 @@
-import type { ComponentProps } from "preact";
+import type { ComponentChildren, ComponentProps } from "preact";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const button = tv({
@@ -6,7 +6,7 @@ const button = tv({
   variants: {
     variant: {
       primary: "bg-primary hover:bg-primary/80 focus:ring-primary",
-      secondary: "bg-slate-200 hover:bg-slate-400 focus:ring-slate-400",
+      secondary: "bg-blue-200 hover:bg-blue-200/80 focus:ring-blue-400",
     },
   },
   defaultVariants: {
@@ -17,12 +17,19 @@ const button = tv({
 type BaseVarants = VariantProps<typeof button>;
 
 interface ButtonProps extends ComponentProps<"button">, BaseVarants {
+  children: ComponentChildren;
   // @todo: add additional props as `loading`, `loadingMessage`, etc.
 }
 
-export function Button({ class: _class, children, type = "button", ...props }: ButtonProps) {
+export function Button({
+  class: _class,
+  variant,
+  children,
+  type = "button",
+  ...props
+}: ButtonProps) {
   return (
-    <button className={button({ class: _class as string })} type={type} {...props}>
+    <button className={button({ variant, class: _class as string })} type={type} {...props}>
       {children}
     </button>
   );
