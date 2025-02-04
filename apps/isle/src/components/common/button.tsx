@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from "react";
 import { tv } from "tailwind-variants";
 
 const buttonVariants = tv({
-  base: "cursor-pointer bg-aquamarine-400 hover:brightness-105 active:brightness-75 min-h-[40px] text-sm px-4 rounded-md text-neutral-950 grid place-items-center font-medium leading-md w-fit",
+  base: "cursor-pointer bg-aquamarine-400 hover:bg-aquamarine-500 disabled:bg-neutral-300 min-h-[40px] text-sm px-4 rounded-md text-neutral-950 grid place-items-center font-medium leading-md w-fit",
   defaultVariants: {
     color: "primary",
   },
