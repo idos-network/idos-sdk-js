@@ -6,13 +6,12 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
     "Segoe UI Symbol", "Noto Color Emoji";
-  --color-aquamarine-400: #00ffb9;
-  --color-aquamarine-500: #00e8a6;
+  --color-primary: #00ffb9;
+  --color-primary-100: #00e8a6;
 }
 
 @layer base {
   :root {
-    --primary: #00ffb9;
   }
 
   .dark {
@@ -20,8 +19,6 @@
 }
 
 @theme {
-  /* colors */
-  --bg-primary: var(--primary);
 }
 
 @layer base {
