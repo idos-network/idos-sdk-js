@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
-@plugin 'tailwindcss-animate';
 @plugin '@tailwindcss/forms';
+@plugin 'tailwindcss-animate';
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
@@ -10,6 +10,7 @@
 
 @layer base {
   :root {
+    --primary: #00FFB9;
   }
 
   .dark {
@@ -18,7 +19,7 @@
 
 @theme {
   /* colors */
-  --bg-primary: #15191e;
+  --bg-primary: var(--primary);
 }
 
 @layer base {
@@ -52,7 +53,6 @@
   body {
     background-color: var(--bg);
     color: var(--fg);
-    overflow: hidden;
   }
 
   ::-webkit-scrollbar {
