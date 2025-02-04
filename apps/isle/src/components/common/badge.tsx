@@ -1,6 +1,6 @@
-import { tv } from "tailwind-variants";
+import { type VariantProps, tv } from "tailwind-variants";
 
-const badgeVariants = tv({
+const badge = tv({
   base: "min-h-[21px] text-xs rounded-sm grid place-items-center font-medium leading-sm w-fit px-1",
   variants: {
     color: {
@@ -15,17 +15,9 @@ const badgeVariants = tv({
   },
 });
 
-export interface BadgeProps {
-  text: string;
-  variant?: "primary" | "success" | "danger" | "warning";
-}
+type BaseVariants = VariantProps<typeof badge>;
+export interface BadgeProps extends BaseVariants, React.PropsWithChildren {}
 
-export function Badge({
-  variant,
-  text,
-}: {
-  text: string;
-  variant?: "primary" | "success" | "danger" | "warning";
-}) {
-  return <span className={badgeVariants({ color: variant })}>{text.toUpperCase()}</span>;
+export function Badge({ color, children }: BadgeProps) {
+  return <span className={badge({ color })}>{children}</span>;
 }
