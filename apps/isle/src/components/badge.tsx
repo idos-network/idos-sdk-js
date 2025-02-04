@@ -2,7 +2,7 @@ import type { ComponentChildren, ComponentProps } from "preact";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const badge = tv({
-  base: "min-h-[21px] text-xs rounded-sm grid place-items-center font-medium leading-sm w-fit px-1",
+  base: "flex h-5 w-fit place-content-center items-center rounded-sm px-1 font-medium text-xs leading-sm",
   variants: {
     color: {
       primary: "bg-neutral-500/30 text-neutral-500",
@@ -22,5 +22,5 @@ interface BadgeProps extends ComponentProps<"span">, BaseVariants {
 }
 
 export function Badge({ color, class: _class, children }: BadgeProps) {
-  return <div className={badge({ color, class: _class as string })}>{children}</div>;
+  return <div class={badge({ color, class: _class as string })}>{children}</div>;
 }
