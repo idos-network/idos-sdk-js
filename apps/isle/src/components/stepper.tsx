@@ -1,4 +1,4 @@
-import { tv, cn as _cn } from "tailwind-variants";
+import { cn as _cn, tv } from "tailwind-variants";
 
 const cn = (...args: any) => _cn(args)({ twMerge: true });
 
