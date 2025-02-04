@@ -1,3 +1,4 @@
+import type { ComponentChildren, ComponentProps } from "preact";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const badge = tv({
@@ -16,8 +17,10 @@ const badge = tv({
 });
 
 type BaseVariants = VariantProps<typeof badge>;
-export interface BadgeProps extends BaseVariants, React.PropsWithChildren {}
+interface BadgeProps extends ComponentProps<"span">, BaseVariants {
+  children: ComponentChildren;
+}
 
-export function Badge({ color, children }: BadgeProps) {
-  return <span className={badge({ color })}>{children}</span>;
+export function Badge({ color, class: _class, children }: BadgeProps) {
+  return <div className={badge({ color, class: _class as string })}>{children}</div>;
 }
