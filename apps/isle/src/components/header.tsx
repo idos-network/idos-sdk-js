@@ -9,7 +9,7 @@ export function Header({ icon, badgeProps }: { icon: ReactNode; badgeProps: Badg
         <Logo />
         {icon}
       </header>
-      <header className="flex hidden w-full items-start justify-between gap-2 sm:flex">
+      <header className="hidden w-full items-start justify-between gap-2 sm:flex">
         <div className="flex items-center justify-between gap-2">
           <Logo />
           <div className="flex-col gap-1">
