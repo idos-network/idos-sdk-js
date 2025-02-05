@@ -2,6 +2,7 @@ import { resolve } from "path";
 import preact from "@preact/preset-vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig({
   define: {
@@ -15,5 +16,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mkcert(), preact()],
+  plugins: [mkcert(), preact(), nodePolyfills()],
 });
