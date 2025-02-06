@@ -17,7 +17,7 @@ const badge = tv({
 });
 
 type BaseVariants = VariantProps<typeof badge>;
-interface BadgeProps extends ComponentProps<"span">, BaseVariants {
+export interface BadgeProps extends ComponentProps<"span">, BaseVariants {
   children: ComponentChildren;
 }
 
