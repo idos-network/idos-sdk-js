@@ -1,8 +1,8 @@
 import { Image, Text, chakra } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 
+import { Header } from "@/components/header";
 import { NotConnected } from "@/features/not-connected";
-import { Header } from "./components/header";
 import { DisconnectedIcon } from "./components/icons/disconnected";
 
 function Layout({ children }: PropsWithChildren) {
@@ -26,10 +26,7 @@ function Layout({ children }: PropsWithChildren) {
         width="full"
         height="full"
       >
-        <Header
-          badgeProps={{ children: "DISCONNECTED", bg: "neutral.950" }}
-          icon={<DisconnectedIcon color="gray.500" />}
-        />
+        <Header />
         <chakra.main display={{ base: "none", sm: "flex" }}>{children}</chakra.main>
         <chakra.footer>
           <Text
