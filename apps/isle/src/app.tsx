@@ -1,30 +1,61 @@
-import { DisconnectedIcon } from "@/components/icons/disconnected";
-import type { ComponentChildren } from "preact";
-import { Header } from "./components/header";
+import { Center, Heading, Image, Text, VStack, chakra } from "@chakra-ui/react";
+import type { PropsWithChildren } from "react";
 
-interface LayoutProps {
-  children?: ComponentChildren;
-}
-function Layout({ children }: LayoutProps) {
+import { Logo } from "@/components/logo";
+import { Badge } from "@/components/ui/badge";
+
+function Layout({ children }: PropsWithChildren) {
   return (
-    <div class="mx-auto flex max-w-[366px] flex-col gap-6 rounded-[38px] bg-neutral-900 p-5 shadow-lg">
-      <main>{children}</main>
-      <footer class="flex hidden flex-col items-center justify-end sm:flex">
-        <p class="flex items-center gap-2 text-slate-500 text-sm leading-0">
-          Powered by <img src="/footer-logo.svg" alt="Powered by idOS" />
-        </p>
-      </footer>
-    </div>
+    <chakra.div display="grid" placeContent="center" minH="100vh">
+      <chakra.div
+        display="grid"
+        gridTemplateRows="auto 1fr auto"
+        gap="6"
+        p="5"
+        rounded="38px"
+        border="1px solid {colors.gray.100}"
+        shadow="2xl"
+        width="366px"
+      >
+        <chakra.header display="flex" alignItems="center" gap="2">
+          <Logo />
+          <VStack alignItems="flex-start" gap="1">
+            <chakra.span fontSize="lg" fontWeight="semibold">
+              idOS
+            </chakra.span>
+            <Badge colorPalette="gray" size="sm">
+              DISCONNECTED
+            </Badge>
+          </VStack>
+        </chakra.header>
+        <chakra.main>{children}</chakra.main>
+        <chakra.footer>
+          <Text
+            color="gray.500"
+            fontSize="sm"
+            textAlign="center"
+            placeContent="center"
+            display="flex"
+            alignItems="center"
+            gap="2"
+          >
+            Powered by <Image src="/footer-logo.svg" alt="Powered by idOS" />
+          </Text>
+        </chakra.footer>
+      </chakra.div>
+    </chakra.div>
   );
 }
 
 export function App() {
   return (
     <Layout>
-      <Header
-        badgeProps={{ children: "Disconnected", color: "primary" }}
-        icon={<DisconnectedIcon class="text-slate-500" size="lg" />}
-      />
+      <Center flexDir="column" gap="2">
+        <Heading fontSize="2xl">Own your data</Heading>
+        <Text textAlign="center">
+          The idOS Isle is the “window” on a target application into the idOS
+        </Text>
+      </Center>
     </Layout>
   );
 }
