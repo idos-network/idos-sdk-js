@@ -7,6 +7,7 @@ const stepper = tv({
   slots: {
     outerCircle: "relative h-6 w-6 rounded-full",
     innerCircle: "-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-2 w-2 rounded-full",
+    title: "text-center font-semibold text-black text-sm dark:text-neutral-50",
   },
   variants: {
     active: {
@@ -17,6 +18,7 @@ const stepper = tv({
       false: {
         outerCircle: "bg-neutral-800",
         innerCircle: "bg-neutral-500",
+        title: "dark:text-neutral-500",
       },
     },
   },
@@ -27,9 +29,47 @@ export interface StepCircleProps extends VariantProps<typeof stepper> {}
 const StepCircle = ({ active }: StepCircleProps) => {
   const { outerCircle, innerCircle } = stepper({ active });
   return (
-    <div class={outerCircle()}>
-      <div class={innerCircle()} />
+    <div className={outerCircle()}>
+      <div className={innerCircle()} />
     </div>
+  );
+};
+
+const StepperLine = ({
+  activeIndex,
+  steps,
+  currentStep,
+}: { steps: Step[]; activeIndex: number; currentStep: Step }) => {
+  const { title } = stepper();
+  const active = (index: number) => activeIndex >= index || !index;
+
+  return (
+    <>
+      <div
+        className={cn(
+          "relative mx-auto flex items-start gap-5.5",
+          currentStep && currentStep.index !== -1 ? "flex-row justify-between gap-15" : "flex-col",
+        )}
+      >
+        <div
+          className={cn(
+            "absolute",
+            currentStep && currentStep.index !== -1
+              ? "top-3 left-0 min-h-px w-full"
+              : "left-3 h-full min-w-px",
+            "bg-neutral-500",
+          )}
+        />
+        {steps.map((step, index) => (
+          <div key={step.index} className="flex items-center gap-2">
+            <StepCircle active={activeIndex >= index || !index} />
+            {activeIndex === -1 && ( // only show title when stepper is not active
+              <span className={title({ active: active(index) })}>{step.title}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    </>
   );
 };
 
@@ -37,7 +77,7 @@ interface Step {
   index?: number;
   title: string;
   description: string;
-  render: ComponentChildren;
+  render: (stepperLine: JSX.Element) => ComponentChildren;
 }
 
 interface StepperProps {
@@ -45,45 +85,14 @@ interface StepperProps {
   index: number;
 }
 
-export function Stepper({
-  index: activeIndex = -1, // stepper starts with index -1 to hide the title
-  steps,
-}: StepperProps) {
-  // showing the current step will hide the stepper general title and make the stepper horizontal
-  const currentStep = steps[activeIndex];
+export function Stepper({ index: activeIndex = -1, steps }: StepperProps) {
+  const currentStep = steps.find((step) => step.index === activeIndex);
 
   return (
     <>
-      {currentStep && (
-        <div class="my-6 flex w-full justify-center">
-          <h2 class="text-center font-semibold text-lg">{currentStep.title}</h2>
-        </div>
+      {currentStep?.render(
+        <StepperLine activeIndex={activeIndex} steps={steps} currentStep={currentStep} />,
       )}
-      <div
-        class={cn(
-          "relative mx-auto flex max-w-[206px] items-start gap-5.5",
-          currentStep ? "flex-row justify-between" : "flex-col",
-        )}
-      >
-        <div
-          className={cn(
-            "absolute",
-            currentStep ? "top-3 left-0 min-h-px w-full" : "left-3 h-full min-w-px",
-            "bg-neutral-500",
-          )}
-        />
-        {steps.map((step, index) => (
-          <div key={step.index} className="flex items-center gap-2">
-            <StepCircle active={activeIndex >= index} />
-            {!currentStep && (
-              <span class="text-center font-semibold text-black text-sm dark:text-neutral-50">
-                {step.title}
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-      {currentStep?.render}
     </>
   );
 }
