@@ -1,24 +1,37 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render } from "preact";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
-import { App } from "@/app.tsx";
-import { config } from "@/wagmi.config";
-import "@/index.css";
+import { App } from "@/app";
+import { ThemeProvider } from "@/components/ui";
+import { getConfig } from "@/wagmi.config";
 
-const root = document.getElementById("app");
+const root = document.getElementById("root");
 
 if (!root) {
   throw new Error("Root element not found");
 }
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      gcTime: 1000 * 60 * 60 * 24, // 24 hours
+      staleTime: Number.POSITIVE_INFINITY,
+    },
+  },
+});
 
-render(
-  <WagmiProvider config={config}>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
-  </WagmiProvider>,
-  root,
+createRoot(root).render(
+  <StrictMode>
+    <WagmiProvider config={getConfig()}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
+        <ReactQueryDevtools buttonPosition="bottom-left" />
+      </QueryClientProvider>
+    </WagmiProvider>
+  </StrictMode>,
 );
