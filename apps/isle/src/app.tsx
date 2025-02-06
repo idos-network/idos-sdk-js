@@ -1,10 +1,8 @@
-import { HStack, Image, Text, VStack, chakra } from "@chakra-ui/react";
+import { Image, Text, chakra } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 
-import { DisconnectedIcon } from "@/components/icons/disconnected";
-import { Logo } from "@/components/logo";
-import { Badge } from "@/components/ui/badge";
 import { NotConnected } from "@/features/not-connected";
+import { Header } from "./components/header";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -24,30 +22,18 @@ function Layout({ children }: PropsWithChildren) {
           _light: "1px solid {colors.gray.50}",
         }}
         shadow="2xl"
-        width="366px"
+        width="full"
+        height="full"
       >
-        <chakra.header display="flex" alignItems="start" justifyContent="space-between" gap="5">
-          <HStack gap="2">
-            <Logo />
-            <VStack alignItems="flex-start" gap="1">
-              <chakra.span fontSize="lg" fontWeight="semibold">
-                idOS
-              </chakra.span>
-              <Badge colorPalette="gray" size="sm">
-                DISCONNECTED
-              </Badge>
-            </VStack>
-          </HStack>
-          <DisconnectedIcon color="gray.500" />
-        </chakra.header>
-        <chakra.main>{children}</chakra.main>
+        <Header badgeProps={{ children: "DISCONNECTED",bg:"neutral.950" }} />
+        <chakra.main display={{ base: "none", sm: "flex" }}>{children}</chakra.main>
         <chakra.footer>
           <Text
+            display={{ base: "none", sm: "flex" }}
             color="gray.500"
             fontSize="sm"
             textAlign="center"
             placeContent="center"
-            display="flex"
             alignItems="center"
             gap="2"
           >
