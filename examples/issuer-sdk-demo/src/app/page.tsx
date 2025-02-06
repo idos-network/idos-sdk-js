@@ -4,12 +4,11 @@ import { Button, Spinner } from "@heroui/react";
 import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
 import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
-import { useAccount } from "wagmi";
+import { useAccount, useSignMessage } from "wagmi";
 
 import {
   createCredentialByPermissionedIssuer,
-  createCredentialByWriteGrant,
-  createReusableCredential,
+  createCredentialsByDelegatedWriteGrant,
 } from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
@@ -20,6 +19,7 @@ export default function Home() {
   const { address, isConnected, isDisconnected } = useAccount();
   const initialised = useRef(false);
   const { setSdk, sdk: clientSDK } = useSdkStore();
+  const { signMessageAsync } = useSignMessage();
 
   const [hasProfile, setHasProfile] = useState(false);
   const signer = useEthersSigner();
@@ -28,9 +28,6 @@ export default function Home() {
 
   const [isPendingCreateCredentialRequest, startCredentialRequestTransition] = useTransition();
   const [isPendingGrantedCreateCredentialRequest, startGrantedCredentialRequestTransition] =
-    useTransition();
-
-  const [isPendingCreateReusableCredentialRequest, startCreateReusableCredentialRequestTransition] =
     useTransition();
 
   const [credentials, setCredentials] = useState<idOSCredential[]>([]);
@@ -123,7 +120,6 @@ export default function Home() {
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
 
         invariant(issuerAddress, "`NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX` is not set");
-        await clientSDK.data.addWriteGrant(issuerAddress);
       }
     });
   };
@@ -144,16 +140,32 @@ export default function Home() {
   const handleCreateGrantedCredential = () => {
     startGrantedCredentialRequestTransition(async () => {
       const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
-      const hasWriteGrants = await clientSDK.data.hasWriteGrantGivenTo(issuerAddress);
+      const currentTimestamp = Date.now();
+      const currentDate = new Date(currentTimestamp);
+      const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
+      const delegatedWriteGrant = {
+        owner_wallet_identifier: address as string,
+        grantee_wallet_identifier: issuerAddress,
+        id: crypto.randomUUID(),
+        access_grant_timelock: currentDate.toISOString(),
+        not_usable_before: currentDate.toISOString(),
+        not_usable_after: notUsableAfter.toISOString(),
+      };
 
-      if (!hasWriteGrants) {
-        await clientSDK.data.addWriteGrant(issuerAddress);
-      }
+      const message: string = await clientSDK.data.requestDWGSignature(delegatedWriteGrant);
+      const signature = await signMessageAsync({ message });
 
       try {
-        await createCredentialByWriteGrant(
+        await createCredentialsByDelegatedWriteGrant(
           String(clientSDK.auth.currentUser.userId),
           clientSDK.auth.currentUser.currentUserPublicKey as string,
+          delegatedWriteGrant.owner_wallet_identifier,
+          delegatedWriteGrant.grantee_wallet_identifier,
+          delegatedWriteGrant.id,
+          delegatedWriteGrant.access_grant_timelock,
+          delegatedWriteGrant.not_usable_before,
+          delegatedWriteGrant.not_usable_after,
+          signature,
         );
         const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
         setCredentials(_credentials);
@@ -169,18 +181,6 @@ export default function Home() {
       );
       const _credentials = await clientSDK.data.list<idOSCredential>("credentials");
       setCredentials(_credentials);
-    });
-  };
-
-  const handleCreateReusableCredential = () => {
-    startCreateReusableCredentialRequestTransition(async () => {
-      const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
-
-      await createReusableCredential(
-        String(clientSDK.auth.currentUser.userId),
-        issuerAddress,
-        clientSDK.auth.currentUser.currentUserPublicKey as string,
-      );
     });
   };
 
@@ -221,16 +221,6 @@ export default function Home() {
             isLoading={isPendingGrantedCreateCredentialRequest}
           >
             Via Write Grant
-          </Button>
-
-          <Button
-            id="create-reusable-credential"
-            color="secondary"
-            variant="flat"
-            onPress={handleCreateReusableCredential}
-            isLoading={isPendingCreateReusableCredentialRequest}
-          >
-            Create a reusable credential (OE1)
           </Button>
         </div>
       </div>

@@ -28,6 +28,15 @@ interface idOSDAGSignatureRequest {
   dag_content_hash: string;
 }
 
+interface idOSDWGSignatureRequest {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+}
+
 /* global crypto */
 
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
@@ -453,6 +462,14 @@ export class Data {
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
+      { message: string },
+    ];
+    const message = response?.[0]?.message;
+    return message;
+  }
+
+  async requestDWGSignature(dwg: idOSDWGSignatureRequest): Promise<string> {
+    const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];
     const message = response?.[0]?.message;

@@ -83,26 +83,6 @@ export async function createCredentialByWriteGrant(
 }
 ```
 
-#### Issue reusable credentials
-
-The app enables issuers to issue reusable credentials for their users that can also be used by issuers.
-
-```typescript
-export async function createReusableCredential(
-    userId: string,
-    granteeAddress: string,
-    userEncryptionPublicKey: string,
-  ) {
-     const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
-
-      await createReusableCredential(
-        String(clientSDK.auth.currentUser.userId),
-        issuerAddress,
-        clientSDK.auth.currentUser.currentUserPublicKey as string,
-      );
-  }
-```
-
 ### Environment Variables
 
 - `NEXT_PUBLIC_KWIL_NODE_URL`: URL of the idOS node.
