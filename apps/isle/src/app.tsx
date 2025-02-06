@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 
 import { Header } from "@/components/header";
 import { NotConnected } from "@/features/not-connected";
-import { DisconnectedIcon } from "./components/icons/disconnected";
 
 function Layout({ children }: PropsWithChildren) {
   return (
