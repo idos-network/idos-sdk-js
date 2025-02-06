@@ -3,6 +3,7 @@ import type { PropsWithChildren } from "react";
 
 import { NotConnected } from "@/features/not-connected";
 import { Header } from "./components/header";
+import { DisconnectedIcon } from "./components/icons/disconnected";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -25,7 +26,10 @@ function Layout({ children }: PropsWithChildren) {
         width="full"
         height="full"
       >
-        <Header badgeProps={{ children: "DISCONNECTED",bg:"neutral.950" }} />
+        <Header
+          badgeProps={{ children: "DISCONNECTED", bg: "neutral.950" }}
+          icon={<DisconnectedIcon color="gray.500" />}
+        />
         <chakra.main display={{ base: "none", sm: "flex" }}>{children}</chakra.main>
         <chakra.footer>
           <Text

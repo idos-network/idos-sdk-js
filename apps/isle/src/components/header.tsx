@@ -1,9 +1,9 @@
 import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
+import { DisconnectedIcon } from "./icons/disconnected";
 import { Logo } from "./logo";
 import { Badge } from "./ui/badge";
-import { DisconnectedIcon } from "./icons/disconnected";
 
-export function Header({ badgeProps }: { badgeProps?: BadgeProps }) {
+export function Header({ badgeProps, icon }: { badgeProps?: BadgeProps; icon: JSX.Element }) {
   return (
     <>
       <chakra.header
@@ -13,7 +13,7 @@ export function Header({ badgeProps }: { badgeProps?: BadgeProps }) {
         alignItems="center"
       >
         <Logo />
-        <DisconnectedIcon color="gray.500" />
+        {icon}
       </chakra.header>
       <chakra.header
         display={{ base: "none", sm: "flex" }}
@@ -31,7 +31,7 @@ export function Header({ badgeProps }: { badgeProps?: BadgeProps }) {
             <Badge colorPalette="gray" size="sm" {...badgeProps} />
           </VStack>
         </HStack>
-        <DisconnectedIcon color="gray.500" />
+        {icon}
       </chakra.header>
     </>
   );
