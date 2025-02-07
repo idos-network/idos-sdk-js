@@ -416,29 +416,6 @@ export class Data {
     return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(granteeAddress: string, synchronous?: boolean) {
-    return await this.kwilWrapper.execute(
-      "add_write_grant",
-      [
-        {
-          wg_grantee_wallet_identifier: granteeAddress,
-        },
-      ],
-      `Grant ${granteeAddress} write access to your idOS credentials`,
-      synchronous,
-    );
-  }
-
-  async hasWriteGrantGivenBy(userId: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_by", { user_id: userId });
-  }
-
-  async hasWriteGrantGivenTo(granteeAddress: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_to", {
-      wg_grantee_wallet_identifier: granteeAddress,
-    });
-  }
-
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
     return hexEncodeSha256Hash(utf8Encode(credential.content));

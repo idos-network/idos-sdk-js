@@ -130,7 +130,7 @@ const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
 
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Write Grants, or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
-### Using Write Grants
+### Using Write Grants - replace with DWG
 The first method involves getting permission from the user via a Write Grant.
 
 A Write Grant is a permission given by the user that allows a specific grantee to perform a few operations on their behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile.
