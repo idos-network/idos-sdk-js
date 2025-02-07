@@ -6,7 +6,6 @@ import {
   utf8Encode,
 } from "@idos-network/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import { omit } from "es-toolkit";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, encryptContent, ensureEntityId } from "./internal";
@@ -177,6 +176,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     true,
   );
 
+  // TODO: Ask Fernando what should we return
   return {
     ...originalCredential,
   };
