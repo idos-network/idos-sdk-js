@@ -1,6 +1,7 @@
-import { Image, Text, chakra } from "@chakra-ui/react";
+import { chakra } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
 
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { NotConnected } from "@/features/not-connected";
 
@@ -26,20 +27,8 @@ function Layout({ children }: PropsWithChildren) {
         height="full"
       >
         <Header />
-        <chakra.main display={{ base: "none", sm: "flex" }}>{children}</chakra.main>
-        <chakra.footer>
-          <Text
-            display={{ base: "none", sm: "flex" }}
-            color="gray.500"
-            fontSize="sm"
-            textAlign="center"
-            placeContent="center"
-            alignItems="center"
-            gap="2"
-          >
-            Powered by <Image src="/footer-logo.svg" alt="Powered by idOS" />
-          </Text>
-        </chakra.footer>
+        <chakra.main>{children}</chakra.main>
+        <Footer />
       </chakra.div>
     </chakra.div>
   );
