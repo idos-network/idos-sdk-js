@@ -3,7 +3,6 @@ import type { PropsWithChildren } from "react";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { NotConnected } from "@/features/not-connected";
 import { CreateProfile } from "./features/create-profile";
 
 function Layout({ children }: PropsWithChildren) {
