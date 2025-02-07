@@ -26,6 +26,18 @@ const config = defineConfig({
           900: { value: "#00624d" },
           950: { value: "#00382d" },
         },
+        neutral: {
+          100: { value: "#F5F5F5" },
+          200: { value: "#E5E5E5" },
+          300: { value: "#D4D4D4" },
+          400: { value: "#A1A1A1" },
+          500: { value: "#737373" },
+          600: { value: "#525252" },
+          700: { value: "#404040" },
+          800: { value: "#262626" },
+          900: { value: "#171717" },
+          950: { value: "#0B0B0B" },
+        },
       },
     },
     semanticTokens: {
