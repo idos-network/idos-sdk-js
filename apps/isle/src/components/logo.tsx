@@ -1,40 +1,70 @@
-import type { JSX } from "preact";
-import { type VariantProps, tv } from "tailwind-variants";
+import { type RecipeVariantProps, chakra, defineSlotRecipe, useSlotRecipe } from "@chakra-ui/react";
 
-const logo = tv({
-  slots: {
-    wrapper: "grid aspect-square place-content-center rounded-full bg-neutral-950",
-    image: "",
+const logo = defineSlotRecipe({
+  slots: ["root", "image"],
+  base: {
+    root: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      rounded: "full",
+      aspectRatio: "1/1",
+      bg: "black",
+      border: "1px solid {colors.gray.900}",
+    },
   },
   variants: {
     size: {
       sm: {
-        wrapper: "h-8 w-8",
-        image: "h-4 w-4",
+        root: {
+          width: 8,
+          height: 8,
+        },
+        image: {
+          width: 4,
+          height: 4,
+        },
       },
       md: {
-        wrapper: "h-10 w-10",
-        image: "h-5 w-5",
+        root: {
+          width: 12,
+          height: 12,
+        },
+        image: {
+          width: 6,
+          height: 6,
+        },
       },
       lg: {
-        wrapper: "h-[60px] w-[60px]",
-        image: "h-8 w-8",
+        root: {
+          width: "60px",
+          height: "60px",
+        },
+        image: {
+          width: 8,
+          height: 8,
+        },
       },
     },
   },
   defaultVariants: {
-    size: "sm",
+    size: "lg",
   },
 });
 
-type BaseVariants = VariantProps<typeof logo>;
-interface LogoProps extends JSX.HTMLAttributes<HTMLImageElement>, BaseVariants {}
+type LogoRecipeProps = RecipeVariantProps<typeof logo>;
+interface LogoProps extends LogoRecipeProps {}
 
-export function Logo({ size }: LogoProps) {
-  const { wrapper, image } = logo({ size });
+export function Logo(props: LogoProps) {
+  const recipe = useSlotRecipe({
+    recipe: logo,
+  });
+  const [recipeProps] = recipe.splitVariantProps(props);
+  const styles = recipe(recipeProps);
+
   return (
-    <div class={wrapper()}>
-      <img src="/logo.svg" alt="idOS logo" class={image()} />
-    </div>
+    <chakra.div css={styles.root}>
+      <chakra.img src="/logo.svg" alt="idOS Isle" css={styles.image} />
+    </chakra.div>
   );
 }
