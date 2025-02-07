@@ -45,6 +45,7 @@ const config = defineConfig({
       button: {
         base: {
           colorPalette: "aquamarine",
+          rounded: "lg",
         },
       },
     },
