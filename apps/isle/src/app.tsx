@@ -1,9 +1,12 @@
 import { chakra } from "@chakra-ui/react";
 import type { PropsWithChildren } from "react";
+import { useAccount } from "wagmi";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+
 import { NotConnected } from "@/features/not-connected";
+import { Profile } from "@/features/profile";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -35,9 +38,19 @@ function Layout({ children }: PropsWithChildren) {
 }
 
 export function App() {
+  const { isConnected } = useAccount();
+
+  if (!isConnected) {
+    return (
+      <Layout>
+        <NotConnected />
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-      <NotConnected />
+      <Profile />
     </Layout>
   );
 }
