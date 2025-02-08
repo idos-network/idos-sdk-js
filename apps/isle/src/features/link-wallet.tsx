@@ -1,4 +1,4 @@
-import { Center, Circle, Heading, Image, Spinner, Text } from "@chakra-ui/react";
+import { Center, Circle, Heading, Image, Text } from "@chakra-ui/react";
 
 import { Icon } from "@/components/icons/icon";
 import { WalletIcon } from "@/components/icons/wallet";
@@ -29,6 +29,12 @@ function WalletLinked() {
 }
 
 export function LinkWallet() {
+  const [linked] = useState(false);
+
+  if (linked) {
+    return <WalletLinked />;
+  }
+
   return (
     <Center flexDir="column" gap="6">
       <Image src="/link-wallet.svg" alt="Link wallet" />
