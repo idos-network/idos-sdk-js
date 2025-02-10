@@ -6,7 +6,7 @@ import { Badge } from "./ui/badge";
 export function Header() {
   return (
     <chakra.header
-      display={{ base: "none", sm: "flex" }}
+      display={"flex"}
       id="header"
       alignItems="start"
       justifyContent="space-between"

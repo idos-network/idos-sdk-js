@@ -10,7 +10,7 @@ import { Profile } from "@/features/profile";
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <chakra.div display="grid" placeContent="center" minH="100vh">
+    <chakra.div display="grid">
       <chakra.div
         display="grid"
         gridTemplateRows="auto 1fr auto"
