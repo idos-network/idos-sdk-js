@@ -15,14 +15,7 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      staleTime: Number.POSITIVE_INFINITY,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 createRoot(root).render(
   <StrictMode>
