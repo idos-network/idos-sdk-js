@@ -7,6 +7,7 @@ import { useAccount, useDisconnect } from "wagmi";
 import { statusAtom } from "@/atoms/account";
 import { CreateProfile } from "@/features/create-profile";
 import { useKwilActionsClient } from "@/kwil-actions.provider";
+import { useEffect } from "react";
 
 const useHasProfile = () => {
   const { address } = useAccount();
@@ -23,6 +24,12 @@ export function Profile() {
   const { data, isPending } = useHasProfile();
   const setStatus = useSetAtom(statusAtom);
 
+  useEffect(() => {
+    if (!data) {
+      setStatus("no profile");
+    }
+  }, [data, setStatus]);
+
   if (isPending) {
     return (
       <Center flexDir="column" gap="6" h="120px">
@@ -32,7 +39,6 @@ export function Profile() {
   }
 
   if (!data) {
-    setStatus("no profile");
     return <CreateProfile />;
   }
 
