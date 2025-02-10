@@ -107,6 +107,11 @@ export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd });
   const queryClient = useQueryClient();
 
+  const handleWalletAdded = () => {
+    const callbackUrl = new URLSearchParams(location.search).get("callbackUrl");
+    if (callbackUrl) location.href = callbackUrl;
+  };
+
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
       <HStack
@@ -161,7 +166,12 @@ export function Component() {
         )}
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
-      <AddWallet isOpen={isOpen} onClose={onClose} defaultWallet={walletToAdd} />
+      <AddWallet
+        isOpen={isOpen}
+        onClose={onClose}
+        defaultValue={walletToAdd}
+        onWalletAdded={handleWalletAdded}
+      />
     </VStack>
   );
 }

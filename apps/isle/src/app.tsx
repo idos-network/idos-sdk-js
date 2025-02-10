@@ -28,7 +28,7 @@ function Layout({ children }: PropsWithChildren) {
           _light: "1px solid {colors.gray.50}",
         }}
         shadow="2xl"
-        minWidth="366px"
+        width="400px"
         height="full"
       >
         <Header />

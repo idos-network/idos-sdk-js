@@ -8,9 +8,9 @@ import { LinkWallet } from "./link-wallet";
 type Mode = "create" | "link" | null;
 
 export function CreateProfile() {
-  const [mode, setMode] = useState<Mode>(null);
+  const [status, setStatus] = useState<Mode>(null);
 
-  if (mode === "link") return <LinkWallet />;
+  if (status === "link") return <LinkWallet />;
   return (
     <Center flexDir="column" gap="6">
       <Heading as="h2" fontSize="2xl" textAlign="center">
@@ -23,7 +23,7 @@ export function CreateProfile() {
       </Text>
       <VStack gap="2" align="stretch" w="full">
         <Button>Create idOS profile</Button>
-        <Button gap="2" onClick={() => setMode("link")}>
+        <Button gap="2" onClick={() => setStatus("link")}>
           Link existing wallet <WalletIcon boxSize="6" />
         </Button>
       </VStack>
