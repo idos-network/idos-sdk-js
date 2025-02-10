@@ -22,6 +22,7 @@ import { useIdOS } from "@/core/idos";
 type AddWalletProps = {
   isOpen: boolean;
   onClose: () => void;
+  defaultWallet?: string;
 };
 
 const createWalletFactory = ({
@@ -70,7 +71,7 @@ const useAddWalletMutation = () => {
   });
 };
 
-export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
+export const AddWallet = ({ isOpen, onClose, defaultWallet }: AddWalletProps) => {
   const toast = useToast();
 
   const isCentered = useBreakpointValue(
@@ -86,6 +87,11 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
   const queryClient = useQueryClient();
 
   const addWallet = useAddWalletMutation();
+
+  const handleCallbackUrl = () => {
+    const callbackUrl = new URLSearchParams(location.search).get("callbackUrl");
+    if (callbackUrl) location.href = callbackUrl;
+  };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -132,6 +138,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
           });
           queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
           form.reset();
+          handleCallbackUrl();
           handleClose();
         },
         async onError(_, __, ctx) {
@@ -174,7 +181,13 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
               <FormLabel fontSize="sm" htmlFor="address">
                 Wallet address
               </FormLabel>
-              <Input id="address" name="address" placeholder="Enter address" required={true} />
+              <Input
+                id="address"
+                name="address"
+                placeholder="Enter address"
+                required={true}
+                defaultValue={defaultWallet}
+              />
             </FormControl>
           </ModalBody>
           <ModalFooter>

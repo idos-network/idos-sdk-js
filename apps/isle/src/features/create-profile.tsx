@@ -2,8 +2,15 @@ import { Center, Heading, Text, VStack } from "@chakra-ui/react";
 
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
+import { useState } from "react";
+import { LinkWallet } from "./link-wallet";
+
+type Mode = "create" | "link" | null;
 
 export function CreateProfile() {
+  const [mode, setMode] = useState<Mode>(null);
+
+  if (mode === "link") return <LinkWallet />;
   return (
     <Center flexDir="column" gap="6">
       <Heading as="h2" fontSize="2xl" textAlign="center">
@@ -16,7 +23,7 @@ export function CreateProfile() {
       </Text>
       <VStack gap="2" align="stretch" w="full">
         <Button>Create idOS profile</Button>
-        <Button gap="2">
+        <Button gap="2" onClick={() => setMode("link")}>
           Link existing wallet <WalletIcon boxSize="6" />
         </Button>
       </VStack>
