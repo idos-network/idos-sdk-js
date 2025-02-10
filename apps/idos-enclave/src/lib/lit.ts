@@ -43,7 +43,7 @@ export function getAllowedWalletAddresses(data: AccessControlCondition[]) {
 }
 
 export const createAccessControlCondition = (walletAddresses: string[] = []) => {
-  const seprator = { operator: "or" };
+  const separator = { operator: "or" };
 
   const withoutOperators = walletAddresses.map((walletAddress) => ({
     conditionType: "evmBasic",
@@ -58,7 +58,7 @@ export const createAccessControlCondition = (walletAddresses: string[] = []) => 
     },
   }));
   if (walletAddresses.length === 1) return withoutOperators;
-  return insertBetween(withoutOperators, seprator);
+  return insertBetween(withoutOperators, separator);
 };
 
 export class Lit {

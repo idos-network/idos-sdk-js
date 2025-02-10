@@ -15,13 +15,13 @@ type KwilActionsContextType = {
   client: KwilActionClient;
 };
 
-// biome-ignore lint/style/noNonNullAssertion: it is initialised in the provider
+// biome-ignore lint/style/noNonNullAssertion: it is initialized in the provider
 const KwilActionsContext = createContext<KwilActionsContextType>(null!);
 
 export function KwilActionsProvider({ children }: PropsWithChildren) {
   const [client, setClient] = useState<KwilActionClient | null>(null);
 
-  const initialiseKwilClient = useCallback(async () => {
+  const initializeKwilClient = useCallback(async () => {
     const _client = await createWebKwilClient({
       nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
     });
@@ -30,8 +30,8 @@ export function KwilActionsProvider({ children }: PropsWithChildren) {
   }, []);
 
   useEffect(() => {
-    initialiseKwilClient();
-  }, [initialiseKwilClient]);
+    initializeKwilClient();
+  }, [initializeKwilClient]);
 
   if (!client) {
     return null;
