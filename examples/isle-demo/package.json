@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.7.0",
-    "@idos-network/kwil-actions": "workspace:*",
+    "@idos-network/idos-sdk": "workspace:*",
     "@tanstack/react-query": "^5.66.0",
     "@uidotdev/usehooks": "^2.4.1",
     "ethers": "^6.13.5",
