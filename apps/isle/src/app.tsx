@@ -3,7 +3,7 @@ import type { PropsWithChildren } from "react";
 
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { CreateProfile } from "./features/create-profile";
+import { NotConnected } from "./features/not-connected";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -37,7 +37,7 @@ function Layout({ children }: PropsWithChildren) {
 export function App() {
   return (
     <Layout>
-      <CreateProfile />
+      <NotConnected />
     </Layout>
   );
 }

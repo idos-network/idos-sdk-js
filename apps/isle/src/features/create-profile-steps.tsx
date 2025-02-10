@@ -1,5 +1,5 @@
 import { Stepper } from "@/components/ui/stepper";
-import { chakra } from "@chakra-ui/react";
+import { Image, Text, chakra } from "@chakra-ui/react";
 import { useState } from "react";
 
 export function CreateProfileSteps() {
@@ -28,10 +28,10 @@ export function CreateProfileSteps() {
         <>
           {success ? (
             // @todo: add a success animation.
-            <chakra.img src="/completed.svg" alt="completed" w={20} mx="auto" />
+            <Image src="/completed.svg" alt="completed" w={20} mx="auto" />
           ) : (
             <>
-              <chakra.p
+              <Text
                 color="neutral.500"
                 fontWeight="medium"
                 fontSize="sm"
@@ -40,7 +40,7 @@ export function CreateProfileSteps() {
                 textAlign="center"
               >
                 Sign the message in your wallet to authenticate with idOS.
-              </chakra.p>
+              </Text>
 
               <chakra.div
                 bg="neutral.800"
@@ -50,12 +50,12 @@ export function CreateProfileSteps() {
                 gap={2}
                 alignItems="start"
               >
-                <chakra.img src="/lit.svg" alt="lit" />
+                <Image src="/lit.svg" alt="lit" />
                 <chakra.div>
-                  <chakra.p color="neutral.500" fontSize="sm">
+                  <Text color="neutral.500" fontSize="sm">
                     If you haven’t previously added this wallet to idOS, a private/public keypair
                     from LIT will be created to encrypt your data.
-                  </chakra.p>
+                  </Text>
                   <chakra.a
                     href="https://litprotocol.com/docs/lit-protocol-overview/lit-mpc-encryption"
                     target="_blank"

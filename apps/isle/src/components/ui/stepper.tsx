@@ -1,4 +1,4 @@
-import { chakra } from "@chakra-ui/react";
+import { Flex, chakra } from "@chakra-ui/react";
 
 const StepperCircle = ({ active }: { active?: boolean }) => {
   return (
@@ -22,14 +22,7 @@ export function Stepper({
 }: { stepsLength?: number; index?: number }) {
   const stepsArray = Array.from({ length: stepsLength }, (_, i) => i + 1);
   return (
-    <chakra.div
-      display="flex"
-      flexDirection="row"
-      position="relative"
-      justifyContent="space-between"
-      maxW={208}
-      mx="auto"
-    >
+    <Flex position="relative" justifyContent="space-between" maxW={208} mx="auto">
       <chakra.div
         position="absolute"
         top="3"
@@ -42,6 +35,6 @@ export function Stepper({
       {stepsArray.map((step, index) => (
         <StepperCircle key={step} active={activeIndex >= index} />
       ))}
-    </chakra.div>
+    </Flex>
   );
 }

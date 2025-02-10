@@ -51,6 +51,13 @@ const config = defineConfig({
           emphasized: { value: "{colors.aquamarine.300}" },
           focusRing: { value: "{colors.aquamarine.400}" },
         },
+        neutral: {
+          solid: { value: "{colors.neutral.900}" },
+          contrast: { value: "{colors.neutral.100}" },
+          fg: { value: "{colors.neutral.700}" },
+          muted: { value: "{colors.neutral.500}" },
+          subtle: { value: "{colors.neutral.400}" },
+        },
       },
     },
     recipes: {
