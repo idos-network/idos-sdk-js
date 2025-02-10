@@ -11,6 +11,7 @@ import type { Enclave } from "./enclave";
 
 import type { KwilWrapper } from "./kwil-wrapper";
 
+// cspell:words idOSDAG
 interface idOSDAGWithSignature {
   dag_owner_wallet_identifier: string;
   dag_grantee_wallet_identifier: string;

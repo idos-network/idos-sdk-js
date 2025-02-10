@@ -74,7 +74,7 @@ const grantsTotalCount = await sdk.getGrantsCount()
 ### Getting shared credential with a grantee (encrypted content).
 
 ```js
-// Import the initialised sdk instance.
+// Import the initialized sdk instance.
 import {sdk} from './idOS'
 
 const grants = await sdk.getSharedCredentialFromIDOS('GRANT_DATA_ID')
@@ -83,7 +83,7 @@ const grants = await sdk.getSharedCredentialFromIDOS('GRANT_DATA_ID')
 ### Getting shared credential content (decrypted).
 
 ```js
-// Import the initialised sdk instance.
+// Import the initialized sdk instance.
 import {sdk} from './idOS'
 
 const credentialContent = await sdk.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
@@ -92,7 +92,7 @@ const credentialContent = await sdk.getSharedCredentialContentDecrypted('GRANT_D
 ### Getting credential ID using grant hash.
 
 ```js
-// Import the initialised sdk instance.
+// Import the initialized sdk instance.
 import {sdk} from './idOS'
 
 const grants = await sdk.getCredentialIdByContentHash('GRANT_HASH')
@@ -101,7 +101,7 @@ const grants = await sdk.getCredentialIdByContentHash('GRANT_HASH')
 ### Getting Access Grant that gave access to a credential.
 
 ```js
-// Import the initialised sdk instance.
+// Import the initialized sdk instance.
 import {sdk} from './idOS'
 
 const grants = await sdk.getCredentialAccessGrant('CREDENTIAL_ID')
@@ -111,7 +111,7 @@ const grants = await sdk.getCredentialAccessGrant('CREDENTIAL_ID')
 This feature enables other obligated entities (OE2) to have access to credential after owner approves sharing his/her credential with this entity.
 
 ```js
-// Import the initialised sdk instance.
+// Import the initialized sdk instance.
 import {sdk} from './idOS'
 
 const grants = await sdk.getReusableCredentialCompliantly('GRANT_HASH')

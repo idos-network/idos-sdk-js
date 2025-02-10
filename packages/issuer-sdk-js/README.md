@@ -205,7 +205,7 @@ const credentialPayload = {
   // user id of the user who is creating the credential.
   user_id: session.user.userId,
 
-  // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringfied JSON object.
+  // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringified JSON object.
   // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.
   // plaintextContent should be passed as a Uint8Array.
   plaintextContent: Utf8Codec.encode(credentialContent),
