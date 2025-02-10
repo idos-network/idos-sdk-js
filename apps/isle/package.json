@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.7.0",
+    "@emotion/cache": "^11.14.0",
+    "@emotion/react": "^11.13.0",
     "@idos-network/kwil-actions": "workspace:*",
     "@tanstack/react-query": "^5.66.0",
     "@uidotdev/usehooks": "^2.4.1",
@@ -22,6 +24,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^5.0.0",
+    "react-frame-component": "^5.2.7",
     "react-icons": "^5.4.0",
     "viem": "~2.22.21",
     "wagmi": "^2.14.9"
