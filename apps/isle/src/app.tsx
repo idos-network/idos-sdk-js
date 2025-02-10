@@ -1,12 +1,14 @@
 import { chakra } from "@chakra-ui/react";
+import { useSetAtom } from "jotai";
 import type { PropsWithChildren } from "react";
 import { useAccount } from "wagmi";
 
+import { statusAtom } from "@/atoms/account";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-
 import { NotConnected } from "@/features/not-connected";
 import { Profile } from "@/features/profile";
+import { KwilActionsProvider } from "@/kwil-actions.provider";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -39,8 +41,11 @@ function Layout({ children }: PropsWithChildren) {
 
 export function App() {
   const { isConnected } = useAccount();
+  const setStatus = useSetAtom(statusAtom);
 
   if (!isConnected) {
+    setStatus("disconnected");
+
     return (
       <Layout>
         <NotConnected />
@@ -49,8 +54,10 @@ export function App() {
   }
 
   return (
-    <Layout>
-      <Profile />
-    </Layout>
+    <KwilActionsProvider>
+      <Layout>
+        <Profile />
+      </Layout>
+    </KwilActionsProvider>
   );
 }
