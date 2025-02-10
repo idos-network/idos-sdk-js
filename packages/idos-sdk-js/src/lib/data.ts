@@ -28,7 +28,7 @@ interface idOSDAGSignatureRequest {
   dag_content_hash: string;
 }
 
-interface idOSDWGSignatureRequest {
+interface idOSDelegatedWriteGrantSignatureRequest {
   owner_wallet_identifier: string;
   grantee_wallet_identifier: string;
   id: string;
@@ -445,7 +445,7 @@ export class Data {
     return message;
   }
 
-  async requestDWGSignature(dwg: idOSDWGSignatureRequest): Promise<string> {
+  async requestDWGSignature(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];
