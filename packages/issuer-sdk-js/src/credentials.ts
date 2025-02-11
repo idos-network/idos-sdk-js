@@ -122,7 +122,7 @@ export async function createCredentialsByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
   credentialParams: BaseCredentialParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
-): Promise<idOSCredential> {
+): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
   const { dbid, kwilClient, kwilSigner, encryptionSecretKey } = issuerConfig;
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
@@ -171,10 +171,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     true,
   );
 
-  // TODO: Ask Fernando what should we return
-  return {
-    ...originalCredential,
-  };
+  return { originalCredential, copyCredential };
 }
 
 interface EditCredentialAsIssuerParams {
