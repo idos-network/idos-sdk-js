@@ -1,11 +1,11 @@
 import { Center, Circle, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { LuCheck } from "react-icons/lu";
+import { useAccount } from "wagmi";
 
 import { Icon } from "@/components/icons/icon";
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
-import { useState } from "react";
-import { LuCheck } from "react-icons/lu";
-import { useAccount } from "wagmi";
 
 function WalletLinked() {
   return (

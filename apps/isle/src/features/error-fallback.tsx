@@ -1,5 +1,6 @@
-import { Button } from "@/components/ui";
 import { Center, Heading, Text } from "@chakra-ui/react";
+
+import { Button } from "@/components/ui";
 
 interface ErrorFallbackProps {
   error: Error;

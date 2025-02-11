@@ -1,7 +1,7 @@
 import { Center, Heading, Image, VStack } from "@chakra-ui/react";
+import { injected, useConnect } from "wagmi";
 
 import { Button } from "@/components/ui";
-import { injected, useConnect } from "wagmi";
 
 export function NotConnected() {
   const { connect, isPending } = useConnect();
