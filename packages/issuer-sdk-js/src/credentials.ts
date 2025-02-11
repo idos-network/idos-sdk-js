@@ -47,9 +47,8 @@ const buildInsertableIDOSCredential = (
     plaintextContent: Uint8Array;
     recipientEncryptionPublicKey: Uint8Array;
   },
-  encryptKeyPair?: nacl.BoxKeyPair,
 ): InsertableIDOSCredential => {
-  const ephemeralKeyPair = encryptKeyPair ? encryptKeyPair : nacl.box.keyPair();
+  const ephemeralKeyPair = nacl.box.keyPair();
   const content = encryptContent(
     plaintextContent,
     recipientEncryptionPublicKey,
@@ -127,31 +126,27 @@ export async function createCredentialsByDelegatedWriteGrant(
   const { dbid, kwilClient, kwilSigner, encryptionSecretKey } = issuerConfig;
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
-  const encryptKeyPair = nacl.box.keyPair();
   const originalCredential = ensureEntityId(
-    buildInsertableIDOSCredential(issuerConfig, credentialParams, encryptKeyPair),
+    buildInsertableIDOSCredential(issuerConfig, credentialParams),
   );
   const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
   const copyCredential = ensureEntityId(
-    buildInsertableIDOSCredential(
-      issuerConfig,
-      {
-        userId: credentialParams.userId,
-        publicNotes: "",
-        plaintextContent: credentialParams.plaintextContent,
-        recipientEncryptionPublicKey: issuerEncPublicKey,
-      },
-      encryptKeyPair,
-    ),
+    buildInsertableIDOSCredential(issuerConfig, {
+      userId: credentialParams.userId,
+      publicNotes: "",
+      plaintextContent: credentialParams.plaintextContent,
+      recipientEncryptionPublicKey: issuerEncPublicKey,
+    }),
   );
   const payload = {
     issuer_auth_public_key: originalCredential.issuer_auth_public_key,
-    encryptor_public_key: originalCredential.encryptor_public_key,
+    original_encryptor_public_key: originalCredential.encryptor_public_key,
     original_credential_id: originalCredential.id,
     original_content: originalCredential.content,
     original_public_notes: originalCredential.public_notes,
     original_public_notes_signature: originalCredential.public_notes_signature,
     original_broader_signature: originalCredential.broader_signature,
+    copy_encryptor_public_key: copyCredential.encryptor_public_key,
     copy_credential_id: copyCredential.id,
     copy_content: copyCredential.content,
     copy_public_notes_signature: copyCredential.public_notes_signature,
