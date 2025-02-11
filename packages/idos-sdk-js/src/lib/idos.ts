@@ -135,7 +135,7 @@ export class idOS {
           }
         };
 
-        // for a safe cooldown for consequent kwill update calls
+        // for a safe cooldown for consequent kwil update calls
         const wait = (
           ms = 1000, // TODO: find another way to handle sequential updating
         ) =>

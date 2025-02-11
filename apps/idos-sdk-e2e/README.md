@@ -1,4 +1,4 @@
-# idOS e2e testubg
+# idOS e2e testing
 
 e2e testing for the [`📁 idos-sdk-js`](./packages/idos-sdk-js/)
 
