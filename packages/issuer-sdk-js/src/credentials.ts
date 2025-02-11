@@ -8,7 +8,12 @@ import {
 import type { idOSCredential } from "@idos-network/idos-sdk-types";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, encryptContent, ensureEntityId } from "./internal";
+import {
+  createActionInput,
+  createActionInputWithoutId,
+  encryptContent,
+  ensureEntityId,
+} from "./internal";
 
 type UpdateablePublicNotes = {
   publicNotes: string;
@@ -165,7 +170,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     {
       name: "create_credentials_by_dwg",
       dbid,
-      inputs: [createActionInput(payload, false)],
+      inputs: [createActionInputWithoutId(payload)],
     },
     kwilSigner,
     true,
