@@ -1,4 +1,10 @@
-import { type RecipeVariantProps, chakra, defineSlotRecipe, useSlotRecipe } from "@chakra-ui/react";
+import {
+  Image,
+  type RecipeVariantProps,
+  chakra,
+  defineSlotRecipe,
+  useSlotRecipe,
+} from "@chakra-ui/react";
 
 const logo = defineSlotRecipe({
   slots: ["root", "image"],
@@ -64,7 +70,7 @@ export function Logo(props: LogoProps) {
 
   return (
     <chakra.div css={styles.root}>
-      <chakra.img src="/logo.svg" alt="idOS Isle" css={styles.image} />
+      <Image src="/logo.svg" alt="idOS Isle" css={styles.image} />
     </chakra.div>
   );
 }
