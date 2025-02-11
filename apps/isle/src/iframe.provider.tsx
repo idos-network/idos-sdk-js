@@ -1,7 +1,7 @@
 import { ChakraProvider, EnvironmentProvider, defaultSystem } from "@chakra-ui/react";
 import createCache from "@emotion/cache";
 import { CacheProvider } from "@emotion/react";
-import Iframe, { FrameContextConsumer } from "react-frame-component";
+import { FrameContextConsumer } from "react-frame-component";
 
 function memoize<T extends object, R>(func: (arg: T) => R): (arg: T) => R {
   const cache = new WeakMap<T, R>();
@@ -22,23 +22,21 @@ const createCacheFn = memoize((container: HTMLElement) => createCache({ containe
 export const IframeProvider = (props: React.PropsWithChildren) => {
   const { children } = props;
   return (
-    <Iframe width="100%" height="100%">
-      <FrameContextConsumer>
-        {(frame) => {
-          const head = frame.document?.head;
-          if (!head) {
-            return null;
-          }
+    <FrameContextConsumer>
+      {(frame) => {
+        const head = frame.document?.head;
+        if (!head) {
+          return null;
+        }
 
-          return (
-            <CacheProvider value={createCacheFn(head)}>
-              <EnvironmentProvider value={() => head.ownerDocument}>
-                <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
-              </EnvironmentProvider>
-            </CacheProvider>
-          );
-        }}
-      </FrameContextConsumer>
-    </Iframe>
+        return (
+          <CacheProvider value={createCacheFn(head)}>
+            <EnvironmentProvider value={() => head.ownerDocument}>
+              <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
+            </EnvironmentProvider>
+          </CacheProvider>
+        );
+      }}
+    </FrameContextConsumer>
   );
 };
