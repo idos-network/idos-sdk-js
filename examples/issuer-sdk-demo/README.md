@@ -1,26 +1,111 @@
 # idOS Issuer SDK Demo
 
-A demo application showcasing the "@idos-network/issuer-sdk-js" package.
+This app demonstrates the process of credential management using the idOS issuer SDK. It allows users to create, manage, and share credentials securely. The app supports creating credentials via permissioned issuers, write grants, and reusable credentials. It also provides a user-friendly interface to list and refresh credentials.
 
+### Features
 
-## Getting started.
+- `Profile Creation`: Users can create an idOS profile if they don't already have one.
+- `Credential Management`: Users can create credentials via:
+    - Permissioned Issuer: Directly from a trusted issuer.
+    - Write Grant: By granting write access to an issuer.
+    - Reusable Credential: Creating reusable credentials for efficient sharing.
+- `Credential Listing`: Displays a list of the user's credentials.
+
+### Installation
 
 1. Clone the repository.
-2. Install dependencies with `pnpm install`.
-3. Create an `.env.local` file and add the following environment variables:
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+3. Start the development server:
+   ```bash
+   pnpm dev
+   ```
 
+## Client-Side Implementation
+
+#### Profile Creation
+
+If the user doesn't have an idOS profile, they are prompted to create one. Once the profile is created, the app initializes the idOS SDK and sets up the necessary permissions.
+
+```typescript
+export async function createProfile(
+  publicKey: string,
+  userId: string,
+  wallet: CreateWalletReqParams,
+) {
+  const issuer = await getIssuerConfig();
+  await createUser(issuer, { id: userId, recipient_encryption_public_key: publicKey }, wallet);
+}
 ```
-NEXT_PUBLIC_IDOS_NETWORK_API_KEY=<your-api-key>
-# SDK SECRETS
-NEXT_PUBLIC_KWIL_NODE_URL=<idOS-node-url>
-NEXT_PUBLIC_ISSUER_ADDRESS=<issuer-address>
 
-# WALLET PRIVATE KEY
-NEXT_ISSUER_PRIVATE_KEY=<issuer-private-key>
+#### Issue Credentials for users
 
-# KEYPAIR
-NEXT_ISSUER_SECRET_KEY=<issuer-secret-key>
-NEXT_ISSUER_PUBLIC_KEY=<issuer-public-key>
+The app enables issuers to issue credentials for their users.
+
+which is done in two ways:
+
+- Permissioned Issuer: Directly from a trusted issuer.
+
+```typescript
+export async function createCredentialByPermissionedIssuer(
+  userId: string,
+  userEncryptionPublicKey: string,
+) {
+  const issuer = await getIssuerConfig();
+
+  await createCredentialPermissioned(issuer, {
+    userId,
+    plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
+    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+  });
+}
 ```
 
-4. Run the development server with `pnpm dev`.
+- Write Grant: By granting write access to an issuer.
+
+```typescript
+export async function createCredentialByWriteGrant(
+  userId: string,
+  userEncryptionPublicKey: string,
+){
+    const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
+    const hasWriteGrants = await clientSDK.data.hasWriteGrantGivenTo(issuerAddress);
+    if (!hasWriteGrants)
+         await clientSDK.data.addWriteGrant(issuerAddress);
+
+    await createCredentialByWriteGrant(
+      String(clientSDK.auth.currentUser.userId),
+      clientSDK.auth.currentUser.currentUserPublicKey as string,
+    );
+}
+```
+
+#### Issue reusable credentials
+
+The app enables issuers to issue reusable credentials for their users that can also be used by issuers.
+
+```typescript
+export async function createReusableCredential(
+    userId: string,
+    granteeAddress: string,
+    userEncryptionPublicKey: string,
+  ) {
+     const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
+
+      await createReusableCredential(
+        String(clientSDK.auth.currentUser.userId),
+        issuerAddress,
+        clientSDK.auth.currentUser.currentUserPublicKey as string,
+      );
+  }
+```
+
+### Environment Variables
+
+- `NEXT_PUBLIC_KWIL_NODE_URL`: URL of the idOS node.
+- `NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX`: Public Signing key for the issuer (hex encoded).
+- `NEXT_ISSUER_SIGNING_SECRET_KEY`: Signing secret key for the issuer.
+- `NEXT_ISSUER_ENCRYPTION_SECRET_KEY`: Encryption secret key for the issuer.

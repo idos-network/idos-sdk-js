@@ -19,6 +19,7 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 
 import { useWalletSelector } from "@/core/near";
+import { useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
@@ -101,8 +102,15 @@ const WalletsList = () => {
 
 export function Component() {
   const { hasProfile } = useIdOS();
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [searchParams] = useSearchParams();
+  const walletToAdd = searchParams.get("add-wallet") || undefined;
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd });
   const queryClient = useQueryClient();
+
+  const handleWalletAdded = () => {
+    const callbackUrl = new URLSearchParams(location.search).get("callbackUrl");
+    if (callbackUrl) location.href = callbackUrl;
+  };
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -158,7 +166,12 @@ export function Component() {
         )}
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
-      <AddWallet isOpen={isOpen} onClose={onClose} />
+      <AddWallet
+        isOpen={isOpen}
+        onClose={onClose}
+        defaultValue={walletToAdd}
+        onWalletAdded={handleWalletAdded}
+      />
     </VStack>
   );
 }

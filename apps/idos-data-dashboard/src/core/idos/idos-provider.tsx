@@ -42,7 +42,7 @@ export const Provider = ({ children }: PropsWithChildren) => {
     return null;
   }, [ethSigner, selector]);
 
-  const initialise = useCallback(async () => {
+  const initialize = useCallback(async () => {
     const signer = await getSigner();
 
     if (!signer || !userAddress || sdk) return;
@@ -71,11 +71,11 @@ export const Provider = ({ children }: PropsWithChildren) => {
   }, [getSigner, userAddress, sdk]);
 
   useEffect(() => {
-    initialise()
+    initialize()
       // @todo: display errors in the UI.
       .catch(console.error)
       .finally(() => setIsLoading(false));
-  }, [initialise]);
+  }, [initialize]);
 
   useEffect(() => {
     if (!userAddress) {

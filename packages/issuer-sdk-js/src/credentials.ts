@@ -19,12 +19,12 @@ import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { encryptContent, ensureEntityId } from "./internal";
 
-type UpdateablePublicNotes = {
+type UpdatablePublicNotes = {
   publicNotes: string;
 };
-const buildUpdateablePublicNotes = (
+const buildUpdatablePublicNotes = (
   issuerConfig: IssuerConfig,
-  { publicNotes }: UpdateablePublicNotes,
+  { publicNotes }: UpdatablePublicNotes,
 ) => {
   const publicNotesSignature = nacl.sign.detached(
     utf8Encode(publicNotes),
@@ -66,7 +66,7 @@ const buildInsertableIDOSCredential = (
     ephemeralKeyPair.secretKey,
   );
 
-  const { public_notes, public_notes_signature } = buildUpdateablePublicNotes(issuerConfig, {
+  const { public_notes, public_notes_signature } = buildUpdatablePublicNotes(issuerConfig, {
     publicNotes,
   });
 

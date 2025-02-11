@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: apps/passporting-server/Dockerfile
       args:
-        TARGETPLATFORM: linux/amd64
+        TARGETPLATFORM: linux/amd64 # cspell:disable-line
     ports:
       - "3000:3000"
     environment:
