@@ -10,8 +10,8 @@ export function ensureEntityId<T extends { id?: string }>(entity: T): { id: stri
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: Using `any` is fine over here as we don't need to be strict about types being passed in.
-export function createActionInput(params: Record<string, any>, idNeeded = true): Utils.ActionInput {
-  const payload = idNeeded ? params : ensureEntityId(params);
+export function createActionInput(params: Record<string, any>): Utils.ActionInput {
+  const payload = ensureEntityId(params);
   const prefixedEntries = Object.entries(payload).map(([key, value]) => [`$${key}`, value]);
   const prefixedObject = Object.fromEntries(prefixedEntries);
   return Utils.ActionInput.fromObject(prefixedObject);
