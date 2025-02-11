@@ -1,22 +1,24 @@
+import { Completed } from "@/components/icons/completed";
 import { Stepper } from "@/components/ui/stepper";
-import { Image, Text, chakra } from "@chakra-ui/react";
+import { Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
 import { useState } from "react";
 
 export function CreateProfileSteps() {
   const [loading] = useState(false);
-  const [success] = useState(true);
+  const [success] = useState(false);
   return (
-    <chakra.div display={"flex"} flexDirection={"column"} gap={6}>
+    <Flex flexDirection="column" gap={6}>
       {!loading && (
-        <chakra.h2 fontSize={18} textAlign="center" fontWeight="semibold" mb="3">
+        <Heading h={2} fontSize={18} textAlign="center" fontWeight="semibold" mb="3">
           Create your idOS Profile.
-        </chakra.h2>
+        </Heading>
       )}
-      <chakra.div>
+      <Flex>
         <Stepper stepsLength={3} index={0} />
-      </chakra.div>
+      </Flex>
       {loading ? (
-        <chakra.div
+        <Flex
+          flexDir="column"
           w={12}
           h={12}
           borderRadius="full"
@@ -28,7 +30,7 @@ export function CreateProfileSteps() {
         <>
           {success ? (
             // @todo: add a success animation.
-            <Image src="/completed.svg" alt="completed" w={20} mx="auto" />
+            <Completed w={20} mx="auto" color="aquamarine.700" />
           ) : (
             <>
               <Text
@@ -42,21 +44,15 @@ export function CreateProfileSteps() {
                 Sign the message in your wallet to authenticate with idOS.
               </Text>
 
-              <chakra.div
-                bg="neutral.800"
-                rounded="2xl"
-                p={4}
-                display="flex"
-                gap={2}
-                alignItems="start"
-              >
+              <Flex bg="neutral.800" rounded="2xl" p={4} gap={2} alignItems="start">
                 <Image src="/lit.svg" alt="lit" />
-                <chakra.div>
+                <Flex flexDir="column">
                   <Text color="neutral.500" fontSize="sm">
                     If you haven’t previously added this wallet to idOS, a private/public keypair
                     from LIT will be created to encrypt your data.
                   </Text>
-                  <chakra.a
+                  <Link
+                    variant="plain"
                     href="https://litprotocol.com/docs/lit-protocol-overview/lit-mpc-encryption"
                     target="_blank"
                     color={{
@@ -68,13 +64,13 @@ export function CreateProfileSteps() {
                     fontSize="xs"
                   >
                     Learn more about LIT’s MPC encryption.
-                  </chakra.a>
-                </chakra.div>
-              </chakra.div>
+                  </Link>
+                </Flex>
+              </Flex>
             </>
           )}
         </>
       )}
-    </chakra.div>
+    </Flex>
   );
 }

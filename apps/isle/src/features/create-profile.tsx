@@ -2,9 +2,9 @@ import { Center, Heading, Text, VStack } from "@chakra-ui/react";
 
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
+import { CreateProfileSteps } from "@/features/create-profile-steps";
+import { LinkWallet } from "@/features/link-wallet";
 import { useState } from "react";
-import { CreateProfileSteps } from "./create-profile-steps";
-import { LinkWallet } from "./link-wallet";
 
 type Mode = "create" | "link" | null;
 
@@ -25,7 +25,7 @@ export function CreateProfile() {
         features.
       </Text>
       <VStack gap="2" align="stretch" w="full">
-        <Button onClick={() => setStatus("link")}>Create idOS profile</Button>
+        <Button onClick={() => setStatus("create")}>Create idOS profile</Button>
         <Button gap="2" onClick={() => setStatus("link")}>
           Link existing wallet <WalletIcon boxSize="6" />
         </Button>
