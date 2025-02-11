@@ -1,5 +1,6 @@
 import { Flex } from "@chakra-ui/react";
 import { HiCheck } from "react-icons/hi";
+
 import { Icon, type IconProps } from "./icon";
 
 export function Completed(props: IconProps) {

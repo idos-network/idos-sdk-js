@@ -1,7 +1,8 @@
-import { Completed } from "@/components/icons/completed";
-import { Stepper } from "@/components/ui/stepper";
 import { Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
 import { useState } from "react";
+
+import { Completed } from "@/components/icons/completed";
+import { Stepper } from "@/components/ui/stepper";
 
 export function CreateProfileSteps() {
   const [loading] = useState(false);

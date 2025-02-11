@@ -1,10 +1,10 @@
 import { Center, Heading, Text, VStack } from "@chakra-ui/react";
+import { useState } from "react";
 
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
 import { CreateProfileSteps } from "@/features/create-profile-steps";
 import { LinkWallet } from "@/features/link-wallet";
-import { useState } from "react";
 
 type Mode = "create" | "link" | null;
 
