@@ -11,7 +11,7 @@ import { scrypt } from "scrypt-js";
  *    CPU/RAM cost (higher = costlier)
  *    n: iteration count
  *    r: block size
- *    p: parallelistm factor
+ *    p: parallelism factor
  * dkLen
  *    length of derived key (bytes)
  */
@@ -19,6 +19,7 @@ import { scrypt } from "scrypt-js";
 const latestVersion = 0.1;
 const allowedVersions = [0, 0.1];
 
+// cspell:words uuidv4Regex
 const uuidv4Regex = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[a-f0-9]{4}-[a-f0-9]{12}$/i;
 
 interface KDFConfig {

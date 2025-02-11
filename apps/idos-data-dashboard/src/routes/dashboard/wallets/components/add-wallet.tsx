@@ -22,6 +22,8 @@ import { useIdOS } from "@/core/idos";
 type AddWalletProps = {
   isOpen: boolean;
   onClose: () => void;
+  defaultValue?: string;
+  onWalletAdded: () => void;
 };
 
 const createWalletFactory = ({
@@ -70,7 +72,7 @@ const useAddWalletMutation = () => {
   });
 };
 
-export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
+export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddWalletProps) => {
   const toast = useToast();
 
   const isCentered = useBreakpointValue(
@@ -133,6 +135,7 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
           queryClient.setQueryData<idOSWallet[]>(["wallets"], updated as idOSWallet[]);
           form.reset();
           handleClose();
+          onWalletAdded();
         },
         async onError(_, __, ctx) {
           console.log(_);
@@ -174,7 +177,13 @@ export const AddWallet = ({ isOpen, onClose }: AddWalletProps) => {
               <FormLabel fontSize="sm" htmlFor="address">
                 Wallet address
               </FormLabel>
-              <Input id="address" name="address" placeholder="Enter address" required={true} />
+              <Input
+                id="address"
+                name="address"
+                placeholder="Enter address"
+                required={true}
+                defaultValue={defaultValue}
+              />
             </FormControl>
           </ModalBody>
           <ModalFooter>

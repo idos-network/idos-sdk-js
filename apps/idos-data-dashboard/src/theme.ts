@@ -37,7 +37,7 @@ export const theme = extendBaseTheme({
         color: "neutral.100",
         bg: "neutral.950",
         minH: "100dvh",
-        WrbkitFontSmoothing: "antialiased",
+        WebkitFontSmoothing: "antialiased",
       },
     },
   },
