@@ -147,13 +147,14 @@ export default function Home() {
         owner_wallet_identifier: address as string,
         grantee_wallet_identifier: issuerAddress,
         id: crypto.randomUUID(),
-        access_grant_timelock: currentDate.toISOString(),
-        not_usable_before: currentDate.toISOString(),
-        not_usable_after: notUsableAfter.toISOString(),
+        access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+        not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+        not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
       };
-
+      console.log(delegatedWriteGrant);
       const message: string = await clientSDK.data.requestDWGSignature(delegatedWriteGrant);
       const signature = await signMessageAsync({ message });
+      console.log(message, signature);
 
       try {
         await createCredentialsByDelegatedWriteGrant(
