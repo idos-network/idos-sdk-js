@@ -1,5 +1,6 @@
 import { Center, Heading, Text, VStack, chakra } from "@chakra-ui/react";
-import type { PropsWithChildren } from "react";
+import { idOSIsle } from "@idos-network/idos-sdk";
+import { type PropsWithChildren, useEffect, useRef } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
 
 import { Footer } from "@/components/footer";
@@ -44,6 +45,31 @@ function NotConnected() {
   );
 }
 
+function Demo() {
+  const isleRef = useRef<idOSIsle | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || isleRef.current) return;
+
+    isleRef.current = idOSIsle.initialize({
+      container: container.id,
+    });
+
+    return () => {
+      isleRef.current?.destroy();
+      isleRef.current = null;
+    };
+  }, []);
+
+  return (
+    <Center h="full">
+      <div ref={containerRef} id="idOS-isle" style={{ width: "100%", height: "600px" }} />
+    </Center>
+  );
+}
+
 export function App() {
   const { isConnected } = useAccount();
 
@@ -55,5 +81,9 @@ export function App() {
     );
   }
 
-  return <Layout />;
+  return (
+    <Layout>
+      <Demo />
+    </Layout>
+  );
 }
