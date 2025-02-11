@@ -16,52 +16,44 @@ export default function Minimized({ children }: PropsWithChildren) {
       width="74px"
       height="42px"
       alignItems="start"
-      border={{
-        _dark: "1px solid {colors.gray.800}",
-        _light: "1px solid {colors.gray.50}",
+      border="1px solid"
+      borderColor={{
+        _dark: "neutral.800",
+        _light: "neutral.50",
       }}
       backgroundColor="neutral.950"
       whileHover={{
-        width: "fit-content",
-        height: "fit-content",
+        width: "366px",
+        height: "400px",
         borderRadius: "38px",
         backgroundColor: "transparent",
-        border: "none",
+        overflow: "hidden",
       }}
-      onMouseEnter={() =>
-        setTimeout(() => {
-          setIsExpanded(true);
-        }, 200)
-      }
+      onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >
-      {isExpanded ? (
-        <MotionBox
-          style={{ overflow: "hidden" }}
-          initial={{ width: 50, height: 50 }}
-          animate={{
-            width: "366px",
-            height: "500px",
-            maxHeight: "auto",
-          }}
-        >
-          {children}
-        </MotionBox>
-      ) : (
-        <motion.div
-          style={{
-            padding: "4px",
-            display: "flex",
-            gap: 1,
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-          }}
-        >
-          <Logo size="sm" />
-          <DisconnectedIcon color="gray.500" />
-        </motion.div>
-      )}
+      <MotionBox
+        style={{
+          display: isExpanded ? "flex" : "none",
+          width: "366px",
+          height: "400px",
+        }}
+      >
+        {children}
+      </MotionBox>
+      <motion.div
+        style={{
+          padding: "4px",
+          gap: 1,
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+          display: !isExpanded ? "flex" : "none",
+        }}
+      >
+        <Logo size="sm" />
+        <DisconnectedIcon color="gray.500" />
+      </motion.div>
     </MotionBox>
   );
 }

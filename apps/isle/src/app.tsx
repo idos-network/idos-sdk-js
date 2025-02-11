@@ -12,7 +12,7 @@ import { KwilActionsProvider } from "@/kwil-actions.provider";
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <chakra.div display="grid" placeContent="center" minH="100vh" mx="auto">
+    <chakra.div display="grid">
       <chakra.div
         display="grid"
         gridTemplateRows="auto 1fr auto"
@@ -20,14 +20,9 @@ function Layout({ children }: PropsWithChildren) {
         p="5"
         rounded="38px"
         bg={{
-          _dark: "gray.950",
+          _dark: "neutral.950",
           _light: "white",
         }}
-        border={{
-          _dark: "1px solid {colors.gray.800}",
-          _light: "1px solid {colors.gray.50}",
-        }}
-        shadow="2xl"
         width="366px"
         height="full"
       >
