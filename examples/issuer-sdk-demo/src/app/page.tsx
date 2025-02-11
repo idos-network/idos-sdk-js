@@ -151,10 +151,8 @@ export default function Home() {
         not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
         not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
       };
-      console.log(delegatedWriteGrant);
       const message: string = await clientSDK.data.requestDWGSignature(delegatedWriteGrant);
       const signature = await signMessageAsync({ message });
-      console.log(message, signature);
 
       try {
         await createCredentialsByDelegatedWriteGrant(
