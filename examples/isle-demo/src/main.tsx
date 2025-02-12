@@ -6,7 +6,7 @@ import { WagmiProvider } from "wagmi";
 
 import { App } from "@/app";
 import { ThemeProvider } from "@/components/ui";
-import { Root } from "@/root";
+
 import { getConfig } from "@/wagmi.config";
 
 const root = document.getElementById("root");
@@ -15,23 +15,14 @@ if (!root) {
   throw new Error("Root element not found");
 }
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      staleTime: Number.POSITIVE_INFINITY,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 createRoot(root).render(
   <StrictMode>
     <WagmiProvider config={getConfig()}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <Root>
-            <App />
-          </Root>
+          <App />
         </ThemeProvider>
         <ReactQueryDevtools buttonPosition="bottom-left" />
       </QueryClientProvider>
