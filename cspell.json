@@ -1,0 +1,13 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": ["comlink", "idos", "chakra", "wagmi", "dvh", "tanstack"],
+  "ignorePaths": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "*.lock",
+    "package-lock.json"
+  ]
+}
