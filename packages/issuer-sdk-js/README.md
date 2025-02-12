@@ -128,14 +128,21 @@ const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
 
 ## Writing credentials
 
-In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Write Grants, or using Permissioned Credential Creation. Below are the two methods for writing credentials.
+In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Delegated Write Grant (DWG), or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
-### Using Write Grants - replace with DWG
-The first method involves getting permission from the user via a Write Grant.
+### Using Delegated Write Grant
+The first method involves getting permission from the user via a Delegated Write Grant
 
-A Write Grant is a permission given by the user that allows a specific grantee to perform a few operations on their behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile.
+A Delegated Write Grant (DWG) is a permission given by the user that allows a specific issuer to create a credential and it's copy for the issuer itself on the user's behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile. A DWG is a ERC-191 message that the user signs. The message contains fields:
+- operation: delegatedWriteGrant
+- owner: _user_wallet_identifier_
+- grantee: _grantee_wallet_identifier_
+- id: _DWG_identifier
+- access grant timelock: _RFC3339_date_time_till_access_grant_will_be_locked_
+- not usable before: _RFC3339_date_time_DWG_can_not_be_used_before_
+- not usable after: _RFC3339_date_time_DWG_can_not_be_used_after_
 
-To do this, you must first create a Write Grant using the idOS SDK. Here's an example of creating a write grant, by calling the [idos.data.addWriteGrant](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#write-grants):
+To do this, you must first to ask a user to sign DWG message:
 
 ```js
 // Client side
@@ -150,16 +157,33 @@ const idos = await idOS.init(...);
 // some endpoint you expose. But, to keep it simple, we're using a constant.
 const ISSUER_SIGNER_ADDRESS = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 
-// Ask the user for a Write Grant
-await idos.data.addWriteGrant(ISSUER_SIGNER_ADDRESS);
-```
+const { signMessageAsync } = useSignMessage();
+const currentTimestamp = Date.now();
+const currentDate = new Date(currentTimestamp);
+const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
+const delegatedWriteGrant = {
+  owner_wallet_identifier: address as string,
+  grantee_wallet_identifier: ISSUER_SIGNER_ADDRESS,
+  id: crypto.randomUUID(),
+  access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
+  not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+  not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
+};
 
-Now that the user has created a Write Grant for us, the issuer, we can create a credential for the user:
+// Get a message to sign
+const message: string = await clientSDK.data.requestDWGSignature(delegatedWriteGrant);
+
+// Ask a user to signt the message.
+const signature = await signMessageAsync({ message });
+```
+Be sure you have the DWG message parameters and it's signature kept. You need to use them on server side later.
+
+Now that the user has created a DWG for us, the issuer, we can create a credential for the user and the credential copy to ourselves:
 
 ```js
 // Server side
 
-import { createCredentialByGrant, encryptionPublicKey } from "@idos-network/issuer-sdk-js";
+import { createCredentialsByDelegatedWriteGrant } from "@idos-network/issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const publicNotesId = crypto.randomUUID();
@@ -217,10 +241,21 @@ const credentialPayload = {
   publicNotes: JSON.stringify(credentialsPublicNotes),
 }
 
-const credential = await createCredentialByGrant(issuerConfig, credentialPayload);
+// Prepare DWG params and the message signature got from user on previous step
+const delegatedWriteGrant = {
+  delegatedWriteGrant.owner_wallet_identifier,
+  delegatedWriteGrant.grantee_wallet_identifier,
+  delegatedWriteGrant.id,
+  delegatedWriteGrant.access_grant_timelock,
+  delegatedWriteGrant.not_usable_before,
+  delegatedWriteGrant.not_usable_after,
+  signature,
+}
+
+const credential = await createCredentialsByDelegatedWriteGrant(issuerConfig, credentialPayload, delegatedWriteGrant);
 ```
 
-This will create a credential in the idOS for the given user id.
+This will create a credential for user in the idOS and copy for the issuer.
 
 
 > ⚠️ Notice
