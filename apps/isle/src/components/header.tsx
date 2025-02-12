@@ -35,8 +35,14 @@ function ProfileStatusIcon() {
 
 const badgePropsSrc: Record<string, BadgeProps> = {
   verified: {
-    bg: "aquamarine.900",
-    color: "aquamarine.400",
+    bg: {
+      _dark: "aquamarine.400/30",
+      _light: "aquamarine.200",
+    },
+    color: {
+      _dark: "aquamarine.400",
+      _light: "aquamarine.800",
+    },
   },
   "pending verification": {
     bg: "yellow.500",

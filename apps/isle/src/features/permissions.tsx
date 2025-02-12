@@ -1,10 +1,13 @@
+import { type BreadcrumbLinkProps, Flex, Icon, Image, Stack, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { LuChevronLeft } from "react-icons/lu";
+
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui/breadcrumb";
 import { DisconnectButton } from "@/components/ui/disconnect";
-import { Flex, Image, Stack, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import RevokeButton from "@/components/ui/revoke-button";
 
 const mockKycData = {
   gender: "Female",
@@ -21,6 +24,15 @@ interface Permission {
   hasGrant: boolean;
   icon: string;
 }
+
+interface PermissionProps extends Permission {
+  onClick: () => void;
+}
+
+const themedColor = {
+  _dark: "neutral.50",
+  _light: "neutral.950",
+};
 
 function PermissionHeader({ name, icon, hasGrant }: Permission) {
   return (
@@ -81,29 +93,47 @@ function KYCData() {
   );
 }
 
-function PermissionView({ name, icon, hasGrant, onClick }: PermissionProps) {
-  // @todo: add breadcrumb separator custom component
+const StyledBreadcrumbLink = ({ children, ...props }: BreadcrumbLinkProps) => {
   return (
-    <Stack>
-      <BreadcrumbRoot size="lg">
-        <BreadcrumbLink fontWeight="medium" cursor="pointer" onClick={onClick}>
-          Permissions
-        </BreadcrumbLink>
-        <BreadcrumbLink fontWeight="medium" cursor="pointer">
-          KYC Data
-        </BreadcrumbLink>
-      </BreadcrumbRoot>
+    <BreadcrumbLink
+      fontSize="sm"
+      fontWeight="medium"
+      cursor="pointer"
+      color={themedColor}
+      {...props}
+    >
+      {children}
+    </BreadcrumbLink>
+  );
+};
 
-      <Stack gap={4} mt={6}>
+const NavigationBreadcrumbs = ({ onClick }: { onClick: () => void }) => {
+  return (
+    <BreadcrumbRoot
+      size="lg"
+      separator={
+        <Icon fontSize="2xl" color={themedColor}>
+          <LuChevronLeft />
+        </Icon>
+      }
+    >
+      <StyledBreadcrumbLink onClick={onClick}>Permissions</StyledBreadcrumbLink>
+      <StyledBreadcrumbLink>KYC Data</StyledBreadcrumbLink>
+    </BreadcrumbRoot>
+  );
+};
+
+function PermissionView({ name, icon, hasGrant, onClick }: PermissionProps) {
+  return (
+    <Stack gap={6}>
+      <NavigationBreadcrumbs onClick={onClick} />
+      <Stack gap={3}>
         <PermissionHeader name={name} icon={icon} hasGrant={hasGrant} />
         <KYCData />
       </Stack>
+      <RevokeButton />
     </Stack>
   );
-}
-
-interface PermissionProps extends Permission {
-  onClick: () => void;
 }
 
 function Permission({ hasGrant, name, icon, onClick }: PermissionProps) {
@@ -131,8 +161,12 @@ function Permission({ hasGrant, name, icon, onClick }: PermissionProps) {
         )}
         {hasGrant && (
           <Flex gap={2}>
-            <ViewIcon w={5} h={5} cursor="pointer" onClick={onClick} />
-            <DeleteIcon w={5} h={5} cursor="pointer" />
+            <Icon w={5} h={5} cursor="pointer" onClick={onClick} color="neutral.400">
+              <ViewIcon />
+            </Icon>
+            <Icon w={5} h={5} cursor="pointer" color="neutral.400">
+              <DeleteIcon />
+            </Icon>
           </Flex>
         )}
       </Flex>
@@ -141,7 +175,6 @@ function Permission({ hasGrant, name, icon, onClick }: PermissionProps) {
 }
 
 export function Permissions() {
-  const [permission, setPermission] = useState<Permission | null>(null);
   const permissionList = [
     {
       name: "Common",
@@ -154,6 +187,7 @@ export function Permissions() {
       icon: "/holyheld.svg",
     },
   ];
+  const [permission, setPermission] = useState<Permission | null>(permissionList[0]);
 
   if (permission) {
     return <PermissionView onClick={() => setPermission(null)} {...permission} />;
