@@ -9,5 +9,6 @@ export * from "./field";
 export * from "./pagination";
 export * from "./password-input";
 export * from "./provider";
+export * from "./radio";
 export * from "./refresh-button";
 export * from "./search-field";

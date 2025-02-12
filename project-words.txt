@@ -65,3 +65,4 @@ viewports
 vite
 wagmi
 webauthn
+comlink
