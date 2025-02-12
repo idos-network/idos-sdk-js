@@ -1,5 +1,5 @@
 import { Center, Fieldset, Heading, Stack, Text, VStack, chakra } from "@chakra-ui/react";
-import { idOSIsle } from "@idos-network/idos-sdk";
+import { idOSIsle, type idOSIsleStatus, type idOSIsleTheme } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
 
@@ -48,10 +48,8 @@ function NotConnected() {
 function Demo() {
   const isleRef = useRef<idOSIsle | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
-  const [currentStatus, setCurrentStatus] = useState<
-    "disconnected" | "no-profile" | "not-verified" | "pending-verification" | "verified" | "error"
-  >("disconnected");
+  const [currentTheme, setCurrentTheme] = useState<idOSIsleTheme>("light");
+  const [currentStatus, setCurrentStatus] = useState<idOSIsleStatus>("disconnected");
 
   useEffect(() => {
     const container = containerRef.current;
@@ -74,19 +72,13 @@ function Demo() {
   }, []);
 
   const handleSetTheme = (event: React.FormEvent<HTMLDivElement>) => {
-    const theme = (event.target as HTMLInputElement).value as "light" | "dark";
+    const theme = (event.target as HTMLInputElement).value as idOSIsleTheme;
     setCurrentTheme(theme);
     isleRef.current?.send("theme.update", { theme });
   };
 
   const handleSetStatus = (event: React.FormEvent<HTMLDivElement>) => {
-    const status = (event.target as HTMLInputElement).value as
-      | "disconnected"
-      | "no-profile"
-      | "not-verified"
-      | "pending-verification"
-      | "verified"
-      | "error";
+    const status = (event.target as HTMLInputElement).value as idOSIsleStatus;
     setCurrentStatus(status);
     isleRef.current?.send("status.update", { status });
   };
