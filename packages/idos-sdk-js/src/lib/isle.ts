@@ -1,23 +1,45 @@
 /* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 
+export type idOSIsleTheme = "light" | "dark";
+export type idOSIsleStatus =
+  | "disconnected"
+  | "no-profile"
+  | "not-verified"
+  | "pending-verification"
+  | "verified"
+  | "error";
+
 interface idOSIsleConstructorOptions {
   container: string;
-  theme?: "light" | "dark";
+  theme?: idOSIsleTheme;
 }
 
-type ControllerMessage = {
-  type: "initialize";
-  data: {
-    theme?: "light" | "dark";
-  };
-};
+type ControllerMessage =
+  | {
+      type: "initialize";
+      data: {
+        theme?: idOSIsleTheme;
+      };
+    }
+  | {
+      type: "theme.update";
+      data: {
+        theme: idOSIsleTheme;
+      };
+    }
+  | {
+      type: "status.update";
+      data: {
+        status: idOSIsleStatus;
+      };
+    };
 
 type NodeMessage = {
-  type: "pong";
+  type: "initialized";
   data: {
-    message: string;
-    [key: string]: unknown;
+    theme: idOSIsleTheme;
+    status: idOSIsleStatus;
   };
 };
 
@@ -30,7 +52,7 @@ export class idOSIsle {
   private containerId: string;
   private controller: Controller;
   private channel: ChannelInstance<ControllerMessage, NodeMessage> | null = null;
-  private theme?: "light" | "dark";
+  private theme?: idOSIsleTheme;
   private iframeId: string;
 
   private constructor(options: idOSIsleConstructorOptions) {

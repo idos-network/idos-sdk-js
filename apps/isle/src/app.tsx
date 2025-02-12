@@ -1,14 +1,16 @@
-import { chakra } from "@chakra-ui/react";
-import { useSetAtom } from "jotai";
+import { Center, Show, Text, chakra } from "@chakra-ui/react";
+import { useTheme } from "next-themes";
 import type { PropsWithChildren } from "react";
-import { useAccount } from "wagmi";
+import { useEffect } from "react";
 
-import { statusAtom } from "@/atoms/account";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { CreateProfile } from "@/features/create-profile";
+import { ErrorFallback } from "@/features/error-fallback";
 import { NotConnected } from "@/features/not-connected";
+import { PendingVerification } from "@/features/pending-verification";
 import { Profile } from "@/features/profile";
-import { KwilActionsProvider } from "@/kwil-actions.provider";
+import { useIsleStore } from "@/store";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -40,24 +42,44 @@ function Layout({ children }: PropsWithChildren) {
 }
 
 export function App() {
-  const { isConnected } = useAccount();
-  const setStatus = useSetAtom(statusAtom);
+  const { setTheme } = useTheme();
+  const initializeNode = useIsleStore((state) => state.initializeNode);
+  const theme = useIsleStore((state) => state.theme);
+  const status = useIsleStore((state) => state.status);
 
-  if (!isConnected) {
-    setStatus("disconnected");
+  useEffect(() => {
+    const cleanup = initializeNode();
+    return cleanup;
+  }, [initializeNode]);
 
-    return (
-      <Layout>
-        <NotConnected />
-      </Layout>
-    );
-  }
+  useEffect(() => {
+    if (theme) {
+      setTheme(theme);
+    }
+  }, [theme, setTheme]);
 
   return (
-    <KwilActionsProvider>
-      <Layout>
+    <Layout>
+      <Show when={status === "disconnected"}>
+        <NotConnected />
+      </Show>
+      <Show when={status === "no-profile"}>
+        <CreateProfile />
+      </Show>
+      <Show when={status === "verified"}>
         <Profile />
-      </Layout>
-    </KwilActionsProvider>
+      </Show>
+      <Show when={status === "pending-verification"}>
+        <PendingVerification />
+      </Show>
+      <Show when={status === "not-verified"}>
+        <Center>
+          <Text>Work in progress</Text>
+        </Center>
+      </Show>
+      <Show when={status === "error"}>
+        <ErrorFallback error={new Error("This is a sample error description")} />
+      </Show>
+    </Layout>
   );
 }
