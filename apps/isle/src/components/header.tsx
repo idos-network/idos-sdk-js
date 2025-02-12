@@ -1,4 +1,4 @@
-import { HStack, VStack, chakra } from "@chakra-ui/react";
+import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
 import { useAtomValue } from "jotai";
 
 import { statusAtom } from "@/atoms/account";
@@ -33,8 +33,28 @@ function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
+const badgePropsSrc: Record<string, BadgeProps> = {
+  verified: {
+    bg: "aquamarine.900",
+    color: "aquamarine.400",
+  },
+  "pending verification": {
+    bg: "yellow.500",
+    color: "white",
+  },
+  "no profile": {
+    bg: "red.500",
+    color: "white",
+  },
+  disconnected: {
+    bg: "gray.500",
+    color: "white",
+  },
+};
+
 export function Header() {
   const status = useAtomValue(statusAtom);
+  const badgeProps = badgePropsSrc[status];
 
   return (
     <chakra.header
@@ -50,7 +70,7 @@ export function Header() {
           <chakra.span fontSize="lg" fontWeight="semibold">
             idOS
           </chakra.span>
-          <Badge bg="neutral.950" size="sm" textTransform="uppercase">
+          <Badge {...badgeProps} size="sm" textTransform="uppercase">
             {status}
           </Badge>
         </VStack>

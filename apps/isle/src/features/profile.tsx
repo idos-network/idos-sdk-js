@@ -1,12 +1,13 @@
-import { Button, Center, Heading, Spinner } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 import { hasProfile } from "@idos-network/kwil-actions/user";
 import { useQuery } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
-import { useAccount, useDisconnect } from "wagmi";
+import { useAccount } from "wagmi";
 
 import { statusAtom } from "@/atoms/account";
 import { CreateProfile } from "@/features/create-profile";
 import { useKwilActionsClient } from "@/kwil-actions.provider";
+import { Permissions } from "./permissions";
 
 const useHasProfile = () => {
   const { address } = useAccount();
@@ -19,7 +20,6 @@ const useHasProfile = () => {
 };
 
 export function Profile() {
-  const { disconnect } = useDisconnect();
   const { data, isPending } = useHasProfile();
   const setStatus = useSetAtom(statusAtom);
 
@@ -35,16 +35,5 @@ export function Profile() {
     setStatus("no profile");
     return <CreateProfile />;
   }
-
-  return (
-    <Center flexDir="column" gap="6">
-      <Heading fontSize="2xl" fontWeight="bold">
-        User profile
-      </Heading>
-
-      <Button colorPalette="green" variant="subtle" w="full" onClick={() => disconnect()}>
-        Disconnect
-      </Button>
-    </Center>
-  );
+  return <Permissions />;
 }
