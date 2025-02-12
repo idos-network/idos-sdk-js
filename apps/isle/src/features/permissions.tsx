@@ -16,7 +16,7 @@ const mockKycData = {
   dataOfBirth: "1990-01-01",
   placeOfBirth: "New York, NY",
   countryOfResidence: "United States",
-  city: "Anytown",
+  city: "Texas",
 };
 
 interface Permission {
