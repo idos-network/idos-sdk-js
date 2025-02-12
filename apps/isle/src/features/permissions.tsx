@@ -82,6 +82,7 @@ function KYCData() {
 }
 
 function PermissionView({ name, icon, hasGrant, onClick }: PermissionProps) {
+  // @todo: add breadcrumb separator custom component
   return (
     <Stack>
       <BreadcrumbRoot size="lg">
