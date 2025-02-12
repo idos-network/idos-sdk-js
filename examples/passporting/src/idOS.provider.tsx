@@ -1,4 +1,4 @@
-"use clent";
+"use client";
 
 import { Button, CircularProgress, Link } from "@heroui/react";
 import { idOS } from "@idos-network/idos-sdk";
@@ -16,24 +16,24 @@ import { useAccount } from "wagmi";
 
 import { useEthersSigner } from "@/wagmi.config";
 
-// biome-ignore lint/style/noNonNullAssertion: because it's initialised in the provider.
+// biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
 export const idOSContext = createContext<idOS>(null!);
 export const useIdOS = () => useContext(idOSContext);
 
 export function IDOSProvider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
   const [initializing, setInitializing] = useState(true);
-  const initialised = useRef(false);
+  const initialized = useRef(false);
   const { address } = useAccount();
   const signer = useEthersSigner();
   const [hasProfile, setHasProfile] = useState(false);
 
-  const initialise = useCallback(async () => {
-    if (initialised.current) return;
+  const initialize = useCallback(async () => {
+    if (initialized.current) return;
 
     if (!signer) return;
 
-    initialised.current = true;
+    initialized.current = true;
 
     const _instance = await idOS.init({
       nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL,
@@ -54,14 +54,14 @@ export function IDOSProvider({ children }: PropsWithChildren) {
   }, [address, signer]);
 
   useEffect(() => {
-    initialise();
-  }, [initialise]);
+    initialize();
+  }, [initialize]);
 
   if (initializing) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
-        <CircularProgress aria-label="Initialising idOS..." />
-        <p>Initialising idOS...</p>
+        <CircularProgress aria-label="initializing idOS..." />
+        <p>initializing idOS...</p>
       </div>
     );
   }

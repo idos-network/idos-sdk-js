@@ -17,7 +17,7 @@ import { useEthersSigner } from "@/wagmi.config";
 
 export default function Home() {
   const { address, isConnected, isDisconnected } = useAccount();
-  const initialised = useRef(false);
+  const initialized = useRef(false);
   const { setSdk, sdk: clientSDK } = useSdkStore();
   const { signMessageAsync } = useSignMessage();
 
@@ -33,10 +33,10 @@ export default function Home() {
   const [credentials, setCredentials] = useState<idOSCredential[]>([]);
 
   useEffect(() => {
-    async function initialise() {
-      if (!isConnected || !signer || initialised.current) return;
+    async function initialize() {
+      if (!isConnected || !signer || initialized.current) return;
 
-      initialised.current = true;
+      initialized.current = true;
 
       try {
         const { idOS } = await import("@idos-network/idos-sdk");
@@ -76,11 +76,11 @@ export default function Home() {
         setSdk(_instance);
       } catch (error) {
         console.error("Failed to initialize idOS Client SDK:", error);
-        initialised.current = false;
+        initialized.current = false;
       }
     }
 
-    initialise();
+    initialize();
   }, [address, isConnected, signer, setSdk]);
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export default function Home() {
       setCredentials([]);
       setHasProfile(false);
       clientSDK?.reset().then(() => {
-        initialised.current = false;
+        initialized.current = false;
       });
     }
   }, [isDisconnected, clientSDK]);
@@ -101,7 +101,7 @@ export default function Home() {
     );
   }
 
-  if (!initialised.current || !clientSDK) {
+  if (!initialized.current || !clientSDK) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2">
         <Spinner />

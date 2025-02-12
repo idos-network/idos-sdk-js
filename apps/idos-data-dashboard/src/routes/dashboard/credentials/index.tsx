@@ -54,7 +54,7 @@ const NoCredentials = () => {
 
 const Credentials = () => {
   const credentials = useFetchCredentials();
-  const [credentialDetailsId, setCredentialDetalsId] = useState<string | null>(null);
+  const [credentialDetailsId, setCredentialDetailsId] = useState<string | null>(null);
   const [credentialGrantsId, setCredentialGrantsId] = useState<string | null>(null);
   const [credentialToDelete, setCredentialToDelete] = useState<idOSCredentialWithShares | null>(
     null,
@@ -101,7 +101,7 @@ const Credentials = () => {
             <ListItem key={credential.id} id={credential.id}>
               <CredentialCard
                 credential={credential}
-                onViewDetails={setCredentialDetalsId}
+                onViewDetails={setCredentialDetailsId}
                 onManageGrants={handleManageGrants}
                 onDelete={handleDelete}
               />
@@ -112,7 +112,7 @@ const Credentials = () => {
           <CredentialDetails
             credentialId={credentialDetailsId}
             isOpen={!!credentialDetailsId}
-            onClose={() => setCredentialDetalsId(null)}
+            onClose={() => setCredentialDetailsId(null)}
           />
         ) : null}
 
