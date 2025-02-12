@@ -1,3 +1,4 @@
+/* cspell:disable-next-line */
 import { createNode } from "@sanity/comlink";
 import { useTheme } from "next-themes";
 import { type PropsWithChildren, useEffect } from "react";
