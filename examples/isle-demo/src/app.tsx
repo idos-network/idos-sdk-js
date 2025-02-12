@@ -63,7 +63,6 @@ function Demo() {
 
     // Listen for initialization
     isleRef.current.on("initialized", ({ data: { theme, status } }) => {
-      console.log("initialized", { theme, status });
       setCurrentTheme(theme);
       setCurrentStatus(status);
     });
