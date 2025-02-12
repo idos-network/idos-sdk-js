@@ -1,3 +1,4 @@
+/* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 
 interface idOSIsleConstructorOptions {
