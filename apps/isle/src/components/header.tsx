@@ -10,7 +10,7 @@ import { useIsleStore } from "@/store";
 /**
  * @todo: fine-tune the colors
  */
-function ProfileStatusIcon() {
+export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
 
   if (status === "disconnected") {

@@ -1,7 +1,7 @@
 import { chakra } from "@chakra-ui/react";
 import * as motion from "motion/react-client";
 import { type PropsWithChildren, useState } from "react";
-import { DisconnectedIcon } from "./icons/disconnected";
+import { ProfileStatusIcon } from "./header";
 import { Logo } from "./logo";
 
 const MotionBox = chakra(motion.div);
@@ -21,10 +21,11 @@ export default function Minimized({ children }: PropsWithChildren) {
         _dark: "neutral.800",
         _light: "neutral.50",
       }}
-      backgroundColor="neutral.950"
+      backgroundColor={{ _dark: "neutral.950", _light: "neutral.50" }}
       whileHover={{
-        width: "366px",
-        height: "400px",
+        width: "380px",
+        minHeight: 100,
+        height: isExpanded ? "auto" : 100,
         borderRadius: "38px",
         backgroundColor: "transparent",
         overflow: "hidden",
@@ -35,25 +36,24 @@ export default function Minimized({ children }: PropsWithChildren) {
       <MotionBox
         style={{
           display: isExpanded ? "flex" : "none",
-          width: "366px",
-          height: "400px",
         }}
       >
         {children}
       </MotionBox>
-      <motion.div
-        style={{
-          padding: "4px",
-          gap: 1,
-          alignItems: "center",
-          justifyContent: "space-between",
-          width: "100%",
-          display: !isExpanded ? "flex" : "none",
+      <MotionBox
+        bg={{
+          _dark: "neutral.950",
+          _light: "white",
         }}
+        display={!isExpanded ? "flex" : "none"}
+        padding="4px"
+        w="full"
+        gap="1"
+        alignItems="center"
       >
         <Logo size="sm" />
-        <DisconnectedIcon color="gray.500" />
-      </motion.div>
+        <ProfileStatusIcon />
+      </MotionBox>
     </MotionBox>
   );
 }
