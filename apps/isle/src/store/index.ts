@@ -25,12 +25,13 @@ export const useIsleStore = create<NodeState>((set) => ({
       node.post("initialized", { theme: _theme, status: "disconnected" });
     });
 
-    node.on("theme.update", ({ theme }) => {
-      set({ theme });
-    });
-
-    node.on("status.update", ({ status }) => {
-      set({ status });
+    node.on("update", ({ theme, status }) => {
+      set((state) => ({
+        ...state,
+        ...(theme !== undefined && { theme }),
+        ...(status !== undefined && { status }),
+      }));
+      node.post("updated", { theme, status });
     });
 
     return node.start();

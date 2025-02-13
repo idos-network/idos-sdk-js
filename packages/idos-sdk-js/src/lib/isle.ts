@@ -23,25 +23,28 @@ type ControllerMessage =
       };
     }
   | {
-      type: "theme.update";
+      type: "update";
       data: {
-        theme: idOSIsleTheme;
-      };
-    }
-  | {
-      type: "status.update";
-      data: {
-        status: idOSIsleStatus;
+        theme?: idOSIsleTheme;
+        status?: idOSIsleStatus;
       };
     };
 
-type NodeMessage = {
-  type: "initialized";
-  data: {
-    theme: idOSIsleTheme;
-    status: idOSIsleStatus;
-  };
-};
+type NodeMessage =
+  | {
+      type: "initialized";
+      data: {
+        theme: idOSIsleTheme;
+        status: idOSIsleStatus;
+      };
+    }
+  | {
+      type: "updated";
+      data: {
+        theme: idOSIsleTheme;
+        status: idOSIsleStatus;
+      };
+    };
 
 type MessageHandler = (message: NodeMessage) => void;
 

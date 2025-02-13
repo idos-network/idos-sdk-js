@@ -11,32 +11,29 @@ export type ControllerMessage =
   | {
       type: "initialize";
       data: {
-        theme?: "light" | "dark";
+        theme?: idOSIsleTheme;
       };
     }
   | {
-      type: "theme.update";
+      type: "update";
       data: {
-        theme: "light" | "dark";
-      };
-    }
-  | {
-      type: "status.update";
-      data: {
-        status:
-          | "disconnected"
-          | "no-profile"
-          | "not-verified"
-          | "pending-verification"
-          | "verified"
-          | "error";
+        theme?: idOSIsleTheme;
+        status?: idOSIsleStatus;
       };
     };
 
-export type NodeMessage = {
-  type: "initialized";
-  data: {
-    theme: idOSIsleTheme;
-    status: idOSIsleStatus;
-  };
-};
+export type NodeMessage =
+  | {
+      type: "initialized";
+      data: {
+        theme: idOSIsleTheme;
+        status: idOSIsleStatus;
+      };
+    }
+  | {
+      type: "updated";
+      data: {
+        theme?: idOSIsleTheme;
+        status?: idOSIsleStatus;
+      };
+    };

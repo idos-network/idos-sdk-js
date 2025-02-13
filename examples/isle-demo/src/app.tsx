@@ -1,4 +1,14 @@
-import { Center, Fieldset, Heading, Stack, Text, VStack, chakra } from "@chakra-ui/react";
+import {
+  Box,
+  Center,
+  Code,
+  Fieldset,
+  Heading,
+  Stack,
+  Text,
+  VStack,
+  chakra,
+} from "@chakra-ui/react";
 import { idOSIsle, type idOSIsleStatus, type idOSIsleTheme } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef, useState } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
@@ -50,6 +60,12 @@ function Demo() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [currentTheme, setCurrentTheme] = useState<idOSIsleTheme>("light");
   const [currentStatus, setCurrentStatus] = useState<idOSIsleStatus>("disconnected");
+  const [stack, setStack] = useState<
+    {
+      theme: idOSIsleTheme;
+      status: idOSIsleStatus;
+    }[]
+  >([]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -63,6 +79,14 @@ function Demo() {
     isleRef.current.on("initialized", ({ data: { theme, status } }) => {
       setCurrentTheme(theme);
       setCurrentStatus(status);
+      setStack((prev) => [...prev, { theme, status }]);
+    });
+
+    // Listen for theme updates
+    isleRef.current.on("updated", ({ data: { theme, status } }) => {
+      setCurrentTheme(theme);
+      setCurrentStatus(status);
+      setStack((prev) => [...prev, { theme, status }]);
     });
 
     return () => {
@@ -74,42 +98,80 @@ function Demo() {
   const handleSetTheme = (event: React.FormEvent<HTMLDivElement>) => {
     const theme = (event.target as HTMLInputElement).value as idOSIsleTheme;
     setCurrentTheme(theme);
-    isleRef.current?.send("theme.update", { theme });
+    isleRef.current?.send("update", { theme });
   };
 
   const handleSetStatus = (event: React.FormEvent<HTMLDivElement>) => {
     const status = (event.target as HTMLInputElement).value as idOSIsleStatus;
     setCurrentStatus(status);
-    isleRef.current?.send("status.update", { status });
+    isleRef.current?.send("update", { status });
   };
 
   return (
     <Center h="full" flexDir="column" gap="5">
       <div ref={containerRef} id="idOS-isle" style={{ width: "100%", height: "600px" }} />
-      <Fieldset.Root>
-        <Fieldset.Legend>Theme</Fieldset.Legend>
-        <Fieldset.HelperText>Choose the theme of the isle</Fieldset.HelperText>
-        <RadioGroup onChange={handleSetTheme} value={currentTheme}>
-          <Stack direction="row" gap={5}>
-            <Radio value="light">Light theme</Radio>
-            <Radio value="dark">Dark theme</Radio>
-          </Stack>
-        </RadioGroup>
-      </Fieldset.Root>
-      <Fieldset.Root>
-        <Fieldset.Legend>Status</Fieldset.Legend>
-        <Fieldset.HelperText>Choose the application status the isle</Fieldset.HelperText>
-        <RadioGroup onChange={handleSetStatus} value={currentStatus}>
-          <Stack direction="column" gap={5}>
-            <Radio value="disconnected">Disconnected</Radio>
-            <Radio value="no-profile">No profile</Radio>
-            <Radio value="not-verified">Not verified</Radio>
-            <Radio value="pending-verification">Pending verification</Radio>
-            <Radio value="verified">Verified</Radio>
-            <Radio value="error">Error</Radio>
-          </Stack>
-        </RadioGroup>
-      </Fieldset.Root>
+      <Stack
+        direction={{
+          base: "column",
+          md: "row",
+        }}
+        gap="5"
+        alignItems="stretch"
+        w="full"
+      >
+        <VStack gap="5" flex="1" alignItems="stretch">
+          <Box border="1px solid {colors.gray.200}" p="5" rounded="md">
+            <Fieldset.Root>
+              <Fieldset.Legend>Theme</Fieldset.Legend>
+              <Fieldset.HelperText>Choose the theme of the isle</Fieldset.HelperText>
+              <RadioGroup onChange={handleSetTheme} value={currentTheme}>
+                <Stack direction="row" gap={5}>
+                  <Radio value="light">Light theme</Radio>
+                  <Radio value="dark">Dark theme</Radio>
+                </Stack>
+              </RadioGroup>
+            </Fieldset.Root>
+          </Box>
+          <Box border="1px solid {colors.gray.200}" p="5" rounded="md">
+            <Fieldset.Root>
+              <Fieldset.Legend>Status</Fieldset.Legend>
+              <Fieldset.HelperText>Choose the application status the isle</Fieldset.HelperText>
+              <RadioGroup onChange={handleSetStatus} value={currentStatus}>
+                <Stack direction="column" gap={5}>
+                  <Radio value="disconnected">Disconnected</Radio>
+                  <Radio value="no-profile">No profile</Radio>
+                  <Radio value="not-verified">Not verified</Radio>
+                  <Radio value="pending-verification">Pending verification</Radio>
+                  <Radio value="verified">Verified</Radio>
+                  <Radio value="error">Error</Radio>
+                </Stack>
+              </RadioGroup>
+            </Fieldset.Root>
+          </Box>
+        </VStack>
+        <VStack
+          gap="1"
+          align="stretch"
+          w="full"
+          h="full"
+          p="1"
+          bg="gray.100"
+          flex="1"
+          rounded="md"
+          maxH="488px"
+          overflow="auto"
+        >
+          {stack.map(({ theme, status }) => (
+            <Code
+              key={crypto.randomUUID()}
+              border="1px solid {colors.gray.200}"
+              colorPalette="green"
+            >
+              {JSON.stringify({ theme, status }, null, 2)}
+            </Code>
+          ))}
+        </VStack>
+      </Stack>
     </Center>
   );
 }
