@@ -39,7 +39,7 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Shares
           </Text>
-          <Text>{grants.data?.length || 0}</Text>
+          <Text data-testid="shares-count">{grants.data?.length || 0}</Text>
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>

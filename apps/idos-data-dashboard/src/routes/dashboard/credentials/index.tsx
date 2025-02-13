@@ -10,13 +10,11 @@ import {
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { useState } from "react";
-import { useAccount, useSwitchChain } from "wagmi";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
-import { sepolia } from "wagmi/chains";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { DeleteCredential } from "./components/delete-credential";
@@ -60,22 +58,10 @@ const Credentials = () => {
     null,
   );
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { chain } = useAccount();
-  const { switchChainAsync } = useSwitchChain();
 
-  const handleManageGrants = async (credentialId: string) => {
-    if (chain?.id !== sepolia.id)
-      await switchChainAsync?.({
-        chainId: sepolia.id,
-      });
-    setCredentialGrantsId(credentialId);
-  };
+  const handleManageGrants = async (credentialId: string) => setCredentialGrantsId(credentialId);
 
   const handleDelete = async (credential: idOSCredentialWithShares) => {
-    if (chain?.id !== sepolia.id)
-      await switchChainAsync?.({
-        chainId: sepolia.id,
-      });
     setCredentialToDelete(credential);
     onOpen();
   };
@@ -98,7 +84,8 @@ const Credentials = () => {
       <>
         <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
           {credentials.data.map((credential) => (
-            <ListItem key={credential.id} id={credential.id}>
+            // biome-ignore lint/a11y/useSemanticElements: <explanation>
+            <ListItem key={credential.id} id={credential.id} role="listitem">
               <CredentialCard
                 credential={credential}
                 onViewDetails={setCredentialDetailsId}
