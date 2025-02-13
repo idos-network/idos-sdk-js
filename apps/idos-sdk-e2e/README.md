@@ -40,7 +40,7 @@ Run all tests:
 pnpm test:e2e
 ```
 
-Run a particilar test:
+Run a particular test:
 ```bash
 pnpm test:e2e 01-evm-auth.spec.ts
 ```
