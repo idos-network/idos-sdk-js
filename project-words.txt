@@ -21,6 +21,7 @@ encryptor
 headlessui
 heroicons
 heroui
+Holyheld
 hono
 idos
 idOS
@@ -65,3 +66,4 @@ viewports
 vite
 wagmi
 webauthn
+comlink
