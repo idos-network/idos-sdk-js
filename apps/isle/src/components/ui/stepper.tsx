@@ -1,16 +1,23 @@
-import { Flex, Grid } from "@chakra-ui/react";
+import { Circle, Flex, Grid } from "@chakra-ui/react";
 
-const StepperCircle = ({ active }: { active?: boolean }) => {
+interface StepperCircleProps {
+  active?: boolean;
+}
+
+const StepperCircle = ({ active }: StepperCircleProps) => {
   return (
     <Grid
-      w={6}
-      h={6}
+      w="6"
+      h="6"
       rounded="full"
       placeItems="center"
-      bg={active ? "aquamarine.950" : "neutral.800"}
-      zIndex={2}
+      bg={{
+        _dark: active ? "aquamarine.950" : "neutral.800",
+        _light: active ? "aquamarine.200" : "neutral.200",
+      }}
+      zIndex="2"
     >
-      <Flex w={2} h={2} rounded="full" bg={active ? "aquamarine.400" : "neutral.500"} />
+      <Circle size="2" bg={active ? "aquamarine.600" : "neutral.400"} />
     </Grid>
   );
 };
