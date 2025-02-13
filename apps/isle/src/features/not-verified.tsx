@@ -55,7 +55,7 @@ const PermissionsToAsk = () => (
   <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} p="4" borderRadius="3xl">
     <PermissionAsk title="Add one credential to your idOS Profile" icon={<KeyIcon w="4" h="4" />} />
     <PermissionAsk
-      title="Grant access to your KYC data, incluing:"
+      title="Grant access to your KYC data, including:"
       icon={<IdentityIcon w="4" h="4" />}
     >
       <KycInfo
