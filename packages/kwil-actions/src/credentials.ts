@@ -36,19 +36,6 @@ export async function getCredentialIdByContentHash(
 }
 
 /**
- * Creates a new idOSCredential if the signer has write grant access
- */
-export async function createCredentialByWriteGrant(
-  kwilClient: KwilActionClient,
-  params: CreateCredentialParams,
-) {
-  return kwilClient.execute({
-    name: "create_credential_by_write_grant",
-    inputs: params,
-  });
-}
-
-/**
  * Creates a new idOSCredential if the signer is a permissioned issuer
  */
 export async function createCredentialAsInserter(
@@ -57,25 +44,6 @@ export async function createCredentialAsInserter(
 ) {
   return kwilClient.execute({
     name: "upsert_credential_as_inserter",
-    inputs: params,
-  });
-}
-
-interface ShareCredentialByWriteGrantParams extends CreateCredentialParams {
-  grantee_wallet_identifier: string;
-  locked_until: number;
-  original_credential_id: string;
-}
-
-/**
- * Shares an idOSCredential by granting write access to the given `grantee_wallet_identifier`.
- */
-export async function shareCredentialByWriteGrant(
-  kwilClient: KwilActionClient,
-  params: ShareCredentialByWriteGrantParams,
-) {
-  return kwilClient.execute({
-    name: "share_credential_by_write_grant",
     inputs: params,
   });
 }
