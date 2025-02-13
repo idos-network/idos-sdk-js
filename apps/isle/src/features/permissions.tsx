@@ -1,13 +1,13 @@
 import { type BreadcrumbLinkProps, Flex, Icon, Image, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuChevronLeft } from "react-icons/lu";
+import { useDisconnect } from "wagmi";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
+import { Button } from "@/components/ui";
 import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui/breadcrumb";
-import { DisconnectButton } from "@/components/ui/disconnect";
-import RevokeButton from "@/components/ui/revoke-button";
 
 const mockKycData = {
   gender: "Female",
@@ -34,10 +34,35 @@ const themedColor = {
   _light: "neutral.950",
 };
 
+export function DisconnectButton() {
+  const { disconnect, isPending } = useDisconnect();
+  return (
+    <Button
+      color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
+      bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
+      onClick={() => disconnect()}
+      loading={isPending}
+    >
+      Disconnect
+    </Button>
+  );
+}
+
+export function RevokeButton() {
+  return (
+    <Button>
+      Revoke Access
+      <Icon w={5} h={5} color="neutral.950">
+        <DeleteIcon />
+      </Icon>
+    </Button>
+  );
+}
+
 function PermissionHeader({ name, icon, hasGrant }: Permission) {
   return (
     <Flex justifyContent="space-between">
-      <Flex alignItems="center" gap={2.5}>
+      <Flex alignItems="center" gap="2.5">
         <Flex
           alignItems="center"
           justifyContent="center"

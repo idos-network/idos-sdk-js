@@ -33,34 +33,8 @@ function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
-const badgePropsSrc: Record<string, BadgeProps> = {
-  verified: {
-    bg: {
-      _dark: "aquamarine.400/30",
-      _light: "aquamarine.200",
-    },
-    color: {
-      _dark: "aquamarine.400",
-      _light: "aquamarine.800",
-    },
-  },
-  "pending verification": {
-    bg: "yellow.500",
-    color: "white",
-  },
-  "no profile": {
-    bg: "red.500",
-    color: "white",
-  },
-  disconnected: {
-    bg: "gray.500",
-    color: "white",
-  },
-};
-
 export function Header() {
   const status = useAtomValue(statusAtom);
-  const badgeProps = badgePropsSrc[status];
 
   return (
     <chakra.header
@@ -76,7 +50,7 @@ export function Header() {
           <chakra.span fontSize="lg" fontWeight="semibold">
             idOS
           </chakra.span>
-          <Badge {...badgeProps} size="sm" textTransform="uppercase">
+          <Badge size="sm" textTransform="uppercase">
             {status}
           </Badge>
         </VStack>
