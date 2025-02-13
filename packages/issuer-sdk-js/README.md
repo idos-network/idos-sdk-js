@@ -171,7 +171,7 @@ const delegatedWriteGrant = {
 };
 
 // Get a message to sign
-const message: string = await clientSDK.data.requestDWGSignature(delegatedWriteGrant);
+const message: string = await idos.data.requestDWGSignature(delegatedWriteGrant);
 
 // Ask a user to signt the message.
 const signature = await signMessageAsync({ message });
