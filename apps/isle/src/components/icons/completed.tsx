@@ -11,7 +11,7 @@ export function Completed(props: IconProps) {
       w={12}
       h={12}
       borderRadius="full"
-      bg="aquamarine.950"
+      bg={{ _dark: "aquamarine.950", _light: "aquamarine.200" }}
       mx="auto"
     >
       <Icon {...props}>
