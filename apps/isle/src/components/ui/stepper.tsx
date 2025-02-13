@@ -29,7 +29,15 @@ export function Stepper({
   const stepsArray = Array.from({ length: stepsLength }, (_, i) => i + 1);
   return (
     <Flex position="relative" justifyContent="space-between" maxW={208} mx="auto" w="full">
-      <Flex position="absolute" top="3" left="0" minH="1px" w="full" bg="neutral.500" zIndex={1} />
+      <Flex
+        position="absolute"
+        top="3"
+        left="0"
+        minH="1px"
+        w="full"
+        bg={{ _dark: "neutral.500", _light: "neutral.400" }}
+        zIndex={1}
+      />
       {stepsArray.map((step, index) => (
         <StepperCircle key={step} active={activeIndex >= index} />
       ))}

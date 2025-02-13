@@ -10,7 +10,7 @@ export function CreateProfileSteps() {
   return (
     <Flex flexDirection="column" gap="6">
       {!loading && (
-        <Heading h="2" fontSize="18" textAlign="center" fontWeight="semibold" mb="3">
+        <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
           Create your idOS Profile.
         </Heading>
       )}
@@ -24,7 +24,7 @@ export function CreateProfileSteps() {
           h="12"
           borderRadius="full"
           border="3px solid"
-          borderColor="aquamarine.950"
+          borderColor={{ _dark: "aquamarine.950", _light: "aquamarine.200" }}
           mx="auto"
         />
       ) : (
@@ -65,10 +65,7 @@ export function CreateProfileSteps() {
                     variant="plain"
                     href="https://litprotocol.com/docs/lit-protocol-overview/lit-mpc-encryption"
                     target="_blank"
-                    color={{
-                      _dark: "aquamarine.500",
-                      _light: "neutral.800",
-                    }}
+                    color={{ _dark: "aquamarine.500", _light: "neutral.800" }}
                     rel="noreferrer"
                     fontWeight="medium"
                     fontSize="xs"
