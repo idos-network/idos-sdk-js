@@ -4,7 +4,7 @@ import basicSetup from "../wallet-setup/basic.setup";
 
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
-// This will work after issuer versel app be pointed to env node with new delegated write grant feature
+// This will work after issuer vercel app be pointed to env node with new delegated write grant feature
 const ISSUER_DEMO_URL = "https://issuer-sdk-demo.vercel.app/";
 
 const { expect } = test;

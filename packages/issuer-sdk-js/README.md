@@ -137,7 +137,7 @@ A Delegated Write Grant (DWG) is a permission given by the user that allows a sp
 - operation: delegatedWriteGrant
 - owner: _user_wallet_identifier_
 - grantee: _grantee_wallet_identifier_
-- issuer public key: _ed25519_public_key_hexencoded_
+- issuer public key: _ed25519_public_key_hex_encoded_
 - id: _DWG_identifier
 - access grant timelock: _RFC3339_date_time_till_access_grant_will_be_locked_
 - not usable before: _RFC3339_date_time_DWG_can_not_be_used_before_
@@ -176,7 +176,7 @@ const delegatedWriteGrant = {
 // Get a message to sign
 const message: string = await idos.data.requestDWGSignature(delegatedWriteGrant);
 
-// Ask a user to signt the message.
+// Ask a user to sign the message.
 const provider = new ethers.providers.Web3Provider(window.ethereum);
 const signer = provider.getSigner();
 const signature = await signer.signMessage(message);
