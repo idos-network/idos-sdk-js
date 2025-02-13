@@ -157,7 +157,6 @@ const idos = await idOS.init(...);
 // some endpoint you expose. But, to keep it simple, we're using a constant.
 const ISSUER_SIGNER_ADDRESS = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 
-const { signMessageAsync } = useSignMessage();
 const currentTimestamp = Date.now();
 const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
@@ -174,7 +173,9 @@ const delegatedWriteGrant = {
 const message: string = await idos.data.requestDWGSignature(delegatedWriteGrant);
 
 // Ask a user to signt the message.
-const signature = await signMessageAsync({ message });
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = provider.getSigner();
+const signature = await signer.signMessage(message);
 ```
 Be sure you have the DWG message parameters and it's signature kept. You need to use them on server side later.
 
