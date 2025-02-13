@@ -156,14 +156,16 @@ const idos = await idOS.init(...);
 
 // This is a placeholder for your signer's address. You could get it from
 // some endpoint you expose. But, to keep it simple, we're using a constant.
-const ISSUER_SIGNER_ADDRESS = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
+const GRANTEE_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
+const ISSUER_SIGNER_PUBLIC_KEY = "6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069f"; // ed25519 public key
 
 const currentTimestamp = Date.now();
 const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 const delegatedWriteGrant = {
   owner_wallet_identifier: address as string,
-  grantee_wallet_identifier: ISSUER_SIGNER_ADDRESS,
+  grantee_wallet_identifier: GRANTEE_WALLET_IDENTIFIER,
+  issuer_public_key: ISSUER_SIGNER_PUBLIC_KEY,
   id: crypto.randomUUID(),
   access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
   not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
