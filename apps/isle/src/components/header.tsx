@@ -1,41 +1,52 @@
 import { HStack, VStack, chakra } from "@chakra-ui/react";
-import { useAtomValue } from "jotai";
 
-import { statusAtom } from "@/atoms/account";
-
-import { DisconnectedIcon } from "./icons/disconnected";
-import { ProfileIcon } from "./icons/profile";
-import { Logo } from "./logo";
-import { Badge } from "./ui/badge";
+import { DisconnectedIcon } from "@/components/icons/disconnected";
+import { ExclamationMarkIcon } from "@/components/icons/exclamation-mark";
+import { ProfileIcon } from "@/components/icons/profile";
+import { Logo } from "@/components/logo";
+import { Badge } from "@/components/ui/badge";
+import { useIsleStore } from "@/store";
 
 /**
  * @todo: fine-tune the colors
  */
 function ProfileStatusIcon() {
-  const status = useAtomValue(statusAtom);
+  const status = useIsleStore((state) => state.status);
 
   if (status === "disconnected") {
     return <DisconnectedIcon color="gray" />;
   }
 
-  if (status === "no profile") {
+  if (status === "no-profile") {
     return <ProfileIcon color="gray" />;
   }
 
-  if (status === "not verified") {
+  if (status === "not-verified") {
     return <ProfileIcon color="red" />;
   }
 
-  if (status === "pending verification") {
+  if (status === "pending-verification") {
     return <ProfileIcon color="yellow.500" />;
+  }
+
+  if (status === "error") {
+    return <ExclamationMarkIcon color="red" />;
   }
 
   return <ProfileIcon color="aquamarine" />;
 }
 
-export function Header() {
-  const status = useAtomValue(statusAtom);
+// @todo: fine-tune the colors for the text color and the badge bg
+function StatusBadge() {
+  const status = useIsleStore((state) => state.status);
 
+  return (
+    <Badge bg={{ _light: "neutral.200", _dark: "neutral.800" }} size="sm" textTransform="uppercase">
+      {status.split("-").join(" ")}
+    </Badge>
+  );
+}
+export function Header() {
   return (
     <chakra.header
       display={"flex"}
@@ -50,9 +61,7 @@ export function Header() {
           <chakra.span fontSize="lg" fontWeight="semibold">
             idOS
           </chakra.span>
-          <Badge bg="neutral.950" size="sm" textTransform="uppercase">
-            {status}
-          </Badge>
+          <StatusBadge />
         </VStack>
       </HStack>
       <ProfileStatusIcon />
