@@ -149,6 +149,7 @@ To do this, you must first to ask a user to sign DWG message:
 
 import { idOS } from "@idos-network/idos-sdk-js";
 import * as Utf8Codec from "@stablelib/utf8";
+import { ethers } from "ethers";
 
 // Arguments are described on idos-sdk-js's README. Be sure to read it.
 const idos = await idOS.init(...);
