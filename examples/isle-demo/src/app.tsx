@@ -156,18 +156,17 @@ function Demo() {
           w="full"
           h="full"
           p="1"
-          bg="gray.100"
+          bg={{
+            _dark: "gray.900",
+            _light: "gray.100",
+          }}
           flex="1"
           rounded="md"
           maxH="488px"
           overflow="auto"
         >
           {stack.map((event) => (
-            <Code
-              key={crypto.randomUUID()}
-              border="1px solid {colors.gray.200}"
-              colorPalette="green"
-            >
+            <Code key={crypto.randomUUID()} colorPalette="green">
               {JSON.stringify(event, null, 2)}
             </Code>
           ))}
