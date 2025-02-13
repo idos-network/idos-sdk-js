@@ -1,4 +1,4 @@
-import { HStack, VStack, chakra } from "@chakra-ui/react";
+import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";
 import { ExclamationMarkIcon } from "@/components/icons/exclamation-mark";
@@ -36,12 +36,40 @@ export function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
-// @todo: fine-tune the colors for the text color and the badge bg
+const badgePropsSrc: Record<string, BadgeProps> = {
+  verified: {
+    bg: {
+      _dark: "aquamarine.400/30",
+      _light: "aquamarine.200",
+    },
+    color: {
+      _dark: "aquamarine.400",
+      _light: "aquamarine.800",
+    },
+  },
+  "pending-verification": {
+    bg: { _dark: "amber.400/30", _light: "amber.400/60" },
+    color: { _dark: "amber.400", _light: "amber.500" },
+  },
+  "no-profile": {
+    bg: "neutral.500/30",
+    color: "neutral.500",
+  },
+  disconnected: {
+    bg: "neutral.500/30",
+    color: "neutral.500",
+  },
+  error: {
+    bg: "red.400/30",
+    color: "red.400",
+  },
+};
+
 function StatusBadge() {
   const status = useIsleStore((state) => state.status);
-
+  const badgeProps = badgePropsSrc[status];
   return (
-    <Badge bg={{ _light: "neutral.200", _dark: "neutral.800" }} size="sm" textTransform="uppercase">
+    <Badge {...badgeProps} size="sm" textTransform="uppercase">
       {status.split("-").join(" ")}
     </Badge>
   );
