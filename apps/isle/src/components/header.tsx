@@ -1,4 +1,4 @@
-import {  HStack, VStack, chakra } from "@chakra-ui/react";
+import { HStack, VStack, chakra } from "@chakra-ui/react";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";
 import { ExclamationMarkIcon } from "@/components/icons/exclamation-mark";

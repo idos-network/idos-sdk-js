@@ -6,8 +6,8 @@ import { useDisconnect } from "wagmi";
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
+import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui";
 import { Button } from "@/components/ui";
-import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui/breadcrumb";
 
 const mockKycData = {
   gender: "Female",
@@ -66,7 +66,7 @@ function PermissionHeader({ name, icon, hasGrant }: Permission) {
         <Flex
           alignItems="center"
           justifyContent="center"
-          gap={2}
+          gap="2"
           bg="white"
           w="30px"
           h="30px"
@@ -86,7 +86,7 @@ function PermissionHeader({ name, icon, hasGrant }: Permission) {
 
 function KYCData() {
   return (
-    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap={0}>
+    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap="0">
       {Object.entries(mockKycData).map(([key, value], index) => (
         <Flex
           key={key}
@@ -150,9 +150,9 @@ const NavigationBreadcrumbs = ({ onClick }: { onClick: () => void }) => {
 
 function PermissionView({ name, icon, hasGrant, onClick }: PermissionProps) {
   return (
-    <Stack gap={6}>
+    <Stack gap="6">
       <NavigationBreadcrumbs onClick={onClick} />
-      <Stack gap={3}>
+      <Stack gap="3">
         <PermissionHeader name={name} icon={icon} hasGrant={hasGrant} />
         <KYCData />
       </Stack>
@@ -185,11 +185,11 @@ function Permission({ hasGrant, name, icon, onClick }: PermissionProps) {
           </Text>
         )}
         {hasGrant && (
-          <Flex gap={2}>
-            <Icon w={5} h={5} cursor="pointer" onClick={onClick} color="neutral.400">
+          <Flex gap="2">
+            <Icon w="5" h="5" cursor="pointer" onClick={onClick} color="neutral.400">
               <ViewIcon />
             </Icon>
-            <Icon w={5} h={5} cursor="pointer" color="neutral.400">
+            <Icon w="5" h="5" cursor="pointer" color="neutral.400">
               <DeleteIcon />
             </Icon>
           </Flex>
@@ -212,7 +212,7 @@ export function Permissions() {
       icon: "/holyheld.svg",
     },
   ];
-  const [permission, setPermission] = useState<Permission | null>(permissionList[0]);
+  const [permission, setPermission] = useState<Permission | null>(null);
 
   if (permission) {
     return <PermissionView onClick={() => setPermission(null)} {...permission} />;
@@ -220,7 +220,7 @@ export function Permissions() {
 
   return (
     <Stack>
-      <Stack gap={6}>
+      <Stack gap="6">
         {permissionList.map((permission) => (
           <Permission
             key={permission.name}
@@ -229,7 +229,7 @@ export function Permissions() {
           />
         ))}
       </Stack>
-      <Flex mt={6} justifyContent="center">
+      <Flex mt="6" justifyContent="center">
         <DisconnectButton />
       </Flex>
     </Stack>
