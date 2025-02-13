@@ -139,13 +139,14 @@ export default function Home() {
 
   const handleCreateGrantedCredential = () => {
     startGrantedCredentialRequestTransition(async () => {
-      const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
+      const issuerPublicKey = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
       const currentTimestamp = Date.now();
       const currentDate = new Date(currentTimestamp);
       const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
       const delegatedWriteGrant = {
         owner_wallet_identifier: address as string,
-        grantee_wallet_identifier: issuerAddress,
+        grantee_wallet_identifier: issuerPublicKey,
+        issuer_public_key: issuerPublicKey,
         id: crypto.randomUUID(),
         access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
         not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -160,6 +161,7 @@ export default function Home() {
           clientSDK.auth.currentUser.currentUserPublicKey as string,
           delegatedWriteGrant.owner_wallet_identifier,
           delegatedWriteGrant.grantee_wallet_identifier,
+          delegatedWriteGrant.issuer_public_key,
           delegatedWriteGrant.id,
           delegatedWriteGrant.access_grant_timelock,
           delegatedWriteGrant.not_usable_before,

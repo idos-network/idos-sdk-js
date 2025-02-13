@@ -116,6 +116,7 @@ export async function createCredentialPermissioned(
 type DelegatedWriteGrantParams = {
   ownerWalletIdentifier: string;
   granteeWalletIdentifier: string;
+  issuerPublicKey: string;
   id: string;
   accessGrantTimelock: string;
   notUsableBefore: string;
@@ -159,6 +160,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     content_hash: contentHash,
     dwg_owner: delegatedWriteGrant.ownerWalletIdentifier,
     dwg_grantee: delegatedWriteGrant.granteeWalletIdentifier,
+    dwg_issuer_public_key: delegatedWriteGrant.issuerPublicKey,
     dwg_id: delegatedWriteGrant.id,
     dwg_access_grant_timelock: delegatedWriteGrant.accessGrantTimelock,
     dwg_not_before: delegatedWriteGrant.notUsableBefore,

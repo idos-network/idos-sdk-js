@@ -32,6 +32,7 @@ interface idOSDAGSignatureRequest {
 interface idOSDelegatedWriteGrantSignatureRequest {
   owner_wallet_identifier: string;
   grantee_wallet_identifier: string;
+  issuer_public_key: string;
   id: string;
   access_grant_timelock: string;
   not_usable_before: string;

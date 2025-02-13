@@ -92,6 +92,7 @@ export async function createCredentialsByDelegatedWriteGrant(
   userEncryptionPublicKey: string,
   ownerWalletIdentifier: string,
   granteeWalletIdentifier: string,
+  issuerPublicKey: string,
   id: string,
   accessGrantTimelock: string,
   notUsableBefore: string,
@@ -112,6 +113,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     {
       ownerWalletIdentifier,
       granteeWalletIdentifier,
+      issuerPublicKey,
       id,
       accessGrantTimelock,
       notUsableBefore,
