@@ -40,14 +40,14 @@ export function LinkWallet() {
   }
 
   return (
-    <Center flexDir="column" gap="6">
+    <Center flexDir="column" gap="3">
       <Image src="/link-wallet.svg" alt="Link wallet" />
       <Text
         color={{
-          _dark: "neutral.950",
-          _light: "neutral.50",
+          _dark: "neutral.50",
+          _light: "neutral.950",
         }}
-        fontSize="sm"
+        fontSize="xs"
         textAlign="center"
         fontWeight="medium"
       >
@@ -56,18 +56,17 @@ export function LinkWallet() {
       <Text
         display="block"
         color="neutral.500"
-        fontSize="sm"
+        fontSize="xs"
         textAlign="center"
         fontWeight="medium"
-        my="3"
       >
         You will be redirected to idOS Dashboard.
       </Text>
-      <Link href={addWalletLink} w="full">
-        <Button gap="2" w="full">
+      <Button asChild gap="2" w="full">
+        <Link href={addWalletLink} textDecoration="none">
           Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
-        </Button>
-      </Link>
+        </Link>
+      </Button>
     </Center>
   );
 }
