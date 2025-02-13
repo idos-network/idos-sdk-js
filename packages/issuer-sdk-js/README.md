@@ -137,6 +137,7 @@ A Delegated Write Grant (DWG) is a permission given by the user that allows a sp
 - operation: delegatedWriteGrant
 - owner: _user_wallet_identifier_
 - grantee: _grantee_wallet_identifier_
+- issuer public key: _ed25519_public_key_hexencoded_
 - id: _DWG_identifier
 - access grant timelock: _RFC3339_date_time_till_access_grant_will_be_locked_
 - not usable before: _RFC3339_date_time_DWG_can_not_be_used_before_
@@ -249,6 +250,7 @@ const credentialPayload = {
 const delegatedWriteGrant = {
   delegatedWriteGrant.owner_wallet_identifier,
   delegatedWriteGrant.grantee_wallet_identifier,
+  delegatedWriteGrant.issuer_public_key,
   delegatedWriteGrant.id,
   delegatedWriteGrant.access_grant_timelock,
   delegatedWriteGrant.not_usable_before,
