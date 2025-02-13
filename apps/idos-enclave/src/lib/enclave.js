@@ -40,7 +40,7 @@ export class Enclave {
     }
   }
 
-  handlstoreableAttributes(storableAttributes) {
+  handleStorableAttributes(storableAttributes) {
     if (!Array.isArray(storableAttributes) || !storableAttributes.length) return;
     // biome-ignore lint/complexity/noForEach: <explanation>
     storableAttributes.forEach((attr) => {
@@ -54,7 +54,7 @@ export class Enclave {
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const litAttrs = this.store.get("litAttrs");
-    this.handlstoreableAttributes(litAttrs);
+    this.handleStorableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -319,7 +319,12 @@ export class Enclave {
 
   #listenToRequests() {
     window.addEventListener("message", async (event) => {
-      if (event.origin !== this.parentOrigin || event.data.target === "metamask-inpage") return;
+      if (
+        event.origin !== this.parentOrigin ||
+        // cspell:disable-next-line
+        event.data.target === "metamask-inpage"
+      )
+        return;
 
       try {
         const [requestName, requestData] = Object.entries(event.data).flat();
@@ -383,7 +388,7 @@ export class Enclave {
     this.store.set(key, value);
   }
 
-  async handleidOSStore(payload) {
+  async handleIdosStore(payload) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = async ({ data: { error, result } }) => {
@@ -434,7 +439,7 @@ export class Enclave {
         }
 
         if (result.type === "idOS:store" && result.status === "pending") {
-          result = await this.handleidOSStore(result.payload);
+          result = await this.handleIdosStore(result.payload);
 
           return this.dialog.postMessage(
             {

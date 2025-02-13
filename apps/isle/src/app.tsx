@@ -1,14 +1,18 @@
-import { HStack, Image, Text, VStack, chakra } from "@chakra-ui/react";
+import { chakra } from "@chakra-ui/react";
+import { useSetAtom } from "jotai";
 import type { PropsWithChildren } from "react";
+import { useAccount } from "wagmi";
 
-import { DisconnectedIcon } from "@/components/icons/disconnected";
-import { Logo } from "@/components/logo";
-import { Badge } from "@/components/ui/badge";
+import { statusAtom } from "@/atoms/account";
+import { Footer } from "@/components/footer";
+import { Header } from "@/components/header";
 import { NotConnected } from "@/features/not-connected";
+import { Profile } from "@/features/profile";
+import { KwilActionsProvider } from "@/kwil-actions.provider";
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <chakra.div display="grid" placeContent="center" minH="100vh">
+    <chakra.div display="grid" placeContent="center" minH="100vh" mx="auto">
       <chakra.div
         display="grid"
         gridTemplateRows="auto 1fr auto"
@@ -25,44 +29,35 @@ function Layout({ children }: PropsWithChildren) {
         }}
         shadow="2xl"
         width="366px"
+        height="full"
       >
-        <chakra.header display="flex" alignItems="start" justifyContent="space-between" gap="5">
-          <HStack gap="2">
-            <Logo />
-            <VStack alignItems="flex-start" gap="1">
-              <chakra.span fontSize="lg" fontWeight="semibold">
-                idOS
-              </chakra.span>
-              <Badge colorPalette="gray" size="sm">
-                DISCONNECTED
-              </Badge>
-            </VStack>
-          </HStack>
-          <DisconnectedIcon color="gray.500" />
-        </chakra.header>
+        <Header />
         <chakra.main>{children}</chakra.main>
-        <chakra.footer>
-          <Text
-            color="gray.500"
-            fontSize="sm"
-            textAlign="center"
-            placeContent="center"
-            display="flex"
-            alignItems="center"
-            gap="2"
-          >
-            Powered by <Image src="/footer-logo.svg" alt="Powered by idOS" />
-          </Text>
-        </chakra.footer>
+        <Footer />
       </chakra.div>
     </chakra.div>
   );
 }
 
 export function App() {
+  const { isConnected } = useAccount();
+  const setStatus = useSetAtom(statusAtom);
+
+  if (!isConnected) {
+    setStatus("disconnected");
+
+    return (
+      <Layout>
+        <NotConnected />
+      </Layout>
+    );
+  }
+
   return (
-    <Layout>
-      <NotConnected />
-    </Layout>
+    <KwilActionsProvider>
+      <Layout>
+        <Profile />
+      </Layout>
+    </KwilActionsProvider>
   );
 }

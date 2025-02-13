@@ -10,7 +10,7 @@ export default function Home() {
         fallback={
           <div className="flex h-full flex-col place-content-center items-center gap-2">
             <CircularProgress aria-label="Searching for a matching credential..." />
-            <p>Seaching for a matching credential...</p>
+            <p>Searching for a matching credential...</p>
           </div>
         }
       >
