@@ -6,6 +6,7 @@ import { ProfileIcon } from "@/components/icons/profile";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { useIsleStore } from "@/store";
+import type { idOSIsleStatus } from "@/types";
 
 /**
  * @todo: fine-tune the colors
@@ -36,7 +37,23 @@ function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
-const badgePropsSrc: Record<string, BadgeProps> = {
+const statusBadgeColors: Record<idOSIsleStatus, BadgeProps> = {
+  disconnected: {
+    bg: "neutral.500/30",
+    color: "neutral.500",
+  },
+  "no-profile": {
+    bg: "neutral.500/30",
+    color: "neutral.500",
+  },
+  "not-verified": {
+    bg: "red.400/30",
+    color: "red.400",
+  },
+  "pending-verification": {
+    bg: { _dark: "amber.400/30", _light: "amber.400/60" },
+    color: { _dark: "amber.400", _light: "amber.500" },
+  },
   verified: {
     bg: {
       _dark: "aquamarine.400/30",
@@ -47,18 +64,6 @@ const badgePropsSrc: Record<string, BadgeProps> = {
       _light: "aquamarine.800",
     },
   },
-  "pending-verification": {
-    bg: { _dark: "amber.400/30", _light: "amber.400/60" },
-    color: { _dark: "amber.400", _light: "amber.500" },
-  },
-  "no-profile": {
-    bg: "neutral.500/30",
-    color: "neutral.500",
-  },
-  disconnected: {
-    bg: "neutral.500/30",
-    color: "neutral.500",
-  },
   error: {
     bg: "red.400/30",
     color: "red.400",
@@ -67,7 +72,7 @@ const badgePropsSrc: Record<string, BadgeProps> = {
 
 function StatusBadge() {
   const status = useIsleStore((state) => state.status);
-  const badgeProps = badgePropsSrc[status];
+  const badgeProps = statusBadgeColors[status];
   return (
     <Badge {...badgeProps} size="sm" textTransform="uppercase">
       {status.split("-").join(" ")}
