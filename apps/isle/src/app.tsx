@@ -1,4 +1,4 @@
-import { Center, Show, Text, chakra } from "@chakra-ui/react";
+import { Show, chakra } from "@chakra-ui/react";
 import { useTheme } from "next-themes";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
@@ -8,10 +8,10 @@ import { Header } from "@/components/header";
 import { CreateProfile } from "@/features/create-profile";
 import { ErrorFallback } from "@/features/error-fallback";
 import { NotConnected } from "@/features/not-connected";
+import { NotVerified } from "@/features/not-verified";
 import { PendingVerification } from "@/features/pending-verification";
 import { Profile } from "@/features/profile";
 import { useIsleStore } from "@/store";
-import { NotVerified } from "./features/not-verified";
 
 function Layout({ children }: PropsWithChildren) {
   return (

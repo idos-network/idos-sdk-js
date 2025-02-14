@@ -59,7 +59,7 @@ export function RevokeButton() {
   );
 }
 
-export const CompanyLogo = ({ icon }: { icon: string }) => {
+export function Circle({ icon }: { icon: string }) {
   return (
     <Flex
       alignItems="center"
@@ -74,13 +74,13 @@ export const CompanyLogo = ({ icon }: { icon: string }) => {
       <Image src={icon} />
     </Flex>
   );
-};
+}
 
 function PermissionHeader({ name, icon, hasGrant }: Permission) {
   return (
     <Flex justifyContent="space-between">
       <Flex alignItems="center" gap="2.5">
-        <CompanyLogo icon={icon} />
+        <Circle icon={icon} />
         <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
           {name}
         </Text>
