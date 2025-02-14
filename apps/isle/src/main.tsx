@@ -7,6 +7,7 @@ import { WagmiProvider } from "wagmi";
 import { App } from "@/app";
 import { ThemeProvider } from "@/components/ui";
 import { getConfig } from "@/wagmi.config";
+import Minimized from "./components/minimized";
 
 const root = document.getElementById("root");
 
@@ -28,7 +29,9 @@ createRoot(root).render(
     <WagmiProvider config={getConfig()}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <App />
+          <Minimized>
+            <App />
+          </Minimized>
         </ThemeProvider>
         <ReactQueryDevtools buttonPosition="bottom-left" />
       </QueryClientProvider>
