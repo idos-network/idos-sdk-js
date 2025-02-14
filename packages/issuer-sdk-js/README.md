@@ -152,6 +152,10 @@ import { idOS } from "@idos-network/idos-sdk-js";
 import * as Utf8Codec from "@stablelib/utf8";
 import { ethers } from "ethers";
 
+// Typical wallet setup
+const provider = new ethers.providers.Web3Provider(window.ethereum);
+const signer = provider.getSigner();
+
 // Arguments are described on idos-sdk-js's README. Be sure to read it.
 const idos = await idOS.init(...);
 
@@ -164,7 +168,7 @@ const currentTimestamp = Date.now();
 const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 const delegatedWriteGrant = {
-  owner_wallet_identifier: address as string,
+  owner_wallet_identifier: await signer.getAddress(),
   grantee_wallet_identifier: GRANTEE_WALLET_IDENTIFIER,
   issuer_public_key: ISSUER_SIGNER_PUBLIC_KEY,
   id: crypto.randomUUID(),
@@ -177,8 +181,6 @@ const delegatedWriteGrant = {
 const message: string = await idos.data.requestDWGSignature(delegatedWriteGrant);
 
 // Ask a user to sign the message.
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const signer = provider.getSigner();
 const signature = await signer.signMessage(message);
 ```
 Be sure you have the DWG message parameters and it's signature kept. You need to use them on server side later.
