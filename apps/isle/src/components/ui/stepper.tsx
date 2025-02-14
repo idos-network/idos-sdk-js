@@ -39,7 +39,7 @@ export function Stepper({
         zIndex={1}
       />
       {stepsArray.map((step, index) => (
-        <StepperCircle key={step} active={activeIndex >= index} />
+        <StepperCircle key={step} active={activeIndex === index} />
       ))}
     </Flex>
   );
