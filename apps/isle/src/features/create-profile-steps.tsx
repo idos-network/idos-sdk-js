@@ -38,7 +38,7 @@ export function CreateProfileSteps() {
                 color="neutral.500"
                 fontWeight="medium"
                 fontSize="sm"
-                maxW={250}
+                maxW="250px"
                 mx="auto"
                 textAlign="center"
               >
@@ -46,14 +46,17 @@ export function CreateProfileSteps() {
               </Text>
 
               <Flex
-                bg={{ _dark: "neutral.800", _light: "neutral.200" }}
-                rounded="2xl"
+                bg={{
+                  _dark: "neutral.800",
+                  _light: "neutral.200",
+                }}
+                rounded="3xl"
                 p="4"
                 gap="2"
                 alignItems="start"
               >
                 <Image src="/lit.svg" alt="lit" />
-                <Flex flexDir="column">
+                <Flex flexDir="column" gap="2">
                   <Text color="neutral.500" fontSize="sm">
                     If you haven’t previously added this wallet to idOS, a private/public keypair
                     from LIT will be created to encrypt your data.

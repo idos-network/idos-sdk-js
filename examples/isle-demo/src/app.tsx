@@ -62,6 +62,7 @@ function Demo() {
   const [currentStatus, setCurrentStatus] = useState<idOSIsleStatus>("disconnected");
   const [stack, setStack] = useState<
     {
+      type: "initialized" | "updated";
       theme: idOSIsleTheme;
       status: idOSIsleStatus;
     }[]
@@ -79,14 +80,14 @@ function Demo() {
     isleRef.current.on("initialized", ({ data: { theme, status } }) => {
       setCurrentTheme(theme);
       setCurrentStatus(status);
-      setStack((prev) => [...prev, { theme, status }]);
+      setStack((prev) => [...prev, { type: "initialized", theme, status }]);
     });
 
     // Listen for theme updates
     isleRef.current.on("updated", ({ data: { theme, status } }) => {
       setCurrentTheme(theme);
       setCurrentStatus(status);
-      setStack((prev) => [...prev, { theme, status }]);
+      setStack((prev) => [...prev, { type: "updated", theme, status }]);
     });
 
     return () => {
@@ -155,19 +156,18 @@ function Demo() {
           w="full"
           h="full"
           p="1"
-          bg="gray.100"
+          bg={{
+            _dark: "gray.900",
+            _light: "gray.100",
+          }}
           flex="1"
           rounded="md"
           maxH="488px"
           overflow="auto"
         >
-          {stack.map(({ theme, status }) => (
-            <Code
-              key={crypto.randomUUID()}
-              border="1px solid {colors.gray.200}"
-              colorPalette="green"
-            >
-              {JSON.stringify({ theme, status }, null, 2)}
+          {stack.map((event) => (
+            <Code key={crypto.randomUUID()} colorPalette="green">
+              {JSON.stringify(event, null, 2)}
             </Code>
           ))}
         </VStack>
