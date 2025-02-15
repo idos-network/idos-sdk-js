@@ -1,0 +1,40 @@
+{
+  "name": "@idos-network/core",
+  "description": "Core utilities and types for idOS SDK's",
+  "version": "0.0.1",
+  "sideEffects": false,
+  "dependencies": {
+    "@stablelib/base64": "^1.0.1",
+    "@stablelib/binary": "^1.0.1",
+    "@stablelib/bytes": "^1.0.1",
+    "@stablelib/hex": "^1.0.1",
+    "@stablelib/sha256": "^1.0.1",
+    "@stablelib/utf8": "^1.0.1",
+    "@kwilteam/kwil-js": "0.7.1",
+    "borsh": "^1.0.0",
+    "bs58": "^6.0.0",
+    "ethers": "^6.13.5",
+    "near-api-js": "3.0.4",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tiny-invariant": "^1.3.3"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./codecs": "./src/codecs/index.ts",
+    "./cryptography": "./src/cryptography/index.ts",
+    "./types": "./src/types/index.ts",
+    "./kwil-nep413-signer": "./src/kwil-nep413-signer/index.ts",
+    "./kwil-actions": "./src/kwil-actions/index.ts",
+    "./kwil-actions/*": "./src/kwil-actions/*.ts",
+    "./store": "./src/store/index.ts"
+  },
+  "license": "MIT",
+  "peerDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "private": true,
+  "type": "module"
+}
