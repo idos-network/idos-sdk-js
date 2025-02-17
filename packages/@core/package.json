@@ -18,7 +18,6 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "tiny-invariant": "^1.3.3"
   },
   "exports": {
