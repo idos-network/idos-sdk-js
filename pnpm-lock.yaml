@@ -489,15 +489,15 @@ importers:
 
   examples/idos-example-dapp:
     dependencies:
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../../packages/@core
       '@idos-network/grantee-sdk-js':
         specifier: workspace:*
         version: link:../../packages/grantee-sdk-js
       '@idos-network/idos-sdk':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
-      '@idos-network/idos-sdk-types':
-        specifier: workspace:*
-        version: link:../../packages/types
       '@idos-network/issuer-sdk-js':
         specifier: workspace:*
         version: link:../../packages/issuer-sdk-js
