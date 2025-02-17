@@ -6,7 +6,7 @@ const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
 const PASSPORTING_URL = "https://passporting-demo.vercel.app/";
 const ISSUER_DEMO_URL = "https://issuer-sdk-demo.vercel.app/";
-const DATA_DASHBOARD_URL = "https://localhost:5174/"; // @todo: change to staging dashboard url
+const DATA_DASHBOARD_URL = "https://dashboard.staging.idos.network/"
 
 const { expect } = test;
 
@@ -19,7 +19,7 @@ test.beforeEach(async ({ context, page }) => {
 
 test.describe
   .serial("Sequential Passporting Tests", () => {
-    test("Making Sure there's on left over credential", async ({
+    test("Making Sure there's no left over credential", async ({
       context,
       page,
       metamaskPage,
