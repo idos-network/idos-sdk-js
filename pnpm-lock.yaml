@@ -1042,15 +1042,9 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@idos-network/codecs':
+      '@idos-network/core':
         specifier: workspace:*
-        version: link:../codecs
-      '@idos-network/idos-sdk-types':
-        specifier: workspace:*
-        version: link:../types
-      '@idos-network/kwil-nep413-signer':
-        specifier: workspace:*
-        version: link:../kwil-nep413-signer
+        version: link:../@core
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.10.0(typescript@5.6.3))
