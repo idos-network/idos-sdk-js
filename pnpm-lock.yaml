@@ -924,21 +924,9 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@idos-network/codecs':
+      '@idos-network/core':
         specifier: workspace:*
-        version: link:../codecs
-      '@idos-network/cryptography':
-        specifier: workspace:*
-        version: link:../cryptography
-      '@idos-network/idos-sdk-types':
-        specifier: workspace:*
-        version: link:../types
-      '@idos-network/kwil-actions':
-        specifier: workspace:*
-        version: link:../kwil-actions
-      '@idos-network/kwil-nep413-signer':
-        specifier: workspace:*
-        version: link:../kwil-nep413-signer
+        version: link:../@core
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.10.0(typescript@5.6.3))
@@ -1046,7 +1034,7 @@ importers:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 0.7.1
-        version: 0.7.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        version: 0.7.1
       es-toolkit:
         specifier: ^1.23.0
         version: 1.30.1
@@ -1086,7 +1074,7 @@ importers:
         version: 5.6.3
       vitest:
         specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))(lightningcss@1.29.1)(playwright@1.49.1)(terser@5.37.0)
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(lightningcss@1.29.1)(playwright@1.49.1)(terser@5.37.0)
 
   packages/kwil-actions:
     dependencies:
@@ -15046,6 +15034,17 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
+  '@kwilteam/kwil-js@0.7.1':
+    dependencies:
+      axios: 0.27.2
+      ethers: 6.13.5(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      jssha: 3.3.1
+      long: 5.2.3
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
+
   '@kwilteam/kwil-js@0.7.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       axios: 0.27.2
@@ -24022,6 +24021,37 @@ snapshots:
 
   jsbn@1.1.0: {}
 
+  jsdom@22.1.0:
+    dependencies:
+      abab: 2.0.6
+      cssstyle: 3.0.0
+      data-urls: 4.0.0
+      decimal.js: 10.4.3
+      domexception: 4.0.0
+      form-data: 4.0.1
+      html-encoding-sniffer: 3.0.0
+      http-proxy-agent: 5.0.0
+      https-proxy-agent: 5.0.1
+      is-potential-custom-element-name: 1.0.1
+      nwsapi: 2.2.16
+      parse5: 7.2.1
+      rrweb-cssom: 0.6.0
+      saxes: 6.0.0
+      symbol-tree: 3.2.4
+      tough-cookie: 4.1.4
+      w3c-xmlserializer: 4.0.0
+      webidl-conversions: 7.0.0
+      whatwg-encoding: 2.0.0
+      whatwg-mimetype: 3.0.0
+      whatwg-url: 12.0.1
+      ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+      xml-name-validator: 4.0.0
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+    optional: true
+
   jsdom@22.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
     dependencies:
       abab: 2.0.6
@@ -27163,6 +27193,47 @@ snapshots:
       '@edge-runtime/vm': 3.2.0
       '@vitest/ui': 0.34.7(vitest@0.31.4)
       jsdom: 22.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      playwright: 1.49.1
+    transitivePeerDependencies:
+      - less
+      - lightningcss
+      - sass
+      - stylus
+      - sugarss
+      - supports-color
+      - terser
+
+  vitest@0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(lightningcss@1.29.1)(playwright@1.49.1)(terser@5.37.0):
+    dependencies:
+      '@types/chai': 4.3.20
+      '@types/chai-subset': 1.3.5
+      '@types/node': 20.17.10
+      '@vitest/expect': 0.31.4
+      '@vitest/runner': 0.31.4
+      '@vitest/snapshot': 0.31.4
+      '@vitest/spy': 0.31.4
+      '@vitest/utils': 0.31.4
+      acorn: 8.14.0
+      acorn-walk: 8.3.4
+      cac: 6.7.14
+      chai: 4.5.0
+      concordance: 5.0.4
+      debug: 4.4.0(supports-color@8.1.1)
+      local-pkg: 0.4.3
+      magic-string: 0.30.17
+      pathe: 1.1.2
+      picocolors: 1.1.1
+      std-env: 3.8.0
+      strip-literal: 1.3.0
+      tinybench: 2.9.0
+      tinypool: 0.5.0
+      vite: 4.5.9(@types/node@20.17.10)(lightningcss@1.29.1)(terser@5.37.0)
+      vite-node: 0.31.4(@types/node@20.17.10)(lightningcss@1.29.1)(terser@5.37.0)
+      why-is-node-running: 2.3.0
+    optionalDependencies:
+      '@edge-runtime/vm': 3.2.0
+      '@vitest/ui': 0.34.7(vitest@0.31.4)
+      jsdom: 22.1.0
       playwright: 1.49.1
     transitivePeerDependencies:
       - less
