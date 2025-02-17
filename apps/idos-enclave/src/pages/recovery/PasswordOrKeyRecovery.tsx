@@ -1,6 +1,6 @@
 import { useSignal } from "@preact/signals";
 
-import type { Store } from "@idos-network/idos-store";
+import type { Store } from "@idos-network/core";
 import { useMemo } from "preact/hooks";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";

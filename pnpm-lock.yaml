@@ -214,9 +214,9 @@ importers:
       '@headlessui/react':
         specifier: 2.1.8
         version: 2.1.8(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
-      '@idos-network/idos-store':
+      '@idos-network/core':
         specifier: workspace:*
-        version: link:../../packages/idos-store
+        version: link:../../packages/@core
       '@lit-protocol/auth-helpers':
         specifier: ^6.4.10
         version: 6.11.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)
