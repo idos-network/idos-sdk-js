@@ -1,6 +1,5 @@
-import { hexEncode } from "@idos-network/codecs";
+import { bs58Decode, hexEncode } from "@idos-network/core";
 import type { AccessKeyList } from "@near-js/types";
-import bs58 from "bs58";
 import type { connect as connectT } from "near-api-js";
 
 export async function getNearFullAccessPublicKeys(
@@ -36,7 +35,7 @@ export async function getNearFullAccessPublicKeys(
 
 export function implicitAddressFromPublicKey(publicKey: string) {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  const implicitAddress = hexEncode(bs58.decode(key_without_prefix));
+  const implicitAddress = hexEncode(bs58Decode(key_without_prefix));
   return implicitAddress;
 }
 

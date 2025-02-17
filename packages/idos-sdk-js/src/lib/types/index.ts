@@ -1,5 +1,3 @@
-export * from "@idos-network/idos-sdk-types";
-
 export type StorableAttribute = {
   key: string;
   value: string | string[];
