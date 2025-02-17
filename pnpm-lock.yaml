@@ -449,9 +449,9 @@ importers:
 
   examples/grantee-sdk-demo:
     dependencies:
-      '@idos-network/codecs':
+      '@idos-network/core':
         specifier: workspace:*
-        version: link:../../packages/codecs
+        version: link:../../packages/@core
       '@idos-network/grantee-sdk-js':
         specifier: workspace:*
         version: link:../../packages/grantee-sdk-js
