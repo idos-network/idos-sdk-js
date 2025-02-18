@@ -5,6 +5,7 @@ import {
   type Config,
   connect,
   createConfig,
+  createStorage,
   disconnect,
   getAccount,
   getWalletClient,
@@ -12,7 +13,7 @@ import {
   reconnect,
   watchAccount,
 } from "@wagmi/core";
-import { mainnet } from "@wagmi/core/chains";
+import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 
 export type idOSIsleTheme = "light" | "dark";
@@ -35,8 +36,8 @@ type ControllerMessage =
   | {
       type: "initialize";
       data: {
-        status: idOSIsleStatus;
         theme?: idOSIsleTheme;
+        status?: idOSIsleStatus;
       };
     }
   | {
@@ -60,7 +61,6 @@ type NodeMessage =
       type: "initialized";
       data: {
         theme: idOSIsleTheme;
-        status: idOSIsleStatus;
       };
     }
   | {
@@ -98,10 +98,15 @@ export class idOSIsle {
     // Initialize Wagmi config if not already initialized
     if (!idOSIsle.wagmiConfig) {
       idOSIsle.wagmiConfig = createConfig({
-        chains: [mainnet],
+        storage: createStorage({
+          key: "idOS:isle",
+          storage: localStorage,
+        }),
+        chains: [mainnet, sepolia],
         connectors: [injected()],
         transports: {
           [mainnet.id]: http(),
+          [sepolia.id]: http(),
         },
       });
     }
@@ -135,26 +140,15 @@ export class idOSIsle {
     this.setupController();
     idOSIsle.instances.set(this.containerId, this);
   }
-  private async autoReconnectWallet(): Promise<void> {
-    try {
-      const account = getAccount(idOSIsle.wagmiConfig);
-      if (account.status === "connected") {
-        await this.updateWalletState("connected", account.address);
-        return;
-      }
 
-      const result = await reconnect(idOSIsle.wagmiConfig);
-      if (result.length) {
-        console.log("Reconnecting...");
-        await this.updateWalletState("connected", result[0].accounts[0]);
-      }
-    } catch (error) {
-      await this.updateWalletState(
-        "error",
-        undefined,
-        error instanceof Error ? error.message : "Unknown error",
-      );
+  private async reconnect(): Promise<void> {
+    const account = getAccount(idOSIsle.wagmiConfig);
+
+    if (account.status === "connected") {
+      return;
     }
+
+    await reconnect(idOSIsle.wagmiConfig);
   }
 
   private setupController(): void {
@@ -168,32 +162,19 @@ export class idOSIsle {
       name: "window",
     });
 
-    const { status } = getAccount(idOSIsle.wagmiConfig);
-    let isleStatus: idOSIsleStatus;
-
-    if (status === "connected") {
-      isleStatus = "no-profile";
-    } else {
-      isleStatus = "disconnected";
-    }
-
     this.channel.start();
     this.channel.post("initialize", {
       theme: this.theme,
-      status: isleStatus,
+      status: "disconnected",
     });
   }
 
   private async watchAccountChanges(): Promise<void> {
     watchAccount(idOSIsle.wagmiConfig, {
-      onChange(account, prevAccount) {
-        const isAccountUpdated = account.address !== prevAccount.address;
-        const isConnecting = account.status === "connecting";
-        const accountStatus = account.status;
-        // @todo: use these values for change listeners
-        console.log("isAccountUpdated", isAccountUpdated);
-        console.log("isConnecting", isConnecting);
-        console.log("accountStatus", accountStatus);
+      onChange: (account) => {
+        if (account.status === "connected" || account.status === "disconnected") {
+          this.send("update", { status: account.status });
+        }
       },
     });
   }
@@ -204,16 +185,16 @@ export class idOSIsle {
       return existingInstance;
     }
     const instance = new idOSIsle(options);
-    instance.autoReconnectWallet();
+    instance.reconnect();
     instance.watchAccountChanges();
     return instance;
   }
 
-  public send(type: ControllerMessage["type"], data: ControllerMessage["data"]): void {
+  send(type: ControllerMessage["type"], data: ControllerMessage["data"]): void {
     this.channel?.post(type, data);
   }
 
-  public on<T extends NodeMessage["type"]>(type: T, handler: MessageHandler<T>): () => void {
+  on<T extends NodeMessage["type"]>(type: T, handler: MessageHandler<T>): () => void {
     const cleanup = this.channel?.on(type, (data) => {
       handler({ type, data } as Extract<NodeMessage, { type: T }>);
     });
@@ -223,63 +204,38 @@ export class idOSIsle {
     };
   }
 
-  private async updateWalletState(
-    status: WalletConnectionStatus,
-    address?: string,
-    error?: string,
-  ): Promise<void> {
-    this.channel?.post("wallet_state", {
-      status,
-      address,
-      error,
-    });
-  }
-
-  public async connectWallet(): Promise<void> {
+  async connect(): Promise<void> {
     try {
-      await this.updateWalletState("connecting");
       const result = await connect(idOSIsle.wagmiConfig, {
         connector: injected(),
       });
 
       if (result.accounts.length > 0) {
         const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
-        if (!walletClient) throw new Error("Failed to get wallet client");
+
+        if (!walletClient) {
+          throw new Error("Failed to get wallet client");
+        }
 
         const provider = new BrowserProvider(walletClient.transport);
         this.signer = await provider.getSigner();
-        await this.updateWalletState("connected", result.accounts[0]);
       } else {
-        await this.updateWalletState("disconnected");
       }
-    } catch (error) {
-      await this.updateWalletState(
-        "error",
-        undefined,
-        error instanceof Error ? error.message : "Unknown error",
-      );
-    }
+    } catch (error) {}
   }
 
-  public async disconnectWallet(): Promise<void> {
+  async disconnect(): Promise<void> {
     try {
       await disconnect(idOSIsle.wagmiConfig);
       this.signer = undefined;
-      await this.updateWalletState("disconnected");
-    } catch (error) {
-      await this.updateWalletState(
-        "error",
-        undefined,
-        error instanceof Error ? error.message : "Unknown error",
-      );
-    }
+    } catch (error) {}
   }
 
-  public async getSigner(): Promise<JsonRpcSigner | undefined> {
+  async getSigner(): Promise<JsonRpcSigner | undefined> {
     return this.signer;
   }
 
-  public destroy(): void {
+  destroy(): void {
     this.controller.destroy();
     this.iframe?.parentNode?.removeChild(this.iframe);
     this.iframe = null;
