@@ -3,12 +3,11 @@ import {
   base64Encode,
   hexEncode,
   hexEncodeSha256Hash,
+  type idOSCredential,
   utf8Encode,
-} from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+} from "@idos-network/core";
 import nacl from "tweetnacl";
 import type { Enclave } from "./enclave";
-
 import type { KwilWrapper } from "./kwil-wrapper";
 
 // cspell:words idOSDAG

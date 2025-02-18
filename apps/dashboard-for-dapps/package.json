@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@chakra-ui/react": "^3.0.2",
-    "@idos-network/codecs": "workspace:*",
+    "@idos-network/core": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",

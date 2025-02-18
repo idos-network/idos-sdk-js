@@ -4,7 +4,7 @@ import {
   ClipboardIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
-import type { Store } from "@idos-network/idos-store";
+import type { Store } from "@idos-network/core";
 import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";

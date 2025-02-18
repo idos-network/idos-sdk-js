@@ -1,4 +1,4 @@
-import { base64Decode, hexEncodeSha256Hash } from "@idos-network/codecs";
+import { base64Decode, hexEncodeSha256Hash } from "@idos-network/core";
 import type { IssuerConfig } from "./create-issuer-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
 import { createActionInput, decryptContent } from "./internal";

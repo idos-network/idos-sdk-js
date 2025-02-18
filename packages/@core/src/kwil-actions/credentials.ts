@@ -1,4 +1,4 @@
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+import type { idOSCredential, idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 interface CreateCredentialParams {

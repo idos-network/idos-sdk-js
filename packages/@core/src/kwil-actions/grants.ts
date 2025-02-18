@@ -1,4 +1,4 @@
-import type { idOSGrant } from "@idos-network/idos-sdk-types";
+import type { idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 /**

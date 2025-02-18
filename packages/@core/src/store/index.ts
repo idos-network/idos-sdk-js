@@ -23,9 +23,10 @@ export class Store {
       set: (key: string, value: any) => this.set.call(this, key, encode(value)),
     };
   }
+
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here
   get(key: string): any {
-    const value = this.#getLocalStorage(key);
+    const value = this._getLocalStorage(key);
     if (!value) return undefined;
 
     return JSON.parse(value);
@@ -36,17 +37,17 @@ export class Store {
       !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString());
 
     if (!daysNumber) {
-      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      this._removeLocalStorage(this.REMEMBER_DURATION_KEY);
       return;
     }
 
     const date = new Date();
     date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
-    this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
+    this._setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
   }
 
   hasRememberDurationElapsed(): boolean {
-    const value = this.#getLocalStorage(this.REMEMBER_DURATION_KEY);
+    const value = this._getLocalStorage(this.REMEMBER_DURATION_KEY);
     if (!value) return false;
 
     // If the value doesn't decode right, we're going to assume that somebody messed around with it.
@@ -57,13 +58,13 @@ export class Store {
     try {
       str = JSON.parse(value);
     } catch (error) {
-      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      this._removeLocalStorage(this.REMEMBER_DURATION_KEY);
       return false;
     }
 
     const expires = Date.parse(str);
     if (Number.isNaN(expires)) {
-      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
+      this._removeLocalStorage(this.REMEMBER_DURATION_KEY);
       return false;
     }
 
@@ -75,18 +76,18 @@ export class Store {
     if (!key || typeof key !== "string") throw new Error(`Bad key: ${key}`);
     if (!value) return;
 
-    this.#setLocalStorage(key, JSON.stringify(value));
+    this._setLocalStorage(key, JSON.stringify(value));
   }
 
-  #getLocalStorage(key: string) {
+  private _getLocalStorage(key: string) {
     return window.localStorage.getItem(`${this.keyPrefix}${key}`);
   }
 
-  #setLocalStorage(key: string, value: string) {
+  private _setLocalStorage(key: string, value: string) {
     return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
   }
 
-  #removeLocalStorage(key: string) {
+  private _removeLocalStorage(key: string) {
     return window.localStorage.removeItem(`${this.keyPrefix}${key}`);
   }
 

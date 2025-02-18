@@ -1,4 +1,4 @@
-import type { Store } from "@idos-network/idos-store";
+import type { Store } from "@idos-network/core";
 import { useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useEffect, useRef, useState } from "preact/hooks";

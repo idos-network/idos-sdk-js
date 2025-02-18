@@ -27,7 +27,7 @@
   "dependencies": {
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/grantee-sdk-js": "workspace:*",
-    "@idos-network/idos-sdk-types": "workspace:*",
+    "@idos-network/core": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
     "@near-wallet-selector/core": "8.9.10",

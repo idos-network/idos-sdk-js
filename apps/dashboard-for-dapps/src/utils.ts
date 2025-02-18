@@ -1,4 +1,4 @@
-import { base64Decode, utf8Decode } from "@idos-network/codecs";
+import { base64Decode, utf8Decode } from "@idos-network/core/codecs";
 import nacl from "tweetnacl";
 
 export function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {

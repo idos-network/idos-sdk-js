@@ -1,5 +1,5 @@
-import { base64Encode } from "@idos-network/codecs";
 import nacl from "tweetnacl";
+import { base64Encode } from "../codecs";
 
 /**
  * Encrypts a message using the recipient's public key and the sender's secret key.
