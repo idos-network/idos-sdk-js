@@ -39,7 +39,6 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev",
-    "format": "biome format --write .",
     "lint": "next lint",
     "start": "next start"
   }

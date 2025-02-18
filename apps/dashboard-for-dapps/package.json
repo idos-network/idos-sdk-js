@@ -39,9 +39,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -b && vite build",
-    "check": "biome check --write .",
     "dev": "vite",
-    "format": "biome format --write .",
     "preview": "vite preview"
   },
   "type": "module"

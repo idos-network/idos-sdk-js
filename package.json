@@ -11,9 +11,9 @@
     "build": "turbo run build",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
-    "format": "turbo run format",
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
-    "lint": "turbo run lint",
+    "format-and-lint": "biome check .",
+    "format-and-lint:fix": "biome check . --write",
     "postinstall": "lefthook install",
     "test": "turbo run test"
   }

@@ -42,8 +42,6 @@
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "format": "biome format --write .",
-    "lint": "biome check --apply ./src",
     "preview": "vite preview"
   },
   "type": "module"
