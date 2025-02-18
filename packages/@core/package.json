@@ -2,15 +2,14 @@
   "name": "@idos-network/core",
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
-  "sideEffects": false,
   "dependencies": {
+    "@kwilteam/kwil-js": "0.7.1",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
     "@stablelib/hex": "^1.0.1",
     "@stablelib/sha256": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
-    "@kwilteam/kwil-js": "0.7.1",
     "borsh": "^1.0.0",
     "bs58": "^6.0.0",
     "ethers": "^6.13.5",
@@ -35,5 +34,6 @@
     "typescript": "^5.7.3"
   },
   "private": true,
+  "sideEffects": false,
   "type": "module"
 }
