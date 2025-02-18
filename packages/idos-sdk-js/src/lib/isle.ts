@@ -1,5 +1,9 @@
 /* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
+import { http, type Config, connect, createConfig, disconnect, getWalletClient } from "@wagmi/core";
+import { injected } from "@wagmi/core";
+import { mainnet } from "@wagmi/core/chains";
+import { BrowserProvider, type JsonRpcSigner } from "ethers";
 
 export type idOSIsleTheme = "light" | "dark";
 export type idOSIsleStatus =
@@ -9,6 +13,8 @@ export type idOSIsleStatus =
   | "pending-verification"
   | "verified"
   | "error";
+
+export type WalletConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
 interface idOSIsleConstructorOptions {
   container: string;
@@ -28,6 +34,14 @@ type ControllerMessage =
         theme?: idOSIsleTheme;
         status?: idOSIsleStatus;
       };
+    }
+  | {
+      type: "wallet_state";
+      data: {
+        status: WalletConnectionStatus;
+        address?: string;
+        error?: string;
+      };
     };
 
 type NodeMessage =
@@ -46,10 +60,13 @@ type NodeMessage =
       };
     };
 
-type MessageHandler = (message: NodeMessage) => void;
+type MessageHandler<T extends NodeMessage["type"]> = (
+  message: Extract<NodeMessage, { type: T }>,
+) => void;
 
 export class idOSIsle {
   private static instances = new Map<string, idOSIsle>();
+  private static wagmiConfig: Config;
 
   private iframe: HTMLIFrameElement | null = null;
   private containerId: string;
@@ -57,11 +74,24 @@ export class idOSIsle {
   private channel: ChannelInstance<ControllerMessage, NodeMessage> | null = null;
   private theme?: idOSIsleTheme;
   private iframeId: string;
+  private signer?: JsonRpcSigner;
 
   private constructor(options: idOSIsleConstructorOptions) {
     this.containerId = options.container;
     this.theme = options.theme;
     this.iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
+
+    // Initialize Wagmi config if not already initialized
+    if (!idOSIsle.wagmiConfig) {
+      idOSIsle.wagmiConfig = createConfig({
+        chains: [mainnet],
+        connectors: [injected()],
+        transports: {
+          [mainnet.id]: http(),
+        },
+      });
+    }
+
     this.controller = createController({
       targetOrigin: "https://localhost:5174",
     });
@@ -122,14 +152,70 @@ export class idOSIsle {
     this.channel?.post(type, data);
   }
 
-  public on(type: NodeMessage["type"], handler: MessageHandler): () => void {
+  public on<T extends NodeMessage["type"]>(type: T, handler: MessageHandler<T>): () => void {
     const cleanup = this.channel?.on(type, (data) => {
-      handler({ type, data });
+      handler({ type, data } as Extract<NodeMessage, { type: T }>);
     });
 
     return () => {
       cleanup?.();
     };
+  }
+
+  private async updateWalletState(
+    status: WalletConnectionStatus,
+    address?: string,
+    error?: string,
+  ): Promise<void> {
+    this.channel?.post("wallet_state", {
+      status,
+      address,
+      error,
+    });
+  }
+
+  public async connectWallet(): Promise<void> {
+    try {
+      await this.updateWalletState("connecting");
+      const result = await connect(idOSIsle.wagmiConfig, {
+        connector: injected(),
+      });
+
+      if (result.accounts.length > 0) {
+        const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
+        if (!walletClient) throw new Error("Failed to get wallet client");
+
+        const provider = new BrowserProvider(walletClient.transport);
+        this.signer = await provider.getSigner();
+        await this.updateWalletState("connected", result.accounts[0]);
+      } else {
+        await this.updateWalletState("disconnected");
+      }
+    } catch (error) {
+      await this.updateWalletState(
+        "error",
+        undefined,
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  }
+
+  public async disconnectWallet(): Promise<void> {
+    try {
+      await disconnect(idOSIsle.wagmiConfig);
+      this.signer = undefined;
+      await this.updateWalletState("disconnected");
+    } catch (error) {
+      await this.updateWalletState(
+        "error",
+        undefined,
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  }
+
+  public async getSigner(): Promise<JsonRpcSigner | undefined> {
+    return this.signer;
   }
 
   public destroy(): void {

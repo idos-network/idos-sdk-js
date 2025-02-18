@@ -28,6 +28,7 @@
     "test:build": "publint --strict"
   },
   "peerDependencies": {
+    "@wagmi/core": "^2.6.5",
     "ethers": "^6.12",
     "near-api-js": "3.0.4"
   },
@@ -36,6 +37,9 @@
       "optional": true
     },
     "near-api-js": {
+      "optional": true
+    },
+    "@wagmi/core": {
       "optional": true
     }
   },
@@ -47,6 +51,7 @@
     "@near-wallet-selector/core": "8.9.10",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@vitest/ui": "^0.34.6",
+    "@wagmi/core": "^2.16.4",
     "clean-package": "^2.2.0",
     "dotenv": "^16.4.5",
     "jsdom": "^22.1.0",

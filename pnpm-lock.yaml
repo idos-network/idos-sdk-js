@@ -940,7 +940,7 @@ importers:
         version: 2.2.0
       near-api-js:
         specifier: 3.0.4
-        version: 3.0.4(encoding@0.1.13)
+        version: 4.0.3(encoding@0.1.13)
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
@@ -959,13 +959,16 @@ importers:
         version: 0.2.1
       '@near-wallet-selector/core':
         specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+        version: 8.9.10(near-api-js@4.0.3(encoding@0.1.13))
       '@release-it/keep-a-changelog':
         specifier: ^5.0.0
         version: 5.0.0(release-it@17.10.0(typescript@5.6.3))
       '@vitest/ui':
         specifier: ^0.34.6
         version: 0.34.7(vitest@0.31.4)
+      '@wagmi/core':
+        specifier: ^2.16.4
+        version: 2.16.4(@tanstack/query-core@5.66.0)(@types/react@19.0.6)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1))
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
@@ -16100,6 +16103,14 @@ snapshots:
       near-api-js: 3.0.4(encoding@0.1.13)
       rxjs: 7.8.1
 
+  '@near-wallet-selector/core@8.9.10(near-api-js@4.0.3(encoding@0.1.13))':
+    dependencies:
+      borsh: 0.7.0
+      events: 3.3.0
+      js-sha256: 0.9.0
+      near-api-js: 4.0.3(encoding@0.1.13)
+      rxjs: 7.8.1
+
   '@near-wallet-selector/core@8.9.15(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       borsh: 1.0.0
@@ -19404,6 +19415,21 @@ snapshots:
       mipd: 0.0.7(typescript@5.6.3)
       viem: 2.22.23(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)
       zustand: 5.0.0(@types/react@18.3.18)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1))
+    optionalDependencies:
+      '@tanstack/query-core': 5.66.0
+      typescript: 5.6.3
+    transitivePeerDependencies:
+      - '@types/react'
+      - immer
+      - react
+      - use-sync-external-store
+
+  '@wagmi/core@2.16.4(@tanstack/query-core@5.66.0)(@types/react@19.0.6)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1))':
+    dependencies:
+      eventemitter3: 5.0.1
+      mipd: 0.0.7(typescript@5.6.3)
+      viem: 2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)
+      zustand: 5.0.0(@types/react@19.0.6)(react@19.0.0)(use-sync-external-store@1.4.0(react@19.0.0))
     optionalDependencies:
       '@tanstack/query-core': 5.66.0
       typescript: 5.6.3
@@ -26725,6 +26751,11 @@ snapshots:
     dependencies:
       react: 18.3.1
 
+  use-sync-external-store@1.4.0(react@19.0.0):
+    dependencies:
+      react: 19.0.0
+    optional: true
+
   utf-8-validate@5.0.10:
     dependencies:
       node-gyp-build: 4.8.4
@@ -26857,6 +26888,23 @@ snapshots:
       isows: 1.0.6(ws@8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))
       ox: 0.6.7(typescript@5.6.3)(zod@3.24.1)
       ws: 8.18.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+    optionalDependencies:
+      typescript: 5.6.3
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+      - zod
+
+  viem@2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1):
+    dependencies:
+      '@noble/curves': 1.8.1
+      '@noble/hashes': 1.7.1
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      abitype: 1.0.8(typescript@5.6.3)(zod@3.24.1)
+      isows: 1.0.6(ws@8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      ox: 0.6.7(typescript@5.6.3)(zod@3.24.1)
+      ws: 8.18.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
     optionalDependencies:
       typescript: 5.6.3
     transitivePeerDependencies:
@@ -27566,6 +27614,12 @@ snapshots:
       '@types/react': 18.3.18
       react: 18.3.1
       use-sync-external-store: 1.4.0(react@18.3.1)
+
+  zustand@5.0.0(@types/react@19.0.6)(react@19.0.0)(use-sync-external-store@1.4.0(react@19.0.0)):
+    optionalDependencies:
+      '@types/react': 19.0.6
+      react: 19.0.0
+      use-sync-external-store: 1.4.0(react@19.0.0)
 
   zustand@5.0.2(@types/react@18.3.17)(react@18.3.1)(use-sync-external-store@1.4.0(react@18.3.1)):
     optionalDependencies:
