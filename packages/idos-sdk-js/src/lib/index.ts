@@ -6,5 +6,5 @@ export * from "./utils";
 export * from "./types";
 export * from "./grants";
 export * from "./isle";
-// export types.
-export * from "../../../types";
+
+export * from "@idos-network/core/types";

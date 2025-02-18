@@ -1,15 +1,19 @@
 {
   "name": "idos-example-dapp",
   "version": "0.1.0",
-  "type": "module",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "license": "MIT",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "lint": "biome check --apply ./src",
-    "format": "biome format --write ."
+  "dependencies": {
+    "@idos-network/core": "workspace:*",
+    "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/idos-sdk": "workspace:*",
+    "@idos-network/issuer-sdk-js": "workspace:*",
+    "@kwilteam/kwil-js": "0.7.1",
+    "@near-wallet-selector/core": "8.9.10",
+    "@near-wallet-selector/here-wallet": "^8.7.0",
+    "@near-wallet-selector/meteor-wallet": "^8.7.0",
+    "@near-wallet-selector/modal-ui-js": "^8.7.0",
+    "@near-wallet-selector/my-near-wallet": "^8.7.0",
+    "@near-wallet-selector/nightly": "^8.7.0",
+    "axios": "^1.6.8"
   },
   "devDependencies": {
     "@stablelib/base64": "^1.0.1",
@@ -24,22 +28,16 @@
     "vite-plugin-mkcert": "^1.16.0",
     "vite-plugin-node-polyfills": "^0.12.0"
   },
-  "dependencies": {
-    "@idos-network/idos-sdk": "workspace:*",
-    "@idos-network/grantee-sdk-js": "workspace:*",
-    "@idos-network/idos-sdk-types": "workspace:*",
-    "@idos-network/issuer-sdk-js": "workspace:*",
-    "@kwilteam/kwil-js": "0.7.1",
-    "@near-wallet-selector/core": "8.9.10",
-    "@near-wallet-selector/here-wallet": "^8.7.0",
-    "@near-wallet-selector/meteor-wallet": "^8.7.0",
-    "@near-wallet-selector/modal-ui-js": "^8.7.0",
-    "@near-wallet-selector/my-near-wallet": "^8.7.0",
-    "@near-wallet-selector/nightly": "^8.7.0",
-    "axios": "^1.6.8"
-  },
+  "license": "MIT",
   "peerDependencies": {
     "ethers": "^6.13",
     "near-api-js": "3.0.4"
-  }
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module"
 }
