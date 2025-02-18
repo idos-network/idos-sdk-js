@@ -9,6 +9,8 @@ import {
   getAccount,
   getWalletClient,
   injected,
+  reconnect,
+  watchAccount,
 } from "@wagmi/core";
 import { mainnet } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
@@ -133,6 +135,27 @@ export class idOSIsle {
     this.setupController();
     idOSIsle.instances.set(this.containerId, this);
   }
+  private async autoReconnectWallet(): Promise<void> {
+    try {
+      const account = getAccount(idOSIsle.wagmiConfig);
+      if (account.status === "connected") {
+        await this.updateWalletState("connected", account.address);
+        return;
+      }
+
+      const result = await reconnect(idOSIsle.wagmiConfig);
+      if (result.length) {
+        console.log("Reconnecting...");
+        await this.updateWalletState("connected", result[0].accounts[0]);
+      }
+    } catch (error) {
+      await this.updateWalletState(
+        "error",
+        undefined,
+        error instanceof Error ? error.message : "Unknown error",
+      );
+    }
+  }
 
   private setupController(): void {
     if (!this.iframe?.contentWindow) return;
@@ -161,13 +184,29 @@ export class idOSIsle {
     });
   }
 
+  private async watchAccountChanges(): Promise<void> {
+    watchAccount(idOSIsle.wagmiConfig, {
+      onChange(account, prevAccount) {
+        const isAccountUpdated = account.address !== prevAccount.address;
+        const isConnecting = account.status === "connecting";
+        const accountStatus = account.status;
+        // @todo: use these values for change listeners
+        console.log("isAccountUpdated", isAccountUpdated);
+        console.log("isConnecting", isConnecting);
+        console.log("accountStatus", accountStatus);
+      },
+    });
+  }
+
   static initialize(options: idOSIsleConstructorOptions): idOSIsle {
     const existingInstance = idOSIsle.instances.get(options.container);
     if (existingInstance) {
       return existingInstance;
     }
-
-    return new idOSIsle(options);
+    const instance = new idOSIsle(options);
+    instance.autoReconnectWallet();
+    instance.watchAccountChanges();
+    return instance;
   }
 
   public send(type: ControllerMessage["type"], data: ControllerMessage["data"]): void {
