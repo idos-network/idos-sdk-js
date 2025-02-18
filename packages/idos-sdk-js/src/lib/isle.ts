@@ -135,7 +135,8 @@ export class idOSIsle {
     this.setupController();
     idOSIsle.instances.set(this.containerId, this);
   }
-  private async autoReconnectWallet(): Promise<void> {
+
+  private async reconnect(): Promise<void> {
     try {
       const account = getAccount(idOSIsle.wagmiConfig);
       if (account.status === "connected") {
@@ -186,7 +187,7 @@ export class idOSIsle {
 
   private async watchAccountChanges(): Promise<void> {
     watchAccount(idOSIsle.wagmiConfig, {
-      onChange(account, prevAccount) {
+      onChange: async (account, prevAccount) => {
         const isAccountUpdated = account.address !== prevAccount.address;
         const isConnecting = account.status === "connecting";
         const accountStatus = account.status;
@@ -204,7 +205,7 @@ export class idOSIsle {
       return existingInstance;
     }
     const instance = new idOSIsle(options);
-    instance.autoReconnectWallet();
+    instance.reconnect();
     instance.watchAccountChanges();
     return instance;
   }
