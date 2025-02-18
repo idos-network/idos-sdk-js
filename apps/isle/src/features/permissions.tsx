@@ -1,7 +1,6 @@
 import { type BreadcrumbLinkProps, Flex, Icon, Image, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuChevronLeft } from "react-icons/lu";
-import { useDisconnect } from "wagmi";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
@@ -35,13 +34,10 @@ const themedColor = {
 };
 
 export function DisconnectButton() {
-  const { disconnect, isPending } = useDisconnect();
   return (
     <Button
       color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
       bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
-      onClick={() => disconnect()}
-      loading={isPending}
     >
       Disconnect
     </Button>
