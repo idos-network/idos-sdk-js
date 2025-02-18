@@ -1,16 +1,7 @@
 {
   "name": "isle-demo",
   "description": "idOS Isle demo app",
-  "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "check": "biome check --write .",
-    "format": "biome format --write .",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "@chakra-ui/react": "^3.7.0",
     "@idos-network/idos-sdk": "workspace:*",
@@ -35,5 +26,14 @@
     "vite": "^5.4.14",
     "vite-plugin-mkcert": "^1.17.6",
     "vite-plugin-node-polyfills": "^0.12.0"
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "check": "biome check --write .",
+    "dev": "vite",
+    "format": "biome format --write .",
+    "preview": "vite preview"
+  },
+  "type": "module"
 }

@@ -2,44 +2,6 @@
   "name": "@idos-network/grantee-sdk-js",
   "description": "idOS Grantee JavaScript SDK",
   "version": "0.0.1",
-  "homepage": "https://idos.network",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "license": "MIT",
-  "type": "module",
-  "main": "src/index.ts",
-  "files": ["dist"],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "scripts": {
-    "dev": "tsup --watch --config tsup.config.ts",
-    "build": "tsup --config tsup.config.ts",
-    "lint": "biome check --apply ./src",
-    "format": "biome format --write .",
-    "release-it": "release-it",
-    "prepack": "clean-package",
-    "postpack": "clean-package restore",
-    "test:build": "publint --strict"
-  },
-  "peerDependencies": {
-    "ethers": "^6.13.5",
-    "near-api-js": "3.0.4"
-  },
-  "devDependencies": {
-    "@idos-network/core": "workspace:*",
-    "@release-it/keep-a-changelog": "^5.0.0",
-    "clean-package": "^2.2.0",
-    "release-it": "^17.0.0",
-    "tsup": "8.0.2",
-    "typescript": "^5.2.2"
-  },
-  "dependencies": {
-    "@kwilteam/kwil-js": "0.7.1",
-    "tweetnacl": "^1.0.3"
-  },
   "clean-package": {
     "replace": {
       "main": "dist/index.js",
@@ -52,5 +14,43 @@
         "./package.json": "./package.json"
       }
     }
-  }
+  },
+  "dependencies": {
+    "@kwilteam/kwil-js": "0.7.1",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@idos-network/core": "workspace:*",
+    "@release-it/keep-a-changelog": "^5.0.0",
+    "clean-package": "^2.2.0",
+    "release-it": "^17.0.0",
+    "tsup": "8.0.2",
+    "typescript": "^5.2.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "main": "src/index.ts",
+  "peerDependencies": {
+    "ethers": "^6.13.5",
+    "near-api-js": "3.0.4"
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --watch --config tsup.config.ts",
+    "format": "biome format --write .",
+    "lint": "biome check --apply ./src",
+    "postpack": "clean-package restore",
+    "prepack": "clean-package",
+    "release-it": "release-it",
+    "test:build": "publint --strict"
+  },
+  "type": "module"
 }
