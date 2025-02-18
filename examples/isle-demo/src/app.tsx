@@ -90,6 +90,11 @@ function Demo() {
       setStack((prev) => [...prev, { type: "updated", theme, status }]);
     });
 
+    isleRef.current.on("connect-wallet", async () => {
+      console.log("connect-wallet");
+      await isleRef.current?.connectWallet();
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;

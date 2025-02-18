@@ -1,7 +1,15 @@
 /* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
-import { http, type Config, connect, createConfig, disconnect, getWalletClient } from "@wagmi/core";
-import { injected } from "@wagmi/core";
+import {
+  http,
+  type Config,
+  connect,
+  createConfig,
+  disconnect,
+  getAccount,
+  getWalletClient,
+  injected,
+} from "@wagmi/core";
 import { mainnet } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 
@@ -25,6 +33,7 @@ type ControllerMessage =
   | {
       type: "initialize";
       data: {
+        status: idOSIsleStatus;
         theme?: idOSIsleTheme;
       };
     }
@@ -58,6 +67,9 @@ type NodeMessage =
         theme: idOSIsleTheme;
         status: idOSIsleStatus;
       };
+    }
+  | {
+      type: "connect-wallet";
     };
 
 type MessageHandler<T extends NodeMessage["type"]> = (
@@ -133,9 +145,19 @@ export class idOSIsle {
       name: "window",
     });
 
+    const { status } = getAccount(idOSIsle.wagmiConfig);
+    let isleStatus: idOSIsleStatus;
+
+    if (status === "connected") {
+      isleStatus = "no-profile";
+    } else {
+      isleStatus = "disconnected";
+    }
+
     this.channel.start();
     this.channel.post("initialize", {
       theme: this.theme,
+      status: isleStatus,
     });
   }
 
