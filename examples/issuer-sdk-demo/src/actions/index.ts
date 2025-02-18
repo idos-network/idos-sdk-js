@@ -107,7 +107,11 @@ export async function createCredentialsByDelegatedWriteGrant(
     {
       userId,
       plaintextContent: vcContent,
-      publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
+      publicNotes: JSON.stringify({
+        ...publicNotes,
+        id: crypto.randomUUID(),
+        type: "PASSPORTING_DEMO", // @todo: remove this once we figure out better way than using type
+      }),
       recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
     },
     {

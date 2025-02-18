@@ -14,7 +14,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
 
   const match = credentials.find((credential) => {
     const publicNotes = JSON.parse(credential.public_notes ?? "{}");
-    return credential.public_notes.includes("PASSPORTING_DEMO") && !!publicNotes.date;
+    return publicNotes.type === "PASSPORTING_DEMO";
   });
 
   if (!match) {
