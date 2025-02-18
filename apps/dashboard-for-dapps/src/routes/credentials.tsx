@@ -10,7 +10,7 @@ import {
   Text,
   chakra,
 } from "@chakra-ui/react";
-import { base64Encode } from "@idos-network/codecs";
+import { base64Encode } from "@idos-network/core/codecs";
 import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";

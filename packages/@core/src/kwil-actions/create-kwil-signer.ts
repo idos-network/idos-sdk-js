@@ -1,9 +1,9 @@
-import { bs58Encode } from "@idos-network/codecs";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/kwil-nep413-signer";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Wallet } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
+import { bs58Encode } from "../codecs";
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.

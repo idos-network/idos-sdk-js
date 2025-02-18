@@ -14,6 +14,7 @@ export interface idOSCredential {
   content: string;
   encryptor_public_key: string;
 }
+
 export interface idOSWallet {
   id: string;
   user_id: string;

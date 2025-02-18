@@ -1,5 +1,4 @@
-import { base64Encode } from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import { base64Encode, type idOSCredential } from "@idos-network/core";
 
 import type { BackupPasswordInfo } from "../types";
 import type {

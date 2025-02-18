@@ -1,13 +1,7 @@
 {
   "name": "idos-sdk-e2e",
-  "version": "1.0.0",
   "description": "idOS e2e tests",
-  "main": "index.js",
-  "license": "MIT",
-  "type": "module",
-  "scripts": {
-    "test:e2e": "playwright test"
-  },
+  "version": "1.0.0",
   "author": "",
   "dependencies": {
     "@synthetixio/synpress-cache": "^0.0.4",
@@ -15,9 +9,15 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
-    "playwright-core": "^1.49.1",
-    "playwright-test-coverage": "^1.2.12",
     "@synthetixio/synpress": "^4.0.3",
-    "@types/node": "^20.10.5"
-  }
+    "@types/node": "^20.10.5",
+    "playwright-core": "^1.49.1",
+    "playwright-test-coverage": "^1.2.12"
+  },
+  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test:e2e": "playwright test"
+  },
+  "type": "module"
 }
