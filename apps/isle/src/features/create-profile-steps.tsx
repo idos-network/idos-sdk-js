@@ -24,7 +24,7 @@ export function CreateProfileSteps() {
           h="12"
           borderRadius="full"
           border="3px solid"
-          borderColor="aquamarine.950"
+          borderColor={{ _dark: "aquamarine.950", _light: "aquamarine.200" }}
           mx="auto"
         />
       ) : (
@@ -38,16 +38,25 @@ export function CreateProfileSteps() {
                 color="neutral.500"
                 fontWeight="medium"
                 fontSize="sm"
-                maxW={250}
+                maxW="250px"
                 mx="auto"
                 textAlign="center"
               >
                 Sign the message in your wallet to authenticate with idOS.
               </Text>
 
-              <Flex bg="neutral.800" rounded="2xl" p="4" gap="2" alignItems="start">
+              <Flex
+                bg={{
+                  _dark: "neutral.800",
+                  _light: "neutral.200",
+                }}
+                rounded="3xl"
+                p="4"
+                gap="2"
+                alignItems="start"
+              >
                 <Image src="/lit.svg" alt="lit" />
-                <Flex flexDir="column">
+                <Flex flexDir="column" gap="2">
                   <Text color="neutral.500" fontSize="sm">
                     If you haven’t previously added this wallet to idOS, a private/public keypair
                     from LIT will be created to encrypt your data.
@@ -56,10 +65,7 @@ export function CreateProfileSteps() {
                     variant="plain"
                     href="https://litprotocol.com/docs/lit-protocol-overview/lit-mpc-encryption"
                     target="_blank"
-                    color={{
-                      _dark: "aquamarine.500",
-                      _light: "neutral.800",
-                    }}
+                    color={{ _dark: "aquamarine.500", _light: "neutral.800" }}
                     rel="noreferrer"
                     fontWeight="medium"
                     fontSize="xs"

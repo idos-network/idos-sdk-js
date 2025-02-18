@@ -1,4 +1,4 @@
-import { base64Encode } from "@idos-network/codecs";
+import { base64Encode } from "@idos-network/core";
 import { Utils } from "@kwilteam/kwil-js";
 import nacl from "tweetnacl";
 

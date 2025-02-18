@@ -11,6 +11,7 @@ export function Footer() {
         placeContent="center"
         alignItems="center"
         gap="2"
+        fontWeight="medium"
       >
         Powered by <Image src="/footer-logo.svg" alt="Powered by idOS" />
       </Text>

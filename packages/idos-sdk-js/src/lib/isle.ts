@@ -1,5 +1,20 @@
 /* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
+import {
+  http,
+  type Config,
+  connect,
+  createConfig,
+  createStorage,
+  disconnect,
+  getAccount,
+  getWalletClient,
+  injected,
+  reconnect,
+  watchAccount,
+} from "@wagmi/core";
+import { mainnet, sepolia } from "@wagmi/core/chains";
+import { BrowserProvider, type JsonRpcSigner } from "ethers";
 
 export type idOSIsleTheme = "light" | "dark";
 export type idOSIsleStatus =
@@ -9,6 +24,8 @@ export type idOSIsleStatus =
   | "pending-verification"
   | "verified"
   | "error";
+
+export type WalletConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
 
 interface idOSIsleConstructorOptions {
   container: string;
@@ -20,6 +37,7 @@ type ControllerMessage =
       type: "initialize";
       data: {
         theme?: idOSIsleTheme;
+        status?: idOSIsleStatus;
       };
     }
   | {
@@ -28,6 +46,14 @@ type ControllerMessage =
         theme?: idOSIsleTheme;
         status?: idOSIsleStatus;
       };
+    }
+  | {
+      type: "wallet_state";
+      data: {
+        status: WalletConnectionStatus;
+        address?: string;
+        error?: string;
+      };
     };
 
 type NodeMessage =
@@ -35,7 +61,6 @@ type NodeMessage =
       type: "initialized";
       data: {
         theme: idOSIsleTheme;
-        status: idOSIsleStatus;
       };
     }
   | {
@@ -44,12 +69,18 @@ type NodeMessage =
         theme: idOSIsleTheme;
         status: idOSIsleStatus;
       };
+    }
+  | {
+      type: "connect-wallet";
     };
 
-type MessageHandler = (message: NodeMessage) => void;
+type MessageHandler<T extends NodeMessage["type"]> = (
+  message: Extract<NodeMessage, { type: T }>,
+) => void;
 
 export class idOSIsle {
   private static instances = new Map<string, idOSIsle>();
+  private static wagmiConfig: Config;
 
   private iframe: HTMLIFrameElement | null = null;
   private containerId: string;
@@ -57,11 +88,29 @@ export class idOSIsle {
   private channel: ChannelInstance<ControllerMessage, NodeMessage> | null = null;
   private theme?: idOSIsleTheme;
   private iframeId: string;
+  private signer?: JsonRpcSigner;
 
   private constructor(options: idOSIsleConstructorOptions) {
     this.containerId = options.container;
     this.theme = options.theme;
     this.iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
+
+    // Initialize Wagmi config if not already initialized
+    if (!idOSIsle.wagmiConfig) {
+      idOSIsle.wagmiConfig = createConfig({
+        storage: createStorage({
+          key: "idOS:isle",
+          storage: localStorage,
+        }),
+        chains: [mainnet, sepolia],
+        connectors: [injected()],
+        transports: {
+          [mainnet.id]: http(),
+          [sepolia.id]: http(),
+        },
+      });
+    }
+
     this.controller = createController({
       targetOrigin: "https://localhost:5174",
     });
@@ -92,6 +141,16 @@ export class idOSIsle {
     idOSIsle.instances.set(this.containerId, this);
   }
 
+  private async reconnect(): Promise<void> {
+    const account = getAccount(idOSIsle.wagmiConfig);
+
+    if (account.status === "connected") {
+      return;
+    }
+
+    await reconnect(idOSIsle.wagmiConfig);
+  }
+
   private setupController(): void {
     if (!this.iframe?.contentWindow) return;
 
@@ -106,6 +165,17 @@ export class idOSIsle {
     this.channel.start();
     this.channel.post("initialize", {
       theme: this.theme,
+      status: "disconnected",
+    });
+  }
+
+  private async watchAccountChanges(): Promise<void> {
+    watchAccount(idOSIsle.wagmiConfig, {
+      onChange: (account) => {
+        if (account.status === "connected" || account.status === "disconnected") {
+          this.send("update", { status: account.status });
+        }
+      },
     });
   }
 
@@ -114,17 +184,19 @@ export class idOSIsle {
     if (existingInstance) {
       return existingInstance;
     }
-
-    return new idOSIsle(options);
+    const instance = new idOSIsle(options);
+    instance.reconnect();
+    instance.watchAccountChanges();
+    return instance;
   }
 
-  public send(type: ControllerMessage["type"], data: ControllerMessage["data"]): void {
+  send(type: ControllerMessage["type"], data: ControllerMessage["data"]): void {
     this.channel?.post(type, data);
   }
 
-  public on(type: NodeMessage["type"], handler: MessageHandler): () => void {
+  on<T extends NodeMessage["type"]>(type: T, handler: MessageHandler<T>): () => void {
     const cleanup = this.channel?.on(type, (data) => {
-      handler({ type, data });
+      handler({ type, data } as Extract<NodeMessage, { type: T }>);
     });
 
     return () => {
@@ -132,7 +204,38 @@ export class idOSIsle {
     };
   }
 
-  public destroy(): void {
+  async connect(): Promise<void> {
+    try {
+      const result = await connect(idOSIsle.wagmiConfig, {
+        connector: injected(),
+      });
+
+      if (result.accounts.length > 0) {
+        const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
+
+        if (!walletClient) {
+          throw new Error("Failed to get wallet client");
+        }
+
+        const provider = new BrowserProvider(walletClient.transport);
+        this.signer = await provider.getSigner();
+      } else {
+      }
+    } catch (error) {}
+  }
+
+  async disconnect(): Promise<void> {
+    try {
+      await disconnect(idOSIsle.wagmiConfig);
+      this.signer = undefined;
+    } catch (error) {}
+  }
+
+  async getSigner(): Promise<JsonRpcSigner | undefined> {
+    return this.signer;
+  }
+
+  destroy(): void {
     this.controller.destroy();
     this.iframe?.parentNode?.removeChild(this.iframe);
     this.iframe = null;

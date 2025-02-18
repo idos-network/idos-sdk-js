@@ -1,8 +1,8 @@
-import type { idOSUserAttribute } from "@idos-network/idos-sdk-types";
+import { Store, type idOSUserAttribute } from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
 import { isEqual } from "es-toolkit";
 import type { Signer } from "ethers";
-import { Store } from "../../../idos-store";
+
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";

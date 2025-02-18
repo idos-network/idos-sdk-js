@@ -1,4 +1,4 @@
-import type { idOSUser, idOSWallet } from "./../../types";
+import type { idOSUser, idOSWallet } from "@idos-network/core/types";
 import type { IssuerConfig } from "./create-issuer-config";
 import { createActionInput, ensureEntityId } from "./internal";
 

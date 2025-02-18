@@ -1,4 +1,4 @@
-import type { Store } from "@idos-network/idos-store";
+import type { Store } from "@idos-network/core";
 import {
   LitAbility,
   LitAccessControlConditionResource,

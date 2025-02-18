@@ -6,12 +6,13 @@ import type { ControllerMessage, NodeMessage, idOSIsleStatus, idOSIsleTheme } fr
 interface NodeState {
   status: idOSIsleStatus;
   node: ReturnType<typeof createNode<NodeMessage, ControllerMessage>> | null;
-  initializeNode: () => () => void;
   theme?: idOSIsleTheme;
+  initializeNode: () => () => void;
+  connectWallet: () => void;
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
-  status: "disconnected",
+  status: "disconnected" as const,
   node: null,
   initializeNode: () => {
     const node = createNode<NodeMessage, ControllerMessage>({
@@ -19,10 +20,10 @@ export const useIsleStore = create<NodeState>((set) => ({
       connectTo: "window",
     });
 
-    node.on("initialize", ({ theme }) => {
+    node.on("initialize", ({ status, theme }) => {
       const _theme = theme ?? (localStorage.getItem("theme") as idOSIsleTheme) ?? "light";
-      set({ theme: _theme });
-      node.post("initialized", { theme: _theme, status: "disconnected" });
+      set({ status, theme: _theme });
+      node.post("initialized", { status, theme: _theme });
     });
 
     node.on("update", ({ theme, status }) => {
@@ -34,6 +35,10 @@ export const useIsleStore = create<NodeState>((set) => ({
       node.post("updated", { theme, status });
     });
 
+    set({ node });
     return node.start();
+  },
+  connectWallet: () => {
+    useIsleStore.getState().node?.post("connect-wallet", {});
   },
 }));

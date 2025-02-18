@@ -3,9 +3,9 @@ import {
   base64Encode,
   hexEncode,
   hexEncodeSha256Hash,
+  type idOSCredential,
   utf8Encode,
-} from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+} from "@idos-network/core";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import {
@@ -188,7 +188,7 @@ interface EditCredentialAsIssuerParams {
 export async function editCredential(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
-) {
+): Promise<{ data?: { tx_hash: string } }> {
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = {
     public_notes_id: publicNotesId,

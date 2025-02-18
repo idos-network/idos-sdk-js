@@ -1,4 +1,4 @@
-import { hexDecode } from "@idos-network/codecs";
+import { hexDecode } from "@idos-network/core";
 import { idOSGrantee as idOSGranteeClass } from "@idos-network/grantee-sdk-js";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";

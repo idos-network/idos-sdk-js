@@ -1,16 +1,23 @@
-import { Flex, Grid } from "@chakra-ui/react";
+import { Circle, Flex, Grid } from "@chakra-ui/react";
 
-const StepperCircle = ({ active }: { active?: boolean }) => {
+interface StepperCircleProps {
+  active?: boolean;
+}
+
+const StepperCircle = ({ active }: StepperCircleProps) => {
   return (
     <Grid
-      w={6}
-      h={6}
+      w="6"
+      h="6"
       rounded="full"
       placeItems="center"
-      bg={active ? "aquamarine.950" : "neutral.800"}
-      zIndex={2}
+      bg={{
+        _dark: active ? "aquamarine.950" : "neutral.800",
+        _light: active ? "aquamarine.200" : "neutral.200",
+      }}
+      zIndex="2"
     >
-      <Flex w={2} h={2} rounded="full" bg={active ? "aquamarine.400" : "neutral.500"} />
+      <Circle size="2" bg={active ? "aquamarine.600" : "neutral.400"} />
     </Grid>
   );
 };
@@ -22,9 +29,17 @@ export function Stepper({
   const stepsArray = Array.from({ length: stepsLength }, (_, i) => i + 1);
   return (
     <Flex position="relative" justifyContent="space-between" maxW={208} mx="auto" w="full">
-      <Flex position="absolute" top="3" left="0" minH="1px" w="full" bg="neutral.500" zIndex={1} />
+      <Flex
+        position="absolute"
+        top="3"
+        left="0"
+        minH="1px"
+        w="full"
+        bg={{ _dark: "neutral.500", _light: "neutral.400" }}
+        zIndex={1}
+      />
       {stepsArray.map((step, index) => (
-        <StepperCircle key={step} active={activeIndex >= index} />
+        <StepperCircle key={step} active={activeIndex === index} />
       ))}
     </Flex>
   );

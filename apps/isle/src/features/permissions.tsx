@@ -1,7 +1,6 @@
 import { type BreadcrumbLinkProps, Flex, Icon, Image, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuChevronLeft } from "react-icons/lu";
-import { useDisconnect } from "wagmi";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
@@ -35,13 +34,10 @@ const themedColor = {
 };
 
 export function DisconnectButton() {
-  const { disconnect, isPending } = useDisconnect();
   return (
     <Button
       color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
       bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
-      onClick={() => disconnect()}
-      loading={isPending}
     >
       Disconnect
     </Button>
@@ -59,22 +55,28 @@ export function RevokeButton() {
   );
 }
 
+export function Circle({ icon }: { icon: string }) {
+  return (
+    <Flex
+      alignItems="center"
+      justifyContent="center"
+      gap="2"
+      bg="white"
+      minW="30px"
+      h="30px"
+      borderRadius="full"
+      shadow="md"
+    >
+      <Image src={icon} />
+    </Flex>
+  );
+}
+
 function PermissionHeader({ name, icon, hasGrant }: Permission) {
   return (
     <Flex justifyContent="space-between">
       <Flex alignItems="center" gap="2.5">
-        <Flex
-          alignItems="center"
-          justifyContent="center"
-          gap="2"
-          bg="white"
-          w="30px"
-          h="30px"
-          borderRadius="full"
-          shadow="md"
-        >
-          <Image src={icon} />
-        </Flex>
+        <Circle icon={icon} />
         <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
           {name}
         </Text>

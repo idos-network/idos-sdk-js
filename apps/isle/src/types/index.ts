@@ -7,10 +7,13 @@ export type idOSIsleStatus =
   | "verified"
   | "error";
 
+export type WalletConnectionStatus = "connecting" | "connected" | "disconnected" | "error";
+
 export type ControllerMessage =
   | {
       type: "initialize";
       data: {
+        status: idOSIsleStatus;
         theme?: idOSIsleTheme;
       };
     }
@@ -19,6 +22,14 @@ export type ControllerMessage =
       data: {
         theme?: idOSIsleTheme;
         status?: idOSIsleStatus;
+      };
+    }
+  | {
+      type: "wallet_state";
+      data: {
+        status: WalletConnectionStatus;
+        address?: string;
+        error?: string;
       };
     };
 
@@ -36,4 +47,7 @@ export type NodeMessage =
         theme?: idOSIsleTheme;
         status?: idOSIsleStatus;
       };
+    }
+  | {
+      type: "connect-wallet";
     };
