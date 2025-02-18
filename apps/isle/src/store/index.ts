@@ -22,7 +22,6 @@ export const useIsleStore = create<NodeState>((set) => ({
 
     node.on("initialize", ({ status, theme }) => {
       const _theme = theme ?? (localStorage.getItem("theme") as idOSIsleTheme) ?? "light";
-      console.log("initialize", { status, theme: _theme });
       set({ status, theme: _theme });
       node.post("initialized", { status, theme: _theme });
     });
