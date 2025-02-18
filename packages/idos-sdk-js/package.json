@@ -43,7 +43,6 @@
     "typescript": "^5.2.2",
     "vitest": "^0.31.4"
   },
-  
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -54,13 +53,11 @@
   "homepage": "https://idos.network",
   "license": "MIT",
   "main": "src/lib/index.ts",
-
   "peerDependencies": {
     "@wagmi/core": "^2.6.5",
     "ethers": "^6.12",
     "near-api-js": "3.0.4"
   },
-
   "peerDependenciesMeta": {
     "ethers": {
       "optional": true
@@ -71,6 +68,7 @@
     "@wagmi/core": {
       "optional": true
     }
+  },
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
