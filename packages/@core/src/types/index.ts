@@ -47,6 +47,9 @@ export interface idOSGrant {
 export type IsleTheme = "light" | "dark";
 export type IsleStatus =
   | "disconnected"
+  | "connecting"
+  | "connected"
+  | "reconnecting"
   | "no-profile"
   | "not-verified"
   | "pending-verification"
@@ -73,7 +76,6 @@ export type IsleNodeMessage =
       type: "initialized";
       data: {
         theme: IsleTheme;
-        status: IsleStatus;
       };
     }
   | {
@@ -84,7 +86,12 @@ export type IsleNodeMessage =
       };
     }
   | {
-      type: "link-wallet";
+      type: "connect-wallet";
+    }
+  | {
+      type: "disconnect-wallet";
     };
 
-export type IsleMessageHandler = (message: IsleNodeMessage) => void;
+export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (
+  message: Extract<IsleNodeMessage, { type: T }>,
+) => void;
