@@ -13,8 +13,7 @@ import type { idOSIsleStatus } from "@/types";
  */
 function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
-
-  if (status === "disconnected") {
+  if (status === "initialising") {
     return <DisconnectedIcon color="gray" />;
   }
 
@@ -73,6 +72,7 @@ const statusBadgeColors: Record<Partial<idOSIsleStatus>, BadgeProps> = {
 function StatusBadge() {
   const status = useIsleStore((state) => state.status);
   const badgeProps = statusBadgeColors[status as keyof typeof statusBadgeColors];
+
   return (
     <Badge {...badgeProps} size="sm" textTransform="uppercase">
       {status.split("-").join(" ")}
