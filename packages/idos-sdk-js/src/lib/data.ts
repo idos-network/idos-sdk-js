@@ -28,6 +28,16 @@ interface idOSDAGSignatureRequest {
   dag_content_hash: string;
 }
 
+interface idOSDelegatedWriteGrantSignatureRequest {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  issuer_public_key: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+}
+
 /* global crypto */
 
 // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
@@ -407,29 +417,6 @@ export class Data {
     return await this.delete(tableName, recordId, undefined, synchronous);
   }
 
-  async addWriteGrant(granteeAddress: string, synchronous?: boolean) {
-    return await this.kwilWrapper.execute(
-      "add_write_grant",
-      [
-        {
-          wg_grantee_wallet_identifier: granteeAddress,
-        },
-      ],
-      `Grant ${granteeAddress} write access to your idOS credentials`,
-      synchronous,
-    );
-  }
-
-  async hasWriteGrantGivenBy(userId: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_by", { user_id: userId });
-  }
-
-  async hasWriteGrantGivenTo(granteeAddress: string) {
-    return await this.kwilWrapper.call("has_write_grant_given_to", {
-      wg_grantee_wallet_identifier: granteeAddress,
-    });
-  }
-
   async getCredentialContentSha256Hash(credentialId: string) {
     const credential = (await this.get("credentials", credentialId)) as idOSCredential;
     return hexEncodeSha256Hash(utf8Encode(credential.content));
@@ -453,6 +440,14 @@ export class Data {
 
   async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
+      { message: string },
+    ];
+    const message = response?.[0]?.message;
+    return message;
+  }
+
+  async requestDWGSignature(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
+    const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];
     const message = response?.[0]?.message;

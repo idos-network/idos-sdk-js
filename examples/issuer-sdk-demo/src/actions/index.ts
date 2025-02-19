@@ -3,8 +3,7 @@
 import { getIssuerConfig } from "@/issuer.config";
 import {
   type CreateWalletReqParams,
-  createCredentialByWriteGrant as _createCredentialByWriteGrant,
-  createReusableCredential as _createReusableCredential,
+  createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
   createCredentialPermissioned,
   createUser,
   editCredential,
@@ -88,19 +87,44 @@ export async function createProfile(
   await createUser(issuer, { id: userId, recipient_encryption_public_key: publicKey }, wallet);
 }
 
-export async function createCredentialByWriteGrant(
+export async function createCredentialsByDelegatedWriteGrant(
   userId: string,
   userEncryptionPublicKey: string,
+  ownerWalletIdentifier: string,
+  granteeWalletIdentifier: string,
+  issuerPublicKey: string,
+  id: string,
+  accessGrantTimelock: string,
+  notUsableBefore: string,
+  notUsableAfter: string,
+  signature: string,
 ) {
   const issuer = await getIssuerConfig();
   const vcContent = generateCredential("demo@idos.network", ethers.Wallet.createRandom().address);
 
-  await _createCredentialByWriteGrant(issuer, {
-    userId,
-    plaintextContent: vcContent,
-    publicNotes: JSON.stringify({ ...publicNotes, id: crypto.randomUUID() }),
-    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
-  });
+  await _createCredentialsByDelegatedWriteGrant(
+    issuer,
+    {
+      userId,
+      plaintextContent: vcContent,
+      publicNotes: JSON.stringify({
+        ...publicNotes,
+        id: crypto.randomUUID(),
+        type: "PASSPORTING_DEMO", // @todo: remove this once we figure out better way than using type
+      }),
+      recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
+    },
+    {
+      ownerWalletIdentifier,
+      granteeWalletIdentifier,
+      issuerPublicKey,
+      id,
+      accessGrantTimelock,
+      notUsableBefore,
+      notUsableAfter,
+      signature,
+    },
+  );
 }
 
 export async function createCredentialByPermissionedIssuer(
@@ -126,27 +150,5 @@ export async function revokeCredentialById(id: string) {
       ...publicNotes,
       status: "revoked",
     }),
-  });
-}
-
-export async function createReusableCredential(
-  userId: string,
-  granteeAddress: string,
-  userEncryptionPublicKey: string,
-) {
-  const issuer = await getIssuerConfig();
-
-  await _createReusableCredential(issuer, {
-    id: crypto.randomUUID(),
-    userId,
-    plaintextContent: generateCredential("demo@idos.network", ethers.Wallet.createRandom().address),
-    publicNotes: JSON.stringify({
-      ...publicNotes,
-      id: crypto.randomUUID(),
-      type: "PASSPORTING_DEMO",
-      date: new Date().toISOString(),
-    }),
-    granteeAddress,
-    recipientEncryptionPublicKey: Base64.decode(userEncryptionPublicKey),
   });
 }

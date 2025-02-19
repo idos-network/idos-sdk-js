@@ -64,45 +64,6 @@ export async function createCredentialByPermissionedIssuer(
 }
 ```
 
-- Write Grant: By granting write access to an issuer.
-
-```typescript
-export async function createCredentialByWriteGrant(
-  userId: string,
-  userEncryptionPublicKey: string,
-){
-    const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
-    const hasWriteGrants = await clientSDK.data.hasWriteGrantGivenTo(issuerAddress);
-    if (!hasWriteGrants)
-         await clientSDK.data.addWriteGrant(issuerAddress);
-
-    await createCredentialByWriteGrant(
-      String(clientSDK.auth.currentUser.userId),
-      clientSDK.auth.currentUser.currentUserPublicKey as string,
-    );
-}
-```
-
-#### Issue reusable credentials
-
-The app enables issuers to issue reusable credentials for their users that can also be used by issuers.
-
-```typescript
-export async function createReusableCredential(
-    userId: string,
-    granteeAddress: string,
-    userEncryptionPublicKey: string,
-  ) {
-     const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
-
-      await createReusableCredential(
-        String(clientSDK.auth.currentUser.userId),
-        issuerAddress,
-        clientSDK.auth.currentUser.currentUserPublicKey as string,
-      );
-  }
-```
-
 ### Environment Variables
 
 - `NEXT_PUBLIC_KWIL_NODE_URL`: URL of the idOS node.
