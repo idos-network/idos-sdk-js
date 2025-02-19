@@ -70,7 +70,7 @@ export function App() {
     }
   }, [theme, setTheme]);
 
-  if (connectionStatus === "initialising") {
+  if (connectionStatus === "initializing") {
     return (
       <Layout>
         <WIP />

@@ -10,8 +10,8 @@ import type {
 } from "@idos-network/core";
 
 interface NodeState {
-  connectionStatus: IsleConnectionStatus | "initialising";
-  status: IsleStatus | "initialising";
+  connectionStatus: IsleConnectionStatus | "initializing";
+  status: IsleStatus | "initializing";
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   initializeNode: () => () => void;
@@ -19,8 +19,8 @@ interface NodeState {
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
-  connectionStatus: "initialising",
-  status: "initialising",
+  connectionStatus: "initializing",
+  status: "initializing",
   node: null,
   initializeNode: () => {
     const node = createNode<IsleNodeMessage, IsleControllerMessage>({

@@ -13,7 +13,7 @@ import type { idOSIsleStatus } from "@/types";
  */
 function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
-  if (status === "initialising") {
+  if (status === "initializing") {
     return <DisconnectedIcon color="gray" />;
   }
 

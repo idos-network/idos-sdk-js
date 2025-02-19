@@ -124,7 +124,7 @@ export class idOSIsle {
 
     this.channel.start();
 
-    // Initial state is already 'initialising' in the store
+    // Initial state is already 'initializing' in the store
     this.channel.on("initialized", async () => {
       const account = getAccount(idOSIsle.wagmiConfig);
       await this.handleAccountChange(account);
@@ -151,7 +151,7 @@ export class idOSIsle {
       this.signer = undefined;
     }
 
-    // We're no longer initialising once we start getting real states
+    // We're no longer initializing once we start getting real states
     this.send("update", {
       connectionStatus: account.status,
       status: "no-profile", // This will be replaced with BE query later
