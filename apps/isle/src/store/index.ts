@@ -2,6 +2,7 @@ import { createNode } from "@sanity/comlink";
 import { create } from "zustand";
 
 import type {
+  IsleConnectionStatus,
   IsleControllerMessage,
   IsleNodeMessage,
   IsleStatus,
@@ -9,16 +10,17 @@ import type {
 } from "@idos-network/core";
 
 interface NodeState {
-  status: IsleStatus;
+  connectionStatus: IsleConnectionStatus | "initializing";
+  status: IsleStatus | "initializing";
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   initializeNode: () => () => void;
   connectWallet: () => void;
-  disconnectWallet: () => void;
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
-  status: "disconnected" as const,
+  connectionStatus: "initializing",
+  status: "initializing",
   node: null,
   initializeNode: () => {
     const node = createNode<IsleNodeMessage, IsleControllerMessage>({
@@ -27,18 +29,19 @@ export const useIsleStore = create<NodeState>((set) => ({
     });
 
     node.on("initialize", ({ theme }) => {
-      const _theme = theme ?? (localStorage.getItem("theme") as IsleTheme) ?? "light";
+      const _theme = theme || (localStorage.getItem("theme") as IsleTheme);
       set({ theme: _theme });
       node.post("initialized", { theme: _theme });
     });
 
-    node.on("update", ({ theme, status }) => {
+    node.on("update", ({ connectionStatus, theme, status }) => {
       set((state) => ({
         ...state,
-        ...(theme !== undefined && { theme }),
+        ...(connectionStatus !== undefined && { connectionStatus }),
         ...(status !== undefined && { status }),
+        ...(theme !== undefined && { theme }),
       }));
-      node.post("updated", { theme, status });
+      node.post("updated", { theme, status, connectionStatus });
     });
 
     set({ node });
@@ -46,8 +49,5 @@ export const useIsleStore = create<NodeState>((set) => ({
   },
   connectWallet: () => {
     useIsleStore.getState().node?.post("connect-wallet", {});
-  },
-  disconnectWallet: () => {
-    useIsleStore.getState().node?.post("disconnect-wallet", {});
   },
 }));

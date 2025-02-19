@@ -12,9 +12,7 @@ import {
   connect,
   createConfig,
   createStorage,
-  disconnect,
   getAccount,
-  getConnections,
   getWalletClient,
   injected,
   reconnect,
@@ -29,7 +27,6 @@ interface idOSIsleConstructorOptions {
 }
 
 export class idOSIsle {
-  private static instances = new Map<string, idOSIsle>();
   private static wagmiConfig: Config;
 
   private iframe: HTMLIFrameElement | null = null;
@@ -40,26 +37,29 @@ export class idOSIsle {
   private signer?: JsonRpcSigner;
   private theme?: IsleTheme;
 
+  private static initializeWagmi(): void {
+    if (idOSIsle.wagmiConfig) return;
+
+    idOSIsle.wagmiConfig = createConfig({
+      storage: createStorage({
+        key: "idOS:isle",
+        storage: localStorage,
+      }),
+      chains: [mainnet, sepolia],
+      connectors: [injected()],
+      transports: {
+        [mainnet.id]: http(),
+        [sepolia.id]: http(),
+      },
+    });
+  }
+
   private constructor(options: idOSIsleConstructorOptions) {
     this.containerId = options.container;
     this.theme = options.theme;
     this.iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
 
-    // Initialize Wagmi config if not already initialized
-    if (!idOSIsle.wagmiConfig) {
-      idOSIsle.wagmiConfig = createConfig({
-        storage: createStorage({
-          key: "idOS:isle",
-          storage: localStorage,
-        }),
-        chains: [mainnet, sepolia],
-        connectors: [injected()],
-        transports: {
-          [mainnet.id]: http(),
-          [sepolia.id]: http(),
-        },
-      });
-    }
+    idOSIsle.initializeWagmi();
 
     this.controller = createController({
       targetOrigin: "https://localhost:5174",
@@ -70,15 +70,13 @@ export class idOSIsle {
       throw new Error(`Element with id "${this.containerId}" not found`);
     }
 
-    // Check if iframe already exists in the container
-    const existingIframe = container.querySelector("iframe") as HTMLIFrameElement;
+    // Remove any existing iframe in the container
+    const existingIframe = container.querySelector("iframe");
     if (existingIframe) {
-      this.iframe = existingIframe;
-      idOSIsle.instances.set(this.containerId, this);
-      return;
+      container.removeChild(existingIframe);
     }
 
-    // Create new iframe if none exists
+    // Create new iframe
     this.iframe = document.createElement("iframe");
     this.iframe.id = this.iframeId;
     this.iframe.src = "https://localhost:5174";
@@ -88,17 +86,29 @@ export class idOSIsle {
 
     container.appendChild(this.iframe);
     this.setupController();
-    idOSIsle.instances.set(this.containerId, this);
   }
 
   private async reconnect(): Promise<void> {
     const account = getAccount(idOSIsle.wagmiConfig);
 
     if (account.status === "connected") {
+      const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
+      if (walletClient) {
+        const provider = new BrowserProvider(walletClient.transport);
+        this.signer = await provider.getSigner();
+      }
       return;
     }
 
     await reconnect(idOSIsle.wagmiConfig);
+  }
+
+  private async setupSigner(): Promise<void> {
+    const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
+    if (walletClient) {
+      const provider = new BrowserProvider(walletClient.transport);
+      this.signer = await provider.getSigner();
+    }
   }
 
   private setupController(): void {
@@ -113,32 +123,56 @@ export class idOSIsle {
     });
 
     this.channel.start();
+
+    // Initial state is already 'initializing' in the store
+    this.channel.on("initialized", async () => {
+      const account = getAccount(idOSIsle.wagmiConfig);
+      await this.handleAccountChange(account);
+    });
+
     this.channel.post("initialize", {
       theme: this.theme,
     });
   }
 
+  private async handleAccountChange(account: {
+    status: "disconnected" | "connecting" | "connected" | "reconnecting";
+    address?: string;
+  }): Promise<void> {
+    // Skip intermediate connecting states when we're already connected
+    if (account.status === "connecting" && this.signer) {
+      return;
+    }
+
+    // For connected state, ensure we have a signer
+    if (account.status === "connected") {
+      await this.setupSigner();
+    } else if (account.status === "disconnected") {
+      this.signer = undefined;
+    }
+
+    // We're no longer initializing once we start getting real states
+    this.send("update", {
+      connectionStatus: account.status,
+      status: "no-profile", // This will be replaced with BE query later
+    });
+  }
+
   private async watchAccountChanges(): Promise<void> {
     watchAccount(idOSIsle.wagmiConfig, {
-      onChange: (account) => {
-        this.send("update", { status: account.status });
+      onChange: async (account) => {
+        if (this.channel) {
+          await this.handleAccountChange(account);
+        }
       },
     });
   }
 
   static initialize(options: idOSIsleConstructorOptions): idOSIsle {
-    const existingInstance = idOSIsle.instances.get(options.container);
-    if (existingInstance) {
-      return existingInstance;
-    }
     const instance = new idOSIsle(options);
-    instance.reconnect();
+    // Start these processes but don't wait for them
+    instance.reconnect().catch(console.error);
     instance.watchAccountChanges();
-
-    instance.on("disconnect-wallet", async () => {
-      await instance.disconnect();
-    });
-
     return instance;
   }
 
@@ -158,6 +192,8 @@ export class idOSIsle {
 
   async connect(): Promise<void> {
     try {
+      await this.handleAccountChange({ status: "connecting" });
+
       const result = await connect(idOSIsle.wagmiConfig, {
         connector: injected(),
       });
@@ -166,26 +202,19 @@ export class idOSIsle {
         const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
 
         if (!walletClient) {
+          await this.handleAccountChange({ status: "disconnected" });
           throw new Error("Failed to get `walletClient` from `wagmiConfig`");
         }
 
         const provider = new BrowserProvider(walletClient.transport);
         this.signer = await provider.getSigner();
+        await this.handleAccountChange({ status: "connected" });
+      } else {
+        await this.handleAccountChange({ status: "disconnected" });
       }
     } catch (error) {
+      await this.handleAccountChange({ status: "disconnected" });
       throw new Error("Failed to connect a wallet to the idOS Isle", { cause: error });
-    }
-  }
-
-  async disconnect(): Promise<void> {
-    try {
-      const { connector } = getConnections(idOSIsle.wagmiConfig)[0];
-      await disconnect(idOSIsle.wagmiConfig, {
-        connector,
-      });
-      this.signer = undefined;
-    } catch (error) {
-      throw new Error("Failed to disconnect from the idOS Isle", { cause: error });
     }
   }
 
@@ -197,6 +226,5 @@ export class idOSIsle {
     this.controller.destroy();
     this.iframe?.parentNode?.removeChild(this.iframe);
     this.iframe = null;
-    idOSIsle.instances.delete(this.containerId);
   }
 }
