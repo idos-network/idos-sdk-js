@@ -37,7 +37,7 @@ function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
-const statusBadgeColors: Record<idOSIsleStatus, BadgeProps> = {
+const statusBadgeColors: Record<Partial<idOSIsleStatus>, BadgeProps> = {
   disconnected: {
     bg: "neutral.500/30",
     color: "neutral.500",
@@ -72,7 +72,7 @@ const statusBadgeColors: Record<idOSIsleStatus, BadgeProps> = {
 
 function StatusBadge() {
   const status = useIsleStore((state) => state.status);
-  const badgeProps = statusBadgeColors[status];
+  const badgeProps = statusBadgeColors[status as keyof typeof statusBadgeColors];
   return (
     <Badge {...badgeProps} size="sm" textTransform="uppercase">
       {status.split("-").join(" ")}
