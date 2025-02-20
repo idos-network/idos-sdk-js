@@ -234,6 +234,7 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
   // Create and mount the idOSIsle iframe
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
+  // @todo: make the domain environment aware.
   iframe.src = "https://localhost:5174";
   iframe.style.width = "100%";
   iframe.style.height = "100%";

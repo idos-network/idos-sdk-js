@@ -1,4 +1,5 @@
 import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
+import type { IsleStatus } from "@idos-network/core";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";
 import { ExclamationMarkIcon } from "@/components/icons/exclamation-mark";
@@ -6,7 +7,6 @@ import { ProfileIcon } from "@/components/icons/profile";
 import { Logo } from "@/components/logo";
 import { Badge } from "@/components/ui/badge";
 import { useIsleStore } from "@/store";
-import type { idOSIsleStatus } from "@/types";
 
 /**
  * @todo: fine-tune the colors
@@ -36,8 +36,8 @@ function ProfileStatusIcon() {
   return <ProfileIcon color="aquamarine" />;
 }
 
-const statusBadgeColors: Record<Partial<idOSIsleStatus>, BadgeProps> = {
-  disconnected: {
+const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
+  initializing: {
     bg: "neutral.500/30",
     color: "neutral.500",
   },
