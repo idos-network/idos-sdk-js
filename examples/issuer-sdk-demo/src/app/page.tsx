@@ -129,7 +129,7 @@ export default function Home() {
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
 
         const callbackUrl = searchParams.get("callbackUrl");
-        if (callbackUrl) window.location.href = callbackUrl;
+        if (callbackUrl && window) window.location.href = callbackUrl;
 
         invariant(issuerAddress, "`NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX` is not set");
       }
