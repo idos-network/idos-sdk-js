@@ -15,6 +15,8 @@ import { Credentials } from "@/components/credentials";
 import { useSdkStore } from "@/stores/sdk";
 import { useEthersSigner } from "@/wagmi.config";
 
+const searchParams = new URLSearchParams(window.location.search);
+
 export default function Home() {
   const { address, isConnected, isDisconnected } = useAccount();
   const initialized = useRef(false);
@@ -93,6 +95,13 @@ export default function Home() {
     }
   }, [isDisconnected, clientSDK]);
 
+  useEffect(() => {
+    const passedAddress = searchParams.get("address");
+    if (!signer?.address || !passedAddress) return;
+
+    if (signer?.address !== passedAddress) alert("Please connect to the correct address");
+  }, [signer]);
+
   if (!isConnected) {
     return (
       <div className="flex h-full items-center justify-center">
@@ -118,6 +127,9 @@ export default function Home() {
         // @ts-ignore
         await clientSDK.setSigner("EVM", signer);
         const issuerAddress = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX;
+
+        const callbackUrl = searchParams.get("callbackUrl");
+        if (callbackUrl) window.location.href = callbackUrl;
 
         invariant(issuerAddress, "`NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX` is not set");
       }
