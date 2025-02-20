@@ -19,7 +19,7 @@ function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
 
 type SignerType = KeyPair | nacl.SignKeyPair;
 
-async function createKwilSigner(signer: SignerType): KwilSigner {
+async function createKwilSigner(signer: SignerType): Promise<KwilSigner> {
   if (isNaclSignKeyPair(signer)) {
     return new KwilSigner(
       async (msg: Uint8Array) => nacl.sign.detached(msg, signer.secretKey),
