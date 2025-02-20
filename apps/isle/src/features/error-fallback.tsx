@@ -10,7 +10,7 @@ export function ErrorFallback({ error }: ErrorFallbackProps) {
   return (
     <Center flexDir="column" gap="6">
       <Heading as="h2" fontSize="lg" textAlign="center">
-        Theres’s been an error.
+        There’s been an error.
       </Heading>
       <Text color="gray.500" fontSize="sm" textAlign="center">
         {error.message}

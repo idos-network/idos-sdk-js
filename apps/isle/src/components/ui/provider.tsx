@@ -39,6 +39,13 @@ const config = defineConfig({
           900: { value: "#171717" },
           950: { value: "#0B0B0B" },
         },
+        amber: {
+          400: { value: "#FFBB33" },
+          500: { value: "#B47902" },
+        },
+        red: {
+          400: { value: "#E23636" },
+        },
       },
     },
     semanticTokens: {

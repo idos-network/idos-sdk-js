@@ -1,11 +1,11 @@
-import { Center, Circle, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { Center, Circle, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuCheck } from "react-icons/lu";
-import { useAccount } from "wagmi";
 
 import { Icon } from "@/components/icons/icon";
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
+import { useIsleStore } from "@/store";
 
 function WalletLinked() {
   return (
@@ -31,23 +31,22 @@ function WalletLinked() {
 
 export function LinkWallet() {
   const [linked] = useState(false);
-  const { address } = useAccount();
-
-  const addWalletLink = `${import.meta.env.VITE_IDOS_DATA_DASHBOARD_URL}/wallets?add-wallet=${address}&callbackUrl=${window.location.href}`;
+  const address = useIsleStore((state) => state.address);
+  const linkWallet = useIsleStore((state) => state.linkWallet);
 
   if (linked) {
     return <WalletLinked />;
   }
 
   return (
-    <Center flexDir="column" gap="6">
+    <Center flexDir="column" gap="3">
       <Image src="/link-wallet.svg" alt="Link wallet" />
       <Text
         color={{
-          _dark: "neutral.950",
-          _light: "neutral.50",
+          _dark: "neutral.50",
+          _light: "neutral.950",
         }}
-        fontSize="sm"
+        fontSize="xs"
         textAlign="center"
         fontWeight="medium"
       >
@@ -56,18 +55,21 @@ export function LinkWallet() {
       <Text
         display="block"
         color="neutral.500"
-        fontSize="sm"
+        fontSize="xs"
         textAlign="center"
         fontWeight="medium"
-        my="3"
       >
         You will be redirected to idOS Dashboard.
       </Text>
-      <Link href={addWalletLink} w="full">
-        <Button gap="2" w="full">
-          Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
-        </Button>
-      </Link>
+      <Button
+        gap="2"
+        w="full"
+        onClick={() => {
+          return linkWallet();
+        }}
+      >
+        Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
+      </Button>
     </Center>
   );
 }

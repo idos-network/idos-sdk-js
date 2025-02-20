@@ -57,6 +57,10 @@ function Demo() {
       container: container.id,
     });
 
+    isleRef.current.on("connect-wallet", async () => {
+      await isleRef.current?.connect();
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;
@@ -64,7 +68,7 @@ function Demo() {
   }, []);
 
   return (
-    <Center h="full">
+    <Center h="full" flexDir="column" gap="5">
       <div ref={containerRef} id="idOS-isle" style={{ width: "100%", height: "600px" }} />
     </Center>
   );

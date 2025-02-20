@@ -1,4 +1,4 @@
-import { base64Decode } from "@idos-network/codecs";
+import { base64Decode } from "@idos-network/core";
 import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import nacl from "tweetnacl";
 

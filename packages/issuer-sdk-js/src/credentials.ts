@@ -3,13 +3,17 @@ import {
   base64Encode,
   hexEncode,
   hexEncodeSha256Hash,
+  type idOSCredential,
   utf8Encode,
-} from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
-import { omit } from "es-toolkit";
+} from "@idos-network/core";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, encryptContent, ensureEntityId } from "./internal";
+import {
+  createActionInput,
+  createActionInputWithoutId,
+  encryptContent,
+  ensureEntityId,
+} from "./internal";
 
 type UpdatablePublicNotes = {
   publicNotes: string;
@@ -42,13 +46,11 @@ const buildInsertableIDOSCredential = (
     publicNotes,
     plaintextContent,
     recipientEncryptionPublicKey,
-    contentHash,
   }: {
     userId: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     recipientEncryptionPublicKey: Uint8Array;
-    contentHash?: string;
   },
 ): InsertableIDOSCredential => {
   const ephemeralKeyPair = nacl.box.keyPair();
@@ -65,7 +67,6 @@ const buildInsertableIDOSCredential = (
   return {
     user_id: userId,
     content: base64Encode(content),
-    content_hash: contentHash,
     public_notes,
     public_notes_signature,
 
@@ -112,68 +113,72 @@ export async function createCredentialPermissioned(
   };
 }
 
-export async function createCredentialByWriteGrant(
+type DelegatedWriteGrantParams = {
+  ownerWalletIdentifier: string;
+  granteeWalletIdentifier: string;
+  issuerPublicKey: string;
+  id: string;
+  accessGrantTimelock: string;
+  notUsableBefore: string;
+  notUsableAfter: string;
+  signature: string;
+};
+
+export async function createCredentialsByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
-  params: BaseCredentialParams,
-): Promise<idOSCredential> {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
-  const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
-
-  await kwilClient.execute(
-    {
-      name: "add_credential_by_write_grant",
-      dbid,
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
+  credentialParams: BaseCredentialParams,
+  delegatedWriteGrant: DelegatedWriteGrantParams,
+): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
+  const { dbid, kwilClient, kwilSigner, encryptionSecretKey } = issuerConfig;
+  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
+  const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
+  const originalCredential = ensureEntityId(
+    buildInsertableIDOSCredential(issuerConfig, credentialParams),
   );
-
-  return {
-    ...payload,
-    original_id: "",
-  };
-}
-
-interface ShareCredentialByWriteGrantParams extends BaseCredentialParams {
-  granteeAddress: string;
-  lockedUntil: number;
-  originalCredentialId: string;
-  contentHash: string;
-}
-export async function shareCredentialByWriteGrant(
-  issuer_config: IssuerConfig,
-  params: ShareCredentialByWriteGrantParams,
-): Promise<idOSCredential> {
-  const { dbid, kwilClient, kwilSigner } = issuer_config;
-  const extraEntries = {
-    grantee_wallet_identifier: params.granteeAddress,
-    locked_until: params.lockedUntil,
-    original_credential_id: params.originalCredentialId,
-  };
+  const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
+  const copyCredential = ensureEntityId(
+    buildInsertableIDOSCredential(issuerConfig, {
+      userId: credentialParams.userId,
+      publicNotes: "",
+      plaintextContent: credentialParams.plaintextContent,
+      recipientEncryptionPublicKey: issuerEncPublicKey,
+    }),
+  );
   const payload = {
-    ...ensureEntityId(buildInsertableIDOSCredential(issuer_config, params)),
-    ...extraEntries,
+    issuer_auth_public_key: originalCredential.issuer_auth_public_key,
+    original_encryptor_public_key: originalCredential.encryptor_public_key,
+    original_credential_id: originalCredential.id,
+    original_content: originalCredential.content,
+    original_public_notes: originalCredential.public_notes,
+    original_public_notes_signature: originalCredential.public_notes_signature,
+    original_broader_signature: originalCredential.broader_signature,
+    copy_encryptor_public_key: copyCredential.encryptor_public_key,
+    copy_credential_id: copyCredential.id,
+    copy_content: copyCredential.content,
+    copy_public_notes_signature: copyCredential.public_notes_signature,
+    copy_broader_signature: copyCredential.broader_signature,
+    content_hash: contentHash,
+    dwg_owner: delegatedWriteGrant.ownerWalletIdentifier,
+    dwg_grantee: delegatedWriteGrant.granteeWalletIdentifier,
+    dwg_issuer_public_key: delegatedWriteGrant.issuerPublicKey,
+    dwg_id: delegatedWriteGrant.id,
+    dwg_access_grant_timelock: delegatedWriteGrant.accessGrantTimelock,
+    dwg_not_before: delegatedWriteGrant.notUsableBefore,
+    dwg_not_after: delegatedWriteGrant.notUsableAfter,
+    dwg_signature: delegatedWriteGrant.signature,
   };
-
-  if (payload.public_notes !== "")
-    throw new Error("shared credentials cannot have public_notes, it must be an empty string");
-
-  if (!params.granteeAddress) throw new Error("`granteeAddress` is required");
 
   await kwilClient.execute(
     {
-      name: "share_credential_by_write_grant",
+      name: "create_credentials_by_dwg",
       dbid,
-      inputs: [createActionInput(payload)],
+      inputs: [createActionInputWithoutId(payload)],
     },
     kwilSigner,
     true,
   );
-  return {
-    ...omit(payload, Object.keys(extraEntries) as (keyof typeof extraEntries)[]),
-    original_id: payload.original_credential_id,
-  };
+
+  return { originalCredential, copyCredential };
 }
 
 interface EditCredentialAsIssuerParams {
@@ -183,7 +188,7 @@ interface EditCredentialAsIssuerParams {
 export async function editCredential(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
-) {
+): Promise<{ data?: { tx_hash: string } }> {
   const { dbid, kwilClient, kwilSigner } = issuerConfig;
   const payload = {
     public_notes_id: publicNotesId,
@@ -201,41 +206,6 @@ export async function editCredential(
   );
 
   return result;
-}
-
-interface CreateReusableCredentialParams extends BaseCredentialParams {
-  granteeAddress: string;
-  lockedUntil?: number;
-}
-export async function createReusableCredential(
-  issuerConfig: IssuerConfig,
-  params: CreateReusableCredentialParams,
-) {
-  const content = params.plaintextContent;
-
-  // Create a credential for the given `recipientEncryptionPublicKey`.
-  const credentialForReceiver = await createCredentialByWriteGrant(issuerConfig, params);
-
-  // Calculate the hash of the `content` field of the params.
-  // This is used to pass the `hash` field when sharing a credential by write grant.
-  const contentHash = hexEncodeSha256Hash(content);
-
-  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
-  const recipientEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(
-    issuerConfig.encryptionSecretKey,
-  ).publicKey;
-
-  // Create a credential for the issuer itself.
-  await shareCredentialByWriteGrant(issuerConfig, {
-    ...params,
-    publicNotes: "",
-    recipientEncryptionPublicKey,
-    lockedUntil: params.lockedUntil || 0,
-    originalCredentialId: credentialForReceiver.id,
-    contentHash,
-  });
-
-  return credentialForReceiver;
 }
 
 export async function getCredentialIdByContentHash(

@@ -1,14 +1,17 @@
-import { chakra } from "@chakra-ui/react";
-import { useSetAtom } from "jotai";
+import { Box, Center, Show, Spinner, chakra } from "@chakra-ui/react";
+import { useTheme } from "next-themes";
 import type { PropsWithChildren } from "react";
-import { useAccount } from "wagmi";
+import { useEffect } from "react";
 
-import { statusAtom } from "@/atoms/account";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { CreateProfile } from "@/features/create-profile";
+import { ErrorFallback } from "@/features/error-fallback";
 import { NotConnected } from "@/features/not-connected";
+import { NotVerified } from "@/features/not-verified";
+import { PendingVerification } from "@/features/pending-verification";
 import { Profile } from "@/features/profile";
-import { KwilActionsProvider } from "@/kwil-actions.provider";
+import { useIsleStore } from "@/store";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -39,25 +42,67 @@ function Layout({ children }: PropsWithChildren) {
   );
 }
 
+function WIP() {
+  return (
+    <Box h="full" pt="6" pb="8">
+      <Center flexDir="column" gap="6">
+        <Spinner size="xl" />
+      </Center>
+    </Box>
+  );
+}
+
 export function App() {
-  const { isConnected } = useAccount();
-  const setStatus = useSetAtom(statusAtom);
+  const { setTheme } = useTheme();
+  const initializeNode = useIsleStore((state) => state.initializeNode);
+  const theme = useIsleStore((state) => state.theme);
+  const connectionStatus = useIsleStore((state) => state.connectionStatus);
+  const status = useIsleStore((state) => state.status);
 
-  if (!isConnected) {
-    setStatus("disconnected");
+  useEffect(() => {
+    const cleanup = initializeNode();
+    return cleanup;
+  }, [initializeNode]);
 
+  useEffect(() => {
+    if (theme) {
+      setTheme(theme);
+    }
+  }, [theme, setTheme]);
+
+  if (connectionStatus === "initializing") {
     return (
       <Layout>
-        <NotConnected />
+        <WIP />
       </Layout>
     );
   }
 
   return (
-    <KwilActionsProvider>
-      <Layout>
-        <Profile />
-      </Layout>
-    </KwilActionsProvider>
+    <Layout>
+      <Show when={connectionStatus === "disconnected"}>
+        <NotConnected />
+      </Show>
+      <Show when={connectionStatus === "connecting"}>
+        <WIP />
+      </Show>
+      <Show when={connectionStatus === "connected"}>
+        <Show when={status === "no-profile"}>
+          <CreateProfile />
+        </Show>
+        <Show when={status === "verified"}>
+          <Profile />
+        </Show>
+        <Show when={status === "pending-verification"}>
+          <PendingVerification />
+        </Show>
+        <Show when={status === "not-verified"}>
+          <NotVerified />
+        </Show>
+      </Show>
+      <Show when={status === "error"}>
+        <ErrorFallback error={new Error("This is a sample error description")} />
+      </Show>
+    </Layout>
   );
 }

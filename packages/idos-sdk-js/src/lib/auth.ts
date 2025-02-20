@@ -1,15 +1,15 @@
 import {
+  type Store,
   base64Decode,
   binaryWriteUint16BE,
   borshSerialize,
   bytesConcat,
   utf8Decode,
-} from "@idos-network/codecs";
+} from "@idos-network/core";
 import type { EthSigner } from "@kwilteam/kwil-js/dist/core/builders";
 import type { SignMessageParams, SignedMessage, Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
-import type { Store } from "../../../idos-store";
 import type { KwilWrapper } from "./kwil-wrapper";
 import { Nonce } from "./nonce";
 import { implicitAddressFromPublicKey } from "./utils";
