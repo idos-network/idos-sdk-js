@@ -1,5 +1,5 @@
 import { Center, Heading, Text, VStack, chakra } from "@chakra-ui/react";
-import { idOSIsle } from "@idos-network/idos-sdk";
+import { createIsle } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
 
@@ -46,14 +46,14 @@ function NotConnected() {
 }
 
 function Demo() {
-  const isleRef = useRef<idOSIsle | null>(null);
+  const isleRef = useRef<ReturnType<typeof createIsle> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container || isleRef.current) return;
 
-    isleRef.current = idOSIsle.initialize({
+    isleRef.current = createIsle({
       container: container.id,
     });
 
