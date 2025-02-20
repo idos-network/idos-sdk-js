@@ -1,6 +1,6 @@
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/core";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
-import { KeyPair } from "near-api-js";
+import type { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
@@ -19,7 +19,7 @@ function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
 
 type SignerType = KeyPair | nacl.SignKeyPair;
 
-function createKwilSigner(signer: SignerType): KwilSigner {
+async function createKwilSigner(signer: SignerType): KwilSigner {
   if (isNaclSignKeyPair(signer)) {
     return new KwilSigner(
       async (msg: Uint8Array) => nacl.sign.detached(msg, signer.secretKey),
@@ -28,6 +28,7 @@ function createKwilSigner(signer: SignerType): KwilSigner {
     );
   }
 
+  const { KeyPair } = await import("near-api-js");
   if (signer instanceof KeyPair) {
     return new KwilSigner(
       kwilNep413Signer("idos-issuer")(signer),
@@ -81,7 +82,7 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
       kwilProvider: params.nodeUrl,
       chainId,
     }),
-    kwilSigner: createKwilSigner(params.signingKeyPair),
+    kwilSigner: await createKwilSigner(params.signingKeyPair),
     signingKeyPair: params.signingKeyPair,
     encryptionSecretKey: params.encryptionSecretKey,
   };
