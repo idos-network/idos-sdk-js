@@ -1,38 +1,52 @@
 import { createNode } from "@sanity/comlink";
 import { create } from "zustand";
 
-import type { ControllerMessage, NodeMessage, idOSIsleStatus, idOSIsleTheme } from "@/types";
+import type {
+  IsleConnectionStatus,
+  IsleControllerMessage,
+  IsleNodeMessage,
+  IsleStatus,
+  IsleTheme,
+} from "@idos-network/core";
 
 interface NodeState {
-  status: idOSIsleStatus;
-  node: ReturnType<typeof createNode<NodeMessage, ControllerMessage>> | null;
-  theme?: idOSIsleTheme;
+  connectionStatus: IsleConnectionStatus;
+  address: string | undefined;
+  status: IsleStatus;
+  node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
+  theme?: IsleTheme;
   initializeNode: () => () => void;
   connectWallet: () => void;
+  linkWallet: () => void;
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
-  status: "disconnected" as const,
+  connectionStatus: "initializing",
+  address: undefined,
+  status: "initializing",
   node: null,
   initializeNode: () => {
-    const node = createNode<NodeMessage, ControllerMessage>({
+    const node = createNode<IsleNodeMessage, IsleControllerMessage>({
       name: "iframe",
       connectTo: "window",
     });
 
-    node.on("initialize", ({ status, theme }) => {
-      const _theme = theme ?? (localStorage.getItem("theme") as idOSIsleTheme) ?? "light";
-      set({ status, theme: _theme });
-      node.post("initialized", { status, theme: _theme });
+    node.on("initialize", ({ theme }) => {
+      const _theme = theme || (localStorage.getItem("theme") as IsleTheme);
+      set({ theme: _theme });
+      node.post("initialized", { theme: _theme });
     });
 
-    node.on("update", ({ theme, status }) => {
+    // @todo: this should be refactored and simplified.
+    node.on("update", ({ connectionStatus, address, theme, status }) => {
       set((state) => ({
         ...state,
-        ...(theme !== undefined && { theme }),
+        ...(connectionStatus !== undefined && { connectionStatus }),
+        ...(address !== undefined && { address }),
         ...(status !== undefined && { status }),
+        ...(theme !== undefined && { theme }),
       }));
-      node.post("updated", { theme, status });
+      node.post("updated", { theme, status, connectionStatus });
     });
 
     set({ node });
@@ -40,5 +54,8 @@ export const useIsleStore = create<NodeState>((set) => ({
   },
   connectWallet: () => {
     useIsleStore.getState().node?.post("connect-wallet", {});
+  },
+  linkWallet: () => {
+    useIsleStore.getState().node?.post("link-wallet", {});
   },
 }));
