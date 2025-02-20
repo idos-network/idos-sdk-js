@@ -1,9 +1,12 @@
 /* cspell:disable-next-line */
-import type {
-  IsleControllerMessage,
-  IsleMessageHandler,
-  IsleNodeMessage,
-  IsleTheme,
+import {
+  type IsleControllerMessage,
+  type IsleMessageHandler,
+  type IsleNodeMessage,
+  type IsleTheme,
+  type KwilActionClient,
+  createWebKwilClient,
+  hasProfile,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -96,6 +99,7 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
   let signer: JsonRpcSigner | undefined;
+  let kwilClient: KwilActionClient | undefined;
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
 
@@ -131,7 +135,6 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
     send("update", {
       connectionStatus: account.status,
       address: account.address,
-      status: "no-profile",
     });
   };
 
@@ -156,6 +159,17 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
     channel.on("initialized", async () => {
       const account = getAccount(wagmiConfig);
       await handleAccountChange(account);
+      kwilClient = await createWebKwilClient({
+        // @todo: make the domain environment aware.
+        nodeUrl: "https://nodes.idos.network",
+      });
+
+      // Check if the user has a profile and update the isle status accordingly.
+      const _hasProfile = await hasProfile(kwilClient, account.address as string);
+
+      send("update", {
+        status: _hasProfile ? "pending-verification" : "no-profile",
+      });
     });
 
     // Send initial configuration
