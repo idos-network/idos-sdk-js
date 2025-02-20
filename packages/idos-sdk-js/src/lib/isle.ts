@@ -133,6 +133,12 @@ export class idOSIsle {
     this.channel.post("initialize", {
       theme: this.theme,
     });
+
+    this.channel.on("link-wallet", async () => {
+      const account = getAccount(idOSIsle.wagmiConfig);
+      const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
+      window.location.href = url;
+    });
   }
 
   private async handleAccountChange(account: {
@@ -154,6 +160,7 @@ export class idOSIsle {
     // We're no longer initializing once we start getting real states
     this.send("update", {
       connectionStatus: account.status,
+      address: account.address,
       status: "no-profile", // This will be replaced with BE query later
     });
   }

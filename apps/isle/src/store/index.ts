@@ -10,16 +10,19 @@ import type {
 } from "@idos-network/core";
 
 interface NodeState {
-  connectionStatus: IsleConnectionStatus | "initializing";
-  status: IsleStatus | "initializing";
+  connectionStatus: IsleConnectionStatus;
+  address: string | undefined;
+  status: IsleStatus;
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   initializeNode: () => () => void;
   connectWallet: () => void;
+  linkWallet: () => void;
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
   connectionStatus: "initializing",
+  address: undefined,
   status: "initializing",
   node: null,
   initializeNode: () => {
@@ -34,10 +37,12 @@ export const useIsleStore = create<NodeState>((set) => ({
       node.post("initialized", { theme: _theme });
     });
 
-    node.on("update", ({ connectionStatus, theme, status }) => {
+    // @todo: this should be refactored and simplified.
+    node.on("update", ({ connectionStatus, address, theme, status }) => {
       set((state) => ({
         ...state,
         ...(connectionStatus !== undefined && { connectionStatus }),
+        ...(address !== undefined && { address }),
         ...(status !== undefined && { status }),
         ...(theme !== undefined && { theme }),
       }));
@@ -49,5 +54,8 @@ export const useIsleStore = create<NodeState>((set) => ({
   },
   connectWallet: () => {
     useIsleStore.getState().node?.post("connect-wallet", {});
+  },
+  linkWallet: () => {
+    useIsleStore.getState().node?.post("link-wallet", {});
   },
 }));
