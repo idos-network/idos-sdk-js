@@ -1,4 +1,4 @@
-import { Center, Heading, Text, VStack, chakra } from "@chakra-ui/react";
+import { Center, Flex, Heading, Text, VStack, chakra } from "@chakra-ui/react";
 import { idOSIsle } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
@@ -12,6 +12,22 @@ function Layout({ children }: PropsWithChildren) {
     <chakra.div display="grid" gridTemplateRows="auto 1fr auto" minH="100dvh">
       <Header />
       <chakra.main px="5">{children}</chakra.main>
+      <Flex
+        id="idos"
+        position="absolute"
+        left="50%"
+        bottom="5%"
+        transform="translateX(-50%)"
+        w="400px"
+        h="100px"
+        visibility="hidden"
+        opacity={0}
+        css={{
+          "&.visible": {
+            visibility: "visible",
+          },
+        }}
+      />
       <Footer />
     </chakra.div>
   );
@@ -55,10 +71,16 @@ function Demo() {
 
     isleRef.current = idOSIsle.initialize({
       container: container.id,
+      kwilOptions: {
+        nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      },
     });
 
     isleRef.current.on("connect-wallet", async () => {
       await isleRef.current?.connect();
+    });
+    isleRef.current.on("create-key-pair", async () => {
+      await isleRef.current?.createKeyPair();
     });
 
     return () => {

@@ -1,15 +1,23 @@
 import { Center, Heading, Text, VStack } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
 import { CreateProfileSteps } from "@/features/create-profile-steps";
 import { LinkWallet } from "@/features/link-wallet";
+import { useIsleStore } from "@/store";
 
 type Mode = "create" | "link" | null;
 
 export function CreateProfile() {
   const [status, setStatus] = useState<Mode>(null);
+  const node = useIsleStore((state) => state.node);
+
+  useEffect(() => {
+    if (status === "create") {
+      node?.post("create-key-pair", {});
+    }
+  }, [node, status]);
 
   if (status === "create") return <CreateProfileSteps />;
   if (status === "link") return <LinkWallet />;

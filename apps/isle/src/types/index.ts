@@ -50,4 +50,7 @@ export type NodeMessage =
     }
   | {
       type: "connect-wallet";
+    }
+  | {
+      type: "create-key-pair";
     };

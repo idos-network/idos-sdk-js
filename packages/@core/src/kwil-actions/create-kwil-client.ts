@@ -2,7 +2,7 @@ import { type KwilSigner, NodeKwil, Utils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody } from "@kwilteam/kwil-js/dist/core/action";
 import invariant from "tiny-invariant";
 
-interface CreateKwilClientParams {
+export interface CreateKwilClientParams {
   chainId?: string;
   dbId?: string;
   nodeUrl: string;

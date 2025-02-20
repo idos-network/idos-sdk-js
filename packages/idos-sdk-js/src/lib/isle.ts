@@ -1,3 +1,9 @@
+import {
+  type CreateKwilClientParams,
+  type KwilActionClient,
+  createNodeKwilClient,
+} from "@idos-network/core";
+import { hasProfile } from "@idos-network/core/kwil-actions";
 /* cspell:disable-next-line */
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -15,7 +21,7 @@ import {
 } from "@wagmi/core";
 import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
-
+import { IframeEnclave } from "./enclave-providers";
 export type idOSIsleTheme = "light" | "dark";
 export type idOSIsleStatus =
   | "disconnected"
@@ -29,6 +35,7 @@ export type WalletConnectionStatus = "connecting" | "connected" | "disconnected"
 
 interface idOSIsleConstructorOptions {
   container: string;
+  kwilOptions: CreateKwilClientParams;
   theme?: idOSIsleTheme;
 }
 
@@ -72,6 +79,9 @@ type NodeMessage =
     }
   | {
       type: "connect-wallet";
+    }
+  | {
+      type: "create-key-pair";
     };
 
 type MessageHandler<T extends NodeMessage["type"]> = (
@@ -89,6 +99,7 @@ export class idOSIsle {
   private theme?: idOSIsleTheme;
   private iframeId: string;
   private signer?: JsonRpcSigner;
+  private kwilClient?: KwilActionClient | null = null;
 
   private constructor(options: idOSIsleConstructorOptions) {
     this.containerId = options.container;
@@ -148,7 +159,47 @@ export class idOSIsle {
       return;
     }
 
-    await reconnect(idOSIsle.wagmiConfig);
+    const accounts = await reconnect(idOSIsle.wagmiConfig);
+    if (accounts.length > 0) {
+      const walletClient = await getWalletClient(idOSIsle.wagmiConfig);
+      if (!walletClient) {
+        throw new Error("Failed to get wallet client");
+      }
+      const provider = new BrowserProvider(walletClient.transport);
+      this.signer = await provider.getSigner();
+    }
+  }
+
+  private async createKwilClient(options: CreateKwilClientParams) {
+    try {
+      if (!this.signer) return;
+
+      const kwilClient = await createNodeKwilClient(options);
+      this.kwilClient = kwilClient;
+
+      const profile = await this.hasProfile();
+      this.send("update", { status: profile ? "verified" : "no-profile" });
+    } catch (error) {
+      console.error({ error });
+      this.send("update", { status: "error" });
+    }
+  }
+
+  async createKeyPair() {
+    const iframeProvider = new IframeEnclave({
+      container: "#idos",
+      mode: "new",
+    });
+    await iframeProvider.load();
+    const userId = crypto.randomUUID();
+
+    const keyPair = await iframeProvider.discoverUserEncryptionPublicKey(userId);
+    return keyPair;
+  }
+
+  private async hasProfile() {
+    if (!this.kwilClient || !this.signer) return;
+    return await hasProfile(this.kwilClient, this.signer.address);
   }
 
   private setupController(): void {
@@ -185,8 +236,11 @@ export class idOSIsle {
       return existingInstance;
     }
     const instance = new idOSIsle(options);
-    instance.reconnect();
+    instance.reconnect().then(() => {
+      instance.createKwilClient(options.kwilOptions);
+    });
     instance.watchAccountChanges();
+
     return instance;
   }
 
