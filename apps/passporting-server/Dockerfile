@@ -33,7 +33,7 @@ RUN apk add --no-cache \
 
 WORKDIR /workspace
 
-# Copy `lockfile` and `package.json`'s of isolated subworkspace
+# Copy `lockfile` and `package.json`'s of isolated sub-workspace
 COPY --from=pruner /workspace/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=pruner /workspace/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=pruner /workspace/out/json/ .
@@ -41,7 +41,7 @@ COPY --from=pruner /workspace/out/json/ .
 # Install the dependencies
 RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm install --frozen-lockfile --ignore-scripts
 
-# Copy source code of isolated subworkspace
+# Copy source code of isolated sub-workspace
 COPY --from=pruner /workspace/out/full/ .
 
 RUN --mount=type=cache,id=pnpm,target=~/.pnpm-store pnpm prune --prod --no-optional
@@ -54,4 +54,4 @@ RUN chown -R hono:nodejs /workspace
 USER hono
 EXPOSE 3000
 
-CMD ["pnpm", "--filter=passporting-server", "start"]
+CMD ["pnpm", "--filter=passporting-server", "start:node"]

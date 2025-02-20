@@ -1,4 +1,4 @@
-# idOS e2e testubg
+# idOS e2e testing
 
 e2e testing for the [`📁 idos-sdk-js`](./packages/idos-sdk-js/)
 
@@ -22,16 +22,26 @@ export WALLET_SEED_PHRASE=candy maple cake sugar pudding cream honey rich smooth
 export WALLET_PASSWORD=hunter2
 ```
 
-Build the wallet cache:
-
+Install playwright
+```bash
+npx playwright install
 ```
-npx synpress tests/wallet-setup
+
+
+Build the wallet cache:
+```bash
+npx synpress wallet-setup
 ```
 
 This will build a wallet cache needed for our tests.
 
-Run the tests:
-
-```
+Run all tests:
+```bash
 pnpm test:e2e
 ```
+
+Run a particular test:
+```bash
+pnpm test:e2e 01-evm-auth.spec.ts
+```
+

@@ -1,8 +1,8 @@
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "@idos-network/core";
 import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 import { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../../kwil-nep413-signer/src";
 
 function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
   return (

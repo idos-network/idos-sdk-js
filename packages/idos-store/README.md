@@ -1,2 +1,0 @@
-# idOS Store
-

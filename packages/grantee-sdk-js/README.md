@@ -15,9 +15,41 @@ Import the SDK and initialize it:
 
 ```js
 import { idOS } from "@idos-network/grantee-sdk-js";
+import nacl from "tweetnacl";
 
-export const sdk = await idOS.init(...options);
+/**
+ * Initializes the idOS SDK with the provided options.
+ *
+ * @async
+ * @function init
+ * @param {Object} options - Configuration options for initializing the SDK.
+ * @param {string} options.recipientEncryptionPrivateKey - The recipient's encryption private key.
+ * @param {KeyPair | SignKeyPair | ethers.Wallet} options.granteeSigner - The grantee's wallet or key pair for signing transactions.
+ * @param {string} [options.nodeUrl="https://nodes.idos.network"] - The URL of the idOS node.
+ * @param {string} [options.chainId] - The chain ID for the network (optional).
+ * @param {string} [options.dbId] - The database ID for the network (optional).
+ * @returns {Promise<idOSGrantee>} - A promise that resolves to an instance of the idOS SDK.
+ */
+
+export const sdk = await idOS.init({
+  nodeUrl: process.env.IDOS_NODE_URL,
+  recipientEncryptionPrivateKey: process.env.GRANTEE_ENCRYPTION_SECRET_KEY,
+  granteeSigner: nacl.sign.keyPair.fromSecretKey(base64Decode(process.env.GRANTEE_SIGNING_SECRET_KEY))
+});
 ```
+
+### Grant Object Anatomy
+
+The `Grant` object represents access permissions for a specific credential. It has the following properties:
+
+| Property         | Type                | Description                                                                 |
+|------------------|---------------------|-----------------------------------------------------------------------------|
+| `id`             | `string`            | The unique identifier of the grant.                                         |
+| `ownerUserId`    | `string`            | The ID of the user who owns the credential.                                 |
+| `granteeAddress` | `string`            | The address of the grantee (the entity granted access).                     |
+| `dataId`         | `string`            | The ID of the shared credential data.                                       |
+| `lockedUntil`    | `number`            | A timestamp (in milliseconds) until which the grant is locked.             |
+| `hash`           | `string` | The content hash of the credential.                             |
 
 
 ### Listing grants.
@@ -25,17 +57,62 @@ export const sdk = await idOS.init(...options);
 ```js
 import {sdk} from './idOS'
 
-const grants = await sdk.listGrants({
-  owner: "0x0000000000000000000000000000000000000000"
+const grants = await sdk.getGrants({
+  page: 1,
+  size: 7,
 })
 ```
 
-### Fetching a shared credential.
+### Get grants total count.
 
 ```js
-// Import the initialised sdk instance.
 import {sdk} from './idOS'
 
-const grants = await sdk.fetchSharedCredential('ID')
+const grantsTotalCount = await sdk.getGrantsCount()
 ```
 
+### Getting shared credential with a grantee (encrypted content).
+
+```js
+// Import the initialized sdk instance.
+import {sdk} from './idOS'
+
+const grants = await sdk.getSharedCredentialFromIDOS('GRANT_DATA_ID')
+```
+
+### Getting shared credential content (decrypted).
+
+```js
+// Import the initialized sdk instance.
+import {sdk} from './idOS'
+
+const credentialContent = await sdk.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
+```
+
+### Getting credential ID using grant hash.
+
+```js
+// Import the initialized sdk instance.
+import {sdk} from './idOS'
+
+const grants = await sdk.getCredentialIdByContentHash('GRANT_HASH')
+```
+
+### Getting Access Grant that gave access to a credential.
+
+```js
+// Import the initialized sdk instance.
+import {sdk} from './idOS'
+
+const grants = await sdk.getCredentialAccessGrant('CREDENTIAL_ID')
+```
+
+### Getting Reusable Credential Compliantly.
+This feature enables other obligated entities (OE2) to have access to credential after owner approves sharing his/her credential with this entity.
+
+```js
+// Import the initialized sdk instance.
+import {sdk} from './idOS'
+
+const grants = await sdk.getReusableCredentialCompliantly('GRANT_HASH')
+```

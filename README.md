@@ -6,6 +6,7 @@
 | :----------------------------------------------------- | :---------------------------------------------------------------------------------------------------- |
 | **[`📁 idos-sdk-js`](./packages/idos-sdk-js/)**        | Source and docs for the idOS JavaScript SDK                                                           |
 | [`📁 idos-enclave`](./apps/idos-enclave)               | Source for the idOS Enclave hosted at [enclave.idos.network](https://enclave.idos.network)            |
+| [`📁 isle`](./apps/isle)                               | Source for the idOS Isle                                                                              |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard) | Source for the idOS data dashboard hosted at [dashboard.idos.network](https://dashboard.idos.network) |
 | [`📁 idos-example-dapp`](./examples/idos-example-dapp) | A sample dapp demonstrating SDK usage.                                                                |
 

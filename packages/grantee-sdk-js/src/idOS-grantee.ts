@@ -4,20 +4,19 @@ import {
   hexEncodeSha256Hash,
   utf8Decode,
   utf8Encode,
-} from "@idos-network/codecs";
-import { decryptContent } from "@idos-network/cryptography";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk-types";
+} from "@idos-network/core/codecs";
+import { decryptContent } from "@idos-network/core/cryptography";
 import {
   type KwilActionClient,
+  createKwilSigner,
   createNodeKwilClient,
-} from "@idos-network/kwil-actions/create-kwil-client";
-import { createKwilSigner } from "@idos-network/kwil-actions/create-kwil-signer";
-import {
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
+  getGrants,
+  getGrantsCount,
   getSharedCredential,
-} from "@idos-network/kwil-actions/credentials";
-import { getGrants, getGrantsCount } from "@idos-network/kwil-actions/grants";
+} from "@idos-network/core/kwil-actions";
+import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl, { type SignKeyPair } from "tweetnacl";

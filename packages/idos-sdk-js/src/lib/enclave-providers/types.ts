@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential } from "@idos-network/core";
 import type { BackupPasswordInfo } from "../types";
 
 export interface StoredData {

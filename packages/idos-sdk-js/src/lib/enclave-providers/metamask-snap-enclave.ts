@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import type { idOSCredential } from "@idos-network/core";
 import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {

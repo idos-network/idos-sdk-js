@@ -1,4 +1,4 @@
-import { Store } from "@idos-network/idos-store";
+import { Store } from "@idos-network/core";
 import { render } from "preact";
 import { App } from "./pages/App";
 import "./styles.css";

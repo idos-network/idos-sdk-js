@@ -1,19 +1,10 @@
 {
   "name": "dashboard-for-dapps",
   "description": "A Dashboard / CRM for dApps",
-  "private": true,
   "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "check": "biome check --write .",
-    "format": "biome format --write .",
-    "preview": "vite preview"
-  },
   "dependencies": {
     "@chakra-ui/react": "^3.0.2",
-    "@idos-network/codecs": "workspace:*",
+    "@idos-network/core": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/utf8": "^1.0.1",
@@ -44,5 +35,12 @@
     "typescript": "~5.6.2",
     "vite": "^5.4.10",
     "vite-plugin-node-polyfills": "^0.12.0"
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module"
 }

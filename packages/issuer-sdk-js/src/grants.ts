@@ -1,4 +1,4 @@
-import { base64Decode, hexEncodeSha256Hash } from "@idos-network/codecs";
+import { base64Decode, hexEncodeSha256Hash } from "@idos-network/core";
 import type { IssuerConfig } from "./create-issuer-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
 import { createActionInput, decryptContent } from "./internal";
@@ -46,7 +46,7 @@ export async function createAccessGrantFromDAG(
 
   const result = await kwilClient.execute(
     {
-      name: "create_access_grant_by_dag",
+      name: "create_ag_by_dag_for_copy",
       dbid,
       inputs: [createActionInput(params)],
     },

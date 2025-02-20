@@ -3,5 +3,4 @@ export * from "./credentials";
 export * from "./grants";
 export * from "./user";
 
-// export types.
-export * from "../../types";
+export * from "@idos-network/core/types";

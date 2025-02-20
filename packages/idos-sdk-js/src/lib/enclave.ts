@@ -1,5 +1,11 @@
-import { base64Decode, base64Encode, utf8Decode, utf8Encode } from "@idos-network/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk-types";
+import {
+  base64Decode,
+  base64Encode,
+  type idOSCredential,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/core";
+
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
 import type { BackupPasswordInfo } from "./types";

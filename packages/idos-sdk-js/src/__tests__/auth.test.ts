@@ -1,8 +1,8 @@
+import { Store } from "@idos-network/core";
 import { Wallet } from "ethers";
 import { Auth, NoProfile } from "src/lib/auth";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test, vi } from "vitest";
-import { Store } from "../../../idos-store";
 import { TestKwilClient } from "./test-kwil-client";
 
 let auth: Auth;
