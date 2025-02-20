@@ -86,7 +86,7 @@ const initializeWagmi = (): void => {
  *
  * @example
  * ```typescript
- * const isle = creatIsle({ container: "my-container" });
+ * const isle = createIsle({ container: "my-container" });
  * await isle.connect(); // Connect a wallet
  * const signer = await isle.getSigner(); // Get the connected signer
  * ```
