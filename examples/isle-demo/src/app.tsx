@@ -21,7 +21,6 @@ function Layout({ children }: PropsWithChildren) {
         w="400px"
         h="100px"
         visibility="hidden"
-        opacity={0}
         css={{
           "&.visible": {
             visibility: "visible",
