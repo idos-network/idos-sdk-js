@@ -16,7 +16,7 @@ export class idOSGranteeSDK {
 
     switch (chainType) {
       case "EVM": {
-        const { Wallet, JSONRpcProvider } = await import("ethers");
+        const { Wallet, JsonRpcProvider } = await import("ethers");
         const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
 
         grantee = await idOSGrantee.init({
