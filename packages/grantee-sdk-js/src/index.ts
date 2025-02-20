@@ -1,6 +1,3 @@
-import { Wallet } from "ethers";
-import { JsonRpcProvider } from "ethers";
-import { KeyPair } from "near-api-js";
 import { idOSGrantee } from "./idOS-grantee.ts";
 
 export class idOSGranteeSDK {
@@ -19,6 +16,7 @@ export class idOSGranteeSDK {
 
     switch (chainType) {
       case "EVM": {
+        const { Wallet, JsonRpcProvider } = await import("ethers");
         const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
 
         grantee = await idOSGrantee.init({
@@ -31,6 +29,7 @@ export class idOSGranteeSDK {
         return new idOSGranteeSDK(grantee);
       }
       case "NEAR": {
+        const { KeyPair } = await import("near-api-js");
         const signer = KeyPair.fromString(authPrivateKey);
         grantee = await idOSGrantee.init({
           granteeSigner: signer,
