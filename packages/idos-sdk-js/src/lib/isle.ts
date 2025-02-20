@@ -161,11 +161,13 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
       await handleAccountChange(account);
       kwilClient = await createWebKwilClient({
         // @todo: make the domain environment aware.
-        nodeUrl: "https://nodes.idos.network",
+        nodeUrl: "https://nodes.playground.idos.network",
       });
 
       // Check if the user has a profile and update the isle status accordingly.
       const _hasProfile = await hasProfile(kwilClient, account.address as string);
+
+      // @todo: we need to send the correct status to the idOS Isle based on the state of the profile in kwil
 
       send("update", {
         status: _hasProfile ? "pending-verification" : "no-profile",
