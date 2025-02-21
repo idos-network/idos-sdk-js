@@ -55,6 +55,9 @@ function Demo() {
 
     isleRef.current = createIsle({
       container: container.id,
+      issuerInfo: {
+        url: import.meta.env.VITE_ISSUER_URL,
+      },
     });
 
     isleRef.current.on("connect-wallet", async () => {
