@@ -192,7 +192,7 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
     // @todo: make the domain environment aware.
     channel.on("link-wallet", async () => {
       const account = getAccount(wagmiConfig);
-      const url = `${isleOptions.dashboardUrl}/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
+      const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
     });
 
