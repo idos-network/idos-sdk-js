@@ -48,6 +48,7 @@ function NotConnected() {
 function Demo() {
   const isleRef = useRef<ReturnType<typeof createIsle> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { address } = useAccount();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -55,20 +56,23 @@ function Demo() {
 
     isleRef.current = createIsle({
       container: container.id,
-      issuerInfo: {
-        url: import.meta.env.VITE_ISSUER_URL,
-      },
     });
 
     isleRef.current.on("connect-wallet", async () => {
       await isleRef.current?.connect();
     });
 
+    isleRef.current.on("create-profile", async () => {
+      // as of now, we get create a profile on the issuer-sdk-demo app.
+      const url = `https://issuer-sdk-demo.vercel.app?address=${address}&callbackUrl=${window.location.href}`;
+      window.location.href = url;
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;
     };
-  }, []);
+  }, [address]);
 
   return (
     <Center h="full" flexDir="column" gap="5">
