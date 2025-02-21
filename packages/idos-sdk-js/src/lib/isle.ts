@@ -36,10 +36,10 @@ interface idOSIsleOptions {
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
   /** Meta information about the issuer */
-  issuerMeta: {
+  issuerMeta?: {
     url: string;
-    name?: string;
-    logo?: string;
+    name: string;
+    logo: string;
   };
 }
 
