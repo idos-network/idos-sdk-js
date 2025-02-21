@@ -5,7 +5,9 @@ import {
   type IsleNodeMessage,
   type IsleTheme,
   type KwilActionClient,
+  createKwilSigner,
   createWebKwilClient,
+  getAllCredentials,
   hasProfile,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
@@ -168,19 +170,37 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
     channel.on("initialized", async () => {
       const account = getAccount(wagmiConfig);
       await handleAccountChange(account);
+
+      if (!signer) {
+        throw new Error("No signer found");
+      }
+
       kwilClient = await createWebKwilClient({
         // @todo: make the domain environment aware.
         nodeUrl: "https://nodes.playground.idos.network",
       });
 
+      const [kwilSigner] = createKwilSigner(signer);
+
+      kwilClient.setSigner(kwilSigner);
+
       // Check if the user has a profile and update the isle status accordingly.
       const _hasProfile = await hasProfile(kwilClient, account.address as string);
 
-      // @todo: we need to send the correct status to the idOS Isle based on the state of the profile in kwil
+      if (!_hasProfile) {
+        send("update", {
+          status: "no-profile",
+        });
+        return;
+      }
+      // if the user has a profile, we need to run additional checks to determine the status of the profile.
+      const credentials = await getAllCredentials(kwilClient);
 
-      send("update", {
-        status: _hasProfile ? "pending-verification" : "no-profile",
-      });
+      if (credentials.length === 0) {
+        send("update", {
+          status: "pending-verification",
+        });
+      }
     });
 
     // Send initial configuration

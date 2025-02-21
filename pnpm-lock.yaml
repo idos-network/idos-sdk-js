@@ -913,8 +913,8 @@ importers:
         specifier: ^1.23.0
         version: 1.30.1
       ethers:
-        specifier: ^6.12
-        version: 6.13.4(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+        specifier: ^6.13.5
+        version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       jsonld:
         specifier: ^8.3.1
         version: 8.3.2(web-streams-polyfill@3.3.3)
