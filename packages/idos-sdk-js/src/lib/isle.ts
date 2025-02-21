@@ -39,8 +39,6 @@ interface idOSIsleOptions {
     name?: string;
     logo?: string;
   };
-  /** The url of idOS dashboard */
-  dashboardUrl: string;
 }
 
 /**

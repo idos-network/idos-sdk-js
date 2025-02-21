@@ -58,7 +58,6 @@ function Demo() {
       issuerInfo: {
         url: import.meta.env.VITE_ISSUER_URL,
       },
-      dashboardUrl: import.meta.env.VITE_IDOS_DASHBOARD_URL,
     });
 
     isleRef.current.on("connect-wallet", async () => {
