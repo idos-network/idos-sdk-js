@@ -24,7 +24,7 @@ import {
   connect as wagmiConnect,
   watchAccount,
 } from "@wagmi/core";
-import { mainnet, optopia, sepolia } from "@wagmi/core/chains";
+import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 
 /**
