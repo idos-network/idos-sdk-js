@@ -193,9 +193,12 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
       // if the user has a profile, we need to run additional checks to determine the status of the profile.
       const credentials = await getAllCredentials(kwilClient);
 
+      /**
+       * @todo: add additional checks for matching credentials based on a condition.
+       */
       if (credentials.length === 0) {
         send("update", {
-          status: "pending-verification",
+          status: "not-verified",
         });
       }
     });
