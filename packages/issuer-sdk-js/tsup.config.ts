@@ -6,6 +6,7 @@ export default defineConfig({
     "./src/create-issuer-config.ts",
     "./src/user.ts",
     "./src/credentials.ts",
+    "./src/grants.ts",
   ],
   splitting: false,
   sourcemap: true,
