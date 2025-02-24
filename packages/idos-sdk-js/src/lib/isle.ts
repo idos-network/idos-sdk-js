@@ -9,6 +9,7 @@ import {
   createWebKwilClient,
   getAllCredentials,
   hasProfile,
+  type idOSCredential,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -41,6 +42,8 @@ interface idOSIsleOptions {
     name: string;
     logo: string;
   };
+  /** A function that determines if a credential matches the conditions */
+  credentialMatcher: (credential: idOSCredential) => boolean;
 }
 
 /**
@@ -190,15 +193,28 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
         });
         return;
       }
-      // if the user has a profile, we need to run additional checks to determine the status of the profile.
+
       const credentials = await getAllCredentials(kwilClient);
 
-      /**
-       * @todo: add additional checks for matching credentials based on a condition.
-       */
-      if (credentials.length === 0) {
+      const matchingCredentials = credentials.filter((cred) => options.credentialMatcher(cred));
+
+      if (matchingCredentials.length === 0) {
         send("update", {
           status: "not-verified",
+        });
+      }
+
+      /**
+       * @todo: this is not accurate at the moment.
+       */
+      if (
+        matchingCredentials.every((cred) => {
+          const publicNotes = JSON.parse(cred.public_notes ?? "");
+          return publicNotes.status === "pending";
+        })
+      ) {
+        send("update", {
+          status: "pending-verification",
         });
       }
     });
