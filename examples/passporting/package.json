@@ -8,7 +8,7 @@
     "@idos-network/core": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@tanstack/react-query": "5.45.1",
-    "ethers": "^6.13.5",
+    "ethers": "catalog:",
     "next": "14.2.4",
     "react": "^18.3.1",
     "react-aria-components": "^1.6.0",
