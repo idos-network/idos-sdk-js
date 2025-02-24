@@ -18,13 +18,12 @@ export function PendingVerification() {
           }}
         >
           <Icon
+            as={CiClock2}
             color={{
               _dark: "aquamarine.500",
               _light: "aquamarine.700",
             }}
-          >
-            <CiClock2 size="24" />
-          </Icon>
+          />
         </Circle>
         <Badge
           bg={{
