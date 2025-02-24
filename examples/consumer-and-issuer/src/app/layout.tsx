@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { cookieToInitialState } from "wagmi";
 
+import { Main } from "@/app/main";
 import { Providers } from "@/app/providers";
 import { WalletConnector } from "@/components/wallet-connector";
 import { getConfig } from "@/wagmi.config";
@@ -38,7 +39,9 @@ export default function RootLayout(props: { children: ReactNode }) {
                 </div>
               </div>
             </header>
-            <main className="p-6">{props.children}</main>
+            <div>
+              <Main>{props.children}</Main>
+            </div>
             <footer>
               <div className="container mx-auto px-6">
                 <div className="flex h-12 items-center justify-center">
