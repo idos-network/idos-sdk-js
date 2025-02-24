@@ -11,6 +11,14 @@
           "types": "./dist/index.d.ts",
           "import": "./dist/index.js"
         },
+        "./client": {
+          "types": "./dist/client/index.d.ts",
+          "import": "./dist/client/index.js"
+        },
+        "./server": {
+          "types": "./dist/server/index.d.ts",
+          "import": "./dist/server/index.js"
+        },
         "./package.json": "./package.json"
       }
     }
@@ -31,6 +39,14 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    },
+    "./server": {
+      "types": "./dist/server/index.d.ts",
+      "import": "./dist/server/index.js"
     }
   },
   "files": ["dist"],
