@@ -2,6 +2,7 @@
 
 import { Button, Spinner } from "@heroui/react";
 import type { idOS, idOSCredential } from "@idos-network/idos-sdk";
+import { createIsle } from "@idos-network/idos-sdk";
 import { useEffect, useRef, useState, useTransition } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
@@ -9,11 +10,13 @@ import { useAccount, useSignMessage } from "wagmi";
 import {
   createCredentialByPermissionedIssuer,
   createCredentialsByDelegatedWriteGrant,
+  createProfile,
 } from "@/actions";
 import { CreateProfile } from "@/components/create-profile";
 import { Credentials } from "@/components/credentials";
 import { useSdkStore } from "@/stores/sdk";
 import { useEthersSigner } from "@/wagmi.config";
+import type { CreateWalletReqParams } from "@idos-network/issuer-sdk-js";
 
 const getSearchParams = () => new URLSearchParams(window.location.search);
 
@@ -22,6 +25,76 @@ export default function Home() {
   const initialized = useRef(false);
   const { setSdk, sdk: clientSDK } = useSdkStore();
   const { signMessageAsync } = useSignMessage();
+
+  const isleRef = useRef<ReturnType<typeof createIsle> | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const addUser = async () => {
+    try {
+      if (!clientSDK) throw new Error("No SDK found");
+      const userId = crypto.randomUUID();
+      const { userEncryptionPublicKey } = await clientSDK.discoverUserEncryptionPublicKey(userId);
+
+      isleRef.current?.send("process-state", {
+        name: "create-profile",
+        status: "pending",
+      });
+
+      const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
+      const signature = await signMessageAsync({
+        message,
+      });
+
+      await createProfile(userEncryptionPublicKey, userId, {
+        address: address as string,
+        signature,
+        message,
+        wallet_type: "EVM",
+        public_key: "",
+      } as CreateWalletReqParams);
+
+      isleRef.current?.send("process-state", {
+        name: "create-profile",
+        status: "success",
+      });
+
+      isleRef.current?.send("update", {
+        status: "not-verified",
+      });
+    } catch (error) {
+      console.log({ error });
+      isleRef.current?.send("process-state", {
+        name: "create-profile",
+        status: "error",
+      });
+    } finally {
+    }
+  };
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container || isleRef.current) return;
+
+    isleRef.current = createIsle({
+      container: container.id,
+      issuerInfo: {
+        url: "",
+      },
+    });
+
+    isleRef.current.on("connect-wallet", async () => {
+      await isleRef.current?.connect();
+    });
+
+    isleRef.current.on("create-profile", async () => {
+      await addUser();
+    });
+
+    return () => {
+      isleRef.current?.destroy();
+      isleRef.current = null;
+    };
+  }, [clientSDK]);
 
   const [hasProfile, setHasProfile] = useState(false);
   const signer = useEthersSigner();
@@ -138,6 +211,7 @@ export default function Home() {
   if (!hasProfile) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-4">
+        <div ref={containerRef} id="idOS-isle" style={{ width: "100%", height: "600px" }} />
         <h1 className="max-w-screen-sm font-semibold lg:text-lg">
           You don't have a profile in the idOS yet. In order to continue, you need to create one
         </h1>
@@ -212,6 +286,7 @@ export default function Home() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-6">
+      <div ref={containerRef} id="idOS-isle" style={{ width: "100%", height: "600px" }} />
       <div className="container max-w-screen-sm">
         <Credentials credentials={credentials} onRefresh={onCredentialsRefresh} />
       </div>

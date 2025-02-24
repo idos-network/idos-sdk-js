@@ -7,12 +7,27 @@ import { useIsleStore } from "@/store";
 
 export function CreateProfileSteps() {
   const createProfile = useIsleStore((state) => state.createProfile);
-  const [loading] = useState(false);
-  const [success] = useState(false);
+  const processState = useIsleStore((state) => state.processState);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [, setError] = useState(false); // @todo: add and render error state.
 
   useEffect(() => {
     createProfile();
   }, [createProfile]);
+
+  useEffect(() => {
+    const { name, status } = processState;
+    if (name === "create-profile" && status === "success") {
+      setSuccess(true);
+    }
+    if (name === "create-profile" && status === "error") {
+      setError(true);
+    }
+    if (name === "create-profile" && status === "pending") {
+      setLoading(true);
+    }
+  }, [processState]);
 
   return (
     <Flex flexDirection="column" gap="6">
@@ -49,6 +64,7 @@ export function CreateProfileSteps() {
                 mx="auto"
                 textAlign="center"
               >
+                {/* @todo: Should we rename this process to pick an authentication method? */}
                 Sign the message in your wallet to authenticate with idOS.
               </Text>
 

@@ -61,7 +61,7 @@ interface idOSIsleInstance {
 // Singleton wagmi config instance shared across all Isle instances
 let wagmiConfig: Config;
 
-let isleOptions: idOSIsleOptions;
+// let isleOptions: idOSIsleOptions;
 
 /**
  * Initializes the wagmi configuration if it hasn't been initialized yet.
@@ -102,7 +102,7 @@ const initializeWagmi = (): void => {
 export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
-  isleOptions = options;
+  // isleOptions = options;
   const controller: Controller = createController({
     targetOrigin: "https://localhost:5174",
   });
@@ -197,11 +197,11 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
     });
 
     // Handle profile creation requests
-    channel.on("create-profile", async () => {
-      const account = getAccount(wagmiConfig);
-      const url = `${isleOptions.issuerInfo.url}?address=${account.address}&callbackUrl=${window.location.href}`;
-      window.location.href = url;
-    });
+    // channel.on("create-profile", async () => {
+    //   const account = getAccount(wagmiConfig);
+    //   const url = `${isleOptions.issuerInfo.url}?address=${account.address}&callbackUrl=${window.location.href}`;
+    //   window.location.href = url;
+    // });
   };
 
   /**

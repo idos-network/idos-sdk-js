@@ -74,6 +74,13 @@ export type IsleControllerMessage =
         theme?: IsleTheme;
         status?: IsleStatus;
       };
+    }
+  | {
+      type: "process-state";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+        name: string;
+      };
     };
 
 export type IsleNodeMessage =

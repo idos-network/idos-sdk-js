@@ -19,12 +19,20 @@ interface NodeState {
   connectWallet: () => void;
   linkWallet: () => void;
   createProfile: () => void;
+  processState: {
+    name: string;
+    status: "idle" | "pending" | "success" | "error";
+  };
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
   connectionStatus: "initializing",
   address: undefined,
   status: "initializing",
+  processState: {
+    name: "",
+    status: "idle",
+  },
   node: null,
   initializeNode: () => {
     const node = createNode<IsleNodeMessage, IsleControllerMessage>({
@@ -50,6 +58,12 @@ export const useIsleStore = create<NodeState>((set) => ({
       node.post("updated", { theme, status, connectionStatus });
     });
 
+    node.on("process-state", ({ name, status }) => {
+      set((state) => ({
+        ...state,
+        processState: { name, status },
+      }));
+    });
     set({ node });
     return node.start();
   },
