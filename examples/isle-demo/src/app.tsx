@@ -1,5 +1,5 @@
 import { Center, Heading, Text, VStack, chakra } from "@chakra-ui/react";
-import { createIsle } from "@idos-network/idos-sdk";
+import { createIsle, type idOSCredential } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
 
@@ -56,6 +56,11 @@ function Demo() {
 
     isleRef.current = createIsle({
       container: container.id,
+      credentialMatcher: (cred: idOSCredential) => {
+        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+        return publicNotes.status === "pending";
+      },
+      appWalletIdentifier: "0x0000000000000000000000000000000000000000",
     });
 
     isleRef.current.on("connect-wallet", async () => {

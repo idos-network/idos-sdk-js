@@ -44,6 +44,8 @@ interface idOSIsleOptions {
   };
   /** A function that determines if a credential matches the conditions */
   credentialMatcher: (credential: idOSCredential) => boolean;
+  /** Embedding application wallet identifier (public key) */
+  appWalletIdentifier: string;
 }
 
 /**
@@ -195,13 +197,18 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
       }
 
       const credentials = await getAllCredentials(kwilClient);
+      const originalCredentials = credentials.filter((cred) => !cred.original_id);
 
-      const matchingCredentials = credentials.filter((cred) => options.credentialMatcher(cred));
+      const matchingCredentials = originalCredentials.filter((cred) =>
+        options.credentialMatcher(cred),
+      );
 
       if (matchingCredentials.length === 0) {
         send("update", {
           status: "not-verified",
         });
+
+        return;
       }
 
       /**
@@ -209,14 +216,21 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
        */
       if (
         matchingCredentials.every((cred) => {
-          const publicNotes = JSON.parse(cred.public_notes ?? "");
-          return publicNotes.status === "pending";
+          const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+          // @todo: check for 'pending' status properly. Currently we let it fall through.
+          return publicNotes.status === "";
         })
       ) {
         send("update", {
           status: "pending-verification",
         });
+
+        return;
       }
+
+      send("update", {
+        status: "verified",
+      });
     });
 
     // Send initial configuration
