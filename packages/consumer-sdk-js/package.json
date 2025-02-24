@@ -1,6 +1,6 @@
 {
   "name": "@idos-network/consumer-sdk-js",
-  "description": "idOS Grantee JavaScript SDK",
+  "description": "idOS Consumer JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
     "replace": {
