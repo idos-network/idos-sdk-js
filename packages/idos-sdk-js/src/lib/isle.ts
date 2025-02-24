@@ -9,6 +9,7 @@ import {
   createWebKwilClient,
   getAllCredentials,
   hasProfile,
+  type idOSCredential,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -41,6 +42,10 @@ interface idOSIsleOptions {
     name: string;
     logo: string;
   };
+  /** A function that determines if a credential matches the conditions */
+  credentialMatcher: (credential: idOSCredential) => boolean;
+  /** Embedding application wallet identifier (public key) */
+  appWalletIdentifier: string;
 }
 
 /**
@@ -190,17 +195,42 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
         });
         return;
       }
-      // if the user has a profile, we need to run additional checks to determine the status of the profile.
-      const credentials = await getAllCredentials(kwilClient);
 
-      /**
-       * @todo: add additional checks for matching credentials based on a condition.
-       */
-      if (credentials.length === 0) {
+      const credentials = await getAllCredentials(kwilClient);
+      const originalCredentials = credentials.filter((cred) => !cred.original_id);
+
+      const matchingCredentials = originalCredentials.filter((cred) =>
+        options.credentialMatcher(cred),
+      );
+
+      if (matchingCredentials.length === 0) {
         send("update", {
           status: "not-verified",
         });
+
+        return;
       }
+
+      /**
+       * @todo: this is not accurate at the moment.
+       */
+      if (
+        matchingCredentials.every((cred) => {
+          const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+          // @todo: check for 'pending' status properly. Currently we let it fall through.
+          return publicNotes.status === "";
+        })
+      ) {
+        send("update", {
+          status: "pending-verification",
+        });
+
+        return;
+      }
+
+      send("update", {
+        status: "verified",
+      });
     });
 
     // Send initial configuration
