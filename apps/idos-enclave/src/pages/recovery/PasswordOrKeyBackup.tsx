@@ -119,12 +119,14 @@ interface PasswordOrSecretRevealProps {
   authMethod: "password" | "secret key";
   secret: string;
   onCancel?: () => void;
+  onDone?: () => void;
 }
 
 export function PasswordOrSecretReveal({
   authMethod,
   secret,
   onCancel,
+  onDone,
 }: PasswordOrSecretRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
@@ -182,6 +184,7 @@ export function PasswordOrSecretReveal({
         </ReadonlyField>
       </div>
       {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
+      {onDone ? <Button onClick={onDone}>Done</Button> : null}
     </div>
   );
 }
@@ -344,6 +347,12 @@ export function PasswordOrKeyBackup({
       <PasswordOrSecretReveal
         {...{ secret, authMethod: passwordOrSecretKey }}
         onCancel={toggleReveal}
+        onDone={() => {
+          onSuccess({
+            type: "idOS:store",
+            status: "success",
+          });
+        }}
       />
     );
   }

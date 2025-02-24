@@ -232,9 +232,10 @@ export class IframeEnclave implements EnclaveProvider {
       await this.#requestToEnclave({
         backupPasswordOrSecret: {},
       });
-      this.#hideEnclave();
     } catch (error) {
       console.error(error);
+    } finally {
+      this.#hideEnclave();
     }
   }
 
