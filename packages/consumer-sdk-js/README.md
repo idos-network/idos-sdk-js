@@ -14,7 +14,7 @@ pnpm add @idos-network/idos-sdk-server-dapp ethers near-api-js
 Import the SDK and initialize it:
 
 ```js
-import { idOS } from "@idos-network/grantee-sdk-js";
+import { idOS } from "@idos-network/consumer-sdk-js";
 import nacl from "tweetnacl";
 
 /**

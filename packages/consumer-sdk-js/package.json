@@ -1,5 +1,5 @@
 {
-  "name": "@idos-network/grantee-sdk-js",
+  "name": "@idos-network/consumer-sdk-js",
   "description": "idOS Grantee JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {

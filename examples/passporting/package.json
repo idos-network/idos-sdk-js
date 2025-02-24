@@ -5,7 +5,7 @@
   "dependencies": {
     "@heroui/react": "2.6.14",
     "@idos-network/core": "workspace:*",
-    "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/consumer-sdk-js": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@tanstack/react-query": "5.45.1",
     "ethers": "^6.13.4",

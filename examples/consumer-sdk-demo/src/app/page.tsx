@@ -1,5 +1,5 @@
+import { idOSGrantee } from "@idos-network/consumer-sdk-js";
 import { base64Decode } from "@idos-network/core";
-import { idOSGrantee } from "@idos-network/grantee-sdk-js";
 import nacl from "tweetnacl";
 
 const ENCRYPTION_SECRET_KEY = process.env.ENCRYPTION_SECRET_KEY ?? "";

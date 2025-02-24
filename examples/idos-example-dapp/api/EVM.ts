@@ -1,4 +1,4 @@
-import { idOSGrantee } from "@idos-network/grantee-sdk-js";
+import { idOSGrantee } from "@idos-network/consumer-sdk-js";
 import { ethers } from "ethers";
 
 /* global crypto */
@@ -42,6 +42,7 @@ export default async function (request: VercelRequest, response: VercelResponse)
   }
 
   const rawBody = request.read();
+  // biome-ignore lint/suspicious/noImplicitAnyLet: JSON.parse can return any type
   let body;
   try {
     body = JSON.parse(rawBody);
