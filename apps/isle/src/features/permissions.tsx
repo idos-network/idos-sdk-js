@@ -188,12 +188,15 @@ function Permission({ hasGrant, name, icon, onClick }: PermissionProps) {
         )}
         {hasGrant && (
           <Flex gap="2">
-            <Icon w="5" h="5" cursor="pointer" onClick={onClick} color="neutral.400">
-              <ViewIcon />
-            </Icon>
-            <Icon w="5" h="5" cursor="pointer" color="neutral.400">
-              <DeleteIcon />
-            </Icon>
+            <Icon
+              as={ViewIcon}
+              w="5"
+              h="5"
+              cursor="pointer"
+              onClick={onClick}
+              color="neutral.400"
+            />
+            <Icon as={DeleteIcon} w="5" h="5" cursor="pointer" color="neutral.400" />
           </Flex>
         )}
       </Flex>
