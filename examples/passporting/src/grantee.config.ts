@@ -1,4 +1,4 @@
-import { idOSGrantee as idOSGranteeClass } from "@idos-network/consumer-sdk-j/server";
+import { idOSGrantee as idOSGranteeClass } from "@idos-network/consumer-sdk-js/server";
 import { hexDecode } from "@idos-network/core";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
