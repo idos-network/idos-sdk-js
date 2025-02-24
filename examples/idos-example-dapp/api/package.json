@@ -8,7 +8,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@idos-network/grantee-sdk-js": "workspace:*"
+    "@idos-network/consumer-sdk-js": "workspace:*"
   },
   "peerDependencies": {
     "ethers": "^6.13.5",

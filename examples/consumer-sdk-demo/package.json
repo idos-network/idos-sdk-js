@@ -1,9 +1,9 @@
 {
-  "name": "grantee-sdk-demo",
+  "name": "consumer-sdk-demo",
   "version": "0.1.0",
   "dependencies": {
     "@idos-network/core": "workspace:*",
-    "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/consumer-sdk-js": "workspace:*",
     "next": "15.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@idos-network/core": "workspace:*",
-    "@idos-network/grantee-sdk-js": "workspace:*",
+    "@idos-network/consumer-sdk-js": "workspace:*",
     "@idos-network/idos-sdk": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@kwilteam/kwil-js": "0.7.1",
