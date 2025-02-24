@@ -6,6 +6,7 @@ const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
 const PASSPORTING_URL = "https://passporting-demo.vercel.app/";
 const ISSUER_DEMO_URL = "https://issuer-sdk-demo.vercel.app/";
+const DATA_DASHBOARD_URL = "https://dashboard.playground.idos.network/";
 
 const { expect } = test;
 
@@ -18,6 +19,49 @@ test.beforeEach(async ({ context, page }) => {
 
 test.describe
   .serial("Sequential Passporting Tests", () => {
+    test("Making Sure there's no left over credential", async ({
+      context,
+      page,
+      metamaskPage,
+      extensionId,
+    }) => {
+      await page.goto(DATA_DASHBOARD_URL);
+      const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+      await page.getByRole("button", { name: "Connect a wallet" }).click();
+      await page.getByRole("button", { name: "Metamask" }).click();
+
+      await metamask.connectToDapp();
+      await page.waitForTimeout(2000);
+      await metamask.confirmSignature();
+
+      await page.waitForSelector("#credentials-list");
+      await page.waitForTimeout(2000);
+
+      const credentialsList = await page.locator("#credentials-list");
+      const credentialsCount = await credentialsList.getByRole("listitem").count();
+
+      await page.waitForTimeout(1000);
+      for (let index = 0; index < credentialsCount; index++) {
+        const credential = await credentialsList.getByRole("listitem").first();
+        const sharedCount = await credential.getByTestId("shares-count").textContent();
+
+        const deleteBtn = await credential.getByRole("button", { name: "Delete" });
+        await deleteBtn.click();
+
+        const confirmDeleteBtn = page.getByRole("button", { name: "Delete" }).last();
+        await confirmDeleteBtn.click();
+
+        for (let index = 0; index < +sharedCount!; index++) {
+          await page.waitForTimeout(3500);
+          await metamask.confirmSignature();
+        }
+        await page.waitForTimeout(3500);
+        await metamask.confirmSignature();
+        await expect(page.getByTestId("delete-credential-dialog")).not.toBeVisible();
+      }
+      expect(await page.locator("#credentials-list").getByRole("listitem").count()).toBe(0);
+    });
+
     test("No reusable credential found", async ({ context, page, metamaskPage, extensionId }) => {
       await page.goto(PASSPORTING_URL);
       const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
@@ -32,7 +76,7 @@ test.describe
       await page.waitForTimeout(3000);
     });
 
-    test("should issue a credential successfully using OE1", async ({
+    test("Should issue a credential successfully using OE1", async ({
       context,
       page,
       metamaskPage,
@@ -101,7 +145,8 @@ test.describe
       await expect(header).toHaveText("We have found a matching credential that we can reuse:");
       await page.waitForTimeout(3000);
     });
-    test("request a reusable credential", async ({ context, page, metamaskPage, extensionId }) => {
+
+    test("Request a reusable credential", async ({ context, page, metamaskPage, extensionId }) => {
       await page.goto(PASSPORTING_URL);
       const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
       await page.getByRole("button", { name: "Connect a wallet" }).click();
@@ -133,30 +178,5 @@ test.describe
       const newHeader = await page.locator("h3").first();
       await page.waitForTimeout(2000);
       await expect(newHeader).toHaveText("You have successfully shared your credential with us!");
-    });
-
-    test("Having a reusable credential", async ({ context, page, metamaskPage, extensionId }) => {
-      await page.goto(PASSPORTING_URL);
-      const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-      await page.getByRole("button", { name: "Connect a wallet" }).click();
-
-      await metamask.connectToDapp();
-      await page.waitForTimeout(2000);
-      await metamask.confirmSignature();
-
-      const header = await page.locator("h3").first();
-      await expect(header).toHaveText("You have successfully shared your credential with us!");
-      await page.waitForTimeout(3000);
-
-      await page.goto(ISSUER_DEMO_URL);
-
-      await page.getByRole("button", { name: "Connect a wallet" }).click();
-
-      await metamask.connectToDapp();
-      await page.waitForTimeout(2000);
-      await metamask.confirmSignature();
-
-      await page.getByRole("button", { name: "Revoke" }).first().click();
-      await page.waitForTimeout(2000);
     });
   });

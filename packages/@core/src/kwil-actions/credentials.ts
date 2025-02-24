@@ -93,3 +93,9 @@ export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, u
     inputs: { user_id: userId },
   });
 }
+
+export async function getAllCredentials(kwilClient: KwilActionClient) {
+  return kwilClient.call<idOSCredential[]>({
+    name: "get_credentials",
+  });
+}

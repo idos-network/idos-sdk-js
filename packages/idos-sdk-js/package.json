@@ -55,7 +55,7 @@
   "main": "src/lib/index.ts",
   "peerDependencies": {
     "@wagmi/core": "^2.6.5",
-    "ethers": "^6.12",
+    "ethers": "^6.13.5",
     "near-api-js": "3.0.4"
   },
   "peerDependenciesMeta": {

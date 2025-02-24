@@ -162,6 +162,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
 
   return (
     <AlertDialog
+      data-testid="delete-credential-dialog"
       isOpen={isOpen}
       size={{
         base: "full",
