@@ -43,7 +43,9 @@ test.describe
       await page.waitForTimeout(1000);
       for (let index = 0; index < credentialsCount; index++) {
         const credential = await credentialsList.getByRole("listitem").first();
-        const sharedCount = await credential.getByTestId("shares-count").textContent();
+        // @todo: remove credential with type "PASSPORTING_DEMO"
+        const sharedCount = (await credential.getByTestId("shares-count").textContent()) ?? "0";
+        if (+sharedCount === 0) continue; // ignore credentials with no shares (credential used for other tests)
 
         const deleteBtn = await credential.getByRole("button", { name: "Delete" });
         await deleteBtn.click();
@@ -51,7 +53,7 @@ test.describe
         const confirmDeleteBtn = page.getByRole("button", { name: "Delete" }).last();
         await confirmDeleteBtn.click();
 
-        for (let index = 0; index < +sharedCount!; index++) {
+        for (let index = 0; index < +sharedCount; index++) {
           await page.waitForTimeout(3500);
           await metamask.confirmSignature();
         }
@@ -59,7 +61,6 @@ test.describe
         await metamask.confirmSignature();
         await expect(page.getByTestId("delete-credential-dialog")).not.toBeVisible();
       }
-      expect(await page.locator("#credentials-list").getByRole("listitem").count()).toBe(0);
     });
 
     test("No reusable credential found", async ({ context, page, metamaskPage, extensionId }) => {
@@ -119,10 +120,12 @@ test.describe
       await issuerPage.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
       await issuerPage
         .getByRole("button", {
-          name: "Create a reusable credential (OE1)",
+          name: "Via Write Grant",
         })
         .first()
         .click();
+      await issuerPage.waitForTimeout(2000);
+      await metamask.confirmSignature();
 
       await issuerPage.waitForTimeout(3000);
     });

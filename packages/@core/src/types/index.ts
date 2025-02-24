@@ -96,6 +96,9 @@ export type IsleNodeMessage =
     }
   | {
       type: "link-wallet";
+    }
+  | {
+      type: "create-profile";
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

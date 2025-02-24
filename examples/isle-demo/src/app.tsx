@@ -1,5 +1,5 @@
 import { Center, Heading, Text, VStack, chakra } from "@chakra-ui/react";
-import { idOSIsle } from "@idos-network/idos-sdk";
+import { createIsle, type idOSCredential } from "@idos-network/idos-sdk";
 import { type PropsWithChildren, useEffect, useRef } from "react";
 import { injected, useAccount, useConnect } from "wagmi";
 
@@ -46,26 +46,38 @@ function NotConnected() {
 }
 
 function Demo() {
-  const isleRef = useRef<idOSIsle | null>(null);
+  const isleRef = useRef<ReturnType<typeof createIsle> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { address } = useAccount();
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container || isleRef.current) return;
 
-    isleRef.current = idOSIsle.initialize({
+    isleRef.current = createIsle({
       container: container.id,
+      credentialMatcher: (cred: idOSCredential) => {
+        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+        return publicNotes.status === "pending";
+      },
+      appWalletIdentifier: "0x0000000000000000000000000000000000000000",
     });
 
     isleRef.current.on("connect-wallet", async () => {
       await isleRef.current?.connect();
     });
 
+    isleRef.current.on("create-profile", async () => {
+      // as of now, we get create a profile on the issuer-sdk-demo app.
+      const url = `https://issuer-sdk-demo.vercel.app?address=${address}&callbackUrl=${window.location.href}`;
+      window.location.href = url;
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;
     };
-  }, []);
+  }, [address]);
 
   return (
     <Center h="full" flexDir="column" gap="5">

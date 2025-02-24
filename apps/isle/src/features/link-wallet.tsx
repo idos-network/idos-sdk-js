@@ -65,7 +65,7 @@ export function LinkWallet() {
         gap="2"
         w="full"
         onClick={() => {
-          return linkWallet();
+          linkWallet();
         }}
       >
         Link wallet to idOS Dashboard <WalletIcon boxSize="6" />

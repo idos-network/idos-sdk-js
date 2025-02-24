@@ -1,12 +1,19 @@
 import { Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Completed } from "@/components/icons/completed";
 import { Stepper } from "@/components/ui/stepper";
+import { useIsleStore } from "@/store";
 
 export function CreateProfileSteps() {
+  const createProfile = useIsleStore((state) => state.createProfile);
   const [loading] = useState(false);
   const [success] = useState(false);
+
+  useEffect(() => {
+    createProfile();
+  }, [createProfile]);
+
   return (
     <Flex flexDirection="column" gap="6">
       {!loading && (

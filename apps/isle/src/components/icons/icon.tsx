@@ -5,5 +5,5 @@ export interface IconProps extends Omit<ChakraIconProps, "fontSize"> {}
 export function Icon(props: IconProps) {
   const { size = "md", boxSize = "8", ...rest } = props;
 
-  return <ChakraIcon asChild boxSize={boxSize} {...rest} />;
+  return <ChakraIcon boxSize={boxSize} {...rest} />;
 }

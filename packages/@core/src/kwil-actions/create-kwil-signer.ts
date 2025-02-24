@@ -1,5 +1,5 @@
 import { KwilSigner } from "@kwilteam/kwil-js";
-import type { Wallet } from "ethers";
+import type { JsonRpcSigner, Wallet } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { bs58Encode } from "../codecs";
@@ -35,7 +35,7 @@ function isNearKeyPair(object: unknown): object is KeyPair {
   );
 }
 
-type KwilSignerType = KeyPair | Wallet | nacl.SignKeyPair;
+type KwilSignerType = KeyPair | Wallet | nacl.SignKeyPair | JsonRpcSigner;
 type SignerAddress = string;
 
 /**

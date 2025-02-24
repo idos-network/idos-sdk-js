@@ -18,6 +18,7 @@ interface NodeState {
   initializeNode: () => () => void;
   connectWallet: () => void;
   linkWallet: () => void;
+  createProfile: () => void;
 }
 
 export const useIsleStore = create<NodeState>((set) => ({
@@ -57,5 +58,8 @@ export const useIsleStore = create<NodeState>((set) => ({
   },
   linkWallet: () => {
     useIsleStore.getState().node?.post("link-wallet", {});
+  },
+  createProfile: () => {
+    useIsleStore.getState().node?.post("create-profile", {});
   },
 }));

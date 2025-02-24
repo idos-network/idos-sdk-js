@@ -919,7 +919,7 @@ importers:
         specifier: ^1.23.0
         version: 1.32.0
       ethers:
-        specifier: ^6.12
+        specifier: ^6.13.5
         version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       jsonld:
         specifier: ^8.3.1
@@ -954,7 +954,7 @@ importers:
         version: 0.34.7(vitest@0.31.4)
       '@wagmi/core':
         specifier: ^2.16.4
-        version: 2.16.4(typescript@5.6.3)(viem@2.23.3)
+        version: 2.16.4(typescript@5.6.3)(viem@2.22.23)
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
@@ -10972,7 +10972,7 @@ packages:
       - use-sync-external-store
     dev: false
 
-  /@wagmi/core@2.16.4(typescript@5.6.3)(viem@2.23.3):
+  /@wagmi/core@2.16.4(typescript@5.6.3)(viem@2.22.23):
     resolution: {integrity: sha512-E4jY4A98gwuHCjzuEajHIG/WhNDY5BChVHMjflV9Bx5CO7COqYRG2dcRLuF6Bo0LQNvVvXDAFUwR2JShJnT5pA==}
     peerDependencies:
       '@tanstack/query-core': '>=5.0.0'
@@ -10987,7 +10987,7 @@ packages:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.6.3)
       typescript: 5.6.3
-      viem: 2.23.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)
+      viem: 2.22.23(typescript@5.6.3)
       zustand: 5.0.0(@types/react@18.3.18)(react@18.3.1)(use-sync-external-store@1.4.0)
     transitivePeerDependencies:
       - '@types/react'
@@ -20866,7 +20866,6 @@ packages:
       - bufferutil
       - utf-8-validate
       - zod
-    dev: false
 
   /viem@2.23.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10):
     resolution: {integrity: sha512-ON/Uybteajqxn3iFyhV/6Ybm+QKhcrsVyTZf/9v2w0CvYQIoyJYCfHSsQR9zpsbOGrR7d2p62w6jzb6fqzzacg==}
@@ -20889,6 +20888,7 @@ packages:
       - bufferutil
       - utf-8-validate
       - zod
+    dev: false
 
   /viem@2.23.3(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2):
     resolution: {integrity: sha512-ON/Uybteajqxn3iFyhV/6Ybm+QKhcrsVyTZf/9v2w0CvYQIoyJYCfHSsQR9zpsbOGrR7d2p62w6jzb6fqzzacg==}
