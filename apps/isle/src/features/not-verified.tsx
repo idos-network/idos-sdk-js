@@ -91,7 +91,9 @@ function Header() {
         <Text as="span" fontWeight="medium" fontSize="lg">
           Common
         </Text>
-        <Text fontSize="sm">is asking for permissions to:</Text>
+        <Text as="span" fontSize="sm">
+          is asking for permissions to:
+        </Text>
       </Text>
     </Flex>
   );
