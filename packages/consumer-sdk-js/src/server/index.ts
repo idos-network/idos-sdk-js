@@ -1,6 +1,7 @@
 import { Wallet } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
+
 import { idOSGrantee } from "./idOS-grantee.ts";
 
 export class idOSGranteeSDK {

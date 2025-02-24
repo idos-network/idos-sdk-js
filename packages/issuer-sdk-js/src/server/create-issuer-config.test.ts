@@ -2,7 +2,8 @@ import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
 
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { createIssuerConfig } from "./index";
+
+import { createIssuerConfig } from "./create-issuer-config";
 
 // Mock the @kwilteam/kwil-js module
 vi.mock("@kwilteam/kwil-js", () => {

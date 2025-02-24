@@ -1,4 +1,4 @@
-import { type IssuerConfig, createIssuerConfig } from "@idos-network/issuer-sdk-js";
+import { type IssuerConfig, createIssuerConfig } from "@idos-network/issuer-sdk-js/server";
 import { decode } from "@stablelib/base64";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";

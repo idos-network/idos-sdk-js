@@ -7,7 +7,7 @@ import {
   createCredentialPermissioned,
   createUser,
   editCredential,
-} from "@idos-network/issuer-sdk-js";
+} from "@idos-network/issuer-sdk-js/server";
 import * as Base64 from "@stablelib/base64";
 import * as Utf8 from "@stablelib/utf8";
 import { ethers } from "ethers";

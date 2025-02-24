@@ -1,4 +1,4 @@
-import { idOSGrantee } from "@idos-network/consumer-sdk-js";
+import { idOSGrantee } from "@idos-network/consumer-sdk-js/server";
 import { ethers } from "ethers";
 
 /* global crypto */
