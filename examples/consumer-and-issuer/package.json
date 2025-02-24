@@ -7,7 +7,7 @@
     "@idos-network/core": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@tanstack/react-query": "5.45.1",
-    "ethers": "^6.13.5",
+    "ethers": "catalog:",
     "framer-motion": "^11.11.9",
     "lucide-react": "^0.453.0",
     "next": "14.2.4",
