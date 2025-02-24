@@ -6,7 +6,7 @@ import { useAccount, useSignMessage } from "wagmi";
 
 import { createProfile } from "@/actions";
 import { useSdkStore } from "@/stores/sdk";
-import type { CreateWalletReqParams } from "@idos-network/issuer-sdk-js";
+import type { CreateWalletReqParams } from "@idos-network/issuer-sdk-js/server";
 
 export function CreateProfile({ onSuccess }: { onSuccess: () => void }) {
   const { address } = useAccount();

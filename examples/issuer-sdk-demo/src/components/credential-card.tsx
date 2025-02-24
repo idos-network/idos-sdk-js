@@ -1,6 +1,6 @@
 import { Button } from "@heroui/react";
 import { Card, CardBody, CardFooter, CardHeader, Divider } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/issuer-sdk-js";
+import type { idOSCredential } from "@idos-network/issuer-sdk-js/server";
 import { CommandIcon } from "lucide-react";
 import { Fragment, useTransition } from "react";
 
