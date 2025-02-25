@@ -87,7 +87,10 @@ export default function Home() {
   return (
     <div>
       <div ref={containerRef} id="idOS-isle" className="h-[800px]" />
-      <div id="idos-root">
+      <div
+        id="idos-root"
+        className="invisible fixed top-0 left-0 z-[10000] flex aspect-square h-full w-full flex-col items-center justify-center bg-black/30 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in [&:has(#idOS-enclave.visible)]:visible [&:has(#idOS-enclave.visible)]:opacity-100"
+      >
         <div
           id="idOS-enclave"
           className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
