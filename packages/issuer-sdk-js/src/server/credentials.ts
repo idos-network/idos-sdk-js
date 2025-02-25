@@ -170,7 +170,7 @@ interface EditCredentialAsIssuerParams {
   publicNotesId: string;
   publicNotes: string;
 }
-export async function editCredentialAsIsser(
+export async function editCredentialAsIssuer(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
 ) {
