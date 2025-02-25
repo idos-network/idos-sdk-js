@@ -1,16 +1,17 @@
 "use client";
 
-import { IframeEnclave, createIsle } from "@idos-network/idos-sdk";
+import { createIsleController } from "@idos-network/controllers";
+import { IframeEnclave } from "@idos-network/idos-sdk";
 import { goTry } from "go-try";
 import { useEffect, useRef } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createIDOSUserProfile } from "@/actions";
+import { createIDOSUserProfile } from "@/app/actions";
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 export default function Home() {
-  const isleRef = useRef<ReturnType<typeof createIsle> | null>(null);
+  const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
@@ -19,7 +20,7 @@ export default function Home() {
     const container = containerRef.current;
     if (!container || isleRef.current) return;
 
-    isleRef.current = createIsle({
+    isleRef.current = createIsleController({
       container: container.id,
       knownIssuers: [
         {
