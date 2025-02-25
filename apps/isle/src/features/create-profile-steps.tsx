@@ -73,7 +73,7 @@ export function CreateProfileSteps() {
           mx="auto"
           textAlign="center"
         >
-          Unexpected error ocurred while creating your idOS Profile.
+          Unexpected error occurred while creating your idOS Profile.
         </Text>
         <Button w="full" onClick={createProfile}>
           Try again
