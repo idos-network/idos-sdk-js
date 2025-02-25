@@ -21,6 +21,36 @@ interface NodeState {
   createProfile: () => void;
 }
 
+type StateUpdate = Partial<Pick<NodeState, "connectionStatus" | "address" | "theme" | "status">>;
+
+const createStateUpdate = (update: StateUpdate): StateUpdate => {
+  return Object.fromEntries(
+    Object.entries(update).filter(([_, value]) => value !== undefined),
+  ) as StateUpdate;
+};
+
+const handleNodeUpdate = (
+  node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>>,
+  update: StateUpdate,
+  set: (fn: (state: NodeState) => NodeState) => void,
+) => {
+  const stateUpdate = createStateUpdate(update);
+
+  if (Object.keys(stateUpdate).length === 0) return;
+
+  set((state) => ({
+    ...state,
+    ...stateUpdate,
+  }));
+
+  // Only send defined values in the response
+  node.post("updated", {
+    theme: update.theme,
+    status: update.status,
+    connectionStatus: update.connectionStatus,
+  });
+};
+
 export const useIsleStore = create<NodeState>((set) => ({
   connectionStatus: "initializing",
   address: undefined,
@@ -38,16 +68,8 @@ export const useIsleStore = create<NodeState>((set) => ({
       node.post("initialized", { theme: _theme });
     });
 
-    // @todo: this should be refactored and simplified.
-    node.on("update", ({ connectionStatus, address, theme, status }) => {
-      set((state) => ({
-        ...state,
-        ...(connectionStatus !== undefined && { connectionStatus }),
-        ...(address !== undefined && { address }),
-        ...(status !== undefined && { status }),
-        ...(theme !== undefined && { theme }),
-      }));
-      node.post("updated", { theme, status, connectionStatus });
+    node.on("update", (update) => {
+      handleNodeUpdate(node, update, set);
     });
 
     set({ node });

@@ -2,3 +2,6 @@ packages:
   - "apps/*"
   - "examples/*"
   - "packages/*"
+
+catalog:
+  ethers: ^6.13.5
