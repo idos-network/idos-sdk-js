@@ -86,10 +86,10 @@ export default function Home() {
   return (
     <div>
       <div ref={containerRef} id="idOS-isle" className="h-[800px]" />
-      <div className="flex h-full w-full items-center justify-center p-6">
+      <div id="idos-root">
         <div
           id="idOS-enclave"
-          className="h-auto w-[200px] overflow-hidden rounded-lg bg-neutral-950"
+          className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
         />
       </div>
     </div>
