@@ -1,4 +1,5 @@
 import {
+  type CreateCredentialsByDelegatedWriteGrantParams,
   createCredentialAsInserter as _createCredentialAsInserter,
   createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
   editCredentialAsIssuer as _editCredentialAsIssuer,
@@ -137,7 +138,7 @@ export async function createCredentialsByDelegatedWriteGrant(
       recipientEncryptionPublicKey: issuerEncPublicKey,
     }),
   );
-  const payload = {
+  const payload: CreateCredentialsByDelegatedWriteGrantParams = {
     issuer_auth_public_key: originalCredential.issuer_auth_public_key,
     original_encryptor_public_key: originalCredential.encryptor_public_key,
     original_credential_id: originalCredential.id,
