@@ -74,6 +74,12 @@ export type IsleControllerMessage =
         theme?: IsleTheme;
         status?: IsleStatus;
       };
+    }
+  | {
+      type: "update-create-profile-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
     };
 
 export type IsleNodeMessage =
