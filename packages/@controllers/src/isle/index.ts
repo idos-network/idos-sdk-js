@@ -30,7 +30,7 @@ import { BrowserProvider, type JsonRpcSigner } from "ethers";
  * Configuration options for creating an idOS Isle instance
  * @interface IdOSIsleOptions
  */
-interface idOSIsleOptions {
+interface idOSIsleControllerOptions {
   /** The ID of the container element where the Isle iframe will be mounted */
   container: string;
   /** Optional theme configuration for the Isle UI */
@@ -49,7 +49,7 @@ interface idOSIsleOptions {
  * Public interface for interacting with an idOS Isle instance
  * @interface idOSIsleInstance
  */
-interface idOSIsleInstance {
+interface idOSIsleController {
   /** Initiates a wallet connection process */
   connect: () => Promise<void>;
   /** Retrieves the current signer instance if available */
@@ -101,7 +101,7 @@ const initializeWagmi = (): void => {
  * const signer = await isle.getSigner(); // Get the connected signer
  * ```
  */
-export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
+export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
