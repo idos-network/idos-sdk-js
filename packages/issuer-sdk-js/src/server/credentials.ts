@@ -1,9 +1,12 @@
 import {
   createCredentialAsInserter as _createCredentialAsInserter,
+  createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
   editCredentialAsIssuer as _editCredentialAsIssuer,
+  getCredentialIdByContentHash as _getCredentialIdByContentHash,
   getSharedCredential as _getSharedCredential,
   base64Decode,
   base64Encode,
+  encryptContent,
   hexEncode,
   hexEncodeSha256Hash,
   type idOSCredential,
@@ -11,7 +14,7 @@ import {
 } from "@idos-network/core";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInputWithoutId, encryptContent, ensureEntityId } from "./internal";
+import { ensureEntityId } from "./internal";
 
 type UpdatablePublicNotes = {
   publicNotes: string;
@@ -103,18 +106,17 @@ export async function createCredentialAsInserter(
   };
 }
 
-type DelegatedWriteGrantParams = {
+interface DelegatedWriteGrantParams {
+  id: string;
   ownerWalletIdentifier: string;
   granteeWalletIdentifier: string;
   issuerPublicKey: string;
-  id: string;
   accessGrantTimelock: string;
   notUsableBefore: string;
   notUsableAfter: string;
   signature: string;
-};
+}
 
-// @todo: move to `@core/kwil-actions`.
 export async function createCredentialsByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
   credentialParams: BaseCredentialParams,
@@ -159,10 +161,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     dwg_signature: delegatedWriteGrant.signature,
   };
 
-  await kwilClient.execute({
-    name: "create_credentials_by_dwg",
-    inputs: [createActionInputWithoutId(payload)],
-  });
+  await _createCredentialsByDelegatedWriteGrant(kwilClient, payload);
 
   return { originalCredential, copyCredential };
 }
@@ -186,17 +185,13 @@ export async function editCredentialAsIsser(
   return result ?? null;
 }
 
-// @todo: move to `@core/kwil-actions`.
 export async function getCredentialIdByContentHash(
   issuerConfig: IssuerConfig,
   contentHash: string,
 ): Promise<string | null> {
   const { kwilClient } = issuerConfig;
 
-  const result = await kwilClient.call<string>({
-    name: "get_sibling_credential_id",
-    inputs: { content_hash: contentHash },
-  });
+  const result = await _getCredentialIdByContentHash(kwilClient, contentHash);
 
   return result ?? null;
 }
