@@ -1,6 +1,6 @@
 import { type KwilSignerType, createKwilSigner, createWebKwilClient } from "@idos-network/core";
 
-type CreateIssuerParams = {
+type CreateIssuerConfigParams = {
   chainId?: string;
   dbId?: string;
   nodeUrl: string;
@@ -8,7 +8,7 @@ type CreateIssuerParams = {
   signer: KwilSignerType;
 };
 
-export async function createIssuer(params: CreateIssuerParams) {
+export async function createIssuerConfig(params: CreateIssuerConfigParams) {
   const kwilClient = await createWebKwilClient({
     nodeUrl: params.nodeUrl,
     chainId: params.chainId,
@@ -23,4 +23,4 @@ export async function createIssuer(params: CreateIssuerParams) {
   };
 }
 
-export type IssuerConfig = Awaited<ReturnType<typeof createIssuer>>;
+export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
