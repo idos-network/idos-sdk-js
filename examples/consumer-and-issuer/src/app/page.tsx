@@ -1,8 +1,6 @@
 "use client";
 
-
-import { createIsle } from "@idos-network/idos-sdk";
-import { IframeEnclave, createIsle, type idOSCredential } from "@idos-network/idos-sdk";
+import { IframeEnclave, createIsle } from "@idos-network/idos-sdk";
 import { goTry } from "go-try";
 import { useEffect, useRef } from "react";
 import { useAccount, useSignMessage } from "wagmi";
