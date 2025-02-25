@@ -6,13 +6,18 @@ import { Button } from "@/components/ui";
 import { CreateProfileSteps } from "@/features/create-profile-steps";
 import { LinkWallet } from "@/features/link-wallet";
 
-type Mode = "create" | "link" | null;
+type State = "create" | "link" | null;
 
 export function CreateProfile() {
-  const [status, setStatus] = useState<Mode>(null);
+  const [state, setState] = useState<State>(null);
 
-  if (status === "create") return <CreateProfileSteps />;
-  if (status === "link") return <LinkWallet />;
+  if (state === "create") {
+    return <CreateProfileSteps />;
+  }
+
+  if (state === "link") {
+    return <LinkWallet />;
+  }
 
   return (
     <Center flexDir="column" gap="6">
@@ -25,8 +30,19 @@ export function CreateProfile() {
         features.
       </Text>
       <VStack gap="2" align="stretch" w="full">
-        <Button onClick={() => setStatus("create")}>Create idOS profile</Button>
-        <Button gap="2" onClick={() => setStatus("link")}>
+        <Button
+          onClick={() => {
+            return setState("create");
+          }}
+        >
+          Create idOS profile
+        </Button>
+        <Button
+          gap="2"
+          onClick={() => {
+            return setState("link");
+          }}
+        >
           Link existing wallet <WalletIcon boxSize="6" />
         </Button>
       </VStack>
