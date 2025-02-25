@@ -20,7 +20,7 @@ export async function getGrants(kwilClient: KwilActionClient, page = 1, size = 7
     inputs: { page, size },
   });
 }
-interface CreateAccessGrantByDAGParams {
+export interface CreateAccessGrantByDAGParams {
   dag_data_id: string;
   dag_owner_wallet_identifier: string;
   dag_grantee_wallet_identifier: string;

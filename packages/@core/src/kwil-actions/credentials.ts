@@ -65,7 +65,7 @@ export async function getAccessGrantsForCredential(
   });
 }
 
-interface EditCredentialAsIssuerParams {
+export interface EditCredentialAsIssuerParams {
   public_notes_id: string;
   public_notes: string;
 }
@@ -100,7 +100,7 @@ export async function getAllCredentials(kwilClient: KwilActionClient) {
   });
 }
 
-interface CreateCredentialsByDelegatedWriteGrantParams {
+export interface CreateCredentialsByDelegatedWriteGrantParams {
   issuer_auth_public_key: string;
   original_encryptor_public_key: string;
   original_credential_id: string;
