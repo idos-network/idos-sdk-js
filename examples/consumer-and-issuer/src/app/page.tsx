@@ -1,10 +1,11 @@
 "use client";
 
-import { IframeEnclave, createIsle, type idOSCredential } from "@idos-network/idos-sdk";
+import { IframeEnclave, createIsle } from "@idos-network/idos-sdk";
 import { goTry } from "go-try";
 import { useEffect, useRef } from "react";
 import { useAccount, useSignMessage } from "wagmi";
-import { createIDOSUserProfile } from "./actions";
+
+import { createIDOSUserProfile } from "@/actions";
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -20,11 +21,15 @@ export default function Home() {
 
     isleRef.current = createIsle({
       container: container.id,
-      credentialMatcher: (cred: idOSCredential) => {
-        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return publicNotes.status === "pending";
-      },
-      appWalletIdentifier: "",
+      knownIssuers: [
+        {
+          url: "https://issuer.idos.network",
+          name: "idOS Issuer",
+          logo: "https://issuer.idos.network/logo.png",
+          authPublicKey: "b1115801ea37364102d0ecddd355c0465293af6efb5f7391c6b4b8065475af4e",
+          credentialType: ["PASSPORTING_DEMO"],
+        },
+      ],
     });
 
     isleRef.current.on("connect-wallet", async () => {
