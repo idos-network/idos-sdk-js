@@ -9,7 +9,6 @@ import {
   createWebKwilClient,
   getAllCredentials,
   hasProfile,
-  type idOSCredential,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -37,15 +36,13 @@ interface idOSIsleOptions {
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
   /** Meta information about the issuer */
-  issuerMeta?: {
+  knownIssuers: {
     url: string;
     name: string;
     logo: string;
-  };
-  /** A function that determines if a credential matches the conditions */
-  credentialMatcher: (credential: idOSCredential) => boolean;
-  /** Embedding application wallet identifier (public key) */
-  appWalletIdentifier: string;
+    authPublicKey: string;
+    credentialType: string[];
+  }[];
 }
 
 /**
@@ -199,9 +196,14 @@ export const createIsle = (options: idOSIsleOptions): idOSIsleInstance => {
       const credentials = await getAllCredentials(kwilClient);
       const originalCredentials = credentials.filter((cred) => !cred.original_id);
 
-      const matchingCredentials = originalCredentials.filter((cred) =>
-        options.credentialMatcher(cred),
-      );
+      const matchingCredentials = originalCredentials.filter((cred) => {
+        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+        return options.knownIssuers?.some(
+          (issuer) =>
+            issuer.authPublicKey === cred.issuer_auth_public_key &&
+            issuer.credentialType.includes(publicNotes.type),
+        );
+      });
 
       if (matchingCredentials.length === 0) {
         send("update", {

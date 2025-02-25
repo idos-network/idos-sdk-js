@@ -1,6 +1,6 @@
 "use client";
 
-import { createIsle, type idOSCredential } from "@idos-network/idos-sdk";
+import { createIsle } from "@idos-network/idos-sdk";
 import { useEffect, useRef } from "react";
 
 export default function Home() {
@@ -13,11 +13,15 @@ export default function Home() {
 
     isleRef.current = createIsle({
       container: container.id,
-      credentialMatcher: (cred: idOSCredential) => {
-        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return publicNotes.status === "pending";
-      },
-      appWalletIdentifier: "",
+      knownIssuers: [
+        {
+          url: "https://issuer.idos.network",
+          name: "idOS Issuer",
+          logo: "https://issuer.idos.network/logo.png",
+          authPublicKey: "b1115801ea37364102d0ecddd355c0465293af6efb5f7391c6b4b8065475af4e",
+          credentialType: ["PASSPORTING_DEMO"],
+        },
+      ],
     });
 
     isleRef.current.on("connect-wallet", async () => {
