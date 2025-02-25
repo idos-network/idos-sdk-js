@@ -38,27 +38,26 @@ export default function Home() {
     });
 
     isleRef.current.on("create-profile", async () => {
-      // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
-      const enclave = new IframeEnclave({
-        container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
-        mode: "new",
-      });
+      try {
+        // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
+        const enclave = new IframeEnclave({
+          container: "#idOS-enclave",
+          url: "https://enclave.playground.idos.network",
+          mode: "new",
+        });
 
-      await enclave.load();
-      const userId = crypto.randomUUID();
-      const { userEncryptionPublicKey } = await enclave.discoverUserEncryptionPublicKey(userId);
-      console.log(userEncryptionPublicKey);
-      const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-      const signature = await signMessageAsync({ message });
+        await enclave.load();
+        const userId = crypto.randomUUID();
+        const { userEncryptionPublicKey } = await enclave.discoverUserEncryptionPublicKey(userId);
+        console.log(userEncryptionPublicKey);
+        const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
+        const signature = await signMessageAsync({ message });
 
-      isleRef.current?.send("update-create-profile-status", {
-        status: "pending",
-      });
-
-      // Creates the idOS user profile.
-      const [error, user] = await goTry(() =>
-        createIDOSUserProfile({
+        isleRef.current?.send("update-create-profile-status", {
+          status: "pending",
+        });
+        // Creates the idOS user profile.
+        await createIDOSUserProfile({
           userId,
           recipientEncryptionPublicKey: userEncryptionPublicKey,
           wallet: {
@@ -68,20 +67,17 @@ export default function Home() {
             signature,
             publicKey: signature,
           },
-        }),
-      );
+        });
 
-      if (error) {
+        isleRef.current?.send("update-create-profile-status", {
+          status: "success",
+        });
+      } catch (error) {
         console.error(error);
         isleRef.current?.send("update-create-profile-status", {
           status: "error",
         });
-        return;
       }
-
-      isleRef.current?.send("update-create-profile-status", {
-        status: "success",
-      });
     });
 
     return () => {
