@@ -1,7 +1,7 @@
 import type { idOSCredential, idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
-interface CreateCredentialParams {
+export interface CreateCredentialParams {
   user_id: string;
   content: string;
   content_hash?: string;
