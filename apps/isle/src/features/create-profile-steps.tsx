@@ -1,90 +1,103 @@
-import { Flex, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { Center, Circle, Heading, Spinner, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import { LuCheck } from "react-icons/lu";
 
-import { Completed } from "@/components/icons/completed";
+import { Icon } from "@/components/icons/icon";
+import { Button } from "@/components/ui";
 import { Stepper } from "@/components/ui/stepper";
 import { useIsleStore } from "@/store";
 
 export function CreateProfileSteps() {
   const createProfile = useIsleStore((state) => state.createProfile);
-  const [loading] = useState(false);
-  const [success] = useState(false);
+  const node = useIsleStore((state) => state.node);
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
 
   useEffect(() => {
     createProfile();
-  }, [createProfile]);
+    node?.on("update-create-profile-status", ({ status }) => {
+      setStatus(status);
+    });
+  }, [createProfile, node]);
 
-  return (
-    <Flex flexDirection="column" gap="6">
-      {!loading && (
+  if (status === "pending") {
+    return (
+      <Center flexDirection="column" gap="6">
         <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
           Create your idOS Profile.
         </Heading>
-      )}
-      <Flex>
         <Stepper stepsLength={3} index={0} />
-      </Flex>
-      {loading ? (
-        <Flex
-          flexDir="column"
-          w="12"
-          h="12"
-          borderRadius="full"
-          border="3px solid"
-          borderColor={{ _dark: "aquamarine.950", _light: "aquamarine.200" }}
-          mx="auto"
-        />
-      ) : (
-        <>
-          {success ? (
-            // @todo: add a success animation.
-            <Completed w="20" mx="auto" color="aquamarine.700" />
-          ) : (
-            <>
-              <Text
-                color="neutral.500"
-                fontWeight="medium"
-                fontSize="sm"
-                maxW="250px"
-                mx="auto"
-                textAlign="center"
-              >
-                Sign the message in your wallet to authenticate with idOS.
-              </Text>
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
 
-              <Flex
-                bg={{
-                  _dark: "neutral.800",
-                  _light: "neutral.200",
-                }}
-                rounded="3xl"
-                p="4"
-                gap="2"
-                alignItems="start"
-              >
-                <Image src="/lit.svg" alt="lit" />
-                <Flex flexDir="column" gap="2">
-                  <Text color="neutral.500" fontSize="sm">
-                    If you haven’t previously added this wallet to idOS, a private/public keypair
-                    from LIT will be created to encrypt your data.
-                  </Text>
-                  <Link
-                    variant="plain"
-                    href="https://litprotocol.com/docs/lit-protocol-overview/lit-mpc-encryption"
-                    target="_blank"
-                    color={{ _dark: "aquamarine.500", _light: "neutral.800" }}
-                    rel="noreferrer"
-                    fontWeight="medium"
-                    fontSize="xs"
-                  >
-                    Learn more about LIT’s MPC encryption.
-                  </Link>
-                </Flex>
-              </Flex>
-            </>
-          )}
-        </>
-      )}
-    </Flex>
+  if (status === "success") {
+    return (
+      <Center flexDirection="column" gap="6">
+        <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
+          idOS Profile created.
+        </Heading>
+        <Stepper stepsLength={3} index={1} />
+        <Circle
+          size="12"
+          bg={{
+            _dark: "aquamarine.950",
+            _light: "aquamarine.400",
+          }}
+          boxShadow="md"
+        >
+          <Icon
+            color={{
+              _dark: "aquamarine.600",
+              _light: "aquamarine.700",
+            }}
+            as={LuCheck}
+          />
+        </Circle>
+      </Center>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Center flexDirection="column" gap="6">
+        <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
+          Error creating idOS Profile.
+        </Heading>
+        <Stepper stepsLength={3} index={1} />
+        <Text
+          color="neutral.500"
+          fontWeight="medium"
+          fontSize="sm"
+          maxW="250px"
+          mx="auto"
+          textAlign="center"
+        >
+          Unexpected error occurred while creating your idOS Profile.
+        </Text>
+        <Button w="full" onClick={createProfile}>
+          Try again
+        </Button>
+      </Center>
+    );
+  }
+
+  return (
+    <Center flexDirection="column" gap="6">
+      <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
+        Create your idOS Profile.
+      </Heading>
+      <Stepper stepsLength={3} index={0} />
+      <Text
+        color="neutral.500"
+        fontWeight="medium"
+        fontSize="sm"
+        maxW="250px"
+        mx="auto"
+        textAlign="center"
+      >
+        Click the "Create idOS Key" button to get started
+      </Text>
+    </Center>
   );
 }
