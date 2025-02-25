@@ -18,10 +18,6 @@
     "vitest": "^0.31.4"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
     "./client": {
       "types": "./dist/client/index.d.ts",
       "import": "./dist/client/index.js"
@@ -29,22 +25,6 @@
     "./server": {
       "types": "./dist/server/index.d.ts",
       "import": "./dist/server/index.js"
-    },
-    "./create-issuer-config": {
-      "types": "./dist/create-issuer-config.d.ts",
-      "import": "./dist/create-issuer-config.js"
-    },
-    "./user": {
-      "types": "./dist/user.d.ts",
-      "import": "./dist/user.js"
-    },
-    "./credentials": {
-      "types": "./dist/credentials.d.ts",
-      "import": "./dist/credentials.js"
-    },
-    "./grants": {
-      "types": "./dist/grants.d.ts",
-      "import": "./dist/grants.js"
     }
   },
   "files": [

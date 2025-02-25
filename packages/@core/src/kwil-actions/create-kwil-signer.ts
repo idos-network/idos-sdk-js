@@ -35,8 +35,8 @@ function isNearKeyPair(object: unknown): object is KeyPair {
   );
 }
 
-type KwilSignerType = KeyPair | Wallet | nacl.SignKeyPair | JsonRpcSigner;
-type SignerAddress = string;
+export type KwilSignerType = KeyPair | Wallet | nacl.SignKeyPair | JsonRpcSigner;
+export type SignerAddress = string;
 
 /**
  * Helper function to create a `KwilSigner` and its associated `SignerAddress`.
