@@ -38,7 +38,7 @@ export default function Home() {
     });
 
     isleRef.current.on("create-profile", async () => {
-      try {
+      const [error] = await goTry(async () => {
         // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
         const enclave = new IframeEnclave({
           container: "#idOS-enclave",
@@ -49,7 +49,6 @@ export default function Home() {
         await enclave.load();
         const userId = crypto.randomUUID();
         const { userEncryptionPublicKey } = await enclave.discoverUserEncryptionPublicKey(userId);
-        console.log(userEncryptionPublicKey);
         const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
         const signature = await signMessageAsync({ message });
 
@@ -72,8 +71,9 @@ export default function Home() {
         isleRef.current?.send("update-create-profile-status", {
           status: "success",
         });
-      } catch (error) {
-        console.error(error);
+      });
+
+      if (error) {
         isleRef.current?.send("update-create-profile-status", {
           status: "error",
         });
