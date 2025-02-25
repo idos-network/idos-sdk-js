@@ -35,6 +35,7 @@ export default function Home() {
       // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
       const enclave = new IframeEnclave({
         container: "#idOS-enclave",
+        url: "https://enclave.playground.idos.network",
         mode: "new",
       });
 
