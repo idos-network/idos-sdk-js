@@ -3,13 +3,10 @@ import {
   type KwilSignerType,
   createKwilSigner,
   createWebKwilClient,
+  hasProfile,
 } from "@idos-network/core";
 
-export interface IssuerConfig {
-  kwilClient: KwilActionClient;
-}
-
-type CreateIssuerConfigParams = {
+type CreateIssuerParams = {
   chainId?: string;
   dbId?: string;
   nodeUrl: string;
@@ -17,8 +14,10 @@ type CreateIssuerConfigParams = {
   signer: KwilSignerType;
 };
 
-export async function createIssuerConfig(params: CreateIssuerConfigParams): Promise<IssuerConfig> {
-  const kwilClient = await createWebKwilClient({
+let kwilClient: KwilActionClient;
+
+export async function createIssuer(params: CreateIssuerParams) {
+  kwilClient = await createWebKwilClient({
     nodeUrl: params.nodeUrl,
     chainId: params.chainId,
     dbId: params.dbId,
@@ -29,5 +28,10 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
 
   return {
     kwilClient,
+    checkUserProfile,
   };
+}
+
+export async function checkUserProfile(address: string) {
+  return hasProfile(kwilClient, address);
 }
