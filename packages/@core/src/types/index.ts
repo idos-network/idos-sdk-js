@@ -55,7 +55,6 @@ export type IsleStatus =
   | "initializing"
   | "no-profile"
   | "not-verified"
-  | "start-verification"
   | "pending-verification"
   | "verified"
   | "error";
