@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import app from "./core.js";
+import app from "./core.ts";
 
 describe("passporting-server", () => {
   const mockEnv = {
@@ -22,6 +22,7 @@ describe("passporting-server", () => {
     const res = await app.request("/", {
       method: "GET",
     });
+
     expect(res.status).toBe(200);
     expect(await res.text()).toBe("🚀");
   });
@@ -35,9 +36,9 @@ describe("passporting-server", () => {
         },
         body: JSON.stringify(mockValidDAGPayload),
       });
+
       expect(res.status).toBe(401);
-      const body = await res.json();
-      expect(body).toEqual({
+      expect(await res.json()).toEqual({
         success: false,
         error: { message: "Unauthorized request" },
       });
@@ -86,16 +87,9 @@ describe("passporting-server", () => {
         },
         body: JSON.stringify(mockValidDAGPayload),
       });
-      const body = await res.body
-        .getReader()
-        .read()
-        .then((r) => (r.value ? new TextDecoder().decode(r.value) : ""));
 
-      expect(res.status, body).toBe(200);
-      expect(JSON.parse(body)).toEqual({
-        success: true,
-        data: { credential: mockCompliantCredential },
-      });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ credential: mockCompliantCredential });
     });
   });
 
@@ -116,33 +110,24 @@ describe("passporting-server", () => {
       });
 
       expect(res.status).toBe(200);
-      const body = await res.json();
-      expect(body).toEqual({
-        success: true,
-        data: {
-          dag_data_id: mockValidDAGPayload.dag_data_id,
-        },
-      });
+      expect(await res.json()).toEqual({ dag_data_id: mockValidDAGPayload.dag_data_id });
     });
 
     test("handles validation errors", async () => {
-      const invalidPayload = {
-        ...mockValidDAGPayload,
-        dag_data_id: "not-a-uuid", // Invalid UUID format
-      };
-
       const res = await app.request("/", {
         method: "POST",
         headers: {
           Authorization: "Bearer test-secret-1",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(invalidPayload),
+        body: JSON.stringify({
+          ...mockValidDAGPayload,
+          dag_data_id: "not-a-uuid", // Invalid UUID format
+        }),
       });
 
       expect(res.status).toBe(400);
-      const body = await res.json();
-      expect(body.success).toBe(false);
+      expect((await res.json()).error.name).toBe("ZodError");
     });
   });
 });
