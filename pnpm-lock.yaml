@@ -412,6 +412,9 @@ importers:
       '@hono/zod-validator':
         specifier: ^0.4.2
         version: 0.4.2(hono@4.6.16)(zod@3.24.1)
+      '@idos-network/consumer-sdk-js':
+        specifier: workspace:*
+        version: link:../../packages/consumer-sdk-js
       '@idos-network/issuer-sdk-js':
         specifier: workspace:*
         version: link:../../packages/issuer-sdk-js

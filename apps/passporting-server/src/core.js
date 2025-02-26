@@ -1,4 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
+import { idOSGrantee as idOSGranteeClass } from "@idos-network/consumer-sdk-js/server";
 import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js/server";
 import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
@@ -56,6 +57,12 @@ app.post(
       encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
 
+    const granteeConfig = await idOSGranteeClass.init({
+      nodeUrl: KWIL_NODE_URL,
+      granteeSigner: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
+      recipientEncryptionPrivateKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
+    });
+
     // Validate the incoming `DAG` payload.
     const {
       dag_data_id,
@@ -66,17 +73,19 @@ app.post(
       dag_content_hash,
     } = c.req.valid("json");
 
-    // Transmit the `DAG` to the idOS.
-    const [error, response] = await goTry(() =>
-      createAccessGrantFromDAG(issuerConfig, {
+    // Transmit the `DAG` to the idOS and retrieve the relevant credential.
+    const [error, credential] = await goTry(async () => {
+      await createAccessGrantFromDAG(issuerConfig, {
         dag_data_id,
         dag_owner_wallet_identifier,
         dag_grantee_wallet_identifier,
         dag_signature,
         dag_locked_until,
         dag_content_hash,
-      }),
-    );
+      });
+
+      return await granteeConfig.getReusableCredentialCompliantly(dag_data_id);
+    });
 
     if (error) {
       return c.json(
@@ -91,10 +100,22 @@ app.post(
       );
     }
 
+    if (!credential) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Credential not found",
+          },
+        },
+        404,
+      );
+    }
+
     return c.json({
       success: true,
       data: {
-        dag_data_id,
+        credential,
       },
     });
   },
