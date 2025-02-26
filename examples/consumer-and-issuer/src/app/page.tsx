@@ -67,7 +67,7 @@ export default function Home() {
         status: "pending",
       });
 
-      const [error, signature] = await goTry(async () => signMessageAsync({ message }));
+      const [error, signature] = await goTry(() => signMessageAsync({ message }));
 
       if (error) {
         isleRef.current?.send("update-create-dwg-status", {
