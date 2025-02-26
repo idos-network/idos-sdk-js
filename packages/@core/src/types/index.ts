@@ -55,6 +55,7 @@ export type IsleStatus =
   | "initializing"
   | "no-profile"
   | "not-verified"
+  | "start-verification"
   | "pending-verification"
   | "verified"
   | "error";
@@ -77,6 +78,12 @@ export type IsleControllerMessage =
     }
   | {
       type: "update-create-profile-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
+    }
+  | {
+      type: "update-create-dwg-status";
       data: {
         status: "idle" | "pending" | "success" | "error";
       };
@@ -105,6 +112,9 @@ export type IsleNodeMessage =
     }
   | {
       type: "create-profile";
+    }
+  | {
+      type: "request-dwg";
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

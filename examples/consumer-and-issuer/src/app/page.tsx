@@ -2,11 +2,13 @@
 
 import { createIsleController } from "@idos-network/controllers";
 import { IframeEnclave } from "@idos-network/idos-sdk";
+import { createIssuerConfig, requestDWGSignature } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { useEffect, useRef } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
+import { useEthersSigner } from "@/wagmi.config";
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -15,6 +17,7 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
+  const signer = useEthersSigner();
 
   useEffect(() => {
     const container = containerRef.current;
@@ -27,7 +30,7 @@ export default function Home() {
           url: "https://issuer.idos.network",
           name: "idOS Issuer",
           logo: "https://issuer.idos.network/logo.png",
-          authPublicKey: "b1115801ea37364102d0ecddd355c0465293af6efb5f7391c6b4b8065475af4e",
+          authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           credentialType: ["PASSPORTING_DEMO"],
         },
       ],
@@ -35,6 +38,48 @@ export default function Home() {
 
     isleRef.current.on("connect-wallet", async () => {
       await isleRef.current?.connect();
+    });
+
+    isleRef.current.on("request-dwg", async () => {
+      // @todo: move this to the isle controller?
+      if (!signer) return;
+
+      const config = await createIssuerConfig({
+        nodeUrl: "https://nodes.playground.idos.network",
+        signer,
+      });
+
+      const issuerPublicKey = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
+      const currentTimestamp = Date.now();
+      const currentDate = new Date(currentTimestamp);
+      const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
+      const delegatedWriteGrant = {
+        id: crypto.randomUUID(),
+        owner_wallet_identifier: address as string,
+        grantee_wallet_identifier: issuerPublicKey,
+        issuer_public_key: issuerPublicKey,
+        access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+        not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+        not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
+      };
+      const message: string = await requestDWGSignature(config, delegatedWriteGrant);
+      isleRef.current?.send("update-create-dwg-status", {
+        status: "pending",
+      });
+
+      const [error, signature] = await goTry(async () => signMessageAsync({ message }));
+
+      if (error) {
+        isleRef.current?.send("update-create-dwg-status", {
+          status: "error",
+        });
+
+        return;
+      }
+
+      isleRef.current?.send("update-create-dwg-status", {
+        status: "success",
+      });
     });
 
     isleRef.current.on("create-profile", async () => {
@@ -84,7 +129,7 @@ export default function Home() {
       isleRef.current?.destroy();
       isleRef.current = null;
     };
-  }, [address, signMessageAsync]);
+  }, [address, signMessageAsync, signer]);
 
   return (
     <div>
