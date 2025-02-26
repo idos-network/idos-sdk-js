@@ -16,13 +16,16 @@
   "devDependencies": {
     "@types/node": "^20.11.17",
     "tsx": "^4.7.1",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^1.6.0"
   },
   "license": "MIT",
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "dev": "node --watch src/server.node.js",
-    "start:node": "node src/server.node.js"
+    "start:node": "node src/server.node.js",
+    "test": "vitest run",
+    "test:watch": "vitest watch"
   },
   "type": "module"
 }
