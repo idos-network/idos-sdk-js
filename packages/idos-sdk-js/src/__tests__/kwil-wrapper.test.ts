@@ -3,19 +3,18 @@ import { Wallet } from "ethers";
 import { implicitAddressFromPublicKey } from "src/lib";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test } from "vitest";
-import { TestKwilClient, dbId, kwilProvider } from "./test-kwil-client";
+import { TestKwilClient, kwilProvider } from "./test-kwil-client";
 
 let kwilWrapper: KwilWrapper;
 
 describe("kwil-wrapper", () => {
   beforeEach(() => {
-    kwilWrapper = new KwilWrapper(new TestKwilClient(), kwilProvider, dbId);
+    kwilWrapper = new KwilWrapper(new TestKwilClient(), kwilProvider);
   });
 
   test("should create a new instance of KwilWrapper", () => {
     expect(kwilWrapper.client).toBeInstanceOf(WebKwil);
     expect(kwilWrapper.kwilProvider).toBe(kwilProvider);
-    expect(kwilWrapper.dbId).toBe(dbId);
   });
 
   test("should set a `secp256k1_ep` signer", async () => {
@@ -49,7 +48,6 @@ describe("kwil-wrapper", () => {
 
     expect(payload).toEqual({
       name: "do something",
-      dbid: kwilWrapper.dbId,
       inputs: [],
     });
   });
@@ -63,7 +61,6 @@ describe("kwil-wrapper", () => {
 
     expect(payload).toEqual({
       name: "do something",
-      dbid: kwilWrapper.dbId,
       description: "*some description*",
       inputs: [actionInput],
     });

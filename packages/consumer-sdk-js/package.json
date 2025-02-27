@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "@kwilteam/kwil-js": "0.7.1",
+    "@kwilteam/kwil-js": "beta",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
@@ -54,7 +54,7 @@
   "license": "MIT",
   "main": "src/index.ts",
   "peerDependencies": {
-    "ethers": "^6.13.5",
+    "ethers": "catalog:",
     "near-api-js": "3.0.4"
   },
   "repository": "https://github.com/idos-network/idos-sdk-js",

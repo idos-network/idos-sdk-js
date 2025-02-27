@@ -16,7 +16,7 @@ export async function createAccessGrantFromDAG(
   issuerConfig: IssuerConfig,
   params: CreateAccessGrantFromDAGParams,
 ) {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const { kwilClient, kwilSigner } = issuerConfig;
 
   const credentialId = await getCredentialIdByContentHash(issuerConfig, params.dag_content_hash);
 
@@ -47,7 +47,6 @@ export async function createAccessGrantFromDAG(
   const result = await kwilClient.execute(
     {
       name: "create_ag_by_dag_for_copy",
-      dbid,
       inputs: [createActionInput(params)],
     },
     kwilSigner,

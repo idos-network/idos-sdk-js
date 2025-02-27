@@ -4,7 +4,6 @@ import invariant from "tiny-invariant";
 
 interface CreateKwilClientParams {
   chainId?: string;
-  dbId?: string;
   nodeUrl: string;
 }
 
@@ -24,7 +23,6 @@ export class KwilActionClient {
 
   constructor(
     private readonly client: NodeKwil | WebKwil,
-    private readonly dbId: string,
   ) {}
 
   /**
@@ -63,7 +61,7 @@ export class KwilActionClient {
   private _createAction(params: KwilActionReqParams): ActionBody {
     return {
       ...params,
-      dbid: this.dbId,
+      namespace: 'main',
       inputs: this._createActionInputs(params.inputs),
     };
   }
@@ -89,19 +87,15 @@ export async function createNodeKwilClient(params: CreateKwilClientParams) {
   });
 
   const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
-  const dbid =
-    params.dbId ||
-    (await _kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid;
 
   invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
-  invariant(dbid, "Can't discover `dbId`. You must pass it explicitly.");
 
   const client = new NodeKwil({
     kwilProvider: params.nodeUrl,
     chainId,
   });
 
-  return new KwilActionClient(client, dbid);
+  return new KwilActionClient(client);
 }
 
 /**
@@ -114,17 +108,13 @@ export async function createWebKwilClient(params: CreateKwilClientParams) {
   });
 
   const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
-  const dbid =
-    params.dbId ||
-    (await _kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid;
 
   invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
-  invariant(dbid, "Can't discover `dbId`. You must pass it explicitly.");
 
   const client = new WebKwil({
     kwilProvider: params.nodeUrl,
     chainId,
   });
 
-  return new KwilActionClient(client, dbid);
+  return new KwilActionClient(client);
 }

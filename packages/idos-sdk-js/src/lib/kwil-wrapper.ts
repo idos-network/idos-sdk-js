@@ -9,41 +9,29 @@ export class KwilWrapper {
   static defaults = {
     kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
     chainId: import.meta.env.VITE_IDOS_NODE_KWIL_CHAIN_ID,
-    dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
   };
 
   client: WebKwil;
   kwilProvider: string;
-  dbId: string;
   signer?: KwilSigner;
 
   constructor(
     client: WebKwil,
     kwilProvider: string = KwilWrapper.defaults.kwilProvider,
-    dbId: string = KwilWrapper.defaults.dbId,
   ) {
     this.client = client;
     this.kwilProvider = kwilProvider;
-    this.dbId = dbId;
   }
 
   static async init({
     nodeUrl = KwilWrapper.defaults.kwilProvider,
-    dbId = KwilWrapper.defaults.dbId,
   }): Promise<KwilWrapper> {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId =
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id ??
       KwilWrapper.defaults.chainId;
 
-    // This assumes that nobody else created a db named "idos".
-    // Given we intend to not let db creation open, that's a safe enough assumption.
-    if (dbId === KwilWrapper.defaults.dbId) {
-      dbId =
-        (await kwil.listDatabases()).data?.filter(({ name }) => name === "idos")[0].dbid ?? dbId;
-    }
-
-    return new KwilWrapper(new WebKwil({ kwilProvider: nodeUrl, chainId }), nodeUrl, dbId);
+    return new KwilWrapper(new WebKwil({ kwilProvider: nodeUrl, chainId }), nodeUrl);
   }
 
   get schema() {
@@ -74,7 +62,7 @@ export class KwilWrapper {
   ) {
     const payload: ActionBody = {
       name: actionName,
-      dbid: this.dbId,
+      namespace: 'main',
       inputs: [],
     };
 

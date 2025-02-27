@@ -29,7 +29,7 @@ describe("createIssuerConfig", () => {
     // Set up mock implementations
     mockChainInfo = vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } });
     mockListDatabases = vi.fn().mockResolvedValue({
-      data: [{ name: "idos", dbid: "mock-dbid" }],
+      data: [{ name: "idos" }],
     });
 
     (NodeKwil as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
@@ -66,7 +66,6 @@ describe("createIssuerConfig", () => {
     // Check the returned config
     expect(result).toEqual({
       chainId: "mock-chain-id",
-      dbid: "mock-dbid",
       kwilClient: expect.any(Object),
       kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),

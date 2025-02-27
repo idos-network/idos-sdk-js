@@ -48,7 +48,6 @@ interface idOSGranteeInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
-  dbId?: string;
   granteeSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
@@ -57,13 +56,11 @@ export class idOSGrantee {
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
-    dbId,
     granteeSigner,
   }: idOSGranteeInitParams): Promise<idOSGrantee> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
-      dbId,
     });
 
     const [signer, address] = createKwilSigner(granteeSigner);
