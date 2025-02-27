@@ -136,24 +136,3 @@ export async function createCredentialsByDelegatedWriteGrant(
     inputs: params,
   });
 }
-
-export interface idOSDelegatedWriteGrantSignatureRequest {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-}
-
-export async function requestDWGSignature(
-  kwilClient: KwilActionClient,
-  dwg: idOSDelegatedWriteGrantSignatureRequest,
-): Promise<string> {
-  const [{ message }] = (await kwilClient.call({
-    name: "dwg_message",
-    inputs: dwg,
-  })) as unknown as [{ message: string }];
-  return message;
-}
