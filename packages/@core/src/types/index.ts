@@ -80,6 +80,12 @@ export type IsleControllerMessage =
       data: {
         status: "idle" | "pending" | "success" | "error";
       };
+    }
+  | {
+      type: "update-create-dwg-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
     };
 
 export type IsleNodeMessage =
@@ -105,6 +111,9 @@ export type IsleNodeMessage =
     }
   | {
       type: "create-profile";
+    }
+  | {
+      type: "request-dwg";
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (
