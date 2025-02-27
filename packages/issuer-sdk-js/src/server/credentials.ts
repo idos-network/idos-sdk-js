@@ -192,9 +192,9 @@ export async function getCredentialIdByContentHash(
 ): Promise<string | null> {
   const { kwilClient } = issuerConfig;
 
-  const result = await _getCredentialIdByContentHash(kwilClient, contentHash);
+  const [{ id }] = await _getCredentialIdByContentHash(kwilClient, contentHash);
 
-  return result ?? null;
+  return id ?? null;
 }
 
 export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {

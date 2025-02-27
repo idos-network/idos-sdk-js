@@ -29,8 +29,8 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  return kwilClient.call<string>({
-    name: "get_credential_id_by_content_hash",
+  return kwilClient.call<[{ id: string }]>({
+    name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
 }
@@ -135,4 +135,25 @@ export async function createCredentialsByDelegatedWriteGrant(
     name: "create_credentials_by_dwg",
     inputs: params,
   });
+}
+
+export interface idOSDelegatedWriteGrantSignatureRequest {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  issuer_public_key: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+}
+
+export async function requestDWGSignature(
+  kwilClient: KwilActionClient,
+  dwg: idOSDelegatedWriteGrantSignatureRequest,
+): Promise<string> {
+  const [{ message }] = (await kwilClient.call({
+    name: "dwg_message",
+    inputs: dwg,
+  })) as unknown as [{ message: string }];
+  return message;
 }
