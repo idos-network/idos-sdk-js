@@ -93,7 +93,7 @@ export default function Home() {
           grantee: {
             granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
             meta: {
-              url: "https://grantee.idos.network",
+              url: "https://idos.network",
               name: "idOS",
               logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
             },
