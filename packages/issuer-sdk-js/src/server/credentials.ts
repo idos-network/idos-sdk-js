@@ -1,6 +1,13 @@
 import {
+  type CreateCredentialsByDelegatedWriteGrantParams,
+  createCredentialAsInserter as _createCredentialAsInserter,
+  createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
+  editCredentialAsIssuer as _editCredentialAsIssuer,
+  getCredentialIdByContentHash as _getCredentialIdByContentHash,
+  getSharedCredential as _getSharedCredential,
   base64Decode,
   base64Encode,
+  encryptContent,
   hexEncode,
   hexEncodeSha256Hash,
   type idOSCredential,
@@ -8,12 +15,7 @@ import {
 } from "@idos-network/core";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
-import {
-  createActionInput,
-  createActionInputWithoutId,
-  encryptContent,
-  ensureEntityId,
-} from "./internal";
+import { ensureEntityId } from "./internal";
 
 type UpdatablePublicNotes = {
   publicNotes: string;
@@ -90,22 +92,14 @@ interface BaseCredentialParams {
   recipientEncryptionPublicKey: Uint8Array;
 }
 
-export async function createCredentialPermissioned(
+export async function createCredentialAsInserter(
   issuerConfig: IssuerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const { kwilClient } = issuerConfig;
   const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
 
-  await kwilClient.execute(
-    {
-      name: "upsert_credential_as_inserter",
-      dbid,
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await _createCredentialAsInserter(kwilClient, payload);
 
   return {
     ...payload,
@@ -113,23 +107,23 @@ export async function createCredentialPermissioned(
   };
 }
 
-type DelegatedWriteGrantParams = {
+interface DelegatedWriteGrantParams {
+  id: string;
   ownerWalletIdentifier: string;
   granteeWalletIdentifier: string;
   issuerPublicKey: string;
-  id: string;
   accessGrantTimelock: string;
   notUsableBefore: string;
   notUsableAfter: string;
   signature: string;
-};
+}
 
 export async function createCredentialsByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
   credentialParams: BaseCredentialParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
 ): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
-  const { dbid, kwilClient, kwilSigner, encryptionSecretKey } = issuerConfig;
+  const { kwilClient, encryptionSecretKey } = issuerConfig;
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
   const originalCredential = ensureEntityId(
@@ -144,7 +138,7 @@ export async function createCredentialsByDelegatedWriteGrant(
       recipientEncryptionPublicKey: issuerEncPublicKey,
     }),
   );
-  const payload = {
+  const payload: CreateCredentialsByDelegatedWriteGrantParams = {
     issuer_auth_public_key: originalCredential.issuer_auth_public_key,
     original_encryptor_public_key: originalCredential.encryptor_public_key,
     original_credential_id: originalCredential.id,
@@ -168,15 +162,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     dwg_signature: delegatedWriteGrant.signature,
   };
 
-  await kwilClient.execute(
-    {
-      name: "create_credentials_by_dwg",
-      dbid,
-      inputs: [createActionInputWithoutId(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await _createCredentialsByDelegatedWriteGrant(kwilClient, payload);
 
   return { originalCredential, copyCredential };
 }
@@ -185,58 +171,36 @@ interface EditCredentialAsIssuerParams {
   publicNotesId: string;
   publicNotes: string;
 }
-export async function editCredential(
+export async function editCredentialAsIssuer(
   issuerConfig: IssuerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
-): Promise<{ data?: { tx_hash: string } }> {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+) {
+  const { kwilClient } = issuerConfig;
   const payload = {
     public_notes_id: publicNotesId,
     public_notes: publicNotes,
   };
 
-  const result = await kwilClient.execute(
-    {
-      name: "edit_public_notes_as_issuer",
-      dbid,
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  const result = await _editCredentialAsIssuer(kwilClient, payload);
 
-  return result;
+  return result ?? null;
 }
 
 export async function getCredentialIdByContentHash(
   issuerConfig: IssuerConfig,
   contentHash: string,
 ): Promise<string | null> {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const { kwilClient } = issuerConfig;
 
-  const response = (await kwilClient.call(
-    {
-      name: "get_sibling_credential_id",
-      dbid,
-      inputs: [createActionInput({ content_hash: contentHash })],
-    },
-    kwilSigner,
-  )) as unknown as { data: { result: [{ id: string }] } };
+  const [{ id }] = await _getCredentialIdByContentHash(kwilClient, contentHash);
 
-  return response.data?.result?.[0]?.id ?? null;
+  return id ?? null;
 }
 
 export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {
-  const { dbid, kwilClient, kwilSigner } = issuerConfig;
+  const { kwilClient } = issuerConfig;
 
-  const response = await kwilClient.call(
-    {
-      name: "get_credential_shared",
-      dbid,
-      inputs: [createActionInput({ id })],
-    },
-    kwilSigner,
-  );
+  const result = await _getSharedCredential(kwilClient, id);
 
-  return response?.data?.result?.[0] as unknown as idOSCredential | null;
+  return result ?? null;
 }

@@ -7,7 +7,7 @@ import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui";
 import { Button } from "@/components/ui";
-import { RevokeConfirmation } from "./revoke-permission";
+import { RevokeConfirmation } from "./revoke-confirmation";
 
 const mockKycData = {
   gender: "Female",

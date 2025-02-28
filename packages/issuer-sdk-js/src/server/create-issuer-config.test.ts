@@ -1,4 +1,4 @@
-import { KwilSigner, NodeKwil } from "@kwilteam/kwil-js";
+import { NodeKwil } from "@kwilteam/kwil-js";
 
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -65,10 +65,7 @@ describe("createIssuerConfig", () => {
 
     // Check the returned config
     expect(result).toEqual({
-      chainId: "mock-chain-id",
-      dbid: "mock-dbid",
       kwilClient: expect.any(Object),
-      kwilSigner: expect.any(KwilSigner),
       signingKeyPair: expect.any(Object),
       encryptionSecretKey: expect.any(Uint8Array),
     });

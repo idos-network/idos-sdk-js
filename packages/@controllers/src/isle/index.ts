@@ -217,6 +217,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     send("update-create-dwg-status", {
       status: "start-verification",
+      meta: {
+        url: options.grantee.meta.url,
+        name: options.grantee.meta.name,
+        logo: options.grantee.meta.logo,
+        KYCPermissions: options.KYCPermissions,
+      },
     });
 
     const message: string = await requestDWGSignature(kwilClient, delegatedWriteGrant);
