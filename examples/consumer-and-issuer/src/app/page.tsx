@@ -2,13 +2,11 @@
 
 import { createIsleController } from "@idos-network/controllers";
 import { IframeEnclave } from "@idos-network/idos-sdk";
-import { createIssuerConfig, requestDWGSignature } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
-import { useEthersSigner } from "@/wagmi.config";
 import { Code } from "@heroui/react";
 import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
 
@@ -98,8 +96,8 @@ export default function Home() {
             granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
             meta: {
               url: "https://grantee.idos.network",
-              name: "idOS Grantee",
-              logo: "https://grantee.idos.network/logo.png",
+              name: "idOS",
+              logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
             },
           },
           KYCPermissions: [
