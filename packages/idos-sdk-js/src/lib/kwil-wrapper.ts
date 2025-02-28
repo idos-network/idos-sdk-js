@@ -1,6 +1,6 @@
 import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/core/types";
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
-import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
+import type { ActionBody, ActionInput, CallBody } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 
 import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
@@ -15,27 +15,18 @@ export class KwilWrapper {
   kwilProvider: string;
   signer?: KwilSigner;
 
-  constructor(
-    client: WebKwil,
-    kwilProvider: string = KwilWrapper.defaults.kwilProvider,
-  ) {
+  constructor(client: WebKwil, kwilProvider: string = KwilWrapper.defaults.kwilProvider) {
     this.client = client;
     this.kwilProvider = kwilProvider;
   }
 
-  static async init({
-    nodeUrl = KwilWrapper.defaults.kwilProvider,
-  }): Promise<KwilWrapper> {
+  static async init({ nodeUrl = KwilWrapper.defaults.kwilProvider }): Promise<KwilWrapper> {
     const kwil = new WebKwil({ kwilProvider: nodeUrl, chainId: "" });
     const chainId =
       (await kwil.chainInfo({ disableWarning: true })).data?.chain_id ??
       KwilWrapper.defaults.chainId;
 
     return new KwilWrapper(new WebKwil({ kwilProvider: nodeUrl, chainId }), nodeUrl);
-  }
-
-  get schema() {
-    return this.client.getSchema(this.dbId);
   }
 
   async setSigner({
@@ -54,7 +45,7 @@ export class KwilWrapper {
     }
   }
 
-  async buildAction(
+  async buildExecAction(
     actionName: string,
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     inputs: Record<string, any>[] | null | any,
@@ -62,7 +53,7 @@ export class KwilWrapper {
   ) {
     const payload: ActionBody = {
       name: actionName,
-      namespace: 'main',
+      namespace: "main",
       inputs: [],
     };
 
@@ -86,20 +77,46 @@ export class KwilWrapper {
     return payload;
   }
 
+  async buildCallAction(
+    actionName: string,
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
+    inputs: Record<string, any>[] | null | any,
+  ) {
+    const payload: CallBody = {
+      name: actionName,
+      namespace: "main",
+      inputs: [],
+    };
+
+    if (inputs) {
+      for (const input of inputs) {
+        if (!input || (input && Object.keys(input).length === 0)) {
+          continue;
+        }
+        const actionInput = new KwilUtils.ActionInput();
+        for (const key in input) {
+          actionInput.put(`$${key}`, input[key]);
+        }
+        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
+      }
+    }
+
+    return payload;
+  }
+
   async call(
     actionName: string,
     // biome-ignore lint/suspicious/noExplicitAny: TBD
     actionInputs: Record<string, any> | null,
-    description?: string,
     useSigner = true,
   ) {
     if (useSigner && !this.signer) throw new Error("Call idOS.setSigner first.");
 
-    const action = await this.buildAction(actionName, [actionInputs], description);
+    const action = await this.buildCallAction(actionName, [actionInputs]);
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
-    return res.data?.result;
+    return res.data;
   }
 
   async execute(
@@ -110,7 +127,7 @@ export class KwilWrapper {
   ) {
     if (!this.signer) throw new Error("No signer set");
 
-    const action = await this.buildAction(actionName, actionInputs, description);
+    const action = await this.buildExecAction(actionName, actionInputs, description);
     const res = await this.client.execute(action, this.signer, synchronous);
     return res.data?.tx_hash;
   }
@@ -124,7 +141,6 @@ export class KwilWrapper {
     const result = (await this.call(
       "has_profile",
       { address: userAddress },
-      undefined,
       false,
       // biome-ignore lint/suspicious/noExplicitAny: TBD
     )) as any;

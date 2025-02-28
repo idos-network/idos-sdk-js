@@ -44,7 +44,7 @@ describe("kwil-wrapper", () => {
   });
 
   test("should build a proper action payload with empty inputs and no description", async () => {
-    const payload = await kwilWrapper.buildAction("do something", null);
+    const payload = await kwilWrapper.buildExecAction("do something", null);
 
     expect(payload).toEqual({
       name: "do something",
@@ -54,7 +54,7 @@ describe("kwil-wrapper", () => {
 
   test("should build a proper action payload with all values passed", async () => {
     const inputs = { key_1: "value_1", key_2: "value_2" };
-    const payload = await kwilWrapper.buildAction("do something", [inputs], "some description");
+    const payload = await kwilWrapper.buildExecAction("do something", [inputs], "some description");
     const actionInput = new Utils.ActionInput();
     actionInput.put("$key_1", "value_1");
     actionInput.put("$key_2", "value_2");
