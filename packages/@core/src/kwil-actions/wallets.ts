@@ -1,6 +1,6 @@
 import type { KwilActionClient } from "./create-kwil-client";
 
-interface UpsertWalletParams {
+export interface UpsertWalletParams {
   id: string;
   user_id: string;
   address: string;

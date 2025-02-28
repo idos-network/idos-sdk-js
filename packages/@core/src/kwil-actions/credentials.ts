@@ -1,7 +1,7 @@
 import type { idOSCredential, idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
-interface CreateCredentialParams {
+export interface CreateCredentialParams {
   user_id: string;
   content: string;
   content_hash?: string;
@@ -29,8 +29,8 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  return kwilClient.call<string>({
-    name: "get_credential_id_by_content_hash",
+  return kwilClient.call<[{ id: string }]>({
+    name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
 }
@@ -65,7 +65,7 @@ export async function getAccessGrantsForCredential(
   });
 }
 
-interface EditCredentialAsIssuerParams {
+export interface EditCredentialAsIssuerParams {
   public_notes_id: string;
   public_notes: string;
 }
@@ -97,5 +97,42 @@ export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, u
 export async function getAllCredentials(kwilClient: KwilActionClient) {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials",
+  });
+}
+
+export interface CreateCredentialsByDelegatedWriteGrantParams {
+  issuer_auth_public_key: string;
+  original_encryptor_public_key: string;
+  original_credential_id: string;
+  original_content: string;
+  original_public_notes: string;
+  original_public_notes_signature: string;
+  original_broader_signature: string;
+  copy_encryptor_public_key: string;
+  copy_credential_id: string;
+  copy_content: string;
+  copy_public_notes_signature: string;
+  copy_broader_signature: string;
+  content_hash: string;
+  dwg_owner: string;
+  dwg_grantee: string;
+  dwg_issuer_public_key: string;
+  dwg_id: string;
+  dwg_access_grant_timelock: string;
+  dwg_not_before: string;
+  dwg_not_after: string;
+  dwg_signature: string;
+}
+
+/**
+ * Creates a new credential from a delegated write grant.
+ */
+export async function createCredentialsByDelegatedWriteGrant(
+  kwilClient: KwilActionClient,
+  params: CreateCredentialsByDelegatedWriteGrantParams,
+) {
+  return kwilClient.execute({
+    name: "create_credentials_by_dwg",
+    inputs: params,
   });
 }

@@ -14,7 +14,7 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string) 
   return has_profile;
 }
 
-interface CreateUserReqParams {
+export interface CreateUserReqParams {
   id: string;
   recipient_encryption_public_key: string;
 }
