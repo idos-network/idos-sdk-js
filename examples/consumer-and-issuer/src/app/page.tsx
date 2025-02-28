@@ -1,18 +1,14 @@
 "use client";
 
+import { Code } from "@heroui/react";
 import { createIsleController } from "@idos-network/controllers";
+import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
 import { IframeEnclave } from "@idos-network/idos-sdk";
-import { createIssuerConfig, requestDWGSignature } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
-import { useEthersSigner } from "@/wagmi.config";
-import { Code } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
-
-const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 export default function Home() {
   const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
@@ -97,9 +93,9 @@ export default function Home() {
           grantee: {
             granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
             meta: {
-              url: "https://grantee.idos.network",
-              name: "idOS Grantee",
-              logo: "https://grantee.idos.network/logo.png",
+              url: "https://idos.network",
+              name: "idOS",
+              logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
             },
           },
           KYCPermissions: [
