@@ -1,16 +1,14 @@
 "use client";
 
+import { Code } from "@heroui/react";
 import { createIsleController } from "@idos-network/controllers";
+import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
 import { IframeEnclave } from "@idos-network/idos-sdk";
 import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
-import { Code } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
-
-const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
 export default function Home() {
   const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
