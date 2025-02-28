@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
 import { Icon } from "@/components/icons/icon";
@@ -106,20 +106,39 @@ function Header({ name }: { name: string }) {
 export function NotVerified() {
   const node = useIsleStore((state) => state.node);
   const [status, setStatus] = useState<
-    "idle" | "pending" | "success" | "start-verification" | "error"
+    "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
+  const hasRequestedRef = useRef(false);
 
   useEffect(() => {
-    node?.post("request-dwg", {});
-    node?.on("update-create-dwg-status", ({ status }) => {
+    if (!node || hasRequestedRef.current) return;
+
+    // Mark that we've made the request
+    hasRequestedRef.current = true;
+
+    // Set up the event listener
+    node.on("update-create-dwg-status", ({ status }) => {
       setStatus(status);
       if (status === "success") {
         setTimeout(() => {
-          setStatus("start-verification");
+          setStatus("verify-identity");
         }, 2000);
       }
     });
   }, [node]);
+
+  if (status === "idle") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          You are not verified yet.
+        </Heading>
+        <Text color="neutral.500" fontSize="sm" textAlign="center">
+          Please verify your identity to proceed.
+        </Text>
+      </Center>
+    );
+  }
 
   if (status === "pending") {
     return (
@@ -177,7 +196,9 @@ export function NotVerified() {
         <Button
           w="full"
           onClick={() => {
-            node?.post("request-dwg", {});
+            node?.post("updated", {
+              status: "not-verified",
+            });
           }}
         >
           Try again
@@ -186,7 +207,7 @@ export function NotVerified() {
     );
   }
 
-  if (status === "start-verification") {
+  if (status === "verify-identity") {
     return (
       <Center flexDir="column" gap="6">
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
@@ -197,7 +218,14 @@ export function NotVerified() {
           This application is asking you to verify your identity. You will now be led to a KYC
           journey to complete the process.
         </Text>
-        <Button w="full">Verify your identity</Button>
+        <Button
+          w="full"
+          onClick={() => {
+            node?.post("verify-identity", {});
+          }}
+        >
+          Verify your identity
+        </Button>
       </Center>
     );
   }

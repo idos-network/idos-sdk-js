@@ -84,7 +84,7 @@ export type IsleControllerMessage =
   | {
       type: "update-create-dwg-status";
       data: {
-        status: "idle" | "pending" | "success" | "error";
+        status: "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error";
       };
     };
 
@@ -114,6 +114,9 @@ export type IsleNodeMessage =
     }
   | {
       type: "request-dwg";
+    }
+  | {
+      type: "verify-identity";
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

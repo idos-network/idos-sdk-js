@@ -4,11 +4,13 @@ import { createIsleController } from "@idos-network/controllers";
 import { IframeEnclave } from "@idos-network/idos-sdk";
 import { createIssuerConfig, requestDWGSignature } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
 import { useEthersSigner } from "@/wagmi.config";
+import { Code } from "@heroui/react";
+import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
 
 const sleep = (delay: number) => new Promise((resolve) => setTimeout(resolve, delay));
 
@@ -17,7 +19,8 @@ export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
-  const signer = useEthersSigner();
+  const [signature, setSignature] = useState<string | null>(null);
+  const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -25,7 +28,8 @@ export default function Home() {
 
     isleRef.current = createIsleController({
       container: container.id,
-      knownIssuers: [
+      consumers: [],
+      acceptedIssuers: [
         {
           url: "https://issuer.idos.network",
           name: "idOS Issuer",
@@ -38,48 +42,6 @@ export default function Home() {
 
     isleRef.current.on("connect-wallet", async () => {
       await isleRef.current?.connect();
-    });
-
-    isleRef.current.on("request-dwg", async () => {
-      // @todo: move this to the isle controller?
-      if (!signer) return;
-
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.playground.idos.network",
-        signer,
-      });
-
-      const issuerPublicKey = process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "";
-      const currentTimestamp = Date.now();
-      const currentDate = new Date(currentTimestamp);
-      const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
-      const delegatedWriteGrant = {
-        id: crypto.randomUUID(),
-        owner_wallet_identifier: address as string,
-        grantee_wallet_identifier: issuerPublicKey,
-        issuer_public_key: issuerPublicKey,
-        access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
-        not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
-        not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
-      };
-      const message: string = await requestDWGSignature(config, delegatedWriteGrant);
-      isleRef.current?.send("update-create-dwg-status", {
-        status: "pending",
-      });
-
-      const [error, signature] = await goTry(() => signMessageAsync({ message }));
-
-      if (error) {
-        isleRef.current?.send("update-create-dwg-status", {
-          status: "error",
-        });
-
-        return;
-      }
-
-      isleRef.current?.send("update-create-dwg-status", {
-        status: "success",
-      });
     });
 
     isleRef.current.on("create-profile", async () => {
@@ -125,11 +87,44 @@ export default function Home() {
       }
     });
 
+    isleRef.current.on("verify-identity", async (data) => {
+      // @todo: this should redirect the user to the issuer's knownKYC provider
+    });
+
+    isleRef.current.on("updated", async ({ data }) => {
+      if (data.status === "not-verified") {
+        const result = await isleRef.current?.requestDelegatedWriteGrant({
+          grantee: {
+            granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            meta: {
+              url: "https://grantee.idos.network",
+              name: "idOS Grantee",
+              logo: "https://grantee.idos.network/logo.png",
+            },
+          },
+          KYCPermissions: [
+            "Name and last name",
+            "Gender",
+            "Country and city of residence",
+            "Place and date of birth",
+            "ID Document",
+            "Liveness check (No pictures)",
+          ],
+        });
+
+        if (result) {
+          const { signature, writeGrant } = result;
+          setSignature(signature);
+          setWriteGrant(writeGrant);
+        }
+      }
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;
     };
-  }, [address, signMessageAsync, signer]);
+  }, [address, signMessageAsync]);
 
   return (
     <div>
@@ -143,6 +138,14 @@ export default function Home() {
           className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
         />
       </div>
+
+      {signature && writeGrant ? (
+        <div className="flex flex-col items-center justify-center gap-4">
+          <Code>
+            <pre>{JSON.stringify({ signature, writeGrant }, null, 2)}</pre>
+          </Code>
+        </div>
+      ) : null}
     </div>
   );
 }
