@@ -291,7 +291,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         );
       });
 
-      if (matchingCredentials.length === 1) {
+      if (matchingCredentials.length === 0) {
         send("update", {
           status: "not-verified",
         });
@@ -306,7 +306,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         matchingCredentials.every((cred) => {
           const publicNotes = JSON.parse(cred.public_notes ?? "{}");
           // @todo: check for 'pending' status properly. Currently we let it fall through.
-          return publicNotes.status === "pending";
+          return publicNotes.status === "";
         })
       ) {
         send("update", {
