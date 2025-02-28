@@ -1,24 +1,22 @@
-import type { idOSUser, idOSWallet } from "@idos-network/core/types";
+import {
+  createUser as _createUser,
+  upsertWalletAsInserter as _upsertWalletAsInserter,
+  type idOSUser,
+  type idOSWallet,
+} from "@idos-network/core";
 import type { IssuerConfig } from "./create-issuer-config";
-import { createActionInput, ensureEntityId } from "./internal";
+import { ensureEntityId } from "./internal";
 
 export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
 }
 
 async function createUserProfile(
-  { kwilClient, kwilSigner }: IssuerConfig,
+  { kwilClient }: IssuerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSUser> {
   const payload = ensureEntityId(params);
-  await kwilClient.execute(
-    {
-      name: "add_user_as_inserter",
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await _createUser(kwilClient, payload);
 
   return payload;
 }
@@ -27,19 +25,12 @@ export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
   id?: string;
 }
 
-async function upsertWallet(
-  { kwilClient, kwilSigner }: IssuerConfig,
+async function upsertWalletAsInserter(
+  { kwilClient }: IssuerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
   const payload = ensureEntityId(params);
-  await kwilClient.execute(
-    {
-      name: "upsert_wallet_as_inserter",
-      inputs: [createActionInput(payload)],
-    },
-    kwilSigner,
-    true,
-  );
+  await _upsertWalletAsInserter(kwilClient, payload);
 
   return payload;
 }
@@ -67,7 +58,7 @@ export async function createUser(
     id: wallet_id,
   };
 
-  const walletResponse = await upsertWallet(config, walletReqParams);
+  const walletResponse = await upsertWalletAsInserter(config, walletReqParams);
 
   // @todo: I am not sure if this is the best way to return the response. Need to think about it.
   return [userResponse, walletResponse];

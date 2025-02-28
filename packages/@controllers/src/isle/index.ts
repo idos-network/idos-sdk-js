@@ -1,5 +1,6 @@
 /* cspell:disable-next-line */
 import {
+  type DelegatedWriteGrantSignatureRequest,
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
@@ -9,6 +10,7 @@ import {
   createWebKwilClient,
   getAllCredentials,
   hasProfile,
+  requestDWGSignature,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -20,11 +22,19 @@ import {
   getWalletClient,
   injected,
   reconnect,
+  signMessage,
   connect as wagmiConnect,
   watchAccount,
 } from "@wagmi/core";
 import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
+import { goTry } from "go-try";
+import invariant from "tiny-invariant";
+
+// IntegratedConsumers: []
+// CredentialRequirements: {
+// acceptedIssuers: []
+// acceptedType: ""
 
 /**
  * Configuration options for creating an idOS Isle instance
@@ -35,14 +45,38 @@ interface idOSIsleControllerOptions {
   container: string;
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
-  /** Meta information about the issuer */
-  knownIssuers: {
+
+  // @todo: rename to `acceptedIssuers`
+  /** Meta information about issuers */
+  acceptedIssuers: {
     url: string;
     name: string;
     logo: string;
     authPublicKey: string;
     credentialType: string[];
   }[];
+
+  /** Meta information about consumers known to the app */
+  consumers: string[];
+}
+
+/**
+ * Options for requesting a delegated write grant
+ * @interface RequestDelegatedWriteGrantOptions
+ */
+interface RequestDelegatedWriteGrantOptions {
+  /** The grantee information */
+  grantee: {
+    /** The public key of the grantee */
+    granteePublicKey: string;
+    /** Meta information about the grantee */
+    meta: {
+      url: string;
+      name: string;
+      logo: string;
+    };
+  };
+  KYCPermissions: string[];
 }
 
 /**
@@ -60,6 +94,10 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
+  /** Requests a delegated write grant for the given grantee */
+  requestDelegatedWriteGrant: (
+    options: RequestDelegatedWriteGrantOptions,
+  ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -148,6 +186,56 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
   };
 
+  const requestDelegatedWriteGrant = async (
+    options: RequestDelegatedWriteGrantOptions,
+  ): Promise<
+    { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
+  > => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    const { address } = getAccount(wagmiConfig);
+    const currentTimestamp = Date.now();
+    const currentDate = new Date(currentTimestamp);
+    const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
+
+    const delegatedWriteGrant = {
+      id: crypto.randomUUID(),
+      owner_wallet_identifier: address as string,
+      grantee_wallet_identifier: options.grantee.granteePublicKey,
+      issuer_public_key: options.grantee.granteePublicKey,
+      access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+      not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
+      not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
+    };
+
+    send("update-create-dwg-status", {
+      status: "start-verification",
+      meta: {
+        url: options.grantee.meta.url,
+        name: options.grantee.meta.name,
+        logo: options.grantee.meta.logo,
+        KYCPermissions: options.KYCPermissions,
+      },
+    });
+
+    const message: string = await requestDWGSignature(kwilClient, delegatedWriteGrant);
+
+    const [error, signature] = await goTry(() => signMessage(wagmiConfig, { message }));
+
+    if (error) {
+      send("update-create-dwg-status", {
+        status: "error",
+      });
+
+      return;
+    }
+
+    send("update-create-dwg-status", {
+      status: "success",
+    });
+
+    return { signature, writeGrant: delegatedWriteGrant };
+  };
+
   /**
    * Sets up the communication channel with the Isle iframe
    * Initializes message handlers and establishes the connection
@@ -162,8 +250,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       heartbeat: true,
       name: "window",
     });
-
-    channel.start();
 
     // Handle initialization completion
     channel.on("initialized", async () => {
@@ -198,7 +284,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const matchingCredentials = originalCredentials.filter((cred) => {
         const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return options.knownIssuers?.some(
+        return options.acceptedIssuers?.some(
           (issuer) =>
             issuer.authPublicKey === cred.issuer_auth_public_key &&
             issuer.credentialType.includes(publicNotes.type),
@@ -247,6 +333,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
     });
+
+    channel.start();
   };
 
   /**
@@ -390,5 +478,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     destroy,
     send,
     on,
+    requestDelegatedWriteGrant,
   };
 };

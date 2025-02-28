@@ -1,7 +1,12 @@
-import { base64Decode, hexEncodeSha256Hash } from "@idos-network/core";
+import {
+  createAccessGrantByDag as _createAccessGrantByDag,
+  base64Decode,
+  decryptContent,
+  hexEncodeSha256Hash,
+} from "@idos-network/core";
+import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
-import { createActionInput, decryptContent } from "./internal";
 
 interface CreateAccessGrantFromDAGParams {
   dag_data_id: string;
@@ -16,7 +21,7 @@ export async function createAccessGrantFromDAG(
   issuerConfig: IssuerConfig,
   params: CreateAccessGrantFromDAGParams,
 ) {
-  const { kwilClient, kwilSigner } = issuerConfig;
+  const { kwilClient } = issuerConfig;
 
   const credentialId = await getCredentialIdByContentHash(issuerConfig, params.dag_content_hash);
 
@@ -24,14 +29,18 @@ export async function createAccessGrantFromDAG(
     throw new Error("idOSCredential not found");
   }
 
-  const credential = await getSharedCredential(issuerConfig, credentialId);
+  const [credential] = await getSharedCredential(issuerConfig, credentialId);
 
   if (!credential) {
-    throw new Error("idOSCredential not found");
+    throw new Error("`idOSCredential` not found");
   }
+
+  const message = base64Decode(credential.content);
+  const nonce = message.slice(0, nacl.box.nonceLength);
 
   const plaintextContent = decryptContent(
     base64Decode(credential.content),
+    nonce,
     base64Decode(credential.encryptor_public_key),
     issuerConfig.encryptionSecretKey,
   );
@@ -41,17 +50,10 @@ export async function createAccessGrantFromDAG(
 
   // Check if the content hash matches the content hash in the credential
   if (contentHash !== params.dag_content_hash) {
-    throw new Error("Hash mismatch between DAG and idOSCredential content");
+    throw new Error("Hash mismatch between `DAG` and `idOSCredential` content");
   }
 
-  const result = await kwilClient.execute(
-    {
-      name: "create_ag_by_dag_for_copy",
-      inputs: [createActionInput(params)],
-    },
-    kwilSigner,
-    true,
-  );
+  const result = await _createAccessGrantByDag(kwilClient, params);
 
-  return result?.data?.tx_hash ?? null;
+  return result ?? null;
 }

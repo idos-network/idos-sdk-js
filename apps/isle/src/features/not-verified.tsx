@@ -10,7 +10,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
 import { Icon } from "@/components/icons/icon";
@@ -53,7 +53,7 @@ function KYCInfo({ values }: { values: string[] }) {
   );
 }
 
-function RequestedPermissions() {
+function RequestedPermissions({ values }: { values: string[] }) {
   return (
     <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} p="4" borderRadius="3xl">
       <VStack gap="2" alignItems="stretch">
@@ -69,27 +69,18 @@ function RequestedPermissions() {
             Grant access to your KYC data like:
           </Text>
         </HStack>
-        <KYCInfo
-          values={[
-            "Name and last name",
-            "Gender",
-            "Country and city of residence",
-            "Place and date of birth",
-            "ID Document",
-            "Liveness check (No pictures)",
-          ]}
-        />
+        <KYCInfo values={values} />
       </VStack>
     </Stack>
   );
 }
 
 // @todo: Image, title and permissions should be consumed from the store or config
-function Header({ name }: { name: string }) {
+function Header({ name, logo }: { name: string; logo: string }) {
   return (
     <Flex gap="2.5" alignItems="center">
       <Circle size="30px" bg="white">
-        <Image src="/common.svg" />
+        <Image src={logo} alt={name} width="30px" height="30px" rounded="full" />
       </Circle>
       <Text gap="1" alignItems="baseline" display="flex">
         <Text as="span" fontWeight="medium" fontSize="lg">
@@ -106,20 +97,49 @@ function Header({ name }: { name: string }) {
 export function NotVerified() {
   const node = useIsleStore((state) => state.node);
   const [status, setStatus] = useState<
-    "idle" | "pending" | "success" | "start-verification" | "error"
+    "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
+  const hasRequestedRef = useRef(false);
+
+  const [meta, setMeta] = useState<{
+    url: string;
+    name: string;
+    logo: string;
+    KYCPermissions: string[];
+  } | null>(null);
 
   useEffect(() => {
-    node?.post("request-dwg", {});
-    node?.on("update-create-dwg-status", ({ status }) => {
-      setStatus(status);
+    if (!node || hasRequestedRef.current) return;
+
+    // Mark that we've made the request
+    hasRequestedRef.current = true;
+
+    // Set up the event listener
+    node.on("update-create-dwg-status", (data) => {
+      setStatus(data.status);
+      if (data.status === "start-verification") {
+        setMeta(data.meta);
+      }
       if (status === "success") {
         setTimeout(() => {
-          setStatus("start-verification");
+          setStatus("verify-identity");
         }, 2000);
       }
     });
-  }, [node]);
+  }, [node, status]);
+
+  if (status === "idle") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          You are not verified yet.
+        </Heading>
+        <Text color="neutral.500" fontSize="sm" textAlign="center">
+          Please verify your identity to proceed.
+        </Text>
+      </Center>
+    );
+  }
 
   if (status === "pending") {
     return (
@@ -177,7 +197,9 @@ export function NotVerified() {
         <Button
           w="full"
           onClick={() => {
-            node?.post("request-dwg", {});
+            node?.post("updated", {
+              status: "not-verified",
+            });
           }}
         >
           Try again
@@ -186,7 +208,7 @@ export function NotVerified() {
     );
   }
 
-  if (status === "start-verification") {
+  if (status === "verify-identity") {
     return (
       <Center flexDir="column" gap="6">
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
@@ -197,7 +219,14 @@ export function NotVerified() {
           This application is asking you to verify your identity. You will now be led to a KYC
           journey to complete the process.
         </Text>
-        <Button w="full">Verify your identity</Button>
+        <Button
+          w="full"
+          onClick={() => {
+            node?.post("verify-identity", {});
+          }}
+        >
+          Verify your identity
+        </Button>
       </Center>
     );
   }
@@ -212,10 +241,10 @@ export function NotVerified() {
         To proceed, please confirm in your wallet.
       </Text>
       <Stack gap="4">
-        <Header name="Common" />
+        <Header name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         <Stack gap="2">
-          <RequestedPermissions />
-          <Disclaimer name="Common" />
+          <RequestedPermissions values={meta?.KYCPermissions ?? []} />
+          <Disclaimer name={meta?.name ?? ""} />
         </Stack>
       </Stack>
     </Stack>
