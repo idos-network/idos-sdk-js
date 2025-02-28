@@ -1,20 +1,13 @@
-import {
-  type BreadcrumbLinkProps,
-  Flex,
-  Icon,
-  Image,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { type BreadcrumbLinkProps, Flex, Icon, Image, Stack, Text } from "@chakra-ui/react";
 import { useState } from "react";
-import { LuCheck, LuChevronLeft } from "react-icons/lu";
+import { LuChevronLeft } from "react-icons/lu";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui";
 import { Button } from "@/components/ui";
+import { RevokeConfirmation } from "./revoke-permission";
 
 const mockKycData = {
   gender: "Female",
@@ -26,7 +19,7 @@ const mockKycData = {
   city: "Texas",
 };
 
-interface Permission {
+export interface Permission {
   name: string;
   hasGrant: boolean;
   icon: string;
@@ -37,93 +30,14 @@ interface PermissionProps extends Permission {
   onRevoke: () => void;
 }
 
-const themedColor = {
+export const themedColor = {
   _dark: "neutral.50",
   _light: "neutral.950",
 };
 
-const deletionStyle = {
+export const deletionStyle = {
   color: { _dark: "aquamarine.400", _light: "aquamarine.800" },
   bg: { _dark: "aquamarine.400/30", _light: "aquamarine.200" },
-};
-
-const RevokedPermission = ({ permission }: { permission: Permission }) => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Circle icon={permission.icon} />
-      <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-        {permission.name}
-      </Text>
-      <Icon fontSize="2xl" color={themedColor}>
-        <LuChevronLeft />
-      </Icon>
-      <Text fontSize="sm">KYC Data</Text>
-    </Flex>
-  );
-};
-
-const Revoking = () => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Spinner size="sm" />
-      <Text fontSize="sm">Revoking...</Text>
-    </Flex>
-  );
-};
-
-const Revoked = () => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Icon fontSize="2xl" color={themedColor}>
-        <LuCheck />
-      </Icon>
-      <Text fontSize="sm">Revoked</Text>
-    </Flex>
-  );
-};
-
-const RevokeConfirmation = ({
-  onCancel,
-  permission,
-}: { onCancel: () => void; permission: Permission }) => {
-  const [isRevoking, setIsRevoking] = useState(false);
-  const [isRevoked, setIsRevoked] = useState(false);
-  const mockRevoking = async () => {
-    setIsRevoking(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsRevoking(false);
-    setIsRevoked(true);
-  };
-
-  if (isRevoking) {
-    return <Revoking />;
-  }
-
-  if (isRevoked) {
-    return <Revoked />;
-  }
-
-  return (
-    <Stack gap="6">
-      <Text textAlign="center" fontSize="lg" fontWeight="semibold">
-        Are you sure you want to revoke access to this data?
-      </Text>
-      <RevokedPermission permission={permission} />
-      <Stack gap="3">
-        <Flex w="full" gap="2">
-          <Button onClick={onCancel} flex={1} {...deletionStyle}>
-            Cancel
-          </Button>
-          <Button onClick={mockRevoking} flex={1}>
-            Revoke
-          </Button>
-        </Flex>
-        <Text textAlign="left" fontSize="xs" color="neutral.500">
-          On timelocked AGs, show the End-Date of the Timelock and prevent to revoke access.
-        </Text>
-      </Stack>
-    </Stack>
-  );
 };
 
 export function DisconnectButton() {
@@ -321,6 +235,9 @@ export function Permissions() {
   if (permissionToRevoke) {
     return (
       <RevokeConfirmation
+        onSuccess={() => {
+          setPermissionToRevoke(null);
+        }}
         permission={permissionToRevoke}
         onCancel={() => setPermissionToRevoke(null)}
       />

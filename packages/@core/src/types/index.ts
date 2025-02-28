@@ -117,6 +117,12 @@ export type IsleNodeMessage =
     }
   | {
       type: "verify-identity";
+    }
+  | {
+      type: "revoke-grant";
+      data: {
+        grantId: string;
+      };
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

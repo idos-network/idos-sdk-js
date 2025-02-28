@@ -120,6 +120,10 @@ export default function Home() {
       }
     });
 
+    isleRef.current.on("revoke-grant", async ({ data }) => {
+      await isleRef.current?.revokeGrant(data.grantId);
+    });
+
     return () => {
       isleRef.current?.destroy();
       isleRef.current = null;

@@ -11,6 +11,7 @@ import {
   getAllCredentials,
   hasProfile,
   requestDWGSignature,
+  revokeGrant as revokeGrantKwil,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -98,6 +99,8 @@ interface idOSIsleController {
   requestDelegatedWriteGrant: (
     options: RequestDelegatedWriteGrantOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
+  /** Revokes an Access Grant for the given `grantId` */
+  revokeGrant: (grantId: string) => Promise<void>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -184,6 +187,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       connectionStatus: account.status,
       address: account.address,
     });
+  };
+
+  const revokeGrant = async (grantId: string): Promise<void> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    await revokeGrantKwil(kwilClient, grantId);
   };
 
   const requestDelegatedWriteGrant = async (
@@ -473,5 +481,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send,
     on,
     requestDelegatedWriteGrant,
+    revokeGrant,
   };
 };

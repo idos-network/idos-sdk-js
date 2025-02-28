@@ -84,4 +84,7 @@ export const useIsleStore = create<NodeState>((set) => ({
   createProfile: () => {
     useIsleStore.getState().node?.post("create-profile", {});
   },
+  revokeGrant: (grantId: string) => {
+    useIsleStore.getState().node?.post("revoke-grant", { grantId });
+  },
 }));
