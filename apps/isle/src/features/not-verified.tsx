@@ -123,7 +123,7 @@ export function NotVerified() {
       if (status === "success") {
         setTimeout(() => {
           setStatus("verify-identity");
-        }, 2000);
+        }, 5_000);
       }
     });
   }, [node, status]);
