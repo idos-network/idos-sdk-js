@@ -40,7 +40,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
       setStatus(status);
 
       if (status === "success") {
-        setTimeout(() => {}, 2000);
+        setTimeout(() => {}, 5_000);
       }
     });
   }, [node]);
