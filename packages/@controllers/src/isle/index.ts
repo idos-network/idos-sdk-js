@@ -11,6 +11,7 @@ import {
   getAllCredentials,
   hasProfile,
   requestDWGSignature,
+  revokeAccessGrant,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -332,6 +333,29 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const account = getAccount(wagmiConfig);
       const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
+    });
+
+    channel.on("revoke-access-grant", async ({ id }) => {
+      send("update-revoke-access-grant-status", {
+        status: "pending",
+      });
+
+      const [error, result] = await goTry(() => {
+        invariant(kwilClient, "No `KwilActionClient` found");
+        return revokeAccessGrant(kwilClient, id);
+      });
+
+      if (error) {
+        send("update-revoke-access-grant-status", {
+          status: "error",
+        });
+
+        return;
+      }
+
+      send("update-revoke-access-grant-status", {
+        status: "success",
+      });
     });
 
     channel.start();

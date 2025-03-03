@@ -41,3 +41,13 @@ export async function createAccessGrantByDag(
     inputs: params,
   });
 }
+
+/**
+ * Revokes an Access Grant for the given `id`.
+ */
+export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.execute({
+    name: "revoke_access_grant",
+    inputs: { id },
+  });
+}
