@@ -9,7 +9,9 @@ import {
   createKwilSigner,
   createWebKwilClient,
   getAllCredentials,
+  getSharedCredential,
   hasProfile,
+  type idOSCredential,
   requestDWGSignature,
   revokeAccessGrant,
 } from "@idos-network/core";
@@ -95,14 +97,16 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
-  /** Requests a delegated write grant for the given grantee */
+  /** Requests a `delegated write grant` for the given `grantee` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
-  /** Requests an access grant for the given grantee */
+  /** Requests an access grant for the given `grantee` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
-  /** Revokes an access grant for the given id */
+  /** Revokes an access grant for the given `id` */
   revokePermission: (id: string) => Promise<unknown>;
+  /** View credential details for the given `id` */
+  viewCredentialDetails: (id: string) => Promise<idOSCredential>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -283,6 +287,15 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     return result;
+  };
+
+  /**
+   * View credential details for the given `id`
+   */
+  const viewCredentialDetails = async (id: string): Promise<idOSCredential> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    const [credential] = await getSharedCredential(kwilClient, id);
+    return credential;
   };
 
   /**
@@ -565,5 +578,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,
+    viewCredentialDetails,
   };
 };

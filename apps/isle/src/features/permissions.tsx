@@ -430,7 +430,11 @@ export function Permissions() {
                         size="xs"
                         colorPalette="green"
                         rounded="full"
-                        onClick={() => {}}
+                        onClick={() => {
+                          node?.post("view-credential-details", {
+                            id: grant.dataId,
+                          });
+                        }}
                       >
                         <ViewIcon w="5" h="5" color="neutral.400" />
                       </IconButton>

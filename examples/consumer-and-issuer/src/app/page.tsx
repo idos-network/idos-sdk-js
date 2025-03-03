@@ -87,6 +87,11 @@ export default function Home() {
       // @todo: this should redirect the user to the issuer's knownKYC provider
     });
 
+    isleRef.current.on("view-credential-details", async ({ data }) => {
+      const credential = await isleRef.current?.viewCredentialDetails(data.id);
+      console.log(credential);
+    });
+
     isleRef.current.on("updated", async ({ data }) => {
       switch (data.status) {
         case "not-verified": {

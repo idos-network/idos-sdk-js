@@ -129,6 +129,12 @@ export type IsleControllerMessage =
         };
         KYCPermissions: string[];
       };
+    }
+  | {
+      type: "credential-details";
+      data: {
+        credential: idOSCredential;
+      };
     };
 
 export type IsleNodeMessage =
@@ -163,6 +169,12 @@ export type IsleNodeMessage =
     }
   | {
       type: "revoke-access-grant";
+      data: {
+        id: string;
+      };
+    }
+  | {
+      type: "view-credential-details";
       data: {
         id: string;
       };
