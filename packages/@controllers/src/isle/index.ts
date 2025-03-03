@@ -87,6 +87,8 @@ interface RequestDelegatedWriteGrantOptions {
 interface idOSIsleController {
   /** Initiates a wallet connection process */
   connect: () => Promise<void>;
+  /** Disconnects the current wallet connection */
+  disconnect: () => Promise<void>;
   /** Retrieves the current signer instance if available */
   getSigner: () => Promise<JsonRpcSigner | undefined>;
   /** Cleans up and removes the Isle instance */
@@ -108,14 +110,17 @@ let wagmiConfig: Config;
  * Initializes the wagmi configuration if it hasn't been initialized yet.
  * This is a singleton to ensure we only have one wagmi instance across the application.
  */
+
+const storage = createStorage({
+  key: "idos-isle",
+  storage: localStorage,
+});
+
 const initializeWagmi = (): void => {
   if (wagmiConfig) return;
 
   wagmiConfig = createConfig({
-    storage: createStorage({
-      key: "idOS:isle",
-      storage: localStorage,
-    }),
+    storage,
     chains: [mainnet, sepolia],
     connectors: [injected()],
     transports: {
@@ -254,6 +259,15 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     // Handle initialization completion
     channel.on("initialized", async () => {
+      const isDisconnected = await storage.getItem("disconnected");
+      if (isDisconnected) {
+        send("update", {
+          connectionStatus: "disconnected",
+          status: "no-profile",
+        });
+        return;
+      }
+
       const account = getAccount(wagmiConfig);
       await handleAccountChange(account);
 
@@ -403,6 +417,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   /**
+   * Disconnects the current wallet connection
+   */
+  const disconnect = async (): Promise<void> => {
+    await storage.setItem("disconnected", true);
+    await handleAccountChange({ status: "disconnected" });
+  };
+
+  /**
    * Sets up a subscription to wallet account changes
    */
   const watchAccountChanges = async (): Promise<void> => {
@@ -477,6 +499,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const connect = async (): Promise<void> => {
     try {
       await handleAccountChange({ status: "connecting" });
+      await storage.removeItem("disconnected");
 
       const result = await wagmiConnect(wagmiConfig, {
         connector: injected(),
@@ -526,5 +549,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send,
     on,
     requestDelegatedWriteGrant,
+    disconnect,
   };
 };

@@ -141,6 +141,9 @@ export type IsleNodeMessage =
       type: "verify-identity";
     }
   | {
+      type: "disconnect-wallet";
+    }
+  | {
       type: "revoke-access-grant";
       data: {
         id: string;

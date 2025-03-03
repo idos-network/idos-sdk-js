@@ -87,6 +87,10 @@ export default function Home() {
       // @todo: this should redirect the user to the issuer's knownKYC provider
     });
 
+    isleRef.current.on("disconnect-wallet", async () => {
+      await isleRef.current?.disconnect();
+    });
+
     isleRef.current.on("updated", async ({ data }) => {
       if (data.status === "not-verified") {
         const result = await isleRef.current?.requestDelegatedWriteGrant({
