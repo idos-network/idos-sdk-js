@@ -1,6 +1,18 @@
-import { Flex, HStack, Heading, Icon, IconButton, Image, Stack, Text } from "@chakra-ui/react";
-import { useMemo, useState } from "react";
-import { LuChevronRight } from "react-icons/lu";
+import {
+  Center,
+  Circle,
+  Flex,
+  HStack,
+  Heading,
+  Icon,
+  IconButton,
+  Image,
+  Spinner,
+  Stack,
+  Text,
+} from "@chakra-ui/react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { LuCheck, LuChevronRight } from "react-icons/lu";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
@@ -9,11 +21,90 @@ import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
-function GrantRevocation({
-  grant,
-  onCancel,
-  onRevoke,
-}: { grant: AccessGrant; onCancel: () => void; onRevoke: () => void }) {
+function GrantRevocation({ grant, onCancel }: { grant: AccessGrant; onCancel: () => void }) {
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
+  const node = useIsleStore((state) => state.node);
+  const hasRequestedRef = useRef(false);
+
+  useEffect(() => {
+    if (!node || hasRequestedRef.current) return;
+
+    // Mark that we've made the request
+    hasRequestedRef.current = true;
+
+    node?.on("update-revoke-access-grant-status", ({ status }) => {
+      setStatus(status);
+
+      if (status === "success") {
+        setTimeout(() => {}, 2000);
+      }
+    });
+  }, [node]);
+
+  if (status === "pending") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (status === "success") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          Permission revoked.
+        </Heading>
+        <Circle
+          size="12"
+          bg={{
+            _dark: "aquamarine.950",
+            _light: "aquamarine.400",
+          }}
+          boxShadow="md"
+        >
+          <Icon
+            color={{
+              _dark: "aquamarine.600",
+              _light: "aquamarine.700",
+            }}
+            as={LuCheck}
+          />
+        </Circle>
+      </Center>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Center flexDirection="column" gap="6">
+        <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
+          Error while revoking permission.
+        </Heading>
+        <Text
+          color="neutral.500"
+          fontWeight="medium"
+          fontSize="sm"
+          maxW="250px"
+          mx="auto"
+          textAlign="center"
+        >
+          Unexpected error occurred while revoking permission.
+        </Text>
+        <Button
+          w="full"
+          onClick={() => {
+            node?.post("revoke-access-grant", {
+              id: grant.id,
+            });
+          }}
+        >
+          Try again
+        </Button>
+      </Center>
+    );
+  }
+
   return (
     <Stack gap="6">
       <Text textAlign="center" fontSize="lg" fontWeight="semibold">
@@ -49,7 +140,14 @@ function GrantRevocation({
           >
             Cancel
           </Button>
-          <Button flex="1" onClick={onRevoke}>
+          <Button
+            flex="1"
+            onClick={() => {
+              node?.post("revoke-access-grant", {
+                id: grant.id,
+              });
+            }}
+          >
             Revoke
           </Button>
         </Flex>
