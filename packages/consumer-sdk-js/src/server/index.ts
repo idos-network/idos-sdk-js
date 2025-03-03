@@ -1,7 +1,7 @@
 import { idOSGrantee } from "./idOS-grantee.ts";
 
 export class idOSGranteeSDK {
-  constructor(private readonly grantee: idOSGrantee) { }
+  constructor(private readonly grantee: idOSGrantee) {}
 
   static async init(
     // @todo: not 100% sure if we want to keep this
