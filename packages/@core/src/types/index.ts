@@ -98,6 +98,12 @@ export type IsleControllerMessage =
           KYCPermissions: string[];
         };
       };
+    }
+  | {
+      type: "update-revoke-access-grant-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
     };
 
 export type IsleNodeMessage =
@@ -129,6 +135,12 @@ export type IsleNodeMessage =
     }
   | {
       type: "verify-identity";
+    }
+  | {
+      type: "revoke-access-grant";
+      data: {
+        id: string;
+      };
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (
