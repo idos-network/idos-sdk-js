@@ -1,191 +1,141 @@
-import {
-  type BreadcrumbLinkProps,
-  Flex,
-  Icon,
-  Image,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
-import { useState } from "react";
-import { LuCheck, LuChevronLeft } from "react-icons/lu";
+import { Flex, HStack, Heading, Icon, IconButton, Image, Stack, Text } from "@chakra-ui/react";
+import { useMemo, useState } from "react";
+import { LuChevronRight } from "react-icons/lu";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
-import { BreadcrumbLink, BreadcrumbRoot } from "@/components/ui";
-import { Button } from "@/components/ui";
+import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
+import { useIsleStore } from "@/store";
 
-const mockKycData = {
-  gender: "Female",
-  firstName: "John",
-  lastName: "Doe",
-  dataOfBirth: "1990-01-01",
-  placeOfBirth: "New York, NY",
-  countryOfResidence: "United States",
-  city: "Texas",
-};
-
-interface Permission {
-  name: string;
-  hasGrant: boolean;
-  icon: string;
-}
-
-interface PermissionProps extends Permission {
-  onClick: () => void;
-  onRevoke: () => void;
-}
-
-const themedColor = {
-  _dark: "neutral.50",
-  _light: "neutral.950",
-};
-
-const deletionStyle = {
-  color: { _dark: "aquamarine.400", _light: "aquamarine.800" },
-  bg: { _dark: "aquamarine.400/30", _light: "aquamarine.200" },
-};
-
-const RevokedPermission = ({ permission }: { permission: Permission }) => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Circle icon={permission.icon} />
-      <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-        {permission.name}
-      </Text>
-      <Icon fontSize="2xl" color={themedColor}>
-        <LuChevronLeft />
-      </Icon>
-      <Text fontSize="sm">KYC Data</Text>
-    </Flex>
-  );
-};
-
-const Revoking = () => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Spinner size="sm" />
-      <Text fontSize="sm">Revoking...</Text>
-    </Flex>
-  );
-};
-
-const Revoked = () => {
-  return (
-    <Flex alignItems="center" gap="2.5" justifyContent="center">
-      <Icon fontSize="2xl" color={themedColor}>
-        <LuCheck />
-      </Icon>
-      <Text fontSize="sm">Revoked</Text>
-    </Flex>
-  );
-};
-
-const RevokeConfirmation = ({
+// @todo: On timelocked AGs, show the End-Date of the Timelock and prevent to revoke access
+function GrantRevocation({
+  grant,
   onCancel,
-  permission,
-}: { onCancel: () => void; permission: Permission }) => {
-  const [isRevoking, setIsRevoking] = useState(false);
-  const [isRevoked, setIsRevoked] = useState(false);
-  const mockRevoking = async () => {
-    setIsRevoking(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsRevoking(false);
-    setIsRevoked(true);
-  };
-
-  if (isRevoking) {
-    return <Revoking />;
-  }
-
-  if (isRevoked) {
-    return <Revoked />;
-  }
-
+  onRevoke,
+}: { grant: AccessGrant; onCancel: () => void; onRevoke: () => void }) {
   return (
     <Stack gap="6">
       <Text textAlign="center" fontSize="lg" fontWeight="semibold">
         Are you sure you want to revoke access to this data?
       </Text>
-      <RevokedPermission permission={permission} />
+      <HStack alignItems="center" gap="2.5" justifyContent="center">
+        <Image
+          src={grant.grantee.logo}
+          alt={grant.grantee.name}
+          rounded="full"
+          w="30px"
+          h="30px"
+          shadow="md"
+        />
+        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+          {grant.grantee.name}
+        </Text>
+        <Icon
+          as={LuChevronRight}
+          fontSize="2xl"
+          color={{ _dark: "neutral.50", _light: "neutral.950" }}
+        />
+
+        <Text fontSize="sm">{grant.type}</Text>
+      </HStack>
       <Stack gap="3">
         <Flex w="full" gap="2">
-          <Button onClick={onCancel} flex={1} {...deletionStyle}>
+          <Button
+            flex="1"
+            color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
+            bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
+            onClick={onCancel}
+          >
             Cancel
           </Button>
-          <Button onClick={mockRevoking} flex={1}>
+          <Button flex="1" onClick={onRevoke}>
             Revoke
           </Button>
         </Flex>
-        <Text textAlign="left" fontSize="xs" color="neutral.500">
-          On timelocked AGs, show the End-Date of the Timelock and prevent to revoke access.
-        </Text>
       </Stack>
     </Stack>
   );
-};
-
-export function DisconnectButton() {
-  return <Button {...deletionStyle}>Disconnect</Button>;
 }
 
-export function RevokeButton({ onClick }: { onClick: () => void }) {
+function Breadcrumbs() {
   return (
-    <Button onClick={onClick}>
-      Revoke Access
-      <Icon w={5} h={5} color="neutral.950">
-        <DeleteIcon />
-      </Icon>
-    </Button>
-  );
-}
-
-export function Circle({ icon }: { icon: string }) {
-  return (
-    <Flex
-      alignItems="center"
-      justifyContent="center"
-      gap="2"
-      bg="white"
-      minW="30px"
-      h="30px"
-      borderRadius="full"
-      shadow="md"
+    <BreadcrumbRoot
+      size="lg"
+      separator={
+        <Icon
+          fontSize="2xl"
+          color={{ _dark: "neutral.50", _light: "neutral.950" }}
+          as={LuChevronRight}
+        />
+      }
     >
-      <Image src={icon} />
-    </Flex>
+      <BreadcrumbLink
+        fontSize="sm"
+        fontWeight="medium"
+        cursor="pointer"
+        color={{
+          _dark: "neutral.50",
+          _light: "neutral.950",
+        }}
+      >
+        Permissions
+      </BreadcrumbLink>
+      <BreadcrumbLink
+        fontSize="sm"
+        fontWeight="medium"
+        cursor="pointer"
+        color={{
+          _dark: "neutral.50",
+          _light: "neutral.950",
+        }}
+      >
+        KYC Data
+      </BreadcrumbLink>
+    </BreadcrumbRoot>
   );
 }
 
-function PermissionHeader({ name, icon, hasGrant }: Permission) {
+function CredentialDetails() {
   return (
-    <Flex justifyContent="space-between">
-      <Flex alignItems="center" gap="2.5">
-        <Circle icon={icon} />
-        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-          {name}
-        </Text>
-      </Flex>
-      <AuthorizedIcon color={hasGrant ? "aquamarine.400" : "neutral.400"} />
-    </Flex>
+    <Stack gap="6">
+      <Breadcrumbs />
+      <Stack gap="3">
+        <Flex justifyContent="space-between">
+          <Flex alignItems="center" gap="2.5">
+            <Image />
+            <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+              Common
+            </Text>
+          </Flex>
+          <AuthorizedIcon color="aquamarine.400" />
+        </Flex>
+        <CredentialContent />
+      </Stack>
+      <Button>
+        Revoke Access
+        <Icon w={5} h={5} color="neutral.950">
+          <DeleteIcon />
+        </Icon>
+      </Button>
+    </Stack>
   );
 }
 
-function KYCData() {
+function CredentialContent() {
   return (
     <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap="0">
-      {Object.entries(mockKycData).map(([key, value], index) => (
+      {Object.entries({}).map(([key, value], index) => (
         <Flex
           key={key}
-          py={3.5}
-          px={4}
+          py="3.5"
+          px="4"
           borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
-          borderBottomWidth={index === Object.keys(mockKycData).length - 1 ? 0 : 1}
+          borderBottomWidth={index === Object.keys({}).length - 1 ? 0 : 1}
           borderStyle="solid"
         >
           <Text
-            flex={1}
+            flex="1"
             fontSize="xs"
             fontWeight="medium"
             color={{ _dark: "neutral.50", _light: "neutral.950" }}
@@ -193,146 +143,41 @@ function KYCData() {
             {key}
           </Text>
           <Text
-            flex={1}
+            flex="1"
             fontSize="sm"
             fontWeight="medium"
             color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          >
-            {value}
-          </Text>
+          />
         </Flex>
       ))}
     </Stack>
   );
 }
 
-const StyledBreadcrumbLink = ({ children, ...props }: BreadcrumbLinkProps) => {
-  return (
-    <BreadcrumbLink
-      fontSize="sm"
-      fontWeight="medium"
-      cursor="pointer"
-      color={themedColor}
-      {...props}
-    >
-      {children}
-    </BreadcrumbLink>
-  );
-};
-
-const NavigationBreadcrumbs = ({ onClick }: { onClick: () => void }) => {
-  return (
-    <BreadcrumbRoot
-      size="lg"
-      separator={
-        <Icon fontSize="2xl" color={themedColor}>
-          <LuChevronLeft />
-        </Icon>
-      }
-    >
-      <StyledBreadcrumbLink onClick={onClick}>Permissions</StyledBreadcrumbLink>
-      <StyledBreadcrumbLink>KYC Data</StyledBreadcrumbLink>
-    </BreadcrumbRoot>
-  );
-};
-
-function PermissionView({ name, icon, hasGrant, onClick, onRevoke }: PermissionProps) {
-  return (
-    <Stack gap="6">
-      <NavigationBreadcrumbs onClick={onClick} />
-      <Stack gap="3">
-        <PermissionHeader name={name} icon={icon} hasGrant={hasGrant} />
-        <KYCData />
-      </Stack>
-      <RevokeButton onClick={onRevoke} />
-    </Stack>
-  );
+interface GranteeInfo {
+  name: string;
+  logo: string;
 }
-
-function Permission({ hasGrant, name, icon, onClick, onRevoke }: PermissionProps) {
-  return (
-    <Stack>
-      <PermissionHeader name={name} icon={icon} hasGrant={hasGrant} />
-      <Flex
-        bg={{ _dark: "neutral.800", _light: "neutral.200" }}
-        borderRadius="xl"
-        p={4}
-        justifyContent="space-between"
-      >
-        {hasGrant ? (
-          <Text
-            fontWeight="medium"
-            fontSize="sm"
-            color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          >
-            KYC Data
-          </Text>
-        ) : (
-          <Text fontWeight="medium" fontSize="sm" color="neutral.500">
-            No Permissions
-          </Text>
-        )}
-        {hasGrant && (
-          <Flex gap="2">
-            <Icon
-              as={ViewIcon}
-              w="5"
-              h="5"
-              cursor="pointer"
-              onClick={onClick}
-              color="neutral.400"
-            />
-            <Icon
-              as={DeleteIcon}
-              w="5"
-              h="5"
-              cursor="pointer"
-              color="neutral.400"
-              onClick={onRevoke}
-            />
-          </Flex>
-        )}
-      </Flex>
-    </Stack>
-  );
+interface AccessGrant {
+  id: string;
+  type: string;
+  grantee: GranteeInfo;
 }
 
 export function Permissions() {
-  const permissionList = [
-    {
-      name: "Common",
-      hasGrant: true,
-      icon: "/common.svg",
-    },
-    {
-      name: "Holyheld",
-      hasGrant: false,
-      icon: "/holyheld.svg",
-    },
-  ];
-  const [permission, setPermission] = useState<Permission | null>(null);
-  const [permissionToRevoke, setPermissionToRevoke] = useState<Permission | null>(null);
+  const accessGrants = useIsleStore((state) => state.accessGrants);
+  const [grantToRevoke, setGrantToRevoke] = useState<AccessGrant | null>(null);
 
-  const handleRevoke = (permission: Permission) => {
-    setPermissionToRevoke(permission);
-    setPermission(null);
-  };
+  const grants = useMemo(() => {
+    return Array.from(accessGrants?.entries() ?? []);
+  }, [accessGrants]);
 
-  if (permissionToRevoke) {
+  if (grantToRevoke) {
     return (
-      <RevokeConfirmation
-        permission={permissionToRevoke}
-        onCancel={() => setPermissionToRevoke(null)}
-      />
-    );
-  }
-
-  if (permission) {
-    return (
-      <PermissionView
-        onClick={() => setPermission(null)}
-        onRevoke={() => handleRevoke(permission)}
-        {...permission}
+      <GrantRevocation
+        grant={grantToRevoke}
+        onCancel={() => setGrantToRevoke(null)}
+        onRevoke={() => {}}
       />
     );
   }
@@ -340,18 +185,85 @@ export function Permissions() {
   return (
     <Stack>
       <Stack gap="6">
-        {permissionList.map((permission) => (
-          <Permission
-            key={permission.name}
-            {...permission}
-            onClick={() => setPermission(permission)}
-            onRevoke={() => handleRevoke(permission)}
-          />
+        {grants.map(([key, value]) => (
+          <Stack key={key.name} gap="3">
+            <HStack justifyContent="space-between" alignItems="center">
+              <HStack gap="2.5">
+                <Image src={key.logo} alt={key.name} rounded="full" w="30px" h="30px" shadow="md" />
+                <Heading
+                  as="h3"
+                  fontWeight="semibold"
+                  fontSize="lg"
+                  color={{ _dark: "neutral.50", _light: "neutral.950" }}
+                >
+                  {key.name}
+                </Heading>
+              </HStack>
+              <AuthorizedIcon color={value.length > 0 ? "aquamarine.400" : "neutral.400"} />
+            </HStack>
+            <Stack>
+              {value.length === 0 ? (
+                <HStack
+                  bg={{ _dark: "neutral.800", _light: "neutral.200" }}
+                  borderRadius="xl"
+                  p={4}
+                >
+                  <Text fontSize="sm" color="neutral.500">
+                    No Permissions
+                  </Text>
+                </HStack>
+              ) : (
+                value.map((grant) => (
+                  <HStack
+                    key={grant.id}
+                    justifyContent="space-between"
+                    bg={{ _dark: "neutral.800", _light: "neutral.200" }}
+                    borderRadius="xl"
+                    p={4}
+                  >
+                    <Text key={grant.id}>{grant.type}</Text>
+                    <HStack gap="2">
+                      <IconButton
+                        aria-label="View"
+                        variant="ghost"
+                        size="xs"
+                        colorPalette="green"
+                        rounded="full"
+                        onClick={() => {}}
+                      >
+                        <ViewIcon w="5" h="5" color="neutral.400" />
+                      </IconButton>
+
+                      <IconButton
+                        aria-label="Revoke"
+                        variant="ghost"
+                        size="xs"
+                        colorPalette="green"
+                        rounded="full"
+                        onClick={() => {
+                          setGrantToRevoke({
+                            id: grant.id,
+                            type: grant.type,
+                            grantee: key,
+                          });
+                        }}
+                      >
+                        <DeleteIcon w="5" h="5" color="neutral.400" />
+                      </IconButton>
+                    </HStack>
+                  </HStack>
+                ))
+              )}
+            </Stack>
+          </Stack>
         ))}
+        <Button
+          color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
+          bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
+        >
+          Disconnect
+        </Button>
       </Stack>
-      <Flex mt="6" justifyContent="center">
-        <DisconnectButton />
-      </Flex>
     </Stack>
   );
 }
