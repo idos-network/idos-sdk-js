@@ -100,7 +100,9 @@ interface idOSIsleController {
     options: RequestPermissionOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
   /** Requests an access grant for the given grantee */
-  requestAccessGrant: (options: RequestPermissionOptions) => Promise<void>;
+  requestPermission: (options: RequestPermissionOptions) => Promise<void>;
+  /** Revokes an access grant for the given id */
+  revokePermission: (id: string) => Promise<unknown>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -242,7 +244,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   /**
    * Requests an access grant for the given grantee
    */
-  const requestAccessGrant = async (options: RequestPermissionOptions): Promise<void> => {
+  const requestPermission = async (options: RequestPermissionOptions): Promise<void> => {
     invariant(kwilClient, "No `KwilActionClient` found");
 
     send("update-request-access-grant-status", {
@@ -250,6 +252,37 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       grantee: options.grantee,
       KYCPermissions: options.KYCPermissions,
     });
+
+    // @todo: implement the request permission logic.
+  };
+
+  /**
+   * Revokes an access grant for the given id
+   */
+  const revokePermission = async (id: string): Promise<unknown> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    send("update-revoke-access-grant-status", {
+      status: "pending",
+    });
+
+    const [error, result] = await goTry(() => {
+      invariant(kwilClient, "No `KwilActionClient` found");
+      return revokeAccessGrant(kwilClient, id);
+    });
+
+    if (error) {
+      send("update-revoke-access-grant-status", {
+        status: "error",
+      });
+
+      return;
+    }
+
+    send("update-revoke-access-grant-status", {
+      status: "success",
+    });
+
+    return result;
   };
 
   /**
@@ -383,29 +416,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const account = getAccount(wagmiConfig);
       const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
-    });
-
-    channel.on("revoke-access-grant", async ({ id }) => {
-      send("update-revoke-access-grant-status", {
-        status: "pending",
-      });
-
-      const [error, result] = await goTry(() => {
-        invariant(kwilClient, "No `KwilActionClient` found");
-        return revokeAccessGrant(kwilClient, id);
-      });
-
-      if (error) {
-        send("update-revoke-access-grant-status", {
-          status: "error",
-        });
-
-        return;
-      }
-
-      send("update-revoke-access-grant-status", {
-        status: "success",
-      });
     });
 
     channel.start();
@@ -553,6 +563,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send,
     on,
     requestDelegatedWriteGrant,
-    requestAccessGrant,
+    requestPermission,
+    revokePermission,
   };
 };
