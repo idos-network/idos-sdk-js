@@ -8,7 +8,7 @@ import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 
-// @todo: On timelocked AGs, show the End-Date of the Timelock and prevent to revoke access
+// @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
 function GrantRevocation({
   grant,
   onCancel,
