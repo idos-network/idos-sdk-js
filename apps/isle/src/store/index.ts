@@ -16,7 +16,7 @@ interface NodeState {
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   accessGrants: Map<
-    { name: string; logo: string },
+    { granteePublicKey: string; meta: { name: string; logo: string; url: string } },
     { id: string; dataId: string; type: string }[]
   > | null;
   initializeNode: () => () => void;

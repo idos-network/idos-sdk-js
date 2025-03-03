@@ -62,10 +62,10 @@ interface idOSIsleControllerOptions {
 }
 
 /**
- * Options for requesting a delegated write grant
+ * Options for requesting a delegated write grant or an access grant
  * @interface RequestDelegatedWriteGrantOptions
  */
-interface RequestDelegatedWriteGrantOptions {
+interface RequestPermissionOptions {
   /** The grantee information */
   grantee: {
     /** The public key of the grantee */
@@ -97,8 +97,10 @@ interface idOSIsleController {
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
   /** Requests a delegated write grant for the given grantee */
   requestDelegatedWriteGrant: (
-    options: RequestDelegatedWriteGrantOptions,
+    options: RequestPermissionOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
+  /** Requests an access grant for the given grantee */
+  requestAccessGrant: (options: RequestPermissionOptions) => Promise<void>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -188,7 +190,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const requestDelegatedWriteGrant = async (
-    options: RequestDelegatedWriteGrantOptions,
+    options: RequestPermissionOptions,
   ): Promise<
     { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
   > => {
@@ -235,6 +237,19 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     return { signature, writeGrant: delegatedWriteGrant };
+  };
+
+  /**
+   * Requests an access grant for the given grantee
+   */
+  const requestAccessGrant = async (options: RequestPermissionOptions): Promise<void> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+
+    send("update-request-access-grant-status", {
+      status: "request-permission",
+      grantee: options.grantee,
+      KYCPermissions: options.KYCPermissions,
+    });
   };
 
   /**
@@ -319,7 +334,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const accessGrants = new Map();
       accessGrants.set(
-        { name: "Random Grantee", logo: "https://avatars.githubusercontent.com/u/4081301?v=4" },
+        {
+          granteePublicKey: "0x123",
+          meta: {
+            name: "Random Grantee",
+            logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+          },
+        },
         [
           {
             id: crypto.randomUUID(),
@@ -335,7 +356,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       );
 
       accessGrants.set(
-        { name: "Random Grantee 2", logo: "https://avatars.githubusercontent.com/u/4081302?v=4" },
+        {
+          granteePublicKey: "0x456",
+          meta: {
+            name: "Random Grantee 2",
+            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+          },
+        },
         [],
       );
 
@@ -462,7 +489,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     handler: IsleMessageHandler<T>,
   ): (() => void) => {
     const cleanup = channel?.on(type, (data) => {
-      handler({ type, data } as Extract<IsleNodeMessage, { type: T }>);
+      handler({ type, data } as unknown as Extract<IsleNodeMessage, { type: T }>);
     });
 
     return () => {
@@ -526,5 +553,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send,
     on,
     requestDelegatedWriteGrant,
+    requestAccessGrant,
   };
 };
