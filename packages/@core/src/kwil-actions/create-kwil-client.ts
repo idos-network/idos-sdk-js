@@ -1,5 +1,4 @@
-import { type KwilSigner, NodeKwil, Utils, WebKwil } from "@kwilteam/kwil-js";
-import type { ActionBody } from "@kwilteam/kwil-js/dist/core/action";
+import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 
 interface CreateKwilClientParams {
