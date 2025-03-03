@@ -73,6 +73,10 @@ export type IsleControllerMessage =
         address?: string;
         theme?: IsleTheme;
         status?: IsleStatus;
+        accessGrants?: WeakMap<
+          { name: string; logo: string },
+          { id: string; dataId: string; type: string }[]
+        >;
       };
     }
   | {

@@ -317,8 +317,31 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         return;
       }
 
+      const accessGrants = new Map();
+      accessGrants.set(
+        { name: "Random Grantee", logo: "https://avatars.githubusercontent.com/u/4081301?v=4" },
+        [
+          {
+            id: crypto.randomUUID(),
+            dataId: crypto.randomUUID(),
+            type: "KYC Data",
+          },
+          {
+            id: crypto.randomUUID(),
+            dataId: crypto.randomUUID(),
+            type: "KYC Data (2)",
+          },
+        ],
+      );
+
+      accessGrants.set(
+        { name: "Random Grantee 2", logo: "https://avatars.githubusercontent.com/u/4081302?v=4" },
+        [],
+      );
+
       send("update", {
         status: "verified",
+        accessGrants,
       });
     });
 

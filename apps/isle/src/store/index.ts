@@ -15,6 +15,10 @@ interface NodeState {
   status: IsleStatus;
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
+  accessGrants: Map<
+    { name: string; logo: string },
+    { id: string; dataId: string; type: string }[]
+  > | null;
   initializeNode: () => () => void;
   connectWallet: () => void;
   linkWallet: () => void;
@@ -55,6 +59,7 @@ export const useIsleStore = create<NodeState>((set) => ({
   connectionStatus: "initializing",
   address: undefined,
   status: "initializing",
+  accessGrants: null,
   node: null,
   initializeNode: () => {
     const node = createNode<IsleNodeMessage, IsleControllerMessage>({
