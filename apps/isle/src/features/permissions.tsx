@@ -21,7 +21,11 @@ import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
-function GrantRevocation({ grant, onCancel }: { grant: AccessGrant; onCancel: () => void }) {
+interface GrantRevocationProps {
+  grant: AccessGrant;
+  onDismiss: () => void;
+}
+function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
@@ -136,7 +140,7 @@ function GrantRevocation({ grant, onCancel }: { grant: AccessGrant; onCancel: ()
             flex="1"
             color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
             bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
-            onClick={onCancel}
+            onClick={onDismiss}
           >
             Cancel
           </Button>
@@ -194,6 +198,7 @@ function Breadcrumbs() {
   );
 }
 
+//@ts-ignore
 function CredentialDetails() {
   return (
     <Stack gap="6">
@@ -223,7 +228,7 @@ function CredentialDetails() {
 function CredentialContent() {
   return (
     <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap="0">
-      {Object.entries({}).map(([key, value], index) => (
+      {Object.entries({ name: "John" }).map(([key, value], index) => (
         <Flex
           key={key}
           py="3.5"
@@ -245,7 +250,9 @@ function CredentialContent() {
             fontSize="sm"
             fontWeight="medium"
             color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          />
+          >
+            {value}
+          </Text>
         </Flex>
       ))}
     </Stack>
@@ -271,13 +278,7 @@ export function Permissions() {
   }, [accessGrants]);
 
   if (grantToRevoke) {
-    return (
-      <GrantRevocation
-        grant={grantToRevoke}
-        onCancel={() => setGrantToRevoke(null)}
-        onRevoke={() => {}}
-      />
-    );
+    return <GrantRevocation grant={grantToRevoke} onDismiss={() => setGrantToRevoke(null)} />;
   }
 
   return (
