@@ -1,10 +1,9 @@
 import {
+  Box,
   Center,
   Circle,
-  Flex,
   HStack,
   Heading,
-  Image,
   Spinner,
   Stack,
   Text,
@@ -13,45 +12,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
+import { Disclaimer } from "@/components/disclaimer";
+import { GranteeInfo } from "@/components/grantee-info";
 import { Icon } from "@/components/icons/icon";
 import { IdentityIcon } from "@/components/icons/identity";
 import { KeyIcon } from "@/components/icons/key";
+import { KYCInfo } from "@/components/kyc-info";
 import { Button, Stepper } from "@/components/ui";
 import { useIsleStore } from "@/store";
-
-function Disclaimer({ name }: { name: string }) {
-  return (
-    <Flex
-      gap="2"
-      bg={{ _dark: "neutral.800", _light: "neutral.200" }}
-      p="4"
-      borderRadius="3xl"
-      alignItems="center"
-    >
-      <Text fontSize="xs" color="neutral.500">
-        Make sure you trust{" "}
-        <Text as="span" color="neutral.400" fontWeight="semibold">
-          {name}
-        </Text>
-        , as you may be sharing sensitive data with this site or app.
-      </Text>
-    </Flex>
-  );
-}
-
-function KYCInfo({ values }: { values: string[] }) {
-  return (
-    <Stack gap="2">
-      <Stack gap="1">
-        {values.map((value) => (
-          <Text key={value} fontSize="xs" color="neutral.500">
-            {value}
-          </Text>
-        ))}
-      </Stack>
-    </Stack>
-  );
-}
 
 function RequestedPermissions({ values }: { values: string[] }) {
   return (
@@ -72,25 +40,6 @@ function RequestedPermissions({ values }: { values: string[] }) {
         <KYCInfo values={values} />
       </VStack>
     </Stack>
-  );
-}
-
-// @todo: Image, title and permissions should be consumed from the store or config
-function Header({ name, logo }: { name: string; logo: string }) {
-  return (
-    <Flex gap="2.5" alignItems="center">
-      <Circle size="30px" bg="white">
-        <Image src={logo} alt={name} width="30px" height="30px" rounded="full" />
-      </Circle>
-      <Text gap="1" alignItems="baseline" display="flex">
-        <Text as="span" fontWeight="medium" fontSize="lg">
-          {name}
-        </Text>
-        <Text as="span" fontSize="sm">
-          is asking for permissions to:
-        </Text>
-      </Text>
-    </Flex>
   );
 }
 
@@ -171,6 +120,8 @@ export function NotVerified() {
               _light: "aquamarine.700",
             }}
             as={LuCheck}
+            w="6"
+            h="6"
           />
         </Circle>
       </Center>
@@ -241,10 +192,12 @@ export function NotVerified() {
         To proceed, please confirm in your wallet.
       </Text>
       <Stack gap="4">
-        <Header name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
+        <GranteeInfo name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         <Stack gap="2">
-          <RequestedPermissions values={meta?.KYCPermissions ?? []} />
-          <Disclaimer name={meta?.name ?? ""} />
+          <Box pl="7">
+            <RequestedPermissions values={meta?.KYCPermissions ?? []} />
+          </Box>
+          <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
       </Stack>
     </Stack>

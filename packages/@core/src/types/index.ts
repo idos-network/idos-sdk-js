@@ -108,6 +108,27 @@ export type IsleControllerMessage =
       data: {
         status: "idle" | "pending" | "success" | "error";
       };
+    }
+  | {
+      type: "update-request-access-grant-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
+    }
+  | {
+      type: "update-request-access-grant-status";
+      data: {
+        status: "request-permission";
+        grantee: {
+          granteePublicKey: string;
+          meta: {
+            url: string;
+            name: string;
+            logo: string;
+          };
+        };
+        KYCPermissions: string[];
+      };
     };
 
 export type IsleNodeMessage =

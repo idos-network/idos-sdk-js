@@ -19,10 +19,11 @@ import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
+import { RequestPermission } from "./request-permission";
 
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
 interface GrantRevocationProps {
-  grant: AccessGrant;
+  grant: AccessGrantWithGrantee;
   onDismiss: () => void;
 }
 function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
@@ -116,15 +117,15 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
       </Text>
       <HStack alignItems="center" gap="2.5" justifyContent="center">
         <Image
-          src={grant.grantee.logo}
-          alt={grant.grantee.name}
+          src={grant.grantee.meta.logo}
+          alt={grant.grantee.meta.name}
           rounded="full"
           w="30px"
           h="30px"
           shadow="md"
         />
         <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-          {grant.grantee.name}
+          {grant.grantee.meta.name}
         </Text>
         <Icon
           as={LuChevronRight}
@@ -260,10 +261,14 @@ function CredentialContent() {
 }
 
 interface GranteeInfo {
-  name: string;
-  logo: string;
+  granteePublicKey: string;
+  meta: {
+    url: string;
+    name: string;
+    logo: string;
+  };
 }
-interface AccessGrant {
+interface AccessGrantWithGrantee {
   id: string;
   type: string;
   grantee: GranteeInfo;
@@ -271,7 +276,34 @@ interface AccessGrant {
 
 export function Permissions() {
   const accessGrants = useIsleStore((state) => state.accessGrants);
-  const [grantToRevoke, setGrantToRevoke] = useState<AccessGrant | null>(null);
+  const [grantToRevoke, setGrantToRevoke] = useState<AccessGrantWithGrantee | null>(null);
+  const [permissionStatus, setPermissionStatus] = useState<
+    "idle" | "request-permission" | "pending" | "success" | "error"
+  >("idle");
+  const [grantee, setGrantee] = useState<GranteeInfo | null>(null);
+  const [kycPermissions, setRequestedPermissions] = useState<string[]>([]);
+  const node = useIsleStore((state) => state.node);
+  const hasRequestedRef = useRef(false);
+
+  useEffect(() => {
+    if (!node || hasRequestedRef.current) return;
+
+    // Mark that we've made the request
+    hasRequestedRef.current = true;
+
+    node.on("update-request-access-grant-status", (data) => {
+      setPermissionStatus(data.status);
+      if (data.status === "request-permission") {
+        setRequestedPermissions(data.KYCPermissions);
+        setGrantee(data.grantee);
+      }
+      if (data.status === "success") {
+        setTimeout(() => {
+          setPermissionStatus("idle");
+        }, 5_000);
+      }
+    });
+  }, [node]);
 
   const grants = useMemo(() => {
     return Array.from(accessGrants?.entries() ?? []);
@@ -281,27 +313,97 @@ export function Permissions() {
     return <GrantRevocation grant={grantToRevoke} onDismiss={() => setGrantToRevoke(null)} />;
   }
 
+  if (permissionStatus === "request-permission" && grantee && kycPermissions) {
+    return <RequestPermission grantee={grantee.meta} permissions={kycPermissions} />;
+  }
+
+  if (permissionStatus === "pending") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          Granting access
+        </Heading>
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (permissionStatus === "error") {
+    return (
+      <Center flexDirection="column" gap="6">
+        <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
+          Error while requesting permissions.
+        </Heading>
+        <Text
+          color="neutral.500"
+          fontWeight="medium"
+          fontSize="sm"
+          maxW="250px"
+          mx="auto"
+          textAlign="center"
+        >
+          An unexpected error occurred while requesting permissions.
+        </Text>
+      </Center>
+    );
+  }
+
+  if (permissionStatus === "success") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          Access Granted.
+        </Heading>
+        <Circle
+          size="12"
+          bg={{
+            _dark: "aquamarine.950",
+            _light: "aquamarine.400",
+          }}
+          boxShadow="md"
+        >
+          <Icon
+            color={{
+              _dark: "aquamarine.600",
+              _light: "aquamarine.700",
+            }}
+            as={LuCheck}
+            w="6"
+            h="6"
+          />
+        </Circle>
+      </Center>
+    );
+  }
+
   return (
     <Stack>
       <Stack gap="6">
-        {grants.map(([key, value]) => (
-          <Stack key={key.name} gap="3">
+        {grants.map(([grantee, values]) => (
+          <Stack key={grantee.granteePublicKey} gap="3">
             <HStack justifyContent="space-between" alignItems="center">
               <HStack gap="2.5">
-                <Image src={key.logo} alt={key.name} rounded="full" w="30px" h="30px" shadow="md" />
+                <Image
+                  src={grantee.meta.logo}
+                  alt={grantee.meta.name}
+                  rounded="full"
+                  w="30px"
+                  h="30px"
+                  shadow="md"
+                />
                 <Heading
                   as="h3"
                   fontWeight="semibold"
                   fontSize="lg"
                   color={{ _dark: "neutral.50", _light: "neutral.950" }}
                 >
-                  {key.name}
+                  {grantee.meta.name}
                 </Heading>
               </HStack>
-              <AuthorizedIcon color={value.length > 0 ? "aquamarine.400" : "neutral.400"} />
+              <AuthorizedIcon color={values.length > 0 ? "aquamarine.400" : "neutral.400"} />
             </HStack>
             <Stack>
-              {value.length === 0 ? (
+              {values.length === 0 ? (
                 <HStack
                   bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                   borderRadius="xl"
@@ -312,7 +414,7 @@ export function Permissions() {
                   </Text>
                 </HStack>
               ) : (
-                value.map((grant) => (
+                values.map((grant) => (
                   <HStack
                     key={grant.id}
                     justifyContent="space-between"
@@ -341,9 +443,9 @@ export function Permissions() {
                         rounded="full"
                         onClick={() => {
                           setGrantToRevoke({
+                            grantee,
                             id: grant.id,
                             type: grant.type,
-                            grantee: key,
                           });
                         }}
                       >

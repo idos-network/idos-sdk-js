@@ -88,31 +88,59 @@ export default function Home() {
     });
 
     isleRef.current.on("updated", async ({ data }) => {
-      if (data.status === "not-verified") {
-        const result = await isleRef.current?.requestDelegatedWriteGrant({
-          grantee: {
-            granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-            meta: {
-              url: "https://idos.network",
-              name: "idOS",
-              logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+      switch (data.status) {
+        case "not-verified": {
+          const result = await isleRef.current?.requestDelegatedWriteGrant({
+            grantee: {
+              granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+              meta: {
+                url: "https://idos.network",
+                name: "idOS",
+                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+              },
             },
-          },
-          KYCPermissions: [
-            "Name and last name",
-            "Gender",
-            "Country and city of residence",
-            "Place and date of birth",
-            "ID Document",
-            "Liveness check (No pictures)",
-          ],
-        });
+            KYCPermissions: [
+              "Name and last name",
+              "Gender",
+              "Country and city of residence",
+              "Place and date of birth",
+              "ID Document",
+              "Liveness check (No pictures)",
+            ],
+          });
 
-        if (result) {
-          const { signature, writeGrant } = result;
-          setSignature(signature);
-          setWriteGrant(writeGrant);
+          if (result) {
+            const { signature, writeGrant } = result;
+            setSignature(signature);
+            setWriteGrant(writeGrant);
+          }
+          break;
         }
+
+        case "verified": {
+          // const result = await isleRef.current?.requestAccessGrant({
+          //   grantee: {
+          //     granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          //     meta: {
+          //       url: "https://idos.network",
+          //       name: "idOS",
+          //       logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+          //     },
+          //   },
+          //   KYCPermissions: [
+          //     "Name and last name",
+          //     "Gender",
+          //     "Country and city of residence",
+          //     "Place and date of birth",
+          //     "ID Document",
+          //     "Liveness check (No pictures)",
+          //   ],
+          // });
+          break;
+        }
+
+        default:
+          break;
       }
     });
 
