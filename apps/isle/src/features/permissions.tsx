@@ -271,6 +271,7 @@ interface AccessGrant {
 
 export function Permissions() {
   const accessGrants = useIsleStore((state) => state.accessGrants);
+  const disconnect = useIsleStore((state) => state.disconnect);
   const [grantToRevoke, setGrantToRevoke] = useState<AccessGrant | null>(null);
 
   const grants = useMemo(() => {
@@ -359,6 +360,7 @@ export function Permissions() {
         <Button
           color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
           bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
+          onClick={disconnect}
         >
           Disconnect
         </Button>
