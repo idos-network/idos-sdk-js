@@ -51,6 +51,7 @@ export type IsleConnectionStatus =
   | "connecting"
   | "connected"
   | "reconnecting";
+
 export type IsleStatus =
   | "initializing"
   | "no-profile"
@@ -59,85 +60,65 @@ export type IsleStatus =
   | "verified"
   | "error";
 
+// Common status types
+export type CommonStatus = "idle" | "pending" | "success" | "error";
+
+// Common metadata for third-party services
+export interface ServiceMeta {
+  url: string;
+  name: string;
+  logo: string;
+}
+
+// Specific status types
+export type CreateDWGStatus = CommonStatus | "verify-identity";
+
+// Message data types
+export interface InitializeData {
+  theme?: IsleTheme;
+}
+
+export interface UpdateData {
+  connectionStatus?: IsleConnectionStatus;
+  address?: string;
+  theme?: IsleTheme;
+  status?: IsleStatus;
+  accessGrants?: Map<ServiceMeta, { id: string; dataId: string; type: string }[]>;
+}
+
+export interface VerificationData extends ServiceMeta {
+  KYCPermissions: string[];
+}
+
+export interface PermissionRequestData {
+  granteePublicKey: string;
+  meta: ServiceMeta;
+}
+
+// Controller Message Types
 export type IsleControllerMessage =
-  | {
-      type: "initialize";
-      data: {
-        theme?: IsleTheme;
-      };
-    }
-  | {
-      type: "update";
-      data: {
-        connectionStatus?: IsleConnectionStatus;
-        address?: string;
-        theme?: IsleTheme;
-        status?: IsleStatus;
-        accessGrants?: WeakMap<
-          { name: string; logo: string },
-          { id: string; dataId: string; type: string }[]
-        >;
-      };
-    }
-  | {
-      type: "update-create-profile-status";
-      data: {
-        status: "idle" | "pending" | "success" | "error";
-      };
-    }
+  | { type: "initialize"; data: InitializeData }
+  | { type: "update"; data: UpdateData }
+  | { type: "update-create-profile-status"; data: { status: CommonStatus } }
+  | { type: "update-create-dwg-status"; data: { status: CreateDWGStatus } }
   | {
       type: "update-create-dwg-status";
-      data: {
-        status: "idle" | "pending" | "success" | "verify-identity" | "error";
-      };
+      data: { status: "start-verification"; meta: VerificationData };
     }
+  | { type: "update-revoke-permission-status"; data: { status: CommonStatus } }
+  | { type: "update-request-permission-status"; data: { status: CommonStatus } }
   | {
-      type: "update-create-dwg-status";
-      data: {
-        status: "start-verification";
-        meta: {
-          url: string;
-          name: string;
-          logo: string;
-          KYCPermissions: string[];
-        };
-      };
-    }
-  | {
-      type: "update-revoke-access-grant-status";
-      data: {
-        status: "idle" | "pending" | "success" | "error";
-      };
-    }
-  | {
-      type: "update-request-access-grant-status";
-      data: {
-        status: "idle" | "pending" | "success" | "error";
-      };
-    }
-  | {
-      type: "update-request-access-grant-status";
+      type: "update-request-permission-status";
       data: {
         status: "request-permission";
-        grantee: {
-          granteePublicKey: string;
-          meta: {
-            url: string;
-            name: string;
-            logo: string;
-          };
-        };
+        grantee: PermissionRequestData;
         KYCPermissions: string[];
       };
     };
 
+// Node Message Types
 export type IsleNodeMessage =
-  | {
-      type: "initialized";
-      data: {
-        theme: IsleTheme;
-      };
-    }
+  | { type: "initialized"; data: { theme: IsleTheme } }
   | {
       type: "updated";
       data: {
@@ -146,27 +127,12 @@ export type IsleNodeMessage =
         status?: IsleStatus;
       };
     }
-  | {
-      type: "connect-wallet";
-    }
-  | {
-      type: "link-wallet";
-    }
-  | {
-      type: "create-profile";
-    }
-  | {
-      type: "request-dwg";
-    }
-  | {
-      type: "verify-identity";
-    }
-  | {
-      type: "revoke-access-grant";
-      data: {
-        id: string;
-      };
-    };
+  | { type: "connect-wallet" }
+  | { type: "link-wallet" }
+  | { type: "create-profile" }
+  | { type: "request-dwg" }
+  | { type: "verify-identity" }
+  | { type: "revoke-permission"; data: { id: string } };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (
   message: Extract<IsleNodeMessage, { type: T }>,

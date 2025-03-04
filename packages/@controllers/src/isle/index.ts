@@ -247,7 +247,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const requestPermission = async (options: RequestPermissionOptions): Promise<void> => {
     invariant(kwilClient, "No `KwilActionClient` found");
 
-    send("update-request-access-grant-status", {
+    send("update-request-permission-status", {
       status: "request-permission",
       grantee: options.grantee,
       KYCPermissions: options.KYCPermissions,
@@ -261,7 +261,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    */
   const revokePermission = async (id: string): Promise<unknown> => {
     invariant(kwilClient, "No `KwilActionClient` found");
-    send("update-revoke-access-grant-status", {
+
+    send("update-revoke-permission-status", {
       status: "pending",
     });
 
@@ -271,14 +272,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     if (error) {
-      send("update-revoke-access-grant-status", {
+      send("update-revoke-permission-status", {
         status: "error",
       });
 
       return;
     }
 
-    send("update-revoke-access-grant-status", {
+    send("update-revoke-permission-status", {
       status: "success",
     });
 
