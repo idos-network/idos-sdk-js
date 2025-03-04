@@ -112,7 +112,7 @@ let wagmiConfig: Config;
  */
 
 const storage = createStorage({
-  key: "idos-isle",
+  key: "idOS:isle",
   storage: localStorage,
 });
 
@@ -499,7 +499,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const connect = async (): Promise<void> => {
     try {
       await handleAccountChange({ status: "connecting" });
-      await storage.removeItem("disconnected");
 
       const result = await wagmiConnect(wagmiConfig, {
         connector: injected(),
@@ -516,6 +515,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         const provider = new BrowserProvider(walletClient.transport);
         signer = await provider.getSigner();
         await handleAccountChange({ status: "connected" });
+        await storage.removeItem("disconnected");
       } else {
         await handleAccountChange({ status: "disconnected" });
       }

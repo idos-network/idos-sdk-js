@@ -21,7 +21,7 @@ interface NodeState {
   > | null;
   initializeNode: () => () => void;
   connectWallet: () => void;
-  internalDisconnect: () => void;
+  disconnect: () => void;
   linkWallet: () => void;
   createProfile: () => void;
 }
@@ -84,7 +84,7 @@ export const useIsleStore = create<NodeState>((set) => ({
   connectWallet: () => {
     useIsleStore.getState().node?.post("connect-wallet", {});
   },
-  internalDisconnect: () => {
+  disconnect: () => {
     useIsleStore.getState().node?.post("disconnect-wallet", {});
   },
   linkWallet: () => {
