@@ -10,8 +10,10 @@ import {
   createWebKwilClient,
   getAllCredentials,
   getSharedCredential,
+  getUserProfile as getUserProfileCore,
   hasProfile,
   type idOSCredential,
+  type idOSUser,
   requestDWGSignature,
   revokeAccessGrant,
 } from "@idos-network/core";
@@ -107,6 +109,8 @@ interface idOSIsleController {
   revokePermission: (id: string) => Promise<unknown>;
   /** View credential details for the given `id` */
   viewCredentialDetails: (id: string) => Promise<idOSCredential>;
+  /** Get the user profile */
+  getUserProfile: () => Promise<idOSUser>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -243,6 +247,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     return { signature, writeGrant: delegatedWriteGrant };
+  };
+
+  const getUserProfile = async (): Promise<idOSUser> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    return getUserProfileCore(kwilClient);
   };
 
   /**
@@ -579,5 +588,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     requestPermission,
     revokePermission,
     viewCredentialDetails,
+    getUserProfile,
   };
 };

@@ -1,3 +1,4 @@
+import type { idOSUser } from "..";
 import type { KwilActionClient } from "./create-kwil-client";
 
 /**
@@ -12,6 +13,14 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string) 
   });
 
   return has_profile;
+}
+
+export async function getUserProfile(kwilClient: KwilActionClient) {
+  const [user] = await kwilClient.call<[idOSUser]>({
+    name: "get_user",
+    inputs: {},
+  });
+  return user;
 }
 
 export interface CreateUserReqParams {

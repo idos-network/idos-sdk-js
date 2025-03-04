@@ -9,6 +9,7 @@ import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createIDOSUserProfile } from "@/app/actions";
+import invariant from "tiny-invariant";
 
 export default function Home() {
   const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
@@ -89,7 +90,26 @@ export default function Home() {
 
     isleRef.current.on("view-credential-details", async ({ data }) => {
       const credential = await isleRef.current?.viewCredentialDetails(data.id);
-      console.log(credential);
+      const enclave = new IframeEnclave({
+        container: "#idOS-enclave",
+        url: "https://localhost:5173/",
+      });
+
+      await enclave.load();
+      const user = await isleRef.current?.getUserProfile();
+      invariant(user, "No user profile found");
+
+      await enclave.ready(
+        user?.id,
+        address,
+        address, // @todo: remove public key as a parameter
+        user.recipient_encryption_public_key,
+      );
+      // @todo: use the credential content
+      const credentialContent = await enclave.decrypt(
+        credential?.content,
+        user.recipient_encryption_public_key,
+      );
     });
 
     isleRef.current.on("updated", async ({ data }) => {
