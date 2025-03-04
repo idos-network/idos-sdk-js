@@ -24,16 +24,37 @@ export default function Home() {
 
     isleRef.current = createIsleController({
       container: container.id,
-      consumers: [],
-      acceptedIssuers: [
-        {
-          url: "https://issuer.idos.network",
-          name: "idOS Issuer",
-          logo: "https://issuer.idos.network/logo.png",
-          authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          credentialType: ["PASSPORTING_DEMO"],
-        },
-      ],
+      credentialRequirements: {
+        acceptedIssuers: [
+          {
+            meta: {
+              url: "https://issuer.idos.network",
+              name: "Random Issuer",
+              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+            },
+            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          },
+        ],
+        integratedConsumers: [
+          {
+            meta: {
+              url: "https://issuer.idos.network",
+              name: "Random Grantee",
+              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+            },
+            granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          },
+          {
+            meta: {
+              url: "https://issuer.idos.network",
+              name: "Random Grantee 2",
+              logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+            },
+            granteePublicKey: "0x123",
+          },
+        ],
+        acceptedCredentialType: "PASSPORTING_DEMO",
+      },
     });
 
     isleRef.current.on("connect-wallet", async () => {

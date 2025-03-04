@@ -124,7 +124,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           h="30px"
           shadow="md"
         />
-        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }} truncate>
           {grant.grantee.meta.name}
         </Text>
         <Icon
@@ -407,7 +407,8 @@ export function Permissions() {
                 <HStack
                   bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                   borderRadius="xl"
-                  p={4}
+                  px={4}
+                  h="56px"
                 >
                   <Text fontSize="sm" color="neutral.500">
                     No Permissions
@@ -420,7 +421,8 @@ export function Permissions() {
                     justifyContent="space-between"
                     bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                     borderRadius="xl"
-                    p={4}
+                    px={4}
+                    h="56px"
                   >
                     <Text key={grant.id}>{grant.type}</Text>
                     <HStack gap="2">
