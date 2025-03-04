@@ -407,7 +407,8 @@ export function Permissions() {
                 <HStack
                   bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                   borderRadius="xl"
-                  p={4}
+                  px={4}
+                  h="56px"
                 >
                   <Text fontSize="sm" color="neutral.500">
                     No Permissions
@@ -420,7 +421,8 @@ export function Permissions() {
                     justifyContent="space-between"
                     bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                     borderRadius="xl"
-                    p={4}
+                    px={4}
+                    h="56px"
                   >
                     <Text key={grant.id}>{grant.type}</Text>
                     <HStack gap="2">

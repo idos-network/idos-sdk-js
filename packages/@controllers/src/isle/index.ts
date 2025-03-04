@@ -32,11 +32,6 @@ import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
 
-// IntegratedConsumers: []
-// CredentialRequirements: {
-// acceptedIssuers: []
-// acceptedType: ""
-
 /**
  * Configuration options for creating an idOS Isle instance
  * @interface IdOSIsleOptions
@@ -47,18 +42,24 @@ interface idOSIsleControllerOptions {
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
 
-  // @todo: rename to `acceptedIssuers`
-  /** Meta information about issuers */
-  acceptedIssuers: {
-    url: string;
-    name: string;
-    logo: string;
-    authPublicKey: string;
-    credentialType: string[];
-  }[];
-
-  /** Meta information about consumers known to the app */
-  consumers: string[];
+  /**
+   * Information about the credential requirements for the app
+   * This information is used to filter and display `AGs` / `Credentials` in the UI.
+   */
+  credentialRequirements: {
+    /** Information about issuers known to the app */
+    acceptedIssuers: {
+      url: string;
+      name: string;
+      logo: string;
+      authPublicKey: string;
+      credentialType: string[];
+    }[];
+    /** Information about consumers known to the app */
+    integratedConsumers: string[];
+    /** The type of credential accepted by the app */
+    acceptedCredentialType: string;
+  };
 }
 
 /**
@@ -333,7 +334,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const matchingCredentials = originalCredentials.filter((cred) => {
         const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return options.acceptedIssuers?.some(
+        return options.credentialRequirements.acceptedIssuers?.some(
           (issuer) =>
             issuer.authPublicKey === cred.issuer_auth_public_key &&
             issuer.credentialType.includes(publicNotes.type),
@@ -365,6 +366,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         return;
       }
 
+      // @todo: implement logic for filtering out `idOSCredentials` and AG's based on the `credentialRequirements`.
       const accessGrants = new Map();
       accessGrants.set(
         {
