@@ -40,6 +40,10 @@ export default function Home() {
       await isleRef.current?.connect();
     });
 
+    isleRef.current.on("revoke-permission", async ({ data }) => {
+      await isleRef.current?.revokePermission(data.id);
+    });
+
     isleRef.current.on("create-profile", async () => {
       const [error] = await goTry(async () => {
         // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
