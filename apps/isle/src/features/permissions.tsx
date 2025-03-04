@@ -124,7 +124,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           h="30px"
           shadow="md"
         />
-        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }} truncate>
           {grant.grantee.meta.name}
         </Text>
         <Icon
