@@ -20,7 +20,6 @@ vi.mock("@kwilteam/kwil-js", () => {
 
 describe("createIssuerConfig", () => {
   let mockChainInfo: ReturnType<typeof vi.fn>;
-  let mockListDatabases: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     // Clear all mocks before each test
@@ -28,13 +27,9 @@ describe("createIssuerConfig", () => {
 
     // Set up mock implementations
     mockChainInfo = vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } });
-    mockListDatabases = vi.fn().mockResolvedValue({
-      data: [{ name: "idos" }],
-    });
 
     (NodeKwil as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
       chainInfo: mockChainInfo,
-      listDatabases: mockListDatabases,
     }));
   });
 
@@ -61,11 +56,9 @@ describe("createIssuerConfig", () => {
 
     // Check if methods were called
     expect(mockChainInfo).toHaveBeenCalled();
-    expect(mockListDatabases).toHaveBeenCalled();
 
     // Check the returned config
     expect(result).toEqual({
-      chainId: "mock-chain-id",
       kwilClient: expect.any(Object),
       signingKeyPair: expect.any(Object),
       encryptionSecretKey: expect.any(Uint8Array),

@@ -48,6 +48,7 @@ describe("kwil-wrapper", () => {
 
     expect(payload).toEqual({
       name: "do something",
+      namespace: "main",
       inputs: [],
     });
   });
@@ -61,6 +62,7 @@ describe("kwil-wrapper", () => {
 
     expect(payload).toEqual({
       name: "do something",
+      namespace: "main",
       description: "*some description*",
       inputs: [actionInput],
     });
