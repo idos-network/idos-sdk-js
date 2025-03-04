@@ -360,13 +360,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       // This logic is done in order to understand if the user has to pass the KYC process.
       const matchingCredentials = originalCredentials.filter((cred) => {
-
         const publicNotes = safeParse(cred.public_notes);
-        return options.acceptedIssuers?.some(
+        return options.credentialRequirements.acceptedIssuers?.some(
           (issuer) =>
             issuer.authPublicKey === cred.issuer_auth_public_key &&
-            issuer.credentialType.includes(publicNotes?.type),
-
+            options.credentialRequirements.acceptedCredentialType === publicNotes?.type,
         );
       });
 
@@ -404,9 +402,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       // Get all the access grants owned by the signer.
       const accessGrants = await getAccessGrantsOwned(kwilClient);
 
-      console.log(duplicateCredentials);
-      console.log(originalCredentialTypes);
-
       // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
       const knownAccessGrants = accessGrants.filter((ag) => {
         return Object.values(groupedCredentials).some((duplicates = []) => {
@@ -417,6 +412,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       // Now that we know which access grants are known, we need to find to which grantee they belong to.
       // For this, we need to take the `options.credentialRequirements.integratedConsumers` and check if any of the `authPublicKey` matches the `ag_grantee_wallet_identifier`
       const permissions = new Map();
+
       for (const consumer of options.credentialRequirements.integratedConsumers) {
         const matchingAccessGrants = knownAccessGrants.filter((ag) => {
           return ag.ag_grantee_wallet_identifier === consumer.granteePublicKey;
