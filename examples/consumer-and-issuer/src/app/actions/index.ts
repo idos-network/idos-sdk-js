@@ -1,3 +1,4 @@
+"use server";
 import { getIssuerConfig } from "@/issuer.config";
 import { createUser } from "@idos-network/issuer-sdk-js/server";
 
