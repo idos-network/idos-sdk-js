@@ -75,7 +75,7 @@ export class KwilActionClient {
     if (!Object.keys(params).length) return [];
     const prefixedEntries = Object.entries(params).map(([key, value]) => [`$${key}`, value]);
     const prefixedObject = Object.fromEntries(prefixedEntries);
-    return [prefixedObject];
+    return prefixedObject;
   }
 }
 
