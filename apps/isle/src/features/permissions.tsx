@@ -99,7 +99,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
         <Button
           w="full"
           onClick={() => {
-            node?.post("revoke-access-grant", {
+            node?.post("revoke-permission", {
               id: grant.id,
             });
           }}
@@ -148,7 +148,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           <Button
             flex="1"
             onClick={() => {
-              node?.post("revoke-access-grant", {
+              node?.post("revoke-permission", {
                 id: grant.id,
               });
             }}

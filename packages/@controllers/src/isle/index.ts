@@ -295,6 +295,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return result;
   };
 
+  const safeParse = (value: string) => {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return {};
+    }
+  };
+
   /**
    * Sets up the communication channel with the Isle iframe
    * Initializes message handlers and establishes the connection
@@ -352,11 +360,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       // This logic is done in order to understand if the user has to pass the KYC process.
       const matchingCredentials = originalCredentials.filter((cred) => {
-        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return options.credentialRequirements.acceptedIssuers?.some(
+
+        const publicNotes = safeParse(cred.public_notes);
+        return options.acceptedIssuers?.some(
           (issuer) =>
             issuer.authPublicKey === cred.issuer_auth_public_key &&
-            options.credentialRequirements.acceptedCredentialType === publicNotes.type,
+            issuer.credentialType.includes(publicNotes?.type),
+
         );
       });
 
@@ -373,7 +383,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
        */
       if (
         matchingCredentials.every((cred) => {
-          const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+          const publicNotes = safeParse(cred.public_notes);
           // @todo: check for 'pending' status properly. Currently we let it fall through.
           return publicNotes.status === "";
         })
