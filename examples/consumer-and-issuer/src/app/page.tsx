@@ -78,6 +78,12 @@ export default function Home() {
         isleRef.current?.send("update-create-profile-status", {
           status: "success",
         });
+
+        setTimeout(() => {
+          isleRef.current?.send("update-create-profile-status", {
+            status: "not-verified",
+          });
+        }, 5_000);
       });
 
       if (error) {
@@ -166,14 +172,6 @@ export default function Home() {
           className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
         />
       </div>
-
-      {signature && writeGrant ? (
-        <div className="flex flex-col items-center justify-center gap-4">
-          <Code>
-            <pre>{JSON.stringify({ signature, writeGrant }, null, 2)}</pre>
-          </Code>
-        </div>
-      ) : null}
     </div>
   );
 }
