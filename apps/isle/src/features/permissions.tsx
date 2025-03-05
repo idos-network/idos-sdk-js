@@ -17,7 +17,7 @@ import { LuCheck, LuChevronRight } from "react-icons/lu";
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
-import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
+import { BreadcrumbLink, BreadcrumbRoot, Button, Tooltip } from "@/components/ui";
 import { useIsleStore } from "@/store";
 import { RequestPermission } from "./request-permission";
 
@@ -30,6 +30,8 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
+  // @todo: refactor this to use the grant data
+  const hasTimeLock = false;
 
   useEffect(() => {
     if (!node || hasRequestedRef.current) return;
@@ -145,16 +147,23 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           >
             Cancel
           </Button>
-          <Button
-            flex="1"
-            onClick={() => {
-              node?.post("revoke-permission", {
-                id: grant.id,
-              });
-            }}
+          <Tooltip
+            disabled={!hasTimeLock}
+            showArrow
+            content="You can't revoke access to this data because it has a timelock."
           >
-            Revoke
-          </Button>
+            <Button
+              disabled={hasTimeLock}
+              flex="1"
+              onClick={() => {
+                node?.post("revoke-permission", {
+                  id: grant.id,
+                });
+              }}
+            >
+              Revoke
+            </Button>
+          </Tooltip>
         </Flex>
       </Stack>
     </Stack>
