@@ -24,9 +24,10 @@ import { RequestPermission } from "./request-permission";
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
 interface GrantRevocationProps {
   grant: AccessGrantWithGrantee;
+  onSuccess: () => void;
   onDismiss: () => void;
 }
-function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
+function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
@@ -41,10 +42,13 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
       setStatus(status);
 
       if (status === "success") {
-        setTimeout(() => {}, 5_000);
+        setTimeout(() => {
+          onSuccess();
+          setStatus("idle");
+        }, 5_000);
       }
     });
-  }, [node]);
+  }, [node, onSuccess]);
 
   if (status === "pending") {
     return (
@@ -74,6 +78,8 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
               _light: "aquamarine.700",
             }}
             as={LuCheck}
+            w="6"
+            h="6"
           />
         </Circle>
       </Center>
@@ -100,7 +106,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           w="full"
           onClick={() => {
             node?.post("revoke-permission", {
-              id: grant.id,
+              id: grant.dataId,
             });
           }}
         >
@@ -149,7 +155,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
             flex="1"
             onClick={() => {
               node?.post("revoke-permission", {
-                id: grant.id,
+                id: grant.dataId,
               });
             }}
           >
@@ -270,6 +276,7 @@ interface GranteeInfo {
 }
 interface AccessGrantWithGrantee {
   id: string;
+  dataId: string;
   type: string;
   grantee: GranteeInfo;
 }
@@ -310,7 +317,13 @@ export function Permissions() {
   }, [accessGrants]);
 
   if (grantToRevoke) {
-    return <GrantRevocation grant={grantToRevoke} onDismiss={() => setGrantToRevoke(null)} />;
+    return (
+      <GrantRevocation
+        grant={grantToRevoke}
+        onSuccess={() => setGrantToRevoke(null)}
+        onDismiss={() => setGrantToRevoke(null)}
+      />
+    );
   }
 
   if (permissionStatus === "request-permission" && grantee && kycPermissions) {
@@ -446,8 +459,7 @@ export function Permissions() {
                         onClick={() => {
                           setGrantToRevoke({
                             grantee,
-                            id: grant.id,
-                            type: grant.type,
+                            ...grant,
                           });
                         }}
                       >
