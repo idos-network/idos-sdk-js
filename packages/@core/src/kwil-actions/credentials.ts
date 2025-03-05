@@ -136,3 +136,13 @@ export async function createCredentialsByDelegatedWriteGrant(
     inputs: params,
   });
 }
+
+/**
+ * Removes an idOSCredential by the given `id`.
+ */
+export async function removeCredential(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.execute({
+    name: "remove_credential",
+    inputs: { id },
+  });
+}

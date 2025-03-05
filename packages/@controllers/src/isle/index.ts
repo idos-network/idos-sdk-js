@@ -11,8 +11,8 @@ import {
   getAccessGrantsOwned,
   getAllCredentials,
   hasProfile,
+  removeCredential,
   requestDWGSignature,
-  revokeAccessGrant,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -277,7 +277,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     const [error, result] = await goTry(() => {
       invariant(kwilClient, "No `KwilActionClient` found");
-      return revokeAccessGrant(kwilClient, id);
+      return removeCredential(kwilClient, id);
     });
 
     if (error) {
