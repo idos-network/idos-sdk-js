@@ -6,9 +6,11 @@ import {
   type IsleNodeMessage,
   type IsleTheme,
   type KwilActionClient,
+  base64Decode,
   createKwilSigner,
   createWebKwilClient,
   getAllCredentials,
+  getCredentialOwned,
   getSharedCredential,
   getUserProfile as getUserProfileCore,
   hasProfile,
@@ -16,7 +18,9 @@ import {
   type idOSUser,
   requestDWGSignature,
   revokeAccessGrant,
+  utf8Decode,
 } from "@idos-network/core";
+import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "@idos-network/idos-sdk";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -50,7 +54,8 @@ interface idOSIsleControllerOptions {
   container: string;
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
-
+  /** enclave options */
+  enclaveOptions: EnclaveOptions;
   // @todo: rename to `acceptedIssuers`
   /** Meta information about issuers */
   acceptedIssuers: {
@@ -155,6 +160,7 @@ const initializeWagmi = (): void => {
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
+  let enclave: EnclaveProvider | null = null;
   const controller: Controller = createController({
     targetOrigin: "https://localhost:5174",
   });
@@ -175,6 +181,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
   };
 
+  const setupEnclave = async (): Promise<void> => {
+    if (enclave) return;
+    try {
+      const enclaveInstance = new IframeEnclave(options.enclaveOptions);
+      await enclaveInstance.load();
+      enclave = enclaveInstance;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   /**
    * Handles changes in the wallet connection status
    * Updates the signer and notifies the Isle UI of the change
@@ -189,6 +206,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     if (account.status === "connected") {
       await setupSigner();
+      await setupEnclave();
     } else if (account.status === "disconnected") {
       signer = undefined;
     }
@@ -298,13 +316,29 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return result;
   };
 
+  const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
+    invariant(enclave, "No `enclave` found");
+    const user = await getUserProfile();
+    const { address } = getAccount(wagmiConfig);
+    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
+
+    const decrypted = await enclave.decrypt(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+    );
+    return utf8Decode(decrypted);
+  };
+
   /**
    * View credential details for the given `id`
    */
   const viewCredentialDetails = async (id: string): Promise<idOSCredential> => {
     invariant(kwilClient, "No `KwilActionClient` found");
-    const [credential] = await getSharedCredential(kwilClient, id);
-    return credential;
+    // Am pretty sure `getCredentialOwned is not the correct function to use. please switch to the right one.
+    // No need to update any steps after updating fetch credential function.
+    const [credential] = await getCredentialOwned(kwilClient, id);
+    const content = await decryptCredentialContent(credential);
+    return { ...credential, content };
   };
 
   /**

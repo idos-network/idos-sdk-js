@@ -35,6 +35,10 @@ export default function Home() {
           credentialType: ["PASSPORTING_DEMO"],
         },
       ],
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: "https://localhost:5173/",
+      },
     });
 
     isleRef.current.on("connect-wallet", async () => {
@@ -89,27 +93,22 @@ export default function Home() {
     });
 
     isleRef.current.on("view-credential-details", async ({ data }) => {
-      const credential = await isleRef.current?.viewCredentialDetails(data.id);
-      const enclave = new IframeEnclave({
-        container: "#idOS-enclave",
-        url: "https://localhost:5173/",
+      isleRef.current?.send("update-view-credential-details-status", {
+        status: "pending",
       });
 
-      await enclave.load();
-      const user = await isleRef.current?.getUserProfile();
-      invariant(user, "No user profile found");
-
-      await enclave.ready(
-        user?.id,
-        address,
-        address, // @todo: remove public key as a parameter
-        user.recipient_encryption_public_key,
-      );
-      // @todo: use the credential content
-      const credentialContent = await enclave.decrypt(
-        credential?.content,
-        user.recipient_encryption_public_key,
-      );
+      try {
+        const credential = await isleRef.current?.viewCredentialDetails(data.id);
+        isleRef.current?.send("update-view-credential-details-status", {
+          status: "success",
+          credential,
+        });
+      } catch (error) {
+        isleRef.current?.send("update-view-credential-details-status", {
+          status: "error",
+          error: error as Error,
+        });
+      }
     });
 
     isleRef.current.on("updated", async ({ data }) => {

@@ -19,6 +19,7 @@ import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
+import type { idOSCredential } from "@idos-network/core";
 import { RequestPermission } from "./request-permission";
 
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
@@ -161,7 +162,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
   );
 }
 
-function Breadcrumbs() {
+function Breadcrumbs({ goHome }: { goHome: () => void }) {
   return (
     <BreadcrumbRoot
       size="lg"
@@ -181,6 +182,7 @@ function Breadcrumbs() {
           _dark: "neutral.50",
           _light: "neutral.950",
         }}
+        onClick={goHome}
       >
         Permissions
       </BreadcrumbLink>
@@ -200,42 +202,84 @@ function Breadcrumbs() {
 }
 
 //@ts-ignore
-function CredentialDetails() {
-  return (
-    <Stack gap="6">
-      <Breadcrumbs />
-      <Stack gap="3">
-        <Flex justifyContent="space-between">
-          <Flex alignItems="center" gap="2.5">
-            <Image />
-            <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-              Common
-            </Text>
-          </Flex>
-          <AuthorizedIcon color="aquamarine.400" />
-        </Flex>
-        <CredentialContent />
-      </Stack>
-      <Button>
-        Revoke Access
-        <Icon w={5} h={5} color="neutral.950">
-          <DeleteIcon />
-        </Icon>
-      </Button>
-    </Stack>
-  );
-}
+function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke: () => void }) {
+  const node = useIsleStore((state) => state.node);
+  const [credential, setCredential] = useState<idOSCredential | null>(null);
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
 
-function CredentialContent() {
+  useEffect(() => {
+    if (!node) return;
+    node.on("update-view-credential-details-status", (data) => {
+      setStatus(data.status);
+      if (data.status === "success") {
+        setCredential(data.credential ?? null);
+      }
+    });
+  }, [node]);
+
+  if (status === "pending") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          Error while viewing credential details.
+        </Heading>
+      </Center>
+    );
+  }
+
+  if (status === "success") {
+    return (
+      <Stack gap="6" w="full" maxW="full" overflow="auto">
+        <Breadcrumbs goHome={goHome} />
+        <Stack gap="3">
+          <Flex justifyContent="space-between">
+            <Flex alignItems="center" gap="2.5">
+              <Image />
+              <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+                Common
+              </Text>
+            </Flex>
+            <AuthorizedIcon color="aquamarine.400" />
+          </Flex>
+          <CredentialContent content={credential?.content} />
+        </Stack>
+        <Button onClick={onRevoke}>
+          Revoke Access
+          <Icon w={5} h={5} color="neutral.950">
+            <DeleteIcon />
+          </Icon>
+        </Button>
+      </Stack>
+    );
+  }
+}
+function CredentialContent({ content }: { content: string | undefined }) {
+  // @todo: decide which data to show
+  const parsedContent: Record<string, string> = content ? JSON.parse(content) : {};
   return (
-    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap="0">
-      {Object.entries({ name: "John" }).map(([key, value], index) => (
+    <Stack
+      bg={{ _dark: "neutral.800", _light: "neutral.200" }}
+      borderRadius="xl"
+      gap="0"
+      w="full"
+      maxW="full"
+      overflow="auto"
+    >
+      {Object.entries(parsedContent).map(([key, value], index) => (
         <Flex
           key={key}
           py="3.5"
           px="4"
           borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
-          borderBottomWidth={index === Object.keys({}).length - 1 ? 0 : 1}
+          borderBottomWidth={index === Object.keys(parsedContent).length - 1 ? 0 : 1}
           borderStyle="solid"
         >
           <Text
@@ -252,7 +296,7 @@ function CredentialContent() {
             fontWeight="medium"
             color={{ _dark: "neutral.50", _light: "neutral.950" }}
           >
-            {value}
+            {JSON.stringify(value)}
           </Text>
         </Flex>
       ))}
@@ -272,11 +316,12 @@ interface AccessGrantWithGrantee {
   id: string;
   type: string;
   grantee: GranteeInfo;
+  mode: "view" | "revoke";
 }
 
 export function Permissions() {
   const accessGrants = useIsleStore((state) => state.accessGrants);
-  const [grantToRevoke, setGrantToRevoke] = useState<AccessGrantWithGrantee | null>(null);
+  const [grant, setGrant] = useState<AccessGrantWithGrantee | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     "idle" | "request-permission" | "pending" | "success" | "error"
   >("idle");
@@ -309,8 +354,16 @@ export function Permissions() {
     return Array.from(accessGrants?.entries() ?? []);
   }, [accessGrants]);
 
-  if (grantToRevoke) {
-    return <GrantRevocation grant={grantToRevoke} onDismiss={() => setGrantToRevoke(null)} />;
+  if (grant?.mode === "view") {
+    return (
+      <CredentialDetails
+        onRevoke={() => setGrant({ ...grant, mode: "revoke" })}
+        goHome={() => setGrant(null)}
+      />
+    );
+  }
+  if (grant?.mode === "revoke") {
+    return <GrantRevocation grant={grant} onDismiss={() => setGrant(null)} />;
   }
 
   if (permissionStatus === "request-permission" && grantee && kycPermissions) {
@@ -431,8 +484,15 @@ export function Permissions() {
                         colorPalette="green"
                         rounded="full"
                         onClick={() => {
+                          setGrant({
+                            grantee,
+                            id: grant.id,
+                            type: grant.type,
+                            mode: "view",
+                          });
                           node?.post("view-credential-details", {
-                            id: grant.dataId,
+                            // @todo: Use the grant's id
+                            id: "55c715ba-5c2a-4527-98e2-77215f8b60e0",
                           });
                         }}
                       >
@@ -446,10 +506,11 @@ export function Permissions() {
                         colorPalette="green"
                         rounded="full"
                         onClick={() => {
-                          setGrantToRevoke({
+                          setGrant({
                             grantee,
                             id: grant.id,
                             type: grant.type,
+                            mode: "revoke",
                           });
                         }}
                       >

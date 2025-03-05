@@ -131,6 +131,14 @@ export type IsleControllerMessage =
       };
     }
   | {
+      type: "update-view-credential-details-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+        credential?: idOSCredential;
+        error?: Error;
+      };
+    }
+  | {
       type: "credential-details";
       data: {
         credential: idOSCredential;

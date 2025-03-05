@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@idos-network/core": "workspace:*",
+    "@idos-network/idos-sdk": "workspace:*",
     "@sanity/comlink": "^3.0.1",
     "@wagmi/core": "^2.16.4",
     "ethers": "catalog:",
