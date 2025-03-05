@@ -51,6 +51,8 @@ export function NotVerified() {
     "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
   const hasRequestedRef = useRef(false);
+  // @todo: this is for demo purposes only. Remove once we have a real KYC journey in place.
+  const [verifying, setVerifying] = useState(false);
 
   const [meta, setMeta] = useState<{
     url: string;
@@ -175,8 +177,10 @@ export function NotVerified() {
           journey to complete the process.
         </Text>
         <Button
+          loading={verifying}
           w="full"
           onClick={() => {
+            setVerifying(true);
             node?.post("verify-identity", {});
           }}
         >

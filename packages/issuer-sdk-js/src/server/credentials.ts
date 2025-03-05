@@ -1,7 +1,7 @@
 import {
-  type CreateCredentialsByDelegatedWriteGrantParams,
+  type CreateCredentialByDelegatedWriteGrantParams,
   createCredentialAsInserter as _createCredentialAsInserter,
-  createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
+  createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
   editCredentialAsIssuer as _editCredentialAsIssuer,
   getCredentialIdByContentHash as _getCredentialIdByContentHash,
   getSharedCredential as _getSharedCredential,
@@ -118,7 +118,7 @@ interface DelegatedWriteGrantParams {
   signature: string;
 }
 
-export async function createCredentialsByDelegatedWriteGrant(
+export async function createCredentialByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
   credentialParams: BaseCredentialParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
@@ -138,7 +138,7 @@ export async function createCredentialsByDelegatedWriteGrant(
       recipientEncryptionPublicKey: issuerEncPublicKey,
     }),
   );
-  const payload: CreateCredentialsByDelegatedWriteGrantParams = {
+  const payload: CreateCredentialByDelegatedWriteGrantParams = {
     issuer_auth_public_key: originalCredential.issuer_auth_public_key,
     original_encryptor_public_key: originalCredential.encryptor_public_key,
     original_credential_id: originalCredential.id,
@@ -162,7 +162,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     dwg_signature: delegatedWriteGrant.signature,
   };
 
-  await _createCredentialsByDelegatedWriteGrant(kwilClient, payload);
+  await _createCredentialByDelegatedWriteGrant(kwilClient, payload);
 
   return { originalCredential, copyCredential };
 }

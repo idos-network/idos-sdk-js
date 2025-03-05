@@ -100,7 +100,7 @@ export async function getAllCredentials(kwilClient: KwilActionClient) {
   });
 }
 
-export interface CreateCredentialsByDelegatedWriteGrantParams {
+export interface CreateCredentialByDelegatedWriteGrantParams {
   issuer_auth_public_key: string;
   original_encryptor_public_key: string;
   original_credential_id: string;
@@ -127,9 +127,9 @@ export interface CreateCredentialsByDelegatedWriteGrantParams {
 /**
  * Creates a new credential from a delegated write grant.
  */
-export async function createCredentialsByDelegatedWriteGrant(
+export async function createCredentialByDelegatedWriteGrant(
   kwilClient: KwilActionClient,
-  params: CreateCredentialsByDelegatedWriteGrantParams,
+  params: CreateCredentialByDelegatedWriteGrantParams,
 ) {
   return kwilClient.execute({
     name: "create_credentials_by_dwg",
