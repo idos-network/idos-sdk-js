@@ -17,7 +17,7 @@ import { LuCheck, LuChevronRight } from "react-icons/lu";
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
-import { BreadcrumbLink, BreadcrumbRoot, Button, Tooltip } from "@/components/ui";
+import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 import { RequestPermission } from "./request-permission";
 
@@ -26,12 +26,27 @@ interface GrantRevocationProps {
   grant: AccessGrantWithGrantee;
   onDismiss: () => void;
 }
+
+export function timelockToMs(timelock: number): number {
+  return timelock * 1000;
+}
+
+function timelockToDate(timelock: number): string {
+  const milliseconds = timelockToMs(timelock);
+
+  return new Intl.DateTimeFormat(["ban", "id"], {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: true,
+  }).format(new Date(milliseconds));
+}
+
 function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
   // @todo: refactor this to use the grant data
-  const hasTimeLock = false;
+  const hasTimeLock = true;
 
   useEffect(() => {
     if (!node || hasRequestedRef.current) return;
@@ -147,24 +162,24 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           >
             Cancel
           </Button>
-          <Tooltip
-            disabled={!hasTimeLock}
-            showArrow
-            content="You can't revoke access to this data because it has a timelock."
+          <Button
+            disabled={hasTimeLock}
+            flex="1"
+            onClick={() => {
+              node?.post("revoke-permission", {
+                id: grant.id,
+              });
+            }}
           >
-            <Button
-              disabled={hasTimeLock}
-              flex="1"
-              onClick={() => {
-                node?.post("revoke-permission", {
-                  id: grant.id,
-                });
-              }}
-            >
-              Revoke
-            </Button>
-          </Tooltip>
+            Revoke
+          </Button>
         </Flex>
+        {hasTimeLock && (
+          <Text fontSize="xs" color="neutral.500">
+            This grant is locked until {timelockToDate(grant.lockedUntil)} and cannot be revoked
+            until then.
+          </Text>
+        )}
       </Stack>
     </Stack>
   );
@@ -281,6 +296,7 @@ interface AccessGrantWithGrantee {
   id: string;
   type: string;
   grantee: GranteeInfo;
+  lockedUntil: number;
 }
 
 export function Permissions() {
@@ -455,6 +471,7 @@ export function Permissions() {
                             grantee,
                             id: grant.id,
                             type: grant.type,
+                            lockedUntil: grant.lockedUntil,
                           });
                         }}
                       >

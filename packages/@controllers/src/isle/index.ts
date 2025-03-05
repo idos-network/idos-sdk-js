@@ -387,11 +387,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
             id: crypto.randomUUID(),
             dataId: crypto.randomUUID(),
             type: "KYC Data",
+            lockedUntil: 1714953600,
           },
           {
             id: crypto.randomUUID(),
             dataId: crypto.randomUUID(),
             type: "KYC Data (2)",
+            lockedUntil: Date.now() + 1000 * 60 * 60 * 24 * 30,
           },
         ],
       );
