@@ -125,7 +125,7 @@ export function Component() {
     if (walletToAdd && !hasProfile && callbackUrl) {
       setTimeout(() => {
         location.href = callbackUrl;
-      }, 4000);
+      }, 5_000);
     }
   }, [walletToAdd, hasProfile, callbackUrl]);
 
@@ -183,7 +183,7 @@ export function Component() {
         )}
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
-      {walletToAdd && !hasProfile && <LinkWalletError />}
+      {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
       <AddWallet
         isOpen={isOpen}
         onClose={onClose}
