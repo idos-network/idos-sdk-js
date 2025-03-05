@@ -350,7 +350,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const originalCredentials = credentials.filter((cred) => !cred.original_id);
       const originalCredentialTypes = originalCredentials.reduce(
         (acc, cred) => {
-          const publicNotes = JSON.parse(cred.public_notes ?? "{}");
+          const publicNotes = safeParse(cred.public_notes);
           acc[cred.id] = publicNotes.type;
           return acc;
         },
