@@ -15,7 +15,8 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./isle": "./src/isle/index.ts"
+    "./isle": "./src/isle/index.ts",
+    "./secure-enclave": "./src/secure-enclave/index.ts"
   },
   "license": "MIT",
   "peerDependencies": {
