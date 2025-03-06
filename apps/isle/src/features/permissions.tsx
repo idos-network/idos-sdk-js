@@ -175,7 +175,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           </Button>
         </Flex>
         {hasTimeLock && (
-          <Text fontSize="xs" color="neutral.500">
+          <Text fontSize="xs" color="neutral.500" textAlign="center">
             This grant is locked until {timelockToDate(grant.lockedUntil)} and cannot be revoked
             until then.
           </Text>
