@@ -3,19 +3,18 @@ import { Wallet } from "ethers";
 import { implicitAddressFromPublicKey } from "src/lib";
 import { KwilWrapper } from "src/lib/kwil-wrapper";
 import { beforeEach, describe, expect, test } from "vitest";
-import { TestKwilClient, dbId, kwilProvider } from "./test-kwil-client";
+import { TestKwilClient, kwilProvider } from "./test-kwil-client";
 
 let kwilWrapper: KwilWrapper;
 
 describe("kwil-wrapper", () => {
   beforeEach(() => {
-    kwilWrapper = new KwilWrapper(new TestKwilClient(), kwilProvider, dbId);
+    kwilWrapper = new KwilWrapper(new TestKwilClient(), kwilProvider);
   });
 
   test("should create a new instance of KwilWrapper", () => {
     expect(kwilWrapper.client).toBeInstanceOf(WebKwil);
     expect(kwilWrapper.kwilProvider).toBe(kwilProvider);
-    expect(kwilWrapper.dbId).toBe(dbId);
   });
 
   test("should set a `secp256k1_ep` signer", async () => {
@@ -45,25 +44,25 @@ describe("kwil-wrapper", () => {
   });
 
   test("should build a proper action payload with empty inputs and no description", async () => {
-    const payload = await kwilWrapper.buildAction("do something", null);
+    const payload = await kwilWrapper.buildExecAction("do something", null);
 
     expect(payload).toEqual({
       name: "do something",
-      dbid: kwilWrapper.dbId,
+      namespace: "main",
       inputs: [],
     });
   });
 
   test("should build a proper action payload with all values passed", async () => {
     const inputs = { key_1: "value_1", key_2: "value_2" };
-    const payload = await kwilWrapper.buildAction("do something", [inputs], "some description");
+    const payload = await kwilWrapper.buildExecAction("do something", [inputs], "some description");
     const actionInput = new Utils.ActionInput();
     actionInput.put("$key_1", "value_1");
     actionInput.put("$key_2", "value_2");
 
     expect(payload).toEqual({
       name: "do something",
-      dbid: kwilWrapper.dbId,
+      namespace: "main",
       description: "*some description*",
       inputs: [actionInput],
     });

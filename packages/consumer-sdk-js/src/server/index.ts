@@ -14,7 +14,6 @@ export class idOSGranteeSDK {
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
     nodeUrl: string,
-    dbId: string,
   ) {
     let grantee: idOSGrantee;
 
@@ -26,7 +25,6 @@ export class idOSGranteeSDK {
           granteeSigner: signer,
           recipientEncryptionPrivateKey,
           nodeUrl,
-          dbId,
         });
 
         return new idOSGranteeSDK(grantee);
@@ -37,7 +35,6 @@ export class idOSGranteeSDK {
           granteeSigner: signer,
           nodeUrl,
           recipientEncryptionPrivateKey,
-          dbId,
         });
         return new idOSGranteeSDK(grantee);
       }

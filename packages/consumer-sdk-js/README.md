@@ -27,7 +27,6 @@ import nacl from "tweetnacl";
  * @param {KeyPair | SignKeyPair | ethers.Wallet} options.granteeSigner - The grantee's wallet or key pair for signing transactions.
  * @param {string} [options.nodeUrl="https://nodes.idos.network"] - The URL of the idOS node.
  * @param {string} [options.chainId] - The chain ID for the network (optional).
- * @param {string} [options.dbId] - The database ID for the network (optional).
  * @returns {Promise<idOSGrantee>} - A promise that resolves to an instance of the idOS SDK.
  */
 

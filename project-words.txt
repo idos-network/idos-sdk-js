@@ -13,7 +13,6 @@ cooldown
 cryptosuite
 DAG
 Datil
-dbid
 devnet
 digitalbazaar
 dompurify
