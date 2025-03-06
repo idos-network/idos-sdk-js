@@ -29,7 +29,7 @@ export default function Home() {
       container: container.id,
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://localhost:5173/",
+        url: "https://enclave.playground.idos.network",
       },
       credentialRequirements: {
         acceptedIssuers: [
@@ -119,7 +119,7 @@ export default function Home() {
         });
 
         setTimeout(() => {
-          isle?.send("update-create-profile-status", {
+          isle?.send("update", {
             status: "not-verified",
           });
         }, 5_000);
