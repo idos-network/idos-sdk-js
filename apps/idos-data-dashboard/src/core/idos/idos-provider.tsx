@@ -64,8 +64,6 @@ export const Provider = ({ children }: PropsWithChildren) => {
       await _sdk.setSigner(signer.type, signer.value);
       const _pk = _sdk.auth.currentUser.currentUserPublicKey;
 
-      window._sdk = _sdk;
-
       setPublicKey(_pk);
     }
 
