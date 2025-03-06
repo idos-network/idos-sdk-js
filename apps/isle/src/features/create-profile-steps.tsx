@@ -23,7 +23,7 @@ export function CreateProfileSteps() {
     return (
       <Center flexDirection="column" gap="6">
         <Heading h="2" fontSize="lg" textAlign="center" fontWeight="semibold" mb="3">
-          Create your idOS Profile.
+          Creating your idOS Profile
         </Heading>
         <Stepper stepsLength={3} index={0} />
         <Spinner size="xl" />
@@ -96,7 +96,7 @@ export function CreateProfileSteps() {
         mx="auto"
         textAlign="center"
       >
-        Click the "Create idOS Key" button to get started
+        Please confirm the transaction in your wallet.
       </Text>
     </Center>
   );

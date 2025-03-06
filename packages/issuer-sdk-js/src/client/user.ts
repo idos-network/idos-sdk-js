@@ -30,6 +30,7 @@ export async function getUserEncryptionPublicKey(userId: string, container: stri
   let enclave: IframeEnclave | null = new IframeEnclave({
     container,
     mode: "new",
+    url: "https://enclave.playground.idos.network",
   });
 
   await enclave.load();
