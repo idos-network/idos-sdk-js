@@ -99,6 +99,25 @@ export default function Home() {
     };
   }, []);
 
+  useEffect(() => {
+    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const currentTheme = darkModeMediaQuery.matches ? "dark" : "light";
+
+    if (isleRef.current) isleRef.current?.send("update", { theme: currentTheme });
+
+    const themeChangeHandler = (e: MediaQueryListEvent) => {
+      const newTheme = e.matches ? "dark" : "light";
+
+      if (isleRef.current) isleRef.current.send("update", { theme: newTheme });
+    };
+
+    darkModeMediaQuery.addEventListener("change", themeChangeHandler);
+
+    return () => {
+      darkModeMediaQuery.removeEventListener("change", themeChangeHandler);
+    };
+  }, []);
+
   // Set up event handlers
   useEffect(() => {
     if (!isleRef.current) return;

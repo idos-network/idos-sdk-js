@@ -12,7 +12,8 @@ export function WalletConnector() {
   if (isConnected) {
     return (
       <Button
-        variant="faded"
+        variant="bordered"
+        className="bg-transparent text-gray-500"
         onPress={() => {
           disconnect();
         }}
@@ -25,6 +26,7 @@ export function WalletConnector() {
   return (
     <Button
       variant="bordered"
+      className="bg-transparent text-gray-500"
       isLoading={isPending}
       onPress={() =>
         connect({
