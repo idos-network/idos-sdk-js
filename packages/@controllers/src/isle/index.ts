@@ -25,7 +25,6 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "@idos-network/idos-sdk";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -44,6 +43,8 @@ import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
+import { IframeEnclave } from "../secure-enclave";
+import type { EnclaveOptions, EnclaveProvider } from "../secure-enclave/types";
 
 /**
  * Configuration options for creating an idOS Isle instance
