@@ -129,6 +129,20 @@ export type IsleControllerMessage =
         };
         KYCPermissions: string[];
       };
+    }
+  | {
+      type: "update-view-credential-details-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+        credential?: idOSCredential;
+        error?: Error;
+      };
+    }
+  | {
+      type: "credential-details";
+      data: {
+        credential: idOSCredential;
+      };
     };
 
 export type IsleNodeMessage =
@@ -163,6 +177,12 @@ export type IsleNodeMessage =
     }
   | {
       type: "revoke-permission";
+      data: {
+        id: string;
+      };
+    }
+  | {
+      type: "view-credential-details";
       data: {
         id: string;
       };

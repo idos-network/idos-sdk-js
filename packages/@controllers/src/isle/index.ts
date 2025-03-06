@@ -6,14 +6,22 @@ import {
   type IsleNodeMessage,
   type IsleTheme,
   type KwilActionClient,
+  base64Decode,
   createKwilSigner,
   createWebKwilClient,
   getAccessGrantsOwned,
   getAllCredentials,
+  getCredentialOwned,
+  getSharedCredential,
+  getUserProfile as getUserProfileCore,
   hasProfile,
+  type idOSCredential,
+  type idOSUser,
   removeCredential,
   requestDWGSignature,
+  utf8Decode,
 } from "@idos-network/core";
+import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "@idos-network/idos-sdk";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -42,7 +50,8 @@ interface idOSIsleControllerOptions {
   container: string;
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
-
+  /** enclave options */
+  enclaveOptions: EnclaveOptions;
   /**
    * Information about the credential requirements for the app
    * This information is used to filter and display `AGs` / `Credentials` in the UI.
@@ -105,14 +114,18 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
-  /** Requests a delegated write grant for the given grantee */
+  /** Requests a `delegated write grant` for the given `grantee` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
-  /** Requests an access grant for the given grantee */
+  /** Requests an access grant for the given `grantee` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
-  /** Revokes an access grant for the given id */
+  /** Revokes an access grant for the given `id` */
   revokePermission: (id: string) => Promise<unknown>;
+  /** View credential details for the given `id` */
+  viewCredentialDetails: (id: string) => Promise<idOSCredential>;
+  /** Get the user profile */
+  getUserProfile: () => Promise<idOSUser>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -157,6 +170,7 @@ const initializeWagmi = (): void => {
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
+  let enclave: EnclaveProvider | null = null;
   const controller: Controller = createController({
     targetOrigin: "https://localhost:5174",
   });
@@ -177,6 +191,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
   };
 
+  const setupEnclave = async (): Promise<void> => {
+    if (enclave) return;
+    try {
+      const enclaveInstance = new IframeEnclave(options.enclaveOptions);
+      await enclaveInstance.load();
+      enclave = enclaveInstance;
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   /**
    * Handles changes in the wallet connection status
    * Updates the signer and notifies the Isle UI of the change
@@ -191,6 +216,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     if (account.status === "connected") {
       await setupSigner();
+      await setupEnclave();
     } else if (account.status === "disconnected") {
       signer = undefined;
     }
@@ -251,6 +277,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return { signature, writeGrant: delegatedWriteGrant };
   };
 
+  const getUserProfile = async (): Promise<idOSUser> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    return getUserProfileCore(kwilClient);
+  };
+
   /**
    * Requests an access grant for the given grantee
    */
@@ -295,12 +326,37 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return result;
   };
 
+  const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
+    invariant(enclave, "No `enclave` found");
+    const user = await getUserProfile();
+    const { address } = getAccount(wagmiConfig);
+    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
+
+    const decrypted = await enclave.decrypt(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+    );
+    return utf8Decode(decrypted);
+  };
+
   const safeParse = (value: string) => {
     try {
       return JSON.parse(value);
     } catch (error) {
       return {};
     }
+  };
+
+  /**
+   * View credential details for the given `id`
+   */
+  const viewCredentialDetails = async (id: string): Promise<idOSCredential> => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+    // Am pretty sure `getCredentialOwned is not the correct function to use. please switch to the right one.
+    // No need to update any steps after updating fetch credential function.
+    const [credential] = await getCredentialOwned(kwilClient, id);
+    const content = await decryptCredentialContent(credential);
+    return { ...credential, content };
   };
 
   /**
@@ -422,8 +478,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
           consumer,
           matchingAccessGrants
             .map((ag) => {
-              // Find the original credential id for the given `ag.data_id`
-              // This is done by checking if the `ag.data_id` is equal to any of the `duplicateCredentials.id` and if so, return the `original_id`
               const originalId = duplicateCredentials.find(
                 (cred) => cred.id === ag.data_id,
               )?.original_id;
@@ -437,6 +491,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
                 dataId: ag.data_id,
                 lockedUntil: ag.locked_until,
                 type: originalCredentialTypes[originalId],
+                originalCredentialId: originalId,
               };
             })
             .filter(Boolean),
@@ -609,5 +664,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,
+    viewCredentialDetails,
+    getUserProfile,
   };
 };

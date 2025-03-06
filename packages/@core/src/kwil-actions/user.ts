@@ -60,6 +60,5 @@ export async function getUserProfile(kwilClient: KwilActionClient) {
   const [user] = await kwilClient.call<[idOSUser]>({
     name: "get_user",
   });
-
   return user;
 }

@@ -23,6 +23,16 @@ export async function getSharedCredential(kwilClient: KwilActionClient, id: stri
 }
 
 /**
+ * Returns the owned idOS Credential for the given `id`.
+ */
+export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
+    inputs: { id },
+  });
+}
+
+/**
  * Returns the idOSCredential `id` which content hash matches the given `contentHash`.
  */
 export async function getCredentialIdByContentHash(

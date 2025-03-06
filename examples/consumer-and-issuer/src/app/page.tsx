@@ -27,6 +27,10 @@ export default function Home() {
 
     isleRef.current = createIsleController({
       container: container.id,
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: "https://localhost:5173/",
+      },
       credentialRequirements: {
         acceptedIssuers: [
           {
@@ -124,6 +128,25 @@ export default function Home() {
       if (error) {
         isle?.send("update-create-profile-status", {
           status: "error",
+        });
+      }
+    });
+
+    isle.on("view-credential-details", async ({ data }) => {
+      isle?.send("update-view-credential-details-status", {
+        status: "pending",
+      });
+
+      try {
+        const credential = await isle?.viewCredentialDetails(data.id);
+        isle?.send("update-view-credential-details-status", {
+          status: "success",
+          credential,
+        });
+      } catch (error) {
+        isle?.send("update-view-credential-details-status", {
+          status: "error",
+          error: error as Error,
         });
       }
     });
