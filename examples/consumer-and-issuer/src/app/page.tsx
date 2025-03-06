@@ -1,14 +1,15 @@
 "use client";
 
-import { Code } from "@heroui/react";
+import { createCredential, createIDOSUserProfile } from "@/app/actions";
+import { useEthersSigner } from "@/wagmi.config";
 import { createIsleController } from "@idos-network/controllers";
 import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
+import type { IsleStatus } from "@idos-network/core";
 import { IframeEnclave } from "@idos-network/idos-sdk";
+import { createIssuerConfig, getUserProfile } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
-
-import { createIDOSUserProfile } from "@/app/actions";
 
 export default function Home() {
   const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
@@ -17,36 +18,70 @@ export default function Home() {
   const { address } = useAccount();
   const [signature, setSignature] = useState<string | null>(null);
   const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
+  const signer = useEthersSigner();
 
+  // Initialize isle controller
   useEffect(() => {
     const container = containerRef.current;
     if (!container || isleRef.current) return;
 
     isleRef.current = createIsleController({
       container: container.id,
-      consumers: [],
-      acceptedIssuers: [
-        {
-          url: "https://issuer.idos.network",
-          name: "idOS Issuer",
-          logo: "https://issuer.idos.network/logo.png",
-          authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          credentialType: ["PASSPORTING_DEMO"],
-        },
-      ],
+      credentialRequirements: {
+        acceptedIssuers: [
+          {
+            meta: {
+              url: "https://idos.network",
+              name: "ACME Bank",
+              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+            },
+            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          },
+        ],
+        integratedConsumers: [
+          {
+            meta: {
+              url: "https://idos.network",
+              name: "ACME Bank",
+              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+            },
+            granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          },
+          {
+            meta: {
+              url: "https://idos.network",
+              name: "Integrated Consumer",
+              logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+            },
+            granteePublicKey: "0x123",
+          },
+        ],
+        acceptedCredentialType: "KYC DATA",
+      },
     });
 
-    isleRef.current.on("connect-wallet", async () => {
-      await isleRef.current?.connect();
+    return () => {
+      isleRef.current?.destroy();
+      isleRef.current = null;
+    };
+  }, []);
+
+  // Set up event handlers
+  useEffect(() => {
+    if (!isleRef.current) return;
+
+    const isle = isleRef.current;
+
+    isle.on("connect-wallet", async () => {
+      await isle?.connect();
     });
 
-    isleRef.current.on("revoke-permission", async ({ data }) => {
-      await isleRef.current?.revokePermission(data.id);
+    isle.on("revoke-permission", async ({ data }) => {
+      await isle?.revokePermission(data.id);
     });
 
-    isleRef.current.on("create-profile", async () => {
+    isle.on("create-profile", async () => {
       const [error] = await goTry(async () => {
-        // Initializes the idOS enclave.This is needed to discover the user's encryption public key.
         const enclave = new IframeEnclave({
           container: "#idOS-enclave",
           url: "https://enclave.playground.idos.network",
@@ -59,10 +94,10 @@ export default function Home() {
         const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
         const signature = await signMessageAsync({ message });
 
-        isleRef.current?.send("update-create-profile-status", {
+        isle?.send("update-create-profile-status", {
           status: "pending",
         });
-        // Creates the idOS user profile.
+
         await createIDOSUserProfile({
           userId,
           recipientEncryptionPublicKey: userEncryptionPublicKey,
@@ -75,32 +110,72 @@ export default function Home() {
           },
         });
 
-        isleRef.current?.send("update-create-profile-status", {
+        isle?.send("update-create-profile-status", {
           status: "success",
         });
 
         setTimeout(() => {
-          isleRef.current?.send("update-create-profile-status", {
+          isle?.send("update-create-profile-status", {
             status: "not-verified",
           });
         }, 5_000);
       });
 
       if (error) {
-        isleRef.current?.send("update-create-profile-status", {
+        isle?.send("update-create-profile-status", {
           status: "error",
         });
       }
     });
+  }, [address, signMessageAsync]);
 
-    isleRef.current.on("verify-identity", async (data) => {
-      // @todo: this should redirect the user to the issuer's knownKYC provider
+  useEffect(() => {
+    if (!isleRef.current || !writeGrant || !signature || !signer) return;
+
+    const isle = isleRef.current;
+
+    isle.on("verify-identity", async () => {
+      const config = await createIssuerConfig({
+        nodeUrl: "https://nodes.playground.idos.network",
+        signer,
+      });
+
+      const userProfile = await getUserProfile(config);
+
+      const [error] = await goTry(() =>
+        createCredential(
+          userProfile.id,
+          userProfile.recipient_encryption_public_key,
+          writeGrant.owner_wallet_identifier,
+          writeGrant.grantee_wallet_identifier,
+          writeGrant.issuer_public_key,
+          writeGrant.id,
+          writeGrant.access_grant_timelock,
+          writeGrant.not_usable_before,
+          writeGrant.not_usable_after,
+          signature,
+        ),
+      );
+
+      if (error) {
+        console.error(error);
+      }
+
+      isle?.send("update", {
+        status: "pending-verification",
+      });
     });
+  }, [writeGrant, signature, signer]);
 
-    isleRef.current.on("updated", async ({ data }) => {
+  useEffect(() => {
+    if (!isleRef.current) return;
+
+    const isle = isleRef.current;
+
+    isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
       switch (data.status) {
         case "not-verified": {
-          const result = await isleRef.current?.requestDelegatedWriteGrant({
+          const result = await isle?.requestDelegatedWriteGrant({
             grantee: {
               granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
               meta: {
@@ -127,38 +202,11 @@ export default function Home() {
           break;
         }
 
-        case "verified": {
-          // const result = await isleRef.current?.requestAccessGrant({
-          //   grantee: {
-          //     granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          //     meta: {
-          //       url: "https://idos.network",
-          //       name: "idOS",
-          //       logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
-          //     },
-          //   },
-          //   KYCPermissions: [
-          //     "Name and last name",
-          //     "Gender",
-          //     "Country and city of residence",
-          //     "Place and date of birth",
-          //     "ID Document",
-          //     "Liveness check (No pictures)",
-          //   ],
-          // });
-          break;
-        }
-
         default:
           break;
       }
     });
-
-    return () => {
-      isleRef.current?.destroy();
-      isleRef.current = null;
-    };
-  }, [address, signMessageAsync]);
+  }, []);
 
   return (
     <div>

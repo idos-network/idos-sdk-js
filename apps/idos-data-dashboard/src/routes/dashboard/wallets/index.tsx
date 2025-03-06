@@ -5,13 +5,14 @@ import {
   IconButton,
   List,
   ListItem,
+  Text,
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/idos-sdk";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, RotateCw } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -42,6 +43,14 @@ const NoWallets = () => {
       subtitle="Create your first wallet and store it on the idOS."
       cta="Add a wallet"
     />
+  );
+};
+
+const LinkWalletError = () => {
+  return (
+    <Text color="red.500" fontSize="sm">
+      You can't link a wallet to an account with no wallets. You'll be redirected back...
+    </Text>
   );
 };
 
@@ -104,13 +113,21 @@ export function Component() {
   const { hasProfile } = useIdOS();
   const [searchParams] = useSearchParams();
   const walletToAdd = searchParams.get("add-wallet") || undefined;
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd });
+  const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const queryClient = useQueryClient();
+  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd && hasProfile });
 
   const handleWalletAdded = () => {
-    const callbackUrl = new URLSearchParams(location.search).get("callbackUrl");
     if (callbackUrl) location.href = callbackUrl;
   };
+
+  useEffect(() => {
+    if (walletToAdd && !hasProfile && callbackUrl) {
+      setTimeout(() => {
+        location.href = callbackUrl;
+      }, 5_000);
+    }
+  }, [walletToAdd, hasProfile, callbackUrl]);
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -166,6 +183,7 @@ export function Component() {
         )}
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
+      {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
       <AddWallet
         isOpen={isOpen}
         onClose={onClose}

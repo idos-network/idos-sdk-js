@@ -8,10 +8,11 @@ import {
   type KwilActionClient,
   createKwilSigner,
   createWebKwilClient,
+  getAccessGrantsOwned,
   getAllCredentials,
   hasProfile,
+  removeCredential,
   requestDWGSignature,
-  revokeAccessGrant,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
@@ -32,11 +33,6 @@ import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
 
-// IntegratedConsumers: []
-// CredentialRequirements: {
-// acceptedIssuers: []
-// acceptedType: ""
-
 /**
  * Configuration options for creating an idOS Isle instance
  * @interface IdOSIsleOptions
@@ -47,18 +43,32 @@ interface idOSIsleControllerOptions {
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
 
-  // @todo: rename to `acceptedIssuers`
-  /** Meta information about issuers */
-  acceptedIssuers: {
-    url: string;
-    name: string;
-    logo: string;
-    authPublicKey: string;
-    credentialType: string[];
-  }[];
-
-  /** Meta information about consumers known to the app */
-  consumers: string[];
+  /**
+   * Information about the credential requirements for the app
+   * This information is used to filter and display `AGs` / `Credentials` in the UI.
+   */
+  credentialRequirements: {
+    /** Information about issuers known to the app */
+    acceptedIssuers: {
+      meta: {
+        url: string;
+        name: string;
+        logo: string;
+      };
+      authPublicKey: string;
+    }[];
+    /** Information about consumers known to the app */
+    integratedConsumers: {
+      meta: {
+        url: string;
+        name: string;
+        logo: string;
+      };
+      granteePublicKey: string;
+    }[];
+    /** The type of credential accepted by the app */
+    acceptedCredentialType: string;
+  };
 }
 
 /**
@@ -267,7 +277,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     const [error, result] = await goTry(() => {
       invariant(kwilClient, "No `KwilActionClient` found");
-      return revokeAccessGrant(kwilClient, id);
+      return removeCredential(kwilClient, id);
     });
 
     if (error) {
@@ -283,6 +293,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     return result;
+  };
+
+  const safeParse = (value: string) => {
+    try {
+      return JSON.parse(value);
+    } catch (error) {
+      return {};
+    }
   };
 
   /**
@@ -330,13 +348,23 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const credentials = await getAllCredentials(kwilClient);
       const originalCredentials = credentials.filter((cred) => !cred.original_id);
+      const originalCredentialTypes = originalCredentials.reduce(
+        (acc, cred) => {
+          const publicNotes = safeParse(cred.public_notes);
+          acc[cred.id] = publicNotes.type;
+          return acc;
+        },
+        {} as Record<string, string>,
+      );
+      const duplicateCredentials = credentials.filter((cred) => cred.original_id);
 
+      // This logic is done in order to understand if the user has to pass the KYC process.
       const matchingCredentials = originalCredentials.filter((cred) => {
-        const publicNotes = JSON.parse(cred.public_notes ?? "{}");
-        return options.acceptedIssuers?.some(
+        const publicNotes = safeParse(cred.public_notes);
+        return options.credentialRequirements.acceptedIssuers?.some(
           (issuer) =>
             issuer.authPublicKey === cred.issuer_auth_public_key &&
-            issuer.credentialType.includes(publicNotes.type),
+            options.credentialRequirements.acceptedCredentialType === publicNotes?.type,
         );
       });
 
@@ -365,45 +393,58 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         return;
       }
 
-      const accessGrants = new Map();
-      accessGrants.set(
-        {
-          granteePublicKey: "0x123",
-          meta: {
-            name: "Random Grantee",
-            logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
-          },
-        },
-        [
-          {
-            id: crypto.randomUUID(),
-            dataId: crypto.randomUUID(),
-            type: "KYC Data",
-            lockedUntil: 1714953600,
-          },
-          {
-            id: crypto.randomUUID(),
-            dataId: crypto.randomUUID(),
-            type: "KYC Data (2)",
-            lockedUntil: Date.now() + 1000 * 60 * 60 * 24 * 30,
-          },
-        ],
+      // Group duplicate credentials by `original_id`
+      const groupedCredentials = Object.groupBy(
+        duplicateCredentials,
+        (cred) => cred.original_id ?? "",
       );
 
-      accessGrants.set(
-        {
-          granteePublicKey: "0x456",
-          meta: {
-            name: "Random Grantee 2",
-            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
-          },
-        },
-        [],
-      );
+      // Get all the access grants owned by the signer.
+      const accessGrants = await getAccessGrantsOwned(kwilClient);
+
+      // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
+      const knownAccessGrants = accessGrants.filter((ag) => {
+        return Object.values(groupedCredentials).some((duplicates = []) => {
+          return duplicates.find((duplicate) => duplicate.id === ag.data_id);
+        });
+      });
+
+      // Now that we know which access grants are known, we need to find to which grantee they belong to.
+      // For this, we need to take the `options.credentialRequirements.integratedConsumers` and check if any of the `authPublicKey` matches the `ag_grantee_wallet_identifier`
+      const permissions = new Map();
+
+      for (const consumer of options.credentialRequirements.integratedConsumers) {
+        const matchingAccessGrants = knownAccessGrants.filter((ag) => {
+          return ag.ag_grantee_wallet_identifier === consumer.granteePublicKey;
+        });
+
+        permissions.set(
+          consumer,
+          matchingAccessGrants
+            .map((ag) => {
+              // Find the original credential id for the given `ag.data_id`
+              // This is done by checking if the `ag.data_id` is equal to any of the `duplicateCredentials.id` and if so, return the `original_id`
+              const originalId = duplicateCredentials.find(
+                (cred) => cred.id === ag.data_id,
+              )?.original_id;
+
+              if (!originalId) {
+                return null;
+              }
+
+              return {
+                id: ag.id,
+                dataId: ag.data_id,
+                type: originalCredentialTypes[originalId],
+              };
+            })
+            .filter(Boolean),
+        );
+      }
 
       send("update", {
         status: "verified",
-        accessGrants,
+        accessGrants: permissions,
       });
     });
 
