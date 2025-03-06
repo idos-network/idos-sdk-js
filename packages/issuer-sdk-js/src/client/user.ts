@@ -1,5 +1,6 @@
 import {
   type DelegatedWriteGrantSignatureRequest,
+  getUserProfile as _getUserProfile,
   requestDWGSignature as _requestDWGSignature,
   hasProfile,
 } from "@idos-network/core";
@@ -15,4 +16,9 @@ export async function requestDWGSignature(
   params: DelegatedWriteGrantSignatureRequest,
 ) {
   return _requestDWGSignature(kwilClient, params);
+}
+
+export async function getUserProfile({ kwilClient }: IssuerConfig) {
+  const user = await _getUserProfile(kwilClient);
+  return user;
 }

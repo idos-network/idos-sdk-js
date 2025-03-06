@@ -176,7 +176,7 @@ export type IsleNodeMessage =
       type: "verify-identity";
     }
   | {
-      type: "revoke-access-grant";
+      type: "revoke-permission";
       data: {
         id: string;
       };

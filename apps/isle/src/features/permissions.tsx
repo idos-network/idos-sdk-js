@@ -25,12 +25,30 @@ import { RequestPermission } from "./request-permission";
 // @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
 interface GrantRevocationProps {
   grant: AccessGrantWithGrantee;
+  onSuccess: () => void;
   onDismiss: () => void;
 }
-function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
+
+export function timelockToMs(timelock: number): number {
+  return timelock * 1000;
+}
+
+function timelockToDate(timelock: number): string {
+  const milliseconds = timelockToMs(timelock);
+
+  return new Intl.DateTimeFormat(["ban", "id"], {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: true,
+  }).format(new Date(milliseconds));
+}
+
+function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
+  // @todo: refactor this to use the grant data
+  const hasTimeLock = true;
 
   useEffect(() => {
     if (!node || hasRequestedRef.current) return;
@@ -42,10 +60,13 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
       setStatus(status);
 
       if (status === "success") {
-        setTimeout(() => {}, 5_000);
+        setTimeout(() => {
+          onSuccess();
+          setStatus("idle");
+        }, 5_000);
       }
     });
-  }, [node]);
+  }, [node, onSuccess]);
 
   if (status === "pending") {
     return (
@@ -75,6 +96,8 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
               _light: "aquamarine.700",
             }}
             as={LuCheck}
+            w="6"
+            h="6"
           />
         </Circle>
       </Center>
@@ -100,8 +123,8 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
         <Button
           w="full"
           onClick={() => {
-            node?.post("revoke-access-grant", {
-              id: grant.id,
+            node?.post("revoke-permission", {
+              id: grant.dataId,
             });
           }}
         >
@@ -125,7 +148,7 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
           h="30px"
           shadow="md"
         />
-        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+        <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }} truncate>
           {grant.grantee.meta.name}
         </Text>
         <Icon
@@ -147,16 +170,23 @@ function GrantRevocation({ grant, onDismiss }: GrantRevocationProps) {
             Cancel
           </Button>
           <Button
+            disabled={hasTimeLock}
             flex="1"
             onClick={() => {
-              node?.post("revoke-access-grant", {
-                id: grant.id,
+              node?.post("revoke-permission", {
+                id: grant.dataId,
               });
             }}
           >
             Revoke
           </Button>
         </Flex>
+        {hasTimeLock && (
+          <Text fontSize="xs" color="neutral.500" textAlign="center">
+            This grant is locked until {timelockToDate(grant.lockedUntil)} and cannot be revoked
+            until then.
+          </Text>
+        )}
       </Stack>
     </Stack>
   );
@@ -249,7 +279,9 @@ function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke:
             </Flex>
             <AuthorizedIcon color="aquamarine.400" />
           </Flex>
-          <CredentialContent content={credential?.content} />
+          <Flex maxW="324px" maxH="340px" overflow="auto">
+            <CredentialContent content={credential?.content} />
+          </Flex>
         </Stack>
         <Button onClick={onRevoke}>
           Revoke Access
@@ -278,6 +310,7 @@ function CredentialContent({ content }: { content: string | undefined }) {
           key={key}
           py="3.5"
           px="4"
+          gap="5"
           borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
           borderBottomWidth={index === Object.keys(parsedContent).length - 1 ? 0 : 1}
           borderStyle="solid"
@@ -314,9 +347,12 @@ interface GranteeInfo {
 }
 interface AccessGrantWithGrantee {
   id: string;
+  dataId: string;
   type: string;
   grantee: GranteeInfo;
   mode: "view" | "revoke";
+  lockedUntil: number;
+  originalCredentialId: string;
 }
 
 export function Permissions() {
@@ -363,7 +399,13 @@ export function Permissions() {
     );
   }
   if (grant?.mode === "revoke") {
-    return <GrantRevocation grant={grant} onDismiss={() => setGrant(null)} />;
+    return (
+      <GrantRevocation
+        grant={grant}
+        onSuccess={() => setGrant(null)}
+        onDismiss={() => setGrant(null)}
+      />
+    );
   }
 
   if (permissionStatus === "request-permission" && grantee && kycPermissions) {
@@ -460,7 +502,8 @@ export function Permissions() {
                 <HStack
                   bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                   borderRadius="xl"
-                  p={4}
+                  px={4}
+                  h="56px"
                 >
                   <Text fontSize="sm" color="neutral.500">
                     No Permissions
@@ -473,7 +516,8 @@ export function Permissions() {
                     justifyContent="space-between"
                     bg={{ _dark: "neutral.800", _light: "neutral.200" }}
                     borderRadius="xl"
-                    p={4}
+                    px={4}
+                    h="56px"
                   >
                     <Text key={grant.id}>{grant.type}</Text>
                     <HStack gap="2">
@@ -486,13 +530,11 @@ export function Permissions() {
                         onClick={() => {
                           setGrant({
                             grantee,
-                            id: grant.id,
-                            type: grant.type,
+                            ...grant,
                             mode: "view",
                           });
                           node?.post("view-credential-details", {
-                            // @todo: Use the grant's id
-                            id: "55c715ba-5c2a-4527-98e2-77215f8b60e0",
+                            id: grant.originalCredentialId,
                           });
                         }}
                       >
@@ -508,8 +550,7 @@ export function Permissions() {
                         onClick={() => {
                           setGrant({
                             grantee,
-                            id: grant.id,
-                            type: grant.type,
+                            ...grant,
                             mode: "revoke",
                           });
                         }}

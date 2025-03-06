@@ -1,4 +1,4 @@
-import type { idOSUser } from "..";
+import type { idOSUser } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 /**

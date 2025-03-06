@@ -27,7 +27,7 @@ function RequestedPermissions({ values }: { values: string[] }) {
       <VStack gap="2" alignItems="stretch">
         <HStack gap="2.5" alignItems="center">
           <KeyIcon w="4" h="4" />
-          <Text fontSize="sm" fontWeight="medium">
+          <Text fontSize="sm" fontWeight="medium" pl="1">
             Add one credential to your idOS Profile
           </Text>
         </HStack>
@@ -37,7 +37,9 @@ function RequestedPermissions({ values }: { values: string[] }) {
             Grant access to your KYC data like:
           </Text>
         </HStack>
-        <KYCInfo values={values} />
+        <Box pl="7">
+          <KYCInfo values={values} />
+        </Box>
       </VStack>
     </Stack>
   );
@@ -49,6 +51,8 @@ export function NotVerified() {
     "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
   const hasRequestedRef = useRef(false);
+  // @todo: this is for demo purposes only. Remove once we have a real KYC journey in place.
+  const [verifying, setVerifying] = useState(false);
 
   const [meta, setMeta] = useState<{
     url: string;
@@ -66,16 +70,18 @@ export function NotVerified() {
     // Set up the event listener
     node.on("update-create-dwg-status", (data) => {
       setStatus(data.status);
+
       if (data.status === "start-verification") {
         setMeta(data.meta);
       }
-      if (status === "success") {
+
+      if (data.status === "success") {
         setTimeout(() => {
           setStatus("verify-identity");
         }, 5_000);
       }
     });
-  }, [node, status]);
+  }, [node]);
 
   if (status === "idle") {
     return (
@@ -171,8 +177,10 @@ export function NotVerified() {
           journey to complete the process.
         </Text>
         <Button
+          loading={verifying}
           w="full"
           onClick={() => {
+            setVerifying(true);
             node?.post("verify-identity", {});
           }}
         >
@@ -194,9 +202,7 @@ export function NotVerified() {
       <Stack gap="4">
         <GranteeInfo name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         <Stack gap="2">
-          <Box pl="7">
-            <RequestedPermissions values={meta?.KYCPermissions ?? []} />
-          </Box>
+          <RequestedPermissions values={meta?.KYCPermissions ?? []} />
           <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
       </Stack>

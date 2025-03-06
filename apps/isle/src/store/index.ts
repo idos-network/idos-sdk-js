@@ -17,7 +17,13 @@ interface NodeState {
   theme?: IsleTheme;
   accessGrants: Map<
     { granteePublicKey: string; meta: { name: string; logo: string; url: string } },
-    { id: string; dataId: string; type: string }[]
+    {
+      id: string;
+      dataId: string;
+      type: string;
+      originalCredentialId: string;
+      lockedUntil: number;
+    }[]
   > | null;
   initializeNode: () => () => void;
   connectWallet: () => void;

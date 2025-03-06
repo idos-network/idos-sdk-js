@@ -51,3 +51,12 @@ export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string
     inputs: { id },
   });
 }
+
+/**
+ * Returns all the Access Grants that have been granted by the given `signer`.
+ */
+export async function getAccessGrantsOwned(kwilClient: KwilActionClient) {
+  return kwilClient.call<idOSGrant[]>({
+    name: "get_access_grants_owned",
+  });
+}
