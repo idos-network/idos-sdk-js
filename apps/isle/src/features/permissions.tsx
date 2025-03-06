@@ -290,9 +290,55 @@ function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke:
     );
   }
 }
-function CredentialContent({ content }: { content: string | undefined }) {
-  // @todo: decide which data to show
-  const parsedContent: Record<string, string> = content ? JSON.parse(content) : {};
+
+function safeParse(json?: string) {
+  try {
+    return JSON.parse(json ?? "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+const addressListRender = (value: { address: string }[]) => {
+  return (
+    <Stack>
+      {value.map((item) => (
+        <Flex key={item.address}>
+          <Text>{item.address}</Text>
+        </Flex>
+      ))}
+    </Stack>
+  );
+};
+
+const defaultRender = (value: string) => value;
+
+const infoRenderMap = {
+  emails: addressListRender,
+  wallets: addressListRender,
+  issuanceDate: (value: string) => {
+    return new Date(value).toLocaleDateString();
+  },
+  approved_at: (value: string) => {
+    return new Date(value).toLocaleDateString();
+  },
+} as const;
+
+function CredentialContent({ content: credentialContent }: { content: string | undefined }) {
+  const parsedContent: Record<string, string> = credentialContent
+    ? safeParse(credentialContent)
+    : {};
+  const hasValidContent = parsedContent?.credentialSubject;
+  const { credentialSubject } = hasValidContent
+    ? safeParse(credentialContent)
+    : { credentialSubject: {} };
+  const hiddenFields = ["@context", "type", "credentialSubject", "proof"];
+
+  const contentToRender = {
+    ...parsedContent,
+    ...credentialSubject,
+  };
+
   return (
     <Stack
       bg={{ _dark: "neutral.800", _light: "neutral.200" }}
@@ -302,34 +348,39 @@ function CredentialContent({ content }: { content: string | undefined }) {
       maxW="full"
       overflow="auto"
     >
-      {Object.entries(parsedContent).map(([key, value], index) => (
-        <Flex
-          key={key}
-          py="3.5"
-          px="4"
-          gap="5"
-          borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
-          borderBottomWidth={index === Object.keys(parsedContent).length - 1 ? 0 : 1}
-          borderStyle="solid"
-        >
-          <Text
-            flex="1"
-            fontSize="xs"
-            fontWeight="medium"
-            color={{ _dark: "neutral.50", _light: "neutral.950" }}
+      {Object.entries(contentToRender || {})
+        .filter(([key]) => !hiddenFields.includes(key))
+        .map(([key, value], index) => (
+          <Flex
+            key={key}
+            py="3.5"
+            px="4"
+            gap="5"
+            borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
+            borderBottomWidth={index === Object.keys(contentToRender || {}).length - 1 ? 0 : 1}
+            borderStyle="solid"
           >
-            {key}
-          </Text>
-          <Text
-            flex="1"
-            fontSize="sm"
-            fontWeight="medium"
-            color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          >
-            {JSON.stringify(value)}
-          </Text>
-        </Flex>
-      ))}
+            <Text
+              flex="1"
+              fontSize="xs"
+              fontWeight="medium"
+              color={{ _dark: "neutral.50", _light: "neutral.950" }}
+            >
+              {key}
+            </Text>
+            <Text
+              whiteSpace="pre"
+              flex="1"
+              fontSize="xs"
+              fontWeight="medium"
+              color={{ _dark: "neutral.50", _light: "neutral.950" }}
+              truncate
+            >
+              {infoRenderMap?.[key as keyof typeof infoRenderMap]?.(value as unknown as any) ??
+                defaultRender(value as unknown as any)}
+            </Text>
+          </Flex>
+        ))}
     </Stack>
   );
 }
