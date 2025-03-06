@@ -2,13 +2,22 @@
 
 import { createCredential, createIDOSUserProfile } from "@/app/actions";
 import { useEthersSigner } from "@/wagmi.config";
+import { Button } from "@heroui/react";
 import { createIsleController } from "@idos-network/controllers";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
+import {
+  type DelegatedWriteGrantSignatureRequest,
+  base64Encode,
+  hexDecode,
+} from "@idos-network/core";
 import type { IsleStatus } from "@idos-network/core";
-import { IframeEnclave } from "@idos-network/idos-sdk";
-import { createIssuerConfig, getUserProfile } from "@idos-network/issuer-sdk-js/client";
+import {
+  createIssuerConfig,
+  getUserEncryptionPublicKey,
+  getUserProfile,
+} from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
+import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
 export default function Home() {
@@ -19,6 +28,30 @@ export default function Home() {
   const [signature, setSignature] = useState<string | null>(null);
   const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
   const signer = useEthersSigner();
+
+  const requestPermission = () => {
+    const isle = isleRef.current;
+    invariant(isle, "idOS Isle is not initialized");
+
+    isle.requestPermission({
+      grantee: {
+        meta: {
+          url: "https://idos.network",
+          name: "Integrated Consumer",
+          logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+        },
+        granteePublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
+      },
+      KYCPermissions: [
+        "Name and last name",
+        "Gender",
+        "Country and city of residence",
+        "Place and date of birth",
+        "ID Document",
+        "Liveness check (No pictures)",
+      ],
+    });
+  };
 
   // Initialize isle controller
   useEffect(() => {
@@ -57,7 +90,7 @@ export default function Home() {
               name: "Integrated Consumer",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
-            granteePublicKey: "0x123",
+            granteePublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
           },
         ],
         acceptedCredentialType: "KYC DATA",
@@ -86,15 +119,13 @@ export default function Home() {
 
     isle.on("create-profile", async () => {
       const [error] = await goTry(async () => {
-        const enclave = new IframeEnclave({
-          container: "#idOS-enclave",
-          url: "https://enclave.playground.idos.network",
-          mode: "new",
-        });
-
-        await enclave.load();
         const userId = crypto.randomUUID();
-        const { userEncryptionPublicKey } = await enclave.discoverUserEncryptionPublicKey(userId);
+
+        const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(
+          userId,
+          "#idOS-enclave",
+        );
+
         const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
         const signature = await signMessageAsync({ message });
 
@@ -126,6 +157,7 @@ export default function Home() {
       });
 
       if (error) {
+        console.error(error);
         isle?.send("update-create-profile-status", {
           status: "error",
         });
@@ -242,6 +274,9 @@ export default function Home() {
           id="idOS-enclave"
           className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
         />
+      </div>
+      <div className="flex place-content-center items-center">
+        <Button onPress={requestPermission}>Request Permission</Button>
       </div>
     </div>
   );
