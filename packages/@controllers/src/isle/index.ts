@@ -306,11 +306,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const credential = await getCredentialById(kwilClient, ownerOriginalCredentials[0].id);
       invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
 
-      const user = await getUserProfile();
-      const address = getAccount(wagmiConfig).address;
-
-      await enclave?.ready(user.id, address, address, user.recipient_encryption_public_key);
-
       const plaintextContent = await decryptCredentialContent(credential);
 
       const { content, encryptorPublicKey } = await enclave.encrypt(
