@@ -116,7 +116,8 @@ export class KwilWrapper {
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
-    return res.data;
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
+    return (res.data as any)?.result;
   }
 
   async execute(
@@ -160,10 +161,12 @@ export class KwilWrapper {
     size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     const list = (await this.call("get_access_grants_granted", { page, size })) as any;
     const totalCount = await this.getGrantsGrantedCount();
 
     const grants = list.map(
+      // biome-ignore lint/suspicious/noExplicitAny: TBD
       (grant: any) =>
         new idOSGrant({
           id: grant.id,
