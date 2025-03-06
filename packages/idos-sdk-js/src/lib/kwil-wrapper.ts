@@ -134,8 +134,9 @@ export class KwilWrapper {
   }
 
   async getUserProfile(): Promise<idOSUser> {
-    const [user] = (await this.call("get_user", null)) as unknown as [idOSUser];
-    return user;
+    const res = await this.call("get_user", null);
+
+    return res[0] as idOSUser;
   }
 
   async hasProfile(userAddress: string): Promise<boolean> {
