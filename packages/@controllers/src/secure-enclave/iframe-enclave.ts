@@ -24,11 +24,11 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async load(): Promise<StoredData> {
-    await this.#loadEnclave();
+    await this.loadEnclave();
 
-    await this.#requestToEnclave({ configure: this.options });
+    await this.requestToEnclave({ configure: this.options });
 
-    return (await this.#requestToEnclave({ storage: {} })) as StoredData;
+    return (await this.requestToEnclave({ storage: {} })) as StoredData;
   }
 
   async ready(
@@ -37,7 +37,7 @@ export class IframeEnclave implements EnclaveProvider {
     signerPublicKey?: string,
     expectedUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array> {
-    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.#requestToEnclave({
+    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.requestToEnclave({
       storage: {
         userId,
         signerAddress,
@@ -47,15 +47,15 @@ export class IframeEnclave implements EnclaveProvider {
     })) as StoredData;
 
     while (!userEncryptionPublicKey) {
-      this.#showEnclave();
+      this.showEnclave();
       try {
-        userEncryptionPublicKey = (await this.#requestToEnclave({
+        userEncryptionPublicKey = (await this.requestToEnclave({
           keys: {},
         })) as Uint8Array;
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;
       } finally {
-        this.#hideEnclave();
+        this.hideEnclave();
       }
     }
 
@@ -63,22 +63,22 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   async store(key: string, value: string): Promise<string> {
-    return this.#requestToEnclave({ storage: { [key]: value } }) as Promise<string>;
+    return this.requestToEnclave({ storage: { [key]: value } }) as Promise<string>;
   }
 
   async reset(): Promise<void> {
-    this.#requestToEnclave({ reset: {} });
+    this.requestToEnclave({ reset: {} });
   }
 
   async updateStore(key: string, value: unknown): Promise<void> {
-    await this.#requestToEnclave({ updateStore: { key, value } });
+    await this.requestToEnclave({ updateStore: { key, value } });
   }
 
   async confirm(message: string): Promise<boolean> {
-    this.#showEnclave();
+    this.showEnclave();
 
-    return this.#requestToEnclave({ confirm: { message } }).then((response) => {
-      this.#hideEnclave();
+    return this.requestToEnclave({ confirm: { message } }).then((response) => {
+      this.hideEnclave();
       return response as boolean;
     });
   }
@@ -87,19 +87,19 @@ export class IframeEnclave implements EnclaveProvider {
     message: Uint8Array,
     receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    return this.#requestToEnclave({
+    return this.requestToEnclave({
       encrypt: { message, receiverPublicKey },
     }) as Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   }
 
   async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
-    return this.#requestToEnclave({
+    return this.requestToEnclave({
       decrypt: { fullMessage: message, senderPublicKey },
     }) as Promise<Uint8Array>;
   }
 
   async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
-    return this.#requestToEnclave({
+    return this.requestToEnclave({
       filterCredentialsByCountries: { credentials, countries },
     }) as Promise<string[]>;
   }
@@ -108,12 +108,12 @@ export class IframeEnclave implements EnclaveProvider {
     credentials: Record<string, string>[],
     privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },
   ): Promise<idOSCredential[]> {
-    return this.#requestToEnclave({
+    return this.requestToEnclave({
       filterCredentials: { credentials, privateFieldFilters },
     }) as Promise<idOSCredential[]>;
   }
 
-  async #loadEnclave(): Promise<void> {
+  async loadEnclave(): Promise<void> {
     const container =
       document.querySelector(this.container) ||
       throwNew(Error, `Can't find container with selector ${this.container}`);
@@ -169,18 +169,18 @@ export class IframeEnclave implements EnclaveProvider {
     );
   }
 
-  #showEnclave() {
+  showEnclave() {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.add("visible");
   }
 
-  #hideEnclave() {
+  hideEnclave() {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.remove("visible");
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  async #requestToEnclave(request: any) {
+  async requestToEnclave(request: any) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
@@ -198,7 +198,7 @@ export class IframeEnclave implements EnclaveProvider {
     backupFn: (data: BackupPasswordInfo) => Promise<void>,
   ): Promise<void> {
     const abortController = new AbortController();
-    this.#showEnclave();
+    this.showEnclave();
 
     window.addEventListener(
       "message",
@@ -210,10 +210,10 @@ export class IframeEnclave implements EnclaveProvider {
         try {
           status = "success";
           await backupFn(event);
-          this.#hideEnclave();
+          this.hideEnclave();
         } catch (error) {
           status = "failure";
-          this.#hideEnclave();
+          this.hideEnclave();
         }
 
         event.ports[0].postMessage({
@@ -229,13 +229,13 @@ export class IframeEnclave implements EnclaveProvider {
     );
 
     try {
-      await this.#requestToEnclave({
+      await this.requestToEnclave({
         backupPasswordOrSecret: {},
       });
     } catch (error) {
       console.error(error);
     } finally {
-      this.#hideEnclave();
+      this.hideEnclave();
     }
   }
 
