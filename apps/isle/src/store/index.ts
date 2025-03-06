@@ -73,10 +73,9 @@ export const useIsleStore = create<NodeState>((set) => ({
       connectTo: "window",
     });
 
-    node.on("initialize", ({ theme }) => {
-      const _theme = theme || (localStorage.getItem("theme") as IsleTheme);
-      set({ theme: _theme });
-      node.post("initialized", { theme: _theme });
+    node.on("initialize", ({ theme: newTheme = "dark" }) => {
+      set({ theme: newTheme });
+      node.post("initialized", { theme: newTheme });
     });
 
     node.on("update", (update) => {

@@ -9,5 +9,5 @@ export function Main({ children }: PropsWithChildren) {
   if (!isConnected) {
     return null;
   }
-  return <main className="p-6">{children}</main>;
+  return <main className="m-0 p-0">{children}</main>;
 }

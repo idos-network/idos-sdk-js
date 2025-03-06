@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 export default function RootLayout(props: { children: ReactNode }) {
   const initialState = cookieToInitialState(getConfig(), headers().get("cookie"));
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={inter.className}>
         <Providers initialState={initialState}>
           <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
