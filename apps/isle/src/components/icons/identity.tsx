@@ -24,22 +24,22 @@ export function IdentityIcon(props: IconProps) {
         <path
           d="M1 4.98229V2.31273C1 1.5881 1.58907 1 2.31491 1H4.93546"
           stroke="currentColor"
-          stroke-miterlimit="10"
+          strokeMiterlimit="10"
         />
         <path
           d="M13.0078 1.02344H15.6818C16.4083 1.02344 16.9967 1.61154 16.9967 2.33617V4.95239"
           stroke="currentColor"
-          stroke-miterlimit="10"
+          strokeMiterlimit="10"
         />
         <path
           d="M16.998 13.0156V15.6852C16.998 16.4105 16.4089 16.9979 15.6831 16.9979H13.0625"
           stroke="currentColor"
-          stroke-miterlimit="10"
+          strokeMiterlimit="10"
         />
         <path
           d="M4.98888 16.9758H2.31491C1.58836 16.9758 1 16.3877 1 15.6631V13.0469"
           stroke="currentColor"
-          stroke-miterlimit="10"
+          strokeMiterlimit="10"
         />
       </svg>
     </Icon>

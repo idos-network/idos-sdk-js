@@ -20,7 +20,7 @@ const useFetchMatchingCredential = () => {
     select: (credentials) => {
       const credential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "PASSPORTING_DEMO" && !!publicNotes.date;
+        return publicNotes.type === "PASSPORTING_DEMO";
       });
       return credential as unknown as idOSCredential;
     },

@@ -2,72 +2,6 @@
   "name": "@idos-network/idos-sdk",
   "description": "idOS JavaScript SDK",
   "version": "0.4.1",
-  "homepage": "https://idos.network",
-  "repository": "https://github.com/idos-network/idos-sdk-js",
-  "license": "MIT",
-  "type": "module",
-  "main": "src/lib/index.ts",
-  "files": ["dist"],
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
-  "scripts": {
-    "dev": "dotenvx run --convention=nextjs -- tsup --watch",
-    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
-    "lint": "biome check --apply ./src",
-    "format": "biome format --write .",
-    "test": "vitest run",
-    "test:ui": "vitest --ui",
-    "test:watch": "vitest",
-    "release-it": "release-it",
-    "prepack": "clean-package",
-    "postpack": "clean-package restore",
-    "test:build": "publint --strict"
-  },
-  "peerDependencies": {
-    "ethers": "^6.12",
-    "near-api-js": "3.0.4"
-  },
-  "peerDependenciesMeta": {
-    "ethers": {
-      "optional": true
-    },
-    "near-api-js": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "@dotenvx/dotenvx": "^1.6.4",
-    "@idos-network/codecs": "workspace:*",
-    "@idos-network/idos-sdk-types": "workspace:*",
-    "@near-js/types": "^0.2.1",
-    "@near-wallet-selector/core": "8.9.10",
-    "@release-it/keep-a-changelog": "^5.0.0",
-    "@vitest/ui": "^0.34.6",
-    "clean-package": "^2.2.0",
-    "dotenv": "^16.4.5",
-    "jsdom": "^22.1.0",
-    "prettier": "^3.0.3",
-    "release-it": "^17.0.0",
-    "tsup": "8.0.2",
-    "typescript": "^5.2.2",
-    "vitest": "^0.31.4"
-  },
-  "dependencies": {
-    "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
-    "@digitalbazaar/vc": "^6.0.2",
-    "@kwilteam/kwil-js": "0.7.1",
-    "@sanity/comlink": "^3.0.1",
-    "bs58": "^6.0.0",
-    "es-toolkit": "^1.23.0",
-    "jsonld": "^8.3.1",
-    "jsonld-document-loader": "^2.0.0",
-    "tweetnacl": "^1.0.3"
-  },
   "clean-package": {
     "replace": {
       "main": "dist/index.js",
@@ -80,5 +14,74 @@
         "./package.json": "./package.json"
       }
     }
-  }
+  },
+  "dependencies": {
+    "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
+    "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
+    "@digitalbazaar/vc": "^6.0.2",
+    "@kwilteam/kwil-js": "0.7.1",
+    "@sanity/comlink": "^3.0.1",
+    "es-toolkit": "^1.23.0",
+    "jsonld": "^8.3.1",
+    "jsonld-document-loader": "^2.0.0",
+    "tweetnacl": "^1.0.3"
+  },
+  "devDependencies": {
+    "@dotenvx/dotenvx": "^1.6.4",
+    "@idos-network/core": "workspace:*",
+    "@near-js/types": "^0.2.1",
+    "@near-wallet-selector/core": "8.9.10",
+    "@release-it/keep-a-changelog": "^5.0.0",
+    "@vitest/ui": "^0.34.6",
+    "@wagmi/core": "^2.16.4",
+    "clean-package": "^2.2.0",
+    "dotenv": "^16.4.5",
+    "jsdom": "^22.1.0",
+    "prettier": "^3.0.3",
+    "release-it": "^17.0.0",
+    "tsup": "8.0.2",
+    "typescript": "^5.2.2",
+    "vitest": "^0.31.4"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "main": "src/lib/index.ts",
+  "peerDependencies": {
+    "@wagmi/core": "^2.6.5",
+    "ethers": "^6.13.5",
+    "near-api-js": "3.0.4"
+  },
+  "peerDependenciesMeta": {
+    "ethers": {
+      "optional": true
+    },
+    "near-api-js": {
+      "optional": true
+    },
+    "@wagmi/core": {
+      "optional": true
+    }
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "export NODE_ENV=production && dotenvx run --convention=nextjs -- tsup",
+    "dev": "dotenvx run --convention=nextjs -- tsup --watch",
+    "format": "biome format --write .",
+    "lint": "biome check --apply ./src",
+    "postpack": "clean-package restore",
+    "prepack": "clean-package",
+    "release-it": "release-it",
+    "test": "vitest run",
+    "test:build": "publint --strict",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest"
+  },
+  "type": "module"
 }

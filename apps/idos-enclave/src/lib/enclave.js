@@ -1,4 +1,4 @@
-import { Store } from "@idos-network/idos-store";
+import { Store } from "@idos-network/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { every, get, negate } from "lodash-es";

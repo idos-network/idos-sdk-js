@@ -8,6 +8,7 @@ Borsh
 chakra
 chatset
 ciphertext
+comlink
 cooldown
 cryptosuite
 DAG
@@ -66,4 +67,3 @@ viewports
 vite
 wagmi
 webauthn
-comlink

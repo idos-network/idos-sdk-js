@@ -1,11 +1,11 @@
-import { Center, Circle, Heading, Image, Link, Text } from "@chakra-ui/react";
+import { Center, Circle, Heading, Image, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { LuCheck } from "react-icons/lu";
-import { useAccount } from "wagmi";
 
 import { Icon } from "@/components/icons/icon";
 import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
+import { useIsleStore } from "@/store";
 
 function WalletLinked() {
   return (
@@ -31,9 +31,8 @@ function WalletLinked() {
 
 export function LinkWallet() {
   const [linked] = useState(false);
-  const { address } = useAccount();
-
-  const addWalletLink = `${import.meta.env.VITE_IDOS_DATA_DASHBOARD_URL}/wallets?add-wallet=${address}&callbackUrl=${window.location.href}`;
+  const address = useIsleStore((state) => state.address);
+  const linkWallet = useIsleStore((state) => state.linkWallet);
 
   if (linked) {
     return <WalletLinked />;
@@ -62,10 +61,14 @@ export function LinkWallet() {
       >
         You will be redirected to idOS Dashboard.
       </Text>
-      <Button asChild gap="2" w="full">
-        <Link href={addWalletLink} textDecoration="none">
-          Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
-        </Link>
+      <Button
+        gap="2"
+        w="full"
+        onClick={() => {
+          linkWallet();
+        }}
+      >
+        Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
       </Button>
     </Center>
   );
