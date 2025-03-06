@@ -15,14 +15,6 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string) 
   return has_profile;
 }
 
-export async function getUserProfile(kwilClient: KwilActionClient) {
-  const [user] = await kwilClient.call<[idOSUser]>({
-    name: "get_user",
-    inputs: {},
-  });
-  return user;
-}
-
 export interface CreateUserReqParams {
   id: string;
   recipient_encryption_public_key: string;
@@ -59,4 +51,14 @@ export async function requestDWGSignature(
   });
 
   return result[0].message ?? "";
+}
+
+/**
+ * Get the profile of the current user.
+ */
+export async function getUserProfile(kwilClient: KwilActionClient) {
+  const [user] = await kwilClient.call<[idOSUser]>({
+    name: "get_user",
+  });
+  return user;
 }
