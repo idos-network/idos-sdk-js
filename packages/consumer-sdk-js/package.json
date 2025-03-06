@@ -24,7 +24,7 @@
     }
   },
   "dependencies": {
-    "@kwilteam/kwil-js": "beta",
+    "@kwilteam/kwil-js": "0.9.0-beta.3",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {

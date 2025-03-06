@@ -3,7 +3,7 @@
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.4",
   "dependencies": {
-    "@kwilteam/kwil-js": "beta",
+    "@kwilteam/kwil-js": "0.9.0-beta.3",
     "es-toolkit": "^1.23.0",
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"

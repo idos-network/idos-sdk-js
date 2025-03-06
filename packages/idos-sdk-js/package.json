@@ -19,7 +19,7 @@
     "@digitalbazaar/ed25519-signature-2020": "^5.2.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.1.0",
     "@digitalbazaar/vc": "^6.0.2",
-    "@kwilteam/kwil-js": "beta",
+    "@kwilteam/kwil-js": "0.9.0-beta.3",
     "@sanity/comlink": "^3.0.1",
     "es-toolkit": "^1.23.0",
     "jsonld": "^8.3.1",
