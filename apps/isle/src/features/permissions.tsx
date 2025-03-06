@@ -231,7 +231,6 @@ function Breadcrumbs({ goHome }: { goHome: () => void }) {
   );
 }
 
-//@ts-ignore
 function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke: () => void }) {
   const node = useIsleStore((state) => state.node);
   const [credential, setCredential] = useState<idOSCredential | null>(null);

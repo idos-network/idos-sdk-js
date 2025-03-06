@@ -11,8 +11,6 @@ import { goTry } from "go-try";
 import { useEffect, useRef, useState } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 
-import invariant from "tiny-invariant";
-
 export default function Home() {
   const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
