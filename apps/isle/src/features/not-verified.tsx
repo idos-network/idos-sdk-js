@@ -171,7 +171,7 @@ export function NotVerified() {
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
           Verify your identity
         </Heading>
-        <Stepper stepsLength={3} index={1} />
+        <Stepper stepsLength={3} index={2} />
         <Text color="neutral.500" fontSize="sm" textAlign="center">
           This application is asking you to verify your identity. You will now be led to a KYC
           journey to complete the process.
