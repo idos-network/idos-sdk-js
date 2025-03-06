@@ -435,6 +435,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
               return {
                 id: ag.id,
                 dataId: ag.data_id,
+                lockedUntil: ag.locked_until,
                 type: originalCredentialTypes[originalId],
               };
             })

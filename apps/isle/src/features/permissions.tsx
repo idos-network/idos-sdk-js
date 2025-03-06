@@ -21,7 +21,6 @@ import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 import { RequestPermission } from "./request-permission";
 
-// @todo: On grants with a timelock, show the End-Date of the Timelock and prevent to revoke access
 interface GrantRevocationProps {
   grant: AccessGrantWithGrantee;
   onSuccess: () => void;
@@ -46,8 +45,7 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
-  // @todo: refactor this to use the grant data
-  const hasTimeLock = true;
+  const hasTimeLock = grant.lockedUntil && grant.lockedUntil * 1000 > Date.now();
 
   useEffect(() => {
     if (!node || hasRequestedRef.current) return;
@@ -169,7 +167,7 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
             Cancel
           </Button>
           <Button
-            disabled={hasTimeLock}
+            disabled={!!hasTimeLock}
             flex="1"
             onClick={() => {
               node?.post("revoke-permission", {
