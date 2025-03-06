@@ -21,6 +21,7 @@ export default function Minimized({ children }: PropsWithChildren) {
         _dark: "neutral.800",
         _light: "neutral.50",
       }}
+      overflow="hidden"
       backgroundColor={{ _dark: "neutral.950", _light: "neutral.50" }}
       whileHover={{
         width: "380px",
@@ -28,7 +29,6 @@ export default function Minimized({ children }: PropsWithChildren) {
         height: isExpanded ? "auto" : 100,
         borderRadius: "38px",
         backgroundColor: "transparent",
-        overflow: "hidden",
       }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
