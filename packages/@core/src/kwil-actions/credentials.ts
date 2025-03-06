@@ -23,6 +23,16 @@ export async function getSharedCredential(kwilClient: KwilActionClient, id: stri
 }
 
 /**
+ * Returns the owned idOS Credential for the given `id`.
+ */
+export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
+    inputs: { id },
+  });
+}
+
+/**
  * Returns the idOSCredential `id` which content hash matches the given `contentHash`.
  */
 export async function getCredentialIdByContentHash(
@@ -144,5 +154,27 @@ export async function removeCredential(kwilClient: KwilActionClient, id: string)
   return kwilClient.execute({
     name: "remove_credential",
     inputs: { id },
+  });
+}
+
+export async function getCredentialById(kwilClient: KwilActionClient, id: string) {
+  const response = await kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
+    inputs: { id },
+  });
+
+  return response.find((r) => r.id === id);
+}
+
+/**
+ * Shares an idOSCredential to the given `userId`.
+ */
+export async function shareCredential(
+  kwilClient: KwilActionClient,
+  credential: Omit<idOSCredential, "original_id"> & { original_credential_id: string },
+) {
+  return kwilClient.execute({
+    name: "share_credential",
+    inputs: credential,
   });
 }

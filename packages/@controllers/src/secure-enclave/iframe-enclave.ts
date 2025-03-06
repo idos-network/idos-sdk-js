@@ -1,7 +1,7 @@
 import { base64Encode, type idOSCredential } from "@idos-network/core";
 
-import type { BackupPasswordInfo } from "../types";
 import type {
+  BackupPasswordInfo,
   DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
@@ -18,7 +18,7 @@ export class IframeEnclave implements EnclaveProvider {
     const { container, ...other } = options;
     this.container = container;
     this.options = other;
-    this.hostUrl = new URL(other.url ?? import.meta.env.VITE_IDOS_ENCLAVE_URL);
+    this.hostUrl = new URL(other.url ?? "https://enclave.idos.network");
     this.iframe = document.createElement("iframe");
     this.iframe.id = "idos-enclave-iframe";
   }

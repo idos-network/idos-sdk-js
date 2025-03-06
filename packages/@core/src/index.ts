@@ -5,3 +5,4 @@ export * from "./types";
 export * from "./kwil-nep413-signer";
 export * from "./kwil-actions";
 export * from "./store";
+export * from "./utils";

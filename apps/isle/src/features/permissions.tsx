@@ -19,6 +19,7 @@ import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
+import type { idOSCredential } from "@idos-network/core";
 import { RequestPermission } from "./request-permission";
 
 interface GrantRevocationProps {
@@ -178,18 +179,18 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
             Revoke
           </Button>
         </Flex>
-        {hasTimeLock && (
+        {hasTimeLock ? (
           <Text fontSize="xs" color="neutral.500" textAlign="center">
             This grant is locked until {timelockToDate(grant.lockedUntil)} and cannot be revoked
             until then.
           </Text>
-        )}
+        ) : null}
       </Stack>
     </Stack>
   );
 }
 
-function Breadcrumbs() {
+function Breadcrumbs({ goHome }: { goHome: () => void }) {
   return (
     <BreadcrumbRoot
       size="lg"
@@ -209,6 +210,7 @@ function Breadcrumbs() {
           _dark: "neutral.50",
           _light: "neutral.950",
         }}
+        onClick={goHome}
       >
         Permissions
       </BreadcrumbLink>
@@ -227,63 +229,158 @@ function Breadcrumbs() {
   );
 }
 
-//@ts-ignore
-function CredentialDetails() {
-  return (
-    <Stack gap="6">
-      <Breadcrumbs />
-      <Stack gap="3">
-        <Flex justifyContent="space-between">
-          <Flex alignItems="center" gap="2.5">
-            <Image />
-            <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
-              Common
-            </Text>
+function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke: () => void }) {
+  const node = useIsleStore((state) => state.node);
+  const [credential, setCredential] = useState<idOSCredential | null>(null);
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
+
+  useEffect(() => {
+    if (!node) return;
+    node.on("update-view-credential-details-status", (data) => {
+      setStatus(data.status);
+      if (data.status === "success") {
+        setCredential(data.credential ?? null);
+      }
+    });
+  }, [node]);
+
+  if (status === "pending") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Spinner size="xl" />
+      </Center>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <Center flexDir="column" gap="6">
+        <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
+          Error while viewing credential details.
+        </Heading>
+      </Center>
+    );
+  }
+
+  if (status === "success") {
+    return (
+      <Stack gap="6" w="full" maxW="full" overflow="auto">
+        <Breadcrumbs goHome={goHome} />
+        <Stack gap="3">
+          <Flex justifyContent="space-between">
+            <Flex alignItems="center" gap="2.5">
+              <Image />
+              <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }}>
+                Common
+              </Text>
+            </Flex>
+            <AuthorizedIcon color="aquamarine.400" />
           </Flex>
-          <AuthorizedIcon color="aquamarine.400" />
-        </Flex>
-        <CredentialContent />
+          <Flex maxW="324px" maxH="340px" overflow="auto">
+            <CredentialContent content={credential?.content} />
+          </Flex>
+        </Stack>
+        <Button onClick={onRevoke}>
+          Revoke Access
+          <Icon w={5} h={5} color="neutral.950">
+            <DeleteIcon />
+          </Icon>
+        </Button>
       </Stack>
-      <Button>
-        Revoke Access
-        <Icon w={5} h={5} color="neutral.950">
-          <DeleteIcon />
-        </Icon>
-      </Button>
-    </Stack>
-  );
+    );
+  }
 }
 
-function CredentialContent() {
+function safeParse(json?: string) {
+  try {
+    return JSON.parse(json ?? "{}");
+  } catch (error) {
+    return {};
+  }
+}
+
+const addressListRender = (value: { address: string }[]) => {
   return (
-    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} borderRadius="xl" gap="0">
-      {Object.entries({ name: "John" }).map(([key, value], index) => (
-        <Flex
-          key={key}
-          py="3.5"
-          px="4"
-          borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
-          borderBottomWidth={index === Object.keys({}).length - 1 ? 0 : 1}
-          borderStyle="solid"
-        >
-          <Text
-            flex="1"
-            fontSize="xs"
-            fontWeight="medium"
-            color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          >
-            {key}
-          </Text>
-          <Text
-            flex="1"
-            fontSize="sm"
-            fontWeight="medium"
-            color={{ _dark: "neutral.50", _light: "neutral.950" }}
-          >
-            {value}
-          </Text>
+    <Stack>
+      {value.map((item) => (
+        <Flex key={item.address}>
+          <Text>{item.address}</Text>
         </Flex>
       ))}
+    </Stack>
+  );
+};
+
+const defaultRender = (value: string) => value;
+
+const infoRenderMap = {
+  emails: addressListRender,
+  wallets: addressListRender,
+  issuanceDate: (value: string) => {
+    return new Date(value).toLocaleDateString();
+  },
+  approved_at: (value: string) => {
+    return new Date(value).toLocaleDateString();
+  },
+} as const;
+
+function CredentialContent({ content: credentialContent }: { content: string | undefined }) {
+  const parsedContent: Record<string, string> = credentialContent
+    ? safeParse(credentialContent)
+    : {};
+  const hasValidContent = parsedContent?.credentialSubject;
+  const { credentialSubject } = hasValidContent
+    ? safeParse(credentialContent)
+    : { credentialSubject: {} };
+  const hiddenFields = ["@context", "type", "credentialSubject", "proof"];
+
+  const contentToRender = {
+    ...parsedContent,
+    ...credentialSubject,
+  };
+
+  return (
+    <Stack
+      bg={{ _dark: "neutral.800", _light: "neutral.200" }}
+      borderRadius="xl"
+      gap="0"
+      w="full"
+      maxW="full"
+      overflow="auto"
+    >
+      {Object.entries(contentToRender || {})
+        .filter(([key]) => !hiddenFields.includes(key))
+        .map(([key, value], index) => (
+          <Flex
+            key={key}
+            py="3.5"
+            px="4"
+            gap="5"
+            borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
+            borderBottomWidth={index === Object.keys(contentToRender || {}).length - 1 ? 0 : 1}
+            borderStyle="solid"
+          >
+            <Text
+              flex="1"
+              fontSize="xs"
+              fontWeight="medium"
+              color={{ _dark: "neutral.50", _light: "neutral.950" }}
+            >
+              {key}
+            </Text>
+            <Text
+              whiteSpace="pre"
+              flex="1"
+              fontSize="xs"
+              fontWeight="medium"
+              color={{ _dark: "neutral.50", _light: "neutral.950" }}
+              truncate
+            >
+              {infoRenderMap?.[key as keyof typeof infoRenderMap]?.(value as unknown as any) ??
+                defaultRender(value as unknown as any)}
+            </Text>
+          </Flex>
+        ))}
     </Stack>
   );
 }
@@ -301,12 +398,14 @@ interface AccessGrantWithGrantee {
   dataId: string;
   type: string;
   grantee: GranteeInfo;
+  mode: "view" | "revoke";
   lockedUntil: number;
+  originalCredentialId: string;
 }
 
 export function Permissions() {
   const accessGrants = useIsleStore((state) => state.accessGrants);
-  const [grantToRevoke, setGrantToRevoke] = useState<AccessGrantWithGrantee | null>(null);
+  const [grant, setGrant] = useState<AccessGrantWithGrantee | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     "idle" | "request-permission" | "pending" | "success" | "error"
   >("idle");
@@ -339,12 +438,20 @@ export function Permissions() {
     return Array.from(accessGrants?.entries() ?? []);
   }, [accessGrants]);
 
-  if (grantToRevoke) {
+  if (grant?.mode === "view") {
+    return (
+      <CredentialDetails
+        onRevoke={() => setGrant({ ...grant, mode: "revoke" })}
+        goHome={() => setGrant(null)}
+      />
+    );
+  }
+  if (grant?.mode === "revoke") {
     return (
       <GrantRevocation
-        grant={grantToRevoke}
-        onSuccess={() => setGrantToRevoke(null)}
-        onDismiss={() => setGrantToRevoke(null)}
+        grant={grant}
+        onSuccess={() => setGrant(null)}
+        onDismiss={() => setGrant(null)}
       />
     );
   }
@@ -468,7 +575,16 @@ export function Permissions() {
                         size="xs"
                         colorPalette="green"
                         rounded="full"
-                        onClick={() => {}}
+                        onClick={() => {
+                          setGrant({
+                            grantee,
+                            ...grant,
+                            mode: "view",
+                          });
+                          node?.post("view-credential-details", {
+                            id: grant.originalCredentialId,
+                          });
+                        }}
                       >
                         <ViewIcon w="5" h="5" color="neutral.400" />
                       </IconButton>
@@ -480,9 +596,10 @@ export function Permissions() {
                         colorPalette="green"
                         rounded="full"
                         onClick={() => {
-                          setGrantToRevoke({
+                          setGrant({
                             grantee,
                             ...grant,
+                            mode: "revoke",
                           });
                         }}
                       >
