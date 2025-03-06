@@ -117,10 +117,10 @@ export default function Home() {
       const [error] = await goTry(async () => {
         const userId = crypto.randomUUID();
 
-        const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(
-          userId,
-          "#idOS-enclave",
-        );
+        const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(userId, {
+          container: "#idOS-enclave",
+          url: "https://enclave.playground.idos.network",
+        });
 
         const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
         const signature = await signMessageAsync({ message });

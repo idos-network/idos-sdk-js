@@ -1,4 +1,4 @@
-import { IframeEnclave } from "@idos-network/controllers/secure-enclave";
+import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/secure-enclave";
 import {
   type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,
@@ -26,11 +26,13 @@ export async function getUserProfile({ kwilClient }: IssuerConfig) {
 /**
  * Get the public key of the user's encryption key
  */
-export async function getUserEncryptionPublicKey(userId: string, container: string) {
+export async function getUserEncryptionPublicKey(
+  userId: string,
+  enclaveOptions: Omit<EnclaveOptions, "mode">,
+) {
   let enclave: IframeEnclave | null = new IframeEnclave({
-    container,
+    ...enclaveOptions,
     mode: "new",
-    url: "https://enclave.playground.idos.network",
   });
 
   await enclave.load();
