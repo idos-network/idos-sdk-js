@@ -20,7 +20,7 @@ export class Enclave {
     const secretKey = storeWithCodec.get("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    this.#listenToRequests();
+    this.listenToRequests();
   }
 
   get isAuthorizedOrigin() {
@@ -127,7 +127,7 @@ export class Enclave {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog(
+            ({ password, duration, credentialId } = await this.openDialog(
               preferredAuthMethod || "auth",
               {
                 expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
@@ -231,7 +231,7 @@ export class Enclave {
       this.confirmButton.addEventListener("click", async (e) => {
         this.confirmButton.disabled = true;
 
-        const { confirmed } = await this.#openDialog("confirm", {
+        const { confirmed } = await this.openDialog("confirm", {
           message,
           origin: this.parentOrigin,
         });
@@ -306,7 +306,7 @@ export class Enclave {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
-          await this.#openDialog("backupPasswordOrSecret", {
+          await this.openDialog("backupPasswordOrSecret", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           });
           resolve();
@@ -317,7 +317,7 @@ export class Enclave {
     });
   }
 
-  #listenToRequests() {
+  listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (
         event.origin !== this.parentOrigin ||
@@ -404,7 +404,7 @@ export class Enclave {
     });
   }
 
-  async #openDialog(intent, message) {
+  async openDialog(intent, message) {
     if (!this.userId) throw new Error("Can't open dialog without userId");
     const width = 600;
     const height =
