@@ -1,9 +1,5 @@
 import type { idOSCredential } from "@idos-network/core";
-import type {
-  DiscoverUserEncryptionPublicKeyResponse,
-  EnclaveProvider,
-  StoredData,
-} from "./src/types";
+import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider, StoredData } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
