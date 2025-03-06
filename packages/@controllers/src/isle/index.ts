@@ -6,20 +6,24 @@ import {
   type IsleNodeMessage,
   type IsleTheme,
   type KwilActionClient,
+  getUserProfile as _getUserProfile,
+  shareCredential as _shareCredential,
   base64Decode,
+  base64Encode,
+  buildInsertableIDOSCredential,
   createKwilSigner,
   createWebKwilClient,
   getAccessGrantsOwned,
   getAllCredentials,
+  getCredentialById,
   getCredentialOwned,
-  getSharedCredential,
-  getUserProfile as getUserProfileCore,
   hasProfile,
   type idOSCredential,
   type idOSUser,
   removeCredential,
   requestDWGSignature,
   utf8Decode,
+  utf8Encode,
 } from "@idos-network/core";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "@idos-network/idos-sdk";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
@@ -179,6 +183,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let kwilClient: KwilActionClient | undefined;
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
+  let ownerOriginalCredentials: idOSCredential[] = [];
 
   /**
    * Sets up a new signer instance using the current wallet client
@@ -279,7 +284,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
   const getUserProfile = async (): Promise<idOSUser> => {
     invariant(kwilClient, "No `KwilActionClient` found");
-    return getUserProfileCore(kwilClient);
+    return _getUserProfile(kwilClient);
   };
 
   /**
@@ -294,7 +299,64 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       KYCPermissions: options.KYCPermissions,
     });
 
-    // @todo: implement the request permission logic.
+    const [error, result] = await goTry(async () => {
+      invariant(kwilClient, "No `KwilActionClient` found");
+      invariant(enclave, "No `idOS enclave` found");
+
+      const credential = await getCredentialById(kwilClient, ownerOriginalCredentials[0].id);
+      invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
+
+      const user = await getUserProfile();
+      const address = getAccount(wagmiConfig).address;
+
+      await enclave?.ready(user.id, address, address, user.recipient_encryption_public_key);
+
+      const plaintextContent = await decryptCredentialContent(credential);
+
+      const { content, encryptorPublicKey } = await enclave.encrypt(
+        utf8Encode(plaintextContent),
+        base64Decode(options.grantee.granteePublicKey),
+      );
+
+      const insertableCredential = await buildInsertableIDOSCredential(
+        credential.user_id,
+        "",
+        base64Encode(content),
+        options.grantee.granteePublicKey,
+        base64Encode(encryptorPublicKey),
+        {
+          granteeAddress: options.grantee.granteePublicKey,
+          lockedUntil: 0,
+        },
+      );
+
+      await _shareCredential(kwilClient, {
+        ...credential,
+        ...insertableCredential,
+        original_credential_id: credential.id,
+        id: crypto.randomUUID(),
+      });
+    });
+
+    if (error) {
+      console.error(error);
+      send("update-request-access-grant-status", {
+        status: "error",
+      });
+
+      return;
+    }
+
+    send("update-request-access-grant-status", {
+      status: "success",
+    });
+
+    const { permissions } = await getPermissions();
+
+    send("update", {
+      status: "verified",
+      accessGrants: permissions,
+    });
   };
 
   /**
@@ -323,13 +385,21 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       status: "success",
     });
 
+    const { permissions } = await getPermissions();
+
+    send("update", {
+      status: "verified",
+      accessGrants: permissions,
+    });
+
     return result;
   };
 
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
-    invariant(enclave, "No `enclave` found");
+    invariant(enclave, "No `idOS enclave` found");
     const user = await getUserProfile();
     const { address } = getAccount(wagmiConfig);
+
     await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
 
     const decrypted = await enclave.decrypt(
@@ -345,6 +415,94 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     } catch (error) {
       return {};
     }
+  };
+
+  /**
+   * Process credentials and return calculated credential data
+   */
+  const getPermissions = async () => {
+    invariant(kwilClient, "No `KwilActionClient` found");
+
+    const acceptedIssuers = options.credentialRequirements.acceptedIssuers;
+    const acceptedCredentialType = options.credentialRequirements.acceptedCredentialType;
+
+    const credentials = await getAllCredentials(kwilClient);
+    const originalCredentials = credentials.filter((cred) => !cred.original_id);
+
+    ownerOriginalCredentials = originalCredentials;
+
+    const originalCredentialTypes = originalCredentials.reduce(
+      (acc, cred) => {
+        const publicNotes = safeParse(cred.public_notes);
+        acc[cred.id] = publicNotes.type;
+        return acc;
+      },
+      {} as Record<string, string>,
+    );
+    const duplicateCredentials = credentials.filter((cred) => cred.original_id);
+
+    // This logic is done in order to understand if the user has to pass the KYC process.
+    const matchingCredentials = originalCredentials.filter((cred) => {
+      const publicNotes = safeParse(cred.public_notes);
+      return acceptedIssuers?.some(
+        (issuer) =>
+          issuer.authPublicKey === cred.issuer_auth_public_key &&
+          acceptedCredentialType === publicNotes?.type,
+      );
+    });
+
+    const groupedCredentials = Object.groupBy(
+      duplicateCredentials,
+      (cred) => cred.original_id ?? "",
+    );
+
+    // Get all the access grants owned by the signer.
+    const accessGrants = await getAccessGrantsOwned(kwilClient);
+
+    // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
+    const knownAccessGrants = accessGrants.filter((ag) => {
+      return Object.values(groupedCredentials).some((duplicates = []) => {
+        return duplicates.find((duplicate) => duplicate.id === ag.data_id);
+      });
+    });
+
+    // Now that we know which access grants are known, we need to find to which grantee they belong to.
+    // For this, we need to take the `options.credentialRequirements.integratedConsumers` and check if any of the `authPublicKey` matches the `ag_grantee_wallet_identifier`
+    const permissions = new Map();
+
+    for (const consumer of options.credentialRequirements.integratedConsumers) {
+      const matchingAccessGrants = knownAccessGrants.filter((ag) => {
+        return ag.ag_grantee_wallet_identifier === consumer.granteePublicKey;
+      });
+
+      permissions.set(
+        consumer,
+        matchingAccessGrants
+          .map((ag) => {
+            const originalId = duplicateCredentials.find(
+              (cred) => cred.id === ag.data_id,
+            )?.original_id;
+
+            if (!originalId) {
+              return null;
+            }
+
+            return {
+              id: ag.id,
+              dataId: ag.data_id,
+              lockedUntil: ag.locked_until,
+              type: originalCredentialTypes[originalId],
+              originalCredentialId: originalId,
+            };
+          })
+          .filter(Boolean),
+      );
+    }
+
+    return {
+      matchingCredentials,
+      permissions,
+    };
   };
 
   /**
@@ -402,27 +560,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         return;
       }
 
-      const credentials = await getAllCredentials(kwilClient);
-      const originalCredentials = credentials.filter((cred) => !cred.original_id);
-      const originalCredentialTypes = originalCredentials.reduce(
-        (acc, cred) => {
-          const publicNotes = safeParse(cred.public_notes);
-          acc[cred.id] = publicNotes.type;
-          return acc;
-        },
-        {} as Record<string, string>,
-      );
-      const duplicateCredentials = credentials.filter((cred) => cred.original_id);
-
-      // This logic is done in order to understand if the user has to pass the KYC process.
-      const matchingCredentials = originalCredentials.filter((cred) => {
-        const publicNotes = safeParse(cred.public_notes);
-        return options.credentialRequirements.acceptedIssuers?.some(
-          (issuer) =>
-            issuer.authPublicKey === cred.issuer_auth_public_key &&
-            options.credentialRequirements.acceptedCredentialType === publicNotes?.type,
-        );
-      });
+      const { matchingCredentials, permissions } = await getPermissions();
 
       if (matchingCredentials.length === 0) {
         send("update", {
@@ -447,55 +585,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         });
 
         return;
-      }
-
-      // Group duplicate credentials by `original_id`
-      const groupedCredentials = Object.groupBy(
-        duplicateCredentials,
-        (cred) => cred.original_id ?? "",
-      );
-
-      // Get all the access grants owned by the signer.
-      const accessGrants = await getAccessGrantsOwned(kwilClient);
-
-      // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
-      const knownAccessGrants = accessGrants.filter((ag) => {
-        return Object.values(groupedCredentials).some((duplicates = []) => {
-          return duplicates.find((duplicate) => duplicate.id === ag.data_id);
-        });
-      });
-
-      // Now that we know which access grants are known, we need to find to which grantee they belong to.
-      // For this, we need to take the `options.credentialRequirements.integratedConsumers` and check if any of the `authPublicKey` matches the `ag_grantee_wallet_identifier`
-      const permissions = new Map();
-
-      for (const consumer of options.credentialRequirements.integratedConsumers) {
-        const matchingAccessGrants = knownAccessGrants.filter((ag) => {
-          return ag.ag_grantee_wallet_identifier === consumer.granteePublicKey;
-        });
-
-        permissions.set(
-          consumer,
-          matchingAccessGrants
-            .map((ag) => {
-              const originalId = duplicateCredentials.find(
-                (cred) => cred.id === ag.data_id,
-              )?.original_id;
-
-              if (!originalId) {
-                return null;
-              }
-
-              return {
-                id: ag.id,
-                dataId: ag.data_id,
-                lockedUntil: ag.locked_until,
-                type: originalCredentialTypes[originalId],
-                originalCredentialId: originalId,
-              };
-            })
-            .filter(Boolean),
-        );
       }
 
       send("update", {
