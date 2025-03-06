@@ -381,7 +381,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
        */
       if (
         matchingCredentials.every((cred) => {
-          const publicNotes = safeParse(cred.public_notes);
+          const publicNotes = JSON.parse(cred.public_notes ?? "{}");
           // @todo: check for 'pending' status properly. Currently we let it fall through.
           return publicNotes.status === "";
         })

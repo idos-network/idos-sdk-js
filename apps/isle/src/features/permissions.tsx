@@ -27,10 +27,27 @@ interface GrantRevocationProps {
   onSuccess: () => void;
   onDismiss: () => void;
 }
+
+export function timelockToMs(timelock: number): number {
+  return timelock * 1000;
+}
+
+function timelockToDate(timelock: number): string {
+  const milliseconds = timelockToMs(timelock);
+
+  return new Intl.DateTimeFormat(["ban", "id"], {
+    dateStyle: "short",
+    timeStyle: "short",
+    hour12: true,
+  }).format(new Date(milliseconds));
+}
+
 function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) {
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
+  // @todo: refactor this to use the grant data
+  const hasTimeLock = true;
 
   useEffect(() => {
     if (!node || hasRequestedRef.current) return;
@@ -152,6 +169,7 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
             Cancel
           </Button>
           <Button
+            disabled={hasTimeLock}
             flex="1"
             onClick={() => {
               node?.post("revoke-permission", {
@@ -162,6 +180,12 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
             Revoke
           </Button>
         </Flex>
+        {hasTimeLock && (
+          <Text fontSize="xs" color="neutral.500" textAlign="center">
+            This grant is locked until {timelockToDate(grant.lockedUntil)} and cannot be revoked
+            until then.
+          </Text>
+        )}
       </Stack>
     </Stack>
   );
@@ -279,6 +303,7 @@ interface AccessGrantWithGrantee {
   dataId: string;
   type: string;
   grantee: GranteeInfo;
+  lockedUntil: number;
 }
 
 export function Permissions() {

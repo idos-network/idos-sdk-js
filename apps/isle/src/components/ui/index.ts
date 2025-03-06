@@ -13,3 +13,4 @@ export * from "./refresh-button";
 export * from "./search-field";
 export * from "./breadcrumb";
 export * from "./stepper";
+export * from "./tooltip";
