@@ -18,5 +18,5 @@ createRoot(root).render(
         <App />
       </Minimized>
     </ThemeProvider>
-  </StrictMode >,
+  </StrictMode>,
 );
