@@ -612,12 +612,6 @@ export function Permissions() {
             </Stack>
           </Stack>
         ))}
-        <Button
-          color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
-          bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
-        >
-          Disconnect
-        </Button>
       </Stack>
     </Stack>
   );
