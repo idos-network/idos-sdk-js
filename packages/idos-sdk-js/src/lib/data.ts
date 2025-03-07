@@ -116,7 +116,7 @@ export class Data {
       for (const record of records) {
         Object.assign(
           record,
-          await this.#buildInsertableIDOSCredential(
+          await this.buildInsertableIDOSCredential(
             record.user_id,
             record.public_notes,
             record.content,
@@ -152,7 +152,7 @@ export class Data {
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       Object.assign(
         record,
-        await this.#buildInsertableIDOSCredential(
+        await this.buildInsertableIDOSCredential(
           (record as AnyRecord).user_id,
           (record as AnyRecord).public_notes,
           (record as AnyRecord).content,
@@ -287,7 +287,7 @@ export class Data {
 
       Object.assign(
         record,
-        await this.#buildInsertableIDOSCredential(
+        await this.buildInsertableIDOSCredential(
           record.user_id,
           record.public_notes,
           record.content,
@@ -318,7 +318,7 @@ export class Data {
   ): Promise<{ id: string }> {
     const originalCredential = (await this.get("credentials", recordId)) as idOSCredential;
 
-    const insertableCredential = await this.#buildInsertableIDOSCredential(
+    const insertableCredential = await this.buildInsertableIDOSCredential(
       originalCredential.user_id,
       "",
       originalCredential.content,
@@ -363,7 +363,7 @@ export class Data {
     if (tableName === "credentials") {
       Object.assign(
         record,
-        await this.#buildInsertableIDOSCredential(
+        await this.buildInsertableIDOSCredential(
           record.user_id,
           "",
           record.content,
@@ -436,7 +436,7 @@ export class Data {
     return message;
   }
 
-  async #buildInsertableIDOSCredential(
+  async buildInsertableIDOSCredential(
     userId: string,
     publicNotes: string,
     plaintextContent: string,

@@ -9,6 +9,7 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@types/node": "^22.7.9",

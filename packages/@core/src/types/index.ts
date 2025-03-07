@@ -73,6 +73,10 @@ export type IsleControllerMessage =
         address?: string;
         theme?: IsleTheme;
         status?: IsleStatus;
+        accessGrants?: WeakMap<
+          { name: string; logo: string },
+          { id: string; dataId: string; type: string }[]
+        >;
       };
     }
   | {
@@ -103,6 +107,41 @@ export type IsleControllerMessage =
       type: "update-revoke-access-grant-status";
       data: {
         status: "idle" | "pending" | "success" | "error";
+      };
+    }
+  | {
+      type: "update-request-access-grant-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+      };
+    }
+  | {
+      type: "update-request-access-grant-status";
+      data: {
+        status: "request-permission";
+        grantee: {
+          granteePublicKey: string;
+          meta: {
+            url: string;
+            name: string;
+            logo: string;
+          };
+        };
+        KYCPermissions: string[];
+      };
+    }
+  | {
+      type: "update-view-credential-details-status";
+      data: {
+        status: "idle" | "pending" | "success" | "error";
+        credential?: idOSCredential;
+        error?: Error;
+      };
+    }
+  | {
+      type: "credential-details";
+      data: {
+        credential: idOSCredential;
       };
     };
 
@@ -137,7 +176,13 @@ export type IsleNodeMessage =
       type: "verify-identity";
     }
   | {
-      type: "revoke-access-grant";
+      type: "revoke-permission";
+      data: {
+        id: string;
+      };
+    }
+  | {
+      type: "view-credential-details";
       data: {
         id: string;
       };

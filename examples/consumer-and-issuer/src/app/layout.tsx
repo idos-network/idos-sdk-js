@@ -19,10 +19,10 @@ export const metadata: Metadata = {
   description: "Showcase app of the idOS Consumer and Issuer SDK's",
 };
 
-export default function RootLayout(props: { children: ReactNode }) {
-  const initialState = cookieToInitialState(getConfig(), headers().get("cookie"));
+export default async function RootLayout(props: { children: ReactNode }) {
+  const initialState = cookieToInitialState(getConfig(), (await headers()).get("cookie"));
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body className={inter.className}>
         <Providers initialState={initialState}>
           <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">

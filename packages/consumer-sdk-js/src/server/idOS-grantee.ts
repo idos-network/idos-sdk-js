@@ -117,7 +117,7 @@ export class idOSGrantee {
     return credentials;
   }
 
-  async getReusableCredentialCompliantly(credentialId: string) {
+  async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
     const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
 
     const accessGrant = await this.getCredentialAccessGrant(credentialId);
