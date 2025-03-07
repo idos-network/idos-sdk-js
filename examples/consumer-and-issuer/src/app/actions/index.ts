@@ -117,7 +117,7 @@ export async function createCredential(
   userId: string,
   userEncryptionPublicKey: string,
   ownerWalletIdentifier: string,
-  granteeWalletIdentifier: string,
+  consumerWalletIdentifier: string,
   issuerPublicKey: string,
   id: string,
   accessGrantTimelock: string,
@@ -142,7 +142,7 @@ export async function createCredential(
     },
     {
       ownerWalletIdentifier,
-      granteeWalletIdentifier,
+      consumerWalletIdentifier,
       issuerPublicKey,
       id,
       accessGrantTimelock,

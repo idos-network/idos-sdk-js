@@ -2,10 +2,10 @@ import { Wallet } from "ethers";
 import { JsonRpcProvider } from "ethers";
 import { KeyPair } from "near-api-js";
 
-import { idOSGrantee } from "./idOS-grantee.ts";
+import { idOSConsumer } from "./idOS-consumer.ts";
 
-export class idOSGranteeSDK {
-  constructor(private readonly grantee: idOSGrantee) {}
+export class idOSConsumerSDK {
+  constructor(private readonly consumer: idOSConsumer) {}
 
   static async init(
     // @todo: not 100% sure if we want to keep this
@@ -16,30 +16,30 @@ export class idOSGranteeSDK {
     nodeUrl: string,
     dbId: string,
   ) {
-    let grantee: idOSGrantee;
+    let consumer: idOSConsumer;
 
     switch (chainType) {
       case "EVM": {
         const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
 
-        grantee = await idOSGrantee.init({
-          granteeSigner: signer,
+        consumer = await idOSConsumer.init({
+          consumerSigner: signer,
           recipientEncryptionPrivateKey,
           nodeUrl,
           dbId,
         });
 
-        return new idOSGranteeSDK(grantee);
+        return new idOSConsumerSDK(consumer);
       }
       case "NEAR": {
         const signer = KeyPair.fromString(authPrivateKey);
-        grantee = await idOSGrantee.init({
-          granteeSigner: signer,
+        consumer = await idOSConsumer.init({
+          consumerSigner: signer,
           nodeUrl,
           recipientEncryptionPrivateKey,
           dbId,
         });
-        return new idOSGranteeSDK(grantee);
+        return new idOSConsumerSDK(consumer);
       }
       default:
         throw new Error(`Unexpected chainType: ${chainType}`);
@@ -47,12 +47,12 @@ export class idOSGranteeSDK {
   }
 
   async listGrants(page: number, size?: number) {
-    return this.grantee.getGrants(page, size);
+    return this.consumer.getGrants(page, size);
   }
 
   async getSharedCredential(dataId: string) {
-    return this.grantee.getSharedCredentialFromIDOS(dataId);
+    return this.consumer.getSharedCredentialFromIDOS(dataId);
   }
 }
 
-export { idOSGrantee } from "./idOS-grantee";
+export { idOSConsumer } from "./idOS-consumer";

@@ -119,8 +119,8 @@ export type IsleControllerMessage =
       type: "update-request-access-grant-status";
       data: {
         status: "request-permission";
-        grantee: {
-          granteePublicKey: string;
+        consumer: {
+          consumerPublicKey: string;
           meta: {
             url: string;
             name: string;

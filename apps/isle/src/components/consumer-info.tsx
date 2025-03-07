@@ -1,11 +1,11 @@
 import { HStack, Image, Text } from "@chakra-ui/react";
 
-interface GranteeInfoProps {
+interface ConsumerInfoProps {
   name: string;
   logo: string;
 }
 
-export function GranteeInfo({ name, logo }: GranteeInfoProps) {
+export function ConsumerInfo({ name, logo }: ConsumerInfoProps) {
   return (
     <HStack gap="2.5" alignItems="flex-start">
       <Image src={logo} alt={name} width="30px" height="30px" rounded="full" />

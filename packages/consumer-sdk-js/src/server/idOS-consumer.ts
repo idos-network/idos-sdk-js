@@ -44,32 +44,32 @@ export class NoncedBox {
   }
 }
 
-interface idOSGranteeInitParams {
+interface idOSConsumerInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
   dbId?: string;
-  granteeSigner: KeyPair | SignKeyPair | ethers.Wallet;
+  consumerSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
-export class idOSGrantee {
+export class idOSConsumer {
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
     dbId,
-    granteeSigner,
-  }: idOSGranteeInitParams): Promise<idOSGrantee> {
+    consumerSigner,
+  }: idOSConsumerInitParams): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
       dbId,
     });
 
-    const [signer, address] = createKwilSigner(granteeSigner);
+    const [signer, address] = createKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
-    return new idOSGrantee(
+    return new idOSConsumer(
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
       address,
@@ -146,7 +146,7 @@ export class idOSGrantee {
       grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
         id: grant.id,
         ownerUserId: grant.ag_owner_user_id,
-        granteeAddress: grant.ag_grantee_wallet_identifier,
+        consumerAddress: grant.ag_grantee_wallet_identifier,
         dataId: grant.data_id,
         lockedUntil: grant.locked_until,
       })),
