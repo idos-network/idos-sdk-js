@@ -61,3 +61,6 @@ test-results
 # next.js
 .next
 next-env.d.ts
+
+# env files
+examples/consumer-and-issuer/.env
