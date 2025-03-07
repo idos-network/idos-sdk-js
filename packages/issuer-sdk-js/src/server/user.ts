@@ -11,7 +11,7 @@ export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
 }
 
-async function createUserProfile(
+export async function createUserProfile(
   { kwilClient }: IssuerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSUser> {
@@ -25,7 +25,7 @@ export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
   id?: string;
 }
 
-async function upsertWalletAsInserter(
+export async function upsertWalletAsInserter(
   { kwilClient }: IssuerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
