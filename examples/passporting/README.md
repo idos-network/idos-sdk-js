@@ -79,24 +79,24 @@ const handleCredentialDuplicateProcess = () => {
 
     const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.data.id);
 
-    const granteeSigningPublicKey = process.env.NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY;
-    const granteeEncryptionPublicKey = process.env.NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY;
+    const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
+    const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
-    invariant(granteeSigningPublicKey, "NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY is not set");
-    invariant(granteeEncryptionPublicKey, "NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY is not set");
+    invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+    invariant(consumerEncryptionPublicKey, "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set");
 
     const { id } = await idOS.data.shareCredential(
       credential.data.id,
-      granteeEncryptionPublicKey,
+      consumerEncryptionPublicKey,
       {
-        granteeAddress: granteeSigningPublicKey,
+        consumerAddress: consumerSigningPublicKey,
         lockedUntil: 0,
       },
     );
 
     const dag = {
       dag_owner_wallet_identifier: address as string,
-      dag_grantee_wallet_identifier: granteeSigningPublicKey,
+      dag_grantee_wallet_identifier: consumerSigningPublicKey,
       dag_data_id: id,
       dag_locked_until: 0,
       dag_content_hash: contentHash,
@@ -151,7 +151,7 @@ export default function Home() {
 
 ```ts
 "use server";
-import { createGranteeSdkInstance } from "@/grantee.config";
+import { createConsumerSdkInstance } from "@/consumer.config";
 import invariant from "tiny-invariant";
 
 export async function invokePassportingService(payload: {
@@ -181,8 +181,8 @@ export async function invokePassportingService(payload: {
 }
 
 export const hasReusableCredential = async (credentialHash: string) => {
-  const granteeSdk = await createGranteeSdkInstance();
-  return granteeSdk.getReusableCredentialCompliantly(credentialHash);
+  const consumerSdk = await createConsumerSdkInstance();
+  return consumerSdk.getReusableCredentialCompliantly(credentialHash);
 };
 ```
 ## How It Works
@@ -195,5 +195,5 @@ export const hasReusableCredential = async (credentialHash: string) => {
 ### Environment Variables
 
 - `NEXT_PUBLIC_DUMMY_CREDENTIAL_ID`: Dummy credential ID for testing.
-- `NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY`: Public Signing key for the grantee.
-- `NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY`: Encryption public key for the grantee.
+- `NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY`: Public Signing key for the consumer.
+- `NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY`: Encryption public key for the consumer.

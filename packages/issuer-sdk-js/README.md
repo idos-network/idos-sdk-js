@@ -136,7 +136,7 @@ The first method involves getting permission from the user via a Delegated Write
 A Delegated Write Grant (DWG) is a permission given by the user that allows a specific issuer to create a credential and it's copy for the issuer itself on the user's behalf. This is particularly relevant to not require the user to come back to your website if you want to add data to their profile. A DWG is a ERC-191 message that the user signs. The message contains fields:
 - operation: delegatedWriteGrant
 - owner: _user_wallet_identifier_
-- grantee: _grantee_wallet_identifier_
+- consumer: _grantee_wallet_identifier_
 - issuer public key: _ed25519_public_key_hex_encoded_
 - id: _DWG_identifier
 - access grant timelock: _RFC3339_date_time_till_access_grant_will_be_locked_
@@ -161,7 +161,7 @@ const idos = await idOS.init(...);
 
 // This is a placeholder for your signer's address. You could get it from
 // some endpoint you expose. But, to keep it simple, we're using a constant.
-const GRANTEE_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
+const CONSUMER_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 const ISSUER_SIGNER_PUBLIC_KEY = "6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069f"; // ed25519 public key
 
 const currentTimestamp = Date.now();
@@ -169,7 +169,7 @@ const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 const delegatedWriteGrant = {
   owner_wallet_identifier: await signer.getAddress(),
-  grantee_wallet_identifier: GRANTEE_WALLET_IDENTIFIER,
+  grantee_wallet_identifier: CONSUMER_WALLET_IDENTIFIER,
   issuer_public_key: ISSUER_SIGNER_PUBLIC_KEY,
   id: crypto.randomUUID(),
   access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
@@ -290,15 +290,15 @@ await createCredentialPermissioned(issuerConfig, credentialPayload);
 
 ## Sharing credentials
 
-The SDK provides issuer to share credentials with other grantees. This function is called `shareCredentialByGrant`.
+The SDK provides issuer to share credentials with other consumers. This function is called `shareCredentialByGrant`.
 ```js
 // Server side
 import issuerConfig from "./issuer-config.js";
 
 await shareCredentialByGrant(issuerConfig,{
   ...credentialPayload,
-  grantee: "GRANTEE_WALLET_ADDRESS",
-  recipientEncryptionPublicKey: new Uint8Array([/* grantee public encryption key (in bytes) */]),
+  consumer: "CONSUMER_WALLET_ADDRESS",
+  recipientEncryptionPublicKey: new Uint8Array([/* consumer public encryption key (in bytes) */]),
   lockedUntil: Math.floor(Date.now() / 1000) + 1000,
   originalCredentialId: credentialPayload.id,
 });

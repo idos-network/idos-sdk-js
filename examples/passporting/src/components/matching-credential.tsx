@@ -47,20 +47,23 @@ function useShareCredential() {
       const contentHash = await idOS.data.getCredentialContentSha256Hash(credentialId);
       const lockedUntil = 0;
 
-      const granteeSigningPublicKey = process.env.NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY;
-      const granteeEncryptionPublicKey = process.env.NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY;
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
-      invariant(granteeSigningPublicKey, "NEXT_PUBLIC_GRANTEE_SIGNING_PUBLIC_KEY is not set");
-      invariant(granteeEncryptionPublicKey, "NEXT_PUBLIC_GRANTEE_ENCRYPTION_PUBLIC_KEY is not set");
+      invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+      invariant(
+        consumerEncryptionPublicKey,
+        "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+      );
 
-      const { id } = await idOS.data.shareCredential(credentialId, granteeEncryptionPublicKey, {
-        granteeAddress: granteeSigningPublicKey,
+      const { id } = await idOS.data.shareCredential(credentialId, consumerEncryptionPublicKey, {
+        consumerAddress: consumerSigningPublicKey,
         lockedUntil: 0,
       });
 
       const dag = {
         dag_owner_wallet_identifier: address as string,
-        dag_grantee_wallet_identifier: granteeSigningPublicKey,
+        dag_grantee_wallet_identifier: consumerSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
         dag_content_hash: contentHash,

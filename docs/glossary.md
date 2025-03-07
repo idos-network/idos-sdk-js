@@ -10,7 +10,7 @@ The `Grant` object represents access permissions for a specific credential. It h
 |------------------|---------------------|-----------------------------------------------------------------------------|
 | `id`             | `string`            | The unique identifier of the grant.                                         |
 | `ownerUserId`    | `string`            | The ID of the user who owns the credential.                                 |
-| `granteeAddress` | `string`            | The address of the grantee (the entity granted access).                     |
+| `consumerAddress` | `string`            | The address of the consumer (the entity granted access).                     |
 | `dataId`         | `string`            | The ID of the shared credential data.                                       |
 | `lockedUntil`    | `number`            | A timestamp (in milliseconds) until which the grant is locked.             |
 | `hash`           | `string` | The content hash of the credential.                             |

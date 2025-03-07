@@ -327,9 +327,9 @@ export class Data {
   // This is the same as `share`, but for credentials only. It doesn't create an AG either for the duplicate.
   async shareCredential(
     recordId: string,
-    granteeRecipientEncryptionPublicKey: string,
+    consumerRecipientEncryptionPublicKey: string,
     grantInfo?: {
-      granteeAddress: string;
+      consumerAddress: string;
       lockedUntil: number;
     },
     synchronous?: boolean,
@@ -340,7 +340,7 @@ export class Data {
       originalCredential.user_id,
       "",
       originalCredential.content,
-      granteeRecipientEncryptionPublicKey,
+      consumerRecipientEncryptionPublicKey,
       grantInfo,
     );
 
@@ -366,9 +366,9 @@ export class Data {
   async share(
     tableName: string,
     recordId: string,
-    granteeRecipientEncryptionPublicKey: string,
+    consumerRecipientEncryptionPublicKey: string,
     grantInfo?: {
-      granteeAddress: string;
+      consumerAddress: string;
       lockedUntil: number;
     },
     synchronous?: boolean,
@@ -385,7 +385,7 @@ export class Data {
           record.user_id,
           "",
           record.content,
-          granteeRecipientEncryptionPublicKey,
+          consumerRecipientEncryptionPublicKey,
           grantInfo,
         ),
       );
@@ -461,7 +461,7 @@ export class Data {
     receiverEncryptionPublicKey: string | undefined,
     // @todo: use plain argument instead of object
     grantInfo?: {
-      granteeAddress: string;
+      consumerAddress: string;
       lockedUntil: number;
     },
   ): Promise<InsertableIDOSCredential> {
@@ -480,7 +480,7 @@ export class Data {
 
     const grantInfoParam = grantInfo
       ? {
-          grantee_wallet_identifier: grantInfo.granteeAddress,
+          grantee_wallet_identifier: grantInfo.consumerAddress,
           locked_until: grantInfo.lockedUntil,
         }
       : {};

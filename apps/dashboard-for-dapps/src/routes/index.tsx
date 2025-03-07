@@ -330,8 +330,8 @@ function SearchResults({
               }}
               pt="4"
               grow
-              label="Grantee"
-              value={grant.granteeAddress}
+              label="Consumer"
+              value={grant.consumerAddress}
               truncate
             />
             <DataListItem
@@ -403,7 +403,7 @@ function Index() {
     if (!debouncedSearchTerm) return grants.data;
 
     const sortedRecords = matchSorter(grants.data.records, debouncedSearchTerm, {
-      keys: ["dataId", "owner", "grantee", "lockedUntil"],
+      keys: ["dataId", "owner", "consumer", "lockedUntil"],
     });
     return {
       records: sortedRecords,
