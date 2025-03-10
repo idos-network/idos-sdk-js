@@ -12,8 +12,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
+import { ConsumerInfo } from "@/components/consumer-info";
 import { Disclaimer } from "@/components/disclaimer";
-import { GranteeInfo } from "@/components/grantee-info";
 import { Icon } from "@/components/icons/icon";
 import { IdentityIcon } from "@/components/icons/identity";
 import { KeyIcon } from "@/components/icons/key";
@@ -200,7 +200,7 @@ export function NotVerified() {
         To proceed, please confirm in your wallet.
       </Text>
       <Stack gap="4">
-        <GranteeInfo name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
+        <ConsumerInfo name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         <Stack gap="2">
           <RequestedPermissions values={meta?.KYCPermissions ?? []} />
           <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />

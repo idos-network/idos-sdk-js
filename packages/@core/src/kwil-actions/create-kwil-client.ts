@@ -79,6 +79,8 @@ export class KwilActionClient {
   }
 }
 
+const DEFAULT_TIMEOUT = 30_000;
+
 /**
  * Create a kwil client for node.js environment
  */
@@ -99,6 +101,7 @@ export async function createNodeKwilClient(params: CreateKwilClientParams) {
   const client = new NodeKwil({
     kwilProvider: params.nodeUrl,
     chainId,
+    timeout: DEFAULT_TIMEOUT,
   });
 
   return new KwilActionClient(client, dbid);
@@ -124,6 +127,7 @@ export async function createWebKwilClient(params: CreateKwilClientParams) {
   const client = new WebKwil({
     kwilProvider: params.nodeUrl,
     chainId,
+    timeout: 30_000,
   });
 
   return new KwilActionClient(client, dbid);

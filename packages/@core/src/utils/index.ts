@@ -17,7 +17,7 @@ export async function buildInsertableIDOSCredential(
   recipientEncryptionPublicKey: string,
   encryptorPublicKey: string,
   grantInfo?: {
-    granteeAddress: string;
+    consumerAddress: string;
     lockedUntil: number;
   },
 ): Promise<InsertableIDOSCredential> {
@@ -33,7 +33,7 @@ export async function buildInsertableIDOSCredential(
 
   const grantInfoParam = grantInfo
     ? {
-        grantee_wallet_identifier: grantInfo.granteeAddress,
+        grantee_wallet_identifier: grantInfo.consumerAddress,
         locked_until: grantInfo.lockedUntil,
       }
     : {};

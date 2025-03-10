@@ -25,7 +25,6 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "@idos-network/idos-sdk";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -44,6 +43,8 @@ import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
+import { IframeEnclave } from "../secure-enclave";
+import type { EnclaveOptions, EnclaveProvider } from "../secure-enclave/types";
 
 /**
  * Configuration options for creating an idOS Isle instance
@@ -77,7 +78,7 @@ interface idOSIsleControllerOptions {
         name: string;
         logo: string;
       };
-      granteePublicKey: string;
+      consumerPublicKey: string;
     }[];
     /** The type of credential accepted by the app */
     acceptedCredentialType: string;
@@ -89,11 +90,11 @@ interface idOSIsleControllerOptions {
  * @interface RequestDelegatedWriteGrantOptions
  */
 interface RequestPermissionOptions {
-  /** The grantee information */
-  grantee: {
-    /** The public key of the grantee */
-    granteePublicKey: string;
-    /** Meta information about the grantee */
+  /** The consumer information */
+  consumer: {
+    /** The public key of the consumer */
+    consumerPublicKey: string;
+    /** Meta information about the consumer */
     meta: {
       url: string;
       name: string;
@@ -118,11 +119,11 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
-  /** Requests a `delegated write grant` for the given `grantee` */
+  /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
-  /** Requests an access grant for the given `grantee` */
+  /** Requests an access grant for the given `consumer` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
   /** Revokes an access grant for the given `id` */
   revokePermission: (id: string) => Promise<unknown>;
@@ -246,8 +247,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     const delegatedWriteGrant = {
       id: crypto.randomUUID(),
       owner_wallet_identifier: address as string,
-      grantee_wallet_identifier: options.grantee.granteePublicKey,
-      issuer_public_key: options.grantee.granteePublicKey,
+      grantee_wallet_identifier: options.consumer.consumerPublicKey,
+      issuer_public_key: options.consumer.consumerPublicKey,
       access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
       not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
       not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -256,9 +257,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send("update-create-dwg-status", {
       status: "start-verification",
       meta: {
-        url: options.grantee.meta.url,
-        name: options.grantee.meta.name,
-        logo: options.grantee.meta.logo,
+        url: options.consumer.meta.url,
+        name: options.consumer.meta.name,
+        logo: options.consumer.meta.logo,
         KYCPermissions: options.KYCPermissions,
       },
     });
@@ -288,14 +289,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   /**
-   * Requests an access grant for the given grantee
+   * Requests an access grant for the given consumer
    */
   const requestPermission = async (options: RequestPermissionOptions): Promise<void> => {
     invariant(kwilClient, "No `KwilActionClient` found");
 
     send("update-request-access-grant-status", {
       status: "request-permission",
-      grantee: options.grantee,
+      consumer: options.consumer,
       KYCPermissions: options.KYCPermissions,
     });
 
@@ -310,17 +311,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const { content, encryptorPublicKey } = await enclave.encrypt(
         utf8Encode(plaintextContent),
-        base64Decode(options.grantee.granteePublicKey),
+        base64Decode(options.consumer.consumerPublicKey),
       );
 
       const insertableCredential = await buildInsertableIDOSCredential(
         credential.user_id,
         "",
         base64Encode(content),
-        options.grantee.granteePublicKey,
+        options.consumer.consumerPublicKey,
         base64Encode(encryptorPublicKey),
         {
-          granteeAddress: options.grantee.granteePublicKey,
+          consumerAddress: options.consumer.consumerPublicKey,
           lockedUntil: 0,
         },
       );
@@ -461,13 +462,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       });
     });
 
-    // Now that we know which access grants are known, we need to find to which grantee they belong to.
+    // Now that we know which access grants are known, we need to find to which consumer they belong to.
     // For this, we need to take the `options.credentialRequirements.integratedConsumers` and check if any of the `authPublicKey` matches the `ag_grantee_wallet_identifier`
     const permissions = new Map();
 
     for (const consumer of options.credentialRequirements.integratedConsumers) {
       const matchingAccessGrants = knownAccessGrants.filter((ag) => {
-        return ag.ag_grantee_wallet_identifier === consumer.granteePublicKey;
+        return ag.ag_grantee_wallet_identifier === consumer.consumerPublicKey;
       });
 
       permissions.set(
