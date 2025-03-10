@@ -23,7 +23,7 @@ import type { idOSCredential } from "@idos-network/core";
 import { RequestPermission } from "./request-permission";
 
 interface GrantRevocationProps {
-  grant: AccessGrantWithGrantee;
+  grant: AccessGrantWithConsumer;
   onSuccess: () => void;
   onDismiss: () => void;
 }
@@ -139,15 +139,15 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
       </Text>
       <HStack alignItems="center" gap="2.5" justifyContent="center">
         <Image
-          src={grant.grantee.meta.logo}
-          alt={grant.grantee.meta.name}
+          src={grant.consumer.meta.logo}
+          alt={grant.consumer.meta.name}
           rounded="full"
           w="30px"
           h="30px"
           shadow="md"
         />
         <Text fontWeight="semibold" color={{ _dark: "neutral.50", _light: "neutral.950" }} truncate>
-          {grant.grantee.meta.name}
+          {grant.consumer.meta.name}
         </Text>
         <Icon
           as={LuChevronRight}
@@ -385,19 +385,19 @@ function CredentialContent({ content: credentialContent }: { content: string | u
   );
 }
 
-interface GranteeInfo {
-  granteePublicKey: string;
+interface ConsumerInfo {
+  consumerPublicKey: string;
   meta: {
     url: string;
     name: string;
     logo: string;
   };
 }
-interface AccessGrantWithGrantee {
+interface AccessGrantWithConsumer {
   id: string;
   dataId: string;
   type: string;
-  grantee: GranteeInfo;
+  consumer: ConsumerInfo;
   mode: "view" | "revoke";
   lockedUntil: number;
   originalCredentialId: string;
@@ -405,11 +405,11 @@ interface AccessGrantWithGrantee {
 
 export function Permissions() {
   const accessGrants = useIsleStore((state) => state.accessGrants);
-  const [grant, setGrant] = useState<AccessGrantWithGrantee | null>(null);
+  const [grant, setGrant] = useState<AccessGrantWithConsumer | null>(null);
   const [permissionStatus, setPermissionStatus] = useState<
     "idle" | "request-permission" | "pending" | "success" | "error"
   >("idle");
-  const [grantee, setGrantee] = useState<GranteeInfo | null>(null);
+  const [consumer, setConsumer] = useState<ConsumerInfo | null>(null);
   const [kycPermissions, setRequestedPermissions] = useState<string[]>([]);
   const node = useIsleStore((state) => state.node);
   const hasRequestedRef = useRef(false);
@@ -424,7 +424,7 @@ export function Permissions() {
       setPermissionStatus(data.status);
       if (data.status === "request-permission") {
         setRequestedPermissions(data.KYCPermissions);
-        setGrantee(data.grantee);
+        setConsumer(data.consumer);
       }
       if (data.status === "success") {
         setTimeout(() => {
@@ -456,8 +456,8 @@ export function Permissions() {
     );
   }
 
-  if (permissionStatus === "request-permission" && grantee && kycPermissions) {
-    return <RequestPermission grantee={grantee.meta} permissions={kycPermissions} />;
+  if (permissionStatus === "request-permission" && consumer && kycPermissions) {
+    return <RequestPermission consumer={consumer.meta} permissions={kycPermissions} />;
   }
 
   if (permissionStatus === "pending") {
@@ -522,13 +522,13 @@ export function Permissions() {
   return (
     <Stack>
       <Stack gap="6">
-        {grants.map(([grantee, values]) => (
-          <Stack key={grantee.granteePublicKey} gap="3">
+        {grants.map(([consumer, values]) => (
+          <Stack key={consumer.consumerPublicKey} gap="3">
             <HStack justifyContent="space-between" alignItems="center">
               <HStack gap="2.5">
                 <Image
-                  src={grantee.meta.logo}
-                  alt={grantee.meta.name}
+                  src={consumer.meta.logo}
+                  alt={consumer.meta.name}
                   rounded="full"
                   w="30px"
                   h="30px"
@@ -540,7 +540,7 @@ export function Permissions() {
                   fontSize="lg"
                   color={{ _dark: "neutral.50", _light: "neutral.950" }}
                 >
-                  {grantee.meta.name}
+                  {consumer.meta.name}
                 </Heading>
               </HStack>
               <AuthorizedIcon color={values.length > 0 ? "aquamarine.400" : "neutral.400"} />
@@ -577,7 +577,7 @@ export function Permissions() {
                         rounded="full"
                         onClick={() => {
                           setGrant({
-                            grantee,
+                            consumer,
                             ...grant,
                             mode: "view",
                           });
@@ -597,7 +597,7 @@ export function Permissions() {
                         rounded="full"
                         onClick={() => {
                           setGrant({
-                            grantee,
+                            consumer,
                             ...grant,
                             mode: "revoke",
                           });
@@ -612,12 +612,6 @@ export function Permissions() {
             </Stack>
           </Stack>
         ))}
-        <Button
-          color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
-          bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
-        >
-          Disconnect
-        </Button>
       </Stack>
     </Stack>
   );

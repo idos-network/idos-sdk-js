@@ -30,13 +30,13 @@ export default function Home() {
     invariant(isle, "idOS Isle is not initialized");
 
     isle.requestPermission({
-      grantee: {
+      consumer: {
         meta: {
           url: "https://idos.network",
           name: "Integrated Consumer",
           logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
         },
-        granteePublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
+        consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
       },
       KYCPermissions: [
         "Name and last name",
@@ -78,7 +78,7 @@ export default function Home() {
               name: "ACME Bank",
               logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
             },
-            granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           },
           {
             meta: {
@@ -86,7 +86,7 @@ export default function Home() {
               name: "Integrated Consumer",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
-            granteePublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
+            consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
           },
         ],
         acceptedCredentialType: "KYC DATA",
@@ -246,8 +246,8 @@ export default function Home() {
       switch (data.status) {
         case "not-verified": {
           const result = await isle?.requestDelegatedWriteGrant({
-            grantee: {
-              granteePublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            consumer: {
+              consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
               meta: {
                 url: "https://idos.network",
                 name: "idOS",

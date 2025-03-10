@@ -84,7 +84,7 @@ const buildInsertableIDOSCredential = (
   };
 };
 
-interface BaseCredentialParams {
+export interface BaseCredentialParams {
   id?: string;
   userId: string;
   publicNotes: string;
@@ -107,10 +107,10 @@ export async function createCredentialAsInserter(
   };
 }
 
-interface DelegatedWriteGrantParams {
+export interface DelegatedWriteGrantParams {
   id: string;
   ownerWalletIdentifier: string;
-  granteeWalletIdentifier: string;
+  consumerWalletIdentifier: string;
   issuerPublicKey: string;
   accessGrantTimelock: string;
   notUsableBefore: string;
@@ -153,7 +153,7 @@ export async function createCredentialByDelegatedWriteGrant(
     copy_broader_signature: copyCredential.broader_signature,
     content_hash: contentHash,
     dwg_owner: delegatedWriteGrant.ownerWalletIdentifier,
-    dwg_grantee: delegatedWriteGrant.granteeWalletIdentifier,
+    dwg_grantee: delegatedWriteGrant.consumerWalletIdentifier,
     dwg_issuer_public_key: delegatedWriteGrant.issuerPublicKey,
     dwg_id: delegatedWriteGrant.id,
     dwg_access_grant_timelock: delegatedWriteGrant.accessGrantTimelock,

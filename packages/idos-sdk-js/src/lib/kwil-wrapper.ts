@@ -172,7 +172,7 @@ export class KwilWrapper {
         new idOSGrant({
           id: grant.id,
           ownerUserId: grant.ag_owner_user_id,
-          granteeAddress: grant.ag_grantee_wallet_identifier,
+          consumerAddress: grant.ag_grantee_wallet_identifier,
           dataId: grant.data_id,
           lockedUntil: grant.locked_until,
         }),

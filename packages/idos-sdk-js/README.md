@@ -286,7 +286,7 @@ The selected auth method will not have a bearing on the encryption capabilities.
 Like mentioned before, in order to lawfully obtain a copy of the user's credentials, the user must grant you an Access Grant. We'll expand on that concept next, but first you need to have some preparation measures in place.
 
 There are two things that a dApp needs to have setup:
-- A `grantee`: a key for a chain account you control. It's used both to identify you as the recipient of an Access Grant and to authenticate you when making calls to idOS nodes. On EVM chains, this is an EOA (Externally-Owned Account, controlled by anyone with its private key), and on NEAR this is a full access public key. For now, the idOS doesn't support having contract wallets as grantees.
+- A `consumer`: a key for a chain account you control. It's used both to identify you as the recipient of an Access Grant and to authenticate you when making calls to idOS nodes. On EVM chains, this is an EOA (Externally-Owned Account, controlled by anyone with its private key), and on NEAR this is a full access public key. For now, the idOS doesn't support having contract wallets as consumers.
 - An `encryptionPublicKey`: a key you control that'll be used to decrypt credential contents shared with you. This should be a [nacl.box.keyPair](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair).
 
 
@@ -296,7 +296,7 @@ There are two things that a dApp needs to have setup:
 
 ### Access Grants
 
-An Access Grant means: I, `owner` (the user), have given you, `grantee` (the dApp), access to the record identified by `dataId`, and I understand I won't be able to revoke said access before `lockedUntil` has passed. The contents of `dataId` are a copy of the credential/attribute that has its contents encrypted to the encryption key provided (by the dApp) during its creation.
+An Access Grant means: I, `owner` (the user), have given you, `consumer` (the dApp), access to the record identified by `dataId`, and I understand I won't be able to revoke said access before `lockedUntil` has passed. The contents of `dataId` are a copy of the credential/attribute that has its contents encrypted to the encryption key provided (by the dApp) during its creation.
 
 By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user's data (either a credential or an attribute) until the UNIX timestamp on `lockedUntil` has passed. This is especially relevant to be able to fulfill compliance obligations.
 
@@ -304,7 +304,7 @@ By acquiring an Access Grant, a dApp ensures that it'll have a copy of the user'
 To avoid any doubts, let's go over the Access Grant fields:
 
 - `ownerUserId`: the grant owner idOS id.
-- `granteeAddress`: on EVM chains this is the dApp's grantee address (like explained in the previous section), and on NEAR this is a full access public key.
+- `consumerAddress`: on EVM chains this is the dApp's consumer address (like explained in the previous section), and on NEAR this is a full access public key.
 - `dataId`: the `id` of the record copy (either a credential or an attribute) that is going to be shared.
 - `lockedUntil`: the earliest UNIX timestamp when the contract will allow the Access Grant to be revoked. Any timestamp in the past, notably "0", means it's revocable at any time.
 
@@ -332,22 +332,22 @@ In this example, `entries` will be a list of credentials where the `"credentialS
 
 By now, we have used the idOS to secure a copy of the data we need to operate.
 
-If you wish to consult it, you'll need to use the `grantee` and [`nacl.box.keyPair`](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair) we've prepared before. Because these are secret, we need call some code in a private place (i.e., a backend, or maybe scripts you run locally).
+If you wish to consult it, you'll need to use the `consumer` and [`nacl.box.keyPair`](https://github.com/dchest/tweetnacl-js/blob/master/README.md#naclboxkeypair) we've prepared before. Because these are secret, we need call some code in a private place (i.e., a backend, or maybe scripts you run locally).
 
-Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-server-dapp) for an EVM grantee:
+Here's an example of how you could achieve that with [`📁 idos-sdk-server-dapp`](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-server-dapp) for an EVM consumer:
 
 ```js
-import { idOSGrantee } from "@idos-network/consumer-sdk-js";
+import { idOSConsumer } from "@idos-network/consumer-sdk-js";
 
-const idosGrantee = await idOSGrantee.init({
+const idosConsumer = await idOSConsumer.init({
   chainType: "EVM",
-  granteeSignerPrivateKey: process.env.EVM_GRANTEE_PRIVATE_KEY,
+  consumerSignerPrivateKey: process.env.EVM_CONSUMER_PRIVATE_KEY,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY,
   nodeUrl: process.env.EVM_IDOS_NODE_URL,
 });
 
 // This assumes we got `dataId` (from a request body, a script argument, etc).
-const contents = await idosGrantee.getSharedCredentialContentDecrypted(dataId);
+const contents = await idosConsumer.getSharedCredentialContentDecrypted(dataId);
 ```
 
 > 💡 Tip
@@ -453,7 +453,7 @@ await idos.data.delete("attributes", id);
 ### Access Grant creation / revocation / list
 
 ### Creating an Access Grant
-Sharing a credential will create an Access Grant for the passed grantee.
+Sharing a credential will create an Access Grant for the passed consumer.
 We're using some variables from `createCredentialByGrant` example. so make sure to check it out at [issuer-sdk-js's README](https://github.com/idos-network/idos-sdk-js/tree/main/packages/idos-sdk-js#readme)
 ```js
 /*
@@ -465,8 +465,8 @@ import issuerConfig from "./issuer-config.js";
 
 await shareCredentialByGrant(issuerConfig, {
   ...credentialPayload,
-  granteeAddress: "GRANTEE_WALLET_ADDRESS",
-  recipientEncryptionPublicKey: new Uint8Array([ /* grantee public encryption key (in bytes) */]),
+  consumerAddress: "CONSUMER_WALLET_ADDRESS",
+  recipientEncryptionPublicKey: new Uint8Array([ /* consumer public encryption key (in bytes) */]),
   lockedUntil: Math.floor(Date.now() / 1000) + LOCKED_UNTIL_SECONDS,
   originalCredentialId: credentialPayload.id,
   publicNotes: "", // make sure to pass an empty string
@@ -485,7 +485,7 @@ await idos.grants.revokeGrant(grantId);
 ```
 
 
-#### List All Grants You Granted to Other Grantees
+#### List All Grants You Granted to Other Consumers
 
 ```js
 await idos.grants.getGrantsOwned();

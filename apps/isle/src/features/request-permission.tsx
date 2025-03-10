@@ -1,5 +1,5 @@
+import { ConsumerInfo } from "@/components/consumer-info";
 import { Disclaimer } from "@/components/disclaimer";
-import { GranteeInfo } from "@/components/grantee-info";
 import { IdentityIcon } from "@/components/icons/identity";
 import { KYCInfo } from "@/components/kyc-info";
 import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
@@ -23,21 +23,21 @@ function RequestedPermissions({ values }: { values: string[] }) {
 }
 
 interface RequestPermissionProps {
-  grantee: {
+  consumer: {
     url: string;
     name: string;
     logo: string;
   };
   permissions: string[];
 }
-export function RequestPermission({ grantee, permissions }: RequestPermissionProps) {
+export function RequestPermission({ consumer, permissions }: RequestPermissionProps) {
   return (
     <Stack gap="6">
       <Stack gap="4">
-        <GranteeInfo name={grantee.name} logo={grantee.logo} />
+        <ConsumerInfo name={consumer.name} logo={consumer.logo} />
         <Stack gap="2">
           <RequestedPermissions values={permissions} />
-          <Disclaimer name={grantee.name} logo={grantee.logo} />
+          <Disclaimer name={consumer.name} logo={consumer.logo} />
         </Stack>
       </Stack>
     </Stack>
