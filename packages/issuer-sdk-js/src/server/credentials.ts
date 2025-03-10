@@ -49,7 +49,7 @@ const buildInsertableIDOSCredential = (
     plaintextContent,
     recipientEncryptionPublicKey,
   }: {
-    userId: string;
+    userId?: string;
     publicNotes: string;
     plaintextContent: Uint8Array;
     recipientEncryptionPublicKey: Uint8Array;
@@ -107,6 +107,8 @@ export async function createCredentialAsInserter(
   };
 }
 
+export type DelegatedWriteGrantBaseParams = Omit<BaseCredentialParams, "userId">;
+
 export interface DelegatedWriteGrantParams {
   id: string;
   ownerWalletIdentifier: string;
@@ -120,7 +122,7 @@ export interface DelegatedWriteGrantParams {
 
 export async function createCredentialByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
-  credentialParams: BaseCredentialParams,
+  credentialParams: DelegatedWriteGrantBaseParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
 ): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
   const { kwilClient, encryptionSecretKey } = issuerConfig;
