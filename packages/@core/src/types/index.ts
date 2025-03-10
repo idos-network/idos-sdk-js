@@ -143,6 +143,13 @@ export type IsleControllerMessage =
       data: {
         credential: idOSCredential;
       };
+    }
+  | {
+      type: "toggle-animation";
+      data: {
+        expanded: boolean;
+        noDismiss?: boolean;
+      };
     };
 
 export type IsleNodeMessage =
