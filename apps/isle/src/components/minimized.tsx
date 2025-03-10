@@ -22,13 +22,12 @@ export default function Minimized({ children }: PropsWithChildren) {
         _light: "neutral.50",
       }}
       overflow="hidden"
-      backgroundColor={{ _dark: "neutral.950", _light: "neutral.50" }}
+      bg="transparent"
       whileHover={{
         width: "380px",
         minHeight: 100,
         height: isExpanded ? "auto" : 100,
         borderRadius: "38px",
-        backgroundColor: "transparent",
       }}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
