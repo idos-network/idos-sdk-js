@@ -84,7 +84,7 @@ const buildInsertableIDOSCredential = (
   };
 };
 
-interface BaseCredentialParams {
+export interface BaseCredentialParams {
   id?: string;
   userId: string;
   publicNotes: string;
@@ -107,7 +107,7 @@ export async function createCredentialAsInserter(
   };
 }
 
-interface DelegatedWriteGrantParams {
+export interface DelegatedWriteGrantParams {
   id: string;
   ownerWalletIdentifier: string;
   consumerWalletIdentifier: string;
