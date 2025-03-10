@@ -41,20 +41,31 @@ type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   public_notes_signature: string;
   broader_signature: string;
 };
-const buildInsertableIDOSCredential = (
+
+type BuildInsertableIDOSCredentialArgs = {
+  userId: string;
+  publicNotes: string;
+  plaintextContent: Uint8Array;
+  recipientEncryptionPublicKey: Uint8Array;
+};
+
+function buildInsertableIDOSCredential(
+  issuerConfig: IssuerConfig,
+  args: BuildInsertableIDOSCredentialArgs,
+): InsertableIDOSCredential;
+function buildInsertableIDOSCredential(
+  issuerConfig: IssuerConfig,
+  args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
+): Omit<InsertableIDOSCredential, "user_id">;
+function buildInsertableIDOSCredential(
   issuerConfig: IssuerConfig,
   {
     userId,
     publicNotes,
     plaintextContent,
     recipientEncryptionPublicKey,
-  }: {
-    userId?: string;
-    publicNotes: string;
-    plaintextContent: Uint8Array;
-    recipientEncryptionPublicKey: Uint8Array;
-  },
-): InsertableIDOSCredential => {
+  }: Omit<BuildInsertableIDOSCredentialArgs, "userId"> & { userId?: string },
+): InsertableIDOSCredential | Omit<InsertableIDOSCredential, "user_id"> {
   const ephemeralKeyPair = nacl.box.keyPair();
   const content = encryptContent(
     plaintextContent,
@@ -82,7 +93,7 @@ const buildInsertableIDOSCredential = (
     issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
     encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
   };
-};
+}
 
 export interface BaseCredentialParams {
   id?: string;
@@ -124,7 +135,10 @@ export async function createCredentialByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
   credentialParams: DelegatedWriteGrantBaseParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
-): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
+): Promise<{
+  originalCredential: Omit<idOSCredential, "user_id">;
+  copyCredential: Omit<idOSCredential, "user_id">;
+}> {
   const { kwilClient, encryptionSecretKey } = issuerConfig;
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
@@ -134,7 +148,6 @@ export async function createCredentialByDelegatedWriteGrant(
   const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
   const copyCredential = ensureEntityId(
     buildInsertableIDOSCredential(issuerConfig, {
-      userId: credentialParams.userId,
       publicNotes: "",
       plaintextContent: credentialParams.plaintextContent,
       recipientEncryptionPublicKey: issuerEncPublicKey,
