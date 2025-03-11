@@ -72,10 +72,14 @@ export async function createCredentialCopy(
     consumerInfo,
   );
 
-  return _createCredentialCopy(kwilClient, {
+  const copyId = crypto.randomUUID();
+
+  await _createCredentialCopy(kwilClient, {
     original_credential_id: originalCredential.id,
     ...originalCredential,
     ...insertableCredential,
-    id: crypto.randomUUID(),
+    id: copyId,
   });
+
+  return { id: copyId };
 }
