@@ -6,7 +6,7 @@ import { type ReactNode, useState } from "react";
 import { type State, WagmiProvider, useAccount } from "wagmi";
 
 import { WalletConnector } from "@/components/wallet-connector";
-import { IDOSProvider } from "@/idOS.provider";
+import { IDOSConsumerProvider } from "@/idOS.provider";
 import { getConfig } from "@/wagmi.config";
 
 function Auth(props: { children: ReactNode }) {
@@ -21,7 +21,7 @@ function Auth(props: { children: ReactNode }) {
     );
   }
 
-  return <IDOSProvider>{props.children}</IDOSProvider>;
+  return <IDOSConsumerProvider>{props.children}</IDOSConsumerProvider>;
 }
 
 export function Providers(props: {
