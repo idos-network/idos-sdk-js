@@ -11,7 +11,7 @@ import { useIsleStore } from "@/store";
 /**
  * @todo: fine-tune the colors
  */
-function ProfileStatusIcon() {
+export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
   if (status === "initializing") {
     return <DisconnectedIcon color="gray" />;
@@ -82,7 +82,7 @@ function StatusBadge() {
 export function Header() {
   return (
     <chakra.header
-      display={{ base: "none", sm: "flex" }}
+      display={"flex"}
       id="header"
       alignItems="start"
       justifyContent="space-between"

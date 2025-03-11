@@ -164,9 +164,17 @@ export default function Home() {
           status: "success",
         });
 
+        isle?.toggleAnimation({
+          expanded: false,
+        });
+
         setTimeout(() => {
           isle?.send("update", {
             status: "not-verified",
+          });
+          isle?.toggleAnimation({
+            expanded: true,
+            noDismiss: true,
           });
         }, 5_000);
       });
@@ -234,6 +242,9 @@ export default function Home() {
       isle?.send("update", {
         status: "pending-verification",
       });
+      isle?.toggleAnimation({
+        expanded: false,
+      });
     });
   }, [writeGrant, signature, signer]);
 
@@ -245,6 +256,10 @@ export default function Home() {
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
       switch (data.status) {
         case "not-verified": {
+          isle?.toggleAnimation({
+            expanded: true,
+            noDismiss: true,
+          });
           const result = await isle?.requestDelegatedWriteGrant({
             consumer: {
               consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",

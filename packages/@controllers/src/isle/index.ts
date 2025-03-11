@@ -131,6 +131,8 @@ interface idOSIsleController {
   viewCredentialDetails: (id: string) => Promise<idOSCredential>;
   /** Get the user profile */
   getUserProfile: () => Promise<idOSUser>;
+  /** Toggle ISLE animation (expand/collapse) */
+  toggleAnimation: ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => void;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -549,6 +551,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const _hasProfile = await hasProfile(kwilClient, account.address as string);
 
       if (!_hasProfile) {
+        toggleAnimation({ expanded: true, noDismiss: true });
         send("update", {
           status: "no-profile",
         });
@@ -578,6 +581,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         send("update", {
           status: "pending-verification",
         });
+        toggleAnimation({ expanded: false, noDismiss: false });
 
         return;
       }
@@ -673,6 +677,19 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     channel?.post(type, data);
   };
 
+  const toggleAnimation = ({
+    expanded,
+    noDismiss,
+    timeout = 700,
+  }: { expanded: boolean; noDismiss?: boolean; timeout?: number }): void => {
+    setTimeout(() => {
+      send("toggle-animation", {
+        expanded,
+        noDismiss,
+      });
+    }, timeout);
+  };
+
   /**
    * Subscribes to messages from the Isle iframe
    * @returns A cleanup function to remove the subscription
@@ -750,5 +767,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     revokePermission,
     viewCredentialDetails,
     getUserProfile,
+    toggleAnimation,
   };
 };
