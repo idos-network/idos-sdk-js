@@ -376,7 +376,9 @@ function CredentialContent({ content: credentialContent }: { content: string | u
               color={{ _dark: "neutral.50", _light: "neutral.950" }}
               truncate
             >
+              {/* biome-ignore lint/suspicious/noExplicitAny: Will be fixed later */}
               {infoRenderMap?.[key as keyof typeof infoRenderMap]?.(value as unknown as any) ??
+                // biome-ignore lint/suspicious/noExplicitAny: Will be fixed later
                 defaultRender(value as unknown as any)}
             </Text>
           </Flex>

@@ -2,7 +2,6 @@ import { createNode } from "@sanity/comlink";
 import { create } from "zustand";
 
 import type {
-  IsleConnectionStatus,
   IsleControllerMessage,
   IsleNodeMessage,
   IsleStatus,
@@ -10,7 +9,6 @@ import type {
 } from "@idos-network/core";
 
 interface NodeState {
-  connectionStatus: IsleConnectionStatus;
   address: string | undefined;
   status: IsleStatus;
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
@@ -31,7 +29,7 @@ interface NodeState {
   createProfile: () => void;
 }
 
-type StateUpdate = Partial<Pick<NodeState, "connectionStatus" | "address" | "theme" | "status">>;
+type StateUpdate = Partial<Pick<NodeState, "address" | "theme" | "status">>;
 
 const createStateUpdate = (update: StateUpdate): StateUpdate => {
   return Object.fromEntries(
@@ -57,12 +55,10 @@ const handleNodeUpdate = (
   node.post("updated", {
     theme: update.theme,
     status: update.status,
-    connectionStatus: update.connectionStatus,
   });
 };
 
 export const useIsleStore = create<NodeState>((set) => ({
-  connectionStatus: "initializing",
   address: undefined,
   status: "initializing",
   accessGrants: null,

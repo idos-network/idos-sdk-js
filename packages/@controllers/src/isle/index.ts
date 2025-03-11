@@ -228,7 +228,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
 
     send("update", {
-      connectionStatus: account.status,
       address: account.address,
     });
   };

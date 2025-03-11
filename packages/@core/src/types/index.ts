@@ -45,12 +45,7 @@ export interface idOSGrant {
  * Following types are specific to the isle post message protocol
  */
 export type IsleTheme = "light" | "dark";
-export type IsleConnectionStatus =
-  | "initializing"
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "reconnecting";
+
 export type IsleStatus =
   | "initializing"
   | "no-profile"
@@ -69,7 +64,6 @@ export type IsleControllerMessage =
   | {
       type: "update";
       data: {
-        connectionStatus?: IsleConnectionStatus;
         address?: string;
         theme?: IsleTheme;
         status?: IsleStatus;
@@ -155,7 +149,6 @@ export type IsleNodeMessage =
   | {
       type: "updated";
       data: {
-        connectionStatus?: IsleConnectionStatus;
         theme?: IsleTheme;
         status?: IsleStatus;
       };
