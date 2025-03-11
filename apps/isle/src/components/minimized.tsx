@@ -2,7 +2,7 @@ import { useOutsideClickHandler } from "@/hooks/use-outside-click";
 import { useIsleStore } from "@/store";
 import { chakra } from "@chakra-ui/react";
 import * as motion from "motion/react-client";
-import { type PropsWithChildren, useEffect, useRef, useState } from "react";
+import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
 import { ProfileStatusIcon } from "./header";
 import { Logo } from "./logo";
 
@@ -15,10 +15,13 @@ export default function Minimized({ children }: PropsWithChildren) {
   const node = useIsleStore((state) => state.node);
   const ref = useRef<HTMLDivElement>(null);
 
-  const toggle = (_isExpanded?: boolean) => {
-    if (noDismiss) return;
-    _isExpanded === undefined ? setIsExpanded(!isExpanded) : setIsExpanded(_isExpanded);
-  };
+  const toggle = useCallback(
+    (_isExpanded?: boolean) => {
+      if (noDismiss) return;
+      _isExpanded === undefined ? setIsExpanded(!isExpanded) : setIsExpanded(_isExpanded);
+    },
+    [noDismiss, isExpanded],
+  );
 
   useOutsideClickHandler(ref, () => toggle(false));
 
@@ -59,7 +62,7 @@ export default function Minimized({ children }: PropsWithChildren) {
             }
           : undefined
       }
-      onClick={toggle}
+      onClick={() => toggle()}
     >
       <MotionBox
         style={{
