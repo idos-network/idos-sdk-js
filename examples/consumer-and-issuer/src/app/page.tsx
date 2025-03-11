@@ -97,7 +97,7 @@ export default function Home() {
       isleRef.current?.destroy();
       isleRef.current = null;
     };
-  }, []);
+  }, [address]);
 
   useEffect(() => {
     const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
