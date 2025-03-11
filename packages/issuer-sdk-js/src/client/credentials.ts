@@ -6,5 +6,8 @@ export async function shareCredential({ kwilClient }: IssuerConfig, id: string) 
   const credential = await getCredentialById(kwilClient, id);
   invariant(credential, `"idOSCredential" with id ${id} not found`);
 
-  await _shareCredential(kwilClient, credential);
+  await _shareCredential(kwilClient, {
+    ...credential,
+    original_credential_id: credential.id,
+  });
 }
