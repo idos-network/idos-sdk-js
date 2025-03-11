@@ -52,6 +52,7 @@ export type IsleStatus =
   | "not-verified"
   | "pending-verification"
   | "verified"
+  | "not-connected"
   | "error";
 
 export type IsleControllerMessage =
