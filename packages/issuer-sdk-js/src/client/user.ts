@@ -39,7 +39,7 @@ export async function getUserEncryptionPublicKey(
   await enclave.reset();
   const publicKey = await enclave.discoverUserEncryptionPublicKey(userId);
   enclave = null;
-  document.querySelector("#idOS-enclave")?.children[0].remove();
+  document.querySelector(enclaveOptions.container)?.children[0].remove();
 
   return publicKey;
 }
