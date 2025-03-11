@@ -6,6 +6,12 @@
     "turbo": "^2.3.3"
   },
   "packageManager": "pnpm@9.6.0",
+  "pnpm": {
+    "overrides": {
+      "@types/react": "19.0.10",
+      "@types/react-dom": "19.0.4"
+    }
+  },
   "private": true,
   "scripts": {
     "build": "turbo run build",
