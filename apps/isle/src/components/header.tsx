@@ -13,7 +13,7 @@ import { useIsleStore } from "@/store";
  */
 export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
-  if (status === "initializing") {
+  if (["initializing", "not-connected"].includes(status)) {
     return <DisconnectedIcon color="gray" />;
   }
 
@@ -52,6 +52,10 @@ const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
   "pending-verification": {
     bg: { _dark: "amber.400/30", _light: "amber.400/60" },
     color: { _dark: "amber.400", _light: "amber.500" },
+  },
+  "not-connected": {
+    bg: "neutral.500/30",
+    color: "neutral.500",
   },
   verified: {
     bg: {

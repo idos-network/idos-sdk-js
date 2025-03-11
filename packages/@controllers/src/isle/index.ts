@@ -535,7 +535,10 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       await handleAccountChange(account);
 
       if (!signer) {
-        throw new Error("No signer found");
+        send("update", {
+          status: "not-connected",
+        });
+        return;
       }
 
       kwilClient = await createWebKwilClient({
@@ -557,7 +560,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         });
         return;
       }
-
       const { matchingCredentials, permissions } = await getPermissions();
 
       if (matchingCredentials.length === 0) {

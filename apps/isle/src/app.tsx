@@ -11,6 +11,7 @@ import { NotVerified } from "@/features/not-verified";
 import { PendingVerification } from "@/features/pending-verification";
 import { Profile } from "@/features/profile";
 import { useIsleStore } from "@/store";
+import { NotConnected } from "./features/not-connected";
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -84,6 +85,9 @@ export function App() {
       </Show>
       <Show when={status === "not-verified"}>
         <NotVerified />
+      </Show>
+      <Show when={status === "not-connected"}>
+        <NotConnected />
       </Show>
       <Show when={status === "error"}>
         <ErrorFallback error={new Error("This is a sample error description")} />
