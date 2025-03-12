@@ -2,9 +2,9 @@ import { CommandIcon } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="bg-black py-20">
+    <footer className="bg-neutral-950 pt-12">
       <div className="container mx-auto">
-        <div className="mx-6 rounded-2xl bg-neutral-950 p-12 shadow-xl">
+        <div className="mx-6 p-12">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="text-center md:text-left">
               <div className="mb-4 flex items-center justify-center md:justify-start">

@@ -16,11 +16,12 @@ export function WalletConnector() {
   if (isConnected) {
     return (
       <div className="flex items-center gap-4">
-        <Button as={Link} color="success" variant="bordered" href="/onboarding">
+        <Button as={Link} href="/onboarding">
           <Wallet2Icon className="h-4 w-4" />
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </Button>
         <Button
+          color="danger"
           onPress={() => {
             disconnect();
             router.replace("/");
