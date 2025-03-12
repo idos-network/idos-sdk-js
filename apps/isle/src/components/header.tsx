@@ -15,7 +15,7 @@ export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
 
   if (status === "initializing") {
-    return <Spinner size="md" />;
+    return <Spinner w="24px" h="24px" />;
   }
 
   if (status === "not-connected") {

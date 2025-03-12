@@ -47,12 +47,11 @@ export default function Minimized({ children }: PropsWithChildren) {
       width="80px"
       height="40px"
       alignItems="center"
-      marginLeft="auto"
-      marginRight="15%"
       border="1px solid"
+      ml="auto"
       shadow="sm"
       borderColor={{
-        _dark: "neutral.800",
+        _dark: "neutral.700",
         _light: "neutral.200",
       }}
       overflow="hidden"
