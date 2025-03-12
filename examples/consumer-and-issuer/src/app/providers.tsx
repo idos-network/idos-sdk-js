@@ -3,13 +3,14 @@
 import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
 import { getConfig } from "@/wagmi.config";
 
 export function Providers(props: {
-  children: ReactNode;
+  // biome-ignore lint/suspicious/noExplicitAny: types issue
+  children: any;
   initialState?: State;
 }) {
   const [config] = useState(() => getConfig());
