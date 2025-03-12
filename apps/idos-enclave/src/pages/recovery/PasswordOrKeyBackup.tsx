@@ -5,17 +5,15 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/core";
-import type { EncryptResponse } from "@lit-protocol/types";
 import { useSignal } from "@preact/signals";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 
-import { type JSX, useEffect, useMemo } from "preact/compat";
+import { type JSX, useEffect } from "preact/compat";
 
-import { ExclamationTriangleIcon, EyeSlashIcon } from "@heroicons/react/20/solid";
+import { EyeSlashIcon } from "@heroicons/react/20/solid";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
-import { Lit } from "../../lib/lit";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);
@@ -288,8 +286,6 @@ export function PasswordOrKeyBackup({
 }) {
   const reveal = useSignal(false);
   const status = useSignal<"idle" | "pending">("idle");
-  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
-  const litCipher = store.get("lit-cipher-text");
 
   const authMethod: "passkey" | "password" = store.get("preferred-auth-method");
   const password = store.get("password");
@@ -302,45 +298,12 @@ export function PasswordOrKeyBackup({
     reveal.value = !reveal.value;
   };
 
-  const storeLitCiphers = async (cipherInfo: EncryptResponse) => {
-    const { ciphertext, dataToEncryptHash } = cipherInfo;
-    // accessControlConditions already been stored
-    store.set("lit-cipher-text", ciphertext);
-    store.set("lit-data-to-encrypt-hash", dataToEncryptHash);
-  };
-
-  const storeWithLit = async () => {
-    try {
-      status.value = "pending";
-      let userWallets = store.get("new-user-wallets") || [];
-      userWallets = userWallets.map((wallet: { address: string }) => wallet.address);
-
-      const passwordCiphers = await litInstance.encrypt(password, userWallets);
-      const accessControlConditions = litInstance.getAccessControls(userWallets);
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
-      storeLitCiphers(passwordCiphers!);
-
-      onSuccess({
-        type: "idOS:store",
-        status: "pending",
-        payload: {
-          passwordCiphers,
-          accessControlConditions,
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: We depend only on backupStatus.
   useEffect(() => {
     if (["failure", "done", "success"].includes(backupStatus)) {
       status.value = "idle";
     }
   }, [backupStatus]);
-
-  const hideStoreWithLit = backupStatus === "success" && !!litCipher;
 
   if (reveal.value) {
     return (
@@ -375,18 +338,6 @@ export function PasswordOrKeyBackup({
         </GoogleOAuthProvider>
       ) : null}
 
-      {!hideStoreWithLit && (
-        <Button onClick={storeWithLit} disabled={status.value === "pending"}>
-          {status.value === "pending" ? (
-            "Storing..."
-          ) : (
-            <span class="inline-flex items-center">
-              Encrypt with Lit (<ExclamationTriangleIcon class="h-5 w-5" />
-              devnet beta)
-            </span>
-          )}
-        </Button>
-      )}
       {resultMsg ? <Paragraph>{resultMsg}</Paragraph> : null}
     </div>
   );
