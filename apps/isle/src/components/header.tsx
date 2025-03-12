@@ -1,4 +1,4 @@
-import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
+import { type BadgeProps, HStack, Spinner, VStack, chakra } from "@chakra-ui/react";
 import type { IsleStatus } from "@idos-network/core";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";
@@ -13,7 +13,12 @@ import { useIsleStore } from "@/store";
  */
 export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
-  if (["initializing", "not-connected"].includes(status)) {
+
+  if (status === "initializing") {
+    return <Spinner size="md" />;
+  }
+
+  if (status === "not-connected") {
     return <DisconnectedIcon color="gray" />;
   }
 
