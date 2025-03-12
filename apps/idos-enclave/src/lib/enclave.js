@@ -40,21 +40,10 @@ export class Enclave {
     }
   }
 
-  handleStorableAttributes(storableAttributes) {
-    if (!Array.isArray(storableAttributes) || !storableAttributes.length) return;
-    // biome-ignore lint/complexity/noForEach: <explanation>
-    storableAttributes.forEach((attr) => {
-      this.store.set(attr.attribute_key, this.safeParse(attr.value));
-    });
-  }
-
   storage(userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     userId && this.store.set("user-id", userId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
-
-    const litAttrs = this.store.get("litAttrs");
-    this.handleStorableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -342,8 +331,6 @@ export class Enclave {
           countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
-          litAttrs,
-          userWallets,
           key,
           value,
         } = requestData;
@@ -355,14 +342,7 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [
-            userId,
-            signerAddress,
-            signerPublicKey,
-            expectedUserEncryptionPublicKey,
-            litAttrs,
-            userWallets,
-          ],
+          storage: () => [userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],

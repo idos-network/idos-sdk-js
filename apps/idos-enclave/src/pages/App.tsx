@@ -229,7 +229,7 @@ export function App({ store, enclave }: AppProps) {
           isRecoveryMode.value = false;
         }}
       >
-        <PasswordOrKeyRecovery onSuccess={onSuccess} store={store} />
+        <PasswordOrKeyRecovery onSuccess={onSuccess} />
       </Layout>
     );
   }
@@ -238,17 +238,6 @@ export function App({ store, enclave }: AppProps) {
     <Layout onHeaderClick={resetMethod}>
       <div class="flex flex-col gap-4">
         <ChooseMethod setMethod={setMethod} mode={mode} />
-        {mode !== "new" ? (
-          <button
-            type="button"
-            onClick={() => {
-              isRecoveryMode.value = true;
-            }}
-            class="font-semibold text-green-600 underline underline-offset-4 hover:text-green-700"
-          >
-            Forgot?
-          </button>
-        ) : null}
       </div>
     </Layout>
   );
