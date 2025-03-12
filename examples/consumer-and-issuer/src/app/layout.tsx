@@ -17,7 +17,8 @@ export const metadata: Metadata = {
   description: "Showcase app of the idOS Consumer and Issuer SDK's",
 };
 
-export default async function RootLayout(props: { children: ReactNode }) {
+// biome-ignore lint/suspicious/noExplicitAny: types issue
+export default async function RootLayout(props: { children: any }) {
   const initialState = cookieToInitialState(getConfig(), (await headers()).get("cookie"));
   return (
     <html lang="en" suppressHydrationWarning>
