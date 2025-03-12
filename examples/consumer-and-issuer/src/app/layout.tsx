@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { headers } from "next/headers";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { cookieToInitialState } from "wagmi";
 
 import { Providers } from "@/app/providers";
@@ -17,8 +17,7 @@ export const metadata: Metadata = {
   description: "Showcase app of the idOS Consumer and Issuer SDK's",
 };
 
-// biome-ignore lint/suspicious/noExplicitAny: types issue
-export default async function RootLayout(props: { children: any }) {
+export default async function RootLayout(props: { children: JSX.Element }) {
   const initialState = cookieToInitialState(getConfig(), (await headers()).get("cookie"));
   return (
     <html lang="en" suppressHydrationWarning>
