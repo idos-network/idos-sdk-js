@@ -12,6 +12,60 @@ test.beforeEach(async ({ context, page, metamask }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
+test("should create a profile successfully using new wallet", async ({
+  context,
+  page,
+  metamaskPage,
+  extensionId,
+}) => {
+  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+  // generate random private key
+  const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  await metamask.importWalletFromPrivateKey(privateKey);
+
+  await page.getByRole("button", { name: "Connect wallet" }).click();
+
+  await metamask.connectToDapp();
+
+  const isleIframe = page.frameLocator("#idOS-isle > iframe");
+
+  const popupPromise = page.waitForEvent("popup");
+
+  const createProfileButton = isleIframe.getByRole("button", { name: "Create idOS profile" });
+  await expect(createProfileButton).toBeVisible();
+  await createProfileButton.click();
+
+  const unlockButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
+  await unlockButton.waitFor({
+    state: "visible",
+  });
+  await unlockButton.click();
+
+  const idOSPopup = await popupPromise;
+  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
+  const passwordInput = idOSPopup.locator("#idos-password-input");
+  await passwordInput.fill("qwerty");
+  await idOSPopup.getByRole("button", { name: "Create password" }).click();
+
+  await page.waitForTimeout(2000);
+  await metamask.confirmSignature();
+
+  // Simulate the user to be transitioning to not verified status
+  await page.waitForTimeout(6000);
+  await metamask.confirmSignature();
+
+  await expect(isleIframe.locator(".status-badge").first()).toHaveText("not verified");
+
+  await isleIframe.getByRole("button", { name: "Verify your identity" }).click();
+  await page.waitForTimeout(2000);
+  await metamask.confirmSignature();
+  await page.waitForTimeout(5000);
+
+  await expect(isleIframe.locator(".status-badge").first()).toHaveText("pending verification");
+});
+
 test.describe
   .serial("Linking wallet to idOS Dashboard and cleaning up", () => {
     test("should link existing wallet", async ({ context, page, metamaskPage, extensionId }) => {
