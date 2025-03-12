@@ -2,13 +2,11 @@ import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
 
-import { useMemo } from "preact/hooks";
 import { Button } from "../../components/ui/button";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
 import { TextField, type TextFieldProps } from "../../components/ui/text-field";
 import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
-import { Lit } from "../../lib/lit";
 import type { MethodProps } from "./Chooser";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
@@ -90,10 +88,7 @@ export function PasswordForm({
   const password = useSignal("");
   const duration = useSignal(7);
   const hasError = useSignal(false);
-  const recovering = useSignal(false);
   const isLoading = useSignal(false);
-  const litInstance = useMemo(() => new Lit("ethereum", store), [store]);
-  const litCipher = store.get("lit-cipher-text");
 
   async function derivePublicKeyFromPassword(password: string) {
     // TODO Remove human-user migration code.
@@ -102,15 +97,6 @@ export function PasswordForm({
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
   }
-
-  const restorePassword = async () => {
-    const litDataHash = store.get("lit-data-to-encrypt-hash");
-    const litAccessControls = store.get("lit-access-control");
-    recovering.value = true;
-    const decryptedPassword = await litInstance.decrypt(litCipher, litDataHash, litAccessControls);
-    recovering.value = false;
-    password.value = decryptedPassword || "";
-  };
 
   const onSubmit = async (e: Event) => {
     e.preventDefault();
@@ -168,16 +154,6 @@ export function PasswordForm({
           <Button type="submit" disabled={isLoading.value}>
             {isLoading.value ? "Unlocking..." : "Unlock"}
           </Button>
-          {!!litCipher && (
-            <button
-              type="button"
-              onClick={restorePassword}
-              disabled={recovering.value}
-              className="cursor-pointer font-semibold text-green-600 text-sm hover:underline"
-            >
-              {!recovering.value ? "Forgot" : "Recovering..."}
-            </button>
-          )}
         </>
       )}
     </form>
