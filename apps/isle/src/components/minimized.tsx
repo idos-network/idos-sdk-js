@@ -13,7 +13,7 @@ export default function Minimized({ children }: PropsWithChildren) {
   const [noDismiss, setNoDismiss] = useState(false);
 
   const node = useIsleStore((state) => state.node);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
 
   const toggle = useCallback(
     (_isExpanded?: boolean) => {
@@ -23,7 +23,6 @@ export default function Minimized({ children }: PropsWithChildren) {
     [noDismiss, isExpanded],
   );
 
-  // @ts-expect-error fix me later, not now
   useOutsideClickHandler(ref, () => toggle(false));
 
   useEffect(() => {
