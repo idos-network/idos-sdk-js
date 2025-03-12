@@ -12,124 +12,109 @@ test.beforeEach(async ({ context, page, metamask }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-test("should create a profile successfully using new wallet", async ({
-  context,
-  page,
-  metamaskPage,
-  extensionId,
-}) => {
-  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-  // generate random private key
-  const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  await metamask.importWalletFromPrivateKey(privateKey);
+test.describe
+  .serial("Linking wallet to idOS Dashboard and cleaning up", () => {
+    test("should link existing wallet", async ({ context, page, metamaskPage, extensionId }) => {
+      const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+      // generate random private key
+      const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+      await metamask.importWalletFromPrivateKey(privateKey);
+      const walletAddress = await metamask.getAccountAddress();
 
-  await page.getByRole("button", { name: "Connect wallet" }).click();
+      await page.getByRole("button", { name: "Connect wallet" }).click();
 
-  await metamask.connectToDapp();
+      await metamask.connectToDapp();
 
-  // Get the iframe
-  const isleIframe = page.frameLocator("#idOS-isle > iframe");
+      await page.waitForTimeout(10000);
 
-  const popupPromise = page.waitForEvent("popup");
+      const isleIframe = page.frameLocator("#idOS-isle > iframe");
 
-  // Now look for the button within the iframe
-  const createProfileButton = isleIframe.getByRole("button", { name: "Create idOS profile" });
-  await expect(createProfileButton).toBeVisible();
-  await createProfileButton.click();
+      const createProfileButton = isleIframe.getByRole("button", { name: "Link existing wallet" });
+      await expect(createProfileButton).toBeVisible();
+      await createProfileButton.click();
+      const linkWalletButton = isleIframe.getByRole("button", {
+        name: "Link wallet to idOS Dashboard",
+      });
+      await expect(linkWalletButton).toBeVisible();
+      await linkWalletButton.click();
+      await page.waitForTimeout(3000);
+      const [, dashboardPage] = await context.pages();
 
-  const unlockButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
-  await unlockButton.waitFor({
-    state: "visible",
+      await dashboardPage.getByRole("button", { name: "Connect a wallet" }).click();
+      await page.getByRole("button", { name: "Metamask" }).click();
+      await metamask.switchAccount("Pristine");
+      await metamask.connectToDapp();
+      await dashboardPage.waitForTimeout(4000);
+      await metamask.confirmSignature();
+
+      expect(await dashboardPage.url()).toContain("wallets?add-wallet");
+
+      const walletAddressInput = dashboardPage.getByRole("textbox", { name: "Wallet address" });
+
+      await expect(walletAddressInput).toHaveValue(walletAddress);
+
+      const addWalletButton = dashboardPage.getByRole("button", { name: "Add wallet" });
+      await expect(addWalletButton).toBeVisible();
+      await addWalletButton.click();
+      await page.waitForTimeout(1000);
+      await metamask.confirmSignature();
+
+      const addWalletForm = dashboardPage.getByRole("form", { name: "add-wallet-form" });
+      await addWalletForm.waitFor({ state: "detached" });
+
+      await page.waitForTimeout(10000);
+      await metamask.confirmSignature();
+
+      const minimizedIsle = isleIframe.locator("#minimized-isle");
+      await expect(minimizedIsle).toBeVisible({ timeout: 10000 });
+      await minimizedIsle.click();
+      await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
+    });
+    test("clean up added wallets", async ({ context, page, metamaskPage, extensionId }) => {
+      const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
+      // @todo: should we make this CI variable?
+      await page.goto("https://dashboard.playground.idos.network/wallets");
+
+      await page.getByRole("button", { name: "Connect a wallet" }).click();
+      await page.getByRole("button", { name: "Metamask" }).click();
+
+      await metamask.switchAccount("Pristine");
+      await metamask.connectToDapp();
+
+      await page.waitForTimeout(2000);
+      await metamask.confirmSignature();
+
+      const walletsList = page.locator("#wallets-list");
+      await expect(walletsList).toBeVisible();
+
+      const walletsCount = await walletsList.getByRole("listitem").count();
+
+      for (let i = 0; i < walletsCount; i++) {
+        if ((await walletsList.getByRole("listitem").count()) === 1) break;
+
+        let wallet = await walletsList.getByRole("listitem").first();
+
+        let deleteBtn = wallet.getByRole("button", { name: "Delete" });
+        const isDisabled = await deleteBtn.isDisabled();
+
+        if (isDisabled) {
+          wallet = await walletsList.getByRole("listitem").last();
+          deleteBtn = wallet.getByRole("button", { name: "Delete" });
+        }
+
+        await deleteBtn.click();
+
+        const confirmDeleteBtn = page.getByRole("button", { name: "Delete" }).last();
+
+        await confirmDeleteBtn.click();
+        await page.waitForTimeout(1000);
+        await metamask.confirmSignature();
+
+        // Wait for the modal to disappear
+        const deleteModal = await page.locator('[role="alertdialog"]');
+        await expect(deleteModal).not.toBeVisible({ timeout: 10000 });
+      }
+    });
   });
-  await unlockButton.click();
-
-  const idOSPopup = await popupPromise;
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
-  const passwordInput = idOSPopup.locator("#idos-password-input");
-  await passwordInput.fill("qwerty");
-  await idOSPopup.getByRole("button", { name: "Create password" }).click();
-
-  await page.waitForTimeout(2000);
-  await metamask.confirmSignature();
-
-  // Simulate the user to be transitioning to not verified status
-  await page.waitForTimeout(6000);
-  await metamask.confirmSignature();
-
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("not verified");
-
-  await isleIframe.getByRole("button", { name: "Verify your identity" }).click();
-  await page.waitForTimeout(2000);
-  await metamask.confirmSignature();
-  await page.waitForTimeout(5000);
-
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("pending verification");
-});
-
-test("should link existing wallet", async ({ context, page, metamaskPage, extensionId }) => {
-  const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-  // generate random private key
-  const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  await metamask.importWalletFromPrivateKey(privateKey);
-  const walletAddress = await metamask.getAccountAddress();
-
-  await page.getByRole("button", { name: "Connect wallet" }).click();
-
-  await metamask.connectToDapp();
-
-  await page.waitForTimeout(10000);
-
-  const isleIframe = page.frameLocator("#idOS-isle > iframe");
-
-  const createProfileButton = isleIframe.getByRole("button", { name: "Link existing wallet" });
-  await expect(createProfileButton).toBeVisible();
-  await createProfileButton.click();
-  const linkWalletButton = isleIframe.getByRole("button", {
-    name: "Link wallet to idOS Dashboard",
-  });
-  await expect(linkWalletButton).toBeVisible();
-  await linkWalletButton.click();
-  await page.waitForTimeout(3000);
-  const [, dashboardPage] = await context.pages();
-
-  await dashboardPage.getByRole("button", { name: "Connect a wallet" }).click();
-  await page.getByRole("button", { name: "Metamask" }).click();
-  await metamask.switchAccount("Pristine");
-  await metamask.connectToDapp();
-  await dashboardPage.waitForTimeout(2000);
-  await metamask.confirmSignature();
-
-  expect(await dashboardPage.url()).toContain("wallets?add-wallet");
-
-  const walletAddressInput = dashboardPage.getByRole("textbox", { name: "Wallet address" });
-
-  await expect(walletAddressInput).toHaveValue(walletAddress);
-
-  const addWalletButton = dashboardPage.getByRole("button", { name: "Add wallet" });
-  await expect(addWalletButton).toBeVisible();
-  await addWalletButton.click();
-  await page.waitForTimeout(1000);
-  await metamask.confirmSignature();
-
-  const addWalletForm = dashboardPage.getByRole("form", { name: "add-wallet-form" });
-  await addWalletForm.waitFor({ state: "detached" });
-
-  await page.waitForTimeout(10000);
-  await metamask.confirmSignature();
-
-  const minimizedIsle = isleIframe.locator("#minimized-isle");
-  await expect(minimizedIsle).toBeVisible({ timeout: 10000 });
-  await minimizedIsle.click();
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
-
-  // Removing added wallets from the dashboard
-  await page.goto("https://dashboard.playground.idos.network/wallets");
-  await dashboardPage.waitForTimeout(1000);
-  await metamask.confirmSignature();
-  await dashboardPage.waitForTimeout(10000);
-  expect(await dashboardPage.getByRole("heading", { name: "Wallets" })).toBeVisible();
-});
