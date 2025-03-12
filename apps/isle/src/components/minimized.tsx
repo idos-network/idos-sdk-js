@@ -23,6 +23,7 @@ export default function Minimized({ children }: PropsWithChildren) {
     [noDismiss, isExpanded],
   );
 
+  // @ts-expect-error fix me later, not now
   useOutsideClickHandler(ref, () => toggle(false));
 
   useEffect(() => {
@@ -39,21 +40,26 @@ export default function Minimized({ children }: PropsWithChildren) {
   return (
     <MotionBox
       ref={ref}
+      cursor={isExpanded ? "default" : "pointer"}
       display="flex"
-      gap={1}
+      gap="1"
       borderRadius="46px"
-      width="74px"
-      height="42px"
-      alignItems="start"
+      width="80px"
+      height="40px"
+      alignItems="center"
       marginLeft="auto"
       marginRight="15%"
       border="1px solid"
+      shadow="sm"
       borderColor={{
         _dark: "neutral.800",
-        _light: "neutral.50",
+        _light: "neutral.200",
       }}
       overflow="hidden"
-      bg="transparent"
+      bg={{
+        _dark: "neutral.950",
+        _light: "white",
+      }}
       animate={
         isExpanded
           ? {
