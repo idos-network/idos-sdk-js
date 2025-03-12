@@ -1,14 +1,7 @@
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "../codecs";
-import type { idOSCredential } from "../types";
-
-type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
-  id?: idOSCredential["id"];
-  content_hash?: string;
-  public_notes_signature: string;
-  broader_signature: string;
-};
+import type { InsertableIDOSCredential } from "../types";
 
 export async function buildInsertableIDOSCredential(
   userId: string,

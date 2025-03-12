@@ -41,6 +41,13 @@ export interface idOSGrant {
   content_hash?: string;
 }
 
+export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+  id?: idOSCredential["id"];
+  content_hash?: string;
+  public_notes_signature: string;
+  broader_signature: string;
+};
+
 /**
  * Following types are specific to the isle post message protocol
  */
@@ -52,6 +59,7 @@ export type IsleStatus =
   | "not-verified"
   | "pending-verification"
   | "verified"
+  | "not-connected"
   | "error";
 
 export type IsleControllerMessage =

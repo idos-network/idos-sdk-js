@@ -1,22 +1,29 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import {
+  createCredentialCopy,
+  getAllCredentials,
+  getCredentialContentSha256Hash,
+  getUserProfile,
+  requestDAGSignature,
+} from "@idos-network/consumer-sdk-js/client";
+import type { idOSCredential } from "@idos-network/core";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
-import { useIdOS } from "@/idOS.provider";
+import { useIdOSConsumer } from "@/idOS.provider";
 
 import { CredentialCard } from "./credential-card";
 
 const useFetchMatchingCredential = () => {
-  const idOS = useIdOS();
+  const consumerConfig = useIdOSConsumer();
 
   return useSuspenseQuery({
     queryKey: ["matching-credential"],
-    queryFn: () => idOS.data.listAllCredentials(),
+    queryFn: () => getAllCredentials(consumerConfig),
     select: (credentials) => {
       const credential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
@@ -28,11 +35,13 @@ const useFetchMatchingCredential = () => {
 };
 
 export const useFetchSharedCredentialFromUser = () => {
-  const idOS = useIdOS();
+  const consumerConfig = useIdOSConsumer();
   return useSuspenseQuery({
     queryKey: ["shared-credential"],
-    queryFn: () =>
-      fetch(`/api/shared-credential/${idOS.auth.currentUser.userId}`).then((res) => res.json()),
+    queryFn: async () => {
+      const { id: userId } = await getUserProfile(consumerConfig);
+      return fetch(`/api/shared-credential/${userId}`).then((res) => res.json());
+    },
   });
 };
 
@@ -40,11 +49,11 @@ function useShareCredential() {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
-  const idOS = useIdOS();
+  const consumerConfig = useIdOSConsumer();
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
-      const contentHash = await idOS.data.getCredentialContentSha256Hash(credentialId);
+      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -56,10 +65,15 @@ function useShareCredential() {
         "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
       );
 
-      const { id } = await idOS.data.shareCredential(credentialId, consumerEncryptionPublicKey, {
-        consumerAddress: consumerSigningPublicKey,
-        lockedUntil: 0,
-      });
+      const { id } = await createCredentialCopy(
+        consumerConfig,
+        credentialId,
+        consumerEncryptionPublicKey,
+        {
+          consumerAddress: consumerSigningPublicKey,
+          lockedUntil: 0,
+        },
+      );
 
       const dag = {
         dag_owner_wallet_identifier: address as string,
@@ -69,7 +83,7 @@ function useShareCredential() {
         dag_content_hash: contentHash,
       };
 
-      const message: string = await idOS.data.requestDAGSignature(dag);
+      const message: string = await requestDAGSignature(consumerConfig, dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({

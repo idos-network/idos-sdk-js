@@ -45,6 +45,8 @@ export default function Minimized({ children }: PropsWithChildren) {
       width="74px"
       height="42px"
       alignItems="start"
+      marginLeft="auto"
+      marginRight="15%"
       border="1px solid"
       borderColor={{
         _dark: "neutral.800",
