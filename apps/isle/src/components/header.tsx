@@ -74,7 +74,7 @@ function StatusBadge() {
   const badgeProps = statusBadgeColors[status as keyof typeof statusBadgeColors];
 
   return (
-    <Badge {...badgeProps} size="sm" textTransform="uppercase">
+    <Badge {...badgeProps} size="sm" textTransform="uppercase" className="status-badge">
       {status.split("-").join(" ")}
     </Badge>
   );

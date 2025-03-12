@@ -16,11 +16,11 @@ export default function Minimized({ children }: PropsWithChildren) {
   const ref = useRef<HTMLDivElement>(null);
 
   const toggle = useCallback(
-    (_isExpanded?: boolean) => {
+    (expanded: boolean) => {
       if (noDismiss) return;
-      _isExpanded === undefined ? setIsExpanded(!isExpanded) : setIsExpanded(_isExpanded);
+      setIsExpanded(!!expanded);
     },
-    [noDismiss, isExpanded],
+    [noDismiss],
   );
 
   useOutsideClickHandler(ref, () => toggle(false));
@@ -62,7 +62,7 @@ export default function Minimized({ children }: PropsWithChildren) {
             }
           : undefined
       }
-      onClick={() => toggle()}
+      onClick={() => toggle(true)}
     >
       <MotionBox
         style={{
@@ -72,6 +72,7 @@ export default function Minimized({ children }: PropsWithChildren) {
         {children}
       </MotionBox>
       <MotionBox
+        id="minimized-isle"
         bg={{
           _dark: "neutral.950",
           _light: "white",

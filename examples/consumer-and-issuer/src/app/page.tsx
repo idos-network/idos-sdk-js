@@ -12,7 +12,7 @@ import {
   getUserProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
@@ -48,6 +48,40 @@ export default function Home() {
       ],
     });
   };
+
+  const handleDelegatedWriteGrant = useCallback(
+    async (isle: ReturnType<typeof createIsleController>) => {
+      isle?.toggleAnimation({
+        expanded: true,
+        noDismiss: true,
+      });
+      const result = await isle?.requestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://idos.network",
+            name: "idOS",
+            logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+
+      if (result) {
+        const { signature, writeGrant } = result;
+        setSignature(signature);
+        setWriteGrant(writeGrant);
+      }
+    },
+    [],
+  );
 
   // Initialize isle controller
   useEffect(() => {
@@ -168,14 +202,11 @@ export default function Home() {
           expanded: false,
         });
 
-        setTimeout(() => {
+        setTimeout(async () => {
           isle?.send("update", {
             status: "not-verified",
           });
-          isle?.toggleAnimation({
-            expanded: true,
-            noDismiss: true,
-          });
+          await handleDelegatedWriteGrant(isle);
         }, 5_000);
       });
 
@@ -205,7 +236,7 @@ export default function Home() {
         });
       }
     });
-  }, [address, signMessageAsync]);
+  }, [address, signMessageAsync, handleDelegatedWriteGrant]);
 
   useEffect(() => {
     if (!isleRef.current || !writeGrant || !signature || !signer) return;
@@ -247,51 +278,6 @@ export default function Home() {
       });
     });
   }, [writeGrant, signature, signer]);
-
-  useEffect(() => {
-    if (!isleRef.current) return;
-
-    const isle = isleRef.current;
-
-    isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
-      switch (data.status) {
-        case "not-verified": {
-          isle?.toggleAnimation({
-            expanded: true,
-            noDismiss: true,
-          });
-          const result = await isle?.requestDelegatedWriteGrant({
-            consumer: {
-              consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-              meta: {
-                url: "https://idos.network",
-                name: "idOS",
-                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
-              },
-            },
-            KYCPermissions: [
-              "Name and last name",
-              "Gender",
-              "Country and city of residence",
-              "Place and date of birth",
-              "ID Document",
-              "Liveness check (No pictures)",
-            ],
-          });
-
-          if (result) {
-            const { signature, writeGrant } = result;
-            setSignature(signature);
-            setWriteGrant(writeGrant);
-          }
-          break;
-        }
-
-        default:
-          break;
-      }
-    });
-  }, []);
 
   return (
     <div>
