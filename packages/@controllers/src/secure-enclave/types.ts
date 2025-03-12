@@ -61,7 +61,5 @@ export interface EnclaveProvider {
     },
   ): Promise<idOSCredential[]>;
 
-  backupPasswordOrSecret(
-    callbackFn: (response: BackupPasswordInfo) => Promise<void>,
-  ): Promise<void>;
+  backupPasswordOrSecret(): Promise<void>;
 }
