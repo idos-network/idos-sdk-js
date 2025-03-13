@@ -62,11 +62,11 @@ export default function Minimized({ children }: PropsWithChildren) {
       animate={
         isExpanded
           ? {
-            width: "380px",
-            minHeight: 100,
-            height: "auto",
-            borderRadius: "38px",
-          }
+              width: "380px",
+              minHeight: 100,
+              height: "auto",
+              borderRadius: "38px",
+            }
           : undefined
       }
       onClick={() => toggle(true)}
