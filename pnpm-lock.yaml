@@ -316,17 +316,17 @@ importers:
     dependencies:
       '@synthetixio/synpress-cache':
         specifier: ^0.0.4
-        version: 0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)
+        version: 0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       '@synthetixio/synpress-metamask':
         specifier: ^0.0.4
-        version: 0.0.4(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)
+        version: 0.0.4(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)
     devDependencies:
       '@playwright/test':
         specifier: ^1.49.1
         version: 1.50.1
       '@synthetixio/synpress':
         specifier: ^4.0.3
-        version: 4.0.5(@depay/solana-web3.js@1.28.0)(@depay/web3-blockchains@9.7.8)(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
+        version: 4.0.5(@depay/solana-web3.js@1.28.0)(@depay/web3-blockchains@9.7.8)(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@types/node':
         specifier: ^20.10.5
         version: 20.17.18
@@ -661,7 +661,7 @@ importers:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
-        version: 0.9.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 0.9.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -688,7 +688,7 @@ importers:
         version: 6.0.0
       ethers:
         specifier: 'catalog:'
-        version: 6.13.5(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       near-api-js:
         specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
@@ -707,10 +707,10 @@ importers:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
-        version: 0.9.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 0.9.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       ethers:
         specifier: 'catalog:'
-        version: 6.13.5(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       near-api-js:
         specifier: 3.0.4
         version: 3.0.4(encoding@0.1.13)
@@ -738,7 +738,7 @@ importers:
         version: 1.3.3
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(typescript@5.6.3))(typescript@5.6.3)
+        version: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3))(typescript@5.6.3)
       typescript:
         specifier: ^5.2.2
         version: 5.6.3
@@ -756,7 +756,7 @@ importers:
         version: 6.3.0(web-streams-polyfill@3.3.3)
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
-        version: 0.9.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 0.9.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       '@sanity/comlink':
         specifier: ^3.0.1
         version: 3.0.1
@@ -765,7 +765,7 @@ importers:
         version: 1.32.0
       ethers:
         specifier: 'catalog:'
-        version: 6.13.5(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       jsonld:
         specifier: ^8.3.1
         version: 8.3.3(web-streams-polyfill@3.3.3)
@@ -823,13 +823,13 @@ importers:
         version: 5.6.3
       vitest:
         specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.49.1)(terser@5.37.0)
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(playwright@1.50.1)(terser@5.39.0)
 
   packages/issuer-sdk-js:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
-        version: 0.9.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
+        version: 0.9.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       es-toolkit:
         specifier: ^1.23.0
         version: 1.32.0
@@ -866,7 +866,7 @@ importers:
         version: 5.6.3
       vitest:
         specifier: ^0.31.4
-        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.49.1)(terser@5.37.0)
+        version: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(playwright@1.50.1)(terser@5.39.0)
 
 packages:
 
@@ -3290,10 +3290,6 @@ packages:
     engines: {node: '>= 10'}
     cpu: [x64]
     os: [win32]
-
-  '@noble/ciphers@1.1.3':
-    resolution: {integrity: sha512-Ygv6WnWJHLLiW4fnNDC1z+i13bud+enXOFRBlpxI+NJliPWx5wdR+oWlTjLuBPTqjUjtHXtjkU6w3kuuH6upZA==}
-    engines: {node: ^14.21.3 || >=16}
 
   '@noble/ciphers@1.2.1':
     resolution: {integrity: sha512-rONPWMC7PeExE077uLE4oqWrZ1IvAfz3oH9LibVAcVCopJiA9R62uavnbEzdkVmJYI6M6Zgkbeb07+tWjlq2XA==}
@@ -6495,10 +6491,6 @@ packages:
 
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
-
-  eciesjs@0.4.12:
-    resolution: {integrity: sha512-DGejvMCihsRAmKRFQiL6KZDE34vWVd0gvXlykFq1aEzJy/rD65AVyAIUZKZOvgvaP9ATQRcHGEZV5DfgrgjA4w==}
-    engines: {bun: '>=1', deno: '>=2', node: '>=16'}
 
   eciesjs@0.4.13:
     resolution: {integrity: sha512-zBdtR4K+wbj10bWPpIOF9DW+eFYQu8miU5ypunh0t4Bvt83ZPlEWgT5Dq/0G6uwEXumZKjfb5BZxYUZQ2Hzn/Q==}
@@ -10578,10 +10570,6 @@ snapshots:
       picomatch: 4.0.2
       which: 4.0.0
 
-  '@ecies/ciphers@0.2.2(@noble/ciphers@1.1.3)':
-    dependencies:
-      '@noble/ciphers': 1.1.3
-
   '@ecies/ciphers@0.2.2(@noble/ciphers@1.2.1)':
     dependencies:
       '@noble/ciphers': 1.2.1
@@ -13696,7 +13684,7 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.0
     optional: true
 
-  '@kwilteam/kwil-js@0.9.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)':
+  '@kwilteam/kwil-js@0.9.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:
       axios: 0.27.2
       ethers: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -14236,13 +14224,13 @@ snapshots:
 
   '@metamask/safe-event-emitter@3.1.2': {}
 
-  '@metamask/sdk-communication-layer@0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.12)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10))(supports-color@8.1.1)':
+  '@metamask/sdk-communication-layer@0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.13)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10))(supports-color@8.1.1)':
     dependencies:
       bufferutil: 4.0.9
       cross-fetch: 4.1.0(encoding@0.1.13)
       date-fns: 2.30.0
       debug: 4.4.0(supports-color@8.1.1)
-      eciesjs: 0.4.12
+      eciesjs: 0.4.13
       eventemitter2: 6.4.9
       readable-stream: 3.6.2
       socket.io-client: 4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10)
@@ -14260,13 +14248,13 @@ snapshots:
       '@babel/runtime': 7.26.7
       '@metamask/onboarding': 1.0.1
       '@metamask/providers': 16.1.0(supports-color@8.1.1)
-      '@metamask/sdk-communication-layer': 0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.12)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10))(supports-color@8.1.1)
+      '@metamask/sdk-communication-layer': 0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.13)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10))(supports-color@8.1.1)
       '@metamask/sdk-install-modal-web': 0.32.0
       '@paulmillr/qr': 0.2.1
       bowser: 2.11.0
       cross-fetch: 4.1.0(encoding@0.1.13)
       debug: 4.4.0(supports-color@8.1.1)
-      eciesjs: 0.4.12
+      eciesjs: 0.4.13
       eth-rpc-errors: 4.0.3
       eventemitter2: 6.4.9
       obj-multiplex: 1.0.0
@@ -14303,7 +14291,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@8.1.1)
       pony-cause: 2.1.11
-      semver: 7.6.3
+      semver: 7.7.1
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -14317,7 +14305,7 @@ snapshots:
       '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@8.1.1)
       pony-cause: 2.1.11
-      semver: 7.6.3
+      semver: 7.7.1
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
@@ -14561,8 +14549,6 @@ snapshots:
 
   '@next/swc-win32-x64-msvc@15.2.1':
     optional: true
-
-  '@noble/ciphers@1.1.3': {}
 
   '@noble/ciphers@1.2.1': {}
 
@@ -17861,7 +17847,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@synthetixio/synpress-cache@0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)':
+  '@synthetixio/synpress-cache@0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)':
     dependencies:
       axios: 1.6.7
       chalk: 5.3.0
@@ -17872,7 +17858,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.50.1
       progress: 2.0.3
-      tsup: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(typescript@5.7.3)
+      tsup: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -17884,7 +17870,7 @@ snapshots:
       - ts-node
       - typescript
 
-  '@synthetixio/synpress-cache@0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)':
+  '@synthetixio/synpress-cache@0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)':
     dependencies:
       axios: 1.6.7
       chalk: 5.3.0
@@ -17895,7 +17881,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.50.1
       progress: 2.0.3
-      tsup: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(typescript@5.7.3)
+      tsup: 8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -17915,10 +17901,10 @@ snapshots:
     dependencies:
       '@playwright/test': 1.50.1
 
-  '@synthetixio/synpress-metamask@0.0.4(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@synthetixio/synpress-metamask@0.0.4(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@playwright/test': 1.50.1
-      '@synthetixio/synpress-cache': 0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)
+      '@synthetixio/synpress-cache': 0.0.4(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       '@synthetixio/synpress-core': 0.0.4(@playwright/test@1.50.1)
       '@viem/anvil': 0.0.7(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       fs-extra: 11.2.0
@@ -17935,10 +17921,10 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@synthetixio/synpress-metamask@0.0.6(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)':
+  '@synthetixio/synpress-metamask@0.0.6(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)':
     dependencies:
       '@playwright/test': 1.50.1
-      '@synthetixio/synpress-cache': 0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)
+      '@synthetixio/synpress-cache': 0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       '@synthetixio/synpress-core': 0.0.6(@playwright/test@1.50.1)
       '@viem/anvil': 0.0.7(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       fs-extra: 11.2.0
@@ -17955,13 +17941,13 @@ snapshots:
       - typescript
       - utf-8-validate
 
-  '@synthetixio/synpress@4.0.5(@depay/solana-web3.js@1.28.0)(@depay/web3-blockchains@9.7.8)(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)':
+  '@synthetixio/synpress@4.0.5(@depay/solana-web3.js@1.28.0)(@depay/web3-blockchains@9.7.8)(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)':
     dependencies:
       '@playwright/test': 1.50.1
       '@synthetixio/ethereum-wallet-mock': 0.0.6(@depay/solana-web3.js@1.28.0)(@depay/web3-blockchains@9.7.8)(@playwright/test@1.50.1)(bufferutil@4.0.9)(ethers@6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10))(typescript@5.7.3)(utf-8-validate@5.0.10)(zod@3.24.2)
-      '@synthetixio/synpress-cache': 0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)
+      '@synthetixio/synpress-cache': 0.0.6(@swc/core@1.10.16)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)
       '@synthetixio/synpress-core': 0.0.6(@playwright/test@1.50.1)
-      '@synthetixio/synpress-metamask': 0.0.6(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(typescript@5.7.3)(utf-8-validate@5.0.10)
+      '@synthetixio/synpress-metamask': 0.0.6(@playwright/test@1.50.1)(@swc/core@1.10.16)(bufferutil@4.0.9)(playwright-core@1.50.1)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - '@depay/solana-web3.js'
       - '@depay/web3-blockchains'
@@ -18351,7 +18337,7 @@ snapshots:
       pathe: 1.1.2
       picocolors: 1.1.1
       sirv: 2.0.4
-      vitest: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.49.1)(terser@5.37.0)
+      vitest: 0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(playwright@1.50.1)(terser@5.39.0)
 
   '@vitest/utils@0.31.4':
     dependencies:
@@ -18476,7 +18462,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@wagmi/connectors@5.7.8(@types/react@19.0.10)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(viem@2.23.6(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)))(bufferutil@4.0.8)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.6(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1))(zod@3.24.1)':
+  '@wagmi/connectors@5.7.9(@types/react@18.3.18)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@18.3.18)(react@18.3.1)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@18.3.1))(viem@2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.9)(encoding@0.1.13)(react@18.3.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.2(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.0
       '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(supports-color@8.1.1)(utf-8-validate@5.0.10)
@@ -18515,7 +18501,7 @@ snapshots:
       - utf-8-validate
       - zod
 
-  '@wagmi/connectors@5.7.9(@types/react@19.0.10)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.9)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)':
+  '@wagmi/connectors@5.7.9(@types/react@19.0.10)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.9)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.0
       '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(supports-color@8.1.1)(utf-8-validate@5.0.10)
@@ -21494,13 +21480,6 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  eciesjs@0.4.12:
-    dependencies:
-      '@ecies/ciphers': 0.2.2(@noble/ciphers@1.1.3)
-      '@noble/ciphers': 1.1.3
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
-
   eciesjs@0.4.13:
     dependencies:
       '@ecies/ciphers': 0.2.2(@noble/ciphers@1.2.1)
@@ -23382,21 +23361,7 @@ snapshots:
 
   os-tmpdir@1.0.2: {}
 
-  ox@0.1.2(typescript@5.6.3)(zod@3.24.1):
-    dependencies:
-      '@adraffy/ens-normalize': 1.11.0
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
-      '@scure/bip32': 1.6.0
-      '@scure/bip39': 1.5.0
-      abitype: 1.0.7(typescript@5.6.3)(zod@3.24.1)
-      eventemitter3: 5.0.1
-    optionalDependencies:
-      typescript: 5.6.3
-    transitivePeerDependencies:
-      - zod
-
-  ox@0.6.7(typescript@5.6.3)(zod@3.24.1):
+  ox@0.6.7(typescript@5.6.3)(zod@3.24.2):
     dependencies:
       '@adraffy/ens-normalize': 1.11.0
       '@noble/curves': 1.8.1
@@ -23681,15 +23646,15 @@ snapshots:
       postcss: 8.5.2
       ts-node: 10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.6.3)
 
-  postcss-load-config@4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3)):
+  postcss-load-config@4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3)):
     dependencies:
       lilconfig: 3.1.3
       yaml: 2.7.0
     optionalDependencies:
       postcss: 8.5.2
-      ts-node: 10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3)
+      ts-node: 10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3)
 
-  postcss-load-config@4.0.2(postcss@8.5.2)(ts-node@10.9.1(@types/node@22.13.2)(typescript@5.6.3)):
+  postcss-load-config@4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3)):
     dependencies:
       lilconfig: 3.1.3
       yaml: 2.7.0
@@ -24706,7 +24671,7 @@ snapshots:
       postcss: 8.5.2
       postcss-import: 15.1.0(postcss@8.5.2)
       postcss-js: 4.0.1(postcss@8.5.2)
-      postcss-load-config: 4.0.2(postcss@8.5.2)(ts-node@10.9.1(@types/node@22.13.2)(typescript@5.6.3))
+      postcss-load-config: 4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3))
       postcss-nested: 6.2.0(postcss@8.5.2)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.10
@@ -24818,6 +24783,27 @@ snapshots:
       '@swc/core': 1.10.16(@swc/helpers@0.5.15)
     optional: true
 
+  ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 20.17.18
+      acorn: 8.14.1
+      acorn-walk: 8.3.4
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.7.3
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optionalDependencies:
+      '@swc/core': 1.10.16(@swc/helpers@0.5.15)
+    optional: true
+
   ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
@@ -24873,6 +24859,30 @@ snapshots:
       - supports-color
       - ts-node
 
+  tsup@8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))(typescript@5.7.3):
+    dependencies:
+      bundle-require: 4.2.1(esbuild@0.19.12)
+      cac: 6.7.14
+      chokidar: 3.6.0
+      debug: 4.4.0(supports-color@8.1.1)
+      esbuild: 0.19.12
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss-load-config: 4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@20.17.18)(typescript@5.7.3))
+      resolve-from: 5.0.0
+      rollup: 4.34.6
+      source-map: 0.8.0-beta.0
+      sucrase: 3.35.0
+      tree-kill: 1.2.2
+    optionalDependencies:
+      '@swc/core': 1.10.16(@swc/helpers@0.5.15)
+      postcss: 8.5.2
+      typescript: 5.7.3
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+
   tsup@8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3))(typescript@5.6.3):
     dependencies:
       bundle-require: 4.2.1(esbuild@0.19.12)
@@ -24893,54 +24903,6 @@ snapshots:
       '@swc/core': 1.10.16(@swc/helpers@0.5.15)
       postcss: 8.5.2
       typescript: 5.6.3
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-
-  tsup@8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(typescript@5.6.3))(typescript@5.6.3):
-    dependencies:
-      bundle-require: 4.2.1(esbuild@0.19.12)
-      cac: 6.7.14
-      chokidar: 3.6.0
-      debug: 4.4.0(supports-color@8.1.1)
-      esbuild: 0.19.12
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.5.2)(ts-node@10.9.1(@types/node@22.13.2)(typescript@5.6.3))
-      resolve-from: 5.0.0
-      rollup: 4.34.6
-      source-map: 0.8.0-beta.0
-      sucrase: 3.35.0
-      tree-kill: 1.2.2
-    optionalDependencies:
-      '@swc/core': 1.10.16(@swc/helpers@0.5.15)
-      postcss: 8.5.2
-      typescript: 5.6.3
-    transitivePeerDependencies:
-      - supports-color
-      - ts-node
-
-  tsup@8.0.2(@swc/core@1.10.16)(postcss@8.5.2)(typescript@5.7.3):
-    dependencies:
-      bundle-require: 4.2.1(esbuild@0.19.12)
-      cac: 6.7.14
-      chokidar: 3.6.0
-      debug: 4.4.0(supports-color@8.1.1)
-      esbuild: 0.19.12
-      execa: 5.1.1
-      globby: 11.1.0
-      joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.5.2)(ts-node@10.9.1(@swc/core@1.10.16)(@types/node@22.13.2)(typescript@5.6.3))
-      resolve-from: 5.0.0
-      rollup: 4.34.6
-      source-map: 0.8.0-beta.0
-      sucrase: 3.35.0
-      tree-kill: 1.2.2
-    optionalDependencies:
-      '@swc/core': 1.10.16(@swc/helpers@0.5.15)
-      postcss: 8.5.2
-      typescript: 5.7.3
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -25410,27 +25372,7 @@ snapshots:
       fsevents: 2.3.3
       terser: 5.39.0
 
-  vite@5.4.14(@types/node@20.17.10)(terser@5.37.0):
-    dependencies:
-      esbuild: 0.21.5
-      postcss: 8.5.1
-      rollup: 4.28.1
-    optionalDependencies:
-      '@types/node': 20.17.10
-      fsevents: 2.3.3
-      terser: 5.37.0
-
-  vite@5.4.14(@types/node@22.10.2)(terser@5.37.0):
-    dependencies:
-      esbuild: 0.21.5
-      postcss: 8.5.1
-      rollup: 4.28.1
-    optionalDependencies:
-      '@types/node': 22.10.2
-      fsevents: 2.3.3
-      terser: 5.37.0
-
-  vitest@0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(playwright@1.49.1)(terser@5.37.0):
+  vitest@0.31.4(@edge-runtime/vm@3.2.0)(@vitest/ui@0.34.7)(jsdom@22.1.0)(playwright@1.50.1)(terser@5.39.0):
     dependencies:
       '@types/chai': 4.3.20
       '@types/chai-subset': 1.3.5
@@ -25592,8 +25534,8 @@ snapshots:
   wagmi@2.14.13(@tanstack/query-core@5.66.4)(@tanstack/react-query@5.45.1(react@19.0.0))(@types/react@19.0.10)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2):
     dependencies:
       '@tanstack/react-query': 5.45.1(react@19.0.0)
-      '@wagmi/connectors': 5.7.8(@types/react@19.0.10)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(viem@2.23.6(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1)))(bufferutil@4.0.8)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.6(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1))(zod@3.24.1)
-      '@wagmi/core': 2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.6(bufferutil@4.0.8)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.1))
+      '@wagmi/connectors': 5.7.9(@types/react@19.0.10)(@wagmi/core@2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.9)(encoding@0.1.13)(react@19.0.0)(supports-color@8.1.1)(typescript@5.6.3)(utf-8-validate@5.0.10)(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
+      '@wagmi/core': 2.16.5(@tanstack/query-core@5.66.4)(@types/react@19.0.10)(react@19.0.0)(typescript@5.6.3)(use-sync-external-store@1.4.0(react@19.0.0))(viem@2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2))
       react: 19.0.0
       use-sync-external-store: 1.4.0(react@19.0.0)
       viem: 2.23.10(bufferutil@4.0.9)(typescript@5.6.3)(utf-8-validate@5.0.10)(zod@3.24.2)
@@ -25634,13 +25576,6 @@ snapshots:
   web-bip39@0.0.3: {}
 
   web-streams-polyfill@3.3.3: {}
-
-  web-vitals@3.5.2: {}
-
-  webauthn-p256@0.0.10:
-    dependencies:
-      '@noble/curves': 1.8.1
-      '@noble/hashes': 1.7.1
 
   webextension-polyfill@0.10.0: {}
 
