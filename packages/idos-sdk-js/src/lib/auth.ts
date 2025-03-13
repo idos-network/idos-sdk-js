@@ -65,7 +65,7 @@ export class Auth {
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logoutKGW();
 
       this.remember("signer-address", currentAddress);
     }
@@ -145,7 +145,7 @@ export class Auth {
       this.forget();
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logoutKGW();
 
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);

@@ -49,7 +49,6 @@ export const Provider = ({ children }: PropsWithChildren) => {
 
     const _sdk = await idOS.init({
       nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-      dbId: import.meta.env.VITE_IDOS_NODE_KWIL_DB_ID,
       enclaveOptions: {
         container: "#idos",
         url: import.meta.env.VITE_IDOS_ENCLAVE_URL,

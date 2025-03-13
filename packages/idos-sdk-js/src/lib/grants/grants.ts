@@ -3,7 +3,6 @@ import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
 
 interface InitParams {
   nodeUrl?: string;
-  dbId?: string;
 }
 
 export class Grants {

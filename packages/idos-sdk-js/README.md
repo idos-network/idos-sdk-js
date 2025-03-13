@@ -142,12 +142,6 @@ const idos = await idos.init({
 });
 ```
 
-#### `dbId`
-
-This concept is very internal to the idOS nodes, and the right value gets automatically discovered during initialization.
-
-Unless you know what you're doing (e.g., deploying a new idOS network with a Kwil schema that's not called `idos`), omit this field.
-
 #### `enclaveOptions`
 
 So far, we've only used `container` from `enclaveOptions`. There are a few more fields that you can set:
@@ -350,7 +344,6 @@ const idosConsumer = await idOSConsumer.init({
   consumerSignerPrivateKey: process.env.EVM_CONSUMER_PRIVATE_KEY,
   encryptionSecret: process.env.ENCRYPTION_SECRET_KEY,
   nodeUrl: process.env.EVM_IDOS_NODE_URL,
-  dbId: process.env.EVM_IDOS_DB_ID,
 });
 
 // This assumes we got `dataId` (from a request body, a script argument, etc).

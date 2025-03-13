@@ -48,7 +48,6 @@ interface idOSConsumerInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
-  dbId?: string;
   consumerSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
@@ -57,13 +56,11 @@ export class idOSConsumer {
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
-    dbId,
     consumerSigner,
   }: idOSConsumerInitParams): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
-      dbId,
     });
 
     const [signer, address] = createKwilSigner(consumerSigner);

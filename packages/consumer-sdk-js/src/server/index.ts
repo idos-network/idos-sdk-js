@@ -19,7 +19,6 @@ export class idOSConsumerSDK {
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
     nodeUrl: string,
-    dbId: string,
   ) {
     let consumer: idOSConsumer;
 
@@ -31,7 +30,6 @@ export class idOSConsumerSDK {
           consumerSigner: signer,
           recipientEncryptionPrivateKey,
           nodeUrl,
-          dbId,
         });
 
         return new idOSConsumerSDK(consumer);
@@ -42,7 +40,6 @@ export class idOSConsumerSDK {
           consumerSigner: signer,
           nodeUrl,
           recipientEncryptionPrivateKey,
-          dbId,
         });
         return new idOSConsumerSDK(consumer);
       }
