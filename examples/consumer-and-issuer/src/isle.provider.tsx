@@ -2,7 +2,7 @@
 
 import { createIsleController } from "@idos-network/controllers";
 import { useClickAway } from "@uidotdev/usehooks";
-import { type JSX, createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 interface IsleContextType {
   isle: ReturnType<typeof createIsleController> | null;
@@ -19,7 +19,7 @@ export function useIsle() {
 }
 
 interface IsleProviderProps {
-  children: JSX.Element;
+  children: React.ReactNode;
   containerId: string;
 }
 
