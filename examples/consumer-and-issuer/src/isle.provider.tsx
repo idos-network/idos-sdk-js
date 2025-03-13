@@ -2,7 +2,7 @@
 
 import { createIsleController } from "@idos-network/controllers";
 import { useClickAway } from "@uidotdev/usehooks";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { type JSX, createContext, useContext, useEffect, useState } from "react";
 
 interface IsleContextType {
   isle: ReturnType<typeof createIsleController> | null;
@@ -19,7 +19,7 @@ export function useIsle() {
 }
 
 interface IsleProviderProps {
-  children: React.ReactNode;
+  children: JSX.Element;
   containerId: string;
 }
 
@@ -110,6 +110,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
   return (
     <div className="relative">
+      {/* @ts-ignore */}
       <IsleContext.Provider value={{ isle }}>
         {children}
         <div
