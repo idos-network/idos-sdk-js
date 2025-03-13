@@ -3,6 +3,7 @@ import { useIsleStore } from "@/store";
 import { chakra } from "@chakra-ui/react";
 import * as motion from "motion/react-client";
 import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
+
 import { ProfileStatusIcon } from "./header";
 import { Logo } from "./logo";
 
@@ -13,7 +14,7 @@ export default function Minimized({ children }: PropsWithChildren) {
   const [noDismiss, setNoDismiss] = useState(false);
 
   const node = useIsleStore((state) => state.node);
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
 
   const toggle = useCallback(
     (expanded: boolean) => {
@@ -39,29 +40,33 @@ export default function Minimized({ children }: PropsWithChildren) {
   return (
     <MotionBox
       ref={ref}
+      cursor={isExpanded ? "default" : "pointer"}
       display="flex"
-      gap={1}
+      gap="1"
       borderRadius="46px"
-      width="74px"
-      height="42px"
-      alignItems="start"
-      marginLeft="auto"
-      marginRight="15%"
+      width="80px"
+      height="40px"
+      alignItems="center"
       border="1px solid"
+      ml="auto"
+      shadow="sm"
       borderColor={{
-        _dark: "neutral.800",
-        _light: "neutral.50",
+        _dark: "neutral.700",
+        _light: "neutral.200",
       }}
       overflow="hidden"
-      bg="transparent"
+      bg={{
+        _dark: "neutral.950",
+        _light: "white",
+      }}
       animate={
         isExpanded
           ? {
-              width: "380px",
-              minHeight: 100,
-              height: "auto",
-              borderRadius: "38px",
-            }
+            width: "380px",
+            minHeight: 100,
+            height: "auto",
+            borderRadius: "38px",
+          }
           : undefined
       }
       onClick={() => toggle(true)}
