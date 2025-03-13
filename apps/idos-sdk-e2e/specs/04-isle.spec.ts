@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
 import basicSetup from "../wallet-setup/basic.setup";
@@ -7,6 +8,13 @@ const { expect } = test;
 
 const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.vercel.app/";
 const dashboardUrl = "https://dashboard.playground.idos.network";
+
+// Helper function to generate random private key
+const generatePrivateKey = () => {
+  return Array.from(crypto.randomBytes(32))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+};
 
 test.beforeEach(async ({ context, page, metamask }) => {
   test.setTimeout(120000);
@@ -23,9 +31,7 @@ test("should create a profile successfully using new wallet", async ({
 }) => {
   const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
   // generate random private key
-  const privateKey = Array.from(crypto.getRandomValues(new Uint8Array(32)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
+  const privateKey = generatePrivateKey();
   await metamask.importWalletFromPrivateKey(privateKey);
 
   await page.goto(consumerAndIssuerUrl);
