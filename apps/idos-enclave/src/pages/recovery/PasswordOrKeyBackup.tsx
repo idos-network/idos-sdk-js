@@ -6,7 +6,6 @@ import {
 } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/core";
 import { useSignal } from "@preact/signals";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 
 import { type JSX, useEffect } from "preact/compat";
 
@@ -187,94 +186,6 @@ export function PasswordOrSecretReveal({
   );
 }
 
-interface GoogleDocsStoreProps {
-  authMethod: "password" | "secret key";
-  secret: string;
-}
-
-function GoogleDocsStore({ authMethod, secret }: GoogleDocsStoreProps) {
-  const status = useSignal<"idle" | "pending" | "success" | "error">("idle");
-  const documentId = useSignal("");
-
-  const handleGoogleDocsStore = useGoogleLogin({
-    onSuccess: async ({ access_token }) => {
-      status.value = "pending";
-      try {
-        const response = await fetch("https://docs.googleapis.com/v1/documents", {
-          method: "POST",
-          headers: new Headers({
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          }),
-          body: JSON.stringify({
-            title: "idOS Credentials",
-          }),
-        });
-
-        const body = await response.json();
-        documentId.value = body.documentId;
-
-        await fetch(`https://docs.googleapis.com/v1/documents/${documentId.value}:batchUpdate`, {
-          method: "POST",
-          headers: new Headers({
-            Authorization: `Bearer ${access_token}`,
-            "Content-Type": "application/json",
-          }),
-          body: JSON.stringify({
-            requests: [
-              {
-                insertText: {
-                  location: {
-                    index: 1,
-                  },
-                  text: "\n",
-                },
-              },
-              {
-                insertText: {
-                  location: {
-                    index: 1,
-                  },
-                  text: `\nidOS ${authMethod}: ${secret}\n`,
-                },
-              },
-            ],
-          }),
-        });
-
-        status.value = "success";
-      } catch (error) {
-        status.value = "error";
-        throw new Error("Failed to store credentials on Google Drive");
-      }
-    },
-    prompt: "consent",
-    scope: "https://www.googleapis.com/auth/drive.file",
-  });
-
-  return (
-    <div class="flex flex-col gap-2">
-      <Button onClick={() => handleGoogleDocsStore()} disabled={status.value === "pending"}>
-        {status.value === "pending" ? "Saving..." : "Save in Google Drive"}
-      </Button>
-      {status.value === "success" ? (
-        <Paragraph>
-          Your {authMethod} has been successfully saved to Google Drive.{" "}
-          <a
-            href={`https://docs.google.com/document/d/${documentId.value}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-green-600 underline underline-offset-2"
-          >
-            Click here
-          </a>{" "}
-          to see the document.
-        </Paragraph>
-      ) : null}
-    </div>
-  );
-}
-
 export function PasswordOrKeyBackup({
   store,
   backupStatus,
@@ -320,7 +231,6 @@ export function PasswordOrKeyBackup({
     );
   }
 
-  const enableGoogleRecovery = false;
   const resultMsgSrc: Record<string, string> = {
     failure: "An error occurred while updating your attributes. Please try again.",
     success: `Your ${passwordOrSecretKey} has been encrypted and safely stored in your idOS.`,
@@ -332,12 +242,6 @@ export function PasswordOrKeyBackup({
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
       <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
-      {enableGoogleRecovery ? (
-        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-          <GoogleDocsStore {...{ authMethod: passwordOrSecretKey, secret }} />
-        </GoogleOAuthProvider>
-      ) : null}
-
       {resultMsg ? <Paragraph>{resultMsg}</Paragraph> : null}
     </div>
   );
