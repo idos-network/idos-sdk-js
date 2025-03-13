@@ -5,6 +5,9 @@ import basicSetup from "../wallet-setup/basic.setup";
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
+const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.vercel.app/";
+const dashboardUrl = "https://dashboard.playground.idos.network";
+
 test.beforeEach(async ({ context, page, metamask }) => {
   test.setTimeout(120000);
 
@@ -25,7 +28,9 @@ test("should create a profile successfully using new wallet", async ({
     .join("");
   await metamask.importWalletFromPrivateKey(privateKey);
 
-  await page.getByRole("button", { name: "Connect wallet" }).click();
+  await page.goto(consumerAndIssuerUrl);
+
+  await page.getByRole("button", { name: "Get Started now" }).first().click();
 
   await metamask.connectToDapp();
 
@@ -77,7 +82,8 @@ test.describe
       await metamask.importWalletFromPrivateKey(privateKey);
       const walletAddress = await metamask.getAccountAddress();
 
-      await page.getByRole("button", { name: "Connect wallet" }).click();
+      await page.goto(consumerAndIssuerUrl);
+      await page.getByRole("button", { name: "Get Started now" }).first().click();
 
       await metamask.connectToDapp();
 
@@ -129,7 +135,7 @@ test.describe
     test("clean up added wallets", async ({ context, page, metamaskPage, extensionId }) => {
       const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
       // @todo: should we make this CI variable?
-      await page.goto("https://dashboard.playground.idos.network/wallets");
+      await page.goto(`${dashboardUrl}/wallets`);
 
       await page.getByRole("button", { name: "Connect a wallet" }).click();
       await page.getByRole("button", { name: "Metamask" }).click();
