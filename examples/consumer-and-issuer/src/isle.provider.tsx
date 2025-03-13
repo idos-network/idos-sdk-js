@@ -116,7 +116,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         <div
           ref={containerRef as React.RefObject<HTMLDivElement>}
           id={containerId}
-          className="absolute top-0 right-0 h-[600px] w-[380px] bg-transparent"
+          className="absolute top-0 right-0 h-[800px] w-[380px] bg-transparent"
         />
         <div
           id="idos-root"
