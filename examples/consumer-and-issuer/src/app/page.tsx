@@ -1,5 +1,6 @@
 "use client";
 
+import { GetStartedButton } from "@/components/get-started-button";
 import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import {
@@ -13,6 +14,7 @@ import {
   ZapIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAccount } from "wagmi";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -77,7 +79,7 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
           <h1 className="mb-8 font-bold text-5xl text-black md:text-7xl dark:text-gray-100">
-            Welcome to ACME Bank
+            Join ACME Bank
           </h1>
           <p className="mx-auto mb-12 max-w-3xl text-gray-800 text-xl md:text-2xl dark:text-gray-400">
             Experience the future of banking with our revolutionary digital credit card and
@@ -86,9 +88,7 @@ export default function HomePage() {
               $1,000,000
             </span>
           </p>
-          <Button color="primary" size="lg">
-            Get started now
-          </Button>
+          <GetStartedButton title="Get started now" />
         </motion.div>
       </section>
 
@@ -544,9 +544,7 @@ export default function HomePage() {
               </span>{" "}
               credit card.
             </p>
-            <Button color="primary" size="lg">
-              Apply now
-            </Button>
+            <GetStartedButton title="Apply now" />
           </motion.div>
         </div>
       </section>

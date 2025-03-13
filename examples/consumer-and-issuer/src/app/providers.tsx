@@ -6,6 +6,7 @@ import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type JSX, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
+import { IsleProvider } from "@/isle.provider";
 import { getConfig } from "@/wagmi.config";
 
 export function Providers(props: {
