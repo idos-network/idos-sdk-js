@@ -131,7 +131,6 @@ export async function createCredential(
   await createCredentialByDelegatedWriteGrant(
     issuer,
     {
-      userId,
       plaintextContent: vcContent,
       publicNotes: JSON.stringify({
         ...publicNotes,

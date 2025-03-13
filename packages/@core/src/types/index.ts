@@ -41,22 +41,25 @@ export interface idOSGrant {
   content_hash?: string;
 }
 
+export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+  id?: idOSCredential["id"];
+  content_hash?: string;
+  public_notes_signature: string;
+  broader_signature: string;
+};
+
 /**
  * Following types are specific to the isle post message protocol
  */
 export type IsleTheme = "light" | "dark";
-export type IsleConnectionStatus =
-  | "initializing"
-  | "disconnected"
-  | "connecting"
-  | "connected"
-  | "reconnecting";
+
 export type IsleStatus =
   | "initializing"
   | "no-profile"
   | "not-verified"
   | "pending-verification"
   | "verified"
+  | "not-connected"
   | "error";
 
 export type IsleControllerMessage =
@@ -69,7 +72,6 @@ export type IsleControllerMessage =
   | {
       type: "update";
       data: {
-        connectionStatus?: IsleConnectionStatus;
         address?: string;
         theme?: IsleTheme;
         status?: IsleStatus;
@@ -143,6 +145,13 @@ export type IsleControllerMessage =
       data: {
         credential: idOSCredential;
       };
+    }
+  | {
+      type: "toggle-animation";
+      data: {
+        expanded: boolean;
+        noDismiss?: boolean;
+      };
     };
 
 export type IsleNodeMessage =
@@ -155,7 +164,6 @@ export type IsleNodeMessage =
   | {
       type: "updated";
       data: {
-        connectionStatus?: IsleConnectionStatus;
         theme?: IsleTheme;
         status?: IsleStatus;
       };

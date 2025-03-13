@@ -60,3 +60,24 @@ export async function getAccessGrantsOwned(kwilClient: KwilActionClient) {
     name: "get_access_grants_owned",
   });
 }
+
+export interface idOSDAGSignatureParams {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+}
+
+/**
+ * Request a signature for a Delegated Access Grant
+ */
+export async function requestDAGSignature(
+  kwilClient: KwilActionClient,
+  params: idOSDAGSignatureParams,
+) {
+  return kwilClient.call<string>({
+    name: "dag_message",
+    inputs: params,
+  });
+}

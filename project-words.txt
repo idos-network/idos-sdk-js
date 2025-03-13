@@ -26,6 +26,8 @@ hono
 idos
 idOS
 IDOS
+IDOSDAG
+idOSDAG
 idOSSDK
 insertable
 jsigs
@@ -38,6 +40,7 @@ lucide
 multibase
 nacl
 nonced
+OSDAG
 passporting
 permissioned
 Personhood

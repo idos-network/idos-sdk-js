@@ -1,7 +1,11 @@
 "use client";
 
 import { Button, CircularProgress, Link } from "@heroui/react";
-import { idOS } from "@idos-network/idos-sdk";
+import {
+  type ConsumerConfig,
+  checkUserProfile,
+  createConsumerConfig,
+} from "@idos-network/consumer-sdk-js/client";
 import {
   type PropsWithChildren,
   createContext,
@@ -17,13 +21,14 @@ import { useAccount } from "wagmi";
 import { useEthersSigner } from "@/wagmi.config";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
-export const idOSContext = createContext<idOS>(null!);
-export const useIdOS = () => useContext(idOSContext);
+export const idOSConsumerContext = createContext<ConsumerConfig>(null!);
+export const useIdOSConsumer = () => useContext(idOSConsumerContext);
 
-export function IDOSProvider({ children }: PropsWithChildren) {
-  const [sdk, setSdk] = useState<idOS | null>(null);
+export function IDOSConsumerProvider({ children }: PropsWithChildren) {
+  const [config, setConfig] = useState<ConsumerConfig | null>(null);
   const [initializing, setInitializing] = useState(true);
   const initialized = useRef(false);
+
   const { address } = useAccount();
   const signer = useEthersSigner();
   const [hasProfile, setHasProfile] = useState(false);
@@ -35,21 +40,22 @@ export function IDOSProvider({ children }: PropsWithChildren) {
 
     initialized.current = true;
 
-    const _instance = await idOS.init({
-      nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL,
+    const _config = await createConsumerConfig({
+      nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
+      signer,
       enclaveOptions: {
         container: "#idOS-enclave",
       },
     });
 
-    const _hasProfile = await _instance.hasProfile(address as string);
+    const _hasProfile = await checkUserProfile(_config, address as string);
 
     if (_hasProfile && signer) {
-      // @ts-ignore
-      await _instance.setSigner("EVM", signer);
-      setSdk(_instance);
       setHasProfile(true);
     }
+
+    setConfig(_config);
+
     setInitializing(false);
   }, [address, signer]);
 
@@ -66,7 +72,7 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     );
   }
 
-  if (!hasProfile || !sdk) {
+  if (!hasProfile || !config) {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
     invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
 
@@ -81,5 +87,5 @@ export function IDOSProvider({ children }: PropsWithChildren) {
     );
   }
 
-  return <idOSContext.Provider value={sdk}>{children}</idOSContext.Provider>;
+  return <idOSConsumerContext.Provider value={config}>{children}</idOSConsumerContext.Provider>;
 }

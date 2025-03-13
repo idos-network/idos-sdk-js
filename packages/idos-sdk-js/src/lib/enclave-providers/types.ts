@@ -1,5 +1,4 @@
 import type { idOSCredential } from "@idos-network/core";
-import type { BackupPasswordInfo } from "../types";
 
 export interface StoredData {
   encryptionPublicKey?: Uint8Array;
@@ -53,7 +52,5 @@ export interface EnclaveProvider {
     },
   ): Promise<idOSCredential[]>;
 
-  backupPasswordOrSecret(
-    callbackFn: (response: BackupPasswordInfo) => Promise<void>,
-  ): Promise<void>;
+  backupPasswordOrSecret(): Promise<void>;
 }
