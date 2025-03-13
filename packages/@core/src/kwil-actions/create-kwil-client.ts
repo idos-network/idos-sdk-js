@@ -32,7 +32,7 @@ export class KwilActionClient {
   async call<T = unknown>(params: KwilCallActionRequestParams, signer = this.signer) {
     const action = this._createAction(params);
     const response = await this.client.call(action, signer);
-    return response.data as T;
+    return response?.data?.result as T;
   }
 
   /**
