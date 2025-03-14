@@ -75,7 +75,7 @@ const publicNotes = {
   level: "human",
   type: "human",
   status: "approved",
-  issuer: "ACME Bank",
+  issuer: "NeoBank",
 };
 
 export async function createIDOSUserProfile({
