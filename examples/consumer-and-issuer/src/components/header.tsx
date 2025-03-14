@@ -12,7 +12,7 @@ export function Header() {
             className="inline-flex items-center gap-2 text-lg text-neutral-900 dark:text-neutral-100"
           >
             <CommandIcon className="h-6 w-6" />
-            Acme Bank
+            NeoBank
           </Link>
         </div>
 

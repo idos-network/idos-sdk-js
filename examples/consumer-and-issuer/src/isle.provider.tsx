@@ -59,7 +59,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           {
             meta: {
               url: "https://idos.network",
-              name: "ACME Bank",
+              name: "NeoBank",
               logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
             },
             authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
@@ -69,7 +69,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           {
             meta: {
               url: "https://idos.network",
-              name: "ACME Bank",
+              name: "NeoBank",
               logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
             },
             consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
@@ -77,7 +77,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           {
             meta: {
               url: "https://idos.network",
-              name: "Integrated Consumer",
+              name: "ACME Card Provider",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
             consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
