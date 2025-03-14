@@ -83,12 +83,12 @@ export class idOSConsumer {
     return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential[]> {
+  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential> {
     return getSharedCredential(this.kwilClient, dataId);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
+    const credentialCopy = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
@@ -118,7 +118,7 @@ export class idOSConsumer {
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
-    const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
+    const credential = await this.getSharedCredentialFromIDOS(credentialId);
 
     const accessGrant = await this.getCredentialAccessGrant(credentialId);
 

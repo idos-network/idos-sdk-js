@@ -60,7 +60,7 @@ export class idOSConsumerSDK {
     return this.consumer.getGrants(page, size);
   }
 
-  async getSharedCredential(dataId: string): Promise<idOSCredential[]> {
+  async getSharedCredential(dataId: string): Promise<idOSCredential> {
     return this.consumer.getSharedCredentialFromIDOS(dataId);
   }
 

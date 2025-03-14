@@ -420,7 +420,7 @@ export class Data {
     });
   }
 
-  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
+  async requestDAGMessage(dag: idOSDAGSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
       { message: string },
     ];
@@ -428,7 +428,7 @@ export class Data {
     return message;
   }
 
-  async requestDWGSignature(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
+  async requestDWGMessage(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];

@@ -2,7 +2,7 @@ import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/se
 import {
   type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,
-  requestDWGSignature as _requestDWGSignature,
+  requestDWGMessage as _requestDWGMessage,
   hasProfile,
 } from "@idos-network/core";
 import type { IssuerConfig } from "./create-issuer-config";
@@ -11,11 +11,11 @@ export async function checkUserProfile({ kwilClient }: IssuerConfig, address: st
   return hasProfile(kwilClient, address);
 }
 
-export async function requestDWGSignature(
+export async function requestDWGMessage(
   { kwilClient }: IssuerConfig,
   params: DelegatedWriteGrantSignatureRequest,
 ) {
-  return _requestDWGSignature(kwilClient, params);
+  return _requestDWGMessage(kwilClient, params);
 }
 
 export async function getUserProfile({ kwilClient }: IssuerConfig) {

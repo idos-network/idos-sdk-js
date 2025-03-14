@@ -207,7 +207,7 @@ export async function getCredentialIdByContentHash(
 ): Promise<string | null> {
   const { kwilClient } = issuerConfig;
 
-  const [{ id }] = await _getCredentialIdByContentHash(kwilClient, contentHash);
+  const id = await _getCredentialIdByContentHash(kwilClient, contentHash);
 
   return id ?? null;
 }
