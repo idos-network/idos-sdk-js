@@ -9,7 +9,7 @@ export function Footer() {
             <div className="text-center md:text-left">
               <div className="mb-4 flex items-center justify-center md:justify-start">
                 <CommandIcon className="h-6 w-6 text-gray-400" />
-                <span className="ml-2 font-semibold text-gray-100 text-xl">ACME Bank</span>
+                <span className="ml-2 font-semibold text-gray-100 text-xl">NeoBank</span>
               </div>
               <p className="text-gray-400 text-sm">
                 Revolutionizing banking with cutting-edge technology and premium services.
@@ -29,7 +29,7 @@ export function Footer() {
           </div>
           <div className="mt-12 border-gray-900 border-t pt-8">
             <p className="text-center text-gray-500 text-sm">
-              © 2024 ACME Bank. All rights reserved. Member FDIC.
+              © 2024 NeoBank. All rights reserved. Member FDIC.
             </p>
           </div>
         </div>

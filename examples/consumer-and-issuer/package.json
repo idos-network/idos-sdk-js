@@ -8,6 +8,7 @@
     "@idos-network/issuer-sdk-js": "workspace:*",
     "@tanstack/react-query": "5.45.1",
     "@uidotdev/usehooks": "^2.4.1",
+    "react-icons": "^5.4.0",
     "ethers": "catalog:",
     "framer-motion": "^11.11.9",
     "go-try": "^3.0.2",

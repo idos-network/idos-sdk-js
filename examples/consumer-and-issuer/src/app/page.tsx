@@ -79,7 +79,7 @@ export default function HomePage() {
             </motion.div>
           </motion.div>
           <h1 className="mb-8 font-bold text-5xl text-black md:text-7xl dark:text-gray-100">
-            Join ACME Bank
+            Join NeoBank
           </h1>
           <p className="mx-auto mb-12 max-w-3xl text-gray-800 text-xl md:text-2xl dark:text-gray-400">
             Experience the future of banking with our revolutionary digital credit card and
@@ -537,7 +537,7 @@ export default function HomePage() {
               Ready to Elevate Your Financial Journey?
             </h2>
             <p className="mx-auto mb-12 max-w-2xl text-2xl text-gray-800 dark:text-gray-400">
-              Join ACME Bank today and unlock a world of possibilities with our premium
+              Join NeoBank today and unlock a world of possibilities with our premium
               <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">
                 {" "}
                 $1,000,000
