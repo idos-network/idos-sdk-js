@@ -3,6 +3,7 @@ import { useIsleStore } from "@/store";
 import { chakra } from "@chakra-ui/react";
 import * as motion from "motion/react-client";
 import { type PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
+
 import { ProfileStatusIcon } from "./header";
 import { Logo } from "./logo";
 
@@ -16,11 +17,11 @@ export default function Minimized({ children }: PropsWithChildren) {
   const ref = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
 
   const toggle = useCallback(
-    (_isExpanded?: boolean) => {
+    (expanded: boolean) => {
       if (noDismiss) return;
-      _isExpanded === undefined ? setIsExpanded(!isExpanded) : setIsExpanded(_isExpanded);
+      setIsExpanded(!!expanded);
     },
-    [noDismiss, isExpanded],
+    [noDismiss],
   );
 
   useOutsideClickHandler(ref, () => toggle(false));
@@ -68,7 +69,7 @@ export default function Minimized({ children }: PropsWithChildren) {
             }
           : undefined
       }
-      onClick={() => toggle()}
+      onClick={() => toggle(true)}
     >
       <MotionBox
         style={{
@@ -78,6 +79,7 @@ export default function Minimized({ children }: PropsWithChildren) {
         {children}
       </MotionBox>
       <MotionBox
+        id="minimized-isle"
         bg={{
           _dark: "neutral.950",
           _light: "white",

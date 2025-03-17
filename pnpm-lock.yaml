@@ -461,6 +461,9 @@ importers:
       '@tanstack/react-query':
         specifier: 5.45.1
         version: 5.45.1(react@19.0.0)
+      '@uidotdev/usehooks':
+        specifier: ^2.4.1
+        version: 2.4.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
       ethers:
         specifier: 'catalog:'
         version: 6.13.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -18478,6 +18481,11 @@ snapshots:
     dependencies:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
+
+  '@uidotdev/usehooks@2.4.1(react-dom@19.0.0(react@19.0.0))(react@19.0.0)':
+    dependencies:
+      react: 19.0.0
+      react-dom: 19.0.0(react@19.0.0)
 
   '@viem/anvil@0.0.7(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
     dependencies:

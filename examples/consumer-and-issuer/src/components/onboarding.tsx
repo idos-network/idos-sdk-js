@@ -1,7 +1,6 @@
 "use client";
 
-import { Button } from "@heroui/react";
-import { createIsleController } from "@idos-network/controllers";
+import { Button, Spinner } from "@heroui/react";
 import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
 import type { IsleStatus } from "@idos-network/core";
 import {
@@ -10,25 +9,29 @@ import {
   getUserProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createCredential, createIDOSUserProfile } from "@/actions";
+import { useIsle } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
 export function Onboarding() {
-  const isleRef = useRef<ReturnType<typeof createIsleController> | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const { isle } = useIsle();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
   const [signature, setSignature] = useState<string | null>(null);
   const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
   const signer = useEthersSigner();
+  const [status, setStatus] = useState<IsleStatus | null>(null);
 
   const requestPermission = () => {
-    const isle = isleRef.current;
-    invariant(isle, "idOS Isle is not initialized");
+    invariant(isle, "`idOS Isle` is not initialized");
+
+    isle.toggleAnimation({
+      expanded: true,
+    });
 
     isle.requestPermission({
       consumer: {
@@ -50,86 +53,15 @@ export function Onboarding() {
     });
   };
 
-  // Initialize isle controller
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container || isleRef.current) return;
-
-    isleRef.current = createIsleController({
-      container: container.id,
-      enclaveOptions: {
-        container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
-      },
-      credentialRequirements: {
-        acceptedIssuers: [
-          {
-            meta: {
-              url: "https://idos.network",
-              name: "ACME Bank",
-              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
-            },
-            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          },
-        ],
-        integratedConsumers: [
-          {
-            meta: {
-              url: "https://idos.network",
-              name: "ACME Bank",
-              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
-            },
-            consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          },
-          {
-            meta: {
-              url: "https://idos.network",
-              name: "Integrated Consumer",
-              logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
-            },
-            consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
-          },
-        ],
-        acceptedCredentialType: "KYC DATA",
-      },
-    });
-
-    return () => {
-      isleRef.current?.destroy();
-      isleRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const currentTheme = darkModeMediaQuery.matches ? "dark" : "light";
-
-    if (isleRef.current) isleRef.current?.send("update", { theme: currentTheme });
-
-    const themeChangeHandler = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? "dark" : "light";
-
-      if (isleRef.current) isleRef.current.send("update", { theme: newTheme });
-    };
-
-    darkModeMediaQuery.addEventListener("change", themeChangeHandler);
-
-    return () => {
-      darkModeMediaQuery.removeEventListener("change", themeChangeHandler);
-    };
-  }, []);
-
   // Set up event handlers
   useEffect(() => {
-    if (!isleRef.current) return;
-
-    const isle = isleRef.current;
+    if (!isle) return;
 
     isle.on("connect-wallet", async () => {
       await isle.connect();
     });
 
-    isle.on("revoke-permission", async ({ data }) => {
+    isle.on("revoke-permission", async ({ data }: { data: { id: string } }) => {
       await isle.revokePermission(data.id);
     });
 
@@ -188,7 +120,7 @@ export function Onboarding() {
       }
     });
 
-    isle.on("view-credential-details", async ({ data }) => {
+    isle.on("view-credential-details", async ({ data }: { data: { id: string } }) => {
       isle.send("update-view-credential-details-status", {
         status: "pending",
       });
@@ -206,12 +138,10 @@ export function Onboarding() {
         });
       }
     });
-  }, [address, signMessageAsync]);
+  }, [address, signMessageAsync, isle]);
 
   useEffect(() => {
-    if (!isleRef.current || !writeGrant || !signature || !signer) return;
-
-    const isle = isleRef.current;
+    if (!isle || !writeGrant || !signature || !signer) return;
 
     isle.on("verify-identity", async () => {
       const config = await createIssuerConfig({
@@ -247,12 +177,10 @@ export function Onboarding() {
         expanded: false,
       });
     });
-  }, [writeGrant, signature, signer]);
+  }, [writeGrant, signature, signer, isle]);
 
   useEffect(() => {
-    if (!isleRef.current) return;
-
-    const isle = isleRef.current;
+    if (!isle) return;
 
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
       switch (data.status) {
@@ -289,28 +217,44 @@ export function Onboarding() {
         }
 
         default:
-          break;
+          setStatus(data.status ?? null);
       }
     });
-  }, []);
+  }, [isle]);
 
   return (
-    <div className="container relative mx-auto h-screen w-full">
-      <div
-        ref={containerRef}
-        id="idOS-isle"
-        className="absolute top-0 right-0 h-[800px] w-[380px]"
-      />
-      <div
-        id="idos-root"
-        className="invisible fixed top-0 left-0 z-[10000] flex aspect-square h-full w-full flex-col items-center justify-center bg-black/30 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in [&:has(#idOS-enclave.visible)]:visible [&:has(#idOS-enclave.visible)]:opacity-100"
-      >
-        <div
-          id="idOS-enclave"
-          className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
-        />
-      </div>
-      <Button onPress={requestPermission}>Request Permission</Button>
+    <div className="container relative mx-auto flex h-screen w-full flex-col place-content-center items-center gap-6">
+      <h1 className="font-bold text-4xl">Onboarding with ACME Bank</h1>
+      {status === "verified" ? (
+        <div className="flex flex-col items-center gap-2">
+          <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
+          <p className="text-center text-lg">
+            Enjoy unprecedented spending power with our exclusive high-limit <br />
+            <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">
+              $1,000,000
+            </span>{" "}
+            credit card.
+          </p>
+          <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
+          <Button size="lg" color="primary" onPress={requestPermission}>
+            Claim now
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-6">
+          {status === "pending-verification" ? (
+            <div className="flex flex-col items-center gap-2">
+              <p className="text-center text-lg">Your data is now being processed.</p>
+              <p className="text-center text-gray-500 text-sm">
+                It can take up to 24 hours to verify your data. Please be patient or just refresh
+                the screen.
+              </p>
+            </div>
+          ) : (
+            <Spinner />
+          )}
+        </div>
+      )}
     </div>
   );
 }
