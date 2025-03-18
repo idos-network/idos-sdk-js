@@ -1,5 +1,8 @@
 import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
+import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
+import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 import invariant from "tiny-invariant";
+import { actionSchema } from "./schema.ts";
 
 interface CreateKwilClientParams {
   chainId?: string;
@@ -30,8 +33,13 @@ export class KwilActionClient {
    * Calls an action on the kwil nodes. This similar to `GET` like request.
    */
   async call<T = unknown>(params: KwilCallActionRequestParams, signer = this.signer) {
-    const action = this._createAction(params);
-    const response = await this.client.call(action, signer);
+    const action: CallBody = {
+      name: params.name,
+      namespace: "main",
+      inputs: this._createActionInputs(params.name, params.inputs),
+    };
+    console.log(action);
+    const response = await this.client.call(action as CallBody, signer);
     return response?.data?.result as T;
   }
 
@@ -44,7 +52,11 @@ export class KwilActionClient {
     synchronous = true,
   ) {
     invariant(signer, "Signer is not set, you must set it before executing an action");
-    const action = this._createAction(params);
+    const action: ActionBody = {
+      name: params.name,
+      namespace: "main",
+      inputs: [this._createActionInputs(params.name, params.inputs)],
+    };
     const response = await this.client.execute(action, signer, synchronous);
     return response.data?.tx_hash as T;
   }
@@ -59,22 +71,26 @@ export class KwilActionClient {
   /**
    * Creates an action body from the given parameters to be used in the `call` and `execute` methods.
    */
-  private _createAction(params: KwilCallActionRequestParams | KwilExecuteActionRequestParams) {
+  private _createAction(
+    params: KwilCallActionRequestParams | KwilExecuteActionRequestParams,
+  ): CallBody | ActionBody {
     return {
-      ...params,
+      name: params.name,
       namespace: "main",
-      inputs: this._createActionInputs(params.inputs),
+      inputs: [this._createActionInputs(params.name, params.inputs)],
     };
   }
 
   /**
    * Creates action inputs from the given parameters that are used in the action body.
    */
-  private _createActionInputs(params: Record<string, unknown> = {}) {
+  private _createActionInputs(
+    actionName: string,
+    params: Record<string, unknown> = {},
+  ): PositionalParams {
     if (!Object.keys(params).length) return [];
-    const prefixedEntries = Object.entries(params).map(([key, value]) => [`$${key}`, value]);
-    const prefixedObject = Object.fromEntries(prefixedEntries);
-    return prefixedObject;
+    const keys = actionSchema[actionName];
+    return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
   }
 }
 
