@@ -38,6 +38,9 @@ export class KwilActionClient {
       namespace: "main",
       inputs: this._createActionInputs(params.name, params.inputs),
     };
+    if (action?.inputs?.length === 0) {
+      action.inputs = undefined;
+    }
     const response = await this.client.call(action as CallBody, signer);
     return response?.data?.result as T;
   }

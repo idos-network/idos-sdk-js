@@ -84,7 +84,6 @@ export class KwilWrapper {
   }
 
   createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
-    console.log(params);
     if (!params || !Object.keys(params).length) return [];
     const keys = actionSchema[actionName];
     return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
@@ -99,7 +98,10 @@ export class KwilWrapper {
     if (useSigner && !this.signer) throw new Error("Call idOS.setSigner first.");
 
     const action = await this.buildCallAction(actionName, actionInputs);
-    console.log(action);
+    // TODO: remove this workaround when Kwil fix this issue
+    if (action?.inputs?.length === 0) {
+      action.inputs = undefined;
+    }
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
@@ -114,9 +116,7 @@ export class KwilWrapper {
     synchronous = true,
   ) {
     if (!this.signer) throw new Error("No signer set");
-    console.log(actionInputs);
     const action = await this.buildExecAction(actionName, actionInputs, description);
-    console.log(action);
     const res = await this.client.execute(action, this.signer, synchronous);
     return res.data?.tx_hash;
   }
