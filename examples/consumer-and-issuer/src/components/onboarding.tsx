@@ -55,8 +55,9 @@ const steps: Step[] = [
   {
     id: "verified",
     icon: <FaCheckCircle className="h-4 w-4" />,
-    title: "Verified",
-    description: "User has been successfully onboarded!",
+    title: "Claim your Acme card",
+    description:
+      "Congratulations! Your identity has been verified. You can now claim your exclusive high-limit credit card and start your premium banking journey.",
   },
 ];
 
@@ -241,8 +242,8 @@ export function Onboarding() {
               consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
               meta: {
                 url: "https://idos.network",
-                name: "idOS",
-                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+                name: "Neo Bank",
+                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4", // @todo: change to Neo bank logo. same for "make sure part" at the bottom
               },
             },
             KYCPermissions: [
@@ -287,6 +288,7 @@ export function Onboarding() {
       {status === "verified" ? (
         <div className="mt-5 flex flex-col items-center gap-2">
           <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
+          {/* @todo:/ Put a card svg (that was used in home screen) here */}
           <p className="text-center text-lg">
             Enjoy unprecedented spending power with our exclusive high-limit <br />
             <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">

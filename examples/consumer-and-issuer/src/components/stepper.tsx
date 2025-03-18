@@ -12,15 +12,13 @@ interface StepperProps {
   activeIndex: number;
   steps: Step[];
 }
-
+// @todo: make stepper horizontal
 export const Stepper = ({ activeIndex, steps, ...props }: StepperProps) => {
   return (
     <div className={cn("flex flex-col space-y-4")} {...props}>
       {steps.map((step, index) => {
         const isCompleted = index < activeIndex;
         const isUpcoming = index > activeIndex;
-
-        if (isCompleted) return null;
 
         return (
           <div key={step.id} className="relative flex">
