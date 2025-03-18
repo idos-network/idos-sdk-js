@@ -1,7 +1,9 @@
+import { actionSchema } from "@idos-network/core/kwil-actions";
 import type { idOSUser } from "@idos-network/core/types";
-import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
-import type { ActionBody, ActionInput, CallBody } from "@kwilteam/kwil-js/dist/core/action";
+import { KwilSigner, WebKwil } from "@kwilteam/kwil-js";
+import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
+import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 
 import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
 
@@ -54,24 +56,14 @@ export class KwilWrapper {
     const payload: ActionBody = {
       name: actionName,
       namespace: "main",
-      inputs: [],
+      // biome-ignore lint/suspicious/noExplicitAny: TBD
+      inputs: inputs.map((input: Record<string, any>) =>
+        this.createActionInputs(actionName, input),
+      ),
     };
 
     if (description) {
       payload.description = `*${description}*`;
-    }
-
-    if (inputs) {
-      for (const input of inputs) {
-        if (!input || (input && Object.keys(input).length === 0)) {
-          continue;
-        }
-        const actionInput = new KwilUtils.ActionInput();
-        for (const key in input) {
-          actionInput.put(`$${key}`, input[key]);
-        }
-        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
-      }
     }
 
     return payload;
@@ -85,23 +77,17 @@ export class KwilWrapper {
     const payload: CallBody = {
       name: actionName,
       namespace: "main",
-      inputs: [],
+      inputs: this.createActionInputs(actionName, inputs),
     };
 
-    if (inputs) {
-      for (const input of inputs) {
-        if (!input || (input && Object.keys(input).length === 0)) {
-          continue;
-        }
-        const actionInput = new KwilUtils.ActionInput();
-        for (const key in input) {
-          actionInput.put(`$${key}`, input[key]);
-        }
-        payload.inputs = [...(payload.inputs as ActionInput[]), actionInput];
-      }
-    }
-
     return payload;
+  }
+
+  createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
+    console.log(params);
+    if (!params || !Object.keys(params).length) return [];
+    const keys = actionSchema[actionName];
+    return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
   }
 
   async call(
@@ -112,7 +98,8 @@ export class KwilWrapper {
   ) {
     if (useSigner && !this.signer) throw new Error("Call idOS.setSigner first.");
 
-    const action = await this.buildCallAction(actionName, [actionInputs]);
+    const action = await this.buildCallAction(actionName, actionInputs);
+    console.log(action);
 
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
@@ -127,8 +114,9 @@ export class KwilWrapper {
     synchronous = true,
   ) {
     if (!this.signer) throw new Error("No signer set");
-
+    console.log(actionInputs);
     const action = await this.buildExecAction(actionName, actionInputs, description);
+    console.log(action);
     const res = await this.client.execute(action, this.signer, synchronous);
     return res.data?.tx_hash;
   }

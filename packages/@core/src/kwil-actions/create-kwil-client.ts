@@ -38,7 +38,6 @@ export class KwilActionClient {
       namespace: "main",
       inputs: this._createActionInputs(params.name, params.inputs),
     };
-    console.log(action);
     const response = await this.client.call(action as CallBody, signer);
     return response?.data?.result as T;
   }
@@ -75,7 +74,7 @@ export class KwilActionClient {
     actionName: string,
     params: Record<string, unknown> = {},
   ): PositionalParams {
-    if (!Object.keys(params).length) return [];
+    if (!params || !Object.keys(params).length) return [];
     const keys = actionSchema[actionName];
     return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
   }
