@@ -69,19 +69,6 @@ export class KwilActionClient {
   }
 
   /**
-   * Creates an action body from the given parameters to be used in the `call` and `execute` methods.
-   */
-  private _createAction(
-    params: KwilCallActionRequestParams | KwilExecuteActionRequestParams,
-  ): CallBody | ActionBody {
-    return {
-      name: params.name,
-      namespace: "main",
-      inputs: [this._createActionInputs(params.name, params.inputs)],
-    };
-  }
-
-  /**
    * Creates action inputs from the given parameters that are used in the action body.
    */
   private _createActionInputs(
