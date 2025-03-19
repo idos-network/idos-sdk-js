@@ -13,7 +13,13 @@ interface StepperProps {
   steps: Step[];
 }
 
-const StepperCircle = ({ active, title, description, showLine = false }: StepperCircleProps) => {
+const StepperCircle = ({
+  active,
+  title,
+  description,
+  showLine = false,
+  icon,
+}: StepperCircleProps) => {
   return (
     <div className="group relative flex w-full flex-col items-center justify-center gap-2">
       {showLine && (
@@ -26,8 +32,8 @@ const StepperCircle = ({ active, title, description, showLine = false }: Stepper
             : "border border-input bg-background "
         }`}
       >
-        {/* {icon} */}
-        <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-2 w-2 rounded-full bg-white" />
+        {icon}
+        {/* <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-2 w-2 rounded-full bg-white" /> */}
       </div>
       <div className="mt-5 flex flex-col items-center text-center">
         <h4 className="whitespace-nowrap font-semibold text-sm transition lg:text-base">{title}</h4>
@@ -48,6 +54,7 @@ export function Stepper({ activeIndex, steps }: StepperProps) {
           title={step.title}
           description={step.description}
           showLine={index < steps.length - 1}
+          icon={step.icon}
         />
       ))}
     </div>

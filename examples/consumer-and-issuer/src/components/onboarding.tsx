@@ -53,7 +53,7 @@ const steps: Step[] = [
     icon: <FaCheckCircle className="h-4 w-4" />,
     title: "Claim your Acme card",
     description:
-      "Congratulations! Your identity has been verified. You can now claim your exclusive high-limit credit card and start your premium banking journey.",
+      "You can now claim your exclusive high-limit credit card and start your premium banking journey.",
   },
 ];
 
@@ -282,20 +282,21 @@ export function Onboarding() {
 
       <Stepper activeIndex={index} steps={steps} />
       {status === "verified" ? (
-        <div className="mt-5 flex flex-col items-center gap-2">
+        <div className="mt-5 flex w-full flex-col items-center gap-2">
           <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
-          <Card />
-          <p className="text-center text-lg">
-            Enjoy unprecedented spending power with our exclusive high-limit <br />
-            <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">
-              $1,000,000
-            </span>
-            credit card.
-          </p>
-          <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
-          <Button size="lg" color="primary" onPress={requestPermission} isLoading={requesting}>
-            Claim now
-          </Button>
+          <div className="flex w-full items-center gap-4">
+            <Card />
+            <div className="flex flex-col gap-3">
+              <p className="text-center text-lg">
+                Enjoy unprecedented spend your crypto and enjoy our exclusive crypto rewards in
+                partnership with AcmeCard <br />
+              </p>
+              <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
+              <Button size="lg" color="primary" onPress={requestPermission} isLoading={requesting}>
+                Claim your Acme Card now
+              </Button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>
