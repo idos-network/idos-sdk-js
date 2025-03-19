@@ -17,7 +17,8 @@ import { useEffect, useState, useTransition } from "react";
 import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
-import Stepper, { type Step } from "./stepper";
+import { Card } from "./card";
+import { type Step, Stepper } from "./stepper";
 
 const steps: Step[] = [
   // {
@@ -27,33 +28,28 @@ const steps: Step[] = [
   //   description: "In order to sign up for Neo-bank you need to have a matching KYC/AML credential in idOS. user can either create a new profile or link an existing one."
   // },
   {
-    id: "profile-creation",
     icon: <User className="h-4 w-4" />,
     title: "Profile Creation",
     description:
       "User needs to sign a message to confirm that they own the wallet address. and pick authentication method",
   },
   {
-    id: "permissions",
     icon: <CreditCard className="h-4 w-4" />,
     title: "Permissions",
     description:
       "User needs to grant permissions to Neobank to write a credential to their idos profile",
   },
   {
-    id: "verification",
     icon: <CheckCircle className="h-4 w-4" />,
     title: "Verification",
     description: "User needs to verify their identity by providing a valid KYC/AML credential",
   },
   {
-    id: "pending-verification",
     icon: <FaSpinner className="h-4 w-4" />,
     title: "Pending Verification",
     description: "User's data is being processed. Please be patient or just refresh the screen.",
   },
   {
-    id: "verified",
     icon: <FaCheckCircle className="h-4 w-4" />,
     title: "Claim your Acme card",
     description:
@@ -243,7 +239,7 @@ export function Onboarding() {
               meta: {
                 url: "https://idos.network",
                 name: "Neo Bank",
-                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4", // @todo: change to Neo bank logo. same for "make sure part" at the bottom
+                logo: "https://static.thenounproject.com/png/2081783-512.png",
               },
             },
             KYCPermissions: [
@@ -288,7 +284,7 @@ export function Onboarding() {
       {status === "verified" ? (
         <div className="mt-5 flex flex-col items-center gap-2">
           <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
-          {/* @todo:/ Put a card svg (that was used in home screen) here */}
+          <Card />
           <p className="text-center text-lg">
             Enjoy unprecedented spending power with our exclusive high-limit <br />
             <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">

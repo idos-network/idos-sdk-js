@@ -1,55 +1,55 @@
-import { cn } from "@heroui/react";
-import { Check } from "lucide-react";
-
 export interface Step {
-  id: string;
-  icon: React.ReactNode;
   title: string;
   description: string;
+  icon?: React.ReactNode;
+}
+interface StepperCircleProps extends Step {
+  active?: boolean;
+  showLine?: boolean;
 }
 
 interface StepperProps {
   activeIndex: number;
   steps: Step[];
 }
-// @todo: make stepper horizontal
-export const Stepper = ({ activeIndex, steps, ...props }: StepperProps) => {
+
+const StepperCircle = ({ active, title, description, showLine = false }: StepperCircleProps) => {
   return (
-    <div className={cn("flex flex-col space-y-4")} {...props}>
-      {steps.map((step, index) => {
-        const isCompleted = index < activeIndex;
-        const isUpcoming = index > activeIndex;
-
-        return (
-          <div key={step.id} className="relative flex">
-            {/* Icon Circle */}
-            <div
-              className={cn(
-                "relative z-10 flex h-10 w-10 items-center justify-center rounded-full border-2 border-gray-500",
-              )}
-            >
-              <div
-                className={cn(
-                  "-translate-x-1/2 absolute top-full left-[50%] h-3 w-0.5 bg-gray-500",
-                )}
-              />
-              {isCompleted ? <Check aria-hidden="true" className="h-3 w-3" /> : step.icon}
-            </div>
-
-            {/* Content */}
-            <div className={cn("ml-4", isUpcoming && "opacity-50")}>
-              <h3 className={cn("font-semibold text-lg", isUpcoming && "text-gray-500")}>
-                {step.title}
-              </h3>
-              <p className="max-w-sm text-gray-600 text-sm">{step.description}</p>
-            </div>
-          </div>
-        );
-      })}
+    <div className="group relative flex w-full flex-col items-center justify-center gap-2">
+      {showLine && (
+        <div className="absolute top-5 right-[calc(-50%+10px)] left-[calc(50%+20px)] block h-0.5 rounded-full bg-gray-500" />
+      )}
+      <div
+        className={`relative z-10 flex h-9 w-9 shrink-0 flex-col items-center justify-center gap-1 rounded-full p-1 text-center font-medium text-sm ${
+          active
+            ? "bg-primary text-primary-foreground ring-2 ring-ring ring-offset-2 ring-offset-background"
+            : "border border-input bg-background "
+        }`}
+      >
+        {/* {icon} */}
+        <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 h-2 w-2 rounded-full bg-white" />
+      </div>
+      <div className="mt-5 flex flex-col items-center text-center">
+        <h4 className="whitespace-nowrap font-semibold text-sm transition lg:text-base">{title}</h4>
+        <p className="text-gray-400 text-xs transition">{description}</p>
+      </div>
     </div>
   );
 };
 
-Stepper.displayName = "Stepper";
-
-export default Stepper;
+export function Stepper({ activeIndex, steps }: StepperProps) {
+  return (
+    <div className="flex w-full items-start gap-2">
+      {steps.map((step, index) => (
+        <StepperCircle
+          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+          key={index}
+          active={activeIndex >= index}
+          title={step.title}
+          description={step.description}
+          showLine={index < steps.length - 1}
+        />
+      ))}
+    </div>
+  );
+}
