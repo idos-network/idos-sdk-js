@@ -13,7 +13,7 @@ export default async function OnboardingPage() {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 px-3">
       <IsleProvider containerId="idOS-isle">
         <Onboarding />
       </IsleProvider>

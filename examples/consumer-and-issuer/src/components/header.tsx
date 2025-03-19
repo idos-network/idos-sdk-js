@@ -5,7 +5,7 @@ import { WalletConnector } from "./wallet-connector";
 export function Header() {
   return (
     <header className="bg-neutral-100 dark:bg-neutral-950">
-      <nav className="container mx-auto flex h-16 items-center justify-between px-6">
+      <nav className="container mx-auto flex h-16 items-center justify-between px-3">
         <div className="flex items-center">
           <Link
             href="/"

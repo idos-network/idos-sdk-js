@@ -39,11 +39,11 @@ const steps: Step[] = [
     description:
       "User needs to grant permissions to Neobank to write a credential to their idos profile",
   },
-  {
-    icon: <CheckCircle className="h-4 w-4" />,
-    title: "Verification",
-    description: "User needs to verify their identity by providing a valid KYC/AML credential",
-  },
+  // {
+  //   icon: <CheckCircle className="h-4 w-4" />,
+  //   title: "Verification",
+  //   description: "User needs to verify their identity by providing a valid KYC/AML credential",
+  // },
   {
     icon: <FaSpinner className="h-4 w-4" />,
     title: "Pending Verification",
@@ -275,9 +275,8 @@ export function Onboarding() {
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
-
   return (
-    <div className="container relative mx-auto flex h-screen w-full flex-col place-content-center items-center gap-6">
+    <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
 
       <Stepper activeIndex={index} steps={steps} />
