@@ -8,7 +8,7 @@ import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.jso
 import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
 import v1 from "../../assets/v1.json";
 
-interface CredentialFields {
+export interface CredentialFields {
   id: string;
 
   /* Level of KYC verification performed (e.g., basic, intermediate, advanced). */
@@ -24,7 +24,27 @@ interface CredentialFields {
   expirationDate?: Date;
 }
 
-interface CredentialSubject {
+export interface CredentialResidentialAddress {
+  /* Street address. */
+  street: string;
+
+  /* House number. */
+  houseNumber?: string;
+
+  /* Additional address information (e.g., apartment number). */
+  additionalAddressInfo?: string;
+
+  /* Locality (e.g., city, town). */
+  city: string;
+
+  /* Postal code. */
+  postalCode: string;
+
+  /* Country. */
+  country: string;
+}
+
+export interface CredentialSubject {
   /* ID(unique credential)	Unique identifier for the credential itself. */
   id: string;
 
@@ -38,10 +58,10 @@ interface CredentialSubject {
   maidenName?: string;
 
   /* Unique identifier issued by a government authority (e.g., SSN, Tax ID). */
-  governmentId: string;
+  governmentId?: string;
 
   /* Type of government identifier (e.g., Social Security Number, Tax ID, etc.). */
-  governmentIdType: string;
+  governmentIdType?: string;
 
   /* Date of birth of the individual. */
   dateOfBirth: Date;
@@ -74,43 +94,42 @@ interface CredentialSubject {
   selfieFile: Buffer;
 
   /* Residential Address	Full residential address of the individual - if applicable. */
-  residentialAddress?: string;
-
-  /* Residential Address Country	Country of the residential address - if applicable. */
-  residentialAddressCountry?: string;
+  residentialAddress?: CredentialResidentialAddress;
 
   /* Residential Address Proof Category	Type of document provided to verify the address(e.g., utility bill, bank statement). */
   residentialAddressProofCategory?: string;
 
   /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
-  residentialAddressProofDateOfIssue: Date;
+  residentialAddressProofDateOfIssue?: Date;
 
   /* Residential Address Proof File	File or URL of the document provided as address proof. */
-  residentialAddressProofFile: Buffer;
+  residentialAddressProofFile?: Buffer;
 }
 
 function fileToBase85(file: Buffer) {
   return base85.encode(file);
 }
 
-function convertValues<K extends CredentialFields | CredentialSubject>(
-  fields: K,
-  map?: (key: keyof K, value: K[Extract<keyof K, string>]) => unknown,
-): Record<string, unknown> {
+function capitalizeFirstLetter(str: string) {
+  return str[0].toUpperCase() + str.slice(1);
+}
+
+function convertValues<
+  K extends CredentialFields | CredentialSubject | CredentialResidentialAddress,
+>(fields: K, prefix?: string): Record<string, unknown> {
   const acc: Record<string, unknown> = {};
 
   for (const key in fields) {
     if (Object.prototype.hasOwnProperty.call(fields, key)) {
       const value = fields[key];
+      const name = prefix ? `${prefix}${capitalizeFirstLetter(key)}` : key;
       if (value instanceof Date) {
-        acc[key] = value.toISOString();
+        acc[name] = value.toISOString();
       } else if (value instanceof Buffer) {
         // Convert file to base85
-        acc[key] = fileToBase85(value);
-      } else if (map) {
-        acc[key] = map(key as keyof K, value);
+        acc[name] = fileToBase85(value);
       } else {
-        acc[key] = value;
+        acc[name] = value;
       }
     }
   }
@@ -151,6 +170,8 @@ export const buildCredentials = async (
   subject: CredentialSubject,
   issuer: CredentialsIssuerConfig,
 ) => {
+  const { residentialAddress, ...subjectData } = subject;
+
   // Create credentials container
   const credential = {
     "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS_V1, CONTEXT_ED25519_SIGNATURE_2020_V1],
@@ -159,7 +180,8 @@ export const buildCredentials = async (
     ...convertValues(fields),
     credentialSubject: {
       "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
-      ...convertValues(subject),
+      ...convertValues(subjectData),
+      ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
     },
   };
 
