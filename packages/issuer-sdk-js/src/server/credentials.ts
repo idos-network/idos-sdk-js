@@ -20,6 +20,7 @@ import { ensureEntityId } from "./internal";
 type UpdatablePublicNotes = {
   publicNotes: string;
 };
+
 const buildUpdatablePublicNotes = (
   issuerConfig: IssuerConfig,
   { publicNotes }: UpdatablePublicNotes,
