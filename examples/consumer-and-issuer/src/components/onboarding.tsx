@@ -3,16 +3,15 @@
 import { createCredential, createIDOSUserProfile } from "@/actions";
 import { useIsle } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
-import { Button, Spinner } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
-import type { IsleStatus } from "@idos-network/core";
+import { Button } from "@heroui/react";
+import type { DelegatedWriteGrantSignatureRequest, IsleStatus } from "@idos-network/core";
 import {
   createIssuerConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
-import { CheckCircle, CreditCard, User } from "lucide-react";
+import { CreditCard, User } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
@@ -237,9 +236,9 @@ export function Onboarding() {
             consumer: {
               consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
               meta: {
-                url: "https://idos.network",
-                name: "Neo Bank",
-                logo: "https://static.thenounproject.com/png/2081783-512.png",
+                url: "https://consumer-and-issuer-demo.vercel.app/",
+                name: "NeoBank",
+                logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
               },
             },
             KYCPermissions: [

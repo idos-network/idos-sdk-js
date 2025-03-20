@@ -14,6 +14,7 @@ import {
   SparklesIcon,
   ZapIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -76,7 +77,7 @@ export default function HomePage() {
               transition={{ duration: 1, delay: 0.3 }}
               className="dark:text-gray-400"
             >
-              <CommandIcon className="h-24 w-24" strokeWidth={1.5} />
+              <Image src="/static/logo.svg" alt="NeoBank" width={80} height={80} />
             </motion.div>
           </motion.div>
           <h1 className="mb-8 font-bold text-5xl text-black md:text-7xl dark:text-gray-100">

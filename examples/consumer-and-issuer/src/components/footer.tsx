@@ -1,4 +1,4 @@
-import { CommandIcon } from "lucide-react";
+import Image from "next/image";
 
 export function Footer() {
   return (
@@ -8,7 +8,7 @@ export function Footer() {
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="text-center md:text-left">
               <div className="mb-4 flex items-center justify-center md:justify-start">
-                <CommandIcon className="h-6 w-6 text-gray-400" />
+                <Image src="/static/logo.svg" alt="NeoBank" width={40} height={40} />
                 <span className="ml-2 font-semibold text-gray-100 text-xl">NeoBank</span>
               </div>
               <p className="text-gray-400 text-sm">

@@ -1,4 +1,4 @@
-import { CommandIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { WalletConnector } from "./wallet-connector";
 
@@ -11,7 +11,7 @@ export function Header() {
             href="/"
             className="inline-flex items-center gap-2 text-lg text-neutral-900 dark:text-neutral-100"
           >
-            <CommandIcon className="h-6 w-6" />
+            <Image src="/static/logo.svg" alt="NeoBank" width={40} height={40} />
             NeoBank
           </Link>
         </div>
