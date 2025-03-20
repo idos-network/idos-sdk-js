@@ -1,4 +1,5 @@
 "use server";
+import { getConsumerConfig } from "@/consumer.config";
 import { getIssuerConfig } from "@/issuer.config";
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
 import {
@@ -64,10 +65,10 @@ const vcTemplate = (kycData: Record<string, any>) => {
 };
 
 const appendProof = (vc: Record<string, unknown>) => {
-  invariant(
-    process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
-    "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
-  );
+  // invariant(
+  //   process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
+  //   "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
+  // );
   return {
     ...vc,
     proof: {
@@ -80,7 +81,10 @@ const appendProof = (vc: Record<string, unknown>) => {
       proofValue: base64Encode(
         nacl.sign.detached(
           toBytes(vc),
-          base64Decode(process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ?? ""),
+          base64Decode(
+            process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ??
+              "5Pr3KaSP6ZqJ4Qt888MZDDVl3Q/pj2uFaGcxTSkgRx3+9HghmSF9D1X8Cw1ywocpu/jqJuUsFynghZb8UBn40A==",
+          ),
         ),
       ),
     },
@@ -216,3 +220,28 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     ),
   };
 }
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await getConsumerConfig();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
+// @todo: add type for payload
+export const invokePassportingService = async (payload: unknown) => {
+  const response = await fetch("https://passporting-server.vercel.app/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_PASSPORTING_SERVICE_API_KEY}`,
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      console.log({ err });
+      return err;
+    });
+
+  return response;
+};

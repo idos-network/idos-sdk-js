@@ -195,6 +195,12 @@ export type IsleNodeMessage =
       data: {
         id: string;
       };
+    }
+  | {
+      type: "share-credential";
+      data: {
+        id: string;
+      };
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

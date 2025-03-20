@@ -1,3 +1,5 @@
+import { utf8Encode } from "../codecs";
+import { hexEncodeSha256Hash } from "../codecs";
 import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
@@ -49,6 +51,17 @@ export async function getCredentialIdByContentHash(
   });
 
   return id;
+}
+
+export async function getCredentialContentSha256Hash(
+  kwilClient: KwilActionClient,
+  credentialId: string,
+) {
+  const [credential] = await kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
+    inputs: { id: credentialId },
+  });
+  return hexEncodeSha256Hash(utf8Encode(credential.content));
 }
 
 /**
@@ -208,7 +221,7 @@ export type CreateCredentialCopyParams = Omit<idOSCredential, "original_id"> &
 export async function createCredentialCopy(
   kwilClient: KwilActionClient,
   params: CreateCredentialCopyParams,
-) {
+): Promise<{ id: string }> {
   return kwilClient.execute({
     name: "create_credential_copy",
     description: "Share a credential with another user on idOS",

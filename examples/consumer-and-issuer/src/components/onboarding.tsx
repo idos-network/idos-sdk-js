@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import { createAttribute, getAttributes, hasProfile } from "@idos-network/core";
+import { createAttribute, getAttributes, hasProfile, requestDAGMessage } from "@idos-network/core";
 import {
   createIssuerConfig,
   getUserEncryptionPublicKey,
@@ -14,21 +14,31 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/actions";
+import {
+  createCredential,
+  createIDOSUserProfile,
+  getCredentialCompliantly,
+  getUserIdFromToken,
+  invokePassportingService,
+} from "@/actions";
 import { useIsleController } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
+import {
+  createCredentialCopy,
+  getCredentialContentSha256Hash,
+} from "@idos-network/consumer-sdk-js/client";
 
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
-
+window.getCredentialCompliantly = getCredentialCompliantly;
 const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
   return useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
       if (!signer) throw new Error("Signer is not initialized");
       const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
+        nodeUrl: "https://nodes.playground.idos.network",
         signer,
       });
 
@@ -84,7 +94,7 @@ export const useCreateIDVAttribute = () => {
     }) => {
       const { signer } = data;
       const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
+        nodeUrl: "https://nodes.playground.idos.network",
         signer,
       });
       return createAttribute(config.kwilClient, {
@@ -288,11 +298,67 @@ export function Onboarding() {
     });
   }, [isleController]);
 
+  const handleShareCredential = useCallback(
+    async (id: string) => {
+      if (!isleController) return;
+      const kwilClient = await isleController.getKwilClient();
+
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+
+      invariant(kwilClient, "Kwil client not found");
+      // @todo: remove this once we clean previous passporting app (they're using outdated params)
+      invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+      invariant(
+        consumerEncryptionPublicKey,
+        "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+      );
+
+      const enclave = await isleController.getEnclave();
+      invariant(enclave, "Enclave not found");
+      const contentHash = await getCredentialContentSha256Hash(
+        { kwilClient, decryptCredentialContent: isleController.decryptCredentialContent },
+        id,
+      );
+      const { id: credentialId } = await createCredentialCopy(
+        // C1.2
+        { kwilClient },
+        id,
+        consumerEncryptionPublicKey,
+        {
+          consumerAddress: consumerSigningPublicKey,
+          lockedUntil: 0,
+          decryptCredentialContent: isleController.decryptCredentialContent,
+          encryptCredentialContent: isleController.encryptCredentialContent,
+        },
+      );
+
+      const dag = {
+        dag_owner_wallet_identifier: address as string,
+        dag_grantee_wallet_identifier: consumerSigningPublicKey,
+        dag_data_id: credentialId,
+        dag_locked_until: 0,
+        dag_content_hash: contentHash,
+      };
+      const message = await requestDAGMessage(kwilClient, dag);
+      const signature = await signMessageAsync({ message });
+      const dagWithSignature = { ...dag, dag_signature: signature };
+
+      // invoke passporting service
+      await invokePassportingService(dagWithSignature);
+    },
+    [isleController, signMessageAsync, address],
+  );
+
   useEffect(() => {
     if (!isleController) return;
 
     const cleanup = isleController.onIsleMessage(async (message) => {
       switch (message.type) {
+        case "share-credential": {
+          await handleShareCredential(message.data.id);
+          break;
+        }
         case "create-profile":
           await handleCreateProfile();
           break;
@@ -335,7 +401,14 @@ export function Onboarding() {
     });
 
     return cleanup;
-  }, [handleCreateProfile, isleController, kycDisclosure, issueCredential, userData]);
+  }, [
+    handleCreateProfile,
+    isleController,
+    kycDisclosure,
+    issueCredential,
+    userData,
+    handleShareCredential,
+  ]);
 
   useEffect(() => {
     if (!isleController) return;

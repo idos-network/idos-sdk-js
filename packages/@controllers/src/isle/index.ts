@@ -144,6 +144,20 @@ interface idOSIsleController {
   onIsleMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
+  /** Get the Kwil client */
+  getKwilClient: () => Promise<KwilActionClient | undefined>;
+  /** Get the enclave */
+  getEnclave: () => Promise<EnclaveProvider | null>;
+  /** Decrypt credential content */
+  decryptCredentialContent: (credential: idOSCredential) => Promise<string>;
+  /** Encrypt credential content */
+  encryptCredentialContent: (
+    content: string,
+    encryptorPublicKey: string,
+  ) => Promise<{
+    content: string;
+    encryptorPublicKey: string;
+  }>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -207,7 +221,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
 
     const client = await createWebKwilClient({
-      nodeUrl: "https://nodes.staging.idos.network",
+      nodeUrl: "https://nodes.playground.idos.network",
     });
 
     const [kwilSigner] = createKwilSigner(signer);
@@ -477,6 +491,26 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return utf8Decode(decrypted);
   };
 
+  const encryptCredentialContent = async (
+    content: string,
+    encryptorPublicKey: string,
+  ): Promise<{
+    content: string;
+    encryptorPublicKey: string;
+  }> => {
+    invariant(enclave, "No `idOS enclave` found");
+    const user = await getUserProfile();
+    const { address } = getAccount(wagmiConfig);
+
+    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
+
+    const encrypted = await enclave.encrypt(utf8Encode(content), base64Decode(encryptorPublicKey));
+    return {
+      content: base64Encode(encrypted.content),
+      encryptorPublicKey: base64Encode(encrypted.encryptorPublicKey),
+    };
+  };
+
   const safeParse = (value: string) => {
     try {
       return JSON.parse(value);
@@ -526,7 +560,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     // Get all the access grants owned by the signer.
     const accessGrants = await getAccessGrantsOwned(kwilClient);
-
     // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
     const knownAccessGrants = accessGrants.filter((ag) => {
       return Object.values(groupedCredentials).some((duplicates = []) => {
@@ -678,7 +711,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     // @todo: make the domain environment aware.
     channel.on("link-wallet", async () => {
       const account = getAccount(wagmiConfig);
-      const url = `https://dashboard.staging.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
+      const url = `https://dashboard.playground.idos.network/wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
     });
 
@@ -817,6 +850,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return signer;
   };
 
+  const getKwilClient = async (): Promise<KwilActionClient | undefined> => {
+    return kwilClient;
+  };
+
+  const getEnclave = async (): Promise<EnclaveProvider | null> => {
+    return enclave;
+  };
+
   /**
    * Cleans up the Isle instance, removing the iframe and destroying the controller
    */
@@ -853,6 +894,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       "request-dwg",
       "revoke-permission",
       "view-credential-details",
+      "share-credential",
     ];
 
     const cleanups = messageTypes.map((type) =>
@@ -890,5 +932,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
+    getEnclave,
+    getKwilClient,
+    decryptCredentialContent,
+    encryptCredentialContent,
   };
 };

@@ -6,6 +6,7 @@
     "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",
+    "@idos-network/consumer-sdk-js": "workspace:*",
     "@tanstack/react-query": "5.45.1",
     "@uidotdev/usehooks": "^2.4.1",
     "ethers": "catalog:",
