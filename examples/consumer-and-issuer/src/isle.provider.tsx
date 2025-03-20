@@ -13,7 +13,7 @@ const IsleContext = createContext<IsleContextType | null>(null);
 export function useIsle() {
   const context = useContext(IsleContext);
   if (!context) {
-    throw new Error("`useIsle` must be used within an IsleProvider");
+    throw new Error("`useIsle` must be used within an `IsleProvider`");
   }
   return context;
 }
@@ -44,9 +44,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       container: containerId,
       issuerConfig: {
         meta: {
-          url: "https://idos.network",
-          name: "ACME Bank",
-          logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+          url: "https://consumer-and-issuer-demo.vercel.app/",
+          name: "NeoBank",
+          logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
         },
         encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
       },
@@ -54,13 +54,14 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         container: "#idOS-enclave",
         url: "https://enclave.playground.idos.network",
       },
+
       credentialRequirements: {
         acceptedIssuers: [
           {
             meta: {
-              url: "https://idos.network",
+              url: "https://consumer-and-issuer-demo.vercel.app/",
               name: "NeoBank",
-              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+              logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
             authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           },
@@ -68,19 +69,19 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         integratedConsumers: [
           {
             meta: {
-              url: "https://idos.network",
+              url: "https://consumer-and-issuer-demo.vercel.app/",
               name: "NeoBank",
-              logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+              logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
             consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           },
           {
             meta: {
-              url: "https://idos.network",
+              url: "https://acme.com",
               name: "ACME Card Provider",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
-            consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
+            consumerPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
           },
         ],
         acceptedCredentialType: "KYC DATA",
