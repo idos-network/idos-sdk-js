@@ -1,36 +1,12 @@
+import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
+import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import * as vc from "@digitalbazaar/vc";
-
-const cred = {
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
-    "https://w3id.org/security/suites/ed25519-2020/v1",
-  ],
-  id: "uuid:909225d0-6af3-416d-a770-fd6c15bb06da",
-  type: ["VerifiableCredential"],
-  issuer: "https://vc-issuers.next.fractal.id/idos",
-  level: "human",
-  credentialSubject: {
-    id: "uuid:fc7af2fd-4b37-48c6-96a6-ea09ec257282",
-    wallets: [
-      { currency: "eth", verified: true, address: "0x2591f18f0a7339c167b2ddf813fbf50b9970e8c2" },
-    ],
-    emails: [{ verified: false, address: "derp@derp.dep" }],
-  },
-  status: "approved",
-  issuanceDate: "2024-05-03T14:02:06Z",
-  approved_at: "2024-05-03T14:02:06Z",
-  proof: {
-    type: "Ed25519Signature2020",
-    created: "2024-05-03T14:45:13Z",
-    verificationMethod:
-      "https://vc-issuers.next.fractal.id/idos#z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
-    proofPurpose: "assertionMethod",
-    "@context": ["https://www.w3.org/ns/credentials/v2"],
-    proofValue:
-      "z5QRnxqqXMZ7dyB5Sd7RLPLhpUdA99UXRzJd93ekr1Q8BL2KAStkNoqFwkq5DVveUXULA5qWGm9JMDfuytBi6aVP4",
-  },
-};
+import * as base85 from "base85";
+import { JsonLdDocumentLoader } from "jsonld-document-loader";
+import ed25519Signature2020V1 from "./cached-schemas/ed25519-signature-2020-v1";
+import idosCredentialSubjectV1 from "./cached-schemas/idos-credential-subject-v1";
+import idosCredentialsV1 from "./cached-schemas/idos-credentials-v1";
+import v1 from "./cached-schemas/v1";
 
 interface CredentialFields {
   id: string;
@@ -39,13 +15,10 @@ interface CredentialFields {
   level: string;
 
   /* Credential status */
-  credentialStatus: string;
-
-  /* Issuer of the credential. */
-  issuer: string;
+  status: string;
 
   /* @default Date.now() */
-  issuanceDate?: Date;
+  issued?: Date;
 
   /* Date the credential was approved. */
   approvedAt?: Date;
@@ -95,13 +68,13 @@ interface CredentialSubject {
   idDocumentDateOfExpiry?: Date;
 
   /* ID Document Front File	File or URL representing the front of the identity document. */
-  idDocumentFrontFile: File;
+  idDocumentFrontFile: Buffer;
 
   /* ID Document Back File	File or URL representing the back of the identity document - if applicable. */
-  idDocumentBackFile?: File;
+  idDocumentBackFile?: Buffer;
 
   /* (ID Document) Selfie File	File or URL of a selfie with the identity document for verification purposes. */
-  selfieFile: File;
+  selfieFile: Buffer;
 
   /* Residential Address	Full residential address of the individual - if applicable. */
   residentialAddress?: string;
@@ -116,42 +89,94 @@ interface CredentialSubject {
   residentialAddressProofDateOfIssue: Date;
 
   /* Residential Address Proof File	File or URL of the document provided as address proof. */
-  residentialAddressProofFile: File;
+  residentialAddressProofFile: Buffer;
 }
 
-export const convertValues = (fields: CredentialFields | CredentialSubject) => {};
+function fileToBase85(file: Buffer) {
+  return base85.encode(file);
+}
 
-export const buildCredentials = (
+function convertValues<K extends CredentialFields | CredentialSubject>(
+  fields: K,
+  map?: (key: keyof K, value: K[Extract<keyof K, string>]) => unknown,
+): Record<string, unknown> {
+  const acc: Record<string, unknown> = {};
+
+  for (const key in fields) {
+    if (Object.prototype.hasOwnProperty.call(fields, key)) {
+      const value = fields[key];
+      if (value instanceof Date) {
+        acc[key] = value.toISOString();
+      } else if (value instanceof Buffer) {
+        // Convert file to base85
+        acc[key] = fileToBase85(value);
+      } else if (map) {
+        acc[key] = map(key as keyof K, value);
+      } else {
+        acc[key] = value;
+      }
+    }
+  }
+
+  return acc;
+}
+
+export interface CredentialsIssuerConfig {
+  /* Issuer of the credential (URL). */
+  name: string;
+
+  /* Issuer's private key in multibase format. */
+  privateKeyMultibase: string;
+
+  /* Issuer's public key in multibase format. */
+  publicKeyMultibase: string;
+}
+
+const buildDocumentLoader = () => {
+  const loader = new JsonLdDocumentLoader();
+  loader.addStatic("https://www.w3.org/2018/credentials/v1", v1);
+  loader.addStatic(
+    "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld",
+    idosCredentialsV1,
+  );
+  loader.addStatic(
+    "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld",
+    idosCredentialSubjectV1,
+  );
+  loader.addStatic("https://w3id.org/security/suites/ed25519-2020/v1", ed25519Signature2020V1);
+
+  return loader.build();
+};
+
+export const buildCredentials = async (
   fields: CredentialFields,
   subject: CredentialSubject,
-  key: string,
+  issuer: CredentialsIssuerConfig,
 ) => {
   // Create credentials container
   const credential = {
     "@context": [
       "https://www.w3.org/2018/credentials/v1",
-      "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
+      "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld",
       "https://w3id.org/security/suites/ed25519-2020/v1",
     ],
-    type: ["VerifiableCredential", "idOSCredential"],
-    // TODO: Convert dates to ISO
-    ...fields,
+    type: ["VerifiableCredential"],
+    issuer: issuer.name,
+    ...convertValues(fields),
     credentialSubject: {
-      "@context": "https://www.w3.org/2018/credentials/v1",
-      // TODO: Convert files & dates
-      ...subject,
+      "@context":
+        "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld",
+      ...convertValues(subject),
     },
-    /*proof: {
-      type: "Ed25519Signature2020",
-      created: "2024-05-03T14:45:13Z",
-      verificationMethod:
-        "https://vc-issuers.next.fractal.id/idos#z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5",
-      proofPurpose: "assertionMethod",
-      "@context": ["https://www.w3.org/ns/credentials/v2"],
-      proofValue:
-        "z5QRnxqqXMZ7dyB5Sd7RLPLhpUdA99UXRzJd93ekr1Q8BL2KAStkNoqFwkq5DVveUXULA5qWGm9JMDfuytBi6aVP4",
-    },*/
   };
+
+  const key = await Ed25519VerificationKey2020.from({
+    ...issuer,
+    controller: issuer.name,
+    type: "Ed25519VerificationKey2020",
+  });
+  const suite = new Ed25519Signature2020({ key });
+  const documentLoader = buildDocumentLoader();
 
   return vc.issue({ credential, suite, documentLoader });
 };
