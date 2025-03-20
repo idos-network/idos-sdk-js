@@ -42,6 +42,14 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     const controller = createIsleController({
       container: containerId,
+      issuerConfig: {
+        meta: {
+          url: "https://idos.network",
+          name: "ACME Bank",
+          logo: "https://avatars.githubusercontent.com/u/4081301?v=4",
+        },
+        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+      },
       enclaveOptions: {
         container: "#idOS-enclave",
         url: "https://enclave.playground.idos.network",
