@@ -105,15 +105,6 @@ export function NotVerified() {
     );
   }
 
-  if (status === "pending") {
-    return (
-      <Center flexDir="column" gap="6">
-        <Stepper stepsLength={3} index={1} />
-        <Spinner size="xl" />
-      </Center>
-    );
-  }
-
   if (status === "success") {
     return (
       <Center flexDir="column" gap="6">
@@ -212,6 +203,15 @@ export function NotVerified() {
           <RequestedPermissions values={meta?.KYCPermissions ?? []} />
           <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
+        <Button
+          loading={status === "pending"}
+          loadingText="Requesting permissions"
+          onClick={() => {
+            node?.post("request-dwg", {});
+          }}
+        >
+          Request permissions
+        </Button>
       </Stack>
     </Stack>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import { type IsleStatus, createAttribute, getAttributes } from "@idos-network/core";
+import { type IsleStatus, createAttribute, getAttributes, hasProfile } from "@idos-network/core";
 import {
   createIssuerConfig,
   getUserEncryptionPublicKey,
@@ -16,7 +16,7 @@ import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createIDOSUserProfile, getUserIdFromToken } from "@/actions";
+import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/actions";
 import { useIsle } from "@/isle.provider";
 
 import { useEthersSigner } from "@/wagmi.config";
@@ -36,27 +36,28 @@ const useFetchIDVStatus = (userId: string | undefined) => {
   });
 };
 
-const useFetchIDVUserId = (signer: JsonRpcSigner | undefined) => {
+const useFetchIDVUserId = (signer: JsonRpcSigner | undefined, hasIDOSProfile: boolean) => {
   return useQuery({
     queryKey: ["idv-user-id"],
-    queryFn: signer
-      ? async () => {
-          const config = await createIssuerConfig({
-            nodeUrl: "https://nodes.playground.idos.network",
-            signer,
-          });
+    queryFn:
+      signer && hasIDOSProfile
+        ? async () => {
+            const config = await createIssuerConfig({
+              nodeUrl: "https://nodes.playground.idos.network",
+              signer,
+            });
 
-          return getAttributes(config.kwilClient);
-        }
-      : skipToken,
+            return getAttributes(config.kwilClient);
+          }
+        : skipToken,
     select: (data) =>
       data.find((attribute) => attribute.attribute_key === "idvUserId")?.value as string,
   });
 };
 
-const useFetchIDOSProfile = (signer: JsonRpcSigner | undefined) => {
+const useFetchHasIDOSProfile = (signer: JsonRpcSigner | undefined) => {
   return useQuery({
-    queryKey: ["idos-profile"],
+    queryKey: ["has-idos-profile"],
     queryFn: signer
       ? async () => {
           const config = await createIssuerConfig({
@@ -64,9 +65,26 @@ const useFetchIDOSProfile = (signer: JsonRpcSigner | undefined) => {
             signer,
           });
 
-          return getUserProfile(config);
+          return hasProfile(config.kwilClient, await signer.getAddress());
         }
       : skipToken,
+  });
+};
+
+const useFetchIDOSProfile = (signer: JsonRpcSigner | undefined, hasIDOSProfile: boolean) => {
+  return useQuery({
+    queryKey: ["idos-profile"],
+    queryFn:
+      signer && hasIDOSProfile
+        ? async () => {
+            const config = await createIssuerConfig({
+              nodeUrl: "https://nodes.playground.idos.network",
+              signer,
+            });
+
+            return getUserProfile(config);
+          }
+        : skipToken,
   });
 };
 
@@ -92,6 +110,7 @@ export const useCreateIDVAttribute = () => {
     },
   });
 };
+
 const steps: Step[] = [
   {
     icon: <User className="h-4 w-4" />,
@@ -127,15 +146,16 @@ export function Onboarding() {
   const { isle } = useIsle();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
-  const [status, setStatus] = useState<IsleStatus | null>(null);
+  const [status, setStatus] = useState("");
   const [requesting, startRequesting] = useTransition();
   const kycDisclosure = useDisclosure();
   const signer = useEthersSigner();
 
-  const { data: idvUserid } = useFetchIDVUserId(signer);
+  const { data: hasIDOSProfile } = useFetchHasIDOSProfile(signer);
+  const { data: idvUserid } = useFetchIDVUserId(signer, !!hasIDOSProfile);
   const { data: idvStatus } = useFetchIDVStatus(idvUserid);
   const createIDVAttribute = useCreateIDVAttribute();
-  const { data: idOSUser } = useFetchIDOSProfile(signer);
+  const { data: idOSUser } = useFetchIDOSProfile(signer, !!hasIDOSProfile);
 
   const requestPermission = () => {
     invariant(isle, "`idOS Isle` is not initialized");
@@ -280,23 +300,92 @@ export function Onboarding() {
     });
   }, [kycDisclosure, isle]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: We need to listen for the status update and not for the `idOSUser`.
   useEffect(() => {
     if (!isle) return;
 
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
-      setStatus(data.status ?? null);
+      if (data.status === "not-verified") {
+        return;
+      }
+
+      setStatus(String(data.status));
 
       isle.toggleAnimation({
         expanded: true,
       });
     });
+
+    isle.on("request-dwg", async () => {
+      invariant(idOSUser, "`idOSUser` is not defined. Has a user been created?");
+
+      const response = await isle.requestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://consumer-and-issuer-demo.vercel.app/",
+            name: "NeoBank",
+            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+
+      if (response) {
+        const { signature, writeGrant } = response;
+        await createCredential(
+          idOSUser.recipient_encryption_public_key,
+          writeGrant.owner_wallet_identifier,
+          writeGrant.grantee_wallet_identifier,
+          writeGrant.issuer_public_key,
+          writeGrant.id,
+          writeGrant.access_grant_timelock,
+          writeGrant.not_usable_before,
+          writeGrant.not_usable_after,
+          signature,
+        );
+      }
+    });
   }, [isle]);
+
+  useEffect(() => {
+    if (idvStatus === "approved" && isle) {
+      setStatus("request-permissions");
+
+      isle.startRequestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://consumer-and-issuer-demo.vercel.app/",
+            name: "NeoBank",
+            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+    }
+  }, [idvStatus, isle]);
 
   const statusIndexSrc = {
     "no-profile": 0,
     "not-verified": 1,
     "pending-verification": 2,
-    verified: 3,
+    "request-permissions": 3,
+    verified: 4,
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
@@ -304,7 +393,6 @@ export function Onboarding() {
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
-
       <Stepper activeIndex={index} steps={steps} />
       {status === "verified" ? (
         <div className="mt-5 flex w-full flex-col items-center gap-2">

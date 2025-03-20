@@ -128,6 +128,8 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
+  /** Starts the request for a `delegated write grant` */
+  startRequestDelegatedWriteGrant: (options: RequestPermissionOptions) => void;
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
@@ -188,7 +190,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let iframe: HTMLIFrameElement | null = null;
   let enclave: EnclaveProvider | null = null;
   const controller: Controller = createController({
-    targetOrigin: "https://isle.idos.network/",
+    targetOrigin: "https://localhost:5174",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
   let signer: JsonRpcSigner | undefined;
@@ -243,12 +245,23 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
   };
 
+  const startRequestDelegatedWriteGrant = (options: RequestPermissionOptions) => {
+    send("update-create-dwg-status", {
+      status: "start-verification",
+      meta: {
+        url: options.consumer.meta.url,
+        name: options.consumer.meta.name,
+        logo: options.consumer.meta.logo,
+        KYCPermissions: options.KYCPermissions,
+      },
+    });
+  };
+
   const requestDelegatedWriteGrant = async (
     options: RequestPermissionOptions,
   ): Promise<
     { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
   > => {
-    invariant(kwilClient, "No `KwilActionClient` found");
     const { address } = getAccount(wagmiConfig);
     const currentTimestamp = Date.now();
     const currentDate = new Date(currentTimestamp);
@@ -264,17 +277,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
     };
 
-    send("update-create-dwg-status", {
-      status: "start-verification",
-      meta: {
-        url: options.consumer.meta.url,
-        name: options.consumer.meta.name,
-        logo: options.consumer.meta.logo,
-        KYCPermissions: options.KYCPermissions,
-      },
-    });
-
+    invariant(kwilClient, "No `KwilActionClient` found");
     const message: string = await requestDWGSignature(kwilClient, delegatedWriteGrant);
+
+    send("update-create-dwg-status", {
+      status: "pending",
+    });
 
     const [error, signature] = await goTry(() => signMessage(wagmiConfig, { message }));
 
@@ -668,7 +676,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
   // @todo: make the domain environment aware.
-  iframe.src = "https://isle.idos.network/";
+  iframe.src = "https://localhost:5174";
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
@@ -773,6 +781,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     destroy,
     send,
     on,
+    startRequestDelegatedWriteGrant,
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,
