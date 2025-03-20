@@ -1,5 +1,6 @@
 "use client";
 
+import { Card } from "@/components/card";
 import { GetStartedButton } from "@/components/get-started-button";
 import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
@@ -13,6 +14,7 @@ import {
   SparklesIcon,
   ZapIcon,
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
@@ -75,11 +77,11 @@ export default function HomePage() {
               transition={{ duration: 1, delay: 0.3 }}
               className="dark:text-gray-400"
             >
-              <CommandIcon className="h-24 w-24" strokeWidth={1.5} />
+              <Image src="/static/logo.svg" alt="NeoBank" width={80} height={80} />
             </motion.div>
           </motion.div>
           <h1 className="mb-8 font-bold text-5xl text-black md:text-7xl dark:text-gray-100">
-            Join ACME Bank
+            Join NeoBank
           </h1>
           <p className="mx-auto mb-12 max-w-3xl text-gray-800 text-xl md:text-2xl dark:text-gray-400">
             Experience the future of banking with our revolutionary digital credit card and
@@ -305,132 +307,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="relative h-[400px] w-full">
-                <svg
-                  className="absolute inset-0 h-full w-full"
-                  viewBox="0 0 400 250"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  role="img"
-                  aria-label="Premium credit card illustration"
-                >
-                  <title>Premium credit card illustration</title>
-                  {/* Card Background */}
-                  <rect
-                    x="20"
-                    y="20"
-                    width="360"
-                    height="210"
-                    rx="20"
-                    className="fill-white stroke-gray-200 dark:fill-neutral-900 dark:stroke-white/10"
-                    strokeWidth="2"
-                  />
-
-                  {/* Holographic Effect */}
-                  <path
-                    d="M20 20 L380 20 L380 230 L20 230 Z"
-                    fill="url(#holographicGradient)"
-                    opacity="0.1"
-                  />
-
-                  {/* Subtle Pattern */}
-                  <pattern
-                    id="cardPattern"
-                    x="0"
-                    y="0"
-                    width="20"
-                    height="20"
-                    patternUnits="userSpaceOnUse"
-                  >
-                    <circle
-                      cx="10"
-                      cy="10"
-                      r="0.5"
-                      fill="black"
-                      fillOpacity="0.03"
-                      className="dark:fill-white"
-                    />
-                    <circle
-                      cx="10"
-                      cy="10"
-                      r="1"
-                      fill="black"
-                      fillOpacity="0.01"
-                      className="dark:fill-white"
-                    />
-                  </pattern>
-                  <rect x="20" y="20" width="360" height="210" rx="20" fill="url(#cardPattern)" />
-
-                  {/* Chip */}
-                  <rect x="40" y="40" width="40" height="30" rx="4" fill="url(#chipGradient)" />
-                  <rect x="45" y="45" width="5" height="5" rx="1" fill="#FFD700" />
-                  <rect x="55" y="45" width="5" height="5" rx="1" fill="#FFD700" />
-                  <rect x="45" y="55" width="5" height="5" rx="1" fill="#FFD700" />
-                  <rect x="55" y="55" width="5" height="5" rx="1" fill="#FFD700" />
-
-                  {/* Card Number */}
-                  <text
-                    x="40"
-                    y="140"
-                    // biome-ignore lint/nursery/useSortedClasses: <explanation>
-                    className="fill-black dark:fill-white font-mono"
-                    fontSize="24"
-                    letterSpacing="2"
-                  >
-                    •••• •••• •••• 8888
-                  </text>
-
-                  {/* Card Holder */}
-                  <text
-                    x="40"
-                    y="180"
-                    className="fill-black font-medium dark:fill-white"
-                    fontSize="16"
-                    letterSpacing="1"
-                  >
-                    CARD HOLDER NAME
-                  </text>
-
-                  {/* Expiry */}
-                  <text
-                    x="300"
-                    y="180"
-                    // biome-ignore lint/nursery/useSortedClasses: <explanation>
-                    className="fill-black dark:fill-white font-medium"
-                    fontSize="16"
-                    letterSpacing="1"
-                  >
-                    MM/YY
-                  </text>
-
-                  {/* Gradients */}
-                  <defs>
-                    <linearGradient
-                      id="chipGradient"
-                      x1="0"
-                      y1="0"
-                      x2="40"
-                      y2="30"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop offset="0%" stopColor="#FFD700" />
-                      <stop offset="100%" stopColor="#FFA500" />
-                    </linearGradient>
-                    <linearGradient
-                      id="holographicGradient"
-                      x1="0"
-                      y1="0"
-                      x2="400"
-                      y2="250"
-                      gradientUnits="userSpaceOnUse"
-                    >
-                      <stop offset="0%" stopColor="currentColor" stopOpacity="0" />
-                      <stop offset="50%" stopColor="currentColor" stopOpacity="0.05" />
-                      <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-              </div>
+              <Card />
             </motion.div>
 
             <motion.div
@@ -537,7 +414,7 @@ export default function HomePage() {
               Ready to Elevate Your Financial Journey?
             </h2>
             <p className="mx-auto mb-12 max-w-2xl text-2xl text-gray-800 dark:text-gray-400">
-              Join ACME Bank today and unlock a world of possibilities with our premium
+              Join NeoBank today and unlock a world of possibilities with our premium
               <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">
                 {" "}
                 $1,000,000

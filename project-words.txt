@@ -69,3 +69,4 @@ viewports
 vite
 wagmi
 webauthn
+Neobank

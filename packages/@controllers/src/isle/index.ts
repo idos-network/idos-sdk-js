@@ -47,16 +47,35 @@ import { IframeEnclave } from "../secure-enclave";
 import type { EnclaveOptions, EnclaveProvider } from "../secure-enclave/types";
 
 /**
+ * Meta information about an actor.
+ */ interface Meta {
+  url: string;
+  name: string;
+  logo: string;
+}
+
+/**
  * Configuration options for creating an idOS Isle instance
  * @interface IdOSIsleOptions
  */
 interface idOSIsleControllerOptions {
   /** The ID of the container element where the Isle iframe will be mounted */
   container: string;
+
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
+
   /** enclave options */
   enclaveOptions: EnclaveOptions;
+
+  /**
+   * The issuer configuration.
+   */
+  issuerConfig: {
+    meta: Meta;
+    encryptionPublicKey: string;
+  };
+
   /**
    * Information about the credential requirements for the app
    * This information is used to filter and display `AGs` / `Credentials` in the UI.
@@ -64,22 +83,16 @@ interface idOSIsleControllerOptions {
   credentialRequirements: {
     /** Information about issuers known to the app */
     acceptedIssuers: {
-      meta: {
-        url: string;
-        name: string;
-        logo: string;
-      };
+      meta: Meta;
       authPublicKey: string;
     }[];
+
     /** Information about consumers known to the app */
     integratedConsumers: {
-      meta: {
-        url: string;
-        name: string;
-        logo: string;
-      };
+      meta: Meta;
       consumerPublicKey: string;
     }[];
+
     /** The type of credential accepted by the app */
     acceptedCredentialType: string;
   };
@@ -95,11 +108,7 @@ interface RequestPermissionOptions {
     /** The public key of the consumer */
     consumerPublicKey: string;
     /** Meta information about the consumer */
-    meta: {
-      url: string;
-      name: string;
-      logo: string;
-    };
+    meta: Meta;
   };
   KYCPermissions: string[];
 }

@@ -1,21 +1,60 @@
 "use client";
 
-import { Button, Spinner } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
-import type { IsleStatus } from "@idos-network/core";
+import { createCredential, createIDOSUserProfile } from "@/actions";
+import { useIsle } from "@/isle.provider";
+import { useEthersSigner } from "@/wagmi.config";
+import { Button } from "@heroui/react";
+import type { DelegatedWriteGrantSignatureRequest, IsleStatus } from "@idos-network/core";
 import {
   createIssuerConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
-import { useEffect, useState } from "react";
+import { CreditCard, User } from "lucide-react";
+import { useEffect, useState, useTransition } from "react";
+import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
+import { Card } from "./card";
+import { type Step, Stepper } from "./stepper";
 
-import { createCredential, createIDOSUserProfile } from "@/actions";
-import { useIsle } from "@/isle.provider";
-import { useEthersSigner } from "@/wagmi.config";
+const steps: Step[] = [
+  // {
+  //   id: "welcome",
+  //   icon: <PiHandWavingBold className="h-4 w-4" />,
+  //   title: "WELCOME TO NEO-BANK",
+  //   description: "In order to sign up for Neo-bank you need to have a matching KYC/AML credential in idOS. user can either create a new profile or link an existing one."
+  // },
+  {
+    icon: <User className="h-4 w-4" />,
+    title: "Profile Creation",
+    description:
+      "User needs to sign a message to confirm that they own the wallet address. and pick authentication method",
+  },
+  {
+    icon: <CreditCard className="h-4 w-4" />,
+    title: "Permissions",
+    description:
+      "User needs to grant permissions to Neobank to write a credential to their idos profile",
+  },
+  // {
+  //   icon: <CheckCircle className="h-4 w-4" />,
+  //   title: "Verification",
+  //   description: "User needs to verify their identity by providing a valid KYC/AML credential",
+  // },
+  {
+    icon: <FaSpinner className="h-4 w-4" />,
+    title: "Pending Verification",
+    description: "User's data is being processed. Please be patient or just refresh the screen.",
+  },
+  {
+    icon: <FaCheckCircle className="h-4 w-4" />,
+    title: "Claim your Acme card",
+    description:
+      "You can now claim your exclusive high-limit credit card and start your premium banking journey.",
+  },
+];
 
 export function Onboarding() {
   const { isle } = useIsle();
@@ -25,6 +64,7 @@ export function Onboarding() {
   const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
   const signer = useEthersSigner();
   const [status, setStatus] = useState<IsleStatus | null>(null);
+  const [requesting, startRequesting] = useTransition();
 
   const requestPermission = () => {
     invariant(isle, "`idOS Isle` is not initialized");
@@ -33,23 +73,25 @@ export function Onboarding() {
       expanded: true,
     });
 
-    isle.requestPermission({
-      consumer: {
-        meta: {
-          url: "https://idos.network",
-          name: "Integrated Consumer",
-          logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+    startRequesting(async () => {
+      await isle.requestPermission({
+        consumer: {
+          meta: {
+            url: "https://idos.network",
+            name: "ACME Card Provider",
+            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+          },
+          consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
         },
-        consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
-      },
-      KYCPermissions: [
-        "Name and last name",
-        "Gender",
-        "Country and city of residence",
-        "Place and date of birth",
-        "ID Document",
-        "Liveness check (No pictures)",
-      ],
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
     });
   };
 
@@ -183,6 +225,7 @@ export function Onboarding() {
     if (!isle) return;
 
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
+      setStatus(data.status ?? null);
       switch (data.status) {
         case "not-verified": {
           isle.toggleAnimation({
@@ -193,9 +236,9 @@ export function Onboarding() {
             consumer: {
               consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
               meta: {
-                url: "https://idos.network",
-                name: "idOS",
-                logo: "https://avatars.githubusercontent.com/u/143606397?s=48&v=4",
+                url: "https://consumer-and-issuer-demo.vercel.app/",
+                name: "NeoBank",
+                logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
               },
             },
             KYCPermissions: [
@@ -217,44 +260,43 @@ export function Onboarding() {
         }
 
         default:
-          setStatus(data.status ?? null);
+          break;
       }
     });
   }, [isle]);
 
+  const statusIndexSrc = {
+    "no-profile": 0,
+    "not-verified": 1,
+    // TODO: handle verification status
+    "pending-verification": 3,
+    verified: 4,
+  };
+
+  const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
   return (
-    <div className="container relative mx-auto flex h-screen w-full flex-col place-content-center items-center gap-6">
-      <h1 className="font-bold text-4xl">Onboarding with ACME Bank</h1>
+    <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
+      <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
+
+      <Stepper activeIndex={index} steps={steps} />
       {status === "verified" ? (
-        <div className="flex flex-col items-center gap-2">
+        <div className="mt-5 flex w-full flex-col items-center gap-2">
           <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
-          <p className="text-center text-lg">
-            Enjoy unprecedented spending power with our exclusive high-limit <br />
-            <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text font-bold text-transparent dark:from-amber-200 dark:to-yellow-400">
-              $1,000,000
-            </span>{" "}
-            credit card.
-          </p>
-          <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
-          <Button size="lg" color="primary" onPress={requestPermission}>
-            Claim now
-          </Button>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-6">
-          {status === "pending-verification" ? (
-            <div className="flex flex-col items-center gap-2">
-              <p className="text-center text-lg">Your data is now being processed.</p>
-              <p className="text-center text-gray-500 text-sm">
-                It can take up to 24 hours to verify your data. Please be patient or just refresh
-                the screen.
+          <div className="flex w-full items-center gap-4">
+            <Card />
+            <div className="flex flex-col gap-3">
+              <p className="text-center text-lg">
+                Enjoy unprecedented spend your crypto and enjoy our exclusive crypto rewards in
+                partnership with AcmeCard <br />
               </p>
+              <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
+              <Button size="lg" color="primary" onPress={requestPermission} isLoading={requesting}>
+                Claim your Acme Card now
+              </Button>
             </div>
-          ) : (
-            <Spinner />
-          )}
+          </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
