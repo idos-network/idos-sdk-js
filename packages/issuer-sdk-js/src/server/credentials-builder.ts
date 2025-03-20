@@ -14,9 +14,6 @@ interface CredentialFields {
   /* Level of KYC verification performed (e.g., basic, intermediate, advanced). */
   level: string;
 
-  /* Credential status */
-  status: string;
-
   /* @default Date.now() */
   issued?: Date;
 

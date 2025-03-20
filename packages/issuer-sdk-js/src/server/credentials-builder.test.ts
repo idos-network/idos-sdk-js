@@ -8,7 +8,6 @@ describe("buildVerifiableCredentials", () => {
       {
         id: "did:example:1234#z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
         level: "human",
-        status: "approved",
         issued: new Date("2022-01-01"),
         approvedAt: new Date("2022-01-01"),
         expirationDate: new Date("2025-01-01"),
