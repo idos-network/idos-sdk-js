@@ -18,7 +18,7 @@ TODO what secrets do I need to operate this, and were do I use them?
 
 Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with pnpm or the equivalent of your package manager of choice:
 ```
-pnpm add @idos-network/idos-sdk-server-dapp \
+pnpm add @idos-network/consumer-sdk-js \
   ethers near-api-js # These two are optional; only install the ones you for working with your network.
 ```
 
