@@ -1,12 +1,8 @@
 "use client";
 
-import { Button } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest, IsleStatus } from "@idos-network/core";
-import {
-  createIssuerConfig,
-  getUserEncryptionPublicKey,
-  getUserProfile,
-} from "@idos-network/issuer-sdk-js/client";
+import { Button, useDisclosure } from "@heroui/react";
+import type { IsleStatus } from "@idos-network/core";
+import { getUserEncryptionPublicKey } from "@idos-network/issuer-sdk-js/client";
 import { goTry } from "go-try";
 import { CreditCard, User } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
@@ -14,10 +10,11 @@ import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createCredential, createIDOSUserProfile } from "@/actions";
+import { createIDOSUserProfile } from "@/actions";
 import { useIsle } from "@/isle.provider";
-import { useEthersSigner } from "@/wagmi.config";
+
 import { Card } from "./card";
+import { KYCJourney } from "./kyc-journey";
 import { type Step, Stepper } from "./stepper";
 
 const steps: Step[] = [
@@ -28,15 +25,20 @@ const steps: Step[] = [
       "User needs to sign a message to confirm that they own the wallet address. and pick authentication method",
   },
   {
-    icon: <CreditCard className="h-4 w-4" />,
-    title: "Permissions",
-    description:
-      "User needs to grant permissions to Neobank to write a credential to their idos profile",
+    icon: <User className="h-4 w-4" />,
+    title: "Verification",
+    description: "User needs to be verified",
   },
   {
     icon: <FaSpinner className="h-4 w-4" />,
     title: "Pending Verification",
     description: "User's data is being processed. Please be patient or just refresh the screen.",
+  },
+  {
+    icon: <CreditCard className="h-4 w-4" />,
+    title: "Permissions",
+    description:
+      "User needs to grant permissions to Neobank to write a credential to their idos profile",
   },
   {
     icon: <FaCheckCircle className="h-4 w-4" />,
@@ -50,11 +52,9 @@ export function Onboarding() {
   const { isle } = useIsle();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
-  const [signature, setSignature] = useState<string | null>(null);
-  const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
-  const signer = useEthersSigner();
   const [status, setStatus] = useState<IsleStatus | null>(null);
   const [requesting, startRequesting] = useTransition();
+  const kycDisclosure = useDisclosure();
 
   const requestPermission = () => {
     invariant(isle, "`idOS Isle` is not initialized");
@@ -85,7 +85,20 @@ export function Onboarding() {
     });
   };
 
-  // Set up event handlers
+  const handleKYCJourneySuccess = (data: { token: string }) => {
+    kycDisclosure.onClose();
+
+    console.log({ data });
+
+    isle?.send("update", {
+      status: "pending-verification",
+    });
+  };
+
+  const handleKYCJourneyError = (error: unknown) => {
+    kycDisclosure.onClose();
+  };
+
   useEffect(() => {
     if (!isle) return;
 
@@ -129,10 +142,6 @@ export function Onboarding() {
           status: "success",
         });
 
-        isle.toggleAnimation({
-          expanded: false,
-        });
-
         setTimeout(() => {
           isle.send("update", {
             status: "not-verified",
@@ -141,7 +150,7 @@ export function Onboarding() {
             expanded: true,
             noDismiss: true,
           });
-        }, 5_000);
+        }, 2_000);
       });
 
       if (error) {
@@ -173,85 +182,22 @@ export function Onboarding() {
   }, [address, signMessageAsync, isle]);
 
   useEffect(() => {
-    if (!isle || !writeGrant || !signature || !signer) return;
+    if (!isle) return;
 
     isle.on("verify-identity", async () => {
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.playground.idos.network",
-        signer,
-      });
-
-      const userProfile = await getUserProfile(config);
-
-      const [error] = await goTry(() =>
-        createCredential(
-          userProfile.id,
-          userProfile.recipient_encryption_public_key,
-          writeGrant.owner_wallet_identifier,
-          writeGrant.grantee_wallet_identifier,
-          writeGrant.issuer_public_key,
-          writeGrant.id,
-          writeGrant.access_grant_timelock,
-          writeGrant.not_usable_before,
-          writeGrant.not_usable_after,
-          signature,
-        ),
-      );
-
-      if (error) {
-        console.error(error);
-      }
-
-      isle.send("update", {
-        status: "pending-verification",
-      });
-      isle.toggleAnimation({
-        expanded: false,
-      });
+      kycDisclosure.onOpen();
     });
-  }, [writeGrant, signature, signer, isle]);
+  }, [kycDisclosure, isle]);
 
   useEffect(() => {
     if (!isle) return;
 
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
       setStatus(data.status ?? null);
-      switch (data.status) {
-        case "not-verified": {
-          isle.toggleAnimation({
-            expanded: true,
-            noDismiss: true,
-          });
-          const result = await isle.requestDelegatedWriteGrant({
-            consumer: {
-              consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-              meta: {
-                url: "https://consumer-and-issuer-demo.vercel.app/",
-                name: "NeoBank",
-                logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
-              },
-            },
-            KYCPermissions: [
-              "Name and last name",
-              "Gender",
-              "Country and city of residence",
-              "Place and date of birth",
-              "ID Document",
-              "Liveness check (No pictures)",
-            ],
-          });
 
-          if (result) {
-            const { signature, writeGrant } = result;
-            setSignature(signature);
-            setWriteGrant(writeGrant);
-          }
-          break;
-        }
-
-        default:
-          break;
-      }
+      isle.toggleAnimation({
+        expanded: true,
+      });
     });
   }, [isle]);
 
@@ -263,6 +209,7 @@ export function Onboarding() {
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
+
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
@@ -285,6 +232,9 @@ export function Onboarding() {
             </div>
           </div>
         </div>
+      ) : null}
+      {kycDisclosure.isOpen ? (
+        <KYCJourney onSuccess={handleKYCJourneySuccess} onError={handleKYCJourneyError} />
       ) : null}
     </div>
   );

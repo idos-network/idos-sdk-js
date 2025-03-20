@@ -50,9 +50,8 @@ export function NotVerified() {
   const [status, setStatus] = useState<
     "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
+
   const hasRequestedRef = useRef(false);
-  // @todo: this is for demo purposes only. Remove once we have a real KYC journey in place.
-  const [verifying, setVerifying] = useState(false);
 
   const [meta, setMeta] = useState<{
     url: string;
@@ -87,11 +86,21 @@ export function NotVerified() {
     return (
       <Center flexDir="column" gap="6">
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
-          You are not verified yet.
+          Verify your identity
         </Heading>
+        <Stepper stepsLength={3} index={2} />
         <Text color="neutral.500" fontSize="sm" textAlign="center">
-          Please verify your identity to proceed.
+          This application is asking you to verify your identity. You will now be led to a KYC
+          journey to complete the process.
         </Text>
+        <Button
+          w="full"
+          onClick={() => {
+            node?.post("verify-identity", {});
+          }}
+        >
+          Verify your identity
+        </Button>
       </Center>
     );
   }
@@ -177,10 +186,8 @@ export function NotVerified() {
           journey to complete the process.
         </Text>
         <Button
-          loading={verifying}
           w="full"
           onClick={() => {
-            setVerifying(true);
             node?.post("verify-identity", {});
           }}
         >

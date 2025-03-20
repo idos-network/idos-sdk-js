@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 
-const url = `https://kraken.staging.sandbox.fractal.id/kyc?clientId=${process.env.NEXT_PUBLIC_KRAKEN_CLIENT_ID}&level=basic%2Bliveness`;
+const url =
+  "https://kraken.staging.sandbox.fractal.id/kyc?clientId=55dbf89f-63bc-41ba-a682-0db2aeb4ccf9&level=basic%2Bliveness";
 
 type KYCJourneyProps = {
   onSuccess: (data: { token: string }) => void;
@@ -14,6 +15,9 @@ export function KYCJourney({ onSuccess, onError }: KYCJourneyProps) {
         if (message.data.error) {
           onError(message.data.error);
         } else if (message.data.open) {
+          // If you want to use wallets, this is required
+          // since there are security limitations, especially with
+          // opening metamask protocol link in mobile device
           window.open(message.data.open, message.data.target, message.data.features);
         } else {
           onSuccess(message.data);
