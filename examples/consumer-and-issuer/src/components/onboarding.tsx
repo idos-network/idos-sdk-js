@@ -352,31 +352,58 @@ export function Onboarding() {
     });
   };
 
-  const handleKYCJourneySuccess = async (data: { token: string }) => {
-    await refetchUserData();
+  const handleKYCJourneySuccess = useCallback(
+    async (data: { token: string }) => {
+      const [error] = await goTry(async () => {
+        // Wait for the refetch to complete and get fresh data
+        const { data: freshUserData } = await refetchUserData();
 
-    invariant(userData?.idOSProfile, "`idOSUser` is not defined. Has a user been created?");
-    invariant(signer, "`signer` is not defined");
+        invariant(
+          freshUserData?.idOSProfile,
+          "`idOSUser` is not defined. Has a user been created?",
+        );
+        invariant(signer, "`signer` is not defined");
 
-    const { idvUserId, signature } = await getUserIdFromToken(data.token, userData.idOSProfile.id);
+        const { idvUserId, signature } = await getUserIdFromToken(
+          data.token,
+          freshUserData.idOSProfile.id,
+        );
 
-    await createIDVAttribute.mutateAsync({
-      idvUserId,
-      signature,
-      signer,
-      userId: userData.idOSProfile.id,
-    });
+        invariant(idvUserId, "Failed to get IDV User ID from token");
+        invariant(signature, "Failed to get signature from token");
 
-    kycDisclosure.onClose();
+        await createIDVAttribute.mutateAsync({
+          idvUserId,
+          signature,
+          signer,
+          userId: freshUserData.idOSProfile.id,
+        });
 
-    isle?.send("update", {
-      status: "pending-verification",
-    });
-  };
+        kycDisclosure.onClose();
 
-  const handleKYCJourneyError = (error: unknown) => {
-    kycDisclosure.onClose();
-  };
+        isle?.send("update", {
+          status: "pending-verification",
+        });
+      });
+
+      if (error) {
+        console.error("Error in KYC journey success handler:", error);
+        // Show more specific error messages based on the error type
+        if (error instanceof Error) {
+          console.error("Error details:", error.message);
+        }
+        kycDisclosure.onClose();
+      }
+    },
+    [refetchUserData, signer, createIDVAttribute, kycDisclosure, isle],
+  );
+
+  const handleKYCJourneyError = useCallback(
+    (error: unknown) => {
+      kycDisclosure.onClose();
+    },
+    [kycDisclosure],
+  );
 
   const statusIndexSrc = {
     "no-profile": 0,
