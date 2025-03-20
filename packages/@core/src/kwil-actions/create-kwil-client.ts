@@ -2,7 +2,7 @@ import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
 import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 import invariant from "tiny-invariant";
-import { actionSchema } from "./schema.ts";
+import { actionSchema } from "./schema";
 
 interface CreateKwilClientParams {
   chainId?: string;
@@ -49,7 +49,7 @@ export class KwilActionClient {
    * Executes an action on the kwil nodes. This similar to `POST` like request.
    */
   async execute<T = unknown>(
-    params: KwilActionReqParams,
+    params: KwilExecuteActionRequestParams,
     signer = this.signer,
     synchronous = true,
   ) {
@@ -57,6 +57,7 @@ export class KwilActionClient {
     const action: ActionBody = {
       name: params.name,
       namespace: "main",
+      description: params.description,
       inputs: [this._createActionInputs(params.name, params.inputs)],
     };
     const response = await this.client.execute(action, signer, synchronous);
