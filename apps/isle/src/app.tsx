@@ -7,11 +7,11 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { CreateProfile } from "@/features/create-profile";
 import { ErrorFallback } from "@/features/error-fallback";
+import { NotConnected } from "@/features/not-connected";
 import { NotVerified } from "@/features/not-verified";
 import { PendingVerification } from "@/features/pending-verification";
 import { Profile } from "@/features/profile";
 import { useIsleStore } from "@/store";
-import { NotConnected } from "./features/not-connected";
 
 function Layout({ children }: PropsWithChildren) {
   return (
