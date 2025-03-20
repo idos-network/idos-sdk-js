@@ -17,7 +17,7 @@ describe("buildVerifiableCredentials", () => {
         id: "did:example:1234#z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
         firstName: "John",
         familyName: "Lenon",
-        govermentIdType: "SSN",
+        governmentIdType: "SSN",
         governmentId: "123-45-6789",
         dateOfBirth: new Date("1980-01-01"),
         placeOfBirth: "New York, NY",
