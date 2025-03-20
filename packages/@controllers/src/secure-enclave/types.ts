@@ -48,10 +48,6 @@ export interface EnclaveProvider {
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
   discoverUserEncryptionPublicKey(userId: string): Promise<DiscoverUserEncryptionPublicKeyResponse>;
-  filterCredentialsByCountries(
-    credentials: Record<string, string>[],
-    countries: string[],
-  ): Promise<string[]>;
 
   filterCredentials(
     credentials: Record<string, string>[],

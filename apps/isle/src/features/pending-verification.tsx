@@ -1,7 +1,8 @@
-import { Icon } from "@/components/icons/icon";
-import { Badge } from "@/components/ui/badge";
 import { Center, Circle, Heading, VStack } from "@chakra-ui/react";
 import { CiClock2 } from "react-icons/ci";
+
+import { Icon } from "@/components/icons/icon";
+import { Badge } from "@/components/ui/badge";
 
 export function PendingVerification() {
   return (

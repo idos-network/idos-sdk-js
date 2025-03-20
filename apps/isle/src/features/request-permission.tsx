@@ -1,8 +1,9 @@
+import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+
 import { ConsumerInfo } from "@/components/consumer-info";
 import { Disclaimer } from "@/components/disclaimer";
 import { IdentityIcon } from "@/components/icons/identity";
 import { KYCInfo } from "@/components/kyc-info";
-import { Box, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 
 function RequestedPermissions({ values }: { values: string[] }) {
   return (

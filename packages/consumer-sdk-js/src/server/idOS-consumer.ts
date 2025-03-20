@@ -97,11 +97,6 @@ export class idOSConsumer {
     );
   }
 
-  async getLocalAccessGrantsFromUserByAddress() {
-    // @todo: update Alexandr to implement this
-    throw new Error("Not implemented yet");
-  }
-
   async getGrantsCount(): Promise<number> {
     return getGrantsCount(this.kwilClient);
   }

@@ -13,8 +13,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "idOS Consumer and Issuer Demo",
-  description: "Showcase app of the idOS Consumer and Issuer SDK's",
+  title: "NeoBank",
+  description: "Demo application showcasing idOS Consumer and Issuer SDK's",
 };
 
 export default async function RootLayout(props: { children: JSX.Element }) {

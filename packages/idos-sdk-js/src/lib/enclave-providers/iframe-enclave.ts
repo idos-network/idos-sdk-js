@@ -97,12 +97,6 @@ export class IframeEnclave implements EnclaveProvider {
     }) as Promise<Uint8Array>;
   }
 
-  async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
-    return this.requestToEnclave({
-      filterCredentialsByCountries: { credentials, countries },
-    }) as Promise<string[]>;
-  }
-
   filterCredentials(
     credentials: Record<string, string>[],
     privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },

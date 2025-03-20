@@ -23,14 +23,6 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("Method not implemented.");
   }
 
-  filterCredentialsByCountries(
-    credentials: Record<string, string>[],
-    countries: string[],
-  ): Promise<string[]> {
-    console.log(credentials, countries);
-
-    throw new Error("Method not implemented.");
-  }
   async load(): Promise<StoredData> {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
     // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
