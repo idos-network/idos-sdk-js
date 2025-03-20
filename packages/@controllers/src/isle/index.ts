@@ -248,6 +248,10 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const startRequestDelegatedWriteGrant = (options: RequestPermissionOptions) => {
+    send("update", {
+      status: "not-verified",
+    });
+
     send("update-create-dwg-status", {
       status: "start-verification",
       meta: {
@@ -278,6 +282,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
       not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
     };
+
+    kwilClient =
+      kwilClient ||
+      (await createWebKwilClient({
+        // @todo: make the domain environment aware.
+        nodeUrl: "https://nodes.playground.idos.network",
+      }));
 
     invariant(kwilClient, "No `KwilActionClient` found");
     const message: string = await requestDWGSignature(kwilClient, delegatedWriteGrant);

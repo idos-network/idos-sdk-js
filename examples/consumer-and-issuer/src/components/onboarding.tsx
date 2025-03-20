@@ -27,12 +27,21 @@ import { type Step, Stepper } from "./stepper";
 const useFetchIDVStatus = (userId: string | undefined) => {
   return useQuery({
     queryKey: ["idv-status", userId],
-    queryFn: userId
-      ? (): Promise<{ status: string }> =>
-          fetch(`/api/idv-status/${userId}`).then((res) => res.json())
-      : skipToken,
+    queryFn: (): Promise<{ status: string }> =>
+      fetch(`/api/idv-status/${userId}`).then((res) => res.json()),
     select: (data) => data.status,
-    refetchInterval: 5_000,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      // Keep polling if status is pending
+      if (status === "pending") return 5_000;
+      // Stop polling if status is approved or rejected
+      if (status === "approved" || status === "rejected") return false;
+      // Default polling interval
+      return 5_000;
+    },
+    enabled: !!userId,
+    staleTime: 0, // Consider data stale immediately
+    gcTime: 0, // Don't cache the results
   });
 };
 
@@ -140,10 +149,13 @@ export function Onboarding() {
 
   const handleCredentialIssuance = useCallback(async () => {
     const [error] = await goTry(async () => {
+      // Get fresh data when the handler is called
+      const { data: freshUserData } = await refetchUserData();
+
       invariant(signer, "Signer is not initialized");
-      invariant(userData?.hasProfile, "IDOS Profile not found");
-      invariant(userData?.idvUserId, "IDV User ID not found");
-      invariant(userData?.idOSProfile, "IDOS User not found");
+      invariant(freshUserData?.hasProfile, "IDOS Profile not found");
+      invariant(freshUserData?.idvUserId, "IDV User ID not found");
+      invariant(freshUserData?.idOSProfile, "IDOS User not found");
 
       const response = await isle?.requestDelegatedWriteGrant({
         consumer: {
@@ -168,8 +180,8 @@ export function Onboarding() {
         const { signature, writeGrant } = response;
 
         await createCredential(
-          userData.idvUserId,
-          userData.idOSProfile.recipient_encryption_public_key,
+          freshUserData.idvUserId,
+          freshUserData.idOSProfile.recipient_encryption_public_key,
           writeGrant.owner_wallet_identifier,
           writeGrant.grantee_wallet_identifier,
           writeGrant.issuer_public_key,
@@ -187,7 +199,7 @@ export function Onboarding() {
     if (error) {
       console.error("Error in request-dwg handler:", error);
     }
-  }, [isle, userData, signer]);
+  }, [isle, refetchUserData, signer]);
 
   useEffect(() => {
     if (!isle) return;
@@ -276,11 +288,15 @@ export function Onboarding() {
 
     isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
       if (data.status === "not-verified") {
-        return;
+        if (idvStatus === "pending") {
+          setStatus("pending-verification");
+          isle.send("update", {
+            status: "pending-verification",
+          });
+        }
       }
 
       setStatus(String(data.status));
-
       isle.toggleAnimation({
         expanded: true,
       });
@@ -296,12 +312,26 @@ export function Onboarding() {
       isle.on("request-dwg", handleCredentialIssuance);
       hasRegisteredDWGHandler.current = true;
     }
-  }, [isle, handleCredentialIssuance, kycDisclosure, address, signMessageAsync, userData]);
+  }, [
+    isle,
+    handleCredentialIssuance,
+    kycDisclosure,
+    address,
+    signMessageAsync,
+    userData,
+    idvStatus,
+  ]);
 
   useEffect(() => {
-    if (idvStatus === "approved" && isle) {
-      setStatus("request-permissions");
+    if (!isle) return;
 
+    if (idvStatus === "pending" && status === "pending-verification") return;
+    if (idvStatus === "rejected" && status === "not-verified") return;
+    if (idvStatus === "approved" && status === "request-permissions") return;
+
+    if (idvStatus === "approved" && status !== "request-permissions") {
+      console.log("IDV verification approved, starting delegated write grant...");
+      setStatus("request-permissions");
       isle.startRequestDelegatedWriteGrant({
         consumer: {
           consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
@@ -320,8 +350,23 @@ export function Onboarding() {
           "Liveness check (No pictures)",
         ],
       });
+    } else if (idvStatus === "rejected") {
+      console.log("IDV verification rejected");
+      setStatus("not-verified");
+      isle.send("update", {
+        status: "error",
+      });
+    } else if (idvStatus === "pending") {
+      console.log("IDV verification pending");
+      setStatus("pending-verification");
+      // Don't send update here since we want to keep the UI state
     }
-  }, [idvStatus, isle]);
+  }, [idvStatus, isle, status]);
+
+  // Add logging for idvStatus changes
+  useEffect(() => {
+    console.log("IDV Status changed:", idvStatus);
+  }, [idvStatus]);
 
   const requestPermission = () => {
     invariant(isle, "`idOS Isle` is not initialized");
@@ -379,23 +424,22 @@ export function Onboarding() {
           userId: freshUserData.idOSProfile.id,
         });
 
-        kycDisclosure.onClose();
+        // Refetch user data to get the new idvUserId
+        await refetchUserData();
 
-        isle?.send("update", {
-          status: "pending-verification",
-        });
+        kycDisclosure.onClose();
+        setStatus("pending-verification");
       });
 
       if (error) {
         console.error("Error in KYC journey success handler:", error);
-        // Show more specific error messages based on the error type
         if (error instanceof Error) {
           console.error("Error details:", error.message);
         }
         kycDisclosure.onClose();
       }
     },
-    [refetchUserData, signer, createIDVAttribute, kycDisclosure, isle],
+    [refetchUserData, signer, createIDVAttribute, kycDisclosure],
   );
 
   const handleKYCJourneyError = useCallback(
