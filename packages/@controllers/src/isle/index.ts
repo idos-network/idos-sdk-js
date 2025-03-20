@@ -144,6 +144,8 @@ interface idOSIsleController {
   getUserProfile: () => Promise<idOSUser>;
   /** Toggle ISLE animation (expand/collapse) */
   toggleAnimation: ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => void;
+  /** Complete the verification process */
+  completeVerification: () => void;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -519,6 +521,15 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     };
   };
 
+  const completeVerification = async () => {
+    const { permissions } = await getPermissions();
+
+    send("update", {
+      status: "verified",
+      accessGrants: permissions,
+    });
+  };
+
   /**
    * View credential details for the given `id`
    */
@@ -788,5 +799,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     viewCredentialDetails,
     getUserProfile,
     toggleAnimation,
+    completeVerification,
   };
 };
