@@ -61,20 +61,16 @@ export class idOSConsumerSDK {
     return this.consumer.getGrants(page, size);
   }
 
+  async getGrantsCount(): Promise<number> {
+    return this.consumer.getGrantsCount();
+  }
+
   async getSharedCredential(dataId: string): Promise<idOSCredential[]> {
     return this.consumer.getSharedCredentialFromIDOS(dataId);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
     return this.consumer.getSharedCredentialContentDecrypted(dataId);
-  }
-
-  async getLocalAccessGrantsFromUserByAddress() {
-    return this.consumer.getLocalAccessGrantsFromUserByAddress();
-  }
-
-  async getGrantsCount(): Promise<number> {
-    return this.consumer.getGrantsCount();
   }
 
   async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
