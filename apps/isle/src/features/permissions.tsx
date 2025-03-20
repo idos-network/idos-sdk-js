@@ -11,6 +11,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/core";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LuCheck, LuChevronRight } from "react-icons/lu";
 
@@ -19,7 +20,7 @@ import { DeleteIcon } from "@/components/icons/delete";
 import { ViewIcon } from "@/components/icons/view";
 import { BreadcrumbLink, BreadcrumbRoot, Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
-import type { idOSCredential } from "@idos-network/core";
+
 import { RequestPermission } from "./request-permission";
 
 interface GrantRevocationProps {
