@@ -151,3 +151,27 @@ export async function createCredential(
     },
   );
 }
+
+/**
+ * Get the user id from the token
+ */
+export async function getUserIdFromToken(token: string, idOSUserId: string) {
+  const response = await fetch(
+    `https://kraken.staging.sandbox.fractal.id/public/kyc/token/${token}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+      },
+    },
+  );
+  const json = await response.json();
+
+  return {
+    idvUserId: json.krakenUserId,
+    signature: nacl.sign.detached(
+      toBytes(`${json.userId}${idOSUserId}`),
+      base64Decode(process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? ""),
+    ),
+  };
+}
