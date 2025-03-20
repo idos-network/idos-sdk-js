@@ -28,8 +28,14 @@ describe("buildVerifiableCredentials", () => {
         idDocumentFrontFile: Buffer.from("Front of ID document"),
         idDocumentBackFile: Buffer.from("Back of ID document"),
         selfieFile: Buffer.from("Selfie"),
-        residentialAddress: "123 Main St",
-        residentialAddressCountry: "US",
+        residentialAddress: {
+          street: "Main St",
+          houseNumber: "123",
+          additionalAddressInfo: "Apt 1",
+          city: "New York",
+          postalCode: "10001",
+          country: "US",
+        },
         residentialAddressProofCategory: "Utility Bill",
         residentialAddressProofDateOfIssue: new Date("2022-01-01"),
         residentialAddressProofFile: Buffer.from("Proof of address"),
@@ -41,6 +47,13 @@ describe("buildVerifiableCredentials", () => {
           "zrv4XwF1S61SJuUjQpaAPCoM7QJiw8J3EDFPQ4AGN5D3r3iaR8mcSeJZoYjSWe6PqgSfwtC3KPvAvHQ7QxGeNp9rZ2m",
       },
     );
+
+    expect(data.credentialSubject.residentialAddressStreet).toBe("Main St");
+    expect(data.credentialSubject.residentialAddressHouseNumber).toBe("123");
+    expect(data.credentialSubject.residentialAddressAdditionalAddressInfo).toBe("Apt 1");
+    expect(data.credentialSubject.residentialAddressCity).toBe("New York");
+    expect(data.credentialSubject.residentialAddressPostalCode).toBe("10001");
+    expect(data.credentialSubject.residentialAddressCountry).toBe("US");
 
     expect(data.proof.proofPurpose).toBe("assertionMethod");
     expect(data.proof.type).toBe("Ed25519Signature2020");
