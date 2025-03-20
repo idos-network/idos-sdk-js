@@ -1,8 +1,5 @@
 "use client";
 
-import { createCredential, createIDOSUserProfile } from "@/actions";
-import { useIsle } from "@/isle.provider";
-import { useEthersSigner } from "@/wagmi.config";
 import { Button } from "@heroui/react";
 import type { DelegatedWriteGrantSignatureRequest, IsleStatus } from "@idos-network/core";
 import {
@@ -16,16 +13,14 @@ import { useEffect, useState, useTransition } from "react";
 import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
+
+import { createCredential, createIDOSUserProfile } from "@/actions";
+import { useIsle } from "@/isle.provider";
+import { useEthersSigner } from "@/wagmi.config";
 import { Card } from "./card";
 import { type Step, Stepper } from "./stepper";
 
 const steps: Step[] = [
-  // {
-  //   id: "welcome",
-  //   icon: <PiHandWavingBold className="h-4 w-4" />,
-  //   title: "WELCOME TO NEO-BANK",
-  //   description: "In order to sign up for Neo-bank you need to have a matching KYC/AML credential in idOS. user can either create a new profile or link an existing one."
-  // },
   {
     icon: <User className="h-4 w-4" />,
     title: "Profile Creation",
@@ -38,11 +33,6 @@ const steps: Step[] = [
     description:
       "User needs to grant permissions to Neobank to write a credential to their idos profile",
   },
-  // {
-  //   icon: <CheckCircle className="h-4 w-4" />,
-  //   title: "Verification",
-  //   description: "User needs to verify their identity by providing a valid KYC/AML credential",
-  // },
   {
     icon: <FaSpinner className="h-4 w-4" />,
     title: "Pending Verification",
@@ -268,9 +258,8 @@ export function Onboarding() {
   const statusIndexSrc = {
     "no-profile": 0,
     "not-verified": 1,
-    // TODO: handle verification status
-    "pending-verification": 3,
-    verified: 4,
+    "pending-verification": 2,
+    verified: 3,
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
