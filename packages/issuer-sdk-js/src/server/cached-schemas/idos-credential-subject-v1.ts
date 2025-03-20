@@ -8,7 +8,7 @@ export default {
     familyName: "xsd:string",
     maidenName: "xsd:string",
     governmentId: "xsd:string",
-    govermentIdType: "xsd:string",
+    governmentIdType: "xsd:string",
     dateOfBirth: "aux:date",
     placeOfBirth: "xsd:string",
     idDocumentCountry: "xsd:string",
