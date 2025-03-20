@@ -13,7 +13,7 @@ import {
 } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/core";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LuCheck, LuChevronRight } from "react-icons/lu";
+import { LuCheck, LuChevronRight, LuShare } from "react-icons/lu";
 
 import { AuthorizedIcon } from "@/components/icons/authorized";
 import { DeleteIcon } from "@/components/icons/delete";
@@ -607,6 +607,22 @@ export function Permissions() {
                         }}
                       >
                         <DeleteIcon w="5" h="5" color="neutral.400" />
+                      </IconButton>
+                      <IconButton
+                        aria-label="Share"
+                        variant="ghost"
+                        size="xs"
+                        colorPalette="green"
+                        rounded="full"
+                        onClick={() => {
+                          node?.post("share-credential", {
+                            id: grant.originalCredentialId,
+                          });
+                        }}
+                      >
+                        <Icon w={5} h={5} color="neutral.400">
+                          <LuShare />
+                        </Icon>
                       </IconButton>
                     </HStack>
                   </HStack>

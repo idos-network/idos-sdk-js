@@ -1,4 +1,5 @@
 "use server";
+import { getConsumerConfig } from "@/consumer.config";
 import { getIssuerConfig } from "@/issuer.config";
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
 import {
@@ -216,3 +217,8 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     ),
   };
 }
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await getConsumerConfig();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
