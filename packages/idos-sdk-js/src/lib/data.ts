@@ -89,22 +89,6 @@ export class Data {
     )) as any;
   }
 
-  async listCredentialsFilteredByCountries(countries: string[]) {
-    const credentials = await this.list("credentials");
-
-    const credentialsWithContent = (
-      await Promise.all(
-        credentials.map(async (credential) => {
-          return await this.get("credentials", credential.id as string, false);
-        }),
-      )
-    ).filter((o) => o !== null) as Record<string, string>[];
-
-    if (!credentialsWithContent.length) return [];
-
-    return this.enclave.filterCredentialsByCountries(credentialsWithContent, countries);
-  }
-
   async createMultiple<T extends AnyRecord>(
     tableName: string,
     records: T[],

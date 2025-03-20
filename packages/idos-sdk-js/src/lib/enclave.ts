@@ -83,11 +83,6 @@ export class Enclave {
     this.provider.updateStore(key, value);
   }
 
-  async filterCredentialsByCountries(credentials: Record<string, string>[], countries: string[]) {
-    if (!this.userEncryptionPublicKey) await this.ready();
-    return await this.provider.filterCredentialsByCountries(credentials, countries);
-  }
-
   async filterCredentials(
     credentials: Record<string, string>[],
     privateFieldFilters: {
