@@ -1,8 +1,4 @@
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
-import { Wallet } from "ethers";
-import { JsonRpcProvider } from "ethers";
-import { KeyPair } from "near-api-js";
-
 import { idOSConsumer } from "./idOS-consumer.ts";
 
 export class idOSConsumerSDK {
@@ -25,6 +21,7 @@ export class idOSConsumerSDK {
 
     switch (chainType) {
       case "EVM": {
+        const { Wallet, JsonRpcProvider } = await import("ethers");
         const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
 
         consumer = await idOSConsumer.init({
@@ -37,6 +34,7 @@ export class idOSConsumerSDK {
         return new idOSConsumerSDK(consumer);
       }
       case "NEAR": {
+        const { KeyPair } = await import("near-api-js");
         const signer = KeyPair.fromString(authPrivateKey);
         consumer = await idOSConsumer.init({
           consumerSigner: signer,
