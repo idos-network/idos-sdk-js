@@ -3,10 +3,10 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import * as vc from "@digitalbazaar/vc";
 import * as base85 from "base85";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
-import ed25519Signature2020V1 from "./cached-schemas/ed25519-signature-2020-v1";
-import idosCredentialSubjectV1 from "./cached-schemas/idos-credential-subject-v1";
-import idosCredentialsV1 from "./cached-schemas/idos-credentials-v1";
-import v1 from "./cached-schemas/v1";
+import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
+import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
+import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
+import v1 from "../../assets/v1.json";
 
 interface CredentialFields {
   id: string;
@@ -132,18 +132,19 @@ export interface CredentialsIssuerConfig {
   publicKeyMultibase: string;
 }
 
+const CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
+const CONTEXT_IDOS_CREDENTIALS_V1 =
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld";
+const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld";
+const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
+
 const buildDocumentLoader = () => {
   const loader = new JsonLdDocumentLoader();
-  loader.addStatic("https://www.w3.org/2018/credentials/v1", v1);
-  loader.addStatic(
-    "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld",
-    idosCredentialsV1,
-  );
-  loader.addStatic(
-    "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld",
-    idosCredentialSubjectV1,
-  );
-  loader.addStatic("https://w3id.org/security/suites/ed25519-2020/v1", ed25519Signature2020V1);
+  loader.addStatic(CONTEXT_V1, v1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1, idosCredentialsV1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT, idosCredentialSubjectV1);
+  loader.addStatic(CONTEXT_ED25519_SIGNATURE_2020_V1, ed25519Signature2020V1);
 
   return loader.build();
 };
@@ -155,17 +156,12 @@ export const buildCredentials = async (
 ) => {
   // Create credentials container
   const credential = {
-    "@context": [
-      "https://www.w3.org/2018/credentials/v1",
-      "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld",
-      "https://w3id.org/security/suites/ed25519-2020/v1",
-    ],
+    "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS_V1, CONTEXT_ED25519_SIGNATURE_2020_V1],
     type: ["VerifiableCredential"],
     issuer: issuer.name,
     ...convertValues(fields),
     credentialSubject: {
-      "@context":
-        "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld",
+      "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
       ...convertValues(subject),
     },
   };
