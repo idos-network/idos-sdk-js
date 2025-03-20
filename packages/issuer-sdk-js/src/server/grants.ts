@@ -4,7 +4,6 @@ import {
   decryptContent,
   hexEncodeSha256Hash,
 } from "@idos-network/core";
-import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
 
@@ -29,18 +28,14 @@ export async function createAccessGrantFromDAG(
     throw new Error("idOSCredential not found");
   }
 
-  const [credential] = await getSharedCredential(issuerConfig, credentialId);
+  const [credential] = await getSharedCredential(issuerConfig, credentialId); //c1.1
 
   if (!credential) {
     throw new Error("`idOSCredential` not found");
   }
 
-  const message = base64Decode(credential.content);
-  const nonce = message.slice(0, nacl.box.nonceLength);
-
   const plaintextContent = decryptContent(
     base64Decode(credential.content),
-    nonce,
     base64Decode(credential.encryptor_public_key),
     issuerConfig.encryptionSecretKey,
   );

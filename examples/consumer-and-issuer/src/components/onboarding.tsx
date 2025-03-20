@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Spinner } from "@heroui/react";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core";
+import { type DelegatedWriteGrantSignatureRequest, requestDAGSignature } from "@idos-network/core";
 import type { IsleStatus } from "@idos-network/core";
 import {
   createIssuerConfig,
@@ -16,6 +16,10 @@ import { useAccount, useSignMessage } from "wagmi";
 import { createCredential, createIDOSUserProfile } from "@/actions";
 import { useIsle } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
+import {
+  createCredentialCopy,
+  getCredentialContentSha256Hash,
+} from "@idos-network/consumer-sdk-js/client";
 
 export function Onboarding() {
   const { isle } = useIsle();
@@ -138,6 +142,56 @@ export function Onboarding() {
         });
       }
     });
+
+    isle.on("share-credential", async ({ data }: { data: { id: string } }) => {
+      // const signature = await isle.shareCredential(data.id);
+      const kwilClient = await isle.getKwilClient();
+
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+
+      invariant(kwilClient, "Kwil client not found");
+      // @todo: remove this once we clean previous passporting app (they're using outdated params)
+      invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+      invariant(
+        consumerEncryptionPublicKey,
+        "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+      );
+
+      const enclave = await isle.getEnclave();
+      invariant(enclave, "Enclave not found");
+      const contentHash = await getCredentialContentSha256Hash(
+        { kwilClient, decryptCredentialContent: isle.decryptCredentialContent },
+        data.id,
+      );
+
+      const { id } = await createCredentialCopy(
+        // C1.2
+        { kwilClient },
+        data.id,
+        consumerEncryptionPublicKey,
+        {
+          consumerAddress: consumerSigningPublicKey,
+          lockedUntil: 0,
+          decryptCredentialContent: isle.decryptCredentialContent,
+          encryptCredentialContent: isle.encryptCredentialContent,
+        },
+      );
+
+      const dag = {
+        dag_owner_wallet_identifier: address as string,
+        dag_grantee_wallet_identifier: consumerSigningPublicKey,
+        dag_data_id: id,
+        dag_locked_until: 0,
+        dag_content_hash: contentHash,
+      };
+      const [{ message }] = await requestDAGSignature(kwilClient, dag);
+      const signature = await signMessageAsync({ message });
+      const dagWithSignature = { ...dag, dag_signature: signature };
+
+      // invoke passporting service
+      console.log({ dagWithSignature });
+    });
   }, [address, signMessageAsync, isle]);
 
   useEffect(() => {
@@ -191,7 +245,7 @@ export function Onboarding() {
           });
           const result = await isle.requestDelegatedWriteGrant({
             consumer: {
-              consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+              consumerPublicKey: process.env.NEXT_PUBLIC_CONSUMER_PUBLIC_KEY,
               meta: {
                 url: "https://idos.network",
                 name: "idOS",

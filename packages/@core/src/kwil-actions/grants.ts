@@ -76,7 +76,7 @@ export async function requestDAGSignature(
   kwilClient: KwilActionClient,
   params: idOSDAGSignatureParams,
 ) {
-  return kwilClient.call<string>({
+  return kwilClient.call<{ message: string }[]>({
     name: "dag_message",
     inputs: params,
   });

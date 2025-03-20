@@ -1,12 +1,10 @@
-import { IframeEnclave } from "@idos-network/controllers";
 import {
   createCredentialCopy as _createCredentialCopy,
   getAllCredentials as _getAllCredentials,
   getCredentialById as _getCredentialById,
-  base64Decode,
-  base64Encode,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
+  type idOSCredential,
   utf8Encode,
 } from "@idos-network/core";
 import invariant from "tiny-invariant";
@@ -29,12 +27,19 @@ export async function getCredentialById({ kwilClient }: ConsumerConfig, id: stri
 /**
  * Get the SHA256 hash of the content of an idOSCredential
  */
-export async function getCredentialContentSha256Hash({ kwilClient }: ConsumerConfig, id: string) {
+interface GetCredentialContentSha256HashParams extends Pick<ConsumerConfig, "kwilClient"> {
+  decryptCredentialContent: (credential: idOSCredential) => Promise<string>;
+}
+export async function getCredentialContentSha256Hash(
+  { kwilClient, decryptCredentialContent }: GetCredentialContentSha256HashParams,
+  id: string,
+) {
   const credential = await _getCredentialById(kwilClient, id);
 
   invariant(credential, `"idOSCredential" with id ${id} not found`);
+  const content = await decryptCredentialContent(credential);
 
-  return hexEncodeSha256Hash(utf8Encode(credential.content));
+  return hexEncodeSha256Hash(utf8Encode(content));
 }
 
 /**
@@ -42,33 +47,41 @@ export async function getCredentialContentSha256Hash({ kwilClient }: ConsumerCon
  * This doesn't create an Access Grant and is used only for passporting flows
  */
 export async function createCredentialCopy(
-  { enclaveOptions, kwilClient }: ConsumerConfig,
+  { kwilClient }: Pick<ConsumerConfig, "kwilClient">,
   id: string,
   consumerRecipientEncryptionPublicKey: string,
   consumerInfo: {
     consumerAddress: string;
     lockedUntil: number;
+    decryptCredentialContent?: (credential: idOSCredential) => Promise<string>;
+    encryptCredentialContent?: (
+      content: string,
+      encryptorPublicKey: string,
+    ) => Promise<{
+      content: string;
+      encryptorPublicKey: string;
+    }>;
   },
 ) {
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-  const enclave = new IframeEnclave({ ...enclaveOptions, mode: "existing" });
+  invariant(consumerInfo.decryptCredentialContent, "decryptCredentialContent is required");
+  invariant(consumerInfo.encryptCredentialContent, "encryptCredentialContent is required");
 
-  await enclave.load();
-  await enclave.ready();
+  const decryptedContent = await consumerInfo.decryptCredentialContent(originalCredential);
 
-  const { content, encryptorPublicKey } = await enclave.encrypt(
-    utf8Encode(originalCredential.content),
-    base64Decode(consumerRecipientEncryptionPublicKey),
+  const { content, encryptorPublicKey } = await consumerInfo.encryptCredentialContent(
+    decryptedContent,
+    consumerRecipientEncryptionPublicKey,
   );
 
   const insertableCredential = await buildInsertableIDOSCredential(
     originalCredential.user_id,
     "",
-    base64Encode(content),
+    content,
     consumerRecipientEncryptionPublicKey,
-    base64Encode(encryptorPublicKey),
+    encryptorPublicKey,
     consumerInfo,
   );
 

@@ -41,26 +41,27 @@ export function encryptContent(
  * Decrypts a message using the sender's public key and the recipient's secret key.
  */
 export function decryptContent(
-  message: Uint8Array,
-  nonce: Uint8Array,
+  fullMessage: Uint8Array,
   senderEncryptionPublicKey: Uint8Array,
   recipientEncryptionSecretKey: Uint8Array,
 ) {
+  const nonce = fullMessage.slice(0, nacl.box.nonceLength);
+  const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
   const decrypted = nacl.box.open(
     message,
     nonce,
     senderEncryptionPublicKey,
     recipientEncryptionSecretKey,
   );
-
-  if (decrypted == null) {
+  if (decrypted === null) {
     throw Error(
-      `Couldn't decrypt the provided message. ${JSON.stringify(
+      `Couldn't decrypt. ${JSON.stringify(
         {
+          fullMessage: base64Encode(fullMessage),
           message: base64Encode(message),
           nonce: base64Encode(nonce),
-          senderEncryptionPublicKey: base64Encode(senderEncryptionPublicKey),
-          recipientEncryptionSecretKey: base64Encode(recipientEncryptionSecretKey),
+          senderPublicKey: base64Encode(senderEncryptionPublicKey),
+          localPublicKey: base64Encode(recipientEncryptionSecretKey),
         },
         null,
         2,
