@@ -40,7 +40,7 @@ export type SignerAddress = string;
 
 /**
  * Helper function to create a `KwilSigner` and its associated `SignerAddress`.
- * Useful for creating a `KwilSigner` and its associated `SignerAddress` for the `idOSGrantee` constructor.
+ * Useful for creating a `KwilSigner` and its associated `SignerAddress` for the `idOSConsumer` constructor.
  */
 export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAddress] {
   if (isNaclSignKeyPair(signer)) {

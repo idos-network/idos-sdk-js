@@ -1,4 +1,4 @@
-import type { idOSCredential, idOSGrant } from "../types";
+import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 export interface CreateCredentialParams {
@@ -18,6 +18,16 @@ export interface CreateCredentialParams {
 export async function getSharedCredential(kwilClient: KwilActionClient, id: string) {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credential_shared",
+    inputs: { id },
+  });
+}
+
+/**
+ * Returns the owned idOS Credential for the given `id`.
+ */
+export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
     inputs: { id },
   });
 }
@@ -94,13 +104,16 @@ export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, u
   });
 }
 
+/**
+ * Returns all idOSCredentials
+ */
 export async function getAllCredentials(kwilClient: KwilActionClient) {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials",
   });
 }
 
-export interface CreateCredentialsByDelegatedWriteGrantParams {
+export interface CreateCredentialByDelegatedWriteGrantParams {
   issuer_auth_public_key: string;
   original_encryptor_public_key: string;
   original_credential_id: string;
@@ -127,12 +140,66 @@ export interface CreateCredentialsByDelegatedWriteGrantParams {
 /**
  * Creates a new credential from a delegated write grant.
  */
-export async function createCredentialsByDelegatedWriteGrant(
+export async function createCredentialByDelegatedWriteGrant(
   kwilClient: KwilActionClient,
-  params: CreateCredentialsByDelegatedWriteGrantParams,
+  params: CreateCredentialByDelegatedWriteGrantParams,
 ) {
   return kwilClient.execute({
     name: "create_credentials_by_dwg",
+    inputs: params,
+  });
+}
+
+/**
+ * Removes an idOSCredential by the given `id`.
+ */
+export async function removeCredential(kwilClient: KwilActionClient, id: string) {
+  return kwilClient.execute({
+    name: "remove_credential",
+    inputs: { id },
+  });
+}
+
+/**
+ * Returns an idOSCredential by the given `id`.
+ */
+export async function getCredentialById(kwilClient: KwilActionClient, id: string) {
+  const response = await kwilClient.call<idOSCredential[]>({
+    name: "get_credential_owned",
+    inputs: { id },
+  });
+
+  return response.find((r) => r.id === id);
+}
+
+/**
+ * Shares an idOSCredential to the given `userId`.
+ */
+export async function shareCredential(
+  kwilClient: KwilActionClient,
+  credential: Omit<idOSCredential, "original_id"> & { original_credential_id: string },
+) {
+  return kwilClient.execute({
+    name: "share_credential",
+    inputs: credential,
+  });
+}
+
+export type CreateCredentialCopyParams = Omit<idOSCredential, "original_id"> &
+  InsertableIDOSCredential & {
+    original_credential_id: string;
+  };
+
+/**
+ * Creates a new idOSCredential as a copy of the given `originalCredentialId` without creating an Access Grant
+ * Used only for passporting flows
+ */
+export async function createCredentialCopy(
+  kwilClient: KwilActionClient,
+  params: CreateCredentialCopyParams,
+) {
+  return kwilClient.execute({
+    name: "create_credential_copy",
     inputs: params,
   });
 }

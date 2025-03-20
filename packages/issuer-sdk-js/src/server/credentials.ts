@@ -1,7 +1,7 @@
 import {
-  type CreateCredentialsByDelegatedWriteGrantParams,
+  type CreateCredentialByDelegatedWriteGrantParams,
   createCredentialAsInserter as _createCredentialAsInserter,
-  createCredentialsByDelegatedWriteGrant as _createCredentialsByDelegatedWriteGrant,
+  createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
   editCredentialAsIssuer as _editCredentialAsIssuer,
   getCredentialIdByContentHash as _getCredentialIdByContentHash,
   getSharedCredential as _getSharedCredential,
@@ -41,20 +41,31 @@ type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   public_notes_signature: string;
   broader_signature: string;
 };
-const buildInsertableIDOSCredential = (
+
+type BuildInsertableIDOSCredentialArgs = {
+  userId: string;
+  publicNotes: string;
+  plaintextContent: Uint8Array;
+  recipientEncryptionPublicKey: Uint8Array;
+};
+
+function buildInsertableIDOSCredential(
+  issuerConfig: IssuerConfig,
+  args: BuildInsertableIDOSCredentialArgs,
+): InsertableIDOSCredential;
+function buildInsertableIDOSCredential(
+  issuerConfig: IssuerConfig,
+  args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
+): Omit<InsertableIDOSCredential, "user_id">;
+function buildInsertableIDOSCredential(
   issuerConfig: IssuerConfig,
   {
     userId,
     publicNotes,
     plaintextContent,
     recipientEncryptionPublicKey,
-  }: {
-    userId: string;
-    publicNotes: string;
-    plaintextContent: Uint8Array;
-    recipientEncryptionPublicKey: Uint8Array;
-  },
-): InsertableIDOSCredential => {
+  }: Omit<BuildInsertableIDOSCredentialArgs, "userId"> & { userId?: string },
+): InsertableIDOSCredential | Omit<InsertableIDOSCredential, "user_id"> {
   const ephemeralKeyPair = nacl.box.keyPair();
   const content = encryptContent(
     plaintextContent,
@@ -82,9 +93,9 @@ const buildInsertableIDOSCredential = (
     issuer_auth_public_key: hexEncode(issuerConfig.signingKeyPair.publicKey, true),
     encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
   };
-};
+}
 
-interface BaseCredentialParams {
+export interface BaseCredentialParams {
   id?: string;
   userId: string;
   publicNotes: string;
@@ -107,10 +118,12 @@ export async function createCredentialAsInserter(
   };
 }
 
-interface DelegatedWriteGrantParams {
+export type DelegatedWriteGrantBaseParams = Omit<BaseCredentialParams, "userId">;
+
+export interface DelegatedWriteGrantParams {
   id: string;
   ownerWalletIdentifier: string;
-  granteeWalletIdentifier: string;
+  consumerWalletIdentifier: string;
   issuerPublicKey: string;
   accessGrantTimelock: string;
   notUsableBefore: string;
@@ -118,11 +131,14 @@ interface DelegatedWriteGrantParams {
   signature: string;
 }
 
-export async function createCredentialsByDelegatedWriteGrant(
+export async function createCredentialByDelegatedWriteGrant(
   issuerConfig: IssuerConfig,
-  credentialParams: BaseCredentialParams,
+  credentialParams: DelegatedWriteGrantBaseParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
-): Promise<{ originalCredential: idOSCredential; copyCredential: idOSCredential }> {
+): Promise<{
+  originalCredential: Omit<idOSCredential, "user_id">;
+  copyCredential: Omit<idOSCredential, "user_id">;
+}> {
   const { kwilClient, encryptionSecretKey } = issuerConfig;
   // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
   const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
@@ -132,13 +148,12 @@ export async function createCredentialsByDelegatedWriteGrant(
   const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
   const copyCredential = ensureEntityId(
     buildInsertableIDOSCredential(issuerConfig, {
-      userId: credentialParams.userId,
       publicNotes: "",
       plaintextContent: credentialParams.plaintextContent,
       recipientEncryptionPublicKey: issuerEncPublicKey,
     }),
   );
-  const payload: CreateCredentialsByDelegatedWriteGrantParams = {
+  const payload: CreateCredentialByDelegatedWriteGrantParams = {
     issuer_auth_public_key: originalCredential.issuer_auth_public_key,
     original_encryptor_public_key: originalCredential.encryptor_public_key,
     original_credential_id: originalCredential.id,
@@ -153,7 +168,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     copy_broader_signature: copyCredential.broader_signature,
     content_hash: contentHash,
     dwg_owner: delegatedWriteGrant.ownerWalletIdentifier,
-    dwg_grantee: delegatedWriteGrant.granteeWalletIdentifier,
+    dwg_grantee: delegatedWriteGrant.consumerWalletIdentifier,
     dwg_issuer_public_key: delegatedWriteGrant.issuerPublicKey,
     dwg_id: delegatedWriteGrant.id,
     dwg_access_grant_timelock: delegatedWriteGrant.accessGrantTimelock,
@@ -162,7 +177,7 @@ export async function createCredentialsByDelegatedWriteGrant(
     dwg_signature: delegatedWriteGrant.signature,
   };
 
-  await _createCredentialsByDelegatedWriteGrant(kwilClient, payload);
+  await _createCredentialByDelegatedWriteGrant(kwilClient, payload);
 
   return { originalCredential, copyCredential };
 }

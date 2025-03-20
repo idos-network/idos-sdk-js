@@ -8,7 +8,6 @@ import {
 
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
-import type { BackupPasswordInfo } from "./types";
 
 export class Enclave {
   userEncryptionPublicKey?: Uint8Array;
@@ -27,12 +26,6 @@ export class Enclave {
       this.auth.currentUser;
 
     if (!userId) throw new Error("Can't operate on a user that has no profile.");
-
-    const litAttrs = await this.auth.kwilWrapper.getLitAttrs();
-    const userWallets = await this.auth.kwilWrapper.getEvmUserWallets();
-
-    await this.provider.updateStore("litAttrs", litAttrs);
-    await this.provider.updateStore("new-user-wallets", userWallets);
 
     if (this.userEncryptionPublicKey) return this.userEncryptionPublicKey;
 
@@ -106,10 +99,10 @@ export class Enclave {
     return await this.provider.filterCredentials(credentials, privateFieldFilters);
   }
 
-  async backupPasswordOrSecret(callbackFn: (response: BackupPasswordInfo) => Promise<void>) {
+  async backupPasswordOrSecret() {
     await this.ready();
 
-    return this.provider.backupPasswordOrSecret(callbackFn);
+    return this.provider.backupPasswordOrSecret();
   }
 
   async discoverUserEncryptionPublicKey(userId: string) {

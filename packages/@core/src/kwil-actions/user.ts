@@ -1,3 +1,4 @@
+import type { idOSUser } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 /**
@@ -50,4 +51,14 @@ export async function requestDWGSignature(
   });
 
   return result[0].message ?? "";
+}
+
+/**
+ * Get the profile of the current user.
+ */
+export async function getUserProfile(kwilClient: KwilActionClient) {
+  const [user] = await kwilClient.call<[idOSUser]>({
+    name: "get_user",
+  });
+  return user;
 }

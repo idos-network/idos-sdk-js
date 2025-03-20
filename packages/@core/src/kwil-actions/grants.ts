@@ -51,3 +51,33 @@ export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string
     inputs: { id },
   });
 }
+
+/**
+ * Returns all the Access Grants that have been granted by the given `signer`.
+ */
+export async function getAccessGrantsOwned(kwilClient: KwilActionClient) {
+  return kwilClient.call<idOSGrant[]>({
+    name: "get_access_grants_owned",
+  });
+}
+
+export interface idOSDAGSignatureParams {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+}
+
+/**
+ * Request a signature for a Delegated Access Grant
+ */
+export async function requestDAGSignature(
+  kwilClient: KwilActionClient,
+  params: idOSDAGSignatureParams,
+) {
+  return kwilClient.call<string>({
+    name: "dag_message",
+    inputs: params,
+  });
+}

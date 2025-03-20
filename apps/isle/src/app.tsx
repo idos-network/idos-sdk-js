@@ -15,7 +15,7 @@ import { useIsleStore } from "@/store";
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <chakra.div display="grid" placeContent="center" minH="100vh" mx="auto">
+    <chakra.div display="grid">
       <chakra.div
         display="grid"
         gridTemplateRows="auto 1fr auto"
@@ -23,14 +23,9 @@ function Layout({ children }: PropsWithChildren) {
         p="5"
         rounded="38px"
         bg={{
-          _dark: "gray.950",
+          _dark: "neutral.950",
           _light: "white",
         }}
-        border={{
-          _dark: "1px solid {colors.gray.800}",
-          _light: "1px solid {colors.gray.50}",
-        }}
-        shadow="2xl"
         width="366px"
         height="full"
       >
@@ -56,7 +51,6 @@ export function App() {
   const { setTheme } = useTheme();
   const initializeNode = useIsleStore((state) => state.initializeNode);
   const theme = useIsleStore((state) => state.theme);
-  const connectionStatus = useIsleStore((state) => state.connectionStatus);
   const status = useIsleStore((state) => state.status);
 
   useEffect(() => {
@@ -70,7 +64,7 @@ export function App() {
     }
   }, [theme, setTheme]);
 
-  if (connectionStatus === "initializing" || status === "initializing") {
+  if (status === "initializing") {
     return (
       <Layout>
         <WIP />
@@ -80,25 +74,20 @@ export function App() {
 
   return (
     <Layout>
-      <Show when={connectionStatus === "disconnected"}>
+      <Show when={status === "no-profile"}>
+        <CreateProfile />
+      </Show>
+      <Show when={status === "verified"}>
+        <Profile />
+      </Show>
+      <Show when={status === "pending-verification"}>
+        <PendingVerification />
+      </Show>
+      <Show when={status === "not-verified"}>
+        <NotVerified />
+      </Show>
+      <Show when={status === "not-connected"}>
         <NotConnected />
-      </Show>
-      <Show when={connectionStatus === "connecting"}>
-        <WIP />
-      </Show>
-      <Show when={connectionStatus === "connected"}>
-        <Show when={status === "no-profile"}>
-          <CreateProfile />
-        </Show>
-        <Show when={status === "verified"}>
-          <Profile />
-        </Show>
-        <Show when={status === "pending-verification"}>
-          <PendingVerification />
-        </Show>
-        <Show when={status === "not-verified"}>
-          <NotVerified />
-        </Show>
       </Show>
       <Show when={status === "error"}>
         <ErrorFallback error={new Error("This is a sample error description")} />

@@ -156,7 +156,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   if (!credential) return null;
 
   const [currentToRevoke] = state;
-  const { granteeAddress } = currentToRevoke ?? {};
+  const { consumerAddress } = currentToRevoke ?? {};
 
   const meta = JSON.parse(credential.public_notes);
 
@@ -185,9 +185,9 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           <AlertDialogBody>
             {revokeGrants.isPending ? (
               <>
-                <Text mb={1}>Revoking grant for grantee:</Text>
+                <Text mb={1}>Revoking grant for consumer:</Text>
                 <Code px={2} py={1} rounded="md" fontSize="sm" bg="neutral.800">
-                  {granteeAddress}
+                  {consumerAddress}
                 </Code>
               </>
             ) : deleteCredential.isPending ? (

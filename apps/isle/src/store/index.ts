@@ -2,7 +2,6 @@ import { createNode } from "@sanity/comlink";
 import { create } from "zustand";
 
 import type {
-  IsleConnectionStatus,
   IsleControllerMessage,
   IsleNodeMessage,
   IsleStatus,
@@ -10,14 +9,19 @@ import type {
 } from "@idos-network/core";
 
 interface NodeState {
-  connectionStatus: IsleConnectionStatus;
   address: string | undefined;
   status: IsleStatus;
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   accessGrants: Map<
-    { name: string; logo: string },
-    { id: string; dataId: string; type: string }[]
+    { consumerPublicKey: string; meta: { name: string; logo: string; url: string } },
+    {
+      id: string;
+      dataId: string;
+      type: string;
+      originalCredentialId: string;
+      lockedUntil: number;
+    }[]
   > | null;
   initializeNode: () => () => void;
   connectWallet: () => void;
@@ -25,7 +29,7 @@ interface NodeState {
   createProfile: () => void;
 }
 
-type StateUpdate = Partial<Pick<NodeState, "connectionStatus" | "address" | "theme" | "status">>;
+type StateUpdate = Partial<Pick<NodeState, "address" | "theme" | "status">>;
 
 const createStateUpdate = (update: StateUpdate): StateUpdate => {
   return Object.fromEntries(
@@ -51,12 +55,10 @@ const handleNodeUpdate = (
   node.post("updated", {
     theme: update.theme,
     status: update.status,
-    connectionStatus: update.connectionStatus,
   });
 };
 
 export const useIsleStore = create<NodeState>((set) => ({
-  connectionStatus: "initializing",
   address: undefined,
   status: "initializing",
   accessGrants: null,
@@ -67,10 +69,9 @@ export const useIsleStore = create<NodeState>((set) => ({
       connectTo: "window",
     });
 
-    node.on("initialize", ({ theme }) => {
-      const _theme = theme || (localStorage.getItem("theme") as IsleTheme);
-      set({ theme: _theme });
-      node.post("initialized", { theme: _theme });
+    node.on("initialize", ({ theme: newTheme = "dark" }) => {
+      set({ theme: newTheme });
+      node.post("initialized", { theme: newTheme });
     });
 
     node.on("update", (update) => {

@@ -45,6 +45,7 @@ describe("createIssuerConfig", () => {
       nodeUrl: "http://mock-node-url",
       signingKeyPair,
       encryptionSecretKey,
+      timeout: 30_000,
     };
 
     const result = await createIssuerConfig(params);
@@ -57,6 +58,7 @@ describe("createIssuerConfig", () => {
     expect(NodeKwil).toHaveBeenCalledWith({
       kwilProvider: params.nodeUrl,
       chainId: "mock-chain-id",
+      timeout: 30_000,
     });
 
     // Check if methods were called

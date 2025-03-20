@@ -1,4 +1,4 @@
-import type { idOSUser, idOSUserAttribute, idOSWallet } from "@idos-network/core/types";
+import type { idOSUser } from "@idos-network/core/types";
 import { KwilSigner, Utils as KwilUtils, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, ActionInput } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
@@ -164,7 +164,7 @@ export class KwilWrapper {
         new idOSGrant({
           id: grant.id,
           ownerUserId: grant.ag_owner_user_id,
-          granteeAddress: grant.ag_grantee_wallet_identifier,
+          consumerAddress: grant.ag_grantee_wallet_identifier,
           dataId: grant.data_id,
           lockedUntil: grant.locked_until,
         }),
@@ -173,18 +173,5 @@ export class KwilWrapper {
       grants,
       totalCount,
     };
-  }
-
-  async getLitAttrs() {
-    const attrs = (await this.call("get_attributes", null)) as unknown as idOSUserAttribute[];
-    return attrs.filter((attr) => attr.attribute_key.startsWith("lit-"));
-  }
-
-  async getUserWallets() {
-    return (await this.call("get_wallets", null)) as unknown as idOSWallet[];
-  }
-  async getEvmUserWallets() {
-    const userWallets = (await this.getUserWallets()) as unknown as idOSWallet[];
-    return userWallets.filter((wallet) => wallet.wallet_type === "EVM");
   }
 }

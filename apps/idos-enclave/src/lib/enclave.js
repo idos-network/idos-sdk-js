@@ -20,7 +20,7 @@ export class Enclave {
     const secretKey = storeWithCodec.get("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    this.#listenToRequests();
+    this.listenToRequests();
   }
 
   get isAuthorizedOrigin() {
@@ -40,21 +40,10 @@ export class Enclave {
     }
   }
 
-  handleStorableAttributes(storableAttributes) {
-    if (!Array.isArray(storableAttributes) || !storableAttributes.length) return;
-    // biome-ignore lint/complexity/noForEach: <explanation>
-    storableAttributes.forEach((attr) => {
-      this.store.set(attr.attribute_key, this.safeParse(attr.value));
-    });
-  }
-
   storage(userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
     userId && this.store.set("user-id", userId);
     signerAddress && this.store.set("signer-address", signerAddress);
     signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
-
-    const litAttrs = this.store.get("litAttrs");
-    this.handleStorableAttributes(litAttrs);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -127,7 +116,7 @@ export class Enclave {
           if (storedCredentialId) {
             ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
           } else {
-            ({ password, duration, credentialId } = await this.#openDialog(
+            ({ password, duration, credentialId } = await this.openDialog(
               preferredAuthMethod || "auth",
               {
                 expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
@@ -231,7 +220,7 @@ export class Enclave {
       this.confirmButton.addEventListener("click", async (e) => {
         this.confirmButton.disabled = true;
 
-        const { confirmed } = await this.#openDialog("confirm", {
+        const { confirmed } = await this.openDialog("confirm", {
           message,
           origin: this.parentOrigin,
         });
@@ -306,7 +295,7 @@ export class Enclave {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
-          await this.#openDialog("backupPasswordOrSecret", {
+          await this.openDialog("backupPasswordOrSecret", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           });
           resolve();
@@ -317,7 +306,7 @@ export class Enclave {
     });
   }
 
-  #listenToRequests() {
+  listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (
         event.origin !== this.parentOrigin ||
@@ -342,8 +331,6 @@ export class Enclave {
           countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
-          litAttrs,
-          userWallets,
           key,
           value,
         } = requestData;
@@ -355,14 +342,7 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [
-            userId,
-            signerAddress,
-            signerPublicKey,
-            expectedUserEncryptionPublicKey,
-            litAttrs,
-            userWallets,
-          ],
+          storage: () => [userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           updateStore: () => [key, value],
           filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
@@ -404,7 +384,7 @@ export class Enclave {
     });
   }
 
-  async #openDialog(intent, message) {
+  async openDialog(intent, message) {
     if (!this.userId) throw new Error("Can't open dialog without userId");
     const width = 600;
     const height =

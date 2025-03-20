@@ -1,10 +1,9 @@
 import {
+  Box,
   Center,
   Circle,
-  Flex,
   HStack,
   Heading,
-  Image,
   Spinner,
   Stack,
   Text,
@@ -13,45 +12,14 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
+import { ConsumerInfo } from "@/components/consumer-info";
+import { Disclaimer } from "@/components/disclaimer";
 import { Icon } from "@/components/icons/icon";
 import { IdentityIcon } from "@/components/icons/identity";
 import { KeyIcon } from "@/components/icons/key";
+import { KYCInfo } from "@/components/kyc-info";
 import { Button, Stepper } from "@/components/ui";
 import { useIsleStore } from "@/store";
-
-function Disclaimer({ name }: { name: string }) {
-  return (
-    <Flex
-      gap="2"
-      bg={{ _dark: "neutral.800", _light: "neutral.200" }}
-      p="4"
-      borderRadius="3xl"
-      alignItems="center"
-    >
-      <Text fontSize="xs" color="neutral.500">
-        Make sure you trust{" "}
-        <Text as="span" color="neutral.400" fontWeight="semibold">
-          {name}
-        </Text>
-        , as you may be sharing sensitive data with this site or app.
-      </Text>
-    </Flex>
-  );
-}
-
-function KYCInfo({ values }: { values: string[] }) {
-  return (
-    <Stack gap="2">
-      <Stack gap="1">
-        {values.map((value) => (
-          <Text key={value} fontSize="xs" color="neutral.500">
-            {value}
-          </Text>
-        ))}
-      </Stack>
-    </Stack>
-  );
-}
 
 function RequestedPermissions({ values }: { values: string[] }) {
   return (
@@ -59,7 +27,7 @@ function RequestedPermissions({ values }: { values: string[] }) {
       <VStack gap="2" alignItems="stretch">
         <HStack gap="2.5" alignItems="center">
           <KeyIcon w="4" h="4" />
-          <Text fontSize="sm" fontWeight="medium">
+          <Text fontSize="sm" fontWeight="medium" pl="1">
             Add one credential to your idOS Profile
           </Text>
         </HStack>
@@ -69,28 +37,11 @@ function RequestedPermissions({ values }: { values: string[] }) {
             Grant access to your KYC data like:
           </Text>
         </HStack>
-        <KYCInfo values={values} />
+        <Box pl="7">
+          <KYCInfo values={values} />
+        </Box>
       </VStack>
     </Stack>
-  );
-}
-
-// @todo: Image, title and permissions should be consumed from the store or config
-function Header({ name, logo }: { name: string; logo: string }) {
-  return (
-    <Flex gap="2.5" alignItems="center">
-      <Circle size="30px" bg="white">
-        <Image src={logo} alt={name} width="30px" height="30px" rounded="full" />
-      </Circle>
-      <Text gap="1" alignItems="baseline" display="flex">
-        <Text as="span" fontWeight="medium" fontSize="lg">
-          {name}
-        </Text>
-        <Text as="span" fontSize="sm">
-          is asking for permissions to:
-        </Text>
-      </Text>
-    </Flex>
   );
 }
 
@@ -100,6 +51,8 @@ export function NotVerified() {
     "idle" | "pending" | "success" | "start-verification" | "verify-identity" | "error"
   >("idle");
   const hasRequestedRef = useRef(false);
+  // @todo: this is for demo purposes only. Remove once we have a real KYC journey in place.
+  const [verifying, setVerifying] = useState(false);
 
   const [meta, setMeta] = useState<{
     url: string;
@@ -117,16 +70,18 @@ export function NotVerified() {
     // Set up the event listener
     node.on("update-create-dwg-status", (data) => {
       setStatus(data.status);
+
       if (data.status === "start-verification") {
         setMeta(data.meta);
       }
-      if (status === "success") {
+
+      if (data.status === "success") {
         setTimeout(() => {
           setStatus("verify-identity");
         }, 5_000);
       }
     });
-  }, [node, status]);
+  }, [node]);
 
   if (status === "idle") {
     return (
@@ -171,6 +126,8 @@ export function NotVerified() {
               _light: "aquamarine.700",
             }}
             as={LuCheck}
+            w="6"
+            h="6"
           />
         </Circle>
       </Center>
@@ -214,14 +171,16 @@ export function NotVerified() {
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
           Verify your identity
         </Heading>
-        <Stepper stepsLength={3} index={1} />
+        <Stepper stepsLength={3} index={2} />
         <Text color="neutral.500" fontSize="sm" textAlign="center">
           This application is asking you to verify your identity. You will now be led to a KYC
           journey to complete the process.
         </Text>
         <Button
+          loading={verifying}
           w="full"
           onClick={() => {
+            setVerifying(true);
             node?.post("verify-identity", {});
           }}
         >
@@ -241,10 +200,10 @@ export function NotVerified() {
         To proceed, please confirm in your wallet.
       </Text>
       <Stack gap="4">
-        <Header name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
+        <ConsumerInfo name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         <Stack gap="2">
           <RequestedPermissions values={meta?.KYCPermissions ?? []} />
-          <Disclaimer name={meta?.name ?? ""} />
+          <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
       </Stack>
     </Stack>

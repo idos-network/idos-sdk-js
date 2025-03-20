@@ -1,4 +1,4 @@
-import { type BadgeProps, HStack, VStack, chakra } from "@chakra-ui/react";
+import { type BadgeProps, HStack, Spinner, VStack, chakra } from "@chakra-ui/react";
 import type { IsleStatus } from "@idos-network/core";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";
@@ -11,9 +11,14 @@ import { useIsleStore } from "@/store";
 /**
  * @todo: fine-tune the colors
  */
-function ProfileStatusIcon() {
+export function ProfileStatusIcon() {
   const status = useIsleStore((state) => state.status);
+
   if (status === "initializing") {
+    return <Spinner w="24px" h="24px" />;
+  }
+
+  if (status === "not-connected") {
     return <DisconnectedIcon color="gray" />;
   }
 
@@ -53,6 +58,10 @@ const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
     bg: { _dark: "amber.400/30", _light: "amber.400/60" },
     color: { _dark: "amber.400", _light: "amber.500" },
   },
+  "not-connected": {
+    bg: "neutral.500/30",
+    color: "neutral.500",
+  },
   verified: {
     bg: {
       _dark: "aquamarine.400/30",
@@ -74,7 +83,7 @@ function StatusBadge() {
   const badgeProps = statusBadgeColors[status as keyof typeof statusBadgeColors];
 
   return (
-    <Badge {...badgeProps} size="sm" textTransform="uppercase">
+    <Badge {...badgeProps} size="sm" textTransform="uppercase" className="status-badge">
       {status.split("-").join(" ")}
     </Badge>
   );
@@ -82,7 +91,7 @@ function StatusBadge() {
 export function Header() {
   return (
     <chakra.header
-      display={{ base: "none", sm: "flex" }}
+      display={"flex"}
       id="header"
       alignItems="start"
       justifyContent="space-between"
