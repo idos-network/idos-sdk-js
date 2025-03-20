@@ -1,8 +1,14 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import type { IsleStatus } from "@idos-network/core";
-import { getUserEncryptionPublicKey } from "@idos-network/issuer-sdk-js/client";
+import { type IsleStatus, createAttribute, getAttributes } from "@idos-network/core";
+import {
+  createIssuerConfig,
+  getUserEncryptionPublicKey,
+  getUserProfile,
+} from "@idos-network/issuer-sdk-js/client";
+import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
+import type { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import { CreditCard, User } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
@@ -10,13 +16,82 @@ import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createIDOSUserProfile } from "@/actions";
+import { createIDOSUserProfile, getUserIdFromToken } from "@/actions";
 import { useIsle } from "@/isle.provider";
 
+import { useEthersSigner } from "@/wagmi.config";
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { type Step, Stepper } from "./stepper";
 
+const useFetchIDVStatus = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ["idv-status", userId],
+    queryFn: userId
+      ? (): Promise<{ status: string }> =>
+          fetch(`/api/idv-status/${userId}`).then((res) => res.json())
+      : skipToken,
+    select: (data) => data.status,
+    refetchInterval: 5_000,
+  });
+};
+
+const useFetchIDVUserId = (signer: JsonRpcSigner | undefined) => {
+  return useQuery({
+    queryKey: ["idv-user-id"],
+    queryFn: signer
+      ? async () => {
+          const config = await createIssuerConfig({
+            nodeUrl: "https://nodes.playground.idos.network",
+            signer,
+          });
+
+          return getAttributes(config.kwilClient);
+        }
+      : skipToken,
+    select: (data) =>
+      data.find((attribute) => attribute.attribute_key === "idvUserId")?.value as string,
+  });
+};
+
+const useFetchIDOSProfile = (signer: JsonRpcSigner | undefined) => {
+  return useQuery({
+    queryKey: ["idos-profile"],
+    queryFn: signer
+      ? async () => {
+          const config = await createIssuerConfig({
+            nodeUrl: "https://nodes.playground.idos.network",
+            signer,
+          });
+
+          return getUserProfile(config);
+        }
+      : skipToken,
+  });
+};
+
+export const useCreateIDVAttribute = () => {
+  return useMutation({
+    mutationFn: async (data: {
+      idvUserId: string;
+      signature: string;
+      signer: JsonRpcSigner;
+      userId: string;
+    }) => {
+      const { signer } = data;
+      const config = await createIssuerConfig({
+        nodeUrl: "https://nodes.playground.idos.network",
+        signer,
+      });
+      return createAttribute(config.kwilClient, {
+        id: crypto.randomUUID(),
+        attribute_key: "idvUserId",
+        value: data.idvUserId,
+        user_id: data.userId,
+      });
+    },
+  });
+};
 const steps: Step[] = [
   {
     icon: <User className="h-4 w-4" />,
@@ -55,6 +130,12 @@ export function Onboarding() {
   const [status, setStatus] = useState<IsleStatus | null>(null);
   const [requesting, startRequesting] = useTransition();
   const kycDisclosure = useDisclosure();
+  const signer = useEthersSigner();
+
+  const { data: idvUserid } = useFetchIDVUserId(signer);
+  const { data: idvStatus } = useFetchIDVStatus(idvUserid);
+  const createIDVAttribute = useCreateIDVAttribute();
+  const { data: idOSUser } = useFetchIDOSProfile(signer);
 
   const requestPermission = () => {
     invariant(isle, "`idOS Isle` is not initialized");
@@ -85,10 +166,20 @@ export function Onboarding() {
     });
   };
 
-  const handleKYCJourneySuccess = (data: { token: string }) => {
-    kycDisclosure.onClose();
+  const handleKYCJourneySuccess = async (data: { token: string }) => {
+    invariant(idOSUser, "`idOSUser` is not defined. Has a user been created?");
+    invariant(signer, "`signer` is not defined");
 
-    console.log({ data });
+    const { idvUserId, signature } = await getUserIdFromToken(data.token, idOSUser?.id);
+
+    await createIDVAttribute.mutateAsync({
+      idvUserId,
+      signature,
+      signer,
+      userId: idOSUser.id,
+    });
+
+    kycDisclosure.onClose();
 
     isle?.send("update", {
       status: "pending-verification",

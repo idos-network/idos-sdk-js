@@ -1,3 +1,4 @@
+import type { idOSUserAttribute } from "../types";
 import type { KwilActionClient } from "./create-kwil-client";
 
 /**
@@ -12,12 +13,9 @@ export async function getAttributes(kwilClient: KwilActionClient) {
 /**
  * Creates a new attribute for the given `signer`.
  */
-export async function createAttribute(
-  kwilClient: KwilActionClient,
-  attribute: Record<string, unknown>,
-) {
+export async function createAttribute(kwilClient: KwilActionClient, attribute: idOSUserAttribute) {
   return kwilClient.execute({
-    name: "create_attribute",
+    name: "add_attribute",
     description: "Create a new attribute",
     inputs: attribute,
   });

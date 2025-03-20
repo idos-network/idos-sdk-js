@@ -168,10 +168,12 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
   const json = await response.json();
 
   return {
-    idvUserId: json.krakenUserId,
-    signature: nacl.sign.detached(
-      toBytes(`${json.userId}${idOSUserId}`),
-      base64Decode(process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? ""),
+    idvUserId: json.userId,
+    signature: base64Encode(
+      nacl.sign.detached(
+        toBytes(`${json.userId}${idOSUserId}`),
+        base64Decode(process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? ""),
+      ),
     ),
   };
 }
