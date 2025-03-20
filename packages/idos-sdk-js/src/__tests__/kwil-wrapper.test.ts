@@ -54,17 +54,18 @@ describe("kwil-wrapper", () => {
   });
 
   test("should build a proper action payload with all values passed", async () => {
-    const inputs = { key_1: "value_1", key_2: "value_2" };
-    const payload = await kwilWrapper.buildExecAction("do something", [inputs], "some description");
-    const actionInput = new Utils.ActionInput();
-    actionInput.put("$key_1", "value_1");
-    actionInput.put("$key_2", "value_2");
+    const inputs = [{ recipient_encryption_public_key: "value_2", id: "value_1" }];
+    const payload = await kwilWrapper.buildExecAction(
+      "add_user_as_inserter",
+      inputs,
+      "some description",
+    );
 
     expect(payload).toEqual({
-      name: "do something",
+      name: "add_user_as_inserter",
       namespace: "main",
       description: "*some description*",
-      inputs: [actionInput],
+      inputs: [["value_1", "value_2"]],
     });
   });
 });

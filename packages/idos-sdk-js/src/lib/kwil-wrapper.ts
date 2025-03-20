@@ -57,7 +57,7 @@ export class KwilWrapper {
       name: actionName,
       namespace: "main",
       // biome-ignore lint/suspicious/noExplicitAny: TBD
-      inputs: inputs.map((input: Record<string, any>) =>
+      inputs: (Array.isArray(inputs) ? inputs : []).map((input: Record<string, any>) =>
         this.createActionInputs(actionName, input),
       ),
     };
