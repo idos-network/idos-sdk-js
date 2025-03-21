@@ -44,7 +44,7 @@ export class Auth {
 
   constructor(
     public readonly kwilWrapper: KwilWrapper,
-    public readonly store: Store,
+    private readonly store: Store,
   ) {}
 
   async setEvmSigner(signer: Signer) {
