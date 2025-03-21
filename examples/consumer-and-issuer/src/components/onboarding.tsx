@@ -1,35 +1,118 @@
 "use client";
 
-import { createCredential, createIDOSUserProfile, insertDagIntoIdos } from "@/actions";
-import { useIsle } from "@/isle.provider";
-import { useEthersSigner } from "@/wagmi.config";
-import { Button } from "@heroui/react";
+import { Button, useDisclosure } from "@heroui/react";
 import {
   createCredentialCopy,
   getCredentialContentSha256Hash,
 } from "@idos-network/consumer-sdk-js/client";
-import { type DelegatedWriteGrantSignatureRequest, requestDAGSignature } from "@idos-network/core";
-import type { IsleStatus } from "@idos-network/core";
+import { requestDAGSignature } from "@idos-network/core";
+import { type IsleStatus, createAttribute, getAttributes, hasProfile } from "@idos-network/core";
 import {
   createIssuerConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
 } from "@idos-network/issuer-sdk-js/client";
+import { skipToken, useMutation, useQuery } from "@tanstack/react-query";
+import type { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import { CreditCard, User } from "lucide-react";
-import { useEffect, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
+
+import {
+  createCredential,
+  createIDOSUserProfile,
+  getUserIdFromToken,
+  insertDagIntoIdos,
+} from "@/actions";
+import { useIsle } from "@/isle.provider";
+import { useEthersSigner } from "@/wagmi.config";
+
 import { Card } from "./card";
+import { KYCJourney } from "./kyc-journey";
 import { type Step, Stepper } from "./stepper";
+
+const useFetchIDVStatus = (userId: string | undefined) => {
+  return useQuery({
+    queryKey: ["idv-status", userId],
+    queryFn: (): Promise<{ status: string }> =>
+      fetch(`/api/idv-status/${userId}`).then((res) => res.json()),
+    select: (data) => data.status,
+    refetchInterval: (query) => {
+      const status = query.state.data?.status;
+      // Keep polling if status is pending
+      if (status === "pending") return 5_000;
+      // Stop polling if status is approved or rejected
+      if (status === "approved" || status === "rejected") return false;
+      // Default polling interval
+      return 5_000;
+    },
+    enabled: !!userId,
+    staleTime: 0, // Consider data stale immediately
+    gcTime: 0, // Don't cache the results
+  });
+};
+
+const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
+  return useQuery({
+    queryKey: ["user-data"],
+    queryFn: async () => {
+      if (!signer) throw new Error("Signer is not initialized");
+
+      const config = await createIssuerConfig({
+        nodeUrl: "https://nodes.playground.idos.network",
+        signer,
+      });
+
+      const hasUserProfile = await hasProfile(config.kwilClient, await signer.getAddress());
+      if (!hasUserProfile) return null;
+
+      // First get the user profile which handles authentication
+      const idOSProfile = await getUserProfile(config);
+
+      // Then get the attributes using the same authenticated session
+      const attributes = await getAttributes(config.kwilClient);
+      const idvUserId = attributes.find((attribute) => attribute.attribute_key === "idvUserId")
+        ?.value as string;
+
+      return {
+        hasProfile: hasUserProfile,
+        idvUserId,
+        idOSProfile,
+      };
+    },
+    enabled: !!signer,
+    select: (data) => data ?? { hasProfile: false, idvUserId: undefined, idOSProfile: undefined },
+    refetchOnWindowFocus: false,
+  });
+};
+
+export const useCreateIDVAttribute = () => {
+  return useMutation({
+    mutationFn: async (data: {
+      idvUserId: string;
+      signature: string;
+      signer: JsonRpcSigner;
+      userId: string;
+    }) => {
+      const { signer } = data;
+      const config = await createIssuerConfig({
+        nodeUrl: "https://nodes.playground.idos.network",
+        signer,
+      });
+      return createAttribute(config.kwilClient, {
+        id: crypto.randomUUID(),
+        attribute_key: "idvUserId",
+        value: data.idvUserId,
+        user_id: data.userId,
+      });
+    },
+  });
+};
+
 const steps: Step[] = [
-  // {
-  //   id: "welcome",
-  //   icon: <PiHandWavingBold className="h-4 w-4" />,
-  //   title: "WELCOME TO NEO-BANK",
-  //   description: "In order to sign up for Neo-bank you need to have a matching KYC/AML credential in idOS. user can either create a new profile or link an existing one."
-  // },
   {
     icon: <User className="h-4 w-4" />,
     title: "Profile Creation",
@@ -37,20 +120,20 @@ const steps: Step[] = [
       "User needs to sign a message to confirm that they own the wallet address. and pick authentication method",
   },
   {
-    icon: <CreditCard className="h-4 w-4" />,
-    title: "Permissions",
-    description:
-      "User needs to grant permissions to Neobank to write a credential to their idos profile",
+    icon: <User className="h-4 w-4" />,
+    title: "Verification",
+    description: "User needs to be verified",
   },
-  // {
-  //   icon: <CheckCircle className="h-4 w-4" />,
-  //   title: "Verification",
-  //   description: "User needs to verify their identity by providing a valid KYC/AML credential",
-  // },
   {
     icon: <FaSpinner className="h-4 w-4" />,
     title: "Pending Verification",
     description: "User's data is being processed. Please be patient or just refresh the screen.",
+  },
+  {
+    icon: <CreditCard className="h-4 w-4" />,
+    title: "Permissions",
+    description:
+      "User needs to grant permissions to Neobank to write a credential to their idos profile",
   },
   {
     icon: <FaCheckCircle className="h-4 w-4" />,
@@ -64,54 +147,42 @@ export function Onboarding() {
   const { isle } = useIsle();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
-  const [signature, setSignature] = useState<string | null>(null);
-  const [writeGrant, setWriteGrant] = useState<DelegatedWriteGrantSignatureRequest | null>(null);
-  const signer = useEthersSigner();
-  const [status, setStatus] = useState<IsleStatus | null>(null);
+  const [status, setStatus] = useState("");
   const [requesting, startRequesting] = useTransition();
+  const kycDisclosure = useDisclosure();
+  const signer = useEthersSigner();
+  const hasRegisteredDWGHandler = useRef(false);
+  const hasStartedDWG = useRef(false);
+  const hasRegisteredHandlers = useRef(false);
+  const hasRegisteredRevokeHandler = useRef(false);
 
-  const requestPermission = () => {
-    invariant(isle, "`idOS Isle` is not initialized");
+  const { data: userData, refetch: refetchUserData } = useFetchUserData(signer);
+  const { data: idvStatus } = useFetchIDVStatus(userData?.idvUserId);
+  const createIDVAttribute = useCreateIDVAttribute();
 
-    isle.toggleAnimation({
-      expanded: true,
-    });
-
-    startRequesting(async () => {
-      await isle.requestPermission({
-        consumer: {
-          meta: {
-            url: "https://idos.network",
-            name: "ACME Card Provider",
-            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
-          },
-          consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
-        },
-        KYCPermissions: [
-          "Name and last name",
-          "Gender",
-          "Country and city of residence",
-          "Place and date of birth",
-          "ID Document",
-          "Liveness check (No pictures)",
-        ],
-      });
-    });
-  };
-
-  // Set up event handlers
+  // Register revoke-permission handler in its own effect
   useEffect(() => {
     if (!isle) return;
+    if (hasRegisteredRevokeHandler.current) return;
 
-    isle.on("connect-wallet", async () => {
-      await isle.connect();
-    });
-
-    isle.on("revoke-permission", async ({ data }: { data: { id: string } }) => {
+    const handleRevokePermission = async ({ data }: { data: { id: string } }) => {
       await isle.revokePermission(data.id);
-    });
+    };
 
-    isle.on("create-profile", async () => {
+    isle.on("revoke-permission", handleRevokePermission);
+    hasRegisteredRevokeHandler.current = true;
+
+    return () => {
+      hasRegisteredRevokeHandler.current = false;
+    };
+  }, [isle]); // Only depend on isle
+
+  // Register other event handlers
+  useEffect(() => {
+    if (!isle) return;
+    if (hasRegisteredHandlers.current) return;
+
+    const handleCreateProfile = async () => {
       const [error] = await goTry(async () => {
         const userId = crypto.randomUUID();
 
@@ -143,10 +214,6 @@ export function Onboarding() {
           status: "success",
         });
 
-        isle.toggleAnimation({
-          expanded: false,
-        });
-
         setTimeout(() => {
           isle.send("update", {
             status: "not-verified",
@@ -155,7 +222,7 @@ export function Onboarding() {
             expanded: true,
             noDismiss: true,
           });
-        }, 5_000);
+        }, 2_000);
       });
 
       if (error) {
@@ -164,9 +231,9 @@ export function Onboarding() {
           status: "error",
         });
       }
-    });
+    };
 
-    isle.on("view-credential-details", async ({ data }: { data: { id: string } }) => {
+    const handleViewCredentialDetails = async ({ data }: { data: { id: string } }) => {
       isle.send("update-view-credential-details-status", {
         status: "pending",
       });
@@ -183,6 +250,35 @@ export function Onboarding() {
           error: error as Error,
         });
       }
+    };
+
+    const handleUpdated = async ({ data }: { data: { status?: IsleStatus } }) => {
+      if (data.status === "not-verified") {
+        if (idvStatus === "pending") {
+          setStatus("pending-verification");
+          isle.send("update", {
+            status: "pending-verification",
+          });
+        }
+      }
+
+      if (data.status === "not-verified" && idvStatus === "approved") {
+        setStatus("request-permissions");
+        isle.toggleAnimation({
+          expanded: true,
+        });
+        return;
+      }
+
+      setStatus(String(data.status));
+      isle.toggleAnimation({
+        expanded: true,
+      });
+    };
+
+    // Register all handlers
+    isle.on("connect-wallet", async () => {
+      await isle.connect();
     });
 
     isle.on("share-credential", async ({ data }: { data: { id: string } }) => {
@@ -232,23 +328,56 @@ export function Onboarding() {
       // inserting dag into idos
       await insertDagIntoIdos(dagWithSignature);
     });
-  }, [address, signMessageAsync, isle]);
 
-  useEffect(() => {
-    if (!isle || !writeGrant || !signature || !signer) return;
-
+    isle.on("create-profile", handleCreateProfile);
+    isle.on("view-credential-details", handleViewCredentialDetails);
     isle.on("verify-identity", async () => {
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.playground.idos.network",
-        signer,
+      kycDisclosure.onOpen();
+    });
+    isle.on("updated", handleUpdated);
+    hasRegisteredHandlers.current = true;
+
+    // Cleanup function
+    return () => {
+      hasRegisteredHandlers.current = false;
+    };
+  }, [isle, address, kycDisclosure, idvStatus, signMessageAsync]);
+
+  const handleCredentialIssuance = useCallback(async () => {
+    const [error] = await goTry(async () => {
+      // Get fresh data when the handler is called
+      const { data: freshUserData } = await refetchUserData();
+
+      invariant(signer, "Signer is not initialized");
+      invariant(freshUserData?.hasProfile, "IDOS Profile not found");
+      invariant(freshUserData?.idvUserId, "IDV User ID not found");
+      invariant(freshUserData?.idOSProfile, "IDOS User not found");
+
+      const response = await isle?.requestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://consumer-and-issuer-demo.vercel.app/",
+            name: "NeoBank",
+            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
       });
 
-      const userProfile = await getUserProfile(config);
+      if (response) {
+        const { signature, writeGrant } = response;
 
-      const [error] = await goTry(() =>
-        createCredential(
-          userProfile.id,
-          userProfile.recipient_encryption_public_key,
+        await createCredential(
+          freshUserData.idvUserId,
+          freshUserData.idOSProfile.recipient_encryption_public_key,
           writeGrant.owner_wallet_identifier,
           writeGrant.grantee_wallet_identifier,
           writeGrant.issuer_public_key,
@@ -257,79 +386,182 @@ export function Onboarding() {
           writeGrant.not_usable_before,
           writeGrant.not_usable_after,
           signature,
-        ),
-      );
+        );
 
-      if (error) {
-        console.error(error);
+        isle?.completeVerification();
       }
-
-      isle.send("update", {
-        status: "pending-verification",
-      });
-      isle.toggleAnimation({
-        expanded: false,
-      });
     });
-  }, [writeGrant, signature, signer, isle]);
+
+    if (error) {
+      console.error("Error in request-dwg handler:", error);
+    }
+  }, [isle, refetchUserData, signer]);
+
+  // Register the request-dwg handler in a separate effect
+  useEffect(() => {
+    if (!isle) return;
+    if (!userData?.hasProfile || !userData?.idvUserId || !userData?.idOSProfile) return;
+    if (hasRegisteredDWGHandler.current) return;
+
+    isle.on("request-dwg", handleCredentialIssuance);
+    hasRegisteredDWGHandler.current = true;
+
+    return () => {
+      hasRegisteredDWGHandler.current = false;
+    };
+  }, [isle, userData, handleCredentialIssuance]);
 
   useEffect(() => {
     if (!isle) return;
 
-    isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
-      setStatus(data.status ?? null);
-      switch (data.status) {
-        case "not-verified": {
-          isle.toggleAnimation({
-            expanded: true,
-            noDismiss: true,
-          });
-          const result = await isle.requestDelegatedWriteGrant({
-            consumer: {
-              consumerPublicKey: process.env.NEXT_PUBLIC_CONSUMER_PUBLIC_KEY as string,
-              meta: {
-                url: "https://consumer-and-issuer-demo.vercel.app/",
-                name: "NeoBank",
-                logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
-              },
-            },
-            KYCPermissions: [
-              "Name and last name",
-              "Gender",
-              "Country and city of residence",
-              "Place and date of birth",
-              "ID Document",
-              "Liveness check (No pictures)",
-            ],
-          });
+    // Add a guard to prevent running if we're already handling the status
+    if (status === "request-permissions") return;
 
-          if (result) {
-            const { signature, writeGrant } = result;
-            setSignature(signature);
-            setWriteGrant(writeGrant);
-          }
-          break;
-        }
+    // Add a guard to prevent unnecessary updates
+    if (idvStatus === "pending" && status === "pending-verification") return;
+    if (idvStatus === "rejected" && status === "not-verified") return;
+    if (idvStatus === "approved" && status === "request-permissions") return;
 
-        default:
-          break;
-      }
+    if (idvStatus === "approved" && status !== "request-permissions" && !hasStartedDWG.current) {
+      console.log("IDV verification approved, starting delegated write grant...");
+      hasStartedDWG.current = true;
+      setStatus("request-permissions");
+      isle.startRequestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://consumer-and-issuer-demo.vercel.app/",
+            name: "NeoBank",
+            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+    } else if (idvStatus === "rejected") {
+      console.log("IDV verification rejected");
+      setStatus("not-verified");
+      isle.send("update", {
+        status: "error",
+      });
+    } else if (idvStatus === "pending") {
+      console.log("IDV verification pending");
+      setStatus("pending-verification");
+      // Don't send update here since we want to keep the UI state
+    }
+  }, [idvStatus, isle, status]);
+
+  // Add logging for idvStatus changes
+  useEffect(() => {
+    console.log("IDV Status changed:", idvStatus);
+  }, [idvStatus]);
+
+  const requestPermission = () => {
+    invariant(isle, "`idOS Isle` is not initialized");
+
+    isle.toggleAnimation({
+      expanded: true,
     });
-  }, [isle]);
+
+    startRequesting(async () => {
+      await isle.requestPermission({
+        consumer: {
+          meta: {
+            url: "https://idos.network",
+            name: "ACME Card Provider",
+            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+          },
+          consumerPublicKey: "B809Hj90w6pY2J1fW3B8Cr26tOf4Lxbmy2yNy1XQYnY=",
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+    });
+  };
+
+  const handleKYCJourneySuccess = useCallback(
+    async (data: { token: string }) => {
+      const [error] = await goTry(async () => {
+        // Wait for the refetch to complete and get fresh data
+        const { data: freshUserData } = await refetchUserData();
+
+        invariant(
+          freshUserData?.idOSProfile,
+          "`idOSUser` is not defined. Has a user been created?",
+        );
+        invariant(signer, "`signer` is not defined");
+
+        const { idvUserId, signature } = await getUserIdFromToken(
+          data.token,
+          freshUserData.idOSProfile.id,
+        );
+
+        invariant(idvUserId, "Failed to get IDV User ID from token");
+        invariant(signature, "Failed to get signature from token");
+
+        await createIDVAttribute.mutateAsync({
+          idvUserId,
+          signature,
+          signer,
+          userId: freshUserData.idOSProfile.id,
+        });
+
+        // Refetch user data to get the new idvUserId
+        await refetchUserData();
+
+        kycDisclosure.onClose();
+        setStatus("pending-verification");
+      });
+
+      if (error) {
+        console.error("Error in KYC journey success handler:", error);
+        if (error instanceof Error) {
+          console.error("Error details:", error.message);
+        }
+        kycDisclosure.onClose();
+      }
+    },
+    [refetchUserData, signer, createIDVAttribute, kycDisclosure],
+  );
+
+  const handleKYCJourneyError = useCallback(
+    (error: unknown) => {
+      kycDisclosure.onClose();
+    },
+    [kycDisclosure],
+  );
 
   const statusIndexSrc = {
     "no-profile": 0,
     "not-verified": 1,
-    // TODO: handle verification status
-    "pending-verification": 3,
+    "pending-verification": 2,
+    "request-permissions": 3,
     verified: 4,
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
+
+  // Add logging for status and index
+  useEffect(() => {
+    console.log("Current status:", status);
+    console.log("Current stepper index:", index);
+  }, [status, index]);
+
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
-
       <Stepper activeIndex={index} steps={steps} />
       {status === "verified" ? (
         <div className="mt-5 flex w-full flex-col items-center gap-2">
@@ -348,6 +580,9 @@ export function Onboarding() {
             </div>
           </div>
         </div>
+      ) : null}
+      {kycDisclosure.isOpen ? (
+        <KYCJourney onSuccess={handleKYCJourneySuccess} onError={handleKYCJourneyError} />
       ) : null}
     </div>
   );
