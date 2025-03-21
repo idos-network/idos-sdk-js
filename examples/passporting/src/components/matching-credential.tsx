@@ -53,7 +53,10 @@ function useShareCredential() {
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
-      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
+      const contentHash = await getCredentialContentSha256Hash(
+        { kwilClient: consumerConfig.kwilClient },
+        credentialId,
+      );
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -83,7 +86,7 @@ function useShareCredential() {
         dag_content_hash: contentHash,
       };
 
-      const message: string = await requestDAGSignature(consumerConfig, dag);
+      const [{ message }] = await requestDAGSignature(consumerConfig, dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({

@@ -28,7 +28,7 @@ export async function getCredentialById({ kwilClient }: ConsumerConfig, id: stri
  * Get the SHA256 hash of the content of an idOSCredential
  */
 interface GetCredentialContentSha256HashParams extends Pick<ConsumerConfig, "kwilClient"> {
-  decryptCredentialContent: (credential: idOSCredential) => Promise<string>;
+  decryptCredentialContent?: (credential: idOSCredential) => Promise<string>;
 }
 export async function getCredentialContentSha256Hash(
   { kwilClient, decryptCredentialContent }: GetCredentialContentSha256HashParams,
@@ -37,7 +37,8 @@ export async function getCredentialContentSha256Hash(
   const credential = await _getCredentialById(kwilClient, id);
 
   invariant(credential, `"idOSCredential" with id ${id} not found`);
-  const content = await decryptCredentialContent(credential);
+  const content = await decryptCredentialContent?.(credential);
+  invariant(content, `"idOSCredential" with id ${id} has no content`);
 
   return hexEncodeSha256Hash(utf8Encode(content));
 }
