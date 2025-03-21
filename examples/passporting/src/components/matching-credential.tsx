@@ -6,7 +6,7 @@ import {
   getAllCredentials,
   getCredentialContentSha256Hash,
   getUserProfile,
-  requestDAGSignature,
+  requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
 import type { idOSCredential } from "@idos-network/core";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -83,7 +83,7 @@ function useShareCredential() {
         dag_content_hash: contentHash,
       };
 
-      const message: string = await requestDAGSignature(consumerConfig, dag);
+      const message: string = await requestDAGMessage(consumerConfig, dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({

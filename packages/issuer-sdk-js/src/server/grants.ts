@@ -29,7 +29,7 @@ export async function createAccessGrantFromDAG(
     throw new Error("idOSCredential not found");
   }
 
-  const [credential] = await getSharedCredential(issuerConfig, credentialId);
+  const credential = await getSharedCredential(issuerConfig, credentialId);
 
   if (!credential) {
     throw new Error("`idOSCredential` not found");

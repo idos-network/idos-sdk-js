@@ -102,7 +102,7 @@ const handleCredentialDuplicateProcess = () => {
       dag_content_hash: contentHash,
     };
 
-    const message: string = await idOS.data.requestDAGSignature(dag);
+    const message: string = await idOS.data.requestDAGMessage(dag);
     const signature = await signMessageAsync({ message });
 
     await invokePassportingService({

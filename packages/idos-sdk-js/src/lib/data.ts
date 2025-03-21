@@ -62,7 +62,6 @@ export class Data {
     let records = (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
-      `List your ${tableName} in idOS`,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
 
@@ -84,7 +83,6 @@ export class Data {
     return (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
-      `List your ${tableName} in idOS`,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
   }
@@ -131,21 +129,7 @@ export class Data {
     record: Omit<T, "id">,
     synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
-    const name = `add_${this.singularize(
-      tableName === "user_attributes" ? "attributes" : tableName,
-    )}`;
-
     let recipientEncryptionPublicKey: string | undefined;
-
-    const inputs: string[] = ((await this.kwilWrapper.schema) as AnyRecord).data.actions
-      .find((action: AnyRecord) => action.name === name)
-      .parameters.map((input: string) => input.substring(1));
-
-    const recordKeys = Object.keys(record);
-
-    if (inputs.every((input) => recordKeys.includes(input))) {
-      throw new Error(`Invalid payload for action ${name}`);
-    }
 
     if (tableName === "credentials") {
       recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
@@ -181,7 +165,6 @@ export class Data {
       const records = (await this.kwilWrapper.call(
         "get_credential_owned",
         { id: recordId },
-        "Get your credential in idOS",
         // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
@@ -213,7 +196,6 @@ export class Data {
       const records = (await this.kwilWrapper.call(
         "get_credential_shared",
         { id: recordId },
-        "Get credential shared with you in idOS",
         // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
@@ -422,7 +404,7 @@ export class Data {
     });
   }
 
-  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
+  async requestDAGMessage(dag: idOSDAGSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
       { message: string },
     ];
@@ -430,7 +412,7 @@ export class Data {
     return message;
   }
 
-  async requestDWGSignature(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
+  async requestDWGMessage(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];

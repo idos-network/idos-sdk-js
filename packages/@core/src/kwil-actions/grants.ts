@@ -5,9 +5,10 @@ import type { KwilActionClient } from "./create-kwil-client";
  * Returns the amount of Access Grants that have been granted for the given `signer`.
  */
 export async function getGrantsCount(kwilClient: KwilActionClient) {
-  return kwilClient.call<number>({
+  const [{ count }] = await kwilClient.call<[{ count: number }]>({
     name: "get_access_grants_granted_count",
   });
+  return count;
 }
 
 /**
@@ -72,12 +73,39 @@ export interface idOSDAGSignatureParams {
 /**
  * Request a signature for a Delegated Access Grant
  */
-export async function requestDAGSignature(
+export async function requestDAGMessage(
   kwilClient: KwilActionClient,
   params: idOSDAGSignatureParams,
 ) {
-  return kwilClient.call<string>({
+  const [{ message }] = await kwilClient.call<[{ message: string }]>({
     name: "dag_message",
     inputs: params,
   });
+
+  return message;
+}
+
+export interface DelegatedWriteGrantSignatureRequest {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  issuer_public_key: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+}
+
+/**
+ * Request a signature for a delegated write grant.
+ */
+export async function requestDWGMessage(
+  kwilClient: KwilActionClient,
+  params: DelegatedWriteGrantSignatureRequest,
+) {
+  const [{ message }] = await kwilClient.call<[{ message: string }]>({
+    name: "dwg_message",
+    inputs: params,
+  });
+
+  return message;
 }
