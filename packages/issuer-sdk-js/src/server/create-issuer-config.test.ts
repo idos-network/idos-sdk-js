@@ -8,7 +8,9 @@ import { createIssuerConfig } from "./create-issuer-config";
 // Mock the @kwilteam/kwil-js module
 vi.mock("@kwilteam/kwil-js", () => {
   return {
-    NodeKwil: vi.fn(),
+    NodeKwil: vi.fn().mockImplementation(() => ({
+      chainInfo: vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } }),
+    })),
     WebKwil: vi.fn(),
     KwilSigner: vi.fn(),
     Utils: {
@@ -20,18 +22,9 @@ vi.mock("@kwilteam/kwil-js", () => {
 });
 
 describe("createIssuerConfig", () => {
-  let mockChainInfo: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     // Clear all mocks before each test
     vi.clearAllMocks();
-
-    // Set up mock implementations
-    mockChainInfo = vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } });
-
-    (NodeKwil as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-      chainInfo: mockChainInfo,
-    }));
   });
 
   it("should correctly initialize and return config", async () => {
@@ -56,9 +49,6 @@ describe("createIssuerConfig", () => {
       chainId: "mock-chain-id",
       timeout: 30_000,
     });
-
-    // Check if methods were called
-    expect(mockChainInfo).toHaveBeenCalled();
 
     // Check the returned config
     expect(result).toEqual({
