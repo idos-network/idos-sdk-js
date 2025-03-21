@@ -67,10 +67,6 @@ export class Enclave {
     );
   }
 
-  async confirm(message: string) {
-    return this.enclaveProvider.confirm(message);
-  }
-
   async updateStore(key: string, value: unknown) {
     this.enclaveProvider.updateStore(key, value);
   }
