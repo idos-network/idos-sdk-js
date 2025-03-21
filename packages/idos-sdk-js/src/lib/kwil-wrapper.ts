@@ -98,11 +98,6 @@ export class KwilWrapper {
     if (useSigner && !this.signer) throw new Error("Call idOS.setSigner first.");
 
     const action = await this.buildCallAction(actionName, actionInputs);
-    // TODO: remove this workaround when Kwil fix this issue
-    if (action?.inputs?.length === 0) {
-      action.inputs = undefined;
-    }
-
     const res = await this.client.call(action, useSigner ? this.signer : undefined);
 
     // biome-ignore lint/suspicious/noExplicitAny: TBD
