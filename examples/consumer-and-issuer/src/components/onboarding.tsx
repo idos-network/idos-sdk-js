@@ -1,6 +1,6 @@
 "use client";
 
-import { createCredential, createIDOSUserProfile } from "@/actions";
+import { createCredential, createIDOSUserProfile, insertDagIntoIdos } from "@/actions";
 import { useIsle } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 import { Button } from "@heroui/react";
@@ -193,7 +193,6 @@ export function Onboarding() {
       const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
       invariant(kwilClient, "Kwil client not found");
-      // @todo: remove this once we clean previous passporting app (they're using outdated params)
       invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
       invariant(
         consumerEncryptionPublicKey,
@@ -230,9 +229,8 @@ export function Onboarding() {
       const [{ message }] = await requestDAGSignature(kwilClient, dag);
       const signature = await signMessageAsync({ message });
       const dagWithSignature = { ...dag, dag_signature: signature };
-
-      // invoke passporting service
-      console.log({ dagWithSignature });
+      // inserting dag into idos
+      await insertDagIntoIdos(dagWithSignature);
     });
   }, [address, signMessageAsync, isle]);
 
