@@ -59,14 +59,13 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
       const hasUserProfile = await hasProfile(config.kwilClient, await signer.getAddress());
       if (!hasUserProfile) return null;
 
-      const [idvUserId, idOSProfile] = await Promise.all([
-        getAttributes(config.kwilClient).then(
-          (attributes) =>
-            attributes.find((attribute) => attribute.attribute_key === "idvUserId")
-              ?.value as string,
-        ),
-        getUserProfile(config),
-      ]);
+      // First get the user profile which handles authentication
+      const idOSProfile = await getUserProfile(config);
+
+      // Then get the attributes using the same authenticated session
+      const attributes = await getAttributes(config.kwilClient);
+      const idvUserId = attributes.find((attribute) => attribute.attribute_key === "idvUserId")
+        ?.value as string;
 
       return {
         hasProfile: hasUserProfile,
@@ -142,6 +141,7 @@ export function Onboarding() {
   const kycDisclosure = useDisclosure();
   const signer = useEthersSigner();
   const hasRegisteredDWGHandler = useRef(false);
+  const hasStartedDWG = useRef(false);
 
   const { data: userData, refetch: refetchUserData } = useFetchUserData(signer);
   const { data: idvStatus } = useFetchIDVStatus(userData?.idvUserId);
@@ -296,6 +296,14 @@ export function Onboarding() {
         }
       }
 
+      if (data.status === "not-verified" && idvStatus === "approved") {
+        setStatus("request-permissions");
+        isle.toggleAnimation({
+          expanded: true,
+        });
+        return;
+      }
+
       setStatus(String(data.status));
       isle.toggleAnimation({
         expanded: true,
@@ -325,12 +333,17 @@ export function Onboarding() {
   useEffect(() => {
     if (!isle) return;
 
+    // Add a guard to prevent running if we're already handling the status
+    if (status === "request-permissions") return;
+
+    // Add a guard to prevent unnecessary updates
     if (idvStatus === "pending" && status === "pending-verification") return;
     if (idvStatus === "rejected" && status === "not-verified") return;
     if (idvStatus === "approved" && status === "request-permissions") return;
 
-    if (idvStatus === "approved" && status !== "request-permissions") {
+    if (idvStatus === "approved" && status !== "request-permissions" && !hasStartedDWG.current) {
       console.log("IDV verification approved, starting delegated write grant...");
+      hasStartedDWG.current = true;
       setStatus("request-permissions");
       isle.startRequestDelegatedWriteGrant({
         consumer: {
@@ -458,6 +471,12 @@ export function Onboarding() {
   };
 
   const index = statusIndexSrc[status as keyof typeof statusIndexSrc] || 0;
+
+  // Add logging for status and index
+  useEffect(() => {
+    console.log("Current status:", status);
+    console.log("Current stepper index:", index);
+  }, [status, index]);
 
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
