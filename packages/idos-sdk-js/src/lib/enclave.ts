@@ -67,10 +67,6 @@ export class Enclave {
     );
   }
 
-  async updateStore(key: string, value: unknown) {
-    this.enclaveProvider.updateStore(key, value);
-  }
-
   async filterCredentials(
     credentials: Record<string, string>[],
     privateFieldFilters: {
