@@ -9,6 +9,7 @@ import { createIssuerConfig } from "./create-issuer-config";
 vi.mock("@kwilteam/kwil-js", () => {
   return {
     NodeKwil: vi.fn(),
+    WebKwil: vi.fn(),
     KwilSigner: vi.fn(),
     Utils: {
       ActionInput: {
