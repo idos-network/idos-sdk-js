@@ -1,4 +1,5 @@
 import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
+import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
 import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 import invariant from "tiny-invariant";
@@ -84,46 +85,22 @@ export class KwilActionClient {
 
 const DEFAULT_TIMEOUT = 30_000;
 
+const createKwilClient =
+  (Cls: new (opts: Config) => NodeKwil | WebKwil) =>
+  async ({ nodeUrl: kwilProvider, chainId }: CreateKwilClientParams) => {
+    const _kwil = new Cls({ kwilProvider, chainId: "" });
+    chainId ||= (await _kwil.chainInfo()).data?.chain_id;
+    invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
+
+    return new KwilActionClient(new Cls({ kwilProvider, chainId, timeout: DEFAULT_TIMEOUT }));
+  };
+
 /**
  * Create a kwil client for node.js environment
  */
-export async function createNodeKwilClient(params: CreateKwilClientParams) {
-  const _kwil = new NodeKwil({
-    kwilProvider: params.nodeUrl,
-    chainId: "",
-  });
-
-  const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
-
-  invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
-
-  const client = new NodeKwil({
-    kwilProvider: params.nodeUrl,
-    chainId,
-    timeout: DEFAULT_TIMEOUT,
-  });
-
-  return new KwilActionClient(client);
-}
+export const createNodeKwilClient = createKwilClient(NodeKwil);
 
 /**
  * Create a kwil client for browser environment
  */
-export async function createWebKwilClient(params: CreateKwilClientParams) {
-  const _kwil = new WebKwil({
-    kwilProvider: params.nodeUrl,
-    chainId: "",
-  });
-
-  const chainId = params.chainId || (await _kwil.chainInfo()).data?.chain_id;
-
-  invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
-
-  const client = new WebKwil({
-    kwilProvider: params.nodeUrl,
-    chainId,
-    timeout: 30_000,
-  });
-
-  return new KwilActionClient(client);
-}
+export const createWebKwilClient = createKwilClient(WebKwil);
