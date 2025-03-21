@@ -7,6 +7,7 @@ import {
   utf8Encode,
 } from "@idos-network/core";
 import nacl from "tweetnacl";
+import type { Auth } from "./auth";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
 
@@ -52,6 +53,7 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
+    public readonly auth: Auth,
   ) {}
 
   singularize(tableName: string): string {
@@ -95,7 +97,7 @@ export class Data {
     let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       for (const record of records) {
         Object.assign(
@@ -132,7 +134,7 @@ export class Data {
     let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       Object.assign(
         record,
@@ -173,6 +175,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
+        await this.enclave.ready(this.auth);
         record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
@@ -204,6 +207,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
+        await this.enclave.ready(this.auth);
         record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
@@ -259,14 +263,14 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready();
+    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready(this.auth);
 
     let recipientEncryptionPublicKey: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
       Object.assign(
