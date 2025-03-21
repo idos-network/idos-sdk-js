@@ -5,6 +5,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
+import invariant from "tiny-invariant";
 
 import type { Auth } from "./auth";
 import type { EnclaveProvider } from "./enclave-providers/types";
@@ -12,14 +13,10 @@ import type { EnclaveProvider } from "./enclave-providers/types";
 export class Enclave {
   userEncryptionPublicKey?: Uint8Array;
 
-  constructor(
-    public readonly auth: Auth,
-    public readonly enclaveProvider: EnclaveProvider,
-  ) {}
+  constructor(public readonly enclaveProvider: EnclaveProvider) {}
 
-  async ready(): Promise<Uint8Array> {
-    const { userId, userAddress, nearWalletPublicKey, currentUserPublicKey } =
-      this.auth.currentUser;
+  async ready(auth: Auth): Promise<Uint8Array> {
+    const { userId, userAddress, nearWalletPublicKey, currentUserPublicKey } = auth.currentUser;
 
     if (!userId) throw new Error("Can't operate on a user that has no profile.");
 
@@ -39,7 +36,7 @@ export class Enclave {
     message: string,
     recipientEncryptionPublicKey?: string,
   ): Promise<{ content: string; encryptorPublicKey: string }> {
-    if (!this.userEncryptionPublicKey) await this.ready();
+    invariant(this.userEncryptionPublicKey, "Call enclave.ready first");
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       utf8Encode(message),
@@ -55,7 +52,7 @@ export class Enclave {
   }
 
   async decrypt(message: string, senderEncryptionPublicKey?: string): Promise<string> {
-    if (!this.userEncryptionPublicKey) await this.ready();
+    invariant(this.userEncryptionPublicKey, "Call enclave.ready first");
 
     return utf8Decode(
       await this.enclaveProvider.decrypt(
@@ -74,12 +71,13 @@ export class Enclave {
       omit: Record<string, string>;
     },
   ): Promise<idOSCredential[]> {
-    if (!this.userEncryptionPublicKey) await this.ready();
+    invariant(this.userEncryptionPublicKey, "Call enclave.ready first");
+
     return await this.enclaveProvider.filterCredentials(credentials, privateFieldFilters);
   }
 
   async backupPasswordOrSecret() {
-    await this.ready();
+    invariant(this.userEncryptionPublicKey, "Call enclave.ready first");
 
     return this.enclaveProvider.backupPasswordOrSecret();
   }

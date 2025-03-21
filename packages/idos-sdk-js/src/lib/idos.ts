@@ -42,9 +42,9 @@ export class idOS {
     if (!enclaveOptions || !enclaveOptions.container)
       throw new Error("`enclaveOptions.container` must be provided");
 
-    this.enclave = new Enclave(this.auth, new IframeEnclave(enclaveOptions));
+    this.enclave = new Enclave(new IframeEnclave(enclaveOptions));
 
-    this.data = new Data(kwilWrapper, this.enclave);
+    this.data = new Data(kwilWrapper, this.enclave, this.auth);
 
     this.grants = new Grants({ kwilWrapper: this.kwilWrapper });
   }
@@ -98,6 +98,7 @@ export class idOS {
   }
 
   async backupPasswordOrSecret() {
+    await this.enclave.ready(this.auth);
     return this.enclave.backupPasswordOrSecret();
   }
 
