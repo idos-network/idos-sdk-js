@@ -1,4 +1,5 @@
 "use server";
+import { getConsumerConfig } from "@/consumer.config";
 import { getIssuerConfig } from "@/issuer.config";
 import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
 import {
@@ -191,6 +192,27 @@ export async function createCredential(
   );
 }
 
+interface InsertDagIntoIdosParams {
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+  dag_signature: string;
+}
+
+export const insertDagIntoIdos = async (dag: InsertDagIntoIdosParams) => {
+  return await fetch("https://passporting-server.vercel.app/", {
+    method: "POST",
+    body: JSON.stringify(dag),
+  });
+};
+
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await getConsumerConfig();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
 /**
  * Get the user id from the token
  */

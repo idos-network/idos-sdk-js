@@ -1,6 +1,11 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
+import {
+  createCredentialCopy,
+  getCredentialContentSha256Hash,
+} from "@idos-network/consumer-sdk-js/client";
+import { requestDAGSignature } from "@idos-network/core";
 import { type IsleStatus, createAttribute, getAttributes, hasProfile } from "@idos-network/core";
 import {
   createIssuerConfig,
@@ -16,7 +21,12 @@ import { FaCheckCircle, FaSpinner } from "react-icons/fa";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/actions";
+import {
+  createCredential,
+  createIDOSUserProfile,
+  getUserIdFromToken,
+  insertDagIntoIdos,
+} from "@/actions";
 import { useIsle } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
@@ -271,13 +281,60 @@ export function Onboarding() {
       await isle.connect();
     });
 
+    isle.on("share-credential", async ({ data }: { data: { id: string } }) => {
+      // const signature = await isle.shareCredential(data.id);
+      const kwilClient = await isle.getKwilClient();
+
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+
+      invariant(kwilClient, "Kwil client not found");
+      invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+      invariant(
+        consumerEncryptionPublicKey,
+        "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+      );
+
+      const enclave = await isle.getEnclave();
+      invariant(enclave, "Enclave not found");
+      const contentHash = await getCredentialContentSha256Hash(
+        { kwilClient, decryptCredentialContent: isle.decryptCredentialContent },
+        data.id,
+      );
+
+      const { id } = await createCredentialCopy(
+        // C1.2
+        { kwilClient },
+        data.id,
+        consumerEncryptionPublicKey,
+        {
+          consumerAddress: consumerSigningPublicKey,
+          lockedUntil: 0,
+          decryptCredentialContent: isle.decryptCredentialContent,
+          encryptCredentialContent: isle.encryptCredentialContent,
+        },
+      );
+
+      const dag = {
+        dag_owner_wallet_identifier: address as string,
+        dag_grantee_wallet_identifier: consumerSigningPublicKey,
+        dag_data_id: id,
+        dag_locked_until: 0,
+        dag_content_hash: contentHash,
+      };
+      const [{ message }] = await requestDAGSignature(kwilClient, dag);
+      const signature = await signMessageAsync({ message });
+      const dagWithSignature = { ...dag, dag_signature: signature };
+      // inserting dag into idos
+      await insertDagIntoIdos(dagWithSignature);
+    });
+
     isle.on("create-profile", handleCreateProfile);
     isle.on("view-credential-details", handleViewCredentialDetails);
     isle.on("verify-identity", async () => {
       kycDisclosure.onOpen();
     });
     isle.on("updated", handleUpdated);
-
     hasRegisteredHandlers.current = true;
 
     // Cleanup function

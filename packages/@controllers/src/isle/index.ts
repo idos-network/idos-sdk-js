@@ -144,6 +144,20 @@ interface idOSIsleController {
   getUserProfile: () => Promise<idOSUser>;
   /** Toggle ISLE animation (expand/collapse) */
   toggleAnimation: ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => void;
+  /** Get the Kwil client */
+  getKwilClient: () => Promise<KwilActionClient | undefined>;
+  /** Get the enclave */
+  getEnclave: () => Promise<EnclaveProvider | null>;
+  /** Decrypt credential content */
+  decryptCredentialContent: (credential: idOSCredential) => Promise<string>;
+  /** Encrypt credential content */
+  encryptCredentialContent: (
+    content: string,
+    encryptorPublicKey: string,
+  ) => Promise<{
+    content: string;
+    encryptorPublicKey: string;
+  }>;
   /** Complete the verification process */
   completeVerification: () => void;
 }
@@ -434,6 +448,26 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       base64Decode(credential.encryptor_public_key),
     );
     return utf8Decode(decrypted);
+  };
+
+  const encryptCredentialContent = async (
+    content: string,
+    encryptorPublicKey: string,
+  ): Promise<{
+    content: string;
+    encryptorPublicKey: string;
+  }> => {
+    invariant(enclave, "No `idOS enclave` found");
+    const user = await getUserProfile();
+    const { address } = getAccount(wagmiConfig);
+
+    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
+
+    const encrypted = await enclave.encrypt(utf8Encode(content), base64Decode(encryptorPublicKey));
+    return {
+      content: base64Encode(encrypted.content),
+      encryptorPublicKey: base64Encode(encrypted.encryptorPublicKey),
+    };
   };
 
   const safeParse = (value: string) => {
@@ -787,6 +821,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return signer;
   };
 
+  const getKwilClient = async (): Promise<KwilActionClient | undefined> => {
+    return kwilClient;
+  };
+
+  const getEnclave = async (): Promise<EnclaveProvider | null> => {
+    return enclave;
+  };
+
   /**
    * Cleans up the Isle instance, removing the iframe and destroying the controller
    */
@@ -810,6 +852,10 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     viewCredentialDetails,
     getUserProfile,
     toggleAnimation,
+    getEnclave,
+    getKwilClient,
+    decryptCredentialContent,
+    encryptCredentialContent,
     completeVerification,
   };
 };
