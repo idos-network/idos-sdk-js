@@ -75,6 +75,7 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
     },
     enabled: !!signer,
     select: (data) => data ?? { hasProfile: false, idvUserId: undefined, idOSProfile: undefined },
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -142,10 +143,148 @@ export function Onboarding() {
   const signer = useEthersSigner();
   const hasRegisteredDWGHandler = useRef(false);
   const hasStartedDWG = useRef(false);
+  const hasRegisteredHandlers = useRef(false);
+  const hasRegisteredRevokeHandler = useRef(false);
 
   const { data: userData, refetch: refetchUserData } = useFetchUserData(signer);
   const { data: idvStatus } = useFetchIDVStatus(userData?.idvUserId);
   const createIDVAttribute = useCreateIDVAttribute();
+
+  // Register revoke-permission handler in its own effect
+  useEffect(() => {
+    if (!isle) return;
+    if (hasRegisteredRevokeHandler.current) return;
+
+    const handleRevokePermission = async ({ data }: { data: { id: string } }) => {
+      await isle.revokePermission(data.id);
+    };
+
+    isle.on("revoke-permission", handleRevokePermission);
+    hasRegisteredRevokeHandler.current = true;
+
+    return () => {
+      hasRegisteredRevokeHandler.current = false;
+    };
+  }, [isle]); // Only depend on isle
+
+  // Register other event handlers
+  useEffect(() => {
+    if (!isle) return;
+    if (hasRegisteredHandlers.current) return;
+
+    const handleCreateProfile = async () => {
+      const [error] = await goTry(async () => {
+        const userId = crypto.randomUUID();
+
+        const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(userId, {
+          container: "#idOS-enclave",
+          url: "https://enclave.playground.idos.network",
+        });
+
+        const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
+        const signature = await signMessageAsync({ message });
+
+        isle.send("update-create-profile-status", {
+          status: "pending",
+        });
+
+        await createIDOSUserProfile({
+          userId,
+          recipientEncryptionPublicKey: userEncryptionPublicKey,
+          wallet: {
+            address: address as string,
+            type: "EVM",
+            message,
+            signature,
+            publicKey: signature,
+          },
+        });
+
+        isle.send("update-create-profile-status", {
+          status: "success",
+        });
+
+        setTimeout(() => {
+          isle.send("update", {
+            status: "not-verified",
+          });
+          isle.toggleAnimation({
+            expanded: true,
+            noDismiss: true,
+          });
+        }, 2_000);
+      });
+
+      if (error) {
+        console.error(error);
+        isle.send("update-create-profile-status", {
+          status: "error",
+        });
+      }
+    };
+
+    const handleViewCredentialDetails = async ({ data }: { data: { id: string } }) => {
+      isle.send("update-view-credential-details-status", {
+        status: "pending",
+      });
+
+      try {
+        const credential = await isle.viewCredentialDetails(data.id);
+        isle.send("update-view-credential-details-status", {
+          status: "success",
+          credential,
+        });
+      } catch (error) {
+        isle.send("update-view-credential-details-status", {
+          status: "error",
+          error: error as Error,
+        });
+      }
+    };
+
+    const handleUpdated = async ({ data }: { data: { status?: IsleStatus } }) => {
+      if (data.status === "not-verified") {
+        if (idvStatus === "pending") {
+          setStatus("pending-verification");
+          isle.send("update", {
+            status: "pending-verification",
+          });
+        }
+      }
+
+      if (data.status === "not-verified" && idvStatus === "approved") {
+        setStatus("request-permissions");
+        isle.toggleAnimation({
+          expanded: true,
+        });
+        return;
+      }
+
+      setStatus(String(data.status));
+      isle.toggleAnimation({
+        expanded: true,
+      });
+    };
+
+    // Register all handlers
+    isle.on("connect-wallet", async () => {
+      await isle.connect();
+    });
+
+    isle.on("create-profile", handleCreateProfile);
+    isle.on("view-credential-details", handleViewCredentialDetails);
+    isle.on("verify-identity", async () => {
+      kycDisclosure.onOpen();
+    });
+    isle.on("updated", handleUpdated);
+
+    hasRegisteredHandlers.current = true;
+
+    // Cleanup function
+    return () => {
+      hasRegisteredHandlers.current = false;
+    };
+  }, [isle, address, kycDisclosure, idvStatus, signMessageAsync]);
 
   const handleCredentialIssuance = useCallback(async () => {
     const [error] = await goTry(async () => {
@@ -201,134 +340,19 @@ export function Onboarding() {
     }
   }, [isle, refetchUserData, signer]);
 
+  // Register the request-dwg handler in a separate effect
   useEffect(() => {
     if (!isle) return;
+    if (!userData?.hasProfile || !userData?.idvUserId || !userData?.idOSProfile) return;
+    if (hasRegisteredDWGHandler.current) return;
 
-    isle.on("connect-wallet", async () => {
-      await isle.connect();
-    });
+    isle.on("request-dwg", handleCredentialIssuance);
+    hasRegisteredDWGHandler.current = true;
 
-    isle.on("revoke-permission", async ({ data }: { data: { id: string } }) => {
-      await isle.revokePermission(data.id);
-    });
-
-    isle.on("create-profile", async () => {
-      const [error] = await goTry(async () => {
-        const userId = crypto.randomUUID();
-
-        const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(userId, {
-          container: "#idOS-enclave",
-          url: "https://enclave.playground.idos.network",
-        });
-
-        const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-        const signature = await signMessageAsync({ message });
-
-        isle.send("update-create-profile-status", {
-          status: "pending",
-        });
-
-        await createIDOSUserProfile({
-          userId,
-          recipientEncryptionPublicKey: userEncryptionPublicKey,
-          wallet: {
-            address: address as string,
-            type: "EVM",
-            message,
-            signature,
-            publicKey: signature,
-          },
-        });
-
-        isle.send("update-create-profile-status", {
-          status: "success",
-        });
-
-        setTimeout(() => {
-          isle.send("update", {
-            status: "not-verified",
-          });
-          isle.toggleAnimation({
-            expanded: true,
-            noDismiss: true,
-          });
-        }, 2_000);
-      });
-
-      if (error) {
-        console.error(error);
-        isle.send("update-create-profile-status", {
-          status: "error",
-        });
-      }
-    });
-
-    isle.on("view-credential-details", async ({ data }: { data: { id: string } }) => {
-      isle.send("update-view-credential-details-status", {
-        status: "pending",
-      });
-
-      try {
-        const credential = await isle.viewCredentialDetails(data.id);
-        isle.send("update-view-credential-details-status", {
-          status: "success",
-          credential,
-        });
-      } catch (error) {
-        isle.send("update-view-credential-details-status", {
-          status: "error",
-          error: error as Error,
-        });
-      }
-    });
-
-    isle.on("verify-identity", async () => {
-      kycDisclosure.onOpen();
-    });
-
-    isle.on("updated", async ({ data }: { data: { status?: IsleStatus } }) => {
-      if (data.status === "not-verified") {
-        if (idvStatus === "pending") {
-          setStatus("pending-verification");
-          isle.send("update", {
-            status: "pending-verification",
-          });
-        }
-      }
-
-      if (data.status === "not-verified" && idvStatus === "approved") {
-        setStatus("request-permissions");
-        isle.toggleAnimation({
-          expanded: true,
-        });
-        return;
-      }
-
-      setStatus(String(data.status));
-      isle.toggleAnimation({
-        expanded: true,
-      });
-    });
-
-    // Only register the request-dwg event when we have the required data and haven't registered yet
-    if (
-      userData?.hasProfile &&
-      userData?.idvUserId &&
-      userData?.idOSProfile &&
-      !hasRegisteredDWGHandler.current
-    ) {
-      isle.on("request-dwg", handleCredentialIssuance);
-      hasRegisteredDWGHandler.current = true;
-    }
-  }, [
-    isle,
-    handleCredentialIssuance,
-    kycDisclosure,
-    address,
-    signMessageAsync,
-    userData,
-    idvStatus,
-  ]);
+    return () => {
+      hasRegisteredDWGHandler.current = false;
+    };
+  }, [isle, userData, handleCredentialIssuance]);
 
   useEffect(() => {
     if (!isle) return;
