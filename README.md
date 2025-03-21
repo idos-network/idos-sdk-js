@@ -15,7 +15,7 @@
 | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
 | [`📁 dashboard-for-dapps`](./apps/dashboard-for-dapps/) | Dashboard for dApp developers to access data that users shared with them. <br> Deployed at <https://dashboard-for-dapps.idos.network/>. |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard)  | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>.                     |
-| [`📁 idos-enclave`](./apps/idos-enclave)                | Browser encryption wallet for handling user encryption and decryption.                                                                  |
+| [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                |
 | [`📁 isle`](./apps/isle)                                | Full-featured standard UI for dApps to include in their application.                                                                    |
 | [`📁 passporting-server`](./apps/idos-data-dashboard)   | Backend service for credential passporting between [Obliged Entities](./docs/glossary.md#obliged-entities).                             |
 
