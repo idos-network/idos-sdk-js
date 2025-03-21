@@ -1,3 +1,4 @@
+export * from "./attributes";
 export * from "./create-kwil-client";
 export * from "./create-kwil-signer";
 export * from "./credentials";

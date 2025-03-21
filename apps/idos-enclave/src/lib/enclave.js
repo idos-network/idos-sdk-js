@@ -240,27 +240,6 @@ export class Enclave {
     }
   }
 
-  async filterCredentialsByCountries(credentials, countries) {
-    const decrypted = await Promise.all(
-      credentials.map(async (credential) => ({
-        ...credential,
-        content: Utf8Codec.decode(
-          await this.decrypt(
-            Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryptor_public_key),
-          ),
-        ),
-      })),
-    );
-
-    return decrypted
-      .filter((credential) => {
-        const content = JSON.parse(credential.content);
-        return countries.includes(content.credentialSubject.residential_address_country);
-      })
-      .map((credential) => credential.id);
-  }
-
   async filterCredentials(credentials, privateFieldFilters) {
     const matchCriteria = (content, criteria) =>
       every(Object.entries(criteria), ([path, targetSet]) =>
@@ -328,7 +307,6 @@ export class Enclave {
           mode,
           theme,
           credentials,
-          countries,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
           key,
@@ -344,7 +322,6 @@ export class Enclave {
           configure: () => [mode, theme],
           storage: () => [userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
           updateStore: () => [key, value],
-          filterCredentialsByCountries: () => [credentials, countries],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
         }[requestName];
