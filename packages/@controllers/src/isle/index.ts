@@ -188,7 +188,7 @@ const initializeWagmi = (): void => {
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
-  let enclave: EnclaveProvider | null = null;
+  let enclaveProvider: EnclaveProvider | null = null;
   const controller: Controller = createController({
     targetOrigin: "https://localhost:5174",
   });
@@ -229,11 +229,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const setupEnclave = async (): Promise<void> => {
-    if (enclave) return;
+    if (enclaveProvider) return;
     try {
       const enclaveInstance = new IframeEnclave(options.enclaveOptions);
       await enclaveInstance.load();
-      enclave = enclaveInstance;
+      enclaveProvider = enclaveInstance;
     } catch (error) {
       console.error(error);
     }
@@ -258,7 +258,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
           throw new Error("Failed to setup signer");
         }
         await setupEnclave();
-        if (!enclave) {
+        if (!enclaveProvider) {
           throw new Error("Failed to setup enclave");
         }
       } catch (error) {
@@ -270,7 +270,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       }
     } else if (account.status === "disconnected") {
       signer = undefined;
-      enclave = null;
+      enclaveProvider = null;
     }
 
     send("update", {
@@ -374,14 +374,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     const [error, result] = await goTry(async () => {
-      invariant(enclave, "No `idOS enclave` found");
+      invariant(enclaveProvider, "No `idOS enclave` found");
 
       const credential = await getCredentialById(client, ownerOriginalCredentials[0].id);
       invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
 
       const plaintextContent = await decryptCredentialContent(credential);
 
-      const { content, encryptorPublicKey } = await enclave.encrypt(
+      const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
         utf8Encode(plaintextContent),
         base64Decode(options.consumer.consumerPublicKey),
       );
@@ -464,13 +464,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
-    invariant(enclave, "No `idOS enclave` found");
+    invariant(enclaveProvider, "No `idOS enclave` found");
     const user = await getUserProfile();
     const { address } = getAccount(wagmiConfig);
-    await enclave.load();
-    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
 
-    const decrypted = await enclave.decrypt(
+    await enclaveProvider.load();
+    await enclaveProvider.ready(user.id, address, user.recipient_encryption_public_key);
+
+    const decrypted = await enclaveProvider.decrypt(
       base64Decode(credential.content),
       base64Decode(credential.encryptor_public_key),
     );
@@ -589,7 +590,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       // Ensure enclave is initialized before trying to decrypt
       await setupEnclave();
-      invariant(enclave, "Enclave not initialized");
+      invariant(enclaveProvider, "Enclave not initialized");
 
       const content = await decryptCredentialContent(credential);
 

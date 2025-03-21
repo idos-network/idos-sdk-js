@@ -14,7 +14,7 @@ export class Enclave {
 
   constructor(
     public readonly auth: Auth,
-    public readonly provider: EnclaveProvider,
+    public readonly enclaveProvider: EnclaveProvider,
   ) {}
 
   async ready(): Promise<Uint8Array> {
@@ -25,7 +25,7 @@ export class Enclave {
 
     if (this.userEncryptionPublicKey) return this.userEncryptionPublicKey;
 
-    this.userEncryptionPublicKey = await this.provider.ready(
+    this.userEncryptionPublicKey = await this.enclaveProvider.ready(
       userId,
       userAddress,
       nearWalletPublicKey,
@@ -41,7 +41,7 @@ export class Enclave {
   ): Promise<{ content: string; encryptorPublicKey: string }> {
     if (!this.userEncryptionPublicKey) await this.ready();
 
-    const { content, encryptorPublicKey } = await this.provider.encrypt(
+    const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       utf8Encode(message),
       recipientEncryptionPublicKey === undefined
         ? undefined
@@ -58,7 +58,7 @@ export class Enclave {
     if (!this.userEncryptionPublicKey) await this.ready();
 
     return utf8Decode(
-      await this.provider.decrypt(
+      await this.enclaveProvider.decrypt(
         base64Decode(message),
         senderEncryptionPublicKey === undefined
           ? undefined
@@ -68,15 +68,15 @@ export class Enclave {
   }
 
   async confirm(message: string) {
-    return this.provider.confirm(message);
+    return this.enclaveProvider.confirm(message);
   }
 
   async reset() {
-    return this.provider.reset();
+    return this.enclaveProvider.reset();
   }
 
   async updateStore(key: string, value: unknown) {
-    this.provider.updateStore(key, value);
+    this.enclaveProvider.updateStore(key, value);
   }
 
   async filterCredentials(
@@ -87,16 +87,16 @@ export class Enclave {
     },
   ): Promise<idOSCredential[]> {
     if (!this.userEncryptionPublicKey) await this.ready();
-    return await this.provider.filterCredentials(credentials, privateFieldFilters);
+    return await this.enclaveProvider.filterCredentials(credentials, privateFieldFilters);
   }
 
   async backupPasswordOrSecret() {
     await this.ready();
 
-    return this.provider.backupPasswordOrSecret();
+    return this.enclaveProvider.backupPasswordOrSecret();
   }
 
   async discoverUserEncryptionPublicKey(userId: string) {
-    return this.provider.discoverUserEncryptionPublicKey(userId);
+    return this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
   }
 }
