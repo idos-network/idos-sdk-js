@@ -30,15 +30,15 @@ export async function getUserEncryptionPublicKey(
   userId: string,
   enclaveOptions: Omit<EnclaveOptions, "mode">,
 ) {
-  let enclave: IframeEnclave | null = new IframeEnclave({
+  let enclaveProvider: IframeEnclave | null = new IframeEnclave({
     ...enclaveOptions,
     mode: "new",
   });
 
-  await enclave.load();
-  await enclave.reset();
-  const publicKey = await enclave.discoverUserEncryptionPublicKey(userId);
-  enclave = null;
+  await enclaveProvider.load();
+  await enclaveProvider.reset();
+  const publicKey = await enclaveProvider.discoverUserEncryptionPublicKey(userId);
+  enclaveProvider = null;
   document.querySelector(enclaveOptions.container)?.children[0].remove();
 
   return publicKey;
