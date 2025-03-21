@@ -34,7 +34,7 @@ export class idOS {
 
   private constructor({ enclaveOptions, kwilWrapper }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
-    this.store = new Store();
+    this.store = new Store(window.localStorage);
     this.kwilWrapper = kwilWrapper;
 
     this.auth = new Auth(kwilWrapper, this.store);
@@ -42,9 +42,9 @@ export class idOS {
     if (!enclaveOptions || !enclaveOptions.container)
       throw new Error("`enclaveOptions.container` must be provided");
 
-    this.enclave = new Enclave(this.auth, new IframeEnclave(enclaveOptions));
+    this.enclave = new Enclave(new IframeEnclave(enclaveOptions));
 
-    this.data = new Data(kwilWrapper, this.enclave);
+    this.data = new Data(kwilWrapper, this.enclave, this.auth);
 
     this.grants = new Grants({ kwilWrapper: this.kwilWrapper });
   }
@@ -56,7 +56,7 @@ export class idOS {
       ...params,
       kwilWrapper: await KwilWrapper.init(params),
     });
-    await idos.enclave.load();
+    await idos.enclave.enclaveProvider.load();
 
     return idos;
   }
@@ -90,7 +90,7 @@ export class idOS {
   async reset({ enclave = false } = {}): Promise<void> {
     this.store.reset();
     idOS.initializing = false;
-    if (enclave) await this.enclave.reset();
+    if (enclave) await this.enclave.enclaveProvider.reset();
   }
 
   get nodeUrl(): string {
@@ -98,6 +98,7 @@ export class idOS {
   }
 
   async backupPasswordOrSecret() {
+    await this.enclave.ready(this.auth);
     return this.enclave.backupPasswordOrSecret();
   }
 

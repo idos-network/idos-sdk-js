@@ -11,7 +11,7 @@ const currentUserPublicKey = "<PUBLIC_KEY>";
 
 describe("auth", () => {
   beforeEach(() => {
-    auth = new Auth(new KwilWrapper(new TestKwilClient()), new Store());
+    auth = new Auth(new KwilWrapper(new TestKwilClient()), new Store(window.localStorage));
 
     auth.kwilWrapper.getUserProfile = vi.fn().mockResolvedValue({
       recipient_encryption_public_key: currentUserPublicKey,

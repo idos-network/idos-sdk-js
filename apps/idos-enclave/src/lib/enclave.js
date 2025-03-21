@@ -321,7 +321,6 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme],
           storage: () => [userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
-          updateStore: () => [key, value],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
         }[requestName];
@@ -339,10 +338,6 @@ export class Enclave {
         event.ports[0].close();
       }
     });
-  }
-
-  updateStore(key, value) {
-    this.store.set(key, value);
   }
 
   async handleIdosStore(payload) {

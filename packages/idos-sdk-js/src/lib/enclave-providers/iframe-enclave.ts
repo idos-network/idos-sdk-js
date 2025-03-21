@@ -69,10 +69,6 @@ export class IframeEnclave implements EnclaveProvider {
     this.requestToEnclave({ reset: {} });
   }
 
-  async updateStore(key: string, value: unknown): Promise<void> {
-    await this.requestToEnclave({ updateStore: { key, value } });
-  }
-
   async confirm(message: string): Promise<boolean> {
     this.showEnclave();
 
