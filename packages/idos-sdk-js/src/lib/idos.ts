@@ -34,7 +34,7 @@ export class idOS {
 
   private constructor({ enclaveOptions, kwilWrapper }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
-    this.store = new Store();
+    this.store = new Store(window.localStorage);
     this.kwilWrapper = kwilWrapper;
 
     this.auth = new Auth(kwilWrapper, this.store);

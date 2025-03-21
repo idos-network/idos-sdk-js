@@ -9,7 +9,7 @@ import { idOSKeyDerivation } from "./idOSKeyDerivation";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
-    this.store = new Store();
+    this.store = new Store(window.localStorage);
     this.authorizedOrigins = JSON.parse(this.store.get("enclave-authorized-origins") ?? "[]");
 
     this.unlockButton = document.querySelector("button#unlock");

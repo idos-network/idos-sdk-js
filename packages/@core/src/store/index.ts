@@ -8,7 +8,7 @@ export class Store {
 
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
 
-  constructor() {
+  constructor(public storage: Storage) {
     if (this.hasRememberDurationElapsed()) this.reset();
   }
 
@@ -80,21 +80,21 @@ export class Store {
   }
 
   private _getLocalStorage(key: string) {
-    return window.localStorage.getItem(`${this.keyPrefix}${key}`);
+    return this.storage.getItem(`${this.keyPrefix}${key}`);
   }
 
   private _setLocalStorage(key: string, value: string) {
-    return window.localStorage.setItem(`${this.keyPrefix}${key}`, value);
+    return this.storage.setItem(`${this.keyPrefix}${key}`, value);
   }
 
   private _removeLocalStorage(key: string) {
-    return window.localStorage.removeItem(`${this.keyPrefix}${key}`);
+    return this.storage.removeItem(`${this.keyPrefix}${key}`);
   }
 
   reset() {
-    for (const key of Object.keys(window.localStorage)) {
+    for (const key of Object.keys(this.storage)) {
       if (key === "idOS-credential-id") continue;
-      if (key.startsWith(this.keyPrefix)) window.localStorage.removeItem(key);
+      if (key.startsWith(this.keyPrefix)) this.storage.removeItem(key);
     }
   }
 }
