@@ -53,7 +53,7 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
-    public readonly auth: Auth,
+    private readonly auth: Auth,
   ) {}
 
   singularize(tableName: string): string {
