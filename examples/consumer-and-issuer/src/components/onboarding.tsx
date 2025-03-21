@@ -286,7 +286,7 @@ export function Onboarding() {
           });
           const result = await isle.requestDelegatedWriteGrant({
             consumer: {
-              consumerPublicKey: process.env.NEXT_PUBLIC_CONSUMER_PUBLIC_KEY,
+              consumerPublicKey: process.env.NEXT_PUBLIC_CONSUMER_PUBLIC_KEY as string,
               meta: {
                 url: "https://consumer-and-issuer-demo.vercel.app/",
                 name: "NeoBank",
