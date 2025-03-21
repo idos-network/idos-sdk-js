@@ -90,7 +90,7 @@ export class idOS {
   async reset({ enclave = false } = {}): Promise<void> {
     this.store.reset();
     idOS.initializing = false;
-    if (enclave) await this.enclave.reset();
+    if (enclave) await this.enclave.enclaveProvider.reset();
   }
 
   get nodeUrl(): string {
