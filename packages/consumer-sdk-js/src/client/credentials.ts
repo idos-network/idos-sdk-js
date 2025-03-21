@@ -53,12 +53,12 @@ export async function createCredentialCopy(
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-  const enclave = new IframeEnclave({ ...enclaveOptions, mode: "existing" });
+  const enclaveProvider = new IframeEnclave({ ...enclaveOptions, mode: "existing" });
 
-  await enclave.load();
-  await enclave.ready();
+  await enclaveProvider.load();
+  await enclaveProvider.ready();
 
-  const { content, encryptorPublicKey } = await enclave.encrypt(
+  const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
     utf8Encode(originalCredential.content),
     base64Decode(consumerRecipientEncryptionPublicKey),
   );

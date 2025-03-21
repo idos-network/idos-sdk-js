@@ -17,10 +17,6 @@ export class Enclave {
     public readonly provider: EnclaveProvider,
   ) {}
 
-  async load() {
-    await this.provider.load();
-  }
-
   async ready(): Promise<Uint8Array> {
     const { userId, userAddress, nearWalletPublicKey, currentUserPublicKey } =
       this.auth.currentUser;
