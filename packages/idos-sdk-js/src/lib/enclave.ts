@@ -7,8 +7,8 @@ import {
 } from "@idos-network/core";
 import invariant from "tiny-invariant";
 
+import type { EnclaveProvider } from "@idos-network/controllers/enclave";
 import type { Auth } from "./auth";
-import type { EnclaveProvider } from "./enclave-providers/types";
 
 export class Enclave {
   userEncryptionPublicKey?: Uint8Array;
