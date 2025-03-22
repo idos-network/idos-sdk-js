@@ -643,9 +643,6 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
-      '@idos-network/idos-sdk':
-        specifier: workspace:*
-        version: link:../idos-sdk-js
       '@sanity/comlink':
         specifier: ^3.0.1
         version: 3.0.1
@@ -763,6 +760,9 @@ importers:
       '@digitalbazaar/vc':
         specifier: ^6.0.2
         version: 6.3.0(web-streams-polyfill@3.3.3)
+      '@idos-network/controllers':
+        specifier: workspace:*
+        version: link:../@controllers
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
         version: 0.9.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)

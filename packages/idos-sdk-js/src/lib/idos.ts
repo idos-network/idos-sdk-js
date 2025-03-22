@@ -1,3 +1,4 @@
+import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/enclave";
 import { Store } from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
@@ -5,8 +6,6 @@ import type { Signer } from "ethers";
 import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
-import { IframeEnclave } from "./enclave-providers";
-import type { EnclaveOptions } from "./enclave-providers/types";
 import { Grants } from "./grants";
 import type idOSGrant from "./grants/grant";
 import { KwilWrapper } from "./kwil-wrapper";
