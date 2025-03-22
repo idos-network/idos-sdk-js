@@ -1,2 +1,2 @@
 export * from "./isle";
-export * from "./secure-enclave";
+export * from "./enclave";

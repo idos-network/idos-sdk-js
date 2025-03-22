@@ -1,4 +1,4 @@
-import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/secure-enclave";
+import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/enclave";
 import {
   type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,

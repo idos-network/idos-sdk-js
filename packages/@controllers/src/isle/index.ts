@@ -44,8 +44,8 @@ import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
-import { IframeEnclave } from "../secure-enclave";
-import type { EnclaveOptions, EnclaveProvider } from "../secure-enclave/types";
+import { IframeEnclave } from "../enclave";
+import type { EnclaveOptions, EnclaveProvider } from "../enclave/types";
 
 /**
  * Meta information about an actor.
