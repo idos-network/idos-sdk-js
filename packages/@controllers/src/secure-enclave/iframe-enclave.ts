@@ -1,7 +1,6 @@
 import { base64Encode, type idOSCredential } from "@idos-network/core";
 
 import type {
-  BackupPasswordInfo,
   DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
