@@ -7,7 +7,7 @@ import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants";
-import type idOSGrant from "./grants/grant";
+import type idOSGrant from "./grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
 

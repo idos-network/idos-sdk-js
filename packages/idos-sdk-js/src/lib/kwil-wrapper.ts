@@ -5,7 +5,7 @@ import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/d
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 
-import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants/grant";
+import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants";
 
 export class KwilWrapper {
   static defaults = {
