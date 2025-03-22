@@ -15,6 +15,7 @@ export class IframeEnclave implements EnclaveProvider {
 
   constructor(options: EnclaveOptions) {
     const { container, ...other } = options;
+
     this.container = container;
     this.options = other;
     this.hostUrl = new URL(other.url ?? "https://enclave.idos.network");

@@ -31,30 +31,35 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({ enclaveOptions, kwilWrapper }: InitParams & { kwilWrapper: KwilWrapper }) {
+  private constructor(
+    auth: Auth,
+    data: Data,
+    enclave: Enclave,
+    kwilWrapper: KwilWrapper,
+    grants: Grants,
+    store: Store,
+  ) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
-    this.store = new Store(window.localStorage);
+
+    this.auth = auth;
+    this.data = data;
+    this.enclave = enclave;
     this.kwilWrapper = kwilWrapper;
-
-    this.auth = new Auth(kwilWrapper, this.store);
-
-    if (!enclaveOptions || !enclaveOptions.container)
-      throw new Error("`enclaveOptions.container` must be provided");
-
-    this.enclave = new Enclave(new IframeEnclave(enclaveOptions));
-
-    this.data = new Data(kwilWrapper, this.enclave, this.auth);
-
-    this.grants = new Grants({ kwilWrapper: this.kwilWrapper });
+    this.grants = grants;
+    this.store = store;
   }
 
-  static async init(params: InitParams): Promise<idOS> {
-    idOS.initializing = true;
+  static async init({ enclaveOptions, nodeUrl }: InitParams): Promise<idOS> {
+    const enclave = new Enclave(new IframeEnclave(enclaveOptions));
+    const store = new Store(window.localStorage);
+    const kwilWrapper = await KwilWrapper.init({ nodeUrl });
+    const auth = new Auth(kwilWrapper, store);
+    const data = new Data(kwilWrapper, enclave, auth);
+    const grants = new Grants({ kwilWrapper });
 
-    const idos = new idOS({
-      ...params,
-      kwilWrapper: await KwilWrapper.init(params),
-    });
+    idOS.initializing = true;
+    const idos = new idOS(auth, data, enclave, kwilWrapper, grants, store);
+
     await idos.enclave.enclaveProvider.load();
 
     return idos;
