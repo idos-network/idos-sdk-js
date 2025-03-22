@@ -1,14 +1,5 @@
 import type { idOSCredential } from "@idos-network/core";
 
-export type BackupPasswordInfo = {
-  data: {
-    payload: {
-      accessControlConditions: string[];
-      passwordCiphers: { ciphertext: string; dataToEncryptHash: string };
-    };
-  };
-};
-
 export interface StoredData {
   encryptionPublicKey?: Uint8Array;
   userId?: string;
