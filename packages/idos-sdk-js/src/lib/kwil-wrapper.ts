@@ -5,8 +5,6 @@ import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/d
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
 import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 
-import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grants";
-
 export class KwilWrapper {
   static defaults = {
     kwilProvider: import.meta.env.VITE_IDOS_NODE_URL,
@@ -131,38 +129,5 @@ export class KwilWrapper {
     )) as any;
 
     return !!result[0]?.has_profile;
-  }
-
-  async getGrantsGrantedCount(): Promise<number> {
-    const response = (await this.call("get_access_grants_granted_count", null)) as unknown as {
-      count: number;
-    }[];
-    return response[0].count;
-  }
-
-  async getGrantsGranted(
-    page: number,
-    size = DEFAULT_RECORDS_PER_PAGE,
-  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
-    if (!page) throw new Error("paging starts from 1");
-    // biome-ignore lint/suspicious/noExplicitAny: TBD
-    const list = (await this.call("get_access_grants_granted", { page, size })) as any;
-    const totalCount = await this.getGrantsGrantedCount();
-
-    const grants = list.map(
-      // biome-ignore lint/suspicious/noExplicitAny: TBD
-      (grant: any) =>
-        new idOSGrant({
-          id: grant.id,
-          ownerUserId: grant.ag_owner_user_id,
-          consumerAddress: grant.ag_grantee_wallet_identifier,
-          dataId: grant.data_id,
-          lockedUntil: grant.locked_until,
-        }),
-    );
-    return {
-      grants,
-      totalCount,
-    };
   }
 }
