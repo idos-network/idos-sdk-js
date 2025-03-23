@@ -105,8 +105,4 @@ export class idOS {
     await this.enclave.ready(this.auth);
     return this.enclave.backupPasswordOrSecret();
   }
-
-  async discoverUserEncryptionPublicKey(userId: string) {
-    return this.enclave.enclaveProvider.discoverUserEncryptionPublicKey(userId);
-  }
 }
