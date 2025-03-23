@@ -1,5 +1,5 @@
 import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/enclave";
-import { Store } from "@idos-network/core";
+import { CHAIN_TYPES, type ChainType, Store } from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
@@ -10,8 +10,6 @@ import { Grants } from "./grants";
 import type idOSGrant from "./grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
-
-export type SignerType = "EVM" | "NEAR";
 
 interface InitParams {
   nodeUrl?: string;
@@ -69,9 +67,8 @@ export class idOS {
 
   async setSigner(type: "EVM", signer: Signer): Promise<AuthUser>;
 
-  async setSigner(type: SignerType, signer: Wallet | Signer): Promise<AuthUser> {
-    const recognizedTypes = ["NEAR", "EVM"];
-    if (!recognizedTypes.includes(type)) throw new Error(`Signer type "${type}" not recognized`);
+  async setSigner(type: ChainType, signer: Wallet | Signer): Promise<AuthUser> {
+    if (!CHAIN_TYPES.includes(type)) throw new Error(`Signer type "${type}" not recognized`);
 
     type === "EVM" && (await this.auth.setEvmSigner(signer as Signer));
     type === "NEAR" && (await this.auth.setNearSigner(signer as Wallet));

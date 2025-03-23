@@ -1,3 +1,6 @@
+export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
+export type ChainType = (typeof CHAIN_TYPES)[number];
+
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
 export interface idOSUser {
