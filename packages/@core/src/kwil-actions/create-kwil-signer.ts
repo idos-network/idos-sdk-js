@@ -55,13 +55,10 @@ export function createKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAdd
   }
 
   if (isNearKeyPair(signer)) {
+    const publicKey = implicitAddressFromPublicKey(signer.getPublicKey().toString());
     return [
-      new KwilSigner(
-        kwilNep413Signer("idos-issuer")(signer),
-        implicitAddressFromPublicKey(signer.getPublicKey().toString()),
-        "nep413",
-      ),
-      implicitAddressFromPublicKey(signer.getPublicKey().toString()),
+      new KwilSigner(kwilNep413Signer("idos-issuer")(signer), publicKey, "nep413"),
+      publicKey,
     ];
   }
 
