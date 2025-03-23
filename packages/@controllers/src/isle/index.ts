@@ -469,7 +469,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     const { address } = getAccount(wagmiConfig);
 
     await enclaveProvider.load();
-    await enclaveProvider.ready(user.id, address, user.recipient_encryption_public_key);
+    await enclaveProvider.ready(user.id, user.recipient_encryption_public_key);
 
     const decrypted = await enclaveProvider.decrypt(
       base64Decode(credential.content),
