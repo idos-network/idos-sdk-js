@@ -30,13 +30,14 @@ export async function getUserEncryptionPublicKey(
   userId: string,
   enclaveOptions: Omit<EnclaveOptions, "mode">,
 ) {
+  // TODO(pkoch): this should be provided as an argument
   let enclaveProvider: IframeEnclave | null = new IframeEnclave({
     ...enclaveOptions,
     mode: "new",
   });
 
   await enclaveProvider.load();
-  await enclaveProvider.reset();
+  await enclaveProvider.reset(); // TODO(pkoch): this should not be called here, as it wipes the password
   const publicKey = await enclaveProvider.discoverUserEncryptionPublicKey(userId);
   enclaveProvider = null;
   document.querySelector(enclaveOptions.container)?.children[0].remove();

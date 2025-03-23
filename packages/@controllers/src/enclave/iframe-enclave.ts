@@ -29,7 +29,7 @@ export class IframeEnclave implements EnclaveProvider {
     await this.requestToEnclave({ configure: this.options });
   }
 
-  async ready(userId?: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
+  async ready(userId: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
     let { encryptionPublicKey: userEncryptionPublicKey } = (await this.requestToEnclave({
       storage: {
         userId,

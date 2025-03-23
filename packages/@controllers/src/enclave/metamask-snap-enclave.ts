@@ -35,7 +35,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
       });
   }
 
-  async ready(userId?: string): Promise<Uint8Array> {
+  async ready(userId: string): Promise<Uint8Array> {
     let { encryptionPublicKey } = JSON.parse(await this.invokeSnap("storage", { userId }));
 
     encryptionPublicKey ||= await this.invokeSnap("init");

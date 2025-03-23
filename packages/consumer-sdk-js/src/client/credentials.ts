@@ -53,10 +53,10 @@ export async function createCredentialCopy(
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
+  // TODO(pkoch): this should be provided as an argument
   const enclaveProvider = new IframeEnclave({ ...enclaveOptions, mode: "existing" });
-
   await enclaveProvider.load();
-  await enclaveProvider.ready();
+  await enclaveProvider.ready("FIXME", "FIXME"); // TODO(pkoch): missing userId and currentUserPublicKey
 
   const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
     utf8Encode(originalCredential.content),

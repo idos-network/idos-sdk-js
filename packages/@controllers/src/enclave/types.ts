@@ -21,7 +21,7 @@ export interface EnclaveOptions {
 export interface EnclaveProvider {
   load(): Promise<void>;
 
-  ready(userId?: string, currentUserEncryptionPublicKey?: string): Promise<Uint8Array>;
+  ready(userId: string, currentUserEncryptionPublicKey?: string): Promise<Uint8Array>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   encrypt(
