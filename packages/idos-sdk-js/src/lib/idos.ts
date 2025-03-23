@@ -100,9 +100,4 @@ export class idOS {
   get nodeUrl(): string {
     return this.kwilWrapper.kwilProvider;
   }
-
-  async backupPasswordOrSecret() {
-    await this.enclave.ready(this.auth);
-    return this.enclave.backupPasswordOrSecret();
-  }
 }
