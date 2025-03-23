@@ -7,7 +7,6 @@ import { Auth, type AuthUser } from "./auth";
 import { Data } from "./data";
 import { Enclave } from "./enclave";
 import { Grants } from "./grants";
-import type idOSGrant from "./grants";
 import { KwilWrapper } from "./kwil-wrapper";
 import verifiableCredentials from "./verifiable-credentials";
 
@@ -79,13 +78,6 @@ export class idOS {
 
   async hasProfile(userAddress: string): Promise<boolean> {
     return this.kwilWrapper.hasProfile(userAddress);
-  }
-
-  async listGrantedGrants(
-    page: number,
-    size?: number,
-  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
-    return this.kwilWrapper.getGrantsGranted(page, size);
   }
 
   async reset({ enclave = false } = {}): Promise<void> {
