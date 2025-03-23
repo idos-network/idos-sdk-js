@@ -107,6 +107,6 @@ export class idOS {
   }
 
   async discoverUserEncryptionPublicKey(userId: string) {
-    return this.enclave.discoverUserEncryptionPublicKey(userId);
+    return this.enclave.enclaveProvider.discoverUserEncryptionPublicKey(userId);
   }
 }

@@ -76,8 +76,4 @@ export class Enclave {
 
     return this.enclaveProvider.backupPasswordOrSecret();
   }
-
-  async discoverUserEncryptionPublicKey(userId: string) {
-    return this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
-  }
 }
