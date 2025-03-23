@@ -29,7 +29,6 @@ export interface EnclaveProvider {
     signerPublicKey?: string,
     currentUserEncryptionPublicKey?: string,
   ): Promise<Uint8Array>;
-  store(key: string, value: string): Promise<string>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   encrypt(

@@ -62,10 +62,6 @@ export class IframeEnclave implements EnclaveProvider {
     return userEncryptionPublicKey;
   }
 
-  async store(key: string, value: string): Promise<string> {
-    return this.requestToEnclave({ storage: { [key]: value } }) as Promise<string>;
-  }
-
   async reset(): Promise<void> {
     this.requestToEnclave({ reset: {} });
   }

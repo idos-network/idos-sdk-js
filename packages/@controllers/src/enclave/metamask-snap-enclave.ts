@@ -65,10 +65,6 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     });
   }
 
-  async store(key: string, value: string): Promise<string> {
-    return this.invokeSnap("storage", { [key]: value });
-  }
-
   async reset(): Promise<void> {
     return this.invokeSnap("reset");
   }
