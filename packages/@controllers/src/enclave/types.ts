@@ -21,7 +21,7 @@ export interface EnclaveOptions {
 }
 
 export interface EnclaveProvider {
-  load(): Promise<StoredData>;
+  load(): Promise<void>;
 
   ready(
     userId?: string,

@@ -23,12 +23,10 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async load(): Promise<StoredData> {
+  async load(): Promise<void> {
     await this.loadEnclave();
 
     await this.requestToEnclave({ configure: this.options });
-
-    return (await this.requestToEnclave({ storage: {} })) as StoredData;
   }
 
   async ready(
