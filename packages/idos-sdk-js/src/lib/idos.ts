@@ -93,8 +93,4 @@ export class idOS {
     idOS.initializing = false;
     if (enclave) await this.enclave.enclaveProvider.reset();
   }
-
-  get nodeUrl(): string {
-    return this.kwilWrapper.kwilProvider;
-  }
 }
