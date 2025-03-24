@@ -78,8 +78,14 @@ export class KwilActionClient {
     params: Record<string, unknown> = {},
   ): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
+
     const keys = actionSchema[actionName];
-    return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
+    return keys.map((key) => {
+      const value = params[key];
+      // Handle falsy values appropriately
+      if (value === "" || value === 0) return value;
+      return value ?? null;
+    }) as PositionalParams;
   }
 }
 
