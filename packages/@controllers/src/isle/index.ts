@@ -129,8 +129,6 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Subscribes to messages from the Isle iframe */
   on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
-  /** Starts the request for a `delegated write grant` */
-  startRequestDelegatedWriteGrant: (options: RequestPermissionOptions) => void;
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
@@ -198,7 +196,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let iframe: HTMLIFrameElement | null = null;
   let enclave: EnclaveProvider | null = null;
   const controller: Controller = createController({
-    targetOrigin: "https://isle.idos.network",
+    targetOrigin: "https://localhost:5174",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
   let signer: JsonRpcSigner | undefined;
@@ -253,7 +251,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
   };
 
-  const startRequestDelegatedWriteGrant = (options: RequestPermissionOptions) => {
+  const requestDelegatedWriteGrant = async (
+    options: RequestPermissionOptions,
+  ): Promise<
+    { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
+  > => {
     send("update", {
       status: "not-verified",
     });
@@ -267,13 +269,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         KYCPermissions: options.KYCPermissions,
       },
     });
-  };
 
-  const requestDelegatedWriteGrant = async (
-    options: RequestPermissionOptions,
-  ): Promise<
-    { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
-  > => {
     const { address } = getAccount(wagmiConfig);
     const currentTimestamp = Date.now();
     const currentDate = new Date(currentTimestamp);
@@ -704,7 +700,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
   // @todo: make the domain environment aware.
-  iframe.src = "https://isle.idos.network";
+  iframe.src = "https://localhost:5174";
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
@@ -830,7 +826,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     destroy,
     send,
     on,
-    startRequestDelegatedWriteGrant,
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,

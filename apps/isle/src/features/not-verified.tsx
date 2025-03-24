@@ -193,15 +193,6 @@ export function NotVerified() {
           <RequestedPermissions values={meta?.KYCPermissions ?? []} />
           <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
-        <Button
-          loading={status === "pending"}
-          loadingText="Requesting permissions"
-          onClick={() => {
-            node?.post("request-dwg", {});
-          }}
-        >
-          Request permissions
-        </Button>
       </Stack>
     </Stack>
   );
