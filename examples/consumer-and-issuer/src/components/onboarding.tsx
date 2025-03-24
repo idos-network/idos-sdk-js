@@ -69,7 +69,7 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
 
       return {
         hasProfile: hasUserProfile,
-        idvUserId,
+        idvUserId: JSON.parse(idvUserId).idvUserId,
         idOSProfile,
       };
     },
@@ -85,7 +85,6 @@ export const useCreateIDVAttribute = () => {
       idvUserId: string;
       signature: string;
       signer: JsonRpcSigner;
-      userId: string;
     }) => {
       const { signer } = data;
       const config = await createIssuerConfig({
@@ -95,8 +94,7 @@ export const useCreateIDVAttribute = () => {
       return createAttribute(config.kwilClient, {
         id: crypto.randomUUID(),
         attribute_key: "idvUserId",
-        value: data.idvUserId,
-        user_id: data.userId,
+        value: JSON.stringify({ idvUserId: data.idvUserId }),
       });
     },
   });
@@ -317,6 +315,7 @@ export function Onboarding() {
 
       if (response) {
         const { signature, writeGrant } = response;
+        console.log("writeGrant", writeGrant);
 
         await createCredential(
           freshUserData.idvUserId,
@@ -340,20 +339,6 @@ export function Onboarding() {
     }
   }, [isle, refetchUserData, signer]);
 
-  // Register the request-dwg handler in a separate effect
-  useEffect(() => {
-    if (!isle) return;
-    if (!userData?.hasProfile || !userData?.idvUserId || !userData?.idOSProfile) return;
-    if (hasRegisteredDWGHandler.current) return;
-
-    isle.on("request-dwg", handleCredentialIssuance);
-    hasRegisteredDWGHandler.current = true;
-
-    return () => {
-      hasRegisteredDWGHandler.current = false;
-    };
-  }, [isle, userData, handleCredentialIssuance]);
-
   useEffect(() => {
     if (!isle) return;
 
@@ -365,28 +350,11 @@ export function Onboarding() {
     if (idvStatus === "rejected" && status === "not-verified") return;
     if (idvStatus === "approved" && status === "request-permissions") return;
 
-    if (idvStatus === "approved" && status !== "request-permissions" && !hasStartedDWG.current) {
+    if (idvStatus === "approved" && status === "request-permissions" && !hasStartedDWG.current) {
       console.log("IDV verification approved, starting delegated write grant...");
       hasStartedDWG.current = true;
       setStatus("request-permissions");
-      isle.startRequestDelegatedWriteGrant({
-        consumer: {
-          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          meta: {
-            url: "https://consumer-and-issuer-demo.vercel.app/",
-            name: "NeoBank",
-            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
-          },
-        },
-        KYCPermissions: [
-          "Name and last name",
-          "Gender",
-          "Country and city of residence",
-          "Place and date of birth",
-          "ID Document",
-          "Liveness check (No pictures)",
-        ],
-      });
+      handleCredentialIssuance();
     } else if (idvStatus === "rejected") {
       console.log("IDV verification rejected");
       setStatus("not-verified");
@@ -398,7 +366,7 @@ export function Onboarding() {
       setStatus("pending-verification");
       // Don't send update here since we want to keep the UI state
     }
-  }, [idvStatus, isle, status]);
+  }, [idvStatus, isle, status, handleCredentialIssuance]);
 
   // Add logging for idvStatus changes
   useEffect(() => {
@@ -458,7 +426,6 @@ export function Onboarding() {
           idvUserId,
           signature,
           signer,
-          userId: freshUserData.idOSProfile.id,
         });
 
         // Refetch user data to get the new idvUserId
