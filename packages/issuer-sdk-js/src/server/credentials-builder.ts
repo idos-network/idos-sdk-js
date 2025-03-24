@@ -61,7 +61,7 @@ export interface CredentialSubject {
   governmentId?: string;
 
   /* Type of government identifier (e.g., Social Security Number, Tax ID, etc.). */
-  governmentIdType: string;
+  governmentIdType?: string;
 
   /* Date of birth of the individual. */
   dateOfBirth: Date;
