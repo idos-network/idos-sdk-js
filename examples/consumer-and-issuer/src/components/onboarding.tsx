@@ -292,7 +292,6 @@ export function Onboarding() {
     if (!isleController) return;
 
     const cleanup = isleController.onMessage(async (message) => {
-      console.log("message", message);
       switch (message.type) {
         case "create-profile":
           await handleCreateProfile();
