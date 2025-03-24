@@ -1,12 +1,10 @@
 import {
-  base64Decode,
   base64Encode,
-  hexEncode,
+  buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
   type idOSCredential,
   utf8Encode,
 } from "@idos-network/core";
-import nacl from "tweetnacl";
 import type { Auth } from "./auth";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
@@ -428,56 +426,24 @@ export class Data {
     userId: string,
     publicNotes: string,
     plaintextContent: string,
-    receiverEncryptionPublicKey: string | undefined,
-    // @todo: use plain argument instead of object
+    receiverEncryptionPublicKey: string,
     grantInfo?: {
       consumerAddress: string;
       lockedUntil: number;
     },
   ): Promise<InsertableIDOSCredential> {
-    const issuerAuthenticationKeyPair = nacl.sign.keyPair();
-
-    if (!receiverEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
-
     const { content, encryptorPublicKey } = await this.enclave.encrypt(
       plaintextContent,
       receiverEncryptionPublicKey,
     );
-    const publicNotesSignature = nacl.sign.detached(
-      utf8Encode(publicNotes),
-      issuerAuthenticationKeyPair.secretKey,
-    );
 
-    const grantInfoParam = grantInfo
-      ? {
-          grantee_wallet_identifier: grantInfo.consumerAddress,
-          locked_until: grantInfo.lockedUntil,
-        }
-      : {};
-
-    return {
-      user_id: userId,
+    return buildInsertableIDOSCredential(
+      userId,
+      publicNotes,
       content,
-
-      public_notes: publicNotes,
-      public_notes_signature: base64Encode(publicNotesSignature),
-
-      broader_signature: base64Encode(
-        nacl.sign.detached(
-          Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-          issuerAuthenticationKeyPair.secretKey,
-        ),
-      ),
-
-      issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
-      encryptor_public_key: isPresent(encryptorPublicKey),
-      ...grantInfoParam,
-    };
+      receiverEncryptionPublicKey,
+      encryptorPublicKey,
+      grantInfo,
+    );
   }
 }
-
-const isPresent = <T>(obj: T | undefined | null): T => {
-  // @todo: better error message.
-  if (!obj) throw new Error("Unexpected absence");
-  return obj;
-};
