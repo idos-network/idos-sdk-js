@@ -4,6 +4,7 @@ import {
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
+  type IsleStatus,
   type IsleTheme,
   type KwilActionClient,
   getUserProfile as _getUserProfile,
@@ -146,6 +147,11 @@ interface idOSIsleController {
   toggleAnimation: ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => void;
   /** Complete the verification process */
   completeVerification: () => void;
+
+  /** Update the status of the idOS Isle instance */
+  updateIsleStatus: (status: IsleStatus) => void;
+  /** Subscribe to status changes */
+  onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -796,6 +802,27 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     iframe = null;
   };
 
+  const updateIsleStatus = async (status: IsleStatus): Promise<void> => {
+    const payload = {
+      status,
+    };
+
+    if (status === "verified") {
+      const { permissions } = await getPermissions();
+      Object.assign(payload, { accessGrants: permissions });
+    }
+
+    send("update", payload);
+  };
+
+  const onIsleStatusChange = (handler: (status: IsleStatus) => void) => {
+    return on("updated", ({ data }) => {
+      if (data.status) {
+        handler(data.status);
+      }
+    });
+  };
+
   // Return the public interface
   return {
     connect,
@@ -811,5 +838,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     getUserProfile,
     toggleAnimation,
     completeVerification,
+    updateIsleStatus,
+    onIsleStatusChange,
   };
 };
