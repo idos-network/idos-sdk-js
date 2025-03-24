@@ -130,6 +130,88 @@ const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
 
 In order to write a credential to idOS, the issuer needs to obtain permission from the user. This can be done in two ways: using Delegated Write Grant (DWG), or using Permissioned Credential Creation. Below are the two methods for writing credentials.
 
+### Building credential content
+
+First option is to build credentials (and sign) manually:
+
+```typescript
+const credentialContent = {
+  "@context": [
+    "https://www.w3.org/2018/credentials/v1",
+  ],
+  id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
+  type: ["VerifiableCredential"],
+  issuer: "https://vc-issuers.cool-issuer.id/",
+  level: "human",
+  credentialSubject: {
+    id: "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
+    name: "John Doe",
+    email: "johndoe@example.com",
+    country: "USA",
+  },
+  issuanceDate: "2022-06-01T12:00:00Z",
+  expirationDate: "2022-06-30T12:00:00Z",
+  proof: {
+    type: "Ed25519Signature2020",
+    created: "2022-06-01T12:00:00Z",
+    verificationMethod: "https://vc-issuers.fractal.id/idos/keys/1",
+    proofPurpose: "assertionMethod",
+    proofValue: "z22DAdBQgJXUh69e4y9a7t7n9f6c7m7b8a6v6w5z4x3y2x1w",
+  },
+};
+```
+
+Secondly you can use a credentials-builder, which help you to create a proper `VerifiableCredentials` object:
+
+```js
+import { buildCredentials } from "@idos-network/issuer-sdk-js/server";
+
+const credentialFields = {
+  id: `uuid:${session.id}`,
+  level: "human",
+  issued: new Date(),
+  approvedAt: new Date(),
+}
+
+const credentialSubject = {
+  id: `uuid:${user.id}`,
+  firstName: "John",
+  familyName: "Doe",
+  dateOfBirth: new Date(),
+  placeOfBirth: "New York",
+  idDocumentCountry: "US",
+  idDocumentNumber: "293902002",
+  idDocumentType: "ID",
+  idDocumentDateOfIssue: new Date(),
+  idDocumentDateOfExpiry: new Date(),
+  idDocumentFrontFile: Buffer.from("SOME_IMAGE"),
+  selfieFile: Buffer.from("SOME_IMAGE"),
+  residentialAddress: {
+    street: "Main St",
+    houseNumber: "123",
+    additionalAddressInfo: "Apt 1",
+    city: "New York",
+    postalCode: "10001",
+    country: "US",
+  },
+  residentialAddressProofFile: Buffer.from("SOME_IMAGE"),
+  residentialAddressProofCategory: "UTILITY_BILL",
+  residentialAddressProofDateOfIssue: new Date(),
+}
+
+const issuer = {
+  name: "https://vc-issuers.example.com/idos",
+  publicKeyMultibase: "PUBLIC_MULTIBASE_KEY",
+  privateKeyMultibase: "PRIVATE_KEY_MULTIBASE",
+}
+
+const credentialSubject = await buildCredentials(
+  credentialFields,
+  credentialSubject,
+  issuer,
+);
+```
+
 ### Using Delegated Write Grant
 The first method involves getting permission from the user via a Delegated Write Grant
 
@@ -205,30 +287,7 @@ const credentialsPublicNotes = {
   issuer: "MyCoolIssuer",
 }
 
-const credentialContent = JSON.stringify({
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-  ],
-  id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
-  type: ["VerifiableCredential"],
-  issuer: "https://vc-issuers.cool-issuer.id/",
-  level: "human",
-  credentialSubject: {
-    id: "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
-    name: "John Doe",
-    email: "johndoe@example.com",
-    country: "USA",
-  },
-  issuanceDate: "2022-06-01T12:00:00Z",
-  expirationDate: "2022-06-30T12:00:00Z",
-  proof: {
-    type: "Ed25519Signature2020",
-    created: "2022-06-01T12:00:00Z",
-    verificationMethod: "https://vc-issuers.fractal.id/idos/keys/1",
-    proofPurpose: "assertionMethod",
-    proofValue: "z22DAdBQgJXUh69e4y9a7t7n9f6c7m7b8a6v6w5z4x3y2x1w",
-  },
-})
+const credentialContent = JSON.stringify("Content from previous section");
 
 const credentialPayload = {
   id: crypto.randomUUID(),

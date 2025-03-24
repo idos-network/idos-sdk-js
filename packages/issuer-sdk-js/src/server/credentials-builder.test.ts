@@ -6,14 +6,14 @@ describe("buildVerifiableCredentials", () => {
   it("should create a verifiable vc", async () => {
     const data = await buildCredentials(
       {
-        id: "did:example:1234#z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
+        id: "uuid:z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
         level: "human",
         issued: new Date("2022-01-01"),
         approvedAt: new Date("2022-01-01"),
         expirationDate: new Date("2025-01-01"),
       },
       {
-        id: "did:example:1234#z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
+        id: "uuid:z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3",
         firstName: "John",
         familyName: "Lennon",
         governmentIdType: "SSN",
