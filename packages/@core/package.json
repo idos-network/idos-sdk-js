@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@kwilteam/kwil-js": "catalog:",
+    "@near-wallet-selector/core": "8.9.10",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",

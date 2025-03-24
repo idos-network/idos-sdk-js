@@ -25,9 +25,9 @@ interface KwilExecuteActionRequestParams extends KwilActionReqParams {
  * Has utility methods for creating actions and setting a signer.
  */
 export class KwilActionClient {
-  private signer?: KwilSigner;
+  public signer?: KwilSigner;
 
-  constructor(private readonly client: NodeKwil | WebKwil) {}
+  constructor(public readonly client: NodeKwil | WebKwil) {}
 
   /**
    * Calls an action on the kwil nodes. This similar to `GET` like request.

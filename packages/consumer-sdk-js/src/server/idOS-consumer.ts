@@ -8,7 +8,7 @@ import {
 import { decryptContent } from "@idos-network/core/cryptography";
 import {
   type KwilActionClient,
-  createKwilSigner,
+  createBackendKwilSigner,
   createNodeKwilClient,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
@@ -63,7 +63,7 @@ export class idOSConsumer {
       chainId,
     });
 
-    const [signer, address] = createKwilSigner(consumerSigner);
+    const [signer, address] = createBackendKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
     return new idOSConsumer(

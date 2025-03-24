@@ -668,6 +668,9 @@ importers:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
         version: 0.9.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@near-wallet-selector/core':
+        specifier: 8.9.10
+        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1

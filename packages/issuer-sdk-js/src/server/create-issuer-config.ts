@@ -1,4 +1,8 @@
-import { type KwilActionClient, createKwilSigner, createNodeKwilClient } from "@idos-network/core";
+import {
+  type KwilActionClient,
+  createBackendKwilSigner,
+  createNodeKwilClient,
+} from "@idos-network/core";
 
 export interface IssuerConfig {
   kwilClient: KwilActionClient;
@@ -19,7 +23,7 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
     chainId: params.chainId,
   });
 
-  const [signer] = createKwilSigner(params.signingKeyPair);
+  const [signer] = createBackendKwilSigner(params.signingKeyPair);
   kwilClient.setSigner(signer);
 
   return {

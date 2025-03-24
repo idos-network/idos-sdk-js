@@ -1,4 +1,3 @@
-/* cspell:disable-next-line */
 import {
   type DelegatedWriteGrantSignatureRequest,
   type IsleControllerMessage,
@@ -7,12 +6,13 @@ import {
   type IsleStatus,
   type IsleTheme,
   type KwilActionClient,
+  Store,
   getUserProfile as _getUserProfile,
   shareCredential as _shareCredential,
   base64Decode,
   base64Encode,
   buildInsertableIDOSCredential,
-  createKwilSigner,
+  createFrontendKwilSigner,
   createWebKwilClient,
   getAccessGrantsOwned,
   getAllCredentials,
@@ -198,6 +198,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
   let ownerOriginalCredentials: idOSCredential[] = [];
+  const store = new Store(window.localStorage);
 
   const ensureKwilClient = async (): Promise<KwilActionClient> => {
     if (kwilClient) return kwilClient;
@@ -210,7 +211,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       nodeUrl: "https://nodes.staging.idos.network",
     });
 
-    const [kwilSigner] = createKwilSigner(signer);
+    const [kwilSigner] = await createFrontendKwilSigner(store, client, signer);
     client.setSigner(kwilSigner);
 
     kwilClient = client;
