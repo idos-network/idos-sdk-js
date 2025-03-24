@@ -27,9 +27,9 @@ export interface idOSWallet {
 
 export interface idOSUserAttribute {
   id: string;
-  user_id: string;
   attribute_key: string;
   value: string;
+  user_id?: string;
 }
 
 export interface idOSGrant {
