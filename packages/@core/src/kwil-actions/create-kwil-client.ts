@@ -1,7 +1,6 @@
 import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
 import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
-import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 import invariant from "tiny-invariant";
 import { actionSchema } from "./schema";
 
