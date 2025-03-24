@@ -5,12 +5,12 @@ import { useClickAway } from "@uidotdev/usehooks";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 
 interface IsleContextType {
-  isle: ReturnType<typeof createIsleController> | null;
+  isleController: ReturnType<typeof createIsleController> | null;
 }
 
 const IsleContext = createContext<IsleContextType | null>(null);
 
-export function useIsle() {
+export function useIsleController() {
   const context = useContext(IsleContext);
   if (!context) {
     throw new Error("`useIsle` must be used within an `IsleProvider`");
@@ -24,12 +24,12 @@ interface IsleProviderProps {
 }
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
-  const [isle, setIsle] = useState<ReturnType<typeof createIsleController> | null>(null);
+  const [isleController, setIsle] = useState<ReturnType<typeof createIsleController> | null>(null);
 
   // Toggle isle animation from the outside
   const containerRef = useClickAway(() => {
-    if (!isle) return;
-    isle.toggleAnimation({
+    if (!isleController) return;
+    isleController.toggleAnimation({
       expanded: false,
     });
   });
@@ -38,7 +38,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || isle) return;
+    if (!container || isleController) return;
 
     const controller = createIsleController({
       container: containerId,
@@ -98,16 +98,16 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
   // Handle theme changes
   useEffect(() => {
-    if (!isle) return;
+    if (!isleController) return;
 
     const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
     const currentTheme = darkModeMediaQuery.matches ? "dark" : "light";
 
-    isle.send("update", { theme: currentTheme });
+    isleController.send("update", { theme: currentTheme });
 
     const themeChangeHandler = (e: MediaQueryListEvent) => {
       const newTheme = e.matches ? "dark" : "light";
-      isle.send("update", { theme: newTheme });
+      isleController.send("update", { theme: newTheme });
     };
 
     darkModeMediaQuery.addEventListener("change", themeChangeHandler);
@@ -115,12 +115,12 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
     return () => {
       darkModeMediaQuery.removeEventListener("change", themeChangeHandler);
     };
-  }, [isle]);
+  }, [isleController]);
 
   return (
     <div className="relative">
       {/* @ts-ignore */}
-      <IsleContext.Provider value={{ isle }}>
+      <IsleContext.Provider value={{ isleController }}>
         {children}
         <div
           ref={containerRef as React.RefObject<HTMLDivElement>}

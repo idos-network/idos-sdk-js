@@ -148,8 +148,8 @@ interface idOSIsleController {
 
   /** Update the status of the idOS Isle instance */
   updateIsleStatus: (status: IsleStatus) => void;
-  /** Subscribe to status changes */
-  onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
+  /** Subscribe to node messages */
+  onMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -811,12 +811,33 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send("update", payload);
   };
 
-  const onIsleStatusChange = (handler: (status: IsleStatus) => void) => {
-    return on("updated", ({ data }) => {
-      if (data.status) {
-        handler(data.status);
+  const onMessage = (handler: (message: IsleNodeMessage) => void) => {
+    const currentChannel = channel;
+    if (!currentChannel) return () => {};
+
+    const messageTypes: IsleNodeMessage["type"][] = [
+      "verify-identity",
+      "initialized",
+      "updated",
+      "connect-wallet",
+      "link-wallet",
+      "create-profile",
+      "request-dwg",
+      "revoke-permission",
+      "view-credential-details",
+    ];
+
+    const cleanups = messageTypes.map((type) =>
+      currentChannel.on(type, (data) => {
+        handler({ type, data } as IsleNodeMessage);
+      }),
+    );
+
+    return () => {
+      for (const cleanup of cleanups) {
+        cleanup?.();
       }
-    });
+    };
   };
 
   // Return the public interface
@@ -834,6 +855,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     toggleAnimation,
     completeVerification,
     updateIsleStatus,
-    onIsleStatusChange,
+    onMessage,
   };
 };
