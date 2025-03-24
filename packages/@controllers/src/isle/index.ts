@@ -123,6 +123,8 @@ interface idOSIsleController {
   connect: () => Promise<void>;
   /** Cleans up and removes the Isle instance */
   destroy: () => void;
+  /** Sends a message to the Isle iframe */
+  send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
@@ -879,6 +881,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   return {
     connect,
     destroy,
+    send,
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,
