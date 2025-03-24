@@ -174,7 +174,7 @@ const STEPPER_ACTIVE_INDEX = {
   "no-profile": 0,
   "not-verified": 1,
   "pending-verification": 2,
-  "request-permissions": 3,
+  "pending-permissions": 3,
   verified: 4,
 };
 
@@ -292,6 +292,7 @@ export function Onboarding() {
     if (!isleController) return;
 
     const cleanup = isleController.onMessage(async (message) => {
+      console.log("message", message);
       switch (message.type) {
         case "create-profile":
           await handleCreateProfile();
@@ -312,13 +313,30 @@ export function Onboarding() {
           break;
         }
 
+        case "request-dwg": {
+          invariant(userData.data, "`userData` not found");
+          issueCredential.mutate(
+            {
+              idvUserId: userData.data.idvUserId,
+              recipient_encryption_public_key:
+                userData.data.idOSProfile.recipient_encryption_public_key,
+            },
+            {
+              onSuccess: () => {
+                isleController.updateIsleStatus("verified");
+              },
+            },
+          );
+          break;
+        }
+
         default:
           break;
       }
     });
 
     return cleanup;
-  }, [handleCreateProfile, isleController, kycDisclosure]);
+  }, [handleCreateProfile, isleController, kycDisclosure, issueCredential, userData]);
 
   useEffect(() => {
     if (!isleController) return;

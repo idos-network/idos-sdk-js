@@ -144,9 +144,7 @@ export function NotVerified() {
         <Button
           w="full"
           onClick={() => {
-            node?.post("updated", {
-              status: "not-verified",
-            });
+            node?.post("request-dwg", {});
           }}
         >
           Try again

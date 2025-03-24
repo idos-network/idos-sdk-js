@@ -424,6 +424,7 @@ export function Permissions() {
     hasRequestedRef.current = true;
 
     node.on("update-request-access-grant-status", (data) => {
+      setGrant(null);
       setPermissionStatus(data.status);
       if (data.status === "request-permission") {
         setRequestedPermissions(data.KYCPermissions);

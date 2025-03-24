@@ -295,6 +295,10 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       // Ensure client is initialized before any UI operations
       const client = await ensureKwilClient();
 
+      send("update", {
+        status: "pending-permissions",
+      });
+
       toggleAnimation({
         expanded: true,
         noDismiss: true,
@@ -364,6 +368,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    */
   const requestPermission = async (options: RequestPermissionOptions): Promise<void> => {
     const client = await ensureKwilClient();
+
+    updateIsleStatus("verified");
 
     toggleAnimation({
       expanded: true,

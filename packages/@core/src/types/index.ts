@@ -58,6 +58,7 @@ export type IsleStatus =
   | "no-profile"
   | "not-verified"
   | "pending-verification"
+  | "pending-permissions"
   | "verified"
   | "not-connected"
   | "error";
