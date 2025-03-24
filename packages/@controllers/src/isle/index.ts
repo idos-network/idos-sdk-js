@@ -121,14 +121,8 @@ interface RequestPermissionOptions {
 interface idOSIsleController {
   /** Initiates a wallet connection process */
   connect: () => Promise<void>;
-  /** Retrieves the current signer instance if available */
-  getSigner: () => Promise<JsonRpcSigner | undefined>;
   /** Cleans up and removes the Isle instance */
   destroy: () => void;
-  /** Sends a message to the Isle iframe */
-  send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
-  /** Subscribes to messages from the Isle iframe */
-  on: <T extends IsleNodeMessage["type"]>(type: T, handler: IsleMessageHandler<T>) => () => void;
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestPermissionOptions,
@@ -139,17 +133,13 @@ interface idOSIsleController {
   revokePermission: (id: string) => Promise<unknown>;
   /** View credential details for the given `id` */
   viewCredentialDetails: (id: string) => Promise<void>;
-  /** Get the user profile */
-  getUserProfile: () => Promise<idOSUser>;
   /** Toggle ISLE animation (expand/collapse) */
   toggleAnimation: ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => void;
-  /** Complete the verification process */
-  completeVerification: () => void;
 
   /** Update the status of the idOS Isle instance */
   updateIsleStatus: (status: IsleStatus) => void;
   /** Subscribe to node messages */
-  onMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
+  onIsleMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 }
@@ -581,15 +571,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     };
   };
 
-  const completeVerification = async () => {
-    const { permissions } = await getPermissions();
-
-    send("update", {
-      status: "verified",
-      accessGrants: permissions,
-    });
-  };
-
   /**
    * View credential details for the given `id`
    */
@@ -856,7 +837,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     send("update", payload);
   };
 
-  const onMessage = (handler: (message: IsleNodeMessage) => void) => {
+  const onIsleMessage = (handler: (message: IsleNodeMessage) => void) => {
     const currentChannel = channel;
     if (!currentChannel) return () => {};
 
@@ -897,19 +878,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   // Return the public interface
   return {
     connect,
-    getSigner,
     destroy,
-    send,
-    on,
     requestDelegatedWriteGrant,
     requestPermission,
     revokePermission,
     viewCredentialDetails,
-    getUserProfile,
     toggleAnimation,
-    completeVerification,
     updateIsleStatus,
-    onMessage,
+    onIsleMessage,
     onIsleStatusChange,
   };
 };

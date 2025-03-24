@@ -291,7 +291,7 @@ export function Onboarding() {
   useEffect(() => {
     if (!isleController) return;
 
-    const cleanup = isleController.onMessage(async (message) => {
+    const cleanup = isleController.onIsleMessage(async (message) => {
       switch (message.type) {
         case "create-profile":
           await handleCreateProfile();
