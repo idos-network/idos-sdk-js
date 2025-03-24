@@ -1,6 +1,6 @@
 "use client";
 
-import { useDisclosure } from "@heroui/react";
+import { Button, useDisclosure } from "@heroui/react";
 import { createAttribute, getAttributes, hasProfile } from "@idos-network/core";
 import {
   createIssuerConfig,
@@ -10,15 +10,17 @@ import {
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/actions";
 import { useIsleController } from "@/isle.provider";
-
 import { useEthersSigner } from "@/wagmi.config";
-import invariant from "tiny-invariant";
+
+import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
+import { Stepper } from "./stepper";
 
 const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
   return useQuery({
@@ -26,7 +28,7 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
     queryFn: async () => {
       if (!signer) throw new Error("Signer is not initialized");
       const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.playground.idos.network",
+        nodeUrl: "https://nodes.staging.idos.network",
         signer,
       });
 
@@ -82,7 +84,7 @@ export const useCreateIDVAttribute = () => {
     }) => {
       const { signer } = data;
       const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.playground.idos.network",
+        nodeUrl: "https://nodes.staging.idos.network",
         signer,
       });
       return createAttribute(config.kwilClient, {
@@ -92,6 +94,88 @@ export const useCreateIDVAttribute = () => {
       });
     },
   });
+};
+
+const useIssueCredential = () => {
+  const { isleController } = useIsleController();
+
+  return useMutation({
+    mutationFn: async ({
+      idvUserId,
+      recipient_encryption_public_key,
+    }: { idvUserId: string; recipient_encryption_public_key: string }) => {
+      const dwgData = await isleController?.requestDelegatedWriteGrant({
+        consumer: {
+          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          meta: {
+            url: "https://consumer-and-issuer-demo.vercel.app/",
+            name: "NeoBank",
+            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          },
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+
+      if (!dwgData) throw new Error("DWG data not found");
+
+      const { signature, writeGrant } = dwgData;
+
+      await createCredential(
+        idvUserId,
+        recipient_encryption_public_key,
+        writeGrant.owner_wallet_identifier,
+        writeGrant.grantee_wallet_identifier,
+        writeGrant.issuer_public_key,
+        writeGrant.id,
+        writeGrant.access_grant_timelock,
+        writeGrant.not_usable_before,
+        writeGrant.not_usable_after,
+        signature,
+      );
+    },
+  });
+};
+
+const useRequestPermission = () => {
+  const { isleController } = useIsleController();
+
+  return useMutation({
+    mutationFn: async () => {
+      await isleController?.requestPermission({
+        consumer: {
+          meta: {
+            url: "https://idos.network",
+            name: "ACME Card Provider",
+            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+          },
+          consumerPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+        },
+        KYCPermissions: [
+          "Name and last name",
+          "Gender",
+          "Country and city of residence",
+          "Place and date of birth",
+          "ID Document",
+          "Liveness check (No pictures)",
+        ],
+      });
+    },
+  });
+};
+
+const STEPPER_ACTIVE_INDEX = {
+  "no-profile": 0,
+  "not-verified": 1,
+  "pending-verification": 2,
+  "request-permissions": 3,
+  verified: 4,
 };
 
 export function Onboarding() {
@@ -104,9 +188,16 @@ export function Onboarding() {
   const idvStatus = useFetchIDVStatus(userData.data?.idvUserId);
   const createIDVAttribute = useCreateIDVAttribute();
 
+  const issueCredential = useIssueCredential();
+  const requestPermission = useRequestPermission();
+
+  const hasIssuedCredential = useRef(false);
+
   const kycDisclosure = useDisclosure();
 
   const queryClient = useQueryClient();
+
+  const [stepperStatus, setStepperStatus] = useState("");
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
@@ -164,12 +255,13 @@ export function Onboarding() {
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
       invariant(userData.data?.idOSProfile, "`idOSProfile` not found");
-      invariant(signer, "`signer` is not defined");
+      invariant(signer, "`Signer` is not defined");
 
       const { idvUserId, signature } = await getUserIdFromToken(
         token,
         userData.data?.idOSProfile.id,
       );
+
       await createIDVAttribute.mutateAsync({
         idvUserId,
         signature,
@@ -188,57 +280,13 @@ export function Onboarding() {
 
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
 
-  const handleCredentialIssuance = useCallback(async () => {
-    const [error] = await goTry(async () => {
-      invariant(signer, "Signer is not initialized");
-      invariant(userData.data?.hasProfile, "IDOS Profile not found");
-      invariant(userData.data?.idvUserId, "IDV User ID not found");
-      invariant(userData.data?.idOSProfile, "IDOS User not found");
+  useEffect(() => {
+    if (!isleController) return;
 
-      const response = await isleController?.requestDelegatedWriteGrant({
-        consumer: {
-          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
-          meta: {
-            url: "https://consumer-and-issuer-demo.vercel.app/",
-            name: "NeoBank",
-            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
-          },
-        },
-        KYCPermissions: [
-          "Name and last name",
-          "Gender",
-          "Country and city of residence",
-          "Place and date of birth",
-          "ID Document",
-          "Liveness check (No pictures)",
-        ],
-      });
-
-      if (response) {
-        const { signature, writeGrant } = response;
-        console.log("writeGrant", writeGrant);
-
-        await createCredential(
-          userData.data?.idvUserId,
-          userData.data?.idOSProfile.recipient_encryption_public_key,
-          writeGrant.owner_wallet_identifier,
-          writeGrant.grantee_wallet_identifier,
-          writeGrant.issuer_public_key,
-          writeGrant.id,
-          writeGrant.access_grant_timelock,
-          writeGrant.not_usable_before,
-          writeGrant.not_usable_after,
-          signature,
-        );
-
-        isleController?.updateIsleStatus("verified");
-      }
+    return isleController.onIsleStatusChange((status) => {
+      setStepperStatus(status);
     });
-
-    if (error) {
-      console.error("Error in request-dwg handler:", error);
-    }
-  }, [isleController, signer, userData]);
+  }, [isleController]);
 
   useEffect(() => {
     if (!isleController) return;
@@ -254,13 +302,13 @@ export function Onboarding() {
           break;
         }
 
-        // @todo: figure out better API. I don't like the `updated` concept at all.
-        case "updated": {
-          if (message.data.status === "not-verified") {
-            if (idvStatus.data === "approved") {
-              // await handleCredentialIssuance();
-            }
-          }
+        case "view-credential-details": {
+          await isleController.viewCredentialDetails(message.data.id);
+          break;
+        }
+
+        case "revoke-permission": {
+          await isleController.revokePermission(message.data.id);
           break;
         }
 
@@ -270,13 +318,77 @@ export function Onboarding() {
     });
 
     return cleanup;
-  }, [isleController, handleCreateProfile, kycDisclosure, idvStatus]);
+  }, [handleCreateProfile, isleController, kycDisclosure]);
+
+  useEffect(() => {
+    if (!isleController) return;
+    if (!stepperStatus || stepperStatus === "verified") return;
+    if (hasIssuedCredential.current) return;
+
+    if (idvStatus.data === "pending") {
+      setStepperStatus("pending-verification");
+      isleController.updateIsleStatus("pending-verification");
+      return;
+    }
+
+    if (idvStatus.data === "approved") {
+      invariant(userData.data, "`userData` not found");
+      setStepperStatus("request-permissions");
+
+      hasIssuedCredential.current = true;
+
+      issueCredential.mutate(
+        {
+          idvUserId: userData.data.idvUserId,
+          recipient_encryption_public_key:
+            userData.data.idOSProfile.recipient_encryption_public_key,
+        },
+        {
+          onSuccess: () => {
+            isleController.updateIsleStatus("verified");
+          },
+          onError: (error) => {
+            console.error(error);
+          },
+        },
+      );
+    }
+  }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, stepperStatus]);
 
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
+      <Stepper
+        activeIndex={STEPPER_ACTIVE_INDEX[stepperStatus as keyof typeof STEPPER_ACTIVE_INDEX]}
+      />
       {kycDisclosure.isOpen ? (
         <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
+      ) : null}
+
+      {stepperStatus === "verified" ? (
+        <div className="mt-5 flex w-full flex-col items-center gap-2">
+          <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
+          <div className="flex w-full items-center gap-4">
+            <Card />
+            <div className="flex flex-col gap-3">
+              <p className="text-center text-lg">
+                Enjoy unprecedented spend your crypto and enjoy our exclusive crypto rewards in
+                partnership with AcmeCard <br />
+              </p>
+              <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
+              <Button
+                size="lg"
+                color="primary"
+                onPress={() => {
+                  requestPermission.mutate();
+                }}
+                isLoading={requestPermission.isPending}
+              >
+                Claim your Acme Card now
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
