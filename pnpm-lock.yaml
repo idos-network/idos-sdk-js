@@ -763,9 +763,6 @@ importers:
       '@digitalbazaar/vc':
         specifier: ^6.0.2
         version: 6.3.0(web-streams-polyfill@3.3.3)
-      '@idos-network/controllers':
-        specifier: workspace:*
-        version: link:../@controllers
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
         version: 0.9.2(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -797,6 +794,9 @@ importers:
       '@dotenvx/dotenvx':
         specifier: ^1.6.4
         version: 1.36.0
+      '@idos-network/controllers':
+        specifier: workspace:*
+        version: link:../@controllers
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
