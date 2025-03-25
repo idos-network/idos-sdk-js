@@ -16,7 +16,7 @@ export async function getAttributes(kwilClient: KwilActionClient) {
 export async function createAttribute(kwilClient: KwilActionClient, attribute: idOSUserAttribute) {
   return kwilClient.execute({
     name: "add_attribute",
-    description: "Create a new attribute",
+    description: "Create a new attribute in your idOS profile",
     inputs: attribute,
   });
 }
