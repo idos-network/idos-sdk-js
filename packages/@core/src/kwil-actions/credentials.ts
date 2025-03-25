@@ -60,6 +60,7 @@ export async function createCredentialAsInserter(
 ) {
   return kwilClient.execute({
     name: "upsert_credential_as_inserter",
+    description: "Create a new credential in your idOS profile",
     inputs: params,
   });
 }
@@ -96,6 +97,7 @@ export async function editCredentialAsIssuer(
 ) {
   return kwilClient.execute({
     name: "edit_public_notes_as_issuer",
+    description: "Edit a credential in your idOS profile",
     inputs: params,
   });
 }
@@ -152,6 +154,7 @@ export async function createCredentialByDelegatedWriteGrant(
 ) {
   return kwilClient.execute({
     name: "create_credentials_by_dwg",
+    description: "Create a new credential in your idOS profile",
     inputs: params,
   });
 }
@@ -162,6 +165,7 @@ export async function createCredentialByDelegatedWriteGrant(
 export async function removeCredential(kwilClient: KwilActionClient, id: string) {
   return kwilClient.execute({
     name: "remove_credential",
+    description: "Remove a credential from your idOS profile",
     inputs: { id },
   });
 }
@@ -187,6 +191,7 @@ export async function shareCredential(
 ) {
   return kwilClient.execute({
     name: "share_credential",
+    description: "Share a credential with another user on idOS",
     inputs: credential,
   });
 }
@@ -206,6 +211,7 @@ export async function createCredentialCopy(
 ) {
   return kwilClient.execute({
     name: "create_credential_copy",
+    description: "Share a credential with another user on idOS",
     inputs: params,
   });
 }

@@ -373,7 +373,7 @@ export function Onboarding() {
   }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, stepperStatus]);
 
   return (
-    <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
+    <div className="container relative mr-auto flex h-screen w-[60%] flex-col items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
       <Stepper
         activeIndex={STEPPER_ACTIVE_INDEX[stepperStatus as keyof typeof STEPPER_ACTIVE_INDEX]}
