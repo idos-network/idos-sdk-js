@@ -1,10 +1,9 @@
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import * as vc from "@digitalbazaar/vc";
-import { JsonLdDocumentLoader } from "jsonld-document-loader";
 import { describe, expect, it } from "vitest";
 
-import { buildCredentials, buildDocumentLoader, externalDocuments } from "./credentials-builder";
+import { buildCredentials, buildDocumentLoader } from "./credentials-builder";
 
 describe("buildVerifiableCredentials", () => {
   it("should create a verifiable vc", async () => {

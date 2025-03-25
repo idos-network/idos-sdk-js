@@ -166,8 +166,8 @@ Secondly you can use a credentials-builder, which help you to create a proper `V
 ```js
 import { buildCredentials } from "@idos-network/issuer-sdk-js/server";
 
-const id = "33ce045b-19f8-4f5a-89d9-4575f66f4d40";
-const issuerName = "https://vc-issuers.cool-issuer.id";
+const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
+const issuer = "https://vc-issuers.cool.id/idos";
 
 const credentialFields = {
   id: `${issuerName}/credentials/${id}`,
@@ -203,7 +203,8 @@ const credentialSubject = {
 }
 
 const issuer = {
-  name: issuerName,
+  id: `${issuer}/keys/1`,
+  controller: `${issuer}/issuer/1`,
   publicKeyMultibase: "PUBLIC_MULTIBASE_KEY",
   privateKeyMultibase: "PRIVATE_KEY_MULTIBASE",
 }
