@@ -5,7 +5,7 @@ import {
   createCredentialCopy,
   getCredentialContentSha256Hash,
 } from "@idos-network/consumer-sdk-js/client";
-import { requestDAGSignature } from "@idos-network/core";
+import { requestDAGMessage } from "@idos-network/core";
 import { type IsleStatus, createAttribute, getAttributes, hasProfile } from "@idos-network/core";
 import {
   createIssuerConfig,
@@ -282,6 +282,22 @@ export function Onboarding() {
       await isle.connect();
     });
 
+    isle.on("create-profile", handleCreateProfile);
+    isle.on("view-credential-details", handleViewCredentialDetails);
+    isle.on("verify-identity", async () => {
+      kycDisclosure.onOpen();
+    });
+    isle.on("updated", handleUpdated);
+    hasRegisteredHandlers.current = true;
+
+    // Cleanup function
+    return () => {
+      hasRegisteredHandlers.current = false;
+    };
+  }, [isle, address, kycDisclosure, idvStatus, signMessageAsync]);
+
+  useEffect(() => {
+    if (!isle) return;
     isle.on("share-credential", async ({ data }: { data: { id: string } }) => {
       // const signature = await isle.shareCredential(data.id);
       const kwilClient = await isle.getKwilClient();
@@ -323,26 +339,14 @@ export function Onboarding() {
         dag_locked_until: 0,
         dag_content_hash: contentHash,
       };
-      const [{ message }] = await requestDAGSignature(kwilClient, dag);
+      const message: string = await requestDAGMessage(kwilClient, dag);
       const signature = await signMessageAsync({ message });
       const dagWithSignature = { ...dag, dag_signature: signature };
+
       // inserting dag into idos
       await insertDagIntoIdos(dagWithSignature);
     });
-
-    isle.on("create-profile", handleCreateProfile);
-    isle.on("view-credential-details", handleViewCredentialDetails);
-    isle.on("verify-identity", async () => {
-      kycDisclosure.onOpen();
-    });
-    isle.on("updated", handleUpdated);
-    hasRegisteredHandlers.current = true;
-
-    // Cleanup function
-    return () => {
-      hasRegisteredHandlers.current = false;
-    };
-  }, [isle, address, kycDisclosure, idvStatus, signMessageAsync]);
+  }, [isle, address, signMessageAsync]);
 
   const handleCredentialIssuance = useCallback(async () => {
     const [error] = await goTry(async () => {
