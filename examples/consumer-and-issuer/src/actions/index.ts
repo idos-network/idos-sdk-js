@@ -203,12 +203,16 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
   );
   const json = await response.json();
 
+  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+
   return {
+    idOSUserId: idOSUserId,
     idvUserId: json.userId,
     signature: base64Encode(
       nacl.sign.detached(
         toBytes(`${json.userId}${idOSUserId}`),
-        base64Decode(process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? ""),
+        base64Decode(issuerSigningSecretKey),
       ),
     ),
   };
