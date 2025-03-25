@@ -1,4 +1,4 @@
-import type { EnclaveOptions } from "@idos-network/controllers";
+import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers";
 import {
   Store,
   type Wallet,
@@ -24,10 +24,13 @@ export async function createConsumerConfig(params: CreateConsumerConfigParams) {
   const [signer] = await createFrontendKwilSigner(store, kwilClient, params.signer);
   kwilClient.setSigner(signer);
 
+  const enclaveProvider = new IframeEnclave(params.enclaveOptions);
+  await enclaveProvider.load();
+
   return {
     store,
     kwilClient,
-    enclaveOptions: params.enclaveOptions,
+    enclaveProvider,
   };
 }
 

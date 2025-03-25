@@ -1,4 +1,3 @@
-import { IframeEnclave } from "@idos-network/controllers";
 import {
   createCredentialCopy as _createCredentialCopy,
   getAllCredentials as _getAllCredentials,
@@ -42,7 +41,7 @@ export async function getCredentialContentSha256Hash({ kwilClient }: ConsumerCon
  * This doesn't create an Access Grant and is used only for passporting flows
  */
 export async function createCredentialCopy(
-  { enclaveOptions, kwilClient }: ConsumerConfig,
+  { enclaveProvider, kwilClient }: ConsumerConfig,
   id: string,
   consumerRecipientEncryptionPublicKey: string,
   consumerInfo: {
@@ -52,11 +51,6 @@ export async function createCredentialCopy(
 ) {
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
-
-  // TODO(pkoch): this should be provided as an argument
-  const enclaveProvider = new IframeEnclave({ ...enclaveOptions, mode: "existing" });
-  await enclaveProvider.load();
-  await enclaveProvider.ready("FIXME", "FIXME"); // TODO(pkoch): missing userId and currentUserPublicKey
 
   const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
     utf8Encode(originalCredential.content),

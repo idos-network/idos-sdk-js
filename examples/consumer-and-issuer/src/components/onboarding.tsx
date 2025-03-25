@@ -1,11 +1,13 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import { createAttribute, getAttributes, hasProfile } from "@idos-network/core";
+import { createAttribute, getAttributes } from "@idos-network/core";
 import {
+  type IssuerConfig,
   createIssuerConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
+  hasProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { JsonRpcSigner } from "ethers";
@@ -22,17 +24,19 @@ import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
 
-const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
+const enclaveOptions = {
+  container: "#idOS-enclave",
+  url: "https://enclave.playground.idos.network",
+};
+
+const useFetchUserData = (config: IssuerConfig | undefined, signer: JsonRpcSigner | undefined) => {
   return useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
+      if (!config) throw new Error("IssuerConfig is not initialized");
       if (!signer) throw new Error("Signer is not initialized");
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
-        signer,
-      });
 
-      const hasUserProfile = await hasProfile(config.kwilClient, await signer.getAddress());
+      const hasUserProfile = await hasProfile(config);
       if (!hasUserProfile) return null;
 
       // First get the user profile which handles authentication
@@ -80,17 +84,14 @@ export const useCreateIDVAttribute = () => {
     mutationFn: async (data: {
       idvUserId: string;
       signature: string;
-      signer: JsonRpcSigner;
+      config: IssuerConfig;
     }) => {
-      const { signer } = data;
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
-        signer,
-      });
+      const { idvUserId, signature, config } = data;
+
       return createAttribute(config.kwilClient, {
         id: crypto.randomUUID(),
         attribute_key: "idvUserId",
-        value: JSON.stringify({ idvUserId: data.idvUserId }),
+        value: JSON.stringify({ idvUserId, signature }),
       });
     },
   });
@@ -178,13 +179,35 @@ const STEPPER_ACTIVE_INDEX = {
   verified: 4,
 };
 
+function useIssuerConfig(signer: JsonRpcSigner | undefined) {
+  const [config, setConfig] = useState<IssuerConfig | undefined>(undefined);
+  useEffect(() => {
+    if (!signer) return;
+
+    const initialize = async () => {
+      const _config = await createIssuerConfig({
+        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
+        signer,
+        enclaveOptions,
+      });
+
+      setConfig(_config);
+    };
+
+    initialize();
+  }, [signer]);
+
+  return config;
+}
+
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
 
   const signer = useEthersSigner();
-  const userData = useFetchUserData(signer);
+  const config = useIssuerConfig(signer);
+  const userData = useFetchUserData(config, signer);
   const idvStatus = useFetchIDVStatus(userData.data?.idvUserId);
   const createIDVAttribute = useCreateIDVAttribute();
 
@@ -201,12 +224,10 @@ export function Onboarding() {
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
+      invariant(config, "`config` not created yet");
       const userId = crypto.randomUUID();
 
-      const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(userId, {
-        container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
-      });
+      const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(config, userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await signMessageAsync({ message });
@@ -250,12 +271,13 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, signMessageAsync, address, queryClient, config]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
       invariant(userData.data?.idOSProfile, "`idOSProfile` not found");
       invariant(signer, "`Signer` is not defined");
+      invariant(config, "`IssuerConfig` is not defined");
 
       const { idvUserId, signature } = await getUserIdFromToken(
         token,
@@ -265,7 +287,7 @@ export function Onboarding() {
       await createIDVAttribute.mutateAsync({
         idvUserId,
         signature,
-        signer,
+        config,
       });
 
       await queryClient.invalidateQueries({
@@ -275,7 +297,7 @@ export function Onboarding() {
       isleController?.updateIsleStatus("pending-verification");
       kycDisclosure.onClose();
     },
-    [userData, kycDisclosure, signer, createIDVAttribute, queryClient, isleController],
+    [userData, kycDisclosure, signer, createIDVAttribute, queryClient, isleController, config],
   );
 
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
