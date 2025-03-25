@@ -1,3 +1,4 @@
+import { LuCircleCheck, LuCreditCard, LuLoader, LuUser, LuUserRoundX } from "react-icons/lu";
 export interface Step {
   title: string;
   description: string;
@@ -10,8 +11,38 @@ interface StepperCircleProps extends Step {
 
 interface StepperProps {
   activeIndex: number;
-  steps: Step[];
 }
+
+const steps: Step[] = [
+  {
+    icon: <LuUserRoundX className="h-4 w-4" />,
+    title: "Profile Creation",
+    description:
+      "User needs to sign a message to confirm that they own the wallet address. and pick authentication method",
+  },
+  {
+    icon: <LuUser className="h-4 w-4" />,
+    title: "Verification",
+    description: "User needs to be verified",
+  },
+  {
+    icon: <LuLoader className="h-4 w-4" />,
+    title: "Pending Verification",
+    description: "User's data is being processed. Please be patient or just refresh the screen.",
+  },
+  {
+    icon: <LuCreditCard className="h-4 w-4" />,
+    title: "Permissions",
+    description:
+      "User needs to grant permissions to Neobank to write a credential to their idos profile",
+  },
+  {
+    icon: <LuCircleCheck className="h-4 w-4" />,
+    title: "Claim your Acme card",
+    description:
+      "You can now claim your exclusive high-limit credit card and start your premium banking journey.",
+  },
+];
 
 const StepperCircle = ({
   active,
@@ -43,7 +74,7 @@ const StepperCircle = ({
   );
 };
 
-export function Stepper({ activeIndex, steps }: StepperProps) {
+export function Stepper({ activeIndex }: StepperProps) {
   return (
     <div className="flex w-full items-start gap-2">
       {steps.map((step, index) => (

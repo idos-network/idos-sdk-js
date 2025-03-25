@@ -27,9 +27,9 @@ export interface idOSWallet {
 
 export interface idOSUserAttribute {
   id: string;
-  user_id: string;
   attribute_key: string;
   value: string;
+  user_id?: string;
 }
 
 export interface idOSGrant {
@@ -58,6 +58,7 @@ export type IsleStatus =
   | "no-profile"
   | "not-verified"
   | "pending-verification"
+  | "pending-permissions"
   | "verified"
   | "not-connected"
   | "error";

@@ -1,7 +1,6 @@
 import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
 import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
-import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 import invariant from "tiny-invariant";
 import { actionSchema } from "./schema";
 
@@ -78,8 +77,14 @@ export class KwilActionClient {
     params: Record<string, unknown> = {},
   ): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
+
     const keys = actionSchema[actionName];
-    return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
+    return keys.map((key) => {
+      const value = params[key];
+      // Handle falsy values appropriately
+      if (value === "" || value === 0) return value;
+      return value ?? null;
+    }) as PositionalParams;
   }
 }
 

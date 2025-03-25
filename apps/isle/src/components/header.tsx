@@ -58,6 +58,10 @@ const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
     bg: { _dark: "amber.400/30", _light: "amber.400/60" },
     color: { _dark: "amber.400", _light: "amber.500" },
   },
+  "pending-permissions": {
+    bg: { _dark: "amber.400/30", _light: "amber.400/60" },
+    color: { _dark: "amber.400", _light: "amber.500" },
+  },
   "not-connected": {
     bg: "neutral.500/30",
     color: "neutral.500",

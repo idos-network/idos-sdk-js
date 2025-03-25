@@ -144,9 +144,7 @@ export function NotVerified() {
         <Button
           w="full"
           onClick={() => {
-            node?.post("updated", {
-              status: "not-verified",
-            });
+            node?.post("request-dwg", {});
           }}
         >
           Try again
@@ -193,15 +191,6 @@ export function NotVerified() {
           <RequestedPermissions values={meta?.KYCPermissions ?? []} />
           <Disclaimer name={meta?.name ?? ""} logo={meta?.logo ?? ""} />
         </Stack>
-        <Button
-          loading={status === "pending"}
-          loadingText="Requesting permissions"
-          onClick={() => {
-            node?.post("request-dwg", {});
-          }}
-        >
-          Request permissions
-        </Button>
       </Stack>
     </Stack>
   );

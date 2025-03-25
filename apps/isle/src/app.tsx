@@ -83,6 +83,9 @@ export function App() {
       <Show when={status === "pending-verification"}>
         <PendingVerification />
       </Show>
+      <Show when={status === "pending-permissions"}>
+        <NotVerified />
+      </Show>
       <Show when={status === "not-verified"}>
         <NotVerified />
       </Show>
