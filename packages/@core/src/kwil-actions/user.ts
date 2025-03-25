@@ -25,6 +25,7 @@ export interface CreateUserReqParams {
 export async function createUser(kwilClient: KwilActionClient, params: CreateUserReqParams) {
   return kwilClient.execute({
     name: "add_user_as_inserter",
+    description: "Create a user profile in idOS",
     inputs: params,
   });
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import AccountsOverview from "@/components/account-overview";
 import { Card } from "@/components/card";
 import { GetStartedButton } from "@/components/get-started-button";
 import { Button } from "@heroui/react";
@@ -307,7 +308,7 @@ export default function HomePage() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <Card />
+              <AccountsOverview />
             </motion.div>
 
             <motion.div
