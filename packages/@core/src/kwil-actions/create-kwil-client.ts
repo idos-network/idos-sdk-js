@@ -94,7 +94,7 @@ const createKwilClient =
   (Cls: new (opts: Config) => NodeKwil | WebKwil) =>
   async ({ nodeUrl: kwilProvider, chainId }: CreateKwilClientParams) => {
     const _kwil = new Cls({ kwilProvider, chainId: "" });
-    chainId ||= (await _kwil.chainInfo()).data?.chain_id;
+    chainId ||= (await _kwil.chainInfo({ disableWarning: true })).data?.chain_id;
     invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
 
     return new KwilActionClient(new Cls({ kwilProvider, chainId, timeout: DEFAULT_TIMEOUT }));
