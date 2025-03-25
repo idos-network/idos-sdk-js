@@ -1,4 +1,3 @@
-/* cspell:disable-next-line */
 import {
   type DelegatedWriteGrantSignatureRequest,
   type IsleControllerMessage,
@@ -7,12 +6,13 @@ import {
   type IsleStatus,
   type IsleTheme,
   type KwilActionClient,
+  Store,
   getUserProfile as _getUserProfile,
   shareCredential as _shareCredential,
   base64Decode,
   base64Encode,
   buildInsertableIDOSCredential,
-  createKwilSigner,
+  createFrontendKwilSigner,
   createWebKwilClient,
   getAccessGrantsOwned,
   getAllCredentials,
@@ -44,8 +44,8 @@ import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
-import { IframeEnclave } from "../secure-enclave";
-import type { EnclaveOptions, EnclaveProvider } from "../secure-enclave/types";
+import { IframeEnclave } from "../enclave";
+import type { EnclaveOptions, EnclaveProvider } from "../enclave/types";
 
 /**
  * Meta information about an actor.
@@ -202,9 +202,9 @@ const initializeWagmi = (): void => {
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
-  let enclave: EnclaveProvider | null = null;
+  let enclaveProvider: EnclaveProvider | null = null;
   const controller: Controller = createController({
-    targetOrigin: "https://localhost:5174",
+    targetOrigin: "https://isle.idos.network",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
   let signer: JsonRpcSigner | undefined;
@@ -212,6 +212,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
   let ownerOriginalCredentials: idOSCredential[] = [];
+  const store = new Store(window.localStorage);
 
   const ensureKwilClient = async (): Promise<KwilActionClient> => {
     if (kwilClient) return kwilClient;
@@ -224,7 +225,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       nodeUrl: "https://nodes.playground.idos.network",
     });
 
-    const [kwilSigner] = createKwilSigner(signer);
+    const [kwilSigner] = await createFrontendKwilSigner(store, client, signer);
     client.setSigner(kwilSigner);
 
     kwilClient = client;
@@ -243,11 +244,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const setupEnclave = async (): Promise<void> => {
-    if (enclave) return;
+    if (enclaveProvider) return;
     try {
       const enclaveInstance = new IframeEnclave(options.enclaveOptions);
       await enclaveInstance.load();
-      enclave = enclaveInstance;
+      enclaveProvider = enclaveInstance;
     } catch (error) {
       console.error(error);
     }
@@ -272,7 +273,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
           throw new Error("Failed to setup signer");
         }
         await setupEnclave();
-        if (!enclave) {
+        if (!enclaveProvider) {
           throw new Error("Failed to setup enclave");
         }
       } catch (error) {
@@ -284,7 +285,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       }
     } else if (account.status === "disconnected") {
       signer = undefined;
-      enclave = null;
+      enclaveProvider = null;
     }
 
     send("update", {
@@ -388,14 +389,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     const [error, result] = await goTry(async () => {
-      invariant(enclave, "No `idOS enclave` found");
+      invariant(enclaveProvider, "No `idOS enclave` found");
 
       const credential = await getCredentialById(client, ownerOriginalCredentials[0].id);
       invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
 
       const plaintextContent = await decryptCredentialContent(credential);
 
-      const { content, encryptorPublicKey } = await enclave.encrypt(
+      const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
         utf8Encode(plaintextContent),
         base64Decode(options.consumer.consumerPublicKey),
       );
@@ -478,13 +479,14 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
-    invariant(enclave, "No `idOS enclave` found");
+    invariant(enclaveProvider, "No `idOS enclave` found");
     const user = await getUserProfile();
     const { address } = getAccount(wagmiConfig);
-    await enclave.load();
-    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
 
-    const decrypted = await enclave.decrypt(
+    await enclaveProvider.load();
+    await enclaveProvider.ready(user.id, user.recipient_encryption_public_key);
+
+    const decrypted = await enclaveProvider.decrypt(
       base64Decode(credential.content),
       base64Decode(credential.encryptor_public_key),
     );
@@ -622,7 +624,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       // Ensure enclave is initialized before trying to decrypt
       await setupEnclave();
-      invariant(enclave, "Enclave not initialized");
+      invariant(enclaveProvider, "Enclave not initialized");
 
       const content = await decryptCredentialContent(credential);
 
@@ -767,7 +769,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
   // @todo: make the domain environment aware.
-  iframe.src = "https://localhost:5174";
+  iframe.src = "https://isle.idos.network";
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";

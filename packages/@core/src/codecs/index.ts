@@ -1,5 +1,6 @@
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
+import { encode as utf8Encode } from "@stablelib/utf8";
 import bs58 from "bs58";
 
 export { decode as base64Decode } from "@stablelib/base64";
@@ -18,3 +19,6 @@ export { hexEncode, sha256Hash, bs58Encode, bs58Decode };
 export function hexEncodeSha256Hash(data: Uint8Array): string {
   return hexEncode(sha256Hash(data), true);
 }
+
+export const toBytes = (obj: Parameters<typeof JSON.stringify>[0]): Uint8Array =>
+  utf8Encode(JSON.stringify(obj));

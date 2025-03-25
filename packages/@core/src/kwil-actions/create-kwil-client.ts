@@ -25,9 +25,9 @@ interface KwilExecuteActionRequestParams extends KwilActionReqParams {
  * Has utility methods for creating actions and setting a signer.
  */
 export class KwilActionClient {
-  private signer?: KwilSigner;
+  public signer?: KwilSigner;
 
-  constructor(private readonly client: NodeKwil | WebKwil) {}
+  constructor(public readonly client: NodeKwil | WebKwil) {}
 
   /**
    * Calls an action on the kwil nodes. This similar to `GET` like request.
@@ -94,7 +94,7 @@ const createKwilClient =
   (Cls: new (opts: Config) => NodeKwil | WebKwil) =>
   async ({ nodeUrl: kwilProvider, chainId }: CreateKwilClientParams) => {
     const _kwil = new Cls({ kwilProvider, chainId: "" });
-    chainId ||= (await _kwil.chainInfo()).data?.chain_id;
+    chainId ||= (await _kwil.chainInfo({ disableWarning: true })).data?.chain_id;
     invariant(chainId, "Can't discover `chainId`. You must pass it explicitly.");
 
     return new KwilActionClient(new Cls({ kwilProvider, chainId, timeout: DEFAULT_TIMEOUT }));

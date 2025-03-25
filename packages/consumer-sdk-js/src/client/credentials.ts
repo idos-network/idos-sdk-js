@@ -2,9 +2,12 @@ import {
   createCredentialCopy as _createCredentialCopy,
   getAllCredentials as _getAllCredentials,
   getCredentialById as _getCredentialById,
+  base64Decode,
+  base64Encode,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
   type idOSCredential,
+  utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
 import invariant from "tiny-invariant";
@@ -47,7 +50,7 @@ export async function getCredentialContentSha256Hash(
  * This doesn't create an Access Grant and is used only for passporting flows
  */
 export async function createCredentialCopy(
-  { kwilClient }: Pick<ConsumerConfig, "kwilClient">,
+  { enclaveProvider, kwilClient }: ConsumerConfig,
   id: string,
   consumerRecipientEncryptionPublicKey: string,
   consumerInfo: {
@@ -66,22 +69,17 @@ export async function createCredentialCopy(
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-  invariant(consumerInfo.decryptCredentialContent, "decryptCredentialContent is required");
-  invariant(consumerInfo.encryptCredentialContent, "encryptCredentialContent is required");
-
-  const decryptedContent = await consumerInfo.decryptCredentialContent(originalCredential);
-
-  const { content, encryptorPublicKey } = await consumerInfo.encryptCredentialContent(
-    decryptedContent,
-    consumerRecipientEncryptionPublicKey,
+  const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
+    utf8Encode(originalCredential.content),
+    base64Decode(consumerRecipientEncryptionPublicKey),
   );
 
   const insertableCredential = await buildInsertableIDOSCredential(
     originalCredential.user_id,
     "",
-    content,
+    utf8Decode(content),
     consumerRecipientEncryptionPublicKey,
-    encryptorPublicKey,
+    base64Encode(encryptorPublicKey),
     consumerInfo,
   );
 

@@ -1,5 +1,22 @@
-import type { KwilWrapper } from "../kwil-wrapper";
-import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
+import type { KwilWrapper } from "./kwil-wrapper";
+
+export const DEFAULT_RECORDS_PER_PAGE = 7;
+
+export default class idOSGrant {
+  id: string;
+  ownerUserId: string;
+  consumerAddress: string;
+  dataId: string;
+  lockedUntil: number;
+
+  constructor({ id, ownerUserId, consumerAddress, dataId, lockedUntil }: idOSGrant) {
+    this.id = id;
+    this.ownerUserId = ownerUserId;
+    this.consumerAddress = consumerAddress;
+    this.dataId = dataId;
+    this.lockedUntil = lockedUntil;
+  }
+}
 
 export class Grants {
   kwilWrapper: KwilWrapper;
@@ -25,6 +42,7 @@ export class Grants {
     return response[0].count;
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: TBD
   mapToGrant(grant: any): idOSGrant {
     return new idOSGrant({
       id: grant.id,
@@ -36,6 +54,7 @@ export class Grants {
   }
 
   async getGrantsOwned(): Promise<{ grants: idOSGrant[] }> {
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     const list = (await this.kwilWrapper.call("get_access_grants_owned", null)) as any;
     const grants = list.map(this.mapToGrant);
     return {
@@ -48,6 +67,7 @@ export class Grants {
     size = DEFAULT_RECORDS_PER_PAGE,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     if (!page) throw new Error("paging starts from 1");
+    // biome-ignore lint/suspicious/noExplicitAny: TBD
     const list = (await this.kwilWrapper.call("get_access_grants_granted", { page, size })) as any;
     const totalCount = await this.getGrantsGrantedCount();
 

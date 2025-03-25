@@ -6,7 +6,7 @@ import "./styles.css";
 const enclave = window.opener;
 if (enclave.origin !== window.origin) throw new Error("Bad origin");
 
-const store = new Store();
+const store = new Store(window.localStorage);
 
 const root = document.getElementById("app");
 
