@@ -139,7 +139,7 @@ const credentialContent = {
   "@context": [
     "https://www.w3.org/2018/credentials/v1",
   ],
-  id: "uuid:087b9cf0-a968-471d-a4e8-a805a05357ed",
+  id: "https://vc-issuers.cool-issuer.id/credentials/33ce045b-19f8-4f5a-89d9-4575f66f4d40",
   type: ["VerifiableCredential"],
   issuer: "https://vc-issuers.cool-issuer.id/",
   level: "human",
@@ -166,15 +166,18 @@ Secondly you can use a credentials-builder, which help you to create a proper `V
 ```js
 import { buildCredentials } from "@idos-network/issuer-sdk-js/server";
 
+const id = "33ce045b-19f8-4f5a-89d9-4575f66f4d40";
+const isuserName = "https://vc-issuers.cool-issuer.id";
+
 const credentialFields = {
-  id: `uuid:${session.id}`,
+  id: `${issuerName}/credentials/${id}`,
   level: "human",
   issued: new Date(),
   approvedAt: new Date(),
 }
 
 const credentialSubject = {
-  id: `uuid:${user.id}`,
+  id: `uuid:${id}`,
   firstName: "John",
   familyName: "Doe",
   dateOfBirth: new Date(),
@@ -200,7 +203,7 @@ const credentialSubject = {
 }
 
 const issuer = {
-  name: "https://vc-issuers.example.com/idos",
+  name: issuerName,
   publicKeyMultibase: "PUBLIC_MULTIBASE_KEY",
   privateKeyMultibase: "PRIVATE_KEY_MULTIBASE",
 }

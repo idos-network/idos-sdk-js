@@ -138,8 +138,11 @@ function convertValues<
 }
 
 export interface CredentialsIssuerConfig {
+  /* Issuers id */
+  id: string;
+
   /* Issuer of the credential (URL). */
-  name: string;
+  controller: string;
 
   /* Issuer's private key in multibase format. */
   privateKeyMultibase: string;
@@ -155,7 +158,7 @@ const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
   "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld";
 const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
 
-const buildDocumentLoader = () => {
+export const buildDocumentLoader = () => {
   const loader = new JsonLdDocumentLoader();
   loader.addStatic(CONTEXT_V1, v1);
   loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1, idosCredentialsV1);
@@ -176,7 +179,7 @@ export const buildCredentials = async (
   const credential = {
     "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS_V1, CONTEXT_ED25519_SIGNATURE_2020_V1],
     type: ["VerifiableCredential"],
-    issuer: issuer.name,
+    issuer: issuer.controller,
     ...convertValues(fields),
     credentialSubject: {
       "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
@@ -187,7 +190,6 @@ export const buildCredentials = async (
 
   const key = await Ed25519VerificationKey2020.from({
     ...issuer,
-    controller: issuer.name,
     type: "Ed25519VerificationKey2020",
   });
   const suite = new Ed25519Signature2020({ key });
