@@ -15,7 +15,6 @@ export class idOSConsumerSDK {
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
     nodeUrl: string,
-    dbId: string,
   ) {
     let consumer: idOSConsumer;
 
@@ -28,7 +27,6 @@ export class idOSConsumerSDK {
           consumerSigner: signer,
           recipientEncryptionPrivateKey,
           nodeUrl,
-          dbId,
         });
 
         return new idOSConsumerSDK(consumer);
@@ -40,7 +38,6 @@ export class idOSConsumerSDK {
           consumerSigner: signer,
           nodeUrl,
           recipientEncryptionPrivateKey,
-          dbId,
         });
         return new idOSConsumerSDK(consumer);
       }
@@ -65,7 +62,7 @@ export class idOSConsumerSDK {
     return this.consumer.getGrantsCount();
   }
 
-  async getSharedCredential(dataId: string): Promise<idOSCredential[]> {
+  async getSharedCredential(dataId: string): Promise<idOSCredential> {
     return this.consumer.getSharedCredentialFromIDOS(dataId);
   }
 

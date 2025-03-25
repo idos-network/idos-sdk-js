@@ -6,7 +6,7 @@ import {
   getAllCredentials,
   getCredentialContentSha256Hash,
   getUserProfile,
-  requestDAGSignature,
+  requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
 import type { idOSCredential } from "@idos-network/core";
 import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
@@ -53,10 +53,7 @@ function useShareCredential() {
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
-      const contentHash = await getCredentialContentSha256Hash(
-        { kwilClient: consumerConfig.kwilClient },
-        credentialId,
-      );
+      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -86,7 +83,7 @@ function useShareCredential() {
         dag_content_hash: contentHash,
       };
 
-      const [{ message }] = await requestDAGSignature(consumerConfig, dag);
+      const message: string = await requestDAGMessage(consumerConfig, dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({

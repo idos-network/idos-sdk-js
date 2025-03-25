@@ -19,6 +19,7 @@ export async function upsertWalletAsInserter(
 ) {
   return kwilClient.execute({
     name: "upsert_wallet_as_inserter",
+    description: "Add a wallet to idOS",
     inputs: params,
   });
 }

@@ -1,7 +1,7 @@
-name: Playwright Tests (Playground)
+name: Playwright Tests (Playground @ develop)
 on:
   push:
-    branches: [ playground ]
+    branches: [ develop ]
 
 jobs:
   e2e:

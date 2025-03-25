@@ -8,7 +8,6 @@ export interface IssuerConfig {
 
 type CreateIssuerConfigParams = {
   chainId?: string;
-  dbId?: string;
   nodeUrl: string;
   signingKeyPair: nacl.SignKeyPair;
   encryptionSecretKey: Uint8Array;
@@ -18,7 +17,6 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams): Prom
   const kwilClient = await createNodeKwilClient({
     nodeUrl: params.nodeUrl,
     chainId: params.chainId,
-    dbId: params.dbId,
   });
 
   const [signer] = createKwilSigner(params.signingKeyPair);

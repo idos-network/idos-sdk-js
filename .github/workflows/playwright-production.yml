@@ -1,7 +1,7 @@
 name: Playwright Tests (Production)
 on:
   push:
-    branches: [ main ]
+    branches: [ production ]
 
 jobs:
   e2e:
