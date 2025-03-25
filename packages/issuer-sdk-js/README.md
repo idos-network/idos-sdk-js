@@ -167,7 +167,7 @@ Secondly you can use a credentials-builder, which help you to create a proper `V
 import { buildCredentials } from "@idos-network/issuer-sdk-js/server";
 
 const id = "33ce045b-19f8-4f5a-89d9-4575f66f4d40";
-const isuserName = "https://vc-issuers.cool-issuer.id";
+const issuerName = "https://vc-issuers.cool-issuer.id";
 
 const credentialFields = {
   id: `${issuerName}/credentials/${id}`,
