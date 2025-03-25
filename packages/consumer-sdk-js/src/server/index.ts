@@ -1,4 +1,4 @@
-import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
+import type { ChainType, idOSCredential, idOSGrant } from "@idos-network/core/types";
 import { idOSConsumer } from "./idOS-consumer.ts";
 
 export class idOSConsumerSDK {
@@ -11,7 +11,7 @@ export class idOSConsumerSDK {
   static async init(
     // @todo: not 100% sure if we want to keep this
     // perhaps it is better to pass the signer directly from the outside
-    chainType: "EVM" | "NEAR",
+    chainType: ChainType,
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
     nodeUrl: string,

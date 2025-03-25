@@ -1,11 +1,13 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import { createAttribute, getAttributes, hasProfile } from "@idos-network/core";
+import { createAttribute, getAttributes } from "@idos-network/core";
 import {
+  type IssuerConfig,
   createIssuerConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
+  hasProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { JsonRpcSigner } from "ethers";
@@ -22,17 +24,21 @@ import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
 
-const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
+const enclaveOptions = {
+  container: "#idOS-enclave",
+  url: "https://enclave.playground.idos.network",
+};
+
+type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
+
+const useFetchUserData = (config: IssuerConfig | undefined, signer: JsonRpcSigner | undefined) => {
   return useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
+      if (!config) throw new Error("IssuerConfig is not initialized");
       if (!signer) throw new Error("Signer is not initialized");
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
-        signer,
-      });
 
-      const hasUserProfile = await hasProfile(config.kwilClient, await signer.getAddress());
+      const hasUserProfile = await hasProfile(config);
       if (!hasUserProfile) return null;
 
       // First get the user profile which handles authentication
@@ -40,13 +46,17 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
 
       // Then get the attributes using the same authenticated session
       const attributes = await getAttributes(config.kwilClient);
-      const idvUserId = attributes.find((attribute) => attribute.attribute_key === "idvUserId")
-        ?.value as string;
+
+      // We're assuming that the attribute was well populated.
+      const attributePayload = JSON.parse(
+        (attributes.find((attribute) => attribute.attribute_key === "idvUserId")?.value ||
+          "{}") as string,
+      ) as IdvTicket;
 
       return {
         hasProfile: hasUserProfile,
-        idvUserId: idvUserId ? JSON.parse(idvUserId).idvUserId : null,
         idOSProfile,
+        ...attributePayload,
       };
     },
     enabled: Boolean(signer),
@@ -54,11 +64,20 @@ const useFetchUserData = (signer: JsonRpcSigner | undefined) => {
   });
 };
 
-const useFetchIDVStatus = (userId: string | undefined) => {
+const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
   return useQuery({
-    queryKey: ["idv-status", userId],
-    queryFn: (): Promise<{ status: string }> =>
-      fetch(`/api/idv-status/${userId}`).then((res) => res.json()),
+    queryKey: ["idv-status", params?.idvUserId],
+    queryFn: (): Promise<{ status: string }> => {
+      invariant(params, "`params` is not defined");
+
+      const { idvUserId, idOSUserId, signature } = params;
+
+      const url = new URL(`/api/idv-status/${idvUserId}`);
+      url.searchParams.set("idOSUserId", idOSUserId);
+      url.searchParams.set("signature", signature);
+
+      return fetch(url).then((res) => res.json());
+    },
     select: (data) => data.status,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
@@ -69,7 +88,7 @@ const useFetchIDVStatus = (userId: string | undefined) => {
       // Default polling interval
       return 5_000;
     },
-    enabled: Boolean(userId),
+    enabled: Boolean(params),
     staleTime: 0, // Consider data stale immediately
     gcTime: 0, // Don't cache the results
   });
@@ -78,19 +97,17 @@ const useFetchIDVStatus = (userId: string | undefined) => {
 export const useCreateIDVAttribute = () => {
   return useMutation({
     mutationFn: async (data: {
+      idOSUserId: string;
       idvUserId: string;
       signature: string;
-      signer: JsonRpcSigner;
+      config: IssuerConfig;
     }) => {
-      const { signer } = data;
-      const config = await createIssuerConfig({
-        nodeUrl: "https://nodes.staging.idos.network",
-        signer,
-      });
+      const { idOSUserId, idvUserId, signature, config } = data;
+
       return createAttribute(config.kwilClient, {
         id: crypto.randomUUID(),
         attribute_key: "idvUserId",
-        value: JSON.stringify({ idvUserId: data.idvUserId }),
+        value: JSON.stringify({ idOSUserId, idvUserId, signature }),
       });
     },
   });
@@ -178,14 +195,36 @@ const STEPPER_ACTIVE_INDEX = {
   verified: 4,
 };
 
+function useIssuerConfig(signer: JsonRpcSigner | undefined) {
+  const [config, setConfig] = useState<IssuerConfig | undefined>(undefined);
+  useEffect(() => {
+    if (!signer) return;
+
+    const initialize = async () => {
+      const _config = await createIssuerConfig({
+        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
+        signer,
+        enclaveOptions,
+      });
+
+      setConfig(_config);
+    };
+
+    initialize();
+  }, [signer]);
+
+  return config;
+}
+
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
 
   const signer = useEthersSigner();
-  const userData = useFetchUserData(signer);
-  const idvStatus = useFetchIDVStatus(userData.data?.idvUserId);
+  const config = useIssuerConfig(signer);
+  const userData = useFetchUserData(config, signer);
+  const idvStatus = useFetchIDVStatus(userData.data);
   const createIDVAttribute = useCreateIDVAttribute();
 
   const issueCredential = useIssueCredential();
@@ -201,12 +240,10 @@ export function Onboarding() {
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
+      invariant(config, "`config` not created yet");
       const userId = crypto.randomUUID();
 
-      const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(userId, {
-        container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
-      });
+      const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(config, userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await signMessageAsync({ message });
@@ -250,22 +287,23 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, signMessageAsync, address, queryClient, config]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
       invariant(userData.data?.idOSProfile, "`idOSProfile` not found");
       invariant(signer, "`Signer` is not defined");
+      invariant(config, "`IssuerConfig` is not defined");
 
-      const { idvUserId, signature } = await getUserIdFromToken(
-        token,
-        userData.data?.idOSProfile.id,
-      );
+      const idOSUserId = userData.data?.idOSProfile.id;
+      invariant(idOSUserId, "`idOSUserId` can't be discovered");
+      const { idvUserId, signature } = await getUserIdFromToken(token, idOSUserId);
 
       await createIDVAttribute.mutateAsync({
+        idOSUserId,
         idvUserId,
         signature,
-        signer,
+        config,
       });
 
       await queryClient.invalidateQueries({
@@ -275,7 +313,7 @@ export function Onboarding() {
       isleController?.updateIsleStatus("pending-verification");
       kycDisclosure.onClose();
     },
-    [userData, kycDisclosure, signer, createIDVAttribute, queryClient, isleController],
+    [userData, kycDisclosure, signer, createIDVAttribute, queryClient, isleController, config],
   );
 
   const handleKYCError = useCallback(async (error: unknown) => {}, []);

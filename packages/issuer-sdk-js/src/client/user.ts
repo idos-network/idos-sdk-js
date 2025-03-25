@@ -1,14 +1,13 @@
-import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/secure-enclave";
 import {
   type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,
+  hasProfile as _hasProfile,
   requestDWGMessage as _requestDWGMessage,
-  hasProfile,
 } from "@idos-network/core";
 import type { IssuerConfig } from "./create-issuer-config";
 
-export async function checkUserProfile({ kwilClient }: IssuerConfig, address: string) {
-  return hasProfile(kwilClient, address);
+export async function hasProfile({ kwilClient, userAddress }: IssuerConfig) {
+  return _hasProfile(kwilClient, userAddress);
 }
 
 export async function requestDWGMessage(
@@ -27,19 +26,8 @@ export async function getUserProfile({ kwilClient }: IssuerConfig) {
  * Get the public key of the user's encryption key
  */
 export async function getUserEncryptionPublicKey(
+  { enclaveProvider }: IssuerConfig,
   userId: string,
-  enclaveOptions: Omit<EnclaveOptions, "mode">,
 ) {
-  let enclave: IframeEnclave | null = new IframeEnclave({
-    ...enclaveOptions,
-    mode: "new",
-  });
-
-  await enclave.load();
-  await enclave.reset();
-  const publicKey = await enclave.discoverUserEncryptionPublicKey(userId);
-  enclave = null;
-  document.querySelector(enclaveOptions.container)?.children[0].remove();
-
-  return publicKey;
+  return await enclaveProvider.discoverUserEncryptionPublicKey(userId);
 }

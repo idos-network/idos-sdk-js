@@ -48,7 +48,14 @@ export function Component() {
             <Button
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
-              onClick={() => sdk?.backupPasswordOrSecret()}
+              onClick={async () => {
+                if (!sdk) return;
+                if (!sdk.auth.currentUser.userId) throw new Error("User not authenticated");
+
+                const { userId, currentUserPublicKey } = sdk.auth.currentUser;
+                await sdk.enclave.enclaveProvider.ready(userId, currentUserPublicKey);
+                return await sdk.enclave.enclaveProvider.backupPasswordOrSecret();
+              }}
             >
               Back up your idOS key
             </Button>

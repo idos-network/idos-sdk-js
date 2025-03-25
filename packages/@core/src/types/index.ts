@@ -1,3 +1,10 @@
+import type { Wallet as NearWallet } from "@near-wallet-selector/core";
+import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
+export type Wallet = EthersWallet | JsonRpcSigner | NearWallet;
+
+export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
+export type ChainType = (typeof CHAIN_TYPES)[number];
+
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
 export interface idOSUser {

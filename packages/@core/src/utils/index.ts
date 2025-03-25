@@ -17,11 +17,11 @@ export async function buildInsertableIDOSCredential(
   invariant(recipientEncryptionPublicKey, "Missing `recipientEncryptionPublicKey`");
   invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
 
-  const issuerAuthenticationKeyPair = nacl.sign.keyPair();
+  const ephemeralAuthenticationKeyPair = nacl.sign.keyPair();
 
   const publicNotesSignature = nacl.sign.detached(
     utf8Encode(publicNotes),
-    issuerAuthenticationKeyPair.secretKey,
+    ephemeralAuthenticationKeyPair.secretKey,
   );
 
   const grantInfoParam = grantInfo
@@ -41,11 +41,11 @@ export async function buildInsertableIDOSCredential(
     broader_signature: base64Encode(
       nacl.sign.detached(
         Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-        issuerAuthenticationKeyPair.secretKey,
+        ephemeralAuthenticationKeyPair.secretKey,
       ),
     ),
 
-    issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
+    issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
     encryptor_public_key: encryptorPublicKey,
     ...grantInfoParam,
   };

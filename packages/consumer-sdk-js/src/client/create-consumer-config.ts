@@ -1,26 +1,36 @@
-import type { EnclaveOptions } from "@idos-network/controllers";
-import { type KwilSignerType, createKwilSigner, createWebKwilClient } from "@idos-network/core";
+import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers";
+import {
+  Store,
+  type Wallet,
+  createFrontendKwilSigner,
+  createWebKwilClient,
+} from "@idos-network/core";
 
 type CreateConsumerConfigParams = {
   chainId?: string;
   nodeUrl: string;
-  // @todo: we should extract only the possible signer types from the core package.
-  signer: KwilSignerType;
+  signer: Wallet;
   enclaveOptions: Omit<EnclaveOptions, "mode">;
 };
 
 export async function createConsumerConfig(params: CreateConsumerConfigParams) {
+  const store = new Store(window.localStorage);
+
   const kwilClient = await createWebKwilClient({
     nodeUrl: params.nodeUrl,
     chainId: params.chainId,
   });
 
-  const [signer] = createKwilSigner(params.signer);
+  const [signer] = await createFrontendKwilSigner(store, kwilClient, params.signer);
   kwilClient.setSigner(signer);
 
+  const enclaveProvider = new IframeEnclave(params.enclaveOptions);
+  await enclaveProvider.load();
+
   return {
+    store,
     kwilClient,
-    enclaveOptions: params.enclaveOptions,
+    enclaveProvider,
   };
 }
 

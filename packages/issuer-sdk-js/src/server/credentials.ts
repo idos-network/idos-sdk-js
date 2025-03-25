@@ -17,24 +17,6 @@ import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { ensureEntityId } from "./internal";
 
-type UpdatablePublicNotes = {
-  publicNotes: string;
-};
-const buildUpdatablePublicNotes = (
-  issuerConfig: IssuerConfig,
-  { publicNotes }: UpdatablePublicNotes,
-) => {
-  const publicNotesSignature = nacl.sign.detached(
-    utf8Encode(publicNotes),
-    issuerConfig.signingKeyPair.secretKey,
-  );
-
-  return {
-    public_notes: publicNotes,
-    public_notes_signature: base64Encode(publicNotesSignature),
-  };
-};
-
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
   content_hash?: string;
@@ -73,14 +55,14 @@ function buildInsertableIDOSCredential(
     ephemeralKeyPair.secretKey,
   );
 
-  const { public_notes, public_notes_signature } = buildUpdatablePublicNotes(issuerConfig, {
-    publicNotes,
-  });
+  const public_notes_signature = base64Encode(
+    nacl.sign.detached(utf8Encode(publicNotes), issuerConfig.signingKeyPair.secretKey),
+  );
 
   return {
     user_id: userId,
     content: base64Encode(content),
-    public_notes,
+    public_notes: publicNotes,
     public_notes_signature,
 
     broader_signature: base64Encode(

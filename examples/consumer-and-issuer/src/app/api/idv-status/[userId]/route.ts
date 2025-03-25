@@ -1,8 +1,34 @@
-export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
-  const userId = (await params).userId;
+import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
+import { toBytes } from "@idos-network/core";
+import type { NextRequest } from "next/server";
+import invariant from "tiny-invariant";
+import nacl from "tweetnacl";
+
+const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
+invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+
+const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ userId: string }> },
+) {
+  const idvUserId = (await params).userId;
+
+  const searchParams = request.nextUrl.searchParams;
+  const idOSUserId = searchParams.get("idOSUserId");
+  invariant(idOSUserId, "idOSUserId is required");
+  const signature = searchParams.get("signature");
+  invariant(signature, "signature is required");
+
+  invariant(
+    nacl.sign.open(toBytes(`${idvUserId}${idOSUserId}`), issuerSigningKey.publicKey) ===
+      base64Decode(signature),
+    "Signature is invalid",
+  );
 
   const response = await fetch(
-    `https://kraken.staging.sandbox.fractal.id/public/kyc/${userId}/status`,
+    `https://kraken.staging.sandbox.fractal.id/public/kyc/${idvUserId}/status`,
     {
       headers: {
         "Content-Type": "application/json",
