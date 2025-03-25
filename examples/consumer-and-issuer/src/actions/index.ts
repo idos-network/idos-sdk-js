@@ -1,6 +1,6 @@
 "use server";
 import { getIssuerConfig } from "@/issuer.config";
-import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
+import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
 import {
   createCredentialByDelegatedWriteGrant,
   createUser,
@@ -8,9 +8,6 @@ import {
 import invariant from "tiny-invariant";
 
 import nacl from "tweetnacl";
-
-type JsonArg = Parameters<typeof JSON.stringify>[0];
-const toBytes = (obj: JsonArg): Uint8Array => utf8Encode(JSON.stringify(obj));
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
