@@ -1,15 +1,10 @@
 import type { KwilWrapper } from "../kwil-wrapper";
 import idOSGrant, { DEFAULT_RECORDS_PER_PAGE } from "./grant";
 
-interface InitParams {
-  nodeUrl?: string;
-  dbId?: string;
-}
-
 export class Grants {
   kwilWrapper: KwilWrapper;
 
-  constructor(params: InitParams & { kwilWrapper: KwilWrapper }) {
+  constructor(params: { kwilWrapper: KwilWrapper }) {
     this.kwilWrapper = params.kwilWrapper;
   }
 

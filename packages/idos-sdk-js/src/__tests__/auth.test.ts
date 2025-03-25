@@ -17,7 +17,7 @@ describe("auth", () => {
       recipient_encryption_public_key: currentUserPublicKey,
       id: userId,
     });
-    auth.kwilWrapper.client.auth.logout = vi.fn().mockResolvedValue(void 0);
+    auth.kwilWrapper.client.auth.logoutKGW = vi.fn().mockResolvedValue(void 0);
     auth.kwilWrapper.hasProfile = vi.fn().mockResolvedValue(true);
   });
 

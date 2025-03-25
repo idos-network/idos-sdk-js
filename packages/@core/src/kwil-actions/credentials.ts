@@ -18,20 +18,24 @@ export interface CreateCredentialParams {
  * Returns the shared idOS Credential for the given `dataId`.
  */
 export async function getSharedCredential(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.call<idOSCredential[]>({
+  const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_shared",
     inputs: { id },
   });
+
+  return credential;
 }
 
 /**
  * Returns the owned idOS Credential for the given `id`.
  */
 export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.call<idOSCredential[]>({
+  const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_owned",
     inputs: { id },
   });
+
+  return credential;
 }
 
 /**
@@ -41,10 +45,12 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  return kwilClient.call<[{ id: string }]>({
+  const [{ id }] = await kwilClient.call<[{ id: string }]>({
     name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
+
+  return id;
 }
 
 export async function getCredentialContentSha256Hash(
@@ -67,6 +73,7 @@ export async function createCredentialAsInserter(
 ) {
   return kwilClient.execute({
     name: "upsert_credential_as_inserter",
+    description: "Create a new credential in your idOS profile",
     inputs: params,
   });
 }
@@ -103,6 +110,7 @@ export async function editCredentialAsIssuer(
 ) {
   return kwilClient.execute({
     name: "edit_public_notes_as_issuer",
+    description: "Edit a credential in your idOS profile",
     inputs: params,
   });
 }
@@ -159,6 +167,7 @@ export async function createCredentialByDelegatedWriteGrant(
 ) {
   return kwilClient.execute({
     name: "create_credentials_by_dwg",
+    description: "Create a new credential in your idOS profile",
     inputs: params,
   });
 }
@@ -169,6 +178,7 @@ export async function createCredentialByDelegatedWriteGrant(
 export async function removeCredential(kwilClient: KwilActionClient, id: string) {
   return kwilClient.execute({
     name: "remove_credential",
+    description: "Remove a credential from your idOS profile",
     inputs: { id },
   });
 }
@@ -194,6 +204,7 @@ export async function shareCredential(
 ) {
   return kwilClient.execute({
     name: "share_credential",
+    description: "Share a credential with another user on idOS",
     inputs: credential,
   });
 }
@@ -213,6 +224,7 @@ export async function createCredentialCopy(
 ): Promise<{ id: string }> {
   return kwilClient.execute({
     name: "create_credential_copy",
+    description: "Share a credential with another user on idOS",
     inputs: params,
   });
 }

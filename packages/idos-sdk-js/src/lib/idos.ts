@@ -16,7 +16,6 @@ export type SignerType = "EVM" | "NEAR";
 
 interface InitParams {
   nodeUrl?: string;
-  dbId?: string;
   enclaveOptions: EnclaveOptions;
 }
 
@@ -33,12 +32,7 @@ export class idOS {
   grants: Grants;
   store: Store;
 
-  private constructor({
-    enclaveOptions,
-    kwilWrapper,
-    dbId,
-    nodeUrl,
-  }: InitParams & { kwilWrapper: KwilWrapper }) {
+  private constructor({ enclaveOptions, kwilWrapper }: InitParams & { kwilWrapper: KwilWrapper }) {
     if (!idOS.initializing) throw new Error("Usage: `idOS.init(options)`");
     this.store = new Store();
     this.kwilWrapper = kwilWrapper;
@@ -52,7 +46,7 @@ export class idOS {
 
     this.data = new Data(kwilWrapper, this.enclave);
 
-    this.grants = new Grants({ dbId, nodeUrl, kwilWrapper: this.kwilWrapper });
+    this.grants = new Grants({ kwilWrapper: this.kwilWrapper });
   }
 
   static async init(params: InitParams): Promise<idOS> {

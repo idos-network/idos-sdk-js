@@ -21,7 +21,7 @@ import {
   type idOSCredential,
   type idOSUser,
   removeCredential,
-  requestDWGSignature,
+  requestDWGMessage,
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
@@ -305,7 +305,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       }));
 
     invariant(kwilClient, "No `KwilActionClient` found");
-    const message: string = await requestDWGSignature(kwilClient, delegatedWriteGrant);
+    const message: string = await requestDWGMessage(kwilClient, delegatedWriteGrant);
 
     send("update-create-dwg-status", {
       status: "pending",
@@ -582,7 +582,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     invariant(kwilClient, "No `KwilActionClient` found");
     // Am pretty sure `getCredentialOwned is not the correct function to use. please switch to the right one.
     // No need to update any steps after updating fetch credential function.
-    const [credential] = await getCredentialOwned(kwilClient, id);
+    const credential = await getCredentialOwned(kwilClient, id);
     const content = await decryptCredentialContent(credential);
     return { ...credential, content };
   };

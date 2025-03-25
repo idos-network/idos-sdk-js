@@ -25,32 +25,9 @@ export interface CreateUserReqParams {
 export async function createUser(kwilClient: KwilActionClient, params: CreateUserReqParams) {
   return kwilClient.execute({
     name: "add_user_as_inserter",
+    description: "Create a user profile in idOS",
     inputs: params,
   });
-}
-
-export interface DelegatedWriteGrantSignatureRequest {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-}
-/**
- * Request a signature for a delegated write grant.
- */
-export async function requestDWGSignature(
-  kwilClient: KwilActionClient,
-  params: DelegatedWriteGrantSignatureRequest,
-) {
-  const result = await kwilClient.call<[{ message: string }]>({
-    name: "dwg_message",
-    inputs: params,
-  });
-
-  return result[0].message ?? "";
 }
 
 /**

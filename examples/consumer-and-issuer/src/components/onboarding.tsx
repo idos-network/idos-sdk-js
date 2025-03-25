@@ -32,6 +32,7 @@ import { useEthersSigner } from "@/wagmi.config";
 
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
+import Portfolio from "./portfolio";
 import { type Step, Stepper } from "./stepper";
 
 const useFetchIDVStatus = (userId: string | undefined) => {
@@ -560,8 +561,11 @@ export function Onboarding() {
   }, [status, index]);
 
   return (
-    <div className="container relative mr-auto flex h-screen w-[60%] flex-col place-content-center items-center gap-6">
+    <div className="container relative mr-auto flex h-screen w-[60%] flex-col items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
+      <div className="flex w-full flex-col gap-6">
+        <Portfolio />
+      </div>
       <Stepper activeIndex={index} steps={steps} />
       {status === "verified" ? (
         <div className="mt-5 flex w-full flex-col items-center gap-2">

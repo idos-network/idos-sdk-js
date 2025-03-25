@@ -53,6 +53,19 @@ TODO: Implement me. We still haven't moved the functions over.
 import { idOS } from "@idos-network/consumer-sdk-js";
 import nacl from "tweetnacl";
 
+/**
+ * Initializes the idOS SDK with the provided options.
+ *
+ * @async
+ * @function init
+ * @param {Object} options - Configuration options for initializing the SDK.
+ * @param {string} options.recipientEncryptionPrivateKey - The recipient's encryption private key.
+ * @param {KeyPair | SignKeyPair | ethers.Wallet} options.granteeSigner - The grantee's wallet or key pair for signing transactions.
+ * @param {string} [options.nodeUrl="https://nodes.idos.network"] - The URL of the idOS node.
+ * @param {string} [options.chainId] - The chain ID for the network (optional).
+ * @returns {Promise<idOSGrantee>} - A promise that resolves to an instance of the idOS SDK.
+ */
+
 export const idos = await idOS.init({
   nodeUrl: process.env.IDOS_NODE_URL,
   recipientEncryptionPrivateKey: process.env.CONSUMER_ENCRYPTION_SECRET_KEY,
