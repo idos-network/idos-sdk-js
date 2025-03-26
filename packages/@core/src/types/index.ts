@@ -130,7 +130,7 @@ export type IsleControllerMessage =
       data: {
         status: "request-permission";
         consumer: {
-          consumerPublicKey: string;
+          consumerAuthPublicKey: string;
           meta: {
             url: string;
             name: string;

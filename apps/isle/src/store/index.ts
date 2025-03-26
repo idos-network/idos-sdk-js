@@ -14,7 +14,7 @@ interface NodeState {
   node: ReturnType<typeof createNode<IsleNodeMessage, IsleControllerMessage>> | null;
   theme?: IsleTheme;
   accessGrants: Map<
-    { consumerPublicKey: string; meta: { name: string; logo: string; url: string } },
+    { consumerAuthPublicKey: string; meta: { name: string; logo: string; url: string } },
     {
       id: string;
       dataId: string;

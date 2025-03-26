@@ -52,11 +52,12 @@ import invariant from "tiny-invariant";
 
 /**
  * Meta information about an actor.
- */ interface Meta {
+ */
+type Meta = {
   url: string;
   name: string;
   logo: string;
-}
+};
 
 /**
  * Configuration options for creating an idOS Isle instance
@@ -387,17 +388,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
         utf8Encode(plaintextContent),
-        base64Decode(options.consumer.consumerPublicKey),
+        base64Decode(options.consumer.consumerAuthPublicKey),
       );
 
       const insertableCredential = await buildInsertableIDOSCredential(
         credential.user_id,
         "",
         base64Encode(content),
-        options.consumer.consumerPublicKey,
+        options.consumer.consumerAuthPublicKey,
         base64Encode(encryptorPublicKey),
         {
-          consumerAddress: options.consumer.consumerPublicKey,
+          consumerAddress: options.consumer.consumerAuthPublicKey,
           lockedUntil: 0,
         },
       );
