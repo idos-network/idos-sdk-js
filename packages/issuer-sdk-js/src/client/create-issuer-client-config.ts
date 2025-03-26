@@ -6,6 +6,7 @@ import {
   createFrontendKwilSigner,
   createWebKwilClient,
 } from "@idos-network/core";
+import { hasProfile } from "@idos-network/core/kwil-actions";
 
 type CreateIssuerClientConfigParams = {
   chainId?: string;
@@ -25,8 +26,10 @@ export async function createIssuerClientConfig(params: CreateIssuerClientConfigP
   const [signer, userAddress] = await createFrontendKwilSigner(store, kwilClient, params.signer);
   kwilClient.setSigner(signer);
 
-  const enclaveProvider = new IframeEnclave(params.enclaveOptions);
-  await enclaveProvider.load();
+  const enclaveProvider = new IframeEnclave({
+    ...params.enclaveOptions,
+    mode: (await hasProfile(kwilClient, userAddress)) ? "existing" : "new",
+  });
 
   return {
     store,

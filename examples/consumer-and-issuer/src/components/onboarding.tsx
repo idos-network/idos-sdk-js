@@ -267,6 +267,8 @@ export function Onboarding() {
         },
       });
 
+      config.enclaveProvider.options.mode = "existing";
+
       await queryClient.invalidateQueries({
         queryKey: ["user-data"],
       });
