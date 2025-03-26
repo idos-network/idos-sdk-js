@@ -107,7 +107,7 @@ export interface CredentialSubject {
 }
 
 function fileToBase85(file: Buffer) {
-  return base85.encode(file);
+  return base85.encode(file, "ascii85");
 }
 
 function capitalizeFirstLetter(str: string) {
@@ -153,9 +153,9 @@ export interface CredentialsIssuerConfig {
 
 const CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
 const CONTEXT_IDOS_CREDENTIALS_V1 =
-  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credentials-v1.json-ld";
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/1bc3503f5302a7e42777076445d5b05fec8db429/packages/issuer-sdk-js/assets/idos-credentials-v1.json";
 const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
-  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/168f449a799620123bc7b01fc224423739500f94/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json-ld";
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/1bc3503f5302a7e42777076445d5b05fec8db429/packages/issuer-sdk-js/assets/idos-credential-subject-v1.json";
 const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
 
 export const buildDocumentLoader = () => {
