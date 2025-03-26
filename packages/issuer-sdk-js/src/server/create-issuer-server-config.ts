@@ -4,20 +4,22 @@ import {
   createNodeKwilClient,
 } from "@idos-network/core";
 
-export interface IssuerConfig {
+export interface IssuerServerConfig {
   kwilClient: KwilActionClient;
   signingKeyPair: nacl.SignKeyPair;
   encryptionSecretKey: Uint8Array;
 }
 
-type CreateIssuerConfigParams = {
+type CreateIssuerServerConfigParams = {
   chainId?: string;
   nodeUrl: string;
   signingKeyPair: nacl.SignKeyPair;
   encryptionSecretKey: Uint8Array;
 };
 
-export async function createIssuerConfig(params: CreateIssuerConfigParams): Promise<IssuerConfig> {
+export async function createIssuerServerConfig(
+  params: CreateIssuerServerConfigParams,
+): Promise<IssuerServerConfig> {
   const kwilClient = await createNodeKwilClient({
     nodeUrl: params.nodeUrl,
     chainId: params.chainId,

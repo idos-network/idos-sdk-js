@@ -2,13 +2,13 @@ import {
   requestDAGMessage as _requestDAGMessage,
   type idOSDAGSignatureParams,
 } from "@idos-network/core/kwil-actions";
-import type { ConsumerConfig } from "./create-consumer-config";
+import type { ConsumerClientConfig } from "./create-consumer-client-config";
 
 /**
  * Request a signature for a Delegated Access Grant
  */
 export async function requestDAGMessage(
-  { kwilClient }: ConsumerConfig,
+  { kwilClient }: ConsumerClientConfig,
   params: idOSDAGSignatureParams,
 ) {
   return _requestDAGMessage(kwilClient, params);

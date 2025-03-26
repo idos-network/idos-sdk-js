@@ -3,9 +3,9 @@ import {
   getCredentialById,
 } from "@idos-network/core/kwil-actions";
 import invariant from "tiny-invariant";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { IssuerClientConfig } from "./create-issuer-client-config";
 
-export async function shareCredential({ kwilClient }: IssuerConfig, id: string) {
+export async function shareCredential({ kwilClient }: IssuerClientConfig, id: string) {
   const credential = await getCredentialById(kwilClient, id);
   invariant(credential, `"idOSCredential" with id ${id} not found`);
 

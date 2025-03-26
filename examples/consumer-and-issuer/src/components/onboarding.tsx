@@ -3,8 +3,8 @@
 import { Button, useDisclosure } from "@heroui/react";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
-  type IssuerConfig,
-  createIssuerConfig,
+  type IssuerClientConfig,
+  createIssuerClientConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
   hasProfile,
@@ -31,7 +31,10 @@ const enclaveOptions = {
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
 
-const useFetchUserData = (config: IssuerConfig | undefined, signer: JsonRpcSigner | undefined) => {
+const useFetchUserData = (
+  config: IssuerClientConfig | undefined,
+  signer: JsonRpcSigner | undefined,
+) => {
   return useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
@@ -100,7 +103,7 @@ export const useCreateIDVAttribute = () => {
       idOSUserId: string;
       idvUserId: string;
       signature: string;
-      config: IssuerConfig;
+      config: IssuerClientConfig;
     }) => {
       const { idOSUserId, idvUserId, signature, config } = data;
 
@@ -195,13 +198,13 @@ const STEPPER_ACTIVE_INDEX = {
   verified: 4,
 };
 
-function useIssuerConfig(signer: JsonRpcSigner | undefined) {
-  const [config, setConfig] = useState<IssuerConfig | undefined>(undefined);
+function useIssuerClientConfig(signer: JsonRpcSigner | undefined) {
+  const [config, setConfig] = useState<IssuerClientConfig | undefined>(undefined);
   useEffect(() => {
     if (!signer) return;
 
     const initialize = async () => {
-      const _config = await createIssuerConfig({
+      const _config = await createIssuerClientConfig({
         nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
         signer,
         enclaveOptions,
@@ -222,7 +225,7 @@ export function Onboarding() {
   const { address } = useAccount();
 
   const signer = useEthersSigner();
-  const config = useIssuerConfig(signer);
+  const config = useIssuerClientConfig(signer);
   const userData = useFetchUserData(config, signer);
   const idvStatus = useFetchIDVStatus(userData.data);
   const createIDVAttribute = useCreateIDVAttribute();

@@ -16,7 +16,7 @@ import {
   getSharedCredential as _getSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import nacl from "tweetnacl";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { IssuerServerConfig } from "./create-issuer-server-config";
 import { ensureEntityId } from "./internal";
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
@@ -34,15 +34,15 @@ type BuildInsertableIDOSCredentialArgs = {
 };
 
 function buildInsertableIDOSCredential(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   args: BuildInsertableIDOSCredentialArgs,
 ): InsertableIDOSCredential;
 function buildInsertableIDOSCredential(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
 ): Omit<InsertableIDOSCredential, "user_id">;
 function buildInsertableIDOSCredential(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   {
     userId,
     publicNotes,
@@ -88,7 +88,7 @@ export interface BaseCredentialParams {
 }
 
 export async function createCredentialAsInserter(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   params: BaseCredentialParams,
 ): Promise<idOSCredential> {
   const { kwilClient } = issuerConfig;
@@ -116,7 +116,7 @@ export interface DelegatedWriteGrantParams {
 }
 
 export async function createCredentialByDelegatedWriteGrant(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   credentialParams: DelegatedWriteGrantBaseParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
 ): Promise<{
@@ -171,7 +171,7 @@ interface EditCredentialAsIssuerParams {
   publicNotes: string;
 }
 export async function editCredentialAsIssuer(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   { publicNotesId, publicNotes }: EditCredentialAsIssuerParams,
 ) {
   const { kwilClient } = issuerConfig;
@@ -186,7 +186,7 @@ export async function editCredentialAsIssuer(
 }
 
 export async function getCredentialIdByContentHash(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   contentHash: string,
 ): Promise<string | null> {
   const { kwilClient } = issuerConfig;
@@ -196,7 +196,7 @@ export async function getCredentialIdByContentHash(
   return id ?? null;
 }
 
-export async function getSharedCredential(issuerConfig: IssuerConfig, id: string) {
+export async function getSharedCredential(issuerConfig: IssuerServerConfig, id: string) {
   const { kwilClient } = issuerConfig;
 
   const result = await _getSharedCredential(kwilClient, id);

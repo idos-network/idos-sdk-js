@@ -4,20 +4,20 @@ import {
   hasProfile as _hasProfile,
   requestDWGMessage as _requestDWGMessage,
 } from "@idos-network/core/kwil-actions";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { IssuerClientConfig } from "./create-issuer-client-config";
 
-export async function hasProfile({ kwilClient, userAddress }: IssuerConfig) {
+export async function hasProfile({ kwilClient, userAddress }: IssuerClientConfig) {
   return _hasProfile(kwilClient, userAddress);
 }
 
 export async function requestDWGMessage(
-  { kwilClient }: IssuerConfig,
+  { kwilClient }: IssuerClientConfig,
   params: DelegatedWriteGrantSignatureRequest,
 ) {
   return _requestDWGMessage(kwilClient, params);
 }
 
-export async function getUserProfile({ kwilClient }: IssuerConfig) {
+export async function getUserProfile({ kwilClient }: IssuerClientConfig) {
   const user = await _getUserProfile(kwilClient);
   return user;
 }
@@ -26,7 +26,7 @@ export async function getUserProfile({ kwilClient }: IssuerConfig) {
  * Get the public key of the user's encryption key
  */
 export async function getUserEncryptionPublicKey(
-  { enclaveProvider }: IssuerConfig,
+  { enclaveProvider }: IssuerClientConfig,
   userId: string,
 ) {
   return await enclaveProvider.discoverUserEncryptionPublicKey(userId);

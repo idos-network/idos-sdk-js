@@ -3,7 +3,7 @@ import { NodeKwil } from "@kwilteam/kwil-js";
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createIssuerConfig } from "./create-issuer-config";
+import { createIssuerServerConfig } from "./create-issuer-server-config";
 
 // Mock the @kwilteam/kwil-js module
 vi.mock("@kwilteam/kwil-js", () => {
@@ -37,7 +37,7 @@ describe("createIssuerConfig", () => {
       timeout: 30_000,
     };
 
-    const result = await createIssuerConfig(params);
+    const result = await createIssuerServerConfig(params);
 
     // Check if NodeKwil was called correctly
     expect(NodeKwil).toHaveBeenCalledWith({
