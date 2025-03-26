@@ -126,7 +126,7 @@ const useIssueCredential = () => {
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
       const dwgData = await isleController?.requestDelegatedWriteGrant({
         consumer: {
-          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           meta: {
             url: "https://consumer-and-issuer-demo.vercel.app/",
             name: "NeoBank",
@@ -175,7 +175,7 @@ const useRequestPermission = () => {
             name: "ACME Card Provider",
             logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
           },
-          consumerPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+          consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
         },
         KYCPermissions: [
           "Name and last name",
