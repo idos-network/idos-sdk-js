@@ -1,5 +1,5 @@
 "use server";
-import { getIssuerConfig } from "@/issuer.config";
+import { getIssuerServerConfig } from "@/issuer.config";
 import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
 import {
   createCredentialByDelegatedWriteGrant,
@@ -113,7 +113,7 @@ export async function createIDOSUserProfile({
     publicKey: string;
   };
 }) {
-  const config = await getIssuerConfig();
+  const config = await getIssuerServerConfig();
 
   const user = await createUser(
     config,
@@ -160,7 +160,7 @@ export async function createCredential(
   notUsableAfter: string,
   signature: string,
 ) {
-  const issuer = await getIssuerConfig();
+  const issuer = await getIssuerServerConfig();
   const kycData = await getKYCData(userId);
   const vcContent = generateCredential(kycData);
 

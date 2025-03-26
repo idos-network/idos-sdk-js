@@ -8,7 +8,7 @@ import nacl from "tweetnacl";
 
 let cachedIssuer: IssuerServerConfig | null = null;
 
-export async function getIssuerConfig(): Promise<IssuerServerConfig> {
+export async function getIssuerServerConfig(): Promise<IssuerServerConfig> {
   if (cachedIssuer) {
     return cachedIssuer;
   }
