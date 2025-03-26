@@ -16,8 +16,8 @@ import {
   getSharedCredential as _getSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import nacl from "tweetnacl";
+import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
-import { ensureEntityId } from "./internal";
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];

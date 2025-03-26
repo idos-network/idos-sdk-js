@@ -3,8 +3,8 @@ import {
   createUser as _createUser,
   upsertWalletAsInserter as _upsertWalletAsInserter,
 } from "@idos-network/core/kwil-actions";
+import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
-import { ensureEntityId } from "./internal";
 
 export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
