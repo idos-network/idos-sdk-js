@@ -2,9 +2,9 @@
 
 import { Button, CircularProgress, Link } from "@heroui/react";
 import {
-  type ConsumerConfig,
+  type ConsumerClientConfig,
   checkUserProfile,
-  createConsumerConfig,
+  createConsumerClientConfig,
 } from "@idos-network/consumer-sdk-js/client";
 import {
   type PropsWithChildren,
@@ -21,11 +21,11 @@ import { useAccount } from "wagmi";
 import { useEthersSigner } from "@/wagmi.config";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
-export const idOSConsumerContext = createContext<ConsumerConfig>(null!);
+export const idOSConsumerContext = createContext<ConsumerClientConfig>(null!);
 export const useIdOSConsumer = () => useContext(idOSConsumerContext);
 
 export function IDOSConsumerProvider({ children }: PropsWithChildren) {
-  const [config, setConfig] = useState<ConsumerConfig | null>(null);
+  const [config, setConfig] = useState<ConsumerClientConfig | null>(null);
   const [initializing, setInitializing] = useState(true);
   const initialized = useRef(false);
 
@@ -40,7 +40,7 @@ export function IDOSConsumerProvider({ children }: PropsWithChildren) {
 
     initialized.current = true;
 
-    const _config = await createConsumerConfig({
+    const _config = await createConsumerClientConfig({
       nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
       signer,
       enclaveOptions: {

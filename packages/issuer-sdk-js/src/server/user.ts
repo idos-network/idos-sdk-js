@@ -3,7 +3,7 @@ import {
   createUser as _createUser,
   upsertWalletAsInserter as _upsertWalletAsInserter,
 } from "@idos-network/core/kwil-actions";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { IssuerServerConfig } from "./create-issuer-server-config";
 import { ensureEntityId } from "./internal";
 
 export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
@@ -11,7 +11,7 @@ export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
 }
 
 export async function createUserProfile(
-  { kwilClient }: IssuerConfig,
+  { kwilClient }: IssuerServerConfig,
   params: CreateProfileReqParams,
 ): Promise<idOSUser> {
   const payload = ensureEntityId(params);
@@ -25,7 +25,7 @@ export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
 }
 
 export async function upsertWalletAsInserter(
-  { kwilClient }: IssuerConfig,
+  { kwilClient }: IssuerServerConfig,
   params: UpsertWalletReqParams,
 ): Promise<idOSWallet> {
   const payload = ensureEntityId(params);
@@ -37,7 +37,7 @@ export async function upsertWalletAsInserter(
 export interface CreateWalletReqParams extends Omit<UpsertWalletReqParams, "user_id"> {}
 
 export async function createUser(
-  config: IssuerConfig,
+  config: IssuerServerConfig,
   user: CreateProfileReqParams,
   wallet: CreateWalletReqParams,
 ) {
