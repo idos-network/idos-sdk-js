@@ -60,7 +60,7 @@ const vcTemplate = (kycData: Record<string, any>) => {
   };
 };
 
-const appendProof = (vc: Record<string, unknown>) => {
+const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
   invariant(
     process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
     "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
