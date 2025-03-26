@@ -53,7 +53,8 @@ function useShareCredential() {
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
-      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
+      // @todo: remove this once we're back using this app
+      const contentHash = "";
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
