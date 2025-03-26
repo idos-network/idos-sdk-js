@@ -225,19 +225,18 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 };
 
 export const invokePassportingService = async (payload: unknown) => {
-  const response = await fetch("https://passporting-server.vercel.app/", {
+  const response = await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
     method: "POST",
     body: JSON.stringify(payload),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.NEXT_PUBLIC_PASSPORTING_SERVICE_API_KEY}`,
+      Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
     },
   })
     .then((res) => {
       return res.json();
     })
     .catch((err) => {
-      console.log({ err });
       return err;
     });
 
