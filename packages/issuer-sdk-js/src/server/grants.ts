@@ -1,7 +1,7 @@
 import { base64Decode, decryptContent, hexEncodeSha256Hash } from "@idos-network/core";
 import { createAccessGrantByDag as _createAccessGrantByDag } from "@idos-network/core/kwil-actions";
 import nacl from "tweetnacl";
-import type { IssuerConfig } from "./create-issuer-config";
+import type { IssuerServerConfig } from "./create-issuer-server-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
 
 interface CreateAccessGrantFromDAGParams {
@@ -14,7 +14,7 @@ interface CreateAccessGrantFromDAGParams {
 }
 
 export async function createAccessGrantFromDAG(
-  issuerConfig: IssuerConfig,
+  issuerConfig: IssuerServerConfig,
   params: CreateAccessGrantFromDAGParams,
 ) {
   const { kwilClient } = issuerConfig;

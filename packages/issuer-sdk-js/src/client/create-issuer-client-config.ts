@@ -7,14 +7,14 @@ import {
   createWebKwilClient,
 } from "@idos-network/core";
 
-type CreateIssuerConfigParams = {
+type CreateIssuerClientConfigParams = {
   chainId?: string;
   nodeUrl: string;
   signer: Wallet;
   enclaveOptions: Omit<EnclaveOptions, "mode">;
 };
 
-export async function createIssuerConfig(params: CreateIssuerConfigParams) {
+export async function createIssuerClientConfig(params: CreateIssuerClientConfigParams) {
   const store = new Store(window.localStorage);
 
   const kwilClient = await createWebKwilClient({
@@ -39,4 +39,4 @@ export async function createIssuerConfig(params: CreateIssuerConfigParams) {
   };
 }
 
-export type IssuerConfig = Awaited<ReturnType<typeof createIssuerConfig>>;
+export type IssuerClientConfig = Awaited<ReturnType<typeof createIssuerClientConfig>>;

@@ -11,26 +11,29 @@ import {
   getCredentialById as _getCredentialById,
 } from "@idos-network/core/kwil-actions";
 import invariant from "tiny-invariant";
-import type { ConsumerConfig } from "./create-consumer-config";
+import type { ConsumerClientConfig } from "./create-consumer-client-config";
 
 /**
  * Get all idOSCredentials for the given consumer
  */
-export async function getAllCredentials({ kwilClient }: ConsumerConfig) {
+export async function getAllCredentials({ kwilClient }: ConsumerClientConfig) {
   return _getAllCredentials(kwilClient);
 }
 
 /**
  * Get an idOSCredential by its `id`
  */
-export async function getCredentialById({ kwilClient }: ConsumerConfig, id: string) {
+export async function getCredentialById({ kwilClient }: ConsumerClientConfig, id: string) {
   return _getCredentialById(kwilClient, id);
 }
 
 /**
  * Get the SHA256 hash of the content of an idOSCredential
  */
-export async function getCredentialContentSha256Hash({ kwilClient }: ConsumerConfig, id: string) {
+export async function getCredentialContentSha256Hash(
+  { kwilClient }: ConsumerClientConfig,
+  id: string,
+) {
   const credential = await _getCredentialById(kwilClient, id);
 
   invariant(credential, `"idOSCredential" with id ${id} not found`);
@@ -43,7 +46,7 @@ export async function getCredentialContentSha256Hash({ kwilClient }: ConsumerCon
  * This doesn't create an Access Grant and is used only for passporting flows
  */
 export async function createCredentialCopy(
-  { enclaveProvider, kwilClient }: ConsumerConfig,
+  { enclaveProvider, kwilClient }: ConsumerClientConfig,
   id: string,
   consumerRecipientEncryptionPublicKey: string,
   consumerInfo: {
