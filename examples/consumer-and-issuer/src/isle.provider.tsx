@@ -48,7 +48,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           name: "NeoBank",
           logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
         },
-        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
       },
       enclaveOptions: {
         container: "#idOS-enclave",
@@ -63,7 +63,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "NeoBank",
               logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
-            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
         ],
         integratedConsumers: [
@@ -73,7 +73,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "NeoBank",
               logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
           {
             meta: {
