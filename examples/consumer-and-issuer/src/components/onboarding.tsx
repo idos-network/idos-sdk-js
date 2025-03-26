@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import { createAttribute, getAttributes } from "@idos-network/core";
+import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerConfig,
   createIssuerConfig,

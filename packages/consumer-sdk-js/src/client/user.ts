@@ -1,4 +1,4 @@
-import { getUserProfile as _getUserProfile, hasProfile } from "@idos-network/core";
+import { getUserProfile as _getUserProfile, hasProfile } from "@idos-network/core/kwil-actions";
 import type { ConsumerConfig } from "./create-consumer-config";
 
 /**

@@ -1,9 +1,5 @@
-import {
-  createAccessGrantByDag as _createAccessGrantByDag,
-  base64Decode,
-  decryptContent,
-  hexEncodeSha256Hash,
-} from "@idos-network/core";
+import { base64Decode, decryptContent, hexEncodeSha256Hash } from "@idos-network/core";
+import { createAccessGrantByDag as _createAccessGrantByDag } from "@idos-network/core/kwil-actions";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
