@@ -2,12 +2,9 @@ import {
   createCredentialCopy as _createCredentialCopy,
   getAllCredentials as _getAllCredentials,
   getCredentialById as _getCredentialById,
-  base64Decode,
-  base64Encode,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
   type idOSCredential,
-  utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
 import invariant from "tiny-invariant";
@@ -45,41 +42,46 @@ export async function getCredentialContentSha256Hash(
   return hexEncodeSha256Hash(utf8Encode(content));
 }
 
+interface CryptoMethods {
+  encrypt: (
+    content: string,
+    encryptorPublicKey: string,
+  ) => Promise<{
+    content: string;
+    encryptorPublicKey: string;
+  }>;
+  decrypt: (credential: idOSCredential) => Promise<string>;
+}
+
 /**
  * Create a copy of an idOSCredential for the given consumer
  * This doesn't create an Access Grant and is used only for passporting flows
  */
 export async function createCredentialCopy(
-  { enclaveProvider, kwilClient }: ConsumerConfig,
+  { kwilClient }: Omit<ConsumerConfig, "enclaveProvider" | "store">,
   id: string,
   consumerRecipientEncryptionPublicKey: string,
   consumerInfo: {
     consumerAddress: string;
     lockedUntil: number;
-    decryptCredentialContent?: (credential: idOSCredential) => Promise<string>;
-    encryptCredentialContent?: (
-      content: string,
-      encryptorPublicKey: string,
-    ) => Promise<{
-      content: string;
-      encryptorPublicKey: string;
-    }>;
   },
+  { encrypt, decrypt }: CryptoMethods,
 ) {
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-  const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
-    utf8Encode(originalCredential.content),
-    base64Decode(consumerRecipientEncryptionPublicKey),
+  const decryptedContent = await decrypt(originalCredential);
+  const { content, encryptorPublicKey } = await encrypt(
+    decryptedContent,
+    consumerRecipientEncryptionPublicKey,
   );
 
   const insertableCredential = await buildInsertableIDOSCredential(
     originalCredential.user_id,
     "",
-    utf8Decode(content),
+    content,
     consumerRecipientEncryptionPublicKey,
-    base64Encode(encryptorPublicKey),
+    encryptorPublicKey,
     consumerInfo,
   );
 

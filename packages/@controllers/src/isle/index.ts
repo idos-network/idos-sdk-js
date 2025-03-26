@@ -481,7 +481,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
     invariant(enclaveProvider, "No `idOS enclave` found");
     const user = await getUserProfile();
-    const { address } = getAccount(wagmiConfig);
 
     await enclaveProvider.load();
     await enclaveProvider.ready(user.id, user.recipient_encryption_public_key);
@@ -500,13 +499,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     content: string;
     encryptorPublicKey: string;
   }> => {
-    invariant(enclave, "No `idOS enclave` found");
-    const user = await getUserProfile();
-    const { address } = getAccount(wagmiConfig);
+    invariant(enclaveProvider, "No `idOS enclave` found");
 
-    await enclave.ready(user.id, address, address, user.recipient_encryption_public_key);
-
-    const encrypted = await enclave.encrypt(utf8Encode(content), base64Decode(encryptorPublicKey));
+    const encrypted = await enclaveProvider.encrypt(
+      utf8Encode(content),
+      base64Decode(encryptorPublicKey),
+    );
     return {
       content: base64Encode(encrypted.content),
       encryptorPublicKey: base64Encode(encrypted.encryptorPublicKey),
@@ -857,7 +855,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const getEnclave = async (): Promise<EnclaveProvider | null> => {
-    return enclave;
+    return enclaveProvider;
   };
 
   /**

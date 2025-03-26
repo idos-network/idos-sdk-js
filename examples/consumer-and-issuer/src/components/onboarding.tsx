@@ -19,7 +19,6 @@ import { useAccount, useSignMessage } from "wagmi";
 import {
   createCredential,
   createIDOSUserProfile,
-  getCredentialCompliantly,
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
@@ -360,14 +359,18 @@ export function Onboarding() {
       );
       const { id: credentialId } = await createCredentialCopy(
         // C1.2
-        { kwilClient },
+        {
+          kwilClient,
+        },
         id,
         consumerEncryptionPublicKey,
         {
           consumerAddress: consumerSigningPublicKey,
           lockedUntil: 0,
-          decryptCredentialContent: isleController.decryptCredentialContent,
-          encryptCredentialContent: isleController.encryptCredentialContent,
+        },
+        {
+          encrypt: isleController.encryptCredentialContent,
+          decrypt: isleController.decryptCredentialContent,
         },
       );
 
@@ -383,7 +386,8 @@ export function Onboarding() {
       const dagWithSignature = { ...dag, dag_signature: signature };
 
       // invoke passporting service
-      await invokePassportingService(dagWithSignature);
+      const response = await invokePassportingService(dagWithSignature);
+      console.log({ response });
     },
     [isleController, signMessageAsync, address],
   );
