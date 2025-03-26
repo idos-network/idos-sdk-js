@@ -94,7 +94,7 @@ interface idOSIsleControllerOptions {
     /** Information about consumers known to the app */
     integratedConsumers: {
       meta: Meta;
-      consumerPublicKey: string;
+      consumerAuthPublicKey: string;
     }[];
 
     /** The type of credential accepted by the app */
@@ -110,7 +110,7 @@ interface RequestPermissionOptions {
   /** The consumer information */
   consumer: {
     /** The public key of the consumer */
-    consumerPublicKey: string;
+    consumerAuthPublicKey: string;
     /** Meta information about the consumer */
     meta: Meta;
   };
@@ -318,8 +318,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const delegatedWriteGrant = {
         id: crypto.randomUUID(),
         owner_wallet_identifier: address as string,
-        grantee_wallet_identifier: options.consumer.consumerPublicKey,
-        issuer_public_key: options.consumer.consumerPublicKey,
+        grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
+        issuer_public_key: options.consumer.consumerAuthPublicKey,
         access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
         not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
         not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -545,7 +545,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     for (const consumer of options.credentialRequirements.integratedConsumers) {
       const matchingAccessGrants = knownAccessGrants.filter((ag) => {
-        return ag.ag_grantee_wallet_identifier === consumer.consumerPublicKey;
+        return ag.ag_grantee_wallet_identifier === consumer.consumerAuthPublicKey;
       });
 
       permissions.set(

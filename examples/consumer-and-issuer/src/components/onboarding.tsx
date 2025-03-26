@@ -175,7 +175,7 @@ const useRequestPermission = () => {
             name: "ACME Card Provider",
             logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
           },
-          consumerPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+          consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
         },
         KYCPermissions: [
           "Name and last name",
