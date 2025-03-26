@@ -1,5 +1,6 @@
-import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers";
 import {
+  type EnclaveOptions,
+  IframeEnclave,
   Store,
   type Wallet,
   createFrontendKwilSigner,

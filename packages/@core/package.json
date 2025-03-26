@@ -29,7 +29,8 @@
     "./kwil-actions": "./src/kwil-actions/index.ts",
     "./kwil-actions/*": "./src/kwil-actions/*.ts",
     "./store": "./src/store/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./enclave": "./src/enclave/index.ts"
   },
   "license": "MIT",
   "peerDependencies": {
