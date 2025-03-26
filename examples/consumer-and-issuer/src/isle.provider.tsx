@@ -4,8 +4,10 @@ import { createIsleController } from "@idos-network/controllers";
 import { useClickAway } from "@uidotdev/usehooks";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 
+type IsleController = ReturnType<typeof createIsleController>;
+
 interface IsleContextType {
-  isleController: ReturnType<typeof createIsleController> | null;
+  isleController: IsleController | null;
 }
 
 const IsleContext = createContext<IsleContextType | null>(null);
@@ -24,7 +26,7 @@ interface IsleProviderProps {
 }
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
-  const [isleController, setIsle] = useState<ReturnType<typeof createIsleController> | null>(null);
+  const [isleController, setIsle] = useState<IsleController | null>(null);
 
   // Toggle isle animation from the outside
   const containerRef = useClickAway(() => {
