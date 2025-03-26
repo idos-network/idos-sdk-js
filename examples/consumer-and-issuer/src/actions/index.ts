@@ -91,7 +91,6 @@ const generateCredential = (kycData: Record<string, any>): Uint8Array => {
 };
 
 const publicNotes = {
-  id: crypto.randomUUID(),
   level: "human",
   type: "human",
   status: "approved",
