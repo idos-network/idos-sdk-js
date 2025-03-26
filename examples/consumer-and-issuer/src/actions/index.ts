@@ -62,10 +62,10 @@ const vcTemplate = (kycData: Record<string, any>) => {
 };
 
 const appendProof = (vc: Record<string, unknown>) => {
-  // invariant(
-  //   process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
-  //   "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
-  // );
+  invariant(
+    process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
+    "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
+  );
   return {
     ...vc,
     proof: {
@@ -78,10 +78,7 @@ const appendProof = (vc: Record<string, unknown>) => {
       proofValue: base64Encode(
         nacl.sign.detached(
           toBytes(vc),
-          base64Decode(
-            process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ??
-              "5Pr3KaSP6ZqJ4Qt888MZDDVl3Q/pj2uFaGcxTSkgRx3+9HghmSF9D1X8Cw1ywocpu/jqJuUsFynghZb8UBn40A==",
-          ),
+          base64Decode(process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY),
         ),
       ),
     },
