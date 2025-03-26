@@ -3,7 +3,7 @@ import {
   getUserProfile as _getUserProfile,
   hasProfile as _hasProfile,
   requestDWGMessage as _requestDWGMessage,
-} from "@idos-network/core";
+} from "@idos-network/core/kwil-actions";
 import type { IssuerConfig } from "./create-issuer-config";
 
 export async function hasProfile({ kwilClient, userAddress }: IssuerConfig) {

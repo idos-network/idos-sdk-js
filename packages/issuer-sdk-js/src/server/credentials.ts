@@ -1,10 +1,4 @@
 import {
-  type CreateCredentialByDelegatedWriteGrantParams,
-  createCredentialAsInserter as _createCredentialAsInserter,
-  createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
-  editCredentialAsIssuer as _editCredentialAsIssuer,
-  getCredentialIdByContentHash as _getCredentialIdByContentHash,
-  getSharedCredential as _getSharedCredential,
   base64Decode,
   base64Encode,
   encryptContent,
@@ -13,6 +7,14 @@ import {
   type idOSCredential,
   utf8Encode,
 } from "@idos-network/core";
+import {
+  type CreateCredentialByDelegatedWriteGrantParams,
+  createCredentialAsInserter as _createCredentialAsInserter,
+  createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
+  editCredentialAsIssuer as _editCredentialAsIssuer,
+  getCredentialIdByContentHash as _getCredentialIdByContentHash,
+  getSharedCredential as _getSharedCredential,
+} from "@idos-network/core/kwil-actions";
 import nacl from "tweetnacl";
 import type { IssuerConfig } from "./create-issuer-config";
 import { ensureEntityId } from "./internal";
