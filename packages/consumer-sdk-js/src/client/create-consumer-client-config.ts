@@ -3,7 +3,7 @@ import {
   IframeEnclave,
   Store,
   type Wallet,
-  createFrontendKwilSigner,
+  createClientKwilSigner,
   createWebKwilClient,
 } from "@idos-network/core";
 import { hasProfile } from "@idos-network/core/kwil-actions";
@@ -23,7 +23,7 @@ export async function createConsumerClientConfig(params: CreateConsumerClientCon
     chainId: params.chainId,
   });
 
-  const [signer, userAddress] = await createFrontendKwilSigner(store, kwilClient, params.signer);
+  const [signer, userAddress] = await createClientKwilSigner(store, kwilClient, params.signer);
   kwilClient.setSigner(signer);
 
   const enclaveProvider = new IframeEnclave({

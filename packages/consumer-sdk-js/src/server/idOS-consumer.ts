@@ -15,8 +15,8 @@ import {
 } from "@idos-network/core/kwil-actions";
 import {
   type KwilActionClient,
-  createBackendKwilSigner,
   createNodeKwilClient,
+  createServerKwilSigner,
 } from "@idos-network/core/kwil-infra";
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
 import type { ethers } from "ethers";
@@ -65,7 +65,7 @@ export class idOSConsumer {
       chainId,
     });
 
-    const [signer, address] = createBackendKwilSigner(consumerSigner);
+    const [signer, address] = createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
     return new idOSConsumer(

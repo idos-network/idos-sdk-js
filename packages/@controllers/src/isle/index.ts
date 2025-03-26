@@ -12,7 +12,7 @@ import {
   base64Decode,
   base64Encode,
   buildInsertableIDOSCredential,
-  createFrontendKwilSigner,
+  createClientKwilSigner,
   createWebKwilClient,
   type idOSCredential,
   type idOSUser,
@@ -215,7 +215,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       nodeUrl: "https://nodes.playground.idos.network",
     });
 
-    const [kwilSigner] = await createFrontendKwilSigner(store, client, signer);
+    const [kwilSigner] = await createClientKwilSigner(store, client, signer);
     client.setSigner(kwilSigner);
 
     kwilClient = client;

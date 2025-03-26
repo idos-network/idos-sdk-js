@@ -48,7 +48,7 @@ export type SignerAddress = string;
  * This function is explicitly marked as being for backend use only because it doesn't reset
  * the KGW cookie when logging out and re-logging in with a different wallet.
  */
-export function createBackendKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAddress] {
+export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAddress] {
   if (isNaclSignKeyPair(signer)) {
     return [
       new KwilSigner(
@@ -79,7 +79,7 @@ export function createBackendKwilSigner(signer: KwilSignerType): [KwilSigner, Si
   })(signer);
 }
 
-export async function createFrontendKwilSigner(
+export async function createClientKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
   wallet: Wallet,
