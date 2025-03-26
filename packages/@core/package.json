@@ -27,6 +27,7 @@
     "./types": "./src/types/index.ts",
     "./kwil-nep413-signer": "./src/kwil-nep413-signer/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",
+    "./kwil-infra": "./src/kwil-infra/index.ts",
     "./kwil-actions/*": "./src/kwil-actions/*.ts",
     "./store": "./src/store/index.ts",
     "./utils": "./src/utils/index.ts",

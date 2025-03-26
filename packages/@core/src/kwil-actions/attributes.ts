@@ -1,5 +1,5 @@
+import type { KwilActionClient } from "../kwil-infra";
 import type { idOSUserAttribute } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 /**
  * Returns all the attributes for the given `signer`.
