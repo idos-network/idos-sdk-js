@@ -1,7 +1,7 @@
 import {
   requestDAGMessage as _requestDAGMessage,
   type idOSDAGSignatureParams,
-} from "@idos-network/core";
+} from "@idos-network/core/kwil-actions";
 import type { ConsumerConfig } from "./create-consumer-config";
 
 /**

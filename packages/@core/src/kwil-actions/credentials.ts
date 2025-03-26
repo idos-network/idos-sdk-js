@@ -1,7 +1,7 @@
 import { utf8Encode } from "../codecs";
 import { hexEncodeSha256Hash } from "../codecs";
+import type { KwilActionClient } from "../kwil-infra";
 import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 export interface CreateCredentialParams {
   user_id: string;

@@ -1,5 +1,5 @@
+import type { KwilActionClient } from "../kwil-infra";
 import type { idOSUser } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 /**
  * Checks if the user has a profile in the idOS associated with its wallet address.

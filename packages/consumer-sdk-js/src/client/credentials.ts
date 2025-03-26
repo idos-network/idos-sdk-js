@@ -1,12 +1,14 @@
 import {
-  createCredentialCopy as _createCredentialCopy,
-  getAllCredentials as _getAllCredentials,
-  getCredentialById as _getCredentialById,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
   type idOSCredential,
   utf8Encode,
 } from "@idos-network/core";
+import {
+  createCredentialCopy as _createCredentialCopy,
+  getAllCredentials as _getAllCredentials,
+  getCredentialById as _getCredentialById,
+} from "@idos-network/core/kwil-actions";
 import invariant from "tiny-invariant";
 import type { ConsumerConfig } from "./create-consumer-config";
 

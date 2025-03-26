@@ -1,4 +1,5 @@
 import {
+  type EnclaveProvider,
   base64Decode,
   base64Encode,
   type idOSCredential,
@@ -7,7 +8,6 @@ import {
 } from "@idos-network/core";
 import invariant from "tiny-invariant";
 
-import type { EnclaveProvider } from "@idos-network/controllers/enclave";
 import type { Auth } from "./auth";
 
 export class Enclave {

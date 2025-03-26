@@ -1,5 +1,5 @@
+import type { KwilActionClient } from "../kwil-infra";
 import type { idOSGrant } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 /**
  * Returns the amount of Access Grants that have been granted for the given `signer`.

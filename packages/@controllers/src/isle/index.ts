@@ -1,5 +1,7 @@
 import {
-  type DelegatedWriteGrantSignatureRequest,
+  type EnclaveOptions,
+  type EnclaveProvider,
+  IframeEnclave,
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
@@ -7,25 +9,28 @@ import {
   type IsleTheme,
   type KwilActionClient,
   Store,
-  getUserProfile as _getUserProfile,
-  shareCredential as _shareCredential,
   base64Decode,
   base64Encode,
   buildInsertableIDOSCredential,
   createFrontendKwilSigner,
   createWebKwilClient,
+  type idOSCredential,
+  type idOSUser,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/core";
+import {
+  type DelegatedWriteGrantSignatureRequest,
+  getUserProfile as _getUserProfile,
+  shareCredential as _shareCredential,
   getAccessGrantsOwned,
   getAllCredentials,
   getCredentialById,
   getCredentialOwned,
   hasProfile,
-  type idOSCredential,
-  type idOSUser,
   removeCredential,
   requestDWGMessage,
-  utf8Decode,
-  utf8Encode,
-} from "@idos-network/core";
+} from "@idos-network/core/kwil-actions";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -44,8 +49,6 @@ import { mainnet, sepolia } from "@wagmi/core/chains";
 import { BrowserProvider, type JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
-import { IframeEnclave } from "../enclave";
-import type { EnclaveOptions, EnclaveProvider } from "../enclave/types";
 
 /**
  * Meta information about an actor.

@@ -1,9 +1,8 @@
+import type { idOSUser, idOSWallet } from "@idos-network/core";
 import {
   createUser as _createUser,
   upsertWalletAsInserter as _upsertWalletAsInserter,
-  type idOSUser,
-  type idOSWallet,
-} from "@idos-network/core";
+} from "@idos-network/core/kwil-actions";
 import type { IssuerConfig } from "./create-issuer-config";
 import { ensureEntityId } from "./internal";
 
