@@ -126,7 +126,7 @@ const useIssueCredential = () => {
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
       const dwgData = await isleController?.requestDelegatedWriteGrant({
         consumer: {
-          consumerPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
           meta: {
             url: "https://consumer-and-issuer-demo.vercel.app/",
             name: "NeoBank",
