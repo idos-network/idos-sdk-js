@@ -1,6 +1,5 @@
 import {
   type EnclaveOptions,
-  type EnclaveProvider,
   IframeEnclave,
   type IsleControllerMessage,
   type IsleMessageHandler,
@@ -31,6 +30,7 @@ import {
   removeCredential,
   requestDWGMessage,
 } from "@idos-network/core/kwil-actions";
+import type { KwilSigner } from "@kwilteam/kwil-js";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -122,7 +122,7 @@ interface RequestPermissionOptions {
  * Public interface for interacting with an idOS Isle instance
  * @interface idOSIsleInstance
  */
-interface idOSIsleController {
+export interface idOSIsleController {
   /** Initiates a wallet connection process */
   connect: () => Promise<void>;
   /** Cleans up and removes the Isle instance */
@@ -148,7 +148,18 @@ interface idOSIsleController {
   onIsleMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
+  // 🔨
+  buildIssuerClientConfig: () => Promise<IssuerClientConfig | null>;
 }
+
+// 🔨
+type IssuerClientConfig = {
+  store: Store;
+  kwilClient: KwilActionClient;
+  enclaveProvider: IframeEnclave;
+  signer: KwilSigner;
+  userAddress: string;
+};
 
 // Singleton wagmi config instance shared across all Isle instances
 let wagmiConfig: Config;
@@ -192,12 +203,13 @@ const initializeWagmi = (): void => {
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
-  let enclaveProvider: EnclaveProvider | null = null;
+  let enclaveProvider: IframeEnclave | null = null;
   const controller: Controller = createController({
     targetOrigin: "https://isle.idos.network",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
   let signer: JsonRpcSigner | undefined;
+  let kwilSigner: KwilSigner | undefined;
   let kwilClient: KwilActionClient | undefined;
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
@@ -215,7 +227,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       nodeUrl: "https://nodes.playground.idos.network",
     });
 
-    const [kwilSigner] = await createClientKwilSigner(store, client, signer);
+    if (!kwilSigner) {
+      kwilSigner = (await createClientKwilSigner(store, client, signer))[0];
+    }
     client.setSigner(kwilSigner);
 
     kwilClient = client;
@@ -883,6 +897,44 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
   };
 
+  const buildIssuerClientConfig = async (): Promise<IssuerClientConfig | null> => {
+    await setupSigner();
+    if (!signer) {
+      console.error("No signer available");
+      return null;
+    }
+
+    await ensureKwilClient();
+    if (!kwilClient) {
+      console.error("No KwilClient available");
+      return null;
+    }
+    if (!kwilSigner) {
+      console.error("No kwilSigner available");
+      return null;
+    }
+
+    await setupEnclave();
+    if (!enclaveProvider) {
+      console.error("No enclave provider available");
+      return null;
+    }
+
+    const { address } = getAccount(wagmiConfig);
+    if (!address) {
+      console.error("No address available");
+      return null;
+    }
+
+    return {
+      store,
+      kwilClient,
+      enclaveProvider,
+      signer: kwilSigner,
+      userAddress: address,
+    };
+  };
+
   // Return the public interface
   return {
     connect,
@@ -896,5 +948,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
+    buildIssuerClientConfig,
   };
 };

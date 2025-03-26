@@ -4,7 +4,6 @@ import { Button, useDisclosure } from "@heroui/react";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
-  createIssuerClientConfig,
   getUserEncryptionPublicKey,
   getUserProfile,
   hasProfile,
@@ -20,6 +19,7 @@ import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/a
 import { useIsleController } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
+import type { idOSIsleController } from "@idos-network/controllers";
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
@@ -198,23 +198,26 @@ const STEPPER_ACTIVE_INDEX = {
   verified: 4,
 };
 
-function useIssuerClientConfig(signer: JsonRpcSigner | undefined) {
+function useIssuerClientConfig(
+  isleController: idOSIsleController | null,
+  signer: JsonRpcSigner | undefined,
+) {
   const [config, setConfig] = useState<IssuerClientConfig | undefined>(undefined);
   useEffect(() => {
     if (!signer) return;
+    if (!isleController) return;
 
     const initialize = async () => {
-      const _config = await createIssuerClientConfig({
-        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
-        signer,
-        enclaveOptions,
-      });
-
-      setConfig(_config);
+      const clientConfig = await isleController.buildIssuerClientConfig();
+      if (!clientConfig) {
+        console.error("No IssuerClientConfig yet");
+        return;
+      }
+      setConfig(clientConfig);
     };
 
     initialize();
-  }, [signer]);
+  }, [isleController, signer]);
 
   return config;
 }
@@ -225,7 +228,7 @@ export function Onboarding() {
   const { address } = useAccount();
 
   const signer = useEthersSigner();
-  const config = useIssuerClientConfig(signer);
+  const config = useIssuerClientConfig(isleController, signer);
   const userData = useFetchUserData(config, signer);
   const idvStatus = useFetchIDVStatus(userData.data);
   const createIDVAttribute = useCreateIDVAttribute();
