@@ -15,8 +15,8 @@ export async function invokePassportingService(payload: {
   const serviceUrl = process.env.PASSPORTING_SERVICE_URL;
   const serviceApiKey = process.env.PASSPORTING_SERVICE_API_KEY;
 
-  invariant(serviceUrl, "PASSPORTING_SERVICE_URL is not set");
-  invariant(serviceApiKey, "PASSPORTING_SERVICE_API_KEY is not set");
+  invariant(serviceUrl, "`PASSPORTING_SERVICE_URL` is not set");
+  invariant(serviceApiKey, "`PASSPORTING_SERVICE_API_KEY` is not set");
 
   // Call the passporting service to transmit the DAG
   const response = await fetch(serviceUrl, {

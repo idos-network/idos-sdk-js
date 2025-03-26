@@ -1,6 +1,13 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
+import {
+  createConsumerClientConfig,
+  createCredentialCopy,
+  getAllCredentials,
+  getCredentialContentSha256Hash,
+  requestDAGMessage,
+} from "@idos-network/consumer-sdk-js/client";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
@@ -16,7 +23,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
-import { createCredential, createIDOSUserProfile, getUserIdFromToken } from "@/actions";
+import {
+  createCredential,
+  createIDOSUserProfile,
+  getUserIdFromToken,
+  invokePassportingService,
+} from "@/actions";
 import { useIsleController } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
@@ -175,7 +187,8 @@ const useRequestPermission = () => {
             name: "ACME Card Provider",
             logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
           },
-          consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+          consumerAuthPublicKey:
+            process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
         },
         KYCPermissions: [
           "Name and last name",
@@ -217,6 +230,79 @@ function useIssuerClientConfig(signer: JsonRpcSigner | undefined) {
   }, [signer]);
 
   return config;
+}
+
+function useShareCredentialWithConsumer() {
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const signer = useEthersSigner();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      invariant(signer, "`Signer` is not defined");
+      const consumerConfig = await createConsumerClientConfig({
+        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
+        signer,
+        enclaveOptions: {
+          container: "#idOS-enclave",
+        },
+      });
+
+      const credentials = await getAllCredentials(consumerConfig);
+
+      const credential = credentials.find((credential) => {
+        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
+        return publicNotes.type === "KYC DATA";
+      });
+
+      invariant(credential, "`idOSCredential` to share not found");
+
+      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credential.id);
+      const lockedUntil = 0;
+
+      const consumerSigningPublicKey =
+        process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey =
+        process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+
+      invariant(consumerSigningPublicKey, "`NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY` is not set");
+      invariant(
+        consumerEncryptionPublicKey,
+        "`NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
+      );
+
+      const { id } = await createCredentialCopy(
+        consumerConfig,
+        credential.id,
+        consumerEncryptionPublicKey,
+        {
+          consumerAddress: consumerSigningPublicKey,
+          lockedUntil: 0,
+        },
+      );
+
+      const dag = {
+        dag_owner_wallet_identifier: address as string,
+        dag_grantee_wallet_identifier: consumerSigningPublicKey,
+        dag_data_id: id,
+        dag_locked_until: lockedUntil,
+        dag_content_hash: contentHash,
+      };
+
+      const message: string = await requestDAGMessage(consumerConfig, dag);
+      const signature = await signMessageAsync({ message });
+
+      return invokePassportingService({
+        ...dag,
+        dag_signature: signature,
+      });
+    },
+    onSuccess: (data) => {
+      console.log(data);
+      queryClient.setQueryData(["shared-credential"], data);
+    },
+  });
 }
 
 export function Onboarding() {
@@ -415,6 +501,8 @@ export function Onboarding() {
     }
   }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, stepperStatus]);
 
+  const shareCredentialWithConsumer = useShareCredentialWithConsumer();
+
   return (
     <div className="container relative mr-auto flex h-screen w-[60%] flex-col items-center gap-6">
       <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
@@ -440,9 +528,13 @@ export function Onboarding() {
                 size="lg"
                 color="primary"
                 onPress={() => {
-                  requestPermission.mutate();
+                  shareCredentialWithConsumer.mutate(undefined, {
+                    onError: (error) => {
+                      console.error(error);
+                    },
+                  });
                 }}
-                isLoading={requestPermission.isPending}
+                isLoading={shareCredentialWithConsumer.isPending}
               >
                 Claim your Acme Card now
               </Button>
