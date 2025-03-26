@@ -7,15 +7,17 @@ import {
 } from "@idos-network/core/codecs";
 import { decryptContent } from "@idos-network/core/cryptography";
 import {
-  type KwilActionClient,
-  createBackendKwilSigner,
-  createNodeKwilClient,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
   getGrantsCount,
   getSharedCredential,
 } from "@idos-network/core/kwil-actions";
+import {
+  type KwilActionClient,
+  createBackendKwilSigner,
+  createNodeKwilClient,
+} from "@idos-network/core/kwil-infra";
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";

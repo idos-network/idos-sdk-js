@@ -3,10 +3,10 @@ import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { bs58Encode } from "../codecs";
+import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
 import type { Wallet } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
 
 /**
