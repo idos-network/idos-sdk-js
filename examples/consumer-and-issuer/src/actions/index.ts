@@ -8,6 +8,7 @@ import {
 import invariant from "tiny-invariant";
 
 import nacl from "tweetnacl";
+import { idOSConsumer } from "../../consumer.config";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
@@ -216,3 +217,29 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     ),
   };
 }
+
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await idOSConsumer();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
+
+export const invokePassportingService = async (payload: unknown) => {
+  const response = await fetch("https://passporting-server.vercel.app/", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_PASSPORTING_SERVICE_API_KEY}`,
+    },
+  })
+    .then((res) => {
+      return res.json();
+    })
+    .catch((err) => {
+      console.log({ err });
+      return err;
+    });
+
+  return response;
+};
