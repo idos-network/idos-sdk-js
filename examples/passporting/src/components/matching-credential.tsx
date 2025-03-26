@@ -66,7 +66,7 @@ function useShareCredential() {
         "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
       );
 
-      // @todo: this was removed for build pipeline pass. preback when needed using onboarding.tsx example
+      // @todo: this was removed for build pipeline pass. bring back when needed using onboarding.tsx example
       const id = "";
 
       const dag = {
