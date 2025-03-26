@@ -389,7 +389,7 @@ function CredentialContent({ content: credentialContent }: { content: string | u
 }
 
 interface ConsumerInfo {
-  consumerPublicKey: string;
+  consumerAuthPublicKey: string;
   meta: {
     url: string;
     name: string;
@@ -424,6 +424,7 @@ export function Permissions() {
     hasRequestedRef.current = true;
 
     node.on("update-request-access-grant-status", (data) => {
+      setGrant(null);
       setPermissionStatus(data.status);
       if (data.status === "request-permission") {
         setRequestedPermissions(data.KYCPermissions);
@@ -526,7 +527,7 @@ export function Permissions() {
     <Stack>
       <Stack gap="6">
         {grants.map(([consumer, values]) => (
-          <Stack key={consumer.consumerPublicKey} gap="3">
+          <Stack key={consumer.consumerAuthPublicKey} gap="3">
             <HStack justifyContent="space-between" alignItems="center">
               <HStack gap="2.5">
                 <Image

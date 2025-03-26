@@ -44,16 +44,8 @@ export class Auth {
 
   constructor(
     public readonly kwilWrapper: KwilWrapper,
-    public readonly store: Store,
+    private readonly store: Store,
   ) {}
-
-  forget() {
-    this.store.reset();
-  }
-
-  remember(key: string, value: unknown) {
-    this.store.set(key, value);
-  }
 
   async setEvmSigner(signer: Signer) {
     const currentAddress = await signer.getAddress();
@@ -65,9 +57,9 @@ export class Auth {
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logoutKGW();
 
-      this.remember("signer-address", currentAddress);
+      this.store.set("signer-address", currentAddress);
     }
 
     this.kwilWrapper.setSigner({
@@ -98,8 +90,8 @@ export class Auth {
       );
 
       if (signature) {
-        this.remember("signer-address", accountId);
-        this.remember("signer-public-key", publicKey);
+        this.store.set("signer-address", accountId);
+        this.store.set("signer-public-key", publicKey);
       }
 
       const signMessageOriginal = wallet.signMessage.bind(wallet);
@@ -142,18 +134,18 @@ export class Auth {
     let publicKey = this.store.get("signer-public-key");
 
     if (storedAddress !== currentAddress || !publicKey) {
-      this.forget();
+      this.store.reset();
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await this.kwilWrapper.client.auth.logout();
+      await this.kwilWrapper.client.auth.logoutKGW();
 
       const message = "idOS authentication";
       const nonce = Buffer.from(new Nonce(32).bytes);
       // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
       ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
-      this.remember("signer-address", currentAddress);
-      this.remember("signer-public-key", publicKey);
+      this.store.set("signer-address", currentAddress);
+      this.store.set("signer-public-key", publicKey);
     }
 
     const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {

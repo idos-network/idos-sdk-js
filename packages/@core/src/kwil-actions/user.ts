@@ -1,5 +1,5 @@
+import type { KwilActionClient } from "../kwil-infra";
 import type { idOSUser } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 /**
  * Checks if the user has a profile in the idOS associated with its wallet address.
@@ -28,30 +28,6 @@ export async function createUser(kwilClient: KwilActionClient, params: CreateUse
     description: "Create a user profile in idOS",
     inputs: params,
   });
-}
-
-export interface DelegatedWriteGrantSignatureRequest {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-}
-/**
- * Request a signature for a delegated write grant.
- */
-export async function requestDWGSignature(
-  kwilClient: KwilActionClient,
-  params: DelegatedWriteGrantSignatureRequest,
-) {
-  const result = await kwilClient.call<[{ message: string }]>({
-    name: "dwg_message",
-    inputs: params,
-  });
-
-  return result[0].message ?? "";
 }
 
 /**

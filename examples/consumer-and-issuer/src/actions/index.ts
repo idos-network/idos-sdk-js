@@ -1,6 +1,6 @@
 "use server";
-import { getIssuerConfig } from "@/issuer.config";
-import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
+import { getIssuerServerConfig } from "@/issuer.config";
+import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
 import {
   createCredentialByDelegatedWriteGrant,
   createUser,
@@ -8,9 +8,6 @@ import {
 import invariant from "tiny-invariant";
 
 import nacl from "tweetnacl";
-
-type JsonArg = Parameters<typeof JSON.stringify>[0];
-const toBytes = (obj: JsonArg): Uint8Array => utf8Encode(JSON.stringify(obj));
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
@@ -116,7 +113,7 @@ export async function createIDOSUserProfile({
     publicKey: string;
   };
 }) {
-  const config = await getIssuerConfig();
+  const config = await getIssuerServerConfig();
 
   const user = await createUser(
     config,
@@ -163,7 +160,7 @@ export async function createCredential(
   notUsableAfter: string,
   signature: string,
 ) {
-  const issuer = await getIssuerConfig();
+  const issuer = await getIssuerServerConfig();
   const kycData = await getKYCData(userId);
   const vcContent = generateCredential(kycData);
 
@@ -206,12 +203,16 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
   );
   const json = await response.json();
 
+  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+
   return {
+    idOSUserId: idOSUserId,
     idvUserId: json.userId,
     signature: base64Encode(
       nacl.sign.detached(
         toBytes(`${json.userId}${idOSUserId}`),
-        base64Decode(process.env.NEXT_ISSUER_SIGNING_SECRET_KEY ?? ""),
+        base64Decode(issuerSigningSecretKey),
       ),
     ),
   };

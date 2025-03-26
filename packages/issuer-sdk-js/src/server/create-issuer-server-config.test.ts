@@ -3,12 +3,15 @@ import { NodeKwil } from "@kwilteam/kwil-js";
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createIssuerConfig } from "./create-issuer-config";
+import { createIssuerServerConfig } from "./create-issuer-server-config";
 
 // Mock the @kwilteam/kwil-js module
 vi.mock("@kwilteam/kwil-js", () => {
   return {
-    NodeKwil: vi.fn(),
+    NodeKwil: vi.fn().mockImplementation(() => ({
+      chainInfo: vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } }),
+    })),
+    WebKwil: vi.fn(),
     KwilSigner: vi.fn(),
     Utils: {
       ActionInput: {
@@ -19,23 +22,9 @@ vi.mock("@kwilteam/kwil-js", () => {
 });
 
 describe("createIssuerConfig", () => {
-  let mockChainInfo: ReturnType<typeof vi.fn>;
-  let mockListDatabases: ReturnType<typeof vi.fn>;
-
   beforeEach(() => {
     // Clear all mocks before each test
     vi.clearAllMocks();
-
-    // Set up mock implementations
-    mockChainInfo = vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } });
-    mockListDatabases = vi.fn().mockResolvedValue({
-      data: [{ name: "idos", dbid: "mock-dbid" }],
-    });
-
-    (NodeKwil as unknown as ReturnType<typeof vi.fn>).mockImplementation(() => ({
-      chainInfo: mockChainInfo,
-      listDatabases: mockListDatabases,
-    }));
   });
 
   it("should correctly initialize and return config", async () => {
@@ -48,7 +37,7 @@ describe("createIssuerConfig", () => {
       timeout: 30_000,
     };
 
-    const result = await createIssuerConfig(params);
+    const result = await createIssuerServerConfig(params);
 
     // Check if NodeKwil was called correctly
     expect(NodeKwil).toHaveBeenCalledWith({
@@ -60,10 +49,6 @@ describe("createIssuerConfig", () => {
       chainId: "mock-chain-id",
       timeout: 30_000,
     });
-
-    // Check if methods were called
-    expect(mockChainInfo).toHaveBeenCalled();
-    expect(mockListDatabases).toHaveBeenCalled();
 
     // Check the returned config
     expect(result).toEqual({

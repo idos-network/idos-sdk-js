@@ -9,7 +9,7 @@ import { idOSKeyDerivation } from "./idOSKeyDerivation";
 export class Enclave {
   constructor({ parentOrigin }) {
     this.parentOrigin = parentOrigin;
-    this.store = new Store();
+    this.store = new Store(window.localStorage);
     this.authorizedOrigins = JSON.parse(this.store.get("enclave-authorized-origins") ?? "[]");
 
     this.unlockButton = document.querySelector("button#unlock");
@@ -40,10 +40,8 @@ export class Enclave {
     }
   }
 
-  storage(userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey) {
+  storage(userId, expectedUserEncryptionPublicKey) {
     userId && this.store.set("user-id", userId);
-    signerAddress && this.store.set("signer-address", signerAddress);
-    signerPublicKey && this.store.set("signer-public-key", signerPublicKey);
 
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
@@ -54,8 +52,6 @@ export class Enclave {
       return {
         userId: "",
         encryptionPublicKey: "",
-        signerAddress: "",
-        signerPublicKey: "",
       };
     }
 
@@ -63,8 +59,6 @@ export class Enclave {
       // TODO Remove human-user migration code.
       userId: this.userId ?? this.store.get("user-id") ?? this.store.get("human-id"),
       encryptionPublicKey: storeWithCodec.get("encryption-public-key"),
-      signerAddress: this.store.get("signer-address"),
-      signerPublicKey: this.store.get("signer-public-key"),
     };
   }
 
@@ -302,15 +296,11 @@ export class Enclave {
           message,
           receiverPublicKey,
           senderPublicKey,
-          signerAddress,
-          signerPublicKey,
           mode,
           theme,
           credentials,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
-          key,
-          value,
         } = requestData;
 
         const paramBuilder = {
@@ -320,8 +310,7 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme],
-          storage: () => [userId, signerAddress, signerPublicKey, expectedUserEncryptionPublicKey],
-          updateStore: () => [key, value],
+          storage: () => [userId, expectedUserEncryptionPublicKey],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
         }[requestName];
@@ -339,10 +328,6 @@ export class Enclave {
         event.ports[0].close();
       }
     });
-  }
-
-  updateStore(key, value) {
-    this.store.set(key, value);
   }
 
   async handleIdosStore(payload) {

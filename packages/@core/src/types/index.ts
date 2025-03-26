@@ -1,3 +1,10 @@
+import type { Wallet as NearWallet } from "@near-wallet-selector/core";
+import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
+export type Wallet = EthersWallet | JsonRpcSigner | NearWallet;
+
+export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
+export type ChainType = (typeof CHAIN_TYPES)[number];
+
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
 export interface idOSUser {
@@ -27,9 +34,9 @@ export interface idOSWallet {
 
 export interface idOSUserAttribute {
   id: string;
-  user_id: string;
   attribute_key: string;
   value: string;
+  user_id?: string;
 }
 
 export interface idOSGrant {
@@ -58,6 +65,7 @@ export type IsleStatus =
   | "no-profile"
   | "not-verified"
   | "pending-verification"
+  | "pending-permissions"
   | "verified"
   | "not-connected"
   | "error";
@@ -122,7 +130,7 @@ export type IsleControllerMessage =
       data: {
         status: "request-permission";
         consumer: {
-          consumerPublicKey: string;
+          consumerAuthPublicKey: string;
           meta: {
             url: string;
             name: string;

@@ -1,24 +1,23 @@
-import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/secure-enclave";
 import {
   type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,
-  requestDWGSignature as _requestDWGSignature,
-  hasProfile,
-} from "@idos-network/core";
-import type { IssuerConfig } from "./create-issuer-config";
+  hasProfile as _hasProfile,
+  requestDWGMessage as _requestDWGMessage,
+} from "@idos-network/core/kwil-actions";
+import type { IssuerClientConfig } from "./create-issuer-client-config";
 
-export async function checkUserProfile({ kwilClient }: IssuerConfig, address: string) {
-  return hasProfile(kwilClient, address);
+export async function hasProfile({ kwilClient, userAddress }: IssuerClientConfig) {
+  return _hasProfile(kwilClient, userAddress);
 }
 
-export async function requestDWGSignature(
-  { kwilClient }: IssuerConfig,
+export async function requestDWGMessage(
+  { kwilClient }: IssuerClientConfig,
   params: DelegatedWriteGrantSignatureRequest,
 ) {
-  return _requestDWGSignature(kwilClient, params);
+  return _requestDWGMessage(kwilClient, params);
 }
 
-export async function getUserProfile({ kwilClient }: IssuerConfig) {
+export async function getUserProfile({ kwilClient }: IssuerClientConfig) {
   const user = await _getUserProfile(kwilClient);
   return user;
 }
@@ -27,19 +26,8 @@ export async function getUserProfile({ kwilClient }: IssuerConfig) {
  * Get the public key of the user's encryption key
  */
 export async function getUserEncryptionPublicKey(
+  { enclaveProvider }: IssuerClientConfig,
   userId: string,
-  enclaveOptions: Omit<EnclaveOptions, "mode">,
 ) {
-  let enclave: IframeEnclave | null = new IframeEnclave({
-    ...enclaveOptions,
-    mode: "new",
-  });
-
-  await enclave.load();
-  await enclave.reset();
-  const publicKey = await enclave.discoverUserEncryptionPublicKey(userId);
-  enclave = null;
-  document.querySelector(enclaveOptions.container)?.children[0].remove();
-
-  return publicKey;
+  return await enclaveProvider.discoverUserEncryptionPublicKey(userId);
 }

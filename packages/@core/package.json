@@ -3,7 +3,8 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
-    "@kwilteam/kwil-js": "0.7.1",
+    "@kwilteam/kwil-js": "catalog:",
+    "@near-wallet-selector/core": "8.9.10",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
@@ -12,7 +13,7 @@
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
     "bs58": "^6.0.0",
-    "ethers": "^6.13.5",
+    "ethers": "catalog:",
     "near-api-js": "3.0.4",
     "tweetnacl": "^1.0.3"
   },
@@ -26,9 +27,11 @@
     "./types": "./src/types/index.ts",
     "./kwil-nep413-signer": "./src/kwil-nep413-signer/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",
+    "./kwil-infra": "./src/kwil-infra/index.ts",
     "./kwil-actions/*": "./src/kwil-actions/*.ts",
     "./store": "./src/store/index.ts",
-    "./utils": "./src/utils/index.ts"
+    "./utils": "./src/utils/index.ts",
+    "./enclave": "./src/enclave/index.ts"
   },
   "license": "MIT",
   "peerDependencies": {

@@ -1,5 +1,5 @@
 import { Center, Circle, Heading, Spinner, Text } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
 import { Icon } from "@/components/icons/icon";
@@ -11,9 +11,12 @@ export function CreateProfileSteps() {
   const createProfile = useIsleStore((state) => state.createProfile);
   const node = useIsleStore((state) => state.node);
   const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
+  const hasRequestedRef = useRef(false);
 
   useEffect(() => {
+    if (!node || hasRequestedRef.current) return;
     createProfile();
+    hasRequestedRef.current = true;
     node?.on("update-create-profile-status", ({ status }) => {
       setStatus(status);
     });

@@ -1,12 +1,11 @@
 import {
-  base64Decode,
   base64Encode,
-  hexEncode,
+  buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
   type idOSCredential,
   utf8Encode,
 } from "@idos-network/core";
-import nacl from "tweetnacl";
+import type { Auth } from "./auth";
 import type { Enclave } from "./enclave";
 import type { KwilWrapper } from "./kwil-wrapper";
 
@@ -52,6 +51,7 @@ export class Data {
   constructor(
     public readonly kwilWrapper: KwilWrapper,
     public readonly enclave: Enclave,
+    private readonly auth: Auth,
   ) {}
 
   singularize(tableName: string): string {
@@ -62,7 +62,6 @@ export class Data {
     let records = (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
-      `List your ${tableName} in idOS`,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
 
@@ -84,7 +83,6 @@ export class Data {
     return (await this.kwilWrapper.call(
       `get_${tableName}`,
       null,
-      `List your ${tableName} in idOS`,
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     )) as any;
   }
@@ -97,7 +95,7 @@ export class Data {
     let recipientEncryptionPublicKey: string | undefined;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       for (const record of records) {
         Object.assign(
@@ -131,24 +129,10 @@ export class Data {
     record: Omit<T, "id">,
     synchronous?: boolean,
   ): Promise<Omit<T, "id"> & { id: string }> {
-    const name = `add_${this.singularize(
-      tableName === "user_attributes" ? "attributes" : tableName,
-    )}`;
-
     let recipientEncryptionPublicKey: string | undefined;
 
-    const inputs: string[] = ((await this.kwilWrapper.schema) as AnyRecord).data.actions
-      .find((action: AnyRecord) => action.name === name)
-      .parameters.map((input: string) => input.substring(1));
-
-    const recordKeys = Object.keys(record);
-
-    if (inputs.every((input) => recordKeys.includes(input))) {
-      throw new Error(`Invalid payload for action ${name}`);
-    }
-
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
       Object.assign(
         record,
@@ -181,7 +165,6 @@ export class Data {
       const records = (await this.kwilWrapper.call(
         "get_credential_owned",
         { id: recordId },
-        "Get your credential in idOS",
         // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
@@ -190,6 +173,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
+        await this.enclave.ready(this.auth);
         record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
@@ -213,7 +197,6 @@ export class Data {
       const records = (await this.kwilWrapper.call(
         "get_credential_shared",
         { id: recordId },
-        "Get credential shared with you in idOS",
         // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
       )) as any;
 
@@ -222,6 +205,7 @@ export class Data {
       if (!record) return null;
 
       if (decrypt) {
+        await this.enclave.ready(this.auth);
         record.content = await this.enclave.decrypt(record.content, record.encryptor_public_key);
       }
 
@@ -277,14 +261,14 @@ export class Data {
     description?: string,
     synchronous?: boolean,
   ): Promise<T> {
-    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready();
+    if (!this.enclave.userEncryptionPublicKey) await this.enclave.ready(this.auth);
 
     let recipientEncryptionPublicKey: string | undefined;
     // biome-ignore lint/suspicious/noExplicitAny: using any to avoid type errors for now.
     const record: any = recordLike;
 
     if (tableName === "credentials") {
-      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready());
+      recipientEncryptionPublicKey ??= base64Encode(await this.enclave.ready(this.auth));
       if (!recipientEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
 
       Object.assign(
@@ -422,7 +406,7 @@ export class Data {
     });
   }
 
-  async requestDAGSignature(dag: idOSDAGSignatureRequest): Promise<string> {
+  async requestDAGMessage(dag: idOSDAGSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dag_message", dag)) as unknown as [
       { message: string },
     ];
@@ -430,7 +414,7 @@ export class Data {
     return message;
   }
 
-  async requestDWGSignature(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
+  async requestDWGMessage(dwg: idOSDelegatedWriteGrantSignatureRequest): Promise<string> {
     const response = (await this.kwilWrapper.call("dwg_message", dwg)) as unknown as [
       { message: string },
     ];
@@ -442,56 +426,24 @@ export class Data {
     userId: string,
     publicNotes: string,
     plaintextContent: string,
-    receiverEncryptionPublicKey: string | undefined,
-    // @todo: use plain argument instead of object
+    receiverEncryptionPublicKey: string,
     grantInfo?: {
       consumerAddress: string;
       lockedUntil: number;
     },
   ): Promise<InsertableIDOSCredential> {
-    const issuerAuthenticationKeyPair = nacl.sign.keyPair();
-
-    if (!receiverEncryptionPublicKey) throw new Error("Missing recipientEncryptionPublicKey");
-
     const { content, encryptorPublicKey } = await this.enclave.encrypt(
       plaintextContent,
       receiverEncryptionPublicKey,
     );
-    const publicNotesSignature = nacl.sign.detached(
-      utf8Encode(publicNotes),
-      issuerAuthenticationKeyPair.secretKey,
-    );
 
-    const grantInfoParam = grantInfo
-      ? {
-          grantee_wallet_identifier: grantInfo.consumerAddress,
-          locked_until: grantInfo.lockedUntil,
-        }
-      : {};
-
-    return {
-      user_id: userId,
+    return buildInsertableIDOSCredential(
+      userId,
+      publicNotes,
       content,
-
-      public_notes: publicNotes,
-      public_notes_signature: base64Encode(publicNotesSignature),
-
-      broader_signature: base64Encode(
-        nacl.sign.detached(
-          Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
-          issuerAuthenticationKeyPair.secretKey,
-        ),
-      ),
-
-      issuer_auth_public_key: hexEncode(issuerAuthenticationKeyPair.publicKey, true),
-      encryptor_public_key: isPresent(encryptorPublicKey),
-      ...grantInfoParam,
-    };
+      receiverEncryptionPublicKey,
+      encryptorPublicKey,
+      grantInfo,
+    );
   }
 }
-
-const isPresent = <T>(obj: T | undefined | null): T => {
-  // @todo: better error message.
-  if (!obj) throw new Error("Unexpected absence");
-  return obj;
-};

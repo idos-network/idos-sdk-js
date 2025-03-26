@@ -1,7 +1,6 @@
 import { base64Encode, type idOSCredential } from "@idos-network/core";
 
 import type {
-  BackupPasswordInfo,
   DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
@@ -16,6 +15,7 @@ export class IframeEnclave implements EnclaveProvider {
 
   constructor(options: EnclaveOptions) {
     const { container, ...other } = options;
+
     this.container = container;
     this.options = other;
     this.hostUrl = new URL(other.url ?? "https://enclave.idos.network");
@@ -23,25 +23,16 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async load(): Promise<StoredData> {
+  async load(): Promise<void> {
     await this.loadEnclave();
 
     await this.requestToEnclave({ configure: this.options });
-
-    return (await this.requestToEnclave({ storage: {} })) as StoredData;
   }
 
-  async ready(
-    userId?: string,
-    signerAddress?: string,
-    signerPublicKey?: string,
-    expectedUserEncryptionPublicKey?: string,
-  ): Promise<Uint8Array> {
+  async ready(userId: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
     let { encryptionPublicKey: userEncryptionPublicKey } = (await this.requestToEnclave({
       storage: {
         userId,
-        signerAddress,
-        signerPublicKey,
         expectedUserEncryptionPublicKey,
       },
     })) as StoredData;
@@ -62,16 +53,8 @@ export class IframeEnclave implements EnclaveProvider {
     return userEncryptionPublicKey;
   }
 
-  async store(key: string, value: string): Promise<string> {
-    return this.requestToEnclave({ storage: { [key]: value } }) as Promise<string>;
-  }
-
   async reset(): Promise<void> {
     this.requestToEnclave({ reset: {} });
-  }
-
-  async updateStore(key: string, value: unknown): Promise<void> {
-    await this.requestToEnclave({ updateStore: { key, value } });
   }
 
   async confirm(message: string): Promise<boolean> {

@@ -1,5 +1,5 @@
 import type { idOSCredential } from "@idos-network/core";
-import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider, StoredData } from "./types";
+import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
@@ -23,7 +23,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("Method not implemented.");
   }
 
-  async load(): Promise<StoredData> {
+  async load(): Promise<void> {
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
     // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     const connected = Object.values(snaps).find((snap: any) => snap.id === this.snapId);
@@ -33,21 +33,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
         method: "wallet_requestSnaps",
         params: { [this.snapId]: {} },
       });
-
-    const storage = JSON.parse((await this.invokeSnap("storage")) || {});
-    storage.encryptionPublicKey &&= Uint8Array.from(Object.values(storage.encryptionPublicKey));
-
-    return storage;
   }
 
-  async ready(
-    userId?: string,
-    signerAddress?: string,
-    signerPublicKey?: string,
-  ): Promise<Uint8Array> {
-    let { encryptionPublicKey } = JSON.parse(
-      await this.invokeSnap("storage", { userId, signerAddress, signerPublicKey }),
-    );
+  async ready(userId: string): Promise<Uint8Array> {
+    let { encryptionPublicKey } = JSON.parse(await this.invokeSnap("storage", { userId }));
 
     encryptionPublicKey ||= await this.invokeSnap("init");
     encryptionPublicKey &&= Uint8Array.from(Object.values(encryptionPublicKey));
@@ -65,16 +54,8 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     });
   }
 
-  async store(key: string, value: string): Promise<string> {
-    return this.invokeSnap("storage", { [key]: value });
-  }
-
   async reset(): Promise<void> {
     return this.invokeSnap("reset");
-  }
-
-  updateStore(key: string, value: unknown): Promise<void> {
-    return this.invokeSnap("updateStore", { key, value });
   }
 
   async confirm(message: string): Promise<boolean> {

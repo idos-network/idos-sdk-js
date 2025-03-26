@@ -38,6 +38,7 @@ export default function SimpleBalanceChart() {
   };
 
   // Initialize data
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     regenerateData();
   }, []);

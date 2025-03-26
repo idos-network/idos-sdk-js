@@ -1,5 +1,5 @@
+import type { KwilActionClient } from "../kwil-infra";
 import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
-import type { KwilActionClient } from "./create-kwil-client";
 
 export interface CreateCredentialParams {
   user_id: string;
@@ -16,20 +16,24 @@ export interface CreateCredentialParams {
  * Returns the shared idOS Credential for the given `dataId`.
  */
 export async function getSharedCredential(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.call<idOSCredential[]>({
+  const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_shared",
     inputs: { id },
   });
+
+  return credential;
 }
 
 /**
  * Returns the owned idOS Credential for the given `id`.
  */
 export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.call<idOSCredential[]>({
+  const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_owned",
     inputs: { id },
   });
+
+  return credential;
 }
 
 /**
@@ -39,10 +43,12 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  return kwilClient.call<[{ id: string }]>({
+  const [{ id }] = await kwilClient.call<[{ id: string }]>({
     name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
+
+  return id;
 }
 
 /**

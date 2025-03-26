@@ -7,15 +7,17 @@ import {
 } from "@idos-network/core/codecs";
 import { decryptContent } from "@idos-network/core/cryptography";
 import {
-  type KwilActionClient,
-  createKwilSigner,
-  createNodeKwilClient,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
   getGrantsCount,
   getSharedCredential,
 } from "@idos-network/core/kwil-actions";
+import {
+  type KwilActionClient,
+  createNodeKwilClient,
+  createServerKwilSigner,
+} from "@idos-network/core/kwil-infra";
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
@@ -48,7 +50,6 @@ interface idOSConsumerInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
-  dbId?: string;
   consumerSigner: KeyPair | SignKeyPair | ethers.Wallet;
 }
 
@@ -57,16 +58,14 @@ export class idOSConsumer {
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
     chainId,
-    dbId,
     consumerSigner,
   }: idOSConsumerInitParams): Promise<idOSConsumer> {
     const kwilClient = await createNodeKwilClient({
       nodeUrl,
       chainId,
-      dbId,
     });
 
-    const [signer, address] = createKwilSigner(consumerSigner);
+    const [signer, address] = createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
     return new idOSConsumer(
@@ -86,12 +85,12 @@ export class idOSConsumer {
     return base64Encode(this.noncedBox.keyPair.publicKey);
   }
 
-  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential[]> {
+  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential> {
     return getSharedCredential(this.kwilClient, dataId);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const [credentialCopy] = await this.getSharedCredentialFromIDOS(dataId);
+    const credentialCopy = await this.getSharedCredentialFromIDOS(dataId);
 
     return await this.noncedBox.decrypt(
       credentialCopy.content,
@@ -116,7 +115,7 @@ export class idOSConsumer {
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
-    const [credential] = await this.getSharedCredentialFromIDOS(credentialId);
+    const credential = await this.getSharedCredentialFromIDOS(credentialId);
 
     const accessGrant = await this.getCredentialAccessGrant(credentialId);
 

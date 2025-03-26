@@ -1,2 +1,2 @@
-export * from "./create-issuer-config";
+export * from "./create-issuer-client-config";
 export * from "./user";
