@@ -1,5 +1,10 @@
-import { type EnclaveOptions, IframeEnclave } from "@idos-network/controllers/enclave";
-import { CHAIN_TYPES, type ChainType, Store } from "@idos-network/core";
+import {
+  CHAIN_TYPES,
+  type ChainType,
+  type EnclaveOptions,
+  IframeEnclave,
+  Store,
+} from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { Signer } from "ethers";
 
