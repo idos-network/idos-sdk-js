@@ -1,4 +1,7 @@
-import { shareCredential as _shareCredential, getCredentialById } from "@idos-network/core";
+import {
+  shareCredential as _shareCredential,
+  getCredentialById,
+} from "@idos-network/core/kwil-actions";
 import invariant from "tiny-invariant";
 import type { IssuerConfig } from "./create-issuer-config";
 
