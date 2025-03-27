@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@heroui/react": "2.6.14",
+    "@idos-network/consumer-sdk-js": "workspace:*",
     "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@idos-network/issuer-sdk-js": "workspace:*",

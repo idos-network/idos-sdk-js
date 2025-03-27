@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const url =
   "https://kraken.staging.sandbox.fractal.id/kyc?clientId=55dbf89f-63bc-41ba-a682-0db2aeb4ccf9&level=basic%2Bliveness";
@@ -8,6 +8,8 @@ type KYCJourneyProps = {
   onError: (error: unknown) => void;
 };
 export function KYCJourney({ onSuccess, onError }: KYCJourneyProps) {
+  const [nonce] = useState(() => Date.now());
+
   const messageReceiver = useCallback(
     (message: MessageEvent) => {
       // React only messages from ID iframe
@@ -43,7 +45,7 @@ export function KYCJourney({ onSuccess, onError }: KYCJourneyProps) {
         title="Kraken KYC"
         allow="camera *"
         sandbox="allow-forms allow-modals allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
-        src={url}
+        src={`${url}&state=${nonce}`}
       />
     </div>
   );

@@ -50,11 +50,11 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           name: "NeoBank",
           logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
         },
-        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
+        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
       },
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
+        url: "https://enclave.idos.network",
       },
 
       credentialRequirements: {
@@ -75,6 +75,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "NeoBank",
               logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
+            consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
           {
@@ -83,7 +84,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "ACME Card Provider",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+            consumerEncryptionPublicKey:
+              process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
+            consumerAuthPublicKey: process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
           },
         ],
         acceptedCredentialType: "KYC DATA",

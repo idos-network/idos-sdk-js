@@ -7,6 +7,7 @@ import {
 } from "@idos-network/issuer-sdk-js/server";
 import invariant from "tiny-invariant";
 
+import { idOSConsumer } from "@/consumer.config";
 import nacl from "tweetnacl";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
@@ -62,8 +63,8 @@ const vcTemplate = (kycData: Record<string, any>) => {
 
 const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
   invariant(
-    process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
-    "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
+    process.env.ISSUER_ATTESTATION_SECRET_KEY,
+    "`ISSUER_ATTESTATION_SECRET_KEY` is not set",
   );
   return {
     ...vc,
@@ -77,7 +78,7 @@ const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
       proofValue: base64Encode(
         nacl.sign.detached(
           toBytes(vc),
-          base64Decode(process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ?? ""),
+          base64Decode(process.env.ISSUER_ATTESTATION_SECRET_KEY ?? ""),
         ),
       ),
     },
@@ -202,8 +203,8 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
   );
   const json = await response.json();
 
-  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
-  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
 
   return {
     idOSUserId: idOSUserId,
@@ -216,3 +217,22 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     ),
   };
 }
+
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await idOSConsumer();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
+
+export const invokePassportingService = async (payload: unknown) => {
+  return await (
+    await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
+      },
+    })
+  ).json();
+};

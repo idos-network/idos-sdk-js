@@ -96,6 +96,7 @@ interface idOSIsleControllerOptions {
     integratedConsumers: {
       meta: Meta;
       consumerAuthPublicKey: string;
+      consumerEncryptionPublicKey: string;
     }[];
 
     /** The type of credential accepted by the app */
@@ -108,6 +109,17 @@ interface idOSIsleControllerOptions {
  * @interface RequestDelegatedWriteGrantOptions
  */
 interface RequestPermissionOptions {
+  /** The consumer information */
+  consumer: {
+    /** The public key of the consumer */
+    consumerAuthPublicKey: string;
+    consumerEncryptionPublicKey: string;
+    /** Meta information about the consumer */
+    meta: Meta;
+  };
+  KYCPermissions: string[];
+}
+interface RequestDelegatedWriteGrantOptions {
   /** The consumer information */
   consumer: {
     /** The public key of the consumer */
@@ -131,7 +143,7 @@ interface idOSIsleController {
   send: (type: IsleControllerMessage["type"], data: IsleControllerMessage["data"]) => void;
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
-    options: RequestPermissionOptions,
+    options: RequestDelegatedWriteGrantOptions,
   ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
   /** Requests an access grant for the given `consumer` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
@@ -284,7 +296,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const requestDelegatedWriteGrant = async (
-    options: RequestPermissionOptions,
+    options: RequestDelegatedWriteGrantOptions,
   ): Promise<
     { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
   > => {
@@ -388,7 +400,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
       const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
         utf8Encode(plaintextContent),
-        base64Decode(options.consumer.consumerAuthPublicKey),
+        base64Decode(options.consumer.consumerEncryptionPublicKey),
       );
 
       const insertableCredential = await buildInsertableIDOSCredential(
