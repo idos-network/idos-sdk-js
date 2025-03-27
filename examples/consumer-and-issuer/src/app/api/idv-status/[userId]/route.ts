@@ -10,8 +10,8 @@ export async function GET(
 ) {
   const idvUserId = (await params).userId;
 
-  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
-  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
   const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
 
   const searchParams = request.nextUrl.searchParams;

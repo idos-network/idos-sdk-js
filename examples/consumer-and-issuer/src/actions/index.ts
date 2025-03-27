@@ -63,8 +63,8 @@ const vcTemplate = (kycData: Record<string, any>) => {
 
 const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
   invariant(
-    process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
-    "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
+    process.env.ISSUER_ATTESTATION_SECRET_KEY,
+    "`ISSUER_ATTESTATION_SECRET_KEY` is not set",
   );
   return {
     ...vc,
@@ -78,7 +78,7 @@ const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
       proofValue: base64Encode(
         nacl.sign.detached(
           toBytes(vc),
-          base64Decode(process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ?? ""),
+          base64Decode(process.env.ISSUER_ATTESTATION_SECRET_KEY ?? ""),
         ),
       ),
     },
@@ -203,8 +203,8 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
   );
   const json = await response.json();
 
-  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
-  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
 
   return {
     idOSUserId: idOSUserId,

@@ -14,12 +14,12 @@ export async function getIssuerServerConfig(): Promise<IssuerServerConfig> {
   }
 
   const NODE_URL = process.env.NEXT_PUBLIC_KWIL_NODE_URL;
-  const ENCRYPTION_SECRET_KEY = process.env.NEXT_ISSUER_ENCRYPTION_SECRET_KEY;
-  const SIGNING_SECRET_KEY = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
+  const ENCRYPTION_SECRET_KEY = process.env.ISSUER_ENCRYPTION_SECRET_KEY;
+  const SIGNING_SECRET_KEY = process.env.ISSUER_SIGNING_SECRET_KEY;
 
   invariant(NODE_URL, "`NEXT_PUBLIC_KWIL_NODE_URL` is not set");
-  invariant(ENCRYPTION_SECRET_KEY, "`NEXT_ISSUER_ENCRYPTION_SECRET_KEY` is not set");
-  invariant(SIGNING_SECRET_KEY, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  invariant(ENCRYPTION_SECRET_KEY, "`ISSUER_ENCRYPTION_SECRET_KEY` is not set");
+  invariant(SIGNING_SECRET_KEY, "`ISSUER_SIGNING_SECRET_KEY` is not set");
 
   cachedIssuer = await createIssuerServerConfig({
     nodeUrl: NODE_URL,

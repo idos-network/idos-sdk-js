@@ -85,9 +85,8 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
             consumerEncryptionPublicKey:
-              process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
-            consumerAuthPublicKey:
-              process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
+              process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
+            consumerAuthPublicKey: process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
           },
         ],
         acceptedCredentialType: "KYC DATA",

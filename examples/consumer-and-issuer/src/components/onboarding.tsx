@@ -272,15 +272,17 @@ function useShareCredentialWithConsumer() {
       const contentHash = await getCredentialContentSha256Hash(consumerConfig, credential.id);
       const lockedUntil = 0;
 
-      const consumerSigningPublicKey =
-        process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
       const consumerEncryptionPublicKey =
-        process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+        process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
-      invariant(consumerSigningPublicKey, "`NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY` is not set");
+      invariant(
+        consumerSigningPublicKey,
+        "`NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` is not set",
+      );
       invariant(
         consumerEncryptionPublicKey,
-        "`NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
+        "`NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
       );
 
       const { id } = await createCredentialCopy(
