@@ -107,7 +107,7 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
       // Default polling interval
       return 5_000;
     },
-    enabled: Boolean(params),
+    enabled: Boolean(params?.idvUserId),
     staleTime: 0, // Consider data stale immediately
     gcTime: 0, // Don't cache the results
   });
