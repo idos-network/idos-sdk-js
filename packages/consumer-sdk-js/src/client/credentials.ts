@@ -31,14 +31,19 @@ export async function getCredentialById({ kwilClient }: ConsumerClientConfig, id
  * Get the SHA256 hash of the content of an idOSCredential
  */
 export async function getCredentialContentSha256Hash(
-  { kwilClient }: ConsumerClientConfig,
+  { kwilClient, enclaveProvider }: ConsumerClientConfig,
   id: string,
 ) {
   const credential = await _getCredentialById(kwilClient, id);
 
   invariant(credential, `"idOSCredential" with id ${id} not found`);
 
-  return hexEncodeSha256Hash(utf8Encode(credential.content));
+  const plaintext = await enclaveProvider.decrypt(
+    base64Decode(credential.content),
+    base64Decode(credential.encryptor_public_key),
+  );
+
+  return hexEncodeSha256Hash(plaintext);
 }
 
 /**

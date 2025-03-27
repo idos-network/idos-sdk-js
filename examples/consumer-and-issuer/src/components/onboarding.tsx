@@ -5,9 +5,11 @@ import {
   createConsumerClientConfig,
   createCredentialCopy,
   getAllCredentials,
+  getUserProfile as getConsumerUserData,
   getCredentialContentSha256Hash,
   requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
+import type { idOSCredential } from "@idos-network/core";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
@@ -38,7 +40,7 @@ import { Stepper } from "./stepper";
 
 const enclaveOptions = {
   container: "#idOS-enclave",
-  url: "https://enclave.playground.idos.network",
+  url: "https://enclave.idos.network",
 };
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
@@ -250,13 +252,19 @@ function useShareCredentialWithConsumer() {
       });
 
       const credentials = await getAllCredentials(consumerConfig);
+      const userData = await getConsumerUserData(consumerConfig);
 
-      const credential = credentials.find((credential) => {
+      const credential = credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "KYC DATA";
       });
 
       invariant(credential, "`idOSCredential` to share not found");
+
+      await consumerConfig.enclaveProvider.ready(
+        userData.id,
+        userData.recipient_encryption_public_key,
+      );
 
       const contentHash = await getCredentialContentSha256Hash(consumerConfig, credential.id);
       const lockedUntil = 0;

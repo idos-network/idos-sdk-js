@@ -54,7 +54,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       },
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
+        url: "https://enclave.idos.network",
       },
 
       credentialRequirements: {
