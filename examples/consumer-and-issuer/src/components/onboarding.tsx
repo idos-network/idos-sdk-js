@@ -9,7 +9,7 @@ import {
   getCredentialContentSha256Hash,
   requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
-import type { idOSCredential } from "@idos-network/core";
+import { base64Decode, base64Encode, type idOSCredential } from "@idos-network/core";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
@@ -34,6 +34,7 @@ import {
 import { useIsleController } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
+import nacl from "tweetnacl";
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
@@ -89,7 +90,8 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
 
       const { idvUserId, idOSUserId, signature } = params;
 
-      const url = new URL(`/api/idv-status/${idvUserId}`);
+      const url = new URL(`/api/idv-status/${idvUserId}`, window.location.origin);
+
       url.searchParams.set("idOSUserId", idOSUserId);
       url.searchParams.set("signature", signature);
 
@@ -140,7 +142,7 @@ const useIssueCredential = () => {
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
       const dwgData = await isleController?.requestDelegatedWriteGrant({
         consumer: {
-          consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+          consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           meta: {
             url: "https://consumer-and-issuer-demo.vercel.app/",
             name: "NeoBank",
