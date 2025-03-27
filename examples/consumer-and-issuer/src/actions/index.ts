@@ -7,8 +7,8 @@ import {
 } from "@idos-network/issuer-sdk-js/server";
 import invariant from "tiny-invariant";
 
+import { idOSConsumer } from "@/consumer.config";
 import nacl from "tweetnacl";
-import { idOSConsumer } from "../../consumer.config";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
