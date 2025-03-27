@@ -225,20 +225,14 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 };
 
 export const invokePassportingService = async (payload: unknown) => {
-  const response = await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
-    },
-  })
-    .then((res) => {
-      return res.json();
+  return await (
+    await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
+      },
     })
-    .catch((err) => {
-      return err;
-    });
-
-  return response;
+  ).json();
 };
