@@ -4,16 +4,15 @@ import type { NextRequest } from "next/server";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
-const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
-invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
-
-const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
-
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ userId: string }> },
 ) {
   const idvUserId = (await params).userId;
+
+  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
 
   const searchParams = request.nextUrl.searchParams;
   const idOSUserId = searchParams.get("idOSUserId");
