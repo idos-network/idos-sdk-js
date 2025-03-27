@@ -20,7 +20,7 @@ export async function GET(
   const signature = searchParams.get("signature");
   invariant(signature, "signature is required");
 
-  //@todo: @pkoch fix me
+  //@todo: This should ensure that the signature we create on `getUserIdFromToken`.
   // invariant(
   //   nacl.sign.open(toBytes(`${idvUserId}${idOSUserId}`), issuerSigningKey.publicKey) ===
   //     base64Decode(signature),
