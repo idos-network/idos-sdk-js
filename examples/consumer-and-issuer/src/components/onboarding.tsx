@@ -241,6 +241,7 @@ function useShareCredentialWithConsumer() {
   const { signMessageAsync } = useSignMessage();
   const signer = useEthersSigner();
   const queryClient = useQueryClient();
+  const { isleController } = useIsleController();
 
   return useMutation({
     mutationFn: async () => {
@@ -309,7 +310,7 @@ function useShareCredentialWithConsumer() {
       });
     },
     onSuccess: (data) => {
-      console.log(data);
+      isleController?.updateIsleStatus("verified");
       queryClient.setQueryData(["shared-credential"], data);
     },
   });
