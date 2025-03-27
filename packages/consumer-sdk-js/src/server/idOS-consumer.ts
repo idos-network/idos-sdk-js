@@ -1,11 +1,4 @@
-import {
-  base64Decode,
-  base64Encode,
-  hexEncodeSha256Hash,
-  utf8Decode,
-  utf8Encode,
-} from "@idos-network/core/codecs";
-import { decryptContent } from "@idos-network/core/cryptography";
+import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
 import {
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
@@ -21,30 +14,7 @@ import {
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
 import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
-import nacl, { type SignKeyPair } from "tweetnacl";
-
-export class NoncedBox {
-  constructor(public readonly keyPair: nacl.BoxKeyPair) {}
-
-  static nonceFromBase64SecretKey(secret: string): NoncedBox {
-    return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
-  }
-
-  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
-    const decodedMessage = base64Decode(b64FullMessage);
-    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
-    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
-    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
-    const content = decryptContent(
-      message,
-      nonce,
-      senderEncryptionPublicKey,
-      this.keyPair.secretKey,
-    );
-
-    return utf8Decode(content);
-  }
-}
+import type { SignKeyPair } from "tweetnacl";
 
 interface idOSConsumerInitParams {
   recipientEncryptionPrivateKey: string;

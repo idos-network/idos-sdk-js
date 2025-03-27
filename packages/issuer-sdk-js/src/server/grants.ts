@@ -1,6 +1,5 @@
-import { base64Decode, decryptContent, hexEncodeSha256Hash } from "@idos-network/core";
+import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
 import { createAccessGrantByDag as _createAccessGrantByDag } from "@idos-network/core/kwil-actions";
-import nacl from "tweetnacl";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
 import { getCredentialIdByContentHash, getSharedCredential } from "./credentials";
 
@@ -31,18 +30,12 @@ export async function createAccessGrantFromDAG(
     throw new Error("`idOSCredential` not found");
   }
 
-  const message = base64Decode(credential.content);
-  const nonce = message.slice(0, nacl.box.nonceLength);
-
-  const plaintextContent = decryptContent(
-    base64Decode(credential.content),
-    nonce,
-    base64Decode(credential.encryptor_public_key),
-    issuerConfig.encryptionSecretKey,
-  );
+  const plaintextContent = await NoncedBox.nonceFromBase64SecretKey(
+    base64Encode(issuerConfig.encryptionSecretKey),
+  ).decrypt(credential.content, credential.encryptor_public_key);
 
   // Get the content hash from the plaintext content
-  const contentHash = hexEncodeSha256Hash(plaintextContent);
+  const contentHash = hexEncodeSha256Hash(utf8Encode(plaintextContent));
 
   // Check if the content hash matches the content hash in the credential
   if (contentHash !== params.dag_content_hash) {
