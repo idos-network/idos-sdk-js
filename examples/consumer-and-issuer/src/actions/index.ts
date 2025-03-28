@@ -158,6 +158,9 @@ async function getKYCData(userId: string) {
     },
   );
   const json = await response.json();
+  if (!response.ok) {
+    throw new Error(`Failed to fetch KYC data ${JSON.stringify(json)}`);
+  }
 
   return json;
 }
