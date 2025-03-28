@@ -211,24 +211,28 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getKrakenToken()}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );
   const json = await response.json();
+  if (!response.ok) return { ok: false, error: json };
 
   const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
   invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
 
   return {
-    idOSUserId: idOSUserId,
-    idvUserId: json.userId,
-    signature: base64Encode(
-      nacl.sign.detached(
-        toBytes(`${json.userId}${idOSUserId}`),
-        base64Decode(issuerSigningSecretKey),
+    ok: true,
+    data: {
+      idOSUserId: idOSUserId,
+      idvUserId: json.userId,
+      signature: base64Encode(
+        nacl.sign.detached(
+          toBytes(`${json.userId}${idOSUserId}`),
+          base64Decode(issuerSigningSecretKey),
+        ),
       ),
-    ),
+    },
   };
 }
 
@@ -249,4 +253,18 @@ export const invokePassportingService = async (payload: unknown) => {
       },
     })
   ).json();
+};
+
+export const generateKrakenUrlToken = async () => {
+  invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
+
+  const payload = {
+    clientId: process.env.KRAKEN_CLIENT_ID,
+    kyc: true,
+    level: "basic+liveness",
+    state: Date.now().toString(),
+  };
+
+  invariant(process.env.KRAKEN_PRIVATE_KEY, "`KRAKEN_PRIVATE_KEY` is not set");
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY, { algorithm: "ES512" });
 };

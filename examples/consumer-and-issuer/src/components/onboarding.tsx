@@ -401,7 +401,11 @@ export function Onboarding() {
 
       const idOSUserId = userData.data?.idOSProfile.id;
       invariant(idOSUserId, "`idOSUserId` can't be discovered");
-      const { idvUserId, signature } = await getUserIdFromToken(token, idOSUserId);
+      const { ok, error, data } = await getUserIdFromToken(token, idOSUserId);
+      invariant(ok, JSON.stringify(error, null, 2));
+      invariant(data, "`data` is missing, even though `ok` is true");
+      const { idvUserId, signature } = data;
+      invariant(idvUserId, "`idvUserId` can't be discovered");
 
       await createIDVAttribute.mutateAsync({
         idOSUserId,
