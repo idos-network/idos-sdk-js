@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 const url =
-  "https://kraken.staging.sandbox.fractal.id/kyc?clientId=55dbf89f-63bc-41ba-a682-0db2aeb4ccf9&level=basic%2Bliveness";
+  "https://kraken.staging.sandbox.fractal.id/kyc?token=eyJhbGciOiJFUzUxMiJ9.eyJjbGllbnRJZCI6IjU1ZGJmODlmLTYzYmMtNDFiYS1hNjgyLTBkYjJhZWI0Y2NmOSIsImxldmVsIjoiYmFzaWMrbGl2ZW5lc3MraWRvcyIsImV4dGVybmFsVXNlcklkIjoiIn0.AULsw8_gDu2DCfEJGQG6KbNWvx0-I0CzB-OEEPDo9KQZQ2MVAsYpzAujX5CuM_Y2o0rQwJcxJGA-i0UUB8hsEWRCAADAF87lU-B8Meh-NaWS7PZUpb28k2Ppw0LcYlgkZZl1LnNs2AUsE9FT-Cgrpso25uEq7qOeRL4WfUyQ2nrojc6R";
 
 type KYCJourneyProps = {
   onSuccess: (data: { token: string }) => void;
