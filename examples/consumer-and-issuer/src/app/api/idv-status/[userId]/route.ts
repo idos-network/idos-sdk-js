@@ -1,5 +1,5 @@
-import { base64Decode, base64Encode, utf8Encode } from "@idos-network/core";
-import { toBytes } from "@idos-network/core";
+import { getKrakenToken } from "@/actions/index";
+import { base64Decode } from "@idos-network/core";
 import type { NextRequest } from "next/server";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
@@ -32,7 +32,7 @@ export async function GET(
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );

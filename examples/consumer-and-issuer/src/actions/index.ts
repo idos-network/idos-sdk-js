@@ -8,6 +8,7 @@ import {
 import invariant from "tiny-invariant";
 
 import { idOSConsumer } from "@/consumer.config";
+import jwt from "jsonwebtoken";
 import nacl from "tweetnacl";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
@@ -133,13 +134,26 @@ export async function createIDOSUserProfile({
   return user;
 }
 
+export async function getKrakenToken(): Promise<string> {
+  const payload = {
+    api: true,
+    clientId: process.env.KRAKEN_CLIENT_ID,
+  };
+
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY!, {
+    algorithm: "ES512",
+    expiresIn: "600s",
+  });
+}
+
 async function getKYCData(userId: string) {
   const response = await fetch(
     `https://kraken.staging.sandbox.fractal.id/public/kyc/${userId}/data`,
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+        Authorization: `Bearer ${getKrakenToken()}`,
       },
     },
   );
@@ -197,7 +211,7 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+        Authorization: `Bearer ${getKrakenToken()}`,
       },
     },
   );
