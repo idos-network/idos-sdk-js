@@ -134,7 +134,7 @@ export async function createIDOSUserProfile({
   return user;
 }
 
-export function getKrakenToken() {
+export async function getKrakenToken(): Promise<string> {
   const payload = {
     api: true,
     clientId: process.env.KRAKEN_CLIENT_ID,
