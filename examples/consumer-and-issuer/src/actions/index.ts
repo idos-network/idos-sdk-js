@@ -153,7 +153,7 @@ async function getKYCData(userId: string) {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getKrakenToken()}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );
