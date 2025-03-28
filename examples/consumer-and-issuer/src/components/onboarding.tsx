@@ -65,16 +65,21 @@ const useFetchUserData = (
       // Then get the attributes using the same authenticated session
       const attributes = await getAttributes(config.kwilClient);
 
-      // We're assuming that the attribute was well populated.
-      const attributePayload = JSON.parse(
-        (attributes.find((attribute) => attribute.attribute_key === "idvUserId")?.value ||
-          "{}") as string,
-      ) as IdvTicket;
+      const attributeValue = attributes.find(
+        (attribute) => attribute.attribute_key === "idvUserId",
+      )?.value;
+
+      const idvTicket = JSON.parse((attributeValue || "null") as string) as IdvTicket | null;
+      if (idvTicket) {
+        invariant(idvTicket.idvUserId, "`idvUserId` missing from attribute");
+        invariant(idvTicket.idOSUserId, "`idOSUserId` missing from attribute");
+        invariant(idvTicket.signature, "`signature` missing from attribute");
+      }
 
       return {
         hasProfile: hasUserProfile,
         idOSProfile,
-        ...attributePayload,
+        idvTicket,
       };
     },
     enabled: Boolean(signer),
@@ -122,6 +127,9 @@ export const useCreateIDVAttribute = () => {
       config: IssuerClientConfig;
     }) => {
       const { idOSUserId, idvUserId, signature, config } = data;
+      invariant(idOSUserId, "`idOSUserId` is required");
+      invariant(idvUserId, "`idvUserId` is required");
+      invariant(signature, "`signature` is required");
 
       return createAttribute(config.kwilClient, {
         id: crypto.randomUUID(),
@@ -326,7 +334,11 @@ export function Onboarding() {
   const signer = useEthersSigner();
   const config = useIssuerClientConfig(signer);
   const userData = useFetchUserData(config, signer);
-  const idvStatus = useFetchIDVStatus(userData.data);
+  if (userData.error) {
+    console.error(userData.error);
+    isleController?.send("update", { status: "error" });
+  }
+  const idvStatus = useFetchIDVStatus(userData?.data?.idvTicket);
   const createIDVAttribute = useCreateIDVAttribute();
 
   const issueCredential = useIssueCredential();
@@ -459,10 +471,12 @@ export function Onboarding() {
         }
 
         case "request-dwg": {
-          invariant(userData.data, "`userData` not found");
+          invariant(userData.data, "`userData.data` not found");
+          invariant(userData.data.idvTicket, "`userData.data.idvTicket` not found");
+
           issueCredential.mutate(
             {
-              idvUserId: userData.data.idvUserId,
+              idvUserId: userData.data.idvTicket.idvUserId,
               recipient_encryption_public_key:
                 userData.data.idOSProfile.recipient_encryption_public_key,
             },
@@ -495,14 +509,16 @@ export function Onboarding() {
     }
 
     if (idvStatus.data === "approved") {
-      invariant(userData.data, "`userData` not found");
+      invariant(userData.data, "`userData.data` not found");
+      invariant(userData.data.idvTicket, "`userData.data.idvTicket` not found");
+
       setStepperStatus("request-permissions");
 
       hasIssuedCredential.current = true;
 
       issueCredential.mutate(
         {
-          idvUserId: userData.data.idvUserId,
+          idvUserId: userData.data.idvTicket.idvUserId,
           recipient_encryption_public_key:
             userData.data.idOSProfile.recipient_encryption_public_key,
         },
@@ -515,6 +531,7 @@ export function Onboarding() {
           },
         },
       );
+      return;
     }
   }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, stepperStatus]);
 
