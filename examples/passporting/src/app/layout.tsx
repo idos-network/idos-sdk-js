@@ -27,7 +27,7 @@ export default function RootLayout(props: { children: ReactNode }) {
             <header className="sticky top-0 z-sticky bg-gray-950 px-6">
               <div className="flex h-20 items-center justify-between gap-4">
                 <Link href="/" className="text-lg text-white">
-                  idOS Passporting Demo
+                  ACME Card Provider
                 </Link>
                 <WalletConnector />
               </div>
