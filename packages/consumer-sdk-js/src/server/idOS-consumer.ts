@@ -47,7 +47,7 @@ export class idOSConsumer {
 
   private constructor(
     private readonly noncedBox: NoncedBox,
-    private readonly kwilClient: KwilActionClient,
+    public readonly kwilClient: KwilActionClient,
     public readonly address: string,
   ) {}
 

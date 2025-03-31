@@ -9,7 +9,7 @@ import {
   getCredentialContentSha256Hash,
   requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
-import { base64Decode, base64Encode, type idOSCredential } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/core";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
@@ -34,7 +34,6 @@ import {
 import { useIsleController } from "@/isle.provider";
 import { useEthersSigner } from "@/wagmi.config";
 
-import nacl from "tweetnacl";
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
@@ -45,7 +44,6 @@ const enclaveOptions = {
 };
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
-
 const useFetchUserData = (
   config: IssuerClientConfig | undefined,
   signer: JsonRpcSigner | undefined,
