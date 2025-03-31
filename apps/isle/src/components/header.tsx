@@ -23,7 +23,7 @@ export function ProfileStatusIcon() {
   }
 
   if (status === "no-profile") {
-    return <ProfileIcon color="gray" />;
+    return <ProfileIcon color="muted.fg" />;
   }
 
   if (status === "not-verified") {
@@ -38,7 +38,7 @@ export function ProfileStatusIcon() {
     return <ExclamationMarkIcon color="red" />;
   }
 
-  return <ProfileIcon color="aquamarine" />;
+  return <ProfileIcon color="brand" />;
 }
 
 const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
@@ -68,12 +68,12 @@ const statusBadgeColors: Record<Partial<IsleStatus>, BadgeProps> = {
   },
   verified: {
     bg: {
-      _dark: "aquamarine.400/30",
-      _light: "aquamarine.200",
+      _dark: "brand.400/30",
+      _light: "brand.200",
     },
     color: {
-      _dark: "aquamarine.400",
-      _light: "aquamarine.800",
+      _dark: "brand.400",
+      _light: "brand.800",
     },
   },
   error: {
@@ -92,6 +92,7 @@ function StatusBadge() {
     </Badge>
   );
 }
+
 export function Header() {
   return (
     <chakra.header
