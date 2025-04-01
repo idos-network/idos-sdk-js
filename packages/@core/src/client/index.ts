@@ -79,8 +79,6 @@ export class idOSClientIdle {
       chainId: params.chainId,
     });
 
-    // cspell:disable-next-line
-    // TODO(pkoch): Where should I set the mode?
     const enclaveProvider = new IframeEnclave({ ...params.enclaveOptions });
     await enclaveProvider.load();
 

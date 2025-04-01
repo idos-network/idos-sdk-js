@@ -148,6 +148,8 @@ interface idOSIsleController {
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 
   readonly idosClient: idOSClient;
+
+  logClientIn: () => Promise<void>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -694,6 +696,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
   };
 
+  const logClientIn = async (): Promise<void> => {
+    if (idosClient.state === "logged-in") return;
+    invariant(idosClient.state !== "configuration", "idOS client is not configured");
+    invariant(idosClient.state !== "idle", "idOS client doesn't have a signer yet");
+    idosClient = await idosClient.logIn();
+  };
+
   // Initialize the idOSIsle instance
   initializeWagmi();
 
@@ -828,6 +837,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     get idosClient() {
       return idosClient;
     },
+    logClientIn,
     destroy,
     send,
     requestDelegatedWriteGrant,

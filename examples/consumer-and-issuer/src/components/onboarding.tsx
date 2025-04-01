@@ -310,7 +310,7 @@ export function Onboarding() {
         },
       });
 
-      (isleController.idosClient.enclaveProvider as IframeEnclave).options.mode = "existing";
+      await isleController.logClientIn();
 
       await queryClient.invalidateQueries({
         queryKey: ["user-data"],
