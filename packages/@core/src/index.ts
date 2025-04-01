@@ -7,3 +7,4 @@ export * from "./kwil-infra";
 export * from "./store";
 export * from "./utils";
 export * from "./enclave";
+export * from "./client";

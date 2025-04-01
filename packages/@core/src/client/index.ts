@@ -1,47 +1,65 @@
 import type { KwilSigner } from "@kwilteam/kwil-js";
+import invariant from "tiny-invariant";
+
+import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
+import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
-  type EnclaveOptions,
-  type EnclaveProvider,
-  IframeEnclave,
-  type KwilActionClient,
-  Store,
-  type Wallet,
-  createClientKwilSigner,
-  createWebKwilClient,
-  type idOSUser,
-} from "../index";
-import { getUserProfile, hasProfile } from "../kwil-actions";
+  type DelegatedWriteGrantSignatureRequest,
+  type ShareableCredential,
+  createAttribute,
+  createCredentialCopy,
+  getAccessGrantsOwned,
+  getAllCredentials,
+  getAttributes,
+  getCredentialById,
+  getCredentialOwned,
+  getUserProfile,
+  hasProfile,
+  type idOSDAGSignatureParams,
+  removeCredential,
+  requestDAGMessage,
+  requestDWGMessage,
+  shareCredential,
+} from "../kwil-actions";
+import { type KwilActionClient, createClientKwilSigner, createWebKwilClient } from "../kwil-infra";
+import { Store } from "../store";
+import type { Wallet, idOSUser, idOSUserAttribute } from "../types";
+import { buildInsertableIDOSCredential } from "../utils";
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
   [K in keyof T as Exclude<T[K], Function> extends never ? never : K]: T[K];
 };
 
-type idOSClient =
+export type idOSClient =
   | idOSClientConfiguration
   | idOSClientIdle
   | idOSClientWithUserSigner
   | idOSClientLoggedIn;
 
-class idOSClientConfiguration {
+export class idOSClientConfiguration {
   readonly state: "configuration";
   readonly chainId?: string;
   readonly nodeUrl: string;
   readonly enclaveOptions: Omit<EnclaveOptions, "mode">;
 
-  constructor(
-    chainId: string | undefined,
-    nodeUrl: string,
-    enclaveOptions: Omit<EnclaveOptions, "mode">,
-  ) {
+  constructor(params: {
+    chainId?: string;
+    nodeUrl: string;
+    enclaveOptions: Omit<EnclaveOptions, "mode">;
+  }) {
     this.state = "configuration";
-    this.chainId = chainId;
-    this.nodeUrl = nodeUrl;
-    this.enclaveOptions = enclaveOptions;
+    this.chainId = params.chainId;
+    this.nodeUrl = params.nodeUrl;
+    this.enclaveOptions = params.enclaveOptions;
+  }
+
+  async createClient(): Promise<idOSClientIdle> {
+    return idOSClientIdle.fromConfig(this);
   }
 }
 
-class idOSClientIdle {
+export class idOSClientIdle {
   readonly state: "idle";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
@@ -69,11 +87,11 @@ class idOSClientIdle {
     return new idOSClientIdle(store, kwilClient, enclaveProvider);
   }
 
-  async addressHasProfile(userAddress: string): Promise<boolean> {
-    return hasProfile(this.kwilClient, userAddress);
+  async addressHasProfile(address: string): Promise<boolean> {
+    return hasProfile(this.kwilClient, address);
   }
 
-  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner | idOSClientLoggedIn> {
+  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
     const [kwilSigner, walletIdentifier] = await createClientKwilSigner(
       this.store,
       this.kwilClient,
@@ -81,15 +99,15 @@ class idOSClientIdle {
     );
     this.kwilClient.setSigner(kwilSigner);
 
-    const newIdos = new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
+    return new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
+  }
 
-    if (!(await newIdos.hasProfile())) return newIdos;
-
-    return newIdos.logIn();
+  async logOut(): Promise<idOSClientIdle> {
+    return this;
   }
 }
 
-class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>, "state"> {
+export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>, "state"> {
   readonly state: "with-user-signer";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
@@ -113,23 +131,34 @@ class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>, "stat
     this.walletIdentifier = walletIdentifier;
   }
 
+  async logOut(): Promise<idOSClientIdle> {
+    this.kwilClient.setSigner(undefined);
+    await this.enclaveProvider.reset();
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+  }
+
   async hasProfile(): Promise<boolean> {
     return hasProfile(this.kwilClient, this.walletIdentifier);
+  }
+
+  async getUserEncryptionPublicKey(userId: string): Promise<string> {
+    await this.enclaveProvider.reconfigure({ mode: "new" });
+    const { userEncryptionPublicKey } =
+      await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
+    return userEncryptionPublicKey;
   }
 
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
-    // cspell:disable-next-line
-    // TODO(pkoch): ready the enclave
-    return new idOSClientLoggedIn(this, await getUserProfile(this.kwilClient));
-  }
+    await this.enclaveProvider.reconfigure({ mode: "existing" });
+    const kwilUser = await getUserProfile(this.kwilClient);
 
-  // cspell:disable-next-line
-  // TODO(pkoch): add logout
+    return new idOSClientLoggedIn(this, kwilUser);
+  }
 }
 
-class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
+export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
   readonly state: "logged-in";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
@@ -150,6 +179,107 @@ class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "
     this.user = user;
   }
 
-  // cspell:disable-next-line
-  // TODO(pkoch): add logout
+  async logOut(): Promise<idOSClientIdle> {
+    this.kwilClient.setSigner(undefined);
+    await this.enclaveProvider.reset();
+    return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
+  }
+
+  async requestDWGMessage(params: DelegatedWriteGrantSignatureRequest): Promise<string> {
+    return requestDWGMessage(this.kwilClient, params);
+  }
+
+  async removeCredential(id: string) {
+    return await removeCredential(this.kwilClient, id);
+  }
+
+  async getCredentialById(id: string) {
+    return getCredentialById(this.kwilClient, id);
+  }
+
+  async shareCredential(credential: ShareableCredential) {
+    return shareCredential(this.kwilClient, credential);
+  }
+
+  async getAllCredentials() {
+    return getAllCredentials(this.kwilClient);
+  }
+
+  async getAccessGrantsOwned() {
+    return getAccessGrantsOwned(this.kwilClient);
+  }
+
+  async getCredentialOwned(id: string) {
+    return getCredentialOwned(this.kwilClient, id);
+  }
+
+  async getAttributes() {
+    return getAttributes(this.kwilClient);
+  }
+
+  async createAttribute(attribute: idOSUserAttribute) {
+    return createAttribute(this.kwilClient, attribute);
+  }
+
+  async getCredentialContentSha256Hash(id: string) {
+    const credential = await getCredentialById(this.kwilClient, id);
+
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+
+    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+
+    const plaintext = await this.enclaveProvider.decrypt(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+    );
+
+    return hexEncodeSha256Hash(plaintext);
+  }
+
+  async createCredentialCopy(
+    id: string,
+    consumerRecipientEncryptionPublicKey: string,
+    consumerInfo: {
+      consumerAddress: string;
+      lockedUntil: number;
+    },
+  ) {
+    const originalCredential = await getCredentialById(this.kwilClient, id);
+    invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
+
+    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+
+    const decryptedContent = await this.enclaveProvider.decrypt(
+      base64Decode(originalCredential.content),
+      base64Decode(originalCredential.encryptor_public_key),
+    );
+    const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
+      decryptedContent,
+      base64Decode(consumerRecipientEncryptionPublicKey),
+    );
+
+    const insertableCredential = await buildInsertableIDOSCredential(
+      originalCredential.user_id,
+      "",
+      base64Encode(content),
+      consumerRecipientEncryptionPublicKey,
+      base64Encode(encryptorPublicKey),
+      consumerInfo,
+    );
+
+    const copyId = crypto.randomUUID();
+
+    await createCredentialCopy(this.kwilClient, {
+      original_credential_id: originalCredential.id,
+      ...originalCredential,
+      ...insertableCredential,
+      id: copyId,
+    });
+
+    return { id: copyId };
+  }
+
+  async requestDAGMessage(params: idOSDAGSignatureParams) {
+    return requestDAGMessage(this.kwilClient, params);
+  }
 }

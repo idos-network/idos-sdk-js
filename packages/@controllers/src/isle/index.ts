@@ -1,36 +1,20 @@
 import {
   type EnclaveOptions,
-  type EnclaveProvider,
-  IframeEnclave,
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
   type IsleStatus,
   type IsleTheme,
-  type KwilActionClient,
-  Store,
   base64Decode,
   base64Encode,
   buildInsertableIDOSCredential,
-  createClientKwilSigner,
-  createWebKwilClient,
+  type idOSClient,
+  idOSClientConfiguration,
   type idOSCredential,
-  type idOSUser,
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
-import {
-  type DelegatedWriteGrantSignatureRequest,
-  getUserProfile as _getUserProfile,
-  shareCredential as _shareCredential,
-  getAccessGrantsOwned,
-  getAllCredentials,
-  getCredentialById,
-  getCredentialOwned,
-  hasProfile,
-  removeCredential,
-  requestDWGMessage,
-} from "@idos-network/core/kwil-actions";
+import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core/kwil-actions";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -42,13 +26,16 @@ import {
   injected,
   reconnect,
   signMessage,
-  connect as wagmiConnect,
   watchAccount,
 } from "@wagmi/core";
 import { mainnet, sepolia } from "@wagmi/core/chains";
-import { BrowserProvider, type JsonRpcSigner } from "ethers";
+import { BrowserProvider } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
+
+const assertNever = (x: never): never => {
+  throw new Error(`Unexpected object: ${x}`);
+};
 
 /**
  * Meta information about an actor.
@@ -136,8 +123,6 @@ interface RequestDelegatedWriteGrantOptions {
  * @interface idOSIsleInstance
  */
 interface idOSIsleController {
-  /** Initiates a wallet connection process */
-  connect: () => Promise<void>;
   /** Cleans up and removes the Isle instance */
   destroy: () => void;
   /** Sends a message to the Isle iframe */
@@ -161,6 +146,8 @@ interface idOSIsleController {
   onIsleMessage: (handler: (message: IsleNodeMessage) => void) => () => void;
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
+
+  readonly idosClient: idOSClient;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -194,66 +181,48 @@ const initializeWagmi = (): void => {
  *
  * @param options - Configuration options for the Isle instance
  * @returns An interface for interacting with the Isle instance
- *
- * @example
- * ```typescript
- * const isle = createIsle({ container: "my-container" });
- * await isle.connect(); // Connect a wallet
- * const signer = await isle.getSigner(); // Get the connected signer
- * ```
  */
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
+  const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
+  let idosClient: idOSClient = new idOSClientConfiguration({
+    nodeUrl,
+    enclaveOptions: options.enclaveOptions,
+  });
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
-  let enclaveProvider: EnclaveProvider | null = null;
   const controller: Controller = createController({
     targetOrigin: "https://isle.idos.network",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
-  let signer: JsonRpcSigner | undefined;
-  let kwilClient: KwilActionClient | undefined;
+
   const iframeId = `iframe-isle-${Math.random().toString(36).slice(2, 9)}`;
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
   let ownerOriginalCredentials: idOSCredential[] = [];
-  const store = new Store(window.localStorage);
 
-  const ensureKwilClient = async (): Promise<KwilActionClient> => {
-    if (kwilClient) return kwilClient;
-
-    if (!signer) {
-      throw new Error("Cannot initialize KwilClient: No signer available");
-    }
-
-    const client = await createWebKwilClient({
-      nodeUrl: "https://nodes.playground.idos.network",
-    });
-
-    const [kwilSigner] = await createClientKwilSigner(store, client, signer);
-    client.setSigner(kwilSigner);
-
-    kwilClient = client;
-    return client;
-  };
-
-  /**
-   * Sets up a new signer instance using the current wallet client
-   */
   const setupSigner = async (): Promise<void> => {
     const walletClient = await getWalletClient(wagmiConfig);
-    if (walletClient) {
-      const provider = new BrowserProvider(walletClient.transport);
-      signer = await provider.getSigner();
-    }
-  };
+    invariant(walletClient, "No `walletClient` found");
 
-  const setupEnclave = async (): Promise<void> => {
-    if (enclaveProvider) return;
-    try {
-      const enclaveInstance = new IframeEnclave(options.enclaveOptions);
-      await enclaveInstance.load();
-      enclaveProvider = enclaveInstance;
-    } catch (error) {
-      console.error(error);
+    const provider = new BrowserProvider(walletClient.transport);
+    const signer = await provider.getSigner();
+
+    if (idosClient.state === "configuration") {
+      idosClient = await idosClient.createClient();
+    }
+
+    switch (idosClient.state) {
+      case "idle":
+        idosClient = await idosClient.withUserSigner(signer);
+        break;
+      case "with-user-signer":
+      case "logged-in":
+        if (signer.address !== idosClient.walletIdentifier) {
+          idosClient = await idosClient.logOut();
+          idosClient = await idosClient.withUserSigner(signer);
+        }
+        break;
+      default:
+        assertNever(idosClient);
     }
   };
 
@@ -265,35 +234,25 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     status: "disconnected" | "connecting" | "connected" | "reconnecting";
     address?: string;
   }): Promise<void> => {
-    if (account.status === "connecting" && signer) {
+    if (account.status === "connecting") {
       return;
     }
 
     if (account.status === "connected") {
       try {
         await setupSigner();
-        if (!signer) {
-          throw new Error("Failed to setup signer");
-        }
-        await setupEnclave();
-        if (!enclaveProvider) {
-          throw new Error("Failed to setup enclave");
-        }
       } catch (error) {
         console.error("Failed to initialize:", error);
-        send("update", {
-          status: "error",
-        });
+        send("update", { status: "error" });
         return;
       }
     } else if (account.status === "disconnected") {
-      signer = undefined;
-      enclaveProvider = null;
+      if ("logOut" in idosClient) {
+        idosClient = await idosClient.logOut();
+      }
     }
 
-    send("update", {
-      address: account.address,
-    });
+    send("update", { address: account.address });
   };
 
   const requestDelegatedWriteGrant = async (
@@ -301,10 +260,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   ): Promise<
     { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
   > => {
-    try {
-      // Ensure client is initialized before any UI operations
-      const client = await ensureKwilClient();
+    invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
+    try {
       send("update", {
         status: "pending-permissions",
       });
@@ -324,14 +282,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         },
       });
 
-      const { address } = getAccount(wagmiConfig);
       const currentTimestamp = Date.now();
       const currentDate = new Date(currentTimestamp);
       const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 
       const delegatedWriteGrant = {
         id: crypto.randomUUID(),
-        owner_wallet_identifier: address as string,
+        owner_wallet_identifier: idosClient.walletIdentifier,
         grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
         issuer_public_key: options.consumer.consumerAuthPublicKey,
         access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -339,7 +296,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
       };
 
-      const message: string = await requestDWGMessage(client, delegatedWriteGrant);
+      const message: string = await idosClient.requestDWGMessage(delegatedWriteGrant);
 
       send("update-create-dwg-status", {
         status: "pending",
@@ -368,17 +325,10 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
   };
 
-  const getUserProfile = async (): Promise<idOSUser> => {
-    const client = await ensureKwilClient();
-    return _getUserProfile(client);
-  };
-
   /**
    * Requests an access grant for the given consumer
    */
   const requestPermission = async (options: RequestPermissionOptions): Promise<void> => {
-    const client = await ensureKwilClient();
-
     updateIsleStatus("verified");
 
     toggleAnimation({
@@ -392,14 +342,18 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     });
 
     const [error, result] = await goTry(async () => {
-      invariant(enclaveProvider, "No `idOS enclave` found");
+      invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
-      const credential = await getCredentialById(client, ownerOriginalCredentials[0].id);
+      const credential = await idosClient.getCredentialById(ownerOriginalCredentials[0].id);
       invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
 
       const plaintextContent = await decryptCredentialContent(credential);
 
-      const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
+      await idosClient.enclaveProvider.ready(
+        idosClient.user.id,
+        idosClient.user.recipient_encryption_public_key,
+      );
+      const { content, encryptorPublicKey } = await idosClient.enclaveProvider.encrypt(
         utf8Encode(plaintextContent),
         base64Decode(options.consumer.consumerEncryptionPublicKey),
       );
@@ -416,7 +370,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         },
       );
 
-      await _shareCredential(client, {
+      await idosClient.shareCredential({
         ...credential,
         ...insertableCredential,
         original_credential_id: credential.id,
@@ -449,14 +403,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    * Revokes an access grant for the given id
    */
   const revokePermission = async (id: string): Promise<unknown> => {
-    const client = await ensureKwilClient();
+    invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
     send("update-revoke-access-grant-status", {
       status: "pending",
     });
 
     const [error, result] = await goTry(() => {
-      return removeCredential(client, id);
+      // Just to make TS remember that the idosConsumer is logged in.
+      invariant(idosClient.state === "logged-in");
+
+      return idosClient.removeCredential(id);
     });
 
     if (error) {
@@ -482,18 +439,18 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
-    invariant(enclaveProvider, "No `idOS enclave` found");
-    const user = await getUserProfile();
-    const { address } = getAccount(wagmiConfig);
+    invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
-    await enclaveProvider.load();
-    await enclaveProvider.ready(user.id, user.recipient_encryption_public_key);
-
-    const decrypted = await enclaveProvider.decrypt(
-      base64Decode(credential.content),
-      base64Decode(credential.encryptor_public_key),
+    await idosClient.enclaveProvider.ready(
+      idosClient.user.id,
+      idosClient.user.recipient_encryption_public_key,
     );
-    return utf8Decode(decrypted);
+    return utf8Decode(
+      await idosClient.enclaveProvider.decrypt(
+        base64Decode(credential.content),
+        base64Decode(credential.encryptor_public_key),
+      ),
+    );
   };
 
   const safeParse = (value: string) => {
@@ -508,12 +465,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    * Process credentials and return calculated credential data
    */
   const getPermissions = async () => {
-    invariant(kwilClient, "No `KwilActionClient` found");
+    invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
     const acceptedIssuers = options.credentialRequirements.acceptedIssuers;
     const acceptedCredentialType = options.credentialRequirements.acceptedCredentialType;
 
-    const credentials = await getAllCredentials(kwilClient);
+    const credentials = await idosClient.getAllCredentials();
     const originalCredentials = credentials.filter((cred) => !cred.original_id);
 
     ownerOriginalCredentials = originalCredentials;
@@ -544,7 +501,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     );
 
     // Get all the access grants owned by the signer.
-    const accessGrants = await getAccessGrantsOwned(kwilClient);
+    const accessGrants = await idosClient.getAccessGrantsOwned();
 
     // Filter out the known access grants. This is done by checking if the `ag` `data_id` is equal to any of the `duplicate_ids`
     const knownAccessGrants = accessGrants.filter((ag) => {
@@ -597,19 +554,13 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    */
   const viewCredentialDetails = async (id: string): Promise<void> => {
     const [error, result] = await goTry(async () => {
-      const client = await ensureKwilClient();
-      invariant(kwilClient, "No `KwilActionClient` found");
+      invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
       send("update-view-credential-details-status", {
         status: "pending",
       });
 
-      const credential = await getCredentialOwned(client, id);
-
-      // Ensure enclave is initialized before trying to decrypt
-      await setupEnclave();
-      invariant(enclaveProvider, "Enclave not initialized");
-
+      const credential = await idosClient.getCredentialOwned(id);
       const content = await decryptCredentialContent(credential);
 
       send("update-view-credential-details-status", {
@@ -646,7 +597,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const account = getAccount(wagmiConfig);
       await handleAccountChange(account);
 
-      if (!signer) {
+      if (idosClient.state === "configuration" || idosClient.state === "idle") {
         send("update", {
           status: "not-connected",
         });
@@ -654,10 +605,18 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       }
 
       try {
-        const client = await ensureKwilClient();
-
-        // Check if the user has a profile and update the isle status accordingly.
-        const _hasProfile = await hasProfile(client, account.address as string);
+        let _hasProfile: boolean;
+        switch (idosClient.state) {
+          case "with-user-signer":
+            _hasProfile = await idosClient.hasProfile();
+            break;
+          case "logged-in":
+            _hasProfile = true;
+            break;
+          default:
+            assertNever(idosClient);
+            _hasProfile = false; // this is unreachable, it's just to make TS happy.
+        }
 
         if (!_hasProfile) {
           toggleAnimation({ expanded: true, noDismiss: true });
@@ -666,6 +625,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
           });
           return;
         }
+
+        if (idosClient.state !== "logged-in") {
+          idosClient = await idosClient.logIn();
+        }
+
         const { matchingCredentials, permissions } = await getPermissions();
 
         if (matchingCredentials.length === 0) {
@@ -718,24 +682,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   /**
-   * Attempts to reconnect to a previously connected wallet
-   */
-  const reconnectWallet = async (): Promise<void> => {
-    const account = getAccount(wagmiConfig);
-
-    if (account.status === "connected") {
-      const walletClient = await getWalletClient(wagmiConfig);
-      if (walletClient) {
-        const provider = new BrowserProvider(walletClient.transport);
-        signer = await provider.getSigner();
-      }
-      return;
-    }
-
-    await reconnect(wagmiConfig);
-  };
-
-  /**
    * Sets up a subscription to wallet account changes
    */
   const watchAccountChanges = async (): Promise<void> => {
@@ -759,6 +705,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   // Clean up any existing iframe
   const existingIframe = container.querySelector("iframe");
   if (existingIframe) {
+    console.warn("Removing existing isle iframe");
     container.removeChild(existingIframe);
   }
 
@@ -775,7 +722,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   setupController();
 
   // Start initialization processes
-  reconnectWallet().catch(console.error);
+  reconnect(wagmiConfig).catch((error) => console.error(error));
   watchAccountChanges();
 
   // Public API implementation
@@ -814,39 +761,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     return () => {
       cleanup?.();
     };
-  };
-
-  /**
-   * Initiates a wallet connection process
-   * @throws {Error} If the connection fails
-   */
-  const connect = async (): Promise<void> => {
-    try {
-      await handleAccountChange({ status: "connecting" });
-
-      const result = await wagmiConnect(wagmiConfig, {
-        connector: injected(),
-      });
-
-      if (result?.accounts?.length > 0) {
-        const walletClient = await getWalletClient(wagmiConfig);
-
-        if (!walletClient) {
-          await handleAccountChange({ status: "disconnected" });
-          throw new Error("Failed to get `walletClient`");
-        }
-      }
-    } catch (error) {
-      await handleAccountChange({ status: "disconnected" });
-      throw new Error("Failed to connect a wallet to the idOS Isle", { cause: error });
-    }
-  };
-
-  /**
-   * Returns the current signer instance if available
-   */
-  const getSigner = async (): Promise<JsonRpcSigner | undefined> => {
-    return signer;
   };
 
   /**
@@ -911,7 +825,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
   // Return the public interface
   return {
-    connect,
+    get idosClient() {
+      return idosClient;
+    },
     destroy,
     send,
     requestDelegatedWriteGrant,
