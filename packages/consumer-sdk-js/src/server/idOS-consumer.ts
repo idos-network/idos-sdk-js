@@ -107,7 +107,7 @@ export class idOSConsumer {
 
   async getGrants(page = 1, size = 7) {
     return {
-      grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
+      grants: (await getGrants(this.kwilClient, { page, size })).map((grant) => ({
         id: grant.id,
         ownerUserId: grant.ag_owner_user_id,
         consumerAddress: grant.ag_grantee_wallet_identifier,
