@@ -21,6 +21,7 @@ import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
+
 const useFetchUserData = () => {
   const { isleController } = useIsleController();
 
@@ -453,45 +454,5 @@ export function Onboarding() {
 
   const shareCredentialWithConsumer = useShareCredentialWithConsumer();
 
-  return (
-    <div className="container relative mr-auto flex h-screen w-[60%] flex-col items-center gap-6">
-      <h1 className="font-bold text-4xl">Onboarding with NeoBank</h1>
-      <Stepper
-        activeIndex={STEPPER_ACTIVE_INDEX[stepperStatus as keyof typeof STEPPER_ACTIVE_INDEX]}
-      />
-      {kycDisclosure.isOpen ? (
-        <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
-      ) : null}
-
-      {stepperStatus === "verified" ? (
-        <div className="mt-5 flex w-full flex-col items-center gap-2">
-          <h3 className="font-bold text-2xl">You have been successfully onboarded!</h3>
-          <div className="flex w-full items-center gap-4">
-            <Card />
-            <div className="flex flex-col gap-3">
-              <p className="text-center text-lg">
-                Enjoy unprecedented spend your crypto and enjoy our exclusive crypto rewards in
-                partnership with AcmeCard <br />
-              </p>
-              <p className="text-center text-lg">Ready to Elevate Your Financial Journey?</p>
-              <Button
-                size="lg"
-                color="primary"
-                onPress={() => {
-                  shareCredentialWithConsumer.mutate(undefined, {
-                    onError: (error) => {
-                      console.error(error);
-                    },
-                  });
-                }}
-                isLoading={shareCredentialWithConsumer.isPending}
-              >
-                Claim your Acme Card now
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
-    </div>
-  );
+  return <div className="container mx-auto h-full" />;
 }
