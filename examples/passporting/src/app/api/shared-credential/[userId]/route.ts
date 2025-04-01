@@ -8,15 +8,15 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   const grants = await getGrants(consumer.kwilClient, {
     user_id: userId,
   });
-  const dag = grants.find((grant) => grant.ag_owner_user_id === userId);
+  const grant = grants.find((grant) => grant.ag_owner_user_id === userId);
 
-  if (!dag) {
+  if (!grant) {
     return new Response(JSON.stringify(null), {
       status: 200,
     });
   }
 
-  const credential = await consumer.getReusableCredentialCompliantly(dag.data_id);
+  const credential = await consumer.getReusableCredentialCompliantly(grant.data_id);
   if (!credential) {
     return new Response(JSON.stringify(null), {
       status: 200,
