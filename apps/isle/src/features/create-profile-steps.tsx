@@ -41,18 +41,11 @@ export function CreateProfileSteps() {
           idOS Profile created.
         </Heading>
         <Stepper stepsLength={3} index={1} />
-        <Circle
-          size="12"
-          bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
-          }}
-          boxShadow="md"
-        >
+        <Circle size="12" bg="surface" boxShadow="md">
           <Icon
             color={{
-              _dark: "aquamarine.600",
-              _light: "aquamarine.700",
+              _dark: "brand.600",
+              _light: "brand.700",
             }}
             as={LuCheck}
           />

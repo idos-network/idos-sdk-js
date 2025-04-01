@@ -81,18 +81,11 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
           Permission revoked.
         </Heading>
-        <Circle
-          size="12"
-          bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
-          }}
-          boxShadow="md"
-        >
+        <Circle size="12" bg="surface" boxShadow="md">
           <Icon
             color={{
-              _dark: "aquamarine.600",
-              _light: "aquamarine.700",
+              _dark: "brand.600",
+              _light: "brand.700",
             }}
             as={LuCheck}
             w="6"
@@ -162,8 +155,8 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
         <Flex w="full" gap="2">
           <Button
             flex="1"
-            color={{ _dark: "aquamarine.400", _light: "aquamarine.800" }}
-            bg={{ _dark: "aquamarine.400/30", _light: "aquamarine.200" }}
+            color={{ _dark: "brand.400", _light: "brand.800" }}
+            bg={{ _dark: "brand.400/30", _light: "brand.200" }}
             onClick={onDismiss}
           >
             Cancel
@@ -275,7 +268,7 @@ function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke:
                 Common
               </Text>
             </Flex>
-            <AuthorizedIcon color="aquamarine.400" />
+            <AuthorizedIcon color="brand.400" />
           </Flex>
           <Flex maxW="324px" maxH="340px" overflow="auto">
             <CredentialContent content={credential?.content} />
@@ -335,55 +328,36 @@ function CredentialContent({ content: credentialContent }: { content: string | u
     : { credentialSubject: {} };
   const hiddenFields = ["@context", "type", "credentialSubject", "proof"];
 
-  const contentToRender = {
+  const contentToRender: Record<string, string> = {
     ...parsedContent,
     ...credentialSubject,
   };
 
+  const details = Object.entries(contentToRender).filter(([key]) => !hiddenFields.includes(key));
+
   return (
-    <Stack
-      bg={{ _dark: "neutral.800", _light: "neutral.200" }}
-      borderRadius="xl"
-      gap="0"
-      w="full"
-      maxW="full"
-      overflow="auto"
-    >
-      {Object.entries(contentToRender || {})
-        .filter(([key]) => !hiddenFields.includes(key))
-        .map(([key, value], index) => (
-          <Flex
-            key={key}
-            py="3.5"
-            px="4"
-            gap="5"
-            borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
-            borderBottomWidth={index === Object.keys(contentToRender || {}).length - 1 ? 0 : 1}
-            borderStyle="solid"
-          >
-            <Text
-              flex="1"
-              fontSize="xs"
-              fontWeight="medium"
-              color={{ _dark: "neutral.50", _light: "neutral.950" }}
-            >
-              {key}
-            </Text>
-            <Text
-              whiteSpace="pre"
-              flex="1"
-              fontSize="xs"
-              fontWeight="medium"
-              color={{ _dark: "neutral.50", _light: "neutral.950" }}
-              truncate
-            >
-              {/* biome-ignore lint/suspicious/noExplicitAny: Will be fixed later */}
-              {infoRenderMap?.[key as keyof typeof infoRenderMap]?.(value as unknown as any) ??
-                // biome-ignore lint/suspicious/noExplicitAny: Will be fixed later
-                defaultRender(value as unknown as any)}
-            </Text>
-          </Flex>
-        ))}
+    <Stack bg="muted.bg" borderRadius="xl" gap="0" w="full" maxW="full" overflow="auto">
+      {details.map(([key, value], index) => (
+        <Flex
+          key={key}
+          py="3.5"
+          px="4"
+          gap="5"
+          borderColor={{ _dark: "neutral.700", _light: "neutral.300" }}
+          borderBottomWidth={index !== details.length - 1 ? 1 : 0}
+          borderStyle="solid"
+        >
+          <Text flex="1" fontSize="xs" fontWeight="medium" textTransform="uppercase">
+            {key}
+          </Text>
+          <Text whiteSpace="pre" flex="1" fontSize="xs" fontWeight="medium" truncate>
+            {/* biome-ignore lint/suspicious/noExplicitAny: Will be fixed later */}
+            {infoRenderMap?.[key as keyof typeof infoRenderMap]?.(value as unknown as any) ??
+              // biome-ignore lint/suspicious/noExplicitAny: Will be fixed later
+              defaultRender(value as unknown as any)}
+          </Text>
+        </Flex>
+      ))}
     </Stack>
   );
 }
@@ -504,15 +478,15 @@ export function Permissions() {
         <Circle
           size="12"
           bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
+            _dark: "brand.950",
+            _light: "brand.400",
           }}
           boxShadow="md"
         >
           <Icon
             color={{
-              _dark: "aquamarine.600",
-              _light: "aquamarine.700",
+              _dark: "brand.600",
+              _light: "brand.700",
             }}
             as={LuCheck}
             w="6"
@@ -547,7 +521,7 @@ export function Permissions() {
                   {consumer.meta.name}
                 </Heading>
               </HStack>
-              <AuthorizedIcon color={values.length > 0 ? "aquamarine.400" : "neutral.400"} />
+              <AuthorizedIcon color={values.length > 0 ? "brand.400" : "neutral.400"} />
             </HStack>
             <Stack>
               {values.length === 0 ? (

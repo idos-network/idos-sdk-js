@@ -12,7 +12,7 @@ const config = defineConfig({
   theme: {
     tokens: {
       colors: {
-        aquamarine: {
+        brand: {
           DEFAULT: { value: "#00ffb9" },
           50: { value: "#e7fff7" },
           100: { value: "#c6ffea" },
@@ -50,14 +50,14 @@ const config = defineConfig({
     },
     semanticTokens: {
       colors: {
-        aquamarine: {
-          solid: { value: "{colors.aquamarine.400}" },
-          contrast: { value: "{colors.aquamarine.950}" },
-          fg: { value: "{colors.aquamarine.700}" },
-          muted: { value: "{colors.aquamarine.100}" },
-          subtle: { value: "{colors.aquamarine.200}" },
-          emphasized: { value: "{colors.aquamarine.300}" },
-          focusRing: { value: "{colors.aquamarine.400}" },
+        brand: {
+          solid: { value: "{colors.brand.400}" },
+          contrast: { value: "{colors.brand.950}" },
+          fg: { value: "{colors.brand.700}" },
+          muted: { value: "{colors.brand.100}" },
+          subtle: { value: "{colors.brand.200}" },
+          emphasized: { value: "{colors.brand.300}" },
+          focusRing: { value: "{colors.brand.400}" },
         },
         neutral: {
           solid: { value: "{colors.neutral.50}" },
@@ -66,12 +66,33 @@ const config = defineConfig({
           muted: { value: "{colors.neutral.100}" },
           subtle: { value: "{colors.neutral.200}" },
         },
+        surface: {
+          value: {
+            base: "{colors.white}",
+            _dark: "{colors.neutral.950}",
+          },
+        },
+        muted: {
+          bg: {
+            value: {
+              base: "{colors.neutral.200}",
+              _dark: "{colors.neutral.800}",
+            },
+          },
+          fg: { value: "{colors.neutral.500}" },
+        },
+        border: {
+          value: {
+            base: "{colors.neutral.200}",
+            _dark: "{colors.neutral.800}",
+          },
+        },
       },
     },
     recipes: {
       button: {
         base: {
-          colorPalette: "aquamarine",
+          colorPalette: "brand",
           rounded: "lg",
         },
       },

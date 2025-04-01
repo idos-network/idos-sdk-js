@@ -14,26 +14,26 @@ export function PendingVerification() {
         <Circle
           size="12"
           bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
+            _dark: "brand.950",
+            _light: "brand.400",
           }}
         >
           <Icon
             as={CiClock2}
             color={{
-              _dark: "aquamarine.500",
-              _light: "aquamarine.700",
+              _dark: "brand.500",
+              _light: "brand.700",
             }}
           />
         </Circle>
         <Badge
           bg={{
-            _dark: "aquamarine.900",
-            _light: "aquamarine.400",
+            _dark: "brand.900",
+            _light: "brand.400",
           }}
           color={{
-            _dark: "aquamarine.300",
-            _light: "aquamarine.700",
+            _dark: "brand.300",
+            _light: "brand.700",
           }}
         >
           1 TO 24 HOURS

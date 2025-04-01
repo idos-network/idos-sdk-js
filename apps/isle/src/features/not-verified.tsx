@@ -13,7 +13,7 @@ import { useIsleStore } from "@/store";
 
 function RequestedPermissions({ values }: { values: string[] }) {
   return (
-    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} p="4" borderRadius="3xl">
+    <Stack bg="muted.bg" p="4" borderRadius="3xl">
       <VStack gap="2" alignItems="stretch">
         <HStack gap="2.5" alignItems="center">
           <KeyIcon w="4" h="4" />
@@ -79,7 +79,7 @@ export function NotVerified() {
           Verify your identity
         </Heading>
         <Stepper stepsLength={3} index={2} />
-        <Text color="neutral.500" fontSize="sm" textAlign="center">
+        <Text color="muted.fg" fontSize="sm" textAlign="center">
           This application is asking you to verify your identity. You will now be led to a KYC
           journey to complete the process.
         </Text>
@@ -105,15 +105,15 @@ export function NotVerified() {
         <Circle
           size="12"
           bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
+            _dark: "brand.950",
+            _light: "brand.400",
           }}
           boxShadow="md"
         >
           <Icon
             color={{
-              _dark: "aquamarine.600",
-              _light: "aquamarine.700",
+              _dark: "brand.600",
+              _light: "brand.700",
             }}
             as={LuCheck}
             w="6"

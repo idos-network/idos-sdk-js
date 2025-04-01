@@ -12,15 +12,8 @@ function WalletLinked() {
       <Heading as="h2" fontSize="lg" textAlign="center">
         Wallet linked.
       </Heading>
-      <Circle
-        size="12"
-        bg={{
-          _dark: "aquamarine.950",
-          _light: "aquamarine.400",
-        }}
-        boxShadow="md"
-      >
-        <Icon color="aquamarine.700">
+      <Circle size="12" bg="surface" boxShadow="md">
+        <Icon color="brand.700">
           <LuCheck size="28" />
         </Icon>
       </Circle>
@@ -51,13 +44,7 @@ export function LinkWallet() {
       >
         {address}
       </Text>
-      <Text
-        display="block"
-        color="neutral.500"
-        fontSize="xs"
-        textAlign="center"
-        fontWeight="medium"
-      >
+      <Text display="block" color="muted.fg" fontSize="xs" textAlign="center" fontWeight="medium">
         You will be redirected to idOS Dashboard.
       </Text>
       <Button
@@ -67,7 +54,7 @@ export function LinkWallet() {
           linkWallet();
         }}
       >
-        Link wallet to idOS Dashboard <WalletIcon boxSize="6" />
+        Link wallet to idOS Dashboard
       </Button>
     </Center>
   );

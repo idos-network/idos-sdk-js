@@ -7,9 +7,9 @@ import { KYCInfo } from "@/components/kyc-info";
 
 function RequestedPermissions({ values }: { values: string[] }) {
   return (
-    <Stack bg={{ _dark: "neutral.800", _light: "neutral.200" }} p="4" borderRadius="3xl">
+    <Stack bg="muted.bg" p="4" borderRadius="3xl">
       <VStack gap="2" alignItems="stretch">
-        <HStack gap="2.5" alignItems="flex-start">
+        <HStack gap="2.5">
           <IdentityIcon w="5" h="5" />
           <Text fontSize="sm" fontWeight="medium">
             Grant access to your KYC data including:
