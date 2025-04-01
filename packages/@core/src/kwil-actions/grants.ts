@@ -14,11 +14,21 @@ export async function getGrantsCount(kwilClient: KwilActionClient) {
 /**
  * Returns the Access Grants for the given `signer` in a paginated manner.
  */
-export async function getGrants(kwilClient: KwilActionClient, page = 1, size = 7) {
+
+interface GetGrantsParams {
+  page?: number;
+  size?: number;
+  user_id?: string | null;
+}
+
+export async function getGrants(
+  kwilClient: KwilActionClient,
+  params: GetGrantsParams = { page: 1, size: 10, user_id: null },
+) {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",
-    inputs: { page, size },
+    inputs: params,
   });
 }
 export interface CreateAccessGrantByDAGParams {
