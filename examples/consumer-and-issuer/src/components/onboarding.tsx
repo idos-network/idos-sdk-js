@@ -74,6 +74,8 @@ const useFetchUserData = () => {
 };
 
 const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
+  const { isleController } = useIsleController();
+
   return useQuery({
     queryKey: ["idv-status", params?.idvUserId],
     queryFn: (): Promise<{ status: string }> => {
@@ -98,7 +100,8 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
       // Default polling interval
       return 5_000;
     },
-    enabled: Boolean(params?.idvUserId),
+    enabled:
+      Boolean(params?.idvUserId) && Boolean(isleController?.idosClient.state === "logged-in"),
     staleTime: 0, // Consider data stale immediately
     gcTime: 0, // Don't cache the results
   });
@@ -376,6 +379,10 @@ export function Onboarding() {
       setStepperStatus(status);
     });
   }, [isleController]);
+
+  useEffect(() => {
+    if (!address) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
+  }, [address, queryClient, userData?.data?.idvUserId]);
 
   useEffect(() => {
     if (!isleController) return;
