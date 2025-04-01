@@ -3,7 +3,6 @@ import {
   base64Encode,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
-  utf8Encode,
 } from "@idos-network/core";
 import {
   createCredentialCopy as _createCredentialCopy,
@@ -31,14 +30,19 @@ export async function getCredentialById({ kwilClient }: ConsumerClientConfig, id
  * Get the SHA256 hash of the content of an idOSCredential
  */
 export async function getCredentialContentSha256Hash(
-  { kwilClient }: ConsumerClientConfig,
+  { kwilClient, enclaveProvider }: ConsumerClientConfig,
   id: string,
 ) {
   const credential = await _getCredentialById(kwilClient, id);
 
   invariant(credential, `"idOSCredential" with id ${id} not found`);
 
-  return hexEncodeSha256Hash(utf8Encode(credential.content));
+  const plaintext = await enclaveProvider.decrypt(
+    base64Decode(credential.content),
+    base64Decode(credential.encryptor_public_key),
+  );
+
+  return hexEncodeSha256Hash(plaintext);
 }
 
 /**
@@ -57,8 +61,12 @@ export async function createCredentialCopy(
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
+  const decryptedContent = await enclaveProvider.decrypt(
+    base64Decode(originalCredential.content),
+    base64Decode(originalCredential.encryptor_public_key),
+  );
   const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
-    utf8Encode(originalCredential.content),
+    decryptedContent,
     base64Decode(consumerRecipientEncryptionPublicKey),
   );
 

@@ -4,8 +4,10 @@ import { createIsleController } from "@idos-network/controllers";
 import { useClickAway } from "@uidotdev/usehooks";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 
+type IsleController = ReturnType<typeof createIsleController>;
+
 interface IsleContextType {
-  isleController: ReturnType<typeof createIsleController> | null;
+  isleController: IsleController | null;
 }
 
 const IsleContext = createContext<IsleContextType | null>(null);
@@ -24,7 +26,7 @@ interface IsleProviderProps {
 }
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
-  const [isleController, setIsle] = useState<ReturnType<typeof createIsleController> | null>(null);
+  const [isleController, setIsle] = useState<IsleController | null>(null);
 
   // Toggle isle animation from the outside
   const containerRef = useClickAway(() => {
@@ -48,11 +50,11 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           name: "NeoBank",
           logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
         },
-        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
       },
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://enclave.playground.idos.network",
+        url: "https://enclave.idos.network",
       },
 
       credentialRequirements: {
@@ -63,7 +65,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "NeoBank",
               logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
-            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
         ],
         integratedConsumers: [
@@ -73,7 +75,16 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "NeoBank",
               logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
             },
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_PUBLIC_KEY_HEX ?? "",
+            consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
+            consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
+            kycPermissions: [
+              "Name and last name",
+              "Gender",
+              "Country and city of residence",
+              "Place and date of birth",
+              "ID Document",
+              "Liveness check (No pictures)",
+            ],
           },
           {
             meta: {
@@ -81,7 +92,17 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               name: "ACME Card Provider",
               logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
             },
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_PUBLIC_KEY ?? "",
+            consumerEncryptionPublicKey:
+              process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
+            consumerAuthPublicKey: process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
+            kycPermissions: [
+              "Name and last name",
+              "Gender",
+              "Country and city of residence",
+              "Place and date of birth",
+              "ID Document",
+              "Liveness check (No pictures)",
+            ],
           },
         ],
         acceptedCredentialType: "KYC DATA",

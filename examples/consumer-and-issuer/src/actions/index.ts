@@ -7,6 +7,8 @@ import {
 } from "@idos-network/issuer-sdk-js/server";
 import invariant from "tiny-invariant";
 
+import { idOSConsumer } from "@/consumer.config";
+import jwt from "jsonwebtoken";
 import nacl from "tweetnacl";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
@@ -60,10 +62,10 @@ const vcTemplate = (kycData: Record<string, any>) => {
   };
 };
 
-const appendProof = (vc: Record<string, unknown>) => {
+const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
   invariant(
-    process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY,
-    "`NEXT_ISSUER_ATTESTATION_SECRET_KEY` is not set",
+    process.env.ISSUER_ATTESTATION_SECRET_KEY,
+    "`ISSUER_ATTESTATION_SECRET_KEY` is not set",
   );
   return {
     ...vc,
@@ -77,7 +79,7 @@ const appendProof = (vc: Record<string, unknown>) => {
       proofValue: base64Encode(
         nacl.sign.detached(
           toBytes(vc),
-          base64Decode(process.env.NEXT_ISSUER_ATTESTATION_SECRET_KEY ?? ""),
+          base64Decode(process.env.ISSUER_ATTESTATION_SECRET_KEY ?? ""),
         ),
       ),
     },
@@ -91,7 +93,6 @@ const generateCredential = (kycData: Record<string, any>): Uint8Array => {
 };
 
 const publicNotes = {
-  id: crypto.randomUUID(),
   level: "human",
   type: "human",
   status: "approved",
@@ -133,17 +134,33 @@ export async function createIDOSUserProfile({
   return user;
 }
 
+export async function getKrakenToken(): Promise<string> {
+  const payload = {
+    api: true,
+    clientId: process.env.KRAKEN_CLIENT_ID,
+  };
+
+  // biome-ignore lint/style/noNonNullAssertion: <explanation>
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY!, {
+    algorithm: "ES512",
+    expiresIn: "600s",
+  });
+}
+
 async function getKYCData(userId: string) {
   const response = await fetch(
     `https://kraken.staging.sandbox.fractal.id/public/kyc/${userId}/data`,
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );
   const json = await response.json();
+  if (!response.ok) {
+    throw new Error(`Failed to fetch KYC data ${JSON.stringify(json)}`);
+  }
 
   return json;
 }
@@ -197,23 +214,60 @@ export async function getUserIdFromToken(token: string, idOSUserId: string) {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.KRAKEN_API_KEY}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );
   const json = await response.json();
+  if (!response.ok) return { ok: false, error: json };
 
-  const issuerSigningSecretKey = process.env.NEXT_ISSUER_SIGNING_SECRET_KEY;
-  invariant(issuerSigningSecretKey, "`NEXT_ISSUER_SIGNING_SECRET_KEY` is not set");
+  const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
+  invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
 
   return {
-    idOSUserId: idOSUserId,
-    idvUserId: json.userId,
-    signature: base64Encode(
-      nacl.sign.detached(
-        toBytes(`${json.userId}${idOSUserId}`),
-        base64Decode(issuerSigningSecretKey),
+    ok: true,
+    data: {
+      idOSUserId: idOSUserId,
+      idvUserId: json.userId,
+      signature: base64Encode(
+        nacl.sign.detached(
+          toBytes(`${json.userId}${idOSUserId}`),
+          base64Decode(issuerSigningSecretKey),
+        ),
       ),
-    ),
+    },
   };
 }
+
+export const getCredentialCompliantly = async (credentialId: string) => {
+  const consumer = await idOSConsumer();
+  const credential = await consumer.getReusableCredentialCompliantly(credentialId);
+  return credential;
+};
+
+export const invokePassportingService = async (payload: unknown) => {
+  return await (
+    await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
+      },
+    })
+  ).json();
+};
+
+export const generateKrakenUrlToken = async () => {
+  invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
+
+  const payload = {
+    clientId: process.env.KRAKEN_CLIENT_ID,
+    kyc: true,
+    level: "basic+liveness",
+    state: Date.now().toString(),
+  };
+
+  invariant(process.env.KRAKEN_PRIVATE_KEY, "`KRAKEN_PRIVATE_KEY` is not set");
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY, { algorithm: "ES512" });
+};

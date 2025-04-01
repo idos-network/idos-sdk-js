@@ -40,7 +40,7 @@ export async function createUser(
   config: IssuerServerConfig,
   user: CreateProfileReqParams,
   wallet: CreateWalletReqParams,
-) {
+): Promise<[idOSUser, idOSWallet]> {
   const user_id = user.id ?? crypto.randomUUID();
   const wallet_id = wallet.id ?? crypto.randomUUID();
 

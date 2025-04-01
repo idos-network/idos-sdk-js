@@ -12,12 +12,12 @@ const StepperCircle = ({ active }: StepperCircleProps) => {
       rounded="full"
       placeItems="center"
       bg={{
-        _dark: active ? "aquamarine.950" : "neutral.800",
-        _light: active ? "aquamarine.200" : "neutral.200",
+        _dark: active ? "brand.950" : "neutral.800",
+        _light: active ? "brand.200" : "neutral.200",
       }}
       zIndex="2"
     >
-      <Circle size="2" bg={active ? "aquamarine.600" : "neutral.400"} />
+      <Circle size="2" bg={active ? "brand.600" : "neutral.400"} />
     </Grid>
   );
 };

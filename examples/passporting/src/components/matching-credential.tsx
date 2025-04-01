@@ -27,7 +27,7 @@ const useFetchMatchingCredential = () => {
     select: (credentials) => {
       const credential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "PASSPORTING_DEMO";
+        return publicNotes.type === "KYC DATA";
       });
       return credential as unknown as idOSCredential;
     },
@@ -36,11 +36,15 @@ const useFetchMatchingCredential = () => {
 
 export const useFetchSharedCredentialFromUser = () => {
   const consumerConfig = useIdOSConsumer();
-  return useSuspenseQuery({
+  return useSuspenseQuery<idOSCredential | null>({
     queryKey: ["shared-credential"],
     queryFn: async () => {
       const { id: userId } = await getUserProfile(consumerConfig);
-      return fetch(`/api/shared-credential/${userId}`).then((res) => res.json());
+      return fetch(`/api/shared-credential/${userId}`)
+        .then((res) => res.json())
+        .catch(() => {
+          return null;
+        });
     },
   });
 };
@@ -56,13 +60,17 @@ function useShareCredential() {
       const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
       const lockedUntil = 0;
 
-      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
-      const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+      const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
+      const consumerEncryptionPublicKey =
+        process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
-      invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+      invariant(
+        consumerSigningPublicKey,
+        "NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY is not set",
+      );
       invariant(
         consumerEncryptionPublicKey,
-        "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+        "NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
       );
 
       const { id } = await createCredentialCopy(
@@ -125,8 +133,9 @@ export function MatchingCredential() {
       </div>
     );
   }
+  console.log({ data: sharedCredentialFromUser.data, matchingCredential });
 
-  if (sharedCredentialFromUser.data) {
+  if (sharedCredentialFromUser.data?.public_notes) {
     return (
       <div className="flex flex-col gap-6">
         <h3 className="font-semibold text-2xl">

@@ -1,5 +1,8 @@
 import { zValidator } from "@hono/zod-validator";
-import { createAccessGrantFromDAG, createIssuerConfig } from "@idos-network/issuer-sdk-js/server";
+import {
+  createAccessGrantFromDAG,
+  createIssuerServerConfig,
+} from "@idos-network/issuer-sdk-js/server";
 import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";
@@ -50,7 +53,7 @@ app.post(
       );
     }
 
-    const issuerConfig = await createIssuerConfig({
+    const issuerConfig = await createIssuerServerConfig({
       nodeUrl: KWIL_NODE_URL,
       signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
       encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),

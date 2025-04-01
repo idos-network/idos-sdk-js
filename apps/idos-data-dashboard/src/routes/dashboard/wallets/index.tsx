@@ -20,7 +20,7 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/core/idos";
 
 import { useWalletSelector } from "@/core/near";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
@@ -128,6 +128,10 @@ export function Component() {
       }, 5_000);
     }
   }, [walletToAdd, hasProfile, callbackUrl]);
+
+  if (!hasProfile) {
+    return <Navigate to="/" />;
+  }
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>

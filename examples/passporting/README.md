@@ -79,11 +79,11 @@ const handleCredentialDuplicateProcess = () => {
 
     const contentHash = await idOS.data.getCredentialContentSha256Hash(credential.data.id);
 
-    const consumerSigningPublicKey = process.env.NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY;
-    const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY;
+    const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
+    const consumerEncryptionPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY;
 
-    invariant(consumerSigningPublicKey, "NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY is not set");
-    invariant(consumerEncryptionPublicKey, "NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set");
+    invariant(consumerSigningPublicKey, "NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY is not set");
+    invariant(consumerEncryptionPublicKey, "NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set");
 
     const { id } = await idOS.data.shareCredential(
       credential.data.id,
@@ -195,5 +195,5 @@ export const hasReusableCredential = async (credentialHash: string) => {
 ### Environment Variables
 
 - `NEXT_PUBLIC_DUMMY_CREDENTIAL_ID`: Dummy credential ID for testing.
-- `NEXT_PUBLIC_CONSUMER_SIGNING_PUBLIC_KEY`: Public Signing key for the consumer.
-- `NEXT_PUBLIC_CONSUMER_ENCRYPTION_PUBLIC_KEY`: Encryption public key for the consumer.
+- `NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY`: Public Signing key for the consumer.
+- `NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY`: Encryption public key for the consumer.

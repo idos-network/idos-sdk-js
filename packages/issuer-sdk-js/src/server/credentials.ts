@@ -15,6 +15,7 @@ import {
   getCredentialIdByContentHash as _getCredentialIdByContentHash,
   getSharedCredential as _getSharedCredential,
 } from "@idos-network/core/kwil-actions";
+import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
@@ -192,8 +193,9 @@ export async function getCredentialIdByContentHash(
   const { kwilClient } = issuerConfig;
 
   const id = await _getCredentialIdByContentHash(kwilClient, contentHash);
+  invariant(id, "Required `idOSCredential` id not found");
 
-  return id ?? null;
+  return id;
 }
 
 export async function getSharedCredential(issuerConfig: IssuerServerConfig, id: string) {

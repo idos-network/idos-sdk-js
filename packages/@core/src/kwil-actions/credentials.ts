@@ -43,12 +43,12 @@ export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
 ) {
-  const [{ id }] = await kwilClient.call<[{ id: string }]>({
+  const response = await kwilClient.call<[{ id: string }]>({
     name: "get_sibling_credential_id",
     inputs: { content_hash },
   });
 
-  return id;
+  return response[0]?.id ?? null;
 }
 
 /**
@@ -182,12 +182,15 @@ export async function getCredentialById(kwilClient: KwilActionClient, id: string
   return response.find((r) => r.id === id);
 }
 
+export type ShareableCredential = Omit<idOSCredential, "original_id"> & {
+  original_credential_id: string;
+};
 /**
  * Shares an idOSCredential to the given `userId`.
  */
 export async function shareCredential(
   kwilClient: KwilActionClient,
-  credential: Omit<idOSCredential, "original_id"> & { original_credential_id: string },
+  credential: ShareableCredential,
 ) {
   return kwilClient.execute({
     name: "share_credential",

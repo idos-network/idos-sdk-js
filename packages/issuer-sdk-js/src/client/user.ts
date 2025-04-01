@@ -29,5 +29,8 @@ export async function getUserEncryptionPublicKey(
   { enclaveProvider }: IssuerClientConfig,
   userId: string,
 ) {
+  await enclaveProvider.load();
+  await enclaveProvider.reset();
+  await enclaveProvider.ready(userId);
   return await enclaveProvider.discoverUserEncryptionPublicKey(userId);
 }

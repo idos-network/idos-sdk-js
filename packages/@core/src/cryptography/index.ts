@@ -1,5 +1,5 @@
 import nacl from "tweetnacl";
-import { base64Encode } from "../codecs";
+import { base64Decode, base64Encode, utf8Decode } from "../codecs";
 
 /**
  * Encrypts a message using the recipient's public key and the sender's secret key.
@@ -37,10 +37,7 @@ export function encryptContent(
   return fullMessage;
 }
 
-/**
- * Decrypts a message using the sender's public key and the recipient's secret key.
- */
-export function decryptContent(
+function decryptContent(
   message: Uint8Array,
   nonce: Uint8Array,
   senderEncryptionPublicKey: Uint8Array,
@@ -69,4 +66,27 @@ export function decryptContent(
   }
 
   return decrypted;
+}
+
+export class NoncedBox {
+  constructor(public readonly keyPair: nacl.BoxKeyPair) {}
+
+  static nonceFromBase64SecretKey(secret: string): NoncedBox {
+    return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
+  }
+
+  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+    const decodedMessage = base64Decode(b64FullMessage);
+    const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
+    const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);
+    const nonce = decodedMessage.slice(0, nacl.box.nonceLength);
+    const content = decryptContent(
+      message,
+      nonce,
+      senderEncryptionPublicKey,
+      this.keyPair.secretKey,
+    );
+
+    return utf8Decode(content);
+  }
 }
