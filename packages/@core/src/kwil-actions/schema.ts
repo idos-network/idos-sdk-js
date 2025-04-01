@@ -1,9 +1,39 @@
-export const actionSchema: Record<string, string[]> = {
-  add_user_as_inserter: ["id", "recipient_encryption_public_key"],
-  update_user_pub_key_as_inserter: ["id", "recipient_encryption_public_key"],
-  get_user: [],
-  get_user_as_inserter: ["id"],
+import { Utils } from "@kwilteam/kwil-js";
 
+const { DataType } = Utils;
+interface elem {
+  name: string;
+  type: typeof DataType.Uuid | typeof DataType.Text;
+}
+
+export const actionSchema: Record<string, elem[]> = {
+  add_user_as_inserter: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "recipient_encryption_public_key",
+      type: DataType.Text,
+    },
+  ],
+  update_user_pub_key_as_inserter: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "recipient_encryption_public_key",
+      type: DataType.Text,
+    },
+  ],
+  get_user: [],
+  get_user_as_inserter: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   upsert_wallet_as_inserter: [
     "id",
     "user_id",
