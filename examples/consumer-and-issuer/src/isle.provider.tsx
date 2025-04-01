@@ -77,6 +77,14 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
             },
             consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
+            kycPermissions: [
+              "Name and last name",
+              "Gender",
+              "Country and city of residence",
+              "Place and date of birth",
+              "ID Document",
+              "Liveness check (No pictures)",
+            ],
           },
           {
             meta: {
@@ -87,6 +95,14 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
             consumerEncryptionPublicKey:
               process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
+            kycPermissions: [
+              "Name and last name",
+              "Gender",
+              "Country and city of residence",
+              "Place and date of birth",
+              "ID Document",
+              "Liveness check (No pictures)",
+            ],
           },
         ],
         acceptedCredentialType: "KYC DATA",
