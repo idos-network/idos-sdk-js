@@ -3,7 +3,6 @@ import { useState } from "react";
 import { LuCheck } from "react-icons/lu";
 
 import { Icon } from "@/components/icons/icon";
-import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
 import { useIsleStore } from "@/store";
 
