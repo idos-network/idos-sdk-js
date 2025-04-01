@@ -134,7 +134,7 @@ export function PasswordForm({
 
           <Paragraph>
             This password is the key to your idOS data. Be careful not to lose it: you'll need it
-            later to view or share you idOS data.
+            later to view or share your idOS data.
           </Paragraph>
 
           <Button type="submit">Create password</Button>
