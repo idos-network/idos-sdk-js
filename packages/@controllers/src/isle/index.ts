@@ -97,6 +97,7 @@ interface idOSIsleControllerOptions {
       meta: Meta;
       consumerAuthPublicKey: string;
       consumerEncryptionPublicKey: string;
+      kycPermissions: string[];
     }[];
 
     /** The type of credential accepted by the app */
@@ -670,6 +671,19 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         if (matchingCredentials.length === 0) {
           send("update", {
             status: "not-verified",
+          });
+
+          return;
+        }
+
+        const issuerPermission = permissions.get(
+          options.credentialRequirements.integratedConsumers[0],
+        )[0];
+
+        if (!issuerPermission) {
+          await requestPermission({
+            consumer: options.credentialRequirements.integratedConsumers[0],
+            KYCPermissions: options.credentialRequirements.integratedConsumers[0].kycPermissions,
           });
 
           return;

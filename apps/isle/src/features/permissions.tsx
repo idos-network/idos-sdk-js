@@ -81,7 +81,14 @@ function GrantRevocation({ grant, onDismiss, onSuccess }: GrantRevocationProps) 
         <Heading fontSize="lg" fontWeight="semibold" textAlign="center">
           Permission revoked.
         </Heading>
-        <Circle size="12" bg="surface" boxShadow="md">
+        <Circle
+          size="12"
+          bg={{
+            _dark: "brand.950",
+            _light: "brand.400",
+          }}
+          boxShadow="md"
+        >
           <Icon
             color={{
               _dark: "brand.600",
