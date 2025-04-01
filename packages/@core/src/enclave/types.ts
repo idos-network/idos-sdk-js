@@ -20,6 +20,7 @@ export interface EnclaveOptions {
 
 export interface EnclaveProvider {
   load(): Promise<void>;
+  reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void>;
 
   ready(userId: string, currentUserEncryptionPublicKey?: string): Promise<Uint8Array>;
   reset(): Promise<void>;

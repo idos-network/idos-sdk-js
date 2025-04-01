@@ -65,7 +65,7 @@ export class KwilActionClient {
   /**
    * Not sure if this is needed here or should the `signer` be passed in the `execute` method itself, or in the constructor, but it's here for now.
    */
-  setSigner(signer: KwilSigner) {
+  setSigner(signer: KwilSigner | undefined) {
     this.signer = signer;
   }
 

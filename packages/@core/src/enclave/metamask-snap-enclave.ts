@@ -1,5 +1,9 @@
 import type { idOSCredential } from "@idos-network/core";
-import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveProvider } from "./types";
+import type {
+  DiscoverUserEncryptionPublicKeyResponse,
+  EnclaveOptions,
+  EnclaveProvider,
+} from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
@@ -10,6 +14,9 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
+  }
+  reconfigure(_options: Omit<EnclaveOptions, "container" | "url">): Promise<void> {
+    throw new Error("Method not implemented.");
   }
   filterCredentials(
     credentials: Record<string, string>[],

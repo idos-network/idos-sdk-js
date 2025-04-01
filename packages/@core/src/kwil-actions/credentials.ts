@@ -182,12 +182,15 @@ export async function getCredentialById(kwilClient: KwilActionClient, id: string
   return response.find((r) => r.id === id);
 }
 
+export type ShareableCredential = Omit<idOSCredential, "original_id"> & {
+  original_credential_id: string;
+};
 /**
  * Shares an idOSCredential to the given `userId`.
  */
 export async function shareCredential(
   kwilClient: KwilActionClient,
-  credential: Omit<idOSCredential, "original_id"> & { original_credential_id: string },
+  credential: ShareableCredential,
 ) {
   return kwilClient.execute({
     name: "share_credential",

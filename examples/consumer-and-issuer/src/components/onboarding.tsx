@@ -9,7 +9,7 @@ import {
   getCredentialContentSha256Hash,
   requestDAGMessage,
 } from "@idos-network/consumer-sdk-js/client";
-import type { idOSCredential } from "@idos-network/core";
+import type { IframeEnclave, idOSClient, idOSCredential } from "@idos-network/core";
 import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
 import {
   type IssuerClientConfig,
@@ -19,7 +19,6 @@ import {
   hasProfile,
 } from "@idos-network/issuer-sdk-js/client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import { useCallback, useEffect, useRef, useState } from "react";
 import invariant from "tiny-invariant";
@@ -44,24 +43,17 @@ const enclaveOptions = {
 };
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
-const useFetchUserData = (
-  config: IssuerClientConfig | undefined,
-  signer: JsonRpcSigner | undefined,
-) => {
+const useFetchUserData = () => {
+  const { isleController } = useIsleController();
+
   return useQuery({
     queryKey: ["user-data"],
     queryFn: async () => {
-      if (!config) throw new Error("IssuerConfig is not initialized");
-      if (!signer) throw new Error("Signer is not initialized");
-
-      const hasUserProfile = await hasProfile(config);
-      if (!hasUserProfile) return null;
-
-      // First get the user profile which handles authentication
-      const idOSProfile = await getUserProfile(config);
+      invariant(isleController, "`isleController` not initialized");
+      invariant(isleController.idosClient?.state === "logged-in", "`idosClient` is not logged in");
 
       // Then get the attributes using the same authenticated session
-      const attributes = await getAttributes(config.kwilClient);
+      const attributes = await isleController.idosClient.getAttributes();
 
       const attributeValue = attributes.find(
         (attribute) => attribute.attribute_key === "idvUserId",
@@ -74,13 +66,9 @@ const useFetchUserData = (
         invariant(idvTicket.signature, "`signature` missing from attribute");
       }
 
-      return {
-        hasProfile: hasUserProfile,
-        idOSProfile,
-        idvTicket,
-      };
+      return idvTicket;
     },
-    enabled: Boolean(signer),
+    enabled: Boolean(isleController?.idosClient.state === "logged-in"),
     refetchOnWindowFocus: false,
   });
 };
@@ -117,19 +105,22 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
 };
 
 export const useCreateIDVAttribute = () => {
+  const { isleController } = useIsleController();
+
   return useMutation({
     mutationFn: async (data: {
       idOSUserId: string;
       idvUserId: string;
       signature: string;
-      config: IssuerClientConfig;
     }) => {
-      const { idOSUserId, idvUserId, signature, config } = data;
+      invariant(isleController?.idosClient.state === "logged-in", "`idosClient` is not logged in");
+
+      const { idOSUserId, idvUserId, signature } = data;
       invariant(idOSUserId, "`idOSUserId` is required");
       invariant(idvUserId, "`idvUserId` is required");
       invariant(signature, "`signature` is required");
 
-      return createAttribute(config.kwilClient, {
+      return isleController.idosClient.createAttribute({
         id: crypto.randomUUID(),
         attribute_key: "idvUserId",
         value: JSON.stringify({ idOSUserId, idvUserId, signature }),
@@ -146,7 +137,9 @@ const useIssueCredential = () => {
       idvUserId,
       recipient_encryption_public_key,
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
-      const dwgData = await isleController?.requestDelegatedWriteGrant({
+      invariant(isleController, "`isleController` not initialized");
+
+      const dwgData = await isleController.requestDelegatedWriteGrant({
         consumer: {
           consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           meta: {
@@ -185,34 +178,6 @@ const useIssueCredential = () => {
   });
 };
 
-const useRequestPermission = () => {
-  const { isleController } = useIsleController();
-
-  return useMutation({
-    mutationFn: async () => {
-      await isleController?.requestPermission({
-        consumer: {
-          meta: {
-            url: "https://idos.network",
-            name: "ACME Card Provider",
-            logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
-          },
-          consumerAuthPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_AUTH ?? "",
-          consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_INTEGRATED_CONSUMER_ENC ?? "",
-        },
-        KYCPermissions: [
-          "Name and last name",
-          "Gender",
-          "Country and city of residence",
-          "Place and date of birth",
-          "ID Document",
-          "Liveness check (No pictures)",
-        ],
-      });
-    },
-  });
-};
-
 const STEPPER_ACTIVE_INDEX = {
   "no-profile": 0,
   "not-verified": 1,
@@ -221,47 +186,17 @@ const STEPPER_ACTIVE_INDEX = {
   verified: 4,
 };
 
-function useIssuerClientConfig(signer: JsonRpcSigner | undefined) {
-  const [config, setConfig] = useState<IssuerClientConfig | undefined>(undefined);
-  useEffect(() => {
-    if (!signer) return;
-
-    const initialize = async () => {
-      const _config = await createIssuerClientConfig({
-        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
-        signer,
-        enclaveOptions,
-      });
-
-      setConfig(_config);
-    };
-
-    initialize();
-  }, [signer]);
-
-  return config;
-}
-
 function useShareCredentialWithConsumer() {
-  const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const signer = useEthersSigner();
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
 
   return useMutation({
     mutationFn: async () => {
-      invariant(signer, "`Signer` is not defined");
-      const consumerConfig = await createConsumerClientConfig({
-        nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
-        signer,
-        enclaveOptions: {
-          container: "#idOS-enclave",
-        },
-      });
+      invariant(isleController, "`isleController` not initialized");
+      invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
-      const credentials = await getAllCredentials(consumerConfig);
-      const userData = await getConsumerUserData(consumerConfig);
+      const credentials = await isleController.idosClient.getAllCredentials();
 
       const credential = credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
@@ -270,12 +205,9 @@ function useShareCredentialWithConsumer() {
 
       invariant(credential, "`idOSCredential` to share not found");
 
-      await consumerConfig.enclaveProvider.ready(
-        userData.id,
-        userData.recipient_encryption_public_key,
+      const contentHash = await isleController.idosClient.getCredentialContentSha256Hash(
+        credential.id,
       );
-
-      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credential.id);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -291,8 +223,7 @@ function useShareCredentialWithConsumer() {
         "`NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
       );
 
-      const { id } = await createCredentialCopy(
-        consumerConfig,
+      const { id } = await isleController.idosClient.createCredentialCopy(
         credential.id,
         consumerEncryptionPublicKey,
         {
@@ -302,14 +233,14 @@ function useShareCredentialWithConsumer() {
       );
 
       const dag = {
-        dag_owner_wallet_identifier: address as string,
+        dag_owner_wallet_identifier: isleController.idosClient.walletIdentifier,
         dag_grantee_wallet_identifier: consumerSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
         dag_content_hash: contentHash,
       };
 
-      const message: string = await requestDAGMessage(consumerConfig, dag);
+      const message: string = await isleController.idosClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({
@@ -329,18 +260,16 @@ export function Onboarding() {
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
 
-  const signer = useEthersSigner();
-  const config = useIssuerClientConfig(signer);
-  const userData = useFetchUserData(config, signer);
+  const userData = useFetchUserData();
   if (userData.error) {
     console.error(userData.error);
     isleController?.send("update", { status: "error" });
   }
-  const idvStatus = useFetchIDVStatus(userData?.data?.idvTicket);
+
+  const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
 
   const issueCredential = useIssueCredential();
-  const requestPermission = useRequestPermission();
 
   const hasIssuedCredential = useRef(false);
 
@@ -352,10 +281,15 @@ export function Onboarding() {
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
-      invariant(config, "`config` not created yet");
+      invariant(
+        isleController?.idosClient.state === "with-user-signer",
+        "`idosClient` is not in `with-user-signer` state",
+      );
+
       const userId = crypto.randomUUID();
 
-      const { userEncryptionPublicKey } = await getUserEncryptionPublicKey(config, userId);
+      const userEncryptionPublicKey =
+        await isleController.idosClient.getUserEncryptionPublicKey(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await signMessageAsync({ message });
@@ -376,7 +310,7 @@ export function Onboarding() {
         },
       });
 
-      config.enclaveProvider.options.mode = "existing";
+      await isleController.logClientIn();
 
       await queryClient.invalidateQueries({
         queryKey: ["user-data"],
@@ -401,19 +335,19 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient, config]);
+  }, [isleController, signMessageAsync, address, queryClient]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
-      invariant(userData.data?.idOSProfile, "`idOSProfile` not found");
-      invariant(signer, "`Signer` is not defined");
-      invariant(config, "`IssuerConfig` is not defined");
+      invariant(isleController?.idosClient.state === "logged-in", "`idosClient` not logged in");
 
-      const idOSUserId = userData.data?.idOSProfile.id;
+      const idOSUserId = isleController.idosClient.user.id;
       invariant(idOSUserId, "`idOSUserId` can't be discovered");
+
       const { ok, error, data } = await getUserIdFromToken(token, idOSUserId);
       invariant(ok, JSON.stringify(error, null, 2));
       invariant(data, "`data` is missing, even though `ok` is true");
+
       const { idvUserId, signature } = data;
       invariant(idvUserId, "`idvUserId` can't be discovered");
 
@@ -421,17 +355,16 @@ export function Onboarding() {
         idOSUserId,
         idvUserId,
         signature,
-        config,
       });
 
       await queryClient.invalidateQueries({
         queryKey: ["user-data"],
       });
 
-      isleController?.updateIsleStatus("pending-verification");
+      isleController.updateIsleStatus("pending-verification");
       kycDisclosure.onClose();
     },
-    [userData, kycDisclosure, signer, createIDVAttribute, queryClient, isleController, config],
+    [kycDisclosure, createIDVAttribute, queryClient, isleController],
   );
 
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
@@ -470,13 +403,13 @@ export function Onboarding() {
 
         case "request-dwg": {
           invariant(userData.data, "`userData.data` not found");
-          invariant(userData.data.idvTicket, "`userData.data.idvTicket` not found");
+          invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
           issueCredential.mutate(
             {
-              idvUserId: userData.data.idvTicket.idvUserId,
+              idvUserId: userData.data.idvUserId,
               recipient_encryption_public_key:
-                userData.data.idOSProfile.recipient_encryption_public_key,
+                isleController.idosClient.user.recipient_encryption_public_key,
             },
             {
               onSuccess: () => {
@@ -508,7 +441,7 @@ export function Onboarding() {
 
     if (idvStatus.data === "approved") {
       invariant(userData.data, "`userData.data` not found");
-      invariant(userData.data.idvTicket, "`userData.data.idvTicket` not found");
+      invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
       setStepperStatus("request-permissions");
 
@@ -516,9 +449,9 @@ export function Onboarding() {
 
       issueCredential.mutate(
         {
-          idvUserId: userData.data.idvTicket.idvUserId,
+          idvUserId: userData.data.idvUserId,
           recipient_encryption_public_key:
-            userData.data.idOSProfile.recipient_encryption_public_key,
+            isleController.idosClient.user.recipient_encryption_public_key,
         },
         {
           onSuccess: () => {
