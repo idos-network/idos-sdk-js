@@ -4,7 +4,6 @@ import invariant from "tiny-invariant";
 import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
-  type DelegatedWriteGrantSignatureRequest,
   type ShareableCredential,
   createAttribute,
   createCredentialCopy,
@@ -23,7 +22,7 @@ import {
 } from "../kwil-actions";
 import { type KwilActionClient, createClientKwilSigner, createWebKwilClient } from "../kwil-infra";
 import { Store } from "../store";
-import type { Wallet, idOSUser, idOSUserAttribute } from "../types";
+import type { DelegatedWriteGrant, Wallet, idOSUser, idOSUserAttribute } from "../types";
 import { buildInsertableIDOSCredential } from "../utils";
 
 type Properties<T> = {
@@ -183,7 +182,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
   }
 
-  async requestDWGMessage(params: DelegatedWriteGrantSignatureRequest): Promise<string> {
+  async requestDWGMessage(params: DelegatedWriteGrant): Promise<string> {
     return requestDWGMessage(this.kwilClient, params);
   }
 

@@ -1,5 +1,6 @@
 import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
 import {
+  type GetGrantsParams,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
@@ -105,9 +106,9 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getGrants(page = 1, size = 7) {
+  async getGrants(params: GetGrantsParams) {
     return {
-      grants: (await getGrants(this.kwilClient, { page, size })).map((grant) => ({
+      grants: (await getGrants(this.kwilClient, params)).map((grant) => ({
         id: grant.id,
         ownerUserId: grant.ag_owner_user_id,
         consumerAddress: grant.ag_grantee_wallet_identifier,

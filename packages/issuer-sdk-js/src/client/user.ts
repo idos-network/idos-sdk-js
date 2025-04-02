@@ -1,5 +1,5 @@
+import type { DelegatedWriteGrant } from "@idos-network/core";
 import {
-  type DelegatedWriteGrantSignatureRequest,
   getUserProfile as _getUserProfile,
   hasProfile as _hasProfile,
   requestDWGMessage as _requestDWGMessage,
@@ -12,7 +12,7 @@ export async function hasProfile({ kwilClient, userAddress }: IssuerClientConfig
 
 export async function requestDWGMessage(
   { kwilClient }: IssuerClientConfig,
-  params: DelegatedWriteGrantSignatureRequest,
+  params: DelegatedWriteGrant,
 ) {
   return _requestDWGMessage(kwilClient, params);
 }
