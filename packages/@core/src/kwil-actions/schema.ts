@@ -1,12 +1,13 @@
 import { Utils } from "@kwilteam/kwil-js";
 
 const { DataType } = Utils;
+
 interface elem {
   name: string;
-  type: typeof DataType.Uuid | typeof DataType.Text;
+  type: typeof DataType.Uuid | typeof DataType.Text | typeof DataType.Int;
 }
 
-export const actionSchema: Record<string, elem[]> = {
+export const ActionSchema: Record<string, elem[]> = {
   add_user_as_inserter: [
     {
       name: "id",
@@ -35,139 +36,568 @@ export const actionSchema: Record<string, elem[]> = {
     },
   ],
   upsert_wallet_as_inserter: [
-    "id",
-    "user_id",
-    "address",
-    "public_key",
-    "wallet_type",
-    "message",
-    "signature",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+    {
+      name: "public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "wallet_type",
+      type: DataType.Text,
+    },
+    {
+      name: "message",
+      type: DataType.Text,
+    },
+    {
+      name: "signature",
+      type: DataType.Text,
+    },
   ],
-  add_wallet: ["id", "address", "public_key", "message", "signature"],
+  add_wallet: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+    {
+      name: "public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "message",
+      type: DataType.Text,
+    },
+    {
+      name: "signature",
+      type: DataType.Text,
+    },
+  ],
   get_wallets: [],
-  remove_wallet: ["id"],
+  remove_wallet: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   upsert_credential_as_inserter: [
-    "id",
-    "user_id",
-    "issuer_auth_public_key",
-    "encryptor_public_key",
-    "content",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
   ],
   add_credential: [
-    "id",
-    "issuer_auth_public_key",
-    "encryptor_public_key",
-    "content",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
   ],
   get_credentials: [],
-  get_credentials_shared_by_user: ["user_id", "encryptor_public_key"],
-  edit_public_notes_as_issuer: ["public_notes_id"],
-  remove_credential: ["id"],
+  get_credentials_shared_by_user: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+  ],
+  edit_public_notes_as_issuer: [
+    {
+      name: "public_notes_id",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+  ],
+  remove_credential: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   share_credential: [
-    "id",
-    "original_credential_id",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
-    "content",
-    "encryptor_public_key",
-    "issuer_auth_public_key",
-    "grantee_wallet_identifier",
-    "locked_until",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "locked_until",
+      type: DataType.Int,
+    },
   ],
   create_credential_copy: [
-    "id",
-    "original_credential_id",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
-    "content",
-    "encryptor_public_key",
-    "issuer_auth_public_key",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
   ],
   share_credential_through_dag: [
-    "id",
-    "user_id",
-    "issuer_auth_public_key",
-    "encryptor_public_key",
-    "content",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
-    "original_credential_id",
-    "dag_owner_wallet_identifier",
-    "dag_grantee_wallet_identifier",
-    "dag_locked_until",
-    "dag_signature",
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dag_owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_locked_until",
+      type: DataType.Int,
+    },
+    {
+      name: "dag_signature",
+      type: DataType.Text,
+    },
   ],
   create_credentials_by_dwg: [
-    "issuer_auth_public_key",
-    "original_encryptor_public_key",
-    "original_credential_id",
-    "original_content",
-    "original_public_notes",
-    "original_public_notes_signature",
-    "original_broader_signature",
-    "copy_encryptor_public_key",
-    "copy_credential_id",
-    "copy_content",
-    "copy_public_notes_signature",
-    "copy_broader_signature",
-    "content_hash",
-    "dwg_owner",
-    "dwg_grantee",
-    "dwg_issuer_public_key",
-    "dwg_id",
-    "dwg_access_grant_timelock",
-    "dwg_not_before",
-    "dwg_not_after",
-    "dwg_signature",
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "original_encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_content",
+      type: DataType.Text,
+    },
+    {
+      name: "original_public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "original_public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "original_broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "copy_content",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "copy_broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_owner",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_grantee",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dwg_access_grant_timelock",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_not_before",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_not_after",
+      type: DataType.Text,
+    },
+    {
+      name: "dwg_signature",
+      type: DataType.Text,
+    },
   ],
-  get_credential_owned: ["id"],
-
-  get_credential_shared: ["id"],
-  get_sibling_credential_id: ["content_hash"],
-  add_attribute: ["id", "attribute_key", "value"],
+  get_credential_owned: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  get_credential_shared: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  get_sibling_credential_id: [
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+  ],
+  add_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "attribute_key",
+      type: DataType.Text,
+    },
+    {
+      name: "value",
+      type: DataType.Text,
+    },
+  ],
   get_attributes: [],
-  edit_attribute: ["id", "attribute_key", "value"],
-  remove_attribute: ["id"],
-  share_attribute: ["id", "original_attribute_id", "attribute_key", "value"],
-  dwg_message: [
-    "owner_wallet_identifier",
-    "grantee_wallet_identifier",
-    "issuer_public_key",
-    "id",
-    "access_grant_timelock",
-    "not_usable_before",
-    "not_usable_after",
+  edit_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "attribute_key",
+      type: DataType.Text,
+    },
+    {
+      name: "value",
+      type: DataType.Text,
+    },
   ],
-  revoke_access_grant: ["id"],
-  get_access_grants_owned: ["id"],
-  get_access_grants_granted: ["user_id", "page", "size"],
-  get_access_grants_granted_count: ["user_id"],
-  has_locked_access_grants: ["id"],
+  remove_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  share_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_attribute_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "attribute_key",
+      type: DataType.Text,
+    },
+    {
+      name: "value",
+      type: DataType.Text,
+    },
+  ],
+  dwg_message: [
+    {
+      name: "owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "access_grant_timelock",
+      type: DataType.Text,
+    },
+    {
+      name: "not_usable_before",
+      type: DataType.Text,
+    },
+    {
+      name: "not_usable_after",
+      type: DataType.Text,
+    },
+  ],
+  revoke_access_grant: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  get_access_grants_owned: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  get_access_grants_granted: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "page",
+      type: DataType.Int,
+    },
+    {
+      name: "size",
+      type: DataType.Int,
+    },
+  ],
+  get_access_grants_granted_count: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+  ],
+  has_locked_access_grants: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   dag_message: [
-    "dag_owner_wallet_identifier",
-    "dag_grantee_wallet_identifier",
-    "dag_data_id",
-    "dag_locked_until",
-    "dag_content_hash",
+    {
+      name: "dag_owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_data_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dag_locked_until",
+      type: DataType.Int,
+    },
+    {
+      name: "dag_content_hash",
+      type: DataType.Text,
+    },
   ],
   create_ag_by_dag_for_copy: [
-    "dag_owner_wallet_identifier",
-    "dag_grantee_wallet_identifier",
-    "dag_data_id",
-    "dag_locked_until",
-    "dag_content_hash",
-    "dag_signature",
+    {
+      name: "dag_owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_data_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dag_locked_until",
+      type: DataType.Int,
+    },
+    {
+      name: "dag_content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_signature",
+      type: DataType.Text,
+    },
   ],
-  get_access_grants_for_credential: ["credential_id"],
-
-  has_profile: ["address"],
+  get_access_grants_for_credential: [
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+  ],
+  has_profile: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+  ],
 };
