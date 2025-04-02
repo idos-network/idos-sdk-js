@@ -5,4 +5,4 @@ packages:
 
 catalog:
   ethers: ^6.13.5
-  "@kwilteam/kwil-js": ^0.9.3
+  "@kwilteam/kwil-js": ^0.9.4
