@@ -193,7 +193,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
-    targetOrigin: "https://localhost:5174",
+    targetOrigin: "https://isle.idos.network",
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
 
@@ -720,7 +720,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
   // @todo: make the domain environment aware.
-  iframe.src = "https://localhost:5174";
+  iframe.src = "https://isle.idos.network";
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
