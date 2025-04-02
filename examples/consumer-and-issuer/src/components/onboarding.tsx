@@ -1,10 +1,17 @@
 "use client";
 
-import { Button, useDisclosure } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/core";
+import { Button, cn, useDisclosure } from "@heroui/react";
+import type { IsleStatus, idOSCredential } from "@idos-network/core";
+import { useStore } from "@nanostores/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useClickAway } from "@uidotdev/usehooks";
+import { AnimatePresence, motion } from "framer-motion";
 import { goTry } from "go-try";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { RocketIcon, ScanEyeIcon, ShieldEllipsisIcon, ShieldIcon, User2Icon } from "lucide-react";
+import { atom } from "nanostores";
+import Image from "next/image";
+import { useCallback, useEffect, useRef } from "react";
+import Confetti from "react-confetti";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
@@ -15,12 +22,157 @@ import {
   invokePassportingService,
 } from "@/actions";
 import { useIsleController } from "@/isle.provider";
-
-import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
-import { Stepper } from "./stepper";
 
-type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
+function StepIcon({ icon }: { icon: React.ReactNode }) {
+  return (
+    <div className="inline-flex h-10 w-10 shrink-0 place-content-center items-center rounded-md border border-neutral-200 bg-white text-neutral-900 drop-shadow">
+      {icon}
+    </div>
+  );
+}
+
+function OnboardingStep({
+  isActive = false,
+  children,
+}: { isActive?: boolean; children: React.ReactNode }) {
+  return (
+    <li
+      className={cn(
+        "flex items-center gap-4 font-semibold text-md",
+        isActive ? undefined : "opacity-30",
+      )}
+    >
+      {children}
+    </li>
+  );
+}
+
+function CreateProfileStepDescription() {
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Create an idOS profile</h1>
+      <p className="text-lg text-neutral-500">
+        You will be prompted to create an idOS key. Afterwards, we will create an idOS profile for
+        you. Please, follow the prompts to complete the process.
+      </p>
+    </div>
+  );
+}
+
+function IdentityVerificationStepDescription() {
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Identity verification</h1>
+      <p className="text-lg text-neutral-500">
+        We need to verify your identity. This is a mandatory step to continue. Please have your ID
+        ready. This is done via a 3rd party service integrated with us.
+      </p>
+    </div>
+  );
+}
+
+function IdentityVerificationInProgressStepDescription() {
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Pending verification</h1>
+      <p className="text-lg text-neutral-500">
+        Your data is being processed. Please be patient. It will take a few minutes.
+      </p>
+    </div>
+  );
+}
+
+function PermissionsStepDescription() {
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Permissions</h1>
+      <p className="text-lg text-neutral-500">
+        Please grant the necessary permissions so NeoBank can issue a credential to your idOS
+        profile.
+      </p>
+    </div>
+  );
+}
+
+const $claimSuccess = atom(false);
+
+function ClaimCardStepDescription() {
+  const shareCredentialWithConsumer = useShareCredentialWithConsumer();
+  const claimSuccess = useStore($claimSuccess);
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
+
+      <AnimatePresence mode="wait">
+        {claimSuccess ? (
+          <motion.div
+            key="success"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col gap-3"
+          >
+            <h4 className="font-semibold text-xl">
+              You have successfully claimed your exclusive high-limit credit card and started your
+              premium banking journey!
+            </h4>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <Image
+                src="/static/credit-cards.png"
+                alt="NeoBank"
+                width={240}
+                height={240}
+                priority
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Confetti />
+            </motion.div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="claim"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="flex flex-col gap-3"
+          >
+            <p className="text-lg text-neutral-500">
+              You can now claim your exclusive high-limit credit card and start your premium banking
+              journey.
+            </p>
+            <Button
+              className="w-fit"
+              color="primary"
+              size="lg"
+              onPress={() => {
+                shareCredentialWithConsumer.mutate(undefined, {
+                  onSuccess: () => {
+                    $claimSuccess.set(true);
+                  },
+                });
+              }}
+              isLoading={shareCredentialWithConsumer.isPending}
+            >
+              Claim your card
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 const useFetchUserData = () => {
   const { isleController } = useIsleController();
@@ -52,12 +204,13 @@ const useFetchUserData = () => {
   });
 };
 
+type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
 const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
   const { isleController } = useIsleController();
 
   return useQuery({
     queryKey: ["idv-status", params?.idvUserId],
-    queryFn: (): Promise<{ status: string }> => {
+    queryFn: async (): Promise<{ status: string }> => {
       invariant(params, "`params` is not defined");
 
       const { idvUserId, idOSUserId, signature } = params;
@@ -67,7 +220,8 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
       url.searchParams.set("idOSUserId", idOSUserId);
       url.searchParams.set("signature", signature);
 
-      return fetch(url).then((res) => res.json());
+      const res = await fetch(url);
+      return await res.json();
     },
     select: (data) => data.status,
     refetchInterval: (query) => {
@@ -160,14 +314,6 @@ const useIssueCredential = () => {
   });
 };
 
-const STEPPER_ACTIVE_INDEX = {
-  "no-profile": 0,
-  "not-verified": 1,
-  "pending-verification": 2,
-  "pending-permissions": 3,
-  verified: 4,
-};
-
 function useShareCredentialWithConsumer() {
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
@@ -237,30 +383,53 @@ function useShareCredentialWithConsumer() {
   });
 }
 
+function SecureEnclaveRoot() {
+  return (
+    <div
+      id="idOS-enclave-root"
+      className="invisible fixed top-0 left-0 z-[10000] flex aspect-square h-full w-full flex-col items-center justify-center bg-black/30 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in [&:has(#idOS-enclave.visible)]:visible [&:has(#idOS-enclave.visible)]:opacity-100"
+    >
+      <div className="absolute top-[50%] left-[50%] z-[2] flex h-fit w-11/12 translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-lg bg-white p-6 shadow-md lg:w-[460px]">
+        <h3 className="font-semibold text-2xl">Create your idOS key</h3>
+        <p className="text-neutral-500 text-sm">
+          This key is the key to your idOS data. Be careful not to lose it: you'll need it later to
+          view or share your idOS data.
+        </p>
+
+        <div className="relative h-full w-[200px] self-center">
+          <div id="idOS-enclave" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const $step = atom<IsleStatus | undefined>(undefined);
+
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
   const { address } = useAccount();
+  const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
-
-  if (userData.error) {
-    console.error(userData.error);
-    isleController?.send("update", { status: "error" });
-  }
-
   const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
-
   const issueCredential = useIssueCredential();
-
-  const hasIssuedCredential = useRef(false);
 
   const kycDisclosure = useDisclosure();
 
-  const queryClient = useQueryClient();
+  const hasIssuedCredential = useRef(false);
 
-  const [stepperStatus, setStepperStatus] = useState("");
+  const containerRef = useClickAway(() => {
+    if (!isleController) return;
+
+    isleController.toggleAnimation({
+      expanded: false,
+    });
+  });
+
+  const activeStep = useStore($step);
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
@@ -353,14 +522,6 @@ export function Onboarding() {
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
 
   useEffect(() => {
-    if (!isleController) return;
-
-    return isleController.onIsleStatusChange((status) => {
-      setStepperStatus(status);
-    });
-  }, [isleController]);
-
-  useEffect(() => {
     if (!address) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
   }, [address, queryClient, userData?.data?.idvUserId]);
 
@@ -417,11 +578,11 @@ export function Onboarding() {
 
   useEffect(() => {
     if (!isleController) return;
-    if (!stepperStatus || stepperStatus === "verified") return;
+    if (!activeStep || activeStep === "verified") return;
     if (hasIssuedCredential.current) return;
 
     if (idvStatus.data === "pending") {
-      setStepperStatus("pending-verification");
+      $step.set("pending-verification");
       isleController.updateIsleStatus("pending-verification");
       return;
     }
@@ -430,7 +591,7 @@ export function Onboarding() {
       invariant(userData.data, "`userData.data` not found");
       invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
-      setStepperStatus("request-permissions");
+      $step.set("pending-permissions");
 
       hasIssuedCredential.current = true;
 
@@ -451,9 +612,120 @@ export function Onboarding() {
       );
       return;
     }
-  }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, stepperStatus]);
+  }, [idvStatus.data, userData.data, issueCredential.mutate, isleController, activeStep]);
 
-  const shareCredentialWithConsumer = useShareCredentialWithConsumer();
+  useEffect(() => {
+    if (!isleController) return;
 
-  return <div className="container mx-auto h-full" />;
+    return isleController.onIsleStatusChange((status) => {
+      console.log("status", status);
+      $step.set(status);
+    });
+  }, [isleController]);
+
+  return (
+    <div className="container relative mx-auto min-h-dvh p-6">
+      <div>
+        <div className="flex h-full flex-col gap-8 lg:gap-12">
+          <div className="flex flex-col">
+            <ul className="flex flex-col gap-6 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 lg:flex-row lg:items-center">
+              <OnboardingStep isActive={activeStep === "no-profile"}>
+                <StepIcon icon={<User2Icon />} />
+                <p>Create an idOS profile</p>
+              </OnboardingStep>
+              <OnboardingStep isActive={activeStep === "not-verified"}>
+                <StepIcon icon={<ShieldIcon />} />
+                <p>Identity verification</p>
+              </OnboardingStep>
+              <OnboardingStep isActive={activeStep === "pending-verification"}>
+                <StepIcon icon={<ShieldEllipsisIcon />} />
+                <p>Pending verification</p>
+              </OnboardingStep>
+              <OnboardingStep isActive={activeStep === "pending-permissions"}>
+                <StepIcon icon={<ScanEyeIcon />} />
+                <p>Permissions</p>
+              </OnboardingStep>
+              <OnboardingStep isActive={activeStep === "verified"}>
+                <StepIcon icon={<RocketIcon />} />
+                <p>Claim your ACME Bank card!</p>
+              </OnboardingStep>
+            </ul>
+          </div>
+          <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
+            <div className="max-w-3xl">
+              <AnimatePresence mode="wait">
+                {activeStep === "no-profile" && (
+                  <motion.div
+                    key="no-profile"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <CreateProfileStepDescription />
+                  </motion.div>
+                )}
+                {activeStep === "not-verified" && (
+                  <motion.div
+                    key="not-verified"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <IdentityVerificationStepDescription />
+                  </motion.div>
+                )}
+                {activeStep === "pending-verification" && (
+                  <motion.div
+                    key="pending-verification"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <IdentityVerificationInProgressStepDescription />
+                  </motion.div>
+                )}
+                {activeStep === "pending-permissions" && (
+                  <motion.div
+                    key="pending-permissions"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <PermissionsStepDescription />
+                  </motion.div>
+                )}
+                {activeStep === "verified" && (
+                  <motion.div
+                    key="verified"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <ClaimCardStepDescription />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div
+              id="idOS-isle"
+              ref={containerRef as React.RefObject<HTMLDivElement>}
+              className="h-[670px] min-h-[670px] w-[366px] shrink-0 bg-transparent"
+            />
+          </div>
+        </div>
+      </div>
+
+      {kycDisclosure.isOpen ? (
+        <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
+      ) : null}
+
+      <SecureEnclaveRoot />
+    </div>
+  );
 }

@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cookieToInitialState } from "wagmi";
 
-import { Onboarding } from "@/components/onboarding.v2";
+import { Onboarding } from "@/components/onboarding";
 import { IsleProvider } from "@/isle.provider";
 import { getConfig } from "@/wagmi.config";
 
