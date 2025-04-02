@@ -120,13 +120,18 @@ export async function createCredentialByDelegatedWriteGrant(
   issuerConfig: IssuerServerConfig,
   credentialParams: DelegatedWriteGrantBaseParams,
   delegatedWriteGrant: DelegatedWriteGrantParams,
+  consumerEncryptionPublicKey?: Uint8Array,
 ): Promise<{
   originalCredential: Omit<idOSCredential, "user_id">;
   copyCredential: Omit<idOSCredential, "user_id">;
 }> {
   const { kwilClient, encryptionSecretKey } = issuerConfig;
-  // Derive the recipient encryption public key from the issuer's encryption secret key to use it as the recipient encryption public key.
-  const issuerEncPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
+  if (!consumerEncryptionPublicKey) {
+    // If we're not explicitly given a consumer enc pub key, we're assuming that the issuer is creating a copy
+    // for themselves. So, we derive the recipient encryption public key from the issuer's encryption secret key.
+    // biome-ignore lint/style/noParameterAssign:
+    consumerEncryptionPublicKey = nacl.box.keyPair.fromSecretKey(encryptionSecretKey).publicKey;
+  }
   const originalCredential = ensureEntityId(
     buildInsertableIDOSCredential(issuerConfig, credentialParams),
   );
@@ -135,7 +140,7 @@ export async function createCredentialByDelegatedWriteGrant(
     buildInsertableIDOSCredential(issuerConfig, {
       publicNotes: "",
       plaintextContent: credentialParams.plaintextContent,
-      recipientEncryptionPublicKey: issuerEncPublicKey,
+      recipientEncryptionPublicKey: consumerEncryptionPublicKey,
     }),
   );
   const payload: CreateCredentialByDelegatedWriteGrantParams = {
