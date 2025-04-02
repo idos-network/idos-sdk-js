@@ -24,6 +24,7 @@ function Layout({ children }: PropsWithChildren) {
         rounded="38px"
         bg="surface"
         border="1px solid {colors.border}"
+        shadow="sm"
         width="366px"
         height="full"
       >

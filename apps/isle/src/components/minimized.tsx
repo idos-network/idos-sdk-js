@@ -45,8 +45,7 @@ export default function Minimized({ children }: PropsWithChildren) {
       width="20"
       height="10"
       alignItems="center"
-      border="1px solid {colors.border}"
-      shadow="sm"
+      border={isExpanded ? undefined : "1px solid {colors.border}"}
       overflow="hidden"
       bg="surface"
       ml="auto"
