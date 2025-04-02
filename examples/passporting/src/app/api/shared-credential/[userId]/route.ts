@@ -1,14 +1,13 @@
 import { idOSConsumer } from "@/consumer.config";
-import { getGrants } from "@idos-network/core/kwil-actions";
 
 export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const userId = (await params).userId;
   const consumer = await idOSConsumer();
 
-  const grants = await getGrants(consumer.kwilClient, {
+  const { grants } = await consumer.getGrants({
     user_id: userId,
   });
-  const grant = grants.find((grant) => grant.ag_owner_user_id === userId);
+  const grant = grants.find((grant) => grant.ownerUserId === userId);
 
   if (!grant) {
     return new Response(JSON.stringify(null), {
@@ -16,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     });
   }
 
-  const credential = await consumer.getReusableCredentialCompliantly(grant.data_id);
+  const credential = await consumer.getReusableCredentialCompliantly(grant.dataId);
   if (!credential) {
     return new Response(JSON.stringify(null), {
       status: 200,

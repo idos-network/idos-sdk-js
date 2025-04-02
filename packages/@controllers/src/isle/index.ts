@@ -14,7 +14,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/core";
-import type { DelegatedWriteGrantSignatureRequest } from "@idos-network/core/kwil-actions";
+import type { DelegatedWriteGrant } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -130,7 +130,7 @@ interface idOSIsleController {
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestDelegatedWriteGrantOptions,
-  ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined>;
+  ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrant } | undefined>;
   /** Requests an access grant for the given `consumer` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
   /** Revokes an access grant for the given `id` */
@@ -259,9 +259,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
   const requestDelegatedWriteGrant = async (
     options: RequestDelegatedWriteGrantOptions,
-  ): Promise<
-    { signature: string; writeGrant: DelegatedWriteGrantSignatureRequest } | undefined
-  > => {
+  ): Promise<{ signature: string; writeGrant: DelegatedWriteGrant } | undefined> => {
     invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
     try {

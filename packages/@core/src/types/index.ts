@@ -7,6 +7,16 @@ export type ChainType = (typeof CHAIN_TYPES)[number];
 
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
+export interface DelegatedWriteGrant {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  issuer_public_key: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+}
+
 export interface idOSUser {
   id: string;
   recipient_encryption_public_key: string;

@@ -1,23 +1,7 @@
 "use client";
 
 import { Button, useDisclosure } from "@heroui/react";
-import {
-  createConsumerClientConfig,
-  createCredentialCopy,
-  getAllCredentials,
-  getUserProfile as getConsumerUserData,
-  getCredentialContentSha256Hash,
-  requestDAGMessage,
-} from "@idos-network/consumer-sdk-js/client";
-import type { IframeEnclave, idOSClient, idOSCredential } from "@idos-network/core";
-import { createAttribute, getAttributes } from "@idos-network/core/kwil-actions";
-import {
-  type IssuerClientConfig,
-  createIssuerClientConfig,
-  getUserEncryptionPublicKey,
-  getUserProfile,
-  hasProfile,
-} from "@idos-network/issuer-sdk-js/client";
+import type { idOSCredential } from "@idos-network/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { goTry } from "go-try";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -31,16 +15,10 @@ import {
   invokePassportingService,
 } from "@/actions";
 import { useIsleController } from "@/isle.provider";
-import { useEthersSigner } from "@/wagmi.config";
 
 import { Card } from "./card";
 import { KYCJourney } from "./kyc-journey";
 import { Stepper } from "./stepper";
-
-const enclaveOptions = {
-  container: "#idOS-enclave",
-  url: "https://enclave.idos.network",
-};
 
 type IdvTicket = { idvUserId: string; idOSUserId: string; signature: string };
 const useFetchUserData = () => {

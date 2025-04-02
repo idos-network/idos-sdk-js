@@ -1,3 +1,4 @@
+import type { GetGrantsParams } from "@idos-network/core/kwil-actions";
 import type { ChainType, idOSCredential, idOSGrant } from "@idos-network/core/types";
 import { idOSConsumer } from "./idOS-consumer.ts";
 
@@ -54,8 +55,8 @@ export class idOSConsumerSDK {
     return this.consumer.encryptionPublicKey;
   }
 
-  async listGrants(page: number, size?: number) {
-    return this.consumer.getGrants(page, size);
+  async getGrants(params: GetGrantsParams) {
+    return this.consumer.getGrants(params);
   }
 
   async getGrantsCount(): Promise<number> {
