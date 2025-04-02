@@ -39,11 +39,8 @@ export const useFetchSharedCredentialFromUser = () => {
     queryFn: async () => {
       invariant(idOSClient.state === "logged-in");
 
-      return fetch(`/api/shared-credential/${idOSClient.user.id}`)
-        .then((res) => res.json())
-        .catch((error) => {
-          return { credential: null, cause: error.message };
-        });
+      const res = await fetch(`/api/shared-credential/${idOSClient.user.id}`);
+      return (await res.json()) as { credential: idOSCredential | null; cause: string };
     },
     enabled: idOSClient.state === "logged-in",
   });
@@ -141,7 +138,7 @@ export function MatchingCredential() {
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
       </div>
     );
   }
@@ -151,7 +148,7 @@ export function MatchingCredential() {
       <h3 className="font-semibold text-2xl">
         We have found a matching credential that we can reuse:
       </h3>
-      <CredentialCard credential={matchingCredential.data as idOSCredential} />
+      <CredentialCard credential={matchingCredential.data} />
       <div>
         <p className="text-green-500 text-sm">
           In order to proceed, we need to request an encrypted duplicate of this credential.
