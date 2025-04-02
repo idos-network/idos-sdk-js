@@ -41,7 +41,14 @@ export function CreateProfileSteps() {
           idOS Profile created.
         </Heading>
         <Stepper stepsLength={3} index={1} />
-        <Circle size="12" bg="surface" boxShadow="md">
+        <Circle
+          size="12"
+          boxShadow="md"
+          bg={{
+            _dark: "brand.950",
+            _light: "brand.400",
+          }}
+        >
           <Icon
             color={{
               _dark: "brand.600",

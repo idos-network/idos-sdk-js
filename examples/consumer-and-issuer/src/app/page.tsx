@@ -51,7 +51,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-black">
+    <div className="min-h-screen w-full bg-white">
       {/* Hero Section */}
       <section className="relative flex h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white to-neutral-50 dark:from-gray-950 dark:via-neutral-900 dark:to-black" />

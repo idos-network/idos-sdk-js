@@ -1,7 +1,6 @@
 "use client";
 
 import { createIsleController } from "@idos-network/controllers";
-import { useClickAway } from "@uidotdev/usehooks";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 
 type IsleController = ReturnType<typeof createIsleController>;
@@ -28,22 +27,14 @@ interface IsleProviderProps {
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
   const [isleController, setIsle] = useState<IsleController | null>(null);
 
-  // Toggle isle animation from the outside
-  const containerRef = useClickAway(() => {
-    if (!isleController) return;
-    isleController.toggleAnimation({
-      expanded: false,
-    });
-  });
-
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container || isleController) return;
+    if (!containerId || isleController) return;
 
     const controller = createIsleController({
       container: containerId,
+      theme: "light",
       issuerConfig: {
         meta: {
           url: "https://consumer-and-issuer-demo.vercel.app/",
@@ -90,7 +81,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
             meta: {
               url: "https://acme.com",
               name: "ACME Card Provider",
-              logo: "https://avatars.githubusercontent.com/u/4081302?v=4",
+              logo: "https://consumer-and-issuer-demo.vercel.app/static/acme.svg",
             },
             consumerEncryptionPublicKey:
               process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
@@ -117,47 +108,10 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
     };
   }, [containerId]);
 
-  // Handle theme changes
-  useEffect(() => {
-    if (!isleController) return;
-
-    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const currentTheme = darkModeMediaQuery.matches ? "dark" : "light";
-
-    isleController.send("update", { theme: currentTheme });
-
-    const themeChangeHandler = (e: MediaQueryListEvent) => {
-      const newTheme = e.matches ? "dark" : "light";
-      isleController.send("update", { theme: newTheme });
-    };
-
-    darkModeMediaQuery.addEventListener("change", themeChangeHandler);
-
-    return () => {
-      darkModeMediaQuery.removeEventListener("change", themeChangeHandler);
-    };
-  }, [isleController]);
-
   return (
-    <div className="container relative mx-auto h-full">
+    <div>
       {/* @ts-ignore */}
-      <IsleContext.Provider value={{ isleController }}>
-        {children}
-        <div
-          ref={containerRef as React.RefObject<HTMLDivElement>}
-          id={containerId}
-          className="absolute top-0 right-0 h-[800px] w-[366px] bg-transparent"
-        />
-        <div
-          id="idos-root"
-          className="invisible fixed top-0 left-0 z-[10000] flex aspect-square h-full w-full flex-col items-center justify-center bg-black/30 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in [&:has(#idOS-enclave.visible)]:visible [&:has(#idOS-enclave.visible)]:opacity-100"
-        >
-          <div
-            id="idOS-enclave"
-            className="absolute top-[50%] left-[50%] z-[2] h-fit w-[200px] translate-x-[-50%] translate-y-[-50%] overflow-hidden rounded-lg bg-neutral-950"
-          />
-        </div>
-      </IsleContext.Provider>
+      <IsleContext.Provider value={{ isleController }}>{children}</IsleContext.Provider>
     </div>
   );
 }

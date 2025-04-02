@@ -28,10 +28,7 @@ export default function Minimized({ children }: PropsWithChildren) {
       "toggle-animation",
       ({ expanded, noDismiss }: { expanded: boolean; noDismiss?: boolean }) => {
         setIsExpanded(expanded);
-
-        if (noDismiss !== undefined) {
-          setNoDismiss(noDismiss);
-        }
+        setNoDismiss(noDismiss ?? false);
       },
     );
   }, [node]);
@@ -64,10 +61,12 @@ export default function Minimized({ children }: PropsWithChildren) {
         id="minimized-isle"
         bg="surface"
         display={!isExpanded ? "flex" : "none"}
-        padding="1"
+        px="1.5"
+        py="1"
         w="full"
         gap="1"
         alignItems="center"
+        justifyContent="space-between"
       >
         <Logo size="sm" />
         <ProfileStatusIcon />

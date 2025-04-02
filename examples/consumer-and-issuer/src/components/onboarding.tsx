@@ -243,6 +243,7 @@ export function Onboarding() {
   const { address } = useAccount();
 
   const userData = useFetchUserData();
+
   if (userData.error) {
     console.error(userData.error);
     isleController?.send("update", { status: "error" });
