@@ -135,13 +135,15 @@ export async function createIDOSUserProfile({
 }
 
 export async function getKrakenToken(): Promise<string> {
+  invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
+  invariant(process.env.KRAKEN_PRIVATE_KEY, "`KRAKEN_PRIVATE_KEY` is not set");
+
   const payload = {
     api: true,
     clientId: process.env.KRAKEN_CLIENT_ID,
   };
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
-  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY!, {
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY, {
     algorithm: "ES512",
     expiresIn: "600s",
   });
