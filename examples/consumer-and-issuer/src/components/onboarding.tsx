@@ -10,7 +10,7 @@ import { goTry } from "go-try";
 import { RocketIcon, ScanEyeIcon, ShieldEllipsisIcon, ShieldIcon, User2Icon } from "lucide-react";
 import { atom } from "nanostores";
 import Image from "next/image";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
@@ -99,77 +99,63 @@ const $claimSuccess = atom(false);
 
 function ClaimCardStepDescription() {
   const shareCredentialWithConsumer = useShareCredentialWithConsumer();
-  const claimSuccess = useStore($claimSuccess);
+  return (
+    <div className="flex flex-col gap-3">
+      <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
+      <p className="text-lg text-neutral-500">
+        You can now claim your exclusive high-limit credit card and start your premium banking
+        journey.
+      </p>
+      <Button
+        className="w-fit"
+        color="primary"
+        size="lg"
+        onPress={() => {
+          shareCredentialWithConsumer.mutate(undefined, {
+            onSuccess: () => {
+              $claimSuccess.set(true);
+            },
+          });
+        }}
+        isLoading={shareCredentialWithConsumer.isPending}
+      >
+        Claim your card
+      </Button>
+    </div>
+  );
+}
+
+function ClaimCardSuccessStepDescription() {
+  const [showConfetti, setShowConfetti] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowConfetti(false);
+    }, 15_000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
 
-      <AnimatePresence mode="wait">
-        {claimSuccess ? (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col gap-3"
-          >
-            <h4 className="font-semibold text-xl">
-              You have successfully claimed your exclusive high-limit credit card and started your
-              premium banking journey!
-            </h4>
-            <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.4 }}
-            >
-              <Image
-                src="/static/credit-cards.png"
-                alt="NeoBank"
-                width={240}
-                height={240}
-                priority
-              />
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
-            >
-              <Confetti />
-            </motion.div>
-          </motion.div>
-        ) : (
-          <motion.div
-            key="claim"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="flex flex-col gap-3"
-          >
-            <p className="text-lg text-neutral-500">
-              You can now claim your exclusive high-limit credit card and start your premium banking
-              journey.
-            </p>
-            <Button
-              className="w-fit"
-              color="primary"
-              size="lg"
-              onPress={() => {
-                shareCredentialWithConsumer.mutate(undefined, {
-                  onSuccess: () => {
-                    $claimSuccess.set(true);
-                  },
-                });
-              }}
-              isLoading={shareCredentialWithConsumer.isPending}
-            >
-              Claim your card
-            </Button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <h4 className="font-semibold text-xl">
+        You have successfully claimed your exclusive high-limit credit card and started your premium
+        banking journey!
+      </h4>
+      <Image src="/static/credit-cards.png" alt="NeoBank" width={240} height={240} priority />
+      <Button
+        as="a"
+        color="primary"
+        className="w-fit"
+        size="lg"
+        href="https://acme-card-provider-demo.playground.idos.network"
+        target="_blank"
+      >
+        Go to ACME card provider
+      </Button>
+      <Confetti run={showConfetti} recycle={false} numberOfPieces={200} />
     </div>
   );
 }
@@ -546,6 +532,12 @@ export function Onboarding() {
 
         case "revoke-permission": {
           await isleController.revokePermission(message.data.id);
+          const hasConsumerPermission = await isleController.hasConsumerPermission(
+            isleController.options.credentialRequirements.integratedConsumers[1],
+          );
+          if (!hasConsumerPermission) {
+            $claimSuccess.set(false);
+          }
           break;
         }
 
@@ -617,10 +609,22 @@ export function Onboarding() {
   useEffect(() => {
     if (!isleController) return;
 
-    return isleController.onIsleStatusChange((status) => {
+
+    return isleController.onIsleStatusChange(async (status) => {
+      if (status === "verified") {
+        const hasConsumerPermission = await isleController.hasConsumerPermission(
+          isleController.options.credentialRequirements.integratedConsumers[1],
+        );
+
+        if (hasConsumerPermission) {
+          $claimSuccess.set(true);
+        }
+      }
       $step.set(status);
     });
   }, [isleController]);
+
+  const claimSuccess = useStore($claimSuccess);
 
   return (
     <div className="container relative mx-auto min-h-dvh p-6">
@@ -644,7 +648,7 @@ export function Onboarding() {
                 <StepIcon icon={<ScanEyeIcon />} />
                 <p>Permissions</p>
               </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "verified"}>
+              <OnboardingStep isActive={activeStep === "verified" || claimSuccess}>
                 <StepIcon icon={<RocketIcon />} />
                 <p>Claim your ACME Bank card!</p>
               </OnboardingStep>
@@ -653,7 +657,7 @@ export function Onboarding() {
           <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
             <div className="max-w-3xl">
               <AnimatePresence mode="wait">
-                {activeStep === "no-profile" && (
+                {claimSuccess ? (
                   <motion.div
                     key="no-profile"
                     initial={{ opacity: 0, y: 20 }}
@@ -661,52 +665,66 @@ export function Onboarding() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <CreateProfileStepDescription />
+                    <ClaimCardSuccessStepDescription />
                   </motion.div>
-                )}
-                {activeStep === "not-verified" && (
-                  <motion.div
-                    key="not-verified"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <IdentityVerificationStepDescription />
-                  </motion.div>
-                )}
-                {activeStep === "pending-verification" && (
-                  <motion.div
-                    key="pending-verification"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <IdentityVerificationInProgressStepDescription />
-                  </motion.div>
-                )}
-                {activeStep === "pending-permissions" && (
-                  <motion.div
-                    key="pending-permissions"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <PermissionsStepDescription />
-                  </motion.div>
-                )}
-                {activeStep === "verified" && (
-                  <motion.div
-                    key="verified"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ClaimCardStepDescription />
-                  </motion.div>
+                ) : (
+                  <>
+                    {activeStep === "no-profile" && (
+                      <motion.div
+                        key="no-profile"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <CreateProfileStepDescription />
+                      </motion.div>
+                    )}
+                    {activeStep === "not-verified" && (
+                      <motion.div
+                        key="not-verified"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <IdentityVerificationStepDescription />
+                      </motion.div>
+                    )}
+                    {activeStep === "pending-verification" && (
+                      <motion.div
+                        key="pending-verification"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <IdentityVerificationInProgressStepDescription />
+                      </motion.div>
+                    )}
+                    {activeStep === "pending-permissions" && (
+                      <motion.div
+                        key="pending-permissions"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <PermissionsStepDescription />
+                      </motion.div>
+                    )}
+                    {activeStep === "verified" && (
+                      <motion.div
+                        key="verified"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        <ClaimCardStepDescription />
+                      </motion.div>
+                    )}
+                  </>
                 )}
               </AnimatePresence>
             </div>
