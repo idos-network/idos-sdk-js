@@ -18,7 +18,7 @@ export function GetStartedButton({ title = "Get started now" }: { title?: string
 
   return (
     <Button
-      color="primary"
+      color="default"
       size="lg"
       onPress={async () => {
         await connectAsync({

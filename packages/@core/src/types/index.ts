@@ -212,6 +212,13 @@ export type IsleNodeMessage =
       data: {
         id: string;
       };
+    }
+  | {
+      type: "update-dimensions";
+      data: {
+        width: number;
+        height: number;
+      };
     };
 
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (

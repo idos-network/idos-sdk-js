@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 
 import { App } from "@/app";
 import { ThemeProvider } from "@/components/ui";
+import Minimized from "./components/minimized";
 
 const root = document.getElementById("root");
 
@@ -13,7 +14,9 @@ if (!root) {
 createRoot(root).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <Minimized>
+        <App />
+      </Minimized>
     </ThemeProvider>
   </StrictMode>,
 );

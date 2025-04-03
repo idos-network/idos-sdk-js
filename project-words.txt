@@ -26,8 +26,8 @@ hono
 idos
 idOS
 IDOS
-IDOSDAG
 idOSDAG
+IDOSDAG
 idOSSDK
 insertable
 jsigs
@@ -39,6 +39,8 @@ libc
 lucide
 multibase
 nacl
+nanostores
+Neobank
 nonced
 OSDAG
 passporting
@@ -69,4 +71,3 @@ viewports
 vite
 wagmi
 webauthn
-Neobank
