@@ -618,7 +618,6 @@ export function Onboarding() {
     if (!isleController) return;
 
     return isleController.onIsleStatusChange((status) => {
-      console.log("status", status);
       $step.set(status);
     });
   }, [isleController]);
