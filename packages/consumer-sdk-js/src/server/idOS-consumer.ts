@@ -69,8 +69,8 @@ export class idOSConsumer {
     );
   }
 
-  async getGrantsCount(): Promise<number> {
-    return getGrantsCount(this.kwilClient);
+  async getGrantsCount(userId: string | null = null): Promise<number> {
+    return getGrantsCount(this.kwilClient, { user_id: userId });
   }
 
   async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
@@ -115,7 +115,7 @@ export class idOSConsumer {
         dataId: grant.data_id,
         lockedUntil: grant.locked_until,
       })),
-      totalCount: await this.getGrantsCount(),
+      totalCount: await this.getGrantsCount(params.user_id),
     };
   }
 }
