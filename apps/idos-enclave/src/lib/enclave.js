@@ -1,7 +1,8 @@
 import { Store } from "@idos-network/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { every, get, negate } from "lodash-es";
+import { negate } from "es-toolkit";
+import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
