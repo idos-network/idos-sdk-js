@@ -79,27 +79,6 @@ export class Enclave {
 
     let password;
     let duration;
-    let credentialId;
-
-    const getWebAuthnCredential = async (storedCredentialId) => {
-      const credentialRequestWithId = {
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(10)),
-          allowCredentials: [
-            {
-              type: "public-key",
-              id: Base64Codec.decode(storedCredentialId),
-            },
-          ],
-        },
-      };
-
-      const credential = await navigator.credentials.get(credentialRequestWithId);
-      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
-      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-
-      return { password, credentialId };
-    };
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
@@ -109,16 +88,9 @@ export class Enclave {
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
         try {
-          if (storedCredentialId) {
-            ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else {
-            ({ password, duration, credentialId } = await this.openDialog(
-              preferredAuthMethod || "auth",
-              {
-                expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-              },
-            ));
-          }
+          ({ password, duration } = await this.openDialog(preferredAuthMethod || "auth", {
+            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+          }));
         } catch (e) {
           return reject(e);
         }
@@ -127,14 +99,6 @@ export class Enclave {
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
-
-        if (credentialId) {
-          this.store.set("credential-id", credentialId);
-          this.store.set("preferred-auth-method", "passkey");
-        } else {
-          this.store.set("preferred-auth-method", "password");
-          this.store.setRememberDuration(duration);
-        }
 
         return password ? resolve() : reject();
       }),
