@@ -310,6 +310,7 @@ function useShareCredentialWithConsumer() {
       invariant(isleController, "`isleController` not initialized");
       invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
+      isleController.toggleAnimation({ expanded: true });
       const credentials = await isleController.idosClient.getAllCredentials();
 
       const credential = credentials.find((credential: idOSCredential) => {
@@ -608,7 +609,6 @@ export function Onboarding() {
 
   useEffect(() => {
     if (!isleController) return;
-
 
     return isleController.onIsleStatusChange(async (status) => {
       if (status === "verified") {
