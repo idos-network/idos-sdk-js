@@ -1,7 +1,7 @@
 import { Store } from "@idos-network/core";
 import { render } from "preact";
 
-import { App } from "@/pages/App";
+import { App } from "@/app";
 import "@/styles.css";
 
 const enclave = window.opener;

@@ -332,7 +332,7 @@ export class Enclave {
     });
   }
 
-  async handleIdosStore(payload) {
+  async handleIDOSStore(payload) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = async ({ data: { error, result } }) => {
@@ -368,7 +368,9 @@ export class Enclave {
     const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-    await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));
+    await new Promise((resolve) =>
+      this.dialog.addEventListener("idOS-Enclave:ready", resolve, { once: true }),
+    );
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
@@ -383,7 +385,7 @@ export class Enclave {
         }
 
         if (result.type === "idOS:store" && result.status === "pending") {
-          result = await this.handleIdosStore(result.payload);
+          result = await this.handleIDOSStore(result.payload);
 
           return this.dialog.postMessage(
             {

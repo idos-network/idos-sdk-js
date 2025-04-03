@@ -1,3 +1,4 @@
+import { EyeSlashIcon } from "@heroicons/react/20/solid";
 import {
   ArrowDownCircleIcon,
   CheckIcon,
@@ -6,13 +7,12 @@ import {
 } from "@heroicons/react/24/outline";
 import type { Store } from "@idos-network/core";
 import { useSignal } from "@preact/signals";
+import type { JSX } from "preact";
+import { useEffect } from "preact/hooks";
 
-import { type JSX, useEffect } from "preact/compat";
-
-import { EyeSlashIcon } from "@heroicons/react/20/solid";
-import { Button } from "../../components/ui/button";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);

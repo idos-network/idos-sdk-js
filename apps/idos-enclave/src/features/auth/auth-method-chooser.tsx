@@ -1,23 +1,24 @@
 import type { Store } from "@idos-network/core";
 
-import { Button } from "../../components/ui/button";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
-import type { Method, Mode } from "../App";
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
 
-export interface ChooserProps {
-  mode: Mode;
-  setMethod: (method: Method) => void;
+import type { AuthMethod, UIMode } from "../features/App";
+
+export interface AuthMethodChooserProps {
+  mode: UIMode;
+  setMethod: (method: AuthMethod) => void;
 }
 
-export interface MethodProps<K = Record<string, unknown>> {
-  mode: Mode;
+export interface AuthMethodProps<K = Record<string, unknown>> {
+  mode: UIMode;
   store: Store;
   onSuccess: (result: K) => void;
   onError: (error: Error) => void;
 }
 
-export default function Chooser({ setMethod, mode }: ChooserProps) {
+export default function AuthMethodChooser({ setMethod, mode }: AuthMethodChooserProps) {
   return (
     <div className="flex flex-col space-y-4 px-3 md:px-0">
       {mode === "existing" && (
@@ -47,9 +48,6 @@ export default function Chooser({ setMethod, mode }: ChooserProps) {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-password" onClick={() => setMethod("password")}>
           Use a password
-        </Button>
-        <Button id="auth-method-passkey" onClick={() => setMethod("passkey")}>
-          Use a passkey
         </Button>
       </div>
     </div>
