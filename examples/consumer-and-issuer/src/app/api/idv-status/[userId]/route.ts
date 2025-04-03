@@ -1,8 +1,8 @@
 import { getKrakenToken } from "@/actions/index";
-import { base64Decode } from "@idos-network/core";
+//import { base64Decode } from "@idos-network/core";
 import type { NextRequest } from "next/server";
-import invariant from "tiny-invariant";
-import nacl from "tweetnacl";
+//import invariant from "tiny-invariant";
+//import nacl from "tweetnacl";
 
 export async function GET(
   request: NextRequest,
@@ -10,17 +10,16 @@ export async function GET(
 ) {
   const idvUserId = (await params).userId;
 
-  const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
-  invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
-  const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
-
   const searchParams = request.nextUrl.searchParams;
   const idOSUserId = searchParams.get("idOSUserId");
-  invariant(idOSUserId, "idOSUserId is required");
+  if (!idOSUserId) return new Response("Missing idOSUserId on search params.", { status: 400 });
   const signature = searchParams.get("signature");
-  invariant(signature, "signature is required");
+  if (!signature) return new Response("Missing signature on search params.", { status: 400 });
 
   //@todo: This should ensure that the signature we create on `getUserIdFromToken`.
+  // const issuerSigningSecretKey = process.env.ISSUER_SIGNING_SECRET_KEY;
+  // invariant(issuerSigningSecretKey, "`ISSUER_SIGNING_SECRET_KEY` is not set");
+  // const issuerSigningKey = nacl.sign.keyPair.fromSecretKey(base64Decode(issuerSigningSecretKey));
   // invariant(
   //   nacl.sign.open(toBytes(`${idvUserId}${idOSUserId}`), issuerSigningKey.publicKey) ===
   //     base64Decode(signature),

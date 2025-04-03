@@ -3,7 +3,6 @@
 import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { type JSX, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
@@ -18,14 +17,12 @@ export function Providers(props: {
 
   return (
     <HeroUIProvider>
-      <NextThemesProvider attribute="class">
-        <WagmiProvider config={config} initialState={props.initialState}>
-          <QueryClientProvider client={queryClient}>
-            {props.children}
-            <ReactQueryDevtools initialIsOpen={false} />
-          </QueryClientProvider>
-        </WagmiProvider>
-      </NextThemesProvider>
+      <WagmiProvider config={config} initialState={props.initialState}>
+        <QueryClientProvider client={queryClient}>
+          {props.children}
+          <ReactQueryDevtools initialIsOpen={false} />
+        </QueryClientProvider>
+      </WagmiProvider>
     </HeroUIProvider>
   );
 }

@@ -23,7 +23,7 @@ export default async function RootLayout(props: { children: JSX.Element }) {
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <Providers initialState={initialState}>
-          <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
+          <div className="light grid min-h-dvh grid-rows-[auto_1fr_auto] bg-background text-foreground">
             <Header />
             <main>{props.children}</main>
             <Footer />

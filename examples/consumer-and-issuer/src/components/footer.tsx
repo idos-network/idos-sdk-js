@@ -2,9 +2,9 @@ import Image from "next/image";
 
 export function Footer() {
   return (
-    <footer className="bg-neutral-950 pt-12">
-      <div className="container mx-auto">
-        <div className="mx-6 p-12">
+    <footer className="bg-neutral-950">
+      <div className="container mx-auto px-6">
+        <div className="py-6 md:py-14">
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
             <div className="text-center md:text-left">
               <div className="mb-4 flex items-center justify-center md:justify-start">
@@ -17,7 +17,7 @@ export function Footer() {
             </div>
             <div className="text-center md:text-right">
               <h3 className="mb-4 font-semibold text-gray-100">Contact & Hours</h3>
-              <div className="space-y-2">
+              <div className="flex flex-col gap-2">
                 <p className="text-gray-400 text-sm">1-800-NEO-BANK</p>
                 <p className="text-gray-400 text-sm">support@neobank.com</p>
                 <p className="text-gray-400 text-sm">123 Finance Street, NY 10001</p>
@@ -27,9 +27,9 @@ export function Footer() {
               </div>
             </div>
           </div>
-          <div className="mt-12 border-gray-900 border-t pt-8">
+          <div className="mt-6 border-gray-900 border-t pt-8">
             <p className="text-center text-gray-500 text-sm">
-              © 2024 NeoBank. All rights reserved. Member FDIC.
+              © 2025 NeoBank. All rights reserved. Member FDIC.
             </p>
           </div>
         </div>

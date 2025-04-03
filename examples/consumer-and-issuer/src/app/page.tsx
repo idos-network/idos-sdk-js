@@ -1,13 +1,8 @@
 "use client";
 
-import AccountsOverview from "@/components/account-overview";
-import { Card } from "@/components/card";
-import { GetStartedButton } from "@/components/get-started-button";
-import { Button } from "@heroui/react";
 import { motion } from "framer-motion";
 import {
   CheckCircleIcon,
-  CommandIcon,
   CreditCardIcon,
   GemIcon,
   PlaneIcon,
@@ -15,9 +10,9 @@ import {
   SparklesIcon,
   ZapIcon,
 } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+
+import { GetStartedButton } from "@/components/get-started-button";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -56,7 +51,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full bg-white dark:bg-black">
+    <div className="min-h-screen w-full bg-white">
       {/* Hero Section */}
       <section className="relative flex h-screen items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white to-neutral-50 dark:from-gray-950 dark:via-neutral-900 dark:to-black" />
@@ -66,23 +61,11 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
         >
-          <motion.div
-            className="mb-8 flex justify-center"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <motion.div
-              initial={{ color: "#000000" }}
-              animate={{ color: "#1f2937" }}
-              transition={{ duration: 1, delay: 0.3 }}
-              className="dark:text-gray-400"
-            >
-              <Image src="/static/logo.svg" alt="NeoBank" width={80} height={80} />
-            </motion.div>
-          </motion.div>
           <h1 className="mb-8 font-bold text-5xl text-black md:text-7xl dark:text-gray-100">
-            Join NeoBank
+            Join today, do more{" "}
+            <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent dark:from-amber-200 dark:to-yellow-400">
+              tomorrow
+            </span>
           </h1>
           <p className="mx-auto mb-12 max-w-3xl text-gray-800 text-xl md:text-2xl dark:text-gray-400">
             Experience the future of banking with our revolutionary digital credit card and
@@ -283,126 +266,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* Limited Time Offer Section */}
-      <section className="bg-neutral-100 py-32 dark:bg-neutral-950">
-        <div className="container mx-auto px-6">
-          <motion.div
-            className="mb-16 text-center"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="mb-4 font-bold text-5xl text-black dark:text-gray-100">
-              Limited Time Offer
-            </h2>
-            <p className="text-2xl text-gray-800 dark:text-gray-400">
-              Act now to secure your exclusive benefits
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 gap-12 md:grid-cols-2">
-            <motion.div
-              className="relative flex items-center justify-center"
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <AccountsOverview />
-            </motion.div>
-
-            <motion.div
-              className="flex flex-col justify-center space-y-8"
-              initial={{ opacity: 0, x: 20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="grid grid-cols-2 gap-6">
-                <div className="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-lg dark:border-white/10 dark:bg-neutral-900">
-                  <div className="font-bold text-4xl text-black dark:text-gray-100">
-                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent dark:from-amber-200 dark:to-yellow-400">
-                      50K
-                    </span>
-                  </div>
-                  <p className="mt-2 text-gray-800 dark:text-gray-400">Bonus Points</p>
-                </div>
-                <div className="rounded-xl border border-gray-100 bg-white p-6 text-center shadow-lg dark:border-white/10 dark:bg-neutral-900">
-                  <div className="font-bold text-4xl text-black dark:text-gray-100">
-                    <span className="bg-gradient-to-r from-yellow-400 to-amber-500 bg-clip-text text-transparent dark:from-amber-200 dark:to-yellow-400">
-                      $500
-                    </span>
-                  </div>
-                  <p className="mt-2 text-gray-800 dark:text-gray-400">Welcome Bonus</p>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg dark:border-white/10 dark:bg-neutral-900">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-black text-xl dark:text-gray-100">
-                      Annual Fee
-                    </h3>
-                    <p className="text-gray-800 dark:text-gray-400">First year waived</p>
-                  </div>
-                  <div className="rounded-full bg-green-100 px-4 py-2 dark:bg-green-500/20">
-                    <span className="text-green-600 dark:text-green-400">100% OFF</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-100 bg-white p-6 shadow-lg dark:border-white/10 dark:bg-neutral-900">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-black text-xl dark:text-gray-100">
-                      Priority Access
-                    </h3>
-                    <p className="text-gray-800 dark:text-gray-400">Lounge & concierge</p>
-                  </div>
-                  <div className="rounded-full bg-yellow-100 px-4 py-2 dark:bg-yellow-500/20">
-                    <span className="text-yellow-600 dark:text-yellow-400">VIP</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          <motion.div
-            className="mt-12 text-center"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="mb-6 text-gray-800 text-xl dark:text-gray-400">Offer ends in</p>
-            <div className="flex justify-center space-x-8">
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-4xl text-black dark:text-gray-100">
-                  {timeLeft.days}
-                </span>
-                <p className="text-gray-800 text-sm dark:text-gray-400">Days</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-4xl text-black dark:text-gray-100">
-                  {timeLeft.hours.toString().padStart(2, "0")}
-                </span>
-                <p className="text-gray-800 text-sm dark:text-gray-400">Hours</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-4xl text-black dark:text-gray-100">
-                  {timeLeft.minutes.toString().padStart(2, "0")}
-                </span>
-                <p className="text-gray-800 text-sm dark:text-gray-400">Minutes</p>
-              </div>
-              <div className="flex flex-col items-center">
-                <span className="font-bold text-4xl text-black dark:text-gray-100">
-                  {timeLeft.seconds.toString().padStart(2, "0")}
-                </span>
-                <p className="text-gray-800 text-sm dark:text-gray-400">Seconds</p>
-              </div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="bg-white py-32 dark:bg-neutral-950">
         <div className="container mx-auto px-6 text-center">
