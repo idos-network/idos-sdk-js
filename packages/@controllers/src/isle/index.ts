@@ -642,6 +642,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         const { matchingCredentials, permissions } = await getPermissions();
 
         if (matchingCredentials.length === 0) {
+          send("toggle-animation", { expanded: true });
           send("update", {
             status: "not-verified",
           });
