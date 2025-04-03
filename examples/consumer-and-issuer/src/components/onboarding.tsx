@@ -609,9 +609,8 @@ export function Onboarding() {
   useEffect(() => {
     if (!isleController) return;
 
-    return isleController.onIsleStatusChange(async (status) => {
-      console.log("status", status);
 
+    return isleController.onIsleStatusChange(async (status) => {
       if (status === "verified") {
         const hasConsumerPermission = await isleController.hasConsumerPermission(
           isleController.options.credentialRequirements.integratedConsumers[1],
@@ -621,7 +620,6 @@ export function Onboarding() {
           $claimSuccess.set(true);
         }
       }
-
       $step.set(status);
     });
   }, [isleController]);
