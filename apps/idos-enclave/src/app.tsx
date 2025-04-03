@@ -1,7 +1,7 @@
 import type { Store } from "@idos-network/core";
-import { useSignal } from "@preact/signals";
+import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
 import { PasswordForm } from "@/features/auth/password-form";
@@ -29,21 +29,23 @@ function Layout({ children }: PropsWithChildren) {
     </div>
   );
 }
+
 type AppProps = {
   store: Store;
   enclave: Window;
 };
+
 export function App({ store, enclave }: AppProps) {
-  const [method, setMethod] = useState<AuthMethod | null>(null);
-  const [mode, setMode] = useState<UIMode>("existing");
-  const [theme, setTheme] = useState<Theme | null>(localStorage.getItem("theme") as Theme | null);
-  const [confirm, setConfirm] = useState<boolean>(false);
+  const method = useSignal<AuthMethod | null>(null);
+  const mode = useSignal<UIMode>("existing");
+  const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
+  const confirm = useSignal<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
-  const [origin, setOrigin] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [encryptionPublicKey, setEncryptionUserPublicKey] = useState<string>("");
-  const [userId] = useState<string | null>(
+  const origin = useSignal<string | null>(null);
+  const message = useSignal<string | null>(null);
+  const encryptionPublicKey = useSignal<string>("");
+  const userId = useSignal<string | null>(
     new URLSearchParams(window.location.search).get("userId"),
   );
 
@@ -51,62 +53,25 @@ export function App({ store, enclave }: AppProps) {
   const isBackupMode = useSignal(false);
   const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
 
-  useEffect(() => {
-    if (!theme) {
-      setTheme(window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  effect(() => {
+    if (!theme.value) {
+      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     } else {
-      localStorage.setItem("theme", theme);
-      if (theme === "dark") {
+      localStorage.setItem("theme", theme.value);
+      if (theme.value === "dark") {
         document.documentElement.classList.add("dark");
       } else {
         document.documentElement.classList.remove("dark");
       }
     }
-  }, [theme]);
+  });
 
-  useEffect(() => {
-    if (mode === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey) onError("Can't find a public encryption key for this user");
-  }, [mode, encryptionPublicKey]);
-
-  const messageReceiver = useCallback(
-    (event: MessageEvent<EventData>) => {
-      if (event.source !== enclave) return;
-
-      const { data: requestData, ports } = event;
-
-      if (!allowedIntents.includes(requestData.intent))
-        throw new Error(`Unexpected request from parent: ${requestData.intent}`);
-
-      responsePort.current = ports[0];
-      setEncryptionUserPublicKey(requestData.message?.expectedUserEncryptionPublicKey);
-
-      switch (requestData.intent) {
-        case "auth":
-          setMethod(null);
-          break;
-
-        case "password":
-          setMethod("password");
-          break;
-
-        case "confirm":
-          setConfirm(true);
-          setOrigin(requestData.message?.origin);
-          setMessage(requestData.message?.message);
-          break;
-
-        case "backupPasswordOrSecret":
-          isBackupMode.value = true;
-          backupStatus.value = requestData.message?.status;
-          break;
-      }
-
-      if (requestData.configuration.mode) setMode(requestData.configuration.mode);
-      if (requestData.configuration.theme) setTheme(requestData.configuration.theme);
-    },
-    [backupStatus, enclave, isBackupMode],
-  );
+  effect(() => {
+    if (mode.value === "new" || !responsePort.current) return;
+    if (!encryptionPublicKey.value) {
+      onError("Can't find a public encryption key for this user");
+    }
+  });
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -115,25 +80,6 @@ export function App({ store, enclave }: AppProps) {
       responsePort.current.close();
     }
   }, []);
-
-  const onBeforeUnload = useCallback(
-    (event: BeforeUnloadEvent) => {
-      event.preventDefault();
-      respondToEnclave({ error: "closed" });
-    },
-    [respondToEnclave],
-  );
-
-  useEffect(() => {
-    window.addEventListener("message", messageReceiver);
-    window.addEventListener("beforeunload", onBeforeUnload);
-
-    window.dispatchEvent(new Event("idOS-Enclave:ready"));
-
-    return () => {
-      window.removeEventListener("message", messageReceiver);
-    };
-  }, [messageReceiver, onBeforeUnload]);
 
   const onSuccess = useCallback(
     (result: unknown) => {
@@ -149,30 +95,99 @@ export function App({ store, enclave }: AppProps) {
     [respondToEnclave],
   );
 
+  const onBeforeUnload = useCallback(
+    (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      onError("closed");
+    },
+    [onError],
+  );
+
+  const messageReceiver = useCallback(
+    (event: MessageEvent<EventData>) => {
+      if (event.source !== enclave) return;
+
+      const { data: requestData, ports } = event;
+
+      if (!allowedIntents.includes(requestData.intent))
+        throw new Error(`Unexpected request from parent: ${requestData.intent}`);
+
+      responsePort.current = ports[0];
+      encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
+
+      switch (requestData.intent) {
+        case "auth":
+          method.value = null;
+          break;
+
+        case "password":
+          method.value = "password";
+          break;
+
+        case "confirm":
+          confirm.value = true;
+          origin.value = requestData.message?.origin;
+          message.value = requestData.message?.message;
+          break;
+
+        case "backupPasswordOrSecret":
+          isBackupMode.value = true;
+          backupStatus.value = requestData.message?.status;
+          break;
+      }
+
+      if (requestData.configuration.mode) mode.value = requestData.configuration.mode;
+      if (requestData.configuration.theme) theme.value = requestData.configuration.theme;
+    },
+    [
+      enclave,
+      isBackupMode,
+      backupStatus,
+      confirm,
+      message,
+      origin,
+      theme,
+      mode,
+      encryptionPublicKey,
+      method,
+    ],
+  );
+
+  effect(() => {
+    window.addEventListener("message", messageReceiver);
+    window.addEventListener("beforeunload", onBeforeUnload);
+
+    window.dispatchEvent(new Event("idOS-Enclave:ready"));
+
+    return () => {
+      window.removeEventListener("message", messageReceiver);
+      window.removeEventListener("beforeunload", onBeforeUnload);
+    };
+  });
+
   const methodProps = {
     store,
     onError,
     onSuccess,
-    mode,
+    mode: mode.value,
   };
 
-  useEffect(() => {
-    if (mode === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey) onError("can't find a public encryption key for this user");
-  }, [mode, encryptionPublicKey, onError]);
-
-  if (confirm && message) {
+  if (confirm.value && message.value) {
     return (
       <Layout>
-        <Confirmation message={message} origin={origin} onSuccess={onSuccess} />
+        <Confirmation message={message.value} origin={origin.value} onSuccess={onSuccess} />
       </Layout>
     );
   }
 
-  if (method === "password") {
+  if (method.value === "password") {
     return (
       <Layout>
-        <PasswordForm {...methodProps} encryptionPublicKey={encryptionPublicKey} userId={userId} />
+        <PasswordForm
+          {...methodProps}
+          encryptionPublicKey={encryptionPublicKey.value}
+          userId={userId.value}
+        />
       </Layout>
     );
   }
@@ -199,7 +214,11 @@ export function App({ store, enclave }: AppProps) {
 
   return (
     <Layout>
-      <PasswordForm {...methodProps} encryptionPublicKey={encryptionPublicKey} userId={userId} />
+      <PasswordForm
+        {...methodProps}
+        encryptionPublicKey={encryptionPublicKey.value}
+        userId={userId.value}
+      />
     </Layout>
   );
 }
