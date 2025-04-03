@@ -11,12 +11,11 @@ import {
   Text,
   chakra,
 } from "@chakra-ui/react";
-import { DEFAULT_RECORDS_PER_PAGE, type idOS, type idOSCredential } from "@idos-network/idos-sdk";
-import { skipToken, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, invariant, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
@@ -38,7 +37,8 @@ import { useSecretKey } from "@/hooks";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
 import { Pagination } from "@/components/pagination";
-import { idOSContext, useIdOS } from "@/idOS.provider";
+import { useIdosClient } from "@/idOS.provider";
+import { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "@idos-network/core";
 import { safeParse } from "./credentials";
 
 export const Route = createFileRoute("/")({
@@ -50,36 +50,48 @@ export const Route = createFileRoute("/")({
   },
 });
 
-const useFetchGrants = (page: number, idos: idOS) => {
+const useFetchGrants = (page: number) => {
+  const idOSClient = useIdosClient();
+
   return useQuery({
     queryKey: ["grants", { page }],
-    queryFn: () => idos.grants.listGrantedGrants(page, DEFAULT_RECORDS_PER_PAGE),
+    queryFn: () => {
+      invariant(idOSClient.state === "logged-in");
+
+      return idOSClient.getGrants({ page });
+    },
     select: (data) => {
       return {
         records: data.grants.map((grant) => ({
           ...grant,
           lockedUntil:
-            grant.lockedUntil === 0
+            grant.locked_until === 0
               ? "Unlocked"
               : Intl.DateTimeFormat("en-US", {
                   dateStyle: "full",
                   timeStyle: "short",
-                }).format(grant.lockedUntil * 1000),
+                }).format(grant.locked_until * 1000),
         })),
         totalCount: data.totalCount,
       };
     },
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
 type GrantsWithFormattedLockedUntil = NonNullable<ReturnType<typeof useFetchGrants>["data"]>;
 
 const useFetchCredential = (id: string) => {
-  const idOS = useIdOS();
+  const idOSClient = useIdosClient();
+
   return useQuery({
     queryKey: ["credential-details", id],
-    queryFn: id ? () => idOS.data.getShared<idOSCredential>("credentials", id, false) : skipToken,
-    enabled: !!id,
+    queryFn: () => {
+      invariant(idOSClient.state === "logged-in");
+
+      return idOSClient.getSharedCredential(id);
+    },
+    enabled: idOSClient.state === "logged-in" && !!id,
   });
 };
 
@@ -262,7 +274,7 @@ function SearchResults({
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();
   const [secretKey, setSecretKey] = useSecretKey();
-  const credentialSample = useFetchCredential(results.records[0]?.dataId);
+  const credentialSample = useFetchCredential(results.records[0]?.data_id);
 
   if (!results.records.length) {
     return <EmptyState title="No results found" bg="gray.900" rounded="lg" />;
@@ -316,7 +328,7 @@ function SearchResults({
               pt="4"
               grow
               label="Owner ID"
-              value={grant.ownerUserId}
+              value={grant.ag_owner_user_id}
               truncate
             />
             <DataListItem
@@ -331,7 +343,7 @@ function SearchResults({
               pt="4"
               grow
               label="Consumer"
-              value={grant.consumerAddress}
+              value={grant.ag_grantee_wallet_identifier}
               truncate
             />
             <DataListItem
@@ -353,7 +365,7 @@ function SearchResults({
             alignSelf={{
               md: "flex-end",
             }}
-            onClick={() => handleOpenCredentialDetails(grant.dataId)}
+            onClick={() => handleOpenCredentialDetails(grant.data_id)}
           >
             Credential details
           </Button>
@@ -361,7 +373,7 @@ function SearchResults({
       ))}
       <Pagination
         count={results.totalCount}
-        pageSize={DEFAULT_RECORDS_PER_PAGE}
+        pageSize={GET_GRANTS_DEFAULT_RECORDS_PER_PAGE}
         setPage={setPage}
         page={page}
       />
@@ -383,11 +395,10 @@ function SearchResults({
 
 function Index() {
   const [page, setPage] = useState<number>(1);
-  const sdk = useContext(idOSContext);
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
-  const grants = useFetchGrants(page, sdk);
+  const grants = useFetchGrants(page);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const search = e.target.value;

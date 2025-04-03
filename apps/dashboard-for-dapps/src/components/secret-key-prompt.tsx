@@ -13,7 +13,7 @@ import {
 } from "@/components/ui";
 import { decrypt } from "@/utils";
 import { Stack, Text } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import type { idOSCredential } from "@idos-network/core";
 import { useRef, useState } from "react";
 
 export function SecretKeyPrompt({
