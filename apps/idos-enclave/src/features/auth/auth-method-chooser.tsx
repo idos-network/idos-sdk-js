@@ -3,8 +3,7 @@ import type { Store } from "@idos-network/core";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
-
-import type { AuthMethod, UIMode } from "../features/App";
+import type { AuthMethod, UIMode } from "@/types";
 
 export interface AuthMethodChooserProps {
   mode: UIMode;

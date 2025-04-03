@@ -6,8 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
+import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
 import { idOSKeyDerivation } from "@/lib/idOSKeyDerivation";
-import type { AuthMethodProps } from "./auth-method-chooser";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;

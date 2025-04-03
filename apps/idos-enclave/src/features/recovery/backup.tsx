@@ -92,10 +92,11 @@ function DownloadButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   );
 }
 
-function ReadonlyInput(props: JSX.HTMLAttributes<HTMLInputElement>) {
+function ReadonlyInput(
+  props: JSX.HTMLAttributes<HTMLInputElement> & { type?: string; value?: string },
+) {
   return (
     <input
-      type="text"
       readOnly
       class="flex-1 border-0 bg-transparent font-semibold outline-none ring-0 focus:outline-none focus:ring-0"
       {...props}
