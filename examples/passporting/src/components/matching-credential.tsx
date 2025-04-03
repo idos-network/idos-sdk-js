@@ -42,8 +42,8 @@ export const useFetchSharedCredentialFromUser = () => {
       const { id: userId } = await getUserProfile(consumerConfig);
       return fetch(`/api/shared-credential/${userId}`)
         .then((res) => res.json())
-        .catch(() => {
-          return { credential: null, cause: "no-response" };
+        .catch((error) => {
+          return { credential: null, cause: error.message };
         });
     },
   });
