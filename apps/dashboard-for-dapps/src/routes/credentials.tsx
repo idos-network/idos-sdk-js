@@ -11,9 +11,8 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import { base64Encode } from "@idos-network/core/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, invariant, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useDeferredValue, useMemo, useState } from "react";
@@ -41,8 +40,9 @@ import {
   SearchField,
 } from "@/components/ui";
 import { useSecretKey } from "@/hooks";
-import { useIdOS } from "@/idOS.provider";
+import { useIdosClient } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
+import type { idOSCredential } from "@idos-network/core";
 import ascii85 from "ascii85";
 
 export const Route = createFileRoute("/credentials")({
@@ -57,33 +57,35 @@ export const Route = createFileRoute("/credentials")({
 
 export const safeParse = (json?: string) => {
   try {
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    return JSON.parse(json!);
+    return JSON.parse(json || "null");
   } catch (e) {
     return null;
   }
 };
 
 export const useListCredentials = () => {
-  const idOS = useIdOS();
+  const idOSClient = useIdosClient();
 
   return useQuery<idOSCredential[]>({
     queryKey: ["credentials-list"],
     queryFn: async () => {
-      const credentials = await idOS.data.listAllCredentials();
-      const promiseList = credentials?.map(async (credential) => {
-        const fullCredential = (await idOS.data.get(
-          "credentials",
-          credential.id,
-          false,
-        )) as idOSCredential;
-        return { ...fullCredential, original_id: credential.original_id };
-      });
-      const results = await Promise.all(promiseList);
+      invariant(idOSClient.state === "logged-in");
+
+      const credentials = await idOSClient.getAllCredentials();
+
+      const results = await Promise.all(
+        credentials.map(async (credential) => {
+          const fullCredential = await idOSClient.getCredentialById(credential.id);
+          if (!fullCredential) return undefined;
+          return { ...fullCredential, original_id: credential.original_id };
+        }),
+      );
+
       return results.filter((credential) => !!credential);
     },
     select: (data) =>
-      data.filter((credential) => credential.public_notes && !credential.original_id) ?? [],
+      data.filter((credential) => credential.public_notes && !credential.original_id),
+    enabled: idOSClient.state === "logged-in",
   });
 };
 

@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui";
-import { Provider } from "@/idOS.provider";
+import { IdosClientProvider } from "@/idOS.provider";
 import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 import {
   Center,
@@ -89,9 +89,9 @@ function RootComponent() {
         </Container>
       </chakra.header>
       <chakra.main paddingY="6">
-        <Provider>
+        <IdosClientProvider>
           <Outlet />
-        </Provider>
+        </IdosClientProvider>
       </chakra.main>
       <chakra.div id="idOS-enclave" hidden />
       <ReactQueryDevtools buttonPosition="bottom-left" />

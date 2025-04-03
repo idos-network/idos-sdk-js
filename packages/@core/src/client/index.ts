@@ -4,6 +4,7 @@ import invariant from "tiny-invariant";
 import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
+  type GetGrantsParams,
   type ShareableCredential,
   createAttribute,
   createCredentialCopy,
@@ -12,6 +13,9 @@ import {
   getAttributes,
   getCredentialById,
   getCredentialOwned,
+  getGrants,
+  getGrantsCount,
+  getSharedCredential,
   getUserProfile,
   hasProfile,
   type idOSDAGSignatureParams,
@@ -24,6 +28,8 @@ import { type KwilActionClient, createClientKwilSigner, createWebKwilClient } fr
 import { Store } from "../store";
 import type { DelegatedWriteGrant, Wallet, idOSUser, idOSUserAttribute } from "../types";
 import { buildInsertableIDOSCredential } from "../utils";
+
+export { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "../kwil-actions";
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -278,5 +284,20 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async requestDAGMessage(params: idOSDAGSignatureParams) {
     return requestDAGMessage(this.kwilClient, params);
+  }
+
+  async getGrants(params: GetGrantsParams) {
+    return {
+      grants: await getGrants(this.kwilClient, params),
+      totalCount: await this.getGrantsCount(),
+    };
+  }
+
+  async getGrantsCount(): Promise<number> {
+    return getGrantsCount(this.kwilClient);
+  }
+
+  async getSharedCredential(id: string) {
+    return getSharedCredential(this.kwilClient, id);
   }
 }
