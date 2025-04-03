@@ -52,9 +52,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         acceptedIssuers: [
           {
             meta: {
-              url: "https://consumer-and-issuer-demo.vercel.app/",
+              url: "https://consumer-and-issuer-demo.playground.idos.network/",
               name: "NeoBank",
-              logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+              logo: "https://consumer-and-issuer-demo.playground.idos.network/static/logo.svg",
             },
             authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
@@ -62,9 +62,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         integratedConsumers: [
           {
             meta: {
-              url: "https://consumer-and-issuer-demo.vercel.app/",
+              url: "https://consumer-and-issuer-demo.playground.idos.network/",
               name: "NeoBank",
-              logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+              logo: "https://consumer-and-issuer-demo.playground.idos.network/static/logo.svg",
             },
             consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
@@ -79,9 +79,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           },
           {
             meta: {
-              url: "https://acme.com",
+              url: "https://acme-card-provider-demo.playground.idos.network",
               name: "ACME Card Provider",
-              logo: "https://consumer-and-issuer-demo.vercel.app/static/acme.svg",
+              logo: "https://acme-card-provider-demo.playground.idos.network/static/logo.svg",
             },
             consumerEncryptionPublicKey:
               process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",

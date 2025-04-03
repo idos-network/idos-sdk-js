@@ -150,6 +150,15 @@ interface idOSIsleController {
   readonly idosClient: idOSClient;
 
   logClientIn: () => Promise<void>;
+
+  options: idOSIsleControllerOptions;
+
+  hasConsumerPermission: (consumer: {
+    meta: Meta;
+    consumerAuthPublicKey: string;
+    consumerEncryptionPublicKey: string;
+    kycPermissions: string[];
+  }) => Promise<boolean>;
 }
 
 // Singleton wagmi config instance shared across all Isle instances
@@ -846,5 +855,20 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
+
+    get options() {
+      return options;
+    },
+
+    hasConsumerPermission: async (consumer: {
+      meta: Meta;
+      consumerAuthPublicKey: string;
+      consumerEncryptionPublicKey: string;
+      kycPermissions: string[];
+    }) => {
+      const { permissions } = await getPermissions();
+      const consumerPermissions = permissions.get(consumer);
+      return consumerPermissions?.length > 0;
+    },
   };
 };
