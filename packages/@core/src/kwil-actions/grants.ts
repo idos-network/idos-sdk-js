@@ -4,9 +4,13 @@ import type { DelegatedWriteGrant, idOSGrant } from "../types";
 /**
  * Returns the amount of Access Grants that have been granted for the given `signer`.
  */
-export async function getGrantsCount(kwilClient: KwilActionClient) {
+export async function getGrantsCount(
+  kwilClient: KwilActionClient,
+  params: { user_id: string | null } = { user_id: null },
+) {
   const [{ count }] = await kwilClient.call<[{ count: number }]>({
     name: "get_access_grants_granted_count",
+    inputs: params,
   });
   return count;
 }
