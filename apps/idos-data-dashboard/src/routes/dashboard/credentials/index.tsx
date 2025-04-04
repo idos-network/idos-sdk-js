@@ -42,7 +42,7 @@ const useFetchCredentials = () => {
 
 const NoCredentials = () => {
   return (
-    <NoData title="When you get onboarded to the idOS through an issuer, your wallets will show up here." />
+    <NoData title="When you get onboarded to the idOS through an issuer, your credentials will show up here." />
   );
 };
 
