@@ -1,51 +1,51 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
-import {
-  createCredentialCopy,
-  getAllCredentials,
-  getCredentialContentSha256Hash,
-  getUserProfile,
-  requestDAGMessage,
-} from "@idos-network/consumer-sdk-js/client";
 import type { idOSCredential } from "@idos-network/core";
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
-import { useIdOSConsumer } from "@/idOS.provider";
+import { useIdosClient } from "@/idOS.provider";
 
 import { CredentialCard } from "./credential-card";
 
 const useFetchMatchingCredential = () => {
-  const consumerConfig = useIdOSConsumer();
+  const idOSClient = useIdosClient();
 
-  return useSuspenseQuery({
+  return useQuery({
     queryKey: ["matching-credential"],
-    queryFn: () => getAllCredentials(consumerConfig),
+    queryFn: async () => {
+      invariant(idOSClient.state === "logged-in");
+      return idOSClient.getAllCredentials();
+    },
     select: (credentials) => {
       const credential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "KYC DATA";
       });
-      return credential as unknown as idOSCredential;
+      return credential;
     },
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
 export const useFetchSharedCredentialFromUser = () => {
-  const consumerConfig = useIdOSConsumer();
-  return useSuspenseQuery<{ credential: idOSCredential | null; cause: string }>({
+  const idOSClient = useIdosClient();
+
+  return useQuery<idOSCredential | null>({
     queryKey: ["shared-credential"],
     queryFn: async () => {
-      const { id: userId } = await getUserProfile(consumerConfig);
-      return fetch(`/api/shared-credential/${userId}`)
+      invariant(idOSClient.state === "logged-in");
+
+      return fetch(`/api/shared-credential/${idOSClient.user.id}`)
         .then((res) => res.json())
         .catch((error) => {
           return { credential: null, cause: error.message };
         });
     },
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
@@ -53,11 +53,13 @@ function useShareCredential() {
   const { address } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
-  const consumerConfig = useIdOSConsumer();
+  const idOSClient = useIdosClient();
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
-      const contentHash = await getCredentialContentSha256Hash(consumerConfig, credentialId);
+      invariant(idOSClient.state === "logged-in");
+
+      const contentHash = await idOSClient.getCredentialContentSha256Hash(credentialId);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -73,8 +75,7 @@ function useShareCredential() {
         "NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
       );
 
-      const { id } = await createCredentialCopy(
-        consumerConfig,
+      const { id } = await idOSClient.createCredentialCopy(
         credentialId,
         consumerEncryptionPublicKey,
         {
@@ -91,7 +92,7 @@ function useShareCredential() {
         dag_content_hash: contentHash,
       };
 
-      const message: string = await requestDAGMessage(consumerConfig, dag);
+      const message: string = await idOSClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
       return invokePassportingService({
@@ -135,13 +136,13 @@ export function MatchingCredential() {
   }
   console.log({ data: sharedCredentialFromUser.data, matchingCredential });
 
-  if (sharedCredentialFromUser.data?.credential?.public_notes) {
+  if (sharedCredentialFromUser.data?.public_notes) {
     return (
       <div className="flex flex-col gap-6">
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data} />
       </div>
     );
   }

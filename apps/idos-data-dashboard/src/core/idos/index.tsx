@@ -1,6 +1,14 @@
 "use client";
 
-import { Center, Spinner, Text } from "@chakra-ui/react";
+// export type idOSContextValue = {
+//   sdk: idOS;
+//   address: string | undefined; // userAddress
+//   hasProfile: boolean;
+//   publicKey: string | undefined; // currentUserPublicKey
+//   reset: () => Promise<void>; // logOut
+// };
+
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 import {
   type PropsWithChildren,
   createContext,
@@ -10,8 +18,12 @@ import {
   useState,
 } from "react";
 
-import { useEthersSigner } from "@/wagmi.config";
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
+import { ConnectWallet } from "@/connect-wallet";
+import { useWalletSelector } from "@/core/near";
+import { useEthersSigner } from "@/core/wagmi";
+import type { Wallet } from "@near-wallet-selector/core";
+import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
+import type { JsonRpcSigner } from "ethers";
 
 const config = new idOSClientConfiguration({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
@@ -24,9 +36,37 @@ const config = new idOSClientConfiguration({
 export const idOSClientContext = createContext<idOSClient>(config);
 export const useIdosClient = () => useContext(idOSClientContext);
 
+const useSigner = () => {
+  const [signer, setSigner] = useState<(Wallet & SignMessageMethod) | JsonRpcSigner | undefined>(
+    undefined,
+  );
+  const ethSigner = useEthersSigner();
+  const { selector } = useWalletSelector();
+
+  const initialize = useCallback(async () => {
+    if (selector.isSignedIn()) {
+      setSigner(await selector.wallet());
+      return;
+    }
+
+    if (ethSigner) {
+      setSigner(ethSigner);
+      return;
+    }
+
+    return;
+  }, [ethSigner, selector]);
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  return signer;
+};
+
 export function IdosClientProvider({ children }: PropsWithChildren) {
   const [idOSClient, setIdosClient] = useState<idOSClient>(config);
-  const signer = useEthersSigner();
+  const signer = useSigner();
 
   const initialize = useCallback(async () => {
     switch (idOSClient.state) {
@@ -53,13 +93,10 @@ export function IdosClientProvider({ children }: PropsWithChildren) {
   }, [initialize]);
 
   if (idOSClient.state === "configuration" || idOSClient.state === "idle") {
-    return (
-      <Center h="100%" flexDirection="column" gap="2">
-        <Spinner />
-        <Text>initializing idOS...</Text>
-      </Center>
-    );
+    return <ConnectWallet />;
   }
+
+  // TODO(pkoch): how do I know when I'm loading?
 
   return <idOSClientContext.Provider value={idOSClient}>{children}</idOSClientContext.Provider>;
 }
