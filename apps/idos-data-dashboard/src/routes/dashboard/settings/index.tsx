@@ -1,9 +1,9 @@
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
 import { Box, Button, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react";
 import { FileLockIcon } from "lucide-react";
 
 export function Component() {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
 
   return (
     <VStack align="stretch" flex={1} gap={5}>
@@ -49,12 +49,11 @@ export function Component() {
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
               onClick={async () => {
-                if (!sdk) return;
-                if (!sdk.auth.currentUser.userId) throw new Error("User not authenticated");
+                if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
 
-                const { userId, currentUserPublicKey } = sdk.auth.currentUser;
-                await sdk.enclave.enclaveProvider.ready(userId, currentUserPublicKey);
-                return await sdk.enclave.enclaveProvider.backupPasswordOrSecret();
+                const { id, recipient_encryption_public_key } = idOSClient.user;
+                await idOSClient.enclaveProvider.ready(id, recipient_encryption_public_key);
+                return await idOSClient.enclaveProvider.backupPasswordOrSecret();
               }}
             >
               Back up your idOS key

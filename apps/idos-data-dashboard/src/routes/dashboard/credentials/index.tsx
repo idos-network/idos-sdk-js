@@ -14,7 +14,8 @@ import { useState } from "react";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
+import invariant from "tiny-invariant";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { DeleteCredential } from "./components/delete-credential";
@@ -22,12 +23,14 @@ import { GrantsCenter } from "./components/grants-center";
 import type { idOSCredentialWithShares } from "./types";
 
 const useFetchCredentials = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
 
   return useQuery({
     queryKey: ["credentials"],
     queryFn: async () => {
-      const credentials = await sdk.data.listAllCredentials();
+      invariant(idOSClient.state === "logged-in", "idOSClient not logged in");
+
+      const credentials = await idOSClient.getAllCredentials();
       return credentials.map((credential) => ({
         ...credential,
         shares: credentials
@@ -37,6 +40,7 @@ const useFetchCredentials = () => {
     },
     select: (credentials) =>
       credentials.filter((credential) => !credential.original_id && !!credential.public_notes),
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
@@ -118,8 +122,11 @@ const Credentials = () => {
 };
 
 export function Component() {
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdosClient();
   const queryClient = useQueryClient();
+
+  invariant(idOSClient.state !== "configuration", "`idOSClient` is not configured yet");
+  invariant(idOSClient.state !== "idle", "`idOSClient` doesn't have a signer yet");
 
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
@@ -152,7 +159,7 @@ export function Component() {
           }}
         />
       </HStack>
-      {hasProfile ? <Credentials /> : <NoCredentials />}
+      {idOSClient.state === "logged-in" ? <Credentials /> : <NoCredentials />}
     </VStack>
   );
 }

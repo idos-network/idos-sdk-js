@@ -35,16 +35,21 @@ import { useEffect } from "react";
 import { NavLink, type NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
 import { useWalletSelector } from "@/core/near";
+import invariant from "tiny-invariant";
 
 const ConnectedWallet = () => {
-  const { address } = useIdOS();
+  const idOSClient = useIdosClient();
+
+  invariant(idOSClient.state !== "configuration", "idOSClient is not configured yet");
+  invariant(idOSClient.state !== "idle", "idOSClient doesn't have a signer yer");
+
   return (
     <HStack alignItems="center" gap={5} h={20}>
       <Center flexShrink={0} w={50} h={50} bg="neutral.800" rounded="lg">
         <Image
-          alt={`Connected wallet ${address}`}
+          alt={`Connected wallet ${idOSClient.walletIdentifier}`}
           src="/idos-dashboard-logo-dark.svg"
           w={50}
           h={50}
@@ -54,7 +59,7 @@ const ConnectedWallet = () => {
       <Box>
         <Text>Connected Wallet</Text>
         <Text maxW={180} color="neutral.600" isTruncated>
-          {address}
+          {idOSClient.walletIdentifier}
         </Text>
       </Box>
     </HStack>
@@ -84,12 +89,17 @@ const ListItemLink = (props: NavLinkProps & LinkProps) => {
 };
 
 const DisconnectButton = () => {
+  const idOSClient = useIdosClient();
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const { selector } = useWalletSelector();
   const queryClient = useQueryClient();
 
+  invariant(idOSClient.state !== "configuration", "idOSClient is not configured yet");
+  invariant(idOSClient.state !== "idle", "idOSClient doesn't have a signer yer");
+
   const handleDisconnect = async () => {
+    await idOSClient.logOut();
     if (isConnected) disconnect();
     if (selector.isSignedIn()) (await selector.wallet()).signOut();
     queryClient.removeQueries();
@@ -133,7 +143,7 @@ const Breadcrumbs = () => {
 export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdosClient();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Close the sidebar whenever `location` changes.
   useEffect(() => {
@@ -141,6 +151,8 @@ export function Component() {
       onClose();
     }
   }, [location]);
+
+  const hasProfile = idOSClient.state === "logged-in";
 
   return (
     <Flex minH="100dvh">

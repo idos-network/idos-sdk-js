@@ -8,7 +8,7 @@ import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-rou
 import { WagmiProvider } from "wagmi";
 
 import App from "@/app";
-import { Provider as IDOSProvider } from "@/core/idos";
+import { IdosClientProvider } from "@/core/idos";
 import { WalletSelectorContextProvider } from "@/core/near";
 import { projectId, wagmiConfig } from "@/core/wagmi";
 import { theme } from "@/theme";
@@ -32,7 +32,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         {/* @ts-ignore: TODO: fix wagmi types */}
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
-            <IDOSProvider>
+            <IdosClientProvider>
               <RouterProvider
                 router={createBrowserRouter([
                   {
@@ -87,7 +87,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                   },
                 ])}
               />
-            </IDOSProvider>
+            </IdosClientProvider>
             <ReactQueryDevtools buttonPosition="bottom-left" />
           </QueryClientProvider>
         </WagmiProvider>

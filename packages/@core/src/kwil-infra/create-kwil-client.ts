@@ -57,7 +57,9 @@ export class KwilActionClient {
       name: params.name,
       namespace: "main",
       description: params.description,
-      inputs: [this._createActionInputs(params.name, params.inputs)],
+      inputs: (Array.isArray(params.inputs) ? params.inputs : [params.inputs]).map((input) =>
+        this._createActionInputs(params.name, input),
+      ),
     };
     const response = await this.client.execute(action, signer, synchronous);
     return response.data?.tx_hash as T;
