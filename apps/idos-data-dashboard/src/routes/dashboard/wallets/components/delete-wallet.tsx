@@ -1,4 +1,4 @@
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -10,9 +10,10 @@ import {
   Button,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSWallet } from "@idos-network/idos-sdk";
+import type { idOSWallet } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
+import invariant from "tiny-invariant";
 
 type DeleteWalletProps = {
   isOpen: boolean;
@@ -23,17 +24,14 @@ type DeleteWalletProps = {
 type Ctx = { previousWallets: idOSWallet[] };
 
 const useDeleteWalletMutation = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
   const queryClient = useQueryClient();
 
-  return useMutation<{ id: string }[], DefaultError, idOSWallet[], Ctx>({
-    mutationFn: (wallets) =>
-      sdk.data.deleteMultiple(
-        "wallets",
-        wallets.map((wallet) => wallet.id),
-        "Delete wallet from idOS",
-        true,
-      ),
+  return useMutation<void, DefaultError, idOSWallet[], Ctx>({
+    mutationFn: async (wallets) => {
+      invariant(idOSClient.state === "logged-in", "idOSClient is not logged in");
+      await idOSClient.removeWallets(wallets.map((wallet) => wallet.id));
+    },
     async onMutate(wallets) {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];

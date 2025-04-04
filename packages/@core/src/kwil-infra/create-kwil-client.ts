@@ -9,14 +9,15 @@ interface CreateKwilClientParams {
   nodeUrl: string;
 }
 
-interface KwilActionReqParams {
+interface KwilCallActionRequestParams {
   name: string;
   // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
   inputs?: Record<string, any>;
 }
 
-interface KwilCallActionRequestParams extends KwilActionReqParams {}
-interface KwilExecuteActionRequestParams extends KwilActionReqParams {
+interface KwilExecuteActionRequestParams extends KwilCallActionRequestParams {
+  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
+  inputs?: Record<string, any> | Record<string, any>[];
   description?: string;
 }
 
@@ -56,7 +57,9 @@ export class KwilActionClient {
       name: params.name,
       namespace: "main",
       description: params.description,
-      inputs: [this._createActionInputs(params.name, params.inputs)],
+      inputs: (Array.isArray(params.inputs) ? params.inputs : [params.inputs]).map((input) =>
+        this._createActionInputs(params.name, input),
+      ),
     };
     const response = await this.client.execute(action, signer, synchronous);
     return response.data?.tx_hash as T;

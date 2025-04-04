@@ -1,19 +1,21 @@
-import { useIdOS } from "@/core/idos";
-import type { idOSGrant } from "@idos-network/idos-sdk";
+import { useIdosClient } from "@/core/idos";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { idOSGrant } from "@idos-network/core";
+import invariant from "tiny-invariant";
 import type { idOSCredentialWithShares } from "../types";
 
 export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
   return useQuery({
     queryKey: ["grants", credentialId],
     queryFn: async () => {
-      const { grants } = await sdk.grants.getGrantsOwned();
-      return grants;
+      invariant(idOSClient.state === "logged-in", "idOSClient not logged in");
+
+      return idOSClient.getAccessGrantsOwned();
     },
     retry: 1,
     select(grants) {
@@ -23,19 +25,27 @@ export const useFetchGrants = ({ credentialId }: { credentialId: string }) => {
         .filter((credential) => credential.original_id === credentialId)
         .map((credential) => credential.id);
 
-      return grants.filter((grant) => _credentials.includes(grant.dataId));
+      return grants.filter((grant) => _credentials.includes(grant.data_id));
     },
+
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
 type Ctx = { previousGrants: idOSGrant[] };
 
 export const useRevokeGrant = (credentialId?: string) => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
   const queryClient = useQueryClient();
 
-  return useMutation<string | undefined, Error, idOSGrant, Ctx>({
-    mutationFn: ({ id }: idOSGrant) => sdk.grants.revokeGrant(id || ""),
+  return useMutation<string, Error, idOSGrant, Ctx>({
+    mutationFn: async (grant: idOSGrant) => {
+      invariant(idOSClient.state === "logged-in", "idOSClient not logged in");
+
+      await idOSClient.revokeAccessGrant(grant.id);
+
+      return grant.id;
+    },
     mutationKey: ["revokeGrant"],
     onMutate: async (grant): Promise<Ctx> => {
       const previousGrants = queryClient.getQueryData<idOSGrant[]>(["grants", credentialId]) || [];
