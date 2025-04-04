@@ -257,10 +257,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         send("update", { status: "error" });
         return;
       }
-    } else if (account.status === "disconnected") {
-      if ("logOut" in idosClient) {
-        idosClient = await idosClient.logOut();
-      }
     }
 
     send("update", { address: account.address });
