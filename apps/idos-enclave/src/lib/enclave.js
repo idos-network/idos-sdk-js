@@ -42,9 +42,6 @@ export class Enclave {
   }
 
   storage(userId, expectedUserEncryptionPublicKey) {
-    // In case the user is different, we reset the store.
-    if (userId !== this.store.get("user-id")) this.reset();
-
     userId && this.store.set("user-id", userId);
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
