@@ -260,7 +260,7 @@ export const invokePassportingService = async (payload: unknown) => {
     .then((res) => res.json())
     .catch((err) => {
       console.error(err);
-      return { ok: false, error: err };
+      throw new Error("Failed to invoke passporting service", err);
     });
 };
 
