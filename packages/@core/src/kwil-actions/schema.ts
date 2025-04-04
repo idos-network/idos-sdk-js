@@ -508,12 +508,7 @@ export const ActionSchema: Record<string, elem[]> = {
       type: DataType.Uuid,
     },
   ],
-  get_access_grants_owned: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-  ],
+  get_access_grants_owned: [],
   get_access_grants_granted: [
     {
       name: "user_id",
