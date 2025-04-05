@@ -1,4 +1,4 @@
-export const actionSchema: Record<string, string[]> = {
+export const actionSchema = {
   add_user_as_inserter: ["id", "recipient_encryption_public_key"],
   update_user_pub_key_as_inserter: ["id", "recipient_encryption_public_key"],
   get_user: [],
@@ -140,4 +140,4 @@ export const actionSchema: Record<string, string[]> = {
   get_access_grants_for_credential: ["credential_id"],
 
   has_profile: ["address"],
-};
+} as const;
