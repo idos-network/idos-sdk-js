@@ -9,14 +9,15 @@ interface CreateKwilClientParams {
   nodeUrl: string;
 }
 
-interface KwilActionReqParams {
-  name: string;
-  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
-  inputs?: Record<string, any>;
-}
+type ActionName = keyof typeof actionSchema;
 
-interface KwilCallActionRequestParams extends KwilActionReqParams {}
-interface KwilExecuteActionRequestParams extends KwilActionReqParams {
+type KwilCallActionRequestParams<Name extends ActionName = ActionName> = {
+  name: Name;
+  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
+  inputs?: Name extends ActionName ? Record<(typeof actionSchema)[Name][number], any> : never;
+};
+
+interface KwilExecuteActionRequestParams extends KwilCallActionRequestParams {
   description?: string;
 }
 
@@ -78,7 +79,7 @@ export class KwilActionClient {
   ): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
 
-    const keys = actionSchema[actionName];
+    const keys = (actionSchema as Record<string, readonly string[]>)[actionName];
     return keys.map((key) => {
       const value = params[key];
       // Handle falsy values appropriately

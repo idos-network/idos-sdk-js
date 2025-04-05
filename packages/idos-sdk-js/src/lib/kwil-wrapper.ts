@@ -83,7 +83,7 @@ export class KwilWrapper {
 
   createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
-    const keys = actionSchema[actionName];
+    const keys = (actionSchema as Record<string, readonly string[]>)[actionName];
     return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
   }
 
