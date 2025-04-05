@@ -135,13 +135,15 @@ export async function createIDOSUserProfile({
 }
 
 export async function getKrakenToken(): Promise<string> {
+  invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
+  invariant(process.env.KRAKEN_PRIVATE_KEY, "`KRAKEN_PRIVATE_KEY` is not set");
+
   const payload = {
     api: true,
     clientId: process.env.KRAKEN_CLIENT_ID,
   };
 
-  // biome-ignore lint/style/noNonNullAssertion: <explanation>
-  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY!, {
+  return jwt.sign(payload, process.env.KRAKEN_PRIVATE_KEY, {
     algorithm: "ES512",
     expiresIn: "600s",
   });
@@ -153,11 +155,14 @@ async function getKYCData(userId: string) {
     {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${getKrakenToken()}`,
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
     },
   );
   const json = await response.json();
+  if (!response.ok) {
+    throw new Error(`Failed to fetch KYC data ${JSON.stringify(json)}`);
+  }
 
   return json;
 }
@@ -243,16 +248,20 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 };
 
 export const invokePassportingService = async (payload: unknown) => {
-  return await (
-    await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
-      },
-    })
-  ).json();
+  invariant(process.env.PASSPORTING_SERVICE_URL, "`PASSPORTING_SERVICE_URL` is not set");
+  return await await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
+    method: "POST",
+    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
+    },
+  })
+    .then((res) => res.json())
+    .catch((err) => {
+      console.error(err);
+      return { ok: false, error: err };
+    });
 };
 
 export const generateKrakenUrlToken = async () => {

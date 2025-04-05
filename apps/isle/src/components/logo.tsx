@@ -59,12 +59,14 @@ const logo = defineSlotRecipe({
 });
 
 type LogoRecipeProps = RecipeVariantProps<typeof logo>;
+
 interface LogoProps extends LogoRecipeProps {}
 
 export function Logo(props: LogoProps) {
   const recipe = useSlotRecipe({
     recipe: logo,
   });
+
   const [recipeProps] = recipe.splitVariantProps(props);
   const styles = recipe(recipeProps);
 

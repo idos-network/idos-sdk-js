@@ -27,7 +27,7 @@ const useFetchMatchingCredential = () => {
     select: (credentials) => {
       const credential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "PASSPORTING_DEMO";
+        return publicNotes.type === "KYC DATA";
       });
       return credential as unknown as idOSCredential;
     },
@@ -36,11 +36,15 @@ const useFetchMatchingCredential = () => {
 
 export const useFetchSharedCredentialFromUser = () => {
   const consumerConfig = useIdOSConsumer();
-  return useSuspenseQuery({
+  return useSuspenseQuery<{ credential: idOSCredential | null; cause: string }>({
     queryKey: ["shared-credential"],
     queryFn: async () => {
       const { id: userId } = await getUserProfile(consumerConfig);
-      return fetch(`/api/shared-credential/${userId}`).then((res) => res.json());
+      return fetch(`/api/shared-credential/${userId}`)
+        .then((res) => res.json())
+        .catch((error) => {
+          return { credential: null, cause: error.message };
+        });
     },
   });
 };
@@ -129,14 +133,15 @@ export function MatchingCredential() {
       </div>
     );
   }
+  console.log({ data: sharedCredentialFromUser.data, matchingCredential });
 
-  if (sharedCredentialFromUser.data) {
+  if (sharedCredentialFromUser.data?.credential?.public_notes) {
     return (
       <div className="flex flex-col gap-6">
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data} />
+        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
       </div>
     );
   }

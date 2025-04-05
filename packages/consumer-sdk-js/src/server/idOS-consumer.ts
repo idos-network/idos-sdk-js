@@ -1,5 +1,6 @@
 import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
 import {
+  type GetGrantsParams,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
@@ -47,7 +48,7 @@ export class idOSConsumer {
 
   private constructor(
     private readonly noncedBox: NoncedBox,
-    private readonly kwilClient: KwilActionClient,
+    public readonly kwilClient: KwilActionClient,
     public readonly address: string,
   ) {}
 
@@ -68,8 +69,8 @@ export class idOSConsumer {
     );
   }
 
-  async getGrantsCount(): Promise<number> {
-    return getGrantsCount(this.kwilClient);
+  async getGrantsCount(userId: string | null = null): Promise<number> {
+    return getGrantsCount(this.kwilClient, { user_id: userId });
   }
 
   async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
@@ -105,16 +106,16 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getGrants(page = 1, size = 7) {
+  async getGrants(params: GetGrantsParams) {
     return {
-      grants: (await getGrants(this.kwilClient, page, size)).map((grant) => ({
+      grants: (await getGrants(this.kwilClient, params)).map((grant) => ({
         id: grant.id,
         ownerUserId: grant.ag_owner_user_id,
         consumerAddress: grant.ag_grantee_wallet_identifier,
         dataId: grant.data_id,
         lockedUntil: grant.locked_until,
       })),
-      totalCount: await this.getGrantsCount(),
+      totalCount: await this.getGrantsCount(params.user_id),
     };
   }
 }

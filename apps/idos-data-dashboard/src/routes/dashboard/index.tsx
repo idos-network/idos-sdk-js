@@ -175,12 +175,14 @@ export function Component() {
                     <Text as="span">Credentials</Text>
                   </ListItemLink>
                 </ListItem>
-                <ListItem>
-                  <ListItemLink to="/wallets">
-                    <Wallet2Icon size={24} strokeWidth="1.5" />
-                    <Text as="span">Wallets</Text>
-                  </ListItemLink>
-                </ListItem>
+                {hasProfile ? (
+                  <ListItem>
+                    <ListItemLink to="/wallets">
+                      <Wallet2Icon size={24} strokeWidth="1.5" />
+                      <Text as="span">Wallets</Text>
+                    </ListItemLink>
+                  </ListItem>
+                ) : null}
               </List>
               <VStack mt="auto" gap={5} alignItems="stretch">
                 {hasProfile ? (

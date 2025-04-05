@@ -1,7 +1,6 @@
 import { Center, Heading, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 
-import { WalletIcon } from "@/components/icons/wallet";
 import { Button } from "@/components/ui";
 import { CreateProfileSteps } from "@/features/create-profile-steps";
 import { LinkWallet } from "@/features/link-wallet";
@@ -25,12 +24,21 @@ export function CreateProfile() {
         Welcome to the identity <br />
         layer of web3.
       </Heading>
-      <Text color="gray.500" fontSize="sm" textAlign="center">
+      <Text color="muted.fg" fontSize="sm" textAlign="center">
         Create an idOS profile or link an existing wallet to your idOS account to use advanced
         features.
       </Text>
       <VStack gap="2" align="stretch" w="full">
         <Button
+          bg={{
+            _hover: "neutral.300",
+            _dark: {
+              base: "neutral.50",
+            },
+            _light: {
+              base: "muted.bg",
+            },
+          }}
           onClick={() => {
             return setState("create");
           }}
@@ -43,7 +51,7 @@ export function CreateProfile() {
             return setState("link");
           }}
         >
-          Link existing wallet <WalletIcon boxSize="6" />
+          Login
         </Button>
       </VStack>
     </Center>

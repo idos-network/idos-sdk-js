@@ -1,10 +1,11 @@
 import { Store } from "@idos-network/core";
 import { render } from "preact";
-import { App } from "./pages/App";
-import "./styles.css";
+
+import { App } from "@/app";
+import "@/styles.css";
 
 const enclave = window.opener;
-if (enclave.origin !== window.origin) throw new Error("Bad origin");
+if (enclave.origin !== window.origin) throw new Error("Bad idOS enclave origin");
 
 const store = new Store(window.localStorage);
 

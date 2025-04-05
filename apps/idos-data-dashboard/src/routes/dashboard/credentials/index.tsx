@@ -42,11 +42,7 @@ const useFetchCredentials = () => {
 
 const NoCredentials = () => {
   return (
-    <NoData
-      title="You have 0 credentials added."
-      subtitle="Create your first credential and store it on the idOS."
-      cta="Add a credential"
-    />
+    <NoData title="When you get onboarded to the idOS through an issuer, your credentials will show up here." />
   );
 };
 

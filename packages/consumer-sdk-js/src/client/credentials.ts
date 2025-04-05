@@ -3,7 +3,6 @@ import {
   base64Encode,
   buildInsertableIDOSCredential,
   hexEncodeSha256Hash,
-  utf8Encode,
 } from "@idos-network/core";
 import {
   createCredentialCopy as _createCredentialCopy,
@@ -62,8 +61,12 @@ export async function createCredentialCopy(
   const originalCredential = await _getCredentialById(kwilClient, id);
   invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
+  const decryptedContent = await enclaveProvider.decrypt(
+    base64Decode(originalCredential.content),
+    base64Decode(originalCredential.encryptor_public_key),
+  );
   const { content, encryptorPublicKey } = await enclaveProvider.encrypt(
-    utf8Encode(originalCredential.content),
+    decryptedContent,
     base64Decode(consumerRecipientEncryptionPublicKey),
   );
 

@@ -1,12 +1,16 @@
 import type { KwilActionClient } from "../kwil-infra";
-import type { idOSGrant } from "../types";
+import type { DelegatedWriteGrant, idOSGrant } from "../types";
 
 /**
  * Returns the amount of Access Grants that have been granted for the given `signer`.
  */
-export async function getGrantsCount(kwilClient: KwilActionClient) {
+export async function getGrantsCount(
+  kwilClient: KwilActionClient,
+  params: { user_id: string | null } = { user_id: null },
+) {
   const [{ count }] = await kwilClient.call<[{ count: number }]>({
     name: "get_access_grants_granted_count",
+    inputs: params,
   });
   return count;
 }
@@ -14,11 +18,21 @@ export async function getGrantsCount(kwilClient: KwilActionClient) {
 /**
  * Returns the Access Grants for the given `signer` in a paginated manner.
  */
-export async function getGrants(kwilClient: KwilActionClient, page = 1, size = 7) {
+
+export interface GetGrantsParams {
+  page?: number;
+  size?: number;
+  user_id?: string | null;
+}
+
+export async function getGrants(
+  kwilClient: KwilActionClient,
+  params: GetGrantsParams = { page: 1, size: 10, user_id: null },
+) {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",
-    inputs: { page, size },
+    inputs: params,
   });
 }
 export interface CreateAccessGrantByDAGParams {
@@ -87,23 +101,10 @@ export async function requestDAGMessage(
   return message;
 }
 
-export interface DelegatedWriteGrantSignatureRequest {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-}
-
 /**
  * Request a signature for a delegated write grant.
  */
-export async function requestDWGMessage(
-  kwilClient: KwilActionClient,
-  params: DelegatedWriteGrantSignatureRequest,
-) {
+export async function requestDWGMessage(kwilClient: KwilActionClient, params: DelegatedWriteGrant) {
   const [{ message }] = await kwilClient.call<[{ message: string }]>({
     name: "dwg_message",
     inputs: params,

@@ -43,16 +43,16 @@ export function CreateProfileSteps() {
         <Stepper stepsLength={3} index={1} />
         <Circle
           size="12"
-          bg={{
-            _dark: "aquamarine.950",
-            _light: "aquamarine.400",
-          }}
           boxShadow="md"
+          bg={{
+            _dark: "brand.950",
+            _light: "brand.400",
+          }}
         >
           <Icon
             color={{
-              _dark: "aquamarine.600",
-              _light: "aquamarine.700",
+              _dark: "brand.600",
+              _light: "brand.700",
             }}
             as={LuCheck}
           />

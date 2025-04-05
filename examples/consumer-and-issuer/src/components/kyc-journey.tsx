@@ -42,7 +42,7 @@ export function KYCJourney({ onSuccess, onError }: KYCJourneyProps) {
   if (!token) return null;
 
   return (
-    <div className="fixed inset-0 top-0 left-0 z-[10000] flex h-full w-full flex-col place-content-center items-center bg-black/30 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in">
+    <div className="fixed inset-0 top-0 left-0 z-[10000] flex h-full w-full flex-col place-content-center items-center rounded-lg bg-black/30 shadow-md backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in">
       <iframe
         id="kyc-journey"
         className="absolute h-[800px] w-[800px]"

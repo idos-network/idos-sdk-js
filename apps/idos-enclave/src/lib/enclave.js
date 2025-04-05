@@ -1,7 +1,8 @@
 import { Store } from "@idos-network/core";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
-import { every, get, negate } from "lodash-es";
+import { negate } from "es-toolkit";
+import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
@@ -41,8 +42,10 @@ export class Enclave {
   }
 
   storage(userId, expectedUserEncryptionPublicKey) {
-    userId && this.store.set("user-id", userId);
+    // In case the user is different, we reset the store.
+    if (userId !== this.store.get("user-id")) this.reset();
 
+    userId && this.store.set("user-id", userId);
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
@@ -77,27 +80,6 @@ export class Enclave {
 
     let password;
     let duration;
-    let credentialId;
-
-    const getWebAuthnCredential = async (storedCredentialId) => {
-      const credentialRequestWithId = {
-        publicKey: {
-          challenge: crypto.getRandomValues(new Uint8Array(10)),
-          allowCredentials: [
-            {
-              type: "public-key",
-              id: Base64Codec.decode(storedCredentialId),
-            },
-          ],
-        },
-      };
-
-      const credential = await navigator.credentials.get(credentialRequestWithId);
-      password = Utf8Codec.decode(new Uint8Array(credential.response.userHandle));
-      credentialId = Base64Codec.encode(new Uint8Array(credential.rawId));
-
-      return { password, credentialId };
-    };
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
@@ -107,16 +89,9 @@ export class Enclave {
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
         try {
-          if (storedCredentialId) {
-            ({ password, credentialId } = await getWebAuthnCredential(storedCredentialId));
-          } else {
-            ({ password, duration, credentialId } = await this.openDialog(
-              preferredAuthMethod || "auth",
-              {
-                expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-              },
-            ));
-          }
+          ({ password, duration } = await this.openDialog(preferredAuthMethod || "auth", {
+            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+          }));
         } catch (e) {
           return reject(e);
         }
@@ -125,14 +100,6 @@ export class Enclave {
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
-
-        if (credentialId) {
-          this.store.set("credential-id", credentialId);
-          this.store.set("preferred-auth-method", "passkey");
-        } else {
-          this.store.set("preferred-auth-method", "password");
-          this.store.setRememberDuration(duration);
-        }
 
         return password ? resolve() : reject();
       }),
@@ -330,7 +297,7 @@ export class Enclave {
     });
   }
 
-  async handleIdosStore(payload) {
+  async handleIDOSStore(payload) {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = async ({ data: { error, result } }) => {
@@ -366,7 +333,9 @@ export class Enclave {
     const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
     this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
 
-    await new Promise((resolve) => this.dialog.addEventListener("ready", resolve, { once: true }));
+    await new Promise((resolve) =>
+      this.dialog.addEventListener("idOS-Enclave:ready", resolve, { once: true }),
+    );
 
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
@@ -381,7 +350,7 @@ export class Enclave {
         }
 
         if (result.type === "idOS:store" && result.status === "pending") {
-          result = await this.handleIdosStore(result.payload);
+          result = await this.handleIDOSStore(result.payload);
 
           return this.dialog.postMessage(
             {

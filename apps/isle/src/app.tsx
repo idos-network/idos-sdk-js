@@ -22,10 +22,9 @@ function Layout({ children }: PropsWithChildren) {
         gap="6"
         p="5"
         rounded="38px"
-        bg={{
-          _dark: "neutral.950",
-          _light: "white",
-        }}
+        bg="surface"
+        border="1px solid {colors.border}"
+        shadow="sm"
         width="366px"
         height="full"
       >

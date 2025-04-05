@@ -2,12 +2,12 @@ import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
 
-import { Button } from "../../components/ui/button";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
-import { TextField, type TextFieldProps } from "../../components/ui/text-field";
-import { idOSKeyDerivation } from "../../lib/idOSKeyDerivation";
-import type { MethodProps } from "./Chooser";
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
+import { TextField, type TextFieldProps } from "@/components/ui/text-field";
+import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
+import { idOSKeyDerivation } from "@/lib/idOSKeyDerivation";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -81,7 +81,7 @@ export function PasswordForm({
   store,
   encryptionPublicKey,
   userId,
-}: MethodProps<{ password: string; duration: number }> & {
+}: AuthMethodProps<{ password: string; duration: number }> & {
   encryptionPublicKey?: string;
   userId: string | null;
 }) {
@@ -134,7 +134,7 @@ export function PasswordForm({
 
           <Paragraph>
             This password is the key to your idOS data. Be careful not to lose it: you'll need it
-            later to view or share you idOS data.
+            later to view or share your idOS data.
           </Paragraph>
 
           <Button type="submit">Create password</Button>

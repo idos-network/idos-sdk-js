@@ -1,10 +1,9 @@
 import { useSignal } from "@preact/signals";
 
-import { Button } from "../../components/ui/button";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
-import { TextField } from "../../components/ui/text-field";
-import { createNewCredential } from "../../lib/webauthn";
+import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
+import { TextField } from "@/components/ui/text-field";
 
 interface GoogleDriveRecoveryMethodProps {
   onSuccess: ({ credentialId, password }: { credentialId?: string; password: string }) => void;
@@ -18,18 +17,7 @@ function GoogleDriveRecoveryMethod({ onSuccess }: GoogleDriveRecoveryMethodProps
   const handleSubmit = async (event: Event) => {
     event.preventDefault();
 
-    if (recoveryMethod.value === "password") {
-      return onSuccess({ password: secret.value });
-    }
-
-    const credential = await createNewCredential(secret.value);
-
-    if (credential) {
-      onSuccess({
-        credentialId: credential.credentialId,
-        password: credential.password,
-      });
-    }
+    return onSuccess({ password: secret.value });
   };
 
   return (

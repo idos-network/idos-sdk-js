@@ -1,9 +1,9 @@
-import { resolve } from "path";
-import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
+import { resolve } from "node:path";
 import preact from "@preact/preset-vite";
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
-
+import tsconfigPaths from "vite-tsconfig-paths";
 export default defineConfig({
   define: {
     global: {},
@@ -16,19 +16,5 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mkcert(), preact()],
-  optimizeDeps: {
-    esbuildOptions: {
-      // Node.js global to browser globalThis
-      define: {
-        global: "globalThis",
-      },
-      // Enable esbuild polyfill plugins
-      plugins: [
-        NodeGlobalsPolyfillPlugin({
-          buffer: true,
-        }),
-      ],
-    },
-  },
+  plugins: [mkcert(), preact(), tailwindcss(), tsconfigPaths()],
 });
