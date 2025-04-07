@@ -1,6 +1,6 @@
 "use server";
 import { getIssuerServerConfig } from "@/issuer.config";
-import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
+import { base64Decode, base64Encode, idOSCredential, toBytes } from "@idos-network/core";
 import {
   createCredentialByDelegatedWriteGrant,
   createUser,
@@ -247,14 +247,15 @@ export const getCredentialCompliantly = async (credentialId: string) => {
   return credential;
 };
 
-type PassportingServiceResponse = {
-  success: boolean;
-  data?: unknown;
-  error?: {
-    cause: string;
-    message: string;
-  };
-};
+type PassportingServiceResponse =
+  | { success: true; data: { dag_data_id: string } }
+  | {
+      success: false;
+      error: {
+        cause?: unknown;
+        message: string;
+      };
+    };
 
 export const invokePassportingService = async (
   payload: unknown,
@@ -273,28 +274,27 @@ export const invokePassportingService = async (
 
     const data = (await response.json()) as PassportingServiceResponse;
 
-    if (!response.ok || !data.success) {
+    if (!response.ok) {
+      return { success: false, error: { message: response.statusText } };
+    }
+
+    if (!data.success) {
+      return { success: false, error: data.error };
+    }
+
+    return { success: true, data: data.data };
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
       return {
         success: false,
-        error: {
-          cause: data.error?.cause || "unknown",
-          message: data.error?.message || "An error occurred",
-        },
+        error: { cause: error.cause, message: error.message },
       };
     }
 
     return {
-      success: true,
-      data: data.data,
-    };
-  } catch (error) {
-    console.error(error);
-    return {
       success: false,
-      error: {
-        cause: error instanceof Error ? error.cause?.toString() || "unknown" : "unknown",
-        message: error instanceof Error ? error.message : "An error occurred",
-      },
+      error: { message: JSON.stringify(error) },
     };
   }
 };

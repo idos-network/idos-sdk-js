@@ -364,7 +364,7 @@ function useShareCredentialWithConsumer() {
 
       if (!result.success) {
         console.error(result.error);
-        throw new Error("Failed to invoke passporting service");
+        throw new Error(result.error.message);
       }
     },
     onSuccess: (data) => {
