@@ -247,23 +247,56 @@ export const getCredentialCompliantly = async (credentialId: string) => {
   return credential;
 };
 
-export const invokePassportingService = async (payload: unknown) => {
+type PassportingServiceResponse = {
+  success: boolean;
+  data?: unknown;
+  error?: {
+    cause: string;
+    message: string;
+  };
+};
+
+export const invokePassportingService = async (
+  payload: unknown,
+): Promise<PassportingServiceResponse> => {
   invariant(process.env.PASSPORTING_SERVICE_URL, "`PASSPORTING_SERVICE_URL` is not set");
-  return await fetch(process.env.PASSPORTING_SERVICE_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
-    },
-  })
-    .then(async (res) => {
-      return await res.json();
-    })
-    .catch((err) => {
-      console.error(err);
-      return { success: false, error: err };
+
+  try {
+    const response = await fetch(process.env.PASSPORTING_SERVICE_URL, {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
+      },
     });
+
+    const data = (await response.json()) as PassportingServiceResponse;
+
+    if (!response.ok || !data.success) {
+      return {
+        success: false,
+        error: {
+          cause: data.error?.cause || "unknown",
+          message: data.error?.message || "An error occurred",
+        },
+      };
+    }
+
+    return {
+      success: true,
+      data: data.data,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      error: {
+        cause: error instanceof Error ? error.cause?.toString() || "unknown" : "unknown",
+        message: error instanceof Error ? error.message : "An error occurred",
+      },
+    };
+  }
 };
 
 export const generateKrakenUrlToken = async () => {
