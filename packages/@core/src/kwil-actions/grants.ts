@@ -19,6 +19,8 @@ export async function getGrantsCount(
  * Returns the Access Grants for the given `signer` in a paginated manner.
  */
 
+export const GET_GRANTS_DEFAULT_RECORDS_PER_PAGE = 10;
+
 export interface GetGrantsParams {
   page?: number;
   size?: number;
@@ -27,7 +29,7 @@ export interface GetGrantsParams {
 
 export async function getGrants(
   kwilClient: KwilActionClient,
-  params: GetGrantsParams = { page: 1, size: 10, user_id: null },
+  params: GetGrantsParams = { page: 1, size: GET_GRANTS_DEFAULT_RECORDS_PER_PAGE, user_id: null },
 ) {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({

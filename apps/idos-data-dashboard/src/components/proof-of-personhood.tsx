@@ -1,4 +1,4 @@
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
 import {
   Button,
   Image,
@@ -48,9 +48,9 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
     },
   );
 
-  const { address } = useIdOS();
+  const idOSClient = useIdosClient();
 
-  if (!address) return null;
+  if (!("walletIdentifier" in idOSClient)) return null;
 
   return (
     <Modal
@@ -122,7 +122,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
               base: 1,
               lg: "none",
             }}
-            onClick={() => window.location.assign(fractalProofUrl(address))}
+            onClick={() => window.location.assign(fractalProofUrl(idOSClient.walletIdentifier))}
           >
             Verify with Fractal ID
           </Button>

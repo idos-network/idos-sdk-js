@@ -9,7 +9,6 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import type { idOSWallet } from "@idos-network/idos-sdk";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,22 +16,28 @@ import { useEffect, useState } from "react";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
-import { useIdOS } from "@/core/idos";
+import { useIdosClient } from "@/core/idos";
 
 import { useWalletSelector } from "@/core/near";
+import type { idOSWallet } from "@idos-network/core";
 import { Navigate, useSearchParams } from "react-router-dom";
+import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
 const useFetchWallets = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdosClient();
 
   return useQuery({
     queryKey: ["wallets"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName),
+    queryFn: () => {
+      invariant(idOSClient.state === "logged-in", "idOSClient is not logged in");
+      return idOSClient.getWallets();
+    },
     select: (data) => Object.groupBy(data, (wallet) => wallet.address),
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
@@ -110,7 +115,9 @@ const WalletsList = () => {
 };
 
 export function Component() {
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdosClient();
+  const hasProfile = idOSClient.state === "logged-in";
+
   const [searchParams] = useSearchParams();
   const walletToAdd = searchParams.get("add-wallet") || undefined;
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
