@@ -7,6 +7,7 @@ import type { idOSUserAttribute } from "../types";
 export async function getAttributes(kwilClient: KwilActionClient) {
   return kwilClient.call<Record<string, unknown>[]>({
     name: "get_attributes",
+    inputs: {},
   });
 }
 

@@ -9,10 +9,6 @@ export async function buildInsertableIDOSCredential(
   content: string,
   recipientEncryptionPublicKey: string,
   encryptorPublicKey: string,
-  grantInfo?: {
-    consumerAddress: string;
-    lockedUntil: number;
-  },
 ): Promise<InsertableIDOSCredential> {
   invariant(recipientEncryptionPublicKey, "Missing `recipientEncryptionPublicKey`");
   invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
@@ -23,13 +19,6 @@ export async function buildInsertableIDOSCredential(
     utf8Encode(publicNotes),
     ephemeralAuthenticationKeyPair.secretKey,
   );
-
-  const grantInfoParam = grantInfo
-    ? {
-        grantee_wallet_identifier: grantInfo.consumerAddress,
-        locked_until: grantInfo.lockedUntil,
-      }
-    : {};
 
   return {
     user_id: userId,
@@ -47,6 +36,5 @@ export async function buildInsertableIDOSCredential(
 
     issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
     encryptor_public_key: encryptorPublicKey,
-    ...grantInfoParam,
   };
 }

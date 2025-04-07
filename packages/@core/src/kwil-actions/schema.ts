@@ -24,7 +24,7 @@ export const actionSchema = {
     "broader_signature",
   ],
   get_credentials: [],
-  get_credentials_shared_by_user: ["user_id", "encryptor_public_key"],
+  get_credentials_shared_by_user: ["user_id", "issuer_auth_public_key"],
   edit_public_notes_as_issuer: ["public_notes_id"],
   remove_credential: ["id"],
   share_credential: [
@@ -106,7 +106,7 @@ export const actionSchema = {
     "not_usable_after",
   ],
   revoke_access_grant: ["id"],
-  get_access_grants_owned: ["id"],
+  get_access_grants_owned: [],
   get_access_grants_granted: ["user_id", "page", "size"],
   get_access_grants_granted_count: ["user_id"],
   has_locked_access_grants: ["id"],

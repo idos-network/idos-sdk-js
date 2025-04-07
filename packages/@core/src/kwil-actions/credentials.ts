@@ -1,5 +1,5 @@
 import type { KwilActionClient } from "../kwil-infra";
-import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
+import type { idOSCredential, idOSGrant } from "../types";
 
 /**
  * Returns the shared idOS Credential for the given `dataId`.
@@ -83,7 +83,7 @@ export async function editCredentialAsIssuer(
 export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, userId: string) {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials_shared_by_user",
-    inputs: { user_id: userId },
+    inputs: { user_id: userId, issuer_auth_public_key: null },
   });
 }
 
@@ -93,6 +93,7 @@ export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, u
 export async function getAllCredentials(kwilClient: KwilActionClient) {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials",
+    inputs: {},
   });
 }
 
@@ -157,8 +158,17 @@ export async function getCredentialById(kwilClient: KwilActionClient, id: string
   return response.find((r) => r.id === id);
 }
 
-export type ShareableCredential = Omit<idOSCredential, "original_id"> & {
+export type ShareableCredential = {
+  id: string;
   original_credential_id: string;
+  public_notes: string;
+  public_notes_signature: string;
+  broader_signature: string;
+  content: string;
+  encryptor_public_key: string;
+  issuer_auth_public_key: string;
+  grantee_wallet_identifier: string;
+  locked_until: number;
 };
 /**
  * Shares an idOSCredential to the given `userId`.
@@ -174,10 +184,16 @@ export async function shareCredential(
   });
 }
 
-export type CreateCredentialCopyParams = Omit<idOSCredential, "original_id"> &
-  InsertableIDOSCredential & {
-    original_credential_id: string;
-  };
+export type CreateCredentialCopyParams = {
+  id: string;
+  original_credential_id: string;
+  public_notes: string;
+  public_notes_signature: string;
+  broader_signature: string;
+  content: string;
+  encryptor_public_key: string;
+  issuer_auth_public_key: string;
+};
 
 /**
  * Creates a new idOSCredential as a copy of the given `originalCredentialId` without creating an Access Grant

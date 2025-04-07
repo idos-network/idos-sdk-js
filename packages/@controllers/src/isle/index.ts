@@ -363,23 +363,19 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         base64Decode(options.consumer.consumerEncryptionPublicKey),
       );
 
-      const insertableCredential = await buildInsertableIDOSCredential(
-        credential.user_id,
-        "",
-        base64Encode(content),
-        options.consumer.consumerAuthPublicKey,
-        base64Encode(encryptorPublicKey),
-        {
-          consumerAddress: options.consumer.consumerAuthPublicKey,
-          lockedUntil: 0,
-        },
-      );
-
       await idosClient.shareCredential({
         ...credential,
-        ...insertableCredential,
+        ...(await buildInsertableIDOSCredential(
+          credential.user_id,
+          "",
+          base64Encode(content),
+          options.consumer.consumerAuthPublicKey,
+          base64Encode(encryptorPublicKey),
+        )),
         original_credential_id: credential.id,
         id: crypto.randomUUID(),
+        grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
+        locked_until: 0,
       });
     });
 
