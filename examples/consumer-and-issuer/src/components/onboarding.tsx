@@ -136,6 +136,11 @@ function ClaimCardSuccessStepDescription() {
     return () => clearTimeout(timer);
   }, []);
 
+  invariant(
+    process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
+    "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
+  );
+
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
@@ -150,7 +155,7 @@ function ClaimCardSuccessStepDescription() {
         color="primary"
         className="w-fit"
         size="lg"
-        href="https://acme-card-provider-demo.playground.idos.network"
+        href={process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}
         target="_blank"
       >
         Go to ACME card provider
@@ -261,13 +266,18 @@ const useIssueCredential = () => {
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
       invariant(isleController, "`isleController` not initialized");
 
+      invariant(
+        process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+        "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set",
+      );
+
       const dwgData = await isleController.requestDelegatedWriteGrant({
         consumer: {
           consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           meta: {
-            url: "https://consumer-and-issuer-demo.vercel.app/",
+            url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
             name: "NeoBank",
-            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+            logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
           },
         },
         KYCPermissions: [
