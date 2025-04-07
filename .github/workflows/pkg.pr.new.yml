@@ -2,14 +2,14 @@ name: 'pkg.pr.new'
 on:
   push:
     branches:
-      - develop
-      - production
+      - playground
+      - main
     tags:
       - '!**'
   pull_request:
     branches:
-      - develop
-      - production
+      - playground
+      - main
 
 jobs:
   continuous-release:

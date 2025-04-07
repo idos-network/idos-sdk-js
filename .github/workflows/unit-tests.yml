@@ -4,8 +4,8 @@ on:
   pull_request:
   push:
     branches:
-      - develop
-      - production
+      - playground
+      - main
 
 jobs:
   test:
