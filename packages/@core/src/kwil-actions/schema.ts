@@ -1,8 +1,6 @@
 export const actionSchema = {
   add_user_as_inserter: ["id", "recipient_encryption_public_key"],
-  update_user_pub_key_as_inserter: ["id", "recipient_encryption_public_key"],
   get_user: [],
-  get_user_as_inserter: ["id"],
 
   upsert_wallet_as_inserter: [
     "id",
@@ -16,16 +14,6 @@ export const actionSchema = {
   add_wallet: ["id", "address", "public_key", "message", "signature"],
   get_wallets: [],
   remove_wallet: ["id"],
-  upsert_credential_as_inserter: [
-    "id",
-    "user_id",
-    "issuer_auth_public_key",
-    "encryptor_public_key",
-    "content",
-    "public_notes",
-    "public_notes_signature",
-    "broader_signature",
-  ],
   add_credential: [
     "id",
     "issuer_auth_public_key",

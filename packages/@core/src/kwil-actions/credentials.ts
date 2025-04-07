@@ -1,17 +1,6 @@
 import type { KwilActionClient } from "../kwil-infra";
 import type { InsertableIDOSCredential, idOSCredential, idOSGrant } from "../types";
 
-export interface CreateCredentialParams {
-  user_id: string;
-  content: string;
-  content_hash?: string;
-  public_notes: string;
-  public_notes_signature: string;
-  broader_signature: string;
-  issuer_auth_public_key: string;
-  encryptor_public_key: string;
-}
-
 /**
  * Returns the shared idOS Credential for the given `dataId`.
  */
@@ -49,20 +38,6 @@ export async function getCredentialIdByContentHash(
   });
 
   return response[0]?.id ?? null;
-}
-
-/**
- * Creates a new idOSCredential if the signer is a permissioned issuer
- */
-export async function createCredentialAsInserter(
-  kwilClient: KwilActionClient,
-  params: CreateCredentialParams,
-) {
-  return kwilClient.execute({
-    name: "upsert_credential_as_inserter",
-    description: "Create a new credential in your idOS profile",
-    inputs: params,
-  });
 }
 
 export interface GetAccessGrantByCredentialIdParams {
