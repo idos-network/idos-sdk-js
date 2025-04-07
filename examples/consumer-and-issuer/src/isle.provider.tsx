@@ -2,6 +2,7 @@
 
 import { createIsleController } from "@idos-network/controllers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
+import invariant from "tiny-invariant";
 
 type IsleController = ReturnType<typeof createIsleController>;
 
@@ -32,14 +33,23 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
   useEffect(() => {
     if (!containerId || isleController) return;
 
+    invariant(
+      process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+      "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set",
+    );
+    invariant(
+      process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
+      "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
+    );
+
     const controller = createIsleController({
       container: containerId,
       theme: "light",
       issuerConfig: {
         meta: {
-          url: "https://consumer-and-issuer-demo.vercel.app/",
+          url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
           name: "NeoBank",
-          logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+          logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
         },
         encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
       },
@@ -52,9 +62,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         acceptedIssuers: [
           {
             meta: {
-              url: "https://consumer-and-issuer-demo.playground.idos.network/",
+              url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
               name: "NeoBank",
-              logo: "https://consumer-and-issuer-demo.playground.idos.network/static/logo.svg",
+              logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
             },
             authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
           },
@@ -62,9 +72,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         integratedConsumers: [
           {
             meta: {
-              url: "https://consumer-and-issuer-demo.playground.idos.network/",
+              url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
               name: "NeoBank",
-              logo: "https://consumer-and-issuer-demo.playground.idos.network/static/logo.svg",
+              logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
             },
             consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
@@ -79,9 +89,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           },
           {
             meta: {
-              url: "https://acme-card-provider-demo.playground.idos.network",
+              url: process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
               name: "ACME Card Provider",
-              logo: "https://acme-card-provider-demo.playground.idos.network/static/logo.svg",
+              logo: `${process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}/static/logo.svg`,
             },
             consumerEncryptionPublicKey:
               process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
