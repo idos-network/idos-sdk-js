@@ -267,7 +267,7 @@ const useIssueCredential = () => {
           meta: {
             url: "https://consumer-and-issuer-demo.vercel.app/",
             name: "NeoBank",
-            logo: "https://consumer-and-issuer-demo.vercel.app/static/logo.svg",
+            logo: "https://consumer-and-issuer-demo.playground.idos.network/static/logo.svg",
           },
         },
         KYCPermissions: [
