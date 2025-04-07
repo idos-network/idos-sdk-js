@@ -6,3 +6,10 @@ packages:
 catalog:
   ethers: ^6.13.5
   "@kwilteam/kwil-js": 0.9.2
+
+catalogs:
+  react19:
+    react: ^19.1.0
+    react-dom: ^19.1.0
+    "@types/react": ^19.1.0
+    "@types/react-dom": ^19.1.1
