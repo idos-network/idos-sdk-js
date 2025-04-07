@@ -249,7 +249,7 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 
 export const invokePassportingService = async (payload: unknown) => {
   invariant(process.env.PASSPORTING_SERVICE_URL, "`PASSPORTING_SERVICE_URL` is not set");
-  return await await fetch(process.env.PASSPORTING_SERVICE_URL ?? "", {
+  return await fetch(process.env.PASSPORTING_SERVICE_URL, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: {
@@ -257,10 +257,12 @@ export const invokePassportingService = async (payload: unknown) => {
       Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
     },
   })
-    .then((res) => res.json())
+    .then(async (res) => {
+      return await res.json();
+    })
     .catch((err) => {
       console.error(err);
-      throw new Error("Failed to invoke passporting service", err);
+      return { success: false, error: err };
     });
 };
 

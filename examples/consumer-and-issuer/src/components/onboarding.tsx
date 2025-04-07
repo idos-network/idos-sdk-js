@@ -357,11 +357,15 @@ function useShareCredentialWithConsumer() {
 
       const message: string = await isleController.idosClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
-
-      return invokePassportingService({
+      const result = await invokePassportingService({
         ...dag,
         dag_signature: signature,
       });
+
+      if (!result.success) {
+        console.error(result.error);
+        throw new Error("Failed to invoke passporting service");
+      }
     },
     onSuccess: (data) => {
       isleController?.updateIsleStatus("verified");
