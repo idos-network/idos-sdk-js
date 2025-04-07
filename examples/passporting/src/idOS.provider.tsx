@@ -59,21 +59,6 @@ export function IdosClientProvider({ children }: PropsWithChildren) {
     );
   }
 
-  if (idOSClient.state === "with-user-signer") {
-    const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
-
-    return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-4">
-        <h1 className="font-semibold text-2xl">No idOS profile found for this address 😔</h1>
-        <p>Click the button below to create one:</p>
-        <Button as={Link} href={issuerUrl} className="fit-content" target="_blank" rel="noreferrer">
-          Create an idOS profile
-        </Button>
-      </div>
-    );
-  }
-
   return <idOSClientContext.Provider value={idOSClient}>{children}</idOSClientContext.Provider>;
 }
 
