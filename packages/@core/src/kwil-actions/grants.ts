@@ -24,15 +24,15 @@ export interface GetGrantsParams {
   size?: number;
   user_id?: string | null;
 }
-
-export async function getGrants(
-  kwilClient: KwilActionClient,
-  params: GetGrantsParams = { page: 1, size: 10, user_id: null },
-) {
+export async function getGrants(kwilClient: KwilActionClient, params: GetGrantsParams) {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",
-    inputs: params,
+    inputs: {
+      page: params.page ?? 1,
+      size: params.size ?? 10,
+      user_id: params.user_id ?? null,
+    },
   });
 }
 export interface CreateAccessGrantByDAGParams {
@@ -75,6 +75,7 @@ export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string
 export async function getAccessGrantsOwned(kwilClient: KwilActionClient) {
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_owned",
+    inputs: {},
   });
 }
 

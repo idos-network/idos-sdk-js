@@ -78,10 +78,8 @@ function useShareCredential() {
       const { id } = await idOSClient.createCredentialCopy(
         credentialId,
         consumerEncryptionPublicKey,
-        {
-          consumerAddress: consumerSigningPublicKey,
-          lockedUntil: 0,
-        },
+        consumerSigningPublicKey,
+        0,
       );
 
       const dag = {

@@ -309,7 +309,6 @@ export class Data {
       "",
       originalCredential.content,
       consumerRecipientEncryptionPublicKey,
-      grantInfo,
     );
 
     const id = crypto.randomUUID();
@@ -321,6 +320,8 @@ export class Data {
           original_credential_id: originalCredential.id,
           ...originalCredential,
           ...insertableCredential,
+          locked_until: grantInfo?.lockedUntil,
+          grantee_wallet_identifier: grantInfo?.consumerAddress,
           id,
         },
       ],
@@ -354,8 +355,11 @@ export class Data {
           "",
           record.content,
           consumerRecipientEncryptionPublicKey,
-          grantInfo,
         ),
+        {
+          locked_until: grantInfo?.lockedUntil,
+          grantee_wallet_identifier: grantInfo?.consumerAddress,
+        },
       );
     }
 
@@ -427,10 +431,6 @@ export class Data {
     publicNotes: string,
     plaintextContent: string,
     receiverEncryptionPublicKey: string,
-    grantInfo?: {
-      consumerAddress: string;
-      lockedUntil: number;
-    },
   ): Promise<InsertableIDOSCredential> {
     const { content, encryptorPublicKey } = await this.enclave.encrypt(
       plaintextContent,
@@ -443,7 +443,6 @@ export class Data {
       content,
       receiverEncryptionPublicKey,
       encryptorPublicKey,
-      grantInfo,
     );
   }
 }

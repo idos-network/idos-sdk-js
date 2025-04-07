@@ -9,17 +9,23 @@ interface CreateKwilClientParams {
   nodeUrl: string;
 }
 
-type ActionName = keyof typeof actionSchema;
+type KwilActions = typeof actionSchema;
+type ActionName = keyof KwilActions;
 
-type KwilCallActionRequestParams<Name extends ActionName = ActionName> = {
-  name: Name;
-  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
-  inputs?: Name extends ActionName ? Record<(typeof actionSchema)[Name][number], any> : never;
+type AllKwilCallAction = {
+  [Name in ActionName]: {
+    name: Name;
+    inputs: Record<KwilActions[Name][number], unknown>;
+  };
 };
 
-interface KwilExecuteActionRequestParams extends KwilCallActionRequestParams {
-  description?: string;
-}
+type KwilCallActionRequestParams = AllKwilCallAction[ActionName];
+
+type AllKwilExecuteAction = {
+  [Name in ActionName]: AllKwilCallAction[Name] & { description: string };
+};
+
+type KwilExecuteActionRequestParams = AllKwilExecuteAction[ActionName];
 
 /**
  * A client for interacting with kwil with type-safe abstractions for `call` and `execute`.

@@ -351,10 +351,8 @@ function useShareCredentialWithConsumer() {
       const { id } = await isleController.idosClient.createCredentialCopy(
         credential.id,
         consumerEncryptionPublicKey,
-        {
-          consumerAddress: consumerSigningPublicKey,
-          lockedUntil: 0,
-        },
+        consumerSigningPublicKey,
+        0,
       );
 
       const dag = {
