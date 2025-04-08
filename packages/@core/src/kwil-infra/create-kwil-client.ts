@@ -17,7 +17,7 @@ type ActionName = keyof KwilActions;
 type AllKwilCallAction = {
   [Name in ActionName]: {
     name: Name;
-    inputs: Record<KwilActions[Name][number], unknown>;
+    inputs: Record<KwilActions[Name][number]["name"], unknown>;
   };
 };
 
