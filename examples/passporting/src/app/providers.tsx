@@ -7,7 +7,52 @@ import { type State, WagmiProvider, useAccount } from "wagmi";
 
 import { WalletConnector } from "@/components/wallet-connector";
 import { IdosClientProvider } from "@/idOS.provider";
-import { getConfig } from "@/wagmi.config";
+
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
+import { createAppKit } from "@reown/appkit/react";
+
+const queryClient = new QueryClient();
+
+const metadata = {
+  name: "ACME Card Provider",
+  description: "ACME Card Provider",
+  url: "https://acme-card-provider-demo.playground.idos.network/",
+  icons: ["https://acme-card-provider-demo.playground.idos.network//static/logo.svg"],
+};
+
+const networks = [mainnet, sepolia];
+
+export const wagmiAdapter = new WagmiAdapter({
+  networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "4ef6d50d5abec02ac8603a7409f3b2b0",
+  ssr: true,
+});
+
+createAppKit({
+  adapters: [wagmiAdapter],
+  networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "4ef6d50d5abec02ac8603a7409f3b2b0",
+  metadata,
+  features: {
+    analytics: true,
+    email: false,
+    socials: false,
+  },
+  showWallets: false,
+});
+
+export function AppKitProvider({
+  children,
+  initialState,
+}: React.PropsWithChildren<{ initialState?: State }>) {
+  return (
+    // @ts-ignore wagmi config is not typed for some reason
+    <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </WagmiProvider>
+  );
+}
 
 function Auth(props: { children: ReactNode }) {
   const { isConnected } = useAccount();
@@ -28,16 +73,15 @@ export function Providers(props: {
   children: ReactNode;
   initialState?: State;
 }) {
-  const [config] = useState(() => getConfig());
   const [queryClient] = useState(() => new QueryClient());
 
   return (
     <HeroUIProvider>
-      <WagmiProvider config={config} initialState={props.initialState}>
-        <QueryClientProvider client={queryClient}>
-          <Auth>{props.children}</Auth>
-        </QueryClientProvider>
-      </WagmiProvider>
+      <AppKitProvider initialState={props.initialState}>
+        <Auth>
+          <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+        </Auth>
+      </AppKitProvider>
     </HeroUIProvider>
   );
 }

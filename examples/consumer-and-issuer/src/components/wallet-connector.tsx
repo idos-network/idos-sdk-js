@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@heroui/react";
+import { useAppKit } from "@reown/appkit/react";
 import { useRouter } from "next/navigation";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 import { injected } from "wagmi/connectors";
@@ -8,6 +9,7 @@ import { injected } from "wagmi/connectors";
 export function WalletConnector() {
   const { isConnected, address } = useAccount();
   const { connectAsync, isPending } = useConnect();
+  const { open } = useAppKit();
   const { disconnect } = useDisconnect();
   const router = useRouter();
 
@@ -32,9 +34,7 @@ export function WalletConnector() {
       color="secondary"
       isLoading={isPending}
       onPress={async () => {
-        await connectAsync({
-          connector: injected(),
-        });
+        open();
         router.replace("/onboarding");
       }}
     >
