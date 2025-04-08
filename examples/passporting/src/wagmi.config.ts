@@ -1,6 +1,9 @@
+import { createConfig as createPrivyConfig } from "@privy-io/wagmi";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import type { Account, Chain, Client } from "viem";
+
+import type { PrivyClientConfig } from "@privy-io/react-auth";
 import {
   http,
   type Config,
@@ -51,3 +54,18 @@ export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
   const { data: client } = useConnectorClient<Config>({ chainId });
   return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
 }
+
+export const privyConfig = createPrivyConfig({
+  chains: [mainnet, sepolia],
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
+  transports: {
+    [mainnet.id]: http(),
+    [sepolia.id]: http(),
+  },
+});
+
+export const privyGeneralConfig: PrivyClientConfig = {
+  appearance: { theme: "dark" },
+};

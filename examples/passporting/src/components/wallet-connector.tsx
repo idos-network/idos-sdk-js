@@ -1,13 +1,14 @@
 "use client";
 
 import { Button } from "@heroui/react";
+import { useConnectWallet } from "@privy-io/react-auth";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
 
 export function WalletConnector() {
   const { isConnected } = useAccount();
-  const { connect, isPending } = useConnect();
+  const { isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const { connectWallet: connectPrivy } = useConnectWallet();
 
   if (isConnected) {
     return (
@@ -22,14 +23,7 @@ export function WalletConnector() {
   }
 
   return (
-    <Button
-      isLoading={isPending}
-      onPress={() =>
-        connect({
-          connector: injected(),
-        })
-      }
-    >
+    <Button isLoading={isPending} onPress={() => connectPrivy()}>
       Connect a wallet
     </Button>
   );
