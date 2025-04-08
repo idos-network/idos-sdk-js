@@ -9,7 +9,6 @@ import {
 } from "@idos-network/core";
 import {
   type CreateCredentialByDelegatedWriteGrantParams,
-  createCredentialAsInserter as _createCredentialAsInserter,
   createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
   editCredentialAsIssuer as _editCredentialAsIssuer,
   getCredentialIdByContentHash as _getCredentialIdByContentHash,
@@ -86,21 +85,6 @@ export interface BaseCredentialParams {
   publicNotes: string;
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
-}
-
-export async function createCredentialAsInserter(
-  issuerConfig: IssuerServerConfig,
-  params: BaseCredentialParams,
-): Promise<idOSCredential> {
-  const { kwilClient } = issuerConfig;
-  const payload = ensureEntityId(buildInsertableIDOSCredential(issuerConfig, params));
-
-  await _createCredentialAsInserter(kwilClient, payload);
-
-  return {
-    ...payload,
-    original_id: "",
-  };
 }
 
 export type DelegatedWriteGrantBaseParams = Omit<BaseCredentialParams, "userId">;

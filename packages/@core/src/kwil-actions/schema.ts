@@ -2,12 +2,12 @@ import { Utils } from "@kwilteam/kwil-js";
 
 const { DataType } = Utils;
 
-interface elem {
+export interface ActionSchemaElem {
   name: string;
   type: typeof DataType.Uuid | typeof DataType.Text | typeof DataType.Int;
 }
 
-export const ActionSchema: Record<string, elem[]> = {
+export const actionSchema: Record<string, ActionSchemaElem[]> = {
   add_user_as_inserter: [
     {
       name: "id",
@@ -165,7 +165,7 @@ export const ActionSchema: Record<string, elem[]> = {
       type: DataType.Uuid,
     },
     {
-      name: "encryptor_public_key",
+      name: "issuer_auth_public_key",
       type: DataType.Text,
     },
   ],
@@ -595,4 +595,4 @@ export const ActionSchema: Record<string, elem[]> = {
       type: DataType.Text,
     },
   ],
-};
+} as const;

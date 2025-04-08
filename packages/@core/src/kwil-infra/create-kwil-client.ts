@@ -3,23 +3,31 @@ import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
 import type { DataInfo } from "@kwilteam/kwil-js/dist/core/database";
 import invariant from "tiny-invariant";
-import { ActionSchema } from "../kwil-actions/schema";
+import { actionSchema } from "../kwil-actions/schema";
+import type { ActionSchemaElem } from "../kwil-actions/schema";
 
 interface CreateKwilClientParams {
   chainId?: string;
   nodeUrl: string;
 }
 
-interface KwilActionReqParams {
-  name: string;
-  // biome-ignore lint/suspicious/noExplicitAny: we don't need to be strict here.
-  inputs?: Record<string, any>;
-}
+type KwilActions = typeof actionSchema;
+type ActionName = keyof KwilActions;
 
-interface KwilCallActionRequestParams extends KwilActionReqParams {}
-interface KwilExecuteActionRequestParams extends KwilActionReqParams {
-  description?: string;
-}
+type AllKwilCallAction = {
+  [Name in ActionName]: {
+    name: Name;
+    inputs: Record<KwilActions[Name][number], unknown>;
+  };
+};
+
+type KwilCallActionRequestParams = AllKwilCallAction[ActionName];
+
+type AllKwilExecuteAction = {
+  [Name in ActionName]: AllKwilCallAction[Name] & { description: string };
+};
+
+type KwilExecuteActionRequestParams = AllKwilExecuteAction[ActionName];
 
 /**
  * A client for interacting with kwil with type-safe abstractions for `call` and `execute`.
@@ -81,7 +89,7 @@ export class KwilActionClient {
   ): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
 
-    const args = ActionSchema[actionName];
+    const args = (actionSchema as Record<string, readonly ActionSchemaElem[]>)[actionName];
     return args.map(({ name }) => {
       const value = params[name];
       // Handle falsy values appropriately
@@ -91,7 +99,7 @@ export class KwilActionClient {
   }
 
   private _actionTypes(actionName: string): DataInfo[] {
-    const args = ActionSchema[actionName];
+    const args = actionSchema[actionName];
     return args.map((arg) => arg.type);
   }
 }

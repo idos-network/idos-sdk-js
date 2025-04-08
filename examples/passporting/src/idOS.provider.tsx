@@ -2,68 +2,55 @@
 
 import { Button, CircularProgress, Link } from "@heroui/react";
 import {
-  type ConsumerClientConfig,
-  checkUserProfile,
-  createConsumerClientConfig,
-} from "@idos-network/consumer-sdk-js/client";
-import {
   type PropsWithChildren,
   createContext,
   useCallback,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import invariant from "tiny-invariant";
-import { useAccount } from "wagmi";
 
 import { useEthersSigner } from "@/wagmi.config";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 
-// biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
-export const idOSConsumerContext = createContext<ConsumerClientConfig>(null!);
-export const useIdOSConsumer = () => useContext(idOSConsumerContext);
+const startingConfig = new idOSClientConfiguration({
+  nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
+  enclaveOptions: { container: "#idOS-enclave" },
+});
 
-export function IDOSConsumerProvider({ children }: PropsWithChildren) {
-  const [config, setConfig] = useState<ConsumerClientConfig | null>(null);
-  const [initializing, setInitializing] = useState(true);
-  const initialized = useRef(false);
+export const idOSClientContext = createContext<idOSClient>(startingConfig);
+export const useIdosClient = () => useContext(idOSClientContext);
 
-  const { address } = useAccount();
+export function IdosClientProvider({ children }: PropsWithChildren) {
+  const [idOSClient, setIdosClient] = useState<idOSClient>(startingConfig);
   const signer = useEthersSigner();
-  const [hasProfile, setHasProfile] = useState(false);
 
   const initialize = useCallback(async () => {
-    if (initialized.current) return;
-
-    if (!signer) return;
-
-    initialized.current = true;
-
-    const _config = await createConsumerClientConfig({
-      nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
-      signer,
-      enclaveOptions: {
-        container: "#idOS-enclave",
-      },
-    });
-
-    const _hasProfile = await checkUserProfile(_config, address as string);
-
-    if (_hasProfile && signer) {
-      setHasProfile(true);
+    switch (idOSClient.state) {
+      case "configuration":
+        setIdosClient(await idOSClient.createClient());
+        break;
+      case "idle":
+        if (signer) setIdosClient(await idOSClient.withUserSigner(signer));
+        break;
+      case "with-user-signer":
+        if (!signer) setIdosClient(await idOSClient.logOut());
+        if (await idOSClient.hasProfile()) setIdosClient(await idOSClient.logIn());
+        break;
+      case "logged-in":
+        if (!signer) setIdosClient(await idOSClient.logOut());
+        break;
+      default:
+        assertNever(idOSClient);
     }
-
-    setConfig(_config);
-
-    setInitializing(false);
-  }, [address, signer]);
+  }, [idOSClient, signer]);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  if (initializing) {
+  if (idOSClient.state === "configuration" || idOSClient.state === "idle") {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
         <CircularProgress aria-label="initializing idOS..." />
@@ -72,20 +59,9 @@ export function IDOSConsumerProvider({ children }: PropsWithChildren) {
     );
   }
 
-  if (!hasProfile || !config) {
-    const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+  return <idOSClientContext.Provider value={idOSClient}>{children}</idOSClientContext.Provider>;
+}
 
-    return (
-      <div className="flex h-dvh flex-col items-center justify-center gap-4">
-        <h1 className="font-semibold text-2xl">No idOS profile found for this address 😔</h1>
-        <p>Click the button below to create one:</p>
-        <Button as={Link} href={issuerUrl} className="fit-content" target="_blank" rel="noreferrer">
-          Create an idOS profile
-        </Button>
-      </div>
-    );
-  }
-
-  return <idOSConsumerContext.Provider value={config}>{children}</idOSConsumerContext.Provider>;
+function assertNever(state: never) {
+  throw new Error(`Unexpected state: ${JSON.stringify(state)}`);
 }

@@ -2,11 +2,13 @@ name: Format
 
 on:
   pull_request:
-    branches: [develop, production]
+    branches:
+      - playground
+      - main
   push:
     branches:
-      - develop
-      - production
+      - playground
+      - main
 
 jobs:
   format:

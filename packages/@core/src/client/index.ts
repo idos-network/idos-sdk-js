@@ -236,10 +236,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   async createCredentialCopy(
     id: string,
     consumerRecipientEncryptionPublicKey: string,
-    consumerInfo: {
-      consumerAddress: string;
-      lockedUntil: number;
-    },
+    consumerAddress: string,
+    lockedUntil: number,
   ) {
     const originalCredential = await getCredentialById(this.kwilClient, id);
     invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
@@ -255,14 +253,17 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerRecipientEncryptionPublicKey),
     );
 
-    const insertableCredential = await buildInsertableIDOSCredential(
-      originalCredential.user_id,
-      "",
-      base64Encode(content),
-      consumerRecipientEncryptionPublicKey,
-      base64Encode(encryptorPublicKey),
-      consumerInfo,
-    );
+    const insertableCredential = {
+      ...(await buildInsertableIDOSCredential(
+        originalCredential.user_id,
+        "",
+        base64Encode(content),
+        consumerRecipientEncryptionPublicKey,
+        base64Encode(encryptorPublicKey),
+      )),
+      grantee_wallet_identifier: consumerAddress,
+      locked_until: lockedUntil,
+    };
 
     const copyId = crypto.randomUUID();
 

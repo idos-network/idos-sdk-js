@@ -39,6 +39,7 @@ export async function createUser(kwilClient: KwilActionClient, params: CreateUse
 export async function getUserProfile(kwilClient: KwilActionClient) {
   const [user] = await kwilClient.call<[idOSUser]>({
     name: "get_user",
+    inputs: {},
   });
   return user;
 }
