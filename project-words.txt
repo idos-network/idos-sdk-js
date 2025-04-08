@@ -71,3 +71,5 @@ viewports
 vite
 wagmi
 webauthn
+appkit
+APPKIT
