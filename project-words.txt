@@ -1,6 +1,8 @@
 addgroup
 adduser
 Alexandr
+appkit
+APPKIT
 barebones
 biomejs
 Blockhash
@@ -48,6 +50,7 @@ permissioned
 Personhood
 pnpx
 preact
+recyphered
 Reown
 safekeep
 sandboxed
@@ -71,5 +74,3 @@ viewports
 vite
 wagmi
 webauthn
-appkit
-APPKIT
