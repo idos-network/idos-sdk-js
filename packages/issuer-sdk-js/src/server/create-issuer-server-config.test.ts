@@ -17,6 +17,11 @@ vi.mock("@kwilteam/kwil-js", () => {
       ActionInput: {
         fromObject: vi.fn(),
       },
+      DataType: {
+        Uuid: "uuid",
+        Text: "text",
+        Int: "int",
+      },
     },
   };
 });
