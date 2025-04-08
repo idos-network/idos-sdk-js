@@ -17,7 +17,7 @@ import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 import { Button } from "@/components/ui";
-import { IDOSProvider } from "@/idOS.provider";
+import { IDOSClientProvider } from "@/idOS.provider";
 import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 
 export const Route = createRootRouteWithContext<{
@@ -90,9 +90,9 @@ function RootComponent() {
         </Container>
       </chakra.header>
       <chakra.main paddingY="6">
-        <IDOSProvider>
+        <IDOSClientProvider>
           <Outlet />
-        </IDOSProvider>
+        </IDOSClientProvider>
       </chakra.main>
       <chakra.div id="idOS-enclave" hidden />
       <ReactQueryDevtools buttonPosition="bottom-left" />
