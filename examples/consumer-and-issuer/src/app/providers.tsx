@@ -25,14 +25,14 @@ const networks = [mainnet, sepolia];
 
 export const wagmiAdapter = new WagmiAdapter({
   networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
-  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "4ef6d50d5abec02ac8603a7409f3b2b0",
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "",
   ssr: true,
 });
 
 createAppKit({
   adapters: [wagmiAdapter],
   networks: networks as unknown as [AppKitNetwork, ...AppKitNetwork[]],
-  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "4ef6d50d5abec02ac8603a7409f3b2b0",
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "",
   metadata,
   features: {
     analytics: true,
