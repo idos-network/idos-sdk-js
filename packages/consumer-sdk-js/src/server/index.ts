@@ -21,11 +21,10 @@ export class idOSConsumerSDK {
 
     switch (chainType) {
       case "EVM": {
-        const { Wallet, JsonRpcProvider } = await import("ethers");
-        const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
+        const { Wallet } = await import("ethers");
 
         consumer = await idOSConsumer.init({
-          consumerSigner: signer,
+          consumerSigner: new Wallet(authPrivateKey),
           recipientEncryptionPrivateKey,
           nodeUrl,
         });
