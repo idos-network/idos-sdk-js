@@ -6,7 +6,7 @@
     "@heroui/react": "2.7.6",
     "@idos-network/consumer-sdk-js": "workspace:*",
     "@idos-network/core": "workspace:*",
-    "@tanstack/react-query": "5.72.1",
+    "@tanstack/react-query": "5.72.0",
     "ethers": "catalog:",
     "next": "15.2.4",
     "react": "19.1.0",
