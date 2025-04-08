@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@kwilteam/kwil-js':
+      specifier: 0.9.2
+      version: 0.9.2
     ethers:
       specifier: ^6.13.5
       version: 6.13.5
@@ -45,9 +48,6 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
-      '@idos-network/idos-sdk':
-        specifier: workspace:*
-        version: link:../../packages/idos-sdk-js
       '@stablelib/base64':
         specifier: ^2.0.1
         version: 2.0.1
@@ -121,6 +121,9 @@ importers:
       globals:
         specifier: ^16.0.0
         version: 16.0.0
+      tiny-invariant:
+        specifier: ^1.3.3
+        version: 1.3.3
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
@@ -128,8 +131,8 @@ importers:
         specifier: ^6.2.5
         version: 6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)
       vite-plugin-node-polyfills:
-        specifier: ^0.23.0
-        version: 0.23.0(rollup@4.39.0)(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))
+        specifier: ^0.17.0
+        version: 0.17.0(rollup@4.39.0)(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1))
 
   apps/idos-data-dashboard:
     dependencies:
@@ -754,7 +757,7 @@ importers:
         version: 1.3.3
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(@types/node@22.14.0)(typescript@5.8.3))(typescript@5.8.3)
+        version: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(typescript@5.8.3))(typescript@5.8.3)
       typescript:
         specifier: ^5.2.2
         version: 5.8.3
@@ -10176,10 +10179,10 @@ packages:
     peerDependencies:
       vite: ^2.0.0 || ^3.0.0 || ^4.0.0
 
-  vite-plugin-node-polyfills@0.23.0:
-    resolution: {integrity: sha512-4n+Ys+2bKHQohPBKigFlndwWQ5fFKwaGY6muNDMTb0fSQLyBzS+jjUNRZG9sKF0S/Go4ApG6LFnUGopjkILg3w==}
+  vite-plugin-node-polyfills@0.17.0:
+    resolution: {integrity: sha512-iPmPn7376e5u6QvoTSJa16hf5Q0DFwHFXJk2uYpsNlmI3JdPms7hWyh55o+OysJ5jo9J5XPhLC9sMOYifwFd1w==}
     peerDependencies:
-      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0
+      vite: ^2.0.0 || ^3.0.0 || ^4.0.0 || ^5.0.0
 
   vite-prerender-plugin@0.5.7:
     resolution: {integrity: sha512-NSn/lewd0dZn8+mXvv9aXv6Wy7vx2wN5myawZc2YIFcVfrkcqEQVAjsOuWRWprovBHNplWIiPgEoUats8nt8+g==}
@@ -10782,7 +10785,7 @@ snapshots:
       '@babel/traverse': 7.27.0
       '@babel/types': 7.27.0
       convert-source-map: 2.0.0
-      debug: 4.4.0
+      debug: 4.4.0(supports-color@8.1.1)
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -10891,7 +10894,7 @@ snapshots:
       '@babel/parser': 7.27.0
       '@babel/template': 7.27.0
       '@babel/types': 7.27.0
-      debug: 4.4.0
+      debug: 4.4.0(supports-color@8.1.1)
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -11010,20 +11013,6 @@ snapshots:
       '@types/lodash.mergewith': 4.6.9
       lodash.mergewith: 4.6.2
       react: 19.1.0
-
-  '@coinbase/wallet-sdk@3.9.3':
-    dependencies:
-      bn.js: 5.2.1
-      buffer: 6.0.3
-      clsx: 1.2.1
-      eth-block-tracker: 7.1.0
-      eth-json-rpc-filters: 6.0.1
-      eventemitter3: 5.0.1
-      keccak: 3.0.4
-      preact: 10.26.5
-      sha.js: 2.4.11
-    transitivePeerDependencies:
-      - supports-color
 
   '@coinbase/wallet-sdk@3.9.3(supports-color@8.1.1)':
     dependencies:
@@ -14267,27 +14256,11 @@ snapshots:
     dependencies:
       '@lit-labs/ssr-dom-shim': 1.3.0
 
-  '@metamask/eth-json-rpc-provider@1.0.1':
-    dependencies:
-      '@metamask/json-rpc-engine': 7.3.3
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 5.0.2
-    transitivePeerDependencies:
-      - supports-color
-
   '@metamask/eth-json-rpc-provider@1.0.1(supports-color@8.1.1)':
     dependencies:
       '@metamask/json-rpc-engine': 7.3.3(supports-color@8.1.1)
       '@metamask/safe-event-emitter': 3.1.2
       '@metamask/utils': 5.0.2(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@metamask/json-rpc-engine@7.3.3':
-    dependencies:
-      '@metamask/rpc-errors': 6.4.0
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 8.5.0
     transitivePeerDependencies:
       - supports-color
 
@@ -14299,28 +14272,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@metamask/json-rpc-engine@8.0.2':
-    dependencies:
-      '@metamask/rpc-errors': 6.4.0
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 8.5.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@metamask/json-rpc-engine@8.0.2(supports-color@8.1.1)':
     dependencies:
       '@metamask/rpc-errors': 6.4.0(supports-color@8.1.1)
       '@metamask/safe-event-emitter': 3.1.2
       '@metamask/utils': 8.5.0(supports-color@8.1.1)
-    transitivePeerDependencies:
-      - supports-color
-
-  '@metamask/json-rpc-middleware-stream@7.0.2':
-    dependencies:
-      '@metamask/json-rpc-engine': 8.0.2
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 8.5.0
-      readable-stream: 3.6.2
     transitivePeerDependencies:
       - supports-color
 
@@ -14342,23 +14298,6 @@ snapshots:
     dependencies:
       bowser: 2.11.0
 
-  '@metamask/providers@16.1.0':
-    dependencies:
-      '@metamask/json-rpc-engine': 8.0.2
-      '@metamask/json-rpc-middleware-stream': 7.0.2
-      '@metamask/object-multiplex': 2.1.0
-      '@metamask/rpc-errors': 6.4.0
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 8.5.0
-      detect-browser: 5.3.0
-      extension-port-stream: 3.0.0
-      fast-deep-equal: 3.1.3
-      is-stream: 2.0.1
-      readable-stream: 3.6.2
-      webextension-polyfill: 0.10.0
-    transitivePeerDependencies:
-      - supports-color
-
   '@metamask/providers@16.1.0(supports-color@8.1.1)':
     dependencies:
       '@metamask/json-rpc-engine': 8.0.2(supports-color@8.1.1)
@@ -14373,13 +14312,6 @@ snapshots:
       is-stream: 2.0.1
       readable-stream: 3.6.2
       webextension-polyfill: 0.10.0
-    transitivePeerDependencies:
-      - supports-color
-
-  '@metamask/rpc-errors@6.4.0':
-    dependencies:
-      '@metamask/utils': 9.3.0
-      fast-safe-stringify: 2.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -14404,21 +14336,6 @@ snapshots:
       eventemitter2: 6.4.9
       readable-stream: 3.6.2
       socket.io-client: 4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10)
-      utf-8-validate: 5.0.10
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - supports-color
-
-  '@metamask/sdk-communication-layer@0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.14)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
-    dependencies:
-      bufferutil: 4.0.9
-      cross-fetch: 4.1.0(encoding@0.1.13)
-      date-fns: 2.30.0
-      debug: 4.4.0
-      eciesjs: 0.4.14
-      eventemitter2: 6.4.9
-      readable-stream: 3.6.2
-      socket.io-client: 4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       utf-8-validate: 5.0.10
       uuid: 8.3.2
     transitivePeerDependencies:
@@ -14455,44 +14372,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@metamask/sdk@0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)':
-    dependencies:
-      '@babel/runtime': 7.27.0
-      '@metamask/onboarding': 1.0.1
-      '@metamask/providers': 16.1.0
-      '@metamask/sdk-communication-layer': 0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.14)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
-      '@metamask/sdk-install-modal-web': 0.32.0
-      '@paulmillr/qr': 0.2.1
-      bowser: 2.11.0
-      cross-fetch: 4.1.0(encoding@0.1.13)
-      debug: 4.4.0
-      eciesjs: 0.4.14
-      eth-rpc-errors: 4.0.3
-      eventemitter2: 6.4.9
-      obj-multiplex: 1.0.0
-      pump: 3.0.2
-      readable-stream: 3.6.2
-      socket.io-client: 4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      tslib: 2.8.1
-      util: 0.12.5
-      uuid: 8.3.2
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-
   '@metamask/superstruct@3.2.1': {}
-
-  '@metamask/utils@5.0.2':
-    dependencies:
-      '@ethereumjs/tx': 4.2.0
-      '@types/debug': 4.1.12
-      debug: 4.4.0
-      semver: 7.7.1
-      superstruct: 1.0.4
-    transitivePeerDependencies:
-      - supports-color
 
   '@metamask/utils@5.0.2(supports-color@8.1.1)':
     dependencies:
@@ -14504,20 +14384,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@metamask/utils@8.5.0':
-    dependencies:
-      '@ethereumjs/tx': 4.2.0
-      '@metamask/superstruct': 3.2.1
-      '@noble/hashes': 1.7.1
-      '@scure/base': 1.2.4
-      '@types/debug': 4.1.12
-      debug: 4.4.0
-      pony-cause: 2.1.11
-      semver: 7.7.1
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - supports-color
-
   '@metamask/utils@8.5.0(supports-color@8.1.1)':
     dependencies:
       '@ethereumjs/tx': 4.2.0
@@ -14526,20 +14392,6 @@ snapshots:
       '@scure/base': 1.2.4
       '@types/debug': 4.1.12
       debug: 4.4.0(supports-color@8.1.1)
-      pony-cause: 2.1.11
-      semver: 7.7.1
-      uuid: 9.0.1
-    transitivePeerDependencies:
-      - supports-color
-
-  '@metamask/utils@9.3.0':
-    dependencies:
-      '@ethereumjs/tx': 4.2.0
-      '@metamask/superstruct': 3.2.1
-      '@noble/hashes': 1.7.1
-      '@scure/base': 1.2.4
-      '@types/debug': 4.1.12
-      debug: 4.4.0
       pony-cause: 2.1.11
       semver: 7.7.1
       uuid: 9.0.1
@@ -16742,7 +16594,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.51.1
       progress: 2.0.3
-      tsup: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(typescript@5.8.3)
+      tsup: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(@types/node@22.14.0)(typescript@5.8.3))(typescript@5.8.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -16765,7 +16617,7 @@ snapshots:
       gradient-string: 2.0.2
       playwright-core: 1.51.1
       progress: 2.0.3
-      tsup: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(typescript@5.8.3)
+      tsup: 8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(@types/node@22.14.0)(typescript@5.8.3))(typescript@5.8.3)
       unzipper: 0.10.14
       zod: 3.22.4
     transitivePeerDependencies:
@@ -17478,12 +17330,12 @@ snapshots:
   '@wagmi/connectors@5.7.12(@types/react@19.1.0)(@wagmi/core@2.16.7(@tanstack/query-core@5.72.1)(@types/react@19.1.0)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.26.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2)))(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.26.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.0
-      '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(supports-color@8.1.1)(utf-8-validate@5.0.10)
       '@safe-global/safe-apps-provider': 0.18.5(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2)
       '@wagmi/core': 2.16.7(@tanstack/query-core@5.72.1)(@types/react@19.1.0)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@19.1.0))(viem@2.26.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2))
       '@walletconnect/ethereum-provider': 2.19.2(@types/react@19.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2)
-      cbw-sdk: '@coinbase/wallet-sdk@3.9.3'
+      cbw-sdk: '@coinbase/wallet-sdk@3.9.3(supports-color@8.1.1)'
       viem: 2.26.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2)
     optionalDependencies:
       typescript: 5.8.3
@@ -19733,19 +19585,11 @@ snapshots:
 
   dayjs@1.11.10: {}
 
-  debug@4.3.7:
-    dependencies:
-      ms: 2.1.3
-
   debug@4.3.7(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 8.1.1
-
-  debug@4.4.0:
-    dependencies:
-      ms: 2.1.3
 
   debug@4.4.0(supports-color@8.1.1):
     dependencies:
@@ -20019,18 +19863,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  engine.io-client@6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
-    dependencies:
-      '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
-      engine.io-parser: 5.2.3
-      ws: 8.17.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      xmlhttprequest-ssl: 2.1.2
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
   engine.io-parser@5.2.3: {}
 
   enhanced-resolve@5.18.1:
@@ -20236,16 +20068,6 @@ snapshots:
 
   esutils@2.0.3: {}
 
-  eth-block-tracker@7.1.0:
-    dependencies:
-      '@metamask/eth-json-rpc-provider': 1.0.1
-      '@metamask/safe-event-emitter': 3.1.2
-      '@metamask/utils': 5.0.2
-      json-rpc-random-id: 1.0.1
-      pify: 3.0.0
-    transitivePeerDependencies:
-      - supports-color
-
   eth-block-tracker@7.1.0(supports-color@8.1.1):
     dependencies:
       '@metamask/eth-json-rpc-provider': 1.0.1(supports-color@8.1.1)
@@ -20407,7 +20229,7 @@ snapshots:
 
   extension-port-stream@3.0.0:
     dependencies:
-      readable-stream: 3.6.2
+      readable-stream: 4.7.0
       webextension-polyfill: 0.10.0
 
   external-editor@3.1.0:
@@ -22297,13 +22119,13 @@ snapshots:
       postcss: 8.5.3
       ts-node: 10.9.2(@swc/core@1.11.18)(@types/node@22.14.0)(typescript@5.8.3)
 
-  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.30)(typescript@5.8.3)):
+  postcss-load-config@4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(typescript@5.8.3)):
     dependencies:
       lilconfig: 3.1.3
       yaml: 2.7.1
     optionalDependencies:
       postcss: 8.5.3
-      ts-node: 10.9.2(@swc/core@1.11.18)(@types/node@20.17.30)(typescript@5.8.3)
+      ts-node: 10.9.2(@swc/core@1.11.18)(@types/node@22.14.0)(typescript@5.8.3)
 
   postcss-nested@6.2.0(postcss@8.5.3):
     dependencies:
@@ -22954,24 +22776,6 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
-    dependencies:
-      '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
-      engine.io-client: 6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      socket.io-parser: 4.2.4
-    transitivePeerDependencies:
-      - bufferutil
-      - supports-color
-      - utf-8-validate
-
-  socket.io-parser@4.2.4:
-    dependencies:
-      '@socket.io/component-emitter': 3.1.2
-      debug: 4.3.7
-    transitivePeerDependencies:
-      - supports-color
-
   socket.io-parser@4.2.4(supports-color@8.1.1):
     dependencies:
       '@socket.io/component-emitter': 3.1.2
@@ -23191,7 +22995,7 @@ snapshots:
       postcss: 8.5.3
       postcss-import: 15.1.0(postcss@8.5.3)
       postcss-js: 4.0.1(postcss@8.5.3)
-      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.30)(typescript@5.8.3))
+      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(@types/node@20.17.30)(typescript@5.8.3))
       postcss-nested: 6.2.0(postcss@8.5.3)
       postcss-selector-parser: 6.1.2
       resolve: 1.22.10
@@ -23415,7 +23219,7 @@ snapshots:
       - supports-color
       - ts-node
 
-  tsup@8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(typescript@5.8.3):
+  tsup@8.0.2(@swc/core@1.11.18)(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(typescript@5.8.3))(typescript@5.8.3):
     dependencies:
       bundle-require: 4.2.1(esbuild@0.19.12)
       cac: 6.7.14
@@ -23425,7 +23229,7 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@types/node@20.17.30)(typescript@5.8.3))
+      postcss-load-config: 4.0.2(postcss@8.5.3)(ts-node@10.9.2(@swc/core@1.11.18)(typescript@5.8.3))
       resolve-from: 5.0.0
       rollup: 4.39.0
       source-map: 0.8.0-beta.0
@@ -23828,10 +23632,12 @@ snapshots:
     transitivePeerDependencies:
       - rollup
 
-  vite-plugin-node-polyfills@0.23.0(rollup@4.39.0)(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)):
+  vite-plugin-node-polyfills@0.17.0(rollup@4.39.0)(vite@6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)):
     dependencies:
       '@rollup/plugin-inject': 5.0.5(rollup@4.39.0)
+      buffer-polyfill: buffer@6.0.3
       node-stdlib-browser: 1.3.1
+      process: 0.11.10
       vite: 6.2.5(@types/node@22.14.0)(jiti@2.4.2)(lightningcss@1.29.3)(terser@5.39.0)(tsx@4.19.3)(yaml@2.7.1)
     transitivePeerDependencies:
       - rollup

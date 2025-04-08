@@ -53,7 +53,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
           setClient(await client.logOut());
         }
         if (await client.hasProfile()) {
-          await client.logIn();
+          setClient(await client.logIn());
         }
 
         break;
@@ -73,7 +73,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     initialize();
   }, [initialize]);
 
-  if (client.state === "configuration" || client.state === "idle") {
+  if (client.state !== "logged-in") {
     return (
       <Center h="100%" flexDirection="column" gap="2">
         <Spinner />
