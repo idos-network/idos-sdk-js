@@ -3,8 +3,8 @@ import { idOS } from "@idos-network/idos-sdk";
 import {
   type PropsWithChildren,
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -13,10 +13,10 @@ import { useAccount } from "wagmi";
 import { useEthersSigner } from "./wagmi.config";
 
 // biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
-export const idOSContext = createContext<idOS>(null!);
-export const useIdOS = () => useContext(idOSContext);
+export const IDOSContext = createContext<idOS>(null!);
+export const useIdOS = () => use(IDOSContext);
 
-export function Provider({ children }: PropsWithChildren) {
+export function IDOSProvider({ children }: PropsWithChildren) {
   const [sdk, setSdk] = useState<idOS | null>(null);
   const initialized = useRef(false);
 
@@ -60,5 +60,5 @@ export function Provider({ children }: PropsWithChildren) {
     );
   }
 
-  return <idOSContext.Provider value={sdk}>{children}</idOSContext.Provider>;
+  return <IDOSContext value={sdk}>{children}</IDOSContext>;
 }

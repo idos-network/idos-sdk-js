@@ -1,6 +1,3 @@
-import { Button } from "@/components/ui";
-import { Provider } from "@/idOS.provider";
-import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 import {
   Center,
   Container,
@@ -18,6 +15,10 @@ import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
+
+import { Button } from "@/components/ui";
+import { IDOSProvider } from "@/idOS.provider";
+import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -89,9 +90,9 @@ function RootComponent() {
         </Container>
       </chakra.header>
       <chakra.main paddingY="6">
-        <Provider>
+        <IDOSProvider>
           <Outlet />
-        </Provider>
+        </IDOSProvider>
       </chakra.main>
       <chakra.div id="idOS-enclave" hidden />
       <ReactQueryDevtools buttonPosition="bottom-left" />

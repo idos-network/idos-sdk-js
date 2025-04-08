@@ -16,7 +16,7 @@ import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
-import { useContext, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
@@ -38,7 +38,7 @@ import { useSecretKey } from "@/hooks";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 
 import { Pagination } from "@/components/pagination";
-import { idOSContext, useIdOS } from "@/idOS.provider";
+import { useIdOS } from "@/idOS.provider";
 import { safeParse } from "./credentials";
 
 export const Route = createFileRoute("/")({
@@ -383,7 +383,7 @@ function SearchResults({
 
 function Index() {
   const [page, setPage] = useState<number>(1);
-  const sdk = useContext(idOSContext);
+  const sdk = useIdOS();
   const navigate = useNavigate({ from: Route.fullPath });
   const { filter = "" } = Route.useSearch();
   const debouncedSearchTerm = useDebounce(filter, 300);
