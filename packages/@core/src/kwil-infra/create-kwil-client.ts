@@ -17,7 +17,8 @@ type ActionName = keyof KwilActions;
 type AllKwilCallAction = {
   [Name in ActionName]: {
     name: Name;
-    inputs: Record<KwilActions[Name][number]["name"], unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: This is fine
+    inputs: Record<KwilActions[Name][number]["name"], any>;
   };
 };
 
