@@ -17,8 +17,8 @@ export const metadata: Metadata = {
   description: "A demo app demonstrating the usage of the idOS Passporting functionality",
 };
 
-export default function RootLayout(props: { children: ReactNode }) {
-  const initialState = cookieToInitialState(getConfig(), headers().get("cookie"));
+export default async function RootLayout(props: { children: ReactNode }) {
+  const initialState = cookieToInitialState(getConfig(), (await headers()).get("cookie"));
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
