@@ -10,8 +10,7 @@ export class idOSConsumerSDK {
   }
 
   static async init(
-    // @todo: not 100% sure if we want to keep this
-    // perhaps it is better to pass the signer directly from the outside
+    // We need the chainType to know what to dynamically import and make packages optional.
     chainType: ChainType,
     authPrivateKey: string,
     recipientEncryptionPrivateKey: string,
@@ -21,11 +20,10 @@ export class idOSConsumerSDK {
 
     switch (chainType) {
       case "EVM": {
-        const { Wallet, JsonRpcProvider } = await import("ethers");
-        const signer = new Wallet(authPrivateKey, new JsonRpcProvider(nodeUrl));
+        const { Wallet } = await import("ethers");
 
         consumer = await idOSConsumer.init({
-          consumerSigner: signer,
+          consumerSigner: new Wallet(authPrivateKey),
           recipientEncryptionPrivateKey,
           nodeUrl,
         });
@@ -34,12 +32,13 @@ export class idOSConsumerSDK {
       }
       case "NEAR": {
         const { KeyPair } = await import("near-api-js");
-        const signer = KeyPair.fromString(authPrivateKey);
+
         consumer = await idOSConsumer.init({
-          consumerSigner: signer,
+          consumerSigner: KeyPair.fromString(authPrivateKey),
           nodeUrl,
           recipientEncryptionPrivateKey,
         });
+
         return new idOSConsumerSDK(consumer);
       }
       default:

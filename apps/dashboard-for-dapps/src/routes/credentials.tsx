@@ -11,12 +11,12 @@ import {
   chakra,
 } from "@chakra-ui/react";
 import { base64Encode } from "@idos-network/core/codecs";
-import type { idOSCredential } from "@idos-network/idos-sdk";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useDeferredValue, useMemo, useState } from "react";
+import invariant from "tiny-invariant";
 
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
@@ -43,6 +43,7 @@ import {
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
+import type { idOSCredential } from "@idos-network/core";
 import ascii85 from "ascii85";
 
 export const Route = createFileRoute("/credentials")({
@@ -67,20 +68,23 @@ export const safeParse = (json?: string) => {
 export const useListCredentials = () => {
   const idOS = useIdOS();
 
-  return useQuery<idOSCredential[]>({
+  return useQuery({
     queryKey: ["credentials-list"],
     queryFn: async () => {
-      const credentials = await idOS.data.listAllCredentials();
+      invariant(idOS.state === "logged-in", "Invalid `idOSClient` state when fetching credentials");
+      const credentials = await idOS.getAllCredentials();
+
       const promiseList = credentials?.map(async (credential) => {
-        const fullCredential = (await idOS.data.get(
-          "credentials",
-          credential.id,
-          false,
-        )) as idOSCredential;
-        return { ...fullCredential, original_id: credential.original_id };
+        const fullCredential = await idOS.getCredentialById(credential.id);
+        return {
+          ...(fullCredential as idOSCredential),
+          original_id: credential.original_id,
+        } as idOSCredential;
       });
+
       const results = await Promise.all(promiseList);
-      return results.filter((credential) => !!credential);
+
+      return results.filter((credential): credential is idOSCredential => !!credential);
     },
     select: (data) =>
       data.filter((credential) => credential.public_notes && !credential.original_id) ?? [],
@@ -108,7 +112,7 @@ export const useDecryptAllCredentials = ({
             content: decrypted,
           };
         } catch (error) {
-          console.error(`Failed to decrypt/parse credential ${credential.id}:`, error);
+          console.error(`Failed to decrypt/parse credential with id: ${credential.id}:`, error);
           return {
             ...credential,
           };
@@ -429,7 +433,7 @@ function Credentials() {
 
   const decryptedCredentials = useDecryptAllCredentials({
     enabled: !!credentialsList.data?.length,
-    credentials: credentialsList.data ?? [],
+    credentials: credentialsList.data ?? ([] as idOSCredential[]),
   });
 
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle(false);
