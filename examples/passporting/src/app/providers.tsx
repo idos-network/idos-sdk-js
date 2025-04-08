@@ -1,13 +1,14 @@
 "use client";
 
-import { HeroUIProvider } from "@heroui/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
-import { type State, WagmiProvider, useAccount } from "wagmi";
-
 import { WalletConnector } from "@/components/wallet-connector";
 import { IdosClientProvider } from "@/idOS.provider";
-import { getConfig } from "@/wagmi.config";
+import { getConfig, privyConfig, privyGeneralConfig } from "@/wagmi.config";
+import { HeroUIProvider } from "@heroui/react";
+import { PrivyProvider } from "@privy-io/react-auth";
+import { WagmiProvider } from "@privy-io/wagmi";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { type ReactNode, useState } from "react";
+import { type State, useAccount } from "wagmi";
 
 function Auth(props: { children: ReactNode }) {
   const { isConnected } = useAccount();
@@ -28,16 +29,20 @@ export function Providers(props: {
   children: ReactNode;
   initialState?: State;
 }) {
-  const [config] = useState(() => getConfig());
   const [queryClient] = useState(() => new QueryClient());
-
+  const [config] = useState(() => getConfig());
   return (
-    <HeroUIProvider>
-      <WagmiProvider config={config} initialState={props.initialState}>
-        <QueryClientProvider client={queryClient}>
-          <Auth>{props.children}</Auth>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </HeroUIProvider>
+    <>
+      <PrivyProvider appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID} config={privyGeneralConfig}>
+        <HeroUIProvider>
+          <QueryClientProvider client={queryClient}>
+            {/* @ts-ignore */}
+            <WagmiProvider config={privyConfig}>
+              <Auth>{props.children}</Auth>
+            </WagmiProvider>
+          </QueryClientProvider>
+        </HeroUIProvider>
+      </PrivyProvider>
+    </>
   );
 }
