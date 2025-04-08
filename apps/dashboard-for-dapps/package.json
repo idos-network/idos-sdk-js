@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.72.1",
-    "@tanstack/router-devtools": "^1.115.2",
+    "@tanstack/react-router-devtools": "^1.115.2",
     "@tanstack/router-plugin": "^1.115.2",
     "@types/react": "catalog:react19",
     "@types/react-dom": "catalog:react19",
