@@ -97,6 +97,7 @@ function useShareCredential() {
       });
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["shared-credential"] });
       queryClient.setQueryData(["shared-credential"], data);
     },
   });
