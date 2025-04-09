@@ -2,11 +2,13 @@
 
 import { Button } from "@heroui/react";
 import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import { useAccount } from "wagmi";
 
 export function WalletConnector() {
   const { open } = useAppKit();
   const { disconnect } = useDisconnect();
-  const { isConnected, isPending } = useAppKitAccount();
+  const { isConnected } = useAppKitAccount();
+  const { isConnecting } = useAccount();
 
   if (isConnected) {
     return (
@@ -21,7 +23,7 @@ export function WalletConnector() {
   }
 
   return (
-    <Button isLoading={isPending} onPress={() => open()}>
+    <Button isLoading={isConnecting} onPress={() => open()}>
       Connect a wallet
     </Button>
   );

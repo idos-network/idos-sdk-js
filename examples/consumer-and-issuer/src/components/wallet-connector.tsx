@@ -4,12 +4,14 @@ import { Button } from "@heroui/react";
 import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { useAccount } from "wagmi";
 
 export function WalletConnector() {
   const { open } = useAppKit();
   const { disconnect } = useDisconnect();
   const router = useRouter();
-  const { isConnected, isPending } = useAppKitAccount();
+  const { isConnected } = useAppKitAccount();
+  const { isConnecting } = useAccount();
 
   useEffect(() => {
     if (isConnected) {
@@ -37,7 +39,7 @@ export function WalletConnector() {
   return (
     <Button
       color="secondary"
-      isLoading={isPending}
+      isLoading={isConnecting}
       onPress={async () => {
         await open();
       }}
