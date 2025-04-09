@@ -2,9 +2,10 @@
 
 import { Button, Link } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/core";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
 import { useIdosClient } from "@/idOS.provider";
@@ -47,7 +48,7 @@ export const useFetchSharedCredentialFromUser = () => {
 };
 
 function useShareCredential() {
-  const { address } = useAccount();
+  const { address } = useAppKitAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
   const idOSClient = useIdosClient();

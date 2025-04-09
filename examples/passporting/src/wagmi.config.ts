@@ -1,17 +1,7 @@
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import type { Account, Chain, Client } from "viem";
-import {
-  http,
-  type Config,
-  type Transport,
-  cookieStorage,
-  createConfig,
-  createStorage,
-  useConnectorClient,
-} from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
-import { injected } from "wagmi/connectors";
+import { type Config, type Transport, useConnectorClient } from "wagmi";
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;

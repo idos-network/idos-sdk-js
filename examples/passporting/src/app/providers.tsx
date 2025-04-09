@@ -3,13 +3,14 @@
 import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { type State, WagmiProvider, useAccount } from "wagmi";
+import { type State, WagmiProvider } from "wagmi";
 
 import { WalletConnector } from "@/components/wallet-connector";
 import { IdosClientProvider } from "@/idOS.provider";
 
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { createAppKit } from "@reown/appkit/react";
 
 const queryClient = new QueryClient();
@@ -55,7 +56,7 @@ export function AppKitProvider({
 }
 
 function Auth(props: { children: ReactNode }) {
-  const { isConnected } = useAccount();
+  const { isConnected } = useAppKitAccount();
 
   if (!isConnected) {
     return (
