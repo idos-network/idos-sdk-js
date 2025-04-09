@@ -16,7 +16,7 @@ Note that idOS is (currently) a permissioned network. While it's (almost) fully 
 ## Key Actors
 
 - **Owner (User)**:
-  The individuals whose data is securely managed by idOS. Users authenticate using their native blockchain wallets (EVM or NEAR-compatible). For data encryption and decryption operations, user use the idOS Enclave, a webapp running on its own browser origin, ensuring host apps cannot access plaintext data.
+  The individuals whose data is securely managed by idOS. Users authenticate using their native blockchain wallets (EVM or NEAR-compatible). For data encryption and decryption operations, users use the idOS Enclave, a webapp running on its own browser origin, ensuring host apps cannot access plaintext data.
 
 - **Issuer**:
   Organizations that verify user-provided data and issue credentials. Issuers are responsible for ensuring the accuracy, authenticity, and compliance of the information contained in credentials they issue. Examples include financial institutions, insurance companies, educational institutions, healthcare providers, government agencies, and other obliged entities and regulated service providers.
@@ -84,7 +84,7 @@ erDiagram
   The central identity entity in the system, representing a unique person or organization. Users control their profiles through their blockchain wallets and manage how their data is shared.
 
   - **User Profile**:
-  This is an informal, nebulous, term to generically refer to all the information a user controls.
+  This is an informal, nebulous, term to refer generally to all the information a user controls.
 
 - **Wallet**:
   Blockchain wallets that authenticate a user. A user can link multiple wallets across different chains (EVM, NEAR) to their idOS profile to provide flexible authentication options.
@@ -98,7 +98,7 @@ erDiagram
 
   An unintuitive aspect of credentials is that they're encrypted specifically for one recipient. To share credential data, the user (or their authorized delegate) must retrieve their encrypted credential, decrypt it using their keys, re-encrypt it for the new recipient, and store this as a new credential that references the original using **SharedCredential**. This process ensures end-to-end encryption while enabling controlled sharing.
 
-  Because credential content data arrives at idOS already encrypted, it cannot enforce any structure to it. However, we strongly encourage Issuers use W3C Verifiable Credentials, and provide functionality to support them.
+  Because credential content data arrives at idOS already encrypted, it cannot enforce any structure to it. However, we strongly encourage Issuers to use W3C Verifiable Credentials, and provide functionality to support them.
 
 - **Access Grant**:
   A user-authorized permission that allows a specific Consumer to access a credential's encrypted content:
@@ -130,7 +130,7 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
   - **Not Usable Before**: A timestamp (RFC3339 format) indicating when the dWG becomes valid.
   - **Not Usable After**: A timestamp (RFC3339 format) indicating when the dWG expires.
 
-  Whomever transmits the dWG to idOS also needs to provide the original and copy credentials' fields (including the encrypted content). Check the schema for more details.
+  Whoever transmits the dWG to idOS also needs to provide the original and copy credentials' fields (including the encrypted content). Check the schema for more details.
 
   dWGs can only be used once.
 
@@ -147,13 +147,13 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
   - **Locked Until**: A timestamp indicating when the Access Grant can be revoked.
   - **Content Hash**: A hash of the data being shared to ensure integrity during Passporting.
 
-  Whomever transmits the dAG to idOS also needs to provide the copy credential's fields (including the encrypted content). Check the schema for more details.
+  Whoever transmits the dAG to idOS also needs to provide the copy credential's fields (including the encrypted content). Check the schema for more details.
 
   dAGs can be used multiple times.
 
   > 🚧 Will change soon 🚧
   >
-  > dAG beings multi-use is a remnant of the previous Access Grant architecture. Given how the usefulness of dAGs has been evolving, we're going to make them single-use.
+  > dAG being multi-use is a remnant of the previous Access Grant architecture. Given how the usefulness of dAGs has been evolving, we're going to make them single-use.
   >
   > If you want to rely on multi-use, please get in touch with us first, so we can properly guide you and evolve the system accordingly.
 
@@ -168,7 +168,7 @@ These are other parties that bear influence in the system, even though they're n
   Legislative bodies and regulators define the legal frameworks and regulations that govern how citizen data should be handled. They ensure compliance with data protection laws, privacy standards, and other relevant legal requirements to safeguard user rights. idOS is designed to try to cater to as many regulatory frameworks as possible.
 
 - Compliance officers
-  Compliance officers play a critical role in making sure their organization executes all operations in compliance with applicable laws and guidelines. This way, they guarantee everyone's right and data safety is ensured. idOS expects every consumer and issuer to be under the counsel of a compliance officer.
+  Compliance officers play a critical role in making sure their organization executes all operations in compliance with applicable laws and guidelines. This way, they guarantee everyone's rights and ensure data safety. idOS expects every consumer and issuer to be under the counsel of a compliance officer.
 
 - idOS Consortium
   The idOS Consortium brings together leading ecosystems and projects in web3 to collaborate on creating a user-centric and widely adopted decentralized identity framework. By pooling expertise, resources, and innovation, the Consortium focuses on addressing three main areas for the project's development: Product, Growth, and Compliance. Read more about it at <https://docs.idos.network/the-idos-consortium>.
@@ -181,17 +181,17 @@ These are other parties that bear influence in the system, even though they're n
   These nodes form the backbone of the idOS system, providing decentralized storage and retrieval of user data. They are built on [Kwil](https://www.kwil.com/), a decentralized database platform, and include idOS-specific extensions to support the system's unique requirements. These nodes operate according to a predefined schema, ensuring data consistency and integrity. Deployed behind a KGW controlled by the idOS Association, node operators talk to each other through AWS VPC peering. We're also open to supporting WireGuard/Tailscale.
 
   - **Relevant repos**:
-    - https://github.com/idos-network/idos-kwild (🚧 not yet public 🚧)
+    - <https://github.com/idos-network/idos-kwild> (🚧 not yet public 🚧)
     - <https://github.com/idos-network/idos-schema>
   - **Deployments**:
     - _Production_: <https://nodes.idos.network/>
     - _Playground_: <https://nodes.playground.idos.network/>
 
 - **KGW (Kwil GateWay)**:
-  A load balancer and RPC gateway that sits in front of all idOS Storage Network Nodes. These also hold access cookies, which make it possible for logged in users to not have to sign every read request to the nodes.
+  A load balancer and RPC gateway that sits in front of all idOS Storage Network Nodes. It also holds access cookies, which make it possible for logged in users to not have to sign every read request to the nodes.
 
   - **Relevant repos**:
-    - https://github.com/idos-network/kgw (🚧 not yet public 🚧): idOS's kgw Docker image
+    - <https://github.com/idos-network/kgw> (🚧 not yet public 🚧): idOS's kgw Docker image
 
 ### Deployed Applications
 
@@ -205,7 +205,7 @@ These are other parties that bear influence in the system, even though they're n
     - _Playground_: <https://dashboard.playground.idos.network/>
 
 - **Dashboard for dApps**:
-  A tool designed for Consumer dApps to access data shared by users to a Consumer's wallet, and to decrypt shares credentials.
+  A tool designed for Consumer dApps to access data shared by users to a Consumer's wallet, and to decrypt shared credentials.
 
   > ⚠️ Warning ⚠️
   >
@@ -214,18 +214,18 @@ These are other parties that bear influence in the system, even though they're n
   > Please consider deploying your own copy of this application in an environment that enforces user safety and prevents accidental data leaks.
 
   - **Relevant repo folder**:
-    - [apps/idos-data-dashboard](../apps/idos-data-dashboard/)
+    - [apps/dashboard-for-dapps](../apps/dashboard-for-dapps/)
   - **Deployments**:
-    - _Production_: <https://dashboard.idos.network/>
-    - _Playground_: <https://dashboard.playground.idos.network/>
+    - _Production_: <https://dashboard-for-dapps.idos.network/>
+    - _Playground_: <https://dashboard-for-dapps.playground.idos.network/>
 
 - **idOS Enclave**:
-  A secure browser-based environment for handling sensitive operations such as password input, key derivation, encryption, decryption, and looking through credential's encrypted content. The Enclave operates in isolation from the host application, ensuring that plaintext data remains inaccessible to unauthorized parties. This component is critical for maintaining the end-to-end encryption guarantees of the idOS system.
+  A secure browser-based environment for handling sensitive operations such as password input, key derivation, encryption, decryption, and looking through credentials' encrypted content. The Enclave operates in isolation from the host application, ensuring that plaintext data remains inaccessible to unauthorized parties. This component is critical for maintaining the end-to-end encryption guarantees of the idOS system.
   - **Relevant repo folder**:
     - [apps/idos-enclave](../apps/idos-enclave/)
   - **Deployments**:
-    - _Production_: <https://dashboard.idos.network/>
-    - _Playground_: <https://dashboard.playground.idos.network/>
+    - _Production_: <https://enclave.idos.network/>
+    - _Playground_: <https://enclave.playground.idos.network/>
 
 - **idOS Isle**:
   > 🚧 Still under construction 🚧
@@ -251,7 +251,7 @@ These are other parties that bear influence in the system, even though they're n
 ### Demos
 
 - **Consumer & Issuer Demo**:
-  This is branded generally as "Neobank". It's meant to demonstrate how a neobank with that's using a credit card partner (ACME Card Provider) can share credentials using idOS.
+  This is branded generally as "Neobank". It's meant to demonstrate how a neobank that's using a credit card partner (ACME Card Provider) can share credentials using idOS.
 
   Note that its KYC process accepts anything resembling an official document and doesn't force the face to match with what's on the document.
 
@@ -259,7 +259,7 @@ These are other parties that bear influence in the system, even though they're n
     - [examples/consumer-and-issuer](../examples/consumer-and-issuer/)
   - **Deployments**:
     - _Playground_: <https://consumer-and-issuer-demo.playground.idos.network>
-      - Alternative URL: [demo.idos.network](https://demo.idos.network).
+      - Alternative URL: <https://demo.idos.network>
 
 - **ACME Card Provider Demo**:
   This is the sibling demo application of Consumer & Issuer Demo. It just shows its status.
