@@ -96,8 +96,8 @@ function useShareCredential() {
         dag_signature: signature,
       });
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData(["shared-credential"], data);
+    onSuccess: () => {
+      queryClient.refetchQueries({ queryKey: ["shared-credential"] });
     },
   });
 }
