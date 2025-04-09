@@ -28,10 +28,10 @@ When the user returns to the Consumer's app, the app recognizes that the user no
 
 The Consumer's app then lists the access grants it has received from the user. If no access grants are found, the app uses the idOS Client SDK to search for credentials that meet its compliance requirements. This filtering process can involve checking:
 - The Issuer's authentication public key on the credential.
-- Fields in the credential's public notes, such as proof of identity or residence.
+- Fields in the credential's public notes, such as signaling it contains proof of identity or residence.
 - Fields in the credential's encrypted contents, such as the user's country of residence. This filtering occurs within the idOS Enclave, ensuring that the Consumer's app does not have direct access to these fields.
 
-If no suitable credential is found, the user is directed back to the Issuer to create one. However, this scenario is unlikely, as the user has just returned from the Issuer.
+If no suitable credential is found, the user should be directed back to the Issuer to create one. However, given the journey so far, the user is expected to have a suitable credential.
 
 Once a suitable credential is identified, the Consumer's app requests an access grant with the appropriate timelock for the target credential. The user grants this request by:
 1. Retrieving the requested credential from idOS.
@@ -44,19 +44,20 @@ It is important to note that this final step ensures the integrity of the creden
 
 ### Consumer Access to the Granted Credential
 
-Once the access grant is in place, the Consumer's server retrieves the access grant data ID from the Consumer's app or through other means, such as listing access grants obtained from a specific user for back-office purposes. The server then requests the access grant from idOS and retrieves the data ID from it.
+Once the access grant is in place, the Consumer's server retrieves the access grant data ID from the Consumer's app request (or through other means, such as listing access grants obtained from a specific user for back-office purposes). The server then requests the access grant from idOS and retrieves the data ID from it.
 
 Using the data ID, the server requests the corresponding credential from idOS. The server decrypts the credential's contents using its encryption private key and verifies that the decrypted contents were signed by the Issuer. It also ensures that the contents meet the expected criteria.
 
-If everything checks out, the server returns a "success" response to the Consumer's app or performs an appropriate success action, such as displaying a green seal when rendering the credential in a back-office interface.
+If everything checks out, the server returns a "success" response to the Consumer's app (or performs an appropriate success action, such as displaying a green seal when rendering the credential in a back-office interface).
 
 ## Warmer Start Journeys
 
 For users who have already been onboarded to idOS, the process becomes significantly simpler. If a user has a matching credential and has already provided an access grant with an adequate timelock, the steps to serve the user are minimal.
 
 When another Consumer with compatible compliance needs comes along, the user only needs to:
-1. Unlock the idOS Enclave.
-2. Create a re-encrypted credential copy.
-3. Create an access grant for the copy to the second Consumer.
+1. Logging in to idOS.
+2. Unlock the idOS Enclave.
+3. Create a re-encrypted credential copy.
+4. Create an access grant for the copy to the second Consumer.
 
-With just these three steps, the system is ready to serve the user compliantly, streamlining the process and enhancing the user experience.
+With just these four steps, the system is ready to serve the user compliantly, streamlining the process and enhancing the user experience.
