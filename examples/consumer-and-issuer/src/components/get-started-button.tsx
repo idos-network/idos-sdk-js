@@ -1,12 +1,10 @@
 import { Button } from "@heroui/react";
+import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { injected, useAccount, useConnect } from "wagmi";
 
 export function GetStartedButton({ title = "Get started now" }: { title?: string }) {
-  const { isConnected } = useAccount();
-  const { connectAsync } = useConnect();
-  const router = useRouter();
+  const { isConnected } = useAppKitAccount();
+  const { open } = useAppKit();
 
   if (isConnected) {
     return (
@@ -20,11 +18,8 @@ export function GetStartedButton({ title = "Get started now" }: { title?: string
     <Button
       color="default"
       size="lg"
-      onPress={async () => {
-        await connectAsync({
-          connector: injected(),
-        });
-        router.replace("/onboarding");
+      onPress={() => {
+        open();
       }}
     >
       {title}

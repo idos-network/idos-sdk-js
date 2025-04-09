@@ -1,15 +1,12 @@
 "use client";
 
 import { Button } from "@heroui/react";
-import { useAppKit } from "@reown/appkit/react";
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 
 export function WalletConnector() {
-  const { isConnected } = useAccount();
   const { open } = useAppKit();
-  const { connect, isPending } = useConnect();
   const { disconnect } = useDisconnect();
+  const { isConnected, isPending } = useAppKitAccount();
 
   if (isConnected) {
     return (

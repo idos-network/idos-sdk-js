@@ -3,6 +3,7 @@
 import { Button, cn, useDisclosure } from "@heroui/react";
 import type { IsleStatus, idOSCredential } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useClickAway } from "@uidotdev/usehooks";
 import { AnimatePresence, motion } from "framer-motion";
@@ -13,7 +14,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import invariant from "tiny-invariant";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 
 import {
   createCredential,
@@ -414,7 +415,7 @@ const $step = atom<IsleStatus | undefined>(undefined);
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
-  const { address } = useAccount();
+  const { address } = useAppKitAccount();
   const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
