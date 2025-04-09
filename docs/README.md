@@ -159,14 +159,19 @@ While Issuers and Consumers are key actors in the system, they are primarily rep
 
 ## Other stakeholders
 
-- Node operators
-  INSERT_CONTENT_HERE about people who run the nodes
-- Legislative bodies
-  INSERT_CONTENT_HERE about people who write the laws
+These are other parties that bear influence in the system, even though they're not directly represented.
+
+- Data network node operators
+  Node operators are responsible for maintaining the idOS Storage Network Nodes. They ensure the decentralized storage and retrieval of user data, adhering to the predefined schema for data consistency and integrity. They are the stewards of idOS data, and are incentivized accordingly.
+
+- Legislative bodies and regulators
+  Legislative bodies and regulators define the legal frameworks and regulations that govern how citizen data should be handled. They ensure compliance with data protection laws, privacy standards, and other relevant legal requirements to safeguard user rights. idOS is designed to try to cater to as many regulatory frameworks as possible.
+
 - Compliance officers
-  INSERT_CONTENT_HERE about people who make sure their organizations are complying with current regulations.
-- idOS Governance Committee
-  INSERT_CONTENT_HERE
+  Compliance officers play a critical role in making sure their organization executes all operations in compliance with applicable laws and guidelines. This way, they guarantee everyone's right and data safety is ensured. idOS expects every consumer and issuer to be under the counsel of a compliance officer.
+
+- idOS Consortium
+  The idOS Consortium brings together leading ecosystems and projects in web3 to collaborate on creating a user-centric and widely adopted decentralized identity framework. By pooling expertise, resources, and innovation, the Consortium focuses on addressing three main areas for the project's development: Product, Growth, and Compliance. Read more about it at <https://docs.idos.network/the-idos-consortium>.
 
 ## Components
 
