@@ -30,6 +30,14 @@ export function CreateProfile() {
       </Text>
       <VStack gap="2" align="stretch" w="full">
         <Button
+          onClick={() => {
+            return setState("create");
+          }}
+        >
+          Create idOS profile
+        </Button>
+        <Button
+          gap="2"
           bg={{
             _hover: "neutral.300",
             _dark: {
@@ -39,14 +47,6 @@ export function CreateProfile() {
               base: "muted.bg",
             },
           }}
-          onClick={() => {
-            return setState("create");
-          }}
-        >
-          Create idOS profile
-        </Button>
-        <Button
-          gap="2"
           onClick={() => {
             return setState("link");
           }}
