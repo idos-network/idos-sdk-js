@@ -1,72 +1,62 @@
 # Long Tour
 
-## Cold start journey
+## Cold Start Journey
 
-Let's go over the journey that a brand new user to idOS goes through.
+The journey of a brand-new user to idOS begins with several key steps that ensure a smooth onboarding process and compliance with the system's requirements.
 
-### Initial acquaintance
-- User arrives at the Consumer's app
-- Consumer's app is configured (knows the url for the idOs nodes, where to put the idOS Enclave, etc)
-- Consumer's app asks the User to connect their wallet. The User connects their wallet.
-- Consumer's app consults idOS to check if the connected wallet's address has a profile.
-- Since the User is new, idOS tells the app that it doesn't recognize the wallet address.
-- Consumer's app redirects the User to its Issuer for the User to be onboarded.
+### Initial Acquaintance
 
-### User idOS onboarding
-- Issuer's app also notices idOS doesn't recognize the wallet, and offers to create a Profile.
-- User signs a message to prove wallet ownership.
-- Issuer's app request that idOS Enclave discovers the User's encryption public key.
-- User inputs their password in idOS Enclave.
-- idOS Enclave communicates the User's encryption public key back to Issuer's app.
-- Issuer's app instructs Issuer's server to create a Profile for the User on idOS with their current wallet address and encryption public key.
-- Issuer collects and verifies User's information (perhaps with the help of an Identity verifier)
-- Issuer then has two choices:
-    - If the verification is near instantaneous, ask the user to encrypt and store the credential in their idOS Profile.
-        - Additionally, for Issuers who don't want to store User data themselves, they can also ask for an Access Grant, so that the Issuer can access a copy of the inserted data later on and without requiring user interaction.
-    - If the verification might take a while, Issuer asks for a Delegated Write Grant. It's a message signed by User that delegates to Issuer the power to both insert a credential to the user's idOS Profile (cyphered for User), a credential copy (cyphered for Issuer), and the respective Access Grant (with the appropriate timelock).
-- User waits until the Issuer is done verifying the data and inserting a credential to the User's idOS Profile.
-- User gets directed to go back to the Consumer's app
+The journey starts when a user arrives at the Consumer's app. At this stage, the Consumer's app is already configured with the necessary details, such as the URLs for the idOS nodes and the location to deploy the idOS Enclave. The app prompts the user to connect their wallet, and once the user does so, the app consults idOS to check if the connected wallet's address has an existing profile.
 
-### Acquiring an access grant to the right credential
-- User arrives to the Consumer's app, which now recognizes the user as having a Profile on idOS.
-- Consumer's app asks the User to log in their idOS Profile. User signs a message to demonstrate consent.
-- Consumer's app lists the access grants that were given to it, and realizes there are none.
-- Consumer's app uses the idOS Client SDK to list the credentials that match the Consumer's compliance requirements. Common examples of filtering are:
-  - Issuer's authentication public key on the credential
-  - Fields in the credential's public notes, according to what the Issuer puts there (e.g., check if the credential certifies proof of identity, proof of residence, etc)
-  - Fields in the credential's encrypted contents, according to what the Issuer puts there (e.g., check if the user lives is/isn't from a specific country, etc)
-    - This happens on the idOS Enclave. Consumer's app doesn't have access to these fields.
-- If we don't find any Credential that fits our purposes, we need to direct the User to the Issuer to create one. This shouldn't be the case, since we just came back from Issuer.
-- Consumer's app asks for an access grant, with the correct timelock, for the target credential.
-- User grants it. This entails:
-  - User gets the request credential from idOS
-  - User re-encrypts the credential's contents, for Consumer's encryption public key, into a new credential.
-  - User inserts this new credential as being a copy of the original, and inserts the access grant pointing at the Consumer's credential copy.
-- Consumer's app is now able to see it has an access grant.
-- Consumer's app asks Consumer's server to confirm that everything about the access grant and the credential copy is as expected.
-- If Consumer's server is happy, we're all done!
+If the user is new to idOS, the system informs the app that it does not recognize the wallet address. Consequently, the Consumer's app redirects the user to its Issuer for onboarding.
 
-This last step might seem redundant. However, please note that we're trusting that the user didn't manipulate their own computer to produce false results. To be sure that the credential we were shared with has the right content, we should validate it on a computation environment that User can't interfere with: the Consumer's servers.
+### User idOS Onboarding
 
-### Consumer access to the granted credential
-- Consumer's server get the access grant data_id from Consumer's app (or discovers it through another means, e.g., listing the access grants gotten from a specific user to display in a back-office)
-- Consumer's server asks for the access grant from idOS
-- Consumer's server gets the data_id from the access grant
-- Consumer's server asks the credentials with id=data_id from idOS
-- Consumer's server uses their encryption private key to decrypt the credential's contents.
-- Consumer's server confirms that the decrypted contents were signed by the Issuer, and that the contents are as expected.
-- Consumer's server returns a "success" response to Consumer's app (or whichever "success" action might be appropriate, e.g., show a green seal when rendering the credential on a back-office)
+At the Issuer's app, the system also detects that the wallet is unrecognized and offers to create a Profile for the user. To proceed, the user signs a message to prove ownership of the wallet. The Issuer's app then requests the idOS Enclave to discover the user's encryption public key. The user inputs their password into the idOS Enclave, which communicates the encryption public key back to the Issuer's app.
 
-## Warmer start journeys
+With this information, the Issuer's app instructs its server to create a Profile for the user on idOS, associating it with the user's wallet address and encryption public key. The Issuer collects and verifies the user's information, potentially with the help of an identity verifier.
 
-As you've seen in the previous journey, there is a lot of things to set up. Here's the ladder of setup:
-- User has already been onboarded to idOS
-- User has a matching credential
-- User has provided an access grant with an adequate timelock
+At this point, the Issuer has two options:
+1. If the verification process is near-instantaneous, the Issuer can ask the user to encrypt and store the credential in their idOS Profile. Additionally, Issuers who prefer not to store user data themselves can request an Access Grant, allowing them to access a copy of the inserted data later without requiring further user interaction.
+2. If the verification process might take longer, the Issuer requests a Delegated Write Grant. This is a message signed by the user that delegates to the Issuer the authority to insert a credential into the user's idOS Profile (encrypted for the user), a credential copy (encrypted for the Issuer), and the corresponding Access Grant with an appropriate timelock.
 
-After having gone through all of this, if another Consumer comes along that happens to have compliance needs compatible with the credential User already has, we only need three steps:
-- User unlocks idOS Enclave
-- User creates the recyphered credential copy
-- User create an access grant for that copy to the second Consumer.
+Once the verification is complete and the credential is inserted into the user's idOS Profile, the user is directed back to the Consumer's app.
 
-That's it. And just like that, with 3 steps, we become ready to serve the user compliantly! 🥳
+### Acquiring an Access Grant to the Right Credential
+
+When the user returns to the Consumer's app, the app recognizes that the user now has a Profile on idOS. The app prompts the user to log in to their idOS Profile, and the user signs a message to demonstrate consent.
+
+The Consumer's app then lists the access grants it has received from the user. If no access grants are found, the app uses the idOS Client SDK to search for credentials that meet its compliance requirements. This filtering process can involve checking:
+- The Issuer's authentication public key on the credential.
+- Fields in the credential's public notes, such as proof of identity or residence.
+- Fields in the credential's encrypted contents, such as the user's country of residence. This filtering occurs within the idOS Enclave, ensuring that the Consumer's app does not have direct access to these fields.
+
+If no suitable credential is found, the user is directed back to the Issuer to create one. However, this scenario is unlikely, as the user has just returned from the Issuer.
+
+Once a suitable credential is identified, the Consumer's app requests an access grant with the appropriate timelock for the target credential. The user grants this request by:
+1. Retrieving the requested credential from idOS.
+2. Re-encrypting the credential's contents for the Consumer's encryption public key, creating a new credential.
+3. Inserting the new credential as a copy of the original and adding an access grant pointing to the Consumer's credential copy.
+
+With the access grant in place, the Consumer's app confirms its validity with the Consumer's server. If the server is satisfied with the access grant and the credential copy, the process is complete.
+
+It is important to note that this final step ensures the integrity of the credential. By validating it on the Consumer's servers, the system mitigates the risk of user interference or manipulation.
+
+### Consumer Access to the Granted Credential
+
+Once the access grant is in place, the Consumer's server retrieves the access grant data ID from the Consumer's app or through other means, such as listing access grants obtained from a specific user for back-office purposes. The server then requests the access grant from idOS and retrieves the data ID from it.
+
+Using the data ID, the server requests the corresponding credential from idOS. The server decrypts the credential's contents using its encryption private key and verifies that the decrypted contents were signed by the Issuer. It also ensures that the contents meet the expected criteria.
+
+If everything checks out, the server returns a "success" response to the Consumer's app or performs an appropriate success action, such as displaying a green seal when rendering the credential in a back-office interface.
+
+## Warmer Start Journeys
+
+For users who have already been onboarded to idOS, the process becomes significantly simpler. If a user has a matching credential and has already provided an access grant with an adequate timelock, the steps to serve the user are minimal.
+
+When another Consumer with compatible compliance needs comes along, the user only needs to:
+1. Unlock the idOS Enclave.
+2. Create a re-encrypted credential copy.
+3. Create an access grant for the copy to the second Consumer.
+
+With just these three steps, the system is ready to serve the user compliantly, streamlining the process and enhancing the user experience.
