@@ -1,5 +1,14 @@
 # Long Tour
 
+This document will take you on a long tour that'll encompass most of idOS's concepts and components. It assumes you don't need Passporting.
+
+We strongly recommend you read [idOS System Overview](./README.md) first.
+
+> 🚧 Will change soon 🚧
+>
+> We'll add a Passporting journey soon.
+
+
 ## Cold Start Journey
 
 The journey of a brand-new user to idOS begins with several key steps that ensure a smooth onboarding process and compliance with the system's requirements.
@@ -60,4 +69,4 @@ When another Consumer with compatible compliance needs comes along, the user onl
 3. Create a re-encrypted credential copy.
 4. Create an access grant for the copy to the second Consumer.
 
-With just these four steps, the system is ready to serve the user compliantly, streamlining the process and enhancing the user experience.
+With just these four steps, the system is ready to serve the user compliantly, streamlining the process and providing the best user experience we could image. Let us know if you have any ideas on how to make it even more magical! 🧙
