@@ -1,4 +1,4 @@
-import { useIdOS } from "@/core/idos";
+import { useIdOS } from "@/idOS.provider";
 import {
   Button,
   Center,
@@ -15,17 +15,28 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import { base64Decode, utf8Decode } from "@idos-network/core";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdOS();
 
   return useQuery({
     queryKey: ["credential_details", credentialId],
-    queryFn: ({ queryKey: [, credentialId] }) =>
-      sdk.data.get<idOSCredential>("credentials", credentialId),
+    queryFn: async ({ queryKey: [, credentialId] }) => {
+      const credential = await idOSClient.getCredentialOwned(credentialId);
+
+      const decryptedContent = await idOSClient.enclaveProvider.decrypt(
+        base64Decode(credential.content),
+        base64Decode(credential.encryptor_public_key),
+      );
+
+      Object.assign(credential, { content: utf8Decode(decryptedContent) });
+
+      return credential;
+    },
+    enabled: idOSClient.state === "logged-in",
   });
 };
 
