@@ -52,7 +52,6 @@ permissioned
 Personhood
 pnpx
 preact
-recyphered
 Reown
 safekeep
 sandboxed
