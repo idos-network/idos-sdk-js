@@ -42,7 +42,7 @@ erDiagram
     }
     Credential {
         uuid id
-        text user_id
+        uuid user_id
         text public_notes
         text content
         text encryptor_public_key
@@ -50,16 +50,16 @@ erDiagram
     }
     Attributes {
         uuid id
-        text user_id
+        uuid user_id
         text key
         text value
     }
     AccessGrant {
-        string id
-        string ag_owner_user_id
+        uuid id
+        uuid ag_owner_user_id
         string ag_consumer_wallet_identifier
-        string data_id
-        string locked_until
+        uuid data_id
+        timestamp locked_until
         string content_hash
     }
     SharedCredential {
