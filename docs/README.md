@@ -11,7 +11,7 @@ Note that idOS is (currently) a permissioned network. While it's (almost) fully 
 
 > 🔭 Will change later on 🔭
 >
-> We'd rather not be a permissioned network. However, because storing encrypted text public is dangerous, until we find a secure way to do it, we're going to keep the network permissioned.
+> We'd rather not be a permissioned network. However, because storing encrypted text publicly is dangerous, until we find a secure way to do it, we're going to keep the network permissioned.
 
 ## Key Actors
 
