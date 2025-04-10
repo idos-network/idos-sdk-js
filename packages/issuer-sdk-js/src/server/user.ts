@@ -1,10 +1,18 @@
 import type { idOSUser, idOSWallet } from "@idos-network/core";
 import {
   createUser as _createUser,
+  hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
 } from "@idos-network/core/kwil-actions";
 import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
+
+export async function hasProfile(
+  { kwilClient }: IssuerServerConfig,
+  userAddress: string,
+): Promise<boolean> {
+  return _hasProfile(kwilClient, userAddress);
+}
 
 export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
   id?: string;
