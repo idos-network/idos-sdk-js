@@ -22,6 +22,7 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
+import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
 
@@ -436,6 +437,11 @@ export function Onboarding() {
   });
 
   const activeStep = useStore($step);
+
+  useEffect(() => {
+    if (!isleController) return;
+    isleController.setupAppkit(wagmiAdapter.wagmiConfig);
+  }, [isleController]);
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
