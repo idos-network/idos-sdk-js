@@ -13,7 +13,7 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSCredential, idOSGrant } from "@idos-network/idos-sdk";
+import type { idOSCredential, idOSGrant } from "@idos-network/core";
 import {
   type DefaultError,
   useMutation,

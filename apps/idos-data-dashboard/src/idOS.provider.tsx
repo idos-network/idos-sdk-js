@@ -1,4 +1,4 @@
-import { Center, Spinner, Text } from "@chakra-ui/react";
+import { Center, Spinner } from "@chakra-ui/react";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
@@ -9,7 +9,6 @@ import {
   use,
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import invariant from "tiny-invariant";
@@ -18,19 +17,15 @@ import { useEthersSigner } from "@/core/wagmi";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
 
-function assertNever(state: never) {
-  throw new Error(`Unexpected state: ${JSON.stringify(state)}`);
-}
-
 const _idOSClient = new idOSClientConfiguration({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
   enclaveOptions: {
     container: "#idOS-enclave",
-    url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+    url: "import.meta.env.VITE_IDOS_ENCLAVE_URL,",
   },
 });
 
-const useSigner = () => {
+export const useSigner = () => {
   const [signer, setSigner] = useState<(Wallet & SignMessageMethod) | JsonRpcSigner | undefined>(
     undefined,
   );
@@ -48,14 +43,14 @@ const useSigner = () => {
       return;
     }
 
-    return;
+    setSigner(undefined);
   }, [ethSigner, selector]);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  return signer;
+  return { signer, setSigner };
 };
 
 export const IDOSClientContext = createContext<idOSClient>(_idOSClient);
@@ -67,57 +62,68 @@ export const useIdOS = () => {
 };
 
 export function IDOSClientProvider({ children }: PropsWithChildren) {
-  const initialized = useRef(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [client, setClient] = useState<idOSClient>(_idOSClient);
-  const signer = useSigner();
-
-  const initialize = useCallback(async () => {
-    if (initialized.current) return;
-
-    switch (client.state) {
-      case "configuration":
-        setClient(await _idOSClient.createClient());
-
-        break;
-      case "idle":
-        if (signer) {
-          setClient(await client.withUserSigner(signer));
-        }
-
-        break;
-      case "with-user-signer":
-        if (!signer) {
-          setClient(await client.logOut());
-        }
-        if (await client.hasProfile()) {
-          setClient(await client.logIn());
-        }
-
-        break;
-      case "logged-in":
-        if (!signer) {
-          setClient(await client.logOut());
-        }
-
-        initialized.current = true;
-        break;
-      default:
-        assertNever(client);
-    }
-  }, [client, signer]);
+  const { signer } = useSigner();
 
   useEffect(() => {
-    initialize();
-  }, [initialize]);
+    const setupClient = async () => {
+      setIsLoading(true);
 
-  if (client.state !== "logged-in") {
+      try {
+        // Always start with a fresh client
+        const newClient = await _idOSClient.createClient();
+
+        if (!signer) {
+          setClient(newClient);
+          setIsLoading(false);
+          return;
+        }
+
+        // Add the signer to the client
+        const withSigner = await newClient.withUserSigner(signer);
+
+        // Check if the user has a profile and log in if they do
+        if (await withSigner.hasProfile()) {
+          setClient(await withSigner.logIn());
+        } else {
+          setClient(withSigner);
+        }
+      } catch (error) {
+        console.error("Failed to initialize idOS client:", error);
+        const newClient = await _idOSClient.createClient();
+        setClient(newClient);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    setupClient();
+  }, [signer]);
+
+  // While loading, show a spinner
+  if (isLoading) {
     return (
-      <Center h="100dvh" flexDirection="column" gap="2">
+      <Center h="100dvh">
         <Spinner />
-        <Text>initializing idOS...</Text>
       </Center>
     );
   }
 
-  return <IDOSClientContext value={client}>{children}</IDOSClientContext>;
+  // If no signer is available, show the connect wallet screen
+  if (!signer) {
+    return <ConnectWallet />;
+  }
+
+  // If the client is not logged in, show a spinner
+  if (client.state !== "logged-in") {
+    return (
+      <Center h="100dvh">
+        <Spinner />
+      </Center>
+    );
+  }
+
+  // Otherwise, render the children with the client context
+  return <IDOSClientContext.Provider value={client}>{children}</IDOSClientContext.Provider>;
 }
