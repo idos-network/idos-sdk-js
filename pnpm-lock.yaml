@@ -48,6 +48,9 @@ importers:
       '@idos-network/client-sdk-js':
         specifier: workspace:*
         version: link:../../packages/client-sdk-js
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../../packages/@core
       '@stablelib/base64':
         specifier: ^2.0.1
         version: 2.0.1
