@@ -15,6 +15,8 @@ import {
   utf8Encode,
 } from "@idos-network/core";
 import type { DelegatedWriteGrant } from "@idos-network/core";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import type { AppKitNetwork } from "@reown/appkit/networks";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -36,6 +38,12 @@ import invariant from "tiny-invariant";
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${x}`);
 };
+
+export const wagmiAdapter = new WagmiAdapter({
+  networks: [mainnet, sepolia] as unknown as [AppKitNetwork, ...AppKitNetwork[]],
+  // TODO: Remove this once we have a proper project id
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "cm98ydqa9002ll20m0oxdzk4v",
+});
 
 /**
  * Meta information about an actor.
