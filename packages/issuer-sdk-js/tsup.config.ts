@@ -9,5 +9,5 @@ export default defineConfig({
   outDir: "./dist",
   bundle: true,
   dts: true,
-  noExternal: ["@idos-network/kwil-nep413-signer", "@idos-network/core", "@idos-network/codecs"],
+  noExternal: ["@idos-network/core"],
 });
