@@ -15,6 +15,8 @@ import {
   utf8Encode,
 } from "@idos-network/core";
 import type { DelegatedWriteGrant } from "@idos-network/core";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import type { AppKitNetwork } from "@reown/appkit/networks";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import {
   http,
@@ -36,6 +38,12 @@ import invariant from "tiny-invariant";
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${x}`);
 };
+
+export const wagmiAdapter = new WagmiAdapter({
+  networks: [mainnet, sepolia] as unknown as [AppKitNetwork, ...AppKitNetwork[]],
+  // TODO: Remove this once we have a proper project id
+  projectId: process.env.NEXT_PUBLIC_APPKIT_PROJECT_ID ?? "cm98ydqa9002ll20m0oxdzk4v",
+});
 
 /**
  * Meta information about an actor.
@@ -147,6 +155,8 @@ interface idOSIsleController {
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 
+  setupAppkit: (wagmiConfig: unknown) => void;
+
   readonly idosClient: idOSClient;
 
   logClientIn: () => Promise<void>;
@@ -235,6 +245,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       default:
         assertNever(idosClient);
     }
+  };
+
+  const setupAppkit = async (_wagmiConfig: unknown) => {
+    if (wagmiConfig) return;
+    wagmiConfig = _wagmiConfig as Config;
   };
 
   /**
@@ -705,9 +720,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     idosClient = await idosClient.logIn();
   };
 
-  // Initialize the idOSIsle instance
-  initializeWagmi();
-
   const container = document.getElementById(containerId);
   if (!container) {
     throw new Error(`Element with id "${containerId}" not found`);
@@ -850,7 +862,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
-
+    setupAppkit,
     get options() {
       return options;
     },
