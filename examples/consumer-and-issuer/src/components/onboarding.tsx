@@ -440,7 +440,7 @@ export function Onboarding() {
 
   useEffect(() => {
     if (!isleController) return;
-    isleController.setupAppkit(wagmiAdapter.wagmiConfig);
+    isleController.setupWagmiConfig(wagmiAdapter.wagmiConfig);
   }, [isleController]);
 
   const handleCreateProfile = useCallback(async () => {
