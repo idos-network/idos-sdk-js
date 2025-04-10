@@ -8,3 +8,11 @@ export * from "./store";
 export * from "./utils";
 export * from "./enclave";
 export * from "./client";
+
+// TODO(pkoch): Check each of these.
+// Filter credentials
+// - public notes
+// - issuer
+// Check for AG
+// Request AG
+// - directly

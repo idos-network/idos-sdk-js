@@ -17,19 +17,6 @@ import type { ethers } from "ethers";
 import type { KeyPair } from "near-api-js";
 import type { SignKeyPair } from "tweetnacl";
 
-// Backend
-// TODO(pkoch): identify the needs each of these are fulfilling.
-// What is here for the dashboard-for-dapps?
-// What is here for the consumer's backend to call?
-// AG search/filter
-// - paginated
-// Credential search/filter
-// - paginated
-// - filter by public notes
-// - filter by encrypted content
-// Retrieve a specific credential
-// Verify Credential
-
 interface idOSConsumerInitParams {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
@@ -132,3 +119,10 @@ export class idOSConsumer {
     };
   }
 }
+
+// TODO(pkoch): identify the needs each of these are fulfilling.
+// Credential search/filter
+// - paginated
+// - filter by public notes
+// - filter by encrypted content
+// Verify Credential

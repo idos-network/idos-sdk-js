@@ -193,6 +193,12 @@ These are other parties that bear influence in the system, even though they're n
   - **Relevant repos**:
     - <https://github.com/idos-network/kgw> (🚧 not yet public 🚧): idOS's kgw Docker image
 
+### SDKs
+
+- **idOS Client**: the browser SDK. Enables websites to integrate with idOS.
+- **idOS Consumer Server**: helps a consumer integrate their backend with idOS.
+- **idOS Issuer Server**: helps a consumer integrate their backend with idOS.
+
 ### Deployed Applications
 
 - **User Dashboard**:
