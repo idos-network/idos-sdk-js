@@ -1,56 +1,38 @@
-# idOS Consumer JavaScript SDK
+# idOS Consumer Server SDK
 
 [![NPM](https://img.shields.io/npm/v/@idos-network/idos-sdk?logo=npm)](https://www.npmjs.com/package/@idos-network/idos-sdk) ![License](https://img.shields.io/badge/license-MIT-blue?&logo=data:image/svg%2bxml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2NHB4IiBoZWlnaHQ9IjY0cHgiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjRkZGRkZGIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PGcgaWQ9IlNWR1JlcG9fYmdDYXJyaWVyIiBzdHJva2Utd2lkdGg9IjAiPjwvZz48ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiPjwvZz48ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxwYXRoIGQ9Ik0xNiAxNmwzLTggMy4wMDEgOEE1LjAwMiA1LjAwMiAwIDAxMTYgMTZ6Ij48L3BhdGg+IDxwYXRoIGQ9Ik0yIDE2bDMtOCAzLjAwMSA4QTUuMDAyIDUuMDAyIDAgMDEyIDE2eiI+PC9wYXRoPiA8cGF0aCBkPSJNNyAyMWgxMCI+PC9wYXRoPiA8cGF0aCBkPSJNMTIgM3YxOCI+PC9wYXRoPiA8cGF0aCBkPSJNMyA3aDJjMiAwIDUtMSA3LTIgMiAxIDUgMiA3IDJoMiI+PC9wYXRoPiA8L2c+PC9zdmc+Cg==)
 
-## Intro: audience and features
+## Audience and features
 
-The idOS Consumer JavaScript SDK is designed for application developers who need to access data and consume credential data shared through idOS Access Grants. This package caters specifically to both [frontend](./src/client/) and [backend](./src/server/) services and dApps acting as "consumers" - entities that have been granted permission to access user credentials in the idOS ecosystem. It provides a server-side implementation for decrypting and processing credentials, managing Access Grants, and implementing Passporting-compliant credential sharing workflows
-
-Developers working with regulatory requirements, KYC/identity verification services, or any application that needs secure, permissioned access to user data will find this SDK particularly valuable for building privacy-preserving services without handling raw credential data directly.
+The idOS Consumer Server SDK is designed for application developers who need to access user credentials through access grants and verify them. This package caters specifically to backend needs. It provides an implementation for decrypting and processing credentials, managing access grants, and implementing [passporting](../../docs/glossary.md#passporting)-compliant credential sharing workflows.
 
 ## What you’ll need
 
 ### Secrets
 
-TODO what secrets do I need to operate this, and were do I use them?
+> 🛑 DANGER 🛑
+>
+> Make sure you don't lose access to either secret keys. Otherwise, you won't be able to authenticate or decrypt credential contents. The idOS team won't be able to help you.
+
+You'll need:
+  - `recipientEncryptionPrivateKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to decode the credential copies that the owners (users) share with you by creating access grants.
+  - `consumerSigner`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
 
 ### Code
 
-Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with pnpm or the equivalent of your package manager of choice:
+Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with pnpm (or your package manager of choice):
+
 ```
-pnpm add @idos-network/consumer-sdk-js \
-  ethers near-api-js # These two are optional; only install the ones you for working with your network.
+pnpm add @idos-network/consumer-sdk-js
 ```
 
 ## Usage
-### Client-side
-
-TODO: Implement me. We still haven't moved the functions over.
-
-- frontend
-    - import and initialization
-        - `pnpm add @idos-network/idos-consumer-sdk-frontend`
-        - `import { idOS } from...`
-        - `idOS.init({ isleOptions: { container: “#idos-container” } })`
-    - basic user flow
-        - connect wallet
-        - check if has profile
-        - `setSigner`
-        - find valid credential (type + issuer)
-            - here’s how you can filter the user’s credentials for adequacy
-                - `.filter(issuer: “…”, credential_type: “…”)`
-                - you may need to filter based on encrypted data if you have country restrictions
-                    - in this scenario, the user will have to unlock their enclave in order to enable decryption
-                    - `.filter(country: “…”)`
-        - ensure access to your desired credential
-            - request access grant
-                - how timelocks
 
 ### Server-side
 #### Import and initialization
 
 ```js
-import { idOS } from "@idos-network/consumer-sdk-js";
+import { idOS } from "@idos-network/consumer-sdk-js/server";
 import nacl from "tweetnacl";
 
 /**
