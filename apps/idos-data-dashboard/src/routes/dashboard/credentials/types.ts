@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/idos-sdk";
+import type { idOSCredential } from "@idos-network/core";
 
 export type idOSCredentialWithShares = idOSCredential & {
   shares: string[];

@@ -36,7 +36,7 @@ import { NavLink, type NavLinkProps, Outlet, useLocation, useMatches } from "rea
 import { useAccount, useDisconnect } from "wagmi";
 
 import { useWalletSelector } from "@/core/near";
-import { useIdOS } from "@/idOS.provider";
+import { useIdOS, useSigner } from "@/idOS.provider";
 
 const ConnectedWallet = () => {
   const idOSClient = useIdOS();
@@ -88,11 +88,17 @@ const DisconnectButton = () => {
   const { disconnect } = useDisconnect();
   const { selector } = useWalletSelector();
   const queryClient = useQueryClient();
+  const idOSClient = useIdOS();
+  const { setSigner } = useSigner();
 
   const handleDisconnect = async () => {
     if (isConnected) disconnect();
     if (selector.isSignedIn()) (await selector.wallet()).signOut();
+    await idOSClient.logOut();
+    setSigner(undefined);
     queryClient.removeQueries();
+    // Force a navigation to ensure the state is reset
+    window.location.href = "/";
   };
 
   return (

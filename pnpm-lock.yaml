@@ -151,9 +151,6 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
-      '@idos-network/idos-sdk':
-        specifier: workspace:*
-        version: link:../../packages/idos-sdk-js
       '@near-wallet-selector/core':
         specifier: 8.9.10
         version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
