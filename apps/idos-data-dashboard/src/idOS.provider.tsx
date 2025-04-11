@@ -21,7 +21,7 @@ const _idOSClient = new idOSClientConfiguration({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
   enclaveOptions: {
     container: "#idOS-enclave",
-    url: "import.meta.env.VITE_IDOS_ENCLAVE_URL,",
+    url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
   },
 });
 
