@@ -9,7 +9,7 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import type { idOSWallet } from "@idos-network/idos-sdk";
+import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
-import { useIdOS } from "@/core/idos";
+import { useIdOS } from "@/idOS.provider";
 
 import { useWalletSelector } from "@/core/near";
 import { Navigate, useSearchParams } from "react-router-dom";
@@ -27,11 +27,11 @@ import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
 const useFetchWallets = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdOS();
 
   return useQuery({
     queryKey: ["wallets"],
-    queryFn: ({ queryKey: [tableName] }) => sdk.data.list<idOSWallet>(tableName),
+    queryFn: () => idOSClient.getWallets(),
     select: (data) => Object.groupBy(data, (wallet) => wallet.address),
   });
 };
@@ -110,11 +110,13 @@ const WalletsList = () => {
 };
 
 export function Component() {
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdOS();
   const [searchParams] = useSearchParams();
   const walletToAdd = searchParams.get("add-wallet") || undefined;
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const queryClient = useQueryClient();
+
+  const hasProfile = !!idOSClient.user.id;
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd && hasProfile });
 
   const handleWalletAdded = () => {

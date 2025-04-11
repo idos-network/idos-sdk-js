@@ -13,11 +13,13 @@ import {
   useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
-import { getNearFullAccessPublicKeys, type idOSWallet } from "@idos-network/idos-sdk";
+import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 
-import { useIdOS } from "@/core/idos";
+import { useIdOS } from "@/idOS.provider";
+import { getNearFullAccessPublicKeys } from "@/utils/near";
+import invariant from "tiny-invariant";
 
 type AddWalletProps = {
   isOpen: boolean;
@@ -26,18 +28,32 @@ type AddWalletProps = {
   onWalletAdded: () => void;
 };
 
-const createWalletFactory = ({
+const createWalletParamsFactory = ({
   address,
   public_key,
 }: { address: string; public_key?: string }) => ({
+  id: crypto.randomUUID() as string,
   address,
-  public_key,
+  public_key: public_key ?? null,
   message: "",
   signature: "",
 });
 
+const createWallet = async (
+  idOSClient: idOSClientLoggedIn,
+  params: { address: string; public_key?: string },
+): Promise<idOSWallet> => {
+  const walletParams = createWalletParamsFactory(params);
+  await idOSClient.addWallet(walletParams);
+
+  const insertedWallet = (await idOSClient.getWallets()).find((w) => w.id === walletParams.id);
+  invariant(insertedWallet, "insertedWallet is undefined, idOSClient.addWallet must have failed");
+
+  return insertedWallet;
+};
+
 const useAddWalletMutation = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdOS();
   const queryClient = useQueryClient();
 
   return useMutation<
@@ -48,19 +64,22 @@ const useAddWalletMutation = () => {
     { previousWallets: idOSWallet[] }
   >({
     mutationFn: async ({ address, publicKeys }) => {
-      const payload = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
-
-      if (payload.length > 0) return await sdk.data.createMultiple("wallets", payload, true);
-
-      return await sdk.data.create("wallets", createWalletFactory({ address }), true);
+      if (publicKeys.length > 0) {
+        return Promise.all(
+          publicKeys.map((public_key) => createWallet(idOSClient, { address, public_key })),
+        );
+      }
+      return [await createWallet(idOSClient, { address })];
     },
 
     onMutate: async ({ address, publicKeys }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
 
-      const wallets = publicKeys.map((public_key) => createWalletFactory({ address, public_key }));
-      const payload = wallets.length > 0 ? wallets : [createWalletFactory({ address })];
+      const wallets = publicKeys.map((public_key) =>
+        createWalletParamsFactory({ address, public_key }),
+      );
+      const payload = wallets.length > 0 ? wallets : [createWalletParamsFactory({ address })];
 
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
@@ -101,6 +120,7 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
 
     if (address_type === "NEAR") {
       publicKeys = (await getNearFullAccessPublicKeys(address)) || [];
+      console.log(publicKeys);
 
       if (!publicKeys.length) {
         toast({
@@ -117,9 +137,7 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
     addWallet.mutate(
       { address, publicKeys },
       {
-        async onSuccess(data: idOSWallet | idOSWallet[]) {
-          const wallets = Array.isArray(data) ? data : [data];
-
+        async onSuccess(wallets: idOSWallet[]) {
           const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
           const updated = cache.map((cachedWallet) => {
             if (!cachedWallet.id) {

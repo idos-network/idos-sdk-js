@@ -4,13 +4,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { Navigate, Outlet, RouterProvider, createBrowserRouter } from "react-router-dom";
+import { Navigate, RouterProvider, createBrowserRouter } from "react-router-dom";
 import { WagmiProvider } from "wagmi";
 
 import App from "@/app";
-import { Provider as IDOSProvider } from "@/core/idos";
 import { WalletSelectorContextProvider } from "@/core/near";
 import { projectId, wagmiConfig } from "@/core/wagmi";
+import { IDOSClientProvider } from "@/idOS.provider";
 import { theme } from "@/theme";
 
 const queryClient = new QueryClient({
@@ -32,7 +32,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         {/* @ts-ignore: TODO: fix wagmi types */}
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
-            <IDOSProvider>
+            <IDOSClientProvider>
               <RouterProvider
                 router={createBrowserRouter([
                   {
@@ -67,27 +67,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                             path: "/success",
                             element: <Navigate to="/" />,
                           },
-                          // temporary route setup for testing purposes of the SDK.
-                          {
-                            path: "/e2e",
-                            element: <Outlet />,
-                            children: [
-                              {
-                                path: "credential-filtering",
-                                lazy: () =>
-                                  import(
-                                    "@/routes/dashboard/e2e/credential-filtering/credential-filtering"
-                                  ),
-                              },
-                            ],
-                          },
                         ],
                       },
                     ],
                   },
                 ])}
               />
-            </IDOSProvider>
+            </IDOSClientProvider>
             <ReactQueryDevtools buttonPosition="bottom-left" />
           </QueryClientProvider>
         </WagmiProvider>

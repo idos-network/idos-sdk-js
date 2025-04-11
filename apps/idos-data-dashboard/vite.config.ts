@@ -11,7 +11,6 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
-          idos: ["@idos-network/idos-sdk"],
           vendor: [
             "@chakra-ui/react",
             "@tanstack/react-query",
