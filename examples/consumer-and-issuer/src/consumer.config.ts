@@ -1,4 +1,4 @@
-import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer-sdk-js/server";
+import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer-sdk-js";
 import { hexDecode } from "@idos-network/core";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";

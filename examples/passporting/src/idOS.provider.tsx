@@ -1,6 +1,7 @@
 "use client";
 
-import { Button, CircularProgress, Link } from "@heroui/react";
+import { CircularProgress } from "@heroui/react";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 import {
   type PropsWithChildren,
   createContext,
@@ -9,10 +10,8 @@ import {
   useEffect,
   useState,
 } from "react";
-import invariant from "tiny-invariant";
 
 import { useEthersSigner } from "@/wagmi.config";
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 
 const startingConfig = new idOSClientConfiguration({
   nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",

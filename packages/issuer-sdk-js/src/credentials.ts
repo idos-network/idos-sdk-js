@@ -16,8 +16,8 @@ import {
 } from "@idos-network/core/kwil-actions";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
-import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
+import { ensureEntityId } from "./utils";
 
 type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];

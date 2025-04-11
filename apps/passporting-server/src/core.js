@@ -1,8 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import {
-  createAccessGrantFromDAG,
-  createIssuerServerConfig,
-} from "@idos-network/issuer-sdk-js/server";
+import { createAccessGrantFromDAG, createIssuerServerConfig } from "@idos-network/issuer-sdk-js";
 import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";
