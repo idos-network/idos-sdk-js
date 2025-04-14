@@ -35,16 +35,16 @@ import { useEffect } from "react";
 import { NavLink, type NavLinkProps, Outlet, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 
-import { useIdOS } from "@/core/idos";
 import { useWalletSelector } from "@/core/near";
+import { useIdOS } from "@/idOS.provider";
 
 const ConnectedWallet = () => {
-  const { address } = useIdOS();
+  const idOSClient = useIdOS();
   return (
     <HStack alignItems="center" gap={5} h={20}>
       <Center flexShrink={0} w={50} h={50} bg="neutral.800" rounded="lg">
         <Image
-          alt={`Connected wallet ${address}`}
+          alt={`Connected wallet ${idOSClient.walletIdentifier}`}
           src="/idos-dashboard-logo-dark.svg"
           w={50}
           h={50}
@@ -54,7 +54,7 @@ const ConnectedWallet = () => {
       <Box>
         <Text>Connected Wallet</Text>
         <Text maxW={180} color="neutral.600" isTruncated>
-          {address}
+          {idOSClient.walletIdentifier}
         </Text>
       </Box>
     </HStack>
@@ -133,7 +133,7 @@ const Breadcrumbs = () => {
 export function Component() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const location = useLocation();
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdOS();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Close the sidebar whenever `location` changes.
   useEffect(() => {
@@ -175,7 +175,7 @@ export function Component() {
                     <Text as="span">Credentials</Text>
                   </ListItemLink>
                 </ListItem>
-                {hasProfile ? (
+                {idOSClient.user.id ? (
                   <ListItem>
                     <ListItemLink to="/wallets">
                       <Wallet2Icon size={24} strokeWidth="1.5" />
@@ -185,7 +185,7 @@ export function Component() {
                 ) : null}
               </List>
               <VStack mt="auto" gap={5} alignItems="stretch">
-                {hasProfile ? (
+                {idOSClient.user.id ? (
                   <List display="flex" flex={1} flexDir="column" gap={1.5}>
                     <ListItemLink to="/settings">
                       <CogIcon size={24} strokeWidth="1" />
@@ -255,7 +255,7 @@ export function Component() {
             </List>
           </DrawerBody>
           <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
-            {hasProfile ? (
+            {idOSClient.user.id ? (
               <List display="flex" flex={1} flexDir="column" gap={1.5}>
                 <ListItemLink to="/settings">
                   <CogIcon size={24} strokeWidth="1" />

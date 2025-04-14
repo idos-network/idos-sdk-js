@@ -3,19 +3,19 @@ import { useEffect } from "react";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { useDisconnect } from "wagmi";
 
-import { useIdOS } from "@/core/idos";
+import { useIdOS } from "@/idOS.provider";
 
 export default function App() {
   const [searchParams] = useSearchParams();
   const walletToAdd = searchParams.get("add-wallet") || undefined;
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const { disconnectAsync } = useDisconnect();
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdOS();
   const toast = useToast();
 
   useEffect(() => {
     async function checkProfile() {
-      if (walletToAdd && callbackUrl && !hasProfile) {
+      if (walletToAdd && callbackUrl && !idOSClient.user.id) {
         await disconnectAsync();
 
         toast({
@@ -27,7 +27,7 @@ export default function App() {
     }
 
     checkProfile();
-  }, [walletToAdd, callbackUrl, hasProfile, disconnectAsync, toast]);
+  }, [walletToAdd, callbackUrl, idOSClient.user.id, disconnectAsync, toast]);
 
   return <Outlet />;
 }

@@ -148,6 +148,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.13.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.1.0)(react@19.1.0))(@types/react@19.1.0)(react@19.1.0)
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../../packages/@core
       '@idos-network/idos-sdk':
         specifier: workspace:*
         version: link:../../packages/idos-sdk-js
@@ -200,6 +203,9 @@ importers:
         specifier: ^2.12.0
         version: 2.14.16(@tanstack/query-core@5.72.1)(@tanstack/react-query@5.72.1(react@19.1.0))(@types/react@19.1.0)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.26.2(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.24.2))(zod@3.24.2)
     devDependencies:
+      '@near-js/types':
+        specifier: ^0.2.1
+        version: 0.2.1
       '@playwright/test':
         specifier: ^1.45.3
         version: 1.51.1
@@ -221,6 +227,9 @@ importers:
       jsdom:
         specifier: ^22.1.0
         version: 22.1.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      tiny-invariant:
+        specifier: ^1.3.3
+        version: 1.3.3
       typescript:
         specifier: ^5.5.4
         version: 5.8.3
