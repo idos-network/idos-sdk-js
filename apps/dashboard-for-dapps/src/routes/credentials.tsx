@@ -450,7 +450,9 @@ function Credentials() {
   };
 
   const handleRefresh = async () => {
-    await queryClient.invalidateQueries({ queryKey: ["credentials", "credentials-list"] });
+    await queryClient.invalidateQueries({
+      queryKey: ["credentials", "credentials-list"],
+    });
     credentialsList.refetch();
   };
 

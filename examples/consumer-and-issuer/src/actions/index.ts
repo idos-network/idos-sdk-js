@@ -1,10 +1,7 @@
 "use server";
 import { getIssuerServerConfig } from "@/issuer.config";
-import { base64Decode, base64Encode, idOSCredential, toBytes } from "@idos-network/core";
-import {
-  createCredentialByDelegatedWriteGrant,
-  createUser,
-} from "@idos-network/issuer-sdk-js/server";
+import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
+import { createCredentialByDelegatedWriteGrant, createUser } from "@idos-network/issuer-sdk-js";
 import invariant from "tiny-invariant";
 
 import { idOSConsumer } from "@/consumer.config";

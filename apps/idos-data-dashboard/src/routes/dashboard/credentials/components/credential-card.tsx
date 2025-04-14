@@ -1,6 +1,8 @@
 import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
+import { useEffect } from "react";
+import { useFetchGrants } from "../shared";
 import type { idOSCredentialWithShares } from "../types";
 
 type CredentialCardProps = {
@@ -17,10 +19,15 @@ export const CredentialCard = ({
   onDelete,
 }: CredentialCardProps) => {
   const publicFields = JSON.parse(credential.public_notes);
+  const shares = useFetchGrants({ credentialId: credential.id });
 
   const meta = Object.entries(publicFields)
     .filter(([key]) => key !== "id")
     .map(([key, value]) => [key, value]) as [string, string][];
+
+  useEffect(() => {
+    shares.refetch();
+  }, [shares]);
 
   return (
     <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
@@ -37,7 +44,7 @@ export const CredentialCard = ({
           <Text mb={5} color="neutral.500" fontSize="sm">
             Shares
           </Text>
-          <Text data-testid="shares-count">{credential.shares?.length || 0}</Text>
+          <Text data-testid="shares-count">{shares.data?.length || 0}</Text>
         </GridItem>
       </SimpleGrid>
       <Stack flexDir={["column", "row"]} gap={5}>
