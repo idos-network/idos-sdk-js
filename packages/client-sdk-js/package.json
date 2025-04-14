@@ -1,0 +1,43 @@
+{
+  "name": "@idos-network/client-sdk-js",
+  "description": "idOS Client JavaScript SDK",
+  "version": "0.0.4",
+  "dependencies": {},
+  "devDependencies": {
+    "@idos-network/core": "workspace:*",
+    "@release-it/keep-a-changelog": "^5.0.0",
+    "@types/node": "^22.7.9",
+    "release-it": "^17.0.0",
+    "tsup": "8.0.2",
+    "typescript": "^5.2.2"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**",
+    "!dist/**/*.tsbuildinfo",
+    "src/**/*.ts",
+    "!src/**/*.test.ts",
+    "!src/**/*.test-d.ts"
+  ],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "peerDependencies": {},
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "idos-network/idos-sdk-js.git",
+  "scripts": {
+    "build": "tsup --config tsup.config.ts",
+    "dev": "tsup --watch",
+    "format": "biome format --write .",
+    "lint": "biome check --apply ./src",
+    "release-it": "release-it",
+    "test:build": "pnpx publint --strict"
+  },
+  "type": "module"
+}

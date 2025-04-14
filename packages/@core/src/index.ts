@@ -1,4 +1,5 @@
 // Re-export everything from submodules
+export * from "./client";
 export * from "./codecs";
 export * from "./cryptography";
 export * from "./types";
