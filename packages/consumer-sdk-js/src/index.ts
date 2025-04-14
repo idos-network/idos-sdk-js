@@ -119,3 +119,10 @@ export class idOSConsumer {
     };
   }
 }
+
+// TODO(pkoch): identify the needs each of these are fulfilling.
+// Credential search/filter
+// - paginated
+// - filter by public notes
+// - filter by encrypted content
+// Verify Credential
