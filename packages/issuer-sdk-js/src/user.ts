@@ -4,8 +4,8 @@ import {
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
 } from "@idos-network/core/kwil-actions";
-import { ensureEntityId } from "../utils";
 import type { IssuerServerConfig } from "./create-issuer-server-config";
+import { ensureEntityId } from "./utils";
 
 export async function hasProfile(
   { kwilClient }: IssuerServerConfig,
