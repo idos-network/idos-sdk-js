@@ -773,9 +773,6 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@idos-network/controllers':
-        specifier: workspace:*
-        version: link:../@controllers
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
@@ -919,9 +916,6 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@idos-network/controllers':
-        specifier: workspace:*
-        version: link:../@controllers
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core

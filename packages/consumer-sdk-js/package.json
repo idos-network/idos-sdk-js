@@ -7,13 +7,9 @@
       "main": "dist/index.js",
       "types": "dist/index.d.ts",
       "exports": {
-        "./client": {
-          "types": "./dist/client/index.d.ts",
-          "import": "./dist/client/index.js"
-        },
-        "./server": {
-          "types": "./dist/server/index.d.ts",
-          "import": "./dist/server/index.js"
+        ".": {
+          "types": "./dist/index.d.ts",
+          "import": "./dist/index.js"
         },
         "./package.json": "./package.json"
       }
@@ -24,7 +20,6 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "clean-package": "^2.2.0",
@@ -37,14 +32,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
-    },
-    "./server": {
-      "types": "./dist/server/index.d.ts",
-      "import": "./dist/server/index.js"
     }
   },
   "files": ["dist"],
