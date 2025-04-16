@@ -14,7 +14,7 @@ import { useState } from "react";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
-import { useIdOS } from "@/core/idos";
+import { useIdOS } from "@/idOS.provider";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
 import { DeleteCredential } from "./components/delete-credential";
@@ -22,12 +22,12 @@ import { GrantsCenter } from "./components/grants-center";
 import type { idOSCredentialWithShares } from "./types";
 
 const useFetchCredentials = () => {
-  const { sdk } = useIdOS();
+  const idOSClient = useIdOS();
 
   return useQuery({
     queryKey: ["credentials"],
     queryFn: async () => {
-      const credentials = await sdk.data.listAllCredentials();
+      const credentials = await idOSClient.getAllCredentials();
       return credentials.map((credential) => ({
         ...credential,
         shares: credentials
@@ -118,7 +118,7 @@ const Credentials = () => {
 };
 
 export function Component() {
-  const { hasProfile } = useIdOS();
+  const idOSClient = useIdOS();
   const queryClient = useQueryClient();
 
   return (
@@ -152,7 +152,7 @@ export function Component() {
           }}
         />
       </HStack>
-      {hasProfile ? <Credentials /> : <NoCredentials />}
+      {idOSClient.user.id ? <Credentials /> : <NoCredentials />}
     </VStack>
   );
 }

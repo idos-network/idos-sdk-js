@@ -23,7 +23,7 @@ import {
   useBreakpointValue,
 } from "@chakra-ui/react";
 
-import type { idOSGrant } from "@idos-network/idos-sdk";
+import type { idOSGrant } from "@idos-network/core";
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrant } from "../shared";
 
@@ -34,8 +34,8 @@ type GrantsCenterProps = {
 };
 
 function generateGrantId(grant: idOSGrant): string {
-  const { dataId, consumerAddress, lockedUntil } = grant;
-  return [dataId, consumerAddress, lockedUntil].join("-");
+  const { data_id, ag_grantee_wallet_identifier, locked_until } = grant;
+  return [data_id, ag_grantee_wallet_identifier, locked_until].join("-");
 }
 
 function timelockToDate(timelock: number): string {
@@ -85,10 +85,10 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 data-grant={JSON.stringify(grant)}
               >
                 <Td maxW={140}>
-                  <Text isTruncated>{grant.consumerAddress}</Text>
+                  <Text isTruncated>{grant.ag_grantee_wallet_identifier}</Text>
                 </Td>
                 <Td>
-                  <Text>{grant.lockedUntil ? timelockToDate(grant.lockedUntil) : "-"}</Text>
+                  <Text>{grant.locked_until ? timelockToDate(grant.locked_until) : "-"}</Text>
                 </Td>
                 <Td isNumeric>
                   <Button
@@ -96,9 +96,9 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     size="sm"
                     variant="outline"
                     colorScheme="red"
-                    isDisabled={timelockToMs(grant.lockedUntil) >= Date.now()}
+                    isDisabled={timelockToMs(grant.locked_until) >= Date.now()}
                     isLoading={
-                      revokeGrant.isPending && revokeGrant.variables?.dataId === grant.dataId
+                      revokeGrant.isPending && revokeGrant.variables?.data_id === grant.data_id
                     }
                     onClick={() => onRevoke(grant)}
                   >
