@@ -221,6 +221,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const setupWagmiConfig = async (_wagmiConfig: unknown) => {
     if (wagmiConfig) return;
     wagmiConfig = _wagmiConfig as Config;
+
+    watchAccountChanges();
+    reconnect(wagmiConfig).catch((error) => console.error(error));
   };
 
   /**
@@ -714,10 +717,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
   container.appendChild(iframe);
   setupController();
-
-  // Start initialization processes
-  reconnect(wagmiConfig).catch((error) => console.error(error));
-  watchAccountChanges();
 
   // Public API implementation
   /**
