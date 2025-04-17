@@ -126,6 +126,6 @@ export class idOSConsumer {
 // TODO(pkoch): identify the needs each of these are fulfilling.
 // - Credential search/filter
 // - Pagination of AGs
-// - Filter by credentialpublic notes
+// - Filter by credential public notes
 // - Filter by credential encrypted content
 // - Verify credential
