@@ -1,8 +1,10 @@
 import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
 import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
+import type { DataInfo } from "@kwilteam/kwil-js/dist/core/database";
 import invariant from "tiny-invariant";
 import { actionSchema } from "../kwil-actions/schema";
+import type { ActionSchemaElem } from "../kwil-actions/schema";
 
 interface CreateKwilClientParams {
   chainId?: string;
@@ -15,7 +17,8 @@ type ActionName = keyof KwilActions;
 type AllKwilCallAction = {
   [Name in ActionName]: {
     name: Name;
-    inputs: Record<KwilActions[Name][number], unknown>;
+    // biome-ignore lint/suspicious/noExplicitAny: This is fine
+    inputs: Record<KwilActions[Name][number]["name"], any>;
   };
 };
 
@@ -44,6 +47,7 @@ export class KwilActionClient {
       name: params.name,
       namespace: "main",
       inputs: this._createActionInputs(params.name, params.inputs),
+      types: this._actionTypes(params.name),
     };
 
     const response = await this.client.call(action as CallBody, signer);
@@ -63,9 +67,8 @@ export class KwilActionClient {
       name: params.name,
       namespace: "main",
       description: params.description,
-      inputs: (Array.isArray(params.inputs) ? params.inputs : [params.inputs]).map((input) =>
-        this._createActionInputs(params.name, input),
-      ),
+      inputs: [this._createActionInputs(params.name, params.inputs)],
+      types: this._actionTypes(params.name),
     };
     const response = await this.client.execute(action, signer, synchronous);
     return response.data?.tx_hash as T;
@@ -87,13 +90,18 @@ export class KwilActionClient {
   ): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
 
-    const keys = (actionSchema as Record<string, readonly string[]>)[actionName];
-    return keys.map((key) => {
-      const value = params[key];
+    const args = (actionSchema as Record<string, readonly ActionSchemaElem[]>)[actionName];
+    return args.map(({ name }) => {
+      const value = params[name];
       // Handle falsy values appropriately
       if (value === "" || value === 0) return value;
       return value ?? null;
     }) as PositionalParams;
+  }
+
+  private _actionTypes(actionName: string): DataInfo[] {
+    const args = actionSchema[actionName];
+    return args.map((arg) => arg.type);
   }
 }
 

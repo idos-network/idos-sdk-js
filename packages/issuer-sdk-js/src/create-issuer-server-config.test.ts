@@ -12,6 +12,16 @@ vi.mock("@idos-network/core", () => {
   return {
     createNodeKwilClient: vi.fn().mockResolvedValue(mockKwilClient),
     createServerKwilSigner: vi.fn().mockReturnValue([{ mockSigner: true }]),
+    Utils: {
+      ActionInput: {
+        fromObject: vi.fn(),
+      },
+      DataType: {
+        Uuid: "uuid",
+        Text: "text",
+        Int: "int",
+      },
+    },
   };
 });
 
