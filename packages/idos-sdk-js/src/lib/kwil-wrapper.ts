@@ -1,9 +1,9 @@
 import { actionSchema } from "@idos-network/core/kwil-actions";
+import type { ActionSchemaElem } from "@idos-network/core/kwil-actions";
 import type { idOSUser } from "@idos-network/core/types";
 import { KwilSigner, WebKwil } from "@kwilteam/kwil-js";
 import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
 import type { CustomSigner, EthSigner } from "@kwilteam/kwil-js/dist/core/builders.d";
-import type { ValueType } from "@kwilteam/kwil-js/dist/utils/types";
 
 export class KwilWrapper {
   static defaults = {
@@ -83,8 +83,13 @@ export class KwilWrapper {
 
   createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
-    const keys = (actionSchema as Record<string, readonly string[]>)[actionName];
-    return keys.map((key) => (params[key] || null) as ValueType) as PositionalParams; // Return null if no key in input params
+    const args = (actionSchema as Record<string, readonly ActionSchemaElem[]>)[actionName];
+    return args.map(({ name }) => {
+      const value = params[name];
+      // Handle falsy values appropriately
+      if (value === "" || value === 0) return value;
+      return value ?? null;
+    }) as PositionalParams;
   }
 
   async call(
