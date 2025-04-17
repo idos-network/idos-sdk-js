@@ -79,6 +79,7 @@ app.post(
     );
 
     if (error) {
+      console.log({ error });
       return c.json(
         {
           success: false,
