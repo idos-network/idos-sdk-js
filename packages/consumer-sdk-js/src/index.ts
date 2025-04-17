@@ -25,6 +25,10 @@ interface idOSConsumerInitParams {
 }
 
 export class idOSConsumer {
+  readonly address: string;
+  private readonly kwilClient: KwilActionClient;
+  private readonly noncedBox: NoncedBox;
+
   static async init({
     recipientEncryptionPrivateKey,
     nodeUrl = "https://nodes.idos.network",
@@ -46,11 +50,11 @@ export class idOSConsumer {
     );
   }
 
-  private constructor(
-    private readonly noncedBox: NoncedBox,
-    public readonly kwilClient: KwilActionClient,
-    public readonly address: string,
-  ) {}
+  private constructor(noncedBox: NoncedBox, kwilClient: KwilActionClient, address: string) {
+    this.noncedBox = noncedBox;
+    this.kwilClient = kwilClient;
+    this.address = address;
+  }
 
   get encryptionPublicKey() {
     return base64Encode(this.noncedBox.keyPair.publicKey);
@@ -73,7 +77,7 @@ export class idOSConsumer {
     return getGrantsCount(this.kwilClient, { user_id: userId });
   }
 
-  async getCredentialAccessGrant(credentialId: string): Promise<idOSGrant> {
+  async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
     const params = { credential_id: credentialId };
     const accessGrants = await getAccessGrantsForCredential(this.kwilClient, params);
 
@@ -88,10 +92,9 @@ export class idOSConsumer {
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
     const credential = await this.getSharedCredentialFromIDOS(credentialId);
 
-    const accessGrant = await this.getCredentialAccessGrant(credentialId);
+    const accessGrant = await this.getAccessGrantsForCredential(credentialId);
 
     // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
-
     const credentialContent = await this.noncedBox.decrypt(
       credential.content,
       credential.encryptor_public_key,
@@ -106,7 +109,7 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getGrants(params: GetGrantsParams) {
+  async getAccessGrants(params: GetGrantsParams) {
     return {
       grants: (await getGrants(this.kwilClient, params)).map((grant) => ({
         id: grant.id,
@@ -121,8 +124,8 @@ export class idOSConsumer {
 }
 
 // TODO(pkoch): identify the needs each of these are fulfilling.
-// Credential search/filter
-// - paginated
-// - filter by public notes
-// - filter by encrypted content
-// Verify Credential
+// - Credential search/filter
+// - Pagination of AGs
+// - Filter by credentialpublic notes
+// - Filter by credential encrypted content
+// - Verify credential
