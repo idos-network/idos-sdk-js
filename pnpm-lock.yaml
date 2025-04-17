@@ -45,9 +45,6 @@ importers:
       '@chakra-ui/react':
         specifier: ^3.15.1
         version: 3.15.1(@emotion/react@11.14.0(@types/react@19.1.0)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@idos-network/client-sdk-js':
-        specifier: workspace:*
-        version: link:../../packages/client-sdk-js
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
