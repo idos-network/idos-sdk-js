@@ -147,8 +147,6 @@ interface idOSIsleController {
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 
-  setupWagmiConfig: (wagmiConfig: unknown) => void;
-
   readonly idosClient: idOSClient;
 
   logClientIn: () => Promise<void>;
@@ -165,6 +163,27 @@ interface idOSIsleController {
 
 // Singleton wagmi config instance shared across all Isle instances
 let wagmiConfig: Config;
+
+/**
+ * Initializes the wagmi configuration if it hasn't been initialized yet.
+ * This is a singleton to ensure we only have one wagmi instance across the application.
+ */
+const initializeWagmi = (): void => {
+  if (wagmiConfig) return;
+
+  wagmiConfig = createConfig({
+    storage: createStorage({
+      key: "idOS:isle",
+      storage: localStorage,
+    }),
+    chains: [mainnet, sepolia],
+    connectors: [injected()],
+    transports: {
+      [mainnet.id]: http(),
+      [sepolia.id]: http(),
+    },
+  });
+};
 
 /**
  * Creates a new idOS Isle instance.
@@ -216,11 +235,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       default:
         assertNever(idosClient);
     }
-  };
-
-  const setupWagmiConfig = async (_wagmiConfig: unknown) => {
-    if (wagmiConfig) return;
-    wagmiConfig = _wagmiConfig as Config;
   };
 
   /**
@@ -691,6 +705,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     idosClient = await idosClient.logIn();
   };
 
+  // Initialize the idOSIsle instance
+  initializeWagmi();
+
   const container = document.getElementById(containerId);
   if (!container) {
     throw new Error(`Element with id "${containerId}" not found`);
@@ -833,7 +850,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
-    setupWagmiConfig,
+
     get options() {
       return options;
     },
