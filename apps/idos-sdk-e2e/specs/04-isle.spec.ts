@@ -1,3 +1,6 @@
+/*
+// Removing This test temporarily till we figure out how e2e can bypass the IDV process
+
 import crypto from "node:crypto";
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
@@ -184,3 +187,4 @@ test.describe
       }
     });
   });
+*/
