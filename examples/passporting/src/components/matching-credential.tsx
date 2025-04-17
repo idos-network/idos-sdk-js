@@ -2,9 +2,10 @@
 
 import { Button, Link } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/core";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
-import { useAccount, useSignMessage } from "wagmi";
+import { useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
 import { useIdosClient } from "@/idOS.provider";
@@ -39,18 +40,15 @@ export const useFetchSharedCredentialFromUser = () => {
     queryFn: async () => {
       invariant(idOSClient.state === "logged-in");
 
-      return fetch(`/api/shared-credential/${idOSClient.user.id}`)
-        .then((res) => res.json())
-        .catch((error) => {
-          return { credential: null, cause: error.message };
-        });
+      const res = await fetch(`/api/shared-credential/${idOSClient.user.id}`);
+      return (await res.json()) as { credential: idOSCredential | null; cause: string };
     },
     enabled: idOSClient.state === "logged-in",
   });
 };
 
 function useShareCredential() {
-  const { address } = useAccount();
+  const { address } = useAppKitAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
   const idOSClient = useIdosClient();
@@ -98,8 +96,8 @@ function useShareCredential() {
         dag_signature: signature,
       });
     },
-    onSuccess: (data) => {
-      queryClient.setQueryData(["shared-credential"], data);
+    onSettled: () => {
+      queryClient.refetchQueries({ queryKey: ["shared-credential"] });
     },
   });
 }
@@ -155,7 +153,7 @@ export function MatchingCredential() {
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
       </div>
     );
   }
@@ -165,7 +163,7 @@ export function MatchingCredential() {
       <h3 className="font-semibold text-2xl">
         We have found a matching credential that we can reuse:
       </h3>
-      <CredentialCard credential={matchingCredential.data as idOSCredential} />
+      <CredentialCard credential={matchingCredential.data} />
       <div>
         <p className="text-green-500 text-sm">
           In order to proceed, we need to request an encrypted duplicate of this credential.

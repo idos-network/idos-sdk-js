@@ -1,26 +1,15 @@
 {
-  "name": "@idos-network/issuer-sdk-js",
-  "description": "idOS Issuer JavaScript SDK",
+  "name": "@idos-network/client-sdk-js",
+  "description": "idOS Client JavaScript SDK",
   "version": "0.0.4",
-  "dependencies": {
-    "@kwilteam/kwil-js": "catalog:",
-    "es-toolkit": "^1.23.0",
-    "tiny-invariant": "^1.3.3",
-    "@digitalbazaar/vc": "^7.0.0",
-    "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
-    "jsonld-document-loader": "^2.3.0",
-    "base85": "^3.1.0",
-    "tweetnacl": "^1.0.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@idos-network/core": "workspace:*",
     "@release-it/keep-a-changelog": "^5.0.0",
     "@types/node": "^22.7.9",
     "release-it": "^17.0.0",
     "tsup": "8.0.2",
-    "typescript": "^5.2.2",
-    "vitest": "^0.31.4"
+    "typescript": "^5.2.2"
   },
   "exports": {
     ".": {
@@ -37,9 +26,7 @@
   ],
   "homepage": "https://idos.network",
   "license": "MIT",
-  "peerDependencies": {
-    "near-api-js": "3.0.4"
-  },
+  "peerDependencies": {},
   "publishConfig": {
     "access": "public"
   },
@@ -50,9 +37,7 @@
     "format": "biome format --write .",
     "lint": "biome check --apply ./src",
     "release-it": "release-it",
-    "test": "vitest run",
-    "test:build": "pnpx publint --strict",
-    "test:watch": "vitest"
+    "test:build": "pnpx publint --strict"
   },
   "type": "module"
 }

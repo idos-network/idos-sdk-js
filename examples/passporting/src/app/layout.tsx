@@ -1,13 +1,10 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { headers } from "next/headers";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { cookieToInitialState } from "wagmi";
 
 import { Providers } from "@/app/providers";
 import { WalletConnector } from "@/components/wallet-connector";
-import { getConfig } from "@/wagmi.config";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,12 +14,11 @@ export const metadata: Metadata = {
   description: "A demo app demonstrating the usage of the idOS Passporting functionality",
 };
 
-export default function RootLayout(props: { children: ReactNode }) {
-  const initialState = cookieToInitialState(getConfig(), headers().get("cookie"));
+export default async function RootLayout(props: { children: ReactNode }) {
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>
-        <Providers initialState={initialState}>
+        <Providers>
           <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
             <header className="sticky top-0 z-sticky bg-gray-950 px-6">
               <div className="flex h-20 items-center justify-between gap-4">

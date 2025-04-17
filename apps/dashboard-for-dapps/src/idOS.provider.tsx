@@ -1,57 +1,79 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
-import { idOS } from "@idos-network/idos-sdk";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/client-sdk-js";
 import {
   type PropsWithChildren,
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
-import { useAccount } from "wagmi";
-import { useEthersSigner } from "./wagmi.config";
 
-// biome-ignore lint/style/noNonNullAssertion: because it's initialized in the provider.
-export const idOSContext = createContext<idOS>(null!);
-export const useIdOS = () => useContext(idOSContext);
+import { useEthersSigner } from "@/wagmi.config";
 
-export function Provider({ children }: PropsWithChildren) {
-  const [sdk, setSdk] = useState<idOS | null>(null);
+function assertNever(state: never) {
+  throw new Error(`Unexpected state: ${JSON.stringify(state)}`);
+}
+
+const _idOSClient = new idOSClientConfiguration({
+  nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+  enclaveOptions: {
+    container: "#idOS-enclave",
+    url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+  },
+});
+
+export const IDOSClientContext = createContext<idOSClient>(_idOSClient);
+
+export const useIdOS = () => use(IDOSClientContext);
+
+export function IDOSClientProvider({ children }: PropsWithChildren) {
   const initialized = useRef(false);
+  const [client, setClient] = useState<idOSClient>(_idOSClient);
 
-  const { address } = useAccount();
   const signer = useEthersSigner();
 
   const initialize = useCallback(async () => {
     if (initialized.current) return;
 
-    if (!signer) return;
+    switch (client.state) {
+      case "configuration":
+        setClient(await _idOSClient.createClient());
 
-    initialized.current = true;
+        break;
+      case "idle":
+        if (signer) {
+          setClient(await client.withUserSigner(signer));
+        }
 
-    const _instance = await idOS.init({
-      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-      enclaveOptions: {
-        container: "#idOS-enclave",
-        url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
-      },
-    });
+        break;
+      case "with-user-signer":
+        if (!signer) {
+          setClient(await client.logOut());
+        }
+        if (await client.hasProfile()) {
+          setClient(await client.logIn());
+        }
 
-    setSdk(_instance);
-    const _hasProfile = await _instance.hasProfile(address as string);
+        break;
+      case "logged-in":
+        if (!signer) {
+          setClient(await client.logOut());
+        }
 
-    if (_hasProfile && signer) {
-      // @ts-ignore
-      await _instance.setSigner("EVM", signer);
+        initialized.current = true;
+        break;
+      default:
+        assertNever(client);
     }
-  }, [address, signer]);
+  }, [client, signer]);
 
   useEffect(() => {
     initialize();
   }, [initialize]);
 
-  if (!sdk) {
+  if (client.state !== "logged-in") {
     return (
       <Center h="100%" flexDirection="column" gap="2">
         <Spinner />
@@ -60,5 +82,5 @@ export function Provider({ children }: PropsWithChildren) {
     );
   }
 
-  return <idOSContext.Provider value={sdk}>{children}</idOSContext.Provider>;
+  return <IDOSClientContext value={client}>{children}</IDOSClientContext>;
 }

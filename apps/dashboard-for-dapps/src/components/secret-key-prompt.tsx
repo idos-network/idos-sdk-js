@@ -1,3 +1,7 @@
+import { Stack, Text } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/client-sdk-js";
+import { useRef, useState } from "react";
+
 import {
   Button,
   DialogActionTrigger,
@@ -11,10 +15,8 @@ import {
   Field,
   PasswordInput,
 } from "@/components/ui";
+
 import { decrypt } from "@/utils";
-import { Stack, Text } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/idos-sdk";
-import { useRef, useState } from "react";
 
 export function SecretKeyPrompt({
   open,

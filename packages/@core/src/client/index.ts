@@ -4,7 +4,11 @@ import invariant from "tiny-invariant";
 import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
+  type AddWalletParams,
+  type GetGrantsParams,
   type ShareableCredential,
+  addWallet,
+  addWallets,
   createAttribute,
   createCredentialCopy,
   getAccessGrantsOwned,
@@ -12,12 +16,19 @@ import {
   getAttributes,
   getCredentialById,
   getCredentialOwned,
+  getGrants,
+  getGrantsCount,
+  getSharedCredential,
   getUserProfile,
+  getWallets,
   hasProfile,
   type idOSDAGSignatureParams,
   removeCredential,
+  removeWallet,
+  removeWallets,
   requestDAGMessage,
   requestDWGMessage,
+  revokeAccessGrant,
   shareCredential,
 } from "../kwil-actions";
 import { type KwilActionClient, createClientKwilSigner, createWebKwilClient } from "../kwil-infra";
@@ -130,7 +141,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
     return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
   }
 
@@ -178,7 +188,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async logOut(): Promise<idOSClientIdle> {
     this.kwilClient.setSigner(undefined);
-    await this.enclaveProvider.reset();
     return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
   }
 
@@ -279,5 +288,44 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async requestDAGMessage(params: idOSDAGSignatureParams) {
     return requestDAGMessage(this.kwilClient, params);
+  }
+
+  async getGrants(params: GetGrantsParams) {
+    return {
+      grants: await getGrants(this.kwilClient, params),
+      totalCount: await this.getGrantsCount(),
+    };
+  }
+
+  async addWallets(params: AddWalletParams[]) {
+    return addWallets(this.kwilClient, params);
+  }
+
+  async getGrantsCount(): Promise<number> {
+    return getGrantsCount(this.kwilClient);
+  }
+
+  async getSharedCredential(id: string) {
+    return getSharedCredential(this.kwilClient, id);
+  }
+
+  async revokeAccessGrant(grantId: string) {
+    return revokeAccessGrant(this.kwilClient, grantId);
+  }
+
+  async addWallet(params: AddWalletParams) {
+    return addWallet(this.kwilClient, params);
+  }
+
+  async getWallets() {
+    return getWallets(this.kwilClient);
+  }
+
+  async removeWallet(id: string) {
+    return removeWallet(this.kwilClient, id);
+  }
+
+  async removeWallets(ids: string[]) {
+    return removeWallets(this.kwilClient, ids);
   }
 }

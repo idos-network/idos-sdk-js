@@ -1,38 +1,7 @@
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import type { Account, Chain, Client } from "viem";
-import {
-  http,
-  type Config,
-  type Transport,
-  cookieStorage,
-  createConfig,
-  createStorage,
-  useConnectorClient,
-} from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
-import { injected } from "wagmi/connectors";
-
-export function getConfig() {
-  return createConfig({
-    chains: [mainnet, sepolia],
-    connectors: [injected()],
-    storage: createStorage({
-      storage: cookieStorage,
-    }),
-    ssr: true,
-    transports: {
-      [mainnet.id]: http(),
-      [sepolia.id]: http(),
-    },
-  });
-}
-
-declare module "wagmi" {
-  interface Register {
-    config: ReturnType<typeof getConfig>;
-  }
-}
+import { type Config, type Transport, useConnectorClient } from "wagmi";
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;

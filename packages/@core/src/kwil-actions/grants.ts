@@ -24,7 +24,13 @@ export interface GetGrantsParams {
   size?: number;
   user_id?: string | null;
 }
-export async function getGrants(kwilClient: KwilActionClient, params: GetGrantsParams) {
+
+export const GET_GRANTS_DEFAULT_RECORDS_PER_PAGE = 10;
+
+export async function getGrants(
+  kwilClient: KwilActionClient,
+  params: GetGrantsParams = { page: 1, size: GET_GRANTS_DEFAULT_RECORDS_PER_PAGE, user_id: null },
+) {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",

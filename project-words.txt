@@ -1,6 +1,8 @@
 addgroup
 adduser
 Alexandr
+appkit
+APPKIT
 barebones
 biomejs
 Blockhash
@@ -29,11 +31,13 @@ IDOS
 idOSDAG
 IDOSDAG
 idOSSDK
+incentivized
 insertable
 jsigs
 jsonld
 keypair
 kwil
+kwild
 kwilteam
 libc
 lucide
@@ -71,3 +75,4 @@ viewports
 vite
 wagmi
 webauthn
+pkoch

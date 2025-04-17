@@ -1,18 +1,17 @@
-import { NodeKwil } from "@kwilteam/kwil-js";
-
 import nacl from "tweetnacl";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createIssuerServerConfig } from "./create-issuer-server-config";
 
-// Mock the @kwilteam/kwil-js module
-vi.mock("@kwilteam/kwil-js", () => {
+// Mock the @idos-network/core module
+vi.mock("@idos-network/core", () => {
+  const mockKwilClient = {
+    setSigner: vi.fn(),
+  };
+
   return {
-    NodeKwil: vi.fn().mockImplementation(() => ({
-      chainInfo: vi.fn().mockResolvedValue({ data: { chain_id: "mock-chain-id" } }),
-    })),
-    WebKwil: vi.fn(),
-    KwilSigner: vi.fn(),
+    createNodeKwilClient: vi.fn().mockResolvedValue(mockKwilClient),
+    createServerKwilSigner: vi.fn().mockReturnValue([{ mockSigner: true }]),
     Utils: {
       ActionInput: {
         fromObject: vi.fn(),
@@ -37,29 +36,31 @@ describe("createIssuerConfig", () => {
     const encryptionSecretKey = signingKeyPair.secretKey;
     const params = {
       nodeUrl: "http://mock-node-url",
+      chainId: "mock-chain-id",
       signingKeyPair,
       encryptionSecretKey,
       timeout: 30_000,
     };
 
+    // Import mocked functions
+    const { createNodeKwilClient, createServerKwilSigner } = await import("@idos-network/core");
+
     const result = await createIssuerServerConfig(params);
 
-    // Check if NodeKwil was called correctly
-    expect(NodeKwil).toHaveBeenCalledWith({
-      kwilProvider: params.nodeUrl,
-      chainId: "",
+    // Check if createNodeKwilClient was called correctly
+    expect(createNodeKwilClient).toHaveBeenCalledWith({
+      nodeUrl: params.nodeUrl,
+      chainId: params.chainId,
     });
-    expect(NodeKwil).toHaveBeenCalledWith({
-      kwilProvider: params.nodeUrl,
-      chainId: "mock-chain-id",
-      timeout: 30_000,
-    });
+
+    // Check if createServerKwilSigner was called correctly
+    expect(createServerKwilSigner).toHaveBeenCalledWith(params.signingKeyPair);
 
     // Check the returned config
     expect(result).toEqual({
       kwilClient: expect.any(Object),
-      signingKeyPair: expect.any(Object),
-      encryptionSecretKey: expect.any(Uint8Array),
+      signingKeyPair: params.signingKeyPair,
+      encryptionSecretKey: params.encryptionSecretKey,
     });
   });
 });

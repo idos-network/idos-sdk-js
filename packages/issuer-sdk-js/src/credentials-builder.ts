@@ -3,10 +3,10 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import * as vc from "@digitalbazaar/vc";
 import * as base85 from "base85";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
-import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
-import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
-import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
-import v1 from "../../assets/v1.json";
+import ed25519Signature2020V1 from "../assets/ed25519-signature-2020-v1.json";
+import idosCredentialSubjectV1 from "../assets/idos-credential-subject-v1.json";
+import idosCredentialsV1 from "../assets/idos-credentials-v1.json";
+import v1 from "../assets/v1.json";
 
 export interface CredentialFields {
   id: string;
