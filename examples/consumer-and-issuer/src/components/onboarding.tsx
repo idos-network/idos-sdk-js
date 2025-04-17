@@ -24,6 +24,7 @@ import {
 } from "@/actions";
 import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
+import { generateUserData } from "@/utils/e2e-helper";
 import { KYCJourney } from "./kyc-journey";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
@@ -175,6 +176,8 @@ const useFetchUserData = () => {
     queryFn: async () => {
       invariant(isleController, "`isleController` not initialized");
       invariant(isleController.idosClient?.state === "logged-in", "`idosClient` is not logged in");
+
+      if (process.env.IS_E2E) return generateUserData(isleController?.idosClient.user.id);
 
       // Then get the attributes using the same authenticated session
       const attributes = await isleController.idosClient.getAttributes();
