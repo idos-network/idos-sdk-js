@@ -4,7 +4,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   const userId = (await params).userId;
   const consumer = await idOSConsumer();
 
-  const { grants } = await consumer.getGrants({
+  const { grants } = await consumer.getAccessGrants({
     user_id: userId,
   });
   const grant = grants.find((grant) => grant.ownerUserId === userId);
