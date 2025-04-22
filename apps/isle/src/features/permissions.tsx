@@ -556,6 +556,7 @@ export function Permissions() {
                     <HStack gap="2">
                       <IconButton
                         aria-label="View"
+                        id="view-credential"
                         variant="ghost"
                         size="xs"
                         colorPalette="green"

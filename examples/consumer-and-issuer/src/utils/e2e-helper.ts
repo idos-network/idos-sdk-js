@@ -1,15 +1,7 @@
 import { base64Encode } from "@idos-network/core";
+import invariant from "tiny-invariant";
 
-export const generateBase64String = () => {
-  const randomBytes = new Uint8Array(32);
-  crypto.getRandomValues(randomBytes);
-  return base64Encode(randomBytes);
-};
-
-export const generateUserData = (userId: string) => {
-  return {
-    idOSUserId: userId,
-    idvUserId: crypto.randomUUID(),
-    signature: generateBase64String(),
-  };
+export const generateUserData = () => {
+  invariant(process.env.E2E_USER_IDV_INFO, "E2E_USER_IDV_INFO are not passed");
+  return JSON.parse(process.env.E2E_USER_IDV_INFO);
 };

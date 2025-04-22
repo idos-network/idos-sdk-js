@@ -1,6 +1,3 @@
-/*
-// Removing This test temporarily till we figure out how e2e can bypass the IDV process
-
 import crypto from "node:crypto";
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
@@ -9,7 +6,7 @@ import basicSetup from "../wallet-setup/basic.setup";
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
-const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.vercel.app/";
+const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.playground.idos.network/";
 const dashboardUrl = "https://dashboard.playground.idos.network";
 
 // Helper function to generate random private key
@@ -40,6 +37,7 @@ test("should create a profile successfully using new wallet", async ({
   await page.goto(consumerAndIssuerUrl);
 
   await page.getByRole("button", { name: "Get Started now" }).first().click();
+  await page.getByRole("button", { name: "Metamask" }).click();
 
   await metamask.connectToDapp();
 
@@ -48,7 +46,7 @@ test("should create a profile successfully using new wallet", async ({
   const popupPromise = page.waitForEvent("popup");
 
   const createProfileButton = isleIframe.getByRole("button", { name: "Create idOS profile" });
-  await expect(createProfileButton).toBeVisible();
+  await expect(createProfileButton).toBeVisible({ timeout: 10000 });
   await createProfileButton.click();
 
   const unlockButton = page.frameLocator("#idos-enclave-iframe").locator("#unlock");
@@ -58,7 +56,15 @@ test("should create a profile successfully using new wallet", async ({
   await unlockButton.click();
 
   const idOSPopup = await popupPromise;
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
+
+  // Check if the password auth method button exists and click it if it does
+  const authMethodPasswordButton = idOSPopup.locator("#auth-method-password");
+  if (await authMethodPasswordButton.isVisible({ timeout: 5000 })) {
+    await authMethodPasswordButton.click();
+  } else {
+    console.log("'#auth-method-password' button not found, skipping click.");
+  }
+
   const passwordInput = idOSPopup.locator("#idos-password-input");
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Create password" }).click();
@@ -66,18 +72,21 @@ test("should create a profile successfully using new wallet", async ({
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
 
-  // Simulate the user to be transitioning to not verified status
   await page.waitForTimeout(6000);
   await metamask.confirmSignature();
+  await page.waitForTimeout(16000);
 
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("not verified");
+  await expect(isleIframe.locator(".status-badge").first()).toHaveText("pending permissions");
 
-  await isleIframe.getByRole("button", { name: "Verify your identity" }).click();
-  await page.waitForTimeout(2000);
   await metamask.confirmSignature();
-  await page.waitForTimeout(5000);
+  await page.waitForTimeout(3000);
 
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("pending verification");
+  await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
+
+  await isleIframe.locator("#view-credential").click();
+  await page.waitForTimeout(3000);
+
+  await expect(isleIframe.locator("p", { hasText: "basic+liveness" })).toBeVisible();
 });
 
 test.describe
@@ -187,4 +196,3 @@ test.describe
       }
     });
   });
-*/

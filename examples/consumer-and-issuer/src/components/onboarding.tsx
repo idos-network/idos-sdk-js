@@ -216,6 +216,8 @@ const useFetchIDVStatus = (params: IdvTicket | undefined | null) => {
       url.searchParams.set("idOSUserId", idOSUserId);
       url.searchParams.set("signature", signature);
 
+      if (process.env.IS_E2E) return { status: "approved" };
+
       const res = await fetch(url);
       return await res.json();
     },
