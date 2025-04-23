@@ -1,5 +1,5 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
-import { createIOSClient, type idOSClient } from "@idos-network/client-sdk-js";
+import { createIDOSClient, type idOSClient } from "@idos-network/client-sdk-js";
 import {
   type PropsWithChildren,
   createContext,
@@ -16,7 +16,7 @@ function assertNever(state: never) {
   throw new Error(`Unexpected state: ${JSON.stringify(state)}`);
 }
 
-const _idOSClient = createIOSClient({
+const _idOSClient = createIDOSClient({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
   enclaveOptions: {
     container: "#idOS-enclave",
