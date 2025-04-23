@@ -27,7 +27,10 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
     queryFn: async ({ queryKey: [, credentialId] }) => {
       const credential = await idOSClient.getCredentialOwned(credentialId);
 
-      await idOSClient.enclaveProvider.ready(idOSClient.user.id);
+      await idOSClient.enclaveProvider.ready(
+        idOSClient.user.id,
+        idOSClient.user.recipient_encryption_public_key,
+      );
 
       const decryptedContent = await idOSClient.enclaveProvider.decrypt(
         base64Decode(credential.content),
