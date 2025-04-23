@@ -57,14 +57,6 @@ test("should create a profile successfully using new wallet", async ({
 
   const idOSPopup = await popupPromise;
 
-  // Check if the password auth method button exists and click it if it does
-  const authMethodPasswordButton = idOSPopup.locator("#auth-method-password");
-  if (await authMethodPasswordButton.isVisible({ timeout: 5000 })) {
-    await authMethodPasswordButton.click();
-  } else {
-    console.log("'#auth-method-password' button not found, skipping click.");
-  }
-
   const passwordInput = idOSPopup.locator("#idos-password-input");
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Create password" }).click();
@@ -83,10 +75,26 @@ test("should create a profile successfully using new wallet", async ({
 
   await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
 
-  await isleIframe.locator("#view-credential").click();
+  await isleIframe.locator("#view-credential").click({ timeout: 10000 });
   await page.waitForTimeout(3000);
 
   await expect(isleIframe.locator("p", { hasText: "basic+liveness" })).toBeVisible();
+  isleIframe.locator("a", { hasText: "Permissions" }).click();
+
+  const claimCardButton = await page.getByRole("button", { name: "Claim your card" });
+  await claimCardButton.click();
+
+  await expect(claimCardButton).toBeDisabled();
+
+  await page.waitForTimeout(1000);
+  await metamask.confirmSignature();
+
+  await page.waitForTimeout(1000);
+  await metamask.confirmSignature();
+
+  await expect(claimCardButton).not.toBeVisible();
+
+  await expect(isleIframe.locator("p", { hasText: "KYC DATA" })).toHaveCount(2);
 });
 
 test.describe

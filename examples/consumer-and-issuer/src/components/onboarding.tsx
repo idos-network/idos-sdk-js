@@ -177,7 +177,7 @@ const useFetchUserData = () => {
       invariant(isleController, "`isleController` not initialized");
       invariant(isleController.idosClient?.state === "logged-in", "`idosClient` is not logged in");
 
-      if (process.env.IS_E2E) return generateUserData(isleController?.idosClient.user.id);
+      if (process.env.NEXT_PUBLIC_IS_E2E) return generateUserData();
 
       // Then get the attributes using the same authenticated session
       const attributes = await isleController.idosClient.getAttributes();
