@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@heroui/react": "2.7.6",
-    "@idos-network/consumer-sdk-js": "workspace:*",
+    "@idos-network/consumer": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@reown/appkit": "^1.7.2",
     "@reown/appkit-adapter-wagmi": "^1.7.2",

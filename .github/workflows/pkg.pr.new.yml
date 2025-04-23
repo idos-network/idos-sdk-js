@@ -29,7 +29,7 @@ jobs:
       - run: pnpm install
 
       - name: Build
-        run: pnpm build --filter=@idos-network/issuer-sdk-js --filter=@idos-network/client-sdk-js --filter=@idos-network/consumer-sdk-js
+        run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer
 
       - name: Release
-        run: pnpx pkg-pr-new publish --pnpm './packages/issuer-sdk-js' './packages/client-sdk-js' './packages/consumer-sdk-js'
+        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer'
