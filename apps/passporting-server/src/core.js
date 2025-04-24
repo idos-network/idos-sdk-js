@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { createAccessGrantFromDAG, createIssuerServerConfig } from "@idos-network/issuer-sdk-js";
+import { createAccessGrantFromDAG, idOSIssuer } from "@idos-network/issuer-sdk-js";
 import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";
@@ -50,7 +50,7 @@ app.post(
       );
     }
 
-    const issuerConfig = await createIssuerServerConfig({
+    const issuer = await idOSIssuer.init({
       nodeUrl: KWIL_NODE_URL,
       signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
       encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
@@ -68,7 +68,7 @@ app.post(
 
     // Transmit the `DAG` to the idOS.
     const [error, response] = await goTry(() =>
-      createAccessGrantFromDAG(issuerConfig, {
+      issuer.createAccessGrantFromDAG({
         dag_data_id,
         dag_owner_wallet_identifier,
         dag_grantee_wallet_identifier,

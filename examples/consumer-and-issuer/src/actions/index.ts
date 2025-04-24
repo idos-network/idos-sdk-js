@@ -1,12 +1,11 @@
 "use server";
-import { getIssuerServerConfig } from "@/issuer.config";
 import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
-import { createCredentialByDelegatedWriteGrant, createUser } from "@idos-network/issuer-sdk-js";
+import jwt from "jsonwebtoken";
 import invariant from "tiny-invariant";
+import nacl from "tweetnacl";
 
 import { idOSConsumer } from "@/consumer.config";
-import jwt from "jsonwebtoken";
-import nacl from "tweetnacl";
+import { idOSIssuer } from "@/issuer.config";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
@@ -111,10 +110,9 @@ export async function createIDOSUserProfile({
     publicKey: string;
   };
 }) {
-  const config = await getIssuerServerConfig();
+  const issuer = await idOSIssuer();
 
-  const user = await createUser(
-    config,
+  const user = await issuer.createUser(
     {
       id: userId,
       recipient_encryption_public_key: recipientEncryptionPublicKey,
@@ -176,12 +174,11 @@ export async function createCredential(
   notUsableAfter: string,
   signature: string,
 ) {
-  const issuer = await getIssuerServerConfig();
+  const issuer = await idOSIssuer();
   const kycData = await getKYCData(userId);
   const vcContent = generateCredential(kycData);
 
-  await createCredentialByDelegatedWriteGrant(
-    issuer,
+  await issuer.createCredentialByDelegatedWriteGrant(
     {
       plaintextContent: vcContent,
       publicNotes: JSON.stringify({
