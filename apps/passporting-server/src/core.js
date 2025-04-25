@@ -1,5 +1,5 @@
 import { zValidator } from "@hono/zod-validator";
-import { idOSIssuer } from "@idos-network/issuer-sdk-js";
+import { idOSIssuer } from "@idos-network/issuer";
 import { decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";

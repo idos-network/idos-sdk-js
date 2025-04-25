@@ -7,5 +7,5 @@
 Get [our NPM package](https://www.npmjs.com/package/@idos-network/issuer-sdk-js) and its dependencies with pnpm or the equivalent of your package manager of choice:
 
 ```bash
-pnpm add @idos-network/client-sdk-js
+pnpm add @idos-network/client
 ```

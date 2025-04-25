@@ -45,9 +45,9 @@ importers:
       '@chakra-ui/react':
         specifier: ^3.15.1
         version: 3.15.1(@emotion/react@11.14.0(@types/react@19.1.0)(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      '@idos-network/client-sdk-js':
+      '@idos-network/client':
         specifier: workspace:*
-        version: link:../../packages/client-sdk-js
+        version: link:../../packages/client
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
@@ -419,9 +419,9 @@ importers:
       '@hono/zod-validator':
         specifier: ^0.4.2
         version: 0.4.3(hono@4.7.6)(zod@3.24.2)
-      '@idos-network/issuer-sdk-js':
+      '@idos-network/issuer':
         specifier: workspace:*
-        version: link:../../packages/issuer-sdk-js
+        version: link:../../packages/issuer
       '@stablelib/base64':
         specifier: ^1.0.1
         version: 1.0.1
@@ -453,18 +453,18 @@ importers:
       '@heroui/react':
         specifier: 2.6.14
         version: 2.6.14(@types/react@19.1.0)(framer-motion@11.18.2(@emotion/is-prop-valid@1.3.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.30)(typescript@5.8.3)))
-      '@idos-network/consumer-sdk-js':
+      '@idos-network/consumer':
         specifier: workspace:*
-        version: link:../../packages/consumer-sdk-js
+        version: link:../../packages/consumer
       '@idos-network/controllers':
         specifier: workspace:*
         version: link:../../packages/@controllers
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
-      '@idos-network/issuer-sdk-js':
+      '@idos-network/issuer':
         specifier: workspace:*
-        version: link:../../packages/issuer-sdk-js
+        version: link:../../packages/issuer
       '@nanostores/react':
         specifier: ^0.8.4
         version: 0.8.4(nanostores@0.11.4)(react@19.1.0)
@@ -583,9 +583,9 @@ importers:
       '@heroui/react':
         specifier: 2.7.6
         version: 2.7.6(@types/react@19.1.0)(framer-motion@12.6.3(@emotion/is-prop-valid@1.3.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.17.30)(typescript@5.8.3)))
-      '@idos-network/consumer-sdk-js':
+      '@idos-network/consumer':
         specifier: workspace:*
-        version: link:../../packages/consumer-sdk-js
+        version: link:../../packages/consumer
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
@@ -743,7 +743,7 @@ importers:
         specifier: ^1.3.3
         version: 1.3.3
 
-  packages/client-sdk-js:
+  packages/client:
     devDependencies:
       '@idos-network/core':
         specifier: workspace:*
@@ -764,7 +764,7 @@ importers:
         specifier: ^5.2.2
         version: 5.8.3
 
-  packages/consumer-sdk-js:
+  packages/consumer:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
@@ -889,7 +889,7 @@ importers:
         specifier: ^0.31.4
         version: 0.31.4(@edge-runtime/vm@5.0.0)(@vitest/ui@0.34.7)(jsdom@22.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.29.3)(playwright@1.51.1)(terser@5.39.0)
 
-  packages/issuer-sdk-js:
+  packages/issuer:
     dependencies:
       '@digitalbazaar/ed25519-signature-2020':
         specifier: ^5.4.0
@@ -899,7 +899,7 @@ importers:
         version: 4.2.0
       '@digitalbazaar/vc':
         specifier: ^7.0.0
-        version: 7.1.2
+        version: 7.1.2(web-streams-polyfill@4.1.0)
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
         version: 0.9.4
@@ -11248,7 +11248,7 @@ snapshots:
     transitivePeerDependencies:
       - web-streams-polyfill
 
-  '@digitalbazaar/vc@7.1.2':
+  '@digitalbazaar/vc@7.1.2(web-streams-polyfill@4.1.0)':
     dependencies:
       '@digitalbazaar/credentials-context': 3.2.0
       ed25519-signature-2018-context: 1.1.0

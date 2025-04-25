@@ -1,5 +1,5 @@
 {
-  "name": "@idos-network/client-sdk-js",
+  "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK",
   "version": "0.0.4",
   "dependencies": {},

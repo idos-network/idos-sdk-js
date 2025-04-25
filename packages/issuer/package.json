@@ -1,5 +1,5 @@
 {
-  "name": "@idos-network/issuer-sdk-js",
+  "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK",
   "version": "0.0.4",
   "dependencies": {

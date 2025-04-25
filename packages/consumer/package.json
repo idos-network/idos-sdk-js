@@ -1,5 +1,5 @@
 {
-  "name": "@idos-network/consumer-sdk-js",
+  "name": "@idos-network/consumer",
   "description": "idOS Consumer JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
