@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK",
-  "version": "0.0.4",
+  "version": "1.0.0-rc.0",
   "dependencies": {
     "@kwilteam/kwil-js": "catalog:",
     "es-toolkit": "^1.23.0",
