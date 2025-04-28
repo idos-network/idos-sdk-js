@@ -42,6 +42,9 @@
     "ethers": "catalog:",
     "near-api-js": "3.0.4"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "tsup --config tsup.config.ts",
