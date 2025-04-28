@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK",
-  "version": "0.0.4",
+  "version": "1.0.0-rc.0",
   "dependencies": {},
   "devDependencies": {
     "@idos-network/core": "workspace:*",
