@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/consumer",
   "description": "idOS Consumer JavaScript SDK",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.0",
   "clean-package": {
     "replace": {
       "main": "dist/index.js",
