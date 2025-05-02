@@ -145,7 +145,7 @@ If you don’t have an access grant, you can proceed to filtering the user’s c
 
 ### [ frontend ] Filtering credentials
 
-* 💔💔💔 missing extraction into Client SDK
+* TODO: missing extraction into Client SDK
 
 https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L460-L486
 
@@ -154,7 +154,7 @@ https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c14
 
 The simplest way to do this is to ask the user to create and insert an access grant for you.
 
-* 💔💔💔 missing extraction into Client SDK
+* TODO: missing extraction into Client SDK
 
 https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L341-L369
 
@@ -172,11 +172,11 @@ await idOSClient.requestDAGMessage(
 
 and you then insert after sending it to your backend:
 
-* 💔💔💔 missing re-export on Consumer SDK
+* TODO: missing re-export on Consumer SDK
 
 https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40core/src/kwil-actions/grants.ts#L56
 
-* 💔💔💔 missing passporting tricks:
+* TODO: missing passporting tricks:
     * ask for credential duplicate (C1.2) separately and before asking for AG
     * get hash from C1.2 and use it on dAG request
     * send dAG to own backend, which proxy sends to OE1's passporting server
@@ -192,4 +192,4 @@ If you're using passporting:
 const credentialContents: string = await idOSConsumer.getReusableCredentialCompliantly('GRANT_DATA_ID')
 ```
 
-* 💔💔💔 missing verification
+* TODO: missing verification

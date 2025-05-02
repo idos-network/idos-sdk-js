@@ -335,8 +335,6 @@ const credential = await idOSIssuer.buildCredentials(
 To write the credential you issued in the idOS, you'll make use of the write grant acquired above.
 
 ```js
-import issuerConfig from "./issuer-config.js";
-
 const publicNotesId = crypto.randomUUID();
 
 const credentialsPublicNotes = {
@@ -345,7 +343,7 @@ const credentialsPublicNotes = {
   type: "human",
   level: "human",
   status: "approved",
-  issuer: "MyCoolIssuer",
+  issuer: "MyIssuer",
 }
 
 const credentialContent = JSON.stringify(credential);
@@ -358,25 +356,22 @@ const credentialPayload = {
   publicNotes: JSON.stringify(credentialsPublicNotes),
 }
 
-const delegatedWriteGrant = {
-  delegatedWriteGrant.owner_wallet_identifier,
-  delegatedWriteGrant.grantee_wallet_identifier,
-  delegatedWriteGrant.issuer_public_key,
-  delegatedWriteGrant.id,
-  delegatedWriteGrant.access_grant_timelock,
-  delegatedWriteGrant.not_usable_before,
-  delegatedWriteGrant.not_usable_after,
-  signature,
-}
-
-await idOSIssuer.createCredentialsByDelegatedWriteGrant(credentialPayload, delegatedWriteGrant);
+await idOSIssuer.createCredentialsByDelegatedWriteGrant(
+  credentialPayload,
+  {
+    id: delegatedWriteGrant.id,
+    ownerWalletIdentifier: delegatedWriteGrant.owner_wallet_identifier,
+    consumerWalletIdentifier: delegatedWriteGrant.grantee_wallet_identifier,
+    issuerPublicKey: delegatedWriteGrant.issuer_public_key,
+    accessGrantTimelock: delegatedWriteGrant.access_grant_timelock,
+    notUsableBefore: delegatedWriteGrant.not_usable_before,
+    notUsableAfter: delegatedWriteGrant.not_usable_after,
+    signature,
+ },
+);
 ```
 
-This will create a credential for user in the idOS and copy for the issuer.
-
-> ⚠️ Notice
-> 
-> The credential content should be passed as is. It will be encrypted for the recipient before being stored on the idOS.
+This will create a credential for the user in the idOS and a copy for you.
 
 ### [ backend ] Revoking and editing credentials
 
