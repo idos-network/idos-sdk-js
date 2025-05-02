@@ -22,7 +22,7 @@ The diagram below illustrates how this process works differently for new vs exis
 
 ### Key derivation details
 
-idOS keys are derived using scrypt (an industry standard [PBKDF](https://en.wikipedia.org/wiki/Key_derivation_function)) to derive a keypair for a user given their seed and user ID.
+idOS keys are derived using [scrypt](https://en.wikipedia.org/wiki/Scrypt) (an industry standard [PBKDF](https://en.wikipedia.org/wiki/Key_derivation_function)) to derive a keypair for a user given their seed and user ID.
 
 1. Take a seed (e.g. a user’s password)
 2. [Normalize](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize) the seed for consistency across platforms
@@ -37,9 +37,11 @@ Voilà, the Enclave now has an encryption keypair (private key + public key), an
 
 When a dapp initializes the idOS frontend SDK, the SDK creates an invisible iframe containing the Enclave. It’s within this invisible iframe that the “Unlock idOS” button appears.
 
-TODO explain why we want to control the button implementation (to prevent popup blockers)
-
 ![enclave unlock button](enclave-unlock-button.png)
+
+There are two reasons to have this iframe:
+- To have a separate execution context to make it impossible to exfiltrate user secrets
+- To control the button's code to be sure it's not blocked by the browser. Even though this could be handled on the dApp's side, we'd rather not burden every integrator with this minutiae
 
 The Enclave tries as much as possible to avoid user interaction, but there are times where that is inevitable. In those cases, the Enclave will need to show the “Unlock idOS” button, and sometimes even to open the Enclave popup.
 
