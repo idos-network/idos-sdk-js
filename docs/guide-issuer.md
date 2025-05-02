@@ -174,7 +174,7 @@ const user = {
 };
 
 const wallet = {
-  address: "0x0",
+  address,
   wallet_type: "EVM", // vs. NEAR
   message: ownershipProofMessage,
   signature: ownershipProofSignature,
