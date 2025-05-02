@@ -21,6 +21,7 @@ The primary affordances granted by the Consumer SDK are:
 See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulatory-approach) for more context, and discuss with your compliance officer:
 
 * which credential Issuers are you open to trusting;
+* how long, if at all, you need to retain access to user data;
 * whether you’re going to be using [Passporting](passporting.md).
 
 ### Signature and encryption keys
@@ -161,27 +162,34 @@ https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c14
 Alternatively, you can ask for a delegated access grant, which the user creates:
 
 ```js
-await idOSClient.requestDAGMessage(
-  dag_owner_wallet_identifier: string;
-  dag_grantee_wallet_identifier: string;
-  dag_data_id: string;
-  dag_locked_until: number;
-  dag_content_hash: string;
-);
+await idOSClient.requestDAGMessage({
+  dag_owner_wallet_identifier, // This is the user
+  dag_grantee_wallet_identifier, // This is you, the consumer
+  dag_data_id,
+  dag_locked_until, // Unix timestamp. According to your compliance officer's instructions.
+});
 ```
 
 and you then insert after sending it to your backend:
 
-* TODO: missing re-export on Consumer SDK
+```js
+await idOSConsumer.createAccessGrantByDag({
+  dag_data_id,
+  dag_owner_wallet_identifier,
+  dag_grantee_wallet_identifier,
+  dag_signature,
+  dag_locked_until,
+});
+```
 
-https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40core/src/kwil-actions/grants.ts#L56
+#### Using passporting
 
-* TODO: missing passporting tricks:
+* TODO: missing code examples for [passporting](passporting.md):
     * ask for credential duplicate (C1.2) separately and before asking for AG
     * get hash from C1.2 and use it on dAG request
     * send dAG to own backend, which proxy sends to OE1's passporting server
 
-### [ backend ] retrieving and verifying credential
+### [ backend ] Retrieving and verifying credential
 
 ```typescript
 const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
@@ -192,4 +200,12 @@ If you're using passporting:
 const credentialContents: string = await idOSConsumer.getReusableCredentialCompliantly('GRANT_DATA_ID')
 ```
 
-* TODO: missing verification
+If you need a helper to verify that the W3C VC is something you want to trust, here's an example:
+
+```js
+await idOSConsumer.verifyW3CVC(credential, {
+  allowedIssuers: ["https://kyc-provider.example.com/idos"],
+  allowedKeys: ["z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5"],
+  documentLoader, // If you need to specify your own.
+});
+```
