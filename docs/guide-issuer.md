@@ -144,7 +144,7 @@ return { userId }
 
 ##### Step 2: Getting the user's signing and encryption public keys
 
-Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
+Use the `idOSClient.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
 
 ```javascript
 // frontend
