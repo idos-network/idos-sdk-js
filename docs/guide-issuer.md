@@ -109,7 +109,7 @@ const signer = await provider.getSigner();
 
 ### [ frontend + backend ] Ensuring your user has an idOS profile
 
-Get your user's address from the signer above and confirm they have an idOS profile. If not, redirect them to your Issuer. If you have an IDV integration, you can yourself be the issuer. See the [Issuer Guide](issuer.md) for more information.
+Get your user's address from the signer above and confirm they have an idOS profile. If not, redirect them to your onboarding journey.
 
 ```js
 const address = await signer.getAddress();
