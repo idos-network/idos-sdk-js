@@ -1,6 +1,8 @@
 import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
 import {
+  type CreateAccessGrantByDAGParams,
   type GetGrantsParams,
+  createAccessGrantByDag,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
@@ -120,6 +122,10 @@ export class idOSConsumer {
       })),
       totalCount: await this.getGrantsCount(params.user_id),
     };
+  }
+
+  async createAccessGrantByDag(params: CreateAccessGrantByDAGParams) {
+    return createAccessGrantByDag(this.kwilClient, params);
   }
 }
 
