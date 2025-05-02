@@ -246,7 +246,7 @@ const message: string = await idOSClient.requestDWGMessage(delegatedWriteGrant);
 const signature = await signer.signMessage(message);
 ```
 
-Be sure you have the DWG message parameters and it's signature kept. You need to use them on server side later.
+Be sure you have the DWG message parameters and its signature kept. You need to use them on server side later.
 
 ### [ backend ] Issuing and writing credentials
 
