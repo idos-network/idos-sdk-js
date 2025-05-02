@@ -42,6 +42,7 @@ kwilteam
 libc
 lucide
 multibase
+multicodec
 nacl
 nanostores
 Neobank
@@ -50,6 +51,7 @@ OSDAG
 passporting
 permissioned
 Personhood
+pkoch
 pnpx
 preact
 Reown
@@ -75,4 +77,3 @@ viewports
 vite
 wagmi
 webauthn
-pkoch

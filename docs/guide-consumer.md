@@ -7,7 +7,7 @@
 
 ## SDK feature overview
 
-The primary affordances granted by the Consumer SDK are:
+The primary features provided by the Consumer SDK are:
 * checking if your user has an idOS profile and an adequate credential;
 * requesting access to user credentials, with an optional timelock to prevent premature access revocation;
 * retrieving and verifying credentials you've been granted access to;

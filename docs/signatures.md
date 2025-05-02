@@ -1,3 +1,4 @@
+<!-- cSpell:words Rabby -->
 # Wallets/signers and signature schemes
 
 Supported by the SDK, and verifiable for auth with the idOS network:

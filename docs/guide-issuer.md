@@ -7,7 +7,7 @@
 
 ## SDK feature overview
 
-The primary affordances granted by the Issuer SDK are:
+The primary features provided by the Issuer SDK are:
 * checking if your user has an idOS profile, and create one otherwise;
 * transforming IDV results into idOS credentials;
 * implementing a [Passporting-compliant](passporting.md) onboarding flow.
