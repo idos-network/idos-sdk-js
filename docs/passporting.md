@@ -1,14 +1,12 @@
 # Passporting
 
-[Passporting](https://docs.idos.network/compliance/kyc-re-usability/passporting) is the legal right for an obliged entity to rely on another obliged entity’s previous KYC/AML efforts under the right circumstances.
-
-Under the right conditions, passporting enables an obliged entity to onboard users which have been previously verified by another obliged entity, without requiring users to provide additional data, or perform additional checks on data previously provided.
+[Passporting](https://docs.idos.network/compliance/kyc-re-usability/passporting) is the legal right for an obliged entity to rely on another obliged entity’s previous KYC/AML efforts under the right circumstances, without requiring users to provide additional data, or perform additional checks on data previously provided.
 
 Let OE1 be an obliged entity who issues idOS credentials, and OE2 be another obliged entity that wants to onboard users holding OE1 credentials.
 
-For passporting to be applicable, the idOS needs to offer mechanisms for OE1 and OE2 to vet each other and establish a contractual relationship, and for OE2 to secure permission from OE1 for every credential OE2 wants to reuse.
+For passporting to be applicable, the idOS offers mechanisms for OE1 and OE2 to vet each other and establish a contractual relationship, and for OE2 to secure permission from OE1 for every credential OE2 wants to reuse.
 
-## OE omboarding and registry
+## OE onboarding and registry
 
 The idOS network will host a registry of obliged entities (OEs).
 

@@ -120,14 +120,19 @@ idOSClient = await idOSClient.withUserSigner(signer);
 
 ### [ frontend ] Checking for existing access grant
 
+```js
+const grants: IdosGrant[] = await idOSClient.getGrants().grants.filter(g =>
+  g.ag_grantee_wallet_identifier === consumerSigner.address,
+);
+```
+
+Access Grants queries can also be paginated:
 ```typescript
-const grants: IdosCredentials[] = await idOSClient.getGrants({
+const grants: IdosGrant[] = await idOSClient.getGrants({
   page: 1,
   size: 7,
 });
 ```
-
-* 💔💔💔 missing filtering by grantee
 
 Optionally, you can double check that the existing access grant matches your requirements. You do this on your backend.
 
@@ -167,11 +172,14 @@ await idOSClient.requestDAGMessage(
 
 and you then insert after sending it to your backend:
 
-* 💔💔💔 missing extraction into Consumer SDK
+* 💔💔💔 missing re-export on Consumer SDK
 
 https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40core/src/kwil-actions/grants.ts#L56
 
-* 💔💔💔 missing passporting tricks
+* 💔💔💔 missing passporting tricks:
+    * ask for credential duplicate (C1.2) separately and before asking for AG
+    * get hash from C1.2 and use it on dAG request
+    * send dAG to own backend, which proxy sends to OE1's passporting server
 
 ### [ backend ] retrieving and verifying credential
 
