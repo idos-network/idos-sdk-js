@@ -278,3 +278,7 @@ These are other parties that bear influence in the system, even though they're n
 ## Typical usage
 
 See the [Long Tour](./long-tour.md) for a thorough end-to-end walkthrough.
+
+If you're looking for actor-specific guides, take a look at:
+- [Consumer guide](guide-consumer.md)
+- [Issuer guide](guide-issuer.md)
