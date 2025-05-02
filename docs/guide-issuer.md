@@ -124,7 +124,7 @@ If they don't have a profile, you must create one for them. This procedure can o
 
 To create a user profile in idOS, you need:
 1. **A wallet address** associated with the user.
-2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
+2. **A public encryption key** derived from either a password chosen by the user in the idOS enclave app.
 
 ##### Step 1: Deciding on a user id
 
