@@ -250,36 +250,7 @@ Be sure you have the DWG message parameters and its signature kept. You need to 
 
 ### [ backend ] Issuing and writing credentials
 
-To issue a credential, one option is to build credentials (and sign) manually:
-
-```js
-const credentialContent = {
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-  ],
-  id: "https://vc-issuers.cool-issuer.id/credentials/33ce045b-19f8-4f5a-89d9-4575f66f4d40",
-  type: ["VerifiableCredential"],
-  issuer: "https://vc-issuers.cool-issuer.id/",
-  level: "human",
-  credentialSubject: {
-    id: "uuid:33ce045b-19f8-4f5a-89d9-4575f66f4d40",
-    name: "John Doe",
-    email: "johndoe@example.com",
-    country: "USA",
-  },
-  issuanceDate: "2022-06-01T12:00:00Z",
-  expirationDate: "2022-06-30T12:00:00Z",
-  proof: {
-    type: "Ed25519Signature2020",
-    created: "2022-06-01T12:00:00Z",
-    verificationMethod: "https://vc-issuers.fractal.id/idos/keys/1",
-    proofPurpose: "assertionMethod",
-    proofValue: "z22DAdBQgJXUh69e4y9a7t7n9f6c7m7b8a6v6w5z4x3y2x1w",
-  },
-};
-```
-
-Secondly you can use a credentials-builder, which help you to create a proper VerifiableCredentials object:
+To issue a credential, you can use our W3C Verifiable Credentials helpers:
 
 ```js
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
@@ -332,7 +303,7 @@ const credential = await idOSIssuer.buildCredentials(
 );
 ```
 
-To write the credential you issued in the idOS, you'll make use of the write grant acquired above.
+To write the credential you issued, you'll make use of the write grant acquired above.
 
 ```js
 const publicNotesId = crypto.randomUUID();
