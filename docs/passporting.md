@@ -22,7 +22,7 @@ This flow is a passporting-compliant alternative to idOS’s typical credential 
 
 Alice has a profile in the idOS, but no credentials. She visits OE1, who offers to verify her.
 
-![passporting flow 1](idos-passporting-1.png)
+![passporting flow 1](assets/idos-passporting-1.png)
 
 1. OE1 asks Alice for her personal data, and for a write grant
 2. Upon successful IDV, OE1:
@@ -37,7 +37,7 @@ Alice has a profile in the idOS, but no credentials. She visits OE1, who offers 
 Later, Alice visits OE2, who asks her to list her idOS credentials. OE2 finds she has a compatible credential issued by OE1.
 
 
-![passporting flow 1](idos-passporting-2.png)
+![passporting flow 1](assets/idos-passporting-2.png)
 
 1. OE2 asks Alice for an encrypted duplicate of **C1**;
 2. Alice then:
@@ -63,7 +63,7 @@ OE2 now has credential **C1.2** in the idOS, but can’t access it yet. To do so
 
 OE2 can now access **C1.2**, but still needs to make sure **C1.2** was correctly re-encrypted.
 
-![passporting flow 1](idos-passporting-2.png)
+![passporting flow 1](assets/idos-passporting-2.png)
 
 OE2 then:
 

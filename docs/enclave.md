@@ -18,7 +18,7 @@ The Enclave uses the user's chosen password as the seed for their idOS keypair. 
 
 The diagram below illustrates how this process works differently for new vs existing users.
 
-![key derivation diagram](enclave-password.svg)
+![key derivation diagram](assets/enclave-password.svg)
 
 ### Key derivation details
 
@@ -37,7 +37,7 @@ Voilà, the Enclave now has an encryption keypair (private key + public key), an
 
 When a dapp initializes the idOS frontend SDK, the SDK creates an invisible iframe containing the Enclave. It’s within this invisible iframe that the “Unlock idOS” button appears.
 
-![enclave unlock button](enclave-unlock-button.png)
+![enclave unlock button](assets/enclave-unlock-button.png)
 
 There are two reasons to have this iframe:
 - To have a separate execution context to make it impossible to exfiltrate user secrets
@@ -45,4 +45,4 @@ There are two reasons to have this iframe:
 
 The Enclave tries as much as possible to avoid user interaction, but there are times where that is inevitable. In those cases, the Enclave will need to show the “Unlock idOS” button, and sometimes even to open the Enclave popup.
 
-![enclave popup](enclave-popup.png)
+![enclave popup](assets/enclave-popup.png)
