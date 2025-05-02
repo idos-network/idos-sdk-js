@@ -72,9 +72,7 @@ pnpm add @idos-network/consumer
 import { createIDOSClient, type idOSClient } from "@idos-network/client";
 
 const idOSClient = createIDOSClient({
-  enclaveOptions: {
-    container: "#idOS-enclave",
-  },
+  enclaveOptions: { container: "#idOS-enclave" },
 });
 ```
 
@@ -84,9 +82,8 @@ const idOSClient = createIDOSClient({
 import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 
 const idOSConsumer = await idOSConsumerClass.init({
-  nodeUrl: NODE_URL,
-  consumerSigner: nacl.sign.keyPair.fromSecretKey(hexDecode(OTHER_CONSUMER_SIGNING_SECRET_KEY)),
-  recipientEncryptionPrivateKey: OTHER_CONSUMER_ENCRYPTION_SECRET_KEY,
+  consumerSigner,
+  recipientEncryptionPrivateKey,
 });
 ```
 
