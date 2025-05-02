@@ -32,6 +32,16 @@ You'll need:
   - `signingKeyPair`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
     - see [Signatures](signatures.md) for more information
 
+You'll also need a `multibaseSigningKeyPair`, which will be used to sign the W3C VCs you issue. If you're unfamiliar with how to generate one, you can use the following example:
+
+```js
+import { Ed25519VerificationKey2020 } from "https://esm.sh/@digitalcredentials/ed25519-verification-key-2020";
+
+const key = await Ed25519VerificationKey2020.generate();
+console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed)
+console.log(key.publicKeyMultibase);
+```
+
 ### A frontend
 
 Your frontend (web or native app), as your user’s touch point, is where you’ll:
@@ -121,80 +131,60 @@ To create a user profile in idOS, you need:
 Deciding on a user id for a user is an issuer decision. You can use whichever you want, as long as it's an [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
 ```js
-// Server side
+// backend
 
 const userId = crypto.randomUUID();
 
 // Remember it on your database
-session.user.update({ userId })
+// e.g. session.user.update({ userId });
 
 // Return it to the front-end to be used in the next step
 return { userId }
 ```
 
-##### Step 2: Deriving the Public Key
+##### Step 2: Getting the user's signing and encryption public keys
 
 Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
 
 ```javascript
-// Client side
+// frontend
 
-import { idOS } from "@idos-network/idos-sdk-js";
+const { userEncryptionPublicKey } = await idOSClient.discoverUserEncryptionPublicKey(userId);
 
-// Arguments are described on idos-sdk-js's README. Be sure to read it.
-// Note: make sure to set mode to "new" since you're creating a new idOS profile
-const initParams = { ...YOUR_IDOS_INIT_PARAMS, mode: "new" };
-const idos = await idOS.init(...);
+const ownershipProofMessage = "Please sign this message to confirm you own this wallet address";
 
-// Get userId associated with this user from your server
-const { userId } = await yourServer.getIdosInformation();
-
-// Discover user encryption key
-const { userEncryptionPublicKey } = await idos.discoverUserEncryptionPublicKey(userId);
+const ownershipProofSignature = await ethereum.request({
+  method: "personal_sign",
+  params: [ownershipProofMessage, address],
+});
 
 // Report it back to your server
-await yourServer.reportIdosEncryptionPublicKey(userEncryptionPublicKey);
+// e.g. await yourServer.report(userEncryptionPublicKey, ownershipProofSignature);
 ```
-
 
 ##### Step 3: Creating a User Profile
 Once the public key is derived, you can create the user profile in idOS by passing it to the `createUser` function alongside with user id and the wallet the user's going to use to drive their idOS profile.
 
 ```javascript
-// Server side
+// backend
 
-import { createUser } from "@idos-network/issuer-sdk-js";
-import issuerConfig from "./issuer-config.js";
-
-// Get this from the user's request, and remember it
-const currentPublicKey = request.params['userEncryptionPublicKey']
-session.user.currentPublicKey = currentPublicKey
-
-// Get the stored user id
-const userId = session.user.userId
-
-// Build the user object
 const user = {
   id: userId,
-  recipient_encryption_public_key: currentPublicKey,
-}
+  recipient_encryption_public_key: userEncryptionPublicKey,
+};
 
-// Build the wallet object
-const walletPayload = {
-  // The user's wallet address (e.g., an Ethereum address)
+const wallet = {
   address: "0x0",
-  // The type of user wallet (e.g., "EVM", "NEAR")
-  wallet_type: "EVM",
-  // The message that was signed by the address
-  message: "app wants you to sign this message...",
-  // The derived signature for the message, created with the user wallet
-  signature: "0x3fda8a9fef767d974ceb481d606587b17c...",
-  // The user wallet's public key
-  public_key: "RxG8ByhoFYA6fL5X3qw2Ar9wpblWtmPp5MKtlmBsl0c=",
-}
+  wallet_type: "EVM", // vs. NEAR
+  message: ownershipProofMessage,
+  signature: ownershipProofSignature,
+  public_key: ethers.SigningKey.recoverPublicKey(
+    ethers.id(ownershipProofMessage)
+    ownershipProofSignature,
+  ),
+};
 
-// Create the user on idOS nodes, and get some information back.
-const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
+await idOSIssuer.createUser(user, wallet);
 ```
 
 ### [ frontend ] Setting signer
@@ -207,11 +197,10 @@ idOSClient = await idOSClient.withUserSigner(signer);
 
 ### [ frontend ] Checking for issued credential
 
-* 💔💔💔 missing review
-
 ```typescript
-const credentials: IdosCredentials[] = await idOSClient.getAllCredentials();
-credentials.filter(c => (
+const credentials: IdosCredential[] = await idOSClient.getAllCredentials();
+
+credentials.filter(c =>
   c.issuer_auth_public_key === signingKeyPair.publicKey
   && JSON.parse(c.public_notes).type === "super-kyc"
 );
@@ -239,36 +228,27 @@ A Delegated Write Grant (DWG) is a permission given by the user that allows a sp
 To do this, you must first to ask a user to sign DWG message:
 
 ```js
-// This is a placeholder for your signer's address. You could get it from
-// some endpoint you expose. But, to keep it simple, we're using a constant.
-const ISSUER_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
-const ISSUER_SIGNER_PUBLIC_KEY = "6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069f"; // ed25519 public key
-
 const currentTimestamp = Date.now();
 const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 const delegatedWriteGrant = {
   owner_wallet_identifier: await signer.getAddress(),
-  grantee_wallet_identifier: ISSUER_WALLET_IDENTIFIER,
-  issuer_public_key: ISSUER_SIGNER_PUBLIC_KEY,
+  grantee_wallet_identifier: signingKeyPair.address,
+  issuer_public_key: signingKeyPair.publicKey,
   id: crypto.randomUUID(),
   access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
   not_usable_before: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
   not_usable_after: notUsableAfter.toISOString().replace(/.\d+Z$/g, "Z"),
 };
 
-// Get a message to sign
 const message: string = await idOSClient.requestDWGMessage(delegatedWriteGrant);
 
-// Ask a user to sign the message.
 const signature = await signer.signMessage(message);
 ```
 
 Be sure you have the DWG message parameters and it's signature kept. You need to use them on server side later.
 
 ### [ backend ] Issuing and writing credentials
-
-* 💔💔💔 missing passporting tricks
 
 To issue a credential, one option is to build credentials (and sign) manually:
 
@@ -341,11 +321,11 @@ const credentialSubject = {
 const issuer = {
   id: `${issuer}/keys/1`,
   controller: `${issuer}/issuer/1`,
-  publicKeyMultibase: "PUBLIC_MULTIBASE_KEY",
-  privateKeyMultibase: "PRIVATE_KEY_MULTIBASE",
+  publicKeyMultibase: multibaseSigningKeyPair.publicKey,
+  privateKeyMultibase: multibaseSigningKeyPair.privateKey,
 }
 
-const credentialSubject = await idOSIssuer.buildCredentials(
+const credential = await idOSIssuer.buildCredentials(
   credentialFields,
   credentialSubject,
   issuer,
@@ -365,31 +345,19 @@ const credentialsPublicNotes = {
   type: "human",
   level: "human",
   status: "approved",
-  // make yourself discoverable by dApps.
   issuer: "MyCoolIssuer",
 }
 
-const credentialContent = JSON.stringify("Content from previous section");
+const credentialContent = JSON.stringify(credential);
 
 const credentialPayload = {
   id: crypto.randomUUID(),
-
-  // user id of the user who is creating the credential.
-  user_id: session.user.userId,
-
-  // The verifiable credential content should be passed as it's seen in the example at https://verifiablecredentials.dev/ usually a stringified JSON object.
-  // credential content is encrypted, using the Issuer's secret encryption key, along with the receiver's public encryption key.
-  // plaintextContent should be passed as a Uint8Array.
+  user_id: userId,
   plaintextContent: Utf8Codec.encode(credentialContent),
-
-  // The public encryption key of the user who is creating the credential. also passed as a Uint8Array.
-  recipientEncryptionPublicKey: Utf8Codec.encode(session.user.userEncryptionPublicKey),
-
-   // These notes will be publicly disclosed and accessible without needing to decrypt the credential.
+  recipientEncryptionPublicKey: Utf8Codec.encode(userEncryptionPublicKey),
   publicNotes: JSON.stringify(credentialsPublicNotes),
 }
 
-// Prepare DWG params and the message signature got from user on previous step
 const delegatedWriteGrant = {
   delegatedWriteGrant.owner_wallet_identifier,
   delegatedWriteGrant.grantee_wallet_identifier,
@@ -401,7 +369,7 @@ const delegatedWriteGrant = {
   signature,
 }
 
-const credential = await idOSIssuer.createCredentialsByDelegatedWriteGrant(issuerConfig, credentialPayload, delegatedWriteGrant);
+await idOSIssuer.createCredentialsByDelegatedWriteGrant(credentialPayload, delegatedWriteGrant);
 ```
 
 This will create a credential for user in the idOS and copy for the issuer.
