@@ -12,21 +12,13 @@ This keypair (or at least its private key) needs to be stored somewhere, which i
 
 This means the Enclave must be ready to recreate it at any time. To do this, it must use a key generation process that reliably arrives at the same key, again and again, for the same user — whether they’re new or existing.
 
-## New vs existing user mode
-
-The Enclave has two modes, in order to cater to both new and existing idOS users. New users are asked to _create_ their idOS key, and existing users to _unlock_ it.
-
-The Enclave operates by default in “existing user” mode. Integrators who need to create user profiles can set it to “new user” mode when initializing the idOS Frontend SDK.
-
 ## Deriving keys from seeds
 
 The Enclave uses the user's chosen password as the seed for their idOS keypair. This is the same for a new user “setting” their password, or a returning user “entering” their password.
 
-Key derivation is what happens when your operating system asks you for a password to unlock your laptop, perform updates, etc.
-
 The diagram below illustrates how this process works differently for new vs existing users.
 
-![key derivation diagram](enclave-password.png)
+![key derivation diagram](enclave-password.svg)
 
 ### Key derivation details
 
@@ -34,10 +26,10 @@ idOS keys are derived using scrypt (an industry standard [PBKDF](https://en.wiki
 
 1. Take a seed (e.g. a user’s password)
 2. [Normalize](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/normalize) the seed for consistency across platforms
-3. Use magic maths in [scrypt-js](https://github.com/ricmoo/scrypt-js) to derive a 32-byte private key from a combination of
+3. Use [scrypt-js](https://github.com/ricmoo/scrypt-js) to derive a 32-byte private key from a combination of
     1. the normalized seed
     2. the user’s ID, which acts as a [salt](https://en.wikipedia.org/wiki/Salt_(cryptography)) with to help thwart [rainbow table](https://en.wikipedia.org/wiki/Rainbow_table) attacks
-4. Use magic maths in [tweetnacl-js](https://github.com/dchest/tweetnacl-js) to derive the public key from this private key
+4. Use [tweetnacl-js](https://github.com/dchest/tweetnacl-js) to derive the public key from this private key
 
 Voilà, the Enclave now has an encryption keypair (private key + public key), and is now ready to serve encryption and decryption requests coming from the idOS SDK.
 
@@ -45,8 +37,10 @@ Voilà, the Enclave now has an encryption keypair (private key + public key), an
 
 When a dapp initializes the idOS frontend SDK, the SDK creates an invisible iframe containing the Enclave. It’s within this invisible iframe that the “Unlock idOS” button appears.
 
+TODO explain why we want to control the button implementation (to prevent popup blockers)
+
 ![enclave unlock button](enclave-unlock-button.png)
 
-The Enclave tries as much as possible to avoid user interaction, but there are times where that is inevitable. In those cases, the Enclave will need to show the “Unlock idOS” button, and sometimes even to open the Enclave popup. The diagram below illustrates the rules governing these flows.
+The Enclave tries as much as possible to avoid user interaction, but there are times where that is inevitable. In those cases, the Enclave will need to show the “Unlock idOS” button, and sometimes even to open the Enclave popup.
 
 ![enclave popup](enclave-popup.png)

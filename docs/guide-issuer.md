@@ -50,48 +50,40 @@ Your backend (private server) is where you’ll:
 
 ### Our Issuer SDK
 
-Get [our NPM package](https://www.npmjs.com/package/@idos-network/issuer-sdk-js) and its dependencies with pnpm (or your package manager of choice):
+Get our NPM packages
+* https://www.npmjs.com/package/@idos-network/client
+* https://www.npmjs.com/package/@idos-network/issuer
+
+and their dependencies with pnpm (or your package manager of choice)
 
 ```
-pnpm add @idos-network/issuer-sdk-js
+pnpm add @idos-network/client
+pnpm add @idos-network/issuer
 ```
 
 ## Usage
 
 ### [ frontend ] Importing and initializing
 
-* 💔💔💔 missing code
-* 💔💔💔 missing enclave init (is the assumption that issuers should use the consumer SDK?)
-
 ```js
-// issuer-config.js
-import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
-import * as Base64 from "@stablelib/base64";
-const signingKeyPair = nacl.sign.keyPair.fromSecretKey(ISSUER_SIGNING_SECRET_KEY);
-const encryptionSecretKey = Base64.decode(ISSUER_ENCRYPTION_SECRET_KEY);
+import { createIDOSClient, type idOSClient } from "@idos-network/client";
 
-const issuerConfig = await createIssuerConfig({
-  // To use a non-prod environment, pass in "nodes.playground.idos.network".
-  nodeUrl: "https://nodes.idos.network/",
-  signingKeyPair,
-  encryptionSecretKey
+const idOSClient = createIDOSClient({
+  enclaveOptions: {
+    container: "#idOS-enclave",
+  },
 });
 ```
 
 ### [ backend ] Importing and initializing
 
 ```js
-// issuer-config.js
-import { createIssuerConfig } from "@idos-network/issuer-sdk-js";
-import * as Base64 from "@stablelib/base64";
-const signingKeyPair = nacl.sign.keyPair.fromSecretKey(ISSUER_SIGNING_SECRET_KEY);
-const encryptionSecretKey = Base64.decode(ISSUER_ENCRYPTION_SECRET_KEY);
+import { idOSIssuer as idOSIssuerClass } from "@idos-network/issuer";
 
-const issuerConfig = await createIssuerConfig({
-  // To use a non-prod environment, pass in "nodes.playground.idos.network".
-  nodeUrl: "https://nodes.idos.network/",
-  signingKeyPair,
-  encryptionSecretKey
+const idOSIssuer = await idOSIssuerClass.init({
+  nodeUrl: KWIL_NODE_URL,
+  signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
+  encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
 });
 ```
 
@@ -111,8 +103,12 @@ Get your user's address from the signer above and confirm they have an idOS prof
 
 ```js
 const address = await signer.getAddress();
-const hasProfile = await idos.hasProfile(address);
+const hasProfile = await idOSClient.addressHasProfile(address);
+
+if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
+
+#### Creating a profile
 
 If they don't have a profile, you must create one for them. This procedure can only be done by a Permissioned Issuer. Get in touch with us at engineering@idos.network if you're interested in being one.
 
@@ -120,7 +116,7 @@ To create a user profile in idOS, you need:
 1. **A wallet address** associated with the user.
 2. **A public encryption key** derived from either a password or a passkey chosen by the user in the idOS enclave app.
 
-#### Step 1: Decide on a user id
+##### Step 1: Deciding on a user id
 
 Deciding on a user id for a user is an issuer decision. You can use whichever you want, as long as it's an [UUID](https://en.wikipedia.org/wiki/Universally_unique_identifier).
 
@@ -136,7 +132,7 @@ session.user.update({ userId })
 return { userId }
 ```
 
-#### Step 2: Derive the Public Key
+##### Step 2: Deriving the Public Key
 
 Use the `idos.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
 
@@ -161,7 +157,7 @@ await yourServer.reportIdosEncryptionPublicKey(userEncryptionPublicKey);
 ```
 
 
-#### Step 3: Creating a User Profile
+##### Step 3: Creating a User Profile
 Once the public key is derived, you can create the user profile in idOS by passing it to the `createUser` function alongside with user id and the wallet the user's going to use to drive their idOS profile.
 
 ```javascript
@@ -206,16 +202,19 @@ const [profile, wallet] = await createUser(issuerConfig, user, walletPayload);
 Pass your user’s signer to the SDK, so it knows where to send signature requests to.
 
 ```js
-await idos.setSigner("EVM", signer);
+idOSClient = await idOSClient.withUserSigner(signer);
 ```
 
 ### [ frontend ] Checking for issued credential
 
+* 💔💔💔 missing review
+
 ```typescript
-const grants: IdosCredentials[] = await idos.getGrants({
-  page: 1,
-  size: 7,
-})
+const credentials: IdosCredentials[] = await idOSClient.getAllCredentials();
+credentials.filter(c => (
+  c.issuer_auth_public_key === signingKeyPair.publicKey
+  && JSON.parse(c.public_notes).type === "super-kyc"
+);
 ```
 
 If the user doesn’t already have your credential, you can proceed to requesting a write grant so you can issue and write it.
@@ -242,7 +241,7 @@ To do this, you must first to ask a user to sign DWG message:
 ```js
 // This is a placeholder for your signer's address. You could get it from
 // some endpoint you expose. But, to keep it simple, we're using a constant.
-const CONSUMER_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
+const ISSUER_WALLET_IDENTIFIER = "0xc00ffeec00ffeec00ffeec00ffeec00ffeec00ff";
 const ISSUER_SIGNER_PUBLIC_KEY = "6d28cf8e17e4682fbe6285e72b21aa26f094d8dbd18f7828358f822b428d069f"; // ed25519 public key
 
 const currentTimestamp = Date.now();
@@ -250,7 +249,7 @@ const currentDate = new Date(currentTimestamp);
 const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 const delegatedWriteGrant = {
   owner_wallet_identifier: await signer.getAddress(),
-  grantee_wallet_identifier: CONSUMER_WALLET_IDENTIFIER,
+  grantee_wallet_identifier: ISSUER_WALLET_IDENTIFIER,
   issuer_public_key: ISSUER_SIGNER_PUBLIC_KEY,
   id: crypto.randomUUID(),
   access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),  // Need to cut milliseconds to have 2025-02-11T13:35:57Z datetime format
@@ -259,7 +258,7 @@ const delegatedWriteGrant = {
 };
 
 // Get a message to sign
-const message: string = await idos.data.requestDWGMessage(delegatedWriteGrant);
+const message: string = await idOSClient.requestDWGMessage(delegatedWriteGrant);
 
 // Ask a user to sign the message.
 const signature = await signer.signMessage(message);
@@ -303,8 +302,6 @@ const credentialContent = {
 Secondly you can use a credentials-builder, which help you to create a proper VerifiableCredentials object:
 
 ```js
-import { buildCredentials } from "@idos-network/issuer-sdk-js/server";
-
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 const issuer = "https://vc-issuers.cool.id/idos";
 
@@ -348,7 +345,7 @@ const issuer = {
   privateKeyMultibase: "PRIVATE_KEY_MULTIBASE",
 }
 
-const credentialSubject = await buildCredentials(
+const credentialSubject = await idOSIssuer.buildCredentials(
   credentialFields,
   credentialSubject,
   issuer,
@@ -358,7 +355,6 @@ const credentialSubject = await buildCredentials(
 To write the credential you issued in the idOS, you'll make use of the write grant acquired above.
 
 ```js
-import { createCredentialsByDelegatedWriteGrant } from "@idos-network/issuer-sdk-js";
 import issuerConfig from "./issuer-config.js";
 
 const publicNotesId = crypto.randomUUID();
@@ -405,7 +401,7 @@ const delegatedWriteGrant = {
   signature,
 }
 
-const credential = await createCredentialsByDelegatedWriteGrant(issuerConfig, credentialPayload, delegatedWriteGrant);
+const credential = await idOSIssuer.createCredentialsByDelegatedWriteGrant(issuerConfig, credentialPayload, delegatedWriteGrant);
 ```
 
 This will create a credential for user in the idOS and copy for the issuer.
@@ -425,28 +421,11 @@ In order for `editCredential` to work, the credential's `public_notes` field nee
 > If the new `public_notes` value doesn't have an `id` field, you'll stop being able to edit that credential.
 
 ```js
-import issuerConfig from "./issuer-config.js";
-const public_notes_id = crypto.randomUUID();
-await editCredential(issuerConfig, {
-  public_notes_id: publicNotesId,
-  public_notes: JSON.stringify({
+await idOSIssuer.editCredentialAsIssuer(
+  publicNotes.id,
+  JSON.stringify({
     ...credentialsPublicNotes,
     status: "revoked",
   }),
-});
-```
-
-A previously created credential can be revoked by the issuer by calling the `editCredential` function. When creating a credential, the `publicNotes` field needs to have an `id` field that will be used to identify the credential to be revoked. Pass this `id` to the `editCredential` function to revoke the credential.
-
-```js
-import { editCredential } from "@idos-network/issuer-sdk-js";
-import issuerConfig from "./issuer-config.js";
-
-await editCredential(issuer, {
-    publicNotesId: id, // the `id` of the credential to be revoked that is stored in the `publicNotes` field.
-    publicNotes: JSON.stringify({
-      ...publicNotes,
-      status: "revoked" // updating the credential status to revoked
-    }),
-  });
+);
 ```

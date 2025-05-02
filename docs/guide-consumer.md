@@ -32,7 +32,7 @@ See [idOS Regulatory approach](https://docs.idos.network/compliance/idos-regulat
 You'll need:
   - `recipientEncryptionPrivateKey`: base64-encoded `nacl.BoxKeyPair` secret key. It'll be used to decode the credential copies that the owners (users) share with you by creating access grants.
     - see [Encryption](encryption.md) for more information
-  - `consumerSigner`: this can be a NEAR `KeyPair`, a `nacl.SignKeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
+  - `consumerSigner`: this can be a NEAR `KeyPair`, or an `ethers.Wallet`. This will be used to sign RPC calls to the idOS nodes.
     - see [Signatures](signatures.md) for more information
 
 ### A frontend
@@ -52,52 +52,40 @@ Your backend (private server) is where you’ll:
 
 ### Our Consumer SDK
 
-Get [our NPM package](https://www.npmjs.com/package/@idos-network/idos-sdk) and its dependencies with pnpm (or your package manager of choice):
+Get our NPM packages
+* https://www.npmjs.com/package/@idos-network/client
+* https://www.npmjs.com/package/@idos-network/consumer
+
+and their dependencies with pnpm (or your package manager of choice)
 
 ```
-pnpm add @idos-network/consumer-sdk-js
+pnpm add @idos-network/client
+pnpm add @idos-network/consumer
 ```
 
 ## Usage
 
 ### [ frontend ] Importing and initializing
 
-* 💔💔💔 missing enclave init
-
 ```js
-import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import { createIDOSClient, type idOSClient } from "@idos-network/client";
 
-const consumer = await idOSConsumerClass.init({
-  nodeUrl: NODE_URL,
-  consumerSigner: nacl.sign.keyPair.fromSecretKey(hexDecode(OTHER_CONSUMER_SIGNING_SECRET_KEY)),
-  recipientEncryptionPrivateKey: OTHER_CONSUMER_ENCRYPTION_SECRET_KEY,
+const idOSClient = createIDOSClient({
+  enclaveOptions: {
+    container: "#idOS-enclave",
+  },
 });
 ```
 
 ### [ backend ] Importing and initializing
 
 ```typescript
-import { idOS } from "@idos-network/consumer-sdk-js/server";
-import nacl from "tweetnacl";
+import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 
-/**
- * Initializes the idOS SDK with the provided options.
- *
- * @async
- * @function init
- * @param {Object} options - Configuration options for initializing the SDK.
- * @param {string} options.recipientEncryptionPrivateKey - The recipient's encryption private key.
- * @param {KeyPair | SignKeyPair | ethers.Wallet} options.granteeSigner - The grantee's wallet or key pair for signing transactions.
- * @param {string} [options.nodeUrl="https://nodes.idos.network"] - The URL of the idOS node.
- * @param {string} [options.chainId] - The chain ID for the network (optional).
- * @returns {Promise<idOSGrantee>} - A promise that resolves to an instance of the idOS SDK.
- */
-
-export const idos = await idOS.init({
-  nodeUrl: process.env.IDOS_NODE_URL,
-  recipientEncryptionPrivateKey: process.env.CONSUMER_ENCRYPTION_SECRET_KEY,
-  // TODO require less crap from the user. This is way too much functions.
-  consumerSigner: nacl.sign.keyPair.fromSecretKey(base64Decode(process.env.CONSUMER_SIGNING_SECRET_KEY))
+const idOSConsumer = await idOSConsumerClass.init({
+  nodeUrl: NODE_URL,
+  consumerSigner: nacl.sign.keyPair.fromSecretKey(hexDecode(OTHER_CONSUMER_SIGNING_SECRET_KEY)),
+  recipientEncryptionPrivateKey: OTHER_CONSUMER_ENCRYPTION_SECRET_KEY,
 });
 ```
 
@@ -117,7 +105,8 @@ Get your user's address from the signer above and confirm they have an idOS prof
 
 ```js
 const address = await signer.getAddress();
-const hasProfile = await idos.hasProfile(address);
+const hasProfile = await idOSClient.addressHasProfile(address);
+
 if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 ```
 
@@ -126,24 +115,24 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 Pass your user’s signer to the SDK, so it knows where to send signature requests to.
 
 ```js
-await idos.setSigner("EVM", signer);
+idOSClient = await idOSClient.withUserSigner(signer);
 ```
 
 ### [ frontend ] Checking for existing access grant
 
-* 💔💔💔 missing filtering by owner
-
 ```typescript
-const grants: IdosCredentials[] = await idos.getGrants({
+const grants: IdosCredentials[] = await idOSClient.getGrants({
   page: 1,
   size: 7,
-})
+});
 ```
+
+* 💔💔💔 missing filtering by grantee
 
 Optionally, you can double check that the existing access grant matches your requirements. You do this on your backend.
 
 ```typescript
-const credentialContents: string = await idos.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
+const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
 ```
 
 If you don’t have an access grant, you can proceed to filtering the user’s credentials and requesting one or more access grants.
@@ -151,33 +140,48 @@ If you don’t have an access grant, you can proceed to filtering the user’s c
 
 ### [ frontend ] Filtering credentials
 
-* 💔💔💔 missing filtering by issuer
+* 💔💔💔 missing extraction into Client SDK
 
-```js
-const entries = await idos.enclave.filterCredentials(credentials, {
-  pick: {
-    "credentialSubject.identification_document_country": "DE",
-  },
-  omit: {
-    "credentialSubject.identification_document_type": "passport",
-  },
-});
-```
+https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L460-L486
 
 ### [ frontend ] Requesting access grant
 
-* 💔💔💔 missing code (regular; delegated; timelocks)
-* 💔💔💔 missing passporting tricks
 
+The simplest way to do this is to ask the user to create and insert an access grant for you.
+
+* 💔💔💔 missing extraction into Client SDK
+
+https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L341-L369
+
+Alternatively, you can ask for a delegated access grant, which the user creates:
+
+```js
+await idOSClient.requestDAGMessage(
+  dag_owner_wallet_identifier: string;
+  dag_grantee_wallet_identifier: string;
+  dag_data_id: string;
+  dag_locked_until: number;
+  dag_content_hash: string;
+);
+```
+
+and you then insert after sending it to your backend:
+
+* 💔💔💔 missing extraction into Consumer SDK
+
+https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40core/src/kwil-actions/grants.ts#L56
+
+* 💔💔💔 missing passporting tricks
 
 ### [ backend ] retrieving and verifying credential
 
-* 💔💔💔 missing passporting tricks
-
 ```typescript
-const credentialContents: string = await idos.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
-
-const valid = await verifiableCredentials.verify(credentialContents, {
-  allowedIssuers: [verifiableCredentials.PLAYGROUND_FRACTAL_ISSUER],
-})
+const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
 ```
+
+If you're using passporting:
+```typescript
+const credentialContents: string = await idOSConsumer.getReusableCredentialCompliantly('GRANT_DATA_ID')
+```
+
+* 💔💔💔 missing verification
