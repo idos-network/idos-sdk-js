@@ -15,7 +15,10 @@ import { useEthersSigner } from "@/wagmi.config";
 
 const startingConfig = new idOSClientConfiguration({
   nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
-  enclaveOptions: { container: "#idOS-enclave" },
+  enclaveOptions: {
+    container: "#idOS-enclave",
+    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+  },
 });
 
 export const idOSClientContext = createContext<idOSClient>(startingConfig);
