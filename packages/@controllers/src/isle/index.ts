@@ -54,6 +54,9 @@ interface idOSIsleControllerOptions {
   /** The ID of the container element where the Isle iframe will be mounted */
   container: string;
 
+  /** The targetOrigin of the hosted isle */
+  targetOrigin: string;
+
   /** Optional theme configuration for the Isle UI */
   theme?: IsleTheme;
 
@@ -183,7 +186,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   // Internal state
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
-    targetOrigin: "https://isle.idos.network",
+    targetOrigin: options.targetOrigin,
   });
   let channel: ChannelInstance<IsleControllerMessage, IsleNodeMessage> | null = null;
 
