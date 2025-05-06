@@ -165,6 +165,13 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 }
 
+const safeParse = (value: string) => {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    return {};
+  }
+};
 export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
   readonly state: "logged-in";
   readonly store: Store;
@@ -327,5 +334,36 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async removeWallets(ids: string[]) {
     return removeWallets(this.kwilClient, ids);
+  }
+
+  async filterCredentials(requirements: {
+    acceptedIssuers: {
+      authPublicKey: string;
+    }[];
+    acceptedCredentialType: string;
+    privateFieldFilters: {
+      pick: Record<string, string>;
+      omit: Record<string, string>;
+    };
+  }) {
+    const acceptedIssuers = requirements.acceptedIssuers;
+    const acceptedCredentialType = requirements.acceptedCredentialType;
+
+    const credentials = await this.getAllCredentials();
+    const originalCredentials = credentials.filter((cred) => !cred.original_id);
+
+    const matchingCredentials = originalCredentials.filter((cred) => {
+      const publicNotes = safeParse(cred.public_notes);
+      return acceptedIssuers?.some(
+        (issuer) =>
+          issuer.authPublicKey === cred.issuer_auth_public_key &&
+          acceptedCredentialType === publicNotes?.type,
+      );
+    });
+
+    return this.enclaveProvider.filterCredentials(
+      matchingCredentials,
+      requirements.privateFieldFilters,
+    );
   }
 }

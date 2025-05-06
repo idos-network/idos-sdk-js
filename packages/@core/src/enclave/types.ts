@@ -33,7 +33,7 @@ export interface EnclaveProvider {
   discoverUserEncryptionPublicKey(userId: string): Promise<DiscoverUserEncryptionPublicKeyResponse>;
 
   filterCredentials(
-    credentials: Record<string, string>[],
+    credentials: idOSCredential[],
     privateFieldFilters: {
       pick: Record<string, string>;
       omit: Record<string, string>;

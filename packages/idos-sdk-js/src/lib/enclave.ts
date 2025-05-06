@@ -60,7 +60,7 @@ export class Enclave {
   }
 
   async filterCredentials(
-    credentials: Record<string, string>[],
+    credentials: idOSCredential[],
     privateFieldFilters: {
       pick: Record<string, string>;
       omit: Record<string, string>;
