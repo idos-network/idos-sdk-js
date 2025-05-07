@@ -222,7 +222,13 @@ export class Enclave {
     return decrypted
       .map((credential) => ({
         ...credential,
-        content: JSON.parse(credential.content),
+        content: (() => {
+          try {
+            JSON.parse(credential.content);
+          } catch (e) {
+            throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
+          }
+        })(),
       }))
       .filter(({ content }) => matchCriteria(content, privateFieldFilters.pick))
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
