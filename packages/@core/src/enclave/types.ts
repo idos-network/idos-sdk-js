@@ -35,8 +35,8 @@ export interface EnclaveProvider {
   filterCredentials(
     credentials: idOSCredential[],
     privateFieldFilters: {
-      pick: Record<string, string>;
-      omit: Record<string, string>;
+      pick: Record<string, unknown[]>;
+      omit: Record<string, unknown[]>;
     },
   ): Promise<idOSCredential[]>;
 

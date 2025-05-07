@@ -1,6 +1,8 @@
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 
+import { negate } from "es-toolkit";
+import { every, get } from "es-toolkit/compat";
 import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
@@ -165,13 +167,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 }
 
-const safeParse = (value: string) => {
-  try {
-    return JSON.parse(value);
-  } catch (error) {
-    return {};
-  }
-};
 export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSigner>, "state"> {
   readonly state: "logged-in";
   readonly store: Store;
@@ -340,30 +335,50 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     acceptedIssuers: {
       authPublicKey: string;
     }[];
-    acceptedCredentialType: string;
-    privateFieldFilters: {
-      pick: Record<string, string>;
-      omit: Record<string, string>;
+    publicNotesFieldFilters?: {
+      pick: Record<string, unknown[]>;
+      omit: Record<string, unknown[]>;
+    };
+    privateFieldFilters?: {
+      pick: Record<string, unknown[]>;
+      omit: Record<string, unknown[]>;
     };
   }) {
-    const acceptedIssuers = requirements.acceptedIssuers;
-    const acceptedCredentialType = requirements.acceptedCredentialType;
+    const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
+      every(Object.entries(criteria), ([path, targetSet]) =>
+        targetSet.includes(get(content, path)),
+      );
 
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter((cred) => !cred.original_id);
 
-    const matchingCredentials = originalCredentials.filter((cred) => {
-      const publicNotes = safeParse(cred.public_notes);
-      return acceptedIssuers?.some(
-        (issuer) =>
-          issuer.authPublicKey === cred.issuer_auth_public_key &&
-          acceptedCredentialType === publicNotes?.type,
+    let result = originalCredentials.filter((cred) => {
+      return requirements.acceptedIssuers?.some(
+        (issuer) => issuer.authPublicKey === cred.issuer_auth_public_key,
       );
     });
 
-    return this.enclaveProvider.filterCredentials(
-      matchingCredentials,
-      requirements.privateFieldFilters,
-    );
+    const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
+    if (publicNotesFieldFilters) {
+      result = result.filter((credential) => {
+        let publicNotes: Record<string, string>;
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (error) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes".replace("{}`);
+        }
+        return (
+          matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
+          negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))
+        );
+      });
+    }
+
+    const privateFieldFilters = requirements.privateFieldFilters;
+    if (privateFieldFilters) {
+      result = await this.enclaveProvider.filterCredentials(result, privateFieldFilters);
+    }
+
+    return result;
   }
 }
