@@ -6,7 +6,7 @@ import basicSetup from "../wallet-setup/basic.setup";
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
-const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.vercel.app/";
+const consumerAndIssuerUrl = "https://consumer-and-issuer-demo.playground.idos.network/";
 const dashboardUrl = "https://dashboard.playground.idos.network";
 
 // Helper function to generate random private key
@@ -37,6 +37,7 @@ test("should create a profile successfully using new wallet", async ({
   await page.goto(consumerAndIssuerUrl);
 
   await page.getByRole("button", { name: "Get Started now" }).first().click();
+  await page.getByRole("button", { name: "Metamask" }).click();
 
   await metamask.connectToDapp();
 
@@ -55,7 +56,6 @@ test("should create a profile successfully using new wallet", async ({
   await unlockButton.click();
 
   const idOSPopup = await popupPromise;
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
   const passwordInput = idOSPopup.locator("#idos-password-input");
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Create password" }).click();
@@ -63,18 +63,44 @@ test("should create a profile successfully using new wallet", async ({
   await page.waitForTimeout(2000);
   await metamask.confirmSignature();
 
-  // Simulate the user to be transitioning to not verified status
   await page.waitForTimeout(6000);
   await metamask.confirmSignature();
 
   await expect(isleIframe.locator(".status-badge").first()).toHaveText("not verified");
-
   await isleIframe.getByRole("button", { name: "Verify your identity" }).click();
   await page.waitForTimeout(2000);
-  await metamask.confirmSignature();
-  await page.waitForTimeout(5000);
 
-  await expect(isleIframe.locator(".status-badge").first()).toHaveText("pending verification");
+  await popupPromise;
+
+  const krakenIframe = await page.frameLocator("iframe#kyc-journey");
+  const continueButton = krakenIframe.getByRole("button", { name: "Continue" });
+  await expect(continueButton).toBeVisible();
+  await continueButton.click();
+
+  await page.waitForTimeout(2000);
+
+  const sumSubIframe = await krakenIframe.frameLocator("#sumsub-websdk-container > iframe");
+  await expect(sumSubIframe).toBeDefined();
+
+  await sumSubIframe.getByText("All countries except USA", { exact: true }).click();
+  await sumSubIframe.getByText("Continue", { exact: true }).click();
+
+  // Select germany and passport
+  await sumSubIframe.getByRole("button", { name: "Issuing country*" }).click();
+  await sumSubIframe.getByRole("textbox", { name: "Search" }).fill("Germany");
+  await sumSubIframe.getByRole("button", { name: "Germany" }).click();
+  await sumSubIframe.getByText("Passport", { exact: true }).click();
+  await sumSubIframe.getByText("Continue", { exact: true }).click();
+
+  // Upload passport image
+  const fileInput = await sumSubIframe.locator('input[type="file"]').first();
+  await fileInput.setInputFiles("tests/fixtures/passport.jpg");
+  await sumSubIframe.getByText("Continue", { exact: true }).click();
+  await metamask.confirmSignature();
+  await page.waitForTimeout(3000);
+  await metamask.confirmSignature();
+  await page.waitForTimeout(3000);
+  await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
 });
 
 test.describe
