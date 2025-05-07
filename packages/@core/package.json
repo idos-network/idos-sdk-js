@@ -13,6 +13,7 @@
     "@stablelib/utf8": "^1.0.1",
     "borsh": "^1.0.0",
     "bs58": "^6.0.0",
+    "es-toolkit": "^1.23.0",
     "ethers": "catalog:",
     "near-api-js": "3.0.4",
     "tweetnacl": "^1.0.3"

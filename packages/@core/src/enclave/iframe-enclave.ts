@@ -87,8 +87,8 @@ export class IframeEnclave implements EnclaveProvider {
   }
 
   filterCredentials(
-    credentials: Record<string, string>[],
-    privateFieldFilters: { pick: Record<string, string>; omit: Record<string, string> },
+    credentials: idOSCredential[],
+    privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
   ): Promise<idOSCredential[]> {
     return this.requestToEnclave({
       filterCredentials: { credentials, privateFieldFilters },
