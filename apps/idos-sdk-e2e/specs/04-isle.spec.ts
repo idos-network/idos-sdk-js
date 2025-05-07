@@ -36,6 +36,10 @@ test("should create a profile successfully using new wallet", async ({
 
   await page.goto(consumerAndIssuerUrl);
 
+  await page.evaluate(() => {
+    localStorage.setItem("idOS-is-e2e", "true");
+  });
+
   await page.getByRole("button", { name: "Get Started now" }).first().click();
   await page.getByRole("button", { name: "Metamask" }).click();
 
