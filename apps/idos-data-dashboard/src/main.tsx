@@ -32,48 +32,50 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         {/* @ts-ignore: TODO: fix wagmi types */}
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
-            <IDOSClientProvider>
-              <RouterProvider
-                router={createBrowserRouter([
-                  {
-                    path: "/",
-                    element: <App />,
-                    children: [
-                      {
-                        lazy: () => import("@/routes/dashboard"),
-                        children: [
-                          {
-                            index: true,
-                            lazy: () => import("@/routes/dashboard/credentials"),
-                            handle: {
-                              crumb: () => "Credentials",
-                            },
+            <RouterProvider
+              router={createBrowserRouter([
+                {
+                  path: "/",
+                  element: (
+                    <IDOSClientProvider>
+                      <App />
+                    </IDOSClientProvider>
+                  ),
+                  children: [
+                    {
+                      lazy: () => import("@/routes/dashboard"),
+                      children: [
+                        {
+                          index: true,
+                          lazy: () => import("@/routes/dashboard/credentials"),
+                          handle: {
+                            crumb: () => "Credentials",
                           },
-                          {
-                            path: "/wallets",
-                            lazy: () => import("@/routes/dashboard/wallets"),
-                            handle: {
-                              crumb: () => "Wallets",
-                            },
+                        },
+                        {
+                          path: "/wallets",
+                          lazy: () => import("@/routes/dashboard/wallets"),
+                          handle: {
+                            crumb: () => "Wallets",
                           },
-                          {
-                            path: "/settings",
-                            lazy: () => import("@/routes/dashboard/settings"),
-                            handle: {
-                              crumb: () => "Settings",
-                            },
+                        },
+                        {
+                          path: "/settings",
+                          lazy: () => import("@/routes/dashboard/settings"),
+                          handle: {
+                            crumb: () => "Settings",
                           },
-                          {
-                            path: "/success",
-                            element: <Navigate to="/" />,
-                          },
-                        ],
-                      },
-                    ],
-                  },
-                ])}
-              />
-            </IDOSClientProvider>
+                        },
+                        {
+                          path: "/success",
+                          element: <Navigate to="/" />,
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ])}
+            />
             <ReactQueryDevtools buttonPosition="bottom-left" />
           </QueryClientProvider>
         </WagmiProvider>

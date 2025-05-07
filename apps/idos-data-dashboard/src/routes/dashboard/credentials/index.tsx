@@ -121,6 +121,8 @@ export function Component() {
   const idOSClient = useIdOS();
   const queryClient = useQueryClient();
 
+  if (idOSClient.state !== "logged-in") return <NoCredentials />;
+
   return (
     <VStack align="stretch" flex={1} gap={2.5}>
       <HStack
@@ -152,7 +154,7 @@ export function Component() {
           }}
         />
       </HStack>
-      {idOSClient.user.id ? <Credentials /> : <NoCredentials />}
+      <Credentials />
     </VStack>
   );
 }
