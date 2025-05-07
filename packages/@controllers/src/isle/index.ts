@@ -713,7 +713,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   iframe = document.createElement("iframe");
   iframe.id = iframeId;
   // @todo: make the domain environment aware.
-  iframe.src = "https://isle.idos.network";
+  iframe.src = options.targetOrigin;
   iframe.style.width = "100%";
   iframe.style.height = "100%";
   iframe.style.border = "none";
