@@ -382,7 +382,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return result;
   }
 
-  async requestAccessGrant(credentialId: string) {
+  async requestAccessGrant(
+    credentialId: string,
+    {
+      consumerEncryptionPublicKey,
+      consumerAuthPublicKey,
+    }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
+  ) {
     const credential = await getCredentialById(this.kwilClient, credentialId);
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
 
@@ -397,7 +403,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       utf8Encode(plaintextContent),
-      base64Decode(credential.encryptor_public_key),
+      base64Decode(consumerEncryptionPublicKey),
     );
 
     const insertableCredential = {
@@ -406,12 +412,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         credential.user_id,
         "",
         base64Encode(content),
-        this.user.recipient_encryption_public_key,
+        consumerAuthPublicKey,
         base64Encode(encryptorPublicKey),
       )),
       original_credential_id: credential.id,
       id: crypto.randomUUID(),
-      grantee_wallet_identifier: this.user.recipient_encryption_public_key,
+      grantee_wallet_identifier: consumerAuthPublicKey,
       locked_until: 0,
     };
 
