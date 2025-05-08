@@ -124,6 +124,7 @@ test("should create a profile successfully using new wallet", async ({
   await metamask.confirmSignature();
 
   await expect(claimCardButton).not.toBeVisible();
+  await expect(isleIframe.locator("p", { hasText: "KYC DATA" })).toHaveCount(2);
 });
 
 test.describe
