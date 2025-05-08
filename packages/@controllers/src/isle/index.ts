@@ -341,33 +341,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     const [error, result] = await goTry(async () => {
       invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
-      const credential = await idosClient.getCredentialById(ownerOriginalCredentials[0].id);
-      invariant(credential, `No "idOSCredential" with id ${ownerOriginalCredentials[0].id} found`);
-
-      const plaintextContent = await decryptCredentialContent(credential);
-
-      await idosClient.enclaveProvider.ready(
-        idosClient.user.id,
-        idosClient.user.recipient_encryption_public_key,
-      );
-      const { content, encryptorPublicKey } = await idosClient.enclaveProvider.encrypt(
-        utf8Encode(plaintextContent),
-        base64Decode(options.consumer.consumerEncryptionPublicKey),
-      );
-
-      await idosClient.shareCredential({
-        ...credential,
-        ...(await buildInsertableIDOSCredential(
-          credential.user_id,
-          "",
-          base64Encode(content),
-          options.consumer.consumerAuthPublicKey,
-          base64Encode(encryptorPublicKey),
-        )),
-        original_credential_id: credential.id,
-        id: crypto.randomUUID(),
-        grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
-        locked_until: 0,
+      await idosClient.requestAccessGrant(ownerOriginalCredentials[0].id, {
+        consumerEncryptionPublicKey: options.consumer.consumerEncryptionPublicKey,
+        consumerAuthPublicKey: options.consumer.consumerAuthPublicKey,
       });
     });
 
