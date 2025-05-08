@@ -293,13 +293,14 @@ export const invokePassportingService = async (
   }
 };
 
-export const generateKrakenUrlToken = async () => {
+export const generateKrakenUrlToken = async (isE2E: boolean) => {
   invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
+  const level = isE2E ? "basic" : "basic+liveness";
 
   const payload = {
     clientId: process.env.KRAKEN_CLIENT_ID,
     kyc: true,
-    level: "basic+liveness",
+    level,
     state: Date.now().toString(),
   };
 
