@@ -63,6 +63,9 @@ interface idOSIsleControllerOptions {
   /** enclave options */
   enclaveOptions: EnclaveOptions;
 
+  /** wagmi config */
+  wagmiConfig: Config;
+
   /**
    * The issuer configuration.
    */
@@ -150,8 +153,6 @@ interface idOSIsleController {
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 
-  setupWagmiConfig: (wagmiConfig: unknown) => void;
-
   readonly idosClient: idOSClient;
 
   logClientIn: () => Promise<void>;
@@ -165,9 +166,6 @@ interface idOSIsleController {
     kycPermissions: string[];
   }) => Promise<boolean>;
 }
-
-// Singleton wagmi config instance shared across all Isle instances
-let wagmiConfig: Config;
 
 /**
  * Creates a new idOS Isle instance.
@@ -184,6 +182,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     enclaveOptions: options.enclaveOptions,
   });
   // Internal state
+  const wagmiConfig = options.wagmiConfig;
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
     targetOrigin: options.targetOrigin,
@@ -195,7 +194,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let ownerOriginalCredentials: idOSCredential[] = [];
 
   const setupSigner = async (): Promise<void> => {
-    const walletClient = await getWalletClient(wagmiConfig);
+    const walletClient = await getWalletClient(options.wagmiConfig);
     invariant(walletClient, "No `walletClient` found");
 
     const provider = new BrowserProvider(walletClient.transport);
@@ -219,14 +218,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       default:
         assertNever(idosClient);
     }
-  };
-
-  const setupWagmiConfig = async (_wagmiConfig: unknown) => {
-    if (wagmiConfig) return;
-    wagmiConfig = _wagmiConfig as Config;
-
-    watchAccountChanges();
-    reconnect(wagmiConfig).catch((error) => console.error(error));
   };
 
   /**
@@ -566,7 +557,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     // Handle initialization completion
     channel.on("initialized", async () => {
-      const account = getAccount(wagmiConfig);
+      const account = await getAccount(wagmiConfig);
       await handleAccountChange(account);
 
       if (idosClient.state === "configuration" || idosClient.state === "idle") {
@@ -814,7 +805,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
-    setupWagmiConfig,
     get options() {
       return options;
     },
