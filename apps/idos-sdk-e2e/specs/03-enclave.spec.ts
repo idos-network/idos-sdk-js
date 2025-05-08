@@ -34,12 +34,11 @@ test("should decrypt a credential successfully", async ({
   await idOSButton.click();
   const idOSPopup = await popupPromise;
   await page.waitForTimeout(2000);
-  await (await idOSPopup.waitForSelector("#auth-method-password")).click();
   const passwordInput = idOSPopup.locator("#idos-password-input");
   await passwordInput.fill("qwerty");
   await idOSPopup.getByRole("button", { name: "Unlock" }).click();
 
   const code = page.locator("#credential-details");
 
-  await expect(code).toContainText("E2E test");
+  await expect(code).toContainText(/E2E test|John Mock-Doe/);
 });

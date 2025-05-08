@@ -15,7 +15,7 @@ test.beforeEach(async ({ context, page }) => {
   await page.evaluate(() => window.localStorage.clear());
 });
 
-const TEST_WALLET_ADDRESS = "0xB5B3a244943E5A64511673528e003BE79B18901b";
+const TEST_WALLET_ADDRESS = "0xB5B3a244943E5A64511673528e003BE79B18901d";
 
 test("should fetch credentials successfully", async ({
   context,
