@@ -105,6 +105,25 @@ test("should create a profile successfully using new wallet", async ({
   await metamask.confirmSignature();
   await page.waitForTimeout(3000);
   await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
+
+  await isleIframe.locator("button[aria-label='View']").click({ timeout: 10000 });
+  await page.waitForTimeout(3000);
+
+  await expect(isleIframe.locator("p", { hasText: "basic" })).toBeVisible();
+  isleIframe.locator("a", { hasText: "Permissions" }).click();
+
+  const claimCardButton = await page.getByRole("button", { name: "Claim your card" });
+  await claimCardButton.click();
+
+  await expect(claimCardButton).toBeDisabled();
+
+  await page.waitForTimeout(1000);
+  await metamask.confirmSignature();
+
+  await page.waitForTimeout(1000);
+  await metamask.confirmSignature();
+
+  await expect(claimCardButton).not.toBeVisible();
 });
 
 test.describe
@@ -120,6 +139,7 @@ test.describe
 
       await page.goto(consumerAndIssuerUrl);
       await page.getByRole("button", { name: "Get Started now" }).first().click();
+      await page.getByRole("button", { name: "Metamask" }).click();
 
       await metamask.connectToDapp();
 
@@ -127,7 +147,7 @@ test.describe
 
       const isleIframe = page.frameLocator("#idOS-isle > iframe");
 
-      const createProfileButton = isleIframe.getByRole("button", { name: "Link existing wallet" });
+      const createProfileButton = isleIframe.getByRole("button", { name: "Login" });
       await expect(createProfileButton).toBeVisible();
       await createProfileButton.click();
       const linkWalletButton = isleIframe.getByRole("button", {
