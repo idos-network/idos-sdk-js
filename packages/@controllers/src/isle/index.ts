@@ -479,13 +479,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     const duplicateCredentials = credentials.filter((cred) => cred.original_id);
 
     // This logic is done in order to understand if the user has to pass the KYC process.
-    const matchingCredentials = originalCredentials.filter((cred) => {
-      const publicNotes = safeParse(cred.public_notes);
-      return acceptedIssuers?.some(
-        (issuer) =>
-          issuer.authPublicKey === cred.issuer_auth_public_key &&
-          acceptedCredentialType === publicNotes?.type,
-      );
+    const matchingCredentials = await idosClient.filterCredentials({
+      acceptedIssuers,
+      publicNotesFieldFilters: {
+        pick: { type: [acceptedCredentialType] },
+        omit: {},
+      },
     });
 
     const groupedCredentials = Object.groupBy(
