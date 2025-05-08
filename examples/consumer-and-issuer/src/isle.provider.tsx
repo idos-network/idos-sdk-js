@@ -3,6 +3,7 @@
 import { createIsleController } from "@idos-network/controllers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
+import { wagmiAdapter } from "./app/providers";
 
 type IsleController = ReturnType<typeof createIsleController>;
 
@@ -44,6 +45,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     const controller = createIsleController({
       container: containerId,
+      wagmiConfig: wagmiAdapter.wagmiConfig,
       targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
       theme: "light",
       issuerConfig: {

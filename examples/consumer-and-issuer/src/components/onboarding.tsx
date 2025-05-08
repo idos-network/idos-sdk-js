@@ -438,11 +438,6 @@ export function Onboarding() {
 
   const activeStep = useStore($step);
 
-  useEffect(() => {
-    if (!isleController) return;
-    isleController.setupWagmiConfig(wagmiAdapter.wagmiConfig);
-  }, [isleController]);
-
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
       invariant(
