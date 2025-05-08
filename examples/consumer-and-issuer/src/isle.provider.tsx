@@ -45,7 +45,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     const controller = createIsleController({
       container: containerId,
-      wagmiConfig: wagmiAdapter.wagmiConfig,
+      wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
       targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
       theme: "light",
       issuerConfig: {
