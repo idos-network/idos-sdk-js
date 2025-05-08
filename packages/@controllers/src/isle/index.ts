@@ -440,7 +440,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     const acceptedCredentialType = options.credentialRequirements.acceptedCredentialType;
 
     const credentials = await idosClient.getAllCredentials();
-    const originalCredentials = credentials.filter((cred) => !cred.original_id);
+    const originalCredentials = credentials.filter(
+      (cred) => !cred.original_id && !!cred.public_notes,
+    );
+
+    invariant(originalCredentials.length, "No original credentials found");
 
     ownerOriginalCredentials = originalCredentials;
 
