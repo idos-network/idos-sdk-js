@@ -145,7 +145,7 @@ If you don’t have an access grant, you can proceed to filtering the user’s c
 
 Credential filtering is done by calling the method `filterCredentials` from the `idOSClient` and passing the filtering requirements:
 ```typescript
-const filteredCredentials: idOSCredentialp[] = await idOSClient.filterCredentials({acceptedIssuers: [{
+const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials({acceptedIssuers: [{
       authPublicKey // the accepted issuer auth public key to filter credentials by
     }];
     // OPTIONAL. A list of public notes fields of a credential that should be picked or omitted.
