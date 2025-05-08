@@ -9,7 +9,7 @@ export function KYCJourney({ onSuccess, onError }: KYCJourneyProps) {
   const [token, setToken] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    generateKrakenUrlToken().then((o) => setToken(o));
+    generateKrakenUrlToken(localStorage.getItem("idOS-is-e2e") === "true").then((o) => setToken(o));
   }, []);
 
   const messageReceiver = useCallback(

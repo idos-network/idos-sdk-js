@@ -77,3 +77,5 @@ viewports
 vite
 wagmi
 webauthn
+sumsub
+websdk
