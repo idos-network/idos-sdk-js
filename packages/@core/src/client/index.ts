@@ -3,7 +3,7 @@ import invariant from "tiny-invariant";
 
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-import { base64Decode, base64Encode, hexEncodeSha256Hash } from "../codecs";
+import { base64Decode, base64Encode, hexEncodeSha256Hash, utf8Decode, utf8Encode } from "../codecs";
 import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "../enclave";
 import {
   type AddWalletParams,
@@ -380,5 +380,43 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     }
 
     return result;
+  }
+
+  async requestAccessGrant(credentialId: string) {
+    const credential = await getCredentialById(this.kwilClient, credentialId);
+    invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
+
+    const plaintextContent = utf8Decode(
+      await this.enclaveProvider.decrypt(
+        base64Decode(credential.content),
+        base64Decode(credential.encryptor_public_key),
+      ),
+    );
+
+    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+
+    const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
+      utf8Encode(plaintextContent),
+      base64Decode(credential.encryptor_public_key),
+    );
+
+    const insertableCredential = {
+      ...credential,
+      ...(await buildInsertableIDOSCredential(
+        credential.user_id,
+        "",
+        base64Encode(content),
+        this.user.recipient_encryption_public_key,
+        base64Encode(encryptorPublicKey),
+      )),
+      original_credential_id: credential.id,
+      id: crypto.randomUUID(),
+      grantee_wallet_identifier: this.user.recipient_encryption_public_key,
+      locked_until: 0,
+    };
+
+    await this.shareCredential(insertableCredential);
+
+    return insertableCredential;
   }
 }
