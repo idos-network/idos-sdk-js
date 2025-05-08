@@ -143,18 +143,32 @@ If you don’t have an access grant, you can proceed to filtering the user’s c
 
 ### [ frontend ] Filtering credentials
 
-* TODO: missing extraction into Client SDK
-
-https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L460-L486
+Credential filtering is done by calling the method `filterCredentials` from the `idOSClient` and passing the filtering requirements:
+```typescript
+const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials({acceptedIssuers: [{
+      authPublicKey // the accepted issuer auth public key to filter credentials by
+    }];
+    // OPTIONAL. A list of public notes fields of a credential that should be picked or omitted.
+    publicNotesFieldFilters: { 
+      pick: {};
+      omit: {};
+    };
+    // OPTIONAL. A list of private fields of a credential that should be picked or omitted.
+    privateFieldFilters: {
+      pick: {};
+      omit: {};
+    })
+```
+This will return a list of `idOSCredentials` that match the filtering criteria.
 
 ### [ frontend ] Requesting access grant
 
 
 The simplest way to do this is to ask the user to create and insert an access grant for you.
 
-* TODO: missing extraction into Client SDK
-
-https://github.com/idos-network/idos-sdk-js/blob/cd0605a4e545836a6d9fc4751a31c142fc28fd8c/packages/%40controllers/src/isle/index.ts#L341-L369
+```typescript
+const accessGrant: idOSGrant = await idOSClient.requestAccessGrant('CREDENTIAL_ID')
+```
 
 Alternatively, you can ask for a delegated access grant, which the user creates:
 
