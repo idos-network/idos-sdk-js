@@ -350,8 +350,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       );
 
     const credentials = await this.getAllCredentials();
-    const originalCredentials = credentials.filter((cred) => !cred.original_id);
+    const originalCredentials = credentials.filter(
+      (cred) => !cred.original_id && !!cred.public_notes,
+    );
 
+    invariant(originalCredentials.length, "No original credentials found");
     let result = originalCredentials.filter((cred) => {
       return requirements.acceptedIssuers?.some(
         (issuer) => issuer.authPublicKey === cred.issuer_auth_public_key,
