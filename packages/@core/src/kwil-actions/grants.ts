@@ -57,22 +57,26 @@ export async function createAccessGrantByDag(
   kwilClient: KwilActionClient,
   params: CreateAccessGrantByDAGParams,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "create_ag_by_dag_for_copy",
     description: "Create an Access Grant in idOS",
     inputs: params,
   });
+
+  return params;
 }
 
 /**
  * Revokes an Access Grant for the given `id`.
  */
 export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "revoke_access_grant",
     description: "Revoke an Access Grant from idOS",
     inputs: { id },
   });
+
+  return { id };
 }
 
 /**
