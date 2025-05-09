@@ -5,8 +5,8 @@
 ## SDKs
 | Folder                                                 | Contents                          |
 | :----------------------------------------------------- | :-------------------------------- |
-| **[`📁 consumer-sdk-js`](./packages/consumer-sdk-js/)** | idOS JavaScript SDK for consumers |
-| **[`📁 issuer-sdk-js`](./packages/issuer-sdk-js)**      | idOS JavaScript SDK for issuers   |
+| **[`📁 consumer-sdk-js`](./packages/consumer/)** | idOS JavaScript SDK for consumers |
+| **[`📁 issuer-sdk-js`](./packages/issuer)**      | idOS JavaScript SDK for issuers   |
 
 `idos-sdk-js`, `@core`, and `@controllers` are internal packages.
 
