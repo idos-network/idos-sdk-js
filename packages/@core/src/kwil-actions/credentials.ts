@@ -70,11 +70,13 @@ export async function editCredentialAsIssuer(
   kwilClient: KwilActionClient,
   params: EditCredentialAsIssuerParams,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "edit_public_notes_as_issuer",
     description: "Edit a credential in your idOS profile",
     inputs: params,
   });
+
+  return params;
 }
 
 /**
@@ -128,22 +130,26 @@ export async function createCredentialByDelegatedWriteGrant(
   kwilClient: KwilActionClient,
   params: CreateCredentialByDelegatedWriteGrantParams,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "create_credentials_by_dwg",
     description: "Create a new credential in your idOS profile",
     inputs: params,
   });
+
+  return params;
 }
 
 /**
  * Removes an idOSCredential by the given `id`.
  */
 export async function removeCredential(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "remove_credential",
     description: "Remove a credential from your idOS profile",
     inputs: { id },
   });
+
+  return { id };
 }
 
 /**
@@ -177,11 +183,13 @@ export async function shareCredential(
   kwilClient: KwilActionClient,
   credential: ShareableCredential,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "share_credential",
     description: "Share a credential with another user on idOS",
     inputs: credential,
   });
+
+  return credential;
 }
 
 export type CreateCredentialCopyParams = {
@@ -203,9 +211,11 @@ export async function createCredentialCopy(
   kwilClient: KwilActionClient,
   params: CreateCredentialCopyParams,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "create_credential_copy",
     description: "Share a credential with another user on idOS",
     inputs: params,
   });
+
+  return params;
 }
