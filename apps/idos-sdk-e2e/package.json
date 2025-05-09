@@ -5,8 +5,7 @@
   "author": "",
   "dependencies": {
     "@synthetixio/synpress-cache": "^0.0.4",
-    "@synthetixio/synpress-metamask": "^0.0.4",
-    "ethers": "catalog:"
+    "@synthetixio/synpress-metamask": "^0.0.4"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",

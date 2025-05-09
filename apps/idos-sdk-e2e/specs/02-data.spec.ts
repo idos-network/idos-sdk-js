@@ -1,7 +1,6 @@
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
 import basicSetup from "../wallet-setup/basic.setup";
-import { ethers } from 'ethers';
 
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
@@ -68,7 +67,7 @@ test("should add / delete a wallet successfully", async ({
   await addWalletButton.click();
 
   // Generate a new random wallet
-  const wallet = ethers.Wallet.createRandom();
+  const wallet = { address: "0xB5B3a244943E5A64511673528e003BE79B18901d" };
   await page.locator("#address").fill(wallet.address);
   await page.locator("#add-wallet-form-submit").click();
   await metamask.confirmSignature();
