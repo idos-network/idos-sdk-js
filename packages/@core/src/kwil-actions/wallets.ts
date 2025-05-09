@@ -18,11 +18,13 @@ export async function upsertWalletAsInserter(
   kwilClient: KwilActionClient,
   params: UpsertWalletParams,
 ) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "upsert_wallet_as_inserter",
     description: "Add a wallet to idOS",
     inputs: params,
   });
+
+  return params;
 }
 
 export interface AddWalletParams {
@@ -32,15 +34,19 @@ export interface AddWalletParams {
   message: string;
   signature: string;
 }
+
 export async function addWallet(kwilClient: KwilActionClient, params: AddWalletParams) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "add_wallet",
     description: "Add a wallet to idOS",
     inputs: params,
   });
+
+  return params;
 }
+
 export async function addWallets(kwilClient: KwilActionClient, params: AddWalletParams[]) {
-  return Promise.all(
+  await Promise.all(
     params.map((param) =>
       kwilClient.execute({
         name: "add_wallet",
@@ -49,6 +55,8 @@ export async function addWallets(kwilClient: KwilActionClient, params: AddWallet
       }),
     ),
   );
+
+  return params;
 }
 
 export function getWallets(kwilClient: KwilActionClient) {
@@ -58,16 +66,18 @@ export function getWallets(kwilClient: KwilActionClient) {
   });
 }
 
-export function removeWallet(kwilClient: KwilActionClient, id: string) {
-  return kwilClient.execute({
+export async function removeWallet(kwilClient: KwilActionClient, id: string) {
+  await kwilClient.execute({
     name: "remove_wallet",
     description: "Remove a wallet from idOS",
     inputs: { id },
   });
+
+  return { id };
 }
 
-export function removeWallets(kwilClient: KwilActionClient, ids: string[]) {
-  return Promise.all(
+export async function removeWallets(kwilClient: KwilActionClient, ids: string[]) {
+  await Promise.all(
     ids.map((id) =>
       kwilClient.execute({
         name: "remove_wallet",
@@ -76,4 +86,6 @@ export function removeWallets(kwilClient: KwilActionClient, ids: string[]) {
       }),
     ),
   );
+
+  return ids;
 }
