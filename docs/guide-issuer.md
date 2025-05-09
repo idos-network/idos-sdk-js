@@ -38,7 +38,7 @@ You'll also need a `multibaseSigningKeyPair`, which will be used to sign the W3C
 import { Ed25519VerificationKey2020 } from "https://esm.sh/@digitalcredentials/ed25519-verification-key-2020";
 
 const key = await Ed25519VerificationKey2020.generate();
-console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed)
+console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed) 
 console.log(key.publicKeyMultibase);
 ```
 
