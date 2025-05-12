@@ -4,7 +4,7 @@
 
 ## Installing
 
-Get [our NPM package](https://www.npmjs.com/package/@idos-network/issuer-sdk-js) and its dependencies with pnpm or the equivalent of your package manager of choice:
+Get [our NPM package](https://www.npmjs.com/package/@idos-network/client) and its dependencies with pnpm or the equivalent of your package manager of choice:
 
 ```bash
 pnpm add @idos-network/client
