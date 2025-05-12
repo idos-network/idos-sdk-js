@@ -57,11 +57,7 @@ export class KwilActionClient {
   /**
    * Executes an action on the kwil nodes. This similar to `POST` like request.
    */
-  async execute<T = unknown>(
-    params: KwilExecuteActionRequestParams,
-    signer = this.signer,
-    synchronous = true,
-  ) {
+  async execute(params: KwilExecuteActionRequestParams, signer = this.signer, synchronous = true) {
     invariant(signer, "Signer is not set, you must set it before executing an action");
     const action: ActionBody = {
       name: params.name,
@@ -71,7 +67,7 @@ export class KwilActionClient {
       types: this._actionTypes(params.name),
     };
     const response = await this.client.execute(action, signer, synchronous);
-    return response.data?.tx_hash as T;
+    return response.data?.tx_hash;
   }
 
   /**

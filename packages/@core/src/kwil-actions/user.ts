@@ -26,11 +26,13 @@ export interface CreateUserReqParams {
  * Creates a user profile in the idOS.
  */
 export async function createUser(kwilClient: KwilActionClient, params: CreateUserReqParams) {
-  return kwilClient.execute({
+  await kwilClient.execute({
     name: "add_user_as_inserter",
     description: "Create a user profile in idOS",
     inputs: params,
   });
+
+  return params;
 }
 
 /**
@@ -41,5 +43,6 @@ export async function getUserProfile(kwilClient: KwilActionClient) {
     name: "get_user",
     inputs: {},
   });
+
   return user;
 }
