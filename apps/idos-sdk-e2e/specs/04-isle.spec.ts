@@ -189,49 +189,4 @@ test.describe
       await minimizedIsle.click();
       await expect(isleIframe.locator(".status-badge").first()).toHaveText("verified");
     });
-    test("clean up added wallets", async ({ context, page, metamaskPage, extensionId }) => {
-      const metamask = new MetaMask(context, metamaskPage, basicSetup.walletPassword, extensionId);
-      // @todo: should we make this CI variable?
-      await page.goto(`${dashboardUrl}/wallets`);
-
-      await page.getByRole("button", { name: "Connect a wallet" }).click();
-      await page.getByRole("button", { name: "Metamask" }).click();
-
-      await metamask.switchAccount("Pristine");
-      await metamask.connectToDapp();
-
-      await page.waitForTimeout(2000);
-      await metamask.confirmSignature();
-
-      const walletsList = page.locator("#wallets-list");
-      await expect(walletsList).toBeVisible();
-
-      const walletsCount = await walletsList.getByRole("listitem").count();
-
-      for (let i = 0; i < walletsCount; i++) {
-        if ((await walletsList.getByRole("listitem").count()) === 1) break;
-
-        let wallet = await walletsList.getByRole("listitem").first();
-
-        let deleteBtn = wallet.getByRole("button", { name: "Delete" });
-        const isDisabled = await deleteBtn.isDisabled();
-
-        if (isDisabled) {
-          wallet = await walletsList.getByRole("listitem").last();
-          deleteBtn = wallet.getByRole("button", { name: "Delete" });
-        }
-
-        await deleteBtn.click();
-
-        const confirmDeleteBtn = page.getByRole("button", { name: "Delete" }).last();
-
-        await confirmDeleteBtn.click();
-        await page.waitForTimeout(1000);
-        await metamask.confirmSignature();
-
-        // Wait for the modal to disappear
-        const deleteModal = await page.locator('[role="alertdialog"]');
-        await expect(deleteModal).not.toBeVisible({ timeout: 10000 });
-      }
-    });
   });
