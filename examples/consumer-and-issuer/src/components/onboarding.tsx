@@ -335,7 +335,7 @@ function useShareCredentialWithConsumer() {
       const contentHash = await isleController.idosClient.getCredentialContentSha256Hash(
         credential.id,
       );
-      const lockedUntil = 0;
+      const lockedUntil = Math.floor(Date.now() / 1000);
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
       const consumerEncryptionPublicKey =
