@@ -1,7 +1,7 @@
 import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
+import { generateSimpleEthAddress } from "../utils/generate-address";
 import basicSetup from "../wallet-setup/basic.setup";
-
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
 const { expect } = test;
@@ -67,7 +67,10 @@ test("should add / delete a wallet successfully", async ({
   // Testing wallet addition
   const addWalletButton = page.locator("#add-wallet-button");
   await addWalletButton.click();
-  await page.locator("#address").fill(TEST_WALLET_ADDRESS);
+
+  // Generate a new random wallet
+  const walletAddress = generateSimpleEthAddress();
+  await page.locator("#address").fill(walletAddress);
   await page.locator("#add-wallet-form-submit").click();
   await metamask.confirmSignature();
   await page.waitForTimeout(5000);
@@ -75,9 +78,9 @@ test("should add / delete a wallet successfully", async ({
   await expect(list.getByRole("listitem")).toHaveCount(2);
 
   // Testing wallet deletion
-  const deleteButton = await list.locator(`#delete-wallet-${TEST_WALLET_ADDRESS}`);
+  const deleteButton = await list.locator(`#delete-wallet-${walletAddress}`);
   await deleteButton.click();
-  await page.locator(`#confirm-delete-wallet-${TEST_WALLET_ADDRESS}`).click();
+  await page.locator(`#confirm-delete-wallet-${walletAddress}`).click();
   await metamask.confirmSignature();
   await page.waitForTimeout(5000);
   await expect(list.getByRole("listitem")).toHaveCount(1);
