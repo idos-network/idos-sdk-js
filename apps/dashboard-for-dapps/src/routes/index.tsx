@@ -64,12 +64,12 @@ const useFetchGrants = (page: number) => {
         records: data.grants.map((grant) => ({
           ...grant,
           lockedUntil:
-            grant.locked_until === 0
+            +grant.locked_until === 0
               ? "Unlocked"
               : Intl.DateTimeFormat("en-US", {
                   dateStyle: "full",
                   timeStyle: "short",
-                }).format(grant.locked_until * 1000),
+                }).format(+grant.locked_until * 1000),
         })),
         totalCount: data.totalCount,
       };

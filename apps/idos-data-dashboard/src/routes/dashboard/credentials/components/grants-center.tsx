@@ -88,7 +88,9 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   <Text isTruncated>{grant.ag_grantee_wallet_identifier}</Text>
                 </Td>
                 <Td>
-                  <Text>{grant.locked_until ? timelockToDate(grant.locked_until) : "-"}</Text>
+                  <Text>
+                    {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
+                  </Text>
                 </Td>
                 <Td isNumeric>
                   <Button
@@ -96,7 +98,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     size="sm"
                     variant="outline"
                     colorScheme="red"
-                    isDisabled={timelockToMs(grant.locked_until) >= Date.now()}
+                    isDisabled={timelockToMs(+grant.locked_until) >= Date.now()}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.data_id === grant.data_id
                     }

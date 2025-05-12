@@ -54,7 +54,7 @@ export interface idOSGrant {
   ag_owner_user_id: string;
   ag_grantee_wallet_identifier: string;
   data_id: string;
-  locked_until: number;
+  locked_until: string;
   content_hash?: string;
 }
 
