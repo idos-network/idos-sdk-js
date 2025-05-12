@@ -69,7 +69,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const revokeGrants = useRevokeGrants();
   const hasTimeLock =
     grants.data?.length &&
-    grants.data?.find((grant) => timelockToMs(grant.locked_until) >= Date.now());
+    grants.data?.find((grant) => timelockToMs(+grant.locked_until) >= Date.now());
 
   const state = useMutationState({
     filters: {
