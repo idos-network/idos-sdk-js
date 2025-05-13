@@ -8,7 +8,6 @@ const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;
 
 const consumerAndIssuerUrl = process.env.CONSUMER_AND_ISSUER_BASE_URL;
-const dashboardUrl = "https://dashboard.playground.idos.network";
 
 // Helper function to generate random private key
 const generatePrivateKey = () => {
