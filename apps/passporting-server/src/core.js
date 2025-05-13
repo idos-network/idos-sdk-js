@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import { idOSIssuer } from "@idos-network/issuer";
-import { decode } from "@stablelib/base64";
+import { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
+import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -24,37 +25,66 @@ app.post(
       dag_signature: z.string(),
       dag_locked_until: z.number(),
       dag_content_hash: z.string(),
+      message: z.string(),
     }),
   ),
   async (c) => {
-    const {
-      KWIL_NODE_URL,
-      ISSUER_SIGNING_SECRET_KEY,
-      ISSUER_ENCRYPTION_SECRET_KEY,
-      CLIENT_SECRETS,
-    } = env(c);
+    const { KWIL_NODE_URL, ISSUER_SIGNING_SECRET_KEY, ISSUER_ENCRYPTION_SECRET_KEY } = env(c);
 
-    const bearer = c.req.header("Authorization")?.split(" ")[1];
+    const issuer = await idOSIssuer.init({
+      nodeUrl: KWIL_NODE_URL,
+      signingKeyPair: nacl.sign.keyPair.fromSecretKey(base64Decode(ISSUER_SIGNING_SECRET_KEY)),
+      encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
+    });
 
-    // @todo: additional logic to validate that the token is valid.
-    // This is just a very basic validation of the token that assumes that we have a list of valid tokens.
-    if (!bearer || !CLIENT_SECRETS.split(",").includes(bearer)) {
+    const [_, signerPublicKey, signature] = c.req.header("Authorization")?.split(" ") ?? [];
+    const { message } = c.req.valid("json");
+
+    // First check if we have the required authorization header
+    if (!signerPublicKey || !signature) {
       return c.json(
         {
           success: false,
           error: {
-            message: "Unauthorized request",
+            message: "Missing authorization header",
           },
         },
         401,
       );
     }
 
-    const issuer = await idOSIssuer.init({
-      nodeUrl: KWIL_NODE_URL,
-      signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
-      encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
-    });
+    // Then check if the public key is authorized
+    const peers = await issuer.getPassportingPeers();
+    if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Unauthorized",
+          },
+        },
+        401,
+      );
+    }
+
+    // Finally verify the ed25519 signature
+    const signatureBytes = base64Decode(signature);
+    const publicKeyBytes = base64Decode(signerPublicKey);
+    const messageBytes = utf8Encode(message);
+
+    const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+
+    if (!isValid) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Invalid signature",
+          },
+        },
+        401,
+      );
+    }
 
     // Validate the incoming `DAG` payload.
     const {
@@ -66,7 +96,7 @@ app.post(
       dag_content_hash,
     } = c.req.valid("json");
 
-    // Transmit the `DAG` to the idOS.
+    // Transmit the `DAG` to idOS.
     const [error, response] = await goTry(() =>
       issuer.createAccessGrantFromDAG({
         dag_data_id,
