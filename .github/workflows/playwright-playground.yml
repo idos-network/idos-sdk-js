@@ -18,6 +18,7 @@ jobs:
       GRANTS_TEST_BASE_URL: ${{ secrets.IDOS_E2E_GRANTS_BASE_URL }}
       CREDENTIAL_CONTENT: ${{ secrets.IDOS_E2E_CREDENTIAL_CONTENT }}
       CREDENTIAL_ID: ${{ secrets.IDOS_E2E_CREDENTIAL_ID }}
+      CONSUMER_AND_ISSUER_BASE_URL: "https://consumer-and-issuer-demo.idos.network/"
     steps:
     - uses: actions/checkout@v4
 
