@@ -144,18 +144,25 @@ function ClaimCardSuccessStepDescription() {
   );
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col items-center justify-center gap-3">
       <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
 
-      <h4 className="font-semibold text-xl">
+      <h4 className="text-center font-normal text-neutral-500 text-xl">
         You have successfully claimed your exclusive high-limit credit card and started your premium
         banking journey!
       </h4>
-      <Image src="/static/credit-cards.png" alt="NeoBank" width={240} height={240} priority />
+      <Image
+        src="/static/credit-cards.png"
+        alt="NeoBank"
+        className="h-auto w-[80%]"
+        width={240}
+        height={240}
+        priority
+      />
       <Button
         as="a"
-        color="primary"
-        className="w-fit"
+        color="default"
+        className="w-fit bg-black text-white dark:bg-white dark:text-black"
         size="lg"
         href={process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}
         target="_blank"
