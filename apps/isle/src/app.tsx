@@ -24,9 +24,13 @@ function Layout({ children }: PropsWithChildren) {
         rounded="38px"
         bg="surface"
         border="1px solid {colors.border}"
-        shadow="sm"
-        width="366px"
-        height="full"
+        maxWidth="366px"
+        width="98%"
+        mx="auto"
+        my="auto"
+        height="98%"
+        maxHeight="full"
+        shadow="0px 0px 9px -4px #00000066"
       >
         <Header />
         <chakra.main>{children}</chakra.main>
