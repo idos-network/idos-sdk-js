@@ -22,10 +22,9 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
-import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
-import { MatchingCredential } from "./matching-credential";
+import { MatchingCredential } from "./matching-acme-credential";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
   return (

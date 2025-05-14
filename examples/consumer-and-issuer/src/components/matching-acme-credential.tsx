@@ -42,6 +42,7 @@ export const useFetchSharedCredentialFromUser = () => {
       return (await res.json()) as { credential: idOSCredential | null; cause: string };
     },
     enabled: isleController?.idosClient.state === "logged-in",
+    staleTime: 0,
   });
 };
 
@@ -145,14 +146,14 @@ export function MatchingCredential() {
       </div>
     );
   }
-
+  console.log({ sharedCredentialFromUser: sharedCredentialFromUser.data });
   if (sharedCredentialFromUser.data?.credential?.public_notes) {
     return (
       <div className="flex flex-col gap-6">
-        <h3 className="font-semibold text-2xl">
+        <h3 className="font-semibold text-2xl text-white">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
       </div>
     );
   }
