@@ -1,26 +1,25 @@
 {
   "name": "@idos-network/issuer",
-  "description": "idOS Issuer JavaScript SDK",
-  "version": "1.0.0-rc.0",
+  "description": "idOS Issuer JavaScript SDK for server environments (ESM only)",
+  "version": "0.0.1",
   "dependencies": {
-    "@kwilteam/kwil-js": "catalog:",
-    "es-toolkit": "^1.23.0",
-    "tiny-invariant": "^1.3.3",
-    "@digitalbazaar/vc": "^7.0.0",
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
-    "jsonld-document-loader": "^2.3.0",
+    "@digitalbazaar/vc": "^7.0.0",
     "base85": "^3.1.0",
+    "es-toolkit": "^1.23.0",
+    "jsonld-document-loader": "^2.3.0",
+    "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "@release-it/keep-a-changelog": "^5.0.0",
-    "@types/node": "^22.7.9",
-    "release-it": "^17.0.0",
-    "tsup": "8.0.2",
-    "typescript": "^5.2.2",
-    "vitest": "^0.31.4"
+    "tsdown": "^0.11.7",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   },
   "exports": {
     ".": {
@@ -28,31 +27,23 @@
       "import": "./dist/index.js"
     }
   },
-  "files": [
-    "dist/**",
-    "!dist/**/*.tsbuildinfo",
-    "src/**/*.ts",
-    "!src/**/*.test.ts",
-    "!src/**/*.test-d.ts"
-  ],
+  "files": ["dist/**/*", "src/**/*"],
   "homepage": "https://idos.network",
   "license": "MIT",
-  "peerDependencies": {
-    "near-api-js": "3.0.4"
-  },
+  "module": "dist/index.js",
   "publishConfig": {
     "access": "public"
   },
-  "repository": "idos-network/idos-sdk-js.git",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
-    "build": "tsup --config tsup.config.ts",
-    "dev": "tsup --watch",
-    "format": "biome format --write .",
-    "lint": "biome check --apply ./src",
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "publint": "pnpx publint --strict",
     "release-it": "release-it",
-    "test": "vitest run",
-    "test:build": "pnpx publint --strict",
-    "test:watch": "vitest"
+    "test": "vitest",
+    "test:watch": "vitest --watch"
   },
-  "type": "module"
+  "sideEffects": false,
+  "type": "module",
+  "types": "dist/index.d.ts"
 }

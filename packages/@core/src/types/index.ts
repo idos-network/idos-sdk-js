@@ -4,25 +4,14 @@ export type Wallet = EthersWallet | JsonRpcSigner | NearWallet;
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];
-
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
-export interface DelegatedWriteGrant {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-}
-
-export interface idOSUser {
+export type idOSUser = {
   id: string;
   recipient_encryption_public_key: string;
-}
+};
 
-export interface idOSCredential {
+export type idOSCredential = {
   id: string;
   user_id: string;
   issuer_auth_public_key: string;
@@ -30,33 +19,7 @@ export interface idOSCredential {
   public_notes: string;
   content: string;
   encryptor_public_key: string;
-}
-
-export interface idOSWallet {
-  id: string;
-  user_id: string;
-  address: string;
-  wallet_type: string;
-  message: string;
-  public_key: string;
-  signature: string;
-}
-
-export interface idOSUserAttribute {
-  id: string;
-  attribute_key: string;
-  value: string;
-  user_id?: string;
-}
-
-export interface idOSGrant {
-  id: string;
-  ag_owner_user_id: string;
-  ag_grantee_wallet_identifier: string;
-  data_id: string;
-  locked_until: string;
-  content_hash?: string;
-}
+};
 
 export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
   id?: idOSCredential["id"];
@@ -65,8 +28,45 @@ export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"
   broader_signature: string;
 };
 
+export type idOSWallet = {
+  id: string;
+  user_id: string;
+  address: string;
+  wallet_type: string;
+  message: string;
+  public_key: string;
+  signature: string;
+};
+
+export type idOSUserAttribute = {
+  id: string;
+  attribute_key: string;
+  value: string;
+  user_id?: string;
+};
+
+export type idOSGrant = {
+  id: string;
+  ag_owner_user_id: string;
+  ag_grantee_wallet_identifier: string;
+  data_id: string;
+  locked_until: string;
+  content_hash?: string;
+};
+
+export type DelegatedWriteGrant = {
+  owner_wallet_identifier: string;
+  grantee_wallet_identifier: string;
+  issuer_public_key: string;
+  id: string;
+  access_grant_timelock: string;
+  not_usable_before: string;
+  not_usable_after: string;
+};
+
 /**
- * Following types are specific to the isle post message protocol
+ * Following types are specific to the isle `postMessage` protocol.
+ * Do not stress much about them, they will be refactored in the future once the idOS Isle is fully integrated.
  */
 export type IsleTheme = "light" | "dark";
 

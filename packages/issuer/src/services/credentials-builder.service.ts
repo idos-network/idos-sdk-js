@@ -3,11 +3,10 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 import * as vc from "@digitalbazaar/vc";
 import * as base85 from "base85";
 import { JsonLdDocumentLoader } from "jsonld-document-loader";
-
-import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
-import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
-import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
-import v1 from "../../assets/v1.json";
+import ed25519Signature2020V1 from "../assets/ed25519-signature-2020-v1.json";
+import idosCredentialSubjectV1 from "../assets/idos-credential-subject-v1.json";
+import idosCredentialsV1 from "../assets/idos-credentials-v1.json";
+import v1 from "../assets/v1.json";
 
 export interface CredentialFields {
   id: string;
@@ -143,7 +142,7 @@ export class CredentialsBuilderService {
     const acc: Record<string, unknown> = {};
 
     for (const key in fields) {
-      if (Object.prototype.hasOwnProperty.call(fields, key)) {
+      if (Object.hasOwn(fields, key)) {
         const value = fields[key];
         const name = prefix ? `${prefix}${this.capitalizeFirstLetter(key)}` : key;
         if (value instanceof Date) {
@@ -160,7 +159,8 @@ export class CredentialsBuilderService {
     return acc;
   }
 
-  buildDocumentLoader() {
+  // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
+  buildDocumentLoader(): any {
     const loader = new JsonLdDocumentLoader();
     loader.addStatic(CONTEXT_V1, v1);
     loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1, idosCredentialsV1);
@@ -174,7 +174,8 @@ export class CredentialsBuilderService {
     fields: CredentialFields,
     subject: CredentialSubject,
     issuer: CredentialsIssuerConfig,
-  ) {
+    // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
+  ): Promise<any> {
     const { residentialAddress, ...subjectData } = subject;
 
     // Create credentials container

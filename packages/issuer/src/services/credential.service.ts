@@ -9,10 +9,11 @@ import {
 } from "@idos-network/core";
 import {
   type CreateCredentialByDelegatedWriteGrantParams,
-  createCredentialByDelegatedWriteGrant as _createCredentialByDelegatedWriteGrant,
-  editCredentialAsIssuer as _editCredentialAsIssuer,
-  getCredentialIdByContentHash as _getCredentialIdByContentHash,
-  getSharedCredential as _getSharedCredential,
+  type EditCredentialAsIssuerParams,
+  createCredentialByDelegatedWriteGrant,
+  editCredentialAsIssuer,
+  getCredentialIdByContentHash,
+  getSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import type { idOSCredential } from "@idos-network/core/types";
 import invariant from "tiny-invariant";
@@ -32,17 +33,17 @@ type BuildInsertableIDOSCredentialArgs = {
   recipientEncryptionPublicKey: Uint8Array;
 };
 
-export interface BaseCredentialParams {
+export type BaseCredentialParams = {
   id?: string;
   userId: string;
   publicNotes: string;
   plaintextContent: Uint8Array;
   recipientEncryptionPublicKey: Uint8Array;
-}
+};
 
 export type DelegatedWriteGrantBaseParams = Omit<BaseCredentialParams, "userId">;
 
-export interface DelegatedWriteGrantParams {
+export type DelegatedWriteGrantParams = {
   id: string;
   ownerWalletIdentifier: string;
   consumerWalletIdentifier: string;
@@ -51,22 +52,30 @@ export interface DelegatedWriteGrantParams {
   notUsableBefore: string;
   notUsableAfter: string;
   signature: string;
-}
+};
 
 export class CredentialService {
-  constructor(
-    private readonly kwilClient: KwilActionClient,
-    private readonly signingKeyPair: nacl.SignKeyPair,
-    private readonly encryptionSecretKey: Uint8Array,
-  ) {}
+  readonly #kwilClient: KwilActionClient;
+  readonly #signingKeyPair: nacl.SignKeyPair;
+  readonly #encryptionSecretKey: Uint8Array;
 
-  private buildInsertableIDOSCredential(
-    args: BuildInsertableIDOSCredentialArgs,
-  ): InsertableIDOSCredential;
-  private buildInsertableIDOSCredential(
+  constructor(
+    kwilClient: KwilActionClient,
+    signingKeyPair: nacl.SignKeyPair,
+    encryptionSecretKey: Uint8Array,
+  ) {
+    this.#kwilClient = kwilClient;
+    this.#signingKeyPair = signingKeyPair;
+    this.#encryptionSecretKey = encryptionSecretKey;
+  }
+
+  #buildInsertableIDOSCredential(args: BuildInsertableIDOSCredentialArgs): InsertableIDOSCredential;
+
+  #buildInsertableIDOSCredential(
     args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
   ): Omit<InsertableIDOSCredential, "user_id">;
-  private buildInsertableIDOSCredential({
+
+  #buildInsertableIDOSCredential({
     userId,
     publicNotes,
     plaintextContent,
@@ -82,7 +91,7 @@ export class CredentialService {
     );
 
     const public_notes_signature = base64Encode(
-      nacl.sign.detached(utf8Encode(publicNotes), this.signingKeyPair.secretKey),
+      nacl.sign.detached(utf8Encode(publicNotes), this.#signingKeyPair.secretKey),
     );
 
     return {
@@ -94,16 +103,16 @@ export class CredentialService {
       broader_signature: base64Encode(
         nacl.sign.detached(
           Uint8Array.from([...base64Decode(public_notes_signature), ...content]),
-          this.signingKeyPair.secretKey,
+          this.#signingKeyPair.secretKey,
         ),
       ),
 
-      issuer_auth_public_key: hexEncode(this.signingKeyPair.publicKey, true),
+      issuer_auth_public_key: hexEncode(this.#signingKeyPair.publicKey, true),
       encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
     };
   }
 
-  private ensureEntityId<T extends { id?: string }>(entity: T): T & { id: string } {
+  #ensureEntityId<T extends { id?: string }>(entity: T): T & { id: string } {
     if (!entity.id) {
       (entity as T & { id: string }).id = crypto.randomUUID();
     }
@@ -122,17 +131,17 @@ export class CredentialService {
     if (!recipientPublicKey) {
       // If we're not explicitly given a consumer enc pub key, we're assuming that the issuer is creating a copy
       // for themselves. So, we derive the recipient encryption public key from the issuer's encryption secret key.
-      recipientPublicKey = nacl.box.keyPair.fromSecretKey(this.encryptionSecretKey).publicKey;
+      recipientPublicKey = nacl.box.keyPair.fromSecretKey(this.#encryptionSecretKey).publicKey;
     }
 
-    const originalCredential = this.ensureEntityId(
-      this.buildInsertableIDOSCredential(credentialParams),
+    const originalCredential = this.#ensureEntityId(
+      this.#buildInsertableIDOSCredential(credentialParams),
     );
 
     const contentHash = hexEncodeSha256Hash(credentialParams.plaintextContent);
 
-    const copyCredential = this.ensureEntityId(
-      this.buildInsertableIDOSCredential({
+    const copyCredential = this.#ensureEntityId(
+      this.#buildInsertableIDOSCredential({
         publicNotes: "",
         plaintextContent: credentialParams.plaintextContent,
         recipientEncryptionPublicKey: recipientPublicKey,
@@ -163,29 +172,36 @@ export class CredentialService {
       dwg_signature: delegatedWriteGrant.signature,
     };
 
-    await _createCredentialByDelegatedWriteGrant(this.kwilClient, payload);
+    await createCredentialByDelegatedWriteGrant(this.#kwilClient, payload);
 
     return { originalCredential, copyCredential };
   }
 
-  async editCredentialAsIssuer(publicNotesId: string, publicNotes: string) {
+  async editCredentialAsIssuer(
+    publicNotesId: string,
+    publicNotes: string,
+  ): Promise<EditCredentialAsIssuerParams | null> {
     const payload = {
       public_notes_id: publicNotesId,
       public_notes: publicNotes,
     };
 
-    const result = await _editCredentialAsIssuer(this.kwilClient, payload);
+    const result = await editCredentialAsIssuer(this.#kwilClient, payload);
+
     return result ?? null;
   }
 
   async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
-    const id = await _getCredentialIdByContentHash(this.kwilClient, contentHash);
+    const id = await getCredentialIdByContentHash(this.#kwilClient, contentHash);
+
     invariant(id, "Required `idOSCredential` id not found");
+
     return id;
   }
 
-  async getSharedCredential(id: string) {
-    const result = await _getSharedCredential(this.kwilClient, id);
+  async getSharedCredential(id: string): Promise<idOSCredential | null> {
+    const result = await getSharedCredential(this.#kwilClient, id);
+
     return result ?? null;
   }
 }

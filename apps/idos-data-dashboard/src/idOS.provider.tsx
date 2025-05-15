@@ -1,5 +1,5 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
