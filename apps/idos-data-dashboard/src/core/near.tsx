@@ -4,7 +4,7 @@ import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import naxios from "@wpdas/naxios";
+import Naxios from "@wpdas/naxios";
 import type { ReactNode } from "react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
 
@@ -27,7 +27,7 @@ interface WalletSelectorContextValue {
 const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
 const network = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK ?? "testnet";
 
-export const naxiosInstance = new naxios({
+export const naxiosInstance = new Naxios({
   contractId,
   network,
   walletSelectorModules: [setupMeteorWallet(), setupHereWallet()],

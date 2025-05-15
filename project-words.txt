@@ -80,5 +80,4 @@ webauthn
 sumsub
 websdk
 naxios
-naxiosInstance
 wpdas
