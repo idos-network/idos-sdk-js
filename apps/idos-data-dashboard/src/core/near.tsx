@@ -49,9 +49,6 @@ export const WalletSelectorContextProvider: React.FC<{
     const walletApi = await naxiosInstance.walletApi();
     setSelector(walletApi.walletSelector);
     setWalletApi(walletApi);
-
-    // this is added for debugging purpose only
-    // for more information (https://github.com/near/wallet-selector/pull/764#issuecomment-1498073367)
     setLoading(false);
   }, []);
 
