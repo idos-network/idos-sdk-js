@@ -1,13 +1,14 @@
 import { Center, Spinner } from "@chakra-ui/react";
-import type { AccountState, WalletSelector } from "@near-wallet-selector/core";
-import { setupWalletSelector } from "@near-wallet-selector/core";
+import type { Account } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
-import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
+import naxios from "@wpdas/naxios";
 import type { ReactNode } from "react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+
+type WalletSelector = ReturnType<typeof naxiosInstance.walletApi>["walletSelector"];
 
 declare global {
   interface Window {
@@ -17,45 +18,40 @@ declare global {
 }
 
 interface WalletSelectorContextValue {
-  selector: WalletSelector;
-  modal: WalletSelectorModal;
-  accounts: Array<AccountState>;
+  selector: WalletSelector | null;
+  accounts: Array<Account>;
   accountId: string | null;
+  walletApi: Awaited<ReturnType<typeof naxiosInstance.walletApi>> | null;
 }
 
 const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+const network = import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK ?? "testnet";
 
-const WalletSelectorContext = React.createContext<WalletSelectorContextValue | null>(null);
+export const naxiosInstance = new naxios({
+  contractId,
+  network,
+  walletSelectorModules: [setupMeteorWallet(), setupHereWallet()],
+});
+
+export const WalletSelectorContext = React.createContext<WalletSelectorContextValue | null>(null);
 
 export const WalletSelectorContextProvider: React.FC<{
   children: ReactNode;
 }> = ({ children }) => {
   const [selector, setSelector] = useState<WalletSelector | null>(null);
-  const [modal, setModal] = useState<WalletSelectorModal | null>(null);
-  const [accounts, setAccounts] = useState<Array<AccountState>>([]);
+  const [accounts, setAccounts] = useState<Array<Account>>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [walletApi, setWalletApi] = useState<Awaited<
+    ReturnType<typeof naxiosInstance.walletApi>
+  > | null>(null);
 
   const initialize = useCallback(async () => {
-    const _selector = await setupWalletSelector({
-      network: import.meta.env.DEV ? "testnet" : "mainnet",
-      debug: true,
-      modules: [setupMeteorWallet(), setupHereWallet()],
-    });
-
-    const _modal = setupModal(_selector, {
-      contractId,
-      methodNames: [],
-    });
-    const state = _selector.store.getState();
-    setAccounts(state.accounts);
+    const walletApi = await naxiosInstance.walletApi();
+    setSelector(walletApi.walletSelector);
+    setWalletApi(walletApi);
 
     // this is added for debugging purpose only
     // for more information (https://github.com/near/wallet-selector/pull/764#issuecomment-1498073367)
-    window.selector = _selector;
-    window.modal = _modal;
-
-    setSelector(_selector);
-    setModal(_modal);
     setLoading(false);
   }, []);
 
@@ -67,34 +63,34 @@ export const WalletSelectorContextProvider: React.FC<{
   }, [initialize]);
 
   useEffect(() => {
-    if (!selector) {
+    if (!walletApi) {
       return;
     }
-
-    const subscription = selector.store.observable.subscribe((state) => {
-      setAccounts(state.accounts);
+    const onConnectedSubscription = walletApi?.walletSelector.on("signedIn", ({ accounts }) => {
+      console.log("Wallet connected:", accounts);
+      setAccounts(accounts);
+      setWalletApi(naxiosInstance.walletApi());
     });
 
-    const onHideSubscription = modal?.on("onHide", ({ hideReason }) => {
-      console.log(`The reason for hiding the modal ${hideReason}`);
+    const onDisconnectedSubscription = walletApi?.walletSelector.on("signedOut", () => {
+      console.log("Wallet disconnected");
+      setAccounts([]);
     });
 
     return () => {
-      subscription.unsubscribe();
-      onHideSubscription?.remove();
+      onConnectedSubscription?.remove();
+      onDisconnectedSubscription?.remove();
     };
-  }, [selector, modal]);
+  }, [walletApi]);
 
   const walletSelectorContextValue = useMemo<WalletSelectorContextValue>(
     () => ({
-      // biome-ignore lint/style/noNonNullAssertion: TBD
-      selector: selector!,
-      // biome-ignore lint/style/noNonNullAssertion: TBD
-      modal: modal!,
+      selector,
       accounts,
-      accountId: accounts.find((account) => account.active)?.accountId || null,
+      accountId: accounts.find((account) => account.accountId)?.accountId || null,
+      walletApi,
     }),
-    [selector, modal, accounts],
+    [accounts, selector, walletApi],
   );
 
   if (loading) {

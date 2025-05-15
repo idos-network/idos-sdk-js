@@ -1,11 +1,10 @@
 import { Box, Button, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 
-import { useWalletSelector } from "@/core/near";
+import { naxiosInstance } from "@/core/near";
 
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
-  const { modal } = useWalletSelector();
 
   return (
     <Box
@@ -68,7 +67,11 @@ export const ConnectWallet = () => {
               Connect a wallet
               <Image alt="NEAR logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
             </Button>
-            <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
+            <Button
+              size="lg"
+              justifyContent="space-between"
+              onClick={() => naxiosInstance.walletApi().signInModal()}
+            >
               Connect with NEAR
               <Image alt="NEAR logo" src="/near.svg" w={10} h={10} />
             </Button>
