@@ -1,7 +1,6 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
 import type { Wallet } from "@near-wallet-selector/core";
-import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
 import {
   type PropsWithChildren,
@@ -27,15 +26,14 @@ const _idOSClient = new idOSClientConfiguration({
 });
 
 export const useSigner = () => {
-  const [signer, setSigner] = useState<(Wallet & SignMessageMethod) | JsonRpcSigner | undefined>(
-    undefined,
-  );
+  const [signer, setSigner] = useState<Wallet | JsonRpcSigner | undefined>(undefined);
   const ethSigner = useEthersSigner();
   const { selector } = useWalletSelector();
 
   const initialize = useCallback(async () => {
-    if (selector.isSignedIn()) {
-      setSigner(await selector.wallet());
+    if (selector?.isSignedIn()) {
+      const wallet = await selector.wallet();
+      setSigner(wallet as Wallet);
       return;
     }
 
@@ -65,6 +63,7 @@ export const useIdOS = () => {
 export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [client, setClient] = useState<idOSClient>(_idOSClient);
+  const context = useWalletSelector();
   const { signer } = useSigner();
 
   useEffect(() => {
@@ -74,15 +73,18 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
       try {
         // Always start with a fresh client
         const newClient = await _idOSClient.createClient();
+        const hasSigner = signer || !!context.accounts.length;
 
-        if (!signer) {
+        const wallet = (await context.selector?.wallet()) as Wallet;
+        if (!hasSigner) {
           setClient(newClient);
           setIsLoading(false);
           return;
         }
-
+        invariant(signer || wallet, "Neither signer nor wallet found");
         // Add the signer to the client
-        const withSigner = await newClient.withUserSigner(signer);
+
+        const withSigner = await newClient.withUserSigner(signer ? signer : wallet);
 
         // Check if the user has a profile and log in if they do
         if (await withSigner.hasProfile()) {
@@ -100,7 +102,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [signer]);
+  }, [signer, context.accounts, context.selector]);
 
   // While loading, show a spinner
   if (isLoading) {
@@ -110,9 +112,10 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
       </Center>
     );
   }
+  console.log({ signer, context: context.accounts });
 
   // If no signer is available, show the connect wallet screen
-  if (!signer) {
+  if (!signer && !context.accounts.length) {
     return <ConnectWallet />;
   }
 

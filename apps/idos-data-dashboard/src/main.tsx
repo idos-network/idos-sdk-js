@@ -12,6 +12,7 @@ import { WalletSelectorContextProvider } from "@/core/near";
 import { projectId, wagmiConfig } from "@/core/wagmi";
 import { IDOSClientProvider } from "@/idOS.provider";
 import { theme } from "@/theme";
+import "@near-wallet-selector/modal-ui/styles.css";
 
 const queryClient = new QueryClient({
   defaultOptions: {

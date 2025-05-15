@@ -90,7 +90,9 @@ const DisconnectButton = () => {
 
   const handleDisconnect = async () => {
     if (isConnected) disconnect();
-    if (selector.isSignedIn()) (await selector.wallet()).signOut();
+    if (selector) {
+      await (await selector.wallet()).signOut();
+    }
 
     setSigner(undefined);
     queryClient.removeQueries();
