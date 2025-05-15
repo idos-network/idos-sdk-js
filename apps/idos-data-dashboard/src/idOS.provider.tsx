@@ -51,6 +51,8 @@ export const useSigner = () => {
     initialize();
   }, [initialize]);
 
+  console.log("signer", { signer });
+
   return { signer, setSigner };
 };
 

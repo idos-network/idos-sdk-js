@@ -8,6 +8,7 @@ import {
   getGrants,
   getGrantsCount,
   getSharedCredential,
+  getWallets,
 } from "@idos-network/core/kwil-actions";
 import {
   type KwilActionClient,
@@ -126,6 +127,13 @@ export class idOSConsumer {
 
   async createAccessGrantByDag(params: CreateAccessGrantByDAGParams) {
     return createAccessGrantByDag(this.kwilClient, params);
+  }
+
+  /**
+   * Experimental method to get wallets from the IDOS network using `NEAR`.
+   */
+  async getWallets() {
+    return getWallets(this.kwilClient);
   }
 }
 

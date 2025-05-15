@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { getWalletsFromServer } from "@/actions";
 import { Providers } from "@/app/providers";
 import { WalletConnector } from "@/components/wallet-connector";
 import "./globals.css";
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout(props: { children: ReactNode }) {
+  const wallets = await getWalletsFromServer();
+  console.log("wallets", wallets);
   return (
     <html lang="en" className="dark">
       <body className={inter.className}>

@@ -3,6 +3,7 @@
 import invariant from "tiny-invariant";
 
 import { idOSConsumer } from "@/consumer.config";
+import { getCredentialOwned, getWallets } from "@idos-network/core/kwil-actions";
 
 export async function invokePassportingService(payload: {
   dag_owner_wallet_identifier: string;
@@ -39,4 +40,9 @@ export async function invokePassportingService(payload: {
   // @todo: handle errors when the prior method fails.
 
   return credential;
+}
+
+export async function getWalletsFromServer() {
+  const consumer = await idOSConsumer();
+  return consumer.getWallets();
 }

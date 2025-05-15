@@ -51,6 +51,9 @@ export class KwilActionClient {
     };
 
     const response = await this.client.call(action as CallBody, signer);
+
+    console.log("CALL:API_RESPONSE", response);
+
     return response?.data?.result as T;
   }
 
@@ -67,6 +70,9 @@ export class KwilActionClient {
       types: this._actionTypes(params.name),
     };
     const response = await this.client.execute(action, signer, synchronous);
+
+    console.log("EXECUTE:API_RESPONSE", response);
+
     return response.data?.tx_hash;
   }
 

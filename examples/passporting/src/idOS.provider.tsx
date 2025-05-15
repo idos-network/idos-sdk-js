@@ -17,7 +17,7 @@ const startingConfig = new idOSClientConfiguration({
   nodeUrl: process.env.NEXT_PUBLIC_KWIL_NODE_URL ?? "",
   enclaveOptions: {
     container: "#idOS-enclave",
-    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "https://enclave.playground.idos.network",
   },
 });
 
