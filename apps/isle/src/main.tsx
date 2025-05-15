@@ -5,6 +5,7 @@ import { App } from "@/app";
 import { ThemeProvider } from "@/components/ui";
 import Minimized from "./components/minimized";
 
+import "@fontsource-variable/inter/index.css";
 const root = document.getElementById("root");
 
 if (!root) {

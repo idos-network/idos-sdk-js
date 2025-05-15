@@ -20,7 +20,7 @@ export function CreateProfile() {
 
   return (
     <Center flexDir="column" gap="6">
-      <Heading as="h2" fontSize="2xl" textAlign="center">
+      <Heading as="h2" fontSize="2xl" textAlign="center" lineHeight="28px">
         Welcome to the identity <br />
         layer of web3.
       </Heading>

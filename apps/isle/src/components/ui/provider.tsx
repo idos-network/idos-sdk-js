@@ -11,6 +11,10 @@ const config = defineConfig({
 
   theme: {
     tokens: {
+      fonts: {
+        heading: { value: "Inter Variable" },
+        body: { value: "Inter Variable" },
+      },
       colors: {
         brand: {
           DEFAULT: { value: "#00ffb9" },
