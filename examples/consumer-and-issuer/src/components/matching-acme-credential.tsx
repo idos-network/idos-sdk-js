@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, Link } from "@heroui/react";
+import { Button, Link, Spinner } from "@heroui/react";
 import type { idOSCredential } from "@idos-network/core";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -10,7 +10,17 @@ import { useSignMessage } from "wagmi";
 import { invokePassportingService } from "@/actions";
 
 import { useIsleController } from "@/isle.provider";
+import Image from "next/image";
 import { CredentialCard } from "./credential-card";
+
+const WIP = () => {
+  return (
+    <div className="flex flex-col items-center justify-center gap-4">
+      <Spinner size="lg" />
+      <p className="text-sm">We are working on it! Please wait a moment and try again.</p>
+    </div>
+  );
+};
 
 const useFetchMatchingCredential = () => {
   const { isleController } = useIsleController();
@@ -113,6 +123,10 @@ export function MatchingCredential() {
     shareCredential.mutate(matchingCredential.data.id);
   };
 
+  if (matchingCredential.isPending || sharedCredentialFromUser.isPending) {
+    return <WIP />;
+  }
+
   if (isleController?.idosClient.state === "with-user-signer") {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL ?? "https://issuer.idos.network";
     invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
@@ -149,7 +163,14 @@ export function MatchingCredential() {
   if (sharedCredentialFromUser.data?.credential?.public_notes) {
     return (
       <div className="flex flex-col gap-6">
-        <h3 className="font-semibold text-2xl">
+        <Image
+          src="/static/acme-card.jpg"
+          alt="ACME Card"
+          width={240}
+          height={240}
+          className="h-auto w-full rounded-[24px]"
+        />
+        <h3 className="font-semibold text-2xl text-white">
           You have successfully shared your credential with us!
         </h3>
         <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
