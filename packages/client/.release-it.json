@@ -3,9 +3,7 @@
     "commitMessage": "chore: release ${npm.name} v${version}",
     "tagName": "${npm.name}@${version}"
   },
-  "plugins": {
-    "release-it-pnpm": {}
-  },
+  "plugins": {},
   "npm": {
     "versionArgs": ["--workspaces-update=false"]
   },
