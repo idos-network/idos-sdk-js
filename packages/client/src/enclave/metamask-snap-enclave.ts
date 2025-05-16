@@ -11,7 +11,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
   snapId: string;
 
   constructor(_?: Record<string, unknown>) {
-    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
+    // biome-ignore lint/suspicious/noExplicitAny: Types will be added later.
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
@@ -51,7 +51,8 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     return encryptionPublicKey;
   }
 
-  invokeSnap(method: string, params: unknown = {}) {
+  // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
+  invokeSnap(method: string, params: unknown = {}): Promise<any> {
     return this.enclaveHost.request({
       method: "wallet_invokeSnap",
       params: {

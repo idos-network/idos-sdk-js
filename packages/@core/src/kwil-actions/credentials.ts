@@ -4,7 +4,10 @@ import type { idOSCredential, idOSGrant } from "../types";
 /**
  * Returns the shared idOS Credential for the given `dataId`.
  */
-export async function getSharedCredential(kwilClient: KwilActionClient, id: string) {
+export async function getSharedCredential(
+  kwilClient: KwilActionClient,
+  id: string,
+): Promise<idOSCredential | undefined> {
   const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_shared",
     inputs: { id },
@@ -16,7 +19,10 @@ export async function getSharedCredential(kwilClient: KwilActionClient, id: stri
 /**
  * Returns the owned idOS Credential for the given `id`.
  */
-export async function getCredentialOwned(kwilClient: KwilActionClient, id: string) {
+export async function getCredentialOwned(
+  kwilClient: KwilActionClient,
+  id: string,
+): Promise<idOSCredential | undefined> {
   const [credential] = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_owned",
     inputs: { id },
@@ -31,7 +37,7 @@ export async function getCredentialOwned(kwilClient: KwilActionClient, id: strin
 export async function getCredentialIdByContentHash(
   kwilClient: KwilActionClient,
   content_hash: string,
-) {
+): Promise<string | null> {
   const response = await kwilClient.call<[{ id: string }]>({
     name: "get_sibling_credential_id",
     inputs: { content_hash },
@@ -50,7 +56,7 @@ export interface GetAccessGrantByCredentialIdParams {
 export async function getAccessGrantsForCredential(
   kwilClient: KwilActionClient,
   params: GetAccessGrantByCredentialIdParams,
-) {
+): Promise<idOSGrant[]> {
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_for_credential",
     inputs: params,
@@ -69,7 +75,7 @@ export interface EditCredentialAsIssuerParams {
 export async function editCredentialAsIssuer(
   kwilClient: KwilActionClient,
   params: EditCredentialAsIssuerParams,
-) {
+): Promise<EditCredentialAsIssuerParams> {
   await kwilClient.execute({
     name: "edit_public_notes_as_issuer",
     description: "Edit a credential in your idOS profile",
@@ -82,7 +88,10 @@ export async function editCredentialAsIssuer(
 /**
  * Returns a list of idOSCredentials that have been shared with the given `userId`.
  */
-export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, userId: string) {
+export async function getCredentialsSharedByUser(
+  kwilClient: KwilActionClient,
+  userId: string,
+): Promise<idOSCredential[]> {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials_shared_by_user",
     inputs: { user_id: userId, issuer_auth_public_key: null },
@@ -92,7 +101,7 @@ export async function getCredentialsSharedByUser(kwilClient: KwilActionClient, u
 /**
  * Returns all idOSCredentials
  */
-export async function getAllCredentials(kwilClient: KwilActionClient) {
+export async function getAllCredentials(kwilClient: KwilActionClient): Promise<idOSCredential[]> {
   return kwilClient.call<idOSCredential[]>({
     name: "get_credentials",
     inputs: {},
@@ -129,7 +138,7 @@ export interface CreateCredentialByDelegatedWriteGrantParams {
 export async function createCredentialByDelegatedWriteGrant(
   kwilClient: KwilActionClient,
   params: CreateCredentialByDelegatedWriteGrantParams,
-) {
+): Promise<CreateCredentialByDelegatedWriteGrantParams> {
   await kwilClient.execute({
     name: "create_credentials_by_dwg",
     description: "Create a new credential in your idOS profile",
@@ -142,7 +151,10 @@ export async function createCredentialByDelegatedWriteGrant(
 /**
  * Removes an idOSCredential by the given `id`.
  */
-export async function removeCredential(kwilClient: KwilActionClient, id: string) {
+export async function removeCredential(
+  kwilClient: KwilActionClient,
+  id: string,
+): Promise<{ id: string }> {
   await kwilClient.execute({
     name: "remove_credential",
     description: "Remove a credential from your idOS profile",
@@ -155,7 +167,10 @@ export async function removeCredential(kwilClient: KwilActionClient, id: string)
 /**
  * Returns an idOSCredential by the given `id`.
  */
-export async function getCredentialById(kwilClient: KwilActionClient, id: string) {
+export async function getCredentialById(
+  kwilClient: KwilActionClient,
+  id: string,
+): Promise<idOSCredential | undefined> {
   const response = await kwilClient.call<idOSCredential[]>({
     name: "get_credential_owned",
     inputs: { id },
@@ -182,7 +197,7 @@ export type ShareableCredential = {
 export async function shareCredential(
   kwilClient: KwilActionClient,
   credential: ShareableCredential,
-) {
+): Promise<ShareableCredential> {
   await kwilClient.execute({
     name: "share_credential",
     description: "Share a credential with another user on idOS",
@@ -210,7 +225,7 @@ export type CreateCredentialCopyParams = {
 export async function createCredentialCopy(
   kwilClient: KwilActionClient,
   params: CreateCredentialCopyParams,
-) {
+): Promise<CreateCredentialCopyParams> {
   await kwilClient.execute({
     name: "create_credential_copy",
     description: "Share a credential with another user on idOS",

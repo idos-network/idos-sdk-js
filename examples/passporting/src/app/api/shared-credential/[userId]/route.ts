@@ -7,7 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
   const { grants } = await consumer.getAccessGrants({
     user_id: userId,
   });
-  const grant = grants.find((grant) => grant.ownerUserId === userId);
+  const grant = grants.find((grant) => grant.ag_owner_user_id === userId);
 
   if (!grant) {
     return new Response(JSON.stringify({ credential: null, cause: "no-grant" }), {
@@ -15,7 +15,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ user
     });
   }
 
-  const credential = await consumer.getReusableCredentialCompliantly(grant.dataId);
+  const credential = await consumer.getReusableCredentialCompliantly(grant.data_id);
   if (!credential) {
     return new Response(JSON.stringify({ credential: null, cause: "no-credential" }), {
       status: 200,

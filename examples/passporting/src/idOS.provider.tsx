@@ -1,7 +1,7 @@
 "use client";
 
 import { CircularProgress } from "@heroui/react";
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/core";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import {
   type PropsWithChildren,
   createContext,

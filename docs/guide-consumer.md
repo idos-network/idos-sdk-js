@@ -126,7 +126,7 @@ const grants: IdosGrant[] = await idOSClient.getGrants().grants.filter(g =>
 
 Access Grants queries can also be paginated:
 ```typescript
-const grants: IdosGrant[] = await idOSClient.getGrants({
+const grants: idOSGrant[] = await idOSClient.getGrants({
   page: 1,
   size: 7,
 });

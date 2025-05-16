@@ -1,22 +1,22 @@
 import type { idOSCredential } from "@idos-network/core";
 
-export interface StoredData {
+export type StoredData = {
   encryptionPublicKey?: Uint8Array;
   userId?: string;
-}
+};
 
-export interface DiscoverUserEncryptionPublicKeyResponse {
+export type DiscoverUserEncryptionPublicKeyResponse = {
   userId: string;
   userEncryptionPublicKey: string;
-}
+};
 
-export interface EnclaveOptions {
+export type EnclaveOptions = {
   container: string;
   theme?: "light" | "dark";
   mode?: "new" | "existing";
   url?: string;
   throwOnUserCancelUnlock?: boolean;
-}
+};
 
 export interface EnclaveProvider {
   load(): Promise<void>;

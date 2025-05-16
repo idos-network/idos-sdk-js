@@ -1,6 +1,6 @@
 import { Utils } from "@kwilteam/kwil-js";
 
-const { DataType } = Utils;
+export const DataType: typeof Utils.DataType = Utils.DataType;
 
 export interface ActionSchemaElem {
   name: string;

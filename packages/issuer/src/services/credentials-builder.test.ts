@@ -2,15 +2,16 @@ import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import * as vc from "@digitalbazaar/vc";
 import { describe, expect, it } from "vitest";
-
-import { buildCredentials, buildDocumentLoader } from "./credentials-builder";
+import { CredentialsBuilderService } from "./credentials-builder.service";
 
 describe("buildVerifiableCredentials", () => {
   it("should create a verifiable vc", async () => {
     const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
     const issuer = "https://vc-issuers.cool.id/idos";
 
-    const data = await buildCredentials(
+    const builder = new CredentialsBuilderService();
+
+    const data = await builder.buildCredentials(
       {
         id: `${issuer}/credentials/${id}`,
         level: "human",
@@ -92,7 +93,7 @@ describe("buildVerifiableCredentials", () => {
       credential: data,
       suite: vcVerifyingSuite,
       controller,
-      documentLoader: buildDocumentLoader(),
+      documentLoader: builder.buildDocumentLoader(),
     });
     expect(verifyCredentialResult.verified).toBe(true);
   });
