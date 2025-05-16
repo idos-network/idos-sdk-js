@@ -2,31 +2,17 @@
   "name": "@idos-network/consumer",
   "description": "idOS Consumer JavaScript SDK",
   "version": "1.0.0-rc.0",
-  "clean-package": {
-    "replace": {
-      "main": "dist/index.js",
-      "types": "dist/index.d.ts",
-      "exports": {
-        ".": {
-          "types": "./dist/index.d.ts",
-          "import": "./dist/index.js"
-        },
-        "./package.json": "./package.json"
-      }
-    }
-  },
   "dependencies": {
     "@kwilteam/kwil-js": "catalog:",
+    "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "@release-it/keep-a-changelog": "^5.0.0",
-    "clean-package": "^2.2.0",
     "release-it": "^17.0.0",
-    "tiny-invariant": "^1.3.3",
-    "tsup": "8.0.2",
-    "typescript": "^5.2.2"
+    "release-it-pnpm": "^4.6.5",
+    "tsdown": "^0.11.7",
+    "typescript": "^5.8.3"
   },
   "exports": {
     ".": {
@@ -34,7 +20,7 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist/**/*", "src/**/*"],
   "homepage": "https://idos.network",
   "license": "MIT",
   "main": "src/index.ts",
@@ -47,14 +33,10 @@
   },
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
-    "build": "tsup --config tsup.config.ts",
-    "dev": "tsup --watch --config tsup.config.ts",
-    "format": "biome format --write .",
-    "lint": "biome check --apply ./src",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "release-it": "release-it",
-    "test:build": "publint --strict"
+    "publint": "pnpx publint --strict"
   },
   "type": "module"
 }

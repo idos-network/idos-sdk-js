@@ -8,7 +8,7 @@ export function encryptContent(
   message: Uint8Array,
   recipientEncryptionPublicKey: Uint8Array,
   senderEncryptionSecretKey: Uint8Array,
-) {
+): Uint8Array {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
   const encrypted = nacl.box(
     message,
@@ -37,12 +37,15 @@ export function encryptContent(
   return fullMessage;
 }
 
+/**
+ * Decrypts a message using the sender's public key and the recipient's secret key.
+ */
 function decryptContent(
   message: Uint8Array,
   nonce: Uint8Array,
   senderEncryptionPublicKey: Uint8Array,
   recipientEncryptionSecretKey: Uint8Array,
-) {
+): Uint8Array {
   const decrypted = nacl.box.open(
     message,
     nonce,
@@ -50,7 +53,7 @@ function decryptContent(
     recipientEncryptionSecretKey,
   );
 
-  if (decrypted == null) {
+  if (decrypted === null) {
     throw Error(
       `Couldn't decrypt the provided message. ${JSON.stringify(
         {
@@ -69,13 +72,17 @@ function decryptContent(
 }
 
 export class NoncedBox {
-  constructor(public readonly keyPair: nacl.BoxKeyPair) {}
+  readonly keyPair: nacl.BoxKeyPair;
+
+  constructor(keyPair: nacl.BoxKeyPair) {
+    this.keyPair = keyPair;
+  }
 
   static nonceFromBase64SecretKey(secret: string): NoncedBox {
     return new NoncedBox(nacl.box.keyPair.fromSecretKey(base64Decode(secret)));
   }
 
-  async decrypt(b64FullMessage: string, b64SenderPublicKey: string) {
+  async decrypt(b64FullMessage: string, b64SenderPublicKey: string): Promise<string> {
     const decodedMessage = base64Decode(b64FullMessage);
     const senderEncryptionPublicKey = base64Decode(b64SenderPublicKey);
     const message = decodedMessage.slice(nacl.box.nonceLength, decodedMessage.length);

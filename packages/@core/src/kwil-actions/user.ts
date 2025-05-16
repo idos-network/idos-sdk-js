@@ -4,7 +4,7 @@ import type { idOSUser } from "../types";
 /**
  * Checks if the user has a profile in the idOS associated with its wallet address.
  */
-export async function hasProfile(kwilClient: KwilActionClient, address: string) {
+export async function hasProfile(kwilClient: KwilActionClient, address: string): Promise<boolean> {
   const [{ has_profile }] = await kwilClient.call<[{ has_profile: boolean }]>(
     {
       name: "has_profile",
@@ -25,7 +25,10 @@ export interface CreateUserReqParams {
 /**
  * Creates a user profile in the idOS.
  */
-export async function createUser(kwilClient: KwilActionClient, params: CreateUserReqParams) {
+export async function createUser(
+  kwilClient: KwilActionClient,
+  params: CreateUserReqParams,
+): Promise<CreateUserReqParams> {
   await kwilClient.execute({
     name: "add_user_as_inserter",
     description: "Create a user profile in idOS",
@@ -38,7 +41,7 @@ export async function createUser(kwilClient: KwilActionClient, params: CreateUse
 /**
  * Get the profile of the current user.
  */
-export async function getUserProfile(kwilClient: KwilActionClient) {
+export async function getUserProfile(kwilClient: KwilActionClient): Promise<idOSUser> {
   const [user] = await kwilClient.call<[idOSUser]>({
     name: "get_user",
     inputs: {},

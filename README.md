@@ -5,10 +5,10 @@
 ## SDKs
 | Folder                                          | Contents                          |
 | :---------------------------------------------- | :-------------------------------- |
-| **[`📁 consumer-sdk-js`](./packages/consumer/)** | idOS JavaScript SDK for consumers |
-| **[`📁 issuer-sdk-js`](./packages/issuer)**      | idOS JavaScript SDK for issuers   |
+| **[`📁 consumer`](./packages/consumer/)** | idOS JavaScript SDK for consumers |
+| **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers   |
 
-`idos-sdk-js`, `@core`, and `@controllers` are internal packages.
+`@core` and `@controllers` are internal packages.
 
 ## Auxiliary Applications
 | Folder                                                 | Contents                                                                                                                                |
@@ -51,7 +51,7 @@ let idOSClient = createIDOSClient({
 idOSClient = await idOSClient.withUserSigner(signer);
 
 // Overview of user's credentials
-const credentials = await idos.data.list("credentials");
+const credentials = await idOSClient.getAllCredentials();
 console.log(credentials);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```

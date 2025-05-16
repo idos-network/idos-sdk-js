@@ -1,34 +1,21 @@
 import {
   type EnclaveOptions,
+  type idOSClient,
+  idOSClientConfiguration,
+} from "@idos-network/client";
+import type { DelegatedWriteGrant } from "@idos-network/core";
+import {
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
   type IsleStatus,
   type IsleTheme,
   base64Decode,
-  base64Encode,
-  buildInsertableIDOSCredential,
-  type idOSClient,
-  idOSClientConfiguration,
   type idOSCredential,
   utf8Decode,
-  utf8Encode,
 } from "@idos-network/core";
-import type { DelegatedWriteGrant } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
-import {
-  http,
-  type Config,
-  createConfig,
-  createStorage,
-  getAccount,
-  getWalletClient,
-  injected,
-  reconnect,
-  signMessage,
-  watchAccount,
-} from "@wagmi/core";
-import { mainnet, sepolia } from "@wagmi/core/chains";
+import { type Config, getAccount, getWalletClient, signMessage, watchAccount } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
@@ -524,6 +511,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       });
 
       const credential = await idosClient.getCredentialOwned(id);
+
+      invariant(credential, `"idOSCredential" with id ${id} not found`);
+
       const content = await decryptCredentialContent(credential);
 
       send("update-view-credential-details-status", {

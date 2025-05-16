@@ -108,7 +108,7 @@ export async function createClientKwilSigner(
     return [await createNearWalletKwilSigner(wallet, accountId, store, kwilClient), accountId];
   }
 
-  // Force the check that `signer` is never.
+  // Force the check that `signer` is `never`.
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid `signer` type");

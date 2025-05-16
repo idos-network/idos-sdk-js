@@ -32,6 +32,10 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
         idOSClient.user.recipient_encryption_public_key,
       );
 
+      if (!credential) {
+        throw new Error(`"idOSCredential" with id ${credentialId} not found`);
+      }
+
       const decryptedContent = await idOSClient.enclaveProvider.decrypt(
         base64Decode(credential.content),
         base64Decode(credential.encryptor_public_key),

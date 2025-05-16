@@ -4,17 +4,29 @@
     "lib": ["DOM", "ESNext"],
     "module": "ESNext",
     "skipLibCheck": true,
-    /* Bundler mode */
+
+    // Bundler mode
     "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "noEmit": true,
-    /* Linting */
+    "noEmit": false,
+    "emitDeclarationOnly": true,
+
+    // Output configuration
+    "declaration": true,
+    "declarationMap": true,
+    "isolatedDeclarations": true,
+    "sourceMap": false,
+    "inlineSources": false,
+
+    // Linting
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": "."
+    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*"]
 }

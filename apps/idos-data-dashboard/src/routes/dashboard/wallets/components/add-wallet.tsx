@@ -13,7 +13,7 @@ import {
   useBreakpointValue,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/core";
+import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent } from "react";
 
