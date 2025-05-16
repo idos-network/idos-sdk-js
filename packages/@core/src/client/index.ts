@@ -393,6 +393,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
   ) {
     const credential = await getCredentialById(this.kwilClient, credentialId);
+    const contentHash = await this.getCredentialContentSha256Hash(credentialId);
+
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
 
     const plaintextContent = utf8Decode(
@@ -422,6 +424,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       id: crypto.randomUUID(),
       grantee_wallet_identifier: consumerAuthPublicKey,
       locked_until: 0,
+      content_hash: contentHash,
     };
 
     await this.shareCredential(insertableCredential);
