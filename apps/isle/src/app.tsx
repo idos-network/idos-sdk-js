@@ -15,27 +15,24 @@ import { useIsleStore } from "@/store";
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <chakra.div display="grid">
-      <chakra.div
-        display="grid"
-        gridTemplateRows="auto 1fr auto"
-        gap="6"
-        p="5"
-        rounded="38px"
-        bg="surface"
-        border="1px solid {colors.border}"
-        maxWidth="366px"
-        width="98%"
-        mx="auto"
-        my="auto"
-        height="98%"
-        maxHeight="full"
-        shadow="0px 0px 9px -4px #00000066"
-      >
-        <Header />
-        <chakra.main>{children}</chakra.main>
-        <Footer />
-      </chakra.div>
+    <chakra.div
+      py="20px"
+      className="isle"
+      display="grid"
+      gridTemplateRows="auto 1fr auto"
+      gap="6"
+      p="5"
+      rounded="38px"
+      bg="surface"
+      border="1px solid {colors.border}"
+      width="355px"
+      height="full"
+      maxHeight="full"
+      shadow="0px 4px 9px -4px #00000066"
+    >
+      <Header />
+      <chakra.main>{children}</chakra.main>
+      <Footer />
     </chakra.div>
   );
 }
