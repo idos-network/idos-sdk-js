@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK for server environments (ESM only)",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.0",
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
