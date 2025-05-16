@@ -6,20 +6,26 @@ import {
 } from "@idos-network/core/kwil-actions";
 import type { idOSUser, idOSWallet } from "@idos-network/core/types";
 
-export interface CreateProfileReqParams extends Omit<idOSUser, "id"> {
+export type CreateProfileReqParams = Omit<idOSUser, "id"> & {
   id?: string;
-}
+};
 
-export interface UpsertWalletReqParams extends Omit<idOSWallet, "id"> {
+export type UpsertWalletReqParams = Omit<idOSWallet, "id"> & {
   id?: string;
-}
+};
 
-export interface CreateWalletReqParams extends Omit<UpsertWalletReqParams, "user_id"> {}
+export type CreateWalletReqParams = Omit<UpsertWalletReqParams, "user_id"> & {
+  id?: string;
+};
 
 export class UserService {
-  constructor(private readonly kwilClient: KwilActionClient) {}
+  readonly #kwilClient: KwilActionClient;
 
-  private ensureEntityId<T extends { id?: string }>(entity: T): T & { id: string } {
+  constructor(kwilClient: KwilActionClient) {
+    this.#kwilClient = kwilClient;
+  }
+
+  #ensureEntityId<T extends { id?: string }>(entity: T): T & { id: string } {
     if (!entity.id) {
       (entity as T & { id: string }).id = crypto.randomUUID();
     }
@@ -27,18 +33,18 @@ export class UserService {
   }
 
   async hasProfile(userAddress: string): Promise<boolean> {
-    return _hasProfile(this.kwilClient, userAddress);
+    return _hasProfile(this.#kwilClient, userAddress);
   }
 
   async createUserProfile(params: CreateProfileReqParams): Promise<idOSUser> {
-    const payload = this.ensureEntityId(params);
-    await _createUser(this.kwilClient, payload);
+    const payload = this.#ensureEntityId(params);
+    await _createUser(this.#kwilClient, payload);
     return payload;
   }
 
   async upsertWalletAsInserter(params: UpsertWalletReqParams): Promise<idOSWallet> {
-    const payload = this.ensureEntityId(params);
-    await _upsertWalletAsInserter(this.kwilClient, payload);
+    const payload = this.#ensureEntityId(params);
+    await _upsertWalletAsInserter(this.#kwilClient, payload);
     return payload;
   }
 

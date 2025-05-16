@@ -25,7 +25,6 @@ export class IframeEnclave implements EnclaveProvider {
 
   async load(): Promise<void> {
     await this.loadEnclave();
-
     await this.requestToEnclave({ configure: this.options });
   }
 
@@ -98,7 +97,7 @@ export class IframeEnclave implements EnclaveProvider {
   async loadEnclave(): Promise<void> {
     const container =
       document.querySelector(this.container) ||
-      throwNew(Error, `Can't find container with selector ${this.container}`);
+      throwNewError(Error, `Can't find container with selector ${this.container}`);
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
@@ -151,18 +150,18 @@ export class IframeEnclave implements EnclaveProvider {
     );
   }
 
-  showEnclave() {
+  showEnclave(): void {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.add("visible");
   }
 
-  hideEnclave() {
+  hideEnclave(): void {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.remove("visible");
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  async requestToEnclave(request: any) {
+  async requestToEnclave(request: any): Promise<any> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
@@ -190,7 +189,7 @@ export class IframeEnclave implements EnclaveProvider {
         try {
           status = "success";
           this.hideEnclave();
-        } catch (error) {
+        } catch (_) {
           status = "failure";
           this.hideEnclave();
         }
@@ -233,6 +232,6 @@ export class IframeEnclave implements EnclaveProvider {
   }
 }
 
-function throwNew(ErrorClass: ErrorConstructor, ...args: Parameters<ErrorConstructor>): never {
+function throwNewError(ErrorClass: ErrorConstructor, ...args: Parameters<ErrorConstructor>): never {
   throw new ErrorClass(...args);
 }

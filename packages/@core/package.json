@@ -35,7 +35,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.3"
   },
   "private": true,
   "sideEffects": false,

@@ -123,9 +123,14 @@ export async function createNearWalletKwilSigner(
   }
 
   const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
-    // biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
-    if (typeof message !== "string") message = utf8Decode(message);
-    if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
+    if (typeof message !== "string") {
+      // biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
+      message = utf8Decode(message);
+    }
+
+    if (!wallet.signMessage) {
+      throw new Error("Only wallets with signMessage are supported.");
+    }
 
     const nonceSuggestion = Buffer.from(new KwilNonce(32).bytes);
 

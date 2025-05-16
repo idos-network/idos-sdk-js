@@ -9,13 +9,15 @@ import {
   utf8Decode,
 } from "../codecs";
 
-export function implicitAddressFromPublicKey(publicKey: string) {
+export function implicitAddressFromPublicKey(publicKey: string): string {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
   const implicitAddress = hexEncode(bs58Decode(key_without_prefix));
   return implicitAddress;
 }
 
-export function kwilNep413Signer(recipient: string) {
+export function kwilNep413Signer(
+  recipient: string,
+): (keyPair: KeyPair) => (messageBytes: Uint8Array) => Promise<Uint8Array> {
   return (keyPair: KeyPair) =>
     async (messageBytes: Uint8Array): Promise<Uint8Array> => {
       const message = utf8Decode(messageBytes);

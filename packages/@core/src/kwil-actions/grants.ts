@@ -7,7 +7,7 @@ import type { DelegatedWriteGrant, idOSGrant } from "../types";
 export async function getGrantsCount(
   kwilClient: KwilActionClient,
   params: { user_id: string | null } = { user_id: null },
-) {
+): Promise<number> {
   const [{ count }] = await kwilClient.call<[{ count: number }]>({
     name: "get_access_grants_granted_count",
     inputs: params,
@@ -30,7 +30,7 @@ export const GET_GRANTS_DEFAULT_RECORDS_PER_PAGE = 10;
 export async function getGrants(
   kwilClient: KwilActionClient,
   params: GetGrantsParams = { page: 1, size: GET_GRANTS_DEFAULT_RECORDS_PER_PAGE, user_id: null },
-) {
+): Promise<idOSGrant[]> {
   //@todo: add pagination values to the response
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",
@@ -56,7 +56,7 @@ export interface CreateAccessGrantByDAGParams {
 export async function createAccessGrantByDag(
   kwilClient: KwilActionClient,
   params: CreateAccessGrantByDAGParams,
-) {
+): Promise<CreateAccessGrantByDAGParams> {
   await kwilClient.execute({
     name: "create_ag_by_dag_for_copy",
     description: "Create an Access Grant in idOS",
@@ -69,7 +69,10 @@ export async function createAccessGrantByDag(
 /**
  * Revokes an Access Grant for the given `id`.
  */
-export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string) {
+export async function revokeAccessGrant(
+  kwilClient: KwilActionClient,
+  id: string,
+): Promise<{ id: string }> {
   await kwilClient.execute({
     name: "revoke_access_grant",
     description: "Revoke an Access Grant from idOS",
@@ -82,7 +85,7 @@ export async function revokeAccessGrant(kwilClient: KwilActionClient, id: string
 /**
  * Returns all the Access Grants that have been granted by the given `signer`.
  */
-export async function getAccessGrantsOwned(kwilClient: KwilActionClient) {
+export async function getAccessGrantsOwned(kwilClient: KwilActionClient): Promise<idOSGrant[]> {
   return kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_owned",
     inputs: {},
@@ -103,7 +106,7 @@ export interface idOSDAGSignatureParams {
 export async function requestDAGMessage(
   kwilClient: KwilActionClient,
   params: idOSDAGSignatureParams,
-) {
+): Promise<string> {
   const [{ message }] = await kwilClient.call<[{ message: string }]>({
     name: "dag_message",
     inputs: params,
@@ -115,7 +118,10 @@ export async function requestDAGMessage(
 /**
  * Request a signature for a delegated write grant.
  */
-export async function requestDWGMessage(kwilClient: KwilActionClient, params: DelegatedWriteGrant) {
+export async function requestDWGMessage(
+  kwilClient: KwilActionClient,
+  params: DelegatedWriteGrant,
+): Promise<string> {
   const [{ message }] = await kwilClient.call<[{ message: string }]>({
     name: "dwg_message",
     inputs: params,

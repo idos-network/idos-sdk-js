@@ -9,6 +9,7 @@
   },
   "linter": {
     "enabled": true,
+    "ignore": ["dist/**/*", "node_modules/**/*", "./**/*.gen.ts", "./**/*/ui/*.tsx", "./**/*/*.js"],
     "rules": {
       "recommended": true,
       "nursery": {
