@@ -211,6 +211,10 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
       type: DataType.Text,
     },
     {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
       name: "encryptor_public_key",
       type: DataType.Text,
     },
@@ -280,6 +284,10 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
     },
     {
       name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "content_hash",
       type: DataType.Text,
     },
     {
