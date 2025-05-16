@@ -9,7 +9,7 @@
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "release-it": "^17.0.0",
+    "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tsdown": "^0.11.7",
     "typescript": "^5.8.3"
