@@ -21,6 +21,14 @@ const fadeInUp = {
   transition: { duration: 0.6 },
 };
 
+// Function to preload the ACME card image
+const preloadAcmeCardImage = () => {
+  if (typeof window !== "undefined") {
+    const img = new Image();
+    img.src = "/static/acme-card.jpg";
+  }
+};
+
 export default function HomePage() {
   const [timeLeft, setTimeLeft] = useState({
     days: 7,
@@ -30,6 +38,8 @@ export default function HomePage() {
   });
 
   useEffect(() => {
+    preloadAcmeCardImage();
+
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev.seconds > 0) {
