@@ -171,8 +171,7 @@ function ClaimCardSuccessStepDescription({
         color="default"
         className="w-fit bg-black text-white dark:bg-white dark:text-black"
         size="lg"
-        href={process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}
-        target="_blank"
+        as="button"
         onPress={() => {
           goToACMECardProvider();
         }}
