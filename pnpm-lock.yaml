@@ -776,6 +776,9 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
+      clean-package:
+        specifier: ^2.2.0
+        version: 2.2.0
       release-it:
         specifier: ^19.0.2
         version: 19.0.2(@types/node@22.14.0)
@@ -807,6 +810,9 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../@core
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0

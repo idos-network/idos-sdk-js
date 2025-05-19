@@ -2,6 +2,9 @@
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK for browser environments",
   "version": "1.0.0-rc.2",
+  "clean-package": {
+    "remove": ["devDependencies.@idos-network/core"]
+  },
   "dependencies": {
     "@kwilteam/kwil-js": "^0.9.4",
     "es-toolkit": "^1.37.2",
@@ -9,6 +12,7 @@
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
+    "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tsdown": "^0.11.7",
@@ -34,8 +38,10 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "release-it": "release-it",
-    "publint": "pnpx publint --strict"
+    "postpack": "clean-package restore",
+    "prepack": "clean-package",
+    "publint": "pnpx publint --strict",
+    "release-it": "release-it"
   },
   "sideEffects": false,
   "type": "module",
