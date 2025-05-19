@@ -9,5 +9,6 @@ export default defineConfig({
   outDir: "./dist",
   bundle: true,
   dts: true,
+  external: ["ripple-keypairs"],
   noExternal: ["@idos-network/core"],
 });
