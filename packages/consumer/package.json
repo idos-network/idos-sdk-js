@@ -2,6 +2,9 @@
   "name": "@idos-network/consumer",
   "description": "idOS Consumer JavaScript SDK",
   "version": "1.0.0-rc.4",
+  "clean-package": {
+    "remove": ["devDependencies.@idos-network/core"]
+  },
   "dependencies": {
     "@kwilteam/kwil-js": "catalog:",
     "tiny-invariant": "^1.3.3",
@@ -9,6 +12,7 @@
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
+    "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tsdown": "^0.11.7",
@@ -23,7 +27,7 @@
   "files": ["dist/**/*", "src/**/*"],
   "homepage": "https://idos.network",
   "license": "MIT",
-  "main": "src/index.ts",
+  "main": "./dist/index.js",
   "peerDependencies": {
     "ethers": "catalog:",
     "near-api-js": "3.0.4"
@@ -35,8 +39,11 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "release-it": "release-it",
-    "publint": "pnpx publint --strict"
+    "postpack": "clean-package restore",
+    "prepack": "clean-package",
+    "publint": "pnpx publint --strict",
+    "release-it": "release-it"
   },
-  "type": "module"
+  "type": "module",
+  "types": "./dist/index.d.ts"
 }
