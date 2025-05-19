@@ -2,7 +2,7 @@ import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair } from "near-api-js";
 import nacl from "tweetnacl";
-import { bs58Encode } from "../codecs";
+import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
@@ -39,6 +39,10 @@ function isNearKeyPair(object: unknown): object is KeyPair {
   );
 }
 
+function isXrplKeyPair(object: unknown): object is KeyPair {
+  return object !== null && typeof object === "object" && "isXrpSigner" in object;
+}
+
 export type KwilSignerType = KeyPair | EthersWallet | nacl.SignKeyPair | JsonRpcSigner;
 export type SignerAddress = string;
 
@@ -65,6 +69,17 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
     return [
       new KwilSigner(kwilNep413Signer("idos-issuer")(signer), publicKey, "nep413"),
       publicKey,
+    ];
+  }
+
+  if (isXrplKeyPair(signer)) {
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => hexDecode(signer.sign(hexEncode(msg))),
+        signer.publicKey,
+        "xrpl",
+      ),
+      signer.publicKey,
     ];
   }
 
