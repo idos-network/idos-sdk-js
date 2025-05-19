@@ -1,6 +1,7 @@
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair } from "near-api-js";
+import * as xrpKeypair from "ripple-keypairs";
 import nacl from "tweetnacl";
 import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
@@ -75,7 +76,7 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
   if (isXrplKeyPair(signer)) {
     return [
       new KwilSigner(
-        async (msg: Uint8Array) => hexDecode(signer.sign(hexEncode(msg))),
+        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
         signer.publicKey,
         "xrpl",
       ),

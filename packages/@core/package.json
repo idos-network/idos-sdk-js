@@ -16,6 +16,7 @@
     "es-toolkit": "^1.23.0",
     "ethers": "catalog:",
     "near-api-js": "3.0.4",
+    "ripple-keypairs": "^2.0.0",
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
