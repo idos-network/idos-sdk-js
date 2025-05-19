@@ -25,7 +25,7 @@ const fadeInUp = {
 const preloadAcmeCardImage = () => {
   if (typeof window !== "undefined") {
     const img = new Image();
-    img.src = "/static/acme-card.jpg";
+    img.src = "/static/acme-card-success.jpg";
   }
 };
 
