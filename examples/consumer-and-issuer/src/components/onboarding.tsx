@@ -111,7 +111,13 @@ function ClaimCardStepDescription() {
         You can now claim your exclusive high-limit credit card and start your premium banking
         journey.
       </p>
-      <Image src="/static/credit-cards-1.png" alt="NeoBank" width={240} height={240} />
+      <Image
+        src="/static/acme-card.jpg"
+        alt="NeoBank"
+        className="h-auto w-[80%] rounded-[24px]"
+        width={240}
+        height={240}
+      />
       <Button
         className="w-fit"
         color="primary"
@@ -160,7 +166,7 @@ function ClaimCardSuccessStepDescription({
         banking journey!
       </h4>
       <Image
-        src="/static/credit-cards.jpg"
+        src="/static/acme-card.jpg"
         alt="NeoBank"
         className="h-auto w-[80%] rounded-[24px]"
         width={240}
