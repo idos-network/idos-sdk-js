@@ -35,12 +35,14 @@ export default function Minimized({ children }: PropsWithChildren) {
 
   return (
     <MotionBox
+      paddingBlock={isExpanded ? "10px" : "0px"}
       cursor={isExpanded ? "default" : "pointer"}
       display="flex"
       gap="1"
       rounded="46px"
       width="20"
       height="10"
+      mx={!isExpanded ? "1" : "0"}
       alignItems="center"
       border={isExpanded ? undefined : "1px solid {colors.border}"}
       overflow="hidden"
@@ -56,6 +58,7 @@ export default function Minimized({ children }: PropsWithChildren) {
           : undefined
       }
       onClick={() => toggle(true)}
+      shadow={!isExpanded ? "0px 4px 9px -4px #00000066" : ""}
     >
       <MotionBox
         id="minimized-isle"
