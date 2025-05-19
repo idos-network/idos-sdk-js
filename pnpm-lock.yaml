@@ -793,7 +793,7 @@ importers:
     dependencies:
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
-        version: 0.9.4
+        version: 0.9.4(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       ethers:
         specifier: 'catalog:'
         version: 6.14.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -807,9 +807,6 @@ importers:
         specifier: ^1.0.3
         version: 1.0.3
     devDependencies:
-      '@idos-network/core':
-        specifier: workspace:*
-        version: link:../@core
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
@@ -856,6 +853,9 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
+      clean-package:
+        specifier: ^2.2.0
+        version: 2.2.0
       release-it:
         specifier: ^19.0.2
         version: 19.0.2(@types/node@22.14.0)
