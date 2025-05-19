@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK for browser environments",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.4",
   "clean-package": {
     "remove": ["devDependencies.@idos-network/core"]
   },
