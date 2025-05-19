@@ -486,34 +486,6 @@ importers:
         specifier: ^5.7.3
         version: 5.8.3
 
-  apps/xrpl-test:
-    dependencies:
-      '@idos-network/consumer':
-        specifier: workspace:*
-        version: link:../../packages/consumer
-      '@idos-network/core':
-        specifier: workspace:*
-        version: link:../../packages/@core
-      ethers:
-        specifier: 'catalog:'
-        version: 6.14.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-      near-api-js:
-        specifier: 3.0.4
-        version: 3.0.4(encoding@0.1.13)
-      ripple-keypairs:
-        specifier: ^2.0.0
-        version: 2.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
-      tiny-invariant:
-        specifier: latest
-        version: 1.3.3
-    devDependencies:
-      '@types/node':
-        specifier: ^20.12.10
-        version: 20.19.0
-      ts-node:
-        specifier: ^10.9.2
-        version: 10.9.2(@swc/core@1.11.31)(@types/node@20.19.0)(typescript@5.8.3)
-
   examples/consumer-and-issuer:
     dependencies:
       '@gemwallet/api':
@@ -13011,6 +12983,7 @@ snapshots:
   '@cspotcode/source-map-support@0.8.1':
     dependencies:
       '@jridgewell/trace-mapping': 0.3.9
+    optional: true
 
   '@csstools/color-helpers@5.0.2':
     optional: true
@@ -16333,6 +16306,7 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
+    optional: true
 
   '@kwilteam/kwil-js@0.9.4(patch_hash=26apkfuq7hdss5enw6ex4zismm)':
     dependencies:
@@ -20983,13 +20957,17 @@ snapshots:
       mkdirp: 1.0.4
       path-browserify: 1.0.1
 
-  '@tsconfig/node10@1.0.11': {}
+  '@tsconfig/node10@1.0.11':
+    optional: true
 
-  '@tsconfig/node12@1.0.11': {}
+  '@tsconfig/node12@1.0.11':
+    optional: true
 
-  '@tsconfig/node14@1.0.3': {}
+  '@tsconfig/node14@1.0.3':
+    optional: true
 
-  '@tsconfig/node16@1.0.4': {}
+  '@tsconfig/node16@1.0.4':
+    optional: true
 
   '@tybys/wasm-util@0.9.0':
     dependencies:
@@ -24588,7 +24566,8 @@ snapshots:
 
   apg-js@4.4.0: {}
 
-  arg@4.1.3: {}
+  arg@4.1.3:
+    optional: true
 
   arg@5.0.2: {}
 
@@ -25588,7 +25567,8 @@ snapshots:
 
   diff-sequences@29.6.3: {}
 
-  diff@4.0.2: {}
+  diff@4.0.2:
+    optional: true
 
   diff@7.0.0: {}
 
@@ -27432,7 +27412,8 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  make-error@1.3.6: {}
+  make-error@1.3.6:
+    optional: true
 
   match-sorter@8.0.2:
     dependencies:
@@ -29512,6 +29493,7 @@ snapshots:
       yn: 3.1.1
     optionalDependencies:
       '@swc/core': 1.11.31(@swc/helpers@0.5.17)
+    optional: true
 
   ts-toolbelt@6.15.5: {}
 
@@ -29821,7 +29803,8 @@ snapshots:
 
   uuid@9.0.1: {}
 
-  v8-compile-cache-lib@3.0.1: {}
+  v8-compile-cache-lib@3.0.1:
+    optional: true
 
   valibot@0.41.0(typescript@5.8.3):
     optionalDependencies:
@@ -30805,7 +30788,8 @@ snapshots:
       y18n: 4.0.3
       yargs-parser: 18.1.3
 
-  yn@3.1.1: {}
+  yn@3.1.1:
+    optional: true
 
   yocto-queue@0.1.0: {}
 
