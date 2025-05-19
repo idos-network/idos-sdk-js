@@ -164,7 +164,7 @@ export function MatchingCredential() {
     return (
       <div className="flex flex-col gap-6">
         <Image
-          src="/static/acme-card.jpg"
+          src="/static/acme-card-success.jpg"
           alt="ACME Card"
           width={240}
           height={240}
