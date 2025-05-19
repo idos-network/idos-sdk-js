@@ -1,5 +1,5 @@
 import { useWalletSelector } from "@/core/near";
-import { useSigner } from "@/idOS.provider";
+import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
 import {
   Box,
   Button,
@@ -84,18 +84,18 @@ const ListItemLink = (props: NavLinkProps & LinkProps) => {
 const DisconnectButton = () => {
   const { isConnected } = useAccount();
   const { disconnect } = useDisconnect();
-  const { selector } = useWalletSelector();
+  const { selector, setAccounts } = useWalletSelector();
   const queryClient = useQueryClient();
   const { setSigner } = useSigner();
+  const client = useUnsafeIdOS();
 
   const handleDisconnect = async () => {
     if (isConnected) disconnect();
-    if (selector.isSignedIn()) (await selector.wallet()).signOut();
-
+    if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);
+    setAccounts([]);
     queryClient.removeQueries();
-    // Force a navigation to ensure the state is reset
-    window.location.href = "/";
   };
 
   return (
