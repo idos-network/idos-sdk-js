@@ -88,3 +88,4 @@ XUMM
 Xaman
 gemwallet
 partialize
+keypairs

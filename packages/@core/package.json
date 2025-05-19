@@ -6,6 +6,7 @@
     "@gemwallet/api": "^3.8.0",
     "@kwilteam/kwil-js": "catalog:",
     "@near-wallet-selector/core": "8.9.10",
+    "ripple-keypairs": "^2.0.0",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/binary": "^1.0.1",
     "@stablelib/bytes": "^1.0.1",
