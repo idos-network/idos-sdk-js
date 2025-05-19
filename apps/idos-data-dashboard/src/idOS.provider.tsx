@@ -63,8 +63,7 @@ export const useIdOS = () => {
 };
 
 export const useUnsafeIdOS = () => {
-  const context = use(IDOSClientContext);
-  return context;
+  return use(IDOSClientContext);
 };
 
 export function IDOSClientProvider({ children }: PropsWithChildren) {
