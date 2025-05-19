@@ -9,5 +9,6 @@ export default defineConfig({
   format: ["esm"],
   outDir: "./dist",
   bundle: true,
+  external: ["ripple-keypairs"],
   noExternal: ["@idos-network/core"],
 });
