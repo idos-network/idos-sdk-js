@@ -1,5 +1,5 @@
 import { Center, Spinner } from "@chakra-ui/react";
-import type { AccountState, WalletSelector } from "@near-wallet-selector/core";
+import type { Account, WalletSelector } from "@near-wallet-selector/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
@@ -19,8 +19,9 @@ declare global {
 interface WalletSelectorContextValue {
   selector: WalletSelector;
   modal: WalletSelectorModal;
-  accounts: Array<AccountState>;
+  accounts: Array<Account>;
   accountId: string | null;
+  setAccounts: (accounts: Array<Account>) => void;
 }
 
 const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
@@ -32,7 +33,7 @@ export const WalletSelectorContextProvider: React.FC<{
 }> = ({ children }) => {
   const [selector, setSelector] = useState<WalletSelector | null>(null);
   const [modal, setModal] = useState<WalletSelectorModal | null>(null);
-  const [accounts, setAccounts] = useState<Array<AccountState>>([]);
+  const [accounts, setAccounts] = useState<Array<Account>>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
   const initialize = useCallback(async () => {
@@ -46,8 +47,6 @@ export const WalletSelectorContextProvider: React.FC<{
       contractId,
       methodNames: [],
     });
-    const state = _selector.store.getState();
-    setAccounts(state.accounts);
 
     // this is added for debugging purpose only
     // for more information (https://github.com/near/wallet-selector/pull/764#issuecomment-1498073367)
@@ -71,8 +70,8 @@ export const WalletSelectorContextProvider: React.FC<{
       return;
     }
 
-    const subscription = selector.store.observable.subscribe((state) => {
-      setAccounts(state.accounts);
+    const subscription = selector.on("signedIn", ({ accounts }) => {
+      setAccounts(accounts);
     });
 
     const onHideSubscription = modal?.on("onHide", ({ hideReason }) => {
@@ -80,7 +79,7 @@ export const WalletSelectorContextProvider: React.FC<{
     });
 
     return () => {
-      subscription.unsubscribe();
+      subscription.remove();
       onHideSubscription?.remove();
     };
   }, [selector, modal]);
@@ -92,7 +91,8 @@ export const WalletSelectorContextProvider: React.FC<{
       // biome-ignore lint/style/noNonNullAssertion: TBD
       modal: modal!,
       accounts,
-      accountId: accounts.find((account) => account.active)?.accountId || null,
+      accountId: accounts?.[0]?.accountId ?? null,
+      setAccounts,
     }),
     [selector, modal, accounts],
   );

@@ -62,10 +62,15 @@ export const useIdOS = () => {
   return context;
 };
 
+export const useUnsafeIdOS = () => {
+  return use(IDOSClientContext);
+};
+
 export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [client, setClient] = useState<idOSClient>(_idOSClient);
-  const { signer } = useSigner();
+  const { signer: evmSigner } = useSigner();
+  const { accountId, selector } = useWalletSelector();
 
   useEffect(() => {
     const setupClient = async () => {
@@ -74,14 +79,14 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
       try {
         // Always start with a fresh client
         const newClient = await _idOSClient.createClient();
-
-        if (!signer) {
+        if (!(evmSigner || accountId)) {
           setClient(newClient);
           setIsLoading(false);
           return;
         }
+        const nearSigner = accountId ? await selector.wallet() : undefined;
 
-        // Add the signer to the client
+        const signer = evmSigner || nearSigner;
         const withSigner = await newClient.withUserSigner(signer);
 
         // Check if the user has a profile and log in if they do
@@ -100,7 +105,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [signer]);
+  }, [evmSigner, accountId, selector]);
 
   // While loading, show a spinner
   if (isLoading) {
@@ -112,7 +117,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If no signer is available, show the connect wallet screen
-  if (!signer) {
+  if (!evmSigner && !accountId) {
     return <ConnectWallet />;
   }
 
