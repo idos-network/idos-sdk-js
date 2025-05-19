@@ -560,6 +560,7 @@ export function Permissions() {
                         size="xs"
                         colorPalette="green"
                         rounded="full"
+                        _hover={{ bg: "black" }}
                         onClick={() => {
                           setGrant({
                             consumer,
@@ -571,7 +572,12 @@ export function Permissions() {
                           });
                         }}
                       >
-                        <ViewIcon w="5" h="5" color="neutral.400" />
+                        <ViewIcon
+                          w="5"
+                          h="5"
+                          color="neutral.400"
+                          _groupHover={{ color: "white" }}
+                        />
                       </IconButton>
 
                       <IconButton
@@ -579,6 +585,7 @@ export function Permissions() {
                         variant="ghost"
                         size="xs"
                         colorPalette="green"
+                        _hover={{ bg: "black" }}
                         rounded="full"
                         onClick={() => {
                           setGrant({
@@ -588,7 +595,12 @@ export function Permissions() {
                           });
                         }}
                       >
-                        <DeleteIcon w="5" h="5" color="neutral.400" />
+                        <DeleteIcon
+                          _groupHover={{ color: "white" }}
+                          w="5"
+                          h="5"
+                          color="neutral.400"
+                        />
                       </IconButton>
                     </HStack>
                   </HStack>
