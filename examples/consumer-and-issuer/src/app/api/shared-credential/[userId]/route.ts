@@ -2,28 +2,27 @@ import { idOSConsumer } from "@/consumer.config";
 
 export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const userId = (await params).userId;
-
   const consumer = await idOSConsumer();
-  const credentials = await consumer.getCredentialsSharedByUser(userId);
 
-  if (!credentials.length) {
-    return new Response(JSON.stringify(null), {
-      status: 200,
-    });
-  }
-
-  const match = credentials.find((credential) => {
-    const publicNotes = JSON.parse(credential.public_notes ?? "{}");
-    return publicNotes.type === "PASSPORTING_DEMO";
+  const { grants } = await consumer.getAccessGrants({
+    user_id: userId,
   });
+  const grant = grants.find((grant) => grant.ag_owner_user_id === userId);
 
-  if (!match) {
-    return new Response(JSON.stringify(null), {
+  if (!grant) {
+    return new Response(JSON.stringify({ credential: null, cause: "no-grant" }), {
       status: 200,
     });
   }
 
-  return new Response(JSON.stringify(match), {
+  const credential = await consumer.getReusableCredentialCompliantly(grant.data_id);
+  if (!credential) {
+    return new Response(JSON.stringify({ credential: null, cause: "no-credential" }), {
+      status: 200,
+    });
+  }
+
+  return new Response(JSON.stringify({ credential, cause: "success" }), {
     status: 200,
   });
 }
