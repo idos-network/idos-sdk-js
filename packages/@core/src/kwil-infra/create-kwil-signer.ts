@@ -2,6 +2,7 @@ import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair } from "near-api-js";
 import * as xrpKeypair from "ripple-keypairs";
+import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
 import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
@@ -40,11 +41,12 @@ function isNearKeyPair(object: unknown): object is KeyPair {
   );
 }
 
-function isXrplKeyPair(object: unknown): object is KeyPair {
-  return object !== null && typeof object === "object" && "isXrpSigner" in object;
+// @todo: what about using zod.safeParse instead?
+function isXrplKeyPair(object: unknown): object is XrpKeyPair {
+  return !!object && typeof object === "object" && "privateKey" in object && "publicKey" in object;
 }
 
-export type KwilSignerType = KeyPair | EthersWallet | nacl.SignKeyPair | JsonRpcSigner;
+export type KwilSignerType = KeyPair | EthersWallet | nacl.SignKeyPair | JsonRpcSigner | XrpKeyPair;
 export type SignerAddress = string;
 
 /**
