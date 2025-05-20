@@ -13,6 +13,7 @@ import type { Wallet } from "../types";
 import { getXrpPublicKey, looksLikeXrpWallet } from "../xrp";
 import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
 import { createXrpKwilSigner } from "./create-xrp.signer";
+
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
  */
@@ -70,6 +71,7 @@ export type KwilSignerType =
   | JsonRpcSigner
   | StellarKeypair
   | XrpKeyPair;
+
 export type SignerAddress = string;
 
 /**
