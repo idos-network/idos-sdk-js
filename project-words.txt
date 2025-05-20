@@ -83,3 +83,5 @@ vite
 wagmi
 webauthn
 websdk
+xrpl
+XUMM
