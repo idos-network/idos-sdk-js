@@ -79,3 +79,5 @@ wagmi
 webauthn
 sumsub
 websdk
+xrpl
+XUMM
