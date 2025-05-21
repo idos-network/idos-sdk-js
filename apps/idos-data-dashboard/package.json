@@ -5,6 +5,7 @@
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@near-wallet-selector/core": "8.9.10",

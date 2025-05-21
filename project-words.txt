@@ -85,3 +85,5 @@ webauthn
 websdk
 xrpl
 XUMM
+Xaman
+gemwallet
