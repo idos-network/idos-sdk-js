@@ -118,7 +118,7 @@ export function MatchingCredential() {
   if (idOSClient.state === "with-user-signer") {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
 
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+    invariant(issuerUrl, "`NEXT_PUBLIC_ISSUER_URL` is not set");
 
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-4">
