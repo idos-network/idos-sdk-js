@@ -3,7 +3,6 @@
 import { Button, cn, useDisclosure } from "@heroui/react";
 import type { IsleStatus, idOSCredential } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useClickAway } from "@uidotdev/usehooks";
 import { AnimatePresence, motion } from "framer-motion";
@@ -22,9 +21,11 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
-import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
+import { useWalletController, type WalletType } from "@/wallet.provider";
+import { useRouter } from "next/navigation";
+import { encode } from "@stablelib/base64";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
   return (
@@ -306,7 +307,8 @@ const useIssueCredential = () => {
         writeGrant.access_grant_timelock,
         writeGrant.not_usable_before,
         writeGrant.not_usable_after,
-        signature,
+        // @ts-expect-error A hack to make kwil-infra to work
+        encode(signature),
       );
     },
   });
@@ -415,8 +417,9 @@ const $step = atom<IsleStatus | undefined>(undefined);
 
 export function Onboarding() {
   const { isleController } = useIsleController();
-  const { signMessageAsync } = useSignMessage();
-  const { address } = useAppKitAccount();
+  const { isConnected, address, signMessage, initialized, walletType, account } = useWalletController();
+  const router = useRouter();
+
   const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
@@ -427,6 +430,12 @@ export function Onboarding() {
   const kycDisclosure = useDisclosure();
 
   const hasIssuedCredential = useRef(false);
+
+  useEffect(() => {
+    if (initialized && !isConnected) {
+      router.push("/");
+    }
+  }, [isConnected, router, initialized]);
 
   const containerRef = useClickAway(() => {
     if (!isleController) return;
@@ -451,7 +460,7 @@ export function Onboarding() {
         await isleController.idosClient.getUserEncryptionPublicKey(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-      const signature = await signMessageAsync({ message });
+      const signature = await signMessage(message);
 
       isleController?.send("update-create-profile-status", {
         status: "pending",
@@ -462,10 +471,10 @@ export function Onboarding() {
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
           address: address as string,
-          type: "EVM",
+          type: walletType as WalletType,
           message,
           signature,
-          publicKey: signature,
+          publicKey: account?.publicKey ?? signature,
         },
       });
 
@@ -494,7 +503,7 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, signMessage, address, queryClient, walletType]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
@@ -533,9 +542,11 @@ export function Onboarding() {
   }, [address, queryClient, userData?.data?.idvUserId]);
 
   useEffect(() => {
+    console.log("isleController", isleController);
     if (!isleController) return;
 
     const cleanup = isleController.onIsleMessage(async (message) => {
+      console.log("message", message);
       switch (message.type) {
         case "create-profile":
           await handleCreateProfile();

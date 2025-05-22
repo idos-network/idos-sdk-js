@@ -11,6 +11,7 @@ import { mainnet } from "@reown/appkit/networks";
 import { sepolia } from "@reown/appkit/networks";
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
+import { WalletProvider } from "@/wallet.provider";
 
 const queryClient = new QueryClient();
 
@@ -61,12 +62,14 @@ export function Providers(props: {
 
   return (
     <HeroUIProvider>
-      <AppKitProvider>
+        <AppKitProvider>
         <QueryClientProvider client={queryClient}>
-          {props.children}
+          <WalletProvider>
+            {props.children}
+          </WalletProvider>
           <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </AppKitProvider>
+          </QueryClientProvider>
+        </AppKitProvider>
     </HeroUIProvider>
   );
 }

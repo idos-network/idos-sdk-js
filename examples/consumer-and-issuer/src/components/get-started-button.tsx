@@ -1,10 +1,10 @@
 import { Button } from "@heroui/react";
-import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import Link from "next/link";
+import { WalletSelector } from "./wallet-selector";
+import { useWalletController } from "@/wallet.provider";
 
 export function GetStartedButton({ title = "Get started now" }: { title?: string }) {
-  const { isConnected } = useAppKitAccount();
-  const { open } = useAppKit();
+  const { isConnected } = useWalletController();
 
   if (isConnected) {
     return (
@@ -15,14 +15,6 @@ export function GetStartedButton({ title = "Get started now" }: { title?: string
   }
 
   return (
-    <Button
-      color="default"
-      size="lg"
-      onPress={() => {
-        open();
-      }}
-    >
-      {title}
-    </Button>
+    <WalletSelector />
   );
 }

@@ -6,6 +6,7 @@ import nacl from "tweetnacl";
 
 import { idOSConsumer } from "@/consumer.config";
 import { idOSIssuer } from "@/issuer.config";
+import type { WalletType } from "@/wallet.provider";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
@@ -104,7 +105,7 @@ export async function createIDOSUserProfile({
   recipientEncryptionPublicKey: string;
   wallet: {
     address: string;
-    type: "EVM";
+    type: WalletType;
     message: string;
     signature: string;
     publicKey: string;
@@ -122,7 +123,7 @@ export async function createIDOSUserProfile({
       wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: "",
+      public_key: wallet.publicKey ?? "",
     },
   );
 
@@ -177,6 +178,14 @@ export async function createCredential(
   const issuer = await idOSIssuer();
   const kycData = await getKYCData(userId);
   const vcContent = generateCredential(kycData);
+
+  console.log("Owner wallet identifier", ownerWalletIdentifier);
+  console.log("Consumer wallet identifier", consumerWalletIdentifier);
+  console.log("Issuer public key", issuerPublicKey);
+  console.log("Id", id);
+  console.log("Access grant timelock", accessGrantTimelock);
+  console.log("Not usable before", notUsableBefore);
+  console.log("Not usable after", notUsableAfter);
 
   await issuer.createCredentialByDelegatedWriteGrant(
     {
@@ -295,7 +304,7 @@ export const invokePassportingService = async (
 
 export const generateKrakenUrlToken = async (isE2E: boolean) => {
   invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
-  const level = isE2E ? "basic" : "basic+liveness";
+  const level = isE2E ? "basic" : "basic";
 
   const payload = {
     clientId: process.env.KRAKEN_CLIENT_ID,

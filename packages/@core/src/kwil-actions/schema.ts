@@ -29,6 +29,7 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
     },
   ],
   get_user: [],
+  for_test: [],
   get_user_as_inserter: [
     {
       name: "id",

@@ -102,6 +102,12 @@ export async function createClientKwilSigner(
     return [new KwilSigner(wallet, currentAddress), currentAddress];
   }
 
+  // Check for KwilSigner
+  if ("getAddress" in wallet && "signatureType" in wallet && "signer" in wallet) {
+    // @ts-expect-error A hack to make kwil-infra to work
+    return [wallet as KwilSigner, wallet.getAddress()];
+  }
+
   if (looksLikeNearWallet(wallet)) {
     const accountId = (await wallet.getAccounts())[0].accountId;
 
