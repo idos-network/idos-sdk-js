@@ -3,7 +3,7 @@
 import { createIsleController } from "@idos-network/controllers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
-import { wagmiAdapter } from "./app/providers";
+import { useWalletController } from "./wallet.provider";
 
 type IsleController = ReturnType<typeof createIsleController>;
 
@@ -28,11 +28,12 @@ interface IsleProviderProps {
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
   const [isleController, setIsle] = useState<IsleController | null>(null);
+  const { account } = useWalletController();
 
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
   useEffect(() => {
-    if (!containerId || isleController) return;
+    if (!containerId || isleController || !account) return;
 
     invariant(
       process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
@@ -45,9 +46,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     const controller = createIsleController({
       container: containerId,
-      wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
       targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
       theme: "light",
+      account,
       issuerConfig: {
         meta: {
           url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
@@ -60,7 +61,6 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         container: "#idOS-enclave",
         url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
       },
-
       credentialRequirements: {
         acceptedIssuers: [
           {
@@ -119,7 +119,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       controller.destroy();
       setIsle(null);
     };
-  }, [containerId]);
+  }, [containerId, account]);
 
   return (
     <div>

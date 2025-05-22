@@ -6,30 +6,14 @@ import {
   type IsleStatus,
   type IsleTheme,
   base64Decode,
-  base64Encode,
-  buildInsertableIDOSCredential,
   type idOSClient,
   idOSClientConfiguration,
   type idOSCredential,
+  isKwilSignerClientType,
   utf8Decode,
-  utf8Encode,
 } from "@idos-network/core";
-import type { DelegatedWriteGrant } from "@idos-network/core";
+import type { DelegatedWriteGrant, KwilSignerClientTypes } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
-import {
-  http,
-  type Config,
-  createConfig,
-  createStorage,
-  getAccount,
-  getWalletClient,
-  injected,
-  reconnect,
-  signMessage,
-  watchAccount,
-} from "@wagmi/core";
-import { mainnet, sepolia } from "@wagmi/core/chains";
-import { BrowserProvider } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
 
@@ -45,6 +29,13 @@ type Meta = {
   name: string;
   logo: string;
 };
+
+export interface Account {
+  address: string;
+  publicKey?: string;
+  status: "disconnected" | "connecting" | "connected" | "reconnecting";
+  signer: KwilSignerClientTypes;
+}
 
 /**
  * Configuration options for creating an idOS Isle instance
@@ -63,8 +54,7 @@ interface idOSIsleControllerOptions {
   /** enclave options */
   enclaveOptions: EnclaveOptions;
 
-  /** wagmi config */
-  wagmiConfig: Config;
+  account: Account;
 
   /**
    * The issuer configuration.
@@ -177,12 +167,14 @@ interface idOSIsleController {
  */
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
   const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
+  const account = options.account;
+
   let idosClient: idOSClient = new idOSClientConfiguration({
     nodeUrl,
     enclaveOptions: options.enclaveOptions,
   });
+
   // Internal state
-  const wagmiConfig = options.wagmiConfig;
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
     targetOrigin: options.targetOrigin,
@@ -194,29 +186,27 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let ownerOriginalCredentials: idOSCredential[] = [];
 
   const setupSigner = async (): Promise<void> => {
-    const walletClient = await getWalletClient(options.wagmiConfig);
-    invariant(walletClient, "No `walletClient` found");
+    try {
+      if (idosClient.state === "configuration") {
+        idosClient = await idosClient.createClient();
+      }
 
-    const provider = new BrowserProvider(walletClient.transport);
-    const signer = await provider.getSigner();
-
-    if (idosClient.state === "configuration") {
-      idosClient = await idosClient.createClient();
-    }
-
-    switch (idosClient.state) {
-      case "idle":
-        idosClient = await idosClient.withUserSigner(signer);
-        break;
-      case "with-user-signer":
-      case "logged-in":
-        if (signer.address !== idosClient.walletIdentifier) {
-          idosClient = await idosClient.logOut();
-          idosClient = await idosClient.withUserSigner(signer);
-        }
-        break;
-      default:
-        assertNever(idosClient);
+      switch (idosClient.state) {
+        case "idle":
+          idosClient = await idosClient.withUserSigner(account.signer);
+          break;
+        case "with-user-signer":
+        case "logged-in":
+          if (account.address !== idosClient.walletIdentifier) {
+            idosClient = await idosClient.logOut();
+            idosClient = await idosClient.withUserSigner(account.signer);
+          }
+          break;
+        default:
+          assertNever(idosClient);
+      }
+    } catch (error) {
+      console.error("Failed to setup signer:", error);
     }
   };
 
@@ -274,9 +264,17 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const currentDate = new Date(currentTimestamp);
       const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 
+      let ownerWalletIdentifier = idosClient.walletIdentifier;
+
+      // TODO: For EVM is different
+      if (ownerWalletIdentifier.startsWith("G")) {
+        // @ts-expect-error A hack to make kwil-infra to work
+        ownerWalletIdentifier = Buffer.from(idosClient.signer.identifier).toString("hex");
+      }
+
       const delegatedWriteGrant = {
         id: crypto.randomUUID(),
-        owner_wallet_identifier: idosClient.walletIdentifier,
+        owner_wallet_identifier: ownerWalletIdentifier,
         grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
         issuer_public_key: options.consumer.consumerAuthPublicKey,
         access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -290,7 +288,18 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         status: "pending",
       });
 
-      const [error, signature] = await goTry(() => signMessage(wagmiConfig, { message }));
+      const [error, signature] = await goTry(async () => {
+        if (isKwilSignerClientType(account.signer)) {
+          // @ts-expect-error A hack to make kwil-infra to work
+          return account.signer.signer(message as unknown as Uint8Array);
+        }
+        if (account.signer && "signMessage" in account.signer) {
+          // biome-ignore lint/suspicious/noExplicitAny: I don't know how to type this
+          return account.signer.signMessage?.(message as any);
+        }
+
+        throw new Error("Invalid signer");
+      });
 
       if (error) {
         send("update-create-dwg-status", {
@@ -557,7 +566,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     // Handle initialization completion
     channel.on("initialized", async () => {
-      const account = await getAccount(wagmiConfig);
       await handleAccountChange(account);
 
       if (idosClient.state === "configuration" || idosClient.state === "idle") {
@@ -639,25 +647,12 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     channel.on("link-wallet", async () => {
       const dashboardUrl =
         process.env.NEXT_PUBLIC_IDOS_DASHBOARD_URL ?? "https://dashboard.playground.idos.network/";
-      const account = getAccount(wagmiConfig);
+      // const account = getAccount(wagmiConfig);
       const url = `${dashboardUrl}wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
       window.location.href = url;
     });
 
     channel.start();
-  };
-
-  /**
-   * Sets up a subscription to wallet account changes
-   */
-  const watchAccountChanges = async (): Promise<void> => {
-    watchAccount(wagmiConfig, {
-      onChange: async (account) => {
-        if (channel) {
-          await handleAccountChange(account);
-        }
-      },
-    });
   };
 
   const logClientIn = async (): Promise<void> => {

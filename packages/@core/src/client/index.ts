@@ -33,9 +33,14 @@ import {
   revokeAccessGrant,
   shareCredential,
 } from "../kwil-actions";
-import { type KwilActionClient, createClientKwilSigner, createWebKwilClient } from "../kwil-infra";
+import {
+  type KwilActionClient,
+  type KwilSignerClientTypes,
+  createClientKwilSigner,
+  createWebKwilClient,
+} from "../kwil-infra";
 import { Store } from "../store";
-import type { DelegatedWriteGrant, Wallet, idOSUser, idOSUserAttribute } from "../types";
+import type { DelegatedWriteGrant, idOSUser, idOSUserAttribute } from "../types";
 import { buildInsertableIDOSCredential } from "../utils";
 
 type Properties<T> = {
@@ -101,7 +106,7 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, address);
   }
 
-  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
+  async withUserSigner(signer: KwilSignerClientTypes): Promise<idOSClientWithUserSigner> {
     const [kwilSigner, walletIdentifier] = await createClientKwilSigner(
       this.store,
       this.kwilClient,
@@ -122,13 +127,13 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: EnclaveProvider;
-  readonly signer: Wallet;
+  readonly signer: KwilSignerClientTypes;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
-    signer: Wallet,
+    signer: KwilSignerClientTypes,
     kwilSigner: KwilSigner,
     walletIdentifier: string,
   ) {
@@ -172,7 +177,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
   readonly enclaveProvider: EnclaveProvider;
-  readonly signer: Wallet;
+  readonly signer: KwilSignerClientTypes;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly user: idOSUser;

@@ -6,6 +6,7 @@ import nacl from "tweetnacl";
 
 import { idOSConsumer } from "@/consumer.config";
 import { idOSIssuer } from "@/issuer.config";
+import type { WalletType } from "@/wallet.provider";
 
 // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const vcTemplate = (kycData: Record<string, any>) => {
@@ -104,7 +105,7 @@ export async function createIDOSUserProfile({
   recipientEncryptionPublicKey: string;
   wallet: {
     address: string;
-    type: "EVM";
+    type: WalletType;
     message: string;
     signature: string;
     publicKey: string;
@@ -122,7 +123,7 @@ export async function createIDOSUserProfile({
       wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: "",
+      public_key: wallet.publicKey ?? "",
     },
   );
 

@@ -6,6 +6,7 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { type JSX, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
+import { WalletProvider } from "@/wallet.provider";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "@reown/appkit/networks";
 import { sepolia } from "@reown/appkit/networks";
@@ -63,7 +64,7 @@ export function Providers(props: {
     <HeroUIProvider>
       <AppKitProvider>
         <QueryClientProvider client={queryClient}>
-          {props.children}
+          <WalletProvider>{props.children}</WalletProvider>
           <ReactQueryDevtools initialIsOpen={false} />
         </QueryClientProvider>
       </AppKitProvider>

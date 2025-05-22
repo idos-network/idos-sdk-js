@@ -3,7 +3,6 @@
 import { Button, cn, useDisclosure } from "@heroui/react";
 import type { IsleStatus, idOSCredential } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useClickAway } from "@uidotdev/usehooks";
 import { AnimatePresence, motion } from "framer-motion";
@@ -22,8 +21,9 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
-import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
+import { type WalletType, useWalletController } from "@/wallet.provider";
+import { useRouter } from "next/navigation";
 import { KYCJourney } from "./kyc-journey";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
@@ -296,6 +296,12 @@ const useIssueCredential = () => {
 
       const { signature, writeGrant } = dwgData;
 
+      // Check if signature is hex, if not convert it to hex
+      let signatureHex = signature;
+      if (!/^(0x)?[0-9a-fA-F]+$/.test(signature)) {
+        signatureHex = uint8ArrayToHex(new TextEncoder().encode(signature));
+      }
+
       await createCredential(
         idvUserId,
         recipient_encryption_public_key,
@@ -306,7 +312,7 @@ const useIssueCredential = () => {
         writeGrant.access_grant_timelock,
         writeGrant.not_usable_before,
         writeGrant.not_usable_after,
-        signature,
+        signatureHex,
       );
     },
   });
@@ -413,10 +419,18 @@ function SecureEnclaveRoot() {
 
 const $step = atom<IsleStatus | undefined>(undefined);
 
+function uint8ArrayToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export function Onboarding() {
   const { isleController } = useIsleController();
-  const { signMessageAsync } = useSignMessage();
-  const { address } = useAppKitAccount();
+  const { isConnected, address, signMessage, initialized, walletType, account } =
+    useWalletController();
+  const router = useRouter();
+
   const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
@@ -427,6 +441,12 @@ export function Onboarding() {
   const kycDisclosure = useDisclosure();
 
   const hasIssuedCredential = useRef(false);
+
+  useEffect(() => {
+    if (initialized && !isConnected) {
+      router.push("/");
+    }
+  }, [isConnected, router, initialized]);
 
   const containerRef = useClickAway(() => {
     if (!isleController) return;
@@ -451,7 +471,7 @@ export function Onboarding() {
         await isleController.idosClient.getUserEncryptionPublicKey(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-      const signature = await signMessageAsync({ message });
+      const signature = await signMessage(message);
 
       isleController?.send("update-create-profile-status", {
         status: "pending",
@@ -462,10 +482,10 @@ export function Onboarding() {
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
           address: address as string,
-          type: "EVM",
+          type: walletType as WalletType,
           message,
           signature,
-          publicKey: signature,
+          publicKey: account?.publicKey ?? signature,
         },
       });
 
@@ -494,7 +514,7 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, signMessage, address, queryClient, walletType, account?.publicKey]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {

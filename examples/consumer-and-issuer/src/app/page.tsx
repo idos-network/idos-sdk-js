@@ -10,9 +10,11 @@ import {
   SparklesIcon,
   ZapIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 import { GetStartedButton } from "@/components/get-started-button";
+import { useWalletController } from "@/wallet.provider";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -21,12 +23,21 @@ const fadeInUp = {
 };
 
 export default function HomePage() {
+  const { isConnected } = useWalletController();
+  const router = useRouter();
+
   const [timeLeft, setTimeLeft] = useState({
     days: 7,
     hours: 12,
     minutes: 45,
     seconds: 0,
   });
+
+  useEffect(() => {
+    if (isConnected) {
+      router.push("/onboarding");
+    }
+  }, [isConnected, router]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -74,7 +85,9 @@ export default function HomePage() {
               $1,000,000
             </span>
           </p>
-          <GetStartedButton title="Get started now" />
+          <div className="flex flex-row justify-center gap-4">
+            <GetStartedButton title="Get started now" />
+          </div>
         </motion.div>
       </section>
 
@@ -285,7 +298,9 @@ export default function HomePage() {
               </span>{" "}
               credit card.
             </p>
-            <GetStartedButton title="Apply now" />
+            <div className="flex flex-row justify-center gap-4">
+              <GetStartedButton title="Apply now " />
+            </div>
           </motion.div>
         </div>
       </section>

@@ -79,10 +79,16 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
   })(signer);
 }
 
+export type KwilSignerClientTypes = Wallet | JsonRpcSigner | KwilSigner;
+
+export function isKwilSignerClientType(signer: unknown): signer is KwilSigner {
+  return signer !== null && typeof signer === "object" && "signer" in signer;
+}
+
 export async function createClientKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
-  wallet: Wallet,
+  wallet: KwilSignerClientTypes,
 ): Promise<[KwilSigner, SignerAddress]> {
   if ("connect" in wallet && "address" in wallet) {
     //biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
@@ -94,12 +100,21 @@ export async function createClientKwilSigner(
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await kwilClient.client.auth.logoutKGW();
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.error("Failed to logout KGW", error);
+      }
 
       store.set("signer-address", currentAddress);
     }
 
     return [new KwilSigner(wallet, currentAddress), currentAddress];
+  }
+
+  // Check for KwilSigner
+  if ("publicAddress" in wallet && "signatureType" in wallet && "signer" in wallet) {
+    return [wallet as unknown as KwilSigner, wallet.publicAddress as string];
   }
 
   if (looksLikeNearWallet(wallet)) {
@@ -112,5 +127,5 @@ export async function createClientKwilSigner(
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid `signer` type");
-  })(wallet);
+  })(wallet as never);
 }
