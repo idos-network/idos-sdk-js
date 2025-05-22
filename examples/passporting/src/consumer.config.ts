@@ -14,9 +14,9 @@ export async function idOSConsumer() {
   const ENCRYPTION_SECRET_KEY = process.env.CONSUMER_ENCRYPTION_SECRET_KEY;
   const SIGNING_SECRET_KEY = process.env.CONSUMER_SIGNING_SECRET_KEY;
 
-  invariant(NODE_URL, "NEXT_PUBLIC_KWIL_NODE_URL is not set");
-  invariant(ENCRYPTION_SECRET_KEY, "CONSUMER_ENCRYPTION_SECRET_KEY is not set");
-  invariant(SIGNING_SECRET_KEY, "CONSUMER_SIGNING_SECRET_KEY is not set");
+  invariant(NODE_URL, "`NEXT_PUBLIC_KWIL_NODE_URL` is not set");
+  invariant(ENCRYPTION_SECRET_KEY, "`CONSUMER_ENCRYPTION_SECRET_KEY` is not set");
+  invariant(SIGNING_SECRET_KEY, "`CONSUMER_SIGNING_SECRET_KEY` is not set");
 
   cachedConsumer = await idOSConsumerClass.init({
     nodeUrl: NODE_URL,
