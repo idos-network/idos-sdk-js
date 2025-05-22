@@ -8,12 +8,11 @@ import invariant from "tiny-invariant";
 import { useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
-import { useIdosClient } from "@/idOS.provider";
-
+import { useIDOSClient } from "@/idOS.provider";
 import { CredentialCard } from "./credential-card";
 
 const useFetchMatchingCredential = () => {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useQuery({
     queryKey: ["matching-credential"],
@@ -33,7 +32,7 @@ const useFetchMatchingCredential = () => {
 };
 
 export const useFetchSharedCredentialFromUser = () => {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useQuery<{ credential: idOSCredential | null; cause: string }>({
     queryKey: ["shared-credential"],
@@ -51,7 +50,7 @@ function useShareCredential() {
   const { address } = useAppKitAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useMutation({
     mutationFn: async (credentialId: string) => {
@@ -66,11 +65,11 @@ function useShareCredential() {
 
       invariant(
         consumerSigningPublicKey,
-        "NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY is not set",
+        "`NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` is not set",
       );
       invariant(
         consumerEncryptionPublicKey,
-        "NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+        "`NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
       );
 
       const { id } = await idOSClient.createCredentialCopy(
@@ -103,19 +102,22 @@ function useShareCredential() {
 }
 
 export function MatchingCredential() {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
   const matchingCredential = useFetchMatchingCredential();
   const sharedCredentialFromUser = useFetchSharedCredentialFromUser();
   const shareCredential = useShareCredential();
 
   const handleCredentialDuplicateProcess = () => {
-    if (!matchingCredential.data) return;
+    if (!matchingCredential.data) {
+      return;
+    }
 
     shareCredential.mutate(matchingCredential.data.id);
   };
 
   if (idOSClient.state === "with-user-signer") {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
+
     invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
 
     return (
@@ -131,7 +133,7 @@ export function MatchingCredential() {
 
   if (!matchingCredential.data) {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+    invariant(issuerUrl, "`NEXT_PUBLIC_ISSUER_URL` is not set");
 
     return (
       <div className="flex flex-col items-center gap-4">
@@ -153,7 +155,7 @@ export function MatchingCredential() {
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
       </div>
     );
   }

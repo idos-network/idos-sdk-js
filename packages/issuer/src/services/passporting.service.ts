@@ -1,4 +1,4 @@
-import type { KwilActionClient } from "@idos-network/core";
+import type { KwilActionClient, PassportingPeer } from "@idos-network/core";
 import { getPassportingPeers } from "@idos-network/core/kwil-actions";
 
 export class PassportingService {
@@ -7,7 +7,7 @@ export class PassportingService {
   /**
    * Return a list of public keys of the known passporting peers for the given `Signer`.
    */
-  async getPassportingPeers(params: string[]): Promise<string[]> {
-    return getPassportingPeers(this.kwilClient, params);
+  async getPassportingPeers(): Promise<PassportingPeer[]> {
+    return getPassportingPeers(this.kwilClient);
   }
 }

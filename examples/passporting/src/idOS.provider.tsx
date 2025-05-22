@@ -22,7 +22,7 @@ const startingConfig = new idOSClientConfiguration({
 });
 
 export const idOSClientContext = createContext<idOSClient>(startingConfig);
-export const useIdosClient = () => useContext(idOSClientContext);
+export const useIDOSClient = () => useContext(idOSClientContext);
 
 export function IdosClientProvider({ children }: PropsWithChildren) {
   const [idOSClient, setIdosClient] = useState<idOSClient>(startingConfig);

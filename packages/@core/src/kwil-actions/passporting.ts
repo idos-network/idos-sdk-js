@@ -6,14 +6,9 @@ import type { PassportingPeer } from "../types";
 // @ts-ignore
 export async function getPassportingPeers(
   kwilClient: KwilActionClient,
-  params: string[],
 ): Promise<PassportingPeer[]> {
-  return Promise.resolve(
-    Array.from({ length: 10 }).map(() => ({
-      id: crypto.randomUUID(),
-      name: "Passporting Peer",
-      issuer_public_key: hexEncode(nacl.sign.keyPair().publicKey),
-      passporting_server_url_base: "https://passporting-server.com",
-    })),
-  );
+  return kwilClient.call<PassportingPeer[]>({
+    name: "passporting_peers",
+    inputs: {},
+  });
 }
