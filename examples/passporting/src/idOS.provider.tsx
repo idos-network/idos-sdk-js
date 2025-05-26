@@ -52,7 +52,7 @@ export function IdosClientProvider({ children }: PropsWithChildren) {
     initialize();
   }, [initialize]);
 
-  if (idOSClient.state === "configuration" || idOSClient.state === "idle") {
+  if (idOSClient.state !== "logged-in") {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
         <CircularProgress aria-label="initializing idOS..." />

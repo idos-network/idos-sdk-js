@@ -24,32 +24,12 @@ app.post(
       dag_signature: z.string(),
       dag_locked_until: z.number(),
       dag_content_hash: z.string(),
+      signature: z.string(),
       message: z.string(),
     }),
   ),
   async (c) => {
-    const {
-      KWIL_NODE_URL,
-      ISSUER_SIGNING_SECRET_KEY,
-      ISSUER_ENCRYPTION_SECRET_KEY,
-      CLIENT_SECRETS,
-    } = env(c);
-
-    const bearer = c.req.header("Authorization")?.split(" ")[1];
-
-    // @todo: additional logic to validate that the token is valid.
-    // This is just a very basic validation of the token that assumes that we have a list of valid tokens.
-    if (!bearer || !CLIENT_SECRETS.split(",").includes(bearer)) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: "Unauthorized request",
-          },
-        },
-        401,
-      );
-    }
+    const { KWIL_NODE_URL, ISSUER_SIGNING_SECRET_KEY, ISSUER_ENCRYPTION_SECRET_KEY } = env(c);
 
     const issuer = await idOSIssuer.init({
       nodeUrl: KWIL_NODE_URL,
@@ -57,54 +37,54 @@ app.post(
       encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
 
-    // const [_, signerPublicKey] = c.req.header("Authorization")?.split(" ") ?? [];
-    // const { message } = c.req.valid("json");
+    const [_, signerPublicKey] = c.req.header("Authorization")?.split(" ") ?? [];
+    const { message, signature } = c.req.valid("json");
 
-    // // First check if we have the required authorization header
-    // if (!signerPublicKey || !signature) {
-    //   return c.json(
-    //     {
-    //       success: false,
-    //       error: {
-    //         message: "Missing authorization header",
-    //       },
-    //     },
-    //     401,
-    //   );
-    // }
+    // First check if we have the required authorization header
+    if (!signerPublicKey || !signature) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Missing authorization header or signature",
+          },
+        },
+        401,
+      );
+    }
 
-    // // Then check if the public key is authorized
-    // const peers = await issuer.getPassportingPeers();
-    // if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
-    //   return c.json(
-    //     {
-    //       success: false,
-    //       error: {
-    //         message: "Unauthorized",
-    //       },
-    //     },
-    //     401,
-    //   );
-    // }
+    // Then check if the public key is authorized
+    const peers = await issuer.getPassportingPeers();
+    if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Unauthorized",
+          },
+        },
+        401,
+      );
+    }
 
-    // // Finally verify the ed25519 signature
-    // const signatureBytes = base64Decode(signature);
-    // const publicKeyBytes = base64Decode(signerPublicKey);
-    // const messageBytes = utf8Encode(message);
+    // Finally verify the signature
+    const isValid = nacl.sign.detached.verify(
+      base64Decode(message),
+      base64Decode(signature),
+      base64Decode(signerPublicKey),
+    );
 
-    // const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
-
-    // if (!isValid) {
-    //   return c.json(
-    //     {
-    //       success: false,
-    //       error: {
-    //         message: "Invalid signature",
-    //       },
-    //     },
-    //     401,
-    //   );
-    // }
+    if (!isValid) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Invalid signature",
+          },
+        },
+        401,
+      );
+    }
 
     // Validate the incoming `DAG` payload.
     const {

@@ -1,8 +1,9 @@
 "use server";
 
-import invariant from "tiny-invariant";
-
 import { idOSConsumer } from "@/consumer.config";
+import { base64Decode, base64Encode } from "@idos-network/core";
+import invariant from "tiny-invariant";
+import nacl from "tweetnacl";
 
 export async function invokePassportingService(
   url: string,
@@ -16,15 +17,28 @@ export async function invokePassportingService(
   },
 ) {
   const serviceApiKey = process.env.PASSPORTING_SERVICE_API_KEY;
+  const consumerSigningSecretKey = process.env.CONSUMER_SIGNING_SECRET_KEY;
 
   invariant(serviceApiKey, "`PASSPORTING_SERVICE_API_KEY` is not set");
+  invariant(consumerSigningSecretKey, "`CONSUMER_SIGNING_SECRET_KEY` is not set");
+
+  // sign a message using the consumer's signing key
+  const message = JSON.stringify(payload);
+  const signature = nacl.sign.detached(
+    new TextEncoder().encode(message),
+    base64Decode(consumerSigningSecretKey),
+  );
+
+  const consumerSigningPublicKey = base64Encode(
+    nacl.box.keyPair.fromSecretKey(base64Decode(consumerSigningSecretKey)).publicKey,
+  );
 
   // Call the passporting service to transmit the DAG
   const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: JSON.stringify({ ...payload, signature, message }),
     headers: {
-      Authorization: `Bearer ${serviceApiKey}`,
+      Authorization: `Bearer ${serviceApiKey} ${consumerSigningPublicKey}`,
       "Content-Type": "application/json",
     },
   });
@@ -36,6 +50,7 @@ export async function invokePassportingService(
   }
 
   const consumer = await idOSConsumer();
+
   const credential = await consumer.getReusableCredentialCompliantly(payload.dag_data_id);
   // @todo: handle errors when the prior method fails.
 

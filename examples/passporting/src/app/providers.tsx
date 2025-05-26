@@ -76,9 +76,9 @@ export function Providers(props: {
   return (
     <HeroUIProvider>
       <AppKitProvider initialState={props.initialState}>
-        <Auth>
-          <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
-        </Auth>
+        <QueryClientProvider client={queryClient}>
+          <Auth>{props.children}</Auth>
+        </QueryClientProvider>
       </AppKitProvider>
     </HeroUIProvider>
   );
