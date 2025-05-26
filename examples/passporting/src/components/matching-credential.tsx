@@ -19,9 +19,9 @@ const useFetchMatchingCredential = () => {
     queryFn: async () => {
       invariant(idOSClient.state === "logged-in");
 
-      const peers = (await fetch("/api/passporting-peers").then((res) => res.json())) as {
-        peers: PassportingPeer[];
-      };
+      const peers = (await fetch("/api/passporting-peers").then((res) =>
+        res.json(),
+      )) as PassportingPeer[];
 
       const credentials = await idOSClient.getAllCredentials();
 
@@ -34,7 +34,7 @@ const useFetchMatchingCredential = () => {
         return null;
       }
 
-      const matchingPeer = peers.peers.find(
+      const matchingPeer = peers.find(
         (peer) => peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
       );
 
