@@ -6,6 +6,7 @@ import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
 import { z } from "zod";
+import { decode as hexDecode } from "@stablelib/hex";
 
 const app = new Hono();
 
@@ -55,7 +56,8 @@ app.post(
 
     // Then check if the public key is authorized
     const peers = await issuer.getPassportingPeers();
-    if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
+    console.log(signerPublicKey);
+    if (!peers.some((peer) => peer.issuer_public_key === signerPublicKey)) {
       return c.json(
         {
           success: false,
@@ -71,7 +73,7 @@ app.post(
     const isValid = nacl.sign.detached.verify(
       base64Decode(message),
       base64Decode(signature),
-      base64Decode(signerPublicKey),
+      hexDecode(signerPublicKey),
     );
 
     if (!isValid) {

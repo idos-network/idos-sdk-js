@@ -1,7 +1,7 @@
 "use server";
 
 import { idOSConsumer } from "@/consumer.config";
-import { base64Decode, base64Encode } from "@idos-network/core";
+import { base64Encode, hexDecode, hexEncode } from "@idos-network/core";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 
@@ -24,21 +24,23 @@ export async function invokePassportingService(
 
   // sign a message using the consumer's signing key
   const message = JSON.stringify(payload);
-  const signature = nacl.sign.detached(
-    new TextEncoder().encode(message),
-    base64Decode(consumerSigningSecretKey),
-  );
+  const messageBytes = new TextEncoder().encode(message);
+  const signature = nacl.sign.detached(messageBytes, hexDecode(consumerSigningSecretKey));
 
-  const consumerSigningPublicKey = base64Encode(
-    nacl.box.keyPair.fromSecretKey(base64Decode(consumerSigningSecretKey)).publicKey,
+  const consumerSigningPublicKey = hexEncode(
+    nacl.sign.keyPair.fromSecretKey(hexDecode(consumerSigningSecretKey)).publicKey,
   );
 
   // Call the passporting service to transmit the DAG
   const response = await fetch(url, {
     method: "POST",
-    body: JSON.stringify({ ...payload, signature, message }),
+    body: JSON.stringify({
+      ...payload,
+      signature: base64Encode(signature),
+      message: base64Encode(messageBytes),
+    }),
     headers: {
-      Authorization: `Bearer ${serviceApiKey} ${consumerSigningPublicKey}`,
+      Authorization: `Bearer ${consumerSigningPublicKey}`,
       "Content-Type": "application/json",
     },
   });
@@ -46,6 +48,7 @@ export async function invokePassportingService(
   const result = await response.json();
 
   if (result.error) {
+    console.dir(result.error, { depth: null });
     throw new Error(result.error);
   }
 
