@@ -1,12 +1,12 @@
 import { zValidator } from "@hono/zod-validator";
 import { idOSIssuer } from "@idos-network/issuer";
 import { decode as base64Decode } from "@stablelib/base64";
+import { decode as hexDecode } from "@stablelib/hex";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
 import { z } from "zod";
-import { decode as hexDecode } from "@stablelib/hex";
 
 const app = new Hono();
 
