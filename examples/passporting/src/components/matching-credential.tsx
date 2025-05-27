@@ -110,10 +110,13 @@ function useShareCredential() {
       const message: string = await idOSClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
-      return invokePassportingService(credential.passporting_server_url_base, {
-        ...dag,
-        dag_signature: signature,
-      });
+      return invokePassportingService(
+        `${credential.passporting_server_url_base}/passporting-registry`,
+        {
+          ...dag,
+          dag_signature: signature,
+        },
+      );
     },
     onSettled: () => {
       queryClient.refetchQueries({ queryKey: ["shared-credential"] });
