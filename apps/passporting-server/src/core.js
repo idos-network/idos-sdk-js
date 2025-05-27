@@ -56,7 +56,6 @@ app.post(
 
     // Then check if the public key is authorized
     const peers = await issuer.getPassportingPeers();
-    console.log(signerPublicKey);
     if (!peers.some((peer) => peer.issuer_public_key === signerPublicKey)) {
       return c.json(
         {
