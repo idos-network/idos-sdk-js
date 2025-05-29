@@ -53,8 +53,8 @@ app.post(
 
     const issuer = await idOSIssuer.init({
       nodeUrl: KWIL_NODE_URL,
-      signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
-      encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
+      signingKeyPair: nacl.sign.keyPair.fromSecretKey(base64Decode(ISSUER_SIGNING_SECRET_KEY)),
+      encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
 
     // Validate the incoming `DAG` payload.
