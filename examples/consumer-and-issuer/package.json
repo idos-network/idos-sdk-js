@@ -2,6 +2,7 @@
   "name": "consumer-and-issuer-demo",
   "version": "0.0.1",
   "dependencies": {
+    "@gemwallet/api": "^3.8.0",
     "@heroui/react": "2.6.14",
     "@idos-network/consumer": "workspace:*",
     "@idos-network/controllers": "workspace:*",
@@ -27,7 +28,9 @@
     "tiny-invariant": "^1.3.3",
     "tweetnacl": "^1.0.3",
     "viem": "latest",
-    "wagmi": "latest"
+    "wagmi": "latest",
+    "xrpl": "^4.2.5",
+    "xumm": "^1.8.0"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.69.0",
