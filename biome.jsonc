@@ -1,7 +1,8 @@
 {
   "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
   "organizeImports": {
-    "enabled": true
+    "enabled": true,
+    "ignore": ["dist/**/*", "node_modules/**/*", "./**/*.gen.ts", "./**/*/ui/*.tsx", "./**/*/*.js"]
   },
   "vcs": {
     "enabled": true,
@@ -14,6 +15,9 @@
       "recommended": true,
       "nursery": {
         "useSortedClasses": "error"
+      },
+      "correctness": {
+        "noUnusedImports": "error"
       }
     }
   },

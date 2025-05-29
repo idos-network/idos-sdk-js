@@ -14,3 +14,11 @@ Say Alice wants to encrypt a message for Bob. To do this, she needs 3 things: th
 3. Finally, we calculate a message authentication code (a [MAC](https://en.wikipedia.org/wiki/Message_authentication_code)) using the `poly1305` algorithm. This MAC is sent along with the encrypted message and can be used to verify that it wasn’t tampered with.
 
 To decrypt and authenticate the resulting ciphertext, Bob does a mirror version of this process to obtain the original **message**.
+
+## Ephemeral keys
+
+Note that from an access control perspective, in the context of Access Grants, data in idOS is not actually shared. That is, an encrypted credential in idOS is never accessible for two distinct partners (e.g. Issuer and Owner) — instead, an encrypted copy of the "shared" data is created for each Access Grant.
+
+The encryption scheme described above makes it possible for the sender — not just the receiver — of an encrypted message to also decrypt it. While informationally speaking this doesn't affect security (since the sender had, by definition, access to the encrypted message), we chose to be stricter here: our SDKs always encrypt data using an ephemeral private key.
+
+This ensures that, if an Issuer leaks its private encryption key, the credentials they encrypted for users can't be decrypted with that key even if accessed.
