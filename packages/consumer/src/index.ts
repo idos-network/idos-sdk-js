@@ -11,20 +11,18 @@ import {
 } from "@idos-network/core/kwil-actions";
 import {
   type KwilActionClient,
+  type KwilSignerType,
   createNodeKwilClient,
   createServerKwilSigner,
 } from "@idos-network/core/kwil-infra";
 import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
-import type { ethers } from "ethers";
-import type { KeyPair } from "near-api-js";
 import invariant from "tiny-invariant";
-import type { SignKeyPair } from "tweetnacl";
 
 export type idOSConsumerConfig = {
   recipientEncryptionPrivateKey: string;
   nodeUrl?: string;
   chainId?: string;
-  consumerSigner: KeyPair | SignKeyPair | ethers.Wallet;
+  consumerSigner: KwilSignerType;
 };
 
 export class idOSConsumer {
