@@ -73,13 +73,17 @@ export const signGemWalletTx = (
 export const getGemWalletPublicKey = async (
   wallet: typeof GemWallet,
 ): Promise<string | undefined> => {
-  return wallet.getPublicKey().then((response) => response.result?.publicKey as string);
+  if ("isInstalled" in wallet) {
+    await wallet.isInstalled();
+    return wallet.getPublicKey().then((response) => response.result?.publicKey as string);
+  }
 };
 
 export const getXrpAddress = async (
   wallet: Xumm | typeof GemWallet,
 ): Promise<string | undefined> => {
   if ("isInstalled" in wallet) {
+    await wallet.isInstalled();
     return wallet.getAddress().then((response) => response.result?.address);
   }
   return wallet.user.account;
