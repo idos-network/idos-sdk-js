@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/core";
+import type { PassportingPeer, idOSCredential } from "@idos-network/core";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
@@ -18,14 +18,34 @@ const useFetchMatchingCredential = () => {
     queryKey: ["matching-credential"],
     queryFn: async () => {
       invariant(idOSClient.state === "logged-in");
-      return idOSClient.getAllCredentials();
-    },
-    select: (credentials) => {
-      const credential = credentials.find((credential) => {
+
+      const peers = (await fetch("/api/passporting-peers").then((res) => res.json())) as {
+        peers: PassportingPeer[];
+      };
+
+      const credentials = await idOSClient.getAllCredentials();
+
+      const matchingCredential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "KYC DATA";
       });
-      return credential;
+
+      if (!matchingCredential) {
+        return null;
+      }
+
+      const matchingPeer = peers.peers.find(
+        (peer) => peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
+      );
+
+      if (!matchingPeer) {
+        return null;
+      }
+
+      return {
+        ...matchingCredential,
+        passporting_server_url_base: matchingPeer.passporting_server_url_base,
+      };
     },
     enabled: idOSClient.state === "logged-in",
   });
@@ -53,10 +73,10 @@ function useShareCredential() {
   const idOSClient = useIDOSClient();
 
   return useMutation({
-    mutationFn: async (credentialId: string) => {
+    mutationFn: async (credential: idOSCredential & { passporting_server_url_base: string }) => {
       invariant(idOSClient.state === "logged-in");
 
-      const contentHash = await idOSClient.getCredentialContentSha256Hash(credentialId);
+      const contentHash = await idOSClient.getCredentialContentSha256Hash(credential.id);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -73,7 +93,7 @@ function useShareCredential() {
       );
 
       const { id } = await idOSClient.createCredentialCopy(
-        credentialId,
+        credential.id,
         consumerEncryptionPublicKey,
         consumerSigningPublicKey,
         0,
@@ -90,7 +110,7 @@ function useShareCredential() {
       const message: string = await idOSClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
-      return invokePassportingService({
+      return invokePassportingService(credential.passporting_server_url_base, {
         ...dag,
         dag_signature: signature,
       });
@@ -112,7 +132,7 @@ export function MatchingCredential() {
       return;
     }
 
-    shareCredential.mutate(matchingCredential.data.id);
+    shareCredential.mutate(matchingCredential.data);
   };
 
   if (idOSClient.state === "with-user-signer") {

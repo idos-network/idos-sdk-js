@@ -4,22 +4,23 @@ import invariant from "tiny-invariant";
 
 import { idOSConsumer } from "@/consumer.config";
 
-export async function invokePassportingService(payload: {
-  dag_owner_wallet_identifier: string;
-  dag_grantee_wallet_identifier: string;
-  dag_data_id: string;
-  dag_locked_until: number;
-  dag_content_hash: string;
-  dag_signature: string;
-}) {
-  const serviceUrl = process.env.PASSPORTING_SERVICE_URL;
+export async function invokePassportingService(
+  url: string,
+  payload: {
+    dag_owner_wallet_identifier: string;
+    dag_grantee_wallet_identifier: string;
+    dag_data_id: string;
+    dag_locked_until: number;
+    dag_content_hash: string;
+    dag_signature: string;
+  },
+) {
   const serviceApiKey = process.env.PASSPORTING_SERVICE_API_KEY;
 
-  invariant(serviceUrl, "`PASSPORTING_SERVICE_URL` is not set");
   invariant(serviceApiKey, "`PASSPORTING_SERVICE_API_KEY` is not set");
 
   // Call the passporting service to transmit the DAG
-  const response = await fetch(serviceUrl, {
+  const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(payload),
     headers: {

@@ -5,7 +5,7 @@ export async function getPassportingPeers(
   kwilClient: KwilActionClient,
 ): Promise<PassportingPeer[]> {
   return kwilClient.call<PassportingPeer[]>({
-    name: "passporting_peers",
+    name: "get_passporting_peers",
     inputs: {},
   });
 }

@@ -1,7 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import { idOSIssuer } from "@idos-network/issuer";
-import { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
-import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
+import { decode as base64Decode } from "@stablelib/base64";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
@@ -29,7 +28,28 @@ app.post(
     }),
   ),
   async (c) => {
-    const { KWIL_NODE_URL, ISSUER_SIGNING_SECRET_KEY, ISSUER_ENCRYPTION_SECRET_KEY } = env(c);
+    const {
+      KWIL_NODE_URL,
+      ISSUER_SIGNING_SECRET_KEY,
+      ISSUER_ENCRYPTION_SECRET_KEY,
+      CLIENT_SECRETS,
+    } = env(c);
+
+    const bearer = c.req.header("Authorization")?.split(" ")[1];
+
+    // @todo: additional logic to validate that the token is valid.
+    // This is just a very basic validation of the token that assumes that we have a list of valid tokens.
+    if (!bearer || !CLIENT_SECRETS.split(",").includes(bearer)) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            message: "Unauthorized request",
+          },
+        },
+        401,
+      );
+    }
 
     const issuer = await idOSIssuer.init({
       nodeUrl: KWIL_NODE_URL,
@@ -37,54 +57,54 @@ app.post(
       encryptionSecretKey: base64Decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
 
-    const [_, signerPublicKey, signature] = c.req.header("Authorization")?.split(" ") ?? [];
-    const { message } = c.req.valid("json");
+    // const [_, signerPublicKey] = c.req.header("Authorization")?.split(" ") ?? [];
+    // const { message } = c.req.valid("json");
 
-    // First check if we have the required authorization header
-    if (!signerPublicKey || !signature) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: "Missing authorization header",
-          },
-        },
-        401,
-      );
-    }
+    // // First check if we have the required authorization header
+    // if (!signerPublicKey || !signature) {
+    //   return c.json(
+    //     {
+    //       success: false,
+    //       error: {
+    //         message: "Missing authorization header",
+    //       },
+    //     },
+    //     401,
+    //   );
+    // }
 
-    // Then check if the public key is authorized
-    const peers = await issuer.getPassportingPeers();
-    if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: "Unauthorized",
-          },
-        },
-        401,
-      );
-    }
+    // // Then check if the public key is authorized
+    // const peers = await issuer.getPassportingPeers();
+    // if (!peers.some((publicKey) => publicKey === signerPublicKey)) {
+    //   return c.json(
+    //     {
+    //       success: false,
+    //       error: {
+    //         message: "Unauthorized",
+    //       },
+    //     },
+    //     401,
+    //   );
+    // }
 
-    // Finally verify the ed25519 signature
-    const signatureBytes = base64Decode(signature);
-    const publicKeyBytes = base64Decode(signerPublicKey);
-    const messageBytes = utf8Encode(message);
+    // // Finally verify the ed25519 signature
+    // const signatureBytes = base64Decode(signature);
+    // const publicKeyBytes = base64Decode(signerPublicKey);
+    // const messageBytes = utf8Encode(message);
 
-    const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
+    // const isValid = nacl.sign.detached.verify(messageBytes, signatureBytes, publicKeyBytes);
 
-    if (!isValid) {
-      return c.json(
-        {
-          success: false,
-          error: {
-            message: "Invalid signature",
-          },
-        },
-        401,
-      );
-    }
+    // if (!isValid) {
+    //   return c.json(
+    //     {
+    //       success: false,
+    //       error: {
+    //         message: "Invalid signature",
+    //       },
+    //     },
+    //     401,
+    //   );
+    // }
 
     // Validate the incoming `DAG` payload.
     const {
