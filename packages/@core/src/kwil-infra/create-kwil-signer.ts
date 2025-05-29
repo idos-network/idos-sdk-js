@@ -1,6 +1,7 @@
 import { KwilSigner } from "@kwilteam/kwil-js";
+import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
-import type { KeyPair } from "near-api-js";
+import type { KeyPair as NearKeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { bs58Encode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
@@ -28,7 +29,7 @@ function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
 /**
  * Helper function to check if the given object is a NEAR KeyPair.
  */
-function isNearKeyPair(object: unknown): object is KeyPair {
+function isNearKeyPair(object: unknown): object is NearKeyPair {
   return (
     object !== null &&
     typeof object === "object" &&
@@ -39,7 +40,28 @@ function isNearKeyPair(object: unknown): object is KeyPair {
   );
 }
 
-export type KwilSignerType = KeyPair | EthersWallet | nacl.SignKeyPair | JsonRpcSigner;
+/**
+ * Helper function to check if the given object is a Stellar Keypair.
+ */
+function isStellarKeyPair(object: unknown): object is StellarKeypair {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "publicKey" in object &&
+    "sign" in object &&
+    "canSign" in object &&
+    typeof object.publicKey === "function" &&
+    typeof object.sign === "function" &&
+    typeof object.canSign === "function"
+  );
+}
+
+export type KwilSignerType =
+  | NearKeyPair
+  | EthersWallet
+  | nacl.SignKeyPair
+  | JsonRpcSigner
+  | StellarKeypair;
 export type SignerAddress = string;
 
 /**
@@ -65,6 +87,19 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
     return [
       new KwilSigner(kwilNep413Signer("idos-issuer")(signer), publicKey, "nep413"),
       publicKey,
+    ];
+  }
+
+  if (isStellarKeyPair(signer)) {
+    const publicKeyString = signer.publicKey();
+    const rawPublicKey = signer.rawPublicKey();
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => signer.sign(Buffer.from(msg)),
+        rawPublicKey,
+        "ed25519",
+      ),
+      publicKeyString,
     ];
   }
 
