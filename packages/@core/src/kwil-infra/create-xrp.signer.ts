@@ -10,7 +10,6 @@ export async function createXrpKwilSigner(
   currentAddress: string,
   store: Store,
   kwilClient: KwilActionClient,
-  recipient = "idos.network",
 ): Promise<KwilSigner> {
   const storedAddress = store.get("signer-address");
   let publicKey = store.get("signer-public-key");

@@ -111,7 +111,6 @@ export const getXrpTxHash = async (
   message: string | Uint8Array,
   wallet: Xumm | typeof GemWallet,
 ): Promise<string | undefined> => {
-  let hex: string | undefined;
   let messageString: string;
 
   const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
@@ -136,7 +135,8 @@ export const getXrpTxHash = async (
         ],
       },
     };
-    hex = await signXummTx(wallet as Xumm, payload);
+    const xummTx = await signXummTx(wallet as Xumm, payload);
+    console.log("xummTx", xummTx);
   } else if (xrpWalletType === "GemWallet") {
     const signature = await signGemWalletTx(wallet as typeof GemWallet, messageString);
     if (!signature) {
