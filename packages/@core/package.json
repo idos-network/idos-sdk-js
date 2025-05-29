@@ -20,6 +20,7 @@
     "near-api-js": "3.0.4",
     "tweetnacl": "^1.0.3",
     "ripple-binary-codec": "^2.3.0",
+    "xrpl": "^4.2.5",
     "xumm": "^1.8.0"
   },
   "devDependencies": {

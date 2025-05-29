@@ -1,3 +1,4 @@
+import * as GemWallet from "@gemwallet/api";
 import {
   type EnclaveOptions,
   type idOSClient,
@@ -11,18 +12,22 @@ import {
   type IsleStatus,
   type IsleTheme,
   base64Decode,
+  getXrpTxHash,
   type idOSCredential,
   utf8Decode,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import { type Config, getAccount, getWalletClient, signMessage, watchAccount } from "@wagmi/core";
-import { BrowserProvider } from "ethers";
+import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
+import type { Xumm } from "xumm";
 
 const assertNever = (x: never): never => {
   throw new Error(`Unexpected object: ${x}`);
 };
+
+type SignerType = "evm" | "xrpl" | "near";
 
 /**
  * Meta information about an actor.
@@ -41,6 +46,7 @@ interface idOSIsleControllerOptions {
   /** The ID of the container element where the Isle iframe will be mounted */
   container: string;
 
+  signerType: SignerType;
   /** The targetOrigin of the hosted isle */
   targetOrigin: string;
 
@@ -52,6 +58,12 @@ interface idOSIsleControllerOptions {
 
   /** wagmi config */
   wagmiConfig: Config;
+
+  xummInstance?: Xumm;
+  xrpWallets?: {
+    gemWallet?: typeof GemWallet;
+    xumm?: Xumm;
+  };
 
   /**
    * The issuer configuration.
@@ -140,6 +152,9 @@ interface idOSIsleController {
   /** Subscribe to the status of the idOS Isle instance */
   onIsleStatusChange: (handler: (status: IsleStatus) => void) => () => void;
 
+  signTx: (message: string) => Promise<string>;
+  signerType: SignerType;
+
   readonly idosClient: idOSClient;
 
   logClientIn: () => Promise<void>;
@@ -162,8 +177,44 @@ interface idOSIsleController {
  * @param options - Configuration options for the Isle instance
  * @returns An interface for interacting with the Isle instance
  */
+
+const getEvmSigner = async (wagmiConfig: Config) => {
+  const walletClient = await getWalletClient(wagmiConfig);
+  const provider = walletClient && new BrowserProvider(walletClient.transport);
+  const signer = provider && (await provider.getSigner());
+  return signer;
+};
+
+const getXrpSigner = async (options: idOSIsleControllerOptions) => {
+  invariant(options.xrpWallets, "No XRP wallets found");
+  const {
+    xrpWallets: { gemWallet, xumm },
+  } = options;
+  return gemWallet || xumm;
+};
+
+type SignerReturnType<T extends SignerType> = T extends "evm"
+  ? JsonRpcSigner
+  : T extends "xrpl"
+    ? typeof GemWallet | Xumm
+    : never;
+
+async function getSigner<T extends SignerType>(
+  options: idOSIsleControllerOptions,
+  signerType: T,
+): Promise<SignerReturnType<T>> {
+  if (signerType === "xrpl") {
+    return (await getXrpSigner(options)) as SignerReturnType<T>;
+  }
+  if (signerType === "evm") {
+    return (await getEvmSigner(options.wagmiConfig)) as SignerReturnType<T>;
+  }
+
+  throw new Error(`Unsupported signer type: ${signerType}`);
+}
+
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
-  const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
+  const nodeUrl = "http://localhost:8484";
   let idosClient: idOSClient = new idOSClientConfiguration({
     nodeUrl,
     enclaveOptions: options.enclaveOptions,
@@ -171,6 +222,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   // Internal state
   const wagmiConfig = options.wagmiConfig;
   let iframe: HTMLIFrameElement | null = null;
+  let signerType: SignerType = options.signerType;
   const controller: Controller = createController({
     targetOrigin: options.targetOrigin,
   });
@@ -181,11 +233,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let ownerOriginalCredentials: idOSCredential[] = [];
 
   const setupSigner = async (): Promise<void> => {
-    const walletClient = await getWalletClient(options.wagmiConfig);
-    invariant(walletClient, "No `walletClient` found");
-
-    const provider = new BrowserProvider(walletClient.transport);
-    const signer = await provider.getSigner();
+    const signer = await getSigner(options, signerType);
 
     if (idosClient.state === "configuration") {
       idosClient = await idosClient.createClient();
@@ -194,17 +242,32 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     switch (idosClient.state) {
       case "idle":
         idosClient = await idosClient.withUserSigner(signer);
+        signerType = signer instanceof JsonRpcSigner ? "evm" : "xrpl";
         break;
       case "with-user-signer":
       case "logged-in":
-        if (signer.address !== idosClient.walletIdentifier) {
-          idosClient = await idosClient.logOut();
-          idosClient = await idosClient.withUserSigner(signer);
+        if (signer instanceof JsonRpcSigner) {
+          if (signer.address !== idosClient.walletIdentifier) {
+            idosClient = await idosClient.logOut();
+            idosClient = await idosClient.withUserSigner(signer);
+          }
         }
         break;
       default:
         assertNever(idosClient);
     }
+  };
+
+  const signTx = async (message: string): Promise<string> => {
+    let signature: string | undefined;
+    if (signerType === "xrpl") {
+      signature = await getXrpTxHash(message, GemWallet);
+    }
+    if (signerType === "evm") {
+      signature = await signMessage(wagmiConfig, { message });
+    }
+    invariant(signature, "Could not sign message");
+    return signature;
   };
 
   /**
@@ -277,8 +340,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         status: "pending",
       });
 
-      const [error, signature] = await goTry(() => signMessage(wagmiConfig, { message }));
+      const [error, signature] = await goTry(() => signTx(message));
 
+      invariant(signature, "Signature is required");
       if (error) {
         send("update-create-dwg-status", {
           status: "error",
@@ -530,6 +594,51 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     }
   };
 
+  const getConnectedEvmAccount = async (): Promise<{
+    status: "disconnected" | "connecting" | "connected" | "reconnecting";
+    address?: string;
+  }> => {
+    const account = await getAccount(wagmiConfig);
+    return { status: account.status, address: account.address };
+  };
+
+  const getConnectedXrpAccount = async (): Promise<{
+    status: "disconnected" | "connecting" | "connected" | "reconnecting";
+    address?: string;
+  }> => {
+    if (options.xrpWallets?.gemWallet) {
+      signerType = "xrpl";
+      const isInstalled = (await options.xrpWallets.gemWallet.isInstalled()).result.isInstalled;
+      if (!isInstalled) {
+        return { status: "disconnected" };
+      }
+      const account = (await options.xrpWallets.gemWallet.getAddress())?.result?.address;
+      return { status: "connected", address: account };
+    }
+    if (options.xrpWallets?.xumm) {
+      const account = await options.xrpWallets.xumm.user.account;
+      return { status: "connected", address: account };
+    }
+    return { status: "disconnected" };
+  };
+
+  const getConnectedAccount = async (): Promise<{
+    status: "disconnected" | "connecting" | "connected" | "reconnecting";
+    address?: string;
+  }> => {
+    if (signerType === "evm") {
+      const evmAccount = await getConnectedEvmAccount();
+      if (evmAccount.status === "connected") {
+        return evmAccount;
+      }
+    }
+    if (signerType === "xrpl") {
+      const xrpAccount = await getConnectedXrpAccount();
+      return xrpAccount;
+    }
+    return { status: "disconnected" };
+  };
+
   /**
    * Sets up the communication channel with the Isle iframe
    * Initializes message handlers and establishes the connection
@@ -547,7 +656,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
     // Handle initialization completion
     channel.on("initialized", async () => {
-      const account = await getAccount(wagmiConfig);
+      const account = await getConnectedAccount();
       await handleAccountChange(account);
 
       if (idosClient.state === "configuration" || idosClient.state === "idle") {
@@ -795,6 +904,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     updateIsleStatus,
     onIsleMessage,
     onIsleStatusChange,
+    signTx,
+    signerType,
     get options() {
       return options;
     },
