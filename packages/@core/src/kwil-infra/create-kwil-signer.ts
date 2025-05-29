@@ -8,8 +8,9 @@ import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
 import type { Wallet } from "../types";
+import { getXrpAddress, looksLikeXrpWallet } from "../xrp";
 import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
-
+import { createXrpKwilSigner } from "./create-xrp.signer";
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
  */
@@ -129,9 +130,12 @@ export async function createClientKwilSigner(
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
       // When kwil-js supports multi cookies, we can remove this.
-      await kwilClient.client.auth.logoutKGW();
-
       store.set("signer-address", currentAddress);
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.log("error logoutKGW", error);
+      }
     }
 
     return [new KwilSigner(wallet, currentAddress), currentAddress];
@@ -141,6 +145,15 @@ export async function createClientKwilSigner(
     const accountId = (await wallet.getAccounts())[0].accountId;
 
     return [await createNearWalletKwilSigner(wallet, accountId, store, kwilClient), accountId];
+  }
+
+  if (looksLikeXrpWallet(wallet)) {
+    const currentAddress = await getXrpAddress(wallet);
+    if (!currentAddress) {
+      throw new Error("Failed to get XRP address");
+    }
+
+    return [await createXrpKwilSigner(wallet, currentAddress, store, kwilClient), currentAddress];
   }
 
   // Force the check that `signer` is `never`.
