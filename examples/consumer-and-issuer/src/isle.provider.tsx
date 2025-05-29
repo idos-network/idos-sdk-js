@@ -1,5 +1,6 @@
 "use client";
 
+import * as GemWallet from "@gemwallet/api";
 import { createIsleController } from "@idos-network/controllers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
@@ -45,8 +46,12 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     const controller = createIsleController({
       container: containerId,
+      signerType: "evm",
       // biome-ignore lint/suspicious/noExplicitAny: using `any` to avoid type errors.
       wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
+      xrpWallets: {
+        gemWallet: GemWallet,
+      },
       targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
       theme: "light",
       issuerConfig: {

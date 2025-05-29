@@ -79,3 +79,7 @@ wagmi
 webauthn
 sumsub
 websdk
+xrpl
+XUMM
+Xaman
+gemwallet

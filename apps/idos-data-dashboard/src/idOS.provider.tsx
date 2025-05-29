@@ -86,6 +86,17 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
         }
         const nearSigner = accountId ? await selector.wallet() : undefined;
 
+        // @todo: remove this once tested with new ripple keypair
+        // const xrpGemSigner = await createXrpSigner({
+        //   type: "GEM",
+        //   instance: GemWalletAPI,
+        // });
+
+        // const xrpXamanSigner = await createXrpSigner({
+        //   type: "XAMAN",
+        //   instance: xummInstance,
+        // });
+
         const signer = evmSigner || nearSigner;
         const withSigner = await newClient.withUserSigner(signer);
 
