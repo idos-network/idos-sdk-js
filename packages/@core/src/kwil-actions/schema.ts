@@ -603,4 +603,6 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
       type: DataType.Text,
     },
   ],
+  get_passporting_peers: [],
+  get_caller: [],
 } as const;

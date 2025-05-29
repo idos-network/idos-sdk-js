@@ -7,6 +7,7 @@ import {
   getCredentialsSharedByUser,
   getGrants,
   getGrantsCount,
+  getPassportingPeers,
   getSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import {
@@ -15,7 +16,7 @@ import {
   createNodeKwilClient,
   createServerKwilSigner,
 } from "@idos-network/core/kwil-infra";
-import type { idOSCredential, idOSGrant } from "@idos-network/core/types";
+import type { PassportingPeer, idOSCredential, idOSGrant } from "@idos-network/core/types";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -130,6 +131,10 @@ export class idOSConsumer {
     params: CreateAccessGrantByDAGParams,
   ): Promise<CreateAccessGrantByDAGParams> {
     return createAccessGrantByDag(this.#kwilClient, params);
+  }
+
+  async getPassportingPeers(): Promise<PassportingPeer[]> {
+    return getPassportingPeers(this.#kwilClient);
   }
 }
 

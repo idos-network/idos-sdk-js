@@ -4,6 +4,7 @@ import {
   createServerKwilSigner,
 } from "@idos-network/core";
 import type {
+  PassportingPeer,
   idOSCredential,
   idOSGrant,
   idOSUser,
@@ -23,6 +24,7 @@ import {
   type CredentialsIssuerConfig,
 } from "./services/credentials-builder.service";
 import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
+import { PassportingService } from "./services/passporting.service";
 import {
   type CreateProfileReqParams,
   type CreateWalletReqParams,
@@ -42,6 +44,7 @@ export class idOSIssuer {
   readonly #grantService: GrantService;
   readonly #userService: UserService;
   readonly #credentialsBuilderService: CredentialsBuilderService;
+  readonly #passportingService: PassportingService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
     const kwilClient = await createNodeKwilClient({
@@ -61,8 +64,15 @@ export class idOSIssuer {
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
     const userService = new UserService(kwilClient);
     const credentialsBuilderService = new CredentialsBuilderService();
+    const passportingService = new PassportingService(kwilClient);
 
-    return new idOSIssuer(credentialService, grantService, userService, credentialsBuilderService);
+    return new idOSIssuer(
+      credentialService,
+      grantService,
+      userService,
+      credentialsBuilderService,
+      passportingService,
+    );
   }
 
   private constructor(
@@ -70,11 +80,13 @@ export class idOSIssuer {
     grantService: GrantService,
     userService: UserService,
     credentialsBuilderService: CredentialsBuilderService,
+    passportingService: PassportingService,
   ) {
     this.#credentialService = credentialService;
     this.#grantService = grantService;
     this.#userService = userService;
     this.#credentialsBuilderService = credentialsBuilderService;
+    this.#passportingService = passportingService;
   }
 
   // User Service facade methods
@@ -149,6 +161,10 @@ export class idOSIssuer {
   // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
   buildDocumentLoader(): any {
     return this.#credentialsBuilderService.buildDocumentLoader();
+  }
+
+  async getPassportingPeers(): Promise<PassportingPeer[]> {
+    return this.#passportingService.getPassportingPeers();
   }
 }
 

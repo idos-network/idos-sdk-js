@@ -22,7 +22,6 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
-import { wagmiAdapter } from "@/app/providers";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
 

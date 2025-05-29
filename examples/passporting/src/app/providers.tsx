@@ -1,17 +1,15 @@
 "use client";
 
 import { HeroUIProvider } from "@heroui/react";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
+import { createAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
 import { WalletConnector } from "@/components/wallet-connector";
 import { IdosClientProvider } from "@/idOS.provider";
-
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
-import { useAppKitAccount } from "@reown/appkit/react";
-import { createAppKit } from "@reown/appkit/react";
 
 const queryClient = new QueryClient();
 
@@ -48,7 +46,6 @@ export function AppKitProvider({
   initialState,
 }: React.PropsWithChildren<{ initialState?: State }>) {
   return (
-    // @ts-ignore wagmi config is not typed for some reason
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
@@ -79,9 +76,9 @@ export function Providers(props: {
   return (
     <HeroUIProvider>
       <AppKitProvider initialState={props.initialState}>
-        <Auth>
-          <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
-        </Auth>
+        <QueryClientProvider client={queryClient}>
+          <Auth>{props.children}</Auth>
+        </QueryClientProvider>
       </AppKitProvider>
     </HeroUIProvider>
   );

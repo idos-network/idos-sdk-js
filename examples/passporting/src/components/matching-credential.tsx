@@ -1,39 +1,58 @@
 "use client";
 
 import { Button, Link } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/core";
+import type { PassportingPeer, idOSCredential } from "@idos-network/core";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
 import { useSignMessage } from "wagmi";
 
 import { invokePassportingService } from "@/actions";
-import { useIdosClient } from "@/idOS.provider";
-
+import { useIDOSClient } from "@/idOS.provider";
 import { CredentialCard } from "./credential-card";
 
 const useFetchMatchingCredential = () => {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useQuery({
     queryKey: ["matching-credential"],
     queryFn: async () => {
       invariant(idOSClient.state === "logged-in");
-      return idOSClient.getAllCredentials();
-    },
-    select: (credentials) => {
-      const credential = credentials.find((credential) => {
+
+      const peers = (await fetch("/api/passporting-peers").then((res) =>
+        res.json(),
+      )) as PassportingPeer[];
+
+      const credentials = await idOSClient.getAllCredentials();
+
+      const matchingCredential = credentials.find((credential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "KYC DATA";
       });
-      return credential;
+
+      if (!matchingCredential) {
+        return null;
+      }
+
+      const matchingPeer = peers.find(
+        (peer) => peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
+      );
+
+      if (!matchingPeer) {
+        return null;
+      }
+
+      return {
+        ...matchingCredential,
+        passporting_server_url_base: matchingPeer.passporting_server_url_base,
+      };
     },
     enabled: idOSClient.state === "logged-in",
   });
 };
 
 export const useFetchSharedCredentialFromUser = () => {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useQuery<{ credential: idOSCredential | null; cause: string }>({
     queryKey: ["shared-credential"],
@@ -51,13 +70,13 @@ function useShareCredential() {
   const { address } = useAppKitAccount();
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
 
   return useMutation({
-    mutationFn: async (credentialId: string) => {
+    mutationFn: async (credential: idOSCredential & { passporting_server_url_base: string }) => {
       invariant(idOSClient.state === "logged-in");
 
-      const contentHash = await idOSClient.getCredentialContentSha256Hash(credentialId);
+      const contentHash = await idOSClient.getCredentialContentSha256Hash(credential.id);
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -66,15 +85,15 @@ function useShareCredential() {
 
       invariant(
         consumerSigningPublicKey,
-        "NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY is not set",
+        "`NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` is not set",
       );
       invariant(
         consumerEncryptionPublicKey,
-        "NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY is not set",
+        "`NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY` is not set",
       );
 
       const { id } = await idOSClient.createCredentialCopy(
-        credentialId,
+        credential.id,
         consumerEncryptionPublicKey,
         consumerSigningPublicKey,
         0,
@@ -91,10 +110,13 @@ function useShareCredential() {
       const message: string = await idOSClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
-      return invokePassportingService({
-        ...dag,
-        dag_signature: signature,
-      });
+      return invokePassportingService(
+        `${credential.passporting_server_url_base}/passporting-registry`,
+        {
+          ...dag,
+          dag_signature: signature,
+        },
+      );
     },
     onSettled: () => {
       queryClient.refetchQueries({ queryKey: ["shared-credential"] });
@@ -103,20 +125,23 @@ function useShareCredential() {
 }
 
 export function MatchingCredential() {
-  const idOSClient = useIdosClient();
+  const idOSClient = useIDOSClient();
   const matchingCredential = useFetchMatchingCredential();
   const sharedCredentialFromUser = useFetchSharedCredentialFromUser();
   const shareCredential = useShareCredential();
 
   const handleCredentialDuplicateProcess = () => {
-    if (!matchingCredential.data) return;
+    if (!matchingCredential.data) {
+      return;
+    }
 
-    shareCredential.mutate(matchingCredential.data.id);
+    shareCredential.mutate(matchingCredential.data);
   };
 
   if (idOSClient.state === "with-user-signer") {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+
+    invariant(issuerUrl, "`NEXT_PUBLIC_ISSUER_URL` is not set");
 
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-4">
@@ -131,7 +156,7 @@ export function MatchingCredential() {
 
   if (!matchingCredential.data) {
     const issuerUrl = process.env.NEXT_PUBLIC_ISSUER_URL;
-    invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
+    invariant(issuerUrl, "`NEXT_PUBLIC_ISSUER_URL` is not set");
 
     return (
       <div className="flex flex-col items-center gap-4">
@@ -153,7 +178,7 @@ export function MatchingCredential() {
         <h3 className="font-semibold text-2xl">
           You have successfully shared your credential with us!
         </h3>
-        <CredentialCard credential={sharedCredentialFromUser.data?.credential} />
+        <CredentialCard credential={sharedCredentialFromUser.data.credential} />
       </div>
     );
   }

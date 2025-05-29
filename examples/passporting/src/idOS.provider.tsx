@@ -22,7 +22,7 @@ const startingConfig = new idOSClientConfiguration({
 });
 
 export const idOSClientContext = createContext<idOSClient>(startingConfig);
-export const useIdosClient = () => useContext(idOSClientContext);
+export const useIDOSClient = () => useContext(idOSClientContext);
 
 export function IdosClientProvider({ children }: PropsWithChildren) {
   const [idOSClient, setIdosClient] = useState<idOSClient>(startingConfig);
@@ -52,7 +52,7 @@ export function IdosClientProvider({ children }: PropsWithChildren) {
     initialize();
   }, [initialize]);
 
-  if (idOSClient.state === "configuration" || idOSClient.state === "idle") {
+  if (idOSClient.state !== "logged-in") {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-2 px-6">
         <CircularProgress aria-label="initializing idOS..." />
