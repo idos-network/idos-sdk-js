@@ -25,5 +25,10 @@
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "postinstall": "lefthook install",
     "test": "turbo run test"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch"
+    }
   }
 }
