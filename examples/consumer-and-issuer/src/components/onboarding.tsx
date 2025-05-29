@@ -373,7 +373,7 @@ function useShareCredentialWithConsumer() {
       };
 
       const message: string = await isleController.idosClient.requestDAGMessage(dag);
-      const signature = await signMessageAsync({ message });
+      const signature = await isleController.signTx(message);
       const result = await invokePassportingService({
         ...dag,
         dag_signature: signature,
@@ -423,7 +423,7 @@ const $step = atom<IsleStatus | undefined>(undefined);
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
-  const { address } = useAppKitAccount();
+  const { address: evmAddress } = useAppKitAccount();
   const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
@@ -458,8 +458,9 @@ export function Onboarding() {
         await isleController.idosClient.getUserEncryptionPublicKey(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-      const signature = await signMessageAsync({ message });
-
+      const signature = await isleController.signTx(message);
+      const address = await isleController.idosClient.store.get("signer-address");
+      const publicKey = await isleController.idosClient.store.get("signer-public-key");
       isleController?.send("update-create-profile-status", {
         status: "pending",
       });
@@ -468,14 +469,13 @@ export function Onboarding() {
         userId,
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
-          address: address as string,
-          type: "EVM",
+          address,
+          type: isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR",
           message,
           signature,
-          publicKey: signature,
+          publicKey: publicKey || (address as string),
         },
       });
-
       await isleController.logClientIn();
 
       await queryClient.invalidateQueries({
@@ -501,7 +501,7 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, queryClient]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
@@ -536,8 +536,8 @@ export function Onboarding() {
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
 
   useEffect(() => {
-    if (!address) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
-  }, [address, queryClient, userData?.data?.idvUserId]);
+    if (!evmAddress) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
+  }, [evmAddress, queryClient, userData?.data?.idvUserId]);
 
   useEffect(() => {
     if (!isleController) return;

@@ -159,6 +159,9 @@ importers:
       '@emotion/styled':
         specifier: ^11.13.0
         version: 11.14.0(@emotion/react@11.14.0(@types/react@19.1.6)(react@19.1.0))(@types/react@19.1.6)(react@19.1.0)
+      '@gemwallet/api':
+        specifier: ^3.8.0
+        version: 3.8.0
       '@idos-network/client':
         specifier: workspace:*
         version: link:../../packages/client
@@ -218,7 +221,7 @@ importers:
         version: 2.15.5(@tanstack/query-core@5.80.6)(@tanstack/react-query@5.80.6(react@19.1.0))(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.55))(zod@3.25.55)
       xumm:
         specifier: ^1.8.0
-        version: 1.8.0(encoding@0.1.13)
+        version: 1.8.0(encoding@0.1.13)(supports-color@8.1.1)
     devDependencies:
       '@near-js/types':
         specifier: ^0.2.1
@@ -479,6 +482,9 @@ importers:
 
   examples/consumer-and-issuer:
     dependencies:
+      '@gemwallet/api':
+        specifier: ^3.8.0
+        version: 3.8.0
       '@heroui/react':
         specifier: 2.6.14
         version: 2.6.14(@types/react@19.1.6)(framer-motion@11.18.2(@emotion/is-prop-valid@1.3.1)(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-dom@19.1.0(react@19.1.0))(react@19.1.0)(tailwindcss@3.4.17(ts-node@10.9.2(@types/node@20.19.0)(typescript@5.8.3)))
@@ -557,6 +563,12 @@ importers:
       wagmi:
         specifier: latest
         version: 2.15.6(@tanstack/query-core@5.80.6)(@tanstack/react-query@5.45.1(react@19.1.0))(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(supports-color@8.1.1)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.30.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.55))(zod@3.25.55)
+      xrpl:
+        specifier: ^4.2.5
+        version: 4.2.5(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      xumm:
+        specifier: ^1.8.0
+        version: 1.8.0(encoding@0.1.13)(supports-color@8.1.1)
     devDependencies:
       '@tanstack/react-query-devtools':
         specifier: ^5.69.0
@@ -827,6 +839,9 @@ importers:
 
   packages/@controllers:
     dependencies:
+      '@gemwallet/api':
+        specifier: ^3.8.0
+        version: 3.8.0
       '@idos-network/client':
         specifier: workspace:*
         version: link:../client
@@ -848,6 +863,9 @@ importers:
       typescript:
         specifier: ^5.7.3
         version: 5.8.3
+      xumm:
+        specifier: ^1.8.0
+        version: 1.8.0(encoding@0.1.13)(supports-color@8.1.1)
     devDependencies:
       tiny-invariant:
         specifier: ^1.3.3
@@ -909,9 +927,12 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
+      xrpl:
+        specifier: ^4.2.5
+        version: 4.2.5(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       xumm:
         specifier: ^1.8.0
-        version: 1.8.0(encoding@0.1.13)
+        version: 1.8.0(encoding@0.1.13)(supports-color@8.1.1)
     devDependencies:
       tiny-invariant:
         specifier: ^1.3.3
@@ -950,6 +971,9 @@ importers:
 
   packages/client:
     dependencies:
+      '@gemwallet/api':
+        specifier: ^3.8.0
+        version: 3.8.0
       '@kwilteam/kwil-js':
         specifier: ^0.9.4
         version: 0.9.4
@@ -6707,6 +6731,9 @@ packages:
     resolution: {integrity: sha512-0bIpgx8PDjYdrLFeC3csF305QQ1L7sxaWnL5y71mCvhenZzJgku9QsA+9QCXBC1eNYtxWO/xR91zrXJy2T/ixg==}
     engines: {node: '>=16.0.0'}
 
+  '@xrplf/secret-numbers@1.0.0':
+    resolution: {integrity: sha512-qsCLGyqe1zaq9j7PZJopK+iGTGRbk6akkg6iZXJJgxKwck0C5x5Gnwlb1HKYGOwPKyrXWpV6a2YmcpNpUFctGg==}
+
   '@xstate/react@5.0.5':
     resolution: {integrity: sha512-MfF/cPHa3lNKJmGFpUycMbNP25qBXyZXrxc8VYNroAu0Nnk0DV5WzAkTcQXma0xEC4dSwsoA+YQuKbZATtqvgg==}
     peerDependencies:
@@ -10754,6 +10781,10 @@ packages:
     resolution: {integrity: sha512-CPMzkknXlgO9Ow5Qa5iqQm0vOIlJyN8M1bc8etyhLw2Xfrer6bPzLA8/apuKlGQ+XdznYSKPBz5LAhwYjaDAcA==}
     engines: {node: '>= 18'}
 
+  ripple-keypairs@2.0.0:
+    resolution: {integrity: sha512-b5rfL2EZiffmklqZk1W+dvSy97v3V/C7936WxCCgDynaGPp7GE6R2XO7EU9O2LlM/z95rj870IylYnOQs+1Rag==}
+    engines: {node: '>= 16'}
+
   rolldown-plugin-dts@0.13.8:
     resolution: {integrity: sha512-jib3ui3rgADoAXwyuCRid74yoi0ZGTLD0P/bQQXFeaVIdhh4ZXwU2RJ0eUmSFJX1fQVc+a3lfccrPEuV7vvRJg==}
     engines: {node: '>=20.18.0'}
@@ -12246,6 +12277,10 @@ packages:
   xmlhttprequest-ssl@2.1.2:
     resolution: {integrity: sha512-TEU+nJVUUnA4CYJFLvK5X9AOeH4KvDvhIfm0vV1GaQRtchnG0hgK5p8hw/xjv8cunWYCsiPCSDzObPyhEwq3KQ==}
     engines: {node: '>=0.4.0'}
+
+  xrpl@4.2.5:
+    resolution: {integrity: sha512-QIpsqvhaRiVvlq7px7lC+lhrxESDMN1vd8mW0SfTgY5WgzP9RLiDoVywOOvSZqDDjPs0EGfhxzYjREW1gGu0Ng==}
+    engines: {node: '>=18.0.0'}
 
   xstate@5.19.2:
     resolution: {integrity: sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==}
@@ -22696,6 +22731,22 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  '@xrplf/secret-numbers@1.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ripple-keypairs: 2.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  '@xrplf/secret-numbers@1.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
+    dependencies:
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ripple-keypairs: 2.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   '@xstate/react@5.0.5(@types/react@19.1.6)(react@19.1.0)(xstate@5.19.4)':
     dependencies:
       react: 19.1.0
@@ -23526,7 +23577,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       content-type: 1.0.5
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       depd: 2.0.0
       destroy: 1.2.0
       http-errors: 2.0.0
@@ -23960,7 +24011,7 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       compressible: 2.0.18
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       negotiator: 0.6.4
       on-headers: 1.0.2
       safe-buffer: 5.2.1
@@ -24176,9 +24227,11 @@ snapshots:
 
   dayjs@1.11.13: {}
 
-  debug@2.6.9:
+  debug@2.6.9(supports-color@8.1.1):
     dependencies:
       ms: 2.0.0
+    optionalDependencies:
+      supports-color: 8.1.1
 
   debug@4.3.7(supports-color@8.1.1):
     dependencies:
@@ -24910,7 +24963,7 @@ snapshots:
       content-type: 1.0.5
       cookie: 0.7.1
       cookie-signature: 1.0.6
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       depd: 2.0.0
       encodeurl: 2.0.0
       escape-html: 1.0.3
@@ -25017,7 +25070,7 @@ snapshots:
 
   finalhandler@1.3.1:
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       encodeurl: 2.0.0
       escape-html: 1.0.3
       on-finished: 2.4.1
@@ -26261,7 +26314,7 @@ snapshots:
   morgan@1.10.0:
     dependencies:
       basic-auth: 2.0.1
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       depd: 2.0.0
       on-finished: 2.3.0
       on-headers: 1.0.2
@@ -27457,6 +27510,24 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  ripple-keypairs@2.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+    dependencies:
+      '@noble/curves': 1.9.2
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ripple-address-codec: 5.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  ripple-keypairs@2.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5):
+    dependencies:
+      '@noble/curves': 1.9.2
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ripple-address-codec: 5.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   rolldown-plugin-dts@0.13.8(rolldown@1.0.0-beta.9)(typescript@5.8.3):
     dependencies:
       '@babel/generator': 7.27.5
@@ -27580,7 +27651,7 @@ snapshots:
 
   send@0.19.0:
     dependencies:
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       depd: 2.0.0
       destroy: 1.2.0
       encodeurl: 1.0.2
@@ -29147,10 +29218,10 @@ snapshots:
 
   webpack-virtual-modules@0.6.2: {}
 
-  websocket@1.0.35:
+  websocket@1.0.35(supports-color@8.1.1):
     dependencies:
       bufferutil: 4.0.9
-      debug: 2.6.9
+      debug: 2.6.9(supports-color@8.1.1)
       es5-ext: 0.10.64
       typedarray-to-buffer: 3.1.5
       utf-8-validate: 5.0.10
@@ -29314,6 +29385,36 @@ snapshots:
 
   xmlhttprequest-ssl@2.1.2: {}
 
+  xrpl@4.2.5(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+    dependencies:
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      '@xrplf/secret-numbers': 1.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      bignumber.js: 9.1.2
+      eventemitter3: 5.0.1
+      ripple-address-codec: 5.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ripple-binary-codec: 2.3.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      ripple-keypairs: 2.0.0(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  xrpl@4.2.5(bufferutil@4.0.9)(utf-8-validate@6.0.5):
+    dependencies:
+      '@scure/bip32': 1.6.2
+      '@scure/bip39': 1.5.4
+      '@xrplf/isomorphic': 1.0.1(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      '@xrplf/secret-numbers': 1.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      bignumber.js: 9.1.2
+      eventemitter3: 5.0.1
+      ripple-address-codec: 5.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ripple-binary-codec: 2.3.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+      ripple-keypairs: 2.0.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
   xstate@5.19.2: {}
 
   xstate@5.19.4: {}
@@ -29324,17 +29425,17 @@ snapshots:
     dependencies:
       crypto-js: 4.2.0
 
-  xumm-oauth2-pkce@2.8.7(encoding@0.1.13):
+  xumm-oauth2-pkce@2.8.7(encoding@0.1.13)(supports-color@8.1.1):
     dependencies:
       debug: 4.4.1(supports-color@8.1.1)
       events: 3.3.0
       xumm-js-pkce: 1.0.2
-      xumm-sdk: 1.11.2(encoding@0.1.13)
+      xumm-sdk: 1.11.2(encoding@0.1.13)(supports-color@8.1.1)
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  xumm-sdk@1.11.2(encoding@0.1.13):
+  xumm-sdk@1.11.2(encoding@0.1.13)(supports-color@8.1.1):
     dependencies:
       '@types/websocket': 1.0.10
       assert: 2.1.0
@@ -29345,25 +29446,25 @@ snapshots:
       fetch-ponyfill: 7.1.0(encoding@0.1.13)
       node-fetch: 2.7.0(encoding@0.1.13)
       os-browserify: 0.3.0
-      websocket: 1.0.35
+      websocket: 1.0.35(supports-color@8.1.1)
     transitivePeerDependencies:
       - encoding
       - supports-color
 
-  xumm-xapp-sdk@1.7.2:
+  xumm-xapp-sdk@1.7.2(supports-color@8.1.1):
     dependencies:
       debug: 4.4.1(supports-color@8.1.1)
       events: 3.3.0
     transitivePeerDependencies:
       - supports-color
 
-  xumm@1.8.0(encoding@0.1.13):
+  xumm@1.8.0(encoding@0.1.13)(supports-color@8.1.1):
     dependencies:
       buffer: 6.0.3
       events: 3.3.0
-      xumm-oauth2-pkce: 2.8.7(encoding@0.1.13)
-      xumm-sdk: 1.11.2(encoding@0.1.13)
-      xumm-xapp-sdk: 1.7.2
+      xumm-oauth2-pkce: 2.8.7(encoding@0.1.13)(supports-color@8.1.1)
+      xumm-sdk: 1.11.2(encoding@0.1.13)(supports-color@8.1.1)
+      xumm-xapp-sdk: 1.7.2(supports-color@8.1.1)
     transitivePeerDependencies:
       - encoding
       - supports-color

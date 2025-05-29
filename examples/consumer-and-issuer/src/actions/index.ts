@@ -104,7 +104,7 @@ export async function createIDOSUserProfile({
   recipientEncryptionPublicKey: string;
   wallet: {
     address: string;
-    type: "EVM";
+    type: "EVM" | "XRPL" | "NEAR";
     message: string;
     signature: string;
     publicKey: string;
@@ -122,7 +122,7 @@ export async function createIDOSUserProfile({
       wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: "",
+      public_key: wallet.publicKey ?? "",
     },
   );
 
