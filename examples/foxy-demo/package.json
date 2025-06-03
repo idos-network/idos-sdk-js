@@ -1,0 +1,48 @@
+{
+  "name": "foxy-demo",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
+  "dependencies": {
+    "@idos-network/client": "workspace:*",
+    "@idos-network/consumer": "workspace:*",
+    "@react-router/node": "^7.5.3",
+    "@react-router/serve": "^7.5.3",
+    "@reown/appkit": "^1.7.2",
+    "@reown/appkit-adapter-wagmi": "^1.7.2",
+    "@statelyai/inspect": "^0.4.0",
+    "@transak/transak-sdk": "^3.2.0",
+    "@xstate/react": "^5.0.5",
+    "ethers": "catalog:",
+    "isbot": "^5.1.27",
+    "jsonwebtoken": "^9.0.2",
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "react-router": "^7.5.3",
+    "siwe": "^3.0.0",
+    "tweetnacl": "^1.0.3",
+    "viem": "latest",
+    "wagmi": "latest",
+    "xstate": "^5.19.4",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@react-router/dev": "^7.5.3",
+    "@tailwindcss/vite": "^4.1.8",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^20",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "tailwindcss": "^4.1.8",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.3",
+    "vite-plugin-node-polyfills": "^0.17.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
