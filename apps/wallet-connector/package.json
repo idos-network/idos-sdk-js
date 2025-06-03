@@ -1,0 +1,39 @@
+{
+  "name": "wallet-connector",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^3.19.2",
+    "@creit.tech/stellar-wallets-kit": "^1.7.3",
+    "@emotion/react": "^11.13.0",
+    "@idos-network/client": "workspace:*",
+    "@idos-network/core": "workspace:*",
+    "@near-wallet-selector/core": "8.9.10",
+    "@near-wallet-selector/meteor-wallet": "8.9.10",
+    "@near-wallet-selector/modal-ui": "8.9.10",
+    "@reown/appkit": "^1.7.8",
+    "@reown/appkit-adapter-wagmi": "^1.7.8",
+    "@tanstack/react-query": "^5.80.0",
+    "ethers": "^6.14.3",
+    "near-api-js": "3.0.4",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "viem": "^2.30.6",
+    "wagmi": "^2.15.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "@vitejs/plugin-basic-ssl": "^2.0.0",
+    "@vitejs/plugin-react-swc": "^3.9.0",
+    "globals": "^16.0.0",
+    "typescript": "~5.8.3",
+    "vite": "^6.3.5"
+  }
+}
