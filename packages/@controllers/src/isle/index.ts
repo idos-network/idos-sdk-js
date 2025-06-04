@@ -185,7 +185,7 @@ interface idOSIsleController {
  */
 
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
-  const nodeUrl = "https://nodes.playground.idos.network";
+  const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
   let idosClient: idOSClient = new idOSClientConfiguration({
     nodeUrl,
     enclaveOptions: options.enclaveOptions,
