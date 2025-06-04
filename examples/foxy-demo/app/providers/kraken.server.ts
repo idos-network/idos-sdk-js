@@ -3,28 +3,23 @@ import jwt from "jsonwebtoken";
 import { SERVER_ENV } from "./envFlags.server";
 
 export const fetchSharedToken = async (idosCredentialsId: string) => {
-  try {
-    const response = await fetch(
-      `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/${idosCredentialsId}/sharedToken?forClientId=transak`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${await getKrakenToken()}`,
-        },
-        // @ts-ignore - Node.js specific option
-        agent: new https.Agent({
-          rejectUnauthorized: false,
-          checkServerIdentity: () => undefined, // This will bypass the certificate chain verification
-        }),
+  const response = await fetch(
+    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/${idosCredentialsId}/sharedToken?forClientId=transak`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${await getKrakenToken()}`,
       },
-    );
+      // @ts-ignore - Node.js specific option
+      agent: new https.Agent({
+        rejectUnauthorized: false,
+        checkServerIdentity: () => undefined, // This will bypass the certificate chain verification
+      }),
+    },
+  );
 
-    const data = await response.json();
-    return data.token;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
+  const data = await response.json();
+  return data.token;
 };
 
 export const generateKrakenUrl = async () => {

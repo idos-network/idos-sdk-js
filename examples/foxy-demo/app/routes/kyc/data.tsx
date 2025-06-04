@@ -21,6 +21,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   // Get data
   const credentialContents: string =
     await idOSConsumer.getSharedCredentialContentDecrypted(credentialsId);
+
   const data = JSON.parse(credentialContents);
 
   return Response.json({ data });

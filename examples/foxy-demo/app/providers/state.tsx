@@ -12,6 +12,7 @@ import { COMMON_ENV } from "./envFlags.common";
 type Provider = "transak" | "banxa" | "custom" | null;
 
 interface Context {
+  errorMessage?: string | null;
   walletAddress: string | null;
   provider: Provider;
   findCredentialsAttempts: number;
@@ -34,8 +35,7 @@ export const machine = setup({
     createClient: fromPromise(async () => {
       const config = await createIDOSClient({
         enclaveOptions: { container: "#idOS-enclave" },
-        // nodeUrl: "https://nodes.staging.idos.network",
-        nodeUrl: "http://localhost:8484",
+        nodeUrl: COMMON_ENV.IDOS_NODE_URL,
       });
 
       const idleClient = await config.createClient();
@@ -74,6 +74,11 @@ export const machine = setup({
     }),
     createSharableToken: fromPromise(async ({ input }: { input: idOSCredential | null }) => {
       const kycUrl = await fetch(`/app/kyc/token?idosCredentialsId=${input?.id}`);
+
+      if (kycUrl.status !== 200) {
+        throw new Error("KYC API is not available. Please try again later.");
+      }
+
       const tokenData = await kycUrl.json();
       return tokenData.token;
     }),
@@ -91,7 +96,11 @@ export const machine = setup({
         ],
       });
 
-      console.log(credentials);
+      // TODO: Better filtering (level++)
+
+      if (credentials.length === 0) {
+        throw new Error("No credentials found, start the KYC process");
+      }
 
       return credentials;
     }),
@@ -172,6 +181,7 @@ export const machine = setup({
       accessGrant: null,
       findCredentialsAttempts: 0,
       data: null,
+      errorMessage: null,
     }),
     setClient: assign({
       client: ({ event }) => event.output,
@@ -196,6 +206,9 @@ export const machine = setup({
     }),
     setUserData: assign({
       data: ({ event }) => event.output,
+    }),
+    setErrorMessage: assign({
+      errorMessage: ({ event }) => event.error?.message,
     }),
   },
 }).createMachine({
@@ -233,6 +246,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -265,6 +279,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -287,6 +302,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -322,9 +338,7 @@ export const machine = setup({
       always: {
         guard: ({ context }) => context.findCredentialsAttempts >= 20,
         target: "error",
-        meta: {
-          message: "Find credentials timeout",
-        },
+        actions: ["setErrorMessage"],
       },
     },
     requestAccessGrant: {
@@ -341,6 +355,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -365,9 +380,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
-          meta: {
-            message: "Create sharable token error",
-          },
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -382,9 +395,7 @@ export const machine = setup({
         },
         onError: {
           target: "error",
-          meta: {
-            message: "Fetch user data error",
-          },
+          actions: ["setErrorMessage"],
         },
       },
     },
@@ -410,6 +421,7 @@ export const machine = setup({
       },
       onError: {
         target: "error",
+        actions: ["setErrorMessage"],
       },
     },
     done: {

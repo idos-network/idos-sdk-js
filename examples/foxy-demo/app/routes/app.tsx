@@ -15,6 +15,7 @@ export default function App() {
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
   const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
   const userData = MachineContext.useSelector((state) => state.context.data);
+  const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
 
   const transak = useRef<Transak | null>(null);
 
@@ -152,6 +153,7 @@ export default function App() {
     body = (
       <div className="mb-4 w-full text-center">
         <p>{messages[state as keyof typeof messages]}</p>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
     );
   }
