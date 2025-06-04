@@ -19,7 +19,7 @@ export async function createXrpKwilSigner(
     try {
       // HEADS UP: for some reason logoutKGW fails on xrp
       // storePublicKey && await kwilClient.client.auth.logoutKGW();
-      console.log("logoutKGW");
+      console.log("logoutKGW", kwilClient);
     } catch (error) {
       console.error("Failed to logout KGW:", error);
     }
