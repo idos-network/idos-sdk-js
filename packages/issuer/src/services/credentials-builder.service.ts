@@ -48,6 +48,9 @@ export interface CredentialSubject {
   /* ID(unique credential)	Unique identifier for the credential itself. */
   id: string;
 
+  /* Applicant ID reference. */
+  applicantId?: string;
+
   /* Given name of the individual. */
   firstName: string;
 
