@@ -17,6 +17,12 @@ import {
   createServerKwilSigner,
 } from "@idos-network/core/kwil-infra";
 import type { PassportingPeer, idOSCredential, idOSGrant } from "@idos-network/core/types";
+import {
+  type VerifiableCredential,
+  type VerifiableCredentialSubject,
+  type VerifyCredentialsIssuer,
+  verifyCredentials,
+} from "@idos-network/credentials";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -135,6 +141,13 @@ export class idOSConsumer {
 
   async getPassportingPeers(): Promise<PassportingPeer[]> {
     return getPassportingPeers(this.#kwilClient);
+  }
+
+  async verifyCredentials<K = VerifiableCredentialSubject>(
+    credentials: VerifiableCredential<K>,
+    issuers: VerifyCredentialsIssuer[],
+  ): Promise<boolean> {
+    return verifyCredentials<K>(credentials, issuers);
   }
 }
 

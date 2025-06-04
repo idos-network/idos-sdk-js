@@ -15,5 +15,6 @@ ignorePaths:
   - "**/dist/**"
   - "**/assets/**"
   - "*.svg"
+  - "apps/idos-sdk-e2e/playwright-report/**"
   - "pnpm-lock.yaml"
   - "package.json"

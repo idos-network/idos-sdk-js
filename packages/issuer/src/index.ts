@@ -11,18 +11,18 @@ import type {
   idOSUserAttribute,
   idOSWallet,
 } from "@idos-network/core/types";
+import {
+  type CredentialFields,
+  type CredentialSubject,
+  type CredentialsIssuer,
+  buildCredentials,
+} from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,
   type DelegatedWriteGrantParams,
 } from "./services/credential.service";
-import {
-  type CredentialFields,
-  type CredentialSubject,
-  CredentialsBuilderService,
-  type CredentialsIssuerConfig,
-} from "./services/credentials-builder.service";
 import { type CreateAccessGrantFromDAGParams, GrantService } from "./services/grant.service";
 import { PassportingService } from "./services/passporting.service";
 import {
@@ -43,7 +43,6 @@ export class idOSIssuer {
   readonly #credentialService: CredentialService;
   readonly #grantService: GrantService;
   readonly #userService: UserService;
-  readonly #credentialsBuilderService: CredentialsBuilderService;
   readonly #passportingService: PassportingService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
@@ -63,29 +62,20 @@ export class idOSIssuer {
 
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
     const userService = new UserService(kwilClient);
-    const credentialsBuilderService = new CredentialsBuilderService();
     const passportingService = new PassportingService(kwilClient);
 
-    return new idOSIssuer(
-      credentialService,
-      grantService,
-      userService,
-      credentialsBuilderService,
-      passportingService,
-    );
+    return new idOSIssuer(credentialService, grantService, userService, passportingService);
   }
 
   private constructor(
     credentialService: CredentialService,
     grantService: GrantService,
     userService: UserService,
-    credentialsBuilderService: CredentialsBuilderService,
     passportingService: PassportingService,
   ) {
     this.#credentialService = credentialService;
     this.#grantService = grantService;
     this.#userService = userService;
-    this.#credentialsBuilderService = credentialsBuilderService;
     this.#passportingService = passportingService;
   }
 
@@ -152,15 +142,10 @@ export class idOSIssuer {
   async buildCredentials(
     fields: CredentialFields,
     subject: CredentialSubject,
-    issuer: CredentialsIssuerConfig,
+    issuer: CredentialsIssuer,
     // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
   ): Promise<any> {
-    return this.#credentialsBuilderService.buildCredentials(fields, subject, issuer);
-  }
-
-  // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
-  buildDocumentLoader(): any {
-    return this.#credentialsBuilderService.buildDocumentLoader();
+    return buildCredentials(fields, subject, issuer);
   }
 
   async getPassportingPeers(): Promise<PassportingPeer[]> {
