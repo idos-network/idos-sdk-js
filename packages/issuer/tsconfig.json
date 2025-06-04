@@ -29,5 +29,5 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*", "../credentials/src/types.d.ts"]
 }
