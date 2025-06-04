@@ -22,6 +22,7 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
+import { useOnboardingStore } from "@/app/stores/onboarding";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
 
@@ -425,7 +426,7 @@ export function Onboarding() {
   const { signMessageAsync } = useSignMessage();
   const { address: evmAddress } = useAppKitAccount();
   const queryClient = useQueryClient();
-
+  const { setClaimedSuccess, claimedSuccess, resetOnboarding } = useOnboardingStore();
   const userData = useFetchUserData();
   const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
@@ -540,6 +541,12 @@ export function Onboarding() {
   }, [evmAddress, queryClient, userData?.data?.idvUserId]);
 
   useEffect(() => {
+    return () => {
+      resetOnboarding();
+    };
+  }, [resetOnboarding]);
+
+  useEffect(() => {
     if (!isleController) return;
 
     const cleanup = isleController.onIsleMessage(async (message) => {
@@ -564,7 +571,7 @@ export function Onboarding() {
             isleController.options.credentialRequirements.integratedConsumers[1],
           );
           if (!hasConsumerPermission) {
-            $claimSuccess.set(false);
+            setClaimedSuccess(false);
           }
           break;
         }
@@ -594,7 +601,14 @@ export function Onboarding() {
     });
 
     return cleanup;
-  }, [handleCreateProfile, isleController, kycDisclosure, issueCredential, userData]);
+  }, [
+    handleCreateProfile,
+    isleController,
+    kycDisclosure,
+    issueCredential,
+    userData,
+    setClaimedSuccess,
+  ]);
 
   useEffect(() => {
     if (!isleController) return;
@@ -644,14 +658,12 @@ export function Onboarding() {
         );
 
         if (hasConsumerPermission) {
-          $claimSuccess.set(true);
+          setClaimedSuccess(true);
         }
       }
       $step.set(status);
     });
-  }, [isleController]);
-
-  const claimSuccess = useStore($claimSuccess);
+  }, [isleController, setClaimedSuccess]);
 
   return (
     <div className="container relative mx-auto min-h-dvh p-6">
@@ -675,7 +687,7 @@ export function Onboarding() {
                 <StepIcon icon={<ScanEyeIcon />} />
                 <p>Permissions</p>
               </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "verified" || claimSuccess}>
+              <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
                 <StepIcon icon={<RocketIcon />} />
                 <p>Claim your ACME Bank card!</p>
               </OnboardingStep>
@@ -684,7 +696,7 @@ export function Onboarding() {
           <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
             <div className="max-w-3xl">
               <AnimatePresence mode="wait">
-                {claimSuccess ? (
+                {claimedSuccess ? (
                   <motion.div
                     key="no-profile"
                     initial={{ opacity: 0, y: 20 }}

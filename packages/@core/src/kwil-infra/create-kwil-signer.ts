@@ -8,7 +8,7 @@ import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
 import type { Wallet } from "../types";
-import { getXrpAddress, looksLikeXrpWallet } from "../xrp";
+import { getXrpPublicKey, looksLikeXrpWallet } from "../xrp";
 import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
 import { createXrpKwilSigner } from "./create-xrp.signer";
 /**
@@ -148,12 +148,17 @@ export async function createClientKwilSigner(
   }
 
   if (looksLikeXrpWallet(wallet)) {
-    const currentAddress = await getXrpAddress(wallet);
+    const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
+      wallet,
+    )) as { address: string; publicKey: string };
     if (!currentAddress) {
       throw new Error("Failed to get XRP address");
     }
 
-    return [await createXrpKwilSigner(wallet, currentAddress, store, kwilClient), currentAddress];
+    return [
+      await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
+      currentAddress,
+    ];
   }
 
   // Force the check that `signer` is `never`.

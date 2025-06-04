@@ -2,7 +2,7 @@ import type * as GemWallet from "@gemwallet/api";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Xumm } from "xumm";
 import type { Store } from "../store";
-import { getXrpPublicKey, getXrpTxHash } from "../xrp";
+import { getXrpTxHash } from "../xrp";
 import type { KwilActionClient } from "./create-kwil-client";
 
 export async function createXrpKwilSigner(
@@ -10,21 +10,23 @@ export async function createXrpKwilSigner(
   currentAddress: string,
   store: Store,
   kwilClient: KwilActionClient,
+  walletPublicKey: string,
 ): Promise<KwilSigner> {
   const storedAddress = store.get("signer-address");
-  let publicKey = store.get("signer-public-key");
+  const storePublicKey = store.get("signer-public-key");
 
-  if (storedAddress !== currentAddress || !publicKey) {
+  if (storedAddress !== currentAddress || (storePublicKey && storePublicKey !== walletPublicKey)) {
     try {
-      storedAddress && (await kwilClient.client.auth.logoutKGW());
-      publicKey = await getXrpPublicKey(wallet);
-
-      store.set("signer-address", currentAddress);
-      store.set("signer-public-key", publicKey);
+      // HEADS UP: for some reason logoutKGW fails on xrp
+      // storePublicKey && await kwilClient.client.auth.logoutKGW();
+      console.log("logoutKGW");
     } catch (error) {
       console.error("Failed to logout KGW:", error);
     }
   }
+
+  store.set("signer-address", currentAddress);
+  store.set("signer-public-key", walletPublicKey);
 
   const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
     const signature = await getXrpTxHash(message, wallet);
@@ -34,5 +36,5 @@ export async function createXrpKwilSigner(
     return Buffer.from(signature, "hex");
   };
 
-  return new KwilSigner(signer, publicKey, "xrpl");
+  return new KwilSigner(signer, walletPublicKey, "xrpl");
 }

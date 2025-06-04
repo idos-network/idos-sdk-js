@@ -87,3 +87,4 @@ xrpl
 XUMM
 Xaman
 gemwallet
+partialize
