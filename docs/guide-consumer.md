@@ -119,20 +119,33 @@ idOSClient = await idOSClient.withUserSigner(signer);
 ### [ frontend ] Checking for existing access grant
 
 ```js
-const grants: IdosGrant[] = await idOSClient.getGrants().grants.filter(g =>
+const grants: IdosGrant[] = await idOSClient.getAccessGrantsOwned();
+grants.filter(g =>
   g.ag_grantee_wallet_identifier === consumerSigner.address,
 );
 ```
 
-Access Grants queries can also be paginated:
-```typescript
+
+### [ backend ] Checking for existing access grant
+
+You can double check that the existing access grant matches your requirements. You will do this on your backend.
+
+```js
+const grants: IdosGrant[] = await idOSConsumer.getGrants({
+  user_id, // idOS user.id, but be sure, that this value is securely passed to your code
+});
+```
+
+Access Grants queries are paginated by default, but you can modify pagination settings by:
+
+```js
 const grants: idOSGrant[] = await idOSClient.getGrants({
   page: 1,
   size: 7,
 });
 ```
 
-Optionally, you can double check that the existing access grant matches your requirements. You do this on your backend.
+And you can get the credentials contents from the grant via:
 
 ```typescript
 const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
