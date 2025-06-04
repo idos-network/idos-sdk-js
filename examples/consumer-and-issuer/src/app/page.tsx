@@ -13,6 +13,7 @@ import {
 import { useEffect, useState } from "react";
 
 import { GetStartedButton } from "@/components/get-started-button";
+import MultiChainConnectWallet from "@/components/multi-chain-connect-wallet";
 
 const fadeInUp = {
   initial: { opacity: 0, y: 20 },
@@ -74,7 +75,7 @@ export default function HomePage() {
               $1,000,000
             </span>
           </p>
-          <GetStartedButton title="Get started now" />
+          <MultiChainConnectWallet hideDisconnect={true} />
         </motion.div>
       </section>
 

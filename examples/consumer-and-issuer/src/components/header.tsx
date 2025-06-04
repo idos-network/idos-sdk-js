@@ -1,6 +1,7 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
-import { WalletConnector } from "./wallet-connector";
+import MultiChainConnectWallet from "./multi-chain-connect-wallet";
 
 export function Header() {
   return (
@@ -17,7 +18,7 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-6">
-          <WalletConnector />
+          <MultiChainConnectWallet hideConnect={true} />
         </div>
       </nav>
     </header>

@@ -72,10 +72,13 @@ export const signGemWalletTx = (
 
 export const getGemWalletPublicKey = async (
   wallet: typeof GemWallet,
-): Promise<string | undefined> => {
+): Promise<{ address: string; publicKey: string } | undefined> => {
   if ("isInstalled" in wallet) {
     await wallet.isInstalled();
-    return wallet.getPublicKey().then((response) => response.result?.publicKey as string);
+    const { publicKey, address } = await wallet
+      .getPublicKey()
+      .then((res) => res.result as { publicKey: string; address: string });
+    return { address, publicKey };
   }
 };
 
@@ -148,10 +151,13 @@ export const getXrpTxHash = async (
 
 export const getXrpPublicKey = async (
   wallet: Xumm | typeof GemWallet,
-): Promise<string | undefined> => {
+): Promise<{ address: string; publicKey: string } | undefined> => {
   const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
   if (xrpWalletType === "Xumm") {
-    return getXummPublicKey(wallet as Xumm);
+    // @todo: should we remove xaman wallet support?
+    const publicKey = await getXummPublicKey(wallet as Xumm);
+    const address = await getXrpAddress(wallet);
+    return { address: address as string, publicKey: publicKey as string };
   }
   return getGemWalletPublicKey(wallet as typeof GemWallet);
 };

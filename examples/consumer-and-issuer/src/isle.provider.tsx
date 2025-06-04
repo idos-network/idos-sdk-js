@@ -2,11 +2,46 @@
 
 import * as GemWallet from "@gemwallet/api";
 import { createIsleController } from "@idos-network/controllers";
+import type { WalletInfo } from "@idos-network/controllers";
+import { signGemWalletTx } from "@idos-network/core";
+import { type Config, getWalletClient, signMessage } from "@wagmi/core";
+import { BrowserProvider } from "ethers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { wagmiAdapter } from "./app/providers";
+import { useWalletStore } from "./app/stores/wallet";
 
 type IsleController = ReturnType<typeof createIsleController>;
+
+const getEvmSigner = async (wagmiConfig: Config) => {
+  const walletClient = await getWalletClient(wagmiConfig);
+  const provider = walletClient && new BrowserProvider(walletClient.transport);
+  const signer = provider && (await provider.getSigner());
+  return signer;
+};
+
+const walletInfoMapper = ({
+  address,
+  publicKey,
+}: { address: string; publicKey: string }): Record<"evm" | "xrpl", WalletInfo> => ({
+  evm: {
+    address,
+    publicKey,
+    signMethod: (message: string) => signMessage(wagmiAdapter.wagmiConfig, { message: message }),
+    type: "evm",
+    signer: async () => await getEvmSigner(wagmiAdapter.wagmiConfig),
+  },
+  xrpl: {
+    signMethod: async (message: string) => {
+      const signature = await signGemWalletTx(GemWallet, message);
+      return signature as string;
+    },
+    address,
+    publicKey,
+    type: "xrpl",
+    signer: async () => GemWallet,
+  },
+});
 
 interface IsleContextType {
   isleController: IsleController | null;
@@ -29,6 +64,12 @@ interface IsleProviderProps {
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
   const [isleController, setIsle] = useState<IsleController | null>(null);
+  const { walletType, walletAddress, walletPublicKey } = useWalletStore();
+
+  const walletInfo = walletInfoMapper({
+    address: walletAddress as string,
+    publicKey: walletPublicKey as string,
+  })[walletType as "evm" | "xrpl"];
 
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
@@ -43,10 +84,11 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
       "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
     );
+    if (!walletType) return;
 
     const controller = createIsleController({
       container: containerId,
-      signerType: "evm",
+      walletInfo,
       // biome-ignore lint/suspicious/noExplicitAny: using `any` to avoid type errors.
       wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
       xrpWallets: {
@@ -125,7 +167,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       controller.destroy();
       setIsle(null);
     };
-  }, [containerId]);
+  }, [containerId, walletType]);
 
   return (
     <div>

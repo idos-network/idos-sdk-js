@@ -13,6 +13,7 @@
     "@reown/appkit-adapter-wagmi": "^1.7.2",
     "@tanstack/react-query": "5.45.1",
     "@uidotdev/usehooks": "^2.4.1",
+    "@wagmi/core": "^2.16.4",
     "ethers": "catalog:",
     "framer-motion": "^11.11.9",
     "go-try": "^3.0.2",
@@ -30,7 +31,8 @@
     "viem": "latest",
     "wagmi": "latest",
     "xrpl": "^4.2.5",
-    "xumm": "^1.8.0"
+    "xumm": "^1.8.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "^5.69.0",
