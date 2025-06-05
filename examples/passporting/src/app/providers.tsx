@@ -5,11 +5,12 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
+import type { ReactNode } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
 import { WalletConnector } from "@/components/wallet-connector";
-import { IdosClientProvider } from "@/idOS.provider";
+import { IDOSClientProvider } from "@/idOS.provider";
+import { NearWalletProvider, useNearWallet } from "@/near.provider";
 
 const queryClient = new QueryClient();
 
@@ -54,8 +55,18 @@ export function AppKitProvider({
 
 function Auth(props: { children: ReactNode }) {
   const { isConnected } = useAppKitAccount();
+  const nearWallet = useNearWallet();
 
-  if (!isConnected) {
+  // Show loading while NEAR wallet is initializing
+  if (nearWallet.isLoading) {
+    return (
+      <div className="flex h-dvh flex-col items-center justify-center gap-4 p-6">
+        <h1 className="font-semibold text-2xl">Initializing wallets...</h1>
+      </div>
+    );
+  }
+
+  if (!(isConnected || nearWallet.selector.isSignedIn())) {
     return (
       <div className="flex h-dvh flex-col items-center justify-center gap-4 p-6">
         <h1 className="font-semibold text-2xl">Connect your wallet to continue</h1>
@@ -64,21 +75,19 @@ function Auth(props: { children: ReactNode }) {
     );
   }
 
-  return <IdosClientProvider>{props.children}</IdosClientProvider>;
+  return <IDOSClientProvider>{props.children}</IDOSClientProvider>;
 }
 
 export function Providers(props: {
   children: ReactNode;
   initialState?: State;
 }) {
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
     <HeroUIProvider>
       <AppKitProvider initialState={props.initialState}>
-        <QueryClientProvider client={queryClient}>
+        <NearWalletProvider>
           <Auth>{props.children}</Auth>
-        </QueryClientProvider>
+        </NearWalletProvider>
       </AppKitProvider>
     </HeroUIProvider>
   );
