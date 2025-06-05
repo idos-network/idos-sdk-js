@@ -24,5 +24,15 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   const data = JSON.parse(credentialContents);
 
+  // Verify the credential
+  const verificationResult = await idOSConsumer.verifyCredentials(data, [
+    {
+      issuer: "https://localhost:3000/idos/issuers/1",
+      publicKeyMultibase: "z6MknvvLerVJyLVHvhU8evoB6udXU9Ueu6PGmaztwVarPBxQ",
+    },
+  ]);
+
+  console.log("Verification result: ", verificationResult);
+
   return Response.json({ data });
 }
