@@ -1,17 +1,25 @@
-import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-import * as vc from "@digitalbazaar/vc";
 import { describe, expect, it } from "vitest";
-import { CredentialsBuilderService } from "./credentials-builder.service";
+import { buildCredentials } from "./builder";
+import { verifyCredentials } from "./verifier";
 
-describe("buildVerifiableCredentials", () => {
-  it("should create a verifiable vc", async () => {
+describe("verifiableCredentials", () => {
+  it("should create and verify a verifiable vc", async () => {
     const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
     const issuer = "https://vc-issuers.cool.id/idos";
+    const issuer2 = "https://vc-issuers.cool.id/idos2";
 
-    const builder = new CredentialsBuilderService();
+    const validKey = await Ed25519VerificationKey2020.generate({
+      id: `${issuer}/keys/1`,
+      controller: `${issuer}/issuer/1`,
+    });
 
-    const data = await builder.buildCredentials(
+    const anotherKey = await Ed25519VerificationKey2020.generate({
+      id: `${issuer2}/keys/1`,
+      controller: `${issuer2}/issuer/1`,
+    });
+
+    const data = await buildCredentials(
       {
         id: `${issuer}/credentials/${id}`,
         level: "human",
@@ -48,13 +56,7 @@ describe("buildVerifiableCredentials", () => {
         residentialAddressProofDateOfIssue: new Date("2022-01-01"),
         residentialAddressProofFile: Buffer.from("Proof of address"),
       },
-      {
-        id: `${issuer}/keys/1`,
-        controller: `${issuer}/issuer/1`,
-        publicKeyMultibase: "z6MkrQDe6W8yspNAZyVXw9Rt9s8FuP61y9XRnRhA2kbQ1Jyj",
-        privateKeyMultibase:
-          "zrv4XwF1S61SJuUjQpaAPCoM7QJiw8J3EDFPQ4AGN5D3r3iaR8mcSeJZoYjSWe6PqgSfwtC3KPvAvHQ7QxGeNp9rZ2m",
-      },
+      validKey,
     );
 
     // Check if residential address is properly prefixed
@@ -70,32 +72,32 @@ describe("buildVerifiableCredentials", () => {
     expect(data.proof.type).toBe("Ed25519Signature2020");
     expect(data.proof.verificationMethod).toBe("https://vc-issuers.cool.id/idos/keys/1");
 
-    const publicKey = await Ed25519VerificationKey2020.from({
-      id: `${issuer}/keys/1`,
-      controller: `${issuer}/issuer/1`,
-      publicKeyMultibase: "z6MkrQDe6W8yspNAZyVXw9Rt9s8FuP61y9XRnRhA2kbQ1Jyj",
-      type: "Ed25519VerificationKey2020",
-    });
+    const allowedIssuers = [
+      {
+        // This one the right one
+        issuer: issuer2,
+        publicKeyMultibase: anotherKey.publicKeyMultibase,
+      },
+      {
+        // This one is valid
+        issuer,
+        publicKeyMultibase: validKey.publicKeyMultibase,
+      },
+    ];
 
-    const vcVerifyingSuite = new Ed25519Signature2020({
-      key: publicKey,
-      verificationMethod: publicKey.id,
-    });
+    const verified = await verifyCredentials(data, allowedIssuers);
+    expect(verified).toBe(true);
 
-    const controller = {
-      "@context": "https://w3id.org/security/v2",
-      id: publicKey.controller,
-      assertionMethod: [publicKey.id],
-      authentication: [publicKey.id],
-    };
+    // Invalid issuer
+    const invalidIssuers = [
+      {
+        // Just the wrong issuer
+        issuer: issuer2,
+        publicKeyMultibase: anotherKey.publicKeyMultibase,
+      },
+    ];
 
-    // Verify the signature
-    const verifyCredentialResult = await vc.verifyCredential({
-      credential: data,
-      suite: vcVerifyingSuite,
-      controller,
-      documentLoader: builder.buildDocumentLoader(),
-    });
-    expect(verifyCredentialResult.verified).toBe(true);
+    const invalidVerified = await verifyCredentials(data, invalidIssuers);
+    expect(invalidVerified).toBe(false);
   });
 });

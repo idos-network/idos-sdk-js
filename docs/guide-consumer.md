@@ -224,12 +224,19 @@ If you're using passporting:
 const credentialContents: string = await idOSConsumer.getReusableCredentialCompliantly('GRANT_DATA_ID')
 ```
 
-If you need a helper to verify that the W3C VC is something you want to trust, here's an example:
+## Verify credentials signature
+
+It's strongly recommended to verify signature, before you use credentials! If you need a helper to verify that the W3C VC is something you want to trust, here's an example:
 
 ```js
-await idOSConsumer.verifyW3CVC(credential, {
-  allowedIssuers: ["https://kyc-provider.example.com/idos"],
-  allowedKeys: ["z6Mkqm5JuLvBcHkbQogDXz5p5ppTY4DF5FLhoRd2VM9NaKp5"],
-  documentLoader, // If you need to specify your own.
-});
+const allowedIssuers = [
+  {
+    issuer: "https://kyc-provider.example.com/idos",
+    publicKeyMultibase: "z6MkfjxfHddp5Pf1GGUSJQ3m6PEycX2DFTVFruUMZsHPXoJx",
+  },
+];
+
+const verificationResult = await idOSConsumer.verifyCredentials(credentials, allowedIssuers);
+
+console.log("Result: ", verificationResult);
 ```
