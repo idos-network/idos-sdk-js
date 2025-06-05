@@ -4,8 +4,9 @@ import { createIsleController } from "@idos-network/controllers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { wagmiAdapter } from "./app/providers";
+import { useNearWallet } from "./near.provider";
 
-type IsleController = ReturnType<typeof createIsleController>;
+type IsleController = Awaited<ReturnType<typeof createIsleController>>;
 
 interface IsleContextType {
   isleController: IsleController | null;
@@ -28,99 +29,112 @@ interface IsleProviderProps {
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
   const [isleController, setIsle] = useState<IsleController | null>(null);
+  const nearWallet = useNearWallet();
 
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
   useEffect(() => {
-    if (!containerId || isleController) return;
+    let controller: IsleController | null = null;
 
-    invariant(
-      process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
-      "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set",
-    );
-    invariant(
-      process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
-      "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
-    );
+    async function setup() {
+      if (!containerId || isleController) return;
 
-    const controller = createIsleController({
-      container: containerId,
-      // biome-ignore lint/suspicious/noExplicitAny: using `any` to avoid type errors.
-      wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
-      targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
-      theme: "light",
-      issuerConfig: {
-        meta: {
-          url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
-          name: "NeoBank",
-          logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+      invariant(
+        process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+        "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set",
+      );
+      invariant(
+        process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
+        "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
+      );
+
+      controller = await createIsleController({
+        signer: await nearWallet.selector.wallet(),
+        container: containerId,
+        // biome-ignore lint/suspicious/noExplicitAny: using `any` to avoid type errors.
+        wagmiConfig: wagmiAdapter.wagmiConfig as unknown as any,
+        targetOrigin: process.env.NEXT_PUBLIC_ISLE_TARGET_ORIGIN ?? "https://isle.idos.network",
+        theme: "light",
+        issuerConfig: {
+          meta: {
+            url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+            name: "NeoBank",
+            logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+          },
+          encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
         },
-        encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
-      },
-      enclaveOptions: {
-        container: "#idOS-enclave",
-        url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
-      },
+        enclaveOptions: {
+          container: "#idOS-enclave",
+          url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+        },
 
-      credentialRequirements: {
-        acceptedIssuers: [
-          {
-            meta: {
-              url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
-              name: "NeoBank",
-              logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+        credentialRequirements: {
+          acceptedIssuers: [
+            {
+              meta: {
+                url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+                name: "NeoBank",
+                logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+              },
+              authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
             },
-            authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
-          },
-        ],
-        integratedConsumers: [
-          {
-            meta: {
-              url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
-              name: "NeoBank",
-              logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+          ],
+          integratedConsumers: [
+            {
+              meta: {
+                url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+                name: "NeoBank",
+                logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+              },
+              consumerEncryptionPublicKey:
+                process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
+              consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
+              kycPermissions: [
+                "Name and last name",
+                "Gender",
+                "Country and city of residence",
+                "Place and date of birth",
+                "ID Document",
+                "Liveness check (No pictures)",
+              ],
             },
-            consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
-            kycPermissions: [
-              "Name and last name",
-              "Gender",
-              "Country and city of residence",
-              "Place and date of birth",
-              "ID Document",
-              "Liveness check (No pictures)",
-            ],
-          },
-          {
-            meta: {
-              url: process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
-              name: "ACME Card Provider",
-              logo: `${process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}/static/logo.svg`,
+            {
+              meta: {
+                url: process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
+                name: "ACME Card Provider",
+                logo: `${process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}/static/logo.svg`,
+              },
+              consumerEncryptionPublicKey:
+                process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
+              consumerAuthPublicKey:
+                process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
+              kycPermissions: [
+                "Name and last name",
+                "Gender",
+                "Country and city of residence",
+                "Place and date of birth",
+                "ID Document",
+                "Liveness check (No pictures)",
+              ],
             },
-            consumerEncryptionPublicKey:
-              process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
-            consumerAuthPublicKey: process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY ?? "",
-            kycPermissions: [
-              "Name and last name",
-              "Gender",
-              "Country and city of residence",
-              "Place and date of birth",
-              "ID Document",
-              "Liveness check (No pictures)",
-            ],
-          },
-        ],
-        acceptedCredentialType: "KYC DATA",
-      },
+          ],
+          acceptedCredentialType: "KYC DATA",
+        },
+      });
+
+      setIsle(controller);
+    }
+
+    setup().catch((error) => {
+      console.error("Failed to setup Isle controller:", error);
+      setIsle(null);
     });
 
-    setIsle(controller);
-
     return () => {
-      controller.destroy();
+      controller?.destroy();
       setIsle(null);
     };
-  }, [containerId]);
+  }, [containerId, nearWallet]);
 
   return (
     <div>

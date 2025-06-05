@@ -1,7 +1,11 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, idOSCredential } from "@idos-network/core";
+import {
+  type IsleStatus,
+  getNearFullAccessPublicKeys,
+  type idOSCredential,
+} from "@idos-network/core";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -23,7 +27,46 @@ import {
   invokePassportingService,
 } from "@/actions";
 import { useIsleController } from "@/isle.provider";
+import { useNearWallet } from "@/near.provider";
 import { KYCJourney } from "./kyc-journey";
+
+// Custom hook to handle signing with both wagmi and NEAR wallets
+function useUnifiedSignMessage() {
+  const { signMessageAsync: wagmiSignMessage } = useSignMessage();
+  const nearWallet = useNearWallet();
+
+  return useCallback(
+    async ({ message }: { message: string }) => {
+      // Try wagmi first (for Ethereum wallets)
+      try {
+        return await wagmiSignMessage({ message });
+      } catch (wagmiError) {
+        // If wagmi fails (e.g., no connector), try NEAR wallet
+        try {
+          if (nearWallet.selector.isSignedIn()) {
+            const wallet = await nearWallet.selector.wallet();
+            if (wallet.signMessage) {
+              const result = await wallet.signMessage({
+                message,
+                recipient: "idos.network",
+                nonce: Buffer.from(crypto.getRandomValues(new Uint8Array(32))),
+              });
+              if (result && "signature" in result) {
+                return result.signature;
+              }
+              throw new Error("Invalid signature result from NEAR wallet");
+            }
+          }
+          throw new Error("No wallet available for signing");
+        } catch (nearError) {
+          console.error("NEAR signing failed:", nearError);
+          throw wagmiError; // Throw original wagmi error
+        }
+      }
+    },
+    [wagmiSignMessage, nearWallet],
+  );
+}
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
   return (
@@ -320,7 +363,7 @@ const useIssueCredential = () => {
 };
 
 function useShareCredentialWithConsumer() {
-  const { signMessageAsync } = useSignMessage();
+  const signMessageAsync = useUnifiedSignMessage();
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
 
@@ -380,7 +423,6 @@ function useShareCredentialWithConsumer() {
       });
 
       if (!result.success) {
-        console.error(result.error);
         throw new Error(result.error.message);
       }
     },
@@ -422,8 +464,9 @@ const $step = atom<IsleStatus | undefined>(undefined);
 
 export function Onboarding() {
   const { isleController } = useIsleController();
-  const { signMessageAsync } = useSignMessage();
+  const signMessageAsync = useUnifiedSignMessage();
   const { address } = useAppKitAccount();
+  const nearWallet = useNearWallet();
   const queryClient = useQueryClient();
 
   const userData = useFetchUserData();
@@ -464,15 +507,21 @@ export function Onboarding() {
         status: "pending",
       });
 
+      const nearState = nearWallet.selector.store.getState();
+      const nearAddress = nearState.accounts[0].accountId;
+
+      const nearFullAccessPublicKeys = await getNearFullAccessPublicKeys(nearAddress);
+      console.log({ nearFullAccessPublicKeys });
+
       await createIDOSUserProfile({
         userId,
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
-          address: address as string,
-          type: "EVM",
+          address: (address || nearAddress) as string,
+          type: nearWallet.selector.isSignedIn() ? "NEAR" : "EVM",
           message,
           signature,
-          publicKey: signature,
+          publicKey: address ? signature : (nearFullAccessPublicKeys?.[0] ?? ""),
         },
       });
 

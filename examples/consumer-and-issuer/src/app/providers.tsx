@@ -3,9 +3,10 @@
 import { HeroUIProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { type JSX, useState } from "react";
+import type { JSX } from "react";
 import { type State, WagmiProvider } from "wagmi";
 
+import { NearWalletProvider } from "@/near.provider";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "@reown/appkit/networks";
 import { sepolia } from "@reown/appkit/networks";
@@ -47,9 +48,11 @@ export function AppKitProvider({
   initialState,
 }: React.PropsWithChildren<{ initialState?: State }>) {
   return (
-    // @ts-ignore wagmi config is not typed for some reason
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      <QueryClientProvider client={queryClient}>
+        {children}
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
     </WagmiProvider>
   );
 }
@@ -57,15 +60,10 @@ export function AppKitProvider({
 export function Providers(props: {
   children: JSX.Element;
 }) {
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
     <HeroUIProvider>
       <AppKitProvider>
-        <QueryClientProvider client={queryClient}>
-          {props.children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
+        <NearWalletProvider>{props.children}</NearWalletProvider>
       </AppKitProvider>
     </HeroUIProvider>
   );

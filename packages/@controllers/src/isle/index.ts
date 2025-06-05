@@ -53,6 +53,10 @@ interface idOSIsleControllerOptions {
   /** wagmi config */
   wagmiConfig: Config;
 
+  /** signer to be passed to the isle controller */
+  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine for now until we hit a rewrite
+  signer?: any;
+
   /**
    * The issuer configuration.
    */
@@ -162,7 +166,9 @@ interface idOSIsleController {
  * @param options - Configuration options for the Isle instance
  * @returns An interface for interacting with the Isle instance
  */
-export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
+export const createIsleController = async (
+  options: idOSIsleControllerOptions,
+): Promise<idOSIsleController> => {
   const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
   let idosClient: idOSClient = new idOSClientConfiguration({
     nodeUrl,
@@ -170,6 +176,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   });
   // Internal state
   const wagmiConfig = options.wagmiConfig;
+  const externalSigner = options.signer;
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
     targetOrigin: options.targetOrigin,
@@ -180,8 +187,41 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const { containerId, theme } = { containerId: options.container, theme: options.theme };
   let ownerOriginalCredentials: idOSCredential[] = [];
 
+  const setupExternalSigner = async (): Promise<void> => {
+    if (idosClient.state === "configuration") {
+      idosClient = await idosClient.createClient();
+    }
+
+    const signer = options.signer;
+
+    switch (idosClient.state) {
+      case "idle":
+        idosClient = await idosClient.withUserSigner(signer);
+        break;
+      case "with-user-signer":
+      case "logged-in":
+        if (options.signer.address !== idosClient.walletIdentifier) {
+          idosClient = await idosClient.logOut();
+          idosClient = await idosClient.withUserSigner(signer);
+        }
+        break;
+      default:
+        assertNever(idosClient);
+    }
+  };
+
+  if (options.signer) {
+    await setupExternalSigner();
+  }
+
   const setupSigner = async (): Promise<void> => {
+    if (options.signer) {
+      await setupExternalSigner();
+      return;
+    }
+
     const walletClient = await getWalletClient(options.wagmiConfig);
+
     invariant(walletClient, "No `walletClient` found");
 
     const provider = new BrowserProvider(walletClient.transport);
@@ -277,7 +317,22 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         status: "pending",
       });
 
-      const [error, signature] = await goTry(() => signMessage(wagmiConfig, { message }));
+      const [error, signature] = await goTry(async () => {
+        if (externalSigner) {
+          // Use external signer (e.g., NEAR)
+          if (typeof externalSigner.signMessage === "function") {
+            const result = await externalSigner.signMessage({
+              message,
+              recipient: "idos.network",
+              nonce: Buffer.from(crypto.getRandomValues(new Uint8Array(32))),
+            });
+            return result.signature;
+          }
+          throw new Error("External signer does not support message signing");
+        }
+        // Use wagmi signer
+        return await signMessage(wagmiConfig, { message });
+      });
 
       if (error) {
         send("update-create-dwg-status", {

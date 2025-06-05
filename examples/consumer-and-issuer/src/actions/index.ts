@@ -104,7 +104,7 @@ export async function createIDOSUserProfile({
   recipientEncryptionPublicKey: string;
   wallet: {
     address: string;
-    type: "EVM";
+    type: "EVM" | "NEAR";
     message: string;
     signature: string;
     publicKey: string;
@@ -278,7 +278,6 @@ export const invokePassportingService = async (
 
     return { success: true, data: data.data };
   } catch (error) {
-    console.error(error);
     if (error instanceof Error) {
       return {
         success: false,
@@ -288,7 +287,7 @@ export const invokePassportingService = async (
 
     return {
       success: false,
-      error: { message: JSON.stringify(error) },
+      error: { cause: undefined, message: "Unknown error" },
     };
   }
 };
