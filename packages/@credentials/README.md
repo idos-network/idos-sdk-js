@@ -81,13 +81,12 @@ import { verifyCredentials } from "@idos-network/credentials";
 
 // We have a list of issuers we trust to
 const allowedIssuers = [{
-    issuer: "https://vc-issuers.cool.id/issuer/1",
+    issuer: "https://invalid-issuer.id/",
     publicKeyMultibase: "z6MkfjxfHddp5Pf1GGUSJQ3m6PEycX2DFTVFruUMZsHPXoJx",
   },
-  {
-    issuer: key.issuer,
-    publicKeyMultibase: key.publicKeyMultibase,
-  }
+  // Ed25519VerificationKey2020 instance, or issuer informations are available
+  // You don't need a privateKeyMultibase for verification!
+  key,
 ]
 
 const verified = await verifyCredentials(credentials, allowedIssuers);

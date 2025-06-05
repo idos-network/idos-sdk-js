@@ -13,6 +13,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   const grant = await idOSConsumer.getAccessGrantsForCredential(credentialsId);
 
+  console.log("Grant: ", grant);
+
   // @ts-expect-error Missing types
   if (!grant || grant.inserter_id !== user.address) {
     return Response.json({ error: "grant not found" }, { status: 400 });
@@ -27,7 +29,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   // Verify the credential
   const verificationResult = await idOSConsumer.verifyCredentials(data, [
     {
-      issuer: "https://localhost:3000/idos/issuers/1",
+      issuer: "https://localhost:3000/idos",
       publicKeyMultibase: "z6MknvvLerVJyLVHvhU8evoB6udXU9Ueu6PGmaztwVarPBxQ",
     },
   ]);

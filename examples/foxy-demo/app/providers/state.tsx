@@ -128,9 +128,9 @@ export const machine = setup({
           );
 
         // If yes we can use it, otherwise we need to request a new one
-        if (grants.length > 0) {
+        /*if (grants.length > 0) {
           return grants[0];
-        }
+        } */
 
         const id = input.credentials[0].id;
 

@@ -291,7 +291,7 @@ const credentialSubject = {
 
 const issuer = {
   id: `${issuer}/keys/1`,
-  controller: `${issuer}/issuer/1`,
+  controller: `${issuer}/issuers/1`,
   publicKeyMultibase: multibaseSigningKeyPair.publicKey,
   privateKeyMultibase: multibaseSigningKeyPair.privateKey,
 }

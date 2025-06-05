@@ -11,12 +11,12 @@ describe("verifiableCredentials", () => {
 
     const validKey = await Ed25519VerificationKey2020.generate({
       id: `${issuer}/keys/1`,
-      controller: `${issuer}/issuer/1`,
+      controller: `${issuer}/issuers/1`,
     });
 
     const anotherKey = await Ed25519VerificationKey2020.generate({
       id: `${issuer2}/keys/1`,
-      controller: `${issuer2}/issuer/1`,
+      controller: `${issuer2}/issuers/1`,
     });
 
     const data = await buildCredentials(
@@ -72,18 +72,7 @@ describe("verifiableCredentials", () => {
     expect(data.proof.type).toBe("Ed25519Signature2020");
     expect(data.proof.verificationMethod).toBe("https://vc-issuers.cool.id/idos/keys/1");
 
-    const allowedIssuers = [
-      {
-        // This one the right one
-        issuer: issuer2,
-        publicKeyMultibase: anotherKey.publicKeyMultibase,
-      },
-      {
-        // This one is valid
-        issuer,
-        publicKeyMultibase: validKey.publicKeyMultibase,
-      },
-    ];
+    const allowedIssuers = [anotherKey, validKey];
 
     const verified = await verifyCredentials(data, allowedIssuers);
     expect(verified).toBe(true);
@@ -99,5 +88,16 @@ describe("verifiableCredentials", () => {
 
     const invalidVerified = await verifyCredentials(data, invalidIssuers);
     expect(invalidVerified).toBe(false);
+
+    // Accepts issuer as issuer object
+    const validIssuer = [
+      {
+        issuer,
+        publicKeyMultibase: validKey.publicKeyMultibase,
+      },
+    ];
+
+    const validIssuerVerified = await verifyCredentials(data, validIssuer);
+    expect(validIssuerVerified).toBe(true);
   });
 });
