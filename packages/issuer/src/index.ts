@@ -14,6 +14,7 @@ import type {
 import {
   type CredentialFields,
   type CredentialSubject,
+  type Credentials,
   type CredentialsIssuer,
   buildCredentials,
 } from "@idos-network/credentials";
@@ -143,8 +144,7 @@ export class idOSIssuer {
     fields: CredentialFields,
     subject: CredentialSubject,
     issuer: CredentialsIssuer,
-    // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
-  ): Promise<any> {
+  ): Promise<Credentials> {
     return buildCredentials(fields, subject, issuer);
   }
 
@@ -153,4 +153,14 @@ export class idOSIssuer {
   }
 }
 
-export type { idOSCredential, idOSGrant, idOSUser, idOSUserAttribute, idOSWallet };
+export type {
+  idOSCredential,
+  idOSGrant,
+  idOSUser,
+  idOSUserAttribute,
+  idOSWallet,
+  CredentialFields,
+  CredentialSubject,
+  CredentialsIssuer,
+  Credentials,
+};

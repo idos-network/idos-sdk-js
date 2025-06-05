@@ -102,6 +102,7 @@ export interface CredentialSubject {
 }
 
 export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "residentialAddress"> {
+  "@context": string;
   residentialAddressStreet?: string;
   residentialAddressHouseNumber?: string;
   residentialAddressAdditionalAddressInfo?: string;

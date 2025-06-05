@@ -36,17 +36,19 @@ export async function buildCredentials(
 ): Promise<Credentials> {
   const { residentialAddress, ...subjectData } = subject;
 
+  const credentialSubject = {
+    "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
+    ...convertValues(subjectData),
+    ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
+  };
+
   // Create credentials container
   const credential = {
     "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS_V1, CONTEXT_ED25519_SIGNATURE_2020_V1],
     type: ["VerifiableCredential"],
     issuer: issuer.controller,
     ...convertValues(fields),
-    credentialSubject: {
-      "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
-      ...convertValues(subjectData),
-      ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
-    },
+    credentialSubject,
   };
 
   let key: Ed25519VerificationKey2020 | undefined;
