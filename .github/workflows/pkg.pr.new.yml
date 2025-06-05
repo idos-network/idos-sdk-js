@@ -32,4 +32,4 @@ jobs:
         run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer
 
       - name: Release
-        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/credentials'
+        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer'
