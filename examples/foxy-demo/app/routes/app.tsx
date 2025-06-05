@@ -34,14 +34,6 @@ export default function App() {
         window.open(message.data.open, message.data.target, message.data.features);
       } else {
         send({ type: "kycCompleted" });
-        // setKycUrl(null);
-        // Hide iframe, load data, etc...
-        // Oauth2 attributes are presented in the message data
-        // {
-        //    "code": "MXES5XpDzMRAHyMI3Jx5K3nrxzZjWjEr-Cskq3Jevso",
-        //    "sub1": "MXES5XpDzMRAHyMI3Jx5K3nrxzZjWjEr-Cskq3Jevso",
-        //    "state": "state_arg"
-        // }
       }
     }
   }, []);

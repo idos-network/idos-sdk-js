@@ -84,7 +84,7 @@ const allowedIssuers = [{
     issuer: "https://invalid-issuer.id/",
     publicKeyMultibase: "z6MkfjxfHddp5Pf1GGUSJQ3m6PEycX2DFTVFruUMZsHPXoJx",
   },
-  // Ed25519VerificationKey2020 instance, or issuer informations are available
+  // Ed25519VerificationKey2020 instance, or issuer information are available
   // You don't need a privateKeyMultibase for verification!
   key,
 ]
