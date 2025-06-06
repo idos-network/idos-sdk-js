@@ -31,7 +31,8 @@
   "main": "./dist/index.js",
   "peerDependencies": {
     "ethers": "catalog:",
-    "near-api-js": "3.0.4"
+    "near-api-js": "3.0.4",
+    "typescript": "^5.8.3"
   },
   "publishConfig": {
     "access": "public"

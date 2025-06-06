@@ -16,5 +16,10 @@
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "postinstall": "lefthook install",
     "test": "turbo run test"
+  },
+  "pnpm": {
+    "overrides": {
+      "web-streams-polyfill": "3.3.3"
+    }
   }
 }

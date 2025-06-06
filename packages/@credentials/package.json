@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/credentials",
   "description": "idOS Credentials JavaScript SDK",
-  "version": "1.0.0-rc.1.0",
+  "version": "0.0.1",
   "clean-package": {
     "remove": ["devDependencies.@idos-network/core"]
   },
@@ -10,15 +10,11 @@
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
     "@digitalbazaar/vc": "^7.2.0",
     "base85": "^3.1.0",
-    "jsonld-document-loader": "^2.3.0"
+    "jsonld-document-loader": "^2.3.0",
+    "web-streams-polyfill": "3.3.3"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "clean-package": "^2.2.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
-    "tsdown": "^0.11.12",
-    "typescript": "^5.8.3",
     "vitest": "^3.1.4"
   },
   "engines": {
@@ -26,30 +22,25 @@
   },
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
     }
   },
-  "files": ["dist/**/*", "src/**/*"],
   "homepage": "https://idos.network",
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "dist/index.js",
+  "peerDependencies": {
+    "typescript": "^5.8.3"
+  },
   "publishConfig": {
     "access": "public"
   },
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
-    "build": "tsdown",
-    "dev": "tsdown  --watch",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
-    "publint": "pnpx publint --strict",
-    "release-it": "release-it",
     "test": "vitest",
     "test:watch": "vitest --watch"
   },
   "sideEffects": false,
-  "type": "module",
-  "types": "./dist/index.d.ts"
+  "type": "module"
 }
