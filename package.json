@@ -2,6 +2,7 @@
   "name": "idos-sdk-js",
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@web/rollup-plugin-import-meta-assets": "^2.2.1",
     "lefthook": "1.11.3",
     "turbo": "^2.5.3"
   },
