@@ -8,7 +8,7 @@
 | **[`📁 consumer`](./packages/consumer/)** | idOS JavaScript SDK for consumers |
 | **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers   |
 
-`@core` and `@controllers` are internal packages.
+`@core`, `@controllers` and `@credentials` are internal packages.
 
 ## Auxiliary Applications
 | Folder                                                 | Contents                                                                                                                                |
