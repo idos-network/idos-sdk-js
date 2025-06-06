@@ -2,9 +2,9 @@ import https from "node:https";
 import jwt from "jsonwebtoken";
 import { SERVER_ENV } from "./envFlags.server";
 
-export const fetchSharedToken = async (idosCredentialsId: string) => {
+export const fetchSharedToken = async (applicantId: string) => {
   const response = await fetch(
-    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/${idosCredentialsId}/sharedToken?forClientId=transak`,
+    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/${applicantId}/sharedToken?forClientId=transak`,
     {
       method: "GET",
       headers: {
@@ -17,6 +17,10 @@ export const fetchSharedToken = async (idosCredentialsId: string) => {
       }),
     },
   );
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch shared token (${response.statusText}).`);
+  }
 
   const data = await response.json();
   return data.token;

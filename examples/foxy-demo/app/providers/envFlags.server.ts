@@ -10,6 +10,8 @@ export const serverEnvSchema = z.object({
   KRAKEN_CLIENT_ID: z.string(),
   IDOS_CONSUMER_SIGNER: z.string(),
   IDOS_RECIPIENT_ENC_PRIVATE_KEY: z.string(),
+  KRAKEN_PUBLIC_KEY_MULTIBASE: z.string(),
+  KRAKEN_ISSUER: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
