@@ -803,9 +803,6 @@ importers:
 
   packages/consumer:
     dependencies:
-      '@idos-network/credentials':
-        specifier: workspace:*
-        version: link:../credentials
       '@kwilteam/kwil-js':
         specifier: 'catalog:'
         version: 0.9.4(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -825,6 +822,9 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../credentials
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
@@ -883,9 +883,6 @@ importers:
 
   packages/issuer:
     dependencies:
-      '@idos-network/credentials':
-        specifier: workspace:*
-        version: link:../credentials
       es-toolkit:
         specifier: ^1.23.0
         version: 1.34.1
@@ -899,6 +896,9 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../@core
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../credentials
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
