@@ -43,6 +43,8 @@ export async function buildInsertableIDOSCredential(
 
 export async function getNearFullAccessPublicKeys(
   namedAddress: string,
+  networkId = "testnet",
+  nodeUrl = "https://rpc.testnet.near.org",
 ): Promise<string[] | undefined> {
   let connect: typeof ConnectType;
   try {
@@ -52,8 +54,8 @@ export async function getNearFullAccessPublicKeys(
   }
 
   const connectionConfig = {
-    networkId: "",
-    nodeUrl: "",
+    networkId,
+    nodeUrl,
   };
   const nearConnection = await connect(connectionConfig);
 

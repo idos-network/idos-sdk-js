@@ -112,6 +112,20 @@ export async function createIDOSUserProfile({
 }) {
   const issuer = await idOSIssuer();
 
+  console.dir(
+    {
+      id: userId,
+      recipient_encryption_public_key: recipientEncryptionPublicKey,
+    },
+    {
+      address: wallet.address,
+      wallet_type: wallet.type,
+      message: wallet.message,
+      signature: wallet.signature,
+      public_key: wallet.publicKey,
+    },
+  );
+
   const user = await issuer.createUser(
     {
       id: userId,
@@ -122,7 +136,7 @@ export async function createIDOSUserProfile({
       wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: "",
+      public_key: wallet.publicKey,
     },
   );
 
