@@ -598,6 +598,15 @@ importers:
 
   examples/foxy-demo:
     dependencies:
+      '@digitalbazaar/ed25519-signature-2020':
+        specifier: ^5.4.0
+        version: 5.4.0(web-streams-polyfill@3.3.3)
+      '@digitalbazaar/ed25519-verification-key-2020':
+        specifier: ^4.2.0
+        version: 4.2.0
+      '@digitalbazaar/vc':
+        specifier: ^7.2.0
+        version: 7.2.0(web-streams-polyfill@3.3.3)
       '@idos-network/client':
         specifier: workspace:*
         version: link:../../packages/client
@@ -625,6 +634,9 @@ importers:
       '@xstate/react':
         specifier: ^5.0.5
         version: 5.0.5(@types/react@19.1.6)(react@19.1.0)(xstate@5.19.4)
+      base85:
+        specifier: ^3.1.0
+        version: 3.2.0
       ethers:
         specifier: 'catalog:'
         version: 6.14.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -998,9 +1010,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-      web-streams-polyfill:
-        specifier: 3.3.3
-        version: 3.3.3
     devDependencies:
       '@idos-network/core':
         specifier: workspace:*
