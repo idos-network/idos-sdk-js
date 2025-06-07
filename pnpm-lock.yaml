@@ -1051,9 +1051,6 @@ importers:
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
-      web-streams-polyfill:
-        specifier: 3.3.3
-        version: 3.3.3
     devDependencies:
       '@idos-network/core':
         specifier: workspace:*
