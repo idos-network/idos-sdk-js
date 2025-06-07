@@ -1,13 +1,13 @@
 diff --git a/dist/production/index.js b/dist/production/index.js
-index 7494b25c43c08069b9d990dd1692bd5262314e3b..ffd44be748835424c803356d402736d5fb5995ee 100644
+index 7494b25c43c08069b9d990dd1692bd5262314e3b..6c8cf7f267764f0ff1daf6b7a0820280eaa0cb25 100644
 --- a/dist/production/index.js
 +++ b/dist/production/index.js
-@@ -10958,7 +10958,7 @@ var createRequestHandler = (build, mode) => {
-       });
-     };
-     if (_build.future.unstable_middleware) {
--      if (initialContext == null) {
-+      if (!(initialContext instanceof Map)) {
-         loadContext = new unstable_RouterContextProvider();
-       } else {
-         try {
+@@ -522,7 +522,7 @@ var _map;
+ var unstable_RouterContextProvider = class {
+   constructor(init) {
+     __privateAdd(this, _map, /* @__PURE__ */ new Map());
+-    if (init) {
++    if (init && Symbol.iterator in Object(init)) {
+       for (let [context, value] of init) {
+         this.set(context, value);
+       }
