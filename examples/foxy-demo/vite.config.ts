@@ -7,5 +7,13 @@ export default defineConfig(({ isSsrBuild }) => ({
   build: {
     target: isSsrBuild ? "node22" : "esnext",
   },
+  rollupOptions: {
+    external: [
+      "@digitalbazaar/ed25519-signature-2020",
+      "@digitalbazaar/ed25519-verification-key-2020",
+      "@digitalbazaar/vc",
+      "base85",
+    ],
+  },
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
 }));
