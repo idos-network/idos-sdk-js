@@ -21,6 +21,9 @@
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3"
+    },
+    "patchedDependencies": {
+      "react-router@7.6.2": "patches/react-router@7.6.2.patch"
     }
   }
 }
