@@ -10,7 +10,14 @@
   },
   "linter": {
     "enabled": true,
-    "ignore": ["dist/**/*", "node_modules/**/*", "./**/*.gen.ts", "./**/*/ui/*.tsx", "./**/*/*.js"],
+    "ignore": [
+      "dist/**/*",
+      "node_modules/**/*",
+      "./**/*.gen.ts",
+      "./**/*/ui/*.tsx",
+      "./**/*/*.js",
+      ".react-router/**/*"
+    ],
     "rules": {
       "recommended": true,
       "nursery": {

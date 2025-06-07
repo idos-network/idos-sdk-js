@@ -15,6 +15,7 @@ Upserts
 addgroup
 adduser
 appkit
+banxa
 barebones
 biomejs
 chakra
@@ -69,6 +70,7 @@ tailwindcss
 tanstack
 timelock
 timelocks
+transak
 tweetnacl
 typesafety
 uidotdev
