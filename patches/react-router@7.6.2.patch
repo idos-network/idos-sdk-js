@@ -1,4 +1,7 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 58eb176 (build: Patch development.js too)
 diff --git a/dist/development/index.js b/dist/development/index.js
 index 2848b755d791eaee23c4097e9b6076419e11a5c0..6aa7c50e182bd8e596628e4897dd198c04590a11 100644
 --- a/dist/development/index.js
