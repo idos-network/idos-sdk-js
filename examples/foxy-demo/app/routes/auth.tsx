@@ -15,6 +15,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     throw new Error("Address query parameter is required");
   }
 
+  console.log("SERVER_ENV", SERVER_ENV);
+
   const message = new SiweMessage({
     domain: SERVER_ENV.BASE_URL,
     address,

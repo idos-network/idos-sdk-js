@@ -19,7 +19,10 @@ export type ServerEnv = z.infer<typeof serverEnvSchema>;
 /** Zod will filter all the keys not specified on the schema */
 function buildEnv(): ServerEnv {
   try {
-    return serverEnvSchema.parse(process.env);
+    return serverEnvSchema.parse({
+      ...process.env,
+      BASE_URL: process.env.BASE_URL ?? process.env.VERCEL_URL,
+    });
   } catch (error: unknown) {
     console.error("Warning: invalid server env vars!");
     console.error(error);

@@ -12,10 +12,10 @@ import type {
   idOSWallet,
 } from "@idos-network/core/types";
 import {
+  type AvailableIssuerType,
   type CredentialFields,
   type CredentialSubject,
   type Credentials,
-  type CredentialsIssuer,
   buildCredentials,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
@@ -143,7 +143,7 @@ export class idOSIssuer {
   async buildCredentials(
     fields: CredentialFields,
     subject: CredentialSubject,
-    issuer: CredentialsIssuer,
+    issuer: AvailableIssuerType,
   ): Promise<Credentials> {
     return buildCredentials(fields, subject, issuer);
   }
@@ -161,6 +161,6 @@ export type {
   idOSWallet,
   CredentialFields,
   CredentialSubject,
-  CredentialsIssuer,
+  AvailableIssuerType,
   Credentials,
 };
