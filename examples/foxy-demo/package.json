@@ -1,14 +1,6 @@
 {
   "name": "foxy-demo",
-  "private": true,
   "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "build": "react-router build",
-    "dev": "react-router dev",
-    "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
-  },
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
@@ -51,5 +43,13 @@
     "vite": "^6.3.5",
     "vite-plugin-node-polyfills": "^0.23.0",
     "vite-tsconfig-paths": "^5.1.4"
-  }
+  },
+  "private": true,
+  "scripts": {
+    "build": "react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
+  },
+  "type": "module"
 }

@@ -11,8 +11,8 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "@idos-network/credentials": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
@@ -38,8 +38,8 @@
     "@digitalbazaar/vc": "^7.2.0",
     "base85": "^3.1.0",
     "jsonld-document-loader": "^2.3.0",
-    "web-streams-polyfill": "3.3.3",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "web-streams-polyfill": "3.3.3"
   },
   "publishConfig": {
     "access": "public"
