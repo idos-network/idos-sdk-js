@@ -38,18 +38,8 @@
     "ethers": "catalog:",
     "jsonld-document-loader": "^2.3.0",
     "near-api-js": "3.0.4",
-<<<<<<< HEAD
     "typescript": "^5.8.3",
     "web-streams-polyfill": "3.3.3"
-=======
-    "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
-    "@digitalbazaar/vc": "^7.2.0",
-    "base85": "^3.1.0",
-    "jsonld-document-loader": "^2.3.0",
-    "web-streams-polyfill": "3.3.3",
-    "typescript": "^5.8.3"
->>>>>>> c62b40b (Fix build)
   },
   "publishConfig": {
     "access": "public"

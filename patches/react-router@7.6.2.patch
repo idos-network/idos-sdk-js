@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 58eb176 (build: Patch development.js too)
 diff --git a/dist/development/index.js b/dist/development/index.js
 index 2848b755d791eaee23c4097e9b6076419e11a5c0..6aa7c50e182bd8e596628e4897dd198c04590a11 100644
 --- a/dist/development/index.js
@@ -28,30 +24,3 @@ index 7494b25c43c08069b9d990dd1692bd5262314e3b..dcb006fb9b3e906da2e1eba37ad6d9ce
        for (let [context, value] of init) {
          this.set(context, value);
        }
-=======
-diff --git a/dist/production/index.js b/dist/production/index.js
-index 7494b25c43c08069b9d990dd1692bd5262314e3b..6c8cf7f267764f0ff1daf6b7a0820280eaa0cb25 100644
---- a/dist/production/index.js
-+++ b/dist/production/index.js
-<<<<<<< HEAD
-@@ -10958,7 +10958,7 @@ var createRequestHandler = (build, mode) => {
-       });
-     };
-     if (_build.future.unstable_middleware) {
--      if (initialContext == null) {
-+      if (!(initialContext instanceof Map)) {
-         loadContext = new unstable_RouterContextProvider();
-       } else {
-         try {
->>>>>>> 08af96e (build: Fix a react-router build in vercel env)
-=======
-@@ -522,7 +522,7 @@ var _map;
- var unstable_RouterContextProvider = class {
-   constructor(init) {
-     __privateAdd(this, _map, /* @__PURE__ */ new Map());
--    if (init) {
-+    if (init && Symbol.iterator in Object(init)) {
-       for (let [context, value] of init) {
-         this.set(context, value);
-       }
->>>>>>> c62b40b (Fix build)
