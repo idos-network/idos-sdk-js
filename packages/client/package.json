@@ -17,9 +17,6 @@
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
-  "peerDependencies": {
-    "typescript": "catalog:build"
-  },
   "engines": {
     "node": ">=20.0.0"
   },
@@ -33,6 +30,9 @@
   "homepage": "https://idos.network",
   "license": "MIT",
   "module": "dist/index.js",
+  "peerDependencies": {
+    "typescript": "catalog:build"
+  },
   "publishConfig": {
     "access": "public"
   },
