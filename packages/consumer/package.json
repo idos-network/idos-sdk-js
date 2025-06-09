@@ -13,7 +13,7 @@
     "base85": "catalog:core",
     "jsonld-document-loader": "catalog:core",
     "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "^4.1.0"
+    "web-streams-polyfill": "catalog:core"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
