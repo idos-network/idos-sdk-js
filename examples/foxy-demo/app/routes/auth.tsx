@@ -1,6 +1,5 @@
 import { redirect } from "react-router";
 import { SiweMessage } from "siwe";
-import { SERVER_ENV } from "~/providers/envFlags.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/auth";
 
@@ -15,13 +14,25 @@ export async function loader({ request }: Route.LoaderArgs) {
     throw new Error("Address query parameter is required");
   }
 
-  console.log("SERVER_ENV", SERVER_ENV);
+  const uri = new URL(request.url);
+  // Remove hash, query parameters, and search parameters
+  uri.hash = "";
+  uri.search = "";
+  uri.pathname = "";
 
-  const message = new SiweMessage({
-    domain: SERVER_ENV.BASE_URL,
+  console.log("Data: ", {
+    domain: url.hostname,
     address,
     statement: "Sign in with Ethereum to the app.",
-    uri: SERVER_ENV.BASE_URL,
+    uri: uri.toString(),
+    version: "1",
+  });
+
+  const message = new SiweMessage({
+    domain: url.hostname,
+    address,
+    statement: "Sign in with Ethereum to the app.",
+    uri: uri.toString(),
     version: "1",
     chainId: 1,
   });
