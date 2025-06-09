@@ -71,6 +71,7 @@ tanstack
 timelock
 timelocks
 transak
+tsdown
 tweetnacl
 typesafety
 uidotdev
@@ -79,6 +80,7 @@ vercel
 viem
 viewports
 vite
+vitest
 wagmi
 webauthn
 websdk
