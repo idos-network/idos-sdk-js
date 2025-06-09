@@ -20,14 +20,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   uri.search = "";
   uri.pathname = "";
 
-  console.log("Data: ", {
-    domain: url.hostname,
-    address,
-    statement: "Sign in with Ethereum to the app.",
-    uri: uri.toString(),
-    version: "1",
-  });
-
   const message = new SiweMessage({
     domain: url.hostname,
     address,
