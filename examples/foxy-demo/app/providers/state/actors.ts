@@ -49,13 +49,12 @@ export const actors = {
     return kycUrlData.url;
   }),
 
-  createSharableToken: fromPromise(async ({ input }: { input: Context["accessGrant"] }) => {
+  createSharableToken: fromPromise(async ({ input }: { input: Context["credential"] }) => {
     if (!input) {
       throw new Error("Credential not found");
     }
 
-    // @ts-expect-error Missing types
-    const kycUrl = await fetch(`/app/kyc/token?credentialsId=${input.data_id ?? input.id}`);
+    const kycUrl = await fetch(`/app/kyc/token?credentialsId=${input.id}`);
 
     if (kycUrl.status !== 200) {
       throw new Error("KYC API is not available. Please try again later.");
@@ -77,37 +76,41 @@ export const actors = {
           authPublicKey: COMMON_ENV.KRAKEN_ISSUER_PUBLIC_KEY,
         },
       ],
+      publicNotesFieldFilters: {
+        pick: { level: [COMMON_ENV.KRAKEN_LEVEL] },
+        omit: {},
+      },
     });
 
     if (credentials.length === 0) {
       throw new Error("No credentials found, start the KYC process");
     }
 
-    return credentials;
+    return credentials[0];
   }),
 
   requestAccessGrant: fromPromise(
     async ({
       input,
     }: {
-      input: { client: Context["loggedInClient"]; credentials: Context["credentials"] };
+      input: { client: Context["loggedInClient"]; credential: Context["credential"] };
     }) => {
       if (!input.client) {
         throw new Error("Client not found");
       }
 
-      if (!input.credentials || input.credentials.length === 0) {
+      if (!input.credential) {
         throw new Error("No credentials found");
       }
 
-      const id = input.credentials[0].id;
+      const id = input.credential.id;
 
       const ag = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
       });
 
-      return ag;
+      return true;
     },
   ),
 
@@ -115,23 +118,29 @@ export const actors = {
     async ({
       input,
     }: {
-      input: { client: Context["loggedInClient"]; accessGrant: Context["accessGrant"] };
+      input: { client: Context["loggedInClient"]; credential: Context["credential"] };
     }) => {
-      if (!input.client || !input.accessGrant) {
+      if (!input.client || !input.credential) {
         throw new Error("Client or access grant not found");
       }
 
-      await input.client.revokeAccessGrant(input.accessGrant.id);
+      const accessGrants = await input.client.getAccessGrantsOwned();
+      const accessGrant = accessGrants.find((ag) => ag.data_id === input.credential?.id);
+
+      if (!accessGrant) {
+        throw new Error("Access grant not found");
+      }
+
+      await input.client.revokeAccessGrant(accessGrant.id);
     },
   ),
 
-  fetchUserData: fromPromise(async ({ input }: { input: Context["accessGrant"] }) => {
+  fetchUserData: fromPromise(async ({ input }: { input: Context["credential"] }) => {
     if (!input) {
       throw new Error("Credential not found");
     }
 
-    // @ts-expect-error Missing types
-    const data = await fetch(`/app/kyc/data?credentialsId=${input.data_id ?? input.id}`);
+    const data = await fetch(`/app/kyc/data?credentialsId=${input.id}`);
 
     return await data.json();
   }),

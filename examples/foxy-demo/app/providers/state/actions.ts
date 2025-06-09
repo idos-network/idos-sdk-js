@@ -15,7 +15,7 @@ export const actions = {
     loggedInClient: null,
     sharableToken: null,
     credentials: [],
-    accessGrant: null,
+    accessGrant: false,
     findCredentialsAttempts: 0,
     data: null,
     errorMessage: null,
@@ -42,7 +42,7 @@ export const actions = {
   }),
 
   setAccessGrant: assign({
-    accessGrant: ({ event }) => event.output,
+    accessGrant: ({ event }) => event.output ?? false,
   }),
 
   setSharableToken: assign({

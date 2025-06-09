@@ -28,8 +28,8 @@ export const machine = setup({
     profile: null,
     loggedInClient: null,
     sharableToken: null,
-    credentials: [],
-    accessGrant: null,
+    credential: null,
+    accessGrant: false,
     findCredentialsAttempts: 0,
     data: null,
   },
@@ -152,7 +152,7 @@ export const machine = setup({
         src: "requestAccessGrant",
         input: ({ context }) => ({
           client: context.loggedInClient,
-          credentials: context.credentials,
+          credential: context.credential,
         }),
         onDone: {
           actions: ["setAccessGrant"],
@@ -178,7 +178,7 @@ export const machine = setup({
       invoke: {
         id: "createSharableToken",
         src: "createSharableToken",
-        input: ({ context }) => context.accessGrant,
+        input: ({ context }) => context.credential,
         onDone: {
           target: "dataOrTokenFetched",
           actions: ["setSharableToken"],
@@ -192,7 +192,7 @@ export const machine = setup({
     fetchUserData: {
       invoke: {
         src: "createSharableToken",
-        input: ({ context }) => context.accessGrant,
+        input: ({ context }) => context.credential,
         onDone: {
           target: "dataOrTokenFetched",
           actions: ["setUserData"],
@@ -216,7 +216,7 @@ export const machine = setup({
         src: "revokeAccessGrant",
         input: ({ context }) => ({
           client: context.loggedInClient,
-          accessGrant: context.accessGrant,
+          credential: context.credential,
         }),
       },
       onDone: {

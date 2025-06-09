@@ -14,10 +14,10 @@ export interface Context {
   kycUrl: string | null;
   profile: boolean | null;
   sharableToken: string | null;
-  credentials: idOSCredential[] | null;
+  credential: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
-  accessGrant: idOSCredential | null;
+  accessGrant: boolean;
   data: unknown | null;
 }
 
