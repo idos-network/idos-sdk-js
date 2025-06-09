@@ -17,6 +17,8 @@
     "web-streams-polyfill": "catalog:core"
   },
   "devDependencies": {
+    "@idos-network/core": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
