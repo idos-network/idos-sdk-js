@@ -1123,6 +1123,12 @@ importers:
         specifier: 3.3.3
         version: 3.3.3
     devDependencies:
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../@core
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../@credentials
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
