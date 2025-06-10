@@ -25,7 +25,8 @@
     "ripple-binary-codec": "^2.3.0",
     "viem": "latest",
     "wagmi": "^2.12.0",
-    "xumm": "^1.8.0"
+    "xumm": "^1.8.0",
+    "zustand": "^5.0.0"
   },
   "devDependencies": {
     "@near-js/types": "^0.2.1",

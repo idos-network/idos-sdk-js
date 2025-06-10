@@ -1,5 +1,6 @@
 import { useWalletSelector } from "@/core/near";
 import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
+import { useWalletStore } from "@/stores/wallet";
 import {
   Box,
   Button,
@@ -83,19 +84,21 @@ const ListItemLink = (props: NavLinkProps & LinkProps) => {
 
 const DisconnectButton = () => {
   const { isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
+  const { disconnectAsync } = useDisconnect();
   const { selector, setAccounts } = useWalletSelector();
   const queryClient = useQueryClient();
   const { setSigner } = useSigner();
   const client = useUnsafeIdOS();
+  const { resetWallet } = useWalletStore();
 
   const handleDisconnect = async () => {
-    if (isConnected) disconnect();
+    if (isConnected) await disconnectAsync();
     if (selector.isSignedIn()) await (await selector.wallet()).signOut();
     if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);
     setAccounts([]);
     queryClient.removeQueries();
+    resetWallet();
   };
 
   return (

@@ -13,10 +13,12 @@ import {
 } from "react";
 
 import { useEthersSigner } from "@/core/wagmi";
+import * as GemWallet from "@gemwallet/api";
 import invariant from "tiny-invariant";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
+import { useWalletStore } from "./stores/wallet";
 
 const _idOSClient = new idOSClientConfiguration({
   nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
@@ -71,34 +73,34 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [client, setClient] = useState<idOSClient>(_idOSClient);
   const { signer: evmSigner } = useSigner();
   const { accountId, selector } = useWalletSelector();
+  const { walletType, walletAddress } = useWalletStore();
 
   useEffect(() => {
+    if (!walletType) {
+      setIsLoading(false);
+      return;
+    }
     const setupClient = async () => {
-      setIsLoading(true);
-
       try {
         // Always start with a fresh client
+        setIsLoading(true);
         const newClient = await _idOSClient.createClient();
-        if (!(evmSigner || accountId)) {
+        if (!walletAddress || !walletAddress) {
           setClient(newClient);
           setIsLoading(false);
           return;
         }
         const nearSigner = accountId ? await selector.wallet() : undefined;
 
-        // @todo: remove this once tested with new ripple keypair
-        // const xrpGemSigner = await createXrpSigner({
-        //   type: "GEM",
-        //   instance: GemWalletAPI,
-        // });
+        const signerSrc = {
+          evm: evmSigner,
+          near: nearSigner,
+          xrpl: GemWallet,
+        };
 
-        // const xrpXamanSigner = await createXrpSigner({
-        //   type: "XAMAN",
-        //   instance: xummInstance,
-        // });
-
-        const signer = evmSigner || nearSigner;
-        const withSigner = await newClient.withUserSigner(signer);
+        const withSigner = await newClient.withUserSigner(
+          signerSrc[walletType as "evm" | "near" | "xrpl"],
+        );
 
         // Check if the user has a profile and log in if they do
         if (await withSigner.hasProfile()) {
@@ -116,7 +118,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [evmSigner, accountId, selector]);
+  }, [evmSigner, accountId, selector, walletType, walletAddress]);
 
   // While loading, show a spinner
   if (isLoading) {
@@ -128,7 +130,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If no signer is available, show the connect wallet screen
-  if (!evmSigner && !accountId) {
+  if (!walletType || !walletAddress) {
     return <ConnectWallet />;
   }
 
