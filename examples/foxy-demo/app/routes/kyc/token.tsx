@@ -1,26 +1,26 @@
 import { userContext } from "~/middlewares/auth";
-import { getSharedCredentials } from "~/providers/idos.server";
+import { getSharedCredential } from "~/providers/idos.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
 import type { Route } from "./+types/token";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
-  const credentialsId = url.searchParams.get("credentialsId");
+  const credentialId = url.searchParams.get("credentialId");
   const user = context.get(userContext);
 
-  if (!credentialsId || !user) {
-    return Response.json({ error: "credentialsId or user is required" }, { status: 400 });
+  if (!credentialId || !user) {
+    return Response.json({ error: "credentialId or user is required" }, { status: 400 });
   }
 
   try {
-    const credentials = await getSharedCredentials(credentialsId, user.address);
+    const data = await getSharedCredential(credentialId, user.address);
 
-    if (!credentials.credentialSubject.applicantId) {
+    if (!data.credentialSubject.applicantId) {
       throw new Error("Credentials are from previous version and can't be used.");
     }
 
     // Call kraken to get the token
-    const token = await fetchSharedToken(credentials.credentialSubject.applicantId);
+    const token = await fetchSharedToken(data.credentialSubject.applicantId);
 
     return Response.json({ token });
   } catch (error) {

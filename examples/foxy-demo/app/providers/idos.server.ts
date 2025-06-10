@@ -3,7 +3,7 @@ import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
-export async function getSharedCredentials(credentialsId: string, inserterId: string) {
+export async function getSharedCredential(credentialId: string, inserterId: string) {
   const idOSConsumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
@@ -12,7 +12,7 @@ export async function getSharedCredentials(credentialsId: string, inserterId: st
     recipientEncryptionPrivateKey: SERVER_ENV.IDOS_RECIPIENT_ENC_PRIVATE_KEY,
   });
 
-  const grant = await idOSConsumer.getAccessGrantsForCredential(credentialsId);
+  const grant = await idOSConsumer.getAccessGrantsForCredential(credentialId);
 
   // @ts-expect-error Missing types
   if (!grant || grant.inserter_id !== inserterId) {
@@ -21,7 +21,7 @@ export async function getSharedCredentials(credentialsId: string, inserterId: st
 
   // Get data
   const credentialContents: string =
-    await idOSConsumer.getSharedCredentialContentDecrypted(credentialsId);
+    await idOSConsumer.getSharedCredentialContentDecrypted(credentialId);
 
   const data = JSON.parse(credentialContents);
 
@@ -34,7 +34,7 @@ export async function getSharedCredentials(credentialsId: string, inserterId: st
   ]);
 
   if (!verificationResult) {
-    throw new Error("Invalid credentials signature.");
+    throw new Error("Invalid credential signature.");
   }
 
   return data;

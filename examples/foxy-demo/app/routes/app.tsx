@@ -135,9 +135,9 @@ export default function App() {
   }
 
   const messages: Record<string, string> = {
-    findCredentials: "Finding credentials...",
+    findCredential: "Finding credential...",
     requestAccessGrant: "Requesting access grant...",
-    waitForCredentials: "Waiting for finding credentials next attempt...",
+    waitForCredential: "Waiting for finding credential next attempt...",
     login: "Logging in...",
     error: "Error",
   };

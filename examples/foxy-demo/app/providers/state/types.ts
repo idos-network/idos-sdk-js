@@ -10,7 +10,7 @@ export interface Context {
   errorMessage?: string | null;
   walletAddress: string | null;
   provider: Provider;
-  findCredentialsAttempts: number;
+  findCredentialAttempts: number;
   kycUrl: string | null;
   profile: boolean | null;
   sharableToken: string | null;

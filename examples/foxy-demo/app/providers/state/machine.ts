@@ -30,7 +30,7 @@ export const machine = setup({
     sharableToken: null,
     credential: null,
     accessGrant: false,
-    findCredentialsAttempts: 0,
+    findCredentialAttempts: 0,
     data: null,
   },
   states: {
@@ -103,7 +103,7 @@ export const machine = setup({
         src: "loginClient",
         input: ({ context }) => context.client,
         onDone: {
-          target: "findCredentials",
+          target: "findCredential",
           actions: ["setLoggedInClient"],
         },
         onError: {
@@ -112,22 +112,22 @@ export const machine = setup({
         },
       },
     },
-    findCredentials: {
+    findCredential: {
       invoke: {
-        id: "findCredentials",
-        src: "findCredentials",
+        id: "findCredential",
+        src: "findCredential",
         input: ({ context }) => context.loggedInClient,
         onDone: [
           {
-            actions: ["setCredentials"],
+            actions: ["setCredential"],
             target: "requestAccessGrant",
           },
         ],
         onError: [
           {
             guard: ({ context }) => context.kycUrl !== null,
-            target: "waitForCredentials",
-            actions: ["incrementFindCredentialsAttempts"],
+            target: "waitForCredential",
+            actions: ["incrementFindCredentialAttempts"],
           },
           {
             guard: ({ context }) => context.kycUrl === null,
@@ -136,12 +136,12 @@ export const machine = setup({
         ],
       },
     },
-    waitForCredentials: {
+    waitForCredential: {
       after: {
-        2000: "findCredentials",
+        2000: "findCredential",
       },
       always: {
-        guard: ({ context }) => context.findCredentialsAttempts >= 20,
+        guard: ({ context }) => context.findCredentialAttempts >= 20,
         target: "error",
         actions: ["setErrorMessage"],
       },

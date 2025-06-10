@@ -54,7 +54,7 @@ export const actors = {
       throw new Error("Credential not found");
     }
 
-    const kycUrl = await fetch(`/app/kyc/token?credentialsId=${input.id}`);
+    const kycUrl = await fetch(`/app/kyc/token?credentialId=${input.id}`);
 
     if (kycUrl.status !== 200) {
       throw new Error("KYC API is not available. Please try again later.");
@@ -64,7 +64,7 @@ export const actors = {
     return tokenData.token;
   }),
 
-  findCredentials: fromPromise(async ({ input }: { input: Context["loggedInClient"] }) => {
+  findCredential: fromPromise(async ({ input }: { input: Context["loggedInClient"] }) => {
     if (!input) {
       throw new Error("Client not found");
     }
@@ -100,12 +100,12 @@ export const actors = {
       }
 
       if (!input.credential) {
-        throw new Error("No credentials found");
+        throw new Error("No credential found");
       }
 
       const id = input.credential.id;
 
-      const ag = await input.client.requestAccessGrant(id, {
+      await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
       });
@@ -140,7 +140,7 @@ export const actors = {
       throw new Error("Credential not found");
     }
 
-    const data = await fetch(`/app/kyc/data?credentialsId=${input.id}`);
+    const data = await fetch(`/app/kyc/data?credentialId=${input.id}`);
 
     return await data.json();
   }),
