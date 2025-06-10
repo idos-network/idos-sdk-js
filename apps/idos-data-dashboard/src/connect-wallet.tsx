@@ -3,11 +3,35 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { useWalletSelector } from "@/core/near";
 
-import { connectXrp, getXrpPublicKey } from "./utils/xrp";
+import * as GemWallet from "@gemwallet/api";
+import { getGemWalletPublicKey } from "@idos-network/core";
+import { useEffect } from "react";
+import invariant from "tiny-invariant";
+import { useAccount } from "wagmi";
+import { useWalletStore } from "./stores/wallet";
 
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
   const { modal } = useWalletSelector();
+  const { address, isConnected: evmConnected } = useAccount();
+  const { setWalletType, setWalletAddress, setWalletPublicKey } = useWalletStore();
+  const { accountId } = useWalletSelector();
+
+  useEffect(() => {
+    if (evmConnected) {
+      setWalletType("evm");
+      setWalletAddress(address ?? null);
+      setWalletPublicKey(address ?? null);
+    }
+  }, [evmConnected, address, setWalletType, setWalletAddress, setWalletPublicKey]);
+
+  useEffect(() => {
+    if (accountId) {
+      setWalletType("near");
+      setWalletAddress(accountId ?? null);
+      setWalletPublicKey(accountId ?? null);
+    }
+  }, [accountId, setWalletType, setWalletAddress, setWalletPublicKey]);
 
   return (
     <Box
@@ -77,14 +101,24 @@ export const ConnectWallet = () => {
             <Button
               size="lg"
               justifyContent="space-between"
-              onClick={() =>
-                connectXrp()
-                  .then(() => getXrpPublicKey())
-                  .then((publicKey) => {
-                    // TODO: construct an XRP signer and sign into idOS
-                    console.log({ publicKey });
-                  })
-              }
+              onClick={() => {
+                GemWallet.isInstalled().then((res) => {
+                  if (res.result.isInstalled) {
+                    getGemWalletPublicKey(GemWallet).then((publicKey) => {
+                      invariant(publicKey, "Public key is required");
+                      setWalletType("xrpl");
+                      setWalletAddress(publicKey.address ?? null);
+                      setWalletPublicKey(publicKey.publicKey ?? null);
+                    });
+                  } else {
+                    alert("Please install GemWallet to connect with XRP");
+                    window.open(
+                      "https://chromewebstore.google.com/detail/gemwallet/egebedonbdapoieedfcfkofloclfghab?hl=en",
+                      "_blank",
+                    );
+                  }
+                });
+              }}
             >
               Connect with XRP
               <Image alt="XRP logo" src="/xrp.svg" w={10} h={10} />
