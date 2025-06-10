@@ -64,6 +64,12 @@ export interface CredentialSubject {
   /* City and state/province of birth. */
   placeOfBirth: string;
 
+  /* Email address */
+  email?: string;
+
+  /* Phone number */
+  phoneNumber?: string;
+
   /* Country that issued the identity document. */
   idDocumentCountry: string;
 
