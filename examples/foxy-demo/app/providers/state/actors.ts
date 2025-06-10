@@ -105,12 +105,12 @@ export const actors = {
 
       const id = input.credential.id;
 
-      await input.client.requestAccessGrant(id, {
+      const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
       });
 
-      return true;
+      return sharedCredential;
     },
   ),
 
@@ -118,14 +118,14 @@ export const actors = {
     async ({
       input,
     }: {
-      input: { client: Context["loggedInClient"]; credential: Context["credential"] };
+      input: { client: Context["loggedInClient"]; sharedCredential: Context["sharedCredential"] };
     }) => {
-      if (!input.client || !input.credential) {
+      if (!input.client || !input.sharedCredential) {
         throw new Error("Client or access grant not found");
       }
 
       const accessGrants = await input.client.getAccessGrantsOwned();
-      const accessGrant = accessGrants.find((ag) => ag.data_id === input.credential?.id);
+      const accessGrant = accessGrants.find((ag) => ag.data_id === input.sharedCredential?.id);
 
       if (!accessGrant) {
         throw new Error("Access grant not found");
@@ -135,7 +135,7 @@ export const actors = {
     },
   ),
 
-  fetchUserData: fromPromise(async ({ input }: { input: Context["credential"] }) => {
+  fetchUserData: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
     if (!input) {
       throw new Error("Credential not found");
     }

@@ -15,7 +15,7 @@ export const actions = {
     loggedInClient: null,
     sharableToken: null,
     credential: null,
-    accessGrant: false,
+    sharedCredential: null,
     findCredentialAttempts: 0,
     data: null,
     errorMessage: null,
@@ -41,8 +41,8 @@ export const actions = {
     findCredentialAttempts: ({ context }) => context.findCredentialAttempts + 1,
   }),
 
-  setAccessGrant: assign({
-    accessGrant: ({ event }) => event.output ?? false,
+  setSharedCredential: assign({
+    sharedCredential: ({ event }) => event.output ?? null,
   }),
 
   setSharableToken: assign({

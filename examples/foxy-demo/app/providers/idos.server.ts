@@ -4,6 +4,8 @@ import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
 export async function getSharedCredential(credentialId: string, inserterId: string) {
+  console.log("Getting shared credential", credentialId, inserterId);
+
   const idOSConsumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
@@ -12,11 +14,19 @@ export async function getSharedCredential(credentialId: string, inserterId: stri
     recipientEncryptionPrivateKey: SERVER_ENV.IDOS_RECIPIENT_ENC_PRIVATE_KEY,
   });
 
+  const grants = await idOSConsumer.getAccessGrants({});
+  console.log("Grants: ", grants);
+
   const grant = await idOSConsumer.getAccessGrantsForCredential(credentialId);
 
-  // @ts-expect-error Missing types
-  if (!grant || grant.inserter_id !== inserterId) {
+  if (!grant) {
     throw new Error("Grant not found.");
+  }
+
+  // @ts-expect-error Missing types
+  if (grant.inserter_id !== inserterId) {
+    // @ts-expect-error Missing types
+    throw new Error(`Invalid inserter id: ${grant.inserter_id} !== ${inserterId}`);
   }
 
   // Get data

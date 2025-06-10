@@ -15,9 +15,9 @@ export interface Context {
   profile: boolean | null;
   sharableToken: string | null;
   credential: idOSCredential | null;
+  sharedCredential: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
-  accessGrant: boolean;
   data: unknown | null;
 }
 
