@@ -172,6 +172,24 @@ export const machine = setup({
         fetchUserData: {
           target: "fetchUserData",
         },
+        createNoahCustomer: {
+          target: "createNoahCustomer",
+        },
+      },
+    },
+    createNoahCustomer: {
+      invoke: {
+        id: "createNoahCustomer",
+        src: "createNoahCustomer",
+        input: ({ context }) => context.sharedCredential,
+        onDone: {
+          target: "dataOrTokenFetched",
+          actions: ["setUserData"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
+        },
       },
     },
     createSharableToken: {

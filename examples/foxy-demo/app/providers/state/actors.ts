@@ -135,6 +135,20 @@ export const actors = {
     },
   ),
 
+  createNoahCustomer: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const customer = await fetch(`/app/kyc/noah?credentialId=${input.id}`);
+
+    if (customer.status !== 200) {
+      throw new Error("Noah API is not available. Please try again later.");
+    }
+
+    return await customer.json();
+  }),
+
   fetchUserData: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
     if (!input) {
       throw new Error("Credential not found");

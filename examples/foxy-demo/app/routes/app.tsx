@@ -52,8 +52,8 @@ export default function App() {
       send({ type: "getSharableToken" });
     }
 
-    if (provider === "banxa") {
-      send({ type: "fetchUserData" });
+    if (provider === "noah") {
+      send({ type: "createNoahCustomer" });
     }
   }, [state, provider, send]);
 
@@ -80,12 +80,12 @@ export default function App() {
       });
     }
 
-    if (provider === "banxa" && userData) {
+    if (provider === "noah" && userData) {
       console.log("-> Banxa data", userData);
     }
   }, [sharableToken, state, provider, send, userData]);
 
-  const start = async (provider: "transak" | "banxa" | "custom") => {
+  const start = async (provider: "transak" | "noah" | "custom") => {
     send({ type: "configure", provider, address });
   };
 
@@ -104,9 +104,9 @@ export default function App() {
         <button
           type="button"
           className="w-full cursor-pointer rounded-lg bg-green-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-green-700"
-          onClick={() => start("banxa")}
+          onClick={() => start("noah")}
         >
-          Banxa
+          Noah
         </button>
         <button
           type="button"
