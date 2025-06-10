@@ -533,7 +533,7 @@ export function Onboarding() {
     [kycDisclosure, createIDVAttribute, queryClient, isleController],
   );
 
-  const handleKYCError = useCallback(async (error: unknown) => { }, []);
+  const handleKYCError = useCallback(async (error: unknown) => {}, []);
 
   useEffect(() => {
     if (!evmAddress) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);

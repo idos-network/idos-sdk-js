@@ -1,9 +1,9 @@
-import { formatNearMessage, type WalletInfo } from "@idos-network/core";
 import { wagmiAdapter } from "@/app/providers";
-import { getXrpSignature, signGemWalletTx } from "./xrp";
+import type { WalletInfo } from "@idos-network/core";
 import type { CustomSigner } from "@idos-network/core";
-import { getEvmSigner } from "./evm";
 import type { WalletSelector } from "@near-wallet-selector/core";
+import { getEvmSigner } from "./evm";
+import { getXrpSignature, signGemWalletTx } from "./xrp";
 
 class KwilNonce {
   bytes: Uint8Array;

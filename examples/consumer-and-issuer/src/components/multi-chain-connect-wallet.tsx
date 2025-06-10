@@ -1,18 +1,18 @@
 "use client";
+import { useNearWalletSelector } from "@/app/hooks/useNearConnection";
 import { useWalletStore } from "@/app/stores/wallet";
 import * as GemWallet from "@gemwallet/api";
 import { Button } from "@heroui/react";
+import { implicitAddressFromPublicKey } from "@idos-network/core";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import DisconnectWallet from "./disconnect-wallet";
-import WalletConnectIcon from "./icons/wallet-connect";
 import NearIcon from "./icons/near";
+import WalletConnectIcon from "./icons/wallet-connect";
 import XrpIcon from "./icons/xrp";
-import { useNearWalletSelector } from "@/app/hooks/useNearConnection";
-import { implicitAddressFromPublicKey } from "@idos-network/core";
 
 export default function MultiChainConnectWallet({
   hideConnect,

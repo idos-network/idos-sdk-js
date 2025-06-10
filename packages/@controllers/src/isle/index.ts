@@ -591,7 +591,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
             assertNever(idosClient);
             _hasProfile = false; // this is unreachable, it's just to make TS happy.
         }
-        debugger
+        debugger;
         if (!_hasProfile) {
           window.idosClient = idosClient;
           toggleAnimation({ expanded: true, noDismiss: true });

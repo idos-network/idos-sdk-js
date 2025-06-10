@@ -254,7 +254,7 @@ type PassportingServiceResponse =
 export const invokePassportingService = async (
   payload: unknown,
 ): Promise<PassportingServiceResponse> => {
-  const server = "http://localhost:3013"
+  const server = "http://localhost:3013";
   // invariant(process.env.PASSPORTING_SERVICE_URL, "`PASSPORTING_SERVICE_URL` is not set");
 
   try {
@@ -296,7 +296,7 @@ export const invokePassportingService = async (
 
 export const generateKrakenUrlToken = async (isE2E: boolean) => {
   invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
-  const level =  "basic" 
+  const level = "basic";
 
   const payload = {
     clientId: process.env.KRAKEN_CLIENT_ID,

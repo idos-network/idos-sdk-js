@@ -7,9 +7,7 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { signNearMessage } from "../utils/multi-chain";
-import { implicitAddressFromPublicKey } from "@idos-network/core";
 window.Buffer = Buffer;
-
 
 declare global {
   interface Window {

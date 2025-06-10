@@ -2,16 +2,15 @@
 
 import * as GemWallet from "@gemwallet/api";
 import { createIsleController } from "@idos-network/controllers";
-import { type JSX, createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { type JSX, createContext, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
+import { useNearWalletSelector } from "./app/hooks/useNearConnection";
 import { wagmiAdapter } from "./app/providers";
 import { useWalletStore } from "./app/stores/wallet";
-import { useRouter } from "next/navigation";
 import { walletInfoMapper } from "./app/utils/multi-chain";
-import { useNearWalletSelector } from "./app/hooks/useNearConnection";
 
 type IsleController = ReturnType<typeof createIsleController>;
-
 
 interface IsleContextType {
   isleController: IsleController | null;
@@ -33,7 +32,7 @@ interface IsleProviderProps {
 }
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
-  const router = useRouter()
+  const router = useRouter();
   const [isleController, setIsle] = useState<IsleController | null>(null);
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
   const { selector } = useNearWalletSelector();
@@ -43,11 +42,11 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
     publicKey: walletPublicKey as string,
     nearSelector: selector,
   })[walletType as "evm" | "xrpl" | "near"];
-  console.log({walletInfo, selector});
-  
+  console.log({ walletInfo, selector });
+
   useEffect(() => {
-    router.prefetch("/onboarding")
-  }, [router])
+    router.prefetch("/onboarding");
+  }, [router]);
 
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.

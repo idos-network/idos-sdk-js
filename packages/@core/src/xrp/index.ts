@@ -118,7 +118,8 @@ export const getXrpTxHash = async (
   message: string | Uint8Array,
   wallet: typeof GemWallet,
 ): Promise<string | undefined> => {
-  const messageString = typeof message === "string" ? message : Buffer.from(message).toString("utf8");
+  const messageString =
+    typeof message === "string" ? message : Buffer.from(message).toString("utf8");
   const signature = await signGemWalletTx(wallet, messageString);
   if (!signature) {
     throw new Error("Failed to sign transaction with GemWallet");

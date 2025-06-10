@@ -1,7 +1,7 @@
-import type { JsonRpcSigner } from "ethers";
 import type { CustomSigner as KwilCustomSigner } from "@kwilteam/kwil-js/dist/core/signature";
+import type { JsonRpcSigner } from "ethers";
 
-export type Wallet =  JsonRpcSigner | CustomSigner;
+export type Wallet = JsonRpcSigner | CustomSigner;
 
 export type CustomSigner = KwilCustomSigner;
 export interface WalletInfo {
