@@ -15,7 +15,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     const data = await getSharedCredential(credentialId, user.address);
 
-    const customer = await createNoahCustomer(data);
+    const customer = await createNoahCustomer(user.address, data);
 
     return Response.json({ customer });
   } catch (error) {
