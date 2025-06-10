@@ -34,6 +34,8 @@ describe("verifiableCredentials", () => {
         familyName: "Lennon",
         governmentIdType: "SSN",
         governmentId: "123-45-6789",
+        email: "john.lennon@example.com",
+        phoneNumber: "+1234567890",
         dateOfBirth: new Date("1980-01-01"),
         placeOfBirth: "New York, NY",
         idDocumentCountry: "US",
@@ -66,6 +68,9 @@ describe("verifiableCredentials", () => {
     expect(data.credentialSubject.residentialAddressCity).toBe("New York");
     expect(data.credentialSubject.residentialAddressPostalCode).toBe("10001");
     expect(data.credentialSubject.residentialAddressCountry).toBe("US");
+
+    expect(data.credentialSubject.email).toBe("john.lennon@example.com");
+    expect(data.credentialSubject.phoneNumber).toBe("+1234567890");
 
     // Check if proof is properly constructed
     expect(data.proof.proofPurpose).toBe("assertionMethod");
