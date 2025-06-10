@@ -1,8 +1,10 @@
+import type { CustomSigner, WalletInfo } from "@idos-network/core";
+import type { JsonRpcSigner } from "ethers";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 // Types for wallet connections
-export type WalletType = "evm" | "xrpl";
+export type WalletType = WalletInfo["type"];
 
 export interface WalletState {
   isConnected: boolean;
@@ -11,6 +13,7 @@ export interface WalletState {
   walletAddress: string | null;
   walletPublicKey: string | null;
   walletError: string | null;
+  signer?: JsonRpcSigner | CustomSigner | null;
 }
 
 export interface WalletActions {
@@ -21,6 +24,7 @@ export interface WalletActions {
   setWalletPublicKey: (publicKey: string | null) => void;
   setWalletError: (error: string | null) => void;
   clearWalletError: () => void;
+  setSigner: (signer: JsonRpcSigner | CustomSigner | null) => void;
   resetWallet: () => void;
 }
 
@@ -56,6 +60,7 @@ export const useWalletStore = create<WalletStore>()(
           isConnected: false,
           isConnecting: false,
         }),
+      setSigner: (signer) => set({ signer }),
     }),
     {
       name: "wallet-storage",

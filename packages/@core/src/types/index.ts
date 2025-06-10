@@ -1,9 +1,18 @@
-import type { Wallet as NearWallet } from "@near-wallet-selector/core";
-import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
-export type Wallet = EthersWallet | JsonRpcSigner | NearWallet;
+import type { JsonRpcSigner } from "ethers";
+import type { CustomSigner as KwilCustomSigner } from "@kwilteam/kwil-js/dist/core/signature";
 
-export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
-export type ChainType = (typeof CHAIN_TYPES)[number];
+export type Wallet =  JsonRpcSigner | CustomSigner;
+
+export type CustomSigner = KwilCustomSigner;
+export interface WalletInfo {
+  address: string;
+  publicKey: string;
+  signer: () => Promise<JsonRpcSigner> | CustomSigner;
+  signTx: (message: string) => Promise<string>;
+  type: "evm" | "xrpl" | "near" | "steller";
+}
+
+export type ChainType = WalletInfo["type"];
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
 export type idOSUser = {

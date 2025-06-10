@@ -1,19 +1,54 @@
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
-import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
+import type { JsonRpcSigner, Wallet as EthersWallet } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { bs58Encode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
-import type { Wallet } from "../types";
-import { getXrpPublicKey, looksLikeXrpWallet } from "../xrp";
-import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
-import { createXrpKwilSigner } from "./create-xrp.signer";
+import type { WalletInfo } from "../types";
+
+import { base64Decode, binaryWriteUint16BE, borshSerialize, bytesConcat } from "../codecs";
+
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
  */
+
+export function formatNearMessage(
+  signature: string,
+  message: string,
+  nonce: Uint8Array,
+  recipient: string,
+  callbackUrl: string,
+): Uint8Array {
+  const nep413BorschSchema = {
+    struct: {
+      tag: "u32",
+      message: "string",
+      nonce: { array: { type: "u8", len: 32 } },
+      recipient: "string",
+      callbackUrl: { option: "string" },
+    },
+  };
+
+  const nep413BorshParams = {
+    tag: 2147484061,
+    message,
+    nonce: Array.from(nonce),
+    recipient,
+    callbackUrl,
+  };
+
+  const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
+
+  return bytesConcat(
+    binaryWriteUint16BE(nep413BorshPayload.length),
+    nep413BorshPayload,
+    base64Decode(signature),
+  );
+}
+
 function isNaclSignKeyPair(object: unknown): object is nacl.SignKeyPair {
   return (
     object !== null &&
@@ -118,52 +153,56 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
 export async function createClientKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
-  wallet: Wallet,
+  wallet: WalletInfo,
 ): Promise<[KwilSigner, SignerAddress]> {
-  if ("connect" in wallet && "address" in wallet) {
-    //biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
-    wallet = wallet as unknown as JsonRpcSigner;
-    const currentAddress = await wallet.getAddress();
+  const currentAddress = wallet.address; // xrp => GemWallet.getAddress
+  const signer = await wallet.signer();
+  const storedAddress = store.get("signer-address");
 
-    const storedAddress = store.get("signer-address");
-
-    if (storedAddress !== currentAddress) {
-      // To avoid re-using the old signer's kgw cookie.
-      // When kwil-js supports multi cookies, we can remove this.
-      store.set("signer-address", currentAddress);
-      try {
-        await kwilClient.client.auth.logoutKGW();
-      } catch (error) {
-        console.log("error logoutKGW", error);
-      }
+  if (storedAddress && storedAddress !== currentAddress) {
+    // To avoid re-using the old signer's kgw cookie.
+    // When kwil-js supports multi cookies, we can remove this.
+    store.set("signer-address", currentAddress);
+    try {
+      await kwilClient.client.auth.logoutKGW();
+    } catch (error) {
+      console.log("error logoutKGW", error);
     }
-
-    return [new KwilSigner(wallet, currentAddress), currentAddress];
   }
 
-  if (looksLikeNearWallet(wallet)) {
-    const accountId = (await wallet.getAccounts())[0].accountId;
+  // @todo: fix near signer
+  // if (wallet.type === "near") {
+  //   const accountId = (await wallet.signer()).getPublicKey();
+  //   return [await createNearWalletKwilSigner(wallet, accountId, store, kwilClient), accountId];
+  // }
 
-    return [await createNearWalletKwilSigner(wallet, accountId, store, kwilClient), accountId];
+  if (wallet.type === "evm") {
+    return [new KwilSigner(signer as JsonRpcSigner, currentAddress), currentAddress];
   }
+  if (typeof signer !== "function") throw new Error("Invalid `signer` type");
 
-  if (looksLikeXrpWallet(wallet)) {
-    const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
-      wallet,
-    )) as { address: string; publicKey: string };
-    if (!currentAddress) {
-      throw new Error("Failed to get XRP address");
-    }
-
-    return [
-      await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
-      currentAddress,
-    ];
+  if (wallet.type === "xrpl") {
+    return [new KwilSigner(signer, wallet.publicKey, "xrpl"), currentAddress];
   }
+  if (wallet.type === "steller") {
+    return [new KwilSigner(signer, wallet.publicKey, "ed25519"), currentAddress];
+  }
+  if (wallet.type === "near") {
+    console.log({ wallet: wallet.publicKey, currentAddress });
+
+    return [new KwilSigner(signer, wallet.publicKey, "nep413"), currentAddress];
+  }
+  // if (wallet.type === "near" && !(signer instanceof JsonRpcSigner)) {
+  //   return [
+  //      createNearWalletKwilSigner(wallet, wallet.publicKey, store, kwilClient),
+  //     currentAddress,
+  //   ];
+  // }
+  console.log({ wallet: wallet.type });
 
   // Force the check that `signer` is `never`.
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {
     throw new Error("Invalid `signer` type");
-  })(wallet);
+  })(wallet.type);
 }

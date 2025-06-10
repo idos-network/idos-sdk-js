@@ -10,7 +10,7 @@ export async function idOSIssuer() {
     return issuer;
   }
 
-  const NODE_URL = process.env.NEXT_PUBLIC_KWIL_NODE_URL;
+  const NODE_URL = "http://localhost:8484";
   const ENCRYPTION_SECRET_KEY = process.env.ISSUER_ENCRYPTION_SECRET_KEY;
   const SIGNING_SECRET_KEY = process.env.ISSUER_SIGNING_SECRET_KEY;
 

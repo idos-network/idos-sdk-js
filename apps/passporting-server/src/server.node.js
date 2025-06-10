@@ -1,7 +1,7 @@
 import { serve } from "@hono/node-server";
 import app from "./core.js";
 
-const port = 3000;
+const port = 3013;
 
 console.log(`Server is running on http://localhost:${port}`);
 

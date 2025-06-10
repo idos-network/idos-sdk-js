@@ -9,7 +9,10 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
+import NearIcon from "./icons/near";
 import XrpIcon from "./icons/xrp";
+import { useNearWalletSelector } from "@/app/hooks/useNearConnection";
+import { implicitAddressFromPublicKey } from "@idos-network/core";
 
 export default function MultiChainConnectWallet({
   hideConnect,
@@ -24,18 +27,30 @@ export default function MultiChainConnectWallet({
     setConnecting,
     setWalletPublicKey,
     walletAddress,
+    walletPublicKey,
     walletError,
     ...rest
   } = useWalletStore();
   const { isConnected: evmConnected } = useAppKitAccount();
   const { isConnected, address } = useAccount();
+  const { modal, selector, accounts, accountId, setAccounts, publicKey } = useNearWalletSelector();
   const walletConnected = !!walletAddress;
+  console.log({ walletConnected, walletAddress, walletPublicKey });
 
   useEffect(() => {
     if (evmConnected) {
       setWalletType("evm");
     }
   }, [evmConnected, setWalletType]);
+
+  useEffect(() => {
+    if (publicKey) {
+      setWalletType("near");
+      setWalletAddress(publicKey);
+      setWalletPublicKey(implicitAddressFromPublicKey(publicKey));
+    }
+  }, [setWalletAddress, setWalletPublicKey, setWalletType, publicKey]);
+  console.log({ __: publicKey });
 
   useEffect(() => {
     if (isConnected) {
@@ -90,6 +105,15 @@ export default function MultiChainConnectWallet({
       >
         Connect a XRP wallet
         <XrpIcon />
+      </Button>
+      <Button
+        size="lg"
+        onPress={() => {
+          modal?.show();
+        }}
+      >
+        Connect a NEAR wallet
+        <NearIcon />
       </Button>
     </div>
   );

@@ -100,6 +100,10 @@ export function looksLikeXrpWallet(wallet: unknown): wallet is Xumm | typeof Gem
     ("authorize" in wallet || "isInstalled" in wallet)
   );
 }
+
+export function looksLikeStellerWallet(wallet: unknown): boolean {
+  return wallet !== null && typeof wallet === "object" && "openModal" in wallet;
+}
 export const getXrpWalletType = async (object: Record<string, unknown>): Promise<XrpWallet> => {
   if ("authorize" in object) {
     return "Xumm";
@@ -112,41 +116,14 @@ export const getXrpWalletType = async (object: Record<string, unknown>): Promise
 
 export const getXrpTxHash = async (
   message: string | Uint8Array,
-  wallet: Xumm | typeof GemWallet,
+  wallet: typeof GemWallet,
 ): Promise<string | undefined> => {
-  let messageString: string;
-
-  const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
-
-  messageString = typeof message === "string" ? message : Buffer.from(message).toString("utf8"); // Decode Uint8Array to string
-  if (xrpWalletType === "Xumm") {
-    const memoData = Buffer.from(messageString).toString("hex"); // Encode message as hex for Memos
-
-    const payload = {
-      custom_meta: {
-        instruction: messageString,
-      },
-      txjson: {
-        TransactionType: "SignIn",
-        Memos: [
-          {
-            Memo: {
-              MemoData: memoData,
-              MemoType: Buffer.from("idOS").toString("hex"), // Optional type identifier
-            },
-          },
-        ],
-      },
-    };
-    const xummTx = await signXummTx(wallet as Xumm, payload);
-    console.log("xummTx", xummTx);
-  } else if (xrpWalletType === "GemWallet") {
-    const signature = await signGemWalletTx(wallet as typeof GemWallet, messageString);
-    if (!signature) {
-      throw new Error("Failed to sign transaction with GemWallet");
-    }
-    return signature;
+  const messageString = typeof message === "string" ? message : Buffer.from(message).toString("utf8");
+  const signature = await signGemWalletTx(wallet, messageString);
+  if (!signature) {
+    throw new Error("Failed to sign transaction with GemWallet");
   }
+  return signature;
 };
 
 export const getXrpPublicKey = async (

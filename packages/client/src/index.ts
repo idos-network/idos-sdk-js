@@ -42,6 +42,7 @@ import { Store } from "@idos-network/core/store";
 import type {
   DelegatedWriteGrant,
   Wallet,
+  WalletInfo,
   idOSCredential,
   idOSGrant,
   idOSUser,
@@ -118,13 +119,14 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, address);
   }
 
-  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
+  async withUserSigner(wallet: WalletInfo): Promise<idOSClientWithUserSigner> {
     const [kwilSigner, walletIdentifier] = await createClientKwilSigner(
       this.store,
       this.kwilClient,
-      signer,
+      wallet,
     );
     this.kwilClient.setSigner(kwilSigner);
+    const signer = await wallet.signer();
 
     return new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
   }
@@ -371,7 +373,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       (cred) => !cred.original_id && !!cred.public_notes,
     );
 
-    invariant(originalCredentials.length, "No original credentials found");
+    // invariant(originalCredentials.length, "No original credentials found");
     let result = originalCredentials.filter((cred) => {
       return requirements.acceptedIssuers?.some(
         (issuer) => issuer.authPublicKey === cred.issuer_auth_public_key,

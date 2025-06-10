@@ -4,7 +4,7 @@ import {
   type idOSClient,
   idOSClientConfiguration,
 } from "@idos-network/client";
-import type { DelegatedWriteGrant } from "@idos-network/core";
+import type { DelegatedWriteGrant, WalletInfo } from "@idos-network/core";
 import {
   type IsleControllerMessage,
   type IsleMessageHandler,
@@ -121,14 +121,6 @@ interface RequestDelegatedWriteGrantOptions {
   KYCPermissions: string[];
 }
 
-export interface WalletInfo {
-  address: string;
-  publicKey: string;
-  signMethod: (message: string) => Promise<string>;
-  type: "evm" | "xrpl";
-  signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm>;
-}
-
 /**
  * Public interface for interacting with an idOS Isle instance
  * @interface idOSIsleInstance
@@ -162,6 +154,7 @@ interface idOSIsleController {
   signerType: WalletInfo["type"];
 
   readonly idosClient: idOSClient;
+  readonly walletInfo: WalletInfo;
 
   logClientIn: () => Promise<void>;
 
@@ -185,7 +178,7 @@ interface idOSIsleController {
  */
 
 export const createIsleController = (options: idOSIsleControllerOptions): idOSIsleController => {
-  const nodeUrl = process.env.NEXT_PUBLIC_KWIL_NODE_URL || "https://nodes.playground.idos.network";
+  const nodeUrl = "http://localhost:8484";
   let idosClient: idOSClient = new idOSClientConfiguration({
     nodeUrl,
     enclaveOptions: options.enclaveOptions,
@@ -203,22 +196,20 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   let ownerOriginalCredentials: idOSCredential[] = [];
 
   const setupSigner = async (): Promise<void> => {
-    const signer = await options.walletInfo.signer();
-
     if (idosClient.state === "configuration") {
       idosClient = await idosClient.createClient();
     }
 
     switch (idosClient.state) {
       case "idle":
-        idosClient = await idosClient.withUserSigner(signer);
+        idosClient = await idosClient.withUserSigner(options.walletInfo);
         break;
       case "with-user-signer":
       case "logged-in":
-        if (signer instanceof JsonRpcSigner) {
-          if (signer.address !== idosClient.walletIdentifier) {
+        if (options.walletInfo.signer instanceof JsonRpcSigner) {
+          if (options.walletInfo.signer.address !== idosClient.walletIdentifier) {
             idosClient = await idosClient.logOut();
-            idosClient = await idosClient.withUserSigner(signer);
+            idosClient = await idosClient.withUserSigner(options.walletInfo);
           }
         }
         break;
@@ -228,7 +219,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   };
 
   const signTx = async (message: string): Promise<string> => {
-    const signature = await options.walletInfo.signMethod(message);
+    invariant(
+      ["with-user-signer", "logged-in"].includes(idosClient.state),
+      "idOS client is not logged in",
+    );
+    const signature = await options.walletInfo.signTx(message);
     invariant(signature, "Could not sign message");
     return signature;
   };
@@ -449,7 +444,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       (cred) => !cred.original_id && !!cred.public_notes,
     );
 
-    invariant(originalCredentials.length, "No original credentials found");
+    // invariant(originalCredentials.length, "No original credentials found");
 
     ownerOriginalCredentials = originalCredentials;
 
@@ -596,8 +591,9 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
             assertNever(idosClient);
             _hasProfile = false; // this is unreachable, it's just to make TS happy.
         }
-
+        debugger
         if (!_hasProfile) {
+          window.idosClient = idosClient;
           toggleAnimation({ expanded: true, noDismiss: true });
           send("update", {
             status: "no-profile",
@@ -822,6 +818,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     onIsleMessage,
     onIsleStatusChange,
     signTx,
+    walletInfo: options.walletInfo,
     signerType: options.walletInfo.type,
     get options() {
       return options;

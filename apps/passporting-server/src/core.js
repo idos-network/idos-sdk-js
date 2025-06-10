@@ -51,7 +51,7 @@ app.post(
     }
 
     const issuer = await idOSIssuer.init({
-      nodeUrl: KWIL_NODE_URL,
+      nodeUrl: "http://localhost:8484",
       signingKeyPair: nacl.sign.keyPair.fromSecretKey(decode(ISSUER_SIGNING_SECRET_KEY)),
       encryptionSecretKey: decode(ISSUER_ENCRYPTION_SECRET_KEY),
     });
@@ -77,6 +77,7 @@ app.post(
         dag_content_hash,
       }),
     );
+    console.log({ error });
 
     if (error) {
       return c.json(

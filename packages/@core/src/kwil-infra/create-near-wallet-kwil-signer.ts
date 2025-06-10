@@ -23,6 +23,40 @@ const NEAR_WALLET_TYPES: string[] = [
   "bridge",
 ] satisfies NearWallet["type"][];
 
+export function formatNearMessage(
+  signature: string,
+  message: string,
+  nonce: Uint8Array,
+  recipient: string,
+  callbackUrl: string,
+): Uint8Array {
+  const nep413BorschSchema = {
+    struct: {
+      tag: "u32",
+      message: "string",
+      nonce: { array: { type: "u8", len: 32 } },
+      recipient: "string",
+      callbackUrl: { option: "string" },
+    },
+  };
+
+  const nep413BorshParams = {
+    tag: 2147484061,
+    message,
+    nonce: Array.from(nonce),
+    recipient,
+    callbackUrl,
+  };
+
+  const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
+
+  return bytesConcat(
+    binaryWriteUint16BE(nep413BorshPayload.length),
+    nep413BorshPayload,
+    base64Decode(signature),
+  );
+}
+
 export function looksLikeNearWallet(signer: unknown): signer is NearWallet {
   return (
     signer !== null &&

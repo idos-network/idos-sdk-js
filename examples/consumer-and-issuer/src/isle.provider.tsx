@@ -2,46 +2,16 @@
 
 import * as GemWallet from "@gemwallet/api";
 import { createIsleController } from "@idos-network/controllers";
-import type { WalletInfo } from "@idos-network/controllers";
-import { signGemWalletTx } from "@idos-network/core";
-import { type Config, getWalletClient, signMessage } from "@wagmi/core";
-import { BrowserProvider } from "ethers";
-import { type JSX, createContext, useContext, useEffect, useState } from "react";
+import { type JSX, createContext, useContext, useEffect, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
 import { wagmiAdapter } from "./app/providers";
 import { useWalletStore } from "./app/stores/wallet";
+import { useRouter } from "next/navigation";
+import { walletInfoMapper } from "./app/utils/multi-chain";
+import { useNearWalletSelector } from "./app/hooks/useNearConnection";
 
 type IsleController = ReturnType<typeof createIsleController>;
 
-const getEvmSigner = async (wagmiConfig: Config) => {
-  const walletClient = await getWalletClient(wagmiConfig);
-  const provider = walletClient && new BrowserProvider(walletClient.transport);
-  const signer = provider && (await provider.getSigner());
-  return signer;
-};
-
-const walletInfoMapper = ({
-  address,
-  publicKey,
-}: { address: string; publicKey: string }): Record<"evm" | "xrpl", WalletInfo> => ({
-  evm: {
-    address,
-    publicKey,
-    signMethod: (message: string) => signMessage(wagmiAdapter.wagmiConfig, { message: message }),
-    type: "evm",
-    signer: async () => await getEvmSigner(wagmiAdapter.wagmiConfig),
-  },
-  xrpl: {
-    signMethod: async (message: string) => {
-      const signature = await signGemWalletTx(GemWallet, message);
-      return signature as string;
-    },
-    address,
-    publicKey,
-    type: "xrpl",
-    signer: async () => GemWallet,
-  },
-});
 
 interface IsleContextType {
   isleController: IsleController | null;
@@ -63,13 +33,21 @@ interface IsleProviderProps {
 }
 
 export function IsleProvider({ children, containerId }: IsleProviderProps) {
+  const router = useRouter()
   const [isleController, setIsle] = useState<IsleController | null>(null);
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
+  const { selector } = useNearWalletSelector();
 
   const walletInfo = walletInfoMapper({
     address: walletAddress as string,
     publicKey: walletPublicKey as string,
-  })[walletType as "evm" | "xrpl"];
+    nearSelector: selector,
+  })[walletType as "evm" | "xrpl" | "near"];
+  console.log({walletInfo, selector});
+  
+  useEffect(() => {
+    router.prefetch("/onboarding")
+  }, [router])
 
   // Initialize isle controller
   // biome-ignore lint/correctness/useExhaustiveDependencies: We intentionally omit isle from dependencies to prevent infinite loop. The isle check inside the effect ensures we don't create multiple instances.
@@ -84,7 +62,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
       "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
     );
-    if (!walletType) return;
+    if (!walletType || !selector) return;
 
     const controller = createIsleController({
       container: containerId,
@@ -167,7 +145,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       controller.destroy();
       setIsle(null);
     };
-  }, [containerId, walletType]);
+  }, [containerId, walletType, selector]);
 
   return (
     <div>

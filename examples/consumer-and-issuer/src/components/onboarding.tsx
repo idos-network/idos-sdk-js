@@ -460,21 +460,20 @@ export function Onboarding() {
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await isleController.signTx(message);
-      const address = await isleController.idosClient.store.get("signer-address");
-      const publicKey = await isleController.idosClient.store.get("signer-public-key");
       isleController?.send("update-create-profile-status", {
         status: "pending",
       });
+      invariant(signature, "`signature` is not defined");
 
       await createIDOSUserProfile({
         userId,
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
-          address,
-          type: isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR",
+          address: isleController.walletInfo.address,
+          type: isleController.walletInfo.type.toUpperCase() as "EVM" | "XRPL" | "NEAR",
           message,
           signature,
-          publicKey: publicKey || (address as string),
+          publicKey: isleController.walletInfo.address,
         },
       });
       await isleController.logClientIn();
@@ -534,7 +533,7 @@ export function Onboarding() {
     [kycDisclosure, createIDVAttribute, queryClient, isleController],
   );
 
-  const handleKYCError = useCallback(async (error: unknown) => {}, []);
+  const handleKYCError = useCallback(async (error: unknown) => { }, []);
 
   useEffect(() => {
     if (!evmAddress) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
