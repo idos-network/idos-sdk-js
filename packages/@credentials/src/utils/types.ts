@@ -80,7 +80,7 @@ export interface CredentialSubject {
   idDocumentType: string;
 
   /* ID Document Date of Issue	Date the identity document was issued. */
-  idDocumentDateOfIssue: Date;
+  idDocumentDateOfIssue?: Date;
 
   /* ID Document Date of Expiry	Expiration date of the identity document - if applicable. */
   idDocumentDateOfExpiry?: Date;
