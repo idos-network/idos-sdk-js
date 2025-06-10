@@ -14,9 +14,9 @@ export const actions = {
     profile: null,
     loggedInClient: null,
     sharableToken: null,
-    credentials: [],
-    accessGrant: null,
-    findCredentialsAttempts: 0,
+    credential: null,
+    sharedCredential: null,
+    findCredentialAttempts: 0,
     data: null,
     errorMessage: null,
   }),
@@ -33,16 +33,16 @@ export const actions = {
     loggedInClient: ({ event }) => event.output,
   }),
 
-  setCredentials: assign({
-    credentials: ({ event }) => event.output,
+  setCredential: assign({
+    credential: ({ event }) => event.output,
   }),
 
-  incrementFindCredentialsAttempts: assign({
-    findCredentialsAttempts: ({ context }) => context.findCredentialsAttempts + 1,
+  incrementFindCredentialAttempts: assign({
+    findCredentialAttempts: ({ context }) => context.findCredentialAttempts + 1,
   }),
 
-  setAccessGrant: assign({
-    accessGrant: ({ event }) => event.output,
+  setSharedCredential: assign({
+    sharedCredential: ({ event }) => event.output ?? null,
   }),
 
   setSharableToken: assign({

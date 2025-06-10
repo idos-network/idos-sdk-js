@@ -1,5 +1,6 @@
 import https from "node:https";
 import jwt from "jsonwebtoken";
+import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
 export const fetchSharedToken = async (applicantId: string) => {
@@ -30,7 +31,7 @@ export const generateKrakenUrl = async () => {
   const payload = {
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
     kyc: true,
-    level: "basic+liveness+idos",
+    level: COMMON_ENV.KRAKEN_LEVEL,
     state: Date.now().toString(),
   };
 

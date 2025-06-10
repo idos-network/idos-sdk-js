@@ -10,14 +10,14 @@ export interface Context {
   errorMessage?: string | null;
   walletAddress: string | null;
   provider: Provider;
-  findCredentialsAttempts: number;
+  findCredentialAttempts: number;
   kycUrl: string | null;
   profile: boolean | null;
   sharableToken: string | null;
-  credentials: idOSCredential[] | null;
+  credential: idOSCredential | null;
+  sharedCredential: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
-  accessGrant: idOSCredential | null;
   data: unknown | null;
 }
 

@@ -1,6 +1,7 @@
 import { Transak } from "@transak/transak-sdk";
 import { useCallback, useEffect, useRef } from "react";
 import { useUser } from "~/layouts/app";
+import { COMMON_ENV } from "~/providers/envFlags.common";
 import { useSiwe } from "~/providers/siwe-provider";
 import { MachineContext } from "~/providers/state";
 
@@ -23,7 +24,7 @@ export default function App() {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   const messageReceiver = useCallback((message: any) => {
     // React only messages from ID iframe
-    if (message.origin === "https://localhost:3000") {
+    if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
       if (message.data.error) {
         // Hide iframe ...
         console.error(message.data.error);
@@ -134,9 +135,9 @@ export default function App() {
   }
 
   const messages: Record<string, string> = {
-    findCredentials: "Finding credentials...",
+    findCredential: "Finding credential...",
     requestAccessGrant: "Requesting access grant...",
-    waitForCredentials: "Waiting for finding credentials next attempt...",
+    waitForCredential: "Waiting for finding credential next attempt...",
     login: "Logging in...",
     error: "Error",
   };

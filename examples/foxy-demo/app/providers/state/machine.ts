@@ -28,9 +28,9 @@ export const machine = setup({
     profile: null,
     loggedInClient: null,
     sharableToken: null,
-    credentials: [],
-    accessGrant: null,
-    findCredentialsAttempts: 0,
+    credential: null,
+    sharedCredential: null,
+    findCredentialAttempts: 0,
     data: null,
   },
   states: {
@@ -103,7 +103,7 @@ export const machine = setup({
         src: "loginClient",
         input: ({ context }) => context.client,
         onDone: {
-          target: "findCredentials",
+          target: "findCredential",
           actions: ["setLoggedInClient"],
         },
         onError: {
@@ -112,22 +112,22 @@ export const machine = setup({
         },
       },
     },
-    findCredentials: {
+    findCredential: {
       invoke: {
-        id: "findCredentials",
-        src: "findCredentials",
+        id: "findCredential",
+        src: "findCredential",
         input: ({ context }) => context.loggedInClient,
         onDone: [
           {
-            actions: ["setCredentials"],
+            actions: ["setCredential"],
             target: "requestAccessGrant",
           },
         ],
         onError: [
           {
             guard: ({ context }) => context.kycUrl !== null,
-            target: "waitForCredentials",
-            actions: ["incrementFindCredentialsAttempts"],
+            target: "waitForCredential",
+            actions: ["incrementFindCredentialAttempts"],
           },
           {
             guard: ({ context }) => context.kycUrl === null,
@@ -136,12 +136,12 @@ export const machine = setup({
         ],
       },
     },
-    waitForCredentials: {
+    waitForCredential: {
       after: {
-        2000: "findCredentials",
+        2000: "findCredential",
       },
       always: {
-        guard: ({ context }) => context.findCredentialsAttempts >= 20,
+        guard: ({ context }) => context.findCredentialAttempts >= 20,
         target: "error",
         actions: ["setErrorMessage"],
       },
@@ -152,10 +152,10 @@ export const machine = setup({
         src: "requestAccessGrant",
         input: ({ context }) => ({
           client: context.loggedInClient,
-          credentials: context.credentials,
+          credential: context.credential,
         }),
         onDone: {
-          actions: ["setAccessGrant"],
+          actions: ["setSharedCredential"],
           target: "accessGranted",
         },
         onError: {
@@ -178,7 +178,7 @@ export const machine = setup({
       invoke: {
         id: "createSharableToken",
         src: "createSharableToken",
-        input: ({ context }) => context.accessGrant,
+        input: ({ context }) => context.sharedCredential,
         onDone: {
           target: "dataOrTokenFetched",
           actions: ["setSharableToken"],
@@ -192,7 +192,7 @@ export const machine = setup({
     fetchUserData: {
       invoke: {
         src: "createSharableToken",
-        input: ({ context }) => context.accessGrant,
+        input: ({ context }) => context.sharedCredential,
         onDone: {
           target: "dataOrTokenFetched",
           actions: ["setUserData"],
@@ -216,7 +216,7 @@ export const machine = setup({
         src: "revokeAccessGrant",
         input: ({ context }) => ({
           client: context.loggedInClient,
-          accessGrant: context.accessGrant,
+          sharedCredential: context.sharedCredential,
         }),
       },
       onDone: {

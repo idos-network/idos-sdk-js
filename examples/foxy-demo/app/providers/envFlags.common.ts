@@ -1,11 +1,12 @@
 import z from "zod";
 
 export const commonEnvSchema = z.object({
-  KRAKEN_API_URL: z.string(),
-  IDOS_NODE_URL: z.string(),
-  KRAKEN_ISSUER_PUBLIC_KEY: z.string(),
   IDOS_ENCRYPTION_PUBLIC_KEY: z.string(),
+  IDOS_NODE_URL: z.string(),
   IDOS_PUBLIC_KEY: z.string(),
+  KRAKEN_API_URL: z.string(),
+  KRAKEN_ISSUER_PUBLIC_KEY: z.string(),
+  KRAKEN_LEVEL: z.string(),
 });
 
 export type CommonEnv = z.infer<typeof commonEnvSchema>;
@@ -24,7 +25,10 @@ function buildEnv(): CommonEnv {
       {} as Record<string, string>,
     );
 
-    return commonEnvSchema.parse(envWithoutPrefix);
+    return commonEnvSchema.parse({
+      ...envWithoutPrefix,
+      KRAKEN_LEVEL: envWithoutPrefix.KRAKEN_LEVEL ?? "plus+liveness+idos",
+    });
   } catch (error: unknown) {
     console.error("Warning: invalid client env vars!");
     console.error(error);
