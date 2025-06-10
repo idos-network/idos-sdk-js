@@ -1,27 +1,40 @@
 "use client";
 
+import * as GemWallet from "@gemwallet/api";
 import { Button } from "@heroui/react";
 import { useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
 
 export function WalletConnector() {
   const { open } = useAppKit();
   const { disconnect } = useDisconnect();
   const router = useRouter();
-  const { isConnected } = useAppKitAccount();
+  const { isConnected: evmConnected } = useAppKitAccount();
   const { isConnecting } = useAccount();
+  const [xrpConnected, setXrpConnected] = useState(false);
+  const walletConnected = evmConnected || xrpConnected;
 
   useEffect(() => {
-    if (isConnected) {
+    GemWallet.isInstalled().then((res) => {
+      if (res.result.isInstalled) {
+        GemWallet.getAddress().then((res) => {
+          setXrpConnected(!!res.result?.address);
+        });
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    if (walletConnected) {
       router.replace("/onboarding");
     } else {
       router.replace("/");
     }
-  }, [isConnected, router]);
+  }, [walletConnected, router]);
 
-  if (isConnected) {
+  if (walletConnected) {
     return (
       <div className="flex items-center gap-4">
         <Button
@@ -41,6 +54,7 @@ export function WalletConnector() {
       color="secondary"
       isLoading={isConnecting}
       onPress={async () => {
+        // @todo: to be decided when creating a multi chain selector UI
         await open();
       }}
     >

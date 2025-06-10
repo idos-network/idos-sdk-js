@@ -22,6 +22,7 @@ import {
   getUserIdFromToken,
   invokePassportingService,
 } from "@/actions";
+import { useOnboardingStore } from "@/app/stores/onboarding";
 import { useIsleController } from "@/isle.provider";
 import { KYCJourney } from "./kyc-journey";
 
@@ -373,7 +374,7 @@ function useShareCredentialWithConsumer() {
       };
 
       const message: string = await isleController.idosClient.requestDAGMessage(dag);
-      const signature = await signMessageAsync({ message });
+      const signature = await isleController.signTx(message);
       const result = await invokePassportingService({
         ...dag,
         dag_signature: signature,
@@ -423,9 +424,9 @@ const $step = atom<IsleStatus | undefined>(undefined);
 export function Onboarding() {
   const { isleController } = useIsleController();
   const { signMessageAsync } = useSignMessage();
-  const { address } = useAppKitAccount();
+  const { address: evmAddress } = useAppKitAccount();
   const queryClient = useQueryClient();
-
+  const { setClaimedSuccess, claimedSuccess, resetOnboarding } = useOnboardingStore();
   const userData = useFetchUserData();
   const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
@@ -458,8 +459,9 @@ export function Onboarding() {
         await isleController.idosClient.getUserEncryptionPublicKey(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
-      const signature = await signMessageAsync({ message });
-
+      const signature = await isleController.signTx(message);
+      const address = await isleController.idosClient.store.get("signer-address");
+      const publicKey = await isleController.idosClient.store.get("signer-public-key");
       isleController?.send("update-create-profile-status", {
         status: "pending",
       });
@@ -468,14 +470,13 @@ export function Onboarding() {
         userId,
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
-          address: address as string,
-          type: "EVM",
+          address,
+          type: isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR",
           message,
           signature,
-          publicKey: signature,
+          publicKey: publicKey || (address as string),
         },
       });
-
       await isleController.logClientIn();
 
       await queryClient.invalidateQueries({
@@ -501,7 +502,7 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, signMessageAsync, address, queryClient]);
+  }, [isleController, queryClient]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {
@@ -536,8 +537,14 @@ export function Onboarding() {
   const handleKYCError = useCallback(async (error: unknown) => {}, []);
 
   useEffect(() => {
-    if (!address) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
-  }, [address, queryClient, userData?.data?.idvUserId]);
+    if (!evmAddress) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);
+  }, [evmAddress, queryClient, userData?.data?.idvUserId]);
+
+  useEffect(() => {
+    return () => {
+      resetOnboarding();
+    };
+  }, [resetOnboarding]);
 
   useEffect(() => {
     if (!isleController) return;
@@ -564,7 +571,7 @@ export function Onboarding() {
             isleController.options.credentialRequirements.integratedConsumers[1],
           );
           if (!hasConsumerPermission) {
-            $claimSuccess.set(false);
+            setClaimedSuccess(false);
           }
           break;
         }
@@ -594,7 +601,14 @@ export function Onboarding() {
     });
 
     return cleanup;
-  }, [handleCreateProfile, isleController, kycDisclosure, issueCredential, userData]);
+  }, [
+    handleCreateProfile,
+    isleController,
+    kycDisclosure,
+    issueCredential,
+    userData,
+    setClaimedSuccess,
+  ]);
 
   useEffect(() => {
     if (!isleController) return;
@@ -644,14 +658,12 @@ export function Onboarding() {
         );
 
         if (hasConsumerPermission) {
-          $claimSuccess.set(true);
+          setClaimedSuccess(true);
         }
       }
       $step.set(status);
     });
-  }, [isleController]);
-
-  const claimSuccess = useStore($claimSuccess);
+  }, [isleController, setClaimedSuccess]);
 
   return (
     <div className="container relative mx-auto min-h-dvh p-6">
@@ -675,7 +687,7 @@ export function Onboarding() {
                 <StepIcon icon={<ScanEyeIcon />} />
                 <p>Permissions</p>
               </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "verified" || claimSuccess}>
+              <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
                 <StepIcon icon={<RocketIcon />} />
                 <p>Claim your ACME Bank card!</p>
               </OnboardingStep>
@@ -684,7 +696,7 @@ export function Onboarding() {
           <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
             <div className="max-w-3xl">
               <AnimatePresence mode="wait">
-                {claimSuccess ? (
+                {claimedSuccess ? (
                   <motion.div
                     key="no-profile"
                     initial={{ opacity: 0, y: 20 }}

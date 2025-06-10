@@ -3,6 +3,8 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { useWalletSelector } from "@/core/near";
 
+import { connectXrp, getXrpPublicKey } from "./utils/xrp";
+
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
   const { modal } = useWalletSelector();
@@ -71,6 +73,21 @@ export const ConnectWallet = () => {
             <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
               Connect with NEAR
               <Image alt="NEAR logo" src="/near.svg" w={10} h={10} />
+            </Button>
+            <Button
+              size="lg"
+              justifyContent="space-between"
+              onClick={() =>
+                connectXrp()
+                  .then(() => getXrpPublicKey())
+                  .then((publicKey) => {
+                    // TODO: construct an XRP signer and sign into idOS
+                    console.log({ publicKey });
+                  })
+              }
+            >
+              Connect with XRP
+              <Image alt="XRP logo" src="/xrp.svg" w={10} h={10} />
             </Button>
           </VStack>
         </VStack>

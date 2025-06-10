@@ -3,6 +3,7 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
+    "@gemwallet/api": "^3.8.0",
     "@kwilteam/kwil-js": "catalog:",
     "@near-wallet-selector/core": "8.9.10",
     "@stablelib/base64": "^1.0.1",
@@ -17,7 +18,10 @@
     "es-toolkit": "^1.23.0",
     "ethers": "catalog:",
     "near-api-js": "3.0.4",
-    "tweetnacl": "^1.0.3"
+    "tweetnacl": "^1.0.3",
+    "ripple-binary-codec": "^2.3.0",
+    "xrpl": "^4.2.5",
+    "xumm": "^1.8.0"
   },
   "devDependencies": {
     "tiny-invariant": "^1.3.3"
@@ -32,7 +36,8 @@
     "./kwil-infra": "./src/kwil-infra/index.ts",
     "./store": "./src/store/index.ts",
     "./utils": "./src/utils/index.ts",
-    "./enclave": "./src/enclave/index.ts"
+    "./enclave": "./src/enclave/index.ts",
+    "./xrp": "./src/xrp/index.ts"
   },
   "license": "MIT",
   "peerDependencies": {

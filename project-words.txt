@@ -72,6 +72,7 @@ timelock
 timelocks
 transak
 tweetnacl
+txjson
 typesafety
 uidotdev
 usehooks
@@ -82,3 +83,8 @@ vite
 wagmi
 webauthn
 websdk
+xrpl
+XUMM
+Xaman
+gemwallet
+partialize
