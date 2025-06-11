@@ -36,6 +36,7 @@ export async function buildCredentials(
   const credentialSubject = {
     "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
     ...convertValues(subjectData),
+    // @ts-expect-error - TODO: fix this
     ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
   };
 

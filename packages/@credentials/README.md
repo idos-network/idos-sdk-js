@@ -51,7 +51,7 @@ const data = await buildCredentials(
     placeOfBirth: "New York, NY",
     idDocumentCountry: "US",
     idDocumentNumber: "123456789",
-    idDocumentType: "Passport",
+    idDocumentType: "PASSPORT",
     idDocumentDateOfIssue: new Date("2022-01-01"),
     idDocumentDateOfExpiry: new Date("2025-01-01"),
     idDocumentFrontFile: Buffer.from("Front of ID document"),
@@ -70,6 +70,7 @@ const data = await buildCredentials(
     residentialAddressProofFile: Buffer.from("Proof of address"),
   },
   key,
+  true, // Validation against schema
 );
 
 console.log(data);
