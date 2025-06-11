@@ -1,111 +1,173 @@
-import type * as vc from "@digitalbazaar/vc";
+import { z } from "zod";
 
-export interface CredentialFields {
-  id: string;
+// https://github.com/colinhacks/zod/issues/3751
+export const CredentialFieldsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    level: z.ZodString;
+    issued: z.ZodOptional<z.ZodDate>;
+    approvedAt: z.ZodOptional<z.ZodDate>;
+    expirationDate: z.ZodOptional<z.ZodDate>;
+  },
+  "strip"
+> = z.object({
+  id: z.string(),
 
   /* Level of KYC verification performed (e.g., basic, intermediate, advanced). */
-  level: string;
+  level: z.string(),
 
   /* @default Date.now() */
-  issued?: Date;
+  issued: z.date().optional(),
 
   /* Date the credential was approved. */
-  approvedAt?: Date;
+  approvedAt: z.date().optional(),
 
   /* Date the credential was revoked. */
-  expirationDate?: Date;
-}
+  expirationDate: z.date().optional(),
+});
 
-export interface CredentialResidentialAddress {
+export type CredentialFields = z.infer<typeof CredentialFieldsSchema>;
+
+// https://github.com/colinhacks/zod/issues/3751
+export const CredentialResidentialAddressSchema: z.ZodObject<
+  {
+    street: z.ZodString;
+    houseNumber: z.ZodOptional<z.ZodString>;
+    additionalAddressInfo: z.ZodOptional<z.ZodString>;
+    city: z.ZodString;
+    postalCode: z.ZodString;
+    country: z.ZodString;
+  },
+  "strip"
+> = z.object({
   /* Street address. */
-  street: string;
+  street: z.string(),
 
   /* House number. */
-  houseNumber?: string;
+  houseNumber: z.string().optional(),
 
   /* Additional address information (e.g., apartment number). */
-  additionalAddressInfo?: string;
+  additionalAddressInfo: z.string().optional(),
 
   /* Locality (e.g., city, town). */
-  city: string;
+  city: z.string(),
 
   /* Postal code. */
-  postalCode: string;
+  postalCode: z.string(),
 
-  /* Country. */
-  country: string;
-}
+  /* Country (ISO 3166-1 alpha-2). */
+  country: z.string().min(2).max(2),
+});
 
-export interface CredentialSubject {
+export type CredentialResidentialAddress = z.infer<typeof CredentialFieldsSchema>;
+
+export const IDDocumentTypeSchema: z.ZodEnum<["PASSPORT", "DRIVERS", "ID_CARD"]> = z.enum([
+  "PASSPORT",
+  "DRIVERS",
+  "ID_CARD",
+] as const);
+export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
+
+// https://github.com/colinhacks/zod/issues/3751
+export const CredentialSubjectSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    applicantId: z.ZodOptional<z.ZodString>;
+    firstName: z.ZodString;
+    familyName: z.ZodString;
+    maidenName: z.ZodOptional<z.ZodString>;
+    governmentId: z.ZodOptional<z.ZodString>;
+    governmentIdType: z.ZodOptional<z.ZodString>;
+    dateOfBirth: z.ZodDate;
+    placeOfBirth: z.ZodString;
+    email: z.ZodOptional<z.ZodString>;
+    phoneNumber: z.ZodOptional<z.ZodString>;
+    idDocumentCountry: z.ZodString;
+    idDocumentNumber: z.ZodString;
+    idDocumentType: typeof IDDocumentTypeSchema;
+    idDocumentDateOfIssue: z.ZodOptional<z.ZodDate>;
+    idDocumentDateOfExpiry: z.ZodOptional<z.ZodDate>;
+    idDocumentFrontFile: z.ZodType<Buffer<ArrayBufferLike>>;
+    idDocumentBackFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+    selfieFile: z.ZodType<Buffer<ArrayBufferLike>>;
+    residentialAddress: z.ZodOptional<typeof CredentialResidentialAddressSchema>;
+    residentialAddressProofCategory: z.ZodOptional<z.ZodString>;
+    residentialAddressProofDateOfIssue: z.ZodOptional<z.ZodDate>;
+    residentialAddressProofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  },
+  "strip"
+> = z.object({
   /* ID(unique credential)	Unique identifier for the credential itself. */
-  id: string;
+  id: z.string(),
 
-  /* Applicant ID reference. */
-  applicantId?: string;
+  /* Applicant ID. */
+  applicantId: z.string().optional(),
 
-  /* Given name of the individual. */
-  firstName: string;
+  /* First name. */
+  firstName: z.string(),
 
-  /* Surname of the individual. */
-  familyName: string;
+  /* Family name. */
+  familyName: z.string(),
 
-  /* Family name at birth (e.g., maiden name). */
-  maidenName?: string;
+  /* Maiden name. */
+  maidenName: z.string().optional(),
 
-  /* Unique identifier issued by a government authority (e.g., SSN, Tax ID). */
-  governmentId?: string;
+  /* Government ID. */
+  governmentId: z.string().optional(),
 
-  /* Type of government identifier (e.g., Social Security Number, Tax ID, etc.). */
-  governmentIdType?: string;
+  /* Government ID type. */
+  governmentIdType: z.string().optional(),
 
-  /* Date of birth of the individual. */
-  dateOfBirth: Date;
+  /* Date of birth. */
+  dateOfBirth: z.date(),
 
-  /* City and state/province of birth. */
-  placeOfBirth: string;
+  /* Place of birth. */
+  placeOfBirth: z.string(),
 
-  /* Email address */
-  email?: string;
+  /* Email. */
+  email: z.string().email().optional(),
 
-  /* Phone number */
-  phoneNumber?: string;
+  /* Phone number. */
+  phoneNumber: z.string().optional(),
 
-  /* Country that issued the identity document. */
-  idDocumentCountry: string;
+  /* Country that issued the identity document (ISO 3166-1 alpha-2). */
+  idDocumentCountry: z.string().min(2).max(2),
 
   /* ID Document Number	Unique number on the identity document. */
-  idDocumentNumber: string;
+  idDocumentNumber: z.string(),
 
   /* ID Document Type	Type of identity document(e.g., Passport, Driver's License, National ID). */
-  idDocumentType: string;
+  idDocumentType: IDDocumentTypeSchema,
 
   /* ID Document Date of Issue	Date the identity document was issued. */
-  idDocumentDateOfIssue?: Date;
+  idDocumentDateOfIssue: z.date().optional(),
 
   /* ID Document Date of Expiry	Expiration date of the identity document - if applicable. */
-  idDocumentDateOfExpiry?: Date;
+  idDocumentDateOfExpiry: z.date().optional(),
 
-  /* ID Document Front File	File or URL representing the front of the identity document. */
-  idDocumentFrontFile: Buffer;
+  /* ID Document Front File	Buffer with file representing the front of the identity document. */
+  idDocumentFrontFile: z.instanceof(Buffer),
 
-  /* ID Document Back File	File or URL representing the back of the identity document - if applicable. */
-  idDocumentBackFile?: Buffer;
+  /* ID Document Back File	Buffer with file representing the back of the identity document - if applicable. */
+  idDocumentBackFile: z.instanceof(Buffer).optional(),
 
-  /* (ID Document) Selfie File	File or URL of a selfie with the identity document for verification purposes. */
-  selfieFile: Buffer;
+  /* (ID Document) Selfie File	Buffer with selfie with the identity document for verification purposes. */
+  selfieFile: z.instanceof(Buffer),
 
   /* Residential Address	Full residential address of the individual - if applicable. */
-  residentialAddress?: CredentialResidentialAddress;
+  residentialAddress: CredentialResidentialAddressSchema.optional(),
 
   /* Residential Address Proof Category	Type of document provided to verify the address(e.g., utility bill, bank statement). */
-  residentialAddressProofCategory?: string;
+  residentialAddressProofCategory: z.string().optional(),
 
   /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
-  residentialAddressProofDateOfIssue?: Date;
+  residentialAddressProofDateOfIssue: z.date().optional(),
 
   /* Residential Address Proof File	File or URL of the document provided as address proof. */
-  residentialAddressProofFile?: Buffer;
-}
+  residentialAddressProofFile: z.instanceof(Buffer).optional(),
+});
+
+export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
 
 export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "residentialAddress"> {
   "@context": string;
@@ -117,4 +179,29 @@ export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "re
   residentialAddressCountry?: string;
 }
 
-export type VerifiableCredential<K> = vc.VerifiedCredentials<K>;
+// TODO: This is a stub of the types for @digitalbazaar/vc
+// when they introduce TypeScript support we should remove this
+// The copy is here because `types.d.ts` file is not bundled.
+export interface VerifiedCredentialsProof {
+  type: string;
+  created: string;
+  verificationMethod: string;
+  proofValue: string;
+  proofPurpose: string;
+}
+
+export interface VerifiedCredentials<K> {
+  "@context": string[];
+  type: string[];
+  issuer: string;
+  id: string;
+  level: string;
+  issued: string;
+  approvedAt: string;
+  expirationDate: string;
+  credentialSubject: K;
+  issuanceDate: string;
+  proof: VerifiedCredentialsProof;
+}
+
+export type VerifiableCredential<K> = VerifiedCredentials<K>;

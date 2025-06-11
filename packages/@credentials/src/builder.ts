@@ -8,11 +8,13 @@ import {
   CONTEXT_V1,
   defaultDocumentLoader,
 } from "./utils/loader";
-import type {
-  CredentialFields,
-  CredentialSubject,
-  VerifiableCredential,
-  VerifiableCredentialSubject,
+import {
+  type CredentialFields,
+  CredentialFieldsSchema,
+  type CredentialSubject,
+  CredentialSubjectSchema,
+  type VerifiableCredential,
+  type VerifiableCredentialSubject,
 } from "./utils/types";
 
 export type Credentials = VerifiableCredential<VerifiableCredentialSubject>;
@@ -21,7 +23,14 @@ export async function buildCredentials(
   fields: CredentialFields,
   subject: CredentialSubject,
   issuer: AvailableIssuerType,
+  validate = true,
 ): Promise<Credentials> {
+  if (validate) {
+    // This raises an z.ZodError exception if the fields are invalid
+    CredentialFieldsSchema.parse(fields);
+    CredentialSubjectSchema.parse(subject);
+  }
+
   const { residentialAddress, ...subjectData } = subject;
 
   const credentialSubject = {
@@ -40,6 +49,9 @@ export async function buildCredentials(
     ...convertValues(fields),
     credentialSubject,
   };
+
+  if (validate) {
+  }
 
   const suite = new Ed25519Signature2020({ key });
 
