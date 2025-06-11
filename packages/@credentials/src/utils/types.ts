@@ -79,7 +79,7 @@ export const CredentialSubjectSchema: z.ZodObject<
     governmentId: z.ZodOptional<z.ZodString>;
     governmentIdType: z.ZodOptional<z.ZodString>;
     dateOfBirth: z.ZodDate;
-    placeOfBirth: z.ZodString;
+    placeOfBirth: z.ZodOptional<z.ZodString>;
     email: z.ZodOptional<z.ZodString>;
     phoneNumber: z.ZodOptional<z.ZodString>;
     idDocumentCountry: z.ZodString;
@@ -122,7 +122,7 @@ export const CredentialSubjectSchema: z.ZodObject<
   dateOfBirth: z.date(),
 
   /* Place of birth. */
-  placeOfBirth: z.string(),
+  placeOfBirth: z.string().optional(),
 
   /* Email. */
   email: z.string().email().optional(),
