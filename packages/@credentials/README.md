@@ -9,9 +9,9 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 
 const issuer = "https://my-issuer.id/";
 
-const key = await verificationKey.Ed25519VerificationKey2020.generate({
+const key = await Ed25519VerificationKey2020.generate({
   id: `${issuer}/keys/1`,
-  controller: `${issuers}/issuers/1`,
+  controller: `${issuer}/issuers/1`,
 });
 
 /* Ed25519VerificationKey2020 {
