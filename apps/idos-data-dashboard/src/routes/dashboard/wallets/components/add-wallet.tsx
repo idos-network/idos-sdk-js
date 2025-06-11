@@ -20,6 +20,8 @@ import { useSearchParams } from "react-router-dom";
 
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
+import * as GemWallet from "@gemwallet/api";
+import { getXrpPublicKey } from "@idos-network/core";
 import invariant from "tiny-invariant";
 
 type AddWalletProps = {
@@ -95,8 +97,7 @@ const useAddWalletMutation = () => {
 export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddWalletProps) => {
   const toast = useToast();
   const [searchParams] = useSearchParams();
-  const publicKey = searchParams.get("publicKey");
-  const type = searchParams.get("type");
+  const publicKeyParam = searchParams.get("publicKey");
 
   const isCentered = useBreakpointValue(
     {
@@ -114,6 +115,7 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    let publicKeys: string[] = [];
 
     const form = event.currentTarget as HTMLFormElement;
     const address = new FormData(form).get("address") as string;
@@ -126,9 +128,7 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
 
     let address_type: "EVM" | "NEAR" | "XRP" | "INVALID";
 
-    if (type === "xrpl" && publicKey && xrp_pubkey_regexp.test(publicKey)) {
-      address_type = "XRP";
-    } else if (evm_regexp.test(address)) {
+    if (evm_regexp.test(address)) {
       address_type = "EVM";
     } else if (near_regexp.test(address)) {
       address_type = "NEAR";
@@ -148,11 +148,26 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
       return;
     }
 
-    let publicKeys: string[] = [];
+    if (address_type === "XRP") {
+      const result = await getXrpPublicKey(GemWallet);
+      invariant(result?.address, "Failed to get XRP address");
+      // validate passed public key in case user is not connected to intended wallet
+      if (publicKeyParam) {
+        if (result?.publicKey === publicKeyParam) {
+          publicKeys = [result?.publicKey ?? ""];
+        } else {
+          toast({
+            title: "Error while adding wallet",
+            description: "Public key doesn't match the wallet address.",
+          });
+        }
+      } else {
+        publicKeys = [result?.publicKey ?? ""];
+      }
+    }
 
     if (address_type === "NEAR") {
       publicKeys = (await getNearFullAccessPublicKeys(address)) || [];
-      console.log(publicKeys);
 
       if (!publicKeys.length) {
         toast({
@@ -164,17 +179,6 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
         });
         return;
       }
-    } else if (address_type === "XRP" && (publicKey || xrp_pubkey_regexp.test(address))) {
-      if (!publicKey) {
-        toast({
-          title: "Error while adding wallet",
-          description: "No public key provided for XRP wallet.",
-          position: "bottom-right",
-          status: "error",
-        });
-        return;
-      }
-      publicKeys = [publicKey];
     }
 
     addWallet.mutate(
