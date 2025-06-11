@@ -144,8 +144,9 @@ export class idOSIssuer {
     fields: CredentialFields,
     subject: CredentialSubject,
     issuer: AvailableIssuerType,
+    validate = true,
   ): Promise<Credentials> {
-    return buildCredentials(fields, subject, issuer);
+    return buildCredentials(fields, subject, issuer, validate);
   }
 
   async getPassportingPeers(): Promise<PassportingPeer[]> {

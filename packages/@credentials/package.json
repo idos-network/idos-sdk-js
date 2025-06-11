@@ -12,6 +12,9 @@
   "engines": {
     "node": ">=20.0.0"
   },
+  "dependencies": {
+    "zod": "^3.25.58"
+  },
   "exports": {
     ".": {
       "types": "./src/index.ts",
