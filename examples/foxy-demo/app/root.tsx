@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import { SiweProvider } from "./providers/siwe-provider";
 import "./app.css";
 import { MachineProvider } from "./providers/state";
+import { WalletProvider } from "@idos-network/wallets";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -47,7 +48,9 @@ export default function App() {
   return (
     <SiweProvider>
       <MachineProvider>
-        <Outlet />
+        <WalletProvider>
+          <Outlet />
+        </WalletProvider>
       </MachineProvider>
     </SiweProvider>
   );

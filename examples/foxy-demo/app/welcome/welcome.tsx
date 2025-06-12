@@ -1,7 +1,10 @@
 import { useSiwe } from "../providers/siwe-provider";
+import { useWalletChooser } from "@idos-network/wallets";
 
 export function Welcome() {
   const { address, isAuthenticated, signIn, signOut } = useSiwe();
+  const { openChooser } = useWalletChooser();
+  console.log("-> openChooser", openChooser);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-950">
@@ -18,11 +21,9 @@ export function Welcome() {
         <button
           type="button"
           className="cursor-pointer rounded-lg bg-blue-600 px-8 py-4 font-semibold text-lg text-white transition-colors hover:bg-blue-700"
-          onClick={() => (isAuthenticated ? signOut() : signIn())}
+          onClick={() => openChooser()}
         >
-          {isAuthenticated
-            ? `Disconnect (${address?.slice(0, 6)}...${address?.slice(-4)})`
-            : "Login to continue"}
+          Start with a connecting a wallet
         </button>
       </div>
     </main>

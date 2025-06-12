@@ -7,6 +7,7 @@
     "@digitalbazaar/vc": "^7.2.0",
     "@idos-network/client": "workspace:*",
     "@idos-network/consumer": "workspace:*",
+    "@idos-network/wallets": "workspace:*",
     "@react-router/node": "^7.6.2",
     "@react-router/serve": "^7.6.2",
     "@reown/appkit": "^1.7.8",

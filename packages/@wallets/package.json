@@ -1,0 +1,45 @@
+{
+  "name": "@idos-network/wallets",
+  "description": "idOS Wallets support JavaScript SDK",
+  "version": "0.0.1",
+  "clean-package": {
+    "remove": ["devDependencies.@idos-network/core"]
+  },
+  "devDependencies": {
+    "@idos-network/core": "workspace:*",
+    "vitest": "^3.1.4",
+    "@types/react": "catalog:react19",
+    "@types/react-dom": "catalog:react19"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "zod": "^3.25.58"
+  },
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts"
+    }
+  },
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "dist/index.js",
+  "peerDependencies": {
+    "react": "catalog:react19",
+    "react-dom": "catalog:react19",
+    "typescript": "^5.8.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "test": "vitest",
+    "test:watch": "vitest --watch"
+  },
+  "sideEffects": false,
+  "type": "module"
+}
