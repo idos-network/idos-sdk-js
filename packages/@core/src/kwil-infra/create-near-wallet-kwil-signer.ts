@@ -9,6 +9,7 @@ import {
   binaryWriteUint16BE,
   borshSerialize,
   bytesConcat,
+  hexEncode,
   utf8Decode,
 } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
@@ -116,7 +117,7 @@ export async function signNearMessage(
 ): Promise<string> {
   const signer = createNearWalletSigner(wallet, recipient);
   const signedPayload = await signer(message);
-  return Buffer.from(signedPayload).toString("base64");
+  return hexEncode(signedPayload);
 }
 
 export async function createNearWalletKwilSigner(

@@ -62,7 +62,7 @@ export default function MultiChainConnectWallet({
     const subscription = near.selector.store.observable.subscribe((state) => {
       if (state.accounts[0]) {
         const [account] = state.accounts;
-        setWalletAddress(account.publicKey ?? null);
+        setWalletAddress(account.publicKey);
         setWalletPublicKey(account.publicKey ?? null);
         setWalletType("near");
       }

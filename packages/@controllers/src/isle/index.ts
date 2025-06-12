@@ -117,6 +117,7 @@ interface RequestDelegatedWriteGrantOptions {
     consumerAuthPublicKey: string;
     /** Meta information about the consumer */
     meta: Meta;
+    walletIdentifier?: string | null;
   };
   KYCPermissions: string[];
   walletIdentifier?: string | null;

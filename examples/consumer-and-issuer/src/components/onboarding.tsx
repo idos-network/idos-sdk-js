@@ -304,7 +304,10 @@ const useIssueCredential = () => {
           "ID Document",
           "Liveness check (No pictures)",
         ],
-        walletIdentifier: near.selector.isSignedIn() ? walletPublicKey : null,
+
+        walletIdentifier: near.selector.isSignedIn()
+          ? await isleController.idosClient.store.get("signer-public-key")
+          : null,
       });
 
       if (!dwgData) throw new Error("DWG data not found");

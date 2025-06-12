@@ -3,7 +3,7 @@
 import * as GemWallet from "@gemwallet/api";
 import { createIsleController } from "@idos-network/controllers";
 import type { WalletInfo } from "@idos-network/controllers";
-import { signGemWalletTx } from "@idos-network/core";
+import { signGemWalletTx, signNearMessage } from "@idos-network/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
 import { type JSX, createContext, useContext, useEffect, useState } from "react";
@@ -106,14 +106,8 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           address: walletAddress,
           publicKey: walletPublicKey,
           signMethod: async (message: string) => {
-            const wallet = await near.selector.wallet();
-            const signature = await wallet.signMessage({
-              message,
-              recipient: "idos.network",
-              nonce: Buffer.from(crypto.getRandomValues(new Uint8Array(32))),
-            });
-
-            return signature?.signature as string;
+            const signature = await signNearMessage(externalSigner, message);
+            return signature;
           },
           type: "near",
           signer: async () => {
