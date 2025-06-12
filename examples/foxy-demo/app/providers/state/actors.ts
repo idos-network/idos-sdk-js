@@ -146,7 +146,9 @@ export const actors = {
       throw new Error("Noah API is not available. Please try again later.");
     }
 
-    return await customer.json();
+    const data = await customer.json();
+
+    return data.url;
   }),
 
   fetchUserData: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {

@@ -15,9 +15,9 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   try {
     const data = await getSharedCredential(credentialId, user.address);
 
-    const customer = await createNoahCustomer(user.address, data);
+    const url = await createNoahCustomer(user.address, data);
 
-    return Response.json({ customer });
+    return Response.json({ url });
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

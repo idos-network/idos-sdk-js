@@ -4,8 +4,6 @@ import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
 export async function getSharedCredential(credentialId: string, inserterId: string) {
-  console.log("Getting shared credential", credentialId, inserterId);
-
   const idOSConsumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
@@ -40,9 +38,9 @@ export async function getSharedCredential(credentialId: string, inserterId: stri
     },
   ]);
 
-  /*if (!verificationResult) {
+  if (!verificationResult) {
     throw new Error("Invalid credential signature.");
-  }*/
+  }
 
   return data;
 }

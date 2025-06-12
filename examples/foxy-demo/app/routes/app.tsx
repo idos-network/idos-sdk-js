@@ -16,6 +16,7 @@ export default function App() {
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
   const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
   const userData = MachineContext.useSelector((state) => state.context.data);
+  const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
 
   const transak = useRef<Transak | null>(null);
@@ -80,10 +81,10 @@ export default function App() {
       });
     }
 
-    if (provider === "noah" && userData) {
-      console.log("-> Banxa data", userData);
+    if (provider === "noah" && noahUrl) {
+      console.log("-> Noah data", noahUrl);
     }
-  }, [sharableToken, state, provider, send, userData]);
+  }, [sharableToken, state, provider, send, noahUrl]);
 
   const start = async (provider: "transak" | "noah" | "custom") => {
     send({ type: "configure", provider, address });
@@ -147,6 +148,14 @@ export default function App() {
       <div className="mb-4 w-full text-center">
         <p>{messages[state as keyof typeof messages]}</p>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && noahUrl && provider === "noah") {
+    body = (
+      <div className="w-full">
+        <iframe src={noahUrl} width="100%" height="800px" title="KYC" />
       </div>
     );
   }

@@ -19,6 +19,7 @@ export interface Context {
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
+  noahUrl: string | null;
 }
 
 export interface UserData {

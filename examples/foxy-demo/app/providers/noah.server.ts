@@ -50,6 +50,15 @@ export interface PrimaryResidence {
   Country: string;
 }
 
+export interface NoahSubject {
+  customer: NoahCustomer;
+  CustomerID: string;
+}
+
+export interface NoahResponse {
+  HostedURL: string;
+}
+
 export async function createNoahCustomer(address: string, credentials: Credentials) {
   const cs = credentials.credentialSubject;
 
@@ -59,9 +68,7 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     ID_CARD: "NationalIDCard",
   };
 
-  console.log(cs);
-
-  const subject: NoahCustomer = {
+  const customer: NoahCustomer = {
     Type: "Individual",
     FullName: {
       FirstName: cs.firstName,
@@ -94,8 +101,13 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     },
   };
 
-  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}v1/customers/${address}`, {
-    method: "PUT",
+  const subject: NoahSubject = {
+    customer,
+    CustomerID: address,
+  };
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}v1/checkout/manage`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
@@ -103,13 +115,11 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     body: JSON.stringify(subject),
   });
 
-  const data = await response.json();
-  console.log(response);
-  console.log(JSON.stringify(data, null, 2));
-
   if (!response.ok) {
     throw new Error("Failed to create Noah customer");
   }
 
-  return data;
+  const data = (await response.json()) as NoahResponse;
+
+  return data.HostedURL;
 }
