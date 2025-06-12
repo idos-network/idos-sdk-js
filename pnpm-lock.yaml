@@ -509,18 +509,6 @@ importers:
       '@nanostores/react':
         specifier: ^0.8.4
         version: 0.8.4(nanostores@0.11.4)(react@19.1.0)
-      '@near-wallet-selector/core':
-        specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
-      '@near-wallet-selector/here-wallet':
-        specifier: 8.9.10
-        version: 8.9.10(borsh@2.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))
-      '@near-wallet-selector/meteor-wallet':
-        specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
-      '@near-wallet-selector/modal-ui':
-        specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@reown/appkit':
         specifier: ^1.7.2
         version: 1.7.8(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.55)
@@ -16477,6 +16465,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@metamask/sdk@0.32.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
   '@metamask/sdk@0.32.0(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
     dependencies:
       '@babel/runtime': 7.27.6

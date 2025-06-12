@@ -37,6 +37,7 @@ import {
   type KwilActionClient,
   createClientKwilSigner,
   createWebKwilClient,
+  signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import { Store } from "@idos-network/core/store";
 import type {
@@ -460,6 +461,8 @@ export type {
   EnclaveOptions,
   EnclaveProvider,
 };
+
+export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
