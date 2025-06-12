@@ -19,6 +19,7 @@ export const actions = {
     findCredentialAttempts: 0,
     data: null,
     errorMessage: null,
+    noahUrl: null,
   }),
 
   setClient: assign({
@@ -55,5 +56,9 @@ export const actions = {
 
   setErrorMessage: assign({
     errorMessage: ({ event }) => event.error?.message,
+  }),
+
+  setNoahUrl: assign({
+    noahUrl: ({ event }) => event.output,
   }),
 };
