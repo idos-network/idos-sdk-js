@@ -35,6 +35,54 @@ export function looksLikeNearWallet(signer: unknown): signer is NearWallet {
   );
 }
 
+export const signNearMessage = async (wallet: NearWallet, message: string): Promise<string> => {
+  const nonce = Buffer.from(crypto.getRandomValues(new Uint8Array(32)));
+
+  // Create NEP-413 payload
+  const nep413BorschSchema = {
+    struct: {
+      tag: "u32",
+      message: "string",
+      nonce: { array: { type: "u8", len: 32 } },
+      recipient: "string",
+      callbackUrl: { option: "string" },
+    },
+  };
+
+  const nep413BorshParams = {
+    tag: 2147484061,
+    message,
+    nonce: Array.from(nonce),
+    recipient: "idos.network",
+    callbackUrl: undefined,
+  };
+
+  const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
+
+  if (!wallet.signMessage) {
+    throw new Error("Wallet does not support signMessage");
+  }
+  // Sign the message
+  const result = await wallet.signMessage({
+    message,
+    recipient: "idos.network",
+    nonce,
+  });
+
+  if (!result || !result.signature) {
+    throw new Error("Failed to get signature from NEAR wallet");
+  }
+
+  // Create the full payload
+  const fullPayload = bytesConcat(
+    binaryWriteUint16BE(nep413BorshPayload.length),
+    nep413BorshPayload,
+    base64Decode(result.signature),
+  );
+
+  return Buffer.from(fullPayload).toString("base64");
+};
+
 class KwilNonce {
   bytes: Uint8Array;
 

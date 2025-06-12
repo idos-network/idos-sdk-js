@@ -1,3 +1,5 @@
+import type { AccessKeyList } from "@near-js/types";
+import type { connect as ConnectType } from "near-api-js";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "../codecs";
@@ -37,4 +39,37 @@ export async function buildInsertableIDOSCredential(
     issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
     encryptor_public_key: encryptorPublicKey,
   };
+}
+
+export async function getNearFullAccessPublicKeys(
+  namedAddress: string,
+  networkId = "testnet",
+  nodeUrl = "https://rpc.testnet.near.org",
+): Promise<string[] | undefined> {
+  let connect: typeof ConnectType;
+  try {
+    connect = (await import("near-api-js")).connect;
+  } catch (e) {
+    throw new Error("Can't load near-api-js");
+  }
+
+  const connectionConfig = {
+    networkId,
+    nodeUrl,
+  };
+  const nearConnection = await connect(connectionConfig);
+
+  try {
+    const response: AccessKeyList = await nearConnection.connection.provider.query({
+      request_type: "view_access_key_list",
+      finality: "final",
+      account_id: namedAddress,
+    });
+    return response.keys
+      .filter((element) => element.access_key.permission === "FullAccess")
+      ?.map((i) => i.public_key);
+  } catch {
+    // `Near` failed if namedAddress contains uppercase symbols
+    return;
+  }
 }

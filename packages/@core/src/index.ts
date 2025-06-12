@@ -6,3 +6,4 @@ export * from "./kwil-nep413-signer";
 export * from "./store";
 export * from "./types";
 export * from "./utils";
+export * from "./kwil-infra/create-near-wallet-kwil-signer";
