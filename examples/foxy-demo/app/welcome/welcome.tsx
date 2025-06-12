@@ -1,5 +1,5 @@
-import { useSiwe } from "../providers/siwe-provider";
 import { useWalletChooser } from "@idos-network/wallets";
+import { useSiwe } from "../providers/siwe-provider";
 
 export function Welcome() {
   const { address, isAuthenticated, signIn, signOut } = useSiwe();

@@ -10,8 +10,8 @@ import {
 import type { Route } from "./+types/root";
 import { SiweProvider } from "./providers/siwe-provider";
 import "./app.css";
-import { MachineProvider } from "./providers/state";
 import { WalletProvider } from "@idos-network/wallets";
+import { MachineProvider } from "./providers/state";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
