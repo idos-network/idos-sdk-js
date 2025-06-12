@@ -26,6 +26,7 @@ import { useWalletStore } from "@/app/stores/wallet";
 import { useIsleController } from "@/isle.provider";
 import { useNearWallet } from "@/near.provider";
 import { KYCJourney } from "./kyc-journey";
+import { MatchingCredential } from "./matching-credential";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
   return (
@@ -99,6 +100,7 @@ function PermissionsStepDescription() {
 }
 
 const $claimSuccess = atom(false);
+const $goToACMECardProvider = atom(false);
 
 function ClaimCardStepDescription() {
   const shareCredentialWithConsumer = useShareCredentialWithConsumer();
@@ -129,7 +131,11 @@ function ClaimCardStepDescription() {
   );
 }
 
-function ClaimCardSuccessStepDescription() {
+function ClaimCardSuccessStepDescription({
+  goToACMECardProvider,
+}: {
+  goToACMECardProvider: () => void;
+}) {
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
@@ -162,12 +168,14 @@ function ClaimCardSuccessStepDescription() {
         priority
       />
       <Button
-        as="a"
         color="default"
         className="w-fit bg-black text-white dark:bg-white dark:text-black"
         size="lg"
         href={process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}
         target="_blank"
+        onPress={() => {
+          goToACMECardProvider();
+        }}
       >
         Go to ACME card provider
       </Button>
@@ -429,6 +437,24 @@ function SecureEnclaveRoot() {
     </div>
   );
 }
+function AcmeCardProvider({ onExit }: { onExit: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: "100%" }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: "100%" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black backdrop-blur-sm"
+    >
+      <h3 className="absolute top-4 left-4 font-bold text-2xl text-white">ACME Card Provider</h3>
+      <Button onPress={onExit} className="absolute top-4 right-4">
+        X
+      </Button>
+
+      <MatchingCredential />
+    </motion.div>
+  );
+}
 
 const $step = atom<IsleStatus | undefined>(undefined);
 
@@ -678,123 +704,132 @@ export function Onboarding() {
     });
   }, [isleController, setClaimedSuccess]);
 
-  return (
-    <div className="container relative mx-auto min-h-dvh p-6">
-      <div>
-        <div className="flex h-full flex-col gap-8 lg:gap-12">
-          <div className="flex flex-col">
-            <ul className="flex flex-col gap-6 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 lg:flex-row lg:items-center">
-              <OnboardingStep isActive={activeStep === "no-profile"}>
-                <StepIcon icon={<User2Icon />} />
-                <p>Create an idOS profile</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "not-verified"}>
-                <StepIcon icon={<ShieldIcon />} />
-                <p>Identity verification</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "pending-verification"}>
-                <StepIcon icon={<ShieldEllipsisIcon />} />
-                <p>Pending verification</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "pending-permissions"}>
-                <StepIcon icon={<ScanEyeIcon />} />
-                <p>Permissions</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
-                <StepIcon icon={<RocketIcon />} />
-                <p>Claim your ACME Bank card!</p>
-              </OnboardingStep>
-            </ul>
-          </div>
-          <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
-            <div className="max-w-3xl">
-              <AnimatePresence mode="wait">
-                {claimedSuccess ? (
-                  <motion.div
-                    key="no-profile"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ClaimCardSuccessStepDescription />
-                  </motion.div>
-                ) : (
-                  <>
-                    {activeStep === "no-profile" && (
-                      <motion.div
-                        key="no-profile"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <CreateProfileStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "not-verified" && (
-                      <motion.div
-                        key="not-verified"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <IdentityVerificationStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "pending-verification" && (
-                      <motion.div
-                        key="pending-verification"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <IdentityVerificationInProgressStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "pending-permissions" && (
-                      <motion.div
-                        key="pending-permissions"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <PermissionsStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "verified" && (
-                      <motion.div
-                        key="verified"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <ClaimCardStepDescription />
-                      </motion.div>
-                    )}
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+  const showACMECardProvider = useStore($goToACMECardProvider);
 
-            <div
-              id="idOS-isle"
-              ref={containerRef as React.RefObject<HTMLDivElement>}
-              className="h-[670px] min-h-[670px] w-[366px] shrink-0 bg-transparent"
-            />
+  return (
+    <>
+      {showACMECardProvider && <AcmeCardProvider onExit={() => $goToACMECardProvider.set(false)} />}
+      <div className="container relative mx-auto min-h-dvh p-6">
+        <div>
+          <div className="flex h-full flex-col gap-8 lg:gap-12">
+            <div className="flex flex-col">
+              <ul className="flex flex-col gap-6 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 lg:flex-row lg:items-center">
+                <OnboardingStep isActive={activeStep === "no-profile"}>
+                  <StepIcon icon={<User2Icon />} />
+                  <p>Create an idOS profile</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "not-verified"}>
+                  <StepIcon icon={<ShieldIcon />} />
+                  <p>Identity verification</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "pending-verification"}>
+                  <StepIcon icon={<ShieldEllipsisIcon />} />
+                  <p>Pending verification</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "pending-permissions"}>
+                  <StepIcon icon={<ScanEyeIcon />} />
+                  <p>Permissions</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
+                  <StepIcon icon={<RocketIcon />} />
+                  <p>Claim your ACME Bank card!</p>
+                </OnboardingStep>
+              </ul>
+            </div>
+            <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
+              <div className="max-w-3xl">
+                <AnimatePresence mode="wait">
+                  {claimedSuccess ? (
+                    <motion.div
+                      key="no-profile"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ClaimCardSuccessStepDescription
+                        goToACMECardProvider={() => {
+                          $goToACMECardProvider.set(true);
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    <>
+                      {activeStep === "no-profile" && (
+                        <motion.div
+                          key="no-profile"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <CreateProfileStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "not-verified" && (
+                        <motion.div
+                          key="not-verified"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IdentityVerificationStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "pending-verification" && (
+                        <motion.div
+                          key="pending-verification"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IdentityVerificationInProgressStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "pending-permissions" && (
+                        <motion.div
+                          key="pending-permissions"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <PermissionsStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "verified" && (
+                        <motion.div
+                          key="verified"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ClaimCardStepDescription />
+                        </motion.div>
+                      )}
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div
+                id="idOS-isle"
+                ref={containerRef as React.RefObject<HTMLDivElement>}
+                className="h-[670px] min-h-[670px] w-[366px] shrink-0 bg-transparent"
+              />
+            </div>
           </div>
         </div>
+
+        {kycDisclosure.isOpen ? (
+          <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
+        ) : null}
+
+        <SecureEnclaveRoot />
       </div>
-
-      {kycDisclosure.isOpen ? (
-        <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
-      ) : null}
-
-      <SecureEnclaveRoot />
-    </div>
+    </>
   );
 }
