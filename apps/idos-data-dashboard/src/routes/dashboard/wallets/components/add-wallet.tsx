@@ -124,7 +124,6 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
     const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
     const near_regexp = /^[a-zA-Z0-9._-]+\.near$/;
     const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
-    const xrp_pubkey_regexp = /^ED[0-9A-F]{64}$/;
 
     let address_type: "EVM" | "NEAR" | "XRP" | "INVALID";
 
