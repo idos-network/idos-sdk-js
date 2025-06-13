@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Link, Spinner } from "@heroui/react";
-import type { idOSCredential } from "@idos-network/core";
+import type { PassportingPeer, idOSCredential } from "@idos-network/core";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import invariant from "tiny-invariant";
@@ -15,7 +15,7 @@ import { CredentialCard } from "./credential-card";
 
 const WIP = () => {
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
+    <div className="flex flex-col items-center justify-center gap-4 text-white">
       <Spinner size="lg" />
       <p className="text-sm">We are working on it! Please wait a moment and try again.</p>
     </div>
@@ -24,18 +24,44 @@ const WIP = () => {
 
 const useFetchMatchingCredential = () => {
   const { isleController } = useIsleController();
-  return useQuery({
+
+  return useQuery<
+    { credentials: idOSCredential[]; peers: PassportingPeer[] },
+    Error,
+    (idOSCredential & { passporting_server_url_base: string }) | null
+  >({
     queryKey: ["matching-credential"],
     queryFn: async () => {
       invariant(isleController?.idosClient.state === "logged-in");
-      return isleController?.idosClient.getAllCredentials();
+      const [credentials, peers] = await Promise.all([
+        isleController?.idosClient.getAllCredentials(),
+        fetch("/api/passporting-peers").then((res) => res.json()) as Promise<PassportingPeer[]>,
+      ]);
+      return { credentials, peers };
     },
-    select: (credentials) => {
-      const credential = credentials.find((credential) => {
+    select: (data) => {
+      const matchingCredential = data.credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
         return publicNotes.type === "KYC DATA";
       });
-      return credential;
+
+      if (!matchingCredential) {
+        return null;
+      }
+
+      const matchingPeer = data.peers.find(
+        (peer: PassportingPeer) =>
+          peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
+      );
+
+      if (!matchingPeer) {
+        return null;
+      }
+
+      return {
+        ...matchingCredential,
+        passporting_server_url_base: matchingPeer.passporting_server_url_base,
+      };
     },
     enabled: isleController?.idosClient.state === "logged-in",
   });
@@ -147,7 +173,7 @@ export function MatchingCredential() {
     invariant(issuerUrl, "NEXT_PUBLIC_ISSUER_URL is not set");
 
     return (
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-4 text-white">
         <h1 className="font-semibold text-2xl">No matching credential found 😔</h1>
         <p className="text-sm">
           We couldn't find a matching credential in your idOS account. Click the button bellow to
