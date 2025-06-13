@@ -7,5 +7,8 @@ export default defineConfig(({ isSsrBuild }) => ({
   build: {
     target: isSsrBuild ? "node22" : "esnext",
   },
+  server: {
+    allowedHosts: ["4cae-185-154-60-133.ngrok-free.app"],
+  },
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
 }));

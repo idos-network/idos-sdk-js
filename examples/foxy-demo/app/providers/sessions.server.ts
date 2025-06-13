@@ -3,7 +3,7 @@ import type { SessionUser } from "../interfaces";
 
 import { SERVER_ENV } from "./envFlags.server";
 
-export const sessionStorage = createCookieSessionStorage<{ user: SessionUser; returnTo?: string }>({
+export const sessionStorage = createCookieSessionStorage<{ user: SessionUser; returnTo?: string, noahCheckoutSessionID?: string, hifiTosId?: string }>({
   cookie: {
     name: "__session",
     secrets: [SERVER_ENV.SECRET_KEY_BASE],

@@ -132,15 +132,48 @@ export const actors = {
       }
 
       await input.client.revokeAccessGrant(accessGrant.id);
+
+      console.log("-> access grant revoked", accessGrant);
+
+      return true;
     },
   ),
+
+  createHifiTocLink: fromPromise(async () => {
+    const hifiTocLink = await fetch("/app/kyc/hifi/tos");
+
+    if (hifiTocLink.status !== 200) {
+      throw new Error("Hifi API is not available. Please try again later.");
+    }
+
+    const data = await hifiTocLink.json();
+
+    return data.link;
+  }),
+
+  verifyHifiTos: fromPromise(async ({ input }: { input: { hifiTosId: Context["hifiTosId"]; sharedCredential: Context["sharedCredential"] } }) => {
+    if (!input.hifiTosId || !input.sharedCredential) {
+      throw new Error("Hifi TOS ID or Shared credentials not found");
+    }
+
+    const hifiUrl = await fetch(`/app/kyc/hifi/link?credentialId=${input.sharedCredential.id}&signedAgreementId=${input.hifiTosId}`);
+
+    if (hifiUrl.status !== 200) {
+      const text = await hifiUrl.text();
+      throw new Error(`Hifi API is not available. Please try again later. ${text}`);
+    }
+
+    const data = await hifiUrl.json();
+
+    return data.url;
+  }),
 
   createNoahCustomer: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
     if (!input) {
       throw new Error("Credential not found");
     }
 
-    const customer = await fetch(`/app/kyc/noah?credentialId=${input.id}`);
+    const customer = await fetch(`/app/kyc/noah/link?credentialId=${input.id}`);
 
     if (customer.status !== 200) {
       throw new Error("Noah API is not available. Please try again later.");
