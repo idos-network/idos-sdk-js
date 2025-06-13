@@ -3,6 +3,8 @@ import z from "zod";
 export const serverEnvSchema = z.object({
   IDOS_CONSUMER_SIGNER: z.string(),
   IDOS_RECIPIENT_ENC_PRIVATE_KEY: z.string(),
+  NOAH_API_URL: z.string(),
+  NOAH_API_KEY: z.string(),
   KRAKEN_API_URL: z.string(),
   KRAKEN_CLIENT_ID: z.string(),
   KRAKEN_ISSUER: z.string(),

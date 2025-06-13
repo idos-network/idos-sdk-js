@@ -32,6 +32,7 @@ export const machine = setup({
     sharedCredential: null,
     findCredentialAttempts: 0,
     data: null,
+    noahUrl: null,
   },
   states: {
     notConfigured: {
@@ -141,7 +142,7 @@ export const machine = setup({
         2000: "findCredential",
       },
       always: {
-        guard: ({ context }) => context.findCredentialAttempts >= 20,
+        guard: ({ context }) => context.findCredentialAttempts >= 40,
         target: "error",
         actions: ["setErrorMessage"],
       },
@@ -171,6 +172,24 @@ export const machine = setup({
         },
         fetchUserData: {
           target: "fetchUserData",
+        },
+        createNoahCustomer: {
+          target: "createNoahCustomer",
+        },
+      },
+    },
+    createNoahCustomer: {
+      invoke: {
+        id: "createNoahCustomer",
+        src: "createNoahCustomer",
+        input: ({ context }) => context.sharedCredential,
+        onDone: {
+          target: "dataOrTokenFetched",
+          actions: ["setNoahUrl"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
         },
       },
     },

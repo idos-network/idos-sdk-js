@@ -14,7 +14,6 @@ import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Confetti from "react-confetti";
 import invariant from "tiny-invariant";
-import { useSignMessage } from "wagmi";
 
 import {
   createCredential,
@@ -331,7 +330,6 @@ const useIssueCredential = () => {
 };
 
 function useShareCredentialWithConsumer() {
-  const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
   const near = useNearWallet();
@@ -436,7 +434,6 @@ const $step = atom<IsleStatus | undefined>(undefined);
 
 export function Onboarding() {
   const { isleController } = useIsleController();
-  const { signMessageAsync } = useSignMessage();
   const { address: evmAddress } = useAppKitAccount();
   const queryClient = useQueryClient();
   const { setClaimedSuccess, claimedSuccess, resetOnboarding } = useOnboardingStore();
