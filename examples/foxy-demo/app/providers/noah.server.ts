@@ -132,7 +132,6 @@ export async function createNoahCustomer(address: string, credentials: Credentia
   returnUrl.pathname = "/callbacks/noah";
   returnUrl.search = "";
   returnUrl.hash = "";
-  console.log("-> returnUrl", returnUrl.toString());
 
   const subject: NoahPayinFiatRequest = {
     Customer: customer,

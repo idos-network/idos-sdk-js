@@ -23,6 +23,8 @@ export const actions = {
     hifiTosUrl: null,
     hifiTosId: null,
     hifiUrl: null,
+    hifiKycStatus: null,
+    getHifiKycStatusAttempts: 0,
   }),
 
   setClient: assign({
@@ -75,5 +77,13 @@ export const actions = {
 
   setHifiUrl: assign({
     hifiUrl: ({ event }) => event.output,
+  }),
+
+  setHifiKycStatus: assign({
+    hifiKycStatus: ({ event }) => event.output,
+  }),
+
+  incrementGetHifiKycStatusAttempts: assign({
+    getHifiKycStatusAttempts: ({ context }) => context.getHifiKycStatusAttempts + 1,
   }),
 };

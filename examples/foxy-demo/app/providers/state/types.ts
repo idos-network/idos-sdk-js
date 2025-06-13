@@ -23,6 +23,9 @@ export interface Context {
   hifiTosUrl: string | null;
   hifiTosId: string | null;
   hifiUrl: string | null;
+  getHifiKycStatusAttempts: number;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  hifiKycStatus: "ACTIVE" | any;
 }
 
 export interface UserData {

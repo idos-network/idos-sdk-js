@@ -36,6 +36,8 @@ export const machine = setup({
     hifiTosUrl: null,
     hifiTosId: null,
     hifiUrl: null,
+    hifiKycStatus: null,
+    getHifiKycStatusAttempts: 0,
   },
   states: {
     notConfigured: {
@@ -181,7 +183,7 @@ export const machine = setup({
         },
         startHifi: {
           target: "startHifi",
-        }
+        },
       },
     },
     startHifi: {
@@ -196,7 +198,7 @@ export const machine = setup({
           target: "error",
           actions: ["setErrorMessage"],
         },
-      }
+      },
     },
     hifiTosFetched: {
       on: {
@@ -215,13 +217,41 @@ export const machine = setup({
           sharedCredential: context.sharedCredential,
         }),
         onDone: {
-          target: "dataOrTokenFetched",
+          target: "getHifiKycStatus",
           actions: ["setHifiUrl"],
         },
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
         },
+      },
+    },
+    getHifiKycStatus: {
+      invoke: {
+        id: "getHifiKycStatus",
+        src: "getHifiKycStatus",
+        onDone: [
+          {
+            actions: ["setHifiKycStatus"],
+            target: "dataOrTokenFetched",
+          },
+        ],
+        onError: [
+          {
+            target: "waitForHifiKycStatus",
+            actions: ["incrementGetHifiKycStatusAttempts"],
+          },
+        ],
+      },
+    },
+    waitForHifiKycStatus: {
+      after: {
+        2000: "getHifiKycStatus",
+      },
+      always: {
+        guard: ({ context }) => context.getHifiKycStatusAttempts >= 40,
+        target: "error",
+        actions: ["setErrorMessage"],
       },
     },
     createNoahCustomer: {

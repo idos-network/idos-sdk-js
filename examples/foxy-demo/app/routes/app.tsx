@@ -10,7 +10,7 @@ export default function App() {
   const { signOut } = useSiwe();
 
   const { send } = MachineContext.useActorRef();
-  
+
   const state = MachineContext.useSelector((state) => state.value);
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
@@ -19,7 +19,7 @@ export default function App() {
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
-  
+
   const transak = useRef<Transak | null>(null);
 
   console.log("-> state", state);
@@ -158,6 +158,7 @@ export default function App() {
     findCredential: "Finding credential...",
     requestAccessGrant: "Requesting access grant...",
     waitForCredential: "Waiting for finding credential next attempt...",
+    waitForHifiKycStatus: "Waiting for KYC status next attempt...",
     login: "Logging in...",
     error: "Error",
   };
