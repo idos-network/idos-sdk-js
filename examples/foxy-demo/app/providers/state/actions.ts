@@ -20,6 +20,11 @@ export const actions = {
     data: null,
     errorMessage: null,
     noahUrl: null,
+    hifiTosUrl: null,
+    hifiTosId: null,
+    hifiUrl: null,
+    hifiKycStatus: null,
+    getHifiKycStatusAttempts: 0,
   }),
 
   setClient: assign({
@@ -60,5 +65,25 @@ export const actions = {
 
   setNoahUrl: assign({
     noahUrl: ({ event }) => event.output,
+  }),
+
+  setHifiTosUrl: assign({
+    hifiTosUrl: ({ event }) => event.output,
+  }),
+
+  setHifiTosId: assign({
+    hifiTosId: ({ event }) => event.signedAgreementId,
+  }),
+
+  setHifiUrl: assign({
+    hifiUrl: ({ event }) => event.output,
+  }),
+
+  setHifiKycStatus: assign({
+    hifiKycStatus: ({ event }) => event.output,
+  }),
+
+  incrementGetHifiKycStatusAttempts: assign({
+    getHifiKycStatusAttempts: ({ context }) => context.getHifiKycStatusAttempts + 1,
   }),
 };

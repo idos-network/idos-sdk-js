@@ -13,6 +13,10 @@ export const serverEnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]),
   SECRET_KEY_BASE: z.string(),
   SECURE_AUTH_COOKIE: z.enum(["true", "false"]).transform((v) => v === "true"),
+  HIFI_API_URL: z.string(),
+  HIFI_API_KEY: z.string(),
+  FILES_PRIVATE_KEY: z.string(),
+  FILES_PUBLIC_KEY: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
