@@ -6,6 +6,7 @@
     "remove": ["devDependencies.@idos-network/core"]
   },
   "dependencies": {
+    "@gemwallet/api": "^3.8.0",
     "@kwilteam/kwil-js": "catalog:core",
     "es-toolkit": "catalog:core"
   },

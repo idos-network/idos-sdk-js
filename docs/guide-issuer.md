@@ -271,7 +271,7 @@ const credentialSubject = {
   placeOfBirth: "New York",
   idDocumentCountry: "US",
   idDocumentNumber: "293902002",
-  idDocumentType: "ID",
+  idDocumentType: "PASSPORT",
   idDocumentDateOfIssue: new Date(),
   idDocumentDateOfExpiry: new Date(),
   idDocumentFrontFile: Buffer.from("SOME_IMAGE"),
@@ -300,6 +300,7 @@ const credential = await idOSIssuer.buildCredentials(
   credentialFields,
   credentialSubject,
   issuer,
+  true, // If you want to validate against schema
 );
 ```
 

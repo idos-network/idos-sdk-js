@@ -9,9 +9,9 @@ import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-
 
 const issuer = "https://my-issuer.id/";
 
-const key = await verificationKey.Ed25519VerificationKey2020.generate({
+const key = await Ed25519VerificationKey2020.generate({
   id: `${issuer}/keys/1`,
-  controller: `${issuers}/issuers/1`,
+  controller: `${issuer}/issuers/1`,
 });
 
 /* Ed25519VerificationKey2020 {
@@ -51,7 +51,7 @@ const data = await buildCredentials(
     placeOfBirth: "New York, NY",
     idDocumentCountry: "US",
     idDocumentNumber: "123456789",
-    idDocumentType: "Passport",
+    idDocumentType: "PASSPORT",
     idDocumentDateOfIssue: new Date("2022-01-01"),
     idDocumentDateOfExpiry: new Date("2025-01-01"),
     idDocumentFrontFile: Buffer.from("Front of ID document"),
@@ -70,6 +70,7 @@ const data = await buildCredentials(
     residentialAddressProofFile: Buffer.from("Proof of address"),
   },
   key,
+  true, // Validation against schema
 );
 
 console.log(data);

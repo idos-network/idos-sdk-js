@@ -1,6 +1,5 @@
 // Those are the types for the digitalbazaar libraries.
 // There are missing a bunch of types, it's just what we need.
-
 declare module "@digitalbazaar/ed25519-signature-2020" {
   export interface Ed25519Signature2020Options {
     key: Ed25519VerificationKey2020;

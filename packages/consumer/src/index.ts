@@ -19,6 +19,8 @@ import {
 import type { PassportingPeer, idOSCredential, idOSGrant } from "@idos-network/core/types";
 import {
   type AvailableIssuerType,
+  type Credentials,
+  type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
   verifyCredentials,
@@ -151,4 +153,13 @@ export class idOSConsumer {
   }
 }
 
-export type { idOSCredential, idOSGrant };
+export type {
+  idOSCredential,
+  idOSGrant,
+  Credentials,
+  VerifiableCredential,
+  IDDocumentType,
+  VerifiableCredentialSubject,
+  AvailableIssuerType,
+  IDDocumentType,
+};
