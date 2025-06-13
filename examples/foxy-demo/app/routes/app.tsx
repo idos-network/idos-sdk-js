@@ -10,7 +10,7 @@ export default function App() {
   const { signOut } = useSiwe();
 
   const { send } = MachineContext.useActorRef();
-
+  
   const state = MachineContext.useSelector((state) => state.value);
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
@@ -18,8 +18,11 @@ export default function App() {
   const userData = MachineContext.useSelector((state) => state.context.data);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
-
+  const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
+  
   const transak = useRef<Transak | null>(null);
+
+  console.log("-> state", state);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: This is on purpose
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -38,6 +41,15 @@ export default function App() {
         send({ type: "kycCompleted" });
       }
     }
+
+    // Noah callback from /callbacks/noah
+    if (message.data.type === "noah-done") {
+      send({ type: "revokeAccessGrant" });
+    }
+
+    if (message.data.type === "hifi-tos-done") {
+      send({ type: "acceptHifiTos", signedAgreementId: message.data.signedAgreementId });
+    }
   }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -55,6 +67,10 @@ export default function App() {
 
     if (provider === "noah") {
       send({ type: "createNoahCustomer" });
+    }
+
+    if (provider === "hifi") {
+      send({ type: "startHifi" });
     }
   }, [state, provider, send]);
 
@@ -80,13 +96,9 @@ export default function App() {
         transak.current = null;
       });
     }
+  }, [sharableToken, state, provider, send]);
 
-    if (provider === "noah" && noahUrl) {
-      console.log("-> Noah data", noahUrl);
-    }
-  }, [sharableToken, state, provider, send, noahUrl]);
-
-  const start = async (provider: "transak" | "noah" | "custom") => {
+  const start = async (provider: "transak" | "noah" | "custom" | "hifi") => {
     send({ type: "configure", provider, address });
   };
 
@@ -108,6 +120,13 @@ export default function App() {
           onClick={() => start("noah")}
         >
           Noah
+        </button>
+        <button
+          type="button"
+          className="w-full cursor-pointer rounded-lg bg-sky-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-sky-700"
+          onClick={() => start("hifi")}
+        >
+          Hifi
         </button>
         <button
           type="button"
@@ -156,6 +175,14 @@ export default function App() {
     body = (
       <div className="w-full">
         <iframe src={noahUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
+  if (state === "hifiTosFetched" && hifiTosUrl && provider === "hifi") {
+    body = (
+      <div className="w-full">
+        <iframe src={hifiTosUrl} width="100%" height="800px" title="KYC" />
       </div>
     );
   }

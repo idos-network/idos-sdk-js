@@ -4,7 +4,7 @@ import type {
   idOSCredential,
 } from "@idos-network/client";
 
-export type Provider = "transak" | "noah" | "custom" | null;
+export type Provider = "transak" | "noah" | "custom" | "hifi" | null;
 
 export interface Context {
   errorMessage?: string | null;
@@ -20,6 +20,9 @@ export interface Context {
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
   noahUrl: string | null;
+  hifiTosUrl: string | null;
+  hifiTosId: string | null;
+  hifiUrl: string | null;
 }
 
 export interface UserData {

@@ -50,16 +50,41 @@ export interface PrimaryResidence {
   Country: string;
 }
 
-export interface NoahSubject {
-  customer: NoahCustomer;
+export interface NoahLineItem {
+  Description: string;
+  Quantity: string;
+  UnitAmount: string;
+  TotalAmount: string;
+}
+
+export interface NoahPayinFiatRequest {
+  PaymentMethodCategory: "Card" | "Bank";
+  FiatCurrency: string;
+  CryptoCurrency: string;
+  FiatAmount: string;
+  ReturnURL: string;
+  ExternalID: string;
   CustomerID: string;
+  Customer: NoahCustomer;
+  Nonce: string;
+  LineItems: NoahLineItem[];
+}
+
+export interface NoahCeckoutSession {
+  CheckoutSessionID: string;
+  PaymentMethodCategory: string;
+  SourceCurrency: string;
+  DestinationCurrency: string;
+  Status: "pending" | "failed" | "settled";
+  Type: "PayinCrypto" | "PayinFiat" | "PayoutFiat";
 }
 
 export interface NoahResponse {
   HostedURL: string;
+  CheckoutSession: NoahCeckoutSession;
 }
 
-export async function createNoahCustomer(address: string, credentials: Credentials) {
+export async function createNoahCustomer(address: string, credentials: Credentials, url: URL) {
   const cs = credentials.credentialSubject;
 
   const documentTypeMapper: Record<IDDocumentType, NoahIDDocumentType> = {
@@ -101,12 +126,41 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     },
   };
 
-  const subject: NoahSubject = {
-    customer,
+  // Cleanup URL
+  const returnUrl = new URL(url.toString());
+  returnUrl.protocol = "https";
+  returnUrl.pathname = "/callbacks/noah";
+  returnUrl.search = "";
+  returnUrl.hash = "";
+  console.log("-> returnUrl", returnUrl.toString());
+
+  const subject: NoahPayinFiatRequest = {
+    Customer: customer,
+    PaymentMethodCategory: "Card",
+    FiatCurrency: "USD",
+    CryptoCurrency: "BTC_TEST",
+    FiatAmount: "100",
+    ReturnURL: returnUrl.toString(),
+    ExternalID: crypto.randomUUID(),
     CustomerID: address,
+    Nonce: crypto.randomUUID(),
+    LineItems: [
+      {
+        Description: "Book #1",
+        Quantity: "1",
+        UnitAmount: "50",
+        TotalAmount: "50",
+      },
+      {
+        Description: "Book #2",
+        Quantity: "10",
+        UnitAmount: "5",
+        TotalAmount: "50",
+      },
+    ],
   };
 
-  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}v1/checkout/manage`, {
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}v1/checkout/payin/fiat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -121,5 +175,5 @@ export async function createNoahCustomer(address: string, credentials: Credentia
 
   const data = (await response.json()) as NoahResponse;
 
-  return data.HostedURL;
+  return data;
 }

@@ -33,6 +33,9 @@ export const machine = setup({
     findCredentialAttempts: 0,
     data: null,
     noahUrl: null,
+    hifiTosUrl: null,
+    hifiTosId: null,
+    hifiUrl: null,
   },
   states: {
     notConfigured: {
@@ -176,6 +179,49 @@ export const machine = setup({
         createNoahCustomer: {
           target: "createNoahCustomer",
         },
+        startHifi: {
+          target: "startHifi",
+        }
+      },
+    },
+    startHifi: {
+      invoke: {
+        id: "createHifiTocLink",
+        src: "createHifiTocLink",
+        onDone: {
+          target: "hifiTosFetched",
+          actions: ["setHifiTosUrl"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
+        },
+      }
+    },
+    hifiTosFetched: {
+      on: {
+        acceptHifiTos: {
+          target: "verifyHifiTos",
+          actions: ["setHifiTosId"],
+        },
+      },
+    },
+    verifyHifiTos: {
+      invoke: {
+        id: "verifyHifiTos",
+        src: "verifyHifiTos",
+        input: ({ context }) => ({
+          hifiTosId: context.hifiTosId,
+          sharedCredential: context.sharedCredential,
+        }),
+        onDone: {
+          target: "dataOrTokenFetched",
+          actions: ["setHifiUrl"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
+        },
       },
     },
     createNoahCustomer: {
@@ -237,14 +283,14 @@ export const machine = setup({
           client: context.loggedInClient,
           sharedCredential: context.sharedCredential,
         }),
-      },
-      onDone: {
-        target: "notConfigured",
-        actions: ["reset"],
-      },
-      onError: {
-        target: "error",
-        actions: ["setErrorMessage"],
+        onDone: {
+          target: "notConfigured",
+          actions: ["reset"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
+        },
       },
     },
     done: {
