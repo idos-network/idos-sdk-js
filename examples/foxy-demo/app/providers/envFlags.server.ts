@@ -15,6 +15,8 @@ export const serverEnvSchema = z.object({
   SECURE_AUTH_COOKIE: z.enum(["true", "false"]).transform((v) => v === "true"),
   HIFI_API_URL: z.string(),
   HIFI_API_KEY: z.string(),
+  FILES_PRIVATE_KEY: z.string(),
+  FILES_PUBLIC_KEY: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

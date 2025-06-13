@@ -1,3 +1,4 @@
+import { createUserAndKYC } from "~/providers/hifi.server";
 import { getSharedCredential } from "~/providers/idos.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "../+types/link";
@@ -11,7 +12,10 @@ export async function loader({ request }: Route.LoaderArgs) {
   const user = session.get("user");
 
   if (!credentialId || !user || !signedAgreementId) {
-    return Response.json({ error: "credentialId, user or signedAgreementId is required" }, { status: 400 });
+    return Response.json(
+      { error: "credentialId, user or signedAgreementId is required" },
+      { status: 400 },
+    );
   }
 
   // Check if the user accepted the right TOS
@@ -21,18 +25,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   try {
     const data = await getSharedCredential(credentialId, user.address);
+    const userId = await createUserAndKYC(signedAgreementId, credentialId, data, url);
 
-    // const response = await createHifiCustomer(user.address, data, url);
+    session.set("hifiUserId", userId);
+    session.unset("hifiTosId");
 
-    session.unset("noahCheckoutSessionID");
-
-    return Response.json({
-      url: data.credentialSubject.residentialAddressHouseNumber,
-    }, {
-      headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
+    return Response.json(
+      {
+        userId,
       },
-    });
+      {
+        headers: {
+          "Set-Cookie": await sessionStorage.commitSession(session),
+        },
+      },
+    );
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }
