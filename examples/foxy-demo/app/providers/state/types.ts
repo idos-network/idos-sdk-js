@@ -4,7 +4,7 @@ import type {
   idOSCredential,
 } from "@idos-network/client";
 
-export type Provider = "transak" | "banxa" | "custom" | null;
+export type Provider = "transak" | "noah" | "custom" | null;
 
 export interface Context {
   errorMessage?: string | null;
@@ -19,6 +19,7 @@ export interface Context {
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
+  noahUrl: string | null;
 }
 
 export interface UserData {
