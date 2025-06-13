@@ -37,6 +37,7 @@ import {
   type KwilActionClient,
   createClientKwilSigner,
   createWebKwilClient,
+  signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import { Store } from "@idos-network/core/store";
 import type {
@@ -371,7 +372,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       (cred) => !cred.original_id && !!cred.public_notes,
     );
 
-    invariant(originalCredentials.length, "No original credentials found");
+    // invariant(originalCredentials.length, "No original credentials found");
     let result = originalCredentials.filter((cred) => {
       return requirements.acceptedIssuers?.some(
         (issuer) => issuer.authPublicKey === cred.issuer_auth_public_key,
@@ -460,6 +461,8 @@ export type {
   EnclaveOptions,
   EnclaveProvider,
 };
+
+export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;

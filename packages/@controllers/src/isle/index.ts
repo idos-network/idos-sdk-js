@@ -117,15 +117,17 @@ interface RequestDelegatedWriteGrantOptions {
     consumerAuthPublicKey: string;
     /** Meta information about the consumer */
     meta: Meta;
+    walletIdentifier?: string | null;
   };
   KYCPermissions: string[];
+  walletIdentifier?: string | null;
 }
 
 export interface WalletInfo {
   address: string;
   publicKey: string;
   signMethod: (message: string) => Promise<string>;
-  type: "evm" | "xrpl";
+  type: "evm" | "xrpl" | "near";
   signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm>;
 }
 
@@ -287,9 +289,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       const currentDate = new Date(currentTimestamp);
       const notUsableAfter = new Date(currentTimestamp + 24 * 60 * 60 * 1000);
 
+      console.log(options);
+
       const delegatedWriteGrant = {
         id: crypto.randomUUID(),
-        owner_wallet_identifier: idosClient.walletIdentifier,
+        owner_wallet_identifier: options.walletIdentifier || idosClient.walletIdentifier,
         grantee_wallet_identifier: options.consumer.consumerAuthPublicKey,
         issuer_public_key: options.consumer.consumerAuthPublicKey,
         access_grant_timelock: currentDate.toISOString().replace(/.\d+Z$/g, "Z"),
@@ -449,7 +453,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       (cred) => !cred.original_id && !!cred.public_notes,
     );
 
-    invariant(originalCredentials.length, "No original credentials found");
+    // invariant(originalCredentials.length, "No original credentials found");
 
     ownerOriginalCredentials = originalCredentials;
 

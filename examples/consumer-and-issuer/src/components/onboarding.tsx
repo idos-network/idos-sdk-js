@@ -22,7 +22,9 @@ import {
   invokePassportingService,
 } from "@/actions";
 import { useOnboardingStore } from "@/app/stores/onboarding";
+import { useWalletStore } from "@/app/stores/wallet";
 import { useIsleController } from "@/isle.provider";
+import { useNearWallet } from "@/near.provider";
 import { KYCJourney } from "./kyc-journey";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
@@ -267,6 +269,8 @@ export const useCreateIDVAttribute = () => {
 
 const useIssueCredential = () => {
   const { isleController } = useIsleController();
+  const near = useNearWallet();
+  const { walletPublicKey } = useWalletStore();
 
   return useMutation({
     mutationFn: async ({
@@ -274,6 +278,8 @@ const useIssueCredential = () => {
       recipient_encryption_public_key,
     }: { idvUserId: string; recipient_encryption_public_key: string }) => {
       invariant(isleController, "`isleController` not initialized");
+
+      invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
 
       invariant(
         process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
@@ -297,6 +303,10 @@ const useIssueCredential = () => {
           "ID Document",
           "Liveness check (No pictures)",
         ],
+
+        walletIdentifier: near.selector.isSignedIn()
+          ? await isleController.idosClient.store.get("signer-public-key")
+          : null,
       });
 
       if (!dwgData) throw new Error("DWG data not found");
@@ -322,6 +332,7 @@ const useIssueCredential = () => {
 function useShareCredentialWithConsumer() {
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
+  const near = useNearWallet();
 
   return useMutation({
     mutationFn: async () => {
@@ -364,7 +375,9 @@ function useShareCredentialWithConsumer() {
       );
 
       const dag = {
-        dag_owner_wallet_identifier: isleController.idosClient.walletIdentifier,
+        dag_owner_wallet_identifier: near.selector.isSignedIn()
+          ? await isleController.idosClient.store.get("signer-public-key")
+          : isleController.idosClient.walletIdentifier,
         dag_grantee_wallet_identifier: consumerSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
@@ -428,6 +441,7 @@ export function Onboarding() {
   const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
   const issueCredential = useIssueCredential();
+  const { walletPublicKey } = useWalletStore();
 
   const kycDisclosure = useDisclosure();
 
@@ -442,6 +456,8 @@ export function Onboarding() {
   });
 
   const activeStep = useStore($step);
+
+  const near = useNearWallet();
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {

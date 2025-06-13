@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
 // Types for wallet connections
-export type WalletType = "evm" | "xrpl";
+export type WalletType = "evm" | "xrpl" | "near";
 
 export interface WalletState {
   isConnected: boolean;

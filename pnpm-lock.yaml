@@ -509,6 +509,18 @@ importers:
       '@nanostores/react':
         specifier: ^0.8.4
         version: 0.8.4(nanostores@0.11.4)(react@19.1.0)
+      '@near-wallet-selector/core':
+        specifier: 8.9.10
+        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/here-wallet':
+        specifier: 8.9.10
+        version: 8.9.10(borsh@2.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/meteor-wallet':
+        specifier: 8.9.10
+        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+      '@near-wallet-selector/modal-ui':
+        specifier: 8.9.10
+        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       '@reown/appkit':
         specifier: ^1.7.2
         version: 1.7.8(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.55)
@@ -524,6 +536,9 @@ importers:
       '@wagmi/core':
         specifier: ^2.16.4
         version: 2.17.3(@tanstack/query-core@5.80.6)(@types/react@19.1.6)(react@19.1.0)(typescript@5.8.3)(use-sync-external-store@1.5.0(react@19.1.0))(viem@2.31.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.55))
+      '@web3icons/react':
+        specifier: ^4.0.14
+        version: 4.0.14(react@19.1.0)(typescript@5.8.3)
       ethers:
         specifier: 'catalog:'
         version: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
@@ -542,6 +557,9 @@ importers:
       nanostores:
         specifier: ^0.11.4
         version: 0.11.4
+      near-api-js:
+        specifier: 3.0.4
+        version: 3.0.4(encoding@0.1.13)
       next:
         specifier: 15.2.1
         version: 15.2.1(@playwright/test@1.52.0)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -6680,6 +6698,16 @@ packages:
   '@web/rollup-plugin-import-meta-assets@2.2.1':
     resolution: {integrity: sha512-nG7nUQqSJWdl63pBTmnIElJuFi2V1x9eVje19BJuFvfz266jSmZtX3m30ncb7fOJxQt3/ge+FVL8tuNI9+63dQ==}
     engines: {node: '>=18.0.0'}
+
+  '@web3icons/common@0.11.11':
+    resolution: {integrity: sha512-M06zqF0Dt0nIH6o+tRfvLW4DrMdKfqZUsoLKRiJF9nzE5iHrtSsrzO2lAyqJZPfSQFUyJzDxTfd2EoAtQxViqg==}
+    peerDependencies:
+      typescript: ^5.0.0
+
+  '@web3icons/react@4.0.14':
+    resolution: {integrity: sha512-E81eIDjJSnSj8IqBdQOMomCpeMVYtt6mzBwxxNZ5aUIBMp/J1Dcxus4i7HibTXtzfJMwssXhakbG5IIXeodaeQ==}
+    peerDependencies:
+      react: ^18.2.0
 
   '@web3modal/common@4.2.3':
     resolution: {integrity: sha512-n0lvhoRjViqxmkgpy+iEM6E3HBylUgdxUDJU4hUxGmmrbGZGEP7USBRnQOEgXLqLCtWvxKjUAO33JBV/De+Osw==}
@@ -23728,6 +23756,17 @@ snapshots:
       magic-string: 0.30.17
     transitivePeerDependencies:
       - rollup
+
+  '@web3icons/common@0.11.11(typescript@5.8.3)':
+    dependencies:
+      typescript: 5.8.3
+
+  '@web3icons/react@4.0.14(react@19.1.0)(typescript@5.8.3)':
+    dependencies:
+      '@web3icons/common': 0.11.11(typescript@5.8.3)
+      react: 19.1.0
+    transitivePeerDependencies:
+      - typescript
 
   '@web3modal/common@4.2.3':
     dependencies:
