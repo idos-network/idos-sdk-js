@@ -334,6 +334,7 @@ function useShareCredentialWithConsumer() {
   const { signMessageAsync } = useSignMessage();
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
+  const near = useNearWallet();
 
   return useMutation({
     mutationFn: async () => {
@@ -376,7 +377,9 @@ function useShareCredentialWithConsumer() {
       );
 
       const dag = {
-        dag_owner_wallet_identifier: isleController.idosClient.walletIdentifier,
+        dag_owner_wallet_identifier: near.selector.isSignedIn()
+          ? await isleController.idosClient.store.get("signer-public-key")
+          : isleController.idosClient.walletIdentifier,
         dag_grantee_wallet_identifier: consumerSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
