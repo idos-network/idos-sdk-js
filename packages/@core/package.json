@@ -19,9 +19,9 @@
     "ethers": "catalog:core",
     "near-api-js": "catalog:core",
     "tweetnacl": "catalog:core",
-    "ripple-binary-codec": "^2.3.0",
-    "xrpl": "^4.2.5",
-    "xumm": "^1.8.0"
+    "ripple-binary-codec": "catalog:core",
+    "xrpl": "catalog:core",
+    "xumm": "catalog:core"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core"

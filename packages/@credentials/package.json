@@ -11,12 +11,12 @@
     "@digitalbazaar/vc": "catalog:core",
     "base85": "catalog:core",
     "jsonld-document-loader": "catalog:core",
-    "zod": "^3.25.58"
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
     "vitest": "catalog:testing",
-    "web-streams-polyfill": "3.3.3"
+    "web-streams-polyfill": "catalog:core"
   },
   "engines": {
     "node": ">=20.0.0"
