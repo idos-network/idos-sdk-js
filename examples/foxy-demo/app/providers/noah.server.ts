@@ -70,7 +70,7 @@ export interface NoahPayinFiatRequest {
   LineItems: NoahLineItem[];
 }
 
-export interface NoahCeckoutSession {
+export interface NoahCheckoutSession {
   CheckoutSessionID: string;
   PaymentMethodCategory: string;
   SourceCurrency: string;
@@ -81,7 +81,7 @@ export interface NoahCeckoutSession {
 
 export interface NoahResponse {
   HostedURL: string;
-  CheckoutSession: NoahCeckoutSession;
+  CheckoutSession: NoahCheckoutSession;
 }
 
 export async function createNoahCustomer(address: string, credentials: Credentials, url: URL) {
