@@ -73,14 +73,11 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
   useEffect(() => {
     if (!containerId || isleController) return;
 
-    invariant(
-      process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
-      "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set",
-    );
-    invariant(
-      process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
-      "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set",
-    );
+    const issuerUrl = process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL;
+    const acmeCardProviderUrl = process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL;
+
+    invariant(issuerUrl, "`NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL` is not set");
+    invariant(acmeCardProviderUrl, "`NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL` is not set");
 
     if (!walletType) return;
 
@@ -134,9 +131,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
         theme: "light",
         issuerConfig: {
           meta: {
-            url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+            url: issuerUrl,
             name: "NeoBank",
-            logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+            logo: `${issuerUrl}/static/logo.svg`,
           },
           encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
         },
@@ -149,9 +146,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           acceptedIssuers: [
             {
               meta: {
-                url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+                url: issuerUrl,
                 name: "NeoBank",
-                logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+                logo: `${issuerUrl}/static/logo.svg`,
               },
               authPublicKey: process.env.NEXT_PUBLIC_ISSUER_AUTH_PUBLIC_KEY_HEX ?? "",
             },
@@ -159,9 +156,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           integratedConsumers: [
             {
               meta: {
-                url: process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL,
+                url: issuerUrl,
                 name: "NeoBank",
-                logo: `${process.env.NEXT_PUBLIC_CONSUMER_AND_ISSUER_DEMO_URL}/static/logo.svg`,
+                logo: `${issuerUrl}/static/logo.svg`,
               },
               consumerEncryptionPublicKey:
                 process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
@@ -177,9 +174,9 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
             },
             {
               meta: {
-                url: process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL,
+                url: acmeCardProviderUrl,
                 name: "ACME Card Provider",
-                logo: `${process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}/static/logo.svg`,
+                logo: `${acmeCardProviderUrl}/static/logo.svg`,
               },
               consumerEncryptionPublicKey:
                 process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
@@ -208,7 +205,8 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
 
     return () => {
       if (isleController) {
-        isleController.destroy();
+        // biome-ignore lint/suspicious/noExplicitAny: isleController is of type IsleController
+        (isleController as any).destroy();
         setIsle(null);
       }
     };
