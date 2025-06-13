@@ -151,6 +151,13 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
       const result = await getXrpPublicKey(GemWallet);
       invariant(result?.address, "Failed to get XRP address");
       // validate passed public key in case user is not connected to intended wallet
+      if (result?.address !== address) {
+        toast({
+          title: "Error while adding wallet",
+          description: "Unexpected wallet address.",
+        });
+        return;
+      }
       if (publicKeyParam) {
         if (result?.publicKey === publicKeyParam) {
           publicKeys = [result?.publicKey ?? ""];
