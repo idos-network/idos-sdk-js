@@ -1,5 +1,4 @@
 export default function WalletConnectIcon() {
-  // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
   return (
     <svg
       width="41"
@@ -9,6 +8,7 @@ export default function WalletConnectIcon() {
       xmlns="http://www.w3.org/2000/svg"
       xmlnsXlink="http://www.w3.org/1999/xlink"
     >
+      <title>WalletConnect icon</title>
       <rect width="41" height="41" fill="url(#pattern0)" />
       <defs>
         <pattern id="pattern0" patternContentUnits="objectBoundingBox" width="1" height="1">

@@ -22,7 +22,7 @@
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.1",
     "@types/dompurify": "3.2.0",
-    "ethers": "catalog:",
+    "ethers": "catalog:core",
     "tailwindcss": "^4.1.1",
     "typescript": "^5.8.2",
     "vite": "^6.2.5",
