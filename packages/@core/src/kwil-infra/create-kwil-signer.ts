@@ -5,12 +5,15 @@ import type { KeyPair as NearKeyPair } from "near-api-js";
 import nacl from "tweetnacl";
 import { bs58Encode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "../kwil-nep413-signer";
 import type { Store } from "../store";
 import type { Wallet } from "../types";
-import { getXrpPublicKey, looksLikeXrpWallet } from "../xrp";
-import { createNearWalletKwilSigner, looksLikeNearWallet } from "./create-near-wallet-kwil-signer";
-import { createXrpKwilSigner } from "./create-xrp.signer";
+import {
+  createNearWalletKwilSigner,
+  looksLikeNearWallet,
+} from "./near/create-near-wallet-kwil-signer";
+import { implicitAddressFromPublicKey, kwilNep413Signer } from "./nep413";
+import { createXrpKwilSigner } from "./xrp/create-xrp-signer";
+import { getXrpPublicKey, looksLikeXrpWallet } from "./xrp/utils";
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
  */

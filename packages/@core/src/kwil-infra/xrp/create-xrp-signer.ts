@@ -1,9 +1,9 @@
 import type * as GemWallet from "@gemwallet/api";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Xumm } from "xumm";
-import type { Store } from "../store";
-import { getXrpTxHash } from "../xrp";
-import type { KwilActionClient } from "./create-kwil-client";
+import type { Store } from "../../store";
+import type { KwilActionClient } from "../create-kwil-client";
+import { getXrpTxHash } from "./utils";
 
 export async function createXrpKwilSigner(
   wallet: Xumm | typeof GemWallet,

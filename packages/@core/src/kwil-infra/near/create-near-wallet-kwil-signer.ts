@@ -11,10 +11,10 @@ import {
   bytesConcat,
   hexEncode,
   utf8Decode,
-} from "../codecs";
-import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
-import { implicitAddressFromPublicKey } from "../kwil-nep413-signer";
-import type { Store } from "../store";
+} from "../../codecs";
+import type { Store } from "../../store";
+import type { KwilActionClient } from "../create-kwil-client";
+import { implicitAddressFromPublicKey } from "../nep413";
 
 const NEAR_WALLET_TYPES: string[] = [
   "browser",

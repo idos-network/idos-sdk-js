@@ -23,7 +23,7 @@ export type WalletInitConfig = XamanConfig | GemConfig;
 
 type XrpWallet = "Xumm" | "GemWallet";
 
-export const createXummPayload = (message: string): Record<string, unknown> => {
+export function createXummPayload(message: string): Record<string, unknown> {
   const memoData = Buffer.from(message).toString("hex"); // Encode message as hex for Memos
   return {
     custom_meta: {
@@ -41,38 +41,36 @@ export const createXummPayload = (message: string): Record<string, unknown> => {
       ],
     },
   };
-};
-export const signXummTx = (
-  xummInstance: Xumm,
-  payload: Record<string, unknown>,
-): Promise<string> => {
+}
+
+export function signXummTx(xummInstance: Xumm, payload: Record<string, unknown>): Promise<string> {
   return new Promise((resolve) => {
-    // biome-ignore lint/suspicious/noExplicitAny: xumm payload type bit not easy to import
+    // biome-ignore lint/suspicious/noExplicitAny: xumm payload type is not easy to import
     xummInstance.payload?.createAndSubscribe(payload as unknown as any, async (event) => {
       if (!event.payload.response.hex) return;
       const hex = event.payload.response.hex;
       resolve(hex);
     });
   });
-};
+}
 
-export const getXummPublicKey = async (wallet: Xumm): Promise<string | undefined> => {
+export async function getXummPublicKey(wallet: Xumm): Promise<string | undefined> {
   const payload = createXummPayload("Sign request from idOS");
   const txHash = await signXummTx(wallet, payload);
   const decodedTx = decode(txHash);
   return decodedTx.SigningPubKey as string;
-};
+}
 
-export const signGemWalletTx = (
+export function signGemWalletTx(
   gemWalletInstance: typeof GemWallet,
   message: string,
-): Promise<string | undefined> => {
+): Promise<string | undefined> {
   return gemWalletInstance.signMessage(message).then((response) => response.result?.signedMessage);
-};
+}
 
-export const getGemWalletPublicKey = async (
+export async function getGemWalletPublicKey(
   wallet: typeof GemWallet,
-): Promise<{ address: string; publicKey: string } | undefined> => {
+): Promise<{ address: string; publicKey: string } | undefined> {
   if ("isInstalled" in wallet) {
     await wallet.isInstalled();
     const { publicKey, address } = await wallet
@@ -80,17 +78,15 @@ export const getGemWalletPublicKey = async (
       .then((res) => res.result as { publicKey: string; address: string });
     return { address, publicKey };
   }
-};
+}
 
-export const getXrpAddress = async (
-  wallet: Xumm | typeof GemWallet,
-): Promise<string | undefined> => {
+export async function getXrpAddress(wallet: Xumm | typeof GemWallet): Promise<string | undefined> {
   if ("isInstalled" in wallet) {
     await wallet.isInstalled();
     return wallet.getAddress().then((response) => response.result?.address);
   }
   return wallet.user.account;
-};
+}
 
 // Type guard to check if the wallet is an Xumm wallet
 export function looksLikeXrpWallet(wallet: unknown): wallet is Xumm | typeof GemWallet {
@@ -100,7 +96,8 @@ export function looksLikeXrpWallet(wallet: unknown): wallet is Xumm | typeof Gem
     ("authorize" in wallet || "isInstalled" in wallet)
   );
 }
-export const getXrpWalletType = async (object: Record<string, unknown>): Promise<XrpWallet> => {
+
+export async function getXrpWalletType(object: Record<string, unknown>): Promise<XrpWallet> {
   if ("authorize" in object) {
     return "Xumm";
   }
@@ -108,12 +105,12 @@ export const getXrpWalletType = async (object: Record<string, unknown>): Promise
     return "GemWallet";
   }
   throw new Error("Unknown wallet type");
-};
+}
 
-export const getXrpTxHash = async (
+export async function getXrpTxHash(
   message: string | Uint8Array,
   wallet: Xumm | typeof GemWallet,
-): Promise<string | undefined> => {
+): Promise<string | undefined> {
   let messageString: string;
 
   const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
@@ -147,11 +144,11 @@ export const getXrpTxHash = async (
     }
     return signature;
   }
-};
+}
 
-export const getXrpPublicKey = async (
+export async function getXrpPublicKey(
   wallet: Xumm | typeof GemWallet,
-): Promise<{ address: string; publicKey: string } | undefined> => {
+): Promise<{ address: string; publicKey: string } | undefined> {
   const xrpWalletType = await getXrpWalletType(wallet as Record<string, unknown>);
   if (xrpWalletType === "Xumm") {
     // @todo: should we remove xaman wallet support?
@@ -160,4 +157,4 @@ export const getXrpPublicKey = async (
     return { address: address as string, publicKey: publicKey as string };
   }
   return getGemWalletPublicKey(wallet as typeof GemWallet);
-};
+}
