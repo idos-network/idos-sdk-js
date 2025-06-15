@@ -3,15 +3,16 @@ import type { Xumm } from "xumm";
 
 type UserPubkey = string;
 
-const getXamanAccount = async (xummInstance: Xumm): Promise<string | undefined> => {
-  const account = await xummInstance.user.account;
-  return account;
-};
+async function getXamanAccount(xummInstance: Xumm): Promise<string | undefined> {
+  return await xummInstance.user.account;
+}
 
-export const getXamanPublicKey = async (xummInstance: Xumm): Promise<UserPubkey> => {
+export async function getXamanPublicKey(xummInstance: Xumm): Promise<UserPubkey> {
   const account = await getXamanAccount(xummInstance);
+
   return new Promise((resolve, reject) => {
     if (!account) reject("No account found");
+
     xummInstance.payload?.createAndSubscribe(
       {
         TransactionType: "SignIn",
@@ -20,6 +21,7 @@ export const getXamanPublicKey = async (xummInstance: Xumm): Promise<UserPubkey>
           instruction: "Sign in to idOS Data Dashboard",
         },
       },
+
       async (event) => {
         if (!event.payload.response.hex) return;
         console.log({ event });
@@ -31,4 +33,4 @@ export const getXamanPublicKey = async (xummInstance: Xumm): Promise<UserPubkey>
       },
     );
   });
-};
+}

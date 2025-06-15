@@ -31,13 +31,10 @@
     "./codecs": "./src/codecs/index.ts",
     "./cryptography": "./src/cryptography/index.ts",
     "./types": "./src/types/index.ts",
-    "./kwil-nep413-signer": "./src/kwil-nep413-signer/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",
     "./kwil-infra": "./src/kwil-infra/index.ts",
     "./store": "./src/store/index.ts",
-    "./utils": "./src/utils/index.ts",
-    "./enclave": "./src/enclave/index.ts",
-    "./xrp": "./src/xrp/index.ts"
+    "./utils": "./src/utils/index.ts"
   },
   "license": "MIT",
   "peerDependencies": {

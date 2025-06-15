@@ -7,12 +7,11 @@ import {
   hexEncode,
   sha256Hash,
   utf8Decode,
-} from "../codecs";
+} from "../../codecs";
 
 export function implicitAddressFromPublicKey(publicKey: string): string {
   const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  const implicitAddress = hexEncode(bs58Decode(key_without_prefix));
-  return implicitAddress;
+  return hexEncode(bs58Decode(key_without_prefix));
 }
 
 export function kwilNep413Signer(
