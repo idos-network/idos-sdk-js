@@ -5,15 +5,21 @@
   "clean-package": {
     "remove": ["devDependencies.@idos-network/core"]
   },
+  "dependencies": {
+    "@digitalbazaar/ed25519-signature-2020": "catalog:core",
+    "@digitalbazaar/ed25519-verification-key-2020": "catalog:core",
+    "@digitalbazaar/vc": "catalog:core",
+    "base85": "catalog:core",
+    "jsonld-document-loader": "catalog:core",
+    "zod": "catalog:core"
+  },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "vitest": "^3.1.4"
+    "vitest": "catalog:testing",
+    "web-streams-polyfill": "catalog:core"
   },
   "engines": {
     "node": ">=20.0.0"
-  },
-  "dependencies": {
-    "zod": "^3.25.58"
   },
   "exports": {
     ".": {
@@ -26,13 +32,7 @@
   "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
-    "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0",
-    "@digitalbazaar/vc": "^7.2.0",
-    "base85": "^3.1.0",
-    "jsonld-document-loader": "^2.3.0",
-    "typescript": "^5.8.3",
-    "web-streams-polyfill": "3.3.3"
+    "typescript": "catalog:build"
   },
   "publishConfig": {
     "access": "public"
