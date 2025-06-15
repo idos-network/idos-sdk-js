@@ -16,7 +16,7 @@ import {
   utf8Decode,
 } from "@idos-network/core";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
-import { type Config, getAccount, watchAccount } from "@wagmi/core";
+import { type Config, watchAccount } from "@wagmi/core";
 import { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
@@ -659,8 +659,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     channel.on("link-wallet", async () => {
       const dashboardUrl =
         process.env.NEXT_PUBLIC_IDOS_DASHBOARD_URL ?? "https://dashboard.playground.idos.network/";
-      const account = getAccount(wagmiConfig);
-      const url = `${dashboardUrl}wallets?add-wallet=${account.address}&callbackUrl=${window.location.href}`;
+      const { address, publicKey, type } = options.walletInfo;
+      const url = `${dashboardUrl}wallets?add-wallet=${address}&publicKey=${publicKey}&callbackUrl=${window.location.href}&type=${type}`;
       window.location.href = url;
     });
 

@@ -16,9 +16,12 @@ import {
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import type { FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
+import * as GemWallet from "@gemwallet/api";
+import { getXrpPublicKey } from "@idos-network/core";
 import invariant from "tiny-invariant";
 
 type AddWalletProps = {
@@ -93,6 +96,8 @@ const useAddWalletMutation = () => {
 
 export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddWalletProps) => {
   const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const publicKeyParam = searchParams.get("publicKey");
 
   const isCentered = useBreakpointValue(
     {
@@ -110,23 +115,71 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    let publicKeys: string[] = [];
 
     const form = event.currentTarget as HTMLFormElement;
     const address = new FormData(form).get("address") as string;
-    const address_regexp = /^0x[0-9a-fA-F]{40}$/;
-    const address_type = address_regexp.test(address) ? "EVM" : "NEAR";
 
-    let publicKeys: string[] = [];
+    // Address validation patterns
+    const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
+    const near_regexp = /^[a-zA-Z0-9._-]+\.near$/;
+    const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
+
+    let address_type: "EVM" | "NEAR" | "XRP" | "INVALID";
+
+    if (evm_regexp.test(address)) {
+      address_type = "EVM";
+    } else if (near_regexp.test(address)) {
+      address_type = "NEAR";
+    } else if (xrp_address_regexp.test(address)) {
+      address_type = "XRP";
+    } else {
+      address_type = "INVALID";
+    }
+
+    if (address_type === "INVALID") {
+      toast({
+        title: "Invalid wallet address",
+        description: "Please enter a valid EVM, NEAR, or XRP wallet address/public key.",
+        position: "bottom-right",
+        status: "error",
+      });
+      return;
+    }
+
+    if (address_type === "XRP") {
+      const result = await getXrpPublicKey(GemWallet);
+      invariant(result?.address, "Failed to get XRP address");
+      // validate passed public key in case user is not connected to intended wallet
+      if (result?.address !== address) {
+        toast({
+          title: "Error while adding wallet",
+          description: "Unexpected wallet address.",
+        });
+        return;
+      }
+      if (publicKeyParam) {
+        if (result?.publicKey === publicKeyParam) {
+          publicKeys = [result?.publicKey ?? ""];
+        } else {
+          toast({
+            title: "Error while adding wallet",
+            description: "Public key doesn't match the wallet address.",
+          });
+        }
+      } else {
+        publicKeys = [result?.publicKey ?? ""];
+      }
+    }
 
     if (address_type === "NEAR") {
       publicKeys = (await getNearFullAccessPublicKeys(address)) || [];
-      console.log(publicKeys);
 
       if (!publicKeys.length) {
         toast({
           title: "Error while adding wallet",
           description:
-            "This doesn't look like an EVM wallet, and we can't find a `FullAccessKey` for this NEAR address. idOS doesn't support this wallet.",
+            "We can't find a `FullAccessKey` for this NEAR address. idOS doesn't support this wallet.",
           position: "bottom-right",
           status: "error",
         });
