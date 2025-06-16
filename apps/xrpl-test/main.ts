@@ -1,10 +1,11 @@
 import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
-import * as xrpKeypair from "ripple-keypairs";
 
 export async function idOSConsumer() {
-  const NODE_URL = "https://nodes.playground.idos.network";
-  const OTHER_CONSUMER_ENCRYPTION_SECRET_KEY = "";
+  const NODE_URL = "https://2979-2a02-8109-b710-5400-3429-d79e-395f-cda3.ngrok-free.app/";
+  const OTHER_CONSUMER_ENCRYPTION_SECRET_KEY = "j7IppyTqzOfKQ7PuF/lx7HpoDZBbiO2Jrdx1gYN/+8M=";
   const OTHER_CONSUMER_SIGNING_SECRET_KEY = "...";
+
+  const xrpKeypair = await import("ripple-keypairs");
 
   const consumer = await idOSConsumerClass.init({
     nodeUrl: NODE_URL,
@@ -34,7 +35,23 @@ export async function idOSConsumer() {
   return consumer;
 }
 
-const consumer = await idOSConsumer();
+async function main() {
+  try {
+    console.log("Initializing consumer...");
+    const consumer = await idOSConsumer();
+    console.log("Consumer created successfully");
 
-await consumer.getGrantsCount();
-console.log(consumer);
+    console.log("Getting grants count...");
+    const count = await consumer.getGrantsCount();
+    console.log("Grants count:", count);
+  } catch (error) {
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    throw error; // Re-throw to see full error in console
+  }
+}
+
+main().catch(console.error);
