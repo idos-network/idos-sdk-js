@@ -89,3 +89,4 @@ Xaman
 gemwallet
 partialize
 keypairs
+ripple-keypairs
