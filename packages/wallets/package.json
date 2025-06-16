@@ -3,9 +3,7 @@
   "description": "idOS Wallets support JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
+    "remove": ["devDependencies.@idos-network/core"]
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",

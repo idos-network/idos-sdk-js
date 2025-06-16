@@ -1,5 +1,5 @@
-import { SiweMessage } from "siwe";
 import { getAddress } from "ethers";
+import { SiweMessage } from "siwe";
 
 export const generateSignInMessage = (address: string, chain: string, url: URL): string => {
   return new SiweMessage({
@@ -16,4 +16,4 @@ export const verifySignInMessage = async (message: string, signature: string): P
   const siweMessage = new SiweMessage(message);
   const isValid = await siweMessage.verify({ signature });
   return isValid.success;
-}
+};

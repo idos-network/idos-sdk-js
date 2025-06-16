@@ -1,7 +1,7 @@
+import pkg from "@stellar/freighter-api";
 import { StrKey } from "@stellar/stellar-sdk";
 import { Wallet } from "../types";
-import pkg from '@stellar/freighter-api';
-const {isConnected, isAllowed, requestAccess, signMessage, setAllowed } = pkg;
+const { isConnected, isAllowed, requestAccess, signMessage, setAllowed } = pkg;
 
 export default class Freighter extends Wallet {
   static isAvailable(): Promise<boolean> {
@@ -35,7 +35,7 @@ export default class Freighter extends Wallet {
       new Freighter("stellar", "freighter", address, publicKey, 1, async (message: string) => {
         const signedMessage = await signMessage(message);
         return signedMessage.signedMessage as string;
-      })
+      }),
     ];
   }
 }

@@ -3,15 +3,19 @@ import Freighter from "./Freighter";
 
 export default function Stellar({ addWallets }: ChainProvider) {
   return (
-  <div>
-    <button type="button" onClick={async () => {
-      if (await Freighter.isAvailable()) {
-        addWallets(await Freighter.init());
-      } else {
-        console.log("-> Freighter is not available");
-      }
-    }}>
-      Freighter
-    </button>
-  </div>);
+    <div>
+      <button
+        type="button"
+        onClick={async () => {
+          if (await Freighter.isAvailable()) {
+            addWallets(await Freighter.init());
+          } else {
+            console.log("-> Freighter is not available");
+          }
+        }}
+      >
+        Freighter
+      </button>
+    </div>
+  );
 }

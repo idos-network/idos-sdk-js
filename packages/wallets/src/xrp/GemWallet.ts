@@ -1,4 +1,4 @@
-import { isInstalled, getAddress, getPublicKey, signMessage } from "@gemwallet/api";
+import { getAddress, getPublicKey, isInstalled, signMessage } from "@gemwallet/api";
 import { Wallet } from "../types";
 
 export default class GemWallet extends Wallet {

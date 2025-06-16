@@ -1,11 +1,11 @@
 import type React from "react";
 import { type ReactNode, Suspense, createContext, useContext, useState } from "react";
 
-import type { SupportedWallets, Wallet } from "./types";
 import Eth from "./eth";
-import Stellar from "./stellar";
-import Xrp from "./xrp";
 import Near from "./near";
+import Stellar from "./stellar";
+import type { SupportedWallets, Wallet } from "./types";
+import Xrp from "./xrp";
 
 interface WalletContextType {
   wallets: Wallet[];
@@ -35,7 +35,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
       setSelectedWallet(null);
       setCurrentType(null);
       setIsChooserOpen(true);
-    }
+    },
   };
 
   console.log("-> isChooserOpen", isChooserOpen);
@@ -51,10 +51,18 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
       <div>
         <h1>Wallet Chooser</h1>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <button type="button" onClick={() => setType("eth")}>Ethereum</button>
-          <button type="button" onClick={() => setType("near")}>Near</button>
-          <button type="button" onClick={() => setType("xrp")}>XRP</button>
-          <button type="button" onClick={() => setType("stellar")}>Stellar</button>
+          <button type="button" onClick={() => setType("eth")}>
+            Ethereum
+          </button>
+          <button type="button" onClick={() => setType("near")}>
+            Near
+          </button>
+          <button type="button" onClick={() => setType("xrp")}>
+            XRP
+          </button>
+          <button type="button" onClick={() => setType("stellar")}>
+            Stellar
+          </button>
         </div>
       </div>
     );

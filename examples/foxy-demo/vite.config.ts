@@ -14,9 +14,5 @@ export default defineConfig(({ isSsrBuild }) => ({
     "process.env.NODE_DEBUG": "false",
     global: {},
   },
-  plugins: [
-    tailwindcss(),
-    reactRouter(),
-    tsconfigPaths(),
-  ],
+  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
 }));

@@ -1,8 +1,13 @@
-import { deriveAddress } from 'xrpl';
-import pkg from 'ripple-keypairs';
-const {verify} = pkg;
+import pkg from "ripple-keypairs";
+import { deriveAddress } from "xrpl";
+const { verify } = pkg;
 
-export const verifySignInMessage = async (address: string, publicKey: string, message: string, signature: string): Promise<boolean> => {
+export const verifySignInMessage = async (
+  address: string,
+  publicKey: string,
+  message: string,
+  signature: string,
+): Promise<boolean> => {
   const derivedAddress = deriveAddress(publicKey);
 
   if (derivedAddress !== address) {
@@ -10,7 +15,7 @@ export const verifySignInMessage = async (address: string, publicKey: string, me
     return false;
   }
 
-  const messageBytes = Buffer.from(message, 'utf8').toString('hex')
+  const messageBytes = Buffer.from(message, "utf8").toString("hex");
 
   return verify(messageBytes, signature, publicKey);
 };

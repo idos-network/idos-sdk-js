@@ -22,7 +22,14 @@ export class Wallet {
   /* Sign message */
   signMessageInternal: (message: string) => Promise<string>;
 
-  constructor(chain: SupportedWallets, adapter: string, address: string, publicKey: string, networkId: number, signMessage: (message: string) => Promise<string>) {
+  constructor(
+    chain: SupportedWallets,
+    adapter: string,
+    address: string,
+    publicKey: string,
+    networkId: number,
+    signMessage: (message: string) => Promise<string>,
+  ) {
     this.id = crypto.randomUUID();
     this.chain = chain;
     this.adapter = adapter;

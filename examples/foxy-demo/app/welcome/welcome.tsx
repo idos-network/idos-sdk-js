@@ -7,7 +7,9 @@ export function Welcome() {
   const signIn = async () => {
     if (selectedWallet) {
       // Start SIWE
-      const authResponse = await fetch(`/auth?address=${selectedWallet.address}&chain=${selectedWallet.chain}&publicKey=${selectedWallet.publicKey}`);
+      const authResponse = await fetch(
+        `/auth?address=${selectedWallet.address}&chain=${selectedWallet.chain}&publicKey=${selectedWallet.publicKey}`,
+      );
       const { user } = await authResponse.json();
 
       const signature = await selectedWallet.signMessage(user.message);
@@ -22,7 +24,7 @@ export function Welcome() {
       }
       return;
     }
-  }
+  };
 
   useEffect(() => {
     if (selectedWallet) {

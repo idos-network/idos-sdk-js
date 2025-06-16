@@ -1,4 +1,7 @@
-import { generateSignInMessage as generateSignInMessageEth, verifySignInMessage as verifySignInMessageEth } from "./eth/utils";
+import {
+  generateSignInMessage as generateSignInMessageEth,
+  verifySignInMessage as verifySignInMessageEth,
+} from "./eth/utils";
 import { verifySignInMessage as verifySignInMessageStellar } from "./stellar/utils";
 import { verifySignInMessage as verifySignInMessageXrp } from "./xrp/utils";
 
@@ -17,7 +20,13 @@ Version: 1
 Chain ID: 1`;
 };
 
-export const verifySignInMessage = (chain: string, address: string, publicKey: string, message: string, signature: string): Promise<boolean> => {
+export const verifySignInMessage = (
+  chain: string,
+  address: string,
+  publicKey: string,
+  message: string,
+  signature: string,
+): Promise<boolean> => {
   if (chain === "eth") {
     return verifySignInMessageEth(message, signature);
   }
