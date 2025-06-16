@@ -16,7 +16,11 @@ export function Welcome() {
 
       const signInResponse = await fetch("/auth", {
         method: "POST",
-        body: JSON.stringify({ signature, address: selectedWallet.address, publicKey: selectedWallet.publicKey }),
+        body: JSON.stringify({
+          signature,
+          address: selectedWallet.address,
+          publicKey: selectedWallet.publicKey,
+        }),
       });
 
       if (signInResponse.redirected) {

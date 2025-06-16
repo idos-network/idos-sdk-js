@@ -2,9 +2,9 @@ import {
   generateSignInMessage as generateSignInMessageEth,
   verifySignInMessage as verifySignInMessageEth,
 } from "./eth/utils";
+import { verifySignInMessage as verifySignInMessageNear } from "./near/utils";
 import { verifySignInMessage as verifySignInMessageStellar } from "./stellar/utils";
 import { verifySignInMessage as verifySignInMessageXrp } from "./xrp/utils";
-import { verifySignInMessage as verifySignInMessageNear } from "./near/utils";
 
 export const generateSignInMessage = (address: string, chain: string, url: URL): string => {
   if (chain === "eth") {
