@@ -60,10 +60,16 @@ export async function action({ request }: Route.ActionArgs) {
     throw new Error("No session found");
   }
 
-  const { signature } = await request.json();
+  const { signature, address, publicKey } = await request.json();
 
   if (!signature) {
     throw new Error("Signature is required");
+  }
+
+  // Near sends the address and public key in the request body
+  if (user.chain === "near") {
+    user.address = address;
+    user.publicKey = publicKey;
   }
 
   try {

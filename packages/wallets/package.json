@@ -3,12 +3,14 @@
   "description": "idOS Wallets support JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
-    "remove": ["devDependencies.@idos-network/core"]
+    "remove": [
+      "devDependencies.@idos-network/core"
+    ]
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "vitest": "^3.1.4"
   },
   "engines": {
@@ -24,6 +26,7 @@
     "@stellar/stellar-base": "^13.1.0",
     "@stellar/stellar-sdk": "^13.3.0",
     "ethers": "^6.14.4",
+    "near-api-js": "3.0.4",
     "ripple-keypairs": "^2.0.0",
     "siwe": "^3.0.0",
     "xrpl": "^4.2.5",
@@ -44,8 +47,8 @@
   "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "react": "catalog:react19",
-    "react-dom": "catalog:react19",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
     "typescript": "^5.8.3"
   },
   "publishConfig": {

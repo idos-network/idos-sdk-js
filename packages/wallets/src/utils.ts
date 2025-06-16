@@ -4,6 +4,7 @@ import {
 } from "./eth/utils";
 import { verifySignInMessage as verifySignInMessageStellar } from "./stellar/utils";
 import { verifySignInMessage as verifySignInMessageXrp } from "./xrp/utils";
+import { verifySignInMessage as verifySignInMessageNear } from "./near/utils";
 
 export const generateSignInMessage = (address: string, chain: string, url: URL): string => {
   if (chain === "eth") {
@@ -40,11 +41,7 @@ export const verifySignInMessage = (
   }
 
   if (chain === "near") {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(true);
-      }, 30000);
-    });
+    return verifySignInMessageNear(address, publicKey, message, signature);
   }
 
   return Promise.resolve(false);
