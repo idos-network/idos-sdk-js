@@ -18,9 +18,9 @@ export const generateFileUrl = (url: URL, credentialId: string, fileType: string
   });
 
   const fileUrl = new URL(url.toString());
+  fileUrl.protocol = "https";
   fileUrl.pathname = "/file";
   fileUrl.searchParams.forEach((_value, key) => {
-    console.log("-> key", key);
     fileUrl.searchParams.delete(key);
   });
   fileUrl.searchParams.delete("signedAgreementId");

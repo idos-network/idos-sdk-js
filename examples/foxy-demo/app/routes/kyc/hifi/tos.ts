@@ -17,11 +17,14 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
     session.set("hifiTosId", link.idempotencyKey);
 
-    return Response.json({ link: link.url }, {
-      headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
+    return Response.json(
+      { link: link.url },
+      {
+        headers: {
+          "Set-Cookie": await sessionStorage.commitSession(session),
+        },
       },
-    });
+    );
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

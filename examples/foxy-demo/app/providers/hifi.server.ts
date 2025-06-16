@@ -3,6 +3,7 @@ import { SERVER_ENV } from "./envFlags.server";
 
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
 import { generateFileUrl } from "./files.server";
+import { getISORegionCodeFromNominatim } from "./maps.server";
 
 export interface KYCStatusResponse {
   USD_EURO: UsdEuro;
@@ -106,6 +107,25 @@ export const createUserAndKYC = async (
   data: Credentials,
   url: URL,
 ) => {
+  // stateProvinceRegion is required but we don't have it in the data
+  // so we need to get it from the address
+  const stateProvinceRegion = await getISORegionCodeFromNominatim(
+    [
+      [
+        data.credentialSubject.residentialAddressStreet,
+        data.credentialSubject.residentialAddressHouseNumber,
+      ]
+        .filter((x) => x)
+        .join(" "),
+      data.credentialSubject.residentialAddressCity,
+      data.credentialSubject.residentialAddressPostalCode,
+      data.credentialSubject.residentialAddressCountry,
+      data.credentialSubject.residentialAddressAdditionalAddressInfo,
+    ]
+      .filter((x) => x)
+      .join(", "),
+  );
+
   const user: CreateUserRequest = {
     type: "individual",
     firstName: data.credentialSubject.firstName,
@@ -120,11 +140,10 @@ export const createUserAndKYC = async (
       city: data.credentialSubject.residentialAddressCity!,
       // biome-ignore lint/style/noNonNullAssertion: <explanation>
       postalCode: data.credentialSubject.residentialAddressPostalCode!,
-      // TODO: This is required but we don't have it
-      stateProvinceRegion: data.credentialSubject.residentialAddressAdditionalAddressInfo ?? "BW",
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      stateProvinceRegion: stateProvinceRegion.slice(0, 2),
       country:
         countries2to3[
+          // biome-ignore lint/style/noNonNullAssertion: <explanation>
           data.credentialSubject.residentialAddressCountry! as keyof typeof countries2to3
         ],
     },
@@ -155,17 +174,18 @@ export const createUserAndKYC = async (
     // @ts-expect-error Missing types
     signedAgreementId: undefined,
     phone: data.credentialSubject.phoneNumber,
+    // TODO: Get this from the data
     taxIdentificationNumber: "123456789",
-    govIdType: "PASSPORT",
+    govIdType: data.credentialSubject.idDocumentType.toUpperCase(),
     govIdNumber: data.credentialSubject.idDocumentNumber,
     govIdIssuanceDate: data.credentialSubject.idDocumentDateOfIssue?.split("T")[0],
     govIdFrontUrl: generateFileUrl(url, credentialId, "idDocumentFrontFile"),
     govIdBackUrl: data.credentialSubject.idDocumentBackFile
       ? generateFileUrl(url, credentialId, "idDocumentBackFile")
-      : undefined,
+      : generateFileUrl(url, credentialId, "idDocumentFrontFile"), // Send front file if back is not provided
     govIdCountry:
       countries2to3[data.credentialSubject.idDocumentCountry as keyof typeof countries2to3],
-    proofOfAddressType: "UTILITY_BILL",
+    proofOfAddressType: data.credentialSubject.residentialAddressProofCategory.toUpperCase(),
     proofOfAddressUrl: generateFileUrl(url, credentialId, "residentialAddressProofFile"),
   };
 
@@ -203,9 +223,6 @@ export const createUserAndKYC = async (
     console.log("-> error", JSON.stringify(error, null, 2));
     throw new Error(`Can't submit KYC in HIFI because: ${error.message}`);
   }
-
-  const submitKYCResponseJson = await submitKYCResponse.json();
-  console.log("-> submitKYCResponseJson", JSON.stringify(submitKYCResponseJson, null, 2));
 
   return userId as string;
 };

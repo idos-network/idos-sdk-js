@@ -6,10 +6,13 @@ export default function Callback() {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: This is on purpose
   useEffect(() => {
-    window.parent?.postMessage({
-      type: "hifi-tos-done",
-      signedAgreementId: searchParams.get("signedAgreementId"),
-    }, "*");
+    window.parent?.postMessage(
+      {
+        type: "hifi-tos-done",
+        signedAgreementId: searchParams.get("signedAgreementId"),
+      },
+      "*",
+    );
   }, []);
 
   return <div>Processing TOS...</div>;

@@ -21,14 +21,17 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     session.set("noahCheckoutSessionID", response.CheckoutSession.CheckoutSessionID);
 
-    return Response.json({
-      url: response.HostedURL,
-      currentUrl: url.toString(),
-    }, {
-      headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
+    return Response.json(
+      {
+        url: response.HostedURL,
+        currentUrl: url.toString(),
       },
-    });
+      {
+        headers: {
+          "Set-Cookie": await sessionStorage.commitSession(session),
+        },
+      },
+    );
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

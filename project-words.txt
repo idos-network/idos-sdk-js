@@ -8,7 +8,9 @@ Holyheld
 IDOS
 IDOSDAG
 Neobank
+Nominatim
 OSDAG
+Payin
 PayinFiat
 Personhood
 Reown

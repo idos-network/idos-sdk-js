@@ -89,7 +89,6 @@ export default function App() {
       transak.current.init();
 
       Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, (orderData) => {
-        console.log("-> Transak closed");
         console.log(orderData);
         transak.current?.close();
         send({ type: "revokeAccessGrant" });
@@ -159,6 +158,7 @@ export default function App() {
     requestAccessGrant: "Requesting access grant...",
     waitForCredential: "Waiting for finding credential next attempt...",
     waitForHifiKycStatus: "Waiting for KYC status next attempt...",
+    verifyHifiTos: "Verifying and creating a KYC for you...",
     login: "Logging in...",
     error: "Error",
   };
@@ -184,6 +184,21 @@ export default function App() {
     body = (
       <div className="w-full">
         <iframe src={hifiTosUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && provider === "hifi") {
+    body = (
+      <div className="w-full text-center">
+        <p>KYC completed, you can do a transaction now</p>
+        <button
+          type="button"
+          onClick={() => send({ type: "revokeAccessGrant" })}
+          className="mt-10 cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Continue by revoking an access grant
+        </button>
       </div>
     );
   }

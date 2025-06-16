@@ -35,6 +35,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return new Response(file, {
       headers: {
         "Content-Type": mimeType,
+        "Content-Length": file.length.toString(),
       },
     });
   } catch (error) {

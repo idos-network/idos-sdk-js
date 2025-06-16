@@ -133,8 +133,6 @@ export const actors = {
 
       await input.client.revokeAccessGrant(accessGrant.id);
 
-      console.log("-> access grant revoked", accessGrant);
-
       return true;
     },
   ),
