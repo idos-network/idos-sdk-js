@@ -8,7 +8,7 @@
     "@idos-network/core": "workspace:*",
     "@sanity/comlink": "^3.0.1",
     "@wagmi/core": "^2.16.4",
-    "ethers": "catalog:",
+    "ethers": "catalog:core",
     "go-try": "^3.0.2",
     "xumm": "^1.8.0"
   },

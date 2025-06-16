@@ -1,16 +1,17 @@
 "use client";
 
 import { HeroUIProvider } from "@heroui/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { type JSX, useState } from "react";
-import { type State, WagmiProvider } from "wagmi";
-
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet } from "@reown/appkit/networks";
 import { sepolia } from "@reown/appkit/networks";
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { type JSX, useState } from "react";
+import { type State, WagmiProvider } from "wagmi";
+
+import { NearWalletProvider } from "@/near.provider";
 
 const queryClient = new QueryClient();
 
@@ -61,12 +62,14 @@ export function Providers(props: {
 
   return (
     <HeroUIProvider>
-      <AppKitProvider>
-        <QueryClientProvider client={queryClient}>
-          {props.children}
-          <ReactQueryDevtools initialIsOpen={false} />
-        </QueryClientProvider>
-      </AppKitProvider>
+      <NearWalletProvider>
+        <AppKitProvider>
+          <QueryClientProvider client={queryClient}>
+            {props.children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
+        </AppKitProvider>
+      </NearWalletProvider>
     </HeroUIProvider>
   );
 }
