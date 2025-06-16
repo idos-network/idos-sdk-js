@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, idOSCredential } from "@idos-network/core";
+import type { IsleStatus, PassportingPeer, idOSCredential } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -26,6 +26,7 @@ import { useWalletStore } from "@/app/stores/wallet";
 import { useIsleController } from "@/isle.provider";
 import { useNearWallet } from "@/near.provider";
 import { KYCJourney } from "./kyc-journey";
+import { MatchingCredential } from "./matching-acme-credential";
 
 function StepIcon({ icon }: { icon: React.ReactNode }) {
   return (
@@ -99,9 +100,12 @@ function PermissionsStepDescription() {
 }
 
 const $claimSuccess = atom(false);
+const $goToACMECardProvider = atom(false);
 
 function ClaimCardStepDescription() {
   const shareCredentialWithConsumer = useShareCredentialWithConsumer();
+  const matchingCredential = useFetchMatchingCredential();
+
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
@@ -109,13 +113,19 @@ function ClaimCardStepDescription() {
         You can now claim your exclusive high-limit credit card and start your premium banking
         journey.
       </p>
-      <Image src="/static/credit-cards-1.png" alt="NeoBank" width={240} height={240} />
+      <Image
+        src="/static/acme-card.jpg"
+        alt="NeoBank"
+        className="h-auto w-[80%] rounded-[24px]"
+        width={240}
+        height={240}
+      />
       <Button
         className="w-fit"
         color="primary"
         size="lg"
         onPress={() => {
-          shareCredentialWithConsumer.mutate(undefined, {
+          shareCredentialWithConsumer.mutate(matchingCredential.data ?? null, {
             onSuccess: () => {
               $claimSuccess.set(true);
             },
@@ -129,7 +139,11 @@ function ClaimCardStepDescription() {
   );
 }
 
-function ClaimCardSuccessStepDescription() {
+function ClaimCardSuccessStepDescription({
+  goToACMECardProvider,
+}: {
+  goToACMECardProvider: () => void;
+}) {
   const [showConfetti, setShowConfetti] = useState(true);
 
   useEffect(() => {
@@ -154,7 +168,7 @@ function ClaimCardSuccessStepDescription() {
         banking journey!
       </h4>
       <Image
-        src="/static/credit-cards.jpg"
+        src="/static/acme-card.jpg"
         alt="NeoBank"
         className="h-auto w-[80%] rounded-[24px]"
         width={240}
@@ -162,12 +176,13 @@ function ClaimCardSuccessStepDescription() {
         priority
       />
       <Button
-        as="a"
         color="default"
         className="w-fit bg-black text-white dark:bg-white dark:text-black"
         size="lg"
-        href={process.env.NEXT_PUBLIC_ACME_CARD_PROVIDER_DEMO_URL}
-        target="_blank"
+        as="button"
+        onPress={() => {
+          goToACMECardProvider();
+        }}
       >
         Go to ACME card provider
       </Button>
@@ -335,22 +350,19 @@ function useShareCredentialWithConsumer() {
   const near = useNearWallet();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (
+      matchingCredential: (idOSCredential & { passporting_server_url_base: string }) | null,
+    ) => {
       invariant(isleController, "`isleController` not initialized");
       invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
+      invariant(matchingCredential, "`matchingCredential` not found");
 
       isleController.toggleAnimation({ expanded: true });
-      const credentials = await isleController.idosClient.getAllCredentials();
 
-      const credential = credentials.find((credential: idOSCredential) => {
-        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "KYC DATA";
-      });
-
-      invariant(credential, "`idOSCredential` to share not found");
+      invariant(matchingCredential, "`idOSCredential` to share not found");
 
       const contentHash = await isleController.idosClient.getCredentialContentSha256Hash(
-        credential.id,
+        matchingCredential.id,
       );
       const lockedUntil = 0;
 
@@ -368,7 +380,7 @@ function useShareCredentialWithConsumer() {
       );
 
       const { id } = await isleController.idosClient.createCredentialCopy(
-        credential.id,
+        matchingCredential.id,
         consumerEncryptionPublicKey,
         consumerSigningPublicKey,
         0,
@@ -386,10 +398,13 @@ function useShareCredentialWithConsumer() {
 
       const message: string = await isleController.idosClient.requestDAGMessage(dag);
       const signature = await isleController.signTx(message);
-      const result = await invokePassportingService({
-        ...dag,
-        dag_signature: signature,
-      });
+      const result = await invokePassportingService(
+        `${matchingCredential.passporting_server_url_base}/passporting-registry`,
+        {
+          ...dag,
+          dag_signature: signature,
+        },
+      );
 
       if (!result.success) {
         console.error(result.error);
@@ -402,6 +417,49 @@ function useShareCredentialWithConsumer() {
     },
   });
 }
+
+const useFetchMatchingCredential = () => {
+  const { isleController } = useIsleController();
+  invariant(isleController?.idosClient.state === "logged-in", "`isleController` not logged in");
+
+  const idOSClient = isleController.idosClient;
+
+  return useQuery({
+    queryKey: ["matching-credential"],
+    queryFn: async () => {
+      invariant(idOSClient.state === "logged-in");
+
+      const peers = (await fetch("/api/passporting-peers").then((res) =>
+        res.json(),
+      )) as PassportingPeer[];
+
+      const credentials = await idOSClient.getAllCredentials();
+
+      const matchingCredential = credentials.find((credential: idOSCredential) => {
+        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
+        return publicNotes.type === "KYC DATA";
+      });
+
+      if (!matchingCredential) {
+        return null;
+      }
+
+      const matchingPeer = peers.find(
+        (peer) => peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
+      );
+
+      if (!matchingPeer) {
+        return null;
+      }
+
+      return {
+        ...matchingCredential,
+        passporting_server_url_base: matchingPeer.passporting_server_url_base,
+      };
+    },
+    enabled: idOSClient.state === "logged-in",
+  });
+};
 
 function SecureEnclaveRoot() {
   const { isleController } = useIsleController();
@@ -427,6 +485,24 @@ function SecureEnclaveRoot() {
         </div>
       </div>
     </div>
+  );
+}
+function AcmeCardProvider({ onExit }: { onExit: () => void }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: "100%" }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: "100%" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-black backdrop-blur-sm"
+    >
+      <h3 className="absolute top-4 left-4 font-bold text-2xl text-white">ACME Card Provider</h3>
+      <Button onPress={onExit} className="absolute top-4 right-4">
+        X
+      </Button>
+
+      <MatchingCredential />
+    </motion.div>
   );
 }
 
@@ -678,123 +754,132 @@ export function Onboarding() {
     });
   }, [isleController, setClaimedSuccess]);
 
-  return (
-    <div className="container relative mx-auto min-h-dvh p-6">
-      <div>
-        <div className="flex h-full flex-col gap-8 lg:gap-12">
-          <div className="flex flex-col">
-            <ul className="flex flex-col gap-6 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 lg:flex-row lg:items-center">
-              <OnboardingStep isActive={activeStep === "no-profile"}>
-                <StepIcon icon={<User2Icon />} />
-                <p>Create an idOS profile</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "not-verified"}>
-                <StepIcon icon={<ShieldIcon />} />
-                <p>Identity verification</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "pending-verification"}>
-                <StepIcon icon={<ShieldEllipsisIcon />} />
-                <p>Pending verification</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "pending-permissions"}>
-                <StepIcon icon={<ScanEyeIcon />} />
-                <p>Permissions</p>
-              </OnboardingStep>
-              <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
-                <StepIcon icon={<RocketIcon />} />
-                <p>Claim your ACME Bank card!</p>
-              </OnboardingStep>
-            </ul>
-          </div>
-          <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
-            <div className="max-w-3xl">
-              <AnimatePresence mode="wait">
-                {claimedSuccess ? (
-                  <motion.div
-                    key="no-profile"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <ClaimCardSuccessStepDescription />
-                  </motion.div>
-                ) : (
-                  <>
-                    {activeStep === "no-profile" && (
-                      <motion.div
-                        key="no-profile"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <CreateProfileStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "not-verified" && (
-                      <motion.div
-                        key="not-verified"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <IdentityVerificationStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "pending-verification" && (
-                      <motion.div
-                        key="pending-verification"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <IdentityVerificationInProgressStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "pending-permissions" && (
-                      <motion.div
-                        key="pending-permissions"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <PermissionsStepDescription />
-                      </motion.div>
-                    )}
-                    {activeStep === "verified" && (
-                      <motion.div
-                        key="verified"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <ClaimCardStepDescription />
-                      </motion.div>
-                    )}
-                  </>
-                )}
-              </AnimatePresence>
-            </div>
+  const showACMECardProvider = useStore($goToACMECardProvider);
 
-            <div
-              id="idOS-isle"
-              ref={containerRef as React.RefObject<HTMLDivElement>}
-              className="h-[670px] min-h-[670px] w-[366px] shrink-0 bg-transparent"
-            />
+  return (
+    <>
+      {showACMECardProvider && <AcmeCardProvider onExit={() => $goToACMECardProvider.set(false)} />}
+      <div className="container relative mx-auto min-h-dvh p-6">
+        <div>
+          <div className="flex h-full flex-col gap-8 lg:gap-12">
+            <div className="flex flex-col">
+              <ul className="flex flex-col gap-6 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-2.5 lg:flex-row lg:items-center">
+                <OnboardingStep isActive={activeStep === "no-profile"}>
+                  <StepIcon icon={<User2Icon />} />
+                  <p>Create an idOS profile</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "not-verified"}>
+                  <StepIcon icon={<ShieldIcon />} />
+                  <p>Identity verification</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "pending-verification"}>
+                  <StepIcon icon={<ShieldEllipsisIcon />} />
+                  <p>Pending verification</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "pending-permissions"}>
+                  <StepIcon icon={<ScanEyeIcon />} />
+                  <p>Permissions</p>
+                </OnboardingStep>
+                <OnboardingStep isActive={activeStep === "verified" || claimedSuccess}>
+                  <StepIcon icon={<RocketIcon />} />
+                  <p>Claim your ACME Bank card!</p>
+                </OnboardingStep>
+              </ul>
+            </div>
+            <div className="flex h-full flex-col justify-between gap-6 lg:flex-row">
+              <div className="max-w-3xl">
+                <AnimatePresence mode="wait">
+                  {claimedSuccess ? (
+                    <motion.div
+                      key="no-profile"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <ClaimCardSuccessStepDescription
+                        goToACMECardProvider={() => {
+                          $goToACMECardProvider.set(true);
+                        }}
+                      />
+                    </motion.div>
+                  ) : (
+                    <>
+                      {activeStep === "no-profile" && (
+                        <motion.div
+                          key="no-profile"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <CreateProfileStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "not-verified" && (
+                        <motion.div
+                          key="not-verified"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IdentityVerificationStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "pending-verification" && (
+                        <motion.div
+                          key="pending-verification"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <IdentityVerificationInProgressStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "pending-permissions" && (
+                        <motion.div
+                          key="pending-permissions"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <PermissionsStepDescription />
+                        </motion.div>
+                      )}
+                      {activeStep === "verified" && (
+                        <motion.div
+                          key="verified"
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -20 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <ClaimCardStepDescription />
+                        </motion.div>
+                      )}
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div
+                id="idOS-isle"
+                ref={containerRef as React.RefObject<HTMLDivElement>}
+                className="h-[670px] min-h-[670px] w-[366px] shrink-0 bg-transparent"
+              />
+            </div>
           </div>
         </div>
+
+        {kycDisclosure.isOpen ? (
+          <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
+        ) : null}
+
+        <SecureEnclaveRoot />
       </div>
-
-      {kycDisclosure.isOpen ? (
-        <KYCJourney onSuccess={handleKYCSuccess} onError={handleKYCError} />
-      ) : null}
-
-      <SecureEnclaveRoot />
-    </div>
+    </>
   );
 }

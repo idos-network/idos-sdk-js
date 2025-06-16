@@ -14,6 +14,7 @@ app.get("/", (c) => {
   return c.text("🚀");
 });
 
+// @todo: remove this endpoint once migrated to passporting-registry endpoint.
 app.post(
   "/",
   zValidator(
