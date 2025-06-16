@@ -1,7 +1,7 @@
 import { redirect } from "react-router";
-import { SiweMessage } from "siwe";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/auth";
+import { generateSignInMessage, verifySignInMessage } from "@idos-network/wallets/utils";
 
 // Create a new user session
 export async function loader({ request }: Route.LoaderArgs) {
@@ -9,9 +9,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   const url = new URL(request.url);
   const address = url.searchParams.get("address");
+  const chain = url.searchParams.get("chain");
+  const publicKey = url.searchParams.get("publicKey");
 
-  if (!address) {
-    throw new Error("Address query parameter is required");
+  if (!address || !chain || !publicKey) {
+    throw new Error("Address, chain and public key query parameters are required");
   }
 
   const uri = new URL(request.url);
@@ -20,18 +22,13 @@ export async function loader({ request }: Route.LoaderArgs) {
   uri.search = "";
   uri.pathname = "";
 
-  const message = new SiweMessage({
-    domain: url.hostname,
-    address,
-    statement: "Sign in with Ethereum to the app.",
-    uri: uri.toString(),
-    version: "1",
-    chainId: 1,
-  });
+  const message = generateSignInMessage(address, chain, uri);
 
   const user = {
     address,
-    message: message.prepareMessage(),
+    chain,
+    message,
+    publicKey,
     isAuthenticated: false,
   };
 
@@ -63,19 +60,20 @@ export async function action({ request }: Route.ActionArgs) {
     throw new Error("No session found");
   }
 
-  const { signature, address } = await request.json();
+  const { signature } = await request.json();
 
-  if (!signature || !address) {
-    throw new Error("Signature and address are required");
-  }
-
-  if (address.toLowerCase() !== user.address.toLowerCase()) {
-    throw new Error("Address mismatch");
+  if (!signature) {
+    throw new Error("Signature is required");
   }
 
   try {
-    const message = new SiweMessage(user.message);
-    const isValid = await message.verify({ signature });
+    const isValid = await verifySignInMessage(
+      user.chain,
+      user.address,
+      user.publicKey,
+      user.message,
+      signature,
+    );
 
     if (!isValid) {
       throw new Error("Invalid signature");
@@ -94,6 +92,7 @@ export async function action({ request }: Route.ActionArgs) {
       },
     });
   } catch (error) {
+    console.error(error);
     throw new Error("Signature verification failed");
   }
 }

@@ -3,24 +3,42 @@
   "description": "idOS Wallets support JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
-    "remove": ["devDependencies.@idos-network/core"]
+    "remove": [
+      "devDependencies.@idos-network/core"
+    ]
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "vitest": "^3.1.4",
     "@types/react": "catalog:react19",
-    "@types/react-dom": "catalog:react19"
+    "@types/react-dom": "catalog:react19",
+    "vitest": "^3.1.4"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@gemwallet/api": "^3.8.0",
+    "@near-wallet-selector/core": "8.9.10",
+    "@near-wallet-selector/here-wallet": "8.9.10",
+    "@near-wallet-selector/meteor-wallet": "8.9.10",
+    "@near-wallet-selector/my-near-wallet": "^9.0.2",
+    "@stellar/freighter-api": "^4.1.0",
+    "@stellar/stellar-base": "^13.1.0",
+    "@stellar/stellar-sdk": "^13.3.0",
+    "ethers": "^6.14.4",
+    "ripple-keypairs": "^2.0.0",
+    "siwe": "^3.0.0",
+    "xrpl": "^4.2.5",
     "zod": "^3.25.58"
   },
   "exports": {
     ".": {
       "types": "./src/index.ts",
       "import": "./src/index.ts"
+    },
+    "./utils": {
+      "types": "./src/utils.ts",
+      "import": "./src/utils.ts"
     }
   },
   "homepage": "https://idos.network",

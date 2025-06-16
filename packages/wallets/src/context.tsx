@@ -1,22 +1,16 @@
 import type React from "react";
-import { type ReactNode, Suspense, createContext, lazy, useContext, useState } from "react";
+import { type ReactNode, Suspense, createContext, useContext, useState } from "react";
 
 import type { SupportedWallets, Wallet } from "./types";
-
-// Lazy load the Eth component with artificial delay for testing
-const Eth = lazy(
-  () =>
-    new Promise<{ default: React.ComponentType }>((resolve) => {
-      setTimeout(() => {
-        resolve(import("./eth"));
-      }, 2000); // 2 second delay
-    }),
-);
+import Eth from "./eth";
+import Stellar from "./stellar";
+import Xrp from "./xrp";
+import Near from "./near";
 
 interface WalletContextType {
   wallets: Wallet[];
   selectedWallet: Wallet | null;
-  openChooser: () => void;
+  start: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -36,7 +30,12 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
   const value = {
     wallets,
     selectedWallet,
-    openChooser: () => setIsChooserOpen(true),
+    start: () => {
+      setWallets([]);
+      setSelectedWallet(null);
+      setCurrentType(null);
+      setIsChooserOpen(true);
+    }
   };
 
   console.log("-> isChooserOpen", isChooserOpen);
@@ -44,29 +43,61 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
 
   const setType = (type: SupportedWallets) => {
     setCurrentType(type);
-    setIsChooserOpen(false);
   };
 
-  let modal;
-
-  if (isChooserOpen) {
+  let modal: ReactNode;
+  if (isChooserOpen && !currentType) {
     modal = (
       <div>
         <h1>Wallet Chooser</h1>
         <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-          <button onClick={() => setType("eth")}>Ethereum</button>
-          <button onClick={() => setType("near")}>Near</button>
-          <button onClick={() => setType("xrp")}>XRP</button>
-          <button onClick={() => setType("stellar")}>Stellar</button>
+          <button type="button" onClick={() => setType("eth")}>Ethereum</button>
+          <button type="button" onClick={() => setType("near")}>Near</button>
+          <button type="button" onClick={() => setType("xrp")}>XRP</button>
+          <button type="button" onClick={() => setType("stellar")}>Stellar</button>
         </div>
       </div>
     );
   }
 
-  if (currentType) {
+  const addWallets = (newWallets: Wallet[]) => {
+    setWallets([...wallets, ...newWallets]);
+
+    if (wallets.length === 0 && newWallets.length > 0) {
+      setSelectedWallet(newWallets[0]);
+    }
+
+    setIsChooserOpen(false);
+  };
+
+  if (currentType === "eth" && isChooserOpen) {
     modal = (
       <Suspense fallback={<div>Loading wallet...</div>}>
-        <Eth />
+        <Eth addWallets={addWallets} />
+      </Suspense>
+    );
+  }
+
+  if (currentType === "stellar" && isChooserOpen) {
+    modal = (
+      <Suspense fallback={<div>Loading wallet...</div>}>
+        <Stellar addWallets={addWallets} />
+      </Suspense>
+    );
+  }
+
+  if (currentType === "xrp" && isChooserOpen) {
+    modal = (
+      <Suspense fallback={<div>Loading wallet...</div>}>
+        <Xrp addWallets={addWallets} />
+      </Suspense>
+    );
+  }
+
+  if (currentType === "near" && isChooserOpen) {
+    modal = (
+      <Suspense fallback={<div>Loading wallet...</div>}>
+        <Near addWallets={addWallets} />
       </Suspense>
     );
   }

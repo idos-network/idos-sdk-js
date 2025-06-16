@@ -1,10 +1,34 @@
 import { useWalletChooser } from "@idos-network/wallets";
-import { useSiwe } from "../providers/siwe-provider";
+import { useEffect } from "react";
 
 export function Welcome() {
-  const { address, isAuthenticated, signIn, signOut } = useSiwe();
-  const { openChooser } = useWalletChooser();
-  console.log("-> openChooser", openChooser);
+  const { start, selectedWallet } = useWalletChooser();
+
+  const signIn = async () => {
+    if (selectedWallet) {
+      // Start SIWE
+      const authResponse = await fetch(`/auth?address=${selectedWallet.address}&chain=${selectedWallet.chain}&publicKey=${selectedWallet.publicKey}`);
+      const { user } = await authResponse.json();
+
+      const signature = await selectedWallet.signMessage(user.message);
+
+      const signInResponse = await fetch("/auth", {
+        method: "POST",
+        body: JSON.stringify({ signature }),
+      });
+
+      if (signInResponse.redirected) {
+        window.location.href = signInResponse.url;
+      }
+      return;
+    }
+  }
+
+  useEffect(() => {
+    if (selectedWallet) {
+      signIn();
+    }
+  }, [selectedWallet]);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-950">
@@ -21,7 +45,7 @@ export function Welcome() {
         <button
           type="button"
           className="cursor-pointer rounded-lg bg-blue-600 px-8 py-4 font-semibold text-lg text-white transition-colors hover:bg-blue-700"
-          onClick={() => openChooser()}
+          onClick={() => start()}
         >
           Start with a connecting a wallet
         </button>

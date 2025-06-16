@@ -14,5 +14,13 @@ export default {
   future: {
     unstable_middleware: true,
   },
+  browserNodeBuiltinsPolyfill: {
+    modules: {
+      buffer: true, // Provide a JSPM polyfill
+    },
+    globals: {
+      Buffer: true,
+    },
+  },
   presets: [vercelPreset()],
 } satisfies Config;
