@@ -1,5 +1,12 @@
 "use server";
-import { base64Decode, base64Encode, toBytes } from "@idos-network/core";
+import {
+  base64Decode,
+  base64Encode,
+  hexDecode,
+  hexEncode,
+  type idOSCredential,
+  toBytes,
+} from "@idos-network/core";
 import jwt from "jsonwebtoken";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
@@ -242,7 +249,7 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 };
 
 type PassportingServiceResponse =
-  | { success: true; data: { dag_data_id: string } }
+  | { success: true; data: idOSCredential }
   | {
       success: false;
       error: {
@@ -252,45 +259,58 @@ type PassportingServiceResponse =
     };
 
 export const invokePassportingService = async (
-  payload: unknown,
+  url: string,
+  payload: {
+    dag_owner_wallet_identifier: string;
+    dag_grantee_wallet_identifier: string;
+    dag_data_id: string;
+    dag_locked_until: number;
+    dag_content_hash: string;
+    dag_signature: string;
+  },
 ): Promise<PassportingServiceResponse> => {
-  invariant(process.env.PASSPORTING_SERVICE_URL, "`PASSPORTING_SERVICE_URL` is not set");
+  const consumerSigningSecretKey = process.env.CONSUMER_SIGNING_SECRET_KEY;
+  invariant(consumerSigningSecretKey, "`CONSUMER_SIGNING_SECRET_KEY` is not set");
 
-  try {
-    const response = await fetch(process.env.PASSPORTING_SERVICE_URL, {
-      method: "POST",
-      body: JSON.stringify(payload),
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.PASSPORTING_SERVICE_API_KEY}`,
-      },
-    });
+  // sign a message using the consumer's signing key
+  const message = JSON.stringify(payload);
+  const messageBytes = new TextEncoder().encode(message);
+  const signature = nacl.sign.detached(messageBytes, hexDecode(consumerSigningSecretKey));
 
-    const data = (await response.json()) as PassportingServiceResponse;
+  const consumerSigningPublicKey = hexEncode(
+    nacl.sign.keyPair.fromSecretKey(hexDecode(consumerSigningSecretKey)).publicKey,
+  );
 
-    if (!response.ok) {
-      return { success: false, error: { message: response.statusText } };
-    }
+  // Call the passporting service to transmit the DAG
+  const response = await fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      ...payload,
+      signature: base64Encode(signature),
+      message: base64Encode(messageBytes),
+    }),
+    headers: {
+      Authorization: `Bearer ${consumerSigningPublicKey}`,
+      "Content-Type": "application/json",
+    },
+  });
 
-    if (!data.success) {
-      return { success: false, error: data.error };
-    }
+  const result = await response.json();
 
-    return { success: true, data: data.data };
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      return {
-        success: false,
-        error: { cause: error.cause, message: error.message },
-      };
-    }
-
-    return {
-      success: false,
-      error: { message: JSON.stringify(error) },
-    };
+  if (result.error) {
+    console.dir(result.error, { depth: null });
+    throw new Error(result.error);
   }
+
+  const consumer = await idOSConsumer();
+
+  const credential = await consumer.getReusableCredentialCompliantly(payload.dag_data_id);
+  // @todo: handle errors when the prior method fails.
+
+  return {
+    success: true,
+    data: credential,
+  };
 };
 
 export const generateKrakenUrlToken = async (isE2E: boolean) => {

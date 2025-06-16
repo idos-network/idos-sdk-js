@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, idOSCredential } from "@idos-network/core";
+import type { IsleStatus, PassportingPeer, idOSCredential } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -104,6 +104,8 @@ const $goToACMECardProvider = atom(false);
 
 function ClaimCardStepDescription() {
   const shareCredentialWithConsumer = useShareCredentialWithConsumer();
+  const matchingCredential = useFetchMatchingCredential();
+
   return (
     <div className="flex flex-col gap-3">
       <h1 className="font-bold text-4xl">Welcome to NeoBank!</h1>
@@ -123,7 +125,7 @@ function ClaimCardStepDescription() {
         color="primary"
         size="lg"
         onPress={() => {
-          shareCredentialWithConsumer.mutate(undefined, {
+          shareCredentialWithConsumer.mutate(matchingCredential.data ?? null, {
             onSuccess: () => {
               $claimSuccess.set(true);
             },
@@ -348,22 +350,19 @@ function useShareCredentialWithConsumer() {
   const near = useNearWallet();
 
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (
+      matchingCredential: (idOSCredential & { passporting_server_url_base: string }) | null,
+    ) => {
       invariant(isleController, "`isleController` not initialized");
       invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
+      invariant(matchingCredential, "`matchingCredential` not found");
 
       isleController.toggleAnimation({ expanded: true });
-      const credentials = await isleController.idosClient.getAllCredentials();
 
-      const credential = credentials.find((credential: idOSCredential) => {
-        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "KYC DATA";
-      });
-
-      invariant(credential, "`idOSCredential` to share not found");
+      invariant(matchingCredential, "`idOSCredential` to share not found");
 
       const contentHash = await isleController.idosClient.getCredentialContentSha256Hash(
-        credential.id,
+        matchingCredential.id,
       );
       const lockedUntil = 0;
 
@@ -381,7 +380,7 @@ function useShareCredentialWithConsumer() {
       );
 
       const { id } = await isleController.idosClient.createCredentialCopy(
-        credential.id,
+        matchingCredential.id,
         consumerEncryptionPublicKey,
         consumerSigningPublicKey,
         0,
@@ -399,10 +398,13 @@ function useShareCredentialWithConsumer() {
 
       const message: string = await isleController.idosClient.requestDAGMessage(dag);
       const signature = await isleController.signTx(message);
-      const result = await invokePassportingService({
-        ...dag,
-        dag_signature: signature,
-      });
+      const result = await invokePassportingService(
+        `${matchingCredential.passporting_server_url_base}/passporting-registry`,
+        {
+          ...dag,
+          dag_signature: signature,
+        },
+      );
 
       if (!result.success) {
         console.error(result.error);
@@ -415,6 +417,49 @@ function useShareCredentialWithConsumer() {
     },
   });
 }
+
+const useFetchMatchingCredential = () => {
+  const { isleController } = useIsleController();
+  invariant(isleController?.idosClient.state === "logged-in", "`isleController` not logged in");
+
+  const idOSClient = isleController.idosClient;
+
+  return useQuery({
+    queryKey: ["matching-credential"],
+    queryFn: async () => {
+      invariant(idOSClient.state === "logged-in");
+
+      const peers = (await fetch("/api/passporting-peers").then((res) =>
+        res.json(),
+      )) as PassportingPeer[];
+
+      const credentials = await idOSClient.getAllCredentials();
+
+      const matchingCredential = credentials.find((credential: idOSCredential) => {
+        const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
+        return publicNotes.type === "KYC DATA";
+      });
+
+      if (!matchingCredential) {
+        return null;
+      }
+
+      const matchingPeer = peers.find(
+        (peer) => peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
+      );
+
+      if (!matchingPeer) {
+        return null;
+      }
+
+      return {
+        ...matchingCredential,
+        passporting_server_url_base: matchingPeer.passporting_server_url_base,
+      };
+    },
+    enabled: idOSClient.state === "logged-in",
+  });
+};
 
 function SecureEnclaveRoot() {
   const { isleController } = useIsleController();

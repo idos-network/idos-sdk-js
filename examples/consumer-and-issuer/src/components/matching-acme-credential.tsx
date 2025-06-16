@@ -88,11 +88,14 @@ function useShareCredential() {
   const { isleController } = useIsleController();
 
   return useMutation({
-    mutationFn: async (credentialId: string) => {
+    mutationFn: async (
+      matchingCredential: idOSCredential & { passporting_server_url_base: string },
+    ) => {
       invariant(isleController?.idosClient.state === "logged-in");
 
-      const contentHash =
-        await isleController?.idosClient.getCredentialContentSha256Hash(credentialId);
+      const contentHash = await isleController?.idosClient.getCredentialContentSha256Hash(
+        matchingCredential.id,
+      );
       const lockedUntil = 0;
 
       const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
@@ -109,7 +112,7 @@ function useShareCredential() {
       );
 
       const { id } = await isleController.idosClient.createCredentialCopy(
-        credentialId,
+        matchingCredential.id,
         consumerEncryptionPublicKey,
         consumerSigningPublicKey,
         0,
@@ -126,10 +129,13 @@ function useShareCredential() {
       const message: string = await isleController?.idosClient.requestDAGMessage(dag);
       const signature = await signMessageAsync({ message });
 
-      return invokePassportingService({
-        ...dag,
-        dag_signature: signature,
-      });
+      return invokePassportingService(
+        `${matchingCredential.passporting_server_url_base}/passporting-registry`,
+        {
+          ...dag,
+          dag_signature: signature,
+        },
+      );
     },
     onSettled: () => {
       queryClient.refetchQueries({ queryKey: ["shared-credential"] });
@@ -146,7 +152,7 @@ export function MatchingCredential() {
   const handleCredentialDuplicateProcess = () => {
     if (!matchingCredential.data) return;
 
-    shareCredential.mutate(matchingCredential.data.id);
+    shareCredential.mutate(matchingCredential.data);
   };
 
   if (matchingCredential.isPending || sharedCredentialFromUser.isPending) {
