@@ -3,7 +3,7 @@ import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
-export async function getSharedCredential(credentialId: string, inserterId: string) {
+export async function getSharedCredential(credentialId: string, inserterId?: string) {
   const idOSConsumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
@@ -19,7 +19,7 @@ export async function getSharedCredential(credentialId: string, inserterId: stri
   }
 
   // @ts-expect-error Missing types
-  if (grant.inserter_id !== inserterId) {
+  if (inserterId && grant.inserter_id !== inserterId) {
     // @ts-expect-error Missing types
     throw new Error(`Invalid inserter id: ${grant.inserter_id} !== ${inserterId}`);
   }
@@ -38,7 +38,7 @@ export async function getSharedCredential(credentialId: string, inserterId: stri
     },
   ]);
 
-  if (!verificationResult) {
+  if (verificationResult) {
     throw new Error("Invalid credential signature.");
   }
 

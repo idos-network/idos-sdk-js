@@ -8,10 +8,15 @@ Holyheld
 IDOS
 IDOSDAG
 Neobank
+Nominatim
 OSDAG
+Payin
+PayinFiat
 Personhood
 Reown
 Upserts
+XUMM
+Xaman
 addgroup
 adduser
 appkit
@@ -29,6 +34,7 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+gemwallet
 headlessui
 heroicons
 heroui
@@ -53,6 +59,7 @@ multicodec
 nacl
 nanostores
 nonced
+partialize
 passporting
 permissioned
 pkoch

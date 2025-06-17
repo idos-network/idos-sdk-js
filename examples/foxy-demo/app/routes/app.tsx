@@ -18,8 +18,11 @@ export default function App() {
   const userData = MachineContext.useSelector((state) => state.context.data);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
+  const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
 
   const transak = useRef<Transak | null>(null);
+
+  console.log("-> state", state);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: This is on purpose
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -37,6 +40,15 @@ export default function App() {
       } else {
         send({ type: "kycCompleted" });
       }
+    }
+
+    // Noah callback from /callbacks/noah
+    if (message.data.type === "noah-done") {
+      send({ type: "revokeAccessGrant" });
+    }
+
+    if (message.data.type === "hifi-tos-done") {
+      send({ type: "acceptHifiTos", signedAgreementId: message.data.signedAgreementId });
     }
   }, []);
 
@@ -56,6 +68,10 @@ export default function App() {
     if (provider === "noah") {
       send({ type: "createNoahCustomer" });
     }
+
+    if (provider === "hifi") {
+      send({ type: "startHifi" });
+    }
   }, [state, provider, send]);
 
   useEffect(() => {
@@ -73,20 +89,15 @@ export default function App() {
       transak.current.init();
 
       Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, (orderData) => {
-        console.log("-> Transak closed");
         console.log(orderData);
         transak.current?.close();
         send({ type: "revokeAccessGrant" });
         transak.current = null;
       });
     }
+  }, [sharableToken, state, provider, send]);
 
-    if (provider === "noah" && noahUrl) {
-      console.log("-> Noah data", noahUrl);
-    }
-  }, [sharableToken, state, provider, send, noahUrl]);
-
-  const start = async (provider: "transak" | "noah" | "custom") => {
+  const start = async (provider: "transak" | "noah" | "custom" | "hifi") => {
     send({ type: "configure", provider, address });
   };
 
@@ -108,6 +119,13 @@ export default function App() {
           onClick={() => start("noah")}
         >
           Noah
+        </button>
+        <button
+          type="button"
+          className="w-full cursor-pointer rounded-lg bg-sky-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-sky-700"
+          onClick={() => start("hifi")}
+        >
+          Hifi
         </button>
         <button
           type="button"
@@ -139,6 +157,8 @@ export default function App() {
     findCredential: "Finding credential...",
     requestAccessGrant: "Requesting access grant...",
     waitForCredential: "Waiting for finding credential next attempt...",
+    waitForHifiKycStatus: "Waiting for KYC status next attempt...",
+    verifyHifiTos: "Verifying and creating a KYC for you...",
     login: "Logging in...",
     error: "Error",
   };
@@ -156,6 +176,29 @@ export default function App() {
     body = (
       <div className="w-full">
         <iframe src={noahUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
+  if (state === "hifiTosFetched" && hifiTosUrl && provider === "hifi") {
+    body = (
+      <div className="w-full">
+        <iframe src={hifiTosUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && provider === "hifi") {
+    body = (
+      <div className="w-full text-center">
+        <p>KYC completed, you can do a transaction now</p>
+        <button
+          type="button"
+          onClick={() => send({ type: "revokeAccessGrant" })}
+          className="mt-10 cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Continue by revoking an access grant
+        </button>
       </div>
     );
   }
