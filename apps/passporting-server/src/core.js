@@ -1,12 +1,13 @@
 import { zValidator } from "@hono/zod-validator";
 import { idOSIssuer } from "@idos-network/issuer";
 import { decode as base64Decode } from "@stablelib/base64";
-import { decode as hexDecode } from "@stablelib/hex";
+import { decode as hexDecode, encode as hexEncode } from "@stablelib/hex";
 import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
 import { z } from "zod";
+import * as xrpKeypair from "ripple-keypairs";
 
 const app = new Hono();
 
@@ -157,11 +158,23 @@ app.post(
     }
 
     // Finally verify the signature
-    const isValid = nacl.sign.detached.verify(
-      base64Decode(message),
-      base64Decode(signature),
-      hexDecode(signerPublicKey),
-    );
+    let isValid = false;
+
+    // Check if this is an XRPL public key (starts with 'ED' for Ed25519)
+    if (signerPublicKey.startsWith("ED")) {
+      // Use ripple-keypairs for XRPL signature verification
+      // Convert base64 to hex strings for ripple-keypairs
+      const messageHex = hexEncode(base64Decode(message));
+      const signatureHex = hexEncode(base64Decode(signature));
+      isValid = xrpKeypair.verify(messageHex, signatureHex, signerPublicKey);
+    } else {
+      // Use nacl for other signature types
+      isValid = nacl.sign.detached.verify(
+        base64Decode(message),
+        base64Decode(signature),
+        hexDecode(signerPublicKey),
+      );
+    }
 
     if (!isValid) {
       return c.json(

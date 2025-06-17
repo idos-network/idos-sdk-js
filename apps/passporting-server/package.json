@@ -10,6 +10,7 @@
     "@stablelib/hex": "^1.0.1",
     "go-try": "^3.0.2",
     "hono": "^4.6.16",
+    "ripple-keypairs": "^2.0.0",
     "tweetnacl": "^1.0.3",
     "zod": "^3.24.1"
   },
