@@ -98,3 +98,4 @@ Xaman
 gemwallet
 partialize
 keypairs
+LCVJ
