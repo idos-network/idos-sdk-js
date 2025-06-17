@@ -89,87 +89,97 @@ const idOSConsumer = await idOSConsumerClass.init({
 
 ### [ backend ] Signer implementations
 
-The idOS consumer supports multiple signer types. Here are examples for the most common ones:
+To initialize the idOS Consumer SDK, you need to pass in something as a `consumerSigner`. That something needs to conform to an interface that varies between signer types:
 
-#### Nacl Signer (Ed25519)
-
-For server-side applications using Ed25519 key pairs:
+#### Ed25519 Signer (Nacl)
 
 ```typescript
-import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+{
+  privateKey: Uint8Array,
+  publicKey: Uint8Array, 
+  sign: (message: Uint8Array) => Uint8Array
+}
+```
+
+**Implementation with tweetnacl:**
+```typescript
 import nacl from "tweetnacl";
 import { hexDecode } from "@idos-network/core";
 
 // Option 1: Generate a new key pair
-const keyPair = nacl.sign.keyPair();
+const signer = nacl.sign.keyPair();
 
 // Option 2: Use existing secret key
 const secretKey = "your_32_byte_secret_key_here";
-const keyPair = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
-
-const idOSConsumer = await idOSConsumerClass.init({
-  consumerSigner: keyPair,
-  recipientEncryptionPrivateKey: "your_encryption_private_key",
-  nodeUrl: "https://nodes.idos.network", // optional
-});
+const signer = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
 ```
 
-#### XRP Signer (Ripple Keypairs)
-
-For XRPL-based applications using ripple-keypairs:
+#### XRPL Signer Interface
 
 ```typescript
-import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+{
+  privateKey: string,
+  publicKey: string,
+  sign: (message: string) => string
+}
+```
+
+**Implementation with ripple-keypairs:**
+```typescript
 import * as xrpKeypair from "ripple-keypairs";
 
 // Option 1: Generate from seed
 const seed = "sEd7BpLCVJPuJj9S7tfp8igyA54oiZW";
-const keyPair = xrpKeypair.deriveKeypair(seed);
+const signer = xrpKeypair.deriveKeypair(seed);
 
 // Option 2: Create from secret key (when you don't have a seed)
 const secretKey = "EDAF8E853F43D3A59375239ED5B85AABAAC5E4556C5CE0D5458259668697455C07";
 const publicKey = "ED9A5A5420707D80B24C83C0333EBFBB1E8290530DFF45D39B7305B0982CA0D1E8";
 
-// Create a custom key pair object that matches the ripple-keypairs interface
-const keyPair = {
+const signer = {
   privateKey: secretKey,
   publicKey: publicKey,
-  // Add the sign method that ripple-keypairs uses
   sign: (message: string) => xrpKeypair.sign(message, secretKey)
 };
-
-const idOSConsumer = await idOSConsumerClass.init({
-  consumerSigner: keyPair,
-  recipientEncryptionPrivateKey: "your_encryption_private_key",
-  nodeUrl: "https://nodes.idos.network", // optional
-});
 ```
 
-> **Important for XRP Signers**: The `NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` environment variable should contain the **XRP address**, not the public key. You can derive the address from the public key using:
+> **Important for XRPL Signers**: The `NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` environment variable should contain the **XRP address**, not the public key. You can derive the address from the public key using:
 > 
 > ```typescript
-> const address = xrpKeypair.deriveAddress(keyPair.publicKey);
+> const address = xrpKeypair.deriveAddress(signer.publicKey);
 > // Use this address as NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY
 > ```
 
-#### Ethers Signer (EVM)
-
-For Ethereum-based applications:
+#### EVM Signer Interface
 
 ```typescript
-import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+{
+  sign: (message: string | Uint8Array) => Promise<string>
+}
+```
+
+**Implementation with ethers:**
+```typescript
 import { Wallet } from "ethers";
 
 // Option 1: From private key
 const privateKey = "0x..."; // Your private key
-const wallet = new Wallet(privateKey);
+const signer = new Wallet(privateKey);
 
 // Option 2: From mnemonic
 const mnemonic = "your twelve word mnemonic phrase here";
-const wallet = Wallet.fromPhrase(mnemonic);
+const signer = Wallet.fromPhrase(mnemonic);
+```
+
+### SDK Initialization
+
+After creating your signer, initialize the SDK:
+
+```typescript
+import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 
 const idOSConsumer = await idOSConsumerClass.init({
-  consumerSigner: wallet,
+  consumerSigner: signer,
   recipientEncryptionPrivateKey: "your_encryption_private_key",
   nodeUrl: "https://nodes.idos.network", // optional
 });
@@ -177,7 +187,7 @@ const idOSConsumer = await idOSConsumerClass.init({
 
 ### Signer Type Detection
 
-The consumer automatically detects the signer type and handles signature verification appropriately:
+The idOS Consumer SDK automatically detects the signer type and handles signature verification appropriately:
 
 - **Nacl signers**: Use Ed25519 signatures
 - **XRP signers**: Use ripple-keypairs with Ed25519 (XRPL format)
@@ -222,7 +232,7 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 
 ### [ frontend ] Setting signer
 
-Pass your user’s signer to the SDK, so it knows where to send signature requests to.
+Pass your user's signer to the SDK, so it knows where to send signature requests to.
 
 ```js
 idOSClient = await idOSClient.withUserSigner(signer);
@@ -263,7 +273,7 @@ And you can get the credentials contents from the grant via:
 const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
 ```
 
-If you don’t have an access grant, you can proceed to filtering the user’s credentials and requesting one or more access grants.
+If you don't have an access grant, you can proceed to filtering the user's credentials and requesting one or more access grants.
 
 
 ### [ frontend ] Filtering credentials
