@@ -3,7 +3,9 @@
   "description": "idOS Wallets support JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
-    "remove": ["devDependencies.@idos-network/core"]
+    "remove": [
+      "devDependencies.@idos-network/core"
+    ]
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
@@ -20,13 +22,19 @@
     "@near-wallet-selector/here-wallet": "8.9.10",
     "@near-wallet-selector/meteor-wallet": "8.9.10",
     "@near-wallet-selector/my-near-wallet": "^9.0.2",
+    "@reown/appkit": "^1.7.9",
+    "@reown/appkit-adapter-wagmi": "^1.7.9",
     "@stellar/freighter-api": "^4.1.0",
     "@stellar/stellar-base": "^13.1.0",
     "@stellar/stellar-sdk": "^13.3.0",
+    "@wagmi/core": "^2.16.4",
+    "@web3icons/react": "^4.0.14",
     "ethers": "^6.14.4",
     "near-api-js": "3.0.4",
     "ripple-keypairs": "^2.0.0",
     "siwe": "^3.0.0",
+    "viem": "^2.31.3",
+    "wagmi": "^2.15.6",
     "xrpl": "^4.2.5",
     "zod": "^3.25.58"
   },
@@ -38,7 +46,8 @@
     "./utils": {
       "types": "./src/utils.ts",
       "import": "./src/utils.ts"
-    }
+    },
+    "./assets/styles.css": "./assets/styles.css"
   },
   "homepage": "https://idos.network",
   "license": "MIT",

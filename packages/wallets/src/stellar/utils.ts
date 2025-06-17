@@ -1,6 +1,6 @@
 import { StrKey, verify } from "@stellar/stellar-base";
 
-export const verifySignInMessage = async (
+export const verifyMessage = async (
   address: string,
   message: string,
   signature: string,

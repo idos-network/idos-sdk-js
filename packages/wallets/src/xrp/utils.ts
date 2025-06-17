@@ -2,7 +2,7 @@ import pkg from "ripple-keypairs";
 import { deriveAddress } from "xrpl";
 const { verify } = pkg;
 
-export const verifySignInMessage = async (
+export const verifyMessage = async (
   address: string,
   publicKey: string,
   message: string,

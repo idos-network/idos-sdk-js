@@ -1,10 +1,11 @@
 import {
   generateSignInMessage as generateSignInMessageEth,
   verifySignInMessage as verifySignInMessageEth,
+  verifyMessage as verifyMessageEth,
 } from "./eth/utils";
-import { verifySignInMessage as verifySignInMessageNear } from "./near/utils";
-import { verifySignInMessage as verifySignInMessageStellar } from "./stellar/utils";
-import { verifySignInMessage as verifySignInMessageXrp } from "./xrp/utils";
+import { verifyMessage as verifyMessageNear } from "./near/utils";
+import { verifyMessage as verifyMessageStellar } from "./stellar/utils";
+import { verifyMessage as verifyMessageXrp } from "./xrp/utils";
 
 export const generateSignInMessage = (address: string, chain: string, url: URL): string => {
   if (chain === "eth") {
@@ -32,16 +33,30 @@ export const verifySignInMessage = (
     return verifySignInMessageEth(message, signature);
   }
 
+  return verifyMessage(chain, address, publicKey, message, signature);
+};
+
+export const verifyMessage = (
+  chain: string,
+  address: string,
+  publicKey: string,
+  message: string,
+  signature: string,
+): Promise<boolean> => {
+  if (chain === "eth") {
+    return verifyMessageEth(address, message, signature);
+  }
+
   if (chain === "stellar") {
-    return verifySignInMessageStellar(address, message, signature);
+    return verifyMessageStellar(address, message, signature);
   }
 
   if (chain === "xrp") {
-    return verifySignInMessageXrp(address, publicKey, message, signature);
+    return verifyMessageXrp(address, publicKey, message, signature);
   }
 
   if (chain === "near") {
-    return verifySignInMessageNear(address, publicKey, message, signature);
+    return verifyMessageNear(address, publicKey, message, signature);
   }
 
   return Promise.resolve(false);

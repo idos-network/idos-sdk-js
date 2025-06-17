@@ -1,11 +1,13 @@
 import type React from "react";
 import { type ReactNode, Suspense, createContext, useContext, useState } from "react";
+import { TokenIcon } from "@web3icons/react";
 
 import Eth from "./eth";
 import Near from "./near";
 import Stellar from "./stellar";
 import type { SupportedWallets, Wallet } from "./types";
 import Xrp from "./xrp";
+import { StellarIcon } from "./stellar/icons";
 
 interface WalletContextType {
   wallets: Wallet[];
@@ -48,23 +50,27 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
   let modal: ReactNode;
   if (isChooserOpen && !currentType) {
     modal = (
-      <div>
+      <>
         <h1>Wallet Chooser</h1>
-        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div className="buttons-container">
           <button type="button" onClick={() => setType("eth")}>
+            <TokenIcon symbol="eth" variant="branded" size="36" />
             Ethereum
           </button>
           <button type="button" onClick={() => setType("near")}>
+            <TokenIcon symbol="near" variant="branded" size="36" />
             Near
           </button>
           <button type="button" onClick={() => setType("xrp")}>
+            <TokenIcon symbol="xrp" variant="branded" size="36" />
             XRP
           </button>
           <button type="button" onClick={() => setType("stellar")}>
+            <StellarIcon size={36} />
             Stellar
           </button>
         </div>
-      </div>
+      </>
     );
   }
 
@@ -114,28 +120,8 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
     <WalletContext.Provider value={value}>
       {children}
       {modal && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0, 0, 0, 0.5)",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <div
-            style={{
-              position: "absolute",
-              margin: "auto",
-              width: "300px",
-              height: "150px",
-              backgroundColor: "white",
-            }}
-          >
+        <div className="modal-background">
+          <div className="modal">
             {modal}
           </div>
         </div>

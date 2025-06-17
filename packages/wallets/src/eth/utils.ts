@@ -1,4 +1,4 @@
-import { getAddress } from "ethers";
+import { getAddress, verifyMessage as ethersVerifyMessage } from "ethers";
 import { SiweMessage } from "siwe";
 
 export const generateSignInMessage = (address: string, chain: string, url: URL): string => {
@@ -16,4 +16,17 @@ export const verifySignInMessage = async (message: string, signature: string): P
   const siweMessage = new SiweMessage(message);
   const isValid = await siweMessage.verify({ signature });
   return isValid.success;
+};
+
+export const verifyMessage = async (
+  address: string,
+  message: string,
+  signature: string,
+): Promise<boolean> => {
+  try {
+    const recoveredAddress = ethersVerifyMessage(message, signature);
+    return getAddress(recoveredAddress) === getAddress(address);
+  } catch (e) {
+    return false;
+  }
 };

@@ -15,7 +15,7 @@ async function verifyPublicKeyForAccount(accountId: string, publicKeyToCheck: st
   return accessKeys.some((key) => key.public_key === publicKeyToCheck);
 }
 
-export const verifySignInMessage = async (
+export const verifyMessage = async (
   address: string,
   publicKey: string,
   message: string,

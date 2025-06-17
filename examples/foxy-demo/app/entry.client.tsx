@@ -3,6 +3,8 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { HydratedRouter } from "react-router/dom";
 
+import "@idos-network/wallets/assets/styles.css";
+
 globalThis.Buffer = Buffer as unknown as BufferConstructor;
 
 ReactDOM.hydrateRoot(

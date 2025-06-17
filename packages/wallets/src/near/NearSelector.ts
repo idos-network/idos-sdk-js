@@ -14,10 +14,11 @@ export default class Near extends Wallet {
     const walletSelector = await setupWalletSelector({
       network: "testnet",
       modules: [
-        type === "meteor-wallet" ? setupMeteorWallet() : undefined,
-        type === "here-wallet" ? setupHereWallet() : undefined,
-        type === "my-near-wallet" ? setupMyNearWallet() : undefined,
-      ].filter((x) => x !== undefined),
+        setupMeteorWallet(),
+        setupHereWallet(),
+        // @ts-expect-error Not fully typed
+        setupMyNearWallet(),
+      ],
     });
 
     const signingAdapter = await walletSelector.wallet(type);

@@ -1,21 +1,32 @@
+import { WalletIcon } from "@web3icons/react";
 import type { ChainProvider } from "../types";
-import MetaMask from "./MetaMask";
+import WalletConnect from "./WalletConnect";
+import { useEffect } from "react";
 
-export default function Eth({ addWallets }: ChainProvider) {
+export default function Eth({ addWallets }: ChainProvider): React.ReactNode {
+  const onClick = async () => {
+    addWallets(await WalletConnect.init());
+  }
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: componentDidMount on purpose
+  useEffect(() => {
+    onClick();
+  }, []);
+
   return (
-    <div>
-      <button
-        type="button"
-        onClick={async () => {
-          if (MetaMask.isAvailable()) {
-            addWallets(await MetaMask.init());
-          } else {
-            console.log("-> MetaMask is not available");
-          }
-        }}
-      >
-        Metamask
-      </button>
-    </div>
+    <>
+      <h1>Ethereum</h1>
+      <div className="buttons-container">
+        <button
+          type="button"
+          onClick={async () => {
+            addWallets(await WalletConnect.init());
+          }}
+        >
+          <WalletIcon id="wallet-connect" variant="branded" size="36" />
+          WalletConnect
+        </button>
+      </div>
+    </>
   );
 }
