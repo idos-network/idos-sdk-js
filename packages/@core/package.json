@@ -20,7 +20,7 @@
     "near-api-js": "catalog:core",
     "tweetnacl": "catalog:core",
     "ripple-binary-codec": "catalog:core",
-    "ripple-keypairs": "^2.0.0",
+    "ripple-keypairs": "catalog:core",
     "xrpl": "catalog:core",
     "xumm": "catalog:core"
   },
