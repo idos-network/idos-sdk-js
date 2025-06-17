@@ -1,11 +1,12 @@
 import { Wallet } from "../types";
-import { getAccount, signMessage } from "@wagmi/core";
+import { getConnections, signMessage } from "@wagmi/core";
 
 import { createAppKit } from "@reown/appkit";
 import { mainnet } from "@reown/appkit/networks";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 
 // 1. Get projectId at https://cloud.reown.com
+// TODO: Add your own projectId
 const projectId = "5179b4c5b645907ab0677ba60b65ab67";
 
 const wagmiAdapter = new WagmiAdapter({
@@ -15,6 +16,7 @@ const wagmiAdapter = new WagmiAdapter({
 
 // 2. Create your application's metadata object
 const metadata = {
+  // TODO: Add your own metadata
   name: "My Website",
   description: "My Website description",
   url: "https://mywebsite.com", // url must match your domain & subdomain
@@ -55,17 +57,23 @@ export default class WalletConnect extends Wallet {
 
       function handler(data: unknown) {
         if (!data) return;
+
+        // Something was chosen
+        const connections = getConnections(wagmiAdapter.wagmiConfig);
+
+        if (!connections.length) reject(new Error("No connections found"));
+        if (!connections[0].accounts.length) reject(new Error("No accounts found"));
     
-        // Something was choosed
-        const account = getAccount(wagmiAdapter.wagmiConfig);
-    
-        if (!account) reject(new Error("No account found"));
-    
-        resolve([
-          new WalletConnect("eth", "walletconnect", account.address as string, account.address as string, 1, async (message: string) => {
-            return signMessage(wagmiAdapter.wagmiConfig, { message, account: account.address });
+        resolve(connections[0].accounts.map((account) => 
+          new WalletConnect("eth", "walletconnect", account as string, account, 1, async (message: string) => {
+
+            // Check if the account is connected
+            const connections = getConnections(wagmiAdapter.wagmiConfig);
+            if (!connections[0].accounts.includes(account)) reject(new Error("Account is not connected"));
+
+            return await signMessage(wagmiAdapter.wagmiConfig, { message, account });
           }),
-        ]);
+        ));
       }
       
       modal.subscribeWalletInfo(handler);

@@ -1,11 +1,11 @@
 import { useWalletChooser } from "@idos-network/wallets";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 export function Welcome() {
-  const { start, selectedWallet } = useWalletChooser();
+  const { connect, selectedWallet, wallets } = useWalletChooser();
 
-  const signIn = async () => {
-    if (selectedWallet) {
+  const signIn = useCallback(async () => {
+    /*if (selectedWallet) {
       // Start SIWE
       const authResponse = await fetch(
         `/auth?address=${selectedWallet.address}&chain=${selectedWallet.chain}&publicKey=${selectedWallet.publicKey}`,
@@ -27,14 +27,21 @@ export function Welcome() {
         window.location.href = signInResponse.url;
       }
       return;
-    }
-  };
+    }*/
+  }, [selectedWallet]);
 
   useEffect(() => {
     if (selectedWallet) {
       signIn();
     }
-  }, [selectedWallet]);
+  }, [selectedWallet, signIn]);
+
+  const walletsList = wallets.map((x) => (
+    <div key={`${x.chain}-${x.chain}`}>
+      {x.chain} ({x.chain}) - {x.address} - {x.publicKey}
+      <button onClick={() => x.signMessage("Hello")} type="button" className="bg-blue-500 text-white px-4 py-2 rounded-md">Sign</button>
+    </div>
+  ));
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-950">
@@ -48,12 +55,14 @@ export function Welcome() {
           </p>
         </header>
 
+{walletsList}
+
         <button
           type="button"
           className="cursor-pointer rounded-lg bg-blue-600 px-8 py-4 font-semibold text-lg text-white transition-colors hover:bg-blue-700"
-          onClick={() => start()}
+          onClick={() => connect()}
         >
-          Start with a connecting a wallet
+          add a wallet
         </button>
       </div>
     </main>

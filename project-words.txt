@@ -12,6 +12,10 @@ OSDAG
 Personhood
 Reown
 Upserts
+Valora
+XUMM
+Xaman
+Zerion
 addgroup
 adduser
 appkit
@@ -29,6 +33,7 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+gemwallet
 headlessui
 heroicons
 heroui
@@ -43,6 +48,7 @@ insertable
 jsigs
 jsonld
 keypair
+keypairs
 kwil
 kwild
 kwilteam
@@ -53,6 +59,7 @@ multicodec
 nacl
 nanostores
 nonced
+partialize
 passporting
 permissioned
 pkoch
@@ -86,7 +93,3 @@ wagmi
 webauthn
 websdk
 xrpl
-XUMM
-Xaman
-gemwallet
-partialize

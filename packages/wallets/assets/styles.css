@@ -58,7 +58,7 @@
   display: flex;
   align-items: center;
   position: relative;
-
+  height: 50px;
 }
 
 .modal button:hover {

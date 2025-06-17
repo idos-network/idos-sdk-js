@@ -12,7 +12,7 @@ import { StellarIcon } from "./stellar/icons";
 interface WalletContextType {
   wallets: Wallet[];
   selectedWallet: Wallet | null;
-  start: () => void;
+  connect: () => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -32,16 +32,13 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({
   const value = {
     wallets,
     selectedWallet,
-    start: () => {
-      setWallets([]);
+    connect: () => {
+     //  setWallets([]);
       setSelectedWallet(null);
       setCurrentType(null);
       setIsChooserOpen(true);
     },
   };
-
-  console.log("-> isChooserOpen", isChooserOpen);
-  console.log("-> currentType", currentType);
 
   const setType = (type: SupportedWallets) => {
     setCurrentType(type);

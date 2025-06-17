@@ -1,4 +1,4 @@
-import { getAddress, getPublicKey, isInstalled, signMessage } from "@gemwallet/api";
+import { getAddress, getPublicKey, isInstalled, signMessage, setAccount } from "@gemwallet/api";
 import { Wallet } from "../types";
 
 export default class GemWallet extends Wallet {
@@ -19,6 +19,8 @@ export default class GemWallet extends Wallet {
 
     return [
       new GemWallet("xrp", "gemwallet", address, publicKey, 1, async (message: string) => {
+        await setAccount(address);
+
         const signedMessage = await signMessage(message);
         console.log("signedMessage", signedMessage);
         return signedMessage.result?.signedMessage as string;
