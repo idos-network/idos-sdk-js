@@ -192,6 +192,16 @@ export const actors = {
     return data.status;
   }),
 
+  createOnRampAccount: fromPromise(async () => {
+    const onRampAccount = await fetch("/app/kyc/hifi/account");
+
+    if (onRampAccount.status !== 200) {
+      throw new Error("Hifi API is not available. Please try again later.");
+    }
+
+    return await onRampAccount.json();
+  }),
+
   createNoahCustomer: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
     if (!input) {
       throw new Error("Credential not found");

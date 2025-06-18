@@ -23,6 +23,7 @@ export default [
         ...prefix("hifi", [
           route("tos", "routes/kyc/hifi/tos.ts"),
           route("link", "routes/kyc/hifi/link.ts"),
+          route("account", "routes/kyc/hifi/account.ts"),
           route("status", "routes/kyc/hifi/status.ts"),
         ]),
       ]),

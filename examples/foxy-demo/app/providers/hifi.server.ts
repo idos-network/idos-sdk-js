@@ -226,3 +226,52 @@ export const createUserAndKYC = async (
 
   return userId as string;
 };
+
+export interface OnRampRequest {
+  sourceCurrency: string
+  destinationCurrency: string
+  destinationChain: string
+}
+
+export interface OnRampAccountResponse {
+  message: string
+  account: Account
+}
+
+export interface Account {
+  virtualAccountId: string
+  userId: string
+  paymentRails: string[]
+  sourceCurrency: string
+  destinationChain: string
+  destinationCurrency: string
+  destinationWalletAddress: string
+  railStatus: string
+  depositInstructions: DepositInstructions
+}
+
+export interface DepositInstructions {
+  bankName: string
+  routingNumber: string
+  accountNumber: string
+  bankAddress: string
+}
+
+export const createOnRampAccount = async (userId: string, request: OnRampRequest) => {
+  const response = await fetch(`${SERVER_ENV.HIFI_API_URL}v2/users/${userId}/virtual-accounts`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${SERVER_ENV.HIFI_API_KEY}`,
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    console.log("-> error", JSON.stringify(error, null, 2));
+    throw new Error(`Can't create an on-ramp account in HIFI because: ${error.message}`);
+  }
+
+  return response.json() as Promise<OnRampAccountResponse>;
+};
