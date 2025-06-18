@@ -105,6 +105,8 @@ export const actors = {
 
       const id = input.credential.id;
 
+      await input.client.enclaveProvider.reset();
+
       const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
