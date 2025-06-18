@@ -19,6 +19,7 @@ export default function App() {
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
+  const onRampAccount = MachineContext.useSelector((state) => state.context.onRampAccount);
 
   const transak = useRef<Transak | null>(null);
 
@@ -192,6 +193,9 @@ export default function App() {
     body = (
       <div className="w-full text-center">
         <p>KYC completed, you can do a transaction now</p>
+        <pre>
+          {JSON.stringify(onRampAccount, null, 2)}
+        </pre>
         <button
           type="button"
           onClick={() => send({ type: "revokeAccessGrant" })}

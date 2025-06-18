@@ -105,6 +105,8 @@ export const actors = {
 
       const id = input.credential.id;
 
+      await input.client.enclaveProvider.reset();
+
       const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
@@ -188,6 +190,16 @@ export const actors = {
     }
 
     return data.status;
+  }),
+
+  createOnRampAccount: fromPromise(async () => {
+    const onRampAccount = await fetch("/app/kyc/hifi/account");
+
+    if (onRampAccount.status !== 200) {
+      throw new Error("Hifi API is not available. Please try again later.");
+    }
+
+    return await onRampAccount.json();
   }),
 
   createNoahCustomer: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
