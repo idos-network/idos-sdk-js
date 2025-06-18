@@ -38,7 +38,7 @@ export async function getSharedCredential(credentialId: string, inserterId?: str
     },
   ]);
 
-  if (verificationResult) {
+  if (!verificationResult) {
     throw new Error("Invalid credential signature.");
   }
 
