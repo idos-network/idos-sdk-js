@@ -38,6 +38,7 @@ export const machine = setup({
     hifiUrl: null,
     hifiKycStatus: null,
     getHifiKycStatusAttempts: 0,
+    onRampAccount: null,
   },
   states: {
     notConfigured: {
@@ -232,8 +233,7 @@ export const machine = setup({
         src: "getHifiKycStatus",
         onDone: [
           {
-            actions: ["setHifiKycStatus"],
-            target: "dataOrTokenFetched",
+            target: "createOnRampAccount",
           },
         ],
         onError: [
@@ -252,6 +252,20 @@ export const machine = setup({
         guard: ({ context }) => context.getHifiKycStatusAttempts >= 40,
         target: "error",
         actions: ["setErrorMessage"],
+      },
+    },
+    createOnRampAccount: {
+      invoke: {
+        id: "createOnRampAccount",
+        src: "createOnRampAccount",
+        onDone: {
+          target: "dataOrTokenFetched",
+          actions: ["setOnRampAccount"],
+        },
+        onError: {
+          target: "error",
+          actions: ["setErrorMessage"],
+        },
       },
     },
     createNoahCustomer: {
