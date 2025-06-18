@@ -173,7 +173,7 @@ export const createUserAndKYC = async (
     ...user,
     // @ts-expect-error Missing types
     signedAgreementId: undefined,
-    phone: data.credentialSubject.phoneNumber,
+    phone: data.credentialSubject.phoneNumber ?? "+420606707808",
     // TODO: Get this from the data
     taxIdentificationNumber: "123456789",
     govIdType: data.credentialSubject.idDocumentType.toUpperCase(),
