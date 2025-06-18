@@ -26,6 +26,8 @@ export interface Context {
   getHifiKycStatusAttempts: number;
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   hifiKycStatus: "ACTIVE" | any;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  onRampAccount: any | null;
 }
 
 export interface UserData {

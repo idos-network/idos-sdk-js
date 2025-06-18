@@ -25,6 +25,7 @@ export const actions = {
     hifiUrl: null,
     hifiKycStatus: null,
     getHifiKycStatusAttempts: 0,
+    onRampAccount: null,
   }),
 
   setClient: assign({
@@ -85,5 +86,9 @@ export const actions = {
 
   incrementGetHifiKycStatusAttempts: assign({
     getHifiKycStatusAttempts: ({ context }) => context.getHifiKycStatusAttempts + 1,
+  }),
+
+  setOnRampAccount: assign({
+    onRampAccount: ({ event }) => event.output,
   }),
 };
