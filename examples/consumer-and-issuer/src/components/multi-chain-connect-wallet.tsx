@@ -19,8 +19,7 @@ import XrpIcon from "./icons/xrp";
 
 const derivePublicKey = async (address: string) => {
   invariant(address, "Address is required");
-  const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
-  return publicKey;
+  return Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
 };
 
 export default function MultiChainConnectWallet({
