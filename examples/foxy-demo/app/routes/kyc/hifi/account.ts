@@ -19,7 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const response = await createOnRampAccount(hifiUserId, {
       sourceCurrency: "usd",
       destinationCurrency: "usdc",
-      destinationChain: "POLYGON"
+      destinationChain: "POLYGON",
     });
 
     return Response.json({ response });

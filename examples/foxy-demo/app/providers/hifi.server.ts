@@ -228,33 +228,33 @@ export const createUserAndKYC = async (
 };
 
 export interface OnRampRequest {
-  sourceCurrency: string
-  destinationCurrency: string
-  destinationChain: string
+  sourceCurrency: string;
+  destinationCurrency: string;
+  destinationChain: string;
 }
 
 export interface OnRampAccountResponse {
-  message: string
-  account: Account
+  message: string;
+  account: Account;
 }
 
 export interface Account {
-  virtualAccountId: string
-  userId: string
-  paymentRails: string[]
-  sourceCurrency: string
-  destinationChain: string
-  destinationCurrency: string
-  destinationWalletAddress: string
-  railStatus: string
-  depositInstructions: DepositInstructions
+  virtualAccountId: string;
+  userId: string;
+  paymentRails: string[];
+  sourceCurrency: string;
+  destinationChain: string;
+  destinationCurrency: string;
+  destinationWalletAddress: string;
+  railStatus: string;
+  depositInstructions: DepositInstructions;
 }
 
 export interface DepositInstructions {
-  bankName: string
-  routingNumber: string
-  accountNumber: string
-  bankAddress: string
+  bankName: string;
+  routingNumber: string;
+  accountNumber: string;
+  bankAddress: string;
 }
 
 export const createOnRampAccount = async (userId: string, request: OnRampRequest) => {

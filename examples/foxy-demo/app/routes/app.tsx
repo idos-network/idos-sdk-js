@@ -193,9 +193,7 @@ export default function App() {
     body = (
       <div className="w-full text-center">
         <p>KYC completed, you can do a transaction now</p>
-        <pre>
-          {JSON.stringify(onRampAccount, null, 2)}
-        </pre>
+        <pre>{JSON.stringify(onRampAccount, null, 2)}</pre>
         <button
           type="button"
           onClick={() => send({ type: "revokeAccessGrant" })}
