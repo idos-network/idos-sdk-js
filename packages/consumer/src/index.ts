@@ -25,6 +25,7 @@ import {
   type VerifiableCredentialSubject,
   verifyCredentials,
 } from "@idos-network/credentials";
+import type { KwilSigner } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -38,6 +39,7 @@ export class idOSConsumer {
   readonly address: string;
   #kwilClient: KwilActionClient;
   #noncedBox: NoncedBox;
+  #signer: KwilSigner;
 
   static async init({
     recipientEncryptionPrivateKey,
@@ -57,13 +59,24 @@ export class idOSConsumer {
       NoncedBox.nonceFromBase64SecretKey(recipientEncryptionPrivateKey),
       kwilClient,
       address,
+      signer,
     );
   }
 
-  private constructor(noncedBox: NoncedBox, kwilClient: KwilActionClient, address: string) {
+  private constructor(
+    noncedBox: NoncedBox,
+    kwilClient: KwilActionClient,
+    address: string,
+    signer: KwilSigner,
+  ) {
     this.#noncedBox = noncedBox;
     this.#kwilClient = kwilClient;
     this.address = address;
+    this.#signer = signer;
+  }
+
+  get signer(): KwilSigner {
+    return this.#signer;
   }
 
   get encryptionPublicKey(): string {

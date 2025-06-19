@@ -87,6 +87,128 @@ const idOSConsumer = await idOSConsumerClass.init({
 });
 ```
 
+### [ backend ] Signer implementations
+
+To initialize the idOS Consumer SDK, you need to pass in something as a `consumerSigner`. That something needs to conform to an interface that varies between signer types:
+
+#### Ed25519 Signer (Nacl)
+
+```typescript
+{
+  privateKey: Uint8Array,
+  publicKey: Uint8Array, 
+  sign: (message: Uint8Array) => Uint8Array
+}
+```
+
+**Implementation with tweetnacl:**
+```typescript
+import nacl from "tweetnacl";
+import { hexDecode } from "@idos-network/core";
+
+// Option 1: Generate a new key pair
+const signer = nacl.sign.keyPair();
+
+// Option 2: Use existing secret key
+const secretKey = "your_32_byte_secret_key_here";
+const signer = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
+```
+
+#### XRPL Signer Interface
+
+```typescript
+{
+  privateKey: string,
+  publicKey: string,
+  sign: (message: string) => string
+}
+```
+
+**Implementation with ripple-keypairs:**
+```typescript
+import * as xrpKeypair from "ripple-keypairs";
+
+// Option 1: Generate from seed
+const seed = "sEd7BpLCVJPuJj9S7tfp8igyA54oiZW";
+const signer = xrpKeypair.deriveKeypair(seed);
+
+// Option 2: Create from secret key (when you don't have a seed)
+const secretKey = "EDAF8E853F43D3A59375239ED5B85AABAAC5E4556C5CE0D5458259668697455C07";
+const publicKey = "ED9A5A5420707D80B24C83C0333EBFBB1E8290530DFF45D39B7305B0982CA0D1E8";
+
+const signer = {
+  privateKey: secretKey,
+  publicKey: publicKey,
+  sign: (message: string) => xrpKeypair.sign(message, secretKey)
+};
+```
+
+> **Important for XRPL Signers**: The `NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` environment variable should contain the **XRP address**, not the public key. You can derive the address from the public key using:
+> 
+> ```typescript
+> const address = xrpKeypair.deriveAddress(signer.publicKey);
+> // Use this address as NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY
+> ```
+
+#### EVM Signer Interface
+
+```typescript
+{
+  sign: (message: string | Uint8Array) => Promise<string>
+}
+```
+
+**Implementation with ethers:**
+```typescript
+import { Wallet } from "ethers";
+
+// Option 1: From private key
+const privateKey = "0x..."; // Your private key
+const signer = new Wallet(privateKey);
+
+// Option 2: From mnemonic
+const mnemonic = "your twelve word mnemonic phrase here";
+const signer = Wallet.fromPhrase(mnemonic);
+```
+
+### SDK Initialization
+
+After creating your signer, initialize the SDK:
+
+```typescript
+import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+
+const idOSConsumer = await idOSConsumerClass.init({
+  consumerSigner: signer,
+  recipientEncryptionPrivateKey: "your_encryption_private_key",
+  nodeUrl: "https://nodes.idos.network", // optional
+});
+```
+
+### Signer Type Detection
+
+The idOS Consumer SDK automatically detects the signer type and handles signature verification appropriately:
+
+- **Nacl signers**: Use Ed25519 signatures
+- **XRP signers**: Use ripple-keypairs with Ed25519 (XRPL format)
+- **Ethers signers**: Use EIP-191 secp256k1 signatures
+
+### Accessing the Signer
+
+You can access the signer instance from the consumer:
+
+```typescript
+const consumer = await idOSConsumerClass.init(config);
+const signer = consumer.signer;
+
+// The signer can be used for custom signing operations
+if (typeof signer.signer === "function") {
+  const message = new TextEncoder().encode("Hello, idOS!");
+  const signature = await signer.signer(message);
+  console.log("Signature:", signature);
+}
+```
+
 ### [ frontend ] Connecting your user's wallet
 
 Connect your user's wallet however you do it today, for example:
@@ -110,7 +232,7 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 
 ### [ frontend ] Setting signer
 
-Pass your user’s signer to the SDK, so it knows where to send signature requests to.
+Pass your user's signer to the SDK, so it knows where to send signature requests to.
 
 ```js
 idOSClient = await idOSClient.withUserSigner(signer);
@@ -151,7 +273,7 @@ And you can get the credentials contents from the grant via:
 const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
 ```
 
-If you don’t have an access grant, you can proceed to filtering the user’s credentials and requesting one or more access grants.
+If you don't have an access grant, you can proceed to filtering the user's credentials and requesting one or more access grants.
 
 
 ### [ frontend ] Filtering credentials

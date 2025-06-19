@@ -3,7 +3,6 @@ import {
   base64Decode,
   base64Encode,
   hexDecode,
-  hexEncode,
   type idOSCredential,
   toBytes,
 } from "@idos-network/core";
@@ -275,11 +274,17 @@ export const invokePassportingService = async (
   // sign a message using the consumer's signing key
   const message = JSON.stringify(payload);
   const messageBytes = new TextEncoder().encode(message);
-  const signature = nacl.sign.detached(messageBytes, hexDecode(consumerSigningSecretKey));
+  const consumer = await idOSConsumer();
 
-  const consumerSigningPublicKey = hexEncode(
-    nacl.sign.keyPair.fromSecretKey(hexDecode(consumerSigningSecretKey)).publicKey,
-  );
+  const signer = consumer.signer;
+  const signature =
+    typeof signer.signer === "function"
+      ? await signer.signer(messageBytes)
+      : nacl.sign.detached(messageBytes, hexDecode(consumerSigningSecretKey));
+
+  // deriving signing public key does not follow the same process on different type of signer
+  const consumerSigningPublicKey = process.env.NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY;
+  invariant(consumerSigningPublicKey, "`NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` is not set");
 
   // Call the passporting service to transmit the DAG
   const response = await fetch(url, {
@@ -301,8 +306,6 @@ export const invokePassportingService = async (
     console.dir(result.error, { depth: null });
     throw new Error(result.error);
   }
-
-  const consumer = await idOSConsumer();
 
   const credential = await consumer.getReusableCredentialCompliantly(payload.dag_data_id);
   // @todo: handle errors when the prior method fails.

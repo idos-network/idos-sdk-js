@@ -2,8 +2,10 @@ import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";
+import * as xrpKeypair from "ripple-keypairs";
+import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
-import { bs58Encode } from "../codecs";
+import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import type { Store } from "../store";
 import type { Wallet } from "../types";
@@ -60,12 +62,21 @@ function isStellarKeyPair(object: unknown): object is StellarKeypair {
   );
 }
 
+/**
+ * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
+ */
+function isXrplKeyPair(object: unknown): object is XrpKeyPair {
+  return !!object && typeof object === "object" && "privateKey" in object && "publicKey" in object;
+}
+
 export type KwilSignerType =
   | NearKeyPair
   | EthersWallet
   | nacl.SignKeyPair
   | JsonRpcSigner
-  | StellarKeypair;
+  | StellarKeypair
+  | XrpKeyPair;
+
 export type SignerAddress = string;
 
 /**
@@ -104,6 +115,17 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
         "ed25519",
       ),
       publicKeyString,
+    ];
+  }
+
+  if (isXrplKeyPair(signer)) {
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
+        signer.publicKey,
+        "xrpl",
+      ),
+      signer.publicKey,
     ];
   }
 
