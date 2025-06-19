@@ -3,12 +3,20 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 
 import { useWalletSelector } from "@/core/near";
 
+import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
+import { StrKey } from "@stellar/stellar-base";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
+import stellarKit from "./core/stellar-kit";
 import { useWalletStore } from "./stores/wallet";
+
+const derivePublicKey = async (address: string) => {
+  invariant(address, "Address is required");
+  return Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+};
 
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
@@ -16,6 +24,19 @@ export const ConnectWallet = () => {
   const { address, isConnected: evmConnected } = useAccount();
   const { setWalletType, setWalletAddress, setWalletPublicKey } = useWalletStore();
   const { accountId } = useWalletSelector();
+
+  const connectStellarWallet = async () => {
+    await stellarKit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        stellarKit.setWallet(option.id);
+        const { address } = await stellarKit.getAddress();
+        const publicKey = await derivePublicKey(address);
+        setWalletAddress(address);
+        setWalletPublicKey(publicKey);
+        setWalletType("Stellar");
+      },
+    });
+  };
 
   useEffect(() => {
     if (evmConnected) {
@@ -122,6 +143,10 @@ export const ConnectWallet = () => {
             >
               Connect with XRP
               <Image alt="XRP logo" src="/xrp.svg" w={10} h={10} />
+            </Button>
+            <Button size="lg" justifyContent="space-between" onClick={connectStellarWallet}>
+              Connect with Stellar
+              <Image alt="Stellar logo" src="/stellar.svg" w={10} h={10} />
             </Button>
           </VStack>
         </VStack>
