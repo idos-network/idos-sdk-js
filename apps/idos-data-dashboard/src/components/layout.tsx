@@ -1,4 +1,5 @@
 import { useWalletSelector } from "@/core/near";
+import stellarKit from "@/core/stellar-kit";
 import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
 import { useWalletStore } from "@/stores/wallet";
 import {
@@ -83,17 +84,17 @@ const ListItemLink = (props: NavLinkProps & LinkProps) => {
 };
 
 const DisconnectButton = () => {
-  const { isConnected } = useAccount();
   const { disconnectAsync } = useDisconnect();
   const { selector, setAccounts } = useWalletSelector();
   const queryClient = useQueryClient();
   const { setSigner } = useSigner();
   const client = useUnsafeIdOS();
-  const { resetWallet } = useWalletStore();
+  const { resetWallet, walletType } = useWalletStore();
 
   const handleDisconnect = async () => {
-    if (isConnected) await disconnectAsync();
-    if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (walletType === "Stellar") await stellarKit.disconnect();
+    if (walletType === "near") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (walletType === "evm") await disconnectAsync();
     if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);
     setAccounts([]);

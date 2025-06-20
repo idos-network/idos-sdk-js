@@ -9,6 +9,7 @@ import {
   use,
   useCallback,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 
@@ -18,6 +19,7 @@ import invariant from "tiny-invariant";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
+import { createStellarSigner } from "./core/stellar-kit";
 import { useWalletStore } from "./stores/wallet";
 
 const _idOSClient = new idOSClientConfiguration({
@@ -73,13 +75,29 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [client, setClient] = useState<idOSClient>(_idOSClient);
   const { signer: evmSigner } = useSigner();
   const { accountId, selector } = useWalletSelector();
-  const { walletType, walletAddress } = useWalletStore();
+  const { walletType, walletAddress, walletPublicKey } = useWalletStore();
+
+  const walletToSignerSrc = useMemo(
+    () => ({
+      evm: evmSigner,
+      near: accountId,
+      Stellar: walletPublicKey,
+    }),
+    [evmSigner, accountId, walletPublicKey],
+  );
 
   useEffect(() => {
     if (!walletType) {
       setIsLoading(false);
       return;
     }
+
+    // For every wallet type check for it's working condition specified in walletToSignerSrc
+    if (!walletToSignerSrc[walletType as keyof typeof walletToSignerSrc]) {
+      setIsLoading(false);
+      return;
+    }
+
     const setupClient = async () => {
       try {
         // Always start with a fresh client
@@ -92,14 +110,20 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
         }
         const nearSigner = accountId ? await selector.wallet() : undefined;
 
+        const stellarSigner = await createStellarSigner(
+          walletPublicKey as string,
+          walletAddress as string,
+        );
+
         const signerSrc = {
           evm: evmSigner,
           near: nearSigner,
           xrpl: GemWallet,
+          Stellar: stellarSigner,
         };
 
         const withSigner = await newClient.withUserSigner(
-          signerSrc[walletType as "evm" | "near" | "xrpl"],
+          signerSrc[walletType as "evm" | "near" | "xrpl" | "Stellar"],
         );
 
         // Check if the user has a profile and log in if they do
@@ -118,7 +142,15 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [evmSigner, accountId, selector, walletType, walletAddress]);
+  }, [
+    evmSigner,
+    accountId,
+    selector,
+    walletType,
+    walletAddress,
+    walletPublicKey,
+    walletToSignerSrc,
+  ]);
 
   // While loading, show a spinner
   if (isLoading) {

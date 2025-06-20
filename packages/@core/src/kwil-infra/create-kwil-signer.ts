@@ -62,6 +62,11 @@ function isStellarKeyPair(object: unknown): object is StellarKeypair {
   );
 }
 
+export interface CustomKwilSigner extends KwilSigner {
+  publicAddress: string;
+  signatureType: string;
+}
+
 /**
  * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
  */
@@ -184,6 +189,10 @@ export async function createClientKwilSigner(
       await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
       currentAddress,
     ];
+  }
+
+  if ("signatureType" in wallet && "publicAddress" in wallet) {
+    return [wallet, wallet.publicAddress];
   }
 
   // Force the check that `signer` is `never`.

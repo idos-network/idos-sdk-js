@@ -97,5 +97,6 @@ XUMM
 Xaman
 gemwallet
 partialize
+creit
 keypairs
 LCVJ

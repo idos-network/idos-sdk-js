@@ -319,8 +319,8 @@ const useIssueCredential = () => {
           "Liveness check (No pictures)",
         ],
 
-        walletIdentifier: near.selector.isSignedIn()
-          ? await isleController.idosClient.store.get("signer-public-key")
+        walletIdentifier: ["stellar", "near"].includes(isleController.signerType)
+          ? walletPublicKey
           : null,
       });
 
@@ -347,6 +347,7 @@ const useIssueCredential = () => {
 function useShareCredentialWithConsumer() {
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
+  const { walletPublicKey: publicKey, walletType, walletAddress } = useWalletStore();
   const near = useNearWallet();
 
   return useMutation({
@@ -385,11 +386,15 @@ function useShareCredentialWithConsumer() {
         consumerSigningPublicKey,
         0,
       );
+      invariant(walletType, "`walletType` is not set");
+      const dag_owner_wallet_identifier = ["stellar", "near"].includes(walletType)
+        ? publicKey
+        : isleController.idosClient.walletIdentifier || "";
+
+      invariant(dag_owner_wallet_identifier, "`dag_owner_wallet_identifier` is not set");
 
       const dag = {
-        dag_owner_wallet_identifier: near.selector.isSignedIn()
-          ? await isleController.idosClient.store.get("signer-public-key")
-          : isleController.idosClient.walletIdentifier,
+        dag_owner_wallet_identifier,
         dag_grantee_wallet_identifier: consumerSigningPublicKey,
         dag_data_id: id,
         dag_locked_until: lockedUntil,
@@ -517,7 +522,7 @@ export function Onboarding() {
   const idvStatus = useFetchIDVStatus(userData?.data);
   const createIDVAttribute = useCreateIDVAttribute();
   const issueCredential = useIssueCredential();
-  const { walletPublicKey } = useWalletStore();
+  const { walletPublicKey: publicKey, walletAddress: address } = useWalletStore();
 
   const kycDisclosure = useDisclosure();
 
@@ -549,8 +554,6 @@ export function Onboarding() {
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await isleController.signTx(message);
-      const address = await isleController.idosClient.store.get("signer-address");
-      const publicKey = await isleController.idosClient.store.get("signer-public-key");
       isleController?.send("update-create-profile-status", {
         status: "pending",
       });
@@ -559,8 +562,11 @@ export function Onboarding() {
         userId,
         recipientEncryptionPublicKey: userEncryptionPublicKey,
         wallet: {
-          address,
-          type: isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR",
+          address: address || "",
+          type:
+            isleController.signerType === "stellar"
+              ? "Stellar"
+              : (isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR" | "Stellar"),
           message,
           signature,
           publicKey: publicKey || (address as string),
@@ -591,7 +597,7 @@ export function Onboarding() {
         status: "error",
       });
     }
-  }, [isleController, queryClient]);
+  }, [isleController, queryClient, address, publicKey]);
 
   const handleKYCSuccess = useCallback(
     async ({ token }: { token: string }) => {

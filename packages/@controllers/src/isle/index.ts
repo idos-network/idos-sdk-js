@@ -4,7 +4,7 @@ import {
   type idOSClient,
   idOSClientConfiguration,
 } from "@idos-network/client";
-import type { DelegatedWriteGrant } from "@idos-network/core";
+import type { DelegatedWriteGrant, KwilSigner } from "@idos-network/core";
 import {
   type IsleControllerMessage,
   type IsleMessageHandler,
@@ -127,8 +127,8 @@ export interface WalletInfo {
   address: string;
   publicKey: string;
   signMethod: (message: string) => Promise<string>;
-  type: "evm" | "xrpl" | "near";
-  signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm>;
+  type: "evm" | "xrpl" | "near" | "stellar";
+  signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm | KwilSigner>;
 }
 
 /**
