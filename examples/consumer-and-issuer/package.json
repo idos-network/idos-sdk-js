@@ -2,6 +2,7 @@
   "name": "consumer-and-issuer-demo",
   "version": "0.0.1",
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.7.5",
     "@gemwallet/api": "^3.8.0",
     "@heroui/react": "2.6.14",
     "@idos-network/consumer": "workspace:*",
@@ -15,6 +16,7 @@
     "@near-wallet-selector/modal-ui": "8.9.10",
     "@reown/appkit": "^1.7.2",
     "@reown/appkit-adapter-wagmi": "^1.7.2",
+    "@stellar/stellar-base": "^13.1.0",
     "@tanstack/react-query": "5.45.1",
     "@uidotdev/usehooks": "^2.4.1",
     "@wagmi/core": "^2.16.4",

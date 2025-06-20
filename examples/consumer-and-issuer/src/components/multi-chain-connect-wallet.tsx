@@ -10,9 +10,18 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useNearWallet } from "@/near.provider";
+import stellarKit from "@/stellar.config";
+import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+import { StrKey } from "@stellar/stellar-base";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
 import XrpIcon from "./icons/xrp";
+
+const derivePublicKey = async (address: string) => {
+  invariant(address, "Address is required");
+  const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+  return publicKey;
+};
 
 export default function MultiChainConnectWallet({
   hideConnect,
@@ -35,6 +44,19 @@ export default function MultiChainConnectWallet({
   const near = useNearWallet();
 
   const walletConnected = !!walletAddress;
+
+  const connectStellarWallet = async () => {
+    await stellarKit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        stellarKit.setWallet(option.id);
+        const { address } = await stellarKit.getAddress();
+        const publicKey = await derivePublicKey(address);
+        setWalletAddress(address);
+        setWalletPublicKey(publicKey);
+        setWalletType("stellar");
+      },
+    });
+  };
 
   useEffect(() => {
     if (evmConnected) {
@@ -113,6 +135,11 @@ export default function MultiChainConnectWallet({
       <Button size="lg" onPress={() => near.modal.show()}>
         Connect a NEAR wallet
         <TokenIcon symbol="near" />
+      </Button>
+
+      <Button size="lg" onPress={connectStellarWallet}>
+        Connect a Stellar wallet
+        <TokenIcon symbol="xlm" />
       </Button>
     </div>
   );
