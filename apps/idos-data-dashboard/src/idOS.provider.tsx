@@ -76,6 +76,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { walletType, walletAddress } = useWalletStore();
 
   useEffect(() => {
+    // @todo: make sure when switching wallet (not idos registered wallet) the client stays on main wallet
     if (!walletType) {
       setIsLoading(false);
       return;

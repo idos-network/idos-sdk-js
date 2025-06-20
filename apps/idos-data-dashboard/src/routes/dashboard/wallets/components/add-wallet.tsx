@@ -23,6 +23,9 @@ import { getNearFullAccessPublicKeys } from "@/utils/near";
 import * as GemWallet from "@gemwallet/api";
 import { getXrpPublicKey } from "@idos-network/core";
 import invariant from "tiny-invariant";
+import { useSignMessage } from "wagmi";
+
+const ADD_WALLET_MESSAGE = "Please sign this message to add this wallet to your idOS account.";
 
 type AddWalletProps = {
   isOpen: boolean;
@@ -34,17 +37,19 @@ type AddWalletProps = {
 const createWalletParamsFactory = ({
   address,
   public_key,
-}: { address: string; public_key?: string }) => ({
+  signature,
+  message,
+}: { address: string; public_key?: string; signature?: string; message: string }) => ({
   id: crypto.randomUUID() as string,
   address,
   public_key: public_key ?? null,
-  message: "",
-  signature: "",
+  message,
+  signature: signature ?? "",
 });
 
 const createWallet = async (
   idOSClient: idOSClientLoggedIn,
-  params: { address: string; public_key?: string },
+  params: { address: string; public_key?: string; signature?: string; message: string },
 ): Promise<idOSWallet> => {
   const walletParams = createWalletParamsFactory(params);
   await idOSClient.addWallet(walletParams);
@@ -63,26 +68,29 @@ const useAddWalletMutation = () => {
     // biome-ignore lint/suspicious/noExplicitAny: Will need to be fixed in the future.
     any,
     DefaultError,
-    { address: string; publicKeys: string[] },
+    { address: string; publicKeys: string[]; signature: string; message: string },
     { previousWallets: idOSWallet[] }
   >({
-    mutationFn: async ({ address, publicKeys }) => {
+    mutationFn: async ({ address, publicKeys, signature, message }) => {
       if (publicKeys.length > 0) {
         return Promise.all(
-          publicKeys.map((public_key) => createWallet(idOSClient, { address, public_key })),
+          publicKeys.map((public_key) =>
+            createWallet(idOSClient, { address, public_key, signature, message }),
+          ),
         );
       }
-      return [await createWallet(idOSClient, { address })];
+      return [await createWallet(idOSClient, { address, message, signature })];
     },
 
-    onMutate: async ({ address, publicKeys }) => {
+    onMutate: async ({ address, publicKeys, signature, message }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
 
       const wallets = publicKeys.map((public_key) =>
-        createWalletParamsFactory({ address, public_key }),
+        createWalletParamsFactory({ address, public_key, signature, message }),
       );
-      const payload = wallets.length > 0 ? wallets : [createWalletParamsFactory({ address })];
+      const payload =
+        wallets.length > 0 ? wallets : [createWalletParamsFactory({ address, signature, message })];
 
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
@@ -112,6 +120,7 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
   const queryClient = useQueryClient();
 
   const addWallet = useAddWalletMutation();
+  const { signMessageAsync } = useSignMessage();
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -186,9 +195,34 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
         return;
       }
     }
+    let signature: `0x${string}` | undefined;
+    const message = ADD_WALLET_MESSAGE;
+
+    // @todo: handle other blockchain signing mechanism
+    try {
+      const _signature = await signMessageAsync({
+        message,
+        account: address as `0x${string}`,
+      });
+      signature = _signature as `0x${string}`;
+    } catch (error) {
+      toast({
+        title: "Error while adding wallet",
+        description:
+          "Error while signing message. Please make sure you are connected to the wallet you want to add.",
+        position: "bottom-right",
+        status: "error",
+      });
+      return;
+    }
 
     addWallet.mutate(
-      { address, publicKeys },
+      {
+        address,
+        publicKeys: publicKeys.length > 0 ? publicKeys : [address],
+        signature,
+        message,
+      },
       {
         async onSuccess(wallets: idOSWallet[]) {
           const cache = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
