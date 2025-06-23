@@ -127,7 +127,7 @@ export interface WalletInfo {
   address: string;
   publicKey: string;
   signMethod: (message: string) => Promise<string>;
-  type: "evm" | "xrpl" | "near" | "stellar";
+  type: "evm" | "xrpl" | "near" | "Stellar";
   signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm | KwilSigner>;
 }
 

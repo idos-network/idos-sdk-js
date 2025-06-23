@@ -16,6 +16,7 @@ import { StrKey } from "@stellar/stellar-base";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
 import XrpIcon from "./icons/xrp";
+import Redirect from "./redirect";
 
 const derivePublicKey = async (address: string) => {
   invariant(address, "Address is required");
@@ -52,7 +53,7 @@ export default function MultiChainConnectWallet({
         const publicKey = await derivePublicKey(address);
         setWalletAddress(address);
         setWalletPublicKey(publicKey);
-        setWalletType("stellar");
+        setWalletType("Stellar");
       },
     });
   };
@@ -70,14 +71,6 @@ export default function MultiChainConnectWallet({
     }
   }, [isConnected, address, setWalletAddress, setWalletPublicKey]);
 
-  useEffect(() => {
-    if (walletConnected) {
-      router.replace("/onboarding");
-    } else {
-      router.replace("/");
-    }
-  }, [walletConnected, router]);
-
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const subscription = near.selector.store.observable.subscribe((state) => {
@@ -93,6 +86,9 @@ export default function MultiChainConnectWallet({
   }, []);
 
   if (walletConnected && !hideDisconnect) return <DisconnectWallet />;
+
+  if (walletConnected) return <Redirect to="/onboarding" />;
+  if (!walletConnected && hideConnect) return <Redirect to="/" />;
 
   if (hideConnect) return null;
 

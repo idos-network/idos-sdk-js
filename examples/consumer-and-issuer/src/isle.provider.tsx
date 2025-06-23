@@ -25,7 +25,7 @@ const getEvmSigner = async (wagmiConfig: Config) => {
 const walletInfoMapper = ({
   address,
   publicKey,
-}: { address: string; publicKey: string }): Record<"evm" | "xrpl", WalletInfo> => ({
+}: { address: string; publicKey: string }): Record<"evm" | "xrpl" | "Stellar", WalletInfo> => ({
   evm: {
     address,
     publicKey,
@@ -42,6 +42,53 @@ const walletInfoMapper = ({
     publicKey,
     type: "xrpl",
     signer: async () => GemWallet,
+  },
+  Stellar: {
+    address,
+    publicKey,
+    signMethod: async (message: string) => {
+      // Encode the message as base64 (stellarKit expects this)
+      const messageBase64 = Buffer.from(message).toString("base64");
+
+      const result = await stellarKit.signMessage(messageBase64);
+
+      // Double-decode the signature
+      let signedMessage = Buffer.from(result.signedMessage, "base64");
+
+      if (signedMessage.length > 64) {
+        signedMessage = Buffer.from(signedMessage.toString(), "base64");
+      }
+
+      // Convert to hex string for the database
+      const signatureHex = signedMessage.toString("hex");
+
+      return signatureHex;
+    },
+    type: "Stellar",
+    signer: async () => {
+      const signer = new KwilSigner(
+        async (msg: Uint8Array): Promise<Uint8Array> => {
+          const messageBase64 = Buffer.from(msg).toString("base64");
+          const result = await stellarKit.signMessage(messageBase64);
+
+          let signedMessage = Buffer.from(result.signedMessage, "base64");
+
+          if (signedMessage.length > 64) {
+            signedMessage = Buffer.from(signedMessage.toString(), "base64");
+          }
+          return signedMessage;
+        },
+        publicKey,
+        "ed25519",
+      );
+      try {
+        // @ts-ignore
+        signer.publicAddress = address;
+      } catch (error) {
+        console.log("error setting public address", error);
+      }
+      return signer;
+    },
   },
 });
 
@@ -112,56 +159,12 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
             return externalSigner;
           },
         };
-      } else if (walletType === "stellar") {
-        walletInfo = {
-          address: walletAddress,
-          publicKey: walletPublicKey,
-          signMethod: async (message: string) => {
-            // Encode the message as base64 (stellarKit expects this)
-            const messageBase64 = Buffer.from(message).toString("base64");
-
-            const result = await stellarKit.signMessage(messageBase64);
-
-            // Double-decode the signature
-            let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-            if (signedMessage.length > 64) {
-              signedMessage = Buffer.from(signedMessage.toString(), "base64");
-            }
-
-            // Convert to hex string for the database
-            const signatureHex = signedMessage.toString("hex");
-
-            return signatureHex;
-          },
-          type: "stellar",
-          signer: async () => {
-            const signer = new KwilSigner(
-              async (msg: Uint8Array): Promise<Uint8Array> => {
-                const messageBase64 = Buffer.from(msg).toString("base64");
-                const result = await stellarKit.signMessage(messageBase64);
-
-                let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-                if (signedMessage.length > 64) {
-                  signedMessage = Buffer.from(signedMessage.toString(), "base64");
-                }
-                return signedMessage;
-              },
-              walletPublicKey,
-              "ed25519",
-            );
-            // @ts-ignore
-            signer.publicAddress = walletAddress;
-            return signer;
-          },
-        };
       } else {
         // For EVM and XRPL wallets, use the existing walletInfoMapper
         walletInfo = walletInfoMapper({
           address: walletAddress,
           publicKey: walletPublicKey,
-        })[walletType as "evm" | "xrpl"];
+        })[walletType];
       }
 
       const controller = createIsleController({

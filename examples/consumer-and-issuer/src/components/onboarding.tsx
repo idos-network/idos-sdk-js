@@ -319,7 +319,7 @@ const useIssueCredential = () => {
           "Liveness check (No pictures)",
         ],
 
-        walletIdentifier: ["stellar", "near"].includes(isleController.signerType)
+        walletIdentifier: ["Stellar", "near"].includes(isleController.signerType)
           ? walletPublicKey
           : null,
       });
@@ -387,7 +387,7 @@ function useShareCredentialWithConsumer() {
         0,
       );
       invariant(walletType, "`walletType` is not set");
-      const dag_owner_wallet_identifier = ["stellar", "near"].includes(walletType)
+      const dag_owner_wallet_identifier = ["Stellar", "near"].includes(walletType)
         ? publicKey
         : isleController.idosClient.walletIdentifier || "";
 
@@ -564,7 +564,7 @@ export function Onboarding() {
         wallet: {
           address: address || "",
           type:
-            isleController.signerType === "stellar"
+            isleController.signerType === "Stellar"
               ? "Stellar"
               : (isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR" | "Stellar"),
           message,
