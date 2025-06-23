@@ -4,10 +4,10 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useWalletSelector } from "@/core/near";
 
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
-import { TokenIcon } from "@web3icons/react";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
 import { StrKey } from "@stellar/stellar-base";
+import { TokenIcon } from "@web3icons/react";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
