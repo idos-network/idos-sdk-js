@@ -4,6 +4,7 @@ import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useWalletSelector } from "@/core/near";
 
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+import { TokenIcon } from "@web3icons/react";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
 import { StrKey } from "@stellar/stellar-base";
@@ -146,7 +147,9 @@ export const ConnectWallet = () => {
             </Button>
             <Button size="lg" justifyContent="space-between" onClick={connectStellarWallet}>
               Connect with Stellar
-              <Image alt="Stellar logo" src="/stellar.svg" w={10} h={10} />
+              <Box display="flex" alignItems="center" mr={1}>
+                <TokenIcon symbol="xlm" size={34} />
+              </Box>
             </Button>
           </VStack>
         </VStack>

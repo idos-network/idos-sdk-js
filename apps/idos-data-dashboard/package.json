@@ -16,6 +16,7 @@
     "@stellar/stellar-base": "^13.1.0",
     "@tanstack/react-query": "^5.51.11",
     "@tanstack/react-query-devtools": "^5.51.11",
+    "@web3icons/react": "^4.0.14",
     "@web3modal/wagmi": "^4.2.3",
     "ethers": "catalog:core",
     "framer-motion": "^10.18.0",
