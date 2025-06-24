@@ -1,5 +1,5 @@
 {
-  "name": "foxy-demo",
+  "name": "pay-demo",
   "version": "0.0.1",
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "^5.4.0",
