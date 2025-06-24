@@ -10,9 +10,18 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 
 import { useNearWallet } from "@/near.provider";
+import stellarKit from "@/stellar.config";
+import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+import { StrKey } from "@stellar/stellar-base";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
 import XrpIcon from "./icons/xrp";
+import Redirect from "./redirect";
+
+const derivePublicKey = async (address: string) => {
+  invariant(address, "Address is required");
+  return Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+};
 
 export default function MultiChainConnectWallet({
   hideConnect,
@@ -36,6 +45,19 @@ export default function MultiChainConnectWallet({
 
   const walletConnected = !!walletAddress;
 
+  const connectStellarWallet = async () => {
+    await stellarKit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        stellarKit.setWallet(option.id);
+        const { address } = await stellarKit.getAddress();
+        const publicKey = await derivePublicKey(address);
+        setWalletAddress(address);
+        setWalletPublicKey(publicKey);
+        setWalletType("Stellar");
+      },
+    });
+  };
+
   useEffect(() => {
     if (evmConnected) {
       setWalletType("evm");
@@ -48,14 +70,6 @@ export default function MultiChainConnectWallet({
       setWalletPublicKey(address ?? null);
     }
   }, [isConnected, address, setWalletAddress, setWalletPublicKey]);
-
-  useEffect(() => {
-    if (walletConnected) {
-      router.replace("/onboarding");
-    } else {
-      router.replace("/");
-    }
-  }, [walletConnected, router]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -72,6 +86,9 @@ export default function MultiChainConnectWallet({
   }, []);
 
   if (walletConnected && !hideDisconnect) return <DisconnectWallet />;
+
+  if (walletConnected) return <Redirect to="/onboarding" />;
+  if (!walletConnected && hideConnect) return <Redirect to="/" />;
 
   if (hideConnect) return null;
 
@@ -113,6 +130,11 @@ export default function MultiChainConnectWallet({
       <Button size="lg" onPress={() => near.modal.show()}>
         Connect a NEAR wallet
         <TokenIcon symbol="near" />
+      </Button>
+
+      <Button size="lg" onPress={connectStellarWallet}>
+        Connect a Stellar wallet
+        <TokenIcon symbol="xlm" />
       </Button>
     </div>
   );
