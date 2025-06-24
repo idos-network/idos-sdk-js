@@ -13,16 +13,15 @@ import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon, RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { useAccount } from "wagmi";
 
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
+import { useWalletSelector } from "@/core/near";
 import { useIdOS } from "@/idOS.provider";
 
-import { useWalletSelector } from "@/core/near";
-import { Navigate, useSearchParams } from "react-router-dom";
-import { useAccount } from "wagmi";
-import { AddWallet } from "./components/add-wallet";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -32,7 +31,7 @@ const useFetchWallets = () => {
   return useQuery({
     queryKey: ["wallets"],
     queryFn: () => idOSClient.getWallets(),
-    select: (data) => Object.groupBy(data, (wallet) => wallet.address),
+    select: (data: idOSWallet[]) => Object.groupBy(data, (wallet: idOSWallet) => wallet.address),
   });
 };
 
@@ -115,13 +114,9 @@ export function Component() {
   const walletToAdd = searchParams.get("add-wallet") || undefined;
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const hasProfile = !!idOSClient.user.id;
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd && hasProfile });
-
-  const handleWalletAdded = () => {
-    if (callbackUrl) location.href = callbackUrl;
-  };
 
   useEffect(() => {
     if (walletToAdd && !hasProfile && callbackUrl) {
@@ -163,7 +158,7 @@ export function Component() {
               colorScheme="green"
               leftIcon={<PlusIcon size={24} />}
               hideBelow="lg"
-              onClick={onOpen}
+              onClick={() => navigate("/wallets/add")}
             >
               Add wallet
             </Button>
@@ -172,7 +167,7 @@ export function Component() {
               colorScheme="green"
               icon={<PlusIcon size={24} />}
               hideFrom="lg"
-              onClick={onOpen}
+              onClick={() => navigate("/wallets/add")}
             />
             <IconButton
               aria-label="Refresh wallets"
@@ -190,12 +185,6 @@ export function Component() {
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
       {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
-      <AddWallet
-        isOpen={isOpen}
-        onClose={onClose}
-        defaultValue={walletToAdd}
-        onWalletAdded={handleWalletAdded}
-      />
     </VStack>
   );
 }

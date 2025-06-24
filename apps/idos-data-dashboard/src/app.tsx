@@ -15,7 +15,16 @@ export default function App() {
 
   useEffect(() => {
     async function checkProfile() {
-      if (walletToAdd && callbackUrl && !idOSClient.user.id) {
+      // Only check profile if we have a valid client and user
+      if (
+        walletToAdd &&
+        callbackUrl &&
+        idOSClient &&
+        "user" in idOSClient &&
+        idOSClient.user &&
+        "id" in idOSClient.user &&
+        !idOSClient.user.id
+      ) {
         await disconnectAsync();
 
         toast({
@@ -27,7 +36,7 @@ export default function App() {
     }
 
     checkProfile();
-  }, [walletToAdd, callbackUrl, idOSClient.user.id, disconnectAsync, toast]);
+  }, [walletToAdd, callbackUrl, idOSClient, disconnectAsync, toast]);
 
   return <Outlet />;
 }
