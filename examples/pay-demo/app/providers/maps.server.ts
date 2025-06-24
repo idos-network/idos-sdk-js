@@ -12,7 +12,7 @@ export async function getISORegionCodeFromNominatim(address: string): Promise<st
 
   const res = await fetch(url, {
     headers: {
-      "User-Agent": "Foxy-Demo/1.0 (jan@idos.network)",
+      "User-Agent": "idOS-Pay-Demo/1.0 (jan@idos.network)",
     },
   });
 
