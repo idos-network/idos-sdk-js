@@ -43,6 +43,7 @@ const data = await buildCredentials(
   {
     id: `uuid:${id}`,
     applicantId: "1234567890",
+    inquiryId: "1234567890",
     firstName: "John",
     familyName: "Lennon",
     governmentIdType: "SSN",
