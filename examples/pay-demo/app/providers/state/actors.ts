@@ -76,17 +76,41 @@ export const actors = {
           authPublicKey: COMMON_ENV.KRAKEN_ISSUER_PUBLIC_KEY,
         },
       ],
-      publicNotesFieldFilters: {
-        pick: { level: [COMMON_ENV.KRAKEN_LEVEL] },
-        omit: {},
-      },
     });
 
-    if (credentials.length === 0) {
+    // Compare credentials as arrays
+    const pickArray = COMMON_ENV.KRAKEN_LEVEL.split("+").sort();
+
+    const filteredCredentials = credentials.filter((credential) => {
+      const publicNotes = JSON.parse(credential.public_notes);
+
+      if (!publicNotes || !publicNotes.level) {
+        return false;
+      }
+
+      const credentialLevelArray = publicNotes.level.split("+").sort();
+
+      // Size must match
+      if (credentialLevelArray.length !== pickArray.length) {
+        return false;
+      }
+
+      // Arrays are sorted, so we can compare them element by element
+      // it's quicker than using every()
+      for (let i = 0; i < pickArray.length; i++) {
+        if (credentialLevelArray[i] !== pickArray[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+
+    if (filteredCredentials.length === 0) {
       throw new Error("No credentials found, start the KYC process");
     }
 
-    return credentials[0];
+    return filteredCredentials[0];
   }),
 
   requestAccessGrant: fromPromise(
