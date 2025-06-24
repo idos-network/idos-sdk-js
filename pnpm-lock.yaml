@@ -756,7 +756,7 @@ importers:
         specifier: ^5.0.2
         version: 5.0.10
 
-  examples/foxy-demo:
+  examples/pay-demo:
     dependencies:
       '@digitalbazaar/ed25519-signature-2020':
         specifier: ^5.4.0

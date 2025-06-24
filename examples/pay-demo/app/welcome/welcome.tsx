@@ -8,7 +8,7 @@ export function Welcome() {
       <div className="flex flex-col items-center gap-8 p-8">
         <header className="flex flex-col items-center gap-6">
           <h1 className="text-center font-bold text-3xl text-gray-900 dark:text-white">
-            Welcome to Foxy Demo
+            Welcome to idOS Pay Demo
           </h1>
           <p className="text-center text-gray-600 dark:text-gray-300">
             Get started by logging in to your account

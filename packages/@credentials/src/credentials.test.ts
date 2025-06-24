@@ -25,10 +25,11 @@ describe("verifiableCredentials", () => {
           approvedAt: new Date("2022-01-01"),
           expirationDate: new Date("2030-01-01"),
         },
-        // @ts-expect-error - This is a test
+        // @ts-expect-error - This is a test, so the error is expected, since data is invalid
         {
           id: `uuid:${id}`,
           applicantId: "1234567890",
+          inquiryId: "1234567890",
           firstName: "John",
           familyName: "Lennon",
           governmentIdType: "SSN",
@@ -113,6 +114,7 @@ describe("verifiableCredentials", () => {
       {
         id: `uuid:${id}`,
         applicantId: "1234567890",
+        inquiryId: "1234567890",
         firstName: "John",
         familyName: "Lennon",
         governmentIdType: "SSN",
