@@ -5,7 +5,10 @@ import type { Route } from "./+types/home";
 
 // biome-ignore lint/correctness/noEmptyPattern: <explanation>
 export function meta({}: Route.MetaArgs) {
-  return [{ title: "idOS Pay Demo" }, { name: "description", content: "Welcome to idOS Pay Demo!" }];
+  return [
+    { title: "idOS Pay Demo" },
+    { name: "description", content: "Welcome to idOS Pay Demo!" },
+  ];
 }
 
 export async function loader({ request }: Route.LoaderArgs) {

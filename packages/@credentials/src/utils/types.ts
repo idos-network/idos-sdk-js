@@ -73,6 +73,7 @@ export const CredentialSubjectSchema: z.ZodObject<
   {
     id: z.ZodString;
     applicantId: z.ZodOptional<z.ZodString>;
+    inquiryId: z.ZodOptional<z.ZodString>;
     firstName: z.ZodString;
     familyName: z.ZodString;
     maidenName: z.ZodOptional<z.ZodString>;
@@ -102,6 +103,9 @@ export const CredentialSubjectSchema: z.ZodObject<
 
   /* Applicant ID. */
   applicantId: z.string().optional(),
+
+  /* Inquiry ID. */
+  inquiryId: z.string().optional(),
 
   /* First name. */
   firstName: z.string(),
