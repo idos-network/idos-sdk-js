@@ -10,6 +10,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  useMemo,
   useState,
 } from "react";
 import { useLocation } from "react-router-dom";
@@ -19,6 +20,7 @@ import * as GemWallet from "@gemwallet/api";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
+import { createStellarSigner } from "./core/stellar-kit";
 import { useWalletStore } from "./stores/wallet";
 
 const _idOSClient = new idOSClientConfiguration({
@@ -78,9 +80,18 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const { signer: evmSigner } = useSigner();
   const { accountId, selector } = useWalletSelector();
-  const { walletType, walletAddress } = useWalletStore();
   const location = useLocation();
   const enhanceClientRef = useRef<AbortController | null>(null);
+  const { walletType, walletAddress, walletPublicKey } = useWalletStore();
+
+  const walletToSignerSrc = useMemo(
+    () => ({
+      evm: evmSigner,
+      near: accountId,
+      Stellar: walletPublicKey,
+    }),
+    [evmSigner, accountId, walletPublicKey],
+  );
 
   // Check if we're on the add wallet route
   const isAddWalletRoute = location.pathname.includes("/wallets/add");
@@ -122,10 +133,16 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
 
         const nearSigner = accountId ? await selector.wallet() : undefined;
 
+        const stellarSigner = await createStellarSigner(
+          walletPublicKey as string,
+          walletAddress as string,
+        );
+
         const signerSrc = {
           evm: evmSigner,
           near: nearSigner,
           xrpl: GemWallet,
+          Stellar: stellarSigner,
         };
 
         const selectedSigner = signerSrc[walletType as "evm" | "near" | "xrpl"];
@@ -185,7 +202,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
         enhanceClientRef.current = null;
       }
     };
-  }, [client, evmSigner, accountId, selector, walletType, walletAddress]);
+  }, [client, evmSigner, accountId, selector, walletType, walletAddress, walletPublicKey]);
 
   // Always provide the client context, even if it's null
   const contextValue = client;
