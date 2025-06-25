@@ -25,8 +25,6 @@ import { getXrpPublicKey } from "@idos-network/core";
 import invariant from "tiny-invariant";
 import { useSignMessage } from "wagmi";
 
-const ADD_WALLET_MESSAGE = "Please sign this message to add this wallet to your idOS account.";
-
 type AddWalletProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -134,14 +132,14 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
     const near_regexp = /^[a-zA-Z0-9._-]+\.near$/;
     const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
 
-    let address_type: "EVM" | "NEAR" | "XRP" | "INVALID";
+    let address_type: "EVM" | "NEAR" | "XRPL" | "INVALID";
 
     if (evm_regexp.test(address)) {
       address_type = "EVM";
     } else if (near_regexp.test(address)) {
       address_type = "NEAR";
     } else if (xrp_address_regexp.test(address)) {
-      address_type = "XRP";
+      address_type = "XRPL";
     } else {
       address_type = "INVALID";
     }
@@ -149,16 +147,16 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
     if (address_type === "INVALID") {
       toast({
         title: "Invalid wallet address",
-        description: "Please enter a valid EVM, NEAR, or XRP wallet address/public key.",
+        description: "Please enter a valid EVM, NEAR, or XRPL wallet address/public key.",
         position: "bottom-right",
         status: "error",
       });
       return;
     }
 
-    if (address_type === "XRP") {
+    if (address_type === "XRPL") {
       const result = await getXrpPublicKey(GemWallet);
-      invariant(result?.address, "Failed to get XRP address");
+      invariant(result?.address, "Failed to get XRPL address");
       // validate passed public key in case user is not connected to intended wallet
       if (result?.address !== address) {
         toast({
@@ -195,25 +193,27 @@ export const AddWallet = ({ isOpen, onClose, defaultValue, onWalletAdded }: AddW
         return;
       }
     }
-    let signature: `0x${string}` | undefined;
-    const message = ADD_WALLET_MESSAGE;
+    let signature: `0x${string}` | string = "";
+    const message = "Please sign this message to add this wallet to your idOS account.";
 
     // @todo: handle other blockchain signing mechanism
-    try {
-      const _signature = await signMessageAsync({
-        message,
-        account: address as `0x${string}`,
-      });
-      signature = _signature as `0x${string}`;
-    } catch (error) {
-      toast({
-        title: "Error while adding wallet",
-        description:
-          "Error while signing message. Please make sure you are connected to the wallet you want to add.",
-        position: "bottom-right",
-        status: "error",
-      });
-      return;
+    if (address_type === "EVM") {
+      try {
+        const _signature = await signMessageAsync({
+          message,
+          account: address as `0x${string}`,
+        });
+        signature = _signature as `0x${string}`;
+      } catch (error) {
+        toast({
+          title: "Error while adding wallet",
+          description:
+            "Error while signing message. Please make sure you are connected to the wallet you want to add.",
+          position: "bottom-right",
+          status: "error",
+        });
+        return;
+      }
     }
 
     addWallet.mutate(
