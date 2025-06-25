@@ -1,14 +1,16 @@
 import { useIdOS } from "@/idOS.provider";
 import { Button, HStack, Heading, Text, VStack, useToast } from "@chakra-ui/react";
+import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
+import { getXrpPublicKey, signGemWalletTx } from "@idos-network/core";
 import { defineStepper } from "@stepperize/react";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
-import { TokenETH } from "@web3icons/react";
+import { TokenETH, TokenXRP } from "@web3icons/react";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
-import { useAccountEffect, useDisconnect, useSignMessage } from "wagmi";
+import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 
 const message = "Please sign this message to add this wallet to your idOS account.";
 
@@ -112,52 +114,152 @@ export function Component() {
   const stepper = useStepper();
   const { open } = useWeb3Modal();
   const { disconnectAsync } = useDisconnect();
+  const { address: evmWalletAddress } = useAccount();
   const { signMessageAsync } = useSignMessage();
   const [signature, setSignature] = useState("");
+  const [publicKeys, setPublicKeys] = useState<string[]>([]);
   const [walletToAdd, setWalletToAdd] = useState("");
   const [currentStep, setCurrentStep] = useState("connect");
+  const [walletType, setWalletType] = useState<"EVM" | "XRPL">("EVM");
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const toast = useToast();
+  const idOSClient = useIdOS();
 
-  useAccountEffect({
-    onConnect: (account) => {
-      const address = account.addresses[account.addresses.length - 1];
+  useEffect(() => {
+    if (currentStep === "connect" && evmWalletAddress) {
+      setWalletToAdd(evmWalletAddress);
+      setPublicKeys([evmWalletAddress]);
+    }
+  }, [currentStep, evmWalletAddress]);
 
-      if (currentStep === "connect") {
-        setWalletToAdd(address);
-        setCurrentStep("sign");
-        stepper.next();
-      } else if (currentStep === "reconnect") {
-        setCurrentStep("add");
-        stepper.next();
+  const getAddressType = (address: string) => {
+    const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
+    const near_regexp = /^[a-zA-Z0-9._-]+\.near$/;
+    const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
+    const stellar_address_regexp = /^[A-Z0-9]{56}$/;
+
+    if (evm_regexp.test(address)) return "EVM";
+    if (near_regexp.test(address)) return "NEAR";
+    if (xrp_address_regexp.test(address)) return "XRPL";
+    if (stellar_address_regexp.test(address)) return "Stellar";
+    return "INVALID";
+  };
+
+  const getAccount = async (walletType: "EVM" | "XRPL") => {
+    if (walletType === "EVM") return await open();
+
+    if (walletType === "XRPL") {
+      const result = await getXrpPublicKey(GemWallet);
+      invariant(result, "couldn't get XRPL address");
+      invariant(idOSClient.state === "logged-in", "idOS client is not logged in");
+
+      const idosWalletAddress = idOSClient.walletIdentifier;
+      const { address: connectedAddress } = result;
+      if (connectedAddress === idosWalletAddress) {
+        toast({
+          title: "Error while reconnecting",
+          description:
+            "You are already connected to this wallet. Please switch to the wallet with idOS profile.",
+          position: "bottom-right",
+          status: "error",
+        });
+        throw new Error(
+          "You are already connected to this wallet. Please switch to the wallet with idOS profile.",
+        );
       }
-    },
-  });
+      if (result?.publicKey) {
+        setPublicKeys([result?.publicKey]);
+        setWalletToAdd(result?.address);
+        return result?.address;
+      }
+    }
+    return null;
+  };
 
-  const handleConnect = async () => {
+  const getPublicKeys = async (walletType: "EVM" | "XRPL"): Promise<string[] | undefined> => {
+    // In XRPL case public keys were already been set at getAccount (we don't wanna call it twice since it')
+    if (walletType === "XRPL") return publicKeys;
+    return;
+  };
+
+  const handleConnect = async (walletType: "EVM" | "XRPL") => {
     await disconnectAsync();
-    await open();
+    setWalletType(walletType);
+
+    await getAccount(walletType);
+
+    const publicKeys = await getPublicKeys(walletType);
+    if (publicKeys) setPublicKeys(publicKeys);
+    setCurrentStep("sign");
+    stepper.next();
+  };
+
+  const getSignature = async (walletType: "EVM" | "XRPL") => {
+    let signature = "";
+    if (walletType === "EVM") {
+      signature = await signMessageAsync({ message, account: evmWalletAddress as `0x${string}` });
+    }
+    if (walletType === "XRPL") {
+      try {
+        signature = (await signGemWalletTx(GemWallet, message)) ?? "";
+      } catch (error) {
+        console.error({ error });
+      }
+    }
+    return signature;
   };
 
   const handleSignMessage = async () => {
-    const signature = await signMessageAsync({ message, account: walletToAdd as `0x${string}` });
+    const signature = await getSignature(walletType);
     setSignature(signature);
-    setCurrentStep("reconnect");
+    if (!signature) {
+      toast({
+        title: "Error while signing message",
+        description: "An unexpected error. Please try again.",
+        position: "bottom-right",
+        status: "error",
+      });
+      return;
+    }
     stepper.next();
   };
 
   const handleReconnect = async () => {
-    await disconnectAsync();
-    await open();
+    invariant(idOSClient.state === "logged-in", "idOS client is not logged in");
+    const idosWalletType = getAddressType(idOSClient.walletIdentifier);
+
+    if (idosWalletType === "EVM") {
+      await disconnectAsync();
+      await open();
+    }
+    if (idosWalletType === "XRPL") {
+      const result = await getXrpPublicKey(GemWallet);
+      invariant(result?.address, "couldn't get XRPL address");
+      invariant(idOSClient.state === "logged-in", "idOS client is not logged in");
+      const { address: connectedAddress } = result;
+      const idosWalletAddress = idOSClient.walletIdentifier;
+      if (connectedAddress !== idosWalletAddress) {
+        toast({
+          title: "Error while reconnecting",
+          description:
+            "You are already connected to this wallet. Please switch to the wallet with idOS profile.",
+          position: "bottom-right",
+          status: "error",
+        });
+        return;
+      }
+    }
+    setCurrentStep("add");
+    stepper.next();
   };
 
   const handleAddWallet = async () => {
     addWalletMutation.mutate(
       {
         address: walletToAdd,
-        publicKeys: [walletToAdd], // For EVM wallets, pass the address as public key
+        publicKeys,
         signature,
         message,
       },
@@ -168,6 +270,7 @@ export function Component() {
         },
         async onError(_, __, ctx) {
           queryClient.setQueryData(["wallets"], ctx?.previousWallets);
+          console.error({ __, error: _ });
           toast({
             title: "Error while adding wallet",
             description: "An unexpected error. Please try again.",
@@ -211,8 +314,11 @@ export function Component() {
                 {step.title}
               </Heading>
               <Text>{step.description}</Text>
-              <Button rightIcon={<TokenETH variant="mono" />} onClick={handleConnect}>
+              <Button rightIcon={<TokenETH variant="mono" />} onClick={() => handleConnect("EVM")}>
                 Connect an EVM wallet
+              </Button>
+              <Button rightIcon={<TokenXRP variant="mono" />} onClick={() => handleConnect("XRPL")}>
+                Connect an XRPL wallet
               </Button>
             </>
           ))}
