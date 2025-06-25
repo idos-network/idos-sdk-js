@@ -43,8 +43,8 @@ export const actors = {
     return await input.logIn();
   }),
 
-  startKYC: fromPromise(async () => {
-    const kycUrl = await fetch("/app/kyc/link");
+  startKYC: fromPromise(async ({ input }: { input: Context["kycType"] }) => {
+    const kycUrl = await fetch(`/app/kyc/link?type=${input}`);
     const kycUrlData = await kycUrl.json();
     return kycUrlData.url;
   }),

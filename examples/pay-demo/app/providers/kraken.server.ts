@@ -27,7 +27,7 @@ export const fetchSharedToken = async (applicantId: string) => {
   return data.token;
 };
 
-export const generateKrakenUrl = async () => {
+export const generateKrakenUrl = async (type: string) => {
   const payload = {
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
     kyc: true,
@@ -37,7 +37,7 @@ export const generateKrakenUrl = async () => {
 
   const token = jwt.sign(payload, SERVER_ENV.KRAKEN_PRIVATE_KEY, { algorithm: "ES512" });
 
-  return `${SERVER_ENV.KRAKEN_API_URL}/kyc?token=${token}`;
+  return `${SERVER_ENV.KRAKEN_API_URL}/kyc?token=${token}&provider=${type}`;
 };
 
 export async function getKrakenToken(): Promise<string> {

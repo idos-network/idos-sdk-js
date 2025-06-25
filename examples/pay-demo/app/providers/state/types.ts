@@ -11,6 +11,7 @@ export interface Context {
   walletAddress: string | null;
   provider: Provider;
   findCredentialAttempts: number;
+  kycType: "sumsub" | "persona" | null;
   kycUrl: string | null;
   profile: boolean | null;
   sharableToken: string | null;

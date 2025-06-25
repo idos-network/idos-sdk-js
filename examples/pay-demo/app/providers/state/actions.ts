@@ -9,6 +9,7 @@ export const actions = {
   reset: assign({
     walletAddress: null,
     provider: null,
+    kycType: null,
     kycUrl: null,
     client: null,
     profile: null,
@@ -90,5 +91,9 @@ export const actions = {
 
   setOnRampAccount: assign({
     onRampAccount: ({ event }) => event.output,
+  }),
+
+  setKycType: assign({
+    kycType: ({ event }) => event.kycType,
   }),
 };

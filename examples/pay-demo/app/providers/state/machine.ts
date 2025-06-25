@@ -75,10 +75,18 @@ export const machine = setup({
           }),
         },
         onError: {
-          target: "startKYC",
+          target: "chooseKYCType",
           actions: assign({
             profile: false,
           }),
+        },
+      },
+    },
+    chooseKYCType: {
+      on: {
+        startKYC: {
+          target: "startKYC",
+          actions: ["setKycType"]
         },
       },
     },
@@ -86,6 +94,7 @@ export const machine = setup({
       invoke: {
         id: "startKYC",
         src: "startKYC",
+        input: ({ context }) => context.kycType,
         onDone: {
           target: "waitForKYC",
           actions: "setKycUrl",
