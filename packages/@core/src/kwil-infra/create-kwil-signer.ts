@@ -11,9 +11,10 @@ import type { Store } from "../store";
 import type { Wallet } from "../types";
 import {
   createNearWalletKwilSigner,
+  implicitAddressFromPublicKey,
   looksLikeNearWallet,
 } from "./near/create-near-wallet-kwil-signer";
-import { implicitAddressFromPublicKey, kwilNep413Signer } from "./nep413";
+import { kwilNep413Signer } from "./nep413";
 import { createXrpKwilSigner } from "./xrp/create-xrp-signer";
 import { getXrpPublicKey, looksLikeXrpWallet } from "./xrp/utils";
 /**

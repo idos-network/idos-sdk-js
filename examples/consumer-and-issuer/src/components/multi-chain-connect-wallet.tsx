@@ -12,6 +12,7 @@ import { useAccount } from "wagmi";
 import { useNearWallet } from "@/near.provider";
 import stellarKit from "@/stellar.config";
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+import { getNearFullAccessPublicKeys } from "@idos-network/core";
 import { StrKey } from "@stellar/stellar-base";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
@@ -73,11 +74,13 @@ export default function MultiChainConnectWallet({
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    const subscription = near.selector.store.observable.subscribe((state) => {
+    const subscription = near.selector.store.observable.subscribe(async (state) => {
       if (state.accounts[0]) {
+        const publicKeys = await getNearFullAccessPublicKeys(state.accounts[0].accountId ?? null);
+        console.log({ publicKeys });
         const [account] = state.accounts;
-        setWalletAddress(account.publicKey ?? null);
-        setWalletPublicKey(account.publicKey ?? null);
+        setWalletAddress(account.accountId ?? null);
+        setWalletPublicKey(publicKeys?.[0] ?? null);
         setWalletType("near");
       }
     });
