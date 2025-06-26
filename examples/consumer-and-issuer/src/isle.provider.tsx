@@ -224,7 +224,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               meta: {
                 url: acmeCardProviderUrl,
                 name: "ACME Card Provider",
-                logo: `${acmeCardProviderUrl}/static/logo.svg`,
+                logo: `${window.location.origin}/static/acme.svg`,
               },
               consumerEncryptionPublicKey:
                 process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",
