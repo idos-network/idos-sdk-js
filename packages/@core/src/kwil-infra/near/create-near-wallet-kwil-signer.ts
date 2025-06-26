@@ -4,17 +4,20 @@ import type {
   SignMessageParams,
   SignedMessage,
 } from "@near-wallet-selector/core";
+import type { connect as connectT } from "near-api-js";
+import type { AccessKeyList } from "near-api-js/lib/providers/provider";
 import {
   base64Decode,
   binaryWriteUint16BE,
   borshSerialize,
+  bs58Decode,
   bytesConcat,
   hexEncode,
   utf8Decode,
 } from "../../codecs";
 import type { Store } from "../../store";
 import type { KwilActionClient } from "../create-kwil-client";
-import { implicitAddressFromPublicKey } from "../nep413";
+import { getNearConnectionConfig } from "./get-config";
 
 const NEAR_WALLET_TYPES: string[] = [
   "browser",
@@ -108,6 +111,38 @@ function createNearWalletSigner(
       base64Decode(signature),
     );
   };
+}
+
+export function implicitAddressFromPublicKey(publicKey: string): string {
+  const key_without_prefix = publicKey.replace(/^ed25519:/, "");
+  return hexEncode(bs58Decode(key_without_prefix));
+}
+
+export async function getNearFullAccessPublicKeys(
+  namedAddress: string,
+): Promise<string[] | undefined> {
+  let connect: typeof connectT;
+  try {
+    connect = (await import("near-api-js")).connect;
+  } catch (e) {
+    throw new Error("Can't load near-api-js");
+  }
+  const connectionConfig = getNearConnectionConfig(namedAddress);
+  const nearConnection = await connect(connectionConfig);
+
+  try {
+    const response: AccessKeyList = await nearConnection.connection.provider.query({
+      request_type: "view_access_key_list",
+      finality: "final",
+      account_id: namedAddress,
+    });
+    return response.keys
+      .filter((element) => element.access_key.permission === "FullAccess")
+      ?.map((i) => i.public_key);
+  } catch {
+    // `Near` failed if namedAddress contains uppercase symbols
+    return;
+  }
 }
 
 export async function signNearMessage(

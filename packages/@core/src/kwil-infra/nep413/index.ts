@@ -2,17 +2,10 @@ import type { KeyPair } from "near-api-js";
 import {
   binaryWriteUint16BE,
   borshSerialize,
-  bs58Decode,
   bytesConcat,
-  hexEncode,
   sha256Hash,
   utf8Decode,
 } from "../../codecs";
-
-export function implicitAddressFromPublicKey(publicKey: string): string {
-  const key_without_prefix = publicKey.replace(/^ed25519:/, "");
-  return hexEncode(bs58Decode(key_without_prefix));
-}
 
 export function kwilNep413Signer(
   recipient: string,
