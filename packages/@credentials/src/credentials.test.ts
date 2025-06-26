@@ -90,7 +90,9 @@ describe("verifiableCredentials", () => {
       // gender
       const genderError = zodError.errors.find((error) => error.path[0] === "gender");
       expect(genderError).toBeDefined();
-      expect(genderError?.message).toContain("Invalid enum value. Expected 'M' | 'F', received 'MALE'");
+      expect(genderError?.message).toContain(
+        "Invalid enum value. Expected 'M' | 'F', received 'MALE'",
+      );
     }
   });
 

@@ -13,14 +13,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
 
   try {
-    const data = await getSharedCredential(credentialId, user.address);
-
-    if (!data.credentialSubject.applicantId) {
-      throw new Error("Credentials are from previous version and can't be used.");
-    }
-
     // Call kraken to get the token
-    const token = await fetchSharedToken(data.credentialSubject.applicantId);
+    const token = await fetchSharedToken(credentialId);
 
     return Response.json({ token });
   } catch (error) {

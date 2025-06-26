@@ -24,6 +24,8 @@ export const machine = setup({
     walletAddress: null,
     provider: null,
     kycUrl: null,
+    krakenDAG: null,
+    kycType: null,
     client: null,
     profile: null,
     loggedInClient: null,
@@ -86,7 +88,7 @@ export const machine = setup({
       on: {
         startKYC: {
           target: "startKYC",
-          actions: ["setKycType"]
+          actions: ["setKycType"],
         },
       },
     },
@@ -147,7 +149,7 @@ export const machine = setup({
           },
           {
             guard: ({ context }) => context.kycUrl === null,
-            target: "startKYC",
+            target: "chooseKYCType",
           },
         ],
       },
@@ -293,18 +295,49 @@ export const machine = setup({
       },
     },
     createSharableToken: {
-      invoke: {
-        id: "createSharableToken",
-        src: "createSharableToken",
-        input: ({ context }) => context.sharedCredential,
-        onDone: {
-          target: "dataOrTokenFetched",
-          actions: ["setSharableToken"],
+      initial: "requestKrakenDAG",
+      states: {
+        requestKrakenDAG: {
+          invoke: {
+            id: "requestKrakenDAG",
+            src: "requestKrakenDAG",
+            input: ({ context }) => ({
+              client: context.loggedInClient,
+              credential: context.credential,
+            }),
+            onDone: {
+              target: "createToken",
+              actions: ["setKrakenDAG"],
+            },
+            onError: {
+              target: "error",
+            },
+          },
         },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
+        createToken: {
+          invoke: {
+            id: "createSharableToken",
+            src: "createSharableToken",
+            input: ({ context }) => context.krakenDAG,
+            onDone: {
+              target: "dataOrTokenFetched",
+              actions: ["setSharableToken"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
         },
+        error: {
+          type: "final",
+        },
+        dataOrTokenFetched: {
+          type: "final",
+        },
+      },
+      onDone: {
+        target: "dataOrTokenFetched",
       },
     },
     fetchUserData: {

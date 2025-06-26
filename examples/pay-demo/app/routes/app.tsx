@@ -186,6 +186,8 @@ export default function App() {
     verifyHifiTos: "Verifying and creating a KYC for you...",
     login: "Logging in...",
     error: "Error",
+    requestKrakenDAG: "Requesting access grant for KYC provider...",
+    createToken: "Create a sharable token for provider...",
   };
 
   if (messages[state as keyof typeof messages]) {
@@ -195,6 +197,17 @@ export default function App() {
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
     );
+  }
+
+  // @ts-expect-error Missing substates?
+  if (state.createSharableToken) {
+    body = (
+      <div className="mb-4 w-full text-center">
+        {/* @ts-expect-error Missing substates? */}
+        <p>{messages[state.createSharableToken as keyof typeof messages]}</p>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      </div>
+    )
   }
 
   if (state === "dataOrTokenFetched" && noahUrl && provider === "noah") {

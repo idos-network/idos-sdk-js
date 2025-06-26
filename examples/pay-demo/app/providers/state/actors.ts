@@ -49,7 +49,34 @@ export const actors = {
     return kycUrlData.url;
   }),
 
-  createSharableToken: fromPromise(async ({ input }: { input: Context["credential"] }) => {
+  requestKrakenDAG: fromPromise(
+    async ({
+      input,
+    }: {
+      input: { client: Context["loggedInClient"]; credential: Context["credential"] };
+    }) => {
+      if (!input.client) {
+        throw new Error("Client not found");
+      }
+
+      if (!input.credential) {
+        throw new Error("No credential found");
+      }
+
+      const id = input.credential.id;
+
+      // No need to reset the enclave provider, since we are not using the enclave provider
+
+      const krakenSharedCredential = await input.client.requestAccessGrant(id, {
+        consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
+        consumerAuthPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
+      });
+
+      return krakenSharedCredential;
+    },
+  ),
+
+  createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");
     }

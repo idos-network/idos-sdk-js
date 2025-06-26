@@ -17,6 +17,7 @@ export const actions = {
     sharableToken: null,
     credential: null,
     sharedCredential: null,
+    krakenDAG: null,
     findCredentialAttempts: 0,
     data: null,
     errorMessage: null,
@@ -95,5 +96,9 @@ export const actions = {
 
   setKycType: assign({
     kycType: ({ event }) => event.kycType,
+  }),
+
+  setKrakenDAG: assign({
+    krakenDAG: ({ event }) => event.output ?? null,
   }),
 };

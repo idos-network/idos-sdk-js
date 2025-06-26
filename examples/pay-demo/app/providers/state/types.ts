@@ -17,6 +17,7 @@ export interface Context {
   sharableToken: string | null;
   credential: idOSCredential | null;
   sharedCredential: idOSCredential | null;
+  krakenDAG: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
