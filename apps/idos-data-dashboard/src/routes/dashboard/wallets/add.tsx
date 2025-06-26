@@ -1,11 +1,14 @@
+import stellarKit from "@/core/stellar-kit";
 import { useIdOS } from "@/idOS.provider";
 import { Button, HStack, Heading, Text, VStack, useToast } from "@chakra-ui/react";
+import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey, signGemWalletTx } from "@idos-network/core";
+import { StrKey } from "@stellar/stellar-base";
 import { defineStepper } from "@stepperize/react";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
-import { TokenETH, TokenXRP } from "@web3icons/react";
+import { TokenETH, TokenXLM, TokenXRP } from "@web3icons/react";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +16,44 @@ import invariant from "tiny-invariant";
 import { useAccount, useDisconnect, useSignMessage } from "wagmi";
 
 const message = "Please sign this message to add this wallet to your idOS account.";
+
+const derivePublicKey = async (address: string) => {
+  invariant(address, "Address is required");
+  return Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+};
+
+const connectStellarWallet = async (): Promise<{ address: string; publicKey: string }> => {
+  // biome-ignore lint/suspicious/noAsyncPromiseExecutor: <explanation>
+  return new Promise(async (resolve) => {
+    await stellarKit.openModal({
+      onWalletSelected: async (option: ISupportedWallet) => {
+        stellarKit.setWallet(option.id);
+        const { address } = await stellarKit.getAddress();
+        const publicKey = await derivePublicKey(address);
+        resolve({ address, publicKey });
+      },
+    });
+  });
+};
+
+const signStellarMessage = async (message: string) => {
+  // Encode the message as base64 (stellarKit expects this)
+  const messageBase64 = Buffer.from(message).toString("base64");
+
+  const result = await stellarKit.signMessage(messageBase64);
+
+  // Double-decode the signature
+  let signedMessage = Buffer.from(result.signedMessage, "base64");
+
+  if (signedMessage.length > 64) {
+    signedMessage = Buffer.from(signedMessage.toString(), "base64");
+  }
+
+  // Convert to hex string for the database
+  const signatureHex = signedMessage.toString("hex");
+
+  return signatureHex;
+};
 
 const { useStepper } = defineStepper(
   {
@@ -120,7 +161,7 @@ export function Component() {
   const [publicKeys, setPublicKeys] = useState<string[]>([]);
   const [walletToAdd, setWalletToAdd] = useState("");
   const [currentStep, setCurrentStep] = useState("connect");
-  const [walletType, setWalletType] = useState<"EVM" | "XRPL">("EVM");
+  const [walletType, setWalletType] = useState<"EVM" | "XRPL" | "Stellar">("EVM");
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -147,7 +188,7 @@ export function Component() {
     return "INVALID";
   };
 
-  const getAccount = async (walletType: "EVM" | "XRPL") => {
+  const getAccount = async (walletType: "EVM" | "XRPL" | "Stellar") => {
     if (walletType === "EVM") return await open();
 
     if (walletType === "XRPL") {
@@ -175,16 +216,24 @@ export function Component() {
         return result?.address;
       }
     }
+    if (walletType === "Stellar") {
+      const { address, publicKey } = await connectStellarWallet();
+      setPublicKeys([publicKey]);
+      setWalletToAdd(address);
+      return address;
+    }
     return null;
   };
 
-  const getPublicKeys = async (walletType: "EVM" | "XRPL"): Promise<string[] | undefined> => {
+  const getPublicKeys = async (
+    walletType: "EVM" | "XRPL" | "Stellar",
+  ): Promise<string[] | undefined> => {
     // In XRPL case public keys were already been set at getAccount (we don't wanna call it twice since it')
     if (walletType === "XRPL") return publicKeys;
     return;
   };
 
-  const handleConnect = async (walletType: "EVM" | "XRPL") => {
+  const handleConnect = async (walletType: "EVM" | "XRPL" | "Stellar") => {
     await disconnectAsync();
     setWalletType(walletType);
 
@@ -196,7 +245,7 @@ export function Component() {
     stepper.next();
   };
 
-  const getSignature = async (walletType: "EVM" | "XRPL") => {
+  const getSignature = async (walletType: "EVM" | "XRPL" | "Stellar") => {
     let signature = "";
     if (walletType === "EVM") {
       signature = await signMessageAsync({ message, account: evmWalletAddress as `0x${string}` });
@@ -207,6 +256,9 @@ export function Component() {
       } catch (error) {
         console.error({ error });
       }
+    }
+    if (walletType === "Stellar") {
+      signature = await signStellarMessage(message);
     }
     return signature;
   };
@@ -319,6 +371,12 @@ export function Component() {
               </Button>
               <Button rightIcon={<TokenXRP variant="mono" />} onClick={() => handleConnect("XRPL")}>
                 Connect an XRPL wallet
+              </Button>
+              <Button
+                rightIcon={<TokenXLM variant="mono" />}
+                onClick={() => handleConnect("Stellar")}
+              >
+                Connect a Stellar wallet
               </Button>
             </>
           ))}
