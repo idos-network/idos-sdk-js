@@ -386,6 +386,8 @@ function useShareCredentialWithConsumer() {
         consumerSigningPublicKey,
         0,
       );
+      // Freighter flags immediate signatures calls as rejected so this is a safeguard
+      await new Promise((resolve) => setTimeout(resolve, 300));
       invariant(walletType, "`walletType` is not set");
       const dag_owner_wallet_identifier = ["Stellar", "near"].includes(walletType)
         ? publicKey
@@ -419,6 +421,9 @@ function useShareCredentialWithConsumer() {
     onSuccess: (data) => {
       isleController?.updateIsleStatus("verified");
       queryClient.setQueryData(["shared-credential"], data);
+    },
+    onError: (error) => {
+      console.error({ error });
     },
   });
 }
