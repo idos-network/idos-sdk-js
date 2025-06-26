@@ -12,6 +12,7 @@ import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import stellarKit from "./core/stellar-kit";
+import { useSetIdOS, useUnsafeIdOS } from "./idOS.provider";
 import { useWalletStore } from "./stores/wallet";
 
 const derivePublicKey = async (address: string) => {
@@ -21,10 +22,12 @@ const derivePublicKey = async (address: string) => {
 
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
+  const client = useUnsafeIdOS();
   const { modal } = useWalletSelector();
   const { address, isConnected: evmConnected } = useAccount();
   const { setWalletType, setWalletAddress, setWalletPublicKey } = useWalletStore();
   const { accountId } = useWalletSelector();
+  const setClient = useSetIdOS();
 
   const connectStellarWallet = async () => {
     await stellarKit.openModal({
@@ -54,6 +57,15 @@ export const ConnectWallet = () => {
       setWalletPublicKey(accountId ?? null);
     }
   }, [accountId, setWalletType, setWalletAddress, setWalletPublicKey]);
+
+  useEffect(() => {
+    if (client && client.state === "logged-in") {
+      client.logOut().then((newClient) => {
+        console.log("logged out", client.state);
+        setClient(newClient);
+      });
+    }
+  }, [client, client?.state, setClient]);
 
   return (
     <Box

@@ -10,10 +10,9 @@ import {
   useCallback,
   useEffect,
   useRef,
-  useMemo,
   useState,
 } from "react";
-import { useLocation } from "react-router-dom";
+import invariant from "tiny-invariant";
 
 import { useEthersSigner } from "@/core/wagmi";
 import * as GemWallet from "@gemwallet/api";
@@ -59,20 +58,32 @@ export const useSigner = () => {
   return { signer, setSigner };
 };
 
-export const IDOSClientContext = createContext<idOSClient | null>(null);
+export const IDOSClientContext = createContext<{
+  client: idOSClient | null;
+  setClient: (client: idOSClient | null) => void;
+} | null>(null);
 
 export const useIdOS = () => {
   const context = use(IDOSClientContext);
+  invariant(context?.client?.state === "logged-in", "`idOSClient` not initialized");
   if (!context) {
     throw new Error(
       "idOSClient context not found. Make sure you're using this hook within IDOSClientProvider.",
     );
   }
-  return context;
+  return context.client;
 };
 
 export const useUnsafeIdOS = () => {
-  return use(IDOSClientContext);
+  const context = use(IDOSClientContext);
+  invariant(context, "`idOSClient` not initialized");
+  return context.client;
+};
+
+export const useSetIdOS = () => {
+  const context = use(IDOSClientContext);
+  invariant(context, "`idOSClient` not initialized");
+  return context.setClient;
 };
 
 export function IDOSClientProvider({ children }: PropsWithChildren) {
@@ -80,21 +91,8 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const { signer: evmSigner } = useSigner();
   const { accountId, selector } = useWalletSelector();
-  const location = useLocation();
   const enhanceClientRef = useRef<AbortController | null>(null);
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
-
-  const walletToSignerSrc = useMemo(
-    () => ({
-      evm: evmSigner,
-      near: accountId,
-      Stellar: walletPublicKey,
-    }),
-    [evmSigner, accountId, walletPublicKey],
-  );
-
-  // Check if we're on the add wallet route
-  const isAddWalletRoute = location.pathname.includes("/wallets/add");
 
   // Initialize basic client immediately
   useEffect(() => {
@@ -158,7 +156,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
         }
 
         // Check if the client has the withUserSigner method
-        if ("withUserSigner" in client && typeof client.withUserSigner === "function") {
+        if (client && client.state === "idle") {
           const withSigner = await client.withUserSigner(selectedSigner);
 
           // Check if operation was cancelled
@@ -205,7 +203,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }, [client, evmSigner, accountId, selector, walletType, walletAddress, walletPublicKey]);
 
   // Always provide the client context, even if it's null
-  const contextValue = client;
+  const contextValue = { client, setClient };
 
   // While loading, show a spinner
   if (isLoading) {
@@ -219,7 +217,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If no wallet is connected, show connect wallet screen
-  if (!walletType || !walletAddress) {
+  if (!walletType || !walletAddress || client?.state === "configuration") {
     return (
       <IDOSClientContext.Provider value={contextValue}>
         <ConnectWallet />
@@ -228,24 +226,16 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If client is not logged in, handle based on route
-  if (client && client.state !== "logged-in") {
-    if (isAddWalletRoute) {
-      // Allow add wallet route to proceed
-      return (
-        <IDOSClientContext.Provider value={contextValue}>{children}</IDOSClientContext.Provider>
-      );
-    }
-
+  if (client) {
     // For other routes, show no account found
-    return (
-      <IDOSClientContext.Provider value={contextValue}>
-        <Layout hasAccount={false}>
-          <Text>No account found</Text>
-        </Layout>
-      </IDOSClientContext.Provider>
-    );
+    if (client.state !== "logged-in")
+      return (
+        <IDOSClientContext.Provider value={contextValue}>
+          <Layout hasAccount={false}>
+            <Text>No account found</Text>
+          </Layout>
+        </IDOSClientContext.Provider>
+      );
+    return <IDOSClientContext.Provider value={contextValue}>{children}</IDOSClientContext.Provider>;
   }
-
-  // Normal case - render children
-  return <IDOSClientContext.Provider value={contextValue}>{children}</IDOSClientContext.Provider>;
 }
