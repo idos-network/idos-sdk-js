@@ -113,7 +113,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
 
   // Enhance client with signer when available
   useEffect(() => {
-    if (!client || !walletType || !walletAddress) {
+    if (!client || !walletType || !walletAddress || client.state === "logged-in") {
       return;
     }
 
