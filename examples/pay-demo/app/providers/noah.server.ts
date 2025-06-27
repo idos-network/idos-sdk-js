@@ -168,8 +168,12 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     body: JSON.stringify(subject),
   });
 
+
   if (!response.ok) {
-    throw new Error("Failed to create Noah customer");
+    const text = await response.text();
+    console.error("Noah error:", text);
+    console.error(JSON.stringify(subject, null, 2));
+    throw new Error(`Failed to create Noah customer: ${text}`);
   }
 
   const data = (await response.json()) as NoahResponse;

@@ -261,7 +261,8 @@ export const actors = {
     const customer = await fetch(`/app/kyc/noah/link?credentialId=${input.id}`);
 
     if (customer.status !== 200) {
-      throw new Error("Noah API is not available. Please try again later.");
+      const text = await customer.text();
+      throw new Error(`Noah API is not available. Please try again later. (Reason: ${text})`);
     }
 
     const data = await customer.json();
