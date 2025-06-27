@@ -11,6 +11,7 @@ export default defineConfig({
     "base85",
     "jsonld-document-loader",
     "web-streams-polyfill",
+    "ripple-keypairs",
   ],
   outputOptions: {
     inlineDynamicImports: true,
