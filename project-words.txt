@@ -17,14 +17,13 @@ Personhood
 Reown
 Upserts
 XUMM
-XUMM
-Xaman
 Xaman
 addgroup
 adduser
 appkit
 banxa
 barebones
+betanet
 biomejs
 chakra
 chatset
@@ -75,8 +74,10 @@ preact
 safekeep
 sandboxed
 secp
+shardnet
 siwe
 stablelib
+stepperize
 substates
 sumsub
 synpress
