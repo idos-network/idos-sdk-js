@@ -11,7 +11,4 @@ export default defineConfig({
     "jsonld-document-loader",
     "web-streams-polyfill",
   ],
-  outputOptions: {
-    inlineDynamicImports: true,
-  },
 });
