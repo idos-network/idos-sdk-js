@@ -3,6 +3,7 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
   entry: ["./src/index.ts"],
   dts: true,
+  format: "esm",
   external: [
     "@digitalbazaar/ed25519-signature-2020",
     "@digitalbazaar/ed25519-verification-key-2020",
