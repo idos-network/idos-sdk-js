@@ -1,0 +1,31 @@
+{
+  "name": "embedded-wallet",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.0.2",
+    "@reown/appkit": "^1.7.11",
+    "@reown/appkit-adapter-wagmi": "^1.7.11",
+    "@stepperize/react": "^5.1.6",
+    "@tanstack/react-query": "^5.81.2",
+    "@web3icons/react": "^4.0.14",
+    "preact": "^10.26.9",
+    "viem": "^2.31.4",
+    "wagmi": "^2.15.6"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.1",
+    "@tailwindcss/vite": "^4.1.11",
+    "tailwindcss": "^4.1.11",
+    "typescript": "catalog:build",
+    "vite": "^7.0.0",
+    "vite-plugin-mkcert": "^1.17.8",
+    "vite-plugin-node-polyfills": "^0.23.0"
+  }
+}

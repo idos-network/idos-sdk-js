@@ -60,6 +60,13 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
                           },
                         },
                         {
+                          path: "/wallets/add",
+                          lazy: () => import("@/routes/dashboard/wallets/add-wallet"),
+                          handle: {
+                            crumb: () => "Wallets",
+                          },
+                        },
+                        {
                           path: "/settings",
                           lazy: () => import("@/routes/dashboard/settings"),
                           handle: {

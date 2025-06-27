@@ -1,0 +1,11 @@
+{
+  "virtual:react-router/server-build": {
+    "file": "index.js",
+    "name": "server-build",
+    "src": "virtual:react-router/server-build",
+    "isEntry": true,
+    "css": [
+      "assets/server-build-CVJeRemq.css"
+    ]
+  }
+}

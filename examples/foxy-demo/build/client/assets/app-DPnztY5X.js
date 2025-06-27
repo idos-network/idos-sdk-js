@@ -1,0 +1,1 @@
+import{w as t,j as e,O as o,v as a}from"./chunk-NL6KNZEE-DxjRT9aK.js";const u=()=>{const s=a("layouts/app");if(!s)throw new Error("useUser must be used inside a route which is a child of app/layout");return s.user},n=t(function(){return e.jsx(o,{})});export{n as a,u};

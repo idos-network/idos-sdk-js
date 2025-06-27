@@ -1,0 +1,1 @@
+import{w as o,r as t,j as e}from"./chunk-NL6KNZEE-DxjRT9aK.js";const a=o(function(){return t.useEffect(()=>{window.parent?.postMessage({type:"noah-done"},"*")},[]),e.jsx("div",{children:"Loading..."})});export{a as default};
