@@ -7,6 +7,7 @@ import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
 import { z } from "zod";
+import * as xrpKeypair from "ripple-keypairs";
 
 const app = new Hono();
 
@@ -165,9 +166,6 @@ app.post(
       // Convert base64 to hex strings for ripple-keypairs
       const messageHex = hexEncode(base64Decode(message));
       const signatureHex = hexEncode(base64Decode(signature));
-
-      // Dynamic import to avoid CommonJS/ES module conflict
-      const xrpKeypair = await import("ripple-keypairs");
       isValid = xrpKeypair.verify(messageHex, signatureHex, signerPublicKey);
     } else {
       // Use nacl for other signature types
