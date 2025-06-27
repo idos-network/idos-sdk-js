@@ -1,5 +1,4 @@
 import { userContext } from "~/middlewares/auth";
-import { getSharedCredential } from "~/providers/idos.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
 import type { Route } from "./+types/token";
 
