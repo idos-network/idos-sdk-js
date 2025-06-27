@@ -165,10 +165,11 @@ app.post(
       // Convert base64 to hex strings for ripple-keypairs
       const messageHex = hexEncode(base64Decode(message));
       const signatureHex = hexEncode(base64Decode(signature));
-
+      // we're gonna bring it back once we know how to solve ripple-keypairs commonJs compatibility issue
+      throw new Error("Not implemented");
       // Dynamic import to avoid CommonJS/ES module conflict
-      const xrpKeypair = await import("ripple-keypairs");
-      isValid = xrpKeypair.verify(messageHex, signatureHex, signerPublicKey);
+      // const xrpKeypair = await import("ripple-keypairs");
+      // isValid = xrpKeypair.verify(messageHex, signatureHex, signerPublicKey);
     } else {
       // Use nacl for other signature types
       isValid = nacl.sign.detached.verify(
