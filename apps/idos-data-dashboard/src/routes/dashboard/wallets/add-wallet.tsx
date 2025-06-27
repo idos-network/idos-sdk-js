@@ -1,7 +1,7 @@
 import { useIdOS } from "@/idOS.provider";
-import { Button, HStack, Heading, Spinner, Text, VStack, chakra, useToast } from "@chakra-ui/react";
+import { HStack, Heading, Spinner, Text, VStack, chakra, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { type DefaultError, useMutation } from "@tanstack/react-query";
+import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import invariant from "tiny-invariant";
@@ -30,7 +30,6 @@ const createWallet = async (
   idOSClient: idOSClientLoggedIn,
   params: { address: string; public_key?: string; signature: string; message: string },
 ): Promise<idOSWallet> => {
-  console.log("params", params);
   const walletParams = createWalletParamsFactory(params);
   await idOSClient.addWallet(walletParams);
 
@@ -70,6 +69,7 @@ export function Component() {
   const addWalletMutation = useAddWalletMutation();
   const navigate = useNavigate();
   const toast = useToast();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -96,6 +96,33 @@ export function Component() {
       abortController.abort();
     };
   }, []);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Fine to exclude `addWalletMutation` from the dependency array
+  useEffect(() => {
+    if (!walletSignature) return;
+
+    addWalletMutation.mutate(
+      {
+        address: walletSignature.address || "unknown",
+        publicKeys: [walletSignature.address || "unknown"],
+        signature: walletSignature.signature,
+        message: walletSignature.message || "Sign this message to prove you own this wallet",
+      },
+      {
+        onSuccess: async () => {
+          toast({
+            title: "Wallet added",
+            description: "The wallet has been added to your idOS profile",
+          });
+          await queryClient.invalidateQueries({ queryKey: ["wallets"] });
+          navigate("/wallets");
+        },
+        onError: (error) => {
+          console.error(error);
+        },
+      },
+    );
+  }, [walletSignature]);
 
   const handleIframeLoad = () => {
     setIsIframeLoading(false);
@@ -156,70 +183,19 @@ export function Component() {
             <Text color="neutral.400">Loading wallet connection...</Text>
           </VStack>
         ) : null}
-
-        {walletSignature ? (
-          <VStack
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            bg="neutral.900"
-            zIndex={1}
-            justify="center"
-            align="center"
-            gap={4}
-          >
-            <Heading fontSize="xl">Add wallet to idOS profile</Heading>
-            <Text>Click the button below to add the wallet to your idOS profile</Text>
-            <Button
-              onClick={() => {
-                if (!walletSignature?.signature) {
-                  console.error("No signature available");
-                  return;
-                }
-
-                addWalletMutation.mutate(
-                  {
-                    address: walletSignature.address || "unknown",
-                    publicKeys: [walletSignature.address || "unknown"],
-                    signature: walletSignature.signature,
-                    message:
-                      walletSignature.message || "Sign this message to prove you own this wallet",
-                  },
-                  {
-                    onSuccess: () => {
-                      toast({
-                        title: "Wallet added",
-                        description: "The wallet has been added to your idOS profile",
-                      });
-                      navigate("/wallets");
-                    },
-                    onError: (error) => {
-                      console.error(error);
-                    },
-                  },
-                );
-              }}
-            >
-              Add wallet to idOS
-            </Button>
-          </VStack>
-        ) : (
-          <chakra.iframe
-            src="https://localhost:5173"
-            title="Add wallet"
-            bg="neutral.900"
-            w="100%"
-            h="100%"
-            onLoad={handleIframeLoad}
-            onError={handleIframeError}
-            style={{
-              opacity: isIframeLoading ? 0 : 1,
-              transition: "opacity 0.3s ease-in-out",
-            }}
-          />
-        )}
+        <chakra.iframe
+          src="https://localhost:5173"
+          title="Add wallet"
+          bg="neutral.900"
+          w="100%"
+          h="100%"
+          onLoad={handleIframeLoad}
+          onError={handleIframeError}
+          style={{
+            opacity: isIframeLoading ? 0 : 1,
+            transition: "opacity 0.3s ease-in-out",
+          }}
+        />
       </VStack>
     </VStack>
   );
