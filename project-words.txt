@@ -7,6 +7,7 @@ Datil
 Holyheld
 IDOS
 IDOSDAG
+LCVJ
 Neobank
 Nominatim
 OSDAG
@@ -16,6 +17,8 @@ Personhood
 Reown
 Upserts
 XUMM
+XUMM
+Xaman
 Xaman
 addgroup
 adduser
@@ -28,12 +31,14 @@ chatset
 ciphertext
 comlink
 cooldown
+creit
 cryptosuite
 devnet
 digitalbazaar
 dompurify
 dotenvx
 encryptor
+gemwallet
 gemwallet
 headlessui
 heroicons
@@ -49,6 +54,7 @@ insertable
 jsigs
 jsonld
 keypair
+keypairs
 kwil
 kwild
 kwilteam
@@ -60,6 +66,7 @@ nacl
 nanostores
 nonced
 partialize
+partialize
 passporting
 permissioned
 pkoch
@@ -70,6 +77,7 @@ sandboxed
 secp
 siwe
 stablelib
+substates
 sumsub
 synpress
 synthetixio
@@ -93,10 +101,3 @@ wagmi
 webauthn
 websdk
 xrpl
-XUMM
-Xaman
-gemwallet
-partialize
-creit
-keypairs
-LCVJ
