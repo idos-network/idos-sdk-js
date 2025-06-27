@@ -207,7 +207,7 @@ export default function App() {
         <p>{messages[state.createSharableToken as keyof typeof messages]}</p>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
-    )
+    );
   }
 
   if (state === "dataOrTokenFetched" && noahUrl && provider === "noah") {
