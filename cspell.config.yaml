@@ -16,5 +16,6 @@ ignorePaths:
   - "**/assets/**"
   - "*.svg"
   - "apps/idos-sdk-e2e/playwright-report/**"
+  - "examples/foxy-demo/build/**"
   - "pnpm-lock.yaml"
   - "package.json"

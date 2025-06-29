@@ -1,0 +1,1 @@
+import{w as s,u as t,r,j as a}from"./chunk-NL6KNZEE-DxjRT9aK.js";const i=s(function(){const[e]=t();return r.useEffect(()=>{window.parent?.postMessage({type:"hifi-tos-done",signedAgreementId:e.get("signedAgreementId")},"*")},[]),a.jsx("div",{children:"Processing TOS..."})});export{i as default};
