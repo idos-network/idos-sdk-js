@@ -48,7 +48,7 @@ const { useStepper } = defineStepper(
 
 const queryClient = new QueryClient();
 
-export function EthereumConnector() {
+export function EVMConnector() {
   return (
     <QueryClientProvider client={queryClient}>
       <WagmiProvider config={wagmiAdapter.wagmiConfig}>
@@ -96,7 +96,7 @@ function Ethereum() {
           <h1 class="text-center font-bold text-2xl">{step.title}</h1>
           <p class="text-center text-neutral-400 text-sm">{step.description}</p>
           <Button onClick={() => open()}>
-            Connect with Ethereum
+            Connect with EVM
             <TokenETH variant="mono" size={24} />
           </Button>
         </div>
