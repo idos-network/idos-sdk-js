@@ -6,7 +6,7 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import { effect, useSignal } from "@preact/signals";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { connectedWalletType, message, signature } from "../state";
+import { connectedWalletType, message, signature, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
 //@todo: get a new project id from reown cloud
@@ -69,7 +69,13 @@ export function NearConnector() {
     });
 
     if (signedMessage) {
-      signature.value = signedMessage.signature;
+      walletPayload.value = {
+        address: signedMessage.accountId,
+        signature: signedMessage.signature,
+        // @todo: we might need to derive all the public keys from the wallet as done on the data dashboard.
+        public_key: [signedMessage.publicKey],
+        message,
+      };
     }
   };
 

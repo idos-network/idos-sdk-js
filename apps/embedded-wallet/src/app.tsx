@@ -2,7 +2,7 @@ import { effect } from "@preact/signals";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
-import { connectedWalletType, signature } from "./state";
+import { connectedWalletType, walletPayload } from "./state";
 
 function WalletConnector() {
   if (!connectedWalletType.value) {
@@ -29,7 +29,7 @@ export function App() {
   const { address } = useAppKitAccount();
 
   effect(() => {
-    if (signature.value && address) {
+    if (walletPayload.value && address) {
       // @todo: post message back to the dashboard
     }
   });

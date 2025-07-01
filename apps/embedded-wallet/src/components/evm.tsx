@@ -6,7 +6,7 @@ import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
 import { WagmiProvider, useSignMessage } from "wagmi";
-import { connectedWalletType, message, signature } from "../state";
+import { connectedWalletType, message, signature, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
 //@todo: get a new project id from reown cloud
@@ -87,8 +87,17 @@ function Ethereum() {
         message,
       },
       {
-        onSuccess: (_signature) => {
-          signature.value = _signature;
+        onSuccess: (signature) => {
+          if (!address) {
+            return;
+          }
+
+          walletPayload.value = {
+            address,
+            signature,
+            public_key: [address],
+            message,
+          };
         },
       },
     );
