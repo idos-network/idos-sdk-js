@@ -91,10 +91,8 @@ function Ethereum() {
 
   return (
     <div class="flex flex-col gap-2">
-      {stepper.when("connect", (step) => (
+      {stepper.when("connect", () => (
         <div class="flex flex-col gap-4">
-          <h1 class="text-center font-bold text-2xl">{step.title}</h1>
-          <p class="text-center text-neutral-400 text-sm">{step.description}</p>
           <Button onClick={() => open()}>
             Connect with EVM
             <TokenETH variant="mono" size={24} />
