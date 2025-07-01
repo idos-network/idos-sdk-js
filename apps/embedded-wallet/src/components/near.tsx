@@ -6,7 +6,7 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import { effect, useSignal } from "@preact/signals";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { message, signature } from "../state";
+import { connectedWalletType, message, signature } from "../state";
 import { Button } from "./ui/button";
 
 //@todo: get a new project id from reown cloud
@@ -40,11 +40,21 @@ export function NearConnector() {
 
   effect(() => {
     if (isSignedIn.value && stepper.isFirst) {
+      connectedWalletType.value = "near";
       stepper.next();
     }
+  });
 
+  effect(() => {
     const subscription = selector.store.observable.subscribe(() => {
       isSignedIn.value = selector.isSignedIn();
+
+      // Handle external disconnections
+      if (!selector.isSignedIn() && connectedWalletType.value === "near") {
+        connectedWalletType.value = null;
+        signature.value = "";
+        stepper.reset();
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -66,6 +76,8 @@ export function NearConnector() {
   const handleDisconnect = async () => {
     const wallet = await selector.wallet();
     await wallet.signOut();
+    connectedWalletType.value = null;
+    signature.value = "";
     stepper.reset();
   };
 

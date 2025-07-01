@@ -6,7 +6,7 @@ import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
 import { WagmiProvider, useSignMessage } from "wagmi";
-import { message, signature } from "../state";
+import { connectedWalletType, message, signature } from "../state";
 import { Button } from "./ui/button";
 
 //@todo: get a new project id from reown cloud
@@ -67,7 +67,17 @@ function Ethereum() {
 
   effect(() => {
     if (isConnected && stepper.isFirst) {
+      connectedWalletType.value = "evm";
       stepper.next();
+    }
+  });
+
+  // Handle external disconnections
+  effect(() => {
+    if (!isConnected && connectedWalletType.value === "evm") {
+      connectedWalletType.value = null;
+      signature.value = "";
+      stepper.reset();
     }
   });
 
@@ -86,6 +96,8 @@ function Ethereum() {
 
   const handleDisconnect = async () => {
     await disconnect();
+    connectedWalletType.value = null;
+    signature.value = "";
     stepper.reset();
   };
 
