@@ -1,5 +1,4 @@
 import { effect } from "@preact/signals";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
 import { connectedWalletType, walletPayload } from "./state";
@@ -26,11 +25,25 @@ function WalletConnector() {
 }
 
 export function App() {
-  const { address } = useAppKitAccount();
-
   effect(() => {
-    if (walletPayload.value && address) {
-      // @todo: post message back to the dashboard
+    if (walletPayload.value) {
+      // Send wallet payload back to the parent window
+      if (window.opener) {
+        console.log("Sending wallet payload to parent window:", walletPayload.value);
+
+        window.opener.postMessage(
+          {
+            type: "WALLET_SIGNATURE",
+            data: walletPayload.value,
+          },
+          "https://localhost:5173", // Send only to parent window's origin
+        );
+
+        // Close the popup window after sending the data
+        window.close();
+      } else {
+        console.log("No opener window found");
+      }
     }
   });
 

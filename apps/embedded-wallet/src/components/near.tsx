@@ -6,7 +6,7 @@ import "@near-wallet-selector/modal-ui/styles.css";
 import { effect, useSignal } from "@preact/signals";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { connectedWalletType, message, signature, walletPayload } from "../state";
+import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
 //@todo: get a new project id from reown cloud
@@ -37,6 +37,7 @@ const modal = setupModal(selector, {
 export function NearConnector() {
   const stepper = useStepper();
   const isSignedIn = useSignal(false);
+  const accountId = useSignal<string | null>(null);
 
   effect(() => {
     if (isSignedIn.value && stepper.isFirst) {
@@ -48,11 +49,14 @@ export function NearConnector() {
   effect(() => {
     const subscription = selector.store.observable.subscribe(() => {
       isSignedIn.value = selector.isSignedIn();
+      accountId.value = selector.isSignedIn()
+        ? (selector.store.getState().accounts[0]?.accountId ?? null)
+        : null;
 
       // Handle external disconnections
       if (!selector.isSignedIn() && connectedWalletType.value === "near") {
         connectedWalletType.value = null;
-        signature.value = "";
+        accountId.value = null;
         stepper.reset();
       }
     });
@@ -83,7 +87,7 @@ export function NearConnector() {
     const wallet = await selector.wallet();
     await wallet.signOut();
     connectedWalletType.value = null;
-    signature.value = "";
+    accountId.value = null;
     stepper.reset();
   };
 
@@ -103,7 +107,7 @@ export function NearConnector() {
           <p class="text-center text-neutral-400 text-sm">{step.description}</p>
           <div class="flex flex-col gap-2">
             <p class="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p class="text-center text-neutral-400 text-sm">TODO</p>
+            <p class="text-center text-neutral-400 text-sm">{accountId}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

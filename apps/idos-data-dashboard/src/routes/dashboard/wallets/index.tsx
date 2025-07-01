@@ -1,5 +1,4 @@
 import {
-  Button,
   HStack,
   Heading,
   IconButton,
@@ -11,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, RotateCw } from "lucide-react";
+import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { DataError } from "@/components/data-error";
@@ -22,6 +21,7 @@ import { useIdOS } from "@/idOS.provider";
 import { useWalletSelector } from "@/core/near";
 import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
+import { AddWalletButton } from "./components/add-wallet-button";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -153,22 +153,8 @@ export function Component() {
         </Heading>
         {hasProfile ? (
           <HStack>
-            <Button
-              id="add-wallet-button"
-              colorScheme="green"
-              leftIcon={<PlusIcon size={24} />}
-              hideBelow="lg"
-              onClick={() => navigate("/wallets/add")}
-            >
-              Add wallet
-            </Button>
-            <IconButton
-              aria-label="Add wallet"
-              colorScheme="green"
-              icon={<PlusIcon size={24} />}
-              hideFrom="lg"
-              onClick={() => navigate("/wallets/add")}
-            />
+            <AddWalletButton />
+            <AddWalletButton variant="icon" />
             <IconButton
               aria-label="Refresh wallets"
               icon={<RotateCw size={18} />}

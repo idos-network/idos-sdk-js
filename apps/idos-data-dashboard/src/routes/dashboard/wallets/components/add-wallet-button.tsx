@@ -1,16 +1,17 @@
-import { useIdOS } from "@/idOS.provider";
-import { HStack, Heading, Spinner, Text, VStack, chakra, useToast } from "@chakra-ui/react";
+import { Button, IconButton, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+
+import { useIdOS } from "@/idOS.provider";
 import invariant from "tiny-invariant";
 
 interface WalletSignature {
   address?: string;
   signature: string;
   message?: string;
-  [key: string]: unknown;
+  public_key: string[];
 }
 
 const createWalletParamsFactory = ({
@@ -63,11 +64,16 @@ const useAddWalletMutation = () => {
   });
 };
 
-export function Component() {
+interface AddWalletButtonProps {
+  variant?: "button" | "icon";
+  onWalletAdded?: () => void;
+}
+
+export function AddWalletButton({ variant = "button", onWalletAdded }: AddWalletButtonProps) {
   const [walletSignature, setWalletSignature] = useState<WalletSignature | null>(null);
-  const [isIframeLoading, setIsIframeLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
-  const navigate = useNavigate();
   const toast = useToast();
   const queryClient = useQueryClient();
 
@@ -75,36 +81,48 @@ export function Component() {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Validate origin - should be from the embedded-wallet iframe
-      const expectedOrigins = ["https://localhost:5173", "https://localhost:5174"];
+      console.log("Received message:", event.data);
+      console.log("Message origin:", event.origin);
 
-      if (!expectedOrigins.includes(event.origin)) {
-        console.warn("Message from unexpected origin:", event.origin);
-        return;
-      }
-
+      // Accept messages from any origin for now
       if (event.data?.type === "WALLET_SIGNATURE") {
+        console.log("Processing wallet signature:", event.data.data);
         setWalletSignature(event.data.data);
+        setIsLoading(false);
       }
     };
 
-    // Add event listener for postMessage with AbortController
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
 
-    // Cleanup function to abort the controller
     return () => {
       abortController.abort();
     };
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Fine to exclude `addWalletMutation` from the dependency array
+  useEffect(() => {
+    if (!popupWindow) return;
+
+    const checkPopupClosed = setInterval(() => {
+      if (popupWindow.closed) {
+        setIsLoading(false);
+        setPopupWindow(null);
+        clearInterval(checkPopupClosed);
+      }
+    }, 1000);
+
+    return () => {
+      clearInterval(checkPopupClosed);
+    };
+  }, [popupWindow]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!walletSignature) return;
 
     addWalletMutation.mutate(
       {
         address: walletSignature.address || "unknown",
-        publicKeys: [walletSignature.address || "unknown"],
+        publicKeys: walletSignature.public_key || [],
         signature: walletSignature.signature,
         message: walletSignature.message || "Sign this message to prove you own this wallet",
       },
@@ -115,90 +133,80 @@ export function Component() {
             description: "The wallet has been added to your idOS profile",
           });
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
-          navigate("/wallets");
+          onWalletAdded?.();
         },
         onError: (error) => {
           console.error(error);
+          setIsLoading(false);
+          toast({
+            title: "Error adding wallet",
+            description: "Failed to add wallet to your idOS profile",
+            status: "error",
+          });
         },
       },
     );
   }, [walletSignature]);
 
-  const handleIframeLoad = () => {
-    setIsIframeLoading(false);
+  const handleOpenWalletPopup = () => {
+    setIsLoading(true);
+
+    // Calculate center position for the popup
+    const popupWidth = 500;
+    const popupHeight = 600;
+    const left = (window.screen.width - popupWidth) / 2;
+    const top = (window.screen.height - popupHeight) / 2;
+
+    const popup = window.open(
+      "https://localhost:5174",
+      "wallet-connection",
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=yes`,
+    );
+
+    if (popup) {
+      setPopupWindow(popup);
+
+      if (popup.closed || typeof popup.closed === "undefined") {
+        toast({
+          title: "Popup blocked",
+          description: "Please allow popups for this site to connect your wallet",
+          status: "error",
+        });
+        setIsLoading(false);
+      }
+    } else {
+      toast({
+        title: "Popup blocked",
+        description: "Please allow popups for this site to connect your wallet",
+        status: "error",
+      });
+      setIsLoading(false);
+    }
   };
 
-  const handleIframeError = () => {
-    setIsIframeLoading(false);
-  };
+  if (variant === "icon") {
+    return (
+      <IconButton
+        aria-label="Add wallet"
+        colorScheme="green"
+        icon={<PlusIcon size={24} />}
+        hideFrom="lg"
+        onClick={handleOpenWalletPopup}
+        isLoading={isLoading}
+      />
+    );
+  }
 
   return (
-    <VStack align="stretch" flex={1} gap={2.5}>
-      <HStack
-        justifyContent="space-between"
-        h={{
-          base: 14,
-          lg: 20,
-        }}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-      >
-        <Heading
-          as="h1"
-          fontSize={{
-            base: "x-large",
-            lg: "xx-large",
-          }}
-        >
-          Add wallet
-        </Heading>
-      </HStack>
-
-      <VStack
-        alignItems="center"
-        placeContent="center"
-        gap={5}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-        h="100%"
-        position="relative"
-        overflow="hidden"
-      >
-        {isIframeLoading ? (
-          <VStack
-            position="absolute"
-            top={0}
-            left={0}
-            right={0}
-            bottom={0}
-            bg="neutral.900"
-            zIndex={1}
-            justify="center"
-            align="center"
-            gap={4}
-          >
-            <Spinner />
-            <Text color="neutral.400">Loading wallet connection...</Text>
-          </VStack>
-        ) : null}
-        <chakra.iframe
-          src="https://localhost:5173"
-          title="Add wallet"
-          bg="neutral.900"
-          w="100%"
-          h="100%"
-          onLoad={handleIframeLoad}
-          onError={handleIframeError}
-          style={{
-            opacity: isIframeLoading ? 0 : 1,
-            transition: "opacity 0.3s ease-in-out",
-          }}
-        />
-      </VStack>
-    </VStack>
+    <Button
+      id="add-wallet-button"
+      colorScheme="green"
+      leftIcon={<PlusIcon size={24} />}
+      hideBelow="lg"
+      onClick={handleOpenWalletPopup}
+      isLoading={isLoading}
+    >
+      Add wallet
+    </Button>
   );
 }
-
-Component.displayName = "AddWallet";
