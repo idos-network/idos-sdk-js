@@ -22,6 +22,7 @@ import { useWalletSelector } from "@/core/near";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { AddWalletButton } from "./components/add-wallet-button";
+import { AddWalletUsingModal } from "./components/add-wallet-modal";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -152,7 +153,11 @@ export function Component() {
         </Heading>
         {hasProfile ? (
           <HStack>
-            <AddWalletButton />
+            {import.meta.env.VITE_ADD_WALLET_USING_POPUP === "true" ? (
+              <AddWalletButton />
+            ) : (
+              <AddWalletUsingModal defaultValue={walletToAdd} />
+            )}
             <IconButton
               aria-label="Refresh wallets"
               icon={<RotateCw size={18} />}
