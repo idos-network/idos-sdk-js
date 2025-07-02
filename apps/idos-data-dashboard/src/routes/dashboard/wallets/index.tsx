@@ -1,5 +1,4 @@
 import {
-  Button,
   HStack,
   Heading,
   IconButton,
@@ -11,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlusIcon, RotateCw } from "lucide-react";
+import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { DataError } from "@/components/data-error";
@@ -22,7 +21,8 @@ import { useIdOS } from "@/idOS.provider";
 import { useWalletSelector } from "@/core/near";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
-import { AddWallet } from "./components/add-wallet";
+import { AddWalletButton } from "./components/add-wallet-button";
+import { AddWalletUsingModal } from "./components/add-wallet-modal";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -117,11 +117,6 @@ export function Component() {
   const queryClient = useQueryClient();
 
   const hasProfile = !!idOSClient.user.id;
-  const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!walletToAdd && hasProfile });
-
-  const handleWalletAdded = () => {
-    if (callbackUrl) location.href = callbackUrl;
-  };
 
   useEffect(() => {
     if (walletToAdd && !hasProfile && callbackUrl) {
@@ -158,22 +153,11 @@ export function Component() {
         </Heading>
         {hasProfile ? (
           <HStack>
-            <Button
-              id="add-wallet-button"
-              colorScheme="green"
-              leftIcon={<PlusIcon size={24} />}
-              hideBelow="lg"
-              onClick={onOpen}
-            >
-              Add wallet
-            </Button>
-            <IconButton
-              aria-label="Add wallet"
-              colorScheme="green"
-              icon={<PlusIcon size={24} />}
-              hideFrom="lg"
-              onClick={onOpen}
-            />
+            {import.meta.env.VITE_ADD_WALLET_USING_POPUP === "true" ? (
+              <AddWalletButton />
+            ) : (
+              <AddWalletUsingModal defaultValue={walletToAdd} />
+            )}
             <IconButton
               aria-label="Refresh wallets"
               icon={<RotateCw size={18} />}
@@ -190,12 +174,6 @@ export function Component() {
       </HStack>
       {hasProfile ? <WalletsList /> : <NoWallets />}
       {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
-      <AddWallet
-        isOpen={isOpen}
-        onClose={onClose}
-        defaultValue={walletToAdd}
-        onWalletAdded={handleWalletAdded}
-      />
     </VStack>
   );
 }
