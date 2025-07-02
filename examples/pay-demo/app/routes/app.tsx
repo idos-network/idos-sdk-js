@@ -154,6 +154,30 @@ export default function App() {
     );
   }
 
+  if (state === "chooseKYCType") {
+    body = (
+      <div className="flex flex-col items-center gap-8 p-8">
+        <h1 className="font-bold text-3xl text-gray-800">Choose your KYC provider</h1>
+        <div className="flex max-w-2xl flex-row gap-4">
+          <button
+            type="button"
+            className="w-full cursor-pointer rounded-lg bg-blue-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-blue-700"
+            onClick={() => send({ type: "startKYC", kycType: "sumsub" })}
+          >
+            Sumsub
+          </button>
+          <button
+            type="button"
+            className="w-full cursor-pointer rounded-lg bg-green-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-green-700"
+            onClick={() => send({ type: "startKYC", kycType: "persona" })}
+          >
+            Persona
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const messages: Record<string, string> = {
     findCredential: "Finding credential...",
     requestAccessGrant: "Requesting access grant...",
@@ -162,12 +186,25 @@ export default function App() {
     verifyHifiTos: "Verifying and creating a KYC for you...",
     login: "Logging in...",
     error: "Error",
+    requestKrakenDAG: "Requesting access grant for KYC provider...",
+    createToken: "Create a sharable token for provider...",
   };
 
   if (messages[state as keyof typeof messages]) {
     body = (
       <div className="mb-4 w-full text-center">
         <p>{messages[state as keyof typeof messages]}</p>
+        {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      </div>
+    );
+  }
+
+  // @ts-expect-error Missing substates?
+  if (state.createSharableToken) {
+    body = (
+      <div className="mb-4 w-full text-center">
+        {/* @ts-expect-error Missing substates? */}
+        <p>{messages[state.createSharableToken as keyof typeof messages]}</p>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
       </div>
     );

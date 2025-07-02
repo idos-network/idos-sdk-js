@@ -68,6 +68,9 @@ export const IDDocumentTypeSchema: z.ZodEnum<["PASSPORT", "DRIVERS", "ID_CARD"]>
 ] as const);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
+export const GenderSchema: z.ZodEnum<["M", "F"]> = z.enum(["M", "F"] as const);
+export type Gender = z.infer<typeof GenderSchema>;
+
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialSubjectSchema: z.ZodObject<
   {
@@ -75,6 +78,8 @@ export const CredentialSubjectSchema: z.ZodObject<
     applicantId: z.ZodOptional<z.ZodString>;
     inquiryId: z.ZodOptional<z.ZodString>;
     firstName: z.ZodString;
+    middleName: z.ZodOptional<z.ZodString>;
+    gender: z.ZodOptional<typeof GenderSchema>;
     familyName: z.ZodString;
     maidenName: z.ZodOptional<z.ZodString>;
     governmentId: z.ZodOptional<z.ZodString>;
@@ -109,6 +114,12 @@ export const CredentialSubjectSchema: z.ZodObject<
 
   /* First name. */
   firstName: z.string(),
+
+  /* Middle name. */
+  middleName: z.string().optional(),
+
+  /* Gender (M or F, empty if not provided). */
+  gender: GenderSchema.optional(),
 
   /* Family name. */
   familyName: z.string(),

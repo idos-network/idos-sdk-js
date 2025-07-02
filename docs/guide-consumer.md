@@ -96,7 +96,7 @@ To initialize the idOS Consumer SDK, you need to pass in something as a `consume
 ```typescript
 {
   privateKey: Uint8Array,
-  publicKey: Uint8Array, 
+  publicKey: Uint8Array,
   sign: (message: Uint8Array) => Uint8Array
 }
 ```
@@ -144,7 +144,7 @@ const signer = {
 ```
 
 > **Important for XRPL Signers**: The `NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY` environment variable should contain the **XRP address**, not the public key. You can derive the address from the public key using:
-> 
+>
 > ```typescript
 > const address = xrpKeypair.deriveAddress(signer.publicKey);
 > // Use this address as NEXT_PUBLIC_OTHER_CONSUMER_SIGNING_PUBLIC_KEY
@@ -280,19 +280,21 @@ If you don't have an access grant, you can proceed to filtering the user's crede
 
 Credential filtering is done by calling the method `filterCredentials` from the `idOSClient` and passing the filtering requirements:
 ```typescript
-const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials({acceptedIssuers: [{
-      authPublicKey // the accepted issuer auth public key to filter credentials by
-    }];
+const filteredCredentials: idOSCredential[] = await idOSClient.filterCredentials({
+    acceptedIssuers: [{
+      authPublicKey, // the accepted issuer auth public key to filter credentials by
+    }],
     // OPTIONAL. A list of public notes fields of a credential that should be picked or omitted.
-    publicNotesFieldFilters: { 
-      pick: {};
-      omit: {};
-    };
+    publicNotesFieldFilters: {
+      pick: {},
+      omit: {},
+    },
     // OPTIONAL. A list of private fields of a credential that should be picked or omitted.
     privateFieldFilters: {
-      pick: {};
-      omit: {};
-    })
+      pick: {},
+      omit: {},
+    },
+});
 ```
 This will return a list of `idOSCredentials` that match the filtering criteria.
 
