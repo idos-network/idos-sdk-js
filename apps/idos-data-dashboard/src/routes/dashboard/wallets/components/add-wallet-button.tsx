@@ -1,4 +1,4 @@
-import { Button, IconButton, useToast } from "@chakra-ui/react";
+import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
@@ -65,28 +65,24 @@ const useAddWalletMutation = () => {
 };
 
 interface AddWalletButtonProps {
-  variant?: "button" | "icon";
   onWalletAdded?: () => void;
 }
 
-export function AddWalletButton({ variant = "button", onWalletAdded }: AddWalletButtonProps) {
+export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [walletSignature, setWalletSignature] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
   const toast = useToast();
   const queryClient = useQueryClient();
+  const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
 
   useEffect(() => {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      console.log("Received message:", event.data);
-      console.log("Message origin:", event.origin);
-
       // Accept messages from any origin for now
       if (event.data?.type === "WALLET_SIGNATURE") {
-        console.log("Processing wallet signature:", event.data.data);
         setWalletSignature(event.data.data);
         setIsLoading(false);
       }
@@ -152,15 +148,15 @@ export function AddWalletButton({ variant = "button", onWalletAdded }: AddWallet
     setIsLoading(true);
 
     // Calculate center position for the popup
-    const popupWidth = 500;
-    const popupHeight = 600;
+    const popupWidth = 400;
+    const popupHeight = 620;
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
       "https://localhost:5174",
       "wallet-connection",
-      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=yes`,
+      `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
 
     if (popup) {
@@ -184,16 +180,11 @@ export function AddWalletButton({ variant = "button", onWalletAdded }: AddWallet
     }
   };
 
-  if (variant === "icon") {
+  if (isMobile) {
     return (
-      <IconButton
-        aria-label="Add wallet"
-        colorScheme="green"
-        icon={<PlusIcon size={24} />}
-        hideFrom="lg"
-        onClick={handleOpenWalletPopup}
-        isLoading={isLoading}
-      />
+      <IconButton id="add-wallet-button" colorScheme="green" aria-label="Add wallet">
+        <PlusIcon size={24} />
+      </IconButton>
     );
   }
 

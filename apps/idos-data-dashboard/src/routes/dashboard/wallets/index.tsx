@@ -19,7 +19,7 @@ import { NoData } from "@/components/no-data";
 import { useIdOS } from "@/idOS.provider";
 
 import { useWalletSelector } from "@/core/near";
-import { Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { AddWalletButton } from "./components/add-wallet-button";
 import { DeleteWallet } from "./components/delete-wallet";
@@ -114,7 +114,6 @@ export function Component() {
   const walletToAdd = searchParams.get("add-wallet") || undefined;
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const hasProfile = !!idOSClient.user.id;
 
@@ -154,7 +153,6 @@ export function Component() {
         {hasProfile ? (
           <HStack>
             <AddWalletButton />
-            <AddWalletButton variant="icon" />
             <IconButton
               aria-label="Refresh wallets"
               icon={<RotateCw size={18} />}

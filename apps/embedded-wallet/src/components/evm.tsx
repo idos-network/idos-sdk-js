@@ -1,10 +1,10 @@
-import { effect } from "@preact/signals";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit, useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
+import { useEffect } from "preact/hooks";
 import { WagmiProvider, useSignMessage } from "wagmi";
 import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
@@ -65,20 +65,20 @@ function Ethereum() {
   const { signMessage } = useSignMessage();
   const { disconnect } = useDisconnect();
 
-  effect(() => {
+  useEffect(() => {
     if (isConnected && stepper.isFirst) {
       connectedWalletType.value = "evm";
       stepper.next();
     }
-  });
+  }, [isConnected, stepper]);
 
   // Handle external disconnections
-  effect(() => {
+  useEffect(() => {
     if (!isConnected && connectedWalletType.value === "evm") {
       connectedWalletType.value = null;
       stepper.reset();
     }
-  });
+  }, [isConnected, stepper]);
 
   const handleSignMessage = () => {
     signMessage(

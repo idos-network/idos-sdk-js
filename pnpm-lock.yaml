@@ -236,6 +236,9 @@ importers:
 
   apps/embedded-wallet:
     dependencies:
+      '@idos-network/core':
+        specifier: workspace:*
+        version: link:../../packages/@core
       '@near-wallet-selector/core':
         specifier: 8.9.10
         version: 8.9.10(near-api-js@5.1.1(encoding@0.1.13))

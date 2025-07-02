@@ -29,8 +29,6 @@ export function App() {
     if (walletPayload.value) {
       // Send wallet payload back to the parent window
       if (window.opener) {
-        console.log("Sending wallet payload to parent window:", walletPayload.value);
-
         window.opener.postMessage(
           {
             type: "WALLET_SIGNATURE",

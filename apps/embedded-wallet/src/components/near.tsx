@@ -3,9 +3,11 @@ import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { effect, useSignal } from "@preact/signals";
+import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/core";
+import { useSignal } from "@preact/signals";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
+import { useEffect } from "preact/hooks";
 import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
@@ -37,47 +39,41 @@ const modal = setupModal(selector, {
 export function NearConnector() {
   const stepper = useStepper();
   const isSignedIn = useSignal(false);
-  const accountId = useSignal<string | null>(null);
+  const accountId = useSignal<string>("");
 
-  effect(() => {
+  useEffect(() => {
     if (isSignedIn.value && stepper.isFirst) {
       connectedWalletType.value = "near";
       stepper.next();
     }
-  });
+  }, [isSignedIn.value, stepper]);
 
-  effect(() => {
+  useEffect(() => {
     const subscription = selector.store.observable.subscribe(() => {
       isSignedIn.value = selector.isSignedIn();
-      accountId.value = selector.isSignedIn()
-        ? (selector.store.getState().accounts[0]?.accountId ?? null)
-        : null;
+      console.log(isSignedIn.value);
+      accountId.value = selector.store.getState().accounts[0].accountId || "";
 
       // Handle external disconnections
       if (!selector.isSignedIn() && connectedWalletType.value === "near") {
         connectedWalletType.value = null;
-        accountId.value = null;
+        accountId.value = "";
         stepper.reset();
       }
     });
 
     return () => subscription.unsubscribe();
-  });
+  }, [stepper, accountId, isSignedIn]);
 
   const handleSignMessage = async () => {
     const wallet = await selector.wallet();
-    const signedMessage = await wallet.signMessage({
-      message: message,
-      recipient: "idos.network",
-      nonce: Buffer.from(message.substring(0, 32)),
-    });
+    const signature = await signNearMessage(wallet, message);
 
-    if (signedMessage) {
+    if (signature) {
       walletPayload.value = {
-        address: signedMessage.accountId,
-        signature: signedMessage.signature,
-        // @todo: we might need to derive all the public keys from the wallet as done on the data dashboard.
-        public_key: [signedMessage.publicKey],
+        address: accountId.value,
+        signature,
+        public_key: (await getNearFullAccessPublicKeys(accountId.value)) || [],
         message,
       };
     }
@@ -87,7 +83,7 @@ export function NearConnector() {
     const wallet = await selector.wallet();
     await wallet.signOut();
     connectedWalletType.value = null;
-    accountId.value = null;
+    accountId.value = "";
     stepper.reset();
   };
 
