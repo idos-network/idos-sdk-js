@@ -1,6 +1,8 @@
 import { effect } from "@preact/signals";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
+import { StellarConnector } from "./components/stellar";
+import { XRPLConnector } from "./components/xrp";
 import { connectedWalletType, walletPayload } from "./state";
 
 function WalletConnector() {
@@ -9,6 +11,8 @@ function WalletConnector() {
       <>
         <EVMConnector />
         <NearConnector />
+        <XRPLConnector />
+        <StellarConnector />
       </>
     );
   }
@@ -19,6 +23,14 @@ function WalletConnector() {
 
   if (connectedWalletType.value === "near") {
     return <NearConnector />;
+  }
+
+  if (connectedWalletType.value === "xrpl") {
+    return <XRPLConnector />;
+  }
+
+  if (connectedWalletType.value === "stellar") {
+    return <StellarConnector />;
   }
 
   return null;
