@@ -6,7 +6,7 @@ export type WalletPayload = {
   public_key: string[];
   message: string;
 };
-export type WalletType = "evm" | "near" | null;
+export type WalletType = "evm" | "near" | "xrpl" | null;
 
 export const walletPayload = signal<WalletPayload | null>(null);
 export const message = "Sign this message to prove you own this wallet";
