@@ -11,8 +11,6 @@ import { useEffect } from "preact/hooks";
 import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
-//@todo: get a new project id from reown cloud
-
 const { useStepper } = defineStepper(
   {
     id: "connect",

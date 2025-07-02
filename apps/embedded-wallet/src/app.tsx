@@ -39,6 +39,11 @@ function WalletConnector() {
 export function App() {
   effect(() => {
     if (walletPayload.value) {
+      if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
+        console.warn("VITE_DATA_DASHBOARD_URL is not set");
+        return;
+      }
+
       // Send wallet payload back to the parent window
       if (window.opener) {
         window.opener.postMessage(
@@ -46,7 +51,7 @@ export function App() {
             type: "WALLET_SIGNATURE",
             data: walletPayload.value,
           },
-          "https://localhost:5173", // Send only to parent window's origin
+          import.meta.env.VITE_DATA_DASHBOARD_URL,
         );
 
         // Close the popup window after sending the data

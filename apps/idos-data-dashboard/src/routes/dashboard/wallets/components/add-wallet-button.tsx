@@ -81,7 +81,23 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Accept messages from any origin for now
+      // Only accept messages from the embedded wallet app
+      const allowedOrigin = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
+      if (!allowedOrigin) {
+        console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
+        return;
+      }
+
+      // Extract origin from the full URL
+      const allowedOriginUrl = new URL(allowedOrigin);
+      const allowedOriginString = allowedOriginUrl.origin;
+
+      if (event.origin !== allowedOriginString) {
+        console.warn(
+          `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
+        );
+        return;
+      }
       if (event.data?.type === "WALLET_SIGNATURE") {
         setWalletSignature(event.data.data);
         setIsLoading(false);
@@ -145,6 +161,11 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [walletSignature]);
 
   const handleOpenWalletPopup = () => {
+    invariant(
+      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
+      "VITE_EMBEDDED_WALLET_APP_URL is not set",
+    );
+
     setIsLoading(true);
 
     // Calculate center position for the popup
@@ -154,7 +175,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
-      "https://localhost:5174",
+      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );

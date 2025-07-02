@@ -9,8 +9,7 @@ import { WagmiProvider, useSignMessage } from "wagmi";
 import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
-//@todo: get a new project id from reown cloud
-const projectId = "4ef6d50d5abec02ac8603a7409f3b2b0";
+const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
 export const networks = [mainnet, sepolia];
 
@@ -22,7 +21,7 @@ const wagmiAdapter = new WagmiAdapter({
 const metadata = {
   name: "idOS Data Dashboard",
   description: "Add your wallet to your idOS profile",
-  url: "https://localhost:5173",
+  url: window.origin,
   icons: ["https://avatars.githubusercontent.com/u/179229932"],
 };
 
