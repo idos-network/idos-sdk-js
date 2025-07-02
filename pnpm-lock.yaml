@@ -6,108 +6,9 @@ settings:
 
 catalogs:
   build:
-    tsdown:
-      specifier: ^0.12.7
-      version: 0.12.7
     typescript:
       specifier: ^5.8.3
       version: 5.8.3
-  core:
-    '@digitalbazaar/ed25519-signature-2020':
-      specifier: ^5.4.0
-      version: 5.4.0
-    '@digitalbazaar/ed25519-verification-key-2020':
-      specifier: ^4.2.0
-      version: 4.2.0
-    '@digitalbazaar/vc':
-      specifier: ^7.2.0
-      version: 7.2.0
-    '@gemwallet/api':
-      specifier: ^3.8.0
-      version: 3.8.0
-    '@kwilteam/kwil-js':
-      specifier: 0.9.4
-      version: 0.9.4
-    '@stablelib/base64':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stablelib/binary':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stablelib/bytes':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stablelib/hex':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stablelib/sha256':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stablelib/utf8':
-      specifier: ^2.0.1
-      version: 2.0.1
-    '@stellar/stellar-sdk':
-      specifier: ^13.3.0
-      version: 13.3.0
-    base85:
-      specifier: ^3.1.0
-      version: 3.2.0
-    borsh:
-      specifier: ^2.0.0
-      version: 2.0.0
-    bs58:
-      specifier: ^6.0.0
-      version: 6.0.0
-    es-toolkit:
-      specifier: ^1.39.0
-      version: 1.39.3
-    ethers:
-      specifier: ^6.14.0
-      version: 6.14.3
-    jsonld-document-loader:
-      specifier: ^2.3.0
-      version: 2.3.0
-    near-api-js:
-      specifier: ^5.1.1
-      version: 5.1.1
-    ripple-binary-codec:
-      specifier: ^2.4.0
-      version: 2.4.0
-    ripple-keypairs:
-      specifier: ^2.0.0
-      version: 2.0.0
-    tiny-invariant:
-      specifier: ^1.3.3
-      version: 1.3.3
-    tweetnacl:
-      specifier: ^1.0.3
-      version: 1.0.3
-    xrpl:
-      specifier: ^4.3.0
-      version: 4.3.0
-    xumm:
-      specifier: ^1.8.0
-      version: 1.8.0
-    zod:
-      specifier: ^3.25.64
-      version: 3.25.64
-  react:
-    '@types/react':
-      specifier: ^19.1.0
-      version: 19.1.6
-    '@types/react-dom':
-      specifier: ^19.1.1
-      version: 19.1.6
-    react:
-      specifier: ^19.1.0
-      version: 19.1.0
-    react-dom:
-      specifier: ^19.1.0
-      version: 19.1.0
-  testing:
-    vitest:
-      specifier: ^3.2.2
-      version: 3.2.2
 
 overrides:
   web-streams-polyfill: 3.3.3
@@ -247,16 +148,16 @@ importers:
         version: link:../../packages/@core
       '@near-wallet-selector/core':
         specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+        version: 8.9.10
       '@near-wallet-selector/here-wallet':
         specifier: 8.9.10
-        version: 8.9.10(borsh@2.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))
+        version: 8.9.10(borsh@2.0.0)(encoding@0.1.13)
       '@near-wallet-selector/meteor-wallet':
         specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+        version: 8.9.10
       '@near-wallet-selector/modal-ui':
         specifier: 8.9.10
-        version: 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
+        version: 8.9.10
       '@preact/signals':
         specifier: ^2.0.2
         version: 2.2.0(preact@10.26.9)
@@ -306,9 +207,6 @@ importers:
       vite-plugin-mkcert:
         specifier: ^1.17.8
         version: 1.17.8(vite@7.0.0(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
-      vite-plugin-node-polyfills:
-        specifier: ^0.23.0
-        version: 0.23.0(rollup@4.41.1)(vite@7.0.0(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
 
   apps/idos-data-dashboard:
     dependencies:
@@ -12810,7 +12708,7 @@ snapshots:
       '@babel/traverse': 7.27.4
       '@babel/types': 7.27.6
       convert-source-map: 2.0.0
-      debug: 4.4.1(supports-color@8.1.1)
+      debug: 4.4.1
       gensync: 1.0.0-beta.2
       json5: 2.2.3
       semver: 6.3.1
@@ -13061,7 +12959,7 @@ snapshots:
       '@babel/parser': 7.27.5
       '@babel/template': 7.27.2
       '@babel/types': 7.27.6
-      debug: 4.4.1(supports-color@8.1.1)
+      debug: 4.4.1
       globals: 11.12.0
     transitivePeerDependencies:
       - supports-color
@@ -13185,6 +13083,20 @@ snapshots:
       '@types/lodash.mergewith': 4.6.9
       lodash.mergewith: 4.6.2
       react: 19.1.0
+
+  '@coinbase/wallet-sdk@3.9.3':
+    dependencies:
+      bn.js: 5.2.2
+      buffer: 6.0.3
+      clsx: 1.2.1
+      eth-block-tracker: 7.1.0
+      eth-json-rpc-filters: 6.0.1
+      eventemitter3: 5.0.1
+      keccak: 3.0.4
+      preact: 10.26.9
+      sha.js: 2.4.11
+    transitivePeerDependencies:
+      - supports-color
 
   '@coinbase/wallet-sdk@3.9.3(supports-color@8.1.1)':
     dependencies:
@@ -13343,7 +13255,7 @@ snapshots:
     dependencies:
       '@albedo-link/intent': 0.12.0
       '@creit.tech/xbull-wallet-connect': 0.3.0
-      '@hot-wallet/sdk': 1.0.11(bufferutil@4.0.9)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))(typescript@5.8.3)(utf-8-validate@5.0.10)
+      '@hot-wallet/sdk': 1.0.11(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
       '@ledgerhq/hw-app-str': 7.0.4
       '@ledgerhq/hw-transport': 6.31.4
       '@ledgerhq/hw-transport-webusb': 6.29.4
@@ -15446,6 +15358,24 @@ snapshots:
       - typescript
       - utf-8-validate
 
+  '@hot-wallet/sdk@1.0.11(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@near-js/crypto': 1.4.2
+      '@near-js/utils': 1.1.0
+      '@near-wallet-selector/core': 8.10.2
+      '@solana/wallet-adapter-base': 0.9.27(@solana/web3.js@1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10))
+      '@solana/web3.js': 1.98.2(bufferutil@4.0.9)(encoding@0.1.13)(typescript@5.8.3)(utf-8-validate@5.0.10)
+      borsh: 2.0.0
+      js-sha256: 0.11.1
+      sha1: 1.1.1
+      uuid4: 2.0.3
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - near-api-js
+      - typescript
+      - utf-8-validate
+
   '@img/sharp-darwin-arm64@0.33.5':
     optionalDependencies:
       '@img/sharp-libvips-darwin-arm64': 1.0.4
@@ -15766,11 +15696,27 @@ snapshots:
 
   '@lobstrco/signer-extension-api@1.0.0-beta.0': {}
 
+  '@metamask/eth-json-rpc-provider@1.0.1':
+    dependencies:
+      '@metamask/json-rpc-engine': 7.3.3
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 5.0.2
+    transitivePeerDependencies:
+      - supports-color
+
   '@metamask/eth-json-rpc-provider@1.0.1(supports-color@8.1.1)':
     dependencies:
       '@metamask/json-rpc-engine': 7.3.3(supports-color@8.1.1)
       '@metamask/safe-event-emitter': 3.1.2
       '@metamask/utils': 5.0.2(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/json-rpc-engine@7.3.3':
+    dependencies:
+      '@metamask/rpc-errors': 6.4.0
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 8.5.0
     transitivePeerDependencies:
       - supports-color
 
@@ -15782,11 +15728,28 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@metamask/json-rpc-engine@8.0.2':
+    dependencies:
+      '@metamask/rpc-errors': 6.4.0
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 8.5.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@metamask/json-rpc-engine@8.0.2(supports-color@8.1.1)':
     dependencies:
       '@metamask/rpc-errors': 6.4.0(supports-color@8.1.1)
       '@metamask/safe-event-emitter': 3.1.2
       '@metamask/utils': 8.5.0(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/json-rpc-middleware-stream@7.0.2':
+    dependencies:
+      '@metamask/json-rpc-engine': 8.0.2
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 8.5.0
+      readable-stream: 3.6.2
     transitivePeerDependencies:
       - supports-color
 
@@ -15808,6 +15771,23 @@ snapshots:
     dependencies:
       bowser: 2.11.0
 
+  '@metamask/providers@16.1.0':
+    dependencies:
+      '@metamask/json-rpc-engine': 8.0.2
+      '@metamask/json-rpc-middleware-stream': 7.0.2
+      '@metamask/object-multiplex': 2.1.0
+      '@metamask/rpc-errors': 6.4.0
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 8.5.0
+      detect-browser: 5.3.0
+      extension-port-stream: 3.0.0
+      fast-deep-equal: 3.1.3
+      is-stream: 2.0.1
+      readable-stream: 3.6.2
+      webextension-polyfill: 0.10.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@metamask/providers@16.1.0(supports-color@8.1.1)':
     dependencies:
       '@metamask/json-rpc-engine': 8.0.2(supports-color@8.1.1)
@@ -15822,6 +15802,13 @@ snapshots:
       is-stream: 2.0.1
       readable-stream: 3.6.2
       webextension-polyfill: 0.10.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/rpc-errors@6.4.0':
+    dependencies:
+      '@metamask/utils': 9.3.0
+      fast-safe-stringify: 2.1.1
     transitivePeerDependencies:
       - supports-color
 
@@ -15846,6 +15833,21 @@ snapshots:
       eventemitter2: 6.4.9
       readable-stream: 3.6.2
       socket.io-client: 4.8.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10)
+      utf-8-validate: 5.0.10
+      uuid: 8.3.2
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/sdk-communication-layer@0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.15)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+    dependencies:
+      bufferutil: 4.0.9
+      cross-fetch: 4.1.0(encoding@0.1.13)
+      date-fns: 2.30.0
+      debug: 4.4.1
+      eciesjs: 0.4.15
+      eventemitter2: 6.4.9
+      readable-stream: 3.6.2
+      socket.io-client: 4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
       utf-8-validate: 5.0.10
       uuid: 8.3.2
     transitivePeerDependencies:
@@ -15882,7 +15884,44 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  '@metamask/sdk@0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)':
+    dependencies:
+      '@babel/runtime': 7.27.6
+      '@metamask/onboarding': 1.0.1
+      '@metamask/providers': 16.1.0
+      '@metamask/sdk-communication-layer': 0.32.0(cross-fetch@4.1.0(encoding@0.1.13))(eciesjs@0.4.15)(eventemitter2@6.4.9)(readable-stream@3.6.2)(socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@metamask/sdk-install-modal-web': 0.32.0
+      '@paulmillr/qr': 0.2.1
+      bowser: 2.11.0
+      cross-fetch: 4.1.0(encoding@0.1.13)
+      debug: 4.4.1
+      eciesjs: 0.4.15
+      eth-rpc-errors: 4.0.3
+      eventemitter2: 6.4.9
+      obj-multiplex: 1.0.0
+      pump: 3.0.2
+      readable-stream: 3.6.2
+      socket.io-client: 4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      tslib: 2.8.1
+      util: 0.12.5
+      uuid: 8.3.2
+    transitivePeerDependencies:
+      - bufferutil
+      - encoding
+      - supports-color
+      - utf-8-validate
+
   '@metamask/superstruct@3.2.1': {}
+
+  '@metamask/utils@5.0.2':
+    dependencies:
+      '@ethereumjs/tx': 4.2.0
+      '@types/debug': 4.1.12
+      debug: 4.4.1
+      semver: 7.7.2
+      superstruct: 1.0.4
+    transitivePeerDependencies:
+      - supports-color
 
   '@metamask/utils@5.0.2(supports-color@8.1.1)':
     dependencies:
@@ -15894,6 +15933,20 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@metamask/utils@8.5.0':
+    dependencies:
+      '@ethereumjs/tx': 4.2.0
+      '@metamask/superstruct': 3.2.1
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+      '@types/debug': 4.1.12
+      debug: 4.4.1
+      pony-cause: 2.1.11
+      semver: 7.7.2
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@metamask/utils@8.5.0(supports-color@8.1.1)':
     dependencies:
       '@ethereumjs/tx': 4.2.0
@@ -15902,6 +15955,20 @@ snapshots:
       '@scure/base': 1.2.6
       '@types/debug': 4.1.12
       debug: 4.4.1(supports-color@8.1.1)
+      pony-cause: 2.1.11
+      semver: 7.7.2
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@metamask/utils@9.3.0':
+    dependencies:
+      '@ethereumjs/tx': 4.2.0
+      '@metamask/superstruct': 3.2.1
+      '@noble/hashes': 1.8.0
+      '@scure/base': 1.2.6
+      '@types/debug': 4.1.12
+      debug: 4.4.1
       pony-cause: 2.1.11
       semver: 7.7.2
       uuid: 9.0.1
@@ -15921,6 +15988,12 @@ snapshots:
       uuid: 9.0.1
     transitivePeerDependencies:
       - supports-color
+
+  '@meteorwallet/sdk@1.0.9':
+    dependencies:
+      borsh: 0.7.0
+      nanoid: 3.3.6
+      query-string: 7.1.3
 
   '@meteorwallet/sdk@1.0.9(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
@@ -16182,12 +16255,26 @@ snapshots:
     transitivePeerDependencies:
       - encoding
 
+  '@near-wallet-selector/core@8.10.2':
+    dependencies:
+      borsh: 1.0.0
+      events: 3.3.0
+      js-sha256: 0.9.0
+      rxjs: 7.8.1
+
   '@near-wallet-selector/core@8.10.2(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       borsh: 1.0.0
       events: 3.3.0
       js-sha256: 0.9.0
       near-api-js: 3.0.4(encoding@0.1.13)
+      rxjs: 7.8.1
+
+  '@near-wallet-selector/core@8.9.10':
+    dependencies:
+      borsh: 0.7.0
+      events: 3.3.0
+      js-sha256: 0.9.0
       rxjs: 7.8.1
 
   '@near-wallet-selector/core@8.9.10(near-api-js@3.0.4(encoding@0.1.13))':
@@ -16206,6 +16293,15 @@ snapshots:
       near-api-js: 5.1.1(encoding@0.1.13)
       rxjs: 7.8.1
 
+  '@near-wallet-selector/here-wallet@8.9.10(borsh@2.0.0)(encoding@0.1.13)':
+    dependencies:
+      '@here-wallet/core': 1.6.6(bn.js@5.2.1)(borsh@2.0.0)(encoding@0.1.13)
+      '@near-wallet-selector/core': 8.9.10
+      bn.js: 5.2.1
+    transitivePeerDependencies:
+      - borsh
+      - encoding
+
   '@near-wallet-selector/here-wallet@8.9.10(borsh@2.0.0)(encoding@0.1.13)(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       '@here-wallet/core': 1.6.6(bn.js@5.2.1)(borsh@2.0.0)(encoding@0.1.13)
@@ -16216,11 +16312,26 @@ snapshots:
       - borsh
       - encoding
 
+  '@near-wallet-selector/meteor-wallet@8.9.10':
+    dependencies:
+      '@meteorwallet/sdk': 1.0.9
+      '@near-wallet-selector/core': 8.9.10
+
   '@near-wallet-selector/meteor-wallet@8.9.10(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
       '@meteorwallet/sdk': 1.0.9(near-api-js@3.0.4(encoding@0.1.13))
       '@near-wallet-selector/core': 8.9.10(near-api-js@3.0.4(encoding@0.1.13))
       near-api-js: 3.0.4(encoding@0.1.13)
+
+  '@near-wallet-selector/modal-ui@8.9.10':
+    dependencies:
+      '@near-wallet-selector/core': 8.9.10
+      copy-to-clipboard: 3.3.3
+      qrcode: 1.5.3
+      react: 18.2.0
+      react-dom: 18.2.0(react@18.2.0)
+    transitivePeerDependencies:
+      - near-api-js
 
   '@near-wallet-selector/modal-ui@8.9.10(near-api-js@3.0.4(encoding@0.1.13))':
     dependencies:
@@ -20454,8 +20565,8 @@ snapshots:
       '@trezor/websocket-client': 1.1.1(bufferutil@4.0.9)(tslib@2.8.1)(utf-8-validate@5.0.10)
       '@types/web': 0.0.197
       events: 3.3.0
-      ripple-lib: 1.10.1(bufferutil@4.0.9)(supports-color@8.1.1)(utf-8-validate@5.0.10)
-      socks-proxy-agent: 8.0.4(supports-color@8.1.1)
+      ripple-lib: 1.10.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      socks-proxy-agent: 8.0.4
       tslib: 2.8.1
     transitivePeerDependencies:
       - bufferutil
@@ -21189,12 +21300,12 @@ snapshots:
   '@wagmi/connectors@5.8.5(@types/react@19.1.6)(@wagmi/core@2.17.3(@tanstack/query-core@5.81.2)(@types/react@19.1.6)(react@18.2.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.2.0))(viem@2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)))(bufferutil@4.0.9)(encoding@0.1.13)(react@18.2.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(viem@2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64))(zod@3.25.64)':
     dependencies:
       '@coinbase/wallet-sdk': 4.3.3
-      '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(supports-color@8.1.1)(utf-8-validate@5.0.10)
+      '@metamask/sdk': 0.32.0(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
       '@safe-global/safe-apps-provider': 0.18.6(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
       '@safe-global/safe-apps-sdk': 9.1.0(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
       '@wagmi/core': 2.17.3(@tanstack/query-core@5.81.2)(@types/react@19.1.6)(react@18.2.0)(typescript@5.8.3)(use-sync-external-store@1.4.0(react@18.2.0))(viem@2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64))
       '@walletconnect/ethereum-provider': 2.21.1(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@18.2.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
-      cbw-sdk: '@coinbase/wallet-sdk@3.9.3(supports-color@8.1.1)'
+      cbw-sdk: '@coinbase/wallet-sdk@3.9.3'
       viem: 2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
     optionalDependencies:
       typescript: 5.8.3
@@ -21377,7 +21488,7 @@ snapshots:
       eventemitter3: 5.0.1
       mipd: 0.0.7(typescript@5.8.3)
       viem: 2.31.4(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
-      zustand: 5.0.0(@types/react@19.1.6)(react@18.2.0)(use-sync-external-store@1.5.0(react@18.2.0))
+      zustand: 5.0.0(@types/react@19.1.6)(react@18.2.0)(use-sync-external-store@1.4.0(react@18.2.0))
     optionalDependencies:
       '@tanstack/query-core': 5.81.2
       typescript: 5.8.3
@@ -23865,6 +23976,12 @@ snapshots:
 
   aes-js@4.0.0-beta.5: {}
 
+  agent-base@6.0.2:
+    dependencies:
+      debug: 4.4.1
+    transitivePeerDependencies:
+      - supports-color
+
   agent-base@6.0.2(supports-color@8.1.1):
     dependencies:
       debug: 4.4.1(supports-color@8.1.1)
@@ -24858,6 +24975,10 @@ snapshots:
     optionalDependencies:
       supports-color: 8.1.1
 
+  debug@4.3.7:
+    dependencies:
+      ms: 2.1.3
+
   debug@4.3.7(supports-color@8.1.1):
     dependencies:
       ms: 2.1.3
@@ -24865,6 +24986,10 @@ snapshots:
       supports-color: 8.1.1
 
   debug@4.4.0:
+    dependencies:
+      ms: 2.1.3
+
+  debug@4.4.1:
     dependencies:
       ms: 2.1.3
 
@@ -25159,6 +25284,18 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  engine.io-client@6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.3.7
+      engine.io-parser: 5.2.3
+      ws: 8.17.1(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      xmlhttprequest-ssl: 2.1.2
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   engine.io-parser@5.2.3: {}
 
   enhanced-resolve@5.18.1:
@@ -25405,6 +25542,16 @@ snapshots:
   eta@3.5.0: {}
 
   etag@1.8.1: {}
+
+  eth-block-tracker@7.1.0:
+    dependencies:
+      '@metamask/eth-json-rpc-provider': 1.0.1
+      '@metamask/safe-event-emitter': 3.1.2
+      '@metamask/utils': 5.0.2
+      json-rpc-random-id: 1.0.1
+      pify: 3.0.0
+    transitivePeerDependencies:
+      - supports-color
 
   eth-block-tracker@7.1.0(supports-color@8.1.1):
     dependencies:
@@ -26133,6 +26280,13 @@ snapshots:
       - debug
 
   https-browserify@1.0.0: {}
+
+  https-proxy-agent@5.0.1:
+    dependencies:
+      agent-base: 6.0.2
+      debug: 4.4.1
+    transitivePeerDependencies:
+      - supports-color
 
   https-proxy-agent@5.0.1(supports-color@8.1.1):
     dependencies:
@@ -28370,6 +28524,24 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  ripple-lib@1.10.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+    dependencies:
+      '@types/lodash': 4.17.17
+      '@types/ws': 7.4.7
+      bignumber.js: 9.3.0
+      https-proxy-agent: 5.0.1
+      jsonschema: 1.2.2
+      lodash: 4.17.21
+      ripple-address-codec: 4.3.1
+      ripple-binary-codec: 1.11.0
+      ripple-keypairs: 1.3.1
+      ripple-lib-transactionparser: 0.8.2
+      ws: 7.5.10(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
   rolldown-plugin-dts@0.13.8(rolldown@1.0.0-beta.11-commit.f051675)(typescript@5.8.3):
     dependencies:
       '@babel/generator': 7.27.5
@@ -28682,10 +28854,36 @@ snapshots:
       - supports-color
       - utf-8-validate
 
+  socket.io-client@4.8.1(bufferutil@4.0.9)(utf-8-validate@5.0.10):
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.3.7
+      engine.io-client: 6.6.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      socket.io-parser: 4.2.4
+    transitivePeerDependencies:
+      - bufferutil
+      - supports-color
+      - utf-8-validate
+
+  socket.io-parser@4.2.4:
+    dependencies:
+      '@socket.io/component-emitter': 3.1.2
+      debug: 4.3.7
+    transitivePeerDependencies:
+      - supports-color
+
   socket.io-parser@4.2.4(supports-color@8.1.1):
     dependencies:
       '@socket.io/component-emitter': 3.1.2
       debug: 4.3.7(supports-color@8.1.1)
+    transitivePeerDependencies:
+      - supports-color
+
+  socks-proxy-agent@8.0.4:
+    dependencies:
+      agent-base: 7.1.3
+      debug: 4.4.1
+      socks: 2.8.4
     transitivePeerDependencies:
       - supports-color
 
@@ -29434,11 +29632,6 @@ snapshots:
     dependencies:
       react: 19.1.0
 
-  use-sync-external-store@1.5.0(react@18.2.0):
-    dependencies:
-      react: 18.2.0
-    optional: true
-
   use-sync-external-store@1.5.0(react@19.1.0):
     dependencies:
       react: 19.1.0
@@ -29795,14 +29988,6 @@ snapshots:
       '@rollup/plugin-inject': 5.0.5(rollup@4.41.1)
       node-stdlib-browser: 1.3.1
       vite: 6.3.5(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0)
-    transitivePeerDependencies:
-      - rollup
-
-  vite-plugin-node-polyfills@0.23.0(rollup@4.41.1)(vite@7.0.0(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0)):
-    dependencies:
-      '@rollup/plugin-inject': 5.0.5(rollup@4.41.1)
-      node-stdlib-browser: 1.3.1
-      vite: 7.0.0(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0)
     transitivePeerDependencies:
       - rollup
 
@@ -30456,11 +30641,11 @@ snapshots:
 
   zod@3.25.64: {}
 
-  zustand@5.0.0(@types/react@19.1.6)(react@18.2.0)(use-sync-external-store@1.5.0(react@18.2.0)):
+  zustand@5.0.0(@types/react@19.1.6)(react@18.2.0)(use-sync-external-store@1.4.0(react@18.2.0)):
     optionalDependencies:
       '@types/react': 19.1.6
       react: 18.2.0
-      use-sync-external-store: 1.5.0(react@18.2.0)
+      use-sync-external-store: 1.4.0(react@18.2.0)
 
   zustand@5.0.0(@types/react@19.1.6)(react@19.1.0)(use-sync-external-store@1.4.0(react@19.1.0)):
     optionalDependencies:
