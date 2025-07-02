@@ -643,6 +643,7 @@ export function Onboarding() {
   useEffect(() => {
     return () => {
       resetOnboarding();
+      $step.set("no-profile");
     };
   }, [resetOnboarding]);
 

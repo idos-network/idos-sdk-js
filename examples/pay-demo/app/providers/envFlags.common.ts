@@ -7,6 +7,8 @@ export const commonEnvSchema = z.object({
   KRAKEN_API_URL: z.string(),
   KRAKEN_ISSUER_PUBLIC_KEY: z.string(),
   KRAKEN_LEVEL: z.string(),
+  KRAKEN_ENCRYPTION_PUBLIC_KEY: z.string(),
+  KRAKEN_PUBLIC_KEY: z.string(),
 });
 
 export type CommonEnv = z.infer<typeof commonEnvSchema>;
