@@ -3,9 +3,7 @@
   "description": "idOS Credentials JavaScript SDK",
   "version": "0.0.1",
   "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
+    "remove": ["devDependencies.@idos-network/core"]
   },
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "catalog:core",
