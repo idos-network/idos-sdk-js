@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "^1.7.5",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/core": "workspace:*",
     "@near-wallet-selector/core": "8.9.10",
@@ -18,6 +19,7 @@
     "@preact/signals": "^2.0.2",
     "@reown/appkit": "^1.7.11",
     "@reown/appkit-adapter-wagmi": "^1.7.11",
+    "@stellar/stellar-base": "^13.1.0",
     "@stepperize/react": "^5.1.6",
     "@tanstack/react-query": "^5.81.2",
     "@web3icons/react": "^4.0.14",
