@@ -9,30 +9,30 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@creit.tech/stellar-wallets-kit": "^1.7.5",
-    "@gemwallet/api": "^3.8.0",
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
+    "@gemwallet/api": "catalog:core",
     "@idos-network/core": "workspace:*",
-    "@near-wallet-selector/core": "9.0.2",
-    "@near-wallet-selector/here-wallet": "9.0.2",
-    "@near-wallet-selector/meteor-wallet": "9.0.2",
-    "@near-wallet-selector/modal-ui": "9.0.2",
+    "@near-wallet-selector/core": "catalog:near",
+    "@near-wallet-selector/here-wallet": "catalog:near",
+    "@near-wallet-selector/meteor-wallet": "catalog:near",
+    "@near-wallet-selector/modal-ui": "catalog:near",
     "@preact/signals": "^2.0.2",
-    "@reown/appkit": "^1.7.2",
-    "@reown/appkit-adapter-wagmi": "^1.7.2",
-    "@stellar/stellar-base": "^13.1.0",
+    "@reown/appkit": "catalog:reown",
+    "@reown/appkit-adapter-wagmi": "catalog:reown",
+    "@stellar/stellar-base": "catalog:stellar",
     "@stepperize/react": "^5.1.6",
-    "@tanstack/react-query": "^5.81.2",
+    "@tanstack/react-query": "catalog:tanstack",
     "@web3icons/react": "^4.0.14",
     "preact": "^10.26.9",
-    "viem": "^2.31.4",
-    "wagmi": "^2.15.6"
+    "viem": "catalog:ethereum",
+    "wagmi": "catalog:ethereum"
   },
   "devDependencies": {
     "@preact/preset-vite": "^2.10.1",
     "@tailwindcss/vite": "^4.1.11",
     "tailwindcss": "^4.1.11",
     "typescript": "catalog:build",
-    "vite": "^7.0.0",
+    "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-node-polyfills": "0.12.0"
   }
