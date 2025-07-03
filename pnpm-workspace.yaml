@@ -32,11 +32,11 @@ catalogs:
     "ethers": "^6.14.0"
 
   near:
-    "near-api-js": "3.0.4"
-    "@near-wallet-selector/core": "8.9.10"
-    "@near-wallet-selector/here-wallet": "8.9.10"
-    "@near-wallet-selector/meteor-wallet": "8.9.10"
-    "@near-wallet-selector/modal-ui": "8.9.10"
+    "near-api-js": "4.0.3"
+    "@near-wallet-selector/core": "8.10.2"
+    "@near-wallet-selector/here-wallet": "8.10.2"
+    "@near-wallet-selector/meteor-wallet": "8.10.2"
+    "@near-wallet-selector/modal-ui": "8.10.2"
 
   stellar:
     "@stellar/stellar-sdk": "^13.3.0"
