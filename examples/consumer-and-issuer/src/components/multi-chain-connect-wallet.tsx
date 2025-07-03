@@ -77,7 +77,6 @@ export default function MultiChainConnectWallet({
     const subscription = near.selector.store.observable.subscribe(async (state) => {
       if (state.accounts[0]) {
         const publicKeys = await getNearFullAccessPublicKeys(state.accounts[0].accountId ?? null);
-        console.log({ publicKeys });
         const [account] = state.accounts;
         setWalletAddress(account.accountId ?? null);
         setWalletPublicKey(publicKeys?.[0] ?? null);
