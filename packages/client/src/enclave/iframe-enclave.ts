@@ -23,9 +23,9 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async load(): Promise<void> {
+  async load(walletAddress: string): Promise<void> {
     await this.loadEnclave();
-    await this.requestToEnclave({ configure: this.options });
+    await this.requestToEnclave({ configure: {...this.options, walletAddress} });
   }
 
   async reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void> {
@@ -41,7 +41,8 @@ export class IframeEnclave implements EnclaveProvider {
       },
     })) as StoredData;
 
-    while (!userEncryptionPublicKey) {
+    userEncryptionPublicKey = new Uint8Array(0);
+    // while (!userEncryptionPublicKey) {
       this.showEnclave();
       try {
         userEncryptionPublicKey = (await this.requestToEnclave({
@@ -52,7 +53,7 @@ export class IframeEnclave implements EnclaveProvider {
       } finally {
         this.hideEnclave();
       }
-    }
+    // }
 
     return userEncryptionPublicKey;
   }

@@ -4,6 +4,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
+import { Client as MPCClient } from "./mpc/Client";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
@@ -20,6 +21,11 @@ export class Enclave {
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
     const secretKey = storeWithCodec.get("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
+    this.mpcClient = new MPCClient(
+      "https://partisia-reader-node.staging.idos.network:8080",
+      "02fba53e60467a4babd20d007953a5dde1197463a4"
+    )
 
     this.listenToRequests();
   }
@@ -66,10 +72,56 @@ export class Enclave {
   }
 
   async keys() {
-    await this.ensurePassword();
-    await this.ensureKeyPair();
+    console.log("keys")
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
+    var secretKey = storeWithCodec.get("encryption-private-key")
+
+    if (!secretKey) {
+      const preferredAuthMethod = await this.ensurePreferredAuthMethod()
+      console.log({preferredAuthMethod});
+
+      switch (preferredAuthMethod) {
+        case "password":
+          const password = await this.ensurePassword();
+          const salt = this.userId;
+          secretKey = await idOSKeyDerivation({ password, salt });
+          break;
+        case "mpc":
+          secretKey = await this.ensureMPCPrivateKey();
+          break;
+      }
+    }
+    console.log({secretKey})
+
+    await this.ensureKeyPair(secretKey);
 
     return this.keyPair?.publicKey;
+  }
+
+  async ensurePreferredAuthMethod() {
+    var preferredAuthMethod = this.store.get("preferred-auth-method");
+    if (preferredAuthMethod) { return preferredAuthMethod }
+
+    this.unlockButton.style.display = "block";
+    this.unlockButton.disabled = false;
+
+    return new Promise((resolve, reject) =>
+      this.unlockButton.addEventListener("click", async () => {
+        this.unlockButton.disabled = true;
+
+        try {
+          await this.openDialog("auth", {
+            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+          });
+        } catch (e) {
+          return reject(e);
+        }
+
+        preferredAuthMethod = this.store.get("preferred-auth-method");
+
+        return preferredAuthMethod ? resolve(preferredAuthMethod) : reject();
+      }),
+    );
   }
 
   async ensurePassword() {
@@ -79,17 +131,13 @@ export class Enclave {
     this.unlockButton.disabled = false;
 
     let password;
-    let duration;
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        const storedCredentialId = this.store.get("credential-id");
-        const preferredAuthMethod = this.store.get("preferred-auth-method");
-
         try {
-          ({ password, duration } = await this.openDialog(preferredAuthMethod || "auth", {
+          ({ password } = await this.openDialog("password", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
         } catch (e) {
@@ -101,24 +149,85 @@ export class Enclave {
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
-        return password ? resolve() : reject();
+        return password ? resolve(password) : reject();
       }),
     );
   }
 
-  async ensureKeyPair() {
-    const password = this.store.get("password");
-    const salt = this.userId;
-
-    const storeWithCodec = this.store.pipeCodec(Base64Codec);
-
-    const secretKey =
-      storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
-
+  async ensureKeyPair(secretKey) {
+    console.log("ensureKeyPair");
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
+    const storeWithCodec = this.store.pipeCodec(Base64Codec);
     storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
     storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
+  }
+
+  async ensureMPCPrivateKey() {
+    console.log("ensureMPCPrivateKey");
+
+    const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
+    if (downloadStatus === "ok") { return downloadedSecret }
+
+    if (downloadStatus === "error") { throw Error("A secret might be stored at ZK nodes, but can't be obtained") }
+
+    const privateKey = nacl.box.keyPair().secretKey;
+    const { status: uploadStatus } = await this.uploadSecret(privateKey)
+
+    if (uploadStatus != "success") { throw Error(`A secret upload failed with status: ${uploadStatus}`) }
+
+    return privateKey;
+  }
+
+  async downloadSecret() {
+    console.log("downloadSecret");
+    return new Promise((resolve, reject) => {
+      const ephemeralKeyPair = nacl.box.keyPair();
+      const signerAddress = this.configuration.walletAddress
+      const downloadRequest = this.mpcClient.downloadRequest(signerAddress, ephemeralKeyPair.publicKey)
+      const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest)
+
+      const channel = new MessageChannel();
+      channel.port1.onmessage = async (message) => {
+        console.log("I-FRAME receives a message: ", message);
+        channel.port1.close();
+        const { status, secret } = await this.mpcClient.downloadSecret(this.userId, downloadRequest, message.data.data, ephemeralKeyPair.secretKey)
+
+        return resolve({ status, secret })
+      };
+
+      const signMessage = {
+        type: "idOS-MPC:signMessage",
+        payload: messageToSign,
+      }
+      window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
+    })
+  }
+
+  async uploadSecret(secret) {
+    console.log("uploadSecret");
+    return new Promise((resolve, reject) => {
+      const signerAddress = this.configuration.walletAddress
+      const blindedShares = this.mpcClient.getBlindedShares(secret)
+      const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress)
+      const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest)
+
+      const channel = new MessageChannel();
+      channel.port1.onmessage = async (message) => {
+        console.log("I-FRAME receives a message: ", message);
+        channel.port1.close();
+        const { status, secret } = await this.mpcClient.uploadSecret(this.userId, uploadRequest, message.data.data, blindedShares)
+
+        return resolve({ status, secret: secret? secret.toString("utf8") : secret })
+      };
+
+      const signMessage = {
+        type: "idOS-MPC:signMessage",
+        payload: messageToSign,
+      }
+      window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
+    })
+
   }
 
   encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
@@ -191,8 +300,8 @@ export class Enclave {
     );
   }
 
-  async configure(mode, theme) {
-    this.configuration = { mode, theme };
+  async configure(mode, theme, walletAddress) {
+    this.configuration = { mode, theme, walletAddress };
 
     if (mode === "new") {
       this.unlockButton.classList.add("create");
@@ -274,6 +383,7 @@ export class Enclave {
           credentials,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
+          walletAddress,
         } = requestData;
 
         const paramBuilder = {
@@ -282,10 +392,11 @@ export class Enclave {
           encrypt: () => [message, receiverPublicKey],
           keys: () => [],
           reset: () => [],
-          configure: () => [mode, theme],
+          configure: () => [mode, theme, walletAddress],
           storage: () => [userId, expectedUserEncryptionPublicKey],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
+          target: () => [],
         }[requestName];
 
         if (!paramBuilder) throw new Error(`Unexpected request from parent: ${requestName}`);

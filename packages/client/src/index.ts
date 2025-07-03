@@ -110,7 +110,7 @@ export class idOSClientIdle {
     });
 
     const enclaveProvider = new IframeEnclave({ ...params.enclaveOptions });
-    await enclaveProvider.load();
+    await enclaveProvider.load(store.get("signer-address"));
 
     return new idOSClientIdle(store, kwilClient, enclaveProvider);
   }
@@ -157,6 +157,23 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
+    window.addEventListener("message", this.onMessage.bind(this));
+  }
+
+  async onMessage(message: MessageEvent): Promise<void> {
+    const types = ["idOS-MPC:signMessage"];
+    if (!types.includes(message.data.type)) return;
+
+    console.log("message to sign on client", message);
+    // @ts-ignore type collapse :)
+    const payload = (message.data.payload)
+    const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
+    const response = {
+      status: "success",
+      data: signature,
+    }
+    message.ports[0].postMessage(response);
+    message.ports[0].close();
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -169,7 +186,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 
   async getUserEncryptionPublicKey(userId: string): Promise<string> {
-    await this.enclaveProvider.reconfigure({ mode: "new" });
+    await this.enclaveProvider.reconfigure({ mode: "new", walletAddress: this.store.get("signer-address") });
     const { userEncryptionPublicKey } =
       await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
     return userEncryptionPublicKey;
@@ -178,7 +195,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
-    await this.enclaveProvider.reconfigure({ mode: "existing" });
+    await this.enclaveProvider.reconfigure({ mode: "existing", walletAddress: this.store.get("signer-address") });
     const kwilUser = await getUserProfile(this.kwilClient);
 
     return new idOSClientLoggedIn(this, kwilUser);

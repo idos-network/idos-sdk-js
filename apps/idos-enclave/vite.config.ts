@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 export default defineConfig({
   define: {
     global: {},
@@ -16,5 +17,15 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mkcert(), preact(), tailwindcss(), tsconfigPaths()],
+  plugins: [
+    mkcert(),
+    preact(),
+    tailwindcss(),
+    tsconfigPaths(),
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+      },
+    }),
+  ],
 });

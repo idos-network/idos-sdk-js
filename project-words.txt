@@ -4,11 +4,13 @@ Blockhash
 Borsh
 DAG
 Datil
+decryptable
 Holyheld
 IDOS
 IDOSDAG
 Neobank
 Nominatim
+offchain
 OSDAG
 Payin
 PayinFiat
@@ -46,8 +48,10 @@ idos
 incentivized
 informationally
 insertable
+hexlify
 jsigs
 jsonld
+keccak
 keypair
 kwil
 kwild
@@ -60,6 +64,7 @@ nacl
 nanostores
 nonced
 partialize
+partisia
 passporting
 permissioned
 pkoch
