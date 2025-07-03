@@ -128,7 +128,7 @@ export function PasswordForm({
             Please choose a secure password, store it safely, and enter it below:
           </Paragraph>
 
-          {/* <PasswordField password={password} hasError={hasError} /> */}
+          <PasswordField password={password} hasError={hasError} />
 
           <DurationField duration={duration} />
 
