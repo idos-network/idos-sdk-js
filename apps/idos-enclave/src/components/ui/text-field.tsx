@@ -1,4 +1,4 @@
-import { Input, type InputProps } from "@headlessui/react";
+import type { InputHTMLAttributes } from "preact/compat";
 import { type VariantProps, tv } from "tailwind-variants";
 
 const textField = tv({
@@ -6,11 +6,11 @@ const textField = tv({
 });
 
 type TextFieldVariants = VariantProps<typeof textField>;
-export interface TextFieldProps extends InputProps, TextFieldVariants {}
+export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement>, TextFieldVariants {}
 
 export function TextField({ class: class_, className, ...props }: TextFieldProps) {
   return (
-    <Input
+    <input
       className={textField({
         // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
         class: class_,
