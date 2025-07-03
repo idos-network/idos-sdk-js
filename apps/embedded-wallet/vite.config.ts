@@ -6,14 +6,17 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [
-    preact(),
-    tailwindcss(),
-    mkcert(),
-    nodePolyfills({
-      globals: {
-        Buffer: true,
-      },
-    }),
-  ],
+	plugins: [
+		preact(),
+		tailwindcss(),
+		mkcert(),
+		nodePolyfills({
+			globals: {
+				Buffer: true,
+			},
+		}),
+	],
+	build: {
+		target: "esnext",
+	},
 });
