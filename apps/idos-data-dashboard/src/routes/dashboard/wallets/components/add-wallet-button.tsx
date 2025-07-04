@@ -1,18 +1,12 @@
 import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
+import { type WalletSignature, verifySignature } from "@idos-network/core/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useIdOS } from "@/idOS.provider";
 import invariant from "tiny-invariant";
-
-interface WalletSignature {
-  address?: string;
-  signature: string;
-  message?: string;
-  public_key: string[];
-}
 
 const createWalletParamsFactory = ({
   address,
@@ -69,13 +63,54 @@ interface AddWalletButtonProps {
 }
 
 export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
-  const [walletSignature, setWalletSignature] = useState<WalletSignature | null>(null);
+  const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
   const toast = useToast();
   const queryClient = useQueryClient();
   const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
+
+  const addWallet = async (walletPayload: WalletSignature) => {
+    const isValid = await verifySignature(walletPayload);
+
+    if (!isValid) {
+      toast({
+        title: "Invalid signature",
+        description: "The signature does not match the wallet address",
+        status: "error",
+      });
+      setIsLoading(false);
+      return;
+    }
+    addWalletMutation.mutate(
+      {
+        address: walletPayload.address || "unknown",
+        publicKeys: walletPayload.public_key || [],
+        signature: walletPayload.signature,
+        message: walletPayload.message || "Sign this message to prove you own this wallet",
+      },
+      {
+        onSuccess: async () => {
+          toast({
+            title: "Wallet added",
+            description: "The wallet has been added to your idOS profile",
+          });
+          await queryClient.invalidateQueries({ queryKey: ["wallets"] });
+          onWalletAdded?.();
+        },
+        onError: (error) => {
+          console.error(error);
+          setIsLoading(false);
+          toast({
+            title: "Error adding wallet",
+            description: "Failed to add wallet to your idOS profile",
+            status: "error",
+          });
+        },
+      },
+    );
+  };
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -99,7 +134,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
       if (event.data?.type === "WALLET_SIGNATURE") {
-        setWalletSignature(event.data.data);
+        setWalletPayload(event.data.data);
         setIsLoading(false);
       }
     };
@@ -129,36 +164,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (!walletSignature) return;
-
-    addWalletMutation.mutate(
-      {
-        address: walletSignature.address || "unknown",
-        publicKeys: walletSignature.public_key || [],
-        signature: walletSignature.signature,
-        message: walletSignature.message || "Sign this message to prove you own this wallet",
-      },
-      {
-        onSuccess: async () => {
-          toast({
-            title: "Wallet added",
-            description: "The wallet has been added to your idOS profile",
-          });
-          await queryClient.invalidateQueries({ queryKey: ["wallets"] });
-          onWalletAdded?.();
-        },
-        onError: (error) => {
-          console.error(error);
-          setIsLoading(false);
-          toast({
-            title: "Error adding wallet",
-            description: "Failed to add wallet to your idOS profile",
-            status: "error",
-          });
-        },
-      },
-    );
-  }, [walletSignature]);
+    if (!walletPayload) return;
+    addWallet(walletPayload);
+  }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
     invariant(

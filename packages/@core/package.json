@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@gemwallet/api": "^3.8.0",
+    "@wagmi/core": "2.17.3",
     "@kwilteam/kwil-js": "catalog:core",
     "@near-wallet-selector/core": "9.0.2",
     "@stablelib/base64": "catalog:core",
@@ -30,6 +31,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./codecs": "./src/codecs/index.ts",
+    "./signature-verification": "./src/signature-verification/index.ts",
     "./cryptography": "./src/cryptography/index.ts",
     "./types": "./src/types/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",
