@@ -1,6 +1,6 @@
-import { useIdOS } from "@/idOS.provider";
-import { Box, Button, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, Heading, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { FileLockIcon } from "lucide-react";
+import { useIdOS } from "@/idOS.provider";
 
 export function Component() {
   const idOSClient = useIdOS();

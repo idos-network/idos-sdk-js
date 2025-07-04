@@ -93,7 +93,7 @@ export async function action({ request }: Route.ActionArgs) {
         "Set-Cookie": await sessionStorage.commitSession(session),
       },
     });
-  } catch (error) {
+  } catch (_error) {
     throw new Error("Signature verification failed");
   }
 }

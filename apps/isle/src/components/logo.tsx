@@ -1,8 +1,8 @@
 import {
-  Image,
-  type RecipeVariantProps,
   chakra,
   defineSlotRecipe,
+  Image,
+  type RecipeVariantProps,
   useSlotRecipe,
 } from "@chakra-ui/react";
 

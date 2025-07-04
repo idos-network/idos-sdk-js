@@ -2,11 +2,12 @@ import { testWithSynpress } from "@synthetixio/synpress";
 import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
 import { generateSimpleEthAddress } from "../utils/generate-address";
 import basicSetup from "../wallet-setup/basic.setup";
+
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 
 const { expect } = test;
 
-const normalizeAddress = (address: string) => address.trim().toLowerCase();
+const _normalizeAddress = (address: string) => address.trim().toLowerCase();
 
 test.beforeEach(async ({ context, page }) => {
   test.setTimeout(120000);

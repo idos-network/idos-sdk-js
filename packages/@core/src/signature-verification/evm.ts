@@ -1,4 +1,4 @@
-import { http, createConfig, verifyMessage } from "@wagmi/core";
+import { createConfig, http, verifyMessage } from "@wagmi/core";
 import { mainnet } from "@wagmi/core/chains";
 
 const wagmiConfig = createConfig({

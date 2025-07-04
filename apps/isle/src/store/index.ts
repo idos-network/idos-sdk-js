@@ -1,12 +1,11 @@
-import { createNode } from "@sanity/comlink";
-import { create } from "zustand";
-
 import type {
   IsleControllerMessage,
   IsleNodeMessage,
   IsleStatus,
   IsleTheme,
 } from "@idos-network/core";
+import { createNode } from "@sanity/comlink";
+import { create } from "zustand";
 
 interface NodeState {
   address: string | undefined;

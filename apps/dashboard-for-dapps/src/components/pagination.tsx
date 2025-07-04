@@ -11,7 +11,12 @@ export function Pagination({
   pageSize,
   page,
   setPage,
-}: { count: number; pageSize: number; page: number; setPage: (page: number) => void }) {
+}: {
+  count: number;
+  pageSize: number;
+  page: number;
+  setPage: (page: number) => void;
+}) {
   return (
     <PaginationRoot
       count={count}

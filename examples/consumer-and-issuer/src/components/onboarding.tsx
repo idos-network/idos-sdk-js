@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, PassportingPeer, idOSCredential } from "@idos-network/core";
+import type { IsleStatus, idOSCredential, PassportingPeer } from "@idos-network/core";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -39,7 +39,10 @@ function StepIcon({ icon }: { icon: React.ReactNode }) {
 function OnboardingStep({
   isActive = false,
   children,
-}: { isActive?: boolean; children: React.ReactNode }) {
+}: {
+  isActive?: boolean;
+  children: React.ReactNode;
+}) {
   return (
     <li
       className={cn(
@@ -261,11 +264,7 @@ export const useCreateIDVAttribute = () => {
   const { isleController } = useIsleController();
 
   return useMutation({
-    mutationFn: async (data: {
-      idOSUserId: string;
-      idvUserId: string;
-      signature: string;
-    }) => {
+    mutationFn: async (data: { idOSUserId: string; idvUserId: string; signature: string }) => {
       invariant(isleController?.idosClient.state === "logged-in", "`idosClient` is not logged in");
 
       const { idOSUserId, idvUserId, signature } = data;
@@ -284,14 +283,17 @@ export const useCreateIDVAttribute = () => {
 
 const useIssueCredential = () => {
   const { isleController } = useIsleController();
-  const near = useNearWallet();
+  const _near = useNearWallet();
   const { walletPublicKey } = useWalletStore();
 
   return useMutation({
     mutationFn: async ({
       idvUserId,
       recipient_encryption_public_key,
-    }: { idvUserId: string; recipient_encryption_public_key: string }) => {
+    }: {
+      idvUserId: string;
+      recipient_encryption_public_key: string;
+    }) => {
       invariant(isleController, "`isleController` not initialized");
 
       invariant(isleController.idosClient.state === "logged-in", "`idosClient` not logged in");
@@ -347,8 +349,8 @@ const useIssueCredential = () => {
 function useShareCredentialWithConsumer() {
   const queryClient = useQueryClient();
   const { isleController } = useIsleController();
-  const { walletPublicKey: publicKey, walletType, walletAddress } = useWalletStore();
-  const near = useNearWallet();
+  const { walletPublicKey: publicKey, walletType } = useWalletStore();
+  const _near = useNearWallet();
 
   return useMutation({
     mutationFn: async (
@@ -543,7 +545,7 @@ export function Onboarding() {
 
   const activeStep = useStore($step);
 
-  const near = useNearWallet();
+  const _near = useNearWallet();
 
   const handleCreateProfile = useCallback(async () => {
     const [error] = await goTry(async () => {
@@ -634,7 +636,7 @@ export function Onboarding() {
     [kycDisclosure, createIDVAttribute, queryClient, isleController],
   );
 
-  const handleKYCError = useCallback(async (error: unknown) => {}, []);
+  const handleKYCError = useCallback(async (_error: unknown) => {}, []);
 
   useEffect(() => {
     if (!evmAddress) queryClient.setQueryData(["idv-status", userData?.data?.idvUserId], undefined);

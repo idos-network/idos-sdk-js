@@ -1,4 +1,4 @@
-import { type BadgeProps, HStack, Spinner, VStack, chakra } from "@chakra-ui/react";
+import { type BadgeProps, chakra, HStack, Spinner, VStack } from "@chakra-ui/react";
 import type { IsleStatus } from "@idos-network/core";
 
 import { DisconnectedIcon } from "@/components/icons/disconnected";

@@ -1,11 +1,11 @@
 import {
-  HStack,
   Heading,
+  HStack,
   IconButton,
   List,
   ListItem,
-  VStack,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
@@ -80,7 +80,7 @@ const Credentials = () => {
       <>
         <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
           {credentials.data.map((credential) => (
-            // biome-ignore lint/a11y/useSemanticElements: <explanation>
+            // biome-ignore lint/a11y/useSemanticElements: skipping for now
             <ListItem key={credential.id} id={credential.id} role="listitem">
               <CredentialCard
                 credential={credential}

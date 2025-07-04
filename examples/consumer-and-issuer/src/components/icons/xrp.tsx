@@ -1,6 +1,6 @@
 export default function XrpIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
+    // biome-ignore lint/a11y/noSvgWithoutTitle: skipping for now
     <svg
       width="800px"
       height="800px"

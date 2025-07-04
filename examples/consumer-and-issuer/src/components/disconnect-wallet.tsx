@@ -1,8 +1,8 @@
+import { Button } from "@heroui/react";
+import { useDisconnect } from "@reown/appkit/react";
 import { useWalletStore } from "@/app/stores/wallet";
 import { useNearWallet } from "@/near.provider";
 import stellarKit from "@/stellar.config";
-import { Button } from "@heroui/react";
-import { useDisconnect } from "@reown/appkit/react";
 
 export default function DisconnectWallet() {
   const { disconnect: disconnectEvm } = useDisconnect();

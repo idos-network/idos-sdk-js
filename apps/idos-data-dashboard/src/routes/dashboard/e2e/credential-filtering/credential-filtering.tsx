@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, HStack, Heading, Stack, VStack } from "@chakra-ui/react";
+import { Button, ButtonGroup, Heading, HStack, Stack, VStack } from "@chakra-ui/react";
 import { useMutation } from "@tanstack/react-query";
 import { sepolia } from "viem/chains";
 import { useSwitchChain } from "wagmi";
