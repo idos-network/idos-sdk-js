@@ -30,7 +30,7 @@ const preloadAcmeCardImage = () => {
 };
 
 export default function HomePage() {
-  const [timeLeft, setTimeLeft] = useState({
+  const [_timeLeft, setTimeLeft] = useState({
     days: 7,
     hours: 12,
     minutes: 45,

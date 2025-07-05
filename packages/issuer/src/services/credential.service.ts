@@ -1,16 +1,16 @@
 import {
-  type KwilActionClient,
   base64Decode,
   base64Encode,
   encryptContent,
   hexEncode,
   hexEncodeSha256Hash,
+  type KwilActionClient,
   utf8Encode,
 } from "@idos-network/core";
 import {
   type CreateCredentialByDelegatedWriteGrantParams,
-  type EditCredentialAsIssuerParams,
   createCredentialByDelegatedWriteGrant,
+  type EditCredentialAsIssuerParams,
   editCredentialAsIssuer,
   getCredentialIdByContentHash,
   getSharedCredential,

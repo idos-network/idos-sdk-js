@@ -1,4 +1,4 @@
-import { Image, Text, chakra } from "@chakra-ui/react";
+import { chakra, Image, Text } from "@chakra-ui/react";
 
 export function Footer() {
   return (

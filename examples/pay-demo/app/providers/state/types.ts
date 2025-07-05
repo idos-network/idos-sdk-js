@@ -26,9 +26,9 @@ export interface Context {
   hifiTosId: string | null;
   hifiUrl: string | null;
   getHifiKycStatusAttempts: number;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   hifiKycStatus: "ACTIVE" | any;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   onRampAccount: any | null;
 }
 
