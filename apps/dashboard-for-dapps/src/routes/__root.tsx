@@ -1,17 +1,17 @@
 import {
   Center,
   Container,
+  chakra,
   Flex,
   Grid,
-  HStack,
   Heading,
+  HStack,
   Image,
   Text,
-  chakra,
 } from "@chakra-ui/react";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { Link, Outlet, createRootRouteWithContext, useNavigate } from "@tanstack/react-router";
+import { createRootRouteWithContext, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
@@ -39,9 +39,7 @@ function ConnectWallet() {
     <Center h="100dvh" flexDirection="column" gap="4">
       <Heading fontSize="xl">Connect your wallet to continue</Heading>
       {isPending ? (
-        <>
-          <Button loading={true}> Waiting wallet </Button>
-        </>
+        <Button loading={true}> Waiting wallet </Button>
       ) : (
         <>
           <Button onClick={() => connect({ connector: injectedConnector })}>Browser wallet</Button>

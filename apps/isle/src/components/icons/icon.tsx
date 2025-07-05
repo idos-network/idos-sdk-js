@@ -3,7 +3,7 @@ import { Icon as ChakraIcon, type IconProps as ChakraIconProps } from "@chakra-u
 export interface IconProps extends Omit<ChakraIconProps, "fontSize"> {}
 
 export function Icon(props: IconProps) {
-  const { size = "md", boxSize = "8", ...rest } = props;
+  const { boxSize = "8", ...rest } = props;
 
   return <ChakraIcon boxSize={boxSize} {...rest} />;
 }

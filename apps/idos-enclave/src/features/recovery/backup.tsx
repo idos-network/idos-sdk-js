@@ -210,7 +210,6 @@ export function PasswordOrKeyBackup({
     reveal.value = !reveal.value;
   };
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: We depend only on backupStatus.
   useEffect(() => {
     if (["failure", "done", "success"].includes(backupStatus)) {
       status.value = "idle";

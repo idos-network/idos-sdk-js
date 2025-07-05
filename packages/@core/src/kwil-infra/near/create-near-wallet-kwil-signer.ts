@@ -1,8 +1,8 @@
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type {
   Wallet as NearWallet,
-  SignMessageParams,
   SignedMessage,
+  SignMessageParams,
 } from "@near-wallet-selector/core";
 import type { connect as connectT } from "near-api-js";
 import type { AccessKeyList } from "near-api-js/lib/providers/provider";
@@ -124,7 +124,7 @@ export async function getNearFullAccessPublicKeys(
   let connect: typeof connectT;
   try {
     connect = (await import("near-api-js")).connect;
-  } catch (e) {
+  } catch (_e) {
     throw new Error("Can't load near-api-js");
   }
   const connectionConfig = getNearConnectionConfig(namedAddress);

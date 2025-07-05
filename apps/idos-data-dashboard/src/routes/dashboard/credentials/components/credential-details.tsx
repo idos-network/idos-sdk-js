@@ -1,4 +1,3 @@
-import { useIdOS } from "@/idOS.provider";
 import {
   Button,
   Center,
@@ -18,6 +17,7 @@ import {
 import { base64Decode, utf8Decode } from "@idos-network/core";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
+import { useIdOS } from "@/idOS.provider";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const idOSClient = useIdOS();
@@ -78,7 +78,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     ? (() => {
         try {
           return JSON.stringify(JSON.parse(credential.data.content), null, 2);
-        } catch (e) {
+        } catch (_e) {
           return credential.data.content;
         }
       })()

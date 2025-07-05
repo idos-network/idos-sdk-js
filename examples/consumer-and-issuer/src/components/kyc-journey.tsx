@@ -1,5 +1,5 @@
-import { generateKrakenUrlToken } from "@/actions";
 import { useCallback, useEffect, useState } from "react";
+import { generateKrakenUrlToken } from "@/actions";
 
 type KYCJourneyProps = {
   onSuccess: (data: { token: string }) => void;

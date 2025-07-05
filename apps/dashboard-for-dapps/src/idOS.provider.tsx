@@ -1,8 +1,8 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
 import { createIDOSClient, type idOSClient } from "@idos-network/client";
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   use,
   useCallback,
   useEffect,

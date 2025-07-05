@@ -1,5 +1,5 @@
+import { getExtensionId, MetaMask } from "@synthetixio/synpress/playwright";
 import { defineWalletSetup } from "@synthetixio/synpress-cache";
-import { MetaMask, getExtensionId } from "@synthetixio/synpress/playwright";
 
 const SEED_PHRASE = process.env.WALLET_SEED_PHRASE ?? "";
 const PASSWORD = process.env.WALLET_PASSWORD ?? "";

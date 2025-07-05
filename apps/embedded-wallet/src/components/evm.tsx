@@ -1,11 +1,11 @@
-import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit, useAppKit, useAppKitAccount, useDisconnect } from "@reown/appkit/react";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
 import { useEffect } from "preact/hooks";
-import { WagmiProvider, useSignMessage } from "wagmi";
+import { useSignMessage, WagmiProvider } from "wagmi";
 import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 

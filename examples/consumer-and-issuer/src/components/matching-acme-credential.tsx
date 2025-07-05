@@ -1,16 +1,14 @@
 "use client";
 
 import { Button, Link, Spinner } from "@heroui/react";
-import type { PassportingPeer, idOSCredential } from "@idos-network/core";
+import type { idOSCredential, PassportingPeer } from "@idos-network/core";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 import invariant from "tiny-invariant";
 import { useSignMessage } from "wagmi";
-
 import { invokePassportingService } from "@/actions";
-
 import { useIsleController } from "@/isle.provider";
-import Image from "next/image";
 import { CredentialCard } from "./credential-card";
 
 const WIP = () => {

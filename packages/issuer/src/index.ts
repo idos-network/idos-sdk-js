@@ -1,22 +1,22 @@
 import {
-  type EditCredentialAsIssuerParams,
   createNodeKwilClient,
   createServerKwilSigner,
+  type EditCredentialAsIssuerParams,
 } from "@idos-network/core";
 import type {
-  PassportingPeer,
   idOSCredential,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
+  PassportingPeer,
 } from "@idos-network/core/types";
 import {
   type AvailableIssuerType,
+  buildCredentials,
   type CredentialFields,
   type CredentialSubject,
   type Credentials,
-  buildCredentials,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
 import {

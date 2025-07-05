@@ -1,19 +1,18 @@
 "use client";
-import { useWalletStore } from "@/app/stores/wallet";
+import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import { Button } from "@heroui/react";
+import { getNearFullAccessPublicKeys } from "@idos-network/core";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
+import { StrKey } from "@stellar/stellar-base";
 import { TokenIcon } from "@web3icons/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
-
+import { useWalletStore } from "@/app/stores/wallet";
 import { useNearWallet } from "@/near.provider";
 import stellarKit from "@/stellar.config";
-import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
-import { getNearFullAccessPublicKeys } from "@idos-network/core";
-import { StrKey } from "@stellar/stellar-base";
 import DisconnectWallet from "./disconnect-wallet";
 import WalletConnectIcon from "./icons/wallet-connect";
 import XrpIcon from "./icons/xrp";
@@ -27,19 +26,14 @@ const derivePublicKey = async (address: string) => {
 export default function MultiChainConnectWallet({
   hideConnect,
   hideDisconnect,
-}: { hideConnect?: boolean; hideDisconnect?: boolean }) {
-  const router = useRouter();
+}: {
+  hideConnect?: boolean;
+  hideDisconnect?: boolean;
+}) {
+  const _router = useRouter();
   const { open } = useAppKit();
-  const {
-    setWalletType,
-    walletType,
-    setWalletAddress,
-    setConnecting,
-    setWalletPublicKey,
-    walletAddress,
-    walletError,
-    ...rest
-  } = useWalletStore();
+  const { setWalletType, setWalletAddress, setConnecting, setWalletPublicKey, walletAddress } =
+    useWalletStore();
   const { isConnected: evmConnected } = useAppKitAccount();
   const { isConnected, address } = useAccount();
   const near = useNearWallet();
@@ -72,7 +66,7 @@ export default function MultiChainConnectWallet({
     }
   }, [isConnected, address, setWalletAddress, setWalletPublicKey]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  // biome-ignore lint/correctness/useExhaustiveDependencies: false positive
   useEffect(() => {
     const subscription = near.selector.store.observable.subscribe(async (state) => {
       if (state.accounts[0]) {

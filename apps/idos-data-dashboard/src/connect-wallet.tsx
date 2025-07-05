@@ -1,16 +1,14 @@
 import { Box, Button, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
-import { useWeb3Modal } from "@web3modal/wagmi/react";
-
-import { useWalletSelector } from "@/core/near";
-
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
 import { StrKey } from "@stellar/stellar-base";
 import { TokenIcon } from "@web3icons/react";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
+import { useWalletSelector } from "@/core/near";
 import stellarKit from "./core/stellar-kit";
 import { useWalletStore } from "./stores/wallet";
 

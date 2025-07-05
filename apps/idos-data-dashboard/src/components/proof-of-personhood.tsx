@@ -1,4 +1,3 @@
-import { useIdOS } from "@/idOS.provider";
 import {
   Button,
   Image,
@@ -11,10 +10,11 @@ import {
   ModalOverlay,
   SimpleGrid,
   Text,
-  VStack,
   useBreakpointValue,
+  VStack,
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
+import { useIdOS } from "@/idOS.provider";
 
 type ProfOfPersonhoodProps = {
   isOpen: boolean;

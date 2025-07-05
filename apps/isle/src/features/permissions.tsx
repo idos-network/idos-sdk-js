@@ -2,8 +2,8 @@ import {
   Center,
   Circle,
   Flex,
-  HStack,
   Heading,
+  HStack,
   Icon,
   IconButton,
   Image,
@@ -295,7 +295,7 @@ function CredentialDetails({ goHome, onRevoke }: { goHome: () => void; onRevoke:
 function safeParse(json?: string) {
   try {
     return JSON.parse(json ?? "{}");
-  } catch (error) {
+  } catch (_error) {
     return {};
   }
 }

@@ -1,6 +1,7 @@
 import {
   Center,
   Container,
+  chakra,
   HStack,
   Image,
   List,
@@ -8,16 +9,16 @@ import {
   Spinner,
   Stack,
   Text,
-  chakra,
 } from "@chakra-ui/react";
+import type { idOSCredential } from "@idos-network/core";
 import { base64Encode } from "@idos-network/core/codecs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
+import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
 import { useDeferredValue, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
-
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
   Button,
@@ -43,8 +44,6 @@ import {
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
 import { changeCase, decrypt, openImageInNewTab } from "@/utils";
-import type { idOSCredential } from "@idos-network/core";
-import ascii85 from "ascii85";
 
 export const Route = createFileRoute("/credentials")({
   component: Credentials,
@@ -58,9 +57,8 @@ export const Route = createFileRoute("/credentials")({
 
 export const safeParse = (json?: string) => {
   try {
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    return JSON.parse(json!);
-  } catch (e) {
+    return JSON.parse(json ?? "");
+  } catch (_e) {
     return null;
   }
 };
@@ -94,7 +92,10 @@ export const useListCredentials = () => {
 export const useDecryptAllCredentials = ({
   enabled,
   credentials,
-}: { enabled: boolean; credentials: idOSCredential[] }) => {
+}: {
+  enabled: boolean;
+  credentials: idOSCredential[];
+}) => {
   const [secretKey] = useSecretKey();
 
   return useQuery({
@@ -237,7 +238,11 @@ function CredentialDetails({
                         ({
                           address,
                           currency,
-                        }: { address: string; currency: string; verified: boolean }) => (
+                        }: {
+                          address: string;
+                          currency: string;
+                          verified: boolean;
+                        }) => (
                           <List.Item
                             key={address}
                             display="inline-flex"

@@ -39,7 +39,7 @@ export function SecretKeyPrompt({
       if (!key || !credentialSample) return false;
       const isValid = decrypt(credentialSample.content, credentialSample.encryptor_public_key, key);
       return !!isValid;
-    } catch (error) {
+    } catch (_error) {
       return false;
     }
   };

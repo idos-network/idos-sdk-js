@@ -8,5 +8,5 @@ export default function Redirect({ to }: { to: string }) {
     router.replace(to);
   }, [router, to]);
 
-  return <></>;
+  return null;
 }

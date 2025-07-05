@@ -25,7 +25,10 @@ const StepperCircle = ({ active }: StepperCircleProps) => {
 export function Stepper({
   stepsLength = 3,
   index: activeIndex = 1,
-}: { stepsLength?: number; index?: number }) {
+}: {
+  stepsLength?: number;
+  index?: number;
+}) {
   const stepsArray = Array.from({ length: stepsLength }, (_, i) => i + 1);
   return (
     <Flex position="relative" justifyContent="space-between" maxW={208} mx="auto" w="full">

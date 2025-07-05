@@ -14,19 +14,18 @@ import {
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
-
-import { useIdOS } from "@/idOS.provider";
-import { getNearFullAccessPublicKeys } from "@/utils/near";
 import * as GemWallet from "@gemwallet/api";
+import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey } from "@idos-network/core";
+import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { PlusIcon } from "lucide-react";
+import type { FormEvent } from "react";
+import { useSearchParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
+import { useIdOS } from "@/idOS.provider";
+import { getNearFullAccessPublicKeys } from "@/utils/near";
 
 type AddWalletProps = {
   defaultValue?: string;
@@ -37,7 +36,12 @@ const createWalletParamsFactory = ({
   public_key,
   signature,
   message,
-}: { address: string; public_key?: string; signature?: string; message: string }) => ({
+}: {
+  address: string;
+  public_key?: string;
+  signature?: string;
+  message: string;
+}) => ({
   id: crypto.randomUUID() as string,
   address,
   public_key: public_key ?? null,
@@ -216,7 +220,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
           account: address as `0x${string}`,
         });
         signature = _signature as `0x${string}`;
-      } catch (error) {
+      } catch (_error) {
         toast({
           title: "Error while adding wallet",
           description:

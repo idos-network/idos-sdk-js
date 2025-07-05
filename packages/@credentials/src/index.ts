@@ -1,7 +1,5 @@
-import { type Credentials, buildCredentials } from "./builder";
+import { buildCredentials, type Credentials } from "./builder";
 import type { AvailableIssuerType } from "./utils";
-import { verifyCredentials } from "./verifier";
-
 import type {
   CredentialFields,
   CredentialSubject,
@@ -9,6 +7,7 @@ import type {
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "./utils/types";
+import { verifyCredentials } from "./verifier";
 
 export { buildCredentials, verifyCredentials };
 export type {

@@ -1,8 +1,8 @@
-import { NoncedBox, base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/core";
+import { base64Encode, hexEncodeSha256Hash, NoncedBox, utf8Encode } from "@idos-network/core";
 import {
   type CreateAccessGrantByDAGParams,
-  type GetGrantsParams,
   createAccessGrantByDag,
+  type GetGrantsParams,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
@@ -11,12 +11,12 @@ import {
   getSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import {
-  type KwilActionClient,
-  type KwilSignerType,
   createNodeKwilClient,
   createServerKwilSigner,
+  type KwilActionClient,
+  type KwilSignerType,
 } from "@idos-network/core/kwil-infra";
-import type { PassportingPeer, idOSCredential, idOSGrant } from "@idos-network/core/types";
+import type { idOSCredential, idOSGrant, PassportingPeer } from "@idos-network/core/types";
 import {
   type AvailableIssuerType,
   type Credentials,

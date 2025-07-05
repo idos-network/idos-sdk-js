@@ -2,7 +2,7 @@ import { fetchTosLink } from "~/providers/hifi.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/tos";
 
-export async function loader({ request, context }: Route.LoaderArgs) {
+export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
 
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));

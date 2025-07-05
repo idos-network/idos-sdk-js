@@ -7,7 +7,7 @@ export async function getNearFullAccessPublicKeys(
   let connect: typeof connectT;
   try {
     connect = (await import("near-api-js")).connect;
-  } catch (e) {
+  } catch (_e) {
     throw new Error("Can't load near-api-js");
   }
 

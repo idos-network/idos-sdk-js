@@ -17,6 +17,7 @@ import {
 import { kwilNep413Signer } from "./nep413";
 import { createXrpKwilSigner } from "./xrp/create-xrp-signer";
 import { getXrpPublicKey, looksLikeXrpWallet } from "./xrp/utils";
+
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
  */

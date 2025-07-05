@@ -1,7 +1,3 @@
-import { useWalletSelector } from "@/core/near";
-import stellarKit from "@/core/stellar-kit";
-import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
-import { useWalletStore } from "@/stores/wallet";
 import {
   Box,
   Button,
@@ -22,8 +18,8 @@ import {
   List,
   ListItem,
   Text,
-  VStack,
   useDisclosure,
+  VStack,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -37,6 +33,10 @@ import {
 } from "lucide-react";
 import { NavLink, type NavLinkProps, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
+import { useWalletSelector } from "@/core/near";
+import stellarKit from "@/core/stellar-kit";
+import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
+import { useWalletStore } from "@/stores/wallet";
 
 const Link = (props: NavLinkProps & LinkProps) => {
   return <ChakraLink as={NavLink} {...props} />;

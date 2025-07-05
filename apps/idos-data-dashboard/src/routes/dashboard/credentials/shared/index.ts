@@ -1,6 +1,6 @@
-import { useIdOS } from "@/idOS.provider";
 import type { idOSGrant } from "@idos-network/core";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useIdOS } from "@/idOS.provider";
 
 import type { idOSCredentialWithShares } from "../types";
 

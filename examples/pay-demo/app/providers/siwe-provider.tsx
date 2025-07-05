@@ -1,4 +1,4 @@
-import { type Signer, ethers, getAddress } from "ethers";
+import { ethers, getAddress, type Signer } from "ethers";
 import { createContext, useContext, useState } from "react";
 
 declare global {

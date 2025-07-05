@@ -1,6 +1,6 @@
-import { getKrakenToken } from "@/actions/index";
 //import { base64Decode } from "@idos-network/core";
 import type { NextRequest } from "next/server";
+import { getKrakenToken } from "@/actions/index";
 //import invariant from "tiny-invariant";
 //import nacl from "tweetnacl";
 

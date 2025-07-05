@@ -7,12 +7,11 @@ import {
 } from "@idos-network/core/codecs";
 import {
   type AddWalletParams,
-  type GetGrantsParams,
-  type ShareableCredential,
   addWallet,
   addWallets,
   createAttribute,
   createCredentialCopy,
+  type GetGrantsParams,
   getAccessGrantsOwned,
   getAllCredentials,
   getAttributes,
@@ -31,23 +30,24 @@ import {
   requestDAGMessage,
   requestDWGMessage,
   revokeAccessGrant,
+  type ShareableCredential,
   shareCredential,
 } from "@idos-network/core/kwil-actions";
 import {
-  type KwilActionClient,
   createClientKwilSigner,
   createWebKwilClient,
+  type KwilActionClient,
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import { Store } from "@idos-network/core/store";
 import type {
   DelegatedWriteGrant,
-  Wallet,
   idOSCredential,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
+  Wallet,
 } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
 import type { KwilSigner } from "@kwilteam/kwil-js";

@@ -1,21 +1,20 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
+import * as GemWallet from "@gemwallet/api";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
 import {
-  type PropsWithChildren,
   createContext,
+  type PropsWithChildren,
   use,
   useCallback,
   useEffect,
   useMemo,
   useState,
 } from "react";
-
-import { useEthersSigner } from "@/core/wagmi";
-import * as GemWallet from "@gemwallet/api";
 import invariant from "tiny-invariant";
+import { useEthersSigner } from "@/core/wagmi";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";

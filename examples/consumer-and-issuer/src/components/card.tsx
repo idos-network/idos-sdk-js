@@ -60,8 +60,7 @@ export function Card() {
         <text
           x="40"
           y="140"
-          // biome-ignore lint/nursery/useSortedClasses: <explanation>
-          className="fill-black dark:fill-white font-mono"
+          className="fill-black font-mono dark:fill-white"
           fontSize="24"
           letterSpacing="2"
         >
@@ -83,8 +82,7 @@ export function Card() {
         <text
           x="300"
           y="180"
-          // biome-ignore lint/nursery/useSortedClasses: <explanation>
-          className="fill-black dark:fill-white font-medium"
+          className="fill-black font-medium dark:fill-white"
           fontSize="16"
           letterSpacing="1"
         >

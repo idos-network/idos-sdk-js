@@ -6,12 +6,12 @@ import {
 } from "@idos-network/client";
 import type { DelegatedWriteGrant, KwilSigner } from "@idos-network/core";
 import {
+  base64Decode,
   type IsleControllerMessage,
   type IsleMessageHandler,
   type IsleNodeMessage,
   type IsleStatus,
   type IsleTheme,
-  base64Decode,
   type idOSCredential,
   utf8Decode,
 } from "@idos-network/core";
@@ -347,7 +347,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
       KYCPermissions: options.KYCPermissions,
     });
 
-    const [error, result] = await goTry(async () => {
+    const [error, _result] = await goTry(async () => {
       invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
       await idosClient.requestAccessGrant(ownerOriginalCredentials[0].id, {
@@ -434,7 +434,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const safeParse = (value: string) => {
     try {
       return JSON.parse(value);
-    } catch (error) {
+    } catch (_error) {
       return {};
     }
   };
@@ -534,7 +534,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    * View credential details for the given `id`
    */
   const viewCredentialDetails = async (id: string): Promise<void> => {
-    const [error, result] = await goTry(async () => {
+    const [error, _result] = await goTry(async () => {
       invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
       send("update-view-credential-details-status", {
@@ -670,7 +670,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   /**
    * Sets up a subscription to wallet account changes
    */
-  const watchAccountChanges = async (): Promise<void> => {
+  const _watchAccountChanges = async (): Promise<void> => {
     watchAccount(wagmiConfig, {
       onChange: async (account) => {
         if (channel) {
@@ -723,7 +723,11 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     expanded,
     noDismiss,
     timeout = 700,
-  }: { expanded: boolean; noDismiss?: boolean; timeout?: number }): void => {
+  }: {
+    expanded: boolean;
+    noDismiss?: boolean;
+    timeout?: number;
+  }): void => {
     setTimeout(() => {
       send("toggle-animation", {
         expanded,
@@ -736,7 +740,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
    * Subscribes to messages from the Isle iframe
    * @returns A cleanup function to remove the subscription
    */
-  const on = <T extends IsleNodeMessage["type"]>(
+  const _on = <T extends IsleNodeMessage["type"]>(
     type: T,
     handler: IsleMessageHandler<T>,
   ): (() => void) => {
