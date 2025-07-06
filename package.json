@@ -1,10 +1,9 @@
 {
   "name": "idos-sdk-js",
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
-    "@web/rollup-plugin-import-meta-assets": "^2.2.1",
-    "lefthook": "1.11.3",
-    "turbo": "^2.5.3"
+    "@biomejs/biome": "2.0.6",
+    "lefthook": "1.11.16",
+    "turbo": "^2.5.4"
   },
   "packageManager": "pnpm@9.6.0",
   "pnpm": {
@@ -12,7 +11,6 @@
       "web-streams-polyfill": "3.3.3"
     },
     "patchedDependencies": {
-      "react-router@7.6.2": "patches/react-router@7.6.2.patch",
       "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch"
     }
   },
@@ -21,9 +19,8 @@
     "build": "turbo run build",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
-    "format-and-lint": "biome check .",
-    "format-and-lint:fix": "biome check . --write",
-    "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
+    "check": "biome check . --write",
+    "check:ci": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "postinstall": "lefthook install",
     "preinstall": "npx only-allow pnpm",
     "test": "turbo run test"

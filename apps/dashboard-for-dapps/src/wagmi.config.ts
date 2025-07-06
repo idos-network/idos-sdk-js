@@ -1,7 +1,7 @@
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
 import type { Account, Client } from "viem";
-import { http, type Config, type Transport, createConfig, useConnectorClient } from "wagmi";
+import { type Config, createConfig, http, type Transport, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
 import { injected, walletConnect } from "wagmi/connectors";
 

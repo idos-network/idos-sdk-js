@@ -1,6 +1,7 @@
 import {
   Center,
   Container,
+  chakra,
   DrawerBody,
   DrawerTitle,
   HStack,
@@ -9,15 +10,15 @@ import {
   Spinner,
   Stack,
   Text,
-  chakra,
 } from "@chakra-ui/react";
+import { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "@idos-network/core/kwil-actions";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";
 import { matchSorter } from "match-sorter";
 import { useMemo, useState } from "react";
 import invariant from "tiny-invariant";
-
+import { Pagination } from "@/components/pagination";
 import { SecretKeyPrompt } from "@/components/secret-key-prompt";
 import {
   Button,
@@ -35,11 +36,8 @@ import {
   SearchField,
 } from "@/components/ui";
 import { useSecretKey } from "@/hooks";
-import { changeCase, decrypt, openImageInNewTab } from "@/utils";
-import { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "@idos-network/core/kwil-actions";
-
-import { Pagination } from "@/components/pagination";
 import { useIdOS } from "@/idOS.provider";
+import { changeCase, decrypt, openImageInNewTab } from "@/utils";
 import { safeParse } from "./credentials";
 
 export const Route = createFileRoute("/")({
@@ -102,7 +100,11 @@ function CredentialDetails({
   credentialId,
   open,
   toggle,
-}: { credentialId: string; open: boolean; toggle: (value?: boolean) => void }) {
+}: {
+  credentialId: string;
+  open: boolean;
+  toggle: (value?: boolean) => void;
+}) {
   const credential = useFetchCredential(credentialId);
   const [secretKey] = useSecretKey();
 
@@ -272,7 +274,11 @@ function SearchResults({
   results,
   setPage,
   page,
-}: { results: GrantsWithFormattedLockedUntil; setPage: (page: number) => void; page: number }) {
+}: {
+  results: GrantsWithFormattedLockedUntil;
+  setPage: (page: number) => void;
+  page: number;
+}) {
   const [credentialId, setCredentialId] = useState("");
   const [openSecretKeyPrompt, toggleSecretKeyPrompt] = useToggle();
   const [openCredentialDetails, toggleCredentialDetails] = useToggle();

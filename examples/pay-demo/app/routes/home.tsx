@@ -3,8 +3,7 @@ import { sessionStorage } from "~/providers/sessions.server";
 import { Welcome } from "../welcome/welcome";
 import type { Route } from "./+types/home";
 
-// biome-ignore lint/correctness/noEmptyPattern: <explanation>
-export function meta({}: Route.MetaArgs) {
+export function meta() {
   return [
     { title: "idOS Pay Demo" },
     { name: "description", content: "Welcome to idOS Pay Demo!" },

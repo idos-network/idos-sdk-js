@@ -1,7 +1,6 @@
 import type { Credentials } from "@idos-network/consumer";
-import { SERVER_ENV } from "./envFlags.server";
-
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
+import { SERVER_ENV } from "./envFlags.server";
 import { generateFileUrl } from "./files.server";
 import { getISORegionCodeFromNominatim } from "./maps.server";
 
@@ -133,17 +132,17 @@ export const createUserAndKYC = async (
     email: data.credentialSubject.email,
     dateOfBirth: data.credentialSubject.dateOfBirth.split("T")[0],
     address: {
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: false positive
       addressLine1: data.credentialSubject.residentialAddressStreet!,
       addressLine2: data.credentialSubject.residentialAddressHouseNumber ?? "",
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: false positive
       city: data.credentialSubject.residentialAddressCity!,
-      // biome-ignore lint/style/noNonNullAssertion: <explanation>
+      // biome-ignore lint/style/noNonNullAssertion: false positive
       postalCode: data.credentialSubject.residentialAddressPostalCode!,
       stateProvinceRegion: stateProvinceRegion.slice(0, 2),
       country:
         countries2to3[
-          // biome-ignore lint/style/noNonNullAssertion: <explanation>
+          // biome-ignore lint/style/noNonNullAssertion: false positive
           data.credentialSubject.residentialAddressCountry! as keyof typeof countries2to3
         ],
     },

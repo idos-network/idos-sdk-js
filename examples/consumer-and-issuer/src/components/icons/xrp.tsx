@@ -1,6 +1,5 @@
 export default function XrpIcon() {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
     <svg
       width="800px"
       height="800px"
@@ -8,6 +7,7 @@ export default function XrpIcon() {
       xmlns="http://www.w3.org/2000/svg"
       aria-label="XRP"
     >
+      <title>XRP</title>
       <g fill="none">
         <circle cx="16" cy="16" r="16" fill="#23292F" />
 

@@ -1,11 +1,9 @@
+// @ts-expect-error
+import * as ascii85 from "ascii85";
+import { fileTypeFromBuffer } from "file-type";
 import { verifyFileUrl } from "~/providers/files.server";
 import { getSharedCredential } from "~/providers/idos.server";
 import type { Route } from "./+types/auth";
-
-// @ts-expect-error
-import * as ascii85 from "ascii85";
-
-import { fileTypeFromBuffer } from "file-type";
 
 // Create a new user session
 export async function loader({ request }: Route.LoaderArgs) {

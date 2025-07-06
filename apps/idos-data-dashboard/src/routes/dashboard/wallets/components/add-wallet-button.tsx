@@ -1,19 +1,23 @@
 import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { type WalletSignature, verifySignature } from "@idos-network/core/signature-verification";
+import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-
-import { useIdOS } from "@/idOS.provider";
 import invariant from "tiny-invariant";
+import { useIdOS } from "@/idOS.provider";
 
 const createWalletParamsFactory = ({
   address,
   public_key,
   signature,
   message,
-}: { address: string; public_key?: string; signature: string; message: string }) => ({
+}: {
+  address: string;
+  public_key?: string;
+  signature: string;
+  message: string;
+}) => ({
   id: crypto.randomUUID() as string,
   address,
   public_key: public_key ?? null,
@@ -162,7 +166,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     };
   }, [popupWindow]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!walletPayload) return;
     addWallet(walletPayload);

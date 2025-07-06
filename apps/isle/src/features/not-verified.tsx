@@ -1,4 +1,4 @@
-import { Box, Center, Circle, HStack, Heading, Stack, Text, VStack } from "@chakra-ui/react";
+import { Box, Center, Circle, Heading, HStack, Stack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { LuCheck } from "react-icons/lu";
 

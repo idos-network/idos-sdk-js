@@ -6,8 +6,8 @@ import {
   HStack,
   IconButton,
   Input,
-  Stack,
   mergeRefs,
+  Stack,
   useControllableState,
 } from "@chakra-ui/react";
 import { forwardRef, useRef } from "react";

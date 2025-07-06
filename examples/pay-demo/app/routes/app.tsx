@@ -15,7 +15,7 @@ export default function App() {
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
   const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
-  const userData = MachineContext.useSelector((state) => state.context.data);
+  const _userData = MachineContext.useSelector((state) => state.context.data);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
@@ -25,8 +25,7 @@ export default function App() {
 
   console.log("-> state", state);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: This is on purpose
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   const messageReceiver = useCallback((message: any) => {
     // React only messages from ID iframe
     if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
@@ -53,7 +52,6 @@ export default function App() {
     }
   }, []);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     window.addEventListener("message", messageReceiver);
     return () => window.removeEventListener("message", messageReceiver);
@@ -257,8 +255,8 @@ export default function App() {
       </div>
       <div className="w-full">
         {body}
-        {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-        <div id="idOS-enclave" className={provider ? "block w-fit m-auto" : "hidden"} />
+
+        <div id="idOS-enclave" className={provider ? "m-auto block w-fit" : "hidden"} />
       </div>
     </div>
   );
