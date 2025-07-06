@@ -16,7 +16,8 @@
     "base85": "catalog:core",
     "jsonld-document-loader": "catalog:core",
     "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "catalog:core"
+    "web-streams-polyfill": "catalog:core",
+    "ripple-keypairs": "catalog:xrp"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
@@ -41,8 +42,8 @@
   "license": "MIT",
   "main": "./dist/index.js",
   "peerDependencies": {
-    "ethers": "catalog:core",
-    "near-api-js": "catalog:core",
+    "ethers": "catalog:ethereum",
+    "near-api-js": "catalog:near",
     "typescript": "catalog:build"
   },
   "publishConfig": {

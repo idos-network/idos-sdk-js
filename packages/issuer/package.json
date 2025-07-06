@@ -17,7 +17,8 @@
     "es-toolkit": "catalog:core",
     "jsonld-document-loader": "catalog:core",
     "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "catalog:core"
+    "web-streams-polyfill": "catalog:core",
+    "ripple-keypairs": "catalog:xrp"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
