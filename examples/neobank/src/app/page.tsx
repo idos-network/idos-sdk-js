@@ -1,7 +1,9 @@
+import Image from "next/image";
+
 export default function Home() {
   return (
     <div className="grid h-screen place-content-center">
-      <h1 className="font-semibold text-2xl">NeoBank</h1>
+      <Image src="/logo.svg" alt="NeoBank" width={238} height={41} />
     </div>
   );
 }

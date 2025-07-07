@@ -16,9 +16,9 @@
     "base85": "catalog:core",
     "es-toolkit": "catalog:core",
     "jsonld-document-loader": "catalog:core",
+    "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "catalog:core",
-    "ripple-keypairs": "catalog:xrp"
+    "web-streams-polyfill": "catalog:core"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
