@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { ConnectWallet } from "@/components/connect-wallet";
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
           <p className="text-center text-2xl text-neutral-400">
             Your gateway to secure and seamless crypto banking.
           </p>
-          <Button className="h-12 w-[200px] rounded-full">Connect wallet</Button>
+          <ConnectWallet />
         </section>
       </main>
       <footer className="flex h-20 items-center justify-center p-5 text-center">
