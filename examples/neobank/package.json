@@ -3,22 +3,29 @@
   "version": "0.1.0",
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
+    "@reown/appkit": "catalog:reown",
+    "@reown/appkit-adapter-wagmi": "catalog:reown",
+    "@tanstack/react-query": "catalog:tanstack",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
     "react": "catalog:react",
     "react-dom": "catalog:react",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "viem": "^2.31.7",
+    "wagmi": "^2.15.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tanstack/react-query-devtools": "catalog:tanstack",
     "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
     "tailwindcss": "^4",
+    "tiny-invariant": "catalog:core",
     "tw-animate-css": "^1.3.5",
-    "typescript": "^5"
+    "typescript": "catalog:build"
   },
   "private": true,
   "scripts": {

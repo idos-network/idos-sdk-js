@@ -31,6 +31,10 @@ catalogs:
     "viem": "^2.14.0"
     "ethers": "^6.14.0"
 
+  reown:
+    "@reown/appkit": "^1.7.13"
+    "@reown/appkit-adapter-wagmi": "^1.7.13"
+
   near:
     "near-api-js": "4.0.3"
     "@near-wallet-selector/core": "8.10.2"
@@ -49,10 +53,6 @@ catalogs:
     "xumm": "^1.8.0"
     "ripple-binary-codec": "^2.4.0"
     "ripple-keypairs": "^2.0.0"
-
-  reown:
-    "@reown/appkit": "^1.7.12"
-    "@reown/appkit-adapter-wagmi": "^1.7.12"
 
   build:
     "vite": "^6.2.5"
