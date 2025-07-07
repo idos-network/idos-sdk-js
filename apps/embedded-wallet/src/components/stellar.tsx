@@ -62,18 +62,21 @@ function Stellar() {
 
   const handleSignMessage = async () => {
     if (!address || !publicKey) return;
-    // Encode the message as base64 (stellarKit expects this)
-    const messageBase64 = Buffer.from(message).toString("base64");
 
-    const result = await stellarKit.signMessage(messageBase64);
+    // Sign the raw UTF-8 message
+    console.log("Signing message:", message);
+    const result = await stellarKit.signMessage(message);
 
-    let signedMessage = Buffer.from(result.signedMessage, "base64");
+    console.log("Raw signature result:", result);
+    console.log("Raw signedMessage:", result.signedMessage);
 
-    if (signedMessage.length > 64) {
-      signedMessage = Buffer.from(signedMessage.toString(), "base64");
-    }
+    // The signature from stellarKit is base64 encoded, decode it to get raw bytes
+    const signatureBytes = Buffer.from(result.signedMessage, "base64");
+    console.log("Signature bytes length:", signatureBytes.length);
 
-    const signatureHex = signedMessage.toString("hex");
+    // Convert to hex for the BE verification
+    const signatureHex = signatureBytes.toString("hex");
+    console.log("Signature hex:", signatureHex);
 
     walletPayload.value = {
       address,
