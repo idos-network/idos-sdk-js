@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { Button } from "@/components/ui/button";
-import { BridgeIcon, SellIcon, SwapIcon, SendIcon, ReceiveIcon, BuyIcon } from "./icons";
+import { BridgeIcon, BuyIcon, ReceiveIcon, SellIcon, SendIcon, SwapIcon } from "./icons";
 
 interface ActionButton {
   id: string;

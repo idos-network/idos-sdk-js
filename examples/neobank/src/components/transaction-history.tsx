@@ -1,7 +1,7 @@
 "use client";
-import { Card, CardContent } from "@/components/ui/card";
 import { TokenETH, TokenUSDC } from "@web3icons/react";
-import { ReceiveIcon, SwapIcon, SendIcon } from "./icons";
+import { Card, CardContent } from "@/components/ui/card";
+import { ReceiveIcon, SendIcon, SwapIcon } from "./icons";
 
 interface Transaction {
   id: string;

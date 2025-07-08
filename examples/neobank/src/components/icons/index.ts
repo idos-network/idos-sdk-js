@@ -4,9 +4,8 @@ export interface IconProps {
 }
 
 export * from "./bridge";
-export * from "./send";
+export * from "./buy";
 export * from "./receive";
 export * from "./sell";
+export * from "./send";
 export * from "./swap";
-export * from "./buy";
-

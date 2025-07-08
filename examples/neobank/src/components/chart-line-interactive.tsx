@@ -135,7 +135,9 @@ export default function ChartLineInteractive() {
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
         <div className="flex flex-1 flex-col justify-center gap-1 px-3 py-4 sm:px-6 sm:py-6">
           <CardTitle className="text-lg sm:text-xl">Line Chart - Interactive</CardTitle>
-          <CardDescription className="text-sm">Showing total visitors for the last 3 months</CardDescription>
+          <CardDescription className="text-sm">
+            Showing total visitors for the last 3 months
+          </CardDescription>
         </div>
         <div className="flex">
           {["desktop", "mobile"].map((key) => {
@@ -158,7 +160,10 @@ export default function ChartLineInteractive() {
         </div>
       </CardHeader>
       <CardContent className="p-2 sm:p-4 md:p-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full sm:h-[250px] md:h-[300px] lg:h-[350px]">
+        <ChartContainer
+          config={chartConfig}
+          className="aspect-auto h-[200px] w-full sm:h-[250px] md:h-[300px] lg:h-[350px]"
+        >
           <LineChart
             accessibilityLayer
             data={chartData}

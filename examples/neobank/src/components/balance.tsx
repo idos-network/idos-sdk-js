@@ -18,10 +18,12 @@ export default function BalanceComponent() {
       {/* Balance Info */}
       <div className="flex flex-col gap-2">
         {/* Wallet Address */}
-        {!!address && <div className="flex items-center gap-2">
-          <span className="font-medium text-lg text-white">{trimAddress(address)}</span>
-          <ChevronDown className="h-5 w-5 text-gray-400" />
-        </div>}
+        {!!address && (
+          <div className="flex items-center gap-2">
+            <span className="font-medium text-lg text-white">{trimAddress(address)}</span>
+            <ChevronDown className="h-5 w-5 text-gray-400" />
+          </div>
+        )}
 
         {/* Balance Amount */}
         <div className="font-bold text-6xl text-white">$12,340.56</div>
