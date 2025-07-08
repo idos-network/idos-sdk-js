@@ -34,6 +34,7 @@ export const CredentialResidentialAddressSchema: z.ZodObject<
     street: z.ZodString;
     houseNumber: z.ZodOptional<z.ZodString>;
     additionalAddressInfo: z.ZodOptional<z.ZodString>;
+    region: z.ZodOptional<z.ZodString>;
     city: z.ZodString;
     postalCode: z.ZodString;
     country: z.ZodString;
@@ -48,6 +49,9 @@ export const CredentialResidentialAddressSchema: z.ZodObject<
 
   /* Additional address information (e.g., apartment number). */
   additionalAddressInfo: z.string().optional(),
+
+  /* Region (e.g., state, province). */
+  region: z.string().optional(),
 
   /* Locality (e.g., city, town). */
   city: z.string(),
@@ -68,7 +72,7 @@ export const IDDocumentTypeSchema: z.ZodEnum<["PASSPORT", "DRIVERS", "ID_CARD"]>
 ] as const);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
-export const GenderSchema: z.ZodEnum<["M", "F"]> = z.enum(["M", "F"] as const);
+export const GenderSchema: z.ZodEnum<["M", "F", "OTHER"]> = z.enum(["M", "F", "OTHER"] as const);
 export type Gender = z.infer<typeof GenderSchema>;
 
 // https://github.com/colinhacks/zod/issues/3751
@@ -80,6 +84,7 @@ export const CredentialSubjectSchema: z.ZodObject<
     firstName: z.ZodString;
     middleName: z.ZodOptional<z.ZodString>;
     gender: z.ZodOptional<typeof GenderSchema>;
+    nationality: z.ZodOptional<z.ZodString>;
     familyName: z.ZodString;
     maidenName: z.ZodOptional<z.ZodString>;
     governmentId: z.ZodOptional<z.ZodString>;
@@ -117,6 +122,9 @@ export const CredentialSubjectSchema: z.ZodObject<
 
   /* Middle name. */
   middleName: z.string().optional(),
+
+  /* Nationality (ISO 3166-1 alpha-2). */
+  nationality: z.string().min(2).max(2).optional(),
 
   /* Gender (M or F, empty if not provided). */
   gender: GenderSchema.optional(),
@@ -189,6 +197,7 @@ export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "re
   residentialAddressStreet?: string;
   residentialAddressHouseNumber?: string;
   residentialAddressAdditionalAddressInfo?: string;
+  residentialAddressRegion?: string;
   residentialAddressCity?: string;
   residentialAddressPostalCode?: string;
   residentialAddressCountry?: string;
