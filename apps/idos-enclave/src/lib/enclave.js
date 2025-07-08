@@ -99,27 +99,31 @@ export class Enclave {
   }
 
   async ensurePreferredAuthMethod() {
-    var preferredAuthMethod = this.store.get("preferred-auth-method");
-    if (preferredAuthMethod) { return preferredAuthMethod }
+    console.log("ensurePreferredAuthMethod")
+    const allowedAuthMethods = ["mpc", "password"]
+    var authMethod = this.store.get("preferred-auth-method");
+    if (authMethod) { return authMethod }
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
-        this.unlockButton.disabled = true;
+      this.unlockButton.disabled = true;
 
         try {
-          await this.openDialog("auth", {
-            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-          });
+          ({authMethod} = await this.openDialog("auth", {}));
+
+          if (!allowedAuthMethods.includes(authMethod)) {
+            return reject(new Error(`Invalid auth method: ${authMethod}`));
+          }
         } catch (e) {
+          console.log("error in auth dialog", e)
           return reject(e);
         }
+        this.store.set("preferred-auth-method", authMethod);
 
-        preferredAuthMethod = this.store.get("preferred-auth-method");
-
-        return preferredAuthMethod ? resolve(preferredAuthMethod) : reject();
+        return authMethod ? resolve(authMethod) : reject();
       }),
     );
   }
@@ -165,11 +169,12 @@ export class Enclave {
 
   async ensureMPCPrivateKey() {
     console.log("ensureMPCPrivateKey");
+    if (this.configuration?.mode !== "new") {
+      const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
+      if (downloadStatus === "ok") { return downloadedSecret }
 
-    const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
-    if (downloadStatus === "ok") { return downloadedSecret }
-
-    if (downloadStatus === "error") { throw Error("A secret might be stored at ZK nodes, but can't be obtained") }
+      if (downloadStatus === "error") { throw Error("A secret might be stored at ZK nodes, but can't be obtained") }
+    }
 
     const privateKey = nacl.box.keyPair().secretKey;
     const { status: uploadStatus } = await this.uploadSecret(privateKey)
@@ -458,6 +463,7 @@ export class Enclave {
       const { port1, port2 } = new MessageChannel();
       port1.onmessage = async ({ data: { error, result } }) => {
         if (error) {
+          console.error(error)
           this.unlockButton.disabled = false;
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
@@ -465,7 +471,7 @@ export class Enclave {
           // this.dialog.close();
           return reject(error);
         }
-
+        console.log({openDialogResult: result})
         if (result.type === "idOS:store" && result.status === "pending") {
           result = await this.handleIDOSStore(result.payload);
 

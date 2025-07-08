@@ -41,8 +41,7 @@ export class IframeEnclave implements EnclaveProvider {
       },
     })) as StoredData;
 
-    userEncryptionPublicKey = new Uint8Array(0);
-    // while (!userEncryptionPublicKey) {
+    while (!userEncryptionPublicKey) {
       this.showEnclave();
       try {
         userEncryptionPublicKey = (await this.requestToEnclave({
@@ -53,7 +52,7 @@ export class IframeEnclave implements EnclaveProvider {
       } finally {
         this.hideEnclave();
       }
-    // }
+    }
 
     return userEncryptionPublicKey;
   }

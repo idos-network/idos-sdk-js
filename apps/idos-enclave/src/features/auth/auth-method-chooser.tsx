@@ -44,15 +44,14 @@ export default function AuthMethodChooser({ setMethod, mode, store, onSuccess, o
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Button id="auth-method-password" onClick={() => setMethod("password")}>
+        <Button id="auth-method-password" onClick={() => onSuccess({ authMethod: "password" })}>
           Use a password
         </Button>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-mpc" onClick={() => {
-          store.set("preferred-auth-method", "mpc");
-          onSuccess({});
+          onSuccess({ authMethod: "mpc" });
         }}>
           Use an MPC
         </Button>
