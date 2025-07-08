@@ -91,7 +91,7 @@ describe("verifiableCredentials", () => {
       const genderError = zodError.errors.find((error) => error.path[0] === "gender");
       expect(genderError).toBeDefined();
       expect(genderError?.message).toContain(
-        "Invalid enum value. Expected 'M' | 'F', received 'MALE'",
+        "Invalid enum value. Expected 'M' | 'F' | 'OTHER', received 'MALE'",
       );
     }
   });
@@ -127,6 +127,7 @@ describe("verifiableCredentials", () => {
         middleName: "Paul",
         familyName: "Lennon",
         gender: "M",
+        nationality: "US",
         governmentIdType: "SSN",
         governmentId: "123-45-6789",
         email: "john.lennon@example.com",
@@ -145,6 +146,7 @@ describe("verifiableCredentials", () => {
           street: "Main St",
           houseNumber: "123",
           additionalAddressInfo: "Apt 1",
+          region: "NY",
           city: "New York",
           postalCode: "10001",
           country: "US",
@@ -163,6 +165,7 @@ describe("verifiableCredentials", () => {
     expect(data.credentialSubject.residentialAddressCity).toBe("New York");
     expect(data.credentialSubject.residentialAddressPostalCode).toBe("10001");
     expect(data.credentialSubject.residentialAddressCountry).toBe("US");
+    expect(data.credentialSubject.residentialAddressRegion).toBe("NY");
 
     expect(data.credentialSubject.email).toBe("john.lennon@example.com");
     expect(data.credentialSubject.phoneNumber).toBe("+1234567890");
