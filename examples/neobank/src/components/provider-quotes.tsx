@@ -2,7 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Tag } from "@/components/ui/tag";
+import { OptionButton } from "@/components/ui/option-button";
 
 interface Provider {
   id: string;
@@ -44,13 +45,6 @@ const providers: Provider[] = [
   },
 ];
 
-// @todo: refactor colors to theme variables
-const Tag = ({ children }: { children: React.ReactNode }) => (
-  <span className="rounded-md bg-[#043102] px-3 py-1 font-semibold text-[#74FB5B] text-xs">
-    {children}
-  </span>
-);
-
 const Provider = ({
   img,
   selected,
@@ -67,32 +61,28 @@ const Provider = ({
   usd: string;
   onClick: () => void;
 }) => (
-  <button
-    type="button"
-    className={`flex cursor-pointer flex-col gap-6 rounded-2xl border p-6 ${
-      selected ? "border-[#74FB5B]" : "border-[#88888880]"
-    }`}
+  <OptionButton
+    selected={selected}
     onClick={onClick}
+    topPart={
+      id === "hifi" && (
+        <div className="flex flex-col">
+          <div className="flex items-center gap-2">
+            <Tag>BEST RATE</Tag>
+            <Tag>MOST RELIABLE</Tag>
+          </div>
+        </div>
+      )
+    }
   >
-    {id === "hifi" && (
-      <div className="flex items-center gap-2">
-        <Tag>BEST RATE</Tag>
-        <Tag>MOST RELIABLE</Tag>
-      </div>
-    )}
-
-    <div className="flex justify-between">
-      <div className="flex items-center gap-4">
-        <Checkbox checked={selected} onCheckedChange={() => onClick()} />
-        {img}
-      </div>
-
+    <div className="flex w-full justify-between">
+      {img}
       <div className="flex flex-col items-end font-semibold">
         <div className="font-medium text-sm">{usdc}</div>
         <div className="text-green-400 text-xs">{usd}</div>
       </div>
     </div>
-  </button>
+  </OptionButton>
 );
 
 export default function ProviderQuotes() {
