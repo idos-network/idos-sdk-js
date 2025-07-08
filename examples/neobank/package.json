@@ -14,7 +14,8 @@
     "react-dom": "catalog:react",
     "tailwind-merge": "^3.3.1",
     "viem": "^2.31.7",
-    "wagmi": "^2.15.6"
+    "wagmi": "^2.15.6",
+    "recharts": "^3.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
