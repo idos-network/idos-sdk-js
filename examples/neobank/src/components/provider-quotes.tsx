@@ -1,106 +1,118 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+
+interface Provider {
+  id: string;
+  name: string;
+  isBestRate: boolean;
+  isMostReliable: boolean;
+  usdc: string;
+  usd: string;
+  img: React.ReactNode;
+}
+
+const providers: Provider[] = [
+  {
+    id: "hifi",
+    name: "HiFi",
+    isBestRate: true,
+    isMostReliable: true,
+    usdc: "100 USDC",
+    usd: "$101.07 USD",
+    img: <Image src="/hifi.svg" alt="HiFi" width={100} height={100} />,
+  },
+  {
+    id: "transak",
+    name: "Transak",
+    isBestRate: false,
+    isMostReliable: false,
+    usdc: "100 USDC",
+    usd: "$101.07 USD",
+    img: <Image src="/transak.svg" alt="Transak" width={100} height={100} />,
+  },
+  {
+    id: "noah",
+    name: "Noah",
+    isBestRate: false,
+    isMostReliable: false,
+    usdc: "100 USDC",
+    usd: "$101.07 USD",
+    img: <Image src="/noah.svg" alt="Noah" width={100} height={100} />,
+  },
+];
+
+// @todo: refactor colors to theme variables
+const Tag = ({ children }: { children: React.ReactNode }) => (
+  <span className="rounded-md bg-[#043102] px-3 py-1 font-semibold text-[#74FB5B] text-xs">
+    {children}
+  </span>
+);
+
+const Provider = ({
+  img,
+  selected,
+  usdc,
+  usd,
+  onClick,
+  id,
+}: {
+  img: React.ReactNode;
+  id: string;
+  selected: boolean;
+  name: string;
+  usdc: string;
+  usd: string;
+  onClick: () => void;
+}) => (
+  <button
+    type="button"
+    className={`flex cursor-pointer flex-col gap-6 rounded-2xl border p-6 ${
+      selected ? "border-[#74FB5B]" : "border-[#88888880]"
+    }`}
+    onClick={onClick}
+  >
+    {id === "hifi" && (
+      <div className="flex items-center gap-2">
+        <Tag>BEST RATE</Tag>
+        <Tag>MOST RELIABLE</Tag>
+      </div>
+    )}
+
+    <div className="flex justify-between">
+      <div className="flex items-center gap-4">
+        <Checkbox checked={selected} onCheckedChange={() => onClick()} />
+        {img}
+      </div>
+
+      <div className="flex flex-col items-end font-semibold">
+        <div className="font-medium text-sm">{usdc}</div>
+        <div className="text-green-400 text-xs">{usd}</div>
+      </div>
+    </div>
+  </button>
+);
 
 export default function ProviderQuotes() {
   const [selectedProvider, setSelectedProvider] = useState("hifi");
 
-  const providers = [
-    {
-      id: "hifi",
-      name: "HiFi",
-      isBestRate: true,
-      isMostReliable: true,
-      usdc: "100 USDC",
-      usd: "$101.07 USD",
-    },
-    {
-      id: "transak",
-      name: "Transak",
-      isBestRate: false,
-      isMostReliable: false,
-      usdc: "100 USDC",
-      usd: "$101.07 USD",
-    },
-    {
-      id: "noah",
-      name: "Noah",
-      isBestRate: false,
-      isMostReliable: false,
-      usdc: "100 USDC",
-      usd: "$101.07 USD",
-    },
-  ];
-
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-3xl bg-black p-6 text-white">
-      <div className="mb-8">
-        <h1 className="mb-4 font-light text-4xl">Provider quotes</h1>
-        <p className="text-gray-400 text-lg">Compare rates from these providers.</p>
+    <div className="mx-auto w-full max-w-2xl rounded-2xl bg-black p-6 text-white">
+      <div className="mb-2">
+        <h1 className="mb-6 font-light text-3xl">Provider quotes</h1>
+        <p className="font-medium text-gray-400 text-xs">Compare rates from these providers.</p>
       </div>
 
-      <div className="space-y-4">
+      <div className="flex flex-col gap-4">
         {providers.map((provider) => (
-          <div
+          <Provider
             key={provider.id}
-            className={`relative cursor-pointer rounded-2xl border-2 p-6 transition-all ${
-              provider.isBestRate
-                ? "border-green-500 bg-gray-900"
-                : "border-gray-700 bg-gray-800 hover:border-gray-600"
-            }`}
-            // onClick={() => setSelectedProvider(provider.id)}
-          >
-            {/* Best Rate and Most Reliable badges */}
-            {provider.isBestRate && (
-              <div className="absolute top-4 left-6 flex gap-3">
-                <span className="rounded-full bg-green-600 px-3 py-1 font-medium text-sm text-white">
-                  BEST RATE
-                </span>
-                <span className="rounded-full bg-green-600 px-3 py-1 font-medium text-sm text-white">
-                  MOST RELIABLE
-                </span>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-8">
-              <div className="flex items-center gap-4">
-                {/* Radio button */}
-                <div className="relative">
-                  <input
-                    type="radio"
-                    name="provider"
-                    value={provider.id}
-                    checked={selectedProvider === provider.id}
-                    onChange={() => setSelectedProvider(provider.id)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                      selectedProvider === provider.id ? "border-green-500" : "border-gray-500"
-                    }`}
-                  >
-                    {selectedProvider === provider.id && (
-                      <div className="w-3 h-3 bg-green-500 rounded-full" />
-                    )}
-                  </div>
-                </div>
-
-                {/* Provider indicator dot and name */}
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-3 h-3 rounded-full ${provider.isBestRate ? "bg-green-500" : "bg-gray-500"}`}
-                  />
-                  <span className="text-2xl font-medium">{provider.name}</span>
-                </div>
-              </div>
-
-              {/* Rates */}
-              <div className="text-right">
-                <div className="text-2xl font-medium">{provider.usdc}</div>
-                <div className="text-green-400 text-lg">{provider.usd}</div>
-              </div>
-            </div>
-          </div>
+            {...provider}
+            selected={selectedProvider === provider.id}
+            onClick={() => setSelectedProvider(provider.id)}
+          />
         ))}
       </div>
     </div>
