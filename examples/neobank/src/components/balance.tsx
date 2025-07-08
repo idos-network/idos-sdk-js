@@ -1,6 +1,15 @@
+"use client";
+import { useAppKitAccount } from "@reown/appkit/react";
 import { ChevronDown } from "lucide-react";
 
 export default function BalanceComponent() {
+  const { address } = useAppKitAccount();
+
+  const trimAddress = (addr: string | undefined) => {
+    if (!addr) return "";
+    return `${addr.slice(0, 6)}...${addr.slice(-5)}`;
+  };
+
   return (
     <div className="flex items-center gap-6 bg-black">
       {/* Green Square */}
@@ -9,10 +18,10 @@ export default function BalanceComponent() {
       {/* Balance Info */}
       <div className="flex flex-col gap-2">
         {/* Wallet Address */}
-        <div className="flex items-center gap-2">
-          <span className="font-medium text-lg text-white">0x0E76...77607</span>
+        {!!address && <div className="flex items-center gap-2">
+          <span className="font-medium text-lg text-white">{trimAddress(address)}</span>
           <ChevronDown className="h-5 w-5 text-gray-400" />
-        </div>
+        </div>}
 
         {/* Balance Amount */}
         <div className="font-bold text-6xl text-white">$12,340.56</div>

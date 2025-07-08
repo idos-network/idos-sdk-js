@@ -1,6 +1,7 @@
 "use client";
-import { ArrowUpDown, ArrowUpRight, DollarSign } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { TokenETH, TokenUSDC } from "@web3icons/react";
+import { ReceiveIcon, SwapIcon, SendIcon } from "./icons";
 
 interface Transaction {
   id: string;
@@ -52,40 +53,57 @@ const transactions: Transaction[] = [
 ];
 
 export default function TransactionsPanel() {
+  const iconProps = {
+    className: "text-neobank-primary",
+    size: 12,
+  };
   const getTransactionIcon = (type: string) => {
     switch (type) {
       case "buy":
-        return <ArrowUpRight className="h-4 w-4 text-green-400" />;
+        return <SendIcon {...iconProps} />;
       case "swap":
-        return <ArrowUpDown className="h-4 w-4 text-green-400" />;
+        return <SwapIcon {...iconProps} size={19} />;
       default:
-        return <ArrowUpRight className="h-4 w-4 text-green-400" />;
+        return <ReceiveIcon {...iconProps} />;
     }
   };
 
   return (
     <Card className="h-full w-full rounded-3xl border-gray-800 bg-[#1E1E1E] text-white">
-      <CardContent className="p-6">
+      <CardContent className="px-6">
         {/* Header */}
         <h2 className="mb-6 font-semibold text-2xl text-white">Transactions</h2>
 
         {/* Transaction List */}
-        <div className="space-y-4">
+        <div className="">
           {transactions.map((transaction, index) => (
             <div key={transaction.id} className="relative">
               <div className="flex items-center gap-4 py-3">
                 {/* Transaction Type Icon */}
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-600/20">
-                  {getTransactionIcon(transaction.type)}
-                </div>
 
-                {/* Currency Icon */}
-                <div className="relative">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500">
-                    <DollarSign className="h-5 w-5 text-white" />
+                <div className="relative flex items-center">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground">
+                    {getTransactionIcon(transaction.type)}
                   </div>
-                  <div className="-bottom-1 -right-1 absolute flex h-4 w-4 items-center justify-center rounded-full bg-blue-600">
-                    <ArrowUpRight className="h-2 w-2 text-white" />
+                  <div className="relative">
+                    <div
+                      className="absolute inset-0 bg-white"
+                      style={{
+                        clipPath: "circle(15px at center)",
+                        width: "48px",
+                        height: "48px",
+                      }}
+                    />
+                    {/* USDC icon on top */}
+                    <TokenUSDC
+                      color="#3C75C3"
+                      size={48}
+                      variant="branded"
+                      className="relative z-10"
+                    />
+                    <div className="-bottom-[1px] -right-[1px] absolute z-20 flex h-4 w-4 items-center justify-center rounded-[5px] bg-neobank-accent">
+                      <TokenETH color="white" size={17.5} variant="branded" />
+                    </div>
                   </div>
                 </div>
 
@@ -99,7 +117,7 @@ export default function TransactionsPanel() {
                 <div className="text-right">
                   <div className="font-medium text-green-400">{transaction.value}</div>
                   <div
-                    className={`text-sm ${transaction.isPositive ? "text-green-400" : "text-gray-400"}`}
+                    className={`text-sm ${transaction.isPositive ? "text-neobank-primary" : "text-gray-400"}`}
                   >
                     {transaction.change}
                   </div>
@@ -107,14 +125,17 @@ export default function TransactionsPanel() {
               </div>
 
               {/* Separator line */}
-              {index < transactions.length - 1 && <div className="mt-3 border-gray-700 border-b" />}
+              {index < transactions.length - 1 && <div className="border-gray-700 border-b" />}
             </div>
           ))}
         </div>
 
         {/* All Transactions Link */}
         <div className="mt-8">
-          <button type="button" className="text-white underline underline-offset-4 hover:text-gray-300">
+          <button
+            type="button"
+            className="text-white underline underline-offset-4 hover:text-gray-300"
+          >
             All Transactions
           </button>
         </div>

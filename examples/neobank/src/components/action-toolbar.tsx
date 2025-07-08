@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowDownLeft, ArrowUpDown, ArrowUpRight, Link, Plus, RotateCcw } from "lucide-react";
 import type React from "react";
 import { Button } from "@/components/ui/button";
+import { BridgeIcon, SellIcon, SwapIcon, SendIcon, ReceiveIcon, BuyIcon } from "./icons";
 
 interface ActionButton {
   id: string;
@@ -16,33 +16,33 @@ const actionButtons: ActionButton[] = [
   {
     id: "buy",
     label: "Buy",
-    icon: <Plus className="h-5 w-5" />,
+    icon: <BuyIcon />,
     isActive: true,
   },
   {
     id: "sell",
     label: "Sell",
-    icon: <RotateCcw className="h-5 w-5" />,
+    icon: <SellIcon />,
   },
   {
     id: "swap",
     label: "Swap",
-    icon: <ArrowUpDown className="h-5 w-5" />,
+    icon: <SwapIcon />,
   },
   {
     id: "bridge",
     label: "Bridge",
-    icon: <Link className="h-5 w-5" />,
+    icon: <BridgeIcon />,
   },
   {
     id: "send",
     label: "Send",
-    icon: <ArrowUpRight className="h-5 w-5" />,
+    icon: <SendIcon />,
   },
   {
     id: "receive",
     label: "Receive",
-    icon: <ArrowDownLeft className="h-5 w-5" />,
+    icon: <ReceiveIcon />,
   },
 ];
 
@@ -61,10 +61,11 @@ export default function ActionToolbar() {
               {/* Action Button */}
               <Button
                 onClick={() => handleActionClick(action.id)}
-                className={`h-13 w-13 rounded-full p-0 transition-all duration-200 hover:scale-105 ${action.isActive
-                  ? "bg-green-400 text-black hover:bg-green-500"
-                  : "bg-white text-black hover:bg-gray-100"
-                  }`}
+                className={`h-13 w-13 rounded-full p-0 transition-all duration-200 hover:scale-105 ${
+                  action.isActive
+                    ? "bg-green-400 text-black hover:bg-green-500"
+                    : "bg-white text-black hover:bg-gray-100"
+                }`}
                 variant="ghost"
               >
                 {action.icon}

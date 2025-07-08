@@ -1,7 +1,10 @@
-import PerformanceChart from "@/components/performance-chart";
-import TransactionHistory from "@/components/transaction-history";
+"use client";
+
 import { useDisconnect } from "@reown/appkit/react";
 import { useRouter } from "next/navigation";
+
+import PerformanceChart from "@/components/performance-chart";
+import TransactionHistory from "@/components/transaction-history";
 
 export default function Dashboard() {
 
@@ -15,7 +18,7 @@ export default function Dashboard() {
   return (
     <div className="flex w-full flex-col gap-4">
       <div className="flex flex-col gap-5 md:flex-row">
-        <div className="flex-1">
+        <div className="flex-2">
           <PerformanceChart />
         </div>
         <div className="flex-2">

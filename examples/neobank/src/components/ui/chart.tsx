@@ -127,8 +127,8 @@ function ChartTooltipContent({
     labelKey?: string
   } & {
     // @ts-ignore: check for the right types
-    payload: any
-    label: any
+    payload?: any
+    label?: any
   }) {
   const { config } = useChart()
 

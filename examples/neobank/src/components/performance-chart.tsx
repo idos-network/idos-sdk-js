@@ -114,8 +114,8 @@ export default function PerformanceChart() {
   };
 
   return (
-    <Card className="w-full rounded-3xl border-gray-800 bg-[#1E1E1E] text-white">
-      <CardContent className="p-6">
+    <Card className="h-full w-full rounded-3xl border-gray-800 bg-neobank-dark text-white">
+      <CardContent className="">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-0">
           <h2 className="font-semibold text-white text-xl sm:text-2xl">Performance</h2>
@@ -131,11 +131,16 @@ export default function PerformanceChart() {
         </div>
 
         {/* Chart */}
-        <div className="mb-6 h-[200px] sm:h-[250px] md:h-[300px] lg:h-[350px]">
+        <div className="h-[160px] sm:h-[240px] md:h-[280px] lg:h-[300px]">
           <ChartContainer config={chartConfig} className="h-full w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#374151" vertical={false} />
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="#374151"
+                  vertical={false}
+                  horizontal={false}
+                />
                 <XAxis
                   dataKey="date"
                   tickFormatter={formatDate}
@@ -192,10 +197,11 @@ export default function PerformanceChart() {
               variant={activeFilter === filter ? "default" : "ghost"}
               size="sm"
               onClick={() => setActiveFilter(filter)}
-              className={`px-2 py-1 text-xs sm:px-3 sm:py-2 ${activeFilter === filter
-                ? "bg-green-600 text-white hover:bg-green-700"
-                : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                }`}
+              className={`px-2 py-1 text-xs sm:px-3 sm:py-2 ${
+                activeFilter === filter
+                  ? "bg-green-600 text-white hover:bg-green-700"
+                  : "text-gray-400 hover:bg-gray-800 hover:text-white"
+              }`}
             >
               {filter}
             </Button>

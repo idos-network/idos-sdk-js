@@ -131,11 +131,11 @@ export default function ChartLineInteractive() {
   );
 
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
-        <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
-          <CardTitle>Line Chart - Interactive</CardTitle>
-          <CardDescription>Showing total visitors for the last 3 months</CardDescription>
+        <div className="flex flex-1 flex-col justify-center gap-1 px-3 py-4 sm:px-6 sm:py-6">
+          <CardTitle className="text-lg sm:text-xl">Line Chart - Interactive</CardTitle>
+          <CardDescription className="text-sm">Showing total visitors for the last 3 months</CardDescription>
         </div>
         <div className="flex">
           {["desktop", "mobile"].map((key) => {
@@ -145,11 +145,11 @@ export default function ChartLineInteractive() {
                 type="button"
                 key={chart}
                 data-active={activeChart === chart}
-                className="flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-8 sm:py-6"
+                className="flex flex-1 flex-col justify-center gap-1 border-t px-3 py-3 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-t-0 sm:border-l sm:px-6 sm:py-4 md:px-8 md:py-6"
                 onClick={() => setActiveChart(chart)}
               >
                 <span className="text-muted-foreground text-xs">{chartConfig[chart].label}</span>
-                <span className="font-bold text-3xl leading-none sm:text-lg">
+                <span className="font-bold text-lg leading-none sm:text-xl md:text-2xl lg:text-3xl">
                   {total[key as keyof typeof total].toLocaleString()}
                 </span>
               </button>
@@ -157,14 +157,16 @@ export default function ChartLineInteractive() {
           })}
         </div>
       </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        <ChartContainer config={chartConfig} className="aspect-auto h-[250px] w-full">
+      <CardContent className="p-2 sm:p-4 md:p-6">
+        <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full sm:h-[250px] md:h-[300px] lg:h-[350px]">
           <LineChart
             accessibilityLayer
             data={chartData}
             margin={{
-              left: 12,
-              right: 12,
+              left: 4,
+              right: 4,
+              top: 8,
+              bottom: 8,
             }}
           >
             <CartesianGrid vertical={false} />
@@ -174,6 +176,8 @@ export default function ChartLineInteractive() {
               axisLine={false}
               tickMargin={8}
               minTickGap={32}
+              tick={{ fontSize: 11 }}
+              className="text-xs sm:text-sm"
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
@@ -185,7 +189,7 @@ export default function ChartLineInteractive() {
             <ChartTooltip
               content={
                 <ChartTooltipContent
-                  className="w-[150px]"
+                  className="w-[120px] sm:w-[150px]"
                   nameKey="views"
                   labelFormatter={(value) => {
                     return new Date(value).toLocaleDateString("en-US", {
