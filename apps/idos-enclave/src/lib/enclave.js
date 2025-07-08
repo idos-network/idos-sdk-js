@@ -74,7 +74,7 @@ export class Enclave {
   async keys() {
     console.log("keys")
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
-    var secretKey = storeWithCodec.get("encryption-private-key")
+    let secretKey = storeWithCodec.get("encryption-private-key")
 
     if (!secretKey) {
       const preferredAuthMethod = await this.ensurePreferredAuthMethod()
@@ -101,7 +101,8 @@ export class Enclave {
   async ensurePreferredAuthMethod() {
     console.log("ensurePreferredAuthMethod")
     const allowedAuthMethods = ["mpc", "password"]
-    var authMethod = this.store.get("preferred-auth-method");
+    let authMethod = this.store.get("preferred-auth-method");
+    let password
     if (authMethod) { return authMethod }
 
     this.unlockButton.style.display = "block";
@@ -112,7 +113,7 @@ export class Enclave {
       this.unlockButton.disabled = true;
 
         try {
-          ({authMethod} = await this.openDialog("auth", {}));
+          ({ authMethod, password } = await this.openDialog("auth", {}));
 
           if (!allowedAuthMethods.includes(authMethod)) {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
@@ -122,6 +123,9 @@ export class Enclave {
           return reject(e);
         }
         this.store.set("preferred-auth-method", authMethod);
+        if (password) this.store.set("password", password);
+        this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+        this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
         return authMethod ? resolve(authMethod) : reject();
       }),
@@ -129,12 +133,13 @@ export class Enclave {
   }
 
   async ensurePassword() {
-    if (this.isAuthorizedOrigin && this.store.get("password")) return Promise.resolve;
+    console.log("ensurePassword")
+    let password = this.store.get("password");
+    if (this.isAuthorizedOrigin && password) return Promise.resolve(password);
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
-    let password;
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
