@@ -3,7 +3,7 @@ import { MetaMask, metaMaskFixtures } from "@synthetixio/synpress/playwright";
 import basicSetup from "../wallet-setup/basic.setup";
 
 // @todo: This should be created from the sdk instead of relying on hardcoded values.
-const credentialContent = process.env.CREDENTIAL_CONTENT as string;
+const _credentialContent = process.env.CREDENTIAL_CONTENT as string;
 
 const test = testWithSynpress(metaMaskFixtures(basicSetup));
 const { expect } = test;

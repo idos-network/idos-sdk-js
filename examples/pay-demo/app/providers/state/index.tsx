@@ -7,5 +7,5 @@ export function MachineProvider({ children }: { children: React.ReactNode }) {
   return <MachineContext.Provider>{children}</MachineContext.Provider>;
 }
 
-export * from "./types";
 export * from "./machine";
+export * from "./types";

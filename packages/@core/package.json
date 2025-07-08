@@ -5,24 +5,25 @@
   "dependencies": {
     "@gemwallet/api": "^3.8.0",
     "@kwilteam/kwil-js": "catalog:core",
-    "@near-wallet-selector/core": "9.0.2",
+    "@near-wallet-selector/core": "catalog:near",
     "@stablelib/base64": "catalog:core",
     "@stablelib/binary": "catalog:core",
     "@stablelib/bytes": "catalog:core",
     "@stablelib/hex": "catalog:core",
     "@stablelib/sha256": "catalog:core",
     "@stablelib/utf8": "catalog:core",
-    "@stellar/stellar-sdk": "catalog:core",
+    "@stellar/stellar-sdk": "catalog:stellar",
+    "@wagmi/core": "2.17.3",
     "borsh": "catalog:core",
     "bs58": "catalog:core",
     "es-toolkit": "catalog:core",
-    "ethers": "catalog:core",
-    "near-api-js": "catalog:core",
+    "ethers": "catalog:ethereum",
+    "near-api-js": "catalog:near",
+    "ripple-binary-codec": "catalog:xrp",
+    "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
-    "ripple-binary-codec": "catalog:core",
-    "ripple-keypairs": "catalog:core",
-    "xrpl": "catalog:core",
-    "xumm": "catalog:core"
+    "xrpl": "catalog:xrp",
+    "xumm": "catalog:xrp"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core"
@@ -30,6 +31,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./codecs": "./src/codecs/index.ts",
+    "./signature-verification": "./src/signature-verification/index.ts",
     "./cryptography": "./src/cryptography/index.ts",
     "./types": "./src/types/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",

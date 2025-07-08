@@ -1,8 +1,5 @@
-import {
-  Button as HeadlessButton,
-  type ButtonProps as HeadlessButtonProps,
-} from "@headlessui/react";
-import { type VariantProps, tv } from "tailwind-variants";
+import type { ButtonHTMLAttributes } from "preact/compat";
+import { tv, type VariantProps } from "tailwind-variants";
 
 const button = tv({
   base: "inline-flex place-content-center items-center rounded-md px-6 py-3 font-semibold text-neutral-950 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
@@ -18,11 +15,11 @@ const button = tv({
 });
 
 type BaseVariants = VariantProps<typeof button>;
-interface ButtonProps extends HeadlessButtonProps, BaseVariants {}
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>, BaseVariants {}
 
 export function Button({ variant, class: _class, className, ...props }: ButtonProps) {
   return (
-    <HeadlessButton
+    <button
       // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
       className={button({ variant, class: _class, className })}
       {...props}

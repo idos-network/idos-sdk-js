@@ -1,4 +1,3 @@
-import { useIdOS } from "@/idOS.provider";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -21,6 +20,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useRef } from "react";
+import { useIdOS } from "@/idOS.provider";
 
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrants } from "../shared";

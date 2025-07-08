@@ -6,7 +6,7 @@ import { verifyCredentials } from "./verifier";
 
 describe("verifiableCredentials", () => {
   it("should raise an error if the fields are invalid", async () => {
-    expect.assertions(8); // catch
+    expect.assertions(10); // catch
 
     const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
     const issuer = "https://vc-issuers.cool.id/idos";
@@ -25,7 +25,6 @@ describe("verifiableCredentials", () => {
           approvedAt: new Date("2022-01-01"),
           expirationDate: new Date("2030-01-01"),
         },
-        // @ts-expect-error - This is a test, so the error is expected, since data is invalid
         {
           id: `uuid:${id}`,
           applicantId: "1234567890",
@@ -33,6 +32,8 @@ describe("verifiableCredentials", () => {
           firstName: "John",
           familyName: "Lennon",
           governmentIdType: "SSN",
+          // @ts-expect-error - This is a test, so the error is expected, since data is invalid
+          gender: "MALE",
           governmentId: "123-45-6789",
           email: "john.lennon@example.com",
           phoneNumber: "+1234567890",
@@ -61,7 +62,7 @@ describe("verifiableCredentials", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(ZodError);
       const zodError = error as ZodError;
-      expect(zodError.errors).toHaveLength(3);
+      expect(zodError.errors).toHaveLength(4);
 
       // idDocumentCountry
       const idDocumentCountryError = zodError.errors.find(
@@ -84,6 +85,13 @@ describe("verifiableCredentials", () => {
       expect(residentialAddressCountryError).toBeDefined();
       expect(residentialAddressCountryError?.message).toContain(
         "String must contain at most 2 character(s)",
+      );
+
+      // gender
+      const genderError = zodError.errors.find((error) => error.path[0] === "gender");
+      expect(genderError).toBeDefined();
+      expect(genderError?.message).toContain(
+        "Invalid enum value. Expected 'M' | 'F' | 'OTHER', received 'MALE'",
       );
     }
   });
@@ -116,7 +124,10 @@ describe("verifiableCredentials", () => {
         applicantId: "1234567890",
         inquiryId: "1234567890",
         firstName: "John",
+        middleName: "Paul",
         familyName: "Lennon",
+        gender: "M",
+        nationality: "US",
         governmentIdType: "SSN",
         governmentId: "123-45-6789",
         email: "john.lennon@example.com",
@@ -135,6 +146,7 @@ describe("verifiableCredentials", () => {
           street: "Main St",
           houseNumber: "123",
           additionalAddressInfo: "Apt 1",
+          region: "NY",
           city: "New York",
           postalCode: "10001",
           country: "US",
@@ -153,6 +165,7 @@ describe("verifiableCredentials", () => {
     expect(data.credentialSubject.residentialAddressCity).toBe("New York");
     expect(data.credentialSubject.residentialAddressPostalCode).toBe("10001");
     expect(data.credentialSubject.residentialAddressCountry).toBe("US");
+    expect(data.credentialSubject.residentialAddressRegion).toBe("NY");
 
     expect(data.credentialSubject.email).toBe("john.lennon@example.com");
     expect(data.credentialSubject.phoneNumber).toBe("+1234567890");

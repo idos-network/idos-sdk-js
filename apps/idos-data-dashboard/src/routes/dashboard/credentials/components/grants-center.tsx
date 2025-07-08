@@ -19,8 +19,8 @@ import {
   Th,
   Thead,
   Tr,
-  VStack,
   useBreakpointValue,
+  VStack,
 } from "@chakra-ui/react";
 
 import type { idOSGrant } from "@idos-network/core";

@@ -16,7 +16,7 @@ const generatePrivateKey = () => {
     .join("");
 };
 
-test.beforeEach(async ({ context, page, metamask }) => {
+test.beforeEach(async ({ context, page }) => {
   test.setTimeout(120000);
 
   await context.clearCookies();

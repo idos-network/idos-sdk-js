@@ -1,12 +1,12 @@
 "use client";
 
 import * as GemWallet from "@gemwallet/api";
-import { createIsleController } from "@idos-network/controllers";
 import type { WalletInfo } from "@idos-network/controllers";
+import { createIsleController } from "@idos-network/controllers";
 import { KwilSigner, signGemWalletTx, signNearMessage } from "@idos-network/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
-import { type JSX, createContext, useContext, useEffect, useState } from "react";
+import { createContext, type JSX, useContext, useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { wagmiAdapter } from "./app/providers";
 import { useWalletStore } from "./app/stores/wallet";
@@ -25,7 +25,10 @@ const getEvmSigner = async (wagmiConfig: Config) => {
 const walletInfoMapper = ({
   address,
   publicKey,
-}: { address: string; publicKey: string }): Record<"evm" | "xrpl" | "Stellar", WalletInfo> => ({
+}: {
+  address: string;
+  publicKey: string;
+}): Record<"evm" | "xrpl" | "Stellar", WalletInfo> => ({
   evm: {
     address,
     publicKey,
@@ -133,7 +136,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
       if (!walletAddress || !walletPublicKey) return;
 
       // biome-ignore lint/suspicious/noExplicitAny: external signer can be any type
-      let externalSigner: any = undefined;
+      let externalSigner: any;
       let walletInfo: WalletInfo;
 
       // Handle different wallet types
@@ -224,7 +227,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               meta: {
                 url: acmeCardProviderUrl,
                 name: "ACME Card Provider",
-                logo: `${acmeCardProviderUrl}/static/logo.svg`,
+                logo: `${window.location.origin}/static/acme.svg`,
               },
               consumerEncryptionPublicKey:
                 process.env.NEXT_PUBLIC_OTHER_CONSUMER_ENCRYPTION_PUBLIC_KEY ?? "",

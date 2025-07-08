@@ -11,11 +11,13 @@ export interface Context {
   walletAddress: string | null;
   provider: Provider;
   findCredentialAttempts: number;
+  kycType: "sumsub" | "persona" | null;
   kycUrl: string | null;
   profile: boolean | null;
   sharableToken: string | null;
   credential: idOSCredential | null;
   sharedCredential: idOSCredential | null;
+  krakenDAG: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
@@ -24,9 +26,9 @@ export interface Context {
   hifiTosId: string | null;
   hifiUrl: string | null;
   getHifiKycStatusAttempts: number;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   hifiKycStatus: "ACTIVE" | any;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
   onRampAccount: any | null;
 }
 

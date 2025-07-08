@@ -9,7 +9,7 @@ import AuthMethodChooser from "@/features/auth/auth-method-chooser";
 import { Confirmation } from "@/features/confirmation/confirmation";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
 import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
-import type { AllowedIntent, AuthMethod, Theme, UIMode, idOSEnclaveConfiguration } from "@/types";
+import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
   intent: AllowedIntent;

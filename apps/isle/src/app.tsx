@@ -1,4 +1,4 @@
-import { Box, Center, Show, Spinner, chakra } from "@chakra-ui/react";
+import { Box, Center, chakra, Show, Spinner } from "@chakra-ui/react";
 import { useTheme } from "next-themes";
 import type { PropsWithChildren } from "react";
 import { useEffect } from "react";
