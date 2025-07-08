@@ -11,7 +11,8 @@
       "web-streams-polyfill": "3.3.3"
     },
     "patchedDependencies": {
-      "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch"
+      "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch",
+      "react-router@7.6.3": "patches/react-router@7.6.3.patch"
     },
     "onlyBuiltDependencies": [
       "@reown/appkit"
