@@ -12,6 +12,7 @@ Borsh
 chakra
 chatset
 ciphertext
+codegen
 comlink
 cooldown
 creit
@@ -59,7 +60,9 @@ Nominatim
 nonced
 partialize
 partisia
+partisiablockchain
 nums
+offchain
 OSDAG
 partialize
 passporting
@@ -74,6 +77,7 @@ Reown
 safekeep
 sandboxed
 secp
+secretsharing
 shardnet
 siwe
 stablelib
