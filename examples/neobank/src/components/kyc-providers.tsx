@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { useState } from "react";
 import { OptionButton } from "./ui/option-button";
-import Image from "next/image";
 import { Tag } from "./ui/tag";
 
 const providers = [

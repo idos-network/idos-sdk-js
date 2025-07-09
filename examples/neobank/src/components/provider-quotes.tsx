@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import { Tag } from "@/components/ui/tag";
 import { OptionButton } from "@/components/ui/option-button";
+import { Tag } from "@/components/ui/tag";
 
 interface Provider {
   id: string;
