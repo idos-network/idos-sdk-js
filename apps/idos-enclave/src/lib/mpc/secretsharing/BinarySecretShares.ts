@@ -87,7 +87,7 @@ export class BinarySecretShares {
   }
 
   public getShares(): Buffer[] {
-    return this.secretShares.map((share) => share?.serialize());
+    return this.secretShares.map((share) => share!.serialize());
   }
 
   /**
