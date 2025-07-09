@@ -23,8 +23,8 @@ export class Enclave {
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     this.mpcClient = new MPCClient(
-      "https://partisia-reader-node.staging.idos.network:8080",
-      "02fba53e60467a4babd20d007953a5dde1197463a4"
+      import.meta.env.VITE_MPC_READER_NODE_URL,
+      import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
     )
 
     this.listenToRequests();
