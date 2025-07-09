@@ -16,7 +16,10 @@ export class EngineClient {
 
   constructor(baseUrl: string, contractAddress: PbcAddress) {
     this.contractAddress = contractAddress;
-    this.baseUrl = baseUrl;
+    // Force https for baseUrl
+    this.baseUrl = baseUrl.replace(/^http:/, "https:");
+    // TODO: get back pure baseUrl when new contract deployment will be fixed
+    // this.baseUrl = baseUrl;
   }
 
   public async sendUpload(id: string, uploadRequest: Sharing, signature: Bytes): Promise<string> {
