@@ -32,8 +32,7 @@ export class EngineClient {
       id;
     const status = await putRequest(url, uploadRequest, authHeader);
     if (status !== "201") {
-      // throw new Error(`Error uploading share to ${this.contractAddress} at ${url}`);
-      console.log(`Error uploading share to ${this.contractAddress} at ${url}`);
+      throw new Error(`Error uploading share to ${this.contractAddress} at ${url}`);
     }
     return status;
   }

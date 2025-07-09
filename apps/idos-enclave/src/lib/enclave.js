@@ -78,7 +78,6 @@ export class Enclave {
 
     if (!secretKey) {
       const preferredAuthMethod = await this.ensurePreferredAuthMethod()
-      console.log({preferredAuthMethod});
 
       switch (preferredAuthMethod) {
         case "password":
@@ -91,8 +90,6 @@ export class Enclave {
           break;
       }
     }
-    console.log({secretKey})
-
     await this.ensureKeyPair(secretKey);
 
     return this.keyPair?.publicKey;
@@ -119,7 +116,6 @@ export class Enclave {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
           }
         } catch (e) {
-          console.log("error in auth dialog", e)
           return reject(e);
         }
         this.store.set("preferred-auth-method", authMethod);
@@ -199,7 +195,6 @@ export class Enclave {
 
       const channel = new MessageChannel();
       channel.port1.onmessage = async (message) => {
-        console.log("I-FRAME receives a message: ", message);
         channel.port1.close();
         const { status, secret } = await this.mpcClient.downloadSecret(this.userId, downloadRequest, message.data.data, ephemeralKeyPair.secretKey)
 
@@ -224,7 +219,6 @@ export class Enclave {
 
       const channel = new MessageChannel();
       channel.port1.onmessage = async (message) => {
-        console.log("I-FRAME receives a message: ", message);
         channel.port1.close();
         const { status, secret } = await this.mpcClient.uploadSecret(this.userId, uploadRequest, message.data.data, blindedShares)
 
@@ -476,7 +470,6 @@ export class Enclave {
           // this.dialog.close();
           return reject(error);
         }
-        console.log({openDialogResult: result})
         if (result.type === "idOS:store" && result.status === "pending") {
           result = await this.handleIDOSStore(result.payload);
 

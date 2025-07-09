@@ -122,7 +122,6 @@ export class Client {
       secret = BinarySecretShares.read(secretShares.map((item) => item.share)).reconstructSecret();
       return { status: "ok", secret };
     } catch (e) {
-      console.log("reconstruct error", e);
       return { status: "error", secret: undefined };
     }
   }
