@@ -1,5 +1,5 @@
-import type { FiniteFieldElement } from "./FiniteFieldElement";
-import { Polynomial } from "./Polynomial";
+import type { FiniteFieldElement } from "./finite-field-element";
+import { Polynomial } from "./polynomial";
 
 export class F256 implements FiniteFieldElement<F256> {
   readonly value: number;

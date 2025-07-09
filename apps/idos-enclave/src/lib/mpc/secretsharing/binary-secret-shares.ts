@@ -1,6 +1,6 @@
-import { F256 } from "./F256";
-import { Lagrange } from "./Lagrange";
-import type { Polynomial } from "./Polynomial";
+import { F256 } from "./f256";
+import { Lagrange } from "./lagrange";
+import type { Polynomial } from "./polynomial";
 
 /**
  * Binary data which has been broken into secret shares. BinarySecretShares are distributed among ZK

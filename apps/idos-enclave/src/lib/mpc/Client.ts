@@ -3,9 +3,9 @@ import {
   Configuration,
 } from "@partisiablockchain/blockchain-api-transaction-client";
 import { ethers, type TypedDataDomain } from "ethers";
-import { EngineClient } from "./EngineClient";
+import { EngineClient } from "./engine-client";
 import { deserializeState } from "./generated/IdosContract";
-import { BinarySecretShares, getRandomBytes } from "./secretsharing/BinarySecretShares";
+import { BinarySecretShares, getRandomBytes } from "./secretsharing/binary-secret-shares";
 import {
   type Bytes,
   DOWNLOAD_TYPES,
@@ -16,7 +16,7 @@ import {
   UPLOAD_TYPES,
   type UploadMessageToSign,
   type UploadSignatureMessage,
-} from "./Types";
+} from "./types";
 
 export class Client {
   private readonly baseUrl: string;

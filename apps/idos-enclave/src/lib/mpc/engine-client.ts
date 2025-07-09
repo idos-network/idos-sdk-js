@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import nacl from "tweetnacl";
-import { patchRequest, postRequest, putRequest } from "./Api";
+import { patchRequest, postRequest, putRequest } from "./api";
 import type {
   Bytes,
   DownloadRequest,
@@ -8,7 +8,7 @@ import type {
   PbcAddress,
   Sharing,
   UpdateWalletsRequest,
-} from "./Types";
+} from "./types";
 
 export class EngineClient {
   private readonly baseUrl: string;

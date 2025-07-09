@@ -4,7 +4,7 @@ import * as Utf8Codec from "@stablelib/utf8";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
-import { Client as MPCClient } from "./mpc/Client";
+import { Client as MPCClient } from "./mpc/client";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
