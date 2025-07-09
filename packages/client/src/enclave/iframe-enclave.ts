@@ -54,7 +54,7 @@ export class IframeEnclave implements EnclaveProvider {
       }
     }
 
-    return userEncryptionPublicKey;
+    return userEncryptionPublicKey as Uint8Array;
   }
 
   async reset(): Promise<void> {
