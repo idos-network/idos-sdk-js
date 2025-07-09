@@ -1,14 +1,19 @@
 import { resolve } from "node:path";
 import preact from "@preact/preset-vite";
-import inject from "@rollup/plugin-inject";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   define: {
     global: "window",
+  },
+  resolve: {
+    alias: {
+      buffer: "buffer",
+    },
   },
   build: {
     rollupOptions: {
@@ -23,13 +28,10 @@ export default defineConfig({
     preact(),
     tailwindcss(),
     tsconfigPaths(),
-    inject({
-      Buffer: ["buffer", "Buffer"],
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+      },
     }),
   ],
-  resolve: {
-    alias: {
-      buffer: "buffer",
-    },
-  },
 });
