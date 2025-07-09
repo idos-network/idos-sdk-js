@@ -2,7 +2,6 @@ import type { IconProps } from ".";
 
 export function BuyIcon({ className, size = 17 }: IconProps) {
   return (
-    // biome-ignore lint/a11y/noSvgWithoutTitle: <explanation>
     <svg
       width={size}
       height={size}

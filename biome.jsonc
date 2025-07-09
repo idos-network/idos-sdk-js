@@ -15,7 +15,8 @@
       "!**/*/ui/**/*.tsx",
       "!**/*/*.js",
       "!**/*/.next/**/*",
-      "!**/.react-router/**/*"
+      "!**/.react-router/**/*",
+      "!**/.cache-synpress/**/*"
     ]
   },
   "linter": {
@@ -39,6 +40,9 @@
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
         "noUselessElse": "error"
+      },
+      "a11y": {
+        "noSvgWithoutTitle": "off"
       }
     }
   },
