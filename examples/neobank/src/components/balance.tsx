@@ -26,7 +26,7 @@ export default function BalanceComponent() {
         )}
 
         {/* Balance Amount */}
-        <div className="font-bold text-6xl text-white">$12,340.56</div>
+        <div className="font-bold text-3xl text-white md:text-6xl">$12,340.56</div>
       </div>
     </div>
   );
