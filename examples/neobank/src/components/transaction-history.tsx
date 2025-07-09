@@ -54,7 +54,7 @@ const transactions: Transaction[] = [
 
 export default function TransactionsPanel() {
   const iconProps = {
-    className: "text-neobank-primary",
+    className: "text-green-400",
     size: 12,
   };
   const getTransactionIcon = (type: string) => {
@@ -69,7 +69,7 @@ export default function TransactionsPanel() {
   };
 
   return (
-    <Card className="h-full w-full rounded-3xl border-gray-800 bg-[#1E1E1E] text-white">
+    <Card className="h-full w-full rounded-3xl border-gray-800 bg-stone-900 text-white">
       <CardContent className="px-6">
         {/* Header */}
         <h2 className="mb-6 font-semibold text-2xl text-white">Transactions</h2>
@@ -82,7 +82,7 @@ export default function TransactionsPanel() {
                 {/* Transaction Type Icon */}
 
                 <div className="relative flex items-center">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-700">
                     {getTransactionIcon(transaction.type)}
                   </div>
                   <div className="relative">
