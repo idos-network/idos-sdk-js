@@ -21,7 +21,7 @@ export class EngineClient {
 
   public async sendUpload(id: string, uploadRequest: Sharing, signature: Bytes): Promise<string> {
     const authHeader: HeadersInit = {
-      Authorization: "eip712 " + signature,
+      Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
     const url =
@@ -31,7 +31,7 @@ export class EngineClient {
       "/shares/" +
       id;
     const status = await putRequest(url, uploadRequest, authHeader);
-    if (status != "201") {
+    if (status !== "201") {
       // throw new Error(`Error uploading share to ${this.contractAddress} at ${url}`);
       console.log(`Error uploading share to ${this.contractAddress} at ${url}`);
     }
@@ -44,7 +44,7 @@ export class EngineClient {
     signature: Bytes,
   ): Promise<{ status: string; body: EncryptedShare | undefined }> {
     const authHeader: HeadersInit = {
-      Authorization: "eip712 " + signature,
+      Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
     const url =
@@ -67,7 +67,7 @@ export class EngineClient {
       downloadRequest,
       signature,
     );
-    if (encryptedShare == undefined) {
+    if (encryptedShare === undefined) {
       return { share: undefined, status };
     }
     const encryptedBuffer = ethers.getBytes(encryptedShare.encrypted_share);
@@ -83,9 +83,9 @@ export class EngineClient {
 
   public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string) {
     const authHeader: HeadersInit = {
-      Authorization: "eip712 " + signature,
+      Authorization: `eip712 ${signature}`,
     };
-    const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id;
+    const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     const ok = await patchRequest(url, updateRequest, authHeader);
     if (!ok) {
       throw new Error(`Error updating wallets to ${this.contractAddress} at ${url}`);

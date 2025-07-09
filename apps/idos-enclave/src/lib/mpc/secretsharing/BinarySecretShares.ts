@@ -1,4 +1,3 @@
-import { randomBytes } from "crypto";
 import { F256 } from "./F256";
 import { Lagrange } from "./Lagrange";
 import type { Polynomial } from "./Polynomial";
@@ -61,10 +60,10 @@ export class BinarySecretShares {
    * @return the created shares
    */
   public static read(rawShares: Array<Buffer | undefined>): BinarySecretShares {
-    if (rawShares.filter((x) => x != undefined).length < 3) {
+    if (rawShares.filter((x) => x !== undefined).length < 3) {
       throw new Error("Not enough shares to reconstruct");
     }
-    const readShares = rawShares.map((s) => (s == undefined ? undefined : Share.read(s)));
+    const readShares = rawShares.map((s) => (s === undefined ? undefined : Share.read(s)));
     return new BinarySecretShares(readShares);
   }
 
@@ -88,7 +87,7 @@ export class BinarySecretShares {
   }
 
   public getShares(): Buffer[] {
-    return this.secretShares.map((share) => share!.serialize());
+    return this.secretShares.map((share) => share?.serialize());
   }
 
   /**
@@ -121,7 +120,7 @@ export class BinarySecretShares {
     const possibleUndefined = this.secretShares.map((share) => share?.byteElements[i]);
     for (let j = 0; j < possibleUndefined.length; j++) {
       const possibleUndefinedElement = possibleUndefined[j];
-      if (possibleUndefinedElement != undefined) {
+      if (possibleUndefinedElement !== undefined) {
         alphas.push(BinarySecretShares.ALPHAS[j]);
         sharesOfByte.push(possibleUndefinedElement);
       }
@@ -138,7 +137,7 @@ export class BinarySecretShares {
   }
 
   private getByteLength() {
-    return this.secretShares.filter((x) => x != undefined)[0].byteElements.length;
+    return this.secretShares.filter((x) => x !== undefined)[0].byteElements.length;
   }
 
   /**
@@ -205,14 +204,10 @@ export class Share {
   }
 }
 
+// It works only in browsers
 export function getRandomBytes(length: number): Buffer {
-  if (typeof window !== "undefined" && window.crypto && window.crypto.getRandomValues) {
-    // Browser
-    const array = new Uint8Array(length);
-    window.crypto.getRandomValues(array);
-    return Buffer.from(array);
-  }
-  // Node.js
-  // Use dynamic import to avoid bundler issues
-  return randomBytes(length);
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+
+  return Buffer.from(array);
 }

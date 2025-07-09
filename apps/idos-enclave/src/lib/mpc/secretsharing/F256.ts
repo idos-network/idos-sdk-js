@@ -70,7 +70,7 @@ export class F256 implements FiniteFieldElement<F256> {
   multiply(other: F256): F256 {
     let a = this.value;
     let b = other.value;
-    let m;
+    let m: number;
     let p = 0;
     for (let i = 0; i < 8; i++) {
       p = (p ^ (-(b & 1) & a)) & 0xff;
@@ -95,15 +95,13 @@ export class F256 implements FiniteFieldElement<F256> {
 }
 
 const Constants = {
-  elements: Array.from({ length: 256 }, (value, key) => F256.createElement(key)),
+  elements: Array.from({ length: 256 }, (_value, key) => F256.createElement(key)),
   computationAlphas: [
     F256.createElement(1),
     F256.createElement(2),
     F256.createElement(3),
     F256.createElement(4),
     F256.createElement(5),
-    // F256.createElement(6),
-    // F256.createElement(7),
   ],
   multiplicativeInverse: [
     0x00, 0x01, 0x8d, 0xf6, 0xcb, 0x52, 0x7b, 0xd1, 0xe8, 0x4f, 0x29, 0xc0, 0xb0, 0xe1, 0xe5, 0xc7,

@@ -3,22 +3,12 @@
 // @ts-nocheck
 // noinspection ES6UnusedImports
 import {
-  AbiBitInput,
-  AbiBitOutput,
   AbiByteInput,
   AbiByteOutput,
   type AbiInput,
   type AbiOutput,
-  AvlTreeMap,
   type BlockchainAddress,
-  BlockchainPublicKey,
   type BlockchainStateClient,
-  BlsPublicKey,
-  BlsSignature,
-  BN,
-  Hash,
-  SecretInputBuilder,
-  Signature,
   type StateWithClient,
 } from "@partisiablockchain/abi-client";
 
