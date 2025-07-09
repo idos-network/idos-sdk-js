@@ -24,7 +24,7 @@ function buildOptions<T>(method: RequestType, headers: HeadersInit, entityBytes:
  * @param url the url to request.
  * @return a promise containing the result of the get request.
  */
-export function getRequest<R>(url: string): Promise<{ status: string, body: R | undefined }> {
+export function getRequest<R>(url: string): Promise<{ status: string; body: R | undefined }> {
   const options = buildOptions("GET", getHeaders, null);
   return handleFetch<R>(fetch(url, options));
 }
@@ -40,11 +40,12 @@ export function getRequest<R>(url: string): Promise<{ status: string, body: R | 
 export function putRequest<T>(url: string, object: T, headers?: HeadersInit): Promise<string> {
   const options = buildOptions("PUT", { ...postHeaders, ...headers }, object);
   return fetch(url, options)
-    .then(async (response) => {console.log(response); return response.status.toString()})
-    .catch(error => {
-      console.log("upload error")
-      console.log(error)
-      return error
+    .then(async (response) => {
+      return response.status.toString();
+    })
+    .catch((error) => {
+      console.error(error);
+      return error;
     });
 }
 
@@ -74,23 +75,25 @@ export function patchRequest<T>(url: string, object: T, headers?: HeadersInit): 
 export function postRequest<T, R>(
   url: string,
   object: T,
-  headers?: HeadersInit
-): Promise<{ status: string, body: R | undefined }> {
+  headers?: HeadersInit,
+): Promise<{ status: string; body: R | undefined }> {
   const options = buildOptions("POST", { ...postHeaders, ...headers }, object);
   return handleFetch<R>(fetch(url, options));
 }
 
-function handleFetch<T>(promise: Promise<Response>): Promise<{ status: string, body: T | undefined }> {
+function handleFetch<T>(
+  promise: Promise<Response>,
+): Promise<{ status: string; body: T | undefined }> {
   return promise
     .then(async (response) => {
       if (response.status === 200) {
-        const data = await response.json() as T;
+        const data = (await response.json()) as T;
         return { status: response.status.toString(), body: data };
       }
       return { status: response.status.toString(), body: undefined };
     })
-    .catch(error => {
-      console.log(error);
+    .catch((error) => {
+      console.error(error);
       return { status: "fetch-error", body: undefined };
     });
 }

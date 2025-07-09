@@ -1,4 +1,4 @@
-import { FiniteFieldElement } from "./FiniteFieldElement";
+import type { FiniteFieldElement } from "./FiniteFieldElement";
 import { Polynomial } from "./Polynomial";
 
 /**
@@ -15,7 +15,7 @@ function interpolate<T extends FiniteFieldElement<T>>(
   xs: readonly T[],
   ys: T[],
   zero: T,
-  one: T
+  one: T,
 ): Polynomial<T> {
   if (xs.length !== ys.length) {
     throw new Error("xs and ys must be of same size");
@@ -76,12 +76,12 @@ function interpolateCheckDegree<T extends FiniteFieldElement<T>>(
   ys: T[],
   maximalDegree: number,
   zero: T,
-  one: T
+  one: T,
 ): Polynomial<T> {
   const poly = interpolate(xs, ys, zero, one);
   if (poly.degree() > maximalDegree) {
     throw new Error(
-      `Interpolated polynomial has too high degree. Expected maximal=${maximalDegree}, actual=${poly.degree()}`
+      `Interpolated polynomial has too high degree. Expected maximal=${maximalDegree}, actual=${poly.degree()}`,
     );
   }
   return poly;

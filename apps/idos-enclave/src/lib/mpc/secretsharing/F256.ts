@@ -1,4 +1,4 @@
-import { FiniteFieldElement } from "./FiniteFieldElement";
+import type { FiniteFieldElement } from "./FiniteFieldElement";
 import { Polynomial } from "./Polynomial";
 
 export class F256 implements FiniteFieldElement<F256> {
@@ -39,7 +39,7 @@ export class F256 implements FiniteFieldElement<F256> {
    * @param coefficients the coefficients of the polynomial
    */
   static createPoly(coefficients: F256[]): Polynomial<F256> {
-    return Polynomial.create(coefficients, this.ZERO);
+    return Polynomial.create(coefficients, F256.ZERO);
   }
 
   add(other: F256): F256 {

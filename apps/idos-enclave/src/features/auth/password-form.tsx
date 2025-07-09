@@ -81,7 +81,7 @@ export function PasswordForm({
   store,
   encryptionPublicKey,
   userId,
-}: AuthMethodProps<{ authMethod: string, password: string; duration: number }> & {
+}: AuthMethodProps<{ authMethod: string; password: string; duration: number }> & {
   encryptionPublicKey?: string;
   userId: string | null;
 }) {

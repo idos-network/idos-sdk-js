@@ -166,12 +166,12 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
     console.log("message to sign on client", message);
     // @ts-ignore type collapse :)
-    const payload = (message.data.payload)
+    const payload = message.data.payload;
     const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
     const response = {
       status: "success",
       data: signature,
-    }
+    };
     message.ports[0].postMessage(response);
     message.ports[0].close();
   }
@@ -186,7 +186,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 
   async getUserEncryptionPublicKey(userId: string): Promise<string> {
-    await this.enclaveProvider.reconfigure({ mode: "new", walletAddress: this.store.get("signer-address") });
+    await this.enclaveProvider.reconfigure({
+      mode: "new",
+      walletAddress: this.store.get("signer-address"),
+    });
     const { userEncryptionPublicKey } =
       await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
     return userEncryptionPublicKey;
@@ -195,7 +198,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
-    await this.enclaveProvider.reconfigure({ mode: "existing", walletAddress: this.store.get("signer-address") });
+    await this.enclaveProvider.reconfigure({
+      mode: "existing",
+      walletAddress: this.store.get("signer-address"),
+    });
     const kwilUser = await getUserProfile(this.kwilClient);
 
     return new idOSClientLoggedIn(this, kwilUser);

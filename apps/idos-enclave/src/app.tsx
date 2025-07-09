@@ -4,8 +4,8 @@ import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
-import { PasswordForm } from "@/features/auth/password-form";
 import AuthMethodChooser from "@/features/auth/auth-method-chooser";
+import { PasswordForm } from "@/features/auth/password-form";
 import { Confirmation } from "@/features/confirmation/confirmation";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
 import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
@@ -217,7 +217,7 @@ export function App({ store, enclave }: AppProps) {
     <Layout>
       <AuthMethodChooser
         {...methodProps}
-        setMethod={method.value === null ? (m) => method.value = m : () => {}}
+        setMethod={method.value === null ? (m) => (method.value = m) : () => {}}
       />
     </Layout>
   );

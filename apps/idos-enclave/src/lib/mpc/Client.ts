@@ -1,41 +1,40 @@
 import {
-  DOWNLOAD_TYPES,
-  DownloadSignatureMessage,
-  PbcAddress,
-  UPLOAD_TYPES,
-  Sharing,
-  UploadSignatureMessage,
-  UpdateWalletsSignatureMessage,
-  UPDATE_TYPES,
-  DownloadMessageToSign,
-  UploadMessageToSign,
-} from "./Types";
-import { EngineClient } from "./EngineClient";
-import { ethers, TypedDataDomain } from "ethers";
-import {
   ChainControllerApi,
   Configuration,
 } from "@partisiablockchain/blockchain-api-transaction-client";
+import { ethers, type TypedDataDomain } from "ethers";
+import { EngineClient } from "./EngineClient";
 import { deserializeState } from "./generated/IdosContract";
 import { BinarySecretShares, getRandomBytes } from "./secretsharing/BinarySecretShares";
-
+import {
+  DOWNLOAD_TYPES,
+  type DownloadMessageToSign,
+  type DownloadSignatureMessage,
+  type PbcAddress,
+  type Sharing,
+  UPLOAD_TYPES,
+  type UploadMessageToSign,
+  type UploadSignatureMessage,
+} from "./Types";
 
 export class Client {
   private readonly baseUrl: string;
   private readonly contractAddress: PbcAddress;
   private engines: EngineClient[] | undefined;
 
-  constructor(
-    baseUrl: string,
-    contractAddress: PbcAddress,
-  ) {
+  constructor(baseUrl: string, contractAddress: PbcAddress) {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
   }
 
-  public async uploadSecret(id: string, uploadSignature: UploadSignatureMessage, signature: any, blindedShares: Buffer[]) {
+  public async uploadSecret(
+    id: string,
+    uploadSignature: UploadSignatureMessage,
+    signature: any,
+    blindedShares: Buffer[],
+  ) {
     const engineClients = await this.getEngines();
-    console.log(engineClients)
+    console.log(engineClients);
     const promises = [];
     for (let i = 0; i < engineClients.length; i++) {
       const engineClient = engineClients[i];
@@ -47,17 +46,16 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
 
-    if (statuses.every(item => item === "201")) {
+    if (statuses.every((item) => item === "201")) {
       return { status: "success" };
     }
 
-    if (statuses.filter(item => item === "201").length > 0) {
+    if (statuses.filter((item) => item === "201").length > 0) {
       return { status: "partial-success" };
     }
 
-    return { status: "failure" }
+    return { status: "failure" };
   }
-
 
   public getBlindedShares(secret: Buffer): Buffer[] {
     const shares = BinarySecretShares.create(secret).getShares();
@@ -69,15 +67,19 @@ export class Client {
       domain: this.getTypedDomain(),
       types: UPLOAD_TYPES,
       value: uploadRequest,
-    }
+    };
   }
 
-  public uploadRequest(blindedShares: Buffer[], signerAddress: string, additionalRecoveringAddresses: string[] = []): UploadSignatureMessage {
-    const recoveringAddresses = [signerAddress, ...additionalRecoveringAddresses]
+  public uploadRequest(
+    blindedShares: Buffer[],
+    signerAddress: string,
+    additionalRecoveringAddresses: string[] = [],
+  ): UploadSignatureMessage {
+    const recoveringAddresses = [signerAddress, ...additionalRecoveringAddresses];
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
       recovering_addresses: recoveringAddresses,
-    }
+    };
   }
 
   public downloadMessageToSign(downloadRequest: DownloadSignatureMessage): DownloadMessageToSign {
@@ -85,7 +87,7 @@ export class Client {
       domain: this.getTypedDomain(),
       types: DOWNLOAD_TYPES,
       value: downloadRequest,
-    }
+    };
   }
 
   public downloadRequest(signerAddress: string, publicKey: Uint8Array): DownloadSignatureMessage {
@@ -93,35 +95,33 @@ export class Client {
       recovering_address: signerAddress,
       timestamp: new Date().getTime(),
       public_key: ethers.hexlify(publicKey),
-    }
+    };
   }
 
   public async downloadSecret(
     id: string,
     downloadRequest: DownloadSignatureMessage,
     signature: any,
-    secretKey: Uint8Array
+    secretKey: Uint8Array,
   ): Promise<{ status: string; secret: Buffer | undefined }> {
     const shares = [];
     const engineClients = await this.getEngines();
     for (let i = 0; i < engineClients.length; i++) {
       const engineClient = engineClients[i];
-      shares.push(
-        engineClient.downloadAndDecrypt(id, downloadRequest, signature, secretKey)
-      );
+      shares.push(engineClient.downloadAndDecrypt(id, downloadRequest, signature, secretKey));
     }
     const secretShares = await Promise.all(shares);
-    console.log({secretSharesDownloadStatuses: secretShares.map(item => item.status)})
+    console.log({ secretSharesDownloadStatuses: secretShares.map((item) => item.status) });
 
-    if (secretShares.every(item => item.status === "404")) {
+    if (secretShares.every((item) => item.status === "404")) {
       return { status: "not-stored", secret: undefined };
     }
-    var secret
+    var secret;
     try {
-      secret = BinarySecretShares.read(secretShares.map(item => item.share)).reconstructSecret();
+      secret = BinarySecretShares.read(secretShares.map((item) => item.share)).reconstructSecret();
       return { status: "ok", secret };
-    } catch(e) {
-      console.log("reconstruct error", e)
+    } catch (e) {
+      console.log("reconstruct error", e);
       return { status: "error", secret };
     }
   }
@@ -159,7 +159,7 @@ export class Client {
       const rawState = await chainController.getContract({ address: this.contractAddress });
       const state = deserializeState(Buffer.from(rawState.serializedContract!, "base64"));
       this.engines = state.nodes.map(
-        (value) => new EngineClient(value.endpoint, this.contractAddress)
+        (value) => new EngineClient(value.endpoint, this.contractAddress),
       );
     }
     return this.engines;

@@ -1,7 +1,7 @@
 import { randomBytes } from "crypto";
 import { F256 } from "./F256";
 import { Lagrange } from "./Lagrange";
-import { Polynomial } from "./Polynomial";
+import type { Polynomial } from "./Polynomial";
 
 /**
  * Binary data which has been broken into secret shares. BinarySecretShares are distributed among ZK
@@ -36,17 +36,17 @@ export class BinarySecretShares {
     const random = rng ?? getRandomBytes;
 
     const sharedElements: F256[][] = [];
-    for (let i = 0; i < this.ALPHAS.length; i++) {
+    for (let i = 0; i < BinarySecretShares.ALPHAS.length; i++) {
       sharedElements.push([]);
     }
 
     for (let i = 0; i < variableData.length; i++) {
       const secret = F256.createElement(variableData[i]);
 
-      const polynomial = this.generatePolynomial(secret, random);
+      const polynomial = BinarySecretShares.generatePolynomial(secret, random);
 
-      for (let j = 0; j < this.ALPHAS.length; j++) {
-        const share = polynomial.evaluate(this.ALPHAS[j]);
+      for (let j = 0; j < BinarySecretShares.ALPHAS.length; j++) {
+        const share = polynomial.evaluate(BinarySecretShares.ALPHAS[j]);
         sharedElements[j].push(share);
       }
     }
@@ -61,7 +61,6 @@ export class BinarySecretShares {
    * @return the created shares
    */
   public static read(rawShares: Array<Buffer | undefined>): BinarySecretShares {
-    console.log(rawShares)
     if (rawShares.filter((x) => x != undefined).length < 3) {
       throw new Error("Not enough shares to reconstruct");
     }
@@ -133,7 +132,7 @@ export class BinarySecretShares {
       sharesOfByte,
       2,
       F256.ZERO,
-      F256.ONE
+      F256.ONE,
     );
     return polynomial.getConstantTerm().value;
   }
@@ -212,9 +211,8 @@ export function getRandomBytes(length: number): Buffer {
     const array = new Uint8Array(length);
     window.crypto.getRandomValues(array);
     return Buffer.from(array);
-  } else {
-    // Node.js
-    // Use dynamic import to avoid bundler issues
-    return randomBytes(length);
   }
+  // Node.js
+  // Use dynamic import to avoid bundler issues
+  return randomBytes(length);
 }

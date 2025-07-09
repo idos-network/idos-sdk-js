@@ -25,7 +25,7 @@ export class IframeEnclave implements EnclaveProvider {
 
   async load(walletAddress: string): Promise<void> {
     await this.loadEnclave();
-    await this.requestToEnclave({ configure: {...this.options, walletAddress} });
+    await this.requestToEnclave({ configure: { ...this.options, walletAddress } });
   }
 
   async reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void> {
