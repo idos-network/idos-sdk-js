@@ -16,11 +16,7 @@ export interface AuthMethodProps<K = Record<string, unknown>> {
   onError: (error: Error) => void;
 }
 
-export default function AuthMethodChooser({
-  setMethod,
-  mode,
-  onSuccess,
-}: AuthMethodChooserProps) {
+export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMethodChooserProps) {
   return (
     <div className="flex flex-col space-y-4 px-3 md:px-0">
       {mode === "existing" && (
