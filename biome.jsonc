@@ -15,7 +15,8 @@
       "!**/*/ui/**/*.tsx",
       "!**/*/*.js",
       "!**/*/.next/**/*",
-      "!**/.react-router/**/*"
+      "!**/.react-router/**/*",
+      "!**/.cache-synpress/**/*"
     ]
   },
   "linter": {
