@@ -24,7 +24,6 @@ export async function getXamanPublicKey(xummInstance: Xumm): Promise<UserPubkey>
 
       async (event) => {
         if (!event.payload.response.hex) return;
-        console.log({ event });
         const hex = event.payload.response.hex;
         if (!hex) reject("Failed to create transaction");
 
