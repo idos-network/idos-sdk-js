@@ -71,7 +71,7 @@ erDiagram
     User ||--o{ Credential : "is described by"
     User ||--o{ Attributes : "is described by"
     User ||--o{ AccessGrant : grants
-    Credential }o--|| Issuer : issued_by
+    Credential }o--|| Issuer : "issued by"
     AccessGrant }o--|| Credential : ""
     AccessGrant }o--|| Consumer: "granted to"
     SharedCredential }o--|| Credential : ""
@@ -87,7 +87,7 @@ erDiagram
   This is an informal, nebulous, term to refer generally to all the information a user controls.
 
 - **Wallet**:
-  Blockchain wallets that authenticate a user. A user can link multiple wallets across different chains (EVM, NEAR) to their idOS profile to provide flexible authentication options.
+  Blockchain wallets that authenticate a user. A user can link multiple wallets across different chains (EVM, NEAR, XRPL, Stellar) to their idOS profile to provide flexible authentication options.
 
 - **Credential**:
   Verified claims or attestations about a user. Notable fields are:
