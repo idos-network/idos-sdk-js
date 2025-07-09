@@ -267,14 +267,6 @@ These are other parties that bear influence in the system, even though they're n
     - _Playground_: <https://consumer-and-issuer-demo.playground.idos.network>
       - Alternative URL: <https://demo.idos.network>
 
-- **ACME Card Provider Demo**:
-  This is the sibling demo application of Consumer & Issuer Demo. It just shows its status.
-
-  - **Relevant repo folder**:
-    - [examples/passporting](../examples/passporting/)
-  - **Deployments**:
-    - _Playground_: <https://acme-card-provider-demo.playground.idos.network/>
-
 ## Typical usage
 
 See the [Long Tour](./long-tour.md) for a thorough end-to-end walkthrough.
