@@ -69,7 +69,7 @@ export default function TransactionsPanel() {
   };
 
   return (
-    <Card className="h-full w-full rounded-3xl border-gray-800 bg-stone-900 text-white">
+    <Card className="h-full w-full rounded-3xl border-none bg-card text-white">
       <CardContent className="px-6">
         {/* Header */}
         <h2 className="mb-6 font-semibold text-2xl text-white">Transactions</h2>
@@ -101,7 +101,7 @@ export default function TransactionsPanel() {
                       variant="branded"
                       className="relative z-10"
                     />
-                    <div className="-bottom-[1px] -right-[1px] absolute z-20 flex h-4 w-4 items-center justify-center rounded-[5px] bg-neobank-accent">
+                    <div className="-bottom-[1px] -right-[1px] absolute z-20 flex h-4 w-4 items-center justify-center rounded-[5px] bg-sidebar-accent">
                       <TokenETH color="white" size={17.5} variant="branded" />
                     </div>
                   </div>
