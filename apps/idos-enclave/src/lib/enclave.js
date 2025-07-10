@@ -214,8 +214,8 @@ export class Enclave {
     return new Promise((resolve, reject) => {
       const signerAddress = this.configuration.walletAddress
       if (!signerAddress) {
-        console.warn("signerAddress is not found");
-        return resolve({ status: "error" });
+        console.error("signerAddress is not found");
+        return resolve({ status: "no-signer-address" });
       }
 
       const blindedShares = this.mpcClient.getBlindedShares(secret)
