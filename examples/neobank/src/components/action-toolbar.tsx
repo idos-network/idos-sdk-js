@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import type React from "react";
-import { Button } from "@/components/ui/button";
 import { BridgeIcon, BuyIcon, ReceiveIcon, SellIcon, SendIcon, SwapIcon } from "./icons";
 
 interface ActionButton {
