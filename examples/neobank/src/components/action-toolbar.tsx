@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type React from "react";
 import { Button } from "@/components/ui/button";
 import { BridgeIcon, BuyIcon, ReceiveIcon, SellIcon, SendIcon, SwapIcon } from "./icons";
@@ -59,17 +60,16 @@ export default function ActionToolbar() {
           {actionButtons.map((action) => (
             <div key={action.id} className="flex w-14 flex-col items-center gap-3">
               {/* Action Button */}
-              <Button
-                onClick={() => handleActionClick(action.id)}
-                className={`h-13 w-13 rounded-full p-0 transition-all duration-200 hover:scale-105 ${
+              <Link
+                href={`/dashboard/${action.id}`}
+                className={`flex h-13 w-13 items-center justify-center rounded-full p-0 transition-all duration-200 hover:scale-105 ${
                   action.isActive
                     ? "bg-green-400 text-black hover:bg-green-500"
                     : "bg-white text-black hover:bg-gray-100"
                 }`}
-                variant="ghost"
               >
                 {action.icon}
-              </Button>
+              </Link>
 
               {/* Action Label */}
               <span className="font-medium text-sm text-white">{action.label}</span>

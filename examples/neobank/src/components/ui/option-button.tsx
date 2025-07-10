@@ -3,12 +3,12 @@ import { cn } from "@/lib/utils";
 import { Checkbox } from "./checkbox";
 
 const optionButtonVariants = cva(
-  "flex cursor-pointer flex-col gap-6 rounded-2xl border p-6 bg-[#1E1E1E]",
+  "flex cursor-pointer flex-col gap-6 rounded-2xl border p-6 bg-card",
   {
     variants: {
       variant: {
-        default: "border-[#88888880]",
-        active: "border-[#74FB5B]",
+        default: "border-muted-foreground",
+        active: "border-primary",
       },
     },
     defaultVariants: {

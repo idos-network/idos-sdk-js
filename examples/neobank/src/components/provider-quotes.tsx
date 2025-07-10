@@ -89,10 +89,10 @@ export default function ProviderQuotes() {
   const [selectedProvider, setSelectedProvider] = useState("hifi");
 
   return (
-    <div className="mx-auto w-full max-w-2xl rounded-2xl bg-black p-6 text-white">
+    <div className="mx-auto max-w-2xl flex-1 rounded-2xl bg-card p-6 text-white">
       <div className="mb-2">
-        <h1 className="mb-6 font-light text-3xl">Provider quotes</h1>
-        <p className="font-medium text-gray-400 text-xs">Compare rates from these providers.</p>
+        <h1 className="mb-6 font-medium text-3xl">Provider quotes</h1>
+        <p className="font-medium text-muted text-xs">Compare rates from these providers.</p>
       </div>
 
       <div className="flex flex-col gap-4">
