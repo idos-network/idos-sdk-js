@@ -7,6 +7,7 @@ import nacl from "tweetnacl";
 import { Client as MPCClient } from "./mpc/client";
 
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
+import invariant from "tiny-invariant";
 
 export class Enclave {
   constructor({ parentOrigin }) {
@@ -213,6 +214,7 @@ export class Enclave {
     console.log("uploadSecret");
     return new Promise((resolve, reject) => {
       const signerAddress = this.configuration.walletAddress
+      invariant(signerAddress, "signerAddress is not found");
       const blindedShares = this.mpcClient.getBlindedShares(secret)
       const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress)
       const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest)

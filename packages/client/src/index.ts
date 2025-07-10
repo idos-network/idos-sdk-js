@@ -188,7 +188,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   async getUserEncryptionPublicKey(userId: string): Promise<string> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
-      walletAddress: this.store.get("signer-address"),
+      walletAddress: this.walletIdentifier,
     });
     const { userEncryptionPublicKey } =
       await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
@@ -200,7 +200,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
     await this.enclaveProvider.reconfigure({
       mode: "existing",
-      walletAddress: this.store.get("signer-address"),
+      walletAddress: this.walletIdentifier,
     });
     const kwilUser = await getUserProfile(this.kwilClient);
 
