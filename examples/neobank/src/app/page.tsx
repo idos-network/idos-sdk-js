@@ -1,9 +1,8 @@
-import Image from "next/image";
 import { ConnectWallet } from "@/components/connect-wallet";
 
 export default function Home() {
   return (
-    <div className="flex-1 flex-col justify-center bg-neutral-50">
+    <div className="flex flex-1 flex-col justify-center bg-neutral-50">
       <main className="p-6">
         <section className="flex h-full flex-col place-content-center items-center gap-6 text-center">
           <h1 className="font-bold text-7xl">

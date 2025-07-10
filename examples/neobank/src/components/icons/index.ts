@@ -1,10 +1,15 @@
 export * from "./bank";
 export * from "./bridge";
 export * from "./buy";
+export * from "./completed";
+export * from "./identity-verification";
+export * from "./idos";
 export * from "./receive";
 export * from "./sell";
 export * from "./send";
 export * from "./swap";
+export * from "./visibility";
+export * from "./welcome";
 
 export interface IconProps {
   size?: number;

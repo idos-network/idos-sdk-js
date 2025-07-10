@@ -126,6 +126,9 @@
   .rounded-2xl {
     border-radius: 12px;
   }
+  .rounded-md {
+    border-radius: 10px;
+  }
   .text-3xl {
     font-size: 24px;
   }
