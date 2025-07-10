@@ -213,8 +213,11 @@ export class Enclave {
     console.log("uploadSecret");
     return new Promise((resolve, reject) => {
       const signerAddress = this.configuration.walletAddress
-      if (!signerAddress) 
-        return reject(new Error("signerAddress is not found"));
+      if (!signerAddress) {
+        console.warn("signerAddress is not found");
+        return resolve({ status: "error" });
+      }
+
       const blindedShares = this.mpcClient.getBlindedShares(secret)
       const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress)
       const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest)
