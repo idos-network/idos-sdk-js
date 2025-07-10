@@ -2,6 +2,7 @@
   "name": "neobank",
   "version": "0.1.0",
   "dependencies": {
+    "@idos-network/consumer": "workspace:*",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.12",
     "@reown/appkit": "catalog:reown",
@@ -10,6 +11,8 @@
     "@web3icons/react": "^4.0.14",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "go-try": "^3.0.2",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
     "react": "catalog:react",
@@ -22,6 +25,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-query-devtools": "catalog:tanstack",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^20",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
