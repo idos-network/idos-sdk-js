@@ -16,10 +16,11 @@ export type EnclaveOptions = {
   mode?: "new" | "existing";
   url?: string;
   throwOnUserCancelUnlock?: boolean;
+  walletAddress?: string;
 };
 
 export interface EnclaveProvider {
-  load(): Promise<void>;
+  load(walletAddress?: string): Promise<void>;
   reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void>;
 
   ready(userId: string, currentUserEncryptionPublicKey?: string): Promise<Uint8Array>;

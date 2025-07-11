@@ -3,10 +3,17 @@ import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
+
 export default defineConfig({
   define: {
-    global: {},
+    global: "window",
+  },
+  resolve: {
+    alias: {
+      buffer: "buffer",
+    },
   },
   build: {
     rollupOptions: {
@@ -16,5 +23,15 @@ export default defineConfig({
       },
     },
   },
-  plugins: [mkcert(), preact(), tailwindcss(), tsconfigPaths()],
+  plugins: [
+    mkcert(),
+    preact(),
+    tailwindcss(),
+    tsconfigPaths(),
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+      },
+    }),
+  ],
 });

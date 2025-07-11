@@ -5,8 +5,7 @@ import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import type { AuthMethod, UIMode } from "@/types";
 
-export interface AuthMethodChooserProps {
-  mode: UIMode;
+export interface AuthMethodChooserProps extends AuthMethodProps {
   setMethod: (method: AuthMethod) => void;
 }
 
@@ -17,7 +16,7 @@ export interface AuthMethodProps<K = Record<string, unknown>> {
   onError: (error: Error) => void;
 }
 
-export default function AuthMethodChooser({ setMethod, mode }: AuthMethodChooserProps) {
+export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMethodChooserProps) {
   return (
     <div className="flex flex-col space-y-4 px-3 md:px-0">
       {mode === "existing" && (
@@ -47,6 +46,12 @@ export default function AuthMethodChooser({ setMethod, mode }: AuthMethodChooser
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-password" onClick={() => setMethod("password")}>
           Use a password
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Button id="auth-method-mpc" onClick={() => onSuccess({ authMethod: "mpc" })}>
+          Use MPC
         </Button>
       </div>
     </div>
