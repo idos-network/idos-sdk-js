@@ -9,7 +9,13 @@
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3",
-      "bn.js": "5.2.2"
+      "near-api-js>bn.js": "4.12.2",
+      "@near-wallet-selector/core>bn.js": "4.12.2",
+      "@near-wallet-selector/here-wallet>bn.js": "4.12.2",
+      "@near-wallet-selector/modal-ui>bn.js": "4.12.2",
+      "@near-wallet-selector/meteor-wallet>bn.js": "4.12.2",
+      "@partisiablockchain/abi-client>bn.js": "5.2.2",
+      "@partisiablockchain/blockchain-api-transaction-client>bn.js": "5.2.2"
     },
     "patchedDependencies": {
       "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch",
