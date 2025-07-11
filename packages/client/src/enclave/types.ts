@@ -11,12 +11,13 @@ export type DiscoverUserEncryptionPublicKeyResponse = {
 };
 
 export type EnclaveOptions = {
-  container: string;
+  container?: string;
   theme?: "light" | "dark";
   mode?: "new" | "existing";
   url?: string;
   throwOnUserCancelUnlock?: boolean;
   walletAddress?: string;
+  localProvider?: any;
 };
 
 export interface EnclaveProvider {

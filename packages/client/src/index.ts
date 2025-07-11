@@ -54,7 +54,9 @@ import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "./enclave";
+import { type EnclaveOptions, type EnclaveProvider, IframeEnclave, LocalEnclave } from "./enclave";
+
+export { LocalEnclave };
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -245,7 +247,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
-    return await removeCredential(this.kwilClient, id);
+    return removeCredential(this.kwilClient, id);
   }
 
   async getCredentialById(id: string): Promise<idOSCredential | undefined> {
@@ -289,6 +291,20 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     return hexEncodeSha256Hash(plaintext);
+  }
+
+  async getCredentialContent(id: string): Promise<string> {
+    const credential = await getCredentialById(this.kwilClient, id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+
+    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+
+    const plaintext = await this.enclaveProvider.decrypt(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+    );
+
+    return plaintext as any;
   }
 
   async createCredentialCopy(

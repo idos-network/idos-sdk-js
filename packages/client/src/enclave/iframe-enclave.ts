@@ -16,6 +16,10 @@ export class IframeEnclave implements EnclaveProvider {
   constructor(options: EnclaveOptions) {
     const { container, ...other } = options;
 
+    if (!container) {
+      throw new Error("container is required");
+    }
+
     this.container = container;
     this.options = other;
     this.hostUrl = new URL(other.url ?? "https://enclave.idos.network");
