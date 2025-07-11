@@ -101,4 +101,8 @@ export const actions = {
   setKrakenDAG: assign({
     krakenDAG: ({ event }) => event.output ?? null,
   }),
+
+  setMoneriumAuthUrl: assign({
+    moneriumAuthUrl: ({ event }) => event.output,
+  }),
 };

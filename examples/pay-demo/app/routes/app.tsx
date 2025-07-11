@@ -15,11 +15,11 @@ export default function App() {
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
   const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
-  const _userData = MachineContext.useSelector((state) => state.context.data);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
   const onRampAccount = MachineContext.useSelector((state) => state.context.onRampAccount);
+  const moneriumAuthUrl = MachineContext.useSelector((state) => state.context.moneriumAuthUrl);
 
   const transak = useRef<Transak | null>(null);
 
@@ -57,21 +57,8 @@ export default function App() {
     return () => window.removeEventListener("message", messageReceiver);
   }, []);
 
-  useEffect(() => {
-    if (!provider || state !== "accessGranted") return;
-
-    if (provider === "transak") {
-      send({ type: "getSharableToken" });
-    }
-
-    if (provider === "noah") {
-      send({ type: "createNoahCustomer" });
-    }
-
-    if (provider === "hifi") {
-      send({ type: "startHifi" });
-    }
-  }, [state, provider, send]);
+  console.log("-> state", state);
+  console.log("-> provider", provider);
 
   useEffect(() => {
     if (state !== "dataOrTokenFetched" || !provider) return;
@@ -96,7 +83,7 @@ export default function App() {
     }
   }, [sharableToken, state, provider, send]);
 
-  const start = async (provider: "transak" | "noah" | "custom" | "hifi") => {
+  const start = async (provider: "transak" | "noah" | "custom" | "hifi" | "monerium") => {
     send({ type: "configure", provider, address });
   };
 
@@ -129,9 +116,9 @@ export default function App() {
         <button
           type="button"
           className="w-full cursor-pointer rounded-lg bg-purple-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-purple-700"
-          onClick={() => console.log("Custom selected")}
+          onClick={() => start("monerium")}
         >
-          Custom
+          Monerium
         </button>
       </div>
     );
@@ -220,6 +207,15 @@ export default function App() {
     body = (
       <div className="w-full">
         <iframe src={hifiTosUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
+  // @ts-expect-error Missing substates?
+  if (state.moneriumFlow && moneriumAuthUrl && state.moneriumFlow === "moneriumAuthUrlFetched") {
+    body = (
+      <div className="w-full">
+        <iframe src={moneriumAuthUrl} width="100%" height="800px" title="KYC" />
       </div>
     );
   }

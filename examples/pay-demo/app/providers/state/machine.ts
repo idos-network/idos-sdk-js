@@ -17,6 +17,12 @@ export const machine = setup({
   },
   actors,
   actions,
+  guards: {
+    isTransak: ({ context }: { context: Context }) => context.provider === "transak",
+    isMonerium: ({ context }: { context: Context }) => context.provider === "monerium",
+    isNoah: ({ context }: { context: Context }) => context.provider === "noah",
+    isHifi: ({ context }: { context: Context }) => context.provider === "hifi",
+  },
 }).createMachine({
   id: "idos",
   initial: "notConfigured",
@@ -41,6 +47,7 @@ export const machine = setup({
     hifiKycStatus: null,
     getHifiKycStatusAttempts: 0,
     onRampAccount: null,
+    moneriumAuthUrl: null,
   },
   states: {
     notConfigured: {
@@ -172,29 +179,27 @@ export const machine = setup({
           client: context.loggedInClient,
           credential: context.credential,
         }),
-        onDone: {
+        onDone: [{
+          target: "createSharableToken",
           actions: ["setSharedCredential"],
-          target: "accessGranted",
+          guard: "isTransak",
         },
+        {
+          target: "moneriumFlow",
+          actions: ["setSharedCredential"],
+          guard: "isMonerium",
+        }, {
+          target: "createNoahCustomer",
+          actions: ["setSharedCredential"],
+          guard: "isNoah",
+        }, {
+          target: "startHifi",
+          actions: ["setSharedCredential"],
+          guard: "isHifi",
+        }],
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
-        },
-      },
-    },
-    accessGranted: {
-      on: {
-        getSharableToken: {
-          target: "createSharableToken",
-        },
-        fetchUserData: {
-          target: "fetchUserData",
-        },
-        createNoahCustomer: {
-          target: "createNoahCustomer",
-        },
-        startHifi: {
-          target: "startHifi",
         },
       },
     },
@@ -294,6 +299,34 @@ export const machine = setup({
         },
       },
     },
+    moneriumFlow: {
+      initial: "requestMoneriumAuth",
+      states: {
+        requestMoneriumAuth: {
+          invoke: {
+            id: "requestMoneriumAuth",
+            src: "requestMoneriumAuth",
+            input: ({ context }) => context.sharedCredential,
+            onDone: {
+              target: "moneriumAuthUrlFetched",
+              actions: ["setMoneriumAuthUrl"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        moneriumAuthUrlFetched: {
+        },
+        error: {
+          type: "final",
+        },
+        dataOrTokenFetched: {
+          type: "final",
+        },
+      },
+    },
     createSharableToken: {
       initial: "requestKrakenDAG",
       states: {
@@ -378,9 +411,6 @@ export const machine = setup({
           actions: ["setErrorMessage"],
         },
       },
-    },
-    done: {
-      // todo
     },
     error: {
       type: "final",
