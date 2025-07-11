@@ -76,6 +76,20 @@ export const actors = {
     },
   ),
 
+  requestMoneriumAuth: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumAuth = await fetch(`/app/kyc/monerium/auth?credentialId=${input.id}`);
+
+    if (moneriumAuth.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return await moneriumAuth.json().then((data) => data.url);
+  }),
+
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");

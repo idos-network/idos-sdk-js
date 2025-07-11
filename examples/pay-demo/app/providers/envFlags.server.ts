@@ -17,6 +17,10 @@ export const serverEnvSchema = z.object({
   HIFI_API_KEY: z.string(),
   FILES_PRIVATE_KEY: z.string(),
   FILES_PUBLIC_KEY: z.string(),
+  MONERIUM_API_URL: z.string(),
+  MONERIUM_CLIENT_ID: z.string(),
+  MONERIUM_CLIENT_SECRET: z.string(),
+  MONERIUM_AUTH_CODE_FLOW: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;
