@@ -14,6 +14,7 @@
       "@near-wallet-selector/here-wallet>bn.js": "4.12.2",
       "@near-wallet-selector/modal-ui>bn.js": "4.12.2",
       "@near-wallet-selector/meteor-wallet>bn.js": "4.12.2",
+      "@meteorwallet/sdk>bn.js": "4.12.2",
       "@partisiablockchain/abi-client>bn.js": "5.2.2",
       "@partisiablockchain/blockchain-api-transaction-client>bn.js": "5.2.2"
     },
