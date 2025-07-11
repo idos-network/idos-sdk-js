@@ -22,7 +22,6 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@wagmi/core": "^2.16.4",
     "@web3icons/react": "^4.0.14",
-    "bn.js": "^5.2.2",
     "ethers": "catalog:ethereum",
     "framer-motion": "^11.11.9",
     "go-try": "^3.0.2",

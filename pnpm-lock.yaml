@@ -798,9 +798,6 @@ importers:
       '@web3icons/react':
         specifier: ^4.0.14
         version: 4.0.14(react@19.1.0)(typescript@5.8.3)
-      bn.js:
-        specifier: ^5.2.2
-        version: 5.2.2
       ethers:
         specifier: catalog:ethereum
         version: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
