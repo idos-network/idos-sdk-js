@@ -78,7 +78,6 @@ export class Enclave {
 
     if (!secretKey) {
       let preferredAuthMethod = "password";
-      console.log({VAR: import.meta.env.VITE_ENABLE_MPC})
       if (import.meta.env.VITE_ENABLE_MPC === "true") preferredAuthMethod = await this.ensurePreferredAuthMethod();
 
       switch (preferredAuthMethod) {
