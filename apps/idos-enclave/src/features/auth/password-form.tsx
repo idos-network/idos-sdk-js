@@ -1,13 +1,12 @@
+import { keyDerivation } from "@idos-network/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
-
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
 import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
-import { keyDerivation } from "@idos-network/encryption";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;

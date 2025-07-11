@@ -3,11 +3,18 @@ import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
-export function keyDerivation(password: string, salt: string): Promise<Uint8Array<ArrayBufferLike>> {
+export function keyDerivation(
+  password: string,
+  salt: string,
+): Promise<Uint8Array<ArrayBufferLike>> {
   return idOSKeyDerivation({ password, salt });
 }
 
-export function encrypt(message: Uint8Array, publicKey: Uint8Array, receiverPublicKey: Uint8Array): { content: Uint8Array<ArrayBuffer>; encryptorPublicKey: Uint8Array } {
+export function encrypt(
+  message: Uint8Array,
+  publicKey: Uint8Array,
+  receiverPublicKey: Uint8Array,
+): { content: Uint8Array<ArrayBuffer>; encryptorPublicKey: Uint8Array } {
   const nonce = nacl.randomBytes(nacl.box.nonceLength);
   const ephemeralKeyPair = nacl.box.keyPair();
   const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
@@ -33,7 +40,11 @@ export function encrypt(message: Uint8Array, publicKey: Uint8Array, receiverPubl
   return { content: fullMessage, encryptorPublicKey: ephemeralKeyPair.publicKey };
 }
 
-export async function decrypt(fullMessage: Uint8Array<ArrayBufferLike>, keyPair: nacl.BoxKeyPair, senderPublicKey: Uint8Array): Promise<Uint8Array<ArrayBufferLike>> {
+export async function decrypt(
+  fullMessage: Uint8Array<ArrayBufferLike>,
+  keyPair: nacl.BoxKeyPair,
+  senderPublicKey: Uint8Array,
+): Promise<Uint8Array<ArrayBufferLike>> {
   const nonce = fullMessage.slice(0, nacl.box.nonceLength);
   const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
   const decrypted = nacl.box.open(message, nonce, senderPublicKey, keyPair.secretKey);

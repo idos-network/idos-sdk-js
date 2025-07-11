@@ -1,10 +1,10 @@
 import { Store } from "@idos-network/core";
+import { decrypt, encrypt, keyDerivation } from "@idos-network/encryption";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
-import { decrypt, encrypt, keyDerivation } from "@idos-network/encryption";
 
 export class Enclave {
   constructor({ parentOrigin }) {
@@ -78,7 +78,7 @@ export class Enclave {
     this.unlockButton.disabled = false;
 
     let password: string | undefined;
-    let duration: number | undefined;
+    // let duration: number | undefined;
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
@@ -87,7 +87,8 @@ export class Enclave {
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
         try {
-          ({ password, duration } = await this.openDialog(preferredAuthMethod || "auth", {
+          // TODO: Add duration
+          ({ password } = await this.openDialog(preferredAuthMethod || "auth", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
         } catch (e) {
@@ -134,7 +135,7 @@ export class Enclave {
     this.confirmButton.disabled = false;
 
     return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async (e) => {
+      this.confirmButton.addEventListener("click", async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -181,7 +182,7 @@ export class Enclave {
         content: (() => {
           try {
             JSON.parse(credential.content);
-          } catch (e) {
+          } catch (_e) {
             throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
           }
         })(),
