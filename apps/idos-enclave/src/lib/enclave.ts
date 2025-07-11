@@ -1,4 +1,5 @@
 import { Store } from "@idos-network/core";
+import { decrypt, encrypt, keyDerivation } from "@idos-network/encryption";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { negate } from "es-toolkit";
@@ -83,7 +84,7 @@ export class Enclave {
         case "password":
           const password = await this.ensurePassword();
           const salt = this.userId;
-          secretKey = await idOSKeyDerivation({ password, salt });
+          secretKey = await keyDerivation({ password, salt });
           break;
         case "mpc":
           secretKey = await this.ensureMPCPrivateKey();
@@ -99,7 +100,8 @@ export class Enclave {
     console.log("ensurePreferredAuthMethod")
     const allowedAuthMethods = ["mpc", "password"]
     let authMethod = this.store.get("preferred-auth-method");
-    let password
+    let password;
+
     if (authMethod) { return authMethod }
 
     this.unlockButton.style.display = "block";
@@ -135,13 +137,18 @@ export class Enclave {
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
+=======
+    let password: string | undefined;
+    // let duration: number | undefined;
+>>>>>>> f231e7e (fix(styling): Fix styles and builds)
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
         try {
-          ({ password } = await this.openDialog("password", {
+// TODO: Add duration
+({ password } = await this.openDialog("password", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
         } catch (e) {
@@ -260,7 +267,7 @@ export class Enclave {
     this.confirmButton.disabled = false;
 
     return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async (e) => {
+      this.confirmButton.addEventListener("click", async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -307,7 +314,7 @@ export class Enclave {
         content: (() => {
           try {
             JSON.parse(credential.content);
-          } catch (e) {
+          } catch (_e) {
             throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
           }
         })(),
