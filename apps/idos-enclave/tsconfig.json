@@ -27,6 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/encryption/src/idOSKeyDerivation.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

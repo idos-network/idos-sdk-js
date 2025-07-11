@@ -3,6 +3,7 @@
   "description": "idOS Enclave",
   "version": "0.1.0",
   "dependencies": {
+    "@idos-network/encryption": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@preact/signals": "^2.0.2",
     "@stablelib/base64": "^2.0.1",
