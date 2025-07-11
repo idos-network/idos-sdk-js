@@ -9,6 +9,7 @@ export interface Session {
   noahCheckoutSessionID?: string;
   hifiTosId?: string;
   hifiUserId?: string;
+  moneriumCodeVerifier?: string;
 }
 
 export const sessionStorage = createCookieSessionStorage<Session>({
