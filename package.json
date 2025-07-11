@@ -8,7 +8,8 @@
   "packageManager": "pnpm@10.12.4",
   "pnpm": {
     "overrides": {
-      "web-streams-polyfill": "3.3.3"
+      "web-streams-polyfill": "3.3.3",
+      "bn.js": "5.2.2"
     },
     "patchedDependencies": {
       "@kwilteam/kwil-js@0.9.4": "patches/@kwilteam__kwil-js@0.9.4.patch",
