@@ -1,11 +1,10 @@
 import { Store } from "@idos-network/core";
+import { decrypt, encrypt, keyDerivation } from "@idos-network/encryption";
 import * as Base64Codec from "@stablelib/base64";
 import * as Utf8Codec from "@stablelib/utf8";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
-
-import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 export class Enclave {
   constructor({ parentOrigin }) {
@@ -36,7 +35,7 @@ export class Enclave {
     try {
       const parsed = JSON.parse(string);
       return parsed;
-    } catch (error) {
+    } catch (_error) {
       return string;
     }
   }
@@ -78,18 +77,18 @@ export class Enclave {
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
-    let password;
-    let duration;
+    let password: string | undefined;
+    // let duration: number | undefined;
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        const storedCredentialId = this.store.get("credential-id");
         const preferredAuthMethod = this.store.get("preferred-auth-method");
 
         try {
-          ({ password, duration } = await this.openDialog(preferredAuthMethod || "auth", {
+          // TODO: Add duration
+          ({ password } = await this.openDialog(preferredAuthMethod || "auth", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
         } catch (e) {
@@ -113,7 +112,7 @@ export class Enclave {
     const storeWithCodec = this.store.pipeCodec(Base64Codec);
 
     const secretKey =
-      storeWithCodec.get("encryption-private-key") || (await idOSKeyDerivation({ password, salt }));
+      storeWithCodec.get("encryption-private-key") || (await keyDerivation(password, salt));
 
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
@@ -122,55 +121,13 @@ export class Enclave {
   }
 
   encrypt(message, receiverPublicKey = this.keyPair.publicKey) {
-    const nonce = nacl.randomBytes(nacl.box.nonceLength);
-    const ephemeralKeyPair = nacl.box.keyPair();
-    const encrypted = nacl.box(message, nonce, receiverPublicKey, ephemeralKeyPair.secretKey);
-
-    if (encrypted === null)
-      throw Error(
-        `Couldn't encrypt. ${JSON.stringify(
-          {
-            message: Base64Codec.encode(message),
-            nonce: Base64Codec.encode(nonce),
-            receiverPublicKey: Base64Codec.encode(receiverPublicKey),
-            localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
-          },
-          null,
-          2,
-        )}`,
-      );
-
-    const fullMessage = new Uint8Array(nonce.length + encrypted.length);
-    fullMessage.set(nonce, 0);
-    fullMessage.set(encrypted, nonce.length);
-
-    return { content: fullMessage, encryptorPublicKey: ephemeralKeyPair.publicKey };
+    return encrypt(message, this.keyPair.publicKey, receiverPublicKey);
   }
 
   async decrypt(fullMessage, senderPublicKey) {
     if (!this.keyPair) await this.keys();
 
-    const nonce = fullMessage.slice(0, nacl.box.nonceLength);
-    const message = fullMessage.slice(nacl.box.nonceLength, fullMessage.length);
-    const decrypted = nacl.box.open(message, nonce, senderPublicKey, this.keyPair.secretKey);
-
-    if (decrypted === null) {
-      throw Error(
-        `Couldn't decrypt. ${JSON.stringify(
-          {
-            fullMessage: Base64Codec.encode(fullMessage),
-            message: Base64Codec.encode(message),
-            nonce: Base64Codec.encode(nonce),
-            senderPublicKey: Base64Codec.encode(senderPublicKey),
-            localPublicKey: Base64Codec.encode(this.keyPair.publicKey),
-          },
-          null,
-          2,
-        )}`,
-      );
-    }
-
-    return decrypted;
+    return decrypt(fullMessage, this.keyPair, senderPublicKey);
   }
 
   async confirm(message) {
@@ -178,7 +135,7 @@ export class Enclave {
     this.confirmButton.disabled = false;
 
     return new Promise((resolve) =>
-      this.confirmButton.addEventListener("click", async (e) => {
+      this.confirmButton.addEventListener("click", async () => {
         this.confirmButton.disabled = true;
 
         const { confirmed } = await this.openDialog("confirm", {
@@ -225,7 +182,7 @@ export class Enclave {
         content: (() => {
           try {
             JSON.parse(credential.content);
-          } catch (e) {
+          } catch (_e) {
             throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
           }
         })(),
