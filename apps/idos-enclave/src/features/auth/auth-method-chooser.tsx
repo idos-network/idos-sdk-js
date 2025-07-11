@@ -51,7 +51,7 @@ export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMe
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-mpc" onClick={() => onSuccess({ authMethod: "mpc" })}>
-          Use an MPC
+          Use MPC
         </Button>
       </div>
     </div>
