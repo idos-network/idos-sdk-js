@@ -7,7 +7,7 @@ import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
 import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
-import { idOSKeyDerivation } from "@/lib/idOSKeyDerivation";
+import { keyDerivation } from "@idos-network/encryption";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -93,7 +93,7 @@ export function PasswordForm({
   async function derivePublicKeyFromPassword(password: string) {
     // TODO Remove human-user migration code.
     const salt = store.get("user-id") || store.get("human-id") || userId;
-    const secretKey = await idOSKeyDerivation({ password, salt });
+    const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
   }

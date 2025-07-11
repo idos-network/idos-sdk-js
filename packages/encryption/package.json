@@ -1,0 +1,54 @@
+{
+  "name": "@idos-network/encryption",
+  "description": "idOS Encryption JavaScript SDK for enclave environments",
+  "version": "1.0.0-rc.1.0",
+  "dependencies": {
+    "@stablelib/utf8": "^2.0.1",
+    "@stablelib/base64": "^2.0.1",
+    "scrypt-js": "^3.0.1",
+    "tweetnacl": "^1.0.3",
+    "web-bip39": "^0.0.3"
+  },
+  "devDependencies": {
+    "release-it": "^19.0.2",
+    "release-it-pnpm": "^4.6.5",
+    "tiny-invariant": "catalog:core",
+    "typescript": "catalog:build",
+    "tsdown": "catalog:build"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "dist/index.js",
+  "peerDependencies": {
+    "typescript": "catalog:build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "postpack": "clean-package restore",
+    "prepack": "clean-package",
+    "publint": "pnpx publint --strict",
+    "release-it": "release-it"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts"
+}

@@ -3,6 +3,7 @@
   "description": "idOS Enclave",
   "version": "0.1.0",
   "dependencies": {
+    "@idos-network/encryption": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
