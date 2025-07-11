@@ -77,7 +77,9 @@ export class Enclave {
     let secretKey = storeWithCodec.get("encryption-private-key")
 
     if (!secretKey) {
-      const preferredAuthMethod = await this.ensurePreferredAuthMethod()
+      let preferredAuthMethod = "password";
+      console.log({VAR: import.meta.env.VITE_ENABLE_MPC})
+      if (import.meta.env.VITE_ENABLE_MPC === "true") preferredAuthMethod = await this.ensurePreferredAuthMethod();
 
       switch (preferredAuthMethod) {
         case "password":
