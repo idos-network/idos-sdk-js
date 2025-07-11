@@ -21,7 +21,6 @@ import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
   type Credentials,
-  type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
   verifyCredentials,
@@ -173,7 +172,6 @@ export type {
   idOSGrant,
   Credentials,
   VerifiableCredential,
-  IDDocumentType,
   VerifiableCredentialSubject,
   AvailableIssuerType,
 };

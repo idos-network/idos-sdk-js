@@ -4,6 +4,7 @@ import { encode as utf8Encode } from "@stablelib/utf8";
 import bs58 from "bs58";
 
 export { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
+
 export { writeUint16BE as binaryWriteUint16BE } from "@stablelib/binary";
 export { concat as bytesConcat } from "@stablelib/bytes";
 export { decode as hexDecode } from "@stablelib/hex";
