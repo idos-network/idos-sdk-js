@@ -17,7 +17,8 @@
       "!**/*/.next/**/*",
       "!**/.react-router/**/*",
       "!**/.cache-synpress/**/*",
-      "!apps/idos-enclave/src/lib/mpc/generated/IdosContract.ts"
+      "!apps/idos-enclave/src/lib/mpc/generated/IdosContract.ts",
+      "!**/tsconfig.json"
     ]
   },
   "linter": {
