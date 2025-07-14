@@ -41,29 +41,23 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-
-  /* NeoBank Custom Colors */
-  --color-neobank-dark: #1e1e1e;
-  --color-neobank-primary: #74fb5b;
-  --color-neobank-accent: #627eeb;
-  --color-neobank-success: #22c55e;
 }
 
 :root {
   --radius: 0.625rem;
   --background: oklch(0 0 0);
   --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
+  --card: oklch(0.235 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: #74fb5b;
-  --primary-foreground: #043102;
+  --primary: oklch(0.8804 0.2319 140.71);
+  --primary-foreground: oklch(0.273 0.0883 142.03);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
-  --muted: #7a7a7a;
-  --muted-foreground: oklch(0.556 0 0);
-  --border-muted: #88888880;
+  --muted: oklch(0.7411 0.0054 145.52);
+  --muted-foreground: oklch(0.6268 0 0 / 50.2%);
+  --border-muted: oklch(0.556 0 0 / 50%);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
@@ -79,7 +73,7 @@
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: #627eeb;
+  --sidebar-accent: oklch(0.6 0.15 260);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
@@ -92,12 +86,12 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
+  --primary: oklch(0.8804 0.2319 140.71);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
+  --muted: oklch(0.7411 0.0054 145.52);
+  --muted-foreground: oklch(0.9551 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);

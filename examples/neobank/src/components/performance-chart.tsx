@@ -114,7 +114,7 @@ export default function PerformanceChart() {
   };
 
   return (
-    <Card className="h-full w-full rounded-3xl border-gray-800 bg-stone-900 text-white">
+    <Card className="h-full w-full rounded-3xl border-none bg-card text-white">
       <CardContent className="">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-0">
