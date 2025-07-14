@@ -31,6 +31,7 @@ export default function KycProviders() {
       <div className="flex flex-col gap-4">
         {providers.map((provider) => (
           <OptionButton
+            className="max-h-[75px]"
             key={provider.id}
             selected={selectedProvider === provider.id}
             onClick={() => setSelectedProvider(provider.id)}

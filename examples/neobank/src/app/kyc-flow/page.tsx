@@ -40,7 +40,7 @@ export default function KycFlow() {
   return (
     <div className="mx-auto flex w-full max-w-[1220px] flex-1 rounded-[40px] bg-secondary p-11">
       <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center">
-        <div className="flex h-[100px] w-[100px] items-center justify-center rounded-md bg-[#445DF4]">
+        <div className="flex h-[100px] w-[100px] items-center justify-center rounded-md bg-info">
           <VisibilityIcon />
         </div>
         <Disclaimer />

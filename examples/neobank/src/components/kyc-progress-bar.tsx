@@ -14,14 +14,14 @@ const StepIcon = ({
   const iconWithProps = Children.map(icon, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
-        className: isActive ? "fill-black" : "fill-[#888888]",
+        className: isActive ? "fill-black" : "fill-icon-inactive",
       } as unknown as any);
     }
     return child;
   });
   return (
     <div className="flex items-center">
-      {showLine && <div className="h-[1px] w-8 bg-[#3D3D3D]" />}
+      {showLine && <div className="h-[1px] w-8 bg-divider" />}
       <div
         className={`flex h-[25px] w-[25px] items-center justify-center rounded-full ${
           isActive ? "bg-primary" : "bg-gray-500"
