@@ -10,8 +10,3 @@ export * from "./send";
 export * from "./swap";
 export * from "./visibility";
 export * from "./welcome";
-
-export interface IconProps {
-  size?: number;
-  className?: string;
-}

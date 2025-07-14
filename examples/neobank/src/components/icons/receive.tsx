@@ -1,4 +1,4 @@
-import type { IconProps } from ".";
+import type { IconProps } from "./types";
 
 export function ReceiveIcon({ className, size = 14 }: IconProps) {
   return (

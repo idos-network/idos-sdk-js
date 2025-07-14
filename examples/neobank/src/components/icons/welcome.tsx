@@ -1,6 +1,6 @@
-import type { IconProps } from ".";
+import type { IconProps } from "./types";
 
-export const WelcomeIcon = ({ className }: IconProps) => {
+export function WelcomeIcon({ className }: IconProps) {
   return (
     <svg
       width="15.5"
@@ -17,4 +17,4 @@ export const WelcomeIcon = ({ className }: IconProps) => {
       />
     </svg>
   );
-};
+}

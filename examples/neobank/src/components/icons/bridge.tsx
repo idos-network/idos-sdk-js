@@ -1,4 +1,4 @@
-import type { IconProps } from ".";
+import type { IconProps } from "./types";
 
 export function BridgeIcon({ className, size = 19 }: IconProps) {
   return (
