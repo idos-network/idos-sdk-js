@@ -1,4 +1,4 @@
-import type { IconProps } from ".";
+import type { IconProps } from "./types";
 
 export function BuyIcon({ className, size = 17 }: IconProps) {
   return (

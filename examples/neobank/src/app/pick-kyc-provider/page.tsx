@@ -1,7 +1,10 @@
+"use client";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
-import { OptionButton } from "./ui/option-button";
-import { Tag } from "./ui/tag";
+import { Button } from "@/components/ui/button";
+import { OptionButton } from "@/components/ui/option-button";
+import { Tag } from "@/components/ui/tag";
 
 const providers = [
   {
@@ -21,11 +24,14 @@ const providers = [
 export default function KycProviders() {
   const [selectedProvider, setSelectedProvider] = useState("persona");
   return (
-    <div className="flex flex-col bg-black">
-      <h2 className="mb-10 font-medium text-3xl text-white">Continue with a KYC provider</h2>
+    <div className="mx-auto flex h-full w-full max-w-[432px] flex-1 flex-col justify-center">
+      <h2 className="mb-10 text-center font-medium text-3xl text-white">
+        Continue with a KYC provider
+      </h2>
       <div className="flex flex-col gap-4">
         {providers.map((provider) => (
           <OptionButton
+            className="max-h-[75px]"
             key={provider.id}
             selected={selectedProvider === provider.id}
             onClick={() => setSelectedProvider(provider.id)}
@@ -37,6 +43,9 @@ export default function KycProviders() {
           </OptionButton>
         ))}
       </div>
+      <Button asChild className="mx-auto mt-14 h-12 w-fit rounded-full bg-secondary px-12">
+        <Link href="/kyc-flow">Continue</Link>
+      </Button>
     </div>
   );
 }
