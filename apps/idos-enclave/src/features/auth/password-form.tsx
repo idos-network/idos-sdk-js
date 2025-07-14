@@ -81,7 +81,7 @@ export function PasswordForm({
   store,
   encryptionPublicKey,
   userId,
-}: AuthMethodProps<{ password: string; duration: number }> & {
+}: AuthMethodProps<{ authMethod: string; password: string; duration: number }> & {
   encryptionPublicKey?: string;
   userId: string | null;
 }) {
@@ -116,7 +116,7 @@ export function PasswordForm({
     isLoading.value = false;
     store.set("preferred-auth-method", "password");
 
-    onSuccess({ password: password.value, duration: duration.value });
+    onSuccess({ authMethod: "password", password: password.value, duration: duration.value });
   };
 
   return (

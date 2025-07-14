@@ -12,6 +12,7 @@ Borsh
 chakra
 chatset
 ciphertext
+codegen
 comlink
 cooldown
 creit
@@ -38,8 +39,10 @@ idOSSDK
 incentivized
 informationally
 insertable
+hexlify
 jsigs
 jsonld
+keccak
 keypair
 keypairs
 kwil
@@ -55,7 +58,11 @@ nanostores
 Neobank
 Nominatim
 nonced
+partialize
+partisia
+partisiablockchain
 nums
+offchain
 OSDAG
 partialize
 passporting
@@ -70,6 +77,7 @@ Reown
 safekeep
 sandboxed
 secp
+secretsharing
 shardnet
 siwe
 stablelib

@@ -4,6 +4,7 @@ import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
+import AuthMethodChooser from "@/features/auth/auth-method-chooser";
 import { PasswordForm } from "@/features/auth/password-form";
 import { Confirmation } from "@/features/confirmation/confirmation";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
@@ -214,10 +215,9 @@ export function App({ store, enclave }: AppProps) {
 
   return (
     <Layout>
-      <PasswordForm
+      <AuthMethodChooser
         {...methodProps}
-        encryptionPublicKey={encryptionPublicKey.value}
-        userId={userId.value}
+        setMethod={method.value === null ? (m) => (method.value = m) : () => {}}
       />
     </Layout>
   );
