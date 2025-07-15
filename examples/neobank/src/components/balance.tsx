@@ -1,6 +1,5 @@
 "use client";
 import { useAppKitAccount } from "@reown/appkit/react";
-import { ChevronDown } from "lucide-react";
 
 export const trimAddress = (addr: string | undefined) => {
   if (!addr) return "";
@@ -21,7 +20,6 @@ export default function BalanceComponent() {
         {!!address && (
           <div className="flex items-center gap-2">
             <span className="font-medium text-lg text-white">{trimAddress(address)}</span>
-            <ChevronDown className="h-5 w-5 text-gray-400" />
           </div>
         )}
 
