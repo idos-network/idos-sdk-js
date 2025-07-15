@@ -5,7 +5,7 @@ import {
   ClipboardIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
-import type { Store } from "@idos-network/core";
+import type { Store } from "@idos-network/utils/store";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
@@ -187,7 +187,7 @@ export function PasswordOrSecretReveal({
   );
 }
 
-export function PasswordOrKeyBackup({
+export async function PasswordOrKeyBackup({
   store,
   backupStatus,
   onSuccess,
@@ -199,8 +199,8 @@ export function PasswordOrKeyBackup({
   const reveal = useSignal(false);
   const status = useSignal<"idle" | "pending">("idle");
 
-  const authMethod: "passkey" | "password" = store.get("preferred-auth-method");
-  const password = store.get("password");
+  const authMethod = await store.get<"passkey" | "password">("preferred-auth-method");
+  const password = await store.get<string>("password");
   const passwordOrSecretKey: "password" | "secret key" =
     authMethod === "password" ? "password" : "secret key";
 
@@ -216,7 +216,7 @@ export function PasswordOrKeyBackup({
     }
   }, [backupStatus]);
 
-  if (reveal.value) {
+  if (reveal.value && secret) {
     return (
       <PasswordOrSecretReveal
         {...{ secret, authMethod: passwordOrSecretKey }}

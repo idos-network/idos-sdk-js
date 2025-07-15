@@ -23,7 +23,7 @@ export class IframeEnclave implements EnclaveProvider {
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async load(walletAddress: string): Promise<void> {
+  async load(walletAddress?: string): Promise<void> {
     await this.loadEnclave();
     await this.requestToEnclave({ configure: { ...this.options, walletAddress } });
   }

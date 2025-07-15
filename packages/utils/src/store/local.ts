@@ -1,15 +1,18 @@
-interface PipeCodecArgs<T> {
-  encode: (o: string) => T;
-  decode: (o: T) => string;
-}
+/**
+ * Local storage implementation of the store
+ */
 
-export class Store {
-  keyPrefix = "idOS-";
+import type { PipeCodecArgs, Store } from "./interface";
+
+export class LocalStorageStore implements Store {
+  readonly keyPrefix: string;
   readonly storage: Storage;
   readonly REMEMBER_DURATION_KEY = "storage-expiration";
 
-  constructor(storage: Storage) {
+  // @ts-expect-error window is defined in the library mode, that's fine
+  constructor(storage: Storage = window.localStorage, keyPrefix = "idOS-") {
     this.storage = storage;
+    this.keyPrefix = keyPrefix;
     if (this.hasRememberDurationElapsed()) {
       this.reset();
     }
@@ -27,28 +30,30 @@ export class Store {
     this.storage.removeItem(`${this.keyPrefix}${key}`);
   }
 
-  pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): Store {
+  pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): LocalStorageStore {
     return {
       ...this,
       // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      get: (key: string): any => {
-        const result = this.get(key);
+      get: async (key: string): Promise<any> => {
+        const result = await this.get(key);
         if (result) return decode(result);
       },
       // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      set: (key: string, value: any): void => this.set.call(this, key, encode(value)),
+      set: async (key: string, value: any): Promise<void> => {
+        await this.set(key, encode(value));
+      },
     };
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-  get(key: string): any {
+  get<K = any>(key: string): Promise<K | undefined> {
     const value = this.#getLocalStorage(key);
 
     if (!value) {
-      return undefined;
+      return Promise.resolve(undefined);
     }
 
-    return JSON.parse(value);
+    return Promise.resolve(JSON.parse(value) as K);
   }
 
   setRememberDuration(days?: number | string): void {
@@ -91,19 +96,20 @@ export class Store {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-  set(key: string, value: any): void {
+  set<K = any>(key: string, value: K): Promise<void> {
     if (!key || typeof key !== "string") {
       throw new Error(`Bad key: ${key}`);
     }
 
     if (!value) {
-      return;
+      return Promise.resolve();
     }
 
     this.#setLocalStorage(key, JSON.stringify(value));
+    return Promise.resolve();
   }
 
-  reset(): void {
+  async reset(): Promise<void> {
     for (const key of Object.keys(this.storage)) {
       if (key.startsWith(this.keyPrefix)) {
         this.storage.removeItem(key);

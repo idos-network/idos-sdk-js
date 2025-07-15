@@ -1,4 +1,4 @@
-import type { Store } from "@idos-network/core";
+import type { Store } from "@idos-network/utils/store";
 
 export type UIMode = "new" | "existing" | "confirm";
 export type AuthMethod = "password" | "passkey";

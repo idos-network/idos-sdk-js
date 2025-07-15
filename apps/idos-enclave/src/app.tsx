@@ -1,4 +1,4 @@
-import type { Store } from "@idos-network/core";
+import type { Store } from "@idos-network/utils/store";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
@@ -217,7 +217,12 @@ export function App({ store, enclave }: AppProps) {
     <Layout>
       <AuthMethodChooser
         {...methodProps}
-        setMethod={method.value === null ? (m) => (method.value = m) : () => {}}
+        setMethod={(newMethod: AuthMethod) => {
+          if (method.value === null) {
+            // Don't override the method if it's already set
+            method.value = newMethod;
+          }
+        }}
       />
     </Layout>
   );

@@ -1,4 +1,4 @@
-import { keyDerivation } from "@idos-network/encryption";
+import { keyDerivation } from "@idos-network/utils/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
@@ -91,7 +91,13 @@ export function PasswordForm({
 
   async function derivePublicKeyFromPassword(password: string) {
     // TODO Remove human-user migration code.
-    const salt = store.get("user-id") || store.get("human-id") || userId;
+    const salt =
+      (await store.get<string>("user-id")) || (await store.get<string>("human-id")) || userId;
+
+    if (!salt) {
+      throw new Error("Salt is invalid, please try again.");
+    }
+
     const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
