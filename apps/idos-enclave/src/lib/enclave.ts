@@ -80,7 +80,8 @@ export class Enclave {
       (await this.store.get<string>("enclave-authorized-origins")) ?? "[]",
     );
 
-    const secretKey = await this.storeWithCodec.get("encryption-private-key");
+    const secretKey =
+      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
     if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
   }
 
@@ -199,8 +200,8 @@ export class Enclave {
     );
   }
 
-  async ensurePassword() {
-    const storedPassword = this.store.get("password");
+  async ensurePassword(): Promise<string> {
+    const storedPassword = await this.store.get<string>("password");
 
     if (this.isAuthorizedOrigin && storedPassword) return Promise.resolve(storedPassword);
 
@@ -222,10 +223,10 @@ export class Enclave {
           return reject(e);
         }
 
-        this.store.set("password", password);
+        await this.store.set("password", password);
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
+        await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
         return password ? resolve(password) : reject();
       }),
@@ -235,8 +236,8 @@ export class Enclave {
   async ensureKeyPair(secretKey: Uint8Array<ArrayBufferLike>) {
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    this.storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
-    this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
+    await this.storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
+    await this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
   async ensureMPCPrivateKey() {
