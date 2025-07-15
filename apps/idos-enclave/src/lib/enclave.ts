@@ -483,7 +483,7 @@ export class Enclave {
 
         // Type assertion for method call
         const method = this[requestName as keyof this] as (...args: unknown[]) => Promise<unknown>;
-        const response = await method(...paramBuilderFn());
+        const response = await method.bind(this)(...paramBuilderFn());
         event.ports[0].postMessage({ result: response });
       } catch (error) {
         console.error("catch", error);
