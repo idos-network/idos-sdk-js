@@ -54,26 +54,6 @@ export function App({ store, enclave }: AppProps) {
   const isBackupMode = useSignal(false);
   const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
 
-  effect(() => {
-    if (!theme.value) {
-      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    } else {
-      localStorage.setItem("theme", theme.value);
-      if (theme.value === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  });
-
-  effect(() => {
-    if (mode.value === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey.value) {
-      onError("Can't find a public encryption key for this user");
-    }
-  });
-
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
       responsePort.current.postMessage(data);
@@ -103,6 +83,26 @@ export function App({ store, enclave }: AppProps) {
     },
     [onError],
   );
+
+  effect(() => {
+    if (!theme.value) {
+      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } else {
+      localStorage.setItem("theme", theme.value);
+      if (theme.value === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  });
+
+  effect(() => {
+    if (mode.value === "new" || !responsePort.current) return;
+    if (!encryptionPublicKey.value) {
+      onError("Can't find a public encryption key for this user");
+    }
+  });
 
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
