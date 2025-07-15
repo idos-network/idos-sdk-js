@@ -184,7 +184,9 @@ export class Enclave {
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
-          ({ authMethod, password } = await this.openDialog("auth", {}));
+          ({ authMethod, password } = await this.openDialog("auth", {
+            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+          }));
 
           if (!authMethod || !allowedAuthMethods.includes(authMethod)) {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
