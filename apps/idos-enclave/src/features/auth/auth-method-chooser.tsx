@@ -47,9 +47,7 @@ export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMe
         <Button id="auth-method-password" onClick={() => setMethod("password")}>
           Use a password
         </Button>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Button id="auth-method-mpc" onClick={() => onSuccess({ authMethod: "mpc" })}>
           Use MPC
         </Button>
