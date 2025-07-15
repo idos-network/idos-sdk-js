@@ -1,4 +1,3 @@
-// @ts-expect-error Not typed yet
 import { Enclave } from "./lib/enclave";
 import "./styles.css";
 

@@ -90,7 +90,7 @@ export class Enclave {
   }
 
   async reset() {
-    (this.store as LocalStorageStore).reset();
+    await this.store.reset();
   }
 
   safeParse(string: string) {
@@ -136,6 +136,7 @@ export class Enclave {
 
     if (!secretKey) {
       let preferredAuthMethod: AuthMethod = "password";
+
       if (import.meta.env.VITE_ENABLE_MPC === "true")
         preferredAuthMethod = await this.ensurePreferredAuthMethod();
 
@@ -182,7 +183,8 @@ export class Enclave {
         this.unlockButton.disabled = true;
 
         try {
-          ({ authMethod, password } = await this.openDialog("auth"));
+          // Don't remove the empty object, it's used to trigger the dialog
+          ({ authMethod, password } = await this.openDialog("auth", {}));
 
           if (!authMethod || !allowedAuthMethods.includes(authMethod)) {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
@@ -190,10 +192,10 @@ export class Enclave {
         } catch (e) {
           return reject(e);
         }
-        this.store.set("preferred-auth-method", authMethod);
-        if (password) this.store.set("password", password);
+        await this.store.set("preferred-auth-method", authMethod);
+        if (password) await this.store.set("password", password);
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
+        await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
         return authMethod ? resolve(authMethod) : reject();
       }),
