@@ -1,7 +1,7 @@
 import type * as GemWallet from "@gemwallet/api";
+import type { Store } from "@idos-network/utils/store";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Xumm } from "xumm";
-import type { Store } from "../../store";
 import type { KwilActionClient } from "../create-kwil-client";
 import { getXrpTxHash } from "./utils";
 
@@ -12,8 +12,8 @@ export async function createXrpKwilSigner(
   kwilClient: KwilActionClient,
   walletPublicKey: string,
 ): Promise<KwilSigner> {
-  const storedAddress = store.get("signer-address");
-  const storePublicKey = store.get("signer-public-key");
+  const storedAddress = await store.get<string>("signer-address");
+  const storePublicKey = await store.get<string>("signer-public-key");
 
   if (storedAddress !== currentAddress || (storePublicKey && storePublicKey !== walletPublicKey)) {
     try {
@@ -25,8 +25,8 @@ export async function createXrpKwilSigner(
     }
   }
 
-  store.set("signer-address", currentAddress);
-  store.set("signer-public-key", walletPublicKey);
+  await store.set("signer-address", currentAddress);
+  await store.set("signer-public-key", walletPublicKey);
 
   const signer = async (message: string | Uint8Array): Promise<Uint8Array> => {
     const signature = await getXrpTxHash(message, wallet);

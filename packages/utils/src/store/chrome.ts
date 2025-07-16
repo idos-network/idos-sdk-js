@@ -12,15 +12,22 @@ export class ChromeExtensionStore implements Store {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-  get<K = any>(key: string): Promise<K | undefined> {
-    return chrome.storage.local
-      .get(`${this.keyPrefix}${key}`)
-      .then((result) => JSON.parse(result[key]));
+  async get<K = any>(key: string): Promise<K | undefined> {
+    const prefixedKey = `${this.keyPrefix}${key}`;
+    const result = await chrome.storage.local.get(prefixedKey);
+
+    try {
+      return JSON.parse(result[prefixedKey]);
+    } catch (error) {
+      console.error(`Error parsing JSON for key ${prefixedKey}:`, error);
+      return result[prefixedKey];
+    }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
-    return chrome.storage.local.set({ [`${this.keyPrefix}${key}`]: value });
+    const prefixedKey = `${this.keyPrefix}${key}`;
+    return chrome.storage.local.set({ [prefixedKey]: value });
   }
 
   async reset(): Promise<void> {

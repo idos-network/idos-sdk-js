@@ -174,5 +174,4 @@ export type {
   IDDocumentType,
   VerifiableCredentialSubject,
   AvailableIssuerType,
-  IDDocumentType,
 };
