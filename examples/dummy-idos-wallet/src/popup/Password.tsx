@@ -1,9 +1,15 @@
+import { keyDerivation } from "@idos-network/utils/encryption";
+import { encode } from "@stablelib/base64";
 import { type JSX, useEffect, useState } from "react";
+import nacl from "tweetnacl";
 
 export default function Popup(): JSX.Element {
   const [requestId, setRequestId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [expectedUserEncryptionPublicKey, setExpectedUserEncryptionPublicKey] = useState<string | null>(null);
+  const [expectedUserEncryptionPublicKey, setExpectedUserEncryptionPublicKey] = useState<
+    string | null
+  >(null);
+  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>("Heslo123!");
 
   useEffect(() => {
@@ -20,6 +26,17 @@ export default function Popup(): JSX.Element {
 
   const handleDeriveKey = async () => {
     // TODO: Check if the password matches the expected user encryption public key
+    if (password && userId && expectedUserEncryptionPublicKey) {
+      const secretKey = await keyDerivation(password, userId);
+      const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
+      if (encode(keyPair.publicKey) !== expectedUserEncryptionPublicKey) {
+        setError("Invalid password.");
+        return;
+      }
+    }
+
+    setError(null);
 
     await chrome.runtime.sendMessage({
       type: "IDOS_POPUP_RESPONSE",
@@ -48,24 +65,117 @@ export default function Popup(): JSX.Element {
   };
 
   return (
-    <div id="my-ext" className="container" data-theme="light">
-      <h3>🔐 idOS credential request</h3>
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h4 className="card-title">Website requesting your password to decrypt the credential</h4>
-          <p>
-            <input type="password" value={password ?? ""} onChange={(e) => setPassword(e.target.value)} className="input input-bordered w-full max-w-xs" />
-          </p>
+    <div
+      id="my-ext"
+      className="container"
+      data-theme="light"
+      style={{
+        width: "100%",
+        height: "100%",
+        minWidth: "100%",
+        minHeight: "100%",
+        padding: "20px",
+        display: "flex",
+        flexDirection: "column",
+        gap: "16px",
+        boxSizing: "border-box",
+      }}
+    >
+      <h3>🔐 idOS Credential Request</h3>
+      <p>Website requesting your password to decrypt the credential</p>
 
-          <div className="card-actions mt-4 justify-end">
-            <button type="button" className="btn btn-error" onClick={handleCancel}>
-              Reject
-            </button>
-            <button type="button" className="btn btn-primary" onClick={handleDeriveKey}>
-              OK
-            </button>
-          </div>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div
+          style={{
+            padding: "16px",
+            backgroundColor: "#f3f4f6",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb",
+          }}
+        >
+          <strong>Request ID:</strong> {requestId || "N/A"}
         </div>
+
+        <div
+          style={{
+            padding: "16px",
+            backgroundColor: "#fef3c7",
+            borderRadius: "8px",
+            border: "1px solid #f59e0b",
+          }}
+        >
+          <strong>User ID:</strong> {userId || "N/A"}
+        </div>
+
+        <div
+          style={{
+            padding: "16px",
+            backgroundColor: "#dbeafe",
+            borderRadius: "8px",
+            border: "1px solid #3b82f6",
+          }}
+        >
+          <strong>Password:</strong>
+          <input
+            type="password"
+            value={password ?? ""}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{
+              width: "100%",
+              marginTop: "8px",
+              padding: "8px 12px",
+              border: "1px solid #d1d5db",
+              borderRadius: "6px",
+              fontSize: "14px",
+              backgroundColor: "white",
+            }}
+          />
+          {error && <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{error}</p>}
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: "auto",
+          paddingTop: "16px",
+          borderTop: "1px solid #e5e7eb",
+          display: "flex",
+          gap: "12px",
+          justifyContent: "flex-end",
+        }}
+      >
+        <button
+          type="button"
+          onClick={handleCancel}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#ef4444",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+        >
+          Reject
+        </button>
+        <button
+          type="button"
+          onClick={handleDeriveKey}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+          }}
+        >
+          OK
+        </button>
       </div>
     </div>
   );

@@ -1,11 +1,16 @@
-import { idOSClientIdle, type idOSClientLoggedIn, LocalEnclave } from "@idos-network/client";
+import {
+  idOSClientIdle,
+  type idOSClientLoggedIn,
+  type idOSClientWithUserSigner,
+  LocalEnclave,
+} from "@idos-network/client";
 import { utf8Decode } from "@idos-network/core";
-import { createWebKwilClient } from "@idos-network/core/kwil-infra";
+import { createWebKwilClient, type KwilActionClient } from "@idos-network/core/kwil-infra";
 import { decrypt, keyDerivation } from "@idos-network/utils/encryption";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
 import fetchAdapter from "@vespaiach/axios-fetch-adapter";
 import Axios from "axios";
-import { Wallet } from "ethers";
+import { type HDNodeWallet, Wallet } from "ethers";
 import nacl from "tweetnacl";
 
 console.log("🚀 idOS background script loaded");
@@ -13,8 +18,12 @@ console.log("🚀 idOS background script loaded");
 // Simple port manager for persistent connections
 class PortManager {
   private ports = new Map<number, chrome.runtime.Port>();
-  private idosClient: idOSClientLoggedIn | null = null;
+  private idOSClientWithUserSigner: idOSClientWithUserSigner | null = null;
+  private idOSLoggedInClient: idOSClientLoggedIn | null = null;
   private keyPair: nacl.box.KeyPair | null = null;
+  private wallet: HDNodeWallet | null = null;
+  private store: ChromeExtensionStore | null = null;
+  private kwilClient: KwilActionClient | null = null;
 
   constructor() {
     this.initIdos();
@@ -22,22 +31,22 @@ class PortManager {
 
   private async initIdos() {
     const mnemonic = "lift swear siege over supply crop robust wrist also lava trick dust";
-    const wallet = Wallet.fromPhrase(mnemonic);
+    this.wallet = Wallet.fromPhrase(mnemonic);
 
-    console.log("🔑 wallet:", wallet);
+    console.log("🔑 wallet:", this.wallet);
 
-    const store = new ChromeExtensionStore();
+    this.store = new ChromeExtensionStore();
 
     try {
-      const kwilClient = await createWebKwilClient({
+      this.kwilClient = await createWebKwilClient({
         nodeUrl: "https://nodes.staging.idos.network",
         chainId: "idos-staging",
       });
 
       // Patch request method for old axios version
-      this.patchKwilClient(kwilClient);
+      this.patchKwilClient(this.kwilClient);
 
-      console.log("🔑 client:", kwilClient);
+      console.log("🔑 client:", this.kwilClient);
 
       const localProvider = {
         reconfigure: () => {},
@@ -61,20 +70,28 @@ class PortManager {
       console.log("🔑 enclaveProvider:", enclaveProvider);
 
       // @ts-expect-error - TODO: fix this
-      const idOSClient = new idOSClientIdle(store, kwilClient, enclaveProvider);
+      const idOSClient = new idOSClientIdle(this.store, this.kwilClient, enclaveProvider);
       console.log("🔑 idOSClient:", idOSClient);
 
-      const idOSClientWithUserSigner = await idOSClient.withUserSigner(wallet);
-      console.log("🔑 idOSClientWithUserSigner:", idOSClientWithUserSigner);
+      this.idOSClientWithUserSigner = await idOSClient.withUserSigner(this.wallet);
+      console.log("🔑 idOSClientWithUserSigner:", this.idOSClientWithUserSigner);
 
-      try {
-        this.idosClient = await idOSClientWithUserSigner.logIn();
-        console.log("🔑 idosClient:", this.idosClient);
-      } catch (error) {
-        console.error("🔑 error:", error);
-      }
+      this.tryLogIn();
     } catch (error) {
       console.error("🔑 error:", error);
+    }
+  }
+
+  private async tryLogIn() {
+    try {
+      if (!this.idOSClientWithUserSigner) {
+        throw new Error("No idOS client found");
+      }
+
+      this.idOSLoggedInClient = await this.idOSClientWithUserSigner.logIn();
+      console.log("🔑 idOSLoggedInClient:", this.idOSLoggedInClient);
+    } catch (error) {
+      console.error("🔑 error in login:", error);
     }
   }
 
@@ -155,67 +172,29 @@ class PortManager {
   // Handle different message types
   private async handleMessage(message: any) {
     switch (message.type) {
-      case "getCredentials":
-        return await this.handleGetCredentials(message.params.level);
-
       case "getAllCredentials":
         return await this.handleGetAllCredentials();
 
       case "getCredentialContent":
         return await this.handleGetCredentialContent(message.params.id);
 
-      case "showCredentialsPopup":
-        return await this.showCredentialsPopup(
-          message.params.level,
-          message.params.origin,
-          message.params.url,
-        );
-
       default:
         throw new Error(`Unknown message type: ${message.type}`);
     }
   }
 
-  private async handleGetCredentials(level: string) {
-    // For now, return mock data - in real implementation, this would show popup
-    return {
-      level,
-      data: {
-        name: "John Doe",
-        email: "john@example.com",
-        age: 25,
-        verified: true,
-      },
-    };
-  }
-
   private async handleGetAllCredentials() {
-    if (!this.idosClient) {
+    if (!this.idOSLoggedInClient) {
       throw new Error("No idOS client found");
     }
-    return await this.idosClient.getAllCredentials();
+    return await this.idOSLoggedInClient.getAllCredentials();
   }
 
   private async handleGetCredentialContent(id: string) {
-    if (!this.idosClient) {
+    if (!this.idOSLoggedInClient) {
       throw new Error("No idOS client found");
     }
-    return await this.idosClient.getCredentialContent(id);
-  }
-
-  private async showCredentialsPopup(level: string, origin: string, url: string) {
-    const requestId = crypto.randomUUID();
-
-    chrome.windows.create({
-      url: `${chrome.runtime.getURL("src/popup/index.html")}?requestId=${requestId}&level=${level}&origin=${encodeURIComponent(origin)}&url=${encodeURIComponent(url)}`,
-      type: "popup",
-      width: 400,
-      height: 600,
-      focused: true,
-    });
-
-    // Return the requestId so content script can track this request
-    return { requestId };
+    return await this.idOSLoggedInClient.getCredentialContent(id);
   }
 
   private async showPasswordPopup(
@@ -227,8 +206,8 @@ class PortManager {
     chrome.windows.create({
       url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}`,
       type: "popup",
-      width: 650,
-      height: 250,
+      width: 470,
+      height: 450,
       focused: true,
     });
 
@@ -244,8 +223,24 @@ class PortManager {
     { resolve: (value: string) => void; reject: (reason: any) => void }
   >();
 
-  handlePopupResponse(requestId: string, result: any, error?: string) {
-    console.log("🔑 handlePopupResponse:", requestId, result, error);
+  handleConfigRequest(requestId: string) {
+    chrome.runtime.sendMessage({
+      type: "IDOS_POPUP_CONFIG_RESPONSE",
+      data: {
+        requestId,
+        address: this.wallet?.address,
+        // @ts-expect-error - TODO: fix this
+        network: this.kwilClient?.client.chainId,
+        // @ts-expect-error - TODO: fix this
+        node: this.kwilClient?.client.config.kwilProvider,
+        status: this.idOSLoggedInClient ? "Has profile" : "No profile",
+        user: this.idOSLoggedInClient?.user?.id,
+      },
+    });
+  }
+
+  handlePopupMessage(requestId: string, result: any, error?: string) {
+    console.log("🔑 popup message:", requestId, result, error);
     if (this.pendingPasswordRequests.has(requestId)) {
       const { resolve, reject } = this.pendingPasswordRequests.get(requestId)!;
       this.pendingPasswordRequests.delete(requestId);
@@ -277,10 +272,15 @@ chrome.runtime.onConnect.addListener((port) => {
 
 // Handle popup responses
 chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
-  console.log("🔑 popup response:", request);
+  console.log("🔑 popup message:", request);
+  if (request.type === "IDOS_POPUP_CONFIG") {
+    portManager.handleConfigRequest(request.data.requestId);
+    sendResponse({ success: true });
+  }
+
   if (request.type === "IDOS_POPUP_RESPONSE") {
     const { requestId, result, error } = request.data;
-    portManager.handlePopupResponse(requestId, result, error);
+    portManager.handlePopupMessage(requestId, result, error);
     sendResponse({ success: true });
   }
 });

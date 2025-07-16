@@ -17,6 +17,7 @@
     "@idos-network/client": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@stablelib/base64": "^2.0.1",
     "ethers": "catalog:ethereum",
     "tweetnacl": "catalog:core",
     "@vespaiach/axios-fetch-adapter": "0.3.1"

@@ -1,5 +1,4 @@
 function injectIdOS(global: any) {
-
   // Create the idOS API in the page's window context
   global.idOS = {
     pendingRequests: new Map(),
@@ -9,23 +8,26 @@ function injectIdOS(global: any) {
   function sendRequest(action: string, params: any = {}): Promise<any> {
     return new Promise((resolve, reject) => {
       const requestId = crypto.randomUUID();
-      
+
       // Store the promise resolvers
       global.idOS.pendingRequests.set(requestId, { resolve, reject });
 
       // Send message to content script
-      global.postMessage({
-        type: "IDOS_REQUEST",
-        data: {
-          requestId,
-          action,
-          params: {
-            ...params,
-            origin: window.location.origin,
-            url: window.location.href,
-          }
-        }
-      }, "*");
+      global.postMessage(
+        {
+          type: "IDOS_REQUEST",
+          data: {
+            requestId,
+            action,
+            params: {
+              ...params,
+              origin: window.location.origin,
+              url: window.location.href,
+            },
+          },
+        },
+        "*",
+      );
 
       // Set a timeout for the request
       setTimeout(() => {
@@ -37,22 +39,19 @@ function injectIdOS(global: any) {
     });
   }
 
-  // @ts-expect-error - getAllCredentials is not defined
   global.idOS.getAllCredentials = async () => {
     console.log("🚀 getAllCredentials called");
-    return sendRequest('getAllCredentials');
+    return sendRequest("getAllCredentials");
   };
 
-  // @ts-expect-error - getCredentialContent is not defined
   global.idOS.getCredentialContent = async (id: string) => {
     console.log("🚀 getCredentialContent called", id);
-    return sendRequest('getCredentialContent', { id });
+    return sendRequest("getCredentialContent", { id });
   };
 
-  // @ts-expect-error - showCredentialsPopup is not defined
   global.idOS.showCredentialsPopup = async (level: string) => {
     console.log("🚀 showCredentialsPopup called with level:", level);
-    return sendRequest('showCredentialsPopup', { level });
+    return sendRequest("showCredentialsPopup", { level });
   };
 
   console.log("🔑 idOS API created:", global.idOS);
@@ -65,7 +64,7 @@ function injectIdOS(global: any) {
 
       // @ts-expect-error - pendingRequests is not defined
       if (window.idOS?.pendingRequests?.has(id)) {
-      // @ts-expect-error - pendingRequests is not defined
+        // @ts-expect-error - pendingRequests is not defined
         const pendingRequest = window.idOS.pendingRequests.get(id);
         if (pendingRequest) {
           const { resolve, reject } = pendingRequest;
@@ -87,5 +86,10 @@ function injectIdOS(global: any) {
   console.log("🔑 idOS API exposed to page");
 }
 
-console.log("🚀 idOS API injection script running");
-setTimeout(() => injectIdOS(window), 1000);
+if (!chrome.runtime.id) {
+  // Not in a chrome extension content script
+  console.log("🚀 idOS API injection script running");
+  requestAnimationFrame(() => {
+    injectIdOS(window);
+  });
+}
