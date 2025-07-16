@@ -13,6 +13,7 @@
     "@stablelib/sha256": "catalog:core",
     "@stablelib/utf8": "catalog:core",
     "@stellar/stellar-sdk": "catalog:stellar",
+    "@idos-network/utils": "workspace:*",
     "@wagmi/core": "2.17.3",
     "borsh": "catalog:core",
     "bs58": "catalog:core",

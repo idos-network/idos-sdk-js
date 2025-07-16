@@ -1,3 +1,4 @@
+import type { Store } from "@idos-network/utils/store";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type {
   Wallet as NearWallet,
@@ -15,7 +16,6 @@ import {
   hexEncode,
   utf8Decode,
 } from "../../codecs";
-import type { Store } from "../../store";
 import type { KwilActionClient } from "../create-kwil-client";
 import { getNearConnectionConfig } from "./get-config";
 
@@ -170,8 +170,8 @@ export async function createNearWalletKwilSigner(
     );
 
     if (signature) {
-      store.set("signer-address", accountId);
-      store.set("signer-public-key", publicKey);
+      await store.set("signer-address", accountId);
+      await store.set("signer-public-key", publicKey);
     }
 
     const signMessageOriginal = wallet.signMessage.bind(wallet);
@@ -182,10 +182,12 @@ export async function createNearWalletKwilSigner(
     }: SignMessageParams): Promise<SignedMessage & { nonce?: Uint8Array }> => {
       if (error) return Promise.reject();
 
-      const lastMessage = store.get("sign-last-message");
-      if (signature && message === lastMessage) {
-        const nonce = Buffer.from(store.get("sign-last-nonce"));
-        const callbackUrl = store.get("sign-last-url");
+      const lastMessage = await store.get<string>("sign-last-message");
+      const lastNonce = await store.get<Uint8Array>("sign-last-nonce");
+
+      if (signature && message === lastMessage && lastNonce) {
+        const nonce = Buffer.from(lastNonce);
+        const callbackUrl = await store.get<string>("sign-last-url");
 
         return Promise.resolve({
           accountId: currentAddress,
@@ -199,9 +201,9 @@ export async function createNearWalletKwilSigner(
       const callbackUrl = window.location.href;
       const nonce = Buffer.from(new KwilNonce(32).clampUTF8);
 
-      store.set("sign-last-message", message);
-      store.set("sign-last-nonce", Array.from(nonce));
-      store.set("sign-last-url", callbackUrl);
+      await store.set("sign-last-message", message);
+      await store.set("sign-last-nonce", Array.from(nonce));
+      await store.set("sign-last-url", callbackUrl);
 
       signMessageOriginal({ message, nonce, recipient, callbackUrl });
 
@@ -209,9 +211,9 @@ export async function createNearWalletKwilSigner(
     };
   }
 
-  const storedAddress = store.get("signer-address");
+  const storedAddress = await store.get<string>("signer-address");
 
-  let publicKey = store.get("signer-public-key");
+  let publicKey = await store.get<string>("signer-public-key");
 
   if (storedAddress !== currentAddress || !publicKey) {
     store.reset();
@@ -224,8 +226,8 @@ export async function createNearWalletKwilSigner(
     // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
-    store.set("signer-address", currentAddress);
-    store.set("signer-public-key", publicKey);
+    await store.set("signer-address", currentAddress);
+    await store.set("signer-public-key", publicKey);
   }
 
   const signer = createNearWalletSigner(wallet, recipient);

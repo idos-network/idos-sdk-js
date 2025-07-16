@@ -1,3 +1,4 @@
+import type { Store } from "@idos-network/utils/store";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
@@ -7,7 +8,6 @@ import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
 import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
-import type { Store } from "../store";
 import type { Wallet } from "../types";
 import {
   createNearWalletKwilSigner,
@@ -157,7 +157,7 @@ export async function createClientKwilSigner(
     wallet = wallet as unknown as JsonRpcSigner;
     const currentAddress = await wallet.getAddress();
 
-    const storedAddress = store.get("signer-address");
+    const storedAddress = await store.get<string>("signer-address");
 
     if (storedAddress !== currentAddress) {
       // To avoid re-using the old signer's kgw cookie.
