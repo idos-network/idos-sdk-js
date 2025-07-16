@@ -1,5 +1,6 @@
 import styles from "@assets/styles/index.css?inline";
 import createShadowRoot from "@utils/createShadowRoot";
+import Login from "./Login";
 import Password from "./Password";
 import Popup from "./Popup";
 
@@ -10,6 +11,8 @@ const type = urlParams.get("type");
 
 if (type === "password") {
   root.render(<Password />);
+} else if (type === "login") {
+  root.render(<Login />);
 } else {
   root.render(<Popup />);
 }

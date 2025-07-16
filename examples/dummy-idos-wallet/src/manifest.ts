@@ -29,7 +29,7 @@ export default defineManifest({
     48: "icon48.png",
     128: "icon128.png",
   },
-  permissions: ["activeTab", "storage"],
+  permissions: ["activeTab", "storage", "tabs"],
   content_scripts: [
     {
       js: ["src/content.js"],

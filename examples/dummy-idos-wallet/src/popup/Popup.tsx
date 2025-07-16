@@ -112,18 +112,6 @@ export default function Popup(): JSX.Element {
           <strong>Wallet Address:</strong> {address}
         </div>
       </div>
-
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: "16px",
-          borderTop: "1px solid #e5e7eb",
-          fontSize: "14px",
-          color: "#6b7280",
-        }}
-      >
-        Ready for idOS operations
-      </div>
     </div>
   );
 }

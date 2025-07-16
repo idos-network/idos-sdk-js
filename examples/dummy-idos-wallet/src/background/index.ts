@@ -20,7 +20,7 @@ class PortManager {
   private ports = new Map<number, chrome.runtime.Port>();
   private idOSClientWithUserSigner: idOSClientWithUserSigner | null = null;
   private idOSLoggedInClient: idOSClientLoggedIn | null = null;
-  private keyPair: nacl.box.KeyPair | null = null;
+  private keyPair: nacl.BoxKeyPair | null = null;
   private wallet: HDNodeWallet | null = null;
   private store: ChromeExtensionStore | null = null;
   private kwilClient: KwilActionClient | null = null;
@@ -30,8 +30,9 @@ class PortManager {
   }
 
   private async initIdos() {
-    const mnemonic = "lift swear siege over supply crop robust wrist also lava trick dust";
-    this.wallet = Wallet.fromPhrase(mnemonic);
+    const mnemonicExisting = "lift swear siege over supply crop robust wrist also lava trick dust";
+    // const mnemonicNonExisting = "flush pair armor meadow convince pigeon elbow hurry space news awake shrimp";
+    this.wallet = Wallet.fromPhrase(mnemonicExisting);
 
     console.log("🔑 wallet:", this.wallet);
 
@@ -62,6 +63,9 @@ class PortManager {
         },
         decrypt: async (message: Uint8Array, senderPublicKey: Uint8Array) => {
           console.log("🔑 decrypt:", message, senderPublicKey);
+          if (!this.keyPair) {
+            throw new Error("Key pair not initialized");
+          }
           return utf8Decode(await decrypt(message, this.keyPair, senderPublicKey));
         },
       };
@@ -93,6 +97,10 @@ class PortManager {
     } catch (error) {
       console.error("🔑 error in login:", error);
     }
+  }
+
+  private isLoggedIn() {
+    return this.idOSLoggedInClient !== null;
   }
 
   private patchKwilClient(kwilClient: any) {
@@ -184,17 +192,37 @@ class PortManager {
   }
 
   private async handleGetAllCredentials() {
-    if (!this.idOSLoggedInClient) {
-      throw new Error("No idOS client found");
+    if (!this.isLoggedIn()) {
+      this.openLoginPage();
+      throw new Error("Not logged in - login page opened");
     }
-    return await this.idOSLoggedInClient.getAllCredentials();
+
+    return await this.idOSLoggedInClient?.getAllCredentials();
   }
 
   private async handleGetCredentialContent(id: string) {
-    if (!this.idOSLoggedInClient) {
-      throw new Error("No idOS client found");
+    if (!this.isLoggedIn()) {
+      this.openLoginPage();
+      throw new Error("Not logged in - login page opened");
     }
-    return await this.idOSLoggedInClient.getCredentialContent(id);
+
+    return await this.idOSLoggedInClient?.getCredentialContent(id);
+  }
+
+  private async openLoginPage() {
+    console.log("🔑 Opening login page...");
+
+    // Create a new tab with the login page
+    const loginUrl = chrome.runtime.getURL("src/popup/index.html?type=login");
+
+    try {
+      await chrome.tabs.create({
+        url: loginUrl,
+        active: true,
+      });
+    } catch (error) {
+      console.error("🔑 Failed to open login page:", error);
+    }
   }
 
   private async showPasswordPopup(
