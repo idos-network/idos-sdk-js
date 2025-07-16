@@ -1,3 +1,3 @@
 export default function IdentityVerifierPage() {
-  return <>IdentityVerifierPage</>;
+  return "IdentityVerifierPage";
 }

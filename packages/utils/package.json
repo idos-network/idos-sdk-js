@@ -1,33 +1,34 @@
 {
-  "name": "@idos-network/client",
-  "description": "idOS Client JavaScript SDK for browser environments",
+  "name": "@idos-network/utils",
+  "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.0",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
-  },
   "dependencies": {
-    "@gemwallet/api": "catalog:core",
-    "@kwilteam/kwil-js": "catalog:core",
-    "es-toolkit": "catalog:core"
+    "@stablelib/utf8": "^2.0.1",
+    "@stablelib/base64": "^2.0.1",
+    "scrypt-js": "^3.0.1",
+    "tweetnacl": "^1.0.3",
+    "web-bip39": "^0.0.3"
   },
   "devDependencies": {
-    "@idos-network/core": "workspace:*",
-    "@idos-network/utils": "workspace:*",
-    "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
-    "tsdown": "catalog:build"
+    "typescript": "catalog:build",
+    "tsdown": "catalog:build",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^22.15.30"
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+    "./encryption": {
+      "types": "./dist/encryption/index.d.ts",
+      "import": "./dist/encryption/index.js"
+    },
+    "./store": {
+      "types": "./dist/store/index.d.ts",
+      "import": "./dist/store/index.js"
     }
   },
   "files": [
@@ -36,6 +37,7 @@
   ],
   "homepage": "https://idos.network",
   "license": "MIT",
+  "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
     "typescript": "catalog:build"
@@ -47,12 +49,10 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
     "publint": "pnpx publint --strict",
     "release-it": "release-it"
   },
   "sideEffects": false,
   "type": "module",
-  "types": "dist/index.d.ts"
+  "types": "./dist/index.d.ts"
 }

@@ -1,4 +1,4 @@
-import type { Store } from "@idos-network/core";
+import type { Store } from "@idos-network/utils/store";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
@@ -54,26 +54,6 @@ export function App({ store, enclave }: AppProps) {
   const isBackupMode = useSignal(false);
   const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
 
-  effect(() => {
-    if (!theme.value) {
-      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    } else {
-      localStorage.setItem("theme", theme.value);
-      if (theme.value === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  });
-
-  effect(() => {
-    if (mode.value === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey.value) {
-      onError("Can't find a public encryption key for this user");
-    }
-  });
-
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
       responsePort.current.postMessage(data);
@@ -103,6 +83,26 @@ export function App({ store, enclave }: AppProps) {
     },
     [onError],
   );
+
+  effect(() => {
+    if (!theme.value) {
+      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    } else {
+      localStorage.setItem("theme", theme.value);
+      if (theme.value === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+  });
+
+  effect(() => {
+    if (mode.value === "new" || !responsePort.current) return;
+    if (!encryptionPublicKey.value) {
+      onError("Can't find a public encryption key for this user");
+    }
+  });
 
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
@@ -217,7 +217,12 @@ export function App({ store, enclave }: AppProps) {
     <Layout>
       <AuthMethodChooser
         {...methodProps}
-        setMethod={method.value === null ? (m) => (method.value = m) : () => {}}
+        setMethod={(newMethod: AuthMethod) => {
+          if (method.value === null) {
+            // Don't override the method if it's already set
+            method.value = newMethod;
+          }
+        }}
       />
     </Layout>
   );

@@ -24,7 +24,7 @@ export class EngineClient {
       Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
-    const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id;
+    const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     const status = await putRequest(url, uploadRequest, authHeader);
     if (status !== "201") {
       throw new Error(`Error uploading share to ${this.contractAddress} at ${url}`);
@@ -41,7 +41,7 @@ export class EngineClient {
       Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
-    const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id;
+    const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     return await postRequest(url, downloadRequest, authHeader);
   }
 

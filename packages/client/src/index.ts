@@ -39,7 +39,6 @@ import {
   type KwilActionClient,
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
-import { Store } from "@idos-network/core/store";
 import type {
   DelegatedWriteGrant,
   idOSCredential,
@@ -50,6 +49,7 @@ import type {
   Wallet,
 } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
@@ -72,16 +72,19 @@ export class idOSClientConfiguration {
   readonly chainId?: string;
   readonly nodeUrl: string;
   readonly enclaveOptions: Omit<EnclaveOptions, "mode">;
+  readonly store: Store;
 
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
     enclaveOptions: Omit<EnclaveOptions, "mode">;
+    store?: Store;
   }) {
     this.state = "configuration";
     this.chainId = params.chainId;
     this.nodeUrl = params.nodeUrl;
     this.enclaveOptions = params.enclaveOptions;
+    this.store = params.store ?? new LocalStorageStore();
   }
 
   async createClient(): Promise<idOSClientIdle> {
@@ -103,14 +106,17 @@ export class idOSClientIdle {
   }
 
   static async fromConfig(params: idOSClientConfiguration): Promise<idOSClientIdle> {
-    const store = new Store(window.localStorage);
+    const store = params.store;
+
     const kwilClient = await createWebKwilClient({
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
 
+    const storedSignerAddress = await store.get<string>("signer-address");
+
     const enclaveProvider = new IframeEnclave({ ...params.enclaveOptions });
-    await enclaveProvider.load(store.get("signer-address"));
+    await enclaveProvider.load(storedSignerAddress);
 
     return new idOSClientIdle(store, kwilClient, enclaveProvider);
   }

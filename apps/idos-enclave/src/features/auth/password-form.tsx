@@ -1,13 +1,12 @@
+import { keyDerivation } from "@idos-network/utils/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
 import nacl from "tweetnacl";
-
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
 import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
-import { idOSKeyDerivation } from "@/lib/idOSKeyDerivation";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -92,8 +91,14 @@ export function PasswordForm({
 
   async function derivePublicKeyFromPassword(password: string) {
     // TODO Remove human-user migration code.
-    const salt = store.get("user-id") || store.get("human-id") || userId;
-    const secretKey = await idOSKeyDerivation({ password, salt });
+    const salt =
+      (await store.get<string>("user-id")) || (await store.get<string>("human-id")) || userId;
+
+    if (!salt) {
+      throw new Error("Salt is invalid, please try again.");
+    }
+
+    const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     return encode(keyPair.publicKey);
   }
