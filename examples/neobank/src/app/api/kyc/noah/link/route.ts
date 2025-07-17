@@ -88,7 +88,7 @@ type NoahResponse = {
 };
 
 async function createNoahCustomer(address: string, credentials: Credentials, url: URL) {
-  const cs = credentials.credentialSubject;
+  const credentialSubject = credentials.credentialSubject;
 
   const noahApiKey = process.env.NOAH_API_KEY;
   const noahAPiUrl = process.env.NOAH_API_URL;
@@ -105,33 +105,33 @@ async function createNoahCustomer(address: string, credentials: Credentials, url
   const customer: NoahCustomer = {
     Type: "Individual",
     FullName: {
-      FirstName: cs.firstName,
-      LastName: cs.familyName,
-      MiddleName: cs.maidenName,
+      FirstName: credentialSubject.firstName,
+      LastName: credentialSubject.familyName,
+      MiddleName: credentialSubject.maidenName,
     },
-    DateOfBirth: formatDate(cs.dateOfBirth),
-    Email: cs.email,
-    PhoneNumber: cs.phoneNumber,
+    DateOfBirth: formatDate(credentialSubject.dateOfBirth),
+    Email: credentialSubject.email,
+    PhoneNumber: credentialSubject.phoneNumber,
     Identities: [
       {
-        IssuingCountry: cs.idDocumentCountry,
-        IDNumber: cs.idDocumentNumber,
-        IssuedDate: formatDate(cs.idDocumentDateOfIssue),
-        ExpiryDate: formatDate(cs.idDocumentDateOfExpiry),
-        IDType: documentTypeMapper[cs.idDocumentType] ?? "Passport",
+        IssuingCountry: credentialSubject.idDocumentCountry,
+        IDNumber: credentialSubject.idDocumentNumber,
+        IssuedDate: formatDate(credentialSubject.idDocumentDateOfIssue),
+        ExpiryDate: formatDate(credentialSubject.idDocumentDateOfExpiry),
+        IDType: documentTypeMapper[credentialSubject.idDocumentType] ?? "Passport",
       },
     ],
     PrimaryResidence: {
       // biome-ignore lint/style/noNonNullAssertion: false positive
-      Street: cs.residentialAddressStreet!,
+      Street: credentialSubject.residentialAddressStreet!,
       // biome-ignore lint/style/noNonNullAssertion: false positive
-      City: cs.residentialAddressCity!,
+      City: credentialSubject.residentialAddressCity!,
       // biome-ignore lint/style/noNonNullAssertion: false positive
-      PostCode: cs.residentialAddressPostalCode!,
+      PostCode: credentialSubject.residentialAddressPostalCode!,
       // biome-ignore lint/style/noNonNullAssertion: false positive
-      State: cs.residentialAddressCountry!,
+      State: credentialSubject.residentialAddressCountry!,
       // biome-ignore lint/style/noNonNullAssertion: false positive
-      Country: cs.residentialAddressCountry!,
+      Country: credentialSubject.residentialAddressCountry!,
     },
   };
 
