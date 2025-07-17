@@ -10,6 +10,7 @@ export interface Session {
   hifiTosId?: string;
   hifiUserId?: string;
   moneriumCodeVerifier?: string;
+  moneriumProfileId?: string;
 }
 
 export const sessionStorage = createCookieSessionStorage<Session>({

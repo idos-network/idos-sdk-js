@@ -76,6 +76,20 @@ export const actors = {
     },
   ),
 
+  createMoneriumUser: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumUser = await fetch(`/app/kyc/monerium/user?credentialId=${input.id}`);
+
+    if (moneriumUser.status !== 200) {
+      throw new Error("User was not created, or already exists.");
+    }
+
+    return await moneriumUser.json().then((data) => data.url);
+  }),
+
   requestMoneriumAuth: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
     if (!input) {
       throw new Error("Credential not found");

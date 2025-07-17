@@ -179,24 +179,28 @@ export const machine = setup({
           client: context.loggedInClient,
           credential: context.credential,
         }),
-        onDone: [{
-          target: "createSharableToken",
-          actions: ["setSharedCredential"],
-          guard: "isTransak",
-        },
-        {
-          target: "moneriumFlow",
-          actions: ["setSharedCredential"],
-          guard: "isMonerium",
-        }, {
-          target: "createNoahCustomer",
-          actions: ["setSharedCredential"],
-          guard: "isNoah",
-        }, {
-          target: "startHifi",
-          actions: ["setSharedCredential"],
-          guard: "isHifi",
-        }],
+        onDone: [
+          {
+            target: "createSharableToken",
+            actions: ["setSharedCredential"],
+            guard: "isTransak",
+          },
+          {
+            target: "moneriumFlow",
+            actions: ["setSharedCredential"],
+            guard: "isMonerium",
+          },
+          {
+            target: "createNoahCustomer",
+            actions: ["setSharedCredential"],
+            guard: "isNoah",
+          },
+          {
+            target: "startHifi",
+            actions: ["setSharedCredential"],
+            guard: "isHifi",
+          },
+        ],
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
@@ -300,8 +304,21 @@ export const machine = setup({
       },
     },
     moneriumFlow: {
-      initial: "requestMoneriumAuth",
+      initial: "createMoneriumUser",
       states: {
+        createMoneriumUser: {
+          invoke: {
+            id: "createMoneriumUser",
+            src: "createMoneriumUser",
+            input: ({ context }) => context.sharedCredential,
+          },
+          onDone: {
+            target: "createMoneriumProfile",
+          },
+          onError: {
+            target: "requestMoneriumAuth",
+          },
+        },
         requestMoneriumAuth: {
           invoke: {
             id: "requestMoneriumAuth",
@@ -317,8 +334,8 @@ export const machine = setup({
             },
           },
         },
-        moneriumAuthUrlFetched: {
-        },
+        moneriumAuthUrlFetched: {},
+        createMoneriumProfile: {},
         error: {
           type: "final",
         },
