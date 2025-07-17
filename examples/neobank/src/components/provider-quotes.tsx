@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
 import { OptionButton } from "@/components/ui/option-button";
 import { Tag } from "@/components/ui/tag";
+import { type OnRampProvider, useAppStore } from "@/stores/app-store";
 
 interface Provider {
   id: string;
@@ -86,7 +86,7 @@ const Provider = ({
 );
 
 export default function ProviderQuotes() {
-  const [selectedProvider, setSelectedProvider] = useState("hifi");
+  const { selectedOnRampProvider, selectedKyc, setOnRampProvider } = useAppStore();
 
   return (
     <div className="mx-auto max-w-2xl flex-1 rounded-2xl bg-card p-6 text-white">
@@ -100,8 +100,8 @@ export default function ProviderQuotes() {
           <Provider
             key={provider.id}
             {...provider}
-            selected={selectedProvider === provider.id}
-            onClick={() => setSelectedProvider(provider.id)}
+            selected={selectedOnRampProvider === provider.id}
+            onClick={() => setOnRampProvider(provider.id as OnRampProvider)}
           />
         ))}
       </div>
