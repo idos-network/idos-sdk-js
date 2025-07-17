@@ -1,36 +1,22 @@
-import type { idOSCredential } from "@idos-network/core";
-import type {
-  DiscoverUserEncryptionPublicKeyResponse,
-  EnclaveOptions,
-  EnclaveProvider,
-} from "./types";
+import { BaseProvider } from "./base";
+import type { EnclaveOptions, StoredData } from "./types";
 
-export class MetaMaskSnapEnclave implements EnclaveProvider {
+export class MetaMaskSnapEnclave extends BaseProvider<EnclaveOptions> {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
-  enclaveHost: any;
-  snapId: string;
+  private enclaveHost: any;
+  private snapId: string;
 
-  constructor(_?: Record<string, unknown>) {
+  constructor(options: EnclaveOptions) {
+    super(options);
+
     // biome-ignore lint/suspicious/noExplicitAny: Types will be added later.
     this.enclaveHost = (window as any).ethereum;
     this.snapId = "npm:@idos-network/metamask-snap-enclave";
   }
-  reconfigure(_options: Omit<EnclaveOptions, "container" | "url">): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-  filterCredentials(
-    credentials: idOSCredential[],
-    privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
-  ): Promise<idOSCredential[]> {
-    console.log(credentials, privateFieldFilters);
-    throw new Error("Method not implemented.");
-  }
-
-  async discoverUserEncryptionPublicKey(): Promise<DiscoverUserEncryptionPublicKeyResponse> {
-    throw new Error("Method not implemented.");
-  }
 
   async load(): Promise<void> {
+    await super.load();
+
     const snaps = await this.enclaveHost.request({ method: "wallet_getSnaps" });
     // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
     const connected = Object.values(snaps).find((snap: any) => snap.id === this.snapId);
@@ -42,17 +28,20 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
       });
   }
 
-  async ready(userId: string): Promise<Uint8Array> {
+  async storage(userId: string, _expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
     let { encryptionPublicKey } = JSON.parse(await this.invokeSnap("storage", { userId }));
 
     encryptionPublicKey ||= await this.invokeSnap("init");
     encryptionPublicKey &&= Uint8Array.from(Object.values(encryptionPublicKey));
 
-    return encryptionPublicKey;
+    return {
+      encryptionPublicKey,
+      userId,
+    };
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.
-  invokeSnap(method: string, params: unknown = {}): Promise<any> {
+  private invokeSnap(method: string, params: unknown = {}): Promise<any> {
     return this.enclaveHost.request({
       method: "wallet_invokeSnap",
       params: {
@@ -79,7 +68,10 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("The Metamask Enclave needs to be updated");
   }
 
-  async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
+  async decrypt(
+    message: Uint8Array,
+    senderPublicKey: Uint8Array,
+  ): Promise<Uint8Array<ArrayBufferLike>> {
     const decrypted = await this.invokeSnap("decrypt", { message, senderPublicKey });
 
     return Uint8Array.from(Object.values(decrypted));

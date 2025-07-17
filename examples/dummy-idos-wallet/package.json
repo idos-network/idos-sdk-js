@@ -11,7 +11,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "axios": "0.27.2",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "@idos-network/client": "workspace:*",
@@ -19,8 +18,7 @@
     "@idos-network/core": "workspace:*",
     "@stablelib/base64": "^2.0.1",
     "ethers": "catalog:ethereum",
-    "tweetnacl": "catalog:core",
-    "@vespaiach/axios-fetch-adapter": "0.3.1"
+    "tweetnacl": "catalog:core"
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "^2.0.2",

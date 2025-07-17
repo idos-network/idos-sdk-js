@@ -2,9 +2,6 @@ import type { idOSCredential } from "@idos-network/core";
 import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 import { Client as MPCClient } from "./mpc/client";
 
@@ -36,7 +33,6 @@ type RequestName =
   | "reset"
   | "configure"
   | "storage"
-  | "filterCredentials"
   | "backupPasswordOrSecret"
   | "target";
 
@@ -247,13 +243,11 @@ export class Enclave {
   async ensureMPCPrivateKey() {
     if (this.configuration?.mode !== "new") {
       const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
-      if (downloadStatus === "ok") {
-        return downloadedSecret;
-      }
-
-      if (downloadStatus === "error") {
+      if (downloadStatus !== "ok") {
         throw Error("A secret might be stored at ZK nodes, but can't be obtained");
       }
+
+      return downloadedSecret;
     }
 
     const privateKey = nacl.box.keyPair().secretKey;
@@ -384,46 +378,6 @@ export class Enclave {
     }
   }
 
-  async filterCredentials(
-    credentials: idOSCredential[],
-    privateFieldFilters: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
-    },
-  ) {
-    // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
-    const matchCriteria = (content: any, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
-      );
-
-    const decrypted = await Promise.all(
-      credentials.map(async (credential: idOSCredential) => ({
-        ...credential,
-        content: Utf8Codec.decode(
-          await this.decrypt(
-            Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryptor_public_key),
-          ),
-        ),
-      })),
-    );
-
-    return decrypted
-      .map((credential) => ({
-        ...credential,
-        content: (() => {
-          try {
-            JSON.parse(credential.content);
-          } catch (_e) {
-            throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
-          }
-        })(),
-      }))
-      .filter(({ content }) => matchCriteria(content, privateFieldFilters.pick))
-      .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
-  }
-
   async backupPasswordOrSecret() {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
@@ -463,8 +417,6 @@ export class Enclave {
           senderPublicKey,
           mode,
           theme,
-          credentials,
-          privateFieldFilters,
           expectedUserEncryptionPublicKey,
           walletAddress,
         } = requestData;
@@ -477,7 +429,6 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme, walletAddress],
           storage: () => [userId, expectedUserEncryptionPublicKey],
-          filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
           target: () => [],
         };

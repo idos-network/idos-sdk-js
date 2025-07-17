@@ -1,68 +1,42 @@
-import { base64Encode, type idOSCredential } from "@idos-network/core";
+import { BaseProvider } from "./base";
+import type { EnclaveOptions, StoredData } from "./types";
 
-import type {
-  DiscoverUserEncryptionPublicKeyResponse,
-  EnclaveOptions,
-  EnclaveProvider,
-  StoredData,
-} from "./types";
-
-export class IframeEnclave implements EnclaveProvider {
-  options: Omit<EnclaveOptions, "container" | "url">;
+export interface IframeEnclaveOptions extends EnclaveOptions {
   container: string;
-  iframe: HTMLIFrameElement;
-  hostUrl: URL;
+  url?: string;
+  throwOnUserCancelUnlock?: boolean;
+}
 
-  constructor(options: EnclaveOptions) {
-    const { container, ...other } = options;
+export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
+  private container: string;
+  private iframe: HTMLIFrameElement;
+  private hostUrl: URL;
 
-    if (!container) {
+  constructor(options: IframeEnclaveOptions) {
+    super(options);
+
+    if (!this.options.container) {
       throw new Error("container is required");
     }
 
-    this.container = container;
-    this.options = other;
-    this.hostUrl = new URL(other.url ?? "https://enclave.idos.network");
+    this.container = this.options.container;
+    this.hostUrl = new URL(this.options.url ?? "https://enclave.idos.network");
     this.iframe = document.createElement("iframe");
     this.iframe.id = "idos-enclave-iframe";
   }
 
-  async load(walletAddress?: string): Promise<void> {
+  async load(): Promise<void> {
+    await super.load();
     await this.loadEnclave();
-    await this.requestToEnclave({ configure: { ...this.options, walletAddress } });
-  }
-
-  async reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void> {
-    Object.assign(this.options, options);
-    await this.requestToEnclave({ configure: this.options });
-  }
-
-  async ready(userId: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
-    let { encryptionPublicKey: userEncryptionPublicKey } = (await this.requestToEnclave({
-      storage: {
-        userId,
-        expectedUserEncryptionPublicKey,
-      },
-    })) as StoredData;
-
-    while (!userEncryptionPublicKey) {
-      this.showEnclave();
-      try {
-        userEncryptionPublicKey = (await this.requestToEnclave({
-          keys: {},
-        })) as Uint8Array;
-      } catch (e) {
-        if (this.options.throwOnUserCancelUnlock) throw e;
-      } finally {
-        this.hideEnclave();
-      }
-    }
-
-    return userEncryptionPublicKey as Uint8Array;
   }
 
   async reset(): Promise<void> {
     this.requestToEnclave({ reset: {} });
+  }
+
+  async reconfigure(options: Omit<IframeEnclaveOptions, "container" | "url"> = {}): Promise<void> {
+    super.reconfigure(options);
+    await this.requestToEnclave({ configure: this.options });
   }
 
   async confirm(message: string): Promise<boolean> {
@@ -74,31 +48,49 @@ export class IframeEnclave implements EnclaveProvider {
     });
   }
 
+  async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
+    return this.requestToEnclave({
+      storage: {
+        userId,
+        expectedUserEncryptionPublicKey,
+      },
+    });
+  }
+
+  async keys(): Promise<Uint8Array | undefined> {
+    this.showEnclave();
+
+    try {
+      return await this.requestToEnclave({
+        keys: {},
+      });
+    } catch (e) {
+      if (this.options.throwOnUserCancelUnlock) throw e;
+      return undefined;
+    } finally {
+      this.hideEnclave();
+    }
+  }
+
   async encrypt(
     message: Uint8Array,
     receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
     return this.requestToEnclave({
       encrypt: { message, receiverPublicKey },
-    }) as Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
+    });
   }
 
-  async decrypt(message: Uint8Array, senderPublicKey: Uint8Array): Promise<Uint8Array> {
+  async decrypt(
+    message: Uint8Array,
+    senderPublicKey: Uint8Array,
+  ): Promise<Uint8Array<ArrayBufferLike>> {
     return this.requestToEnclave({
       decrypt: { fullMessage: message, senderPublicKey },
-    }) as Promise<Uint8Array>;
+    });
   }
 
-  filterCredentials(
-    credentials: idOSCredential[],
-    privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
-  ): Promise<idOSCredential[]> {
-    return this.requestToEnclave({
-      filterCredentials: { credentials, privateFieldFilters },
-    }) as Promise<idOSCredential[]>;
-  }
-
-  async loadEnclave(): Promise<void> {
+  private async loadEnclave(): Promise<void> {
     const container =
       document.querySelector(this.container) ||
       throwNewError(Error, `Can't find container with selector ${this.container}`);
@@ -154,18 +146,18 @@ export class IframeEnclave implements EnclaveProvider {
     );
   }
 
-  showEnclave(): void {
+  private showEnclave(): void {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.add("visible");
   }
 
-  hideEnclave(): void {
+  private hideEnclave(): void {
     // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
     this.iframe.parentElement!.classList.remove("visible");
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  async requestToEnclave(request: any): Promise<any> {
+  private async requestToEnclave(request: any): Promise<any> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
@@ -219,20 +211,6 @@ export class IframeEnclave implements EnclaveProvider {
     } finally {
       this.hideEnclave();
     }
-  }
-
-  async discoverUserEncryptionPublicKey(
-    userId: string,
-  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
-    if (this.options.mode !== "new")
-      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
-
-    const userEncryptionPublicKey = await this.ready(userId);
-
-    return {
-      userId,
-      userEncryptionPublicKey: base64Encode(userEncryptionPublicKey),
-    };
   }
 }
 

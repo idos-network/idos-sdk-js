@@ -35,7 +35,7 @@ function injectIdOS(global: any) {
           global.idOS.pendingRequests.delete(requestId);
           reject(new Error("Request timed out"));
         }
-      }, 30000); // 30 second timeout
+      }, 120000); // 2 minutes timeout
     });
   }
 
@@ -52,6 +52,11 @@ function injectIdOS(global: any) {
   global.idOS.showCredentialsPopup = async (level: string) => {
     console.log("🚀 showCredentialsPopup called with level:", level);
     return sendRequest("showCredentialsPopup", { level });
+  };
+
+  global.idOS.confirm = async (message: string) => {
+    console.log("🚀 confirm called with message:", message);
+    return sendRequest("confirm", { message });
   };
 
   console.log("🔑 idOS API created:", global.idOS);

@@ -54,9 +54,9 @@ import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave, LocalEnclave } from "./enclave";
+import { BaseProvider, type EnclaveOptions, IframeEnclave, LocalEnclave } from "./enclave";
 
-export { LocalEnclave };
+export { IframeEnclave, BaseProvider, LocalEnclave };
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -69,17 +69,19 @@ export type idOSClient =
   | idOSClientWithUserSigner
   | idOSClientLoggedIn;
 
-export class idOSClientConfiguration {
+export class idOSClientConfiguration<Provider extends BaseProvider = IframeEnclave> {
   readonly state: "configuration";
   readonly chainId?: string;
   readonly nodeUrl: string;
-  readonly enclaveOptions: Omit<EnclaveOptions, "mode">;
+  readonly enclaveOptions: Omit<Provider["options"], "mode">;
   readonly store: Store;
+  readonly enclaveProvider: BaseProvider;
 
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
-    enclaveOptions: Omit<EnclaveOptions, "mode">;
+    enclaveOptions: Omit<Provider["options"], "mode">;
+    enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
     store?: Store;
   }) {
     this.state = "configuration";
@@ -87,6 +89,18 @@ export class idOSClientConfiguration {
     this.nodeUrl = params.nodeUrl;
     this.enclaveOptions = params.enclaveOptions;
     this.store = params.store ?? new LocalStorageStore();
+
+    // TODO: This is a mess because of types...
+    if (params.enclaveProvider) {
+      this.enclaveProvider = new params.enclaveProvider({
+        ...params.enclaveOptions,
+        // Some of enclave providers require store to be passed in constructor
+        store: this.store,
+      });
+    } else {
+      // @ts-expect-error - In case of missing "container" in options, enclave will blow up
+      this.enclaveProvider = new IframeEnclave(params.enclaveOptions);
+    }
   }
 
   async createClient(): Promise<idOSClientIdle> {
@@ -98,29 +112,30 @@ export class idOSClientIdle {
   readonly state: "idle";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
 
-  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: EnclaveProvider) {
+  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: BaseProvider) {
     this.state = "idle";
     this.store = store;
     this.kwilClient = kwilClient;
     this.enclaveProvider = enclaveProvider;
   }
 
-  static async fromConfig(params: idOSClientConfiguration): Promise<idOSClientIdle> {
-    const store = params.store;
-
+  static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
     const kwilClient = await createWebKwilClient({
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
 
-    const storedSignerAddress = await store.get<string>("signer-address");
+    const storedSignerAddress = await params.store.get<string>("signer-address");
 
-    const enclaveProvider = new IframeEnclave({ ...params.enclaveOptions });
-    await enclaveProvider.load(storedSignerAddress);
+    if (storedSignerAddress) {
+      await params.enclaveProvider.reconfigure({ walletAddress: storedSignerAddress });
+    }
 
-    return new idOSClientIdle(store, kwilClient, enclaveProvider);
+    await params.enclaveProvider.load();
+
+    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -147,7 +162,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly state: "with-user-signer";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -165,7 +180,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
-    window.addEventListener("message", this.onMessage.bind(this));
+    // window.addEventListener("message", this.onMessage.bind(this));
   }
 
   async onMessage(message: MessageEvent): Promise<void> {
@@ -198,6 +213,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       mode: "new",
       walletAddress: this.walletIdentifier,
     });
+
     const { userEncryptionPublicKey } =
       await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
     return userEncryptionPublicKey;
@@ -220,7 +236,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly state: "logged-in";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -504,15 +520,14 @@ export type {
   idOSUserAttribute,
   idOSWallet,
   EnclaveOptions,
-  EnclaveProvider,
 };
 
 export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
-  enclaveOptions: Omit<EnclaveOptions, "mode">;
-}): idOSClientConfiguration {
+  enclaveOptions: Omit<IframeEnclave["options"], "mode">;
+}): idOSClientConfiguration<IframeEnclave> {
   return new idOSClientConfiguration({
     nodeUrl: params.nodeUrl,
     enclaveOptions: params.enclaveOptions,

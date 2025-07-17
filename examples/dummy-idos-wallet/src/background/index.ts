@@ -1,15 +1,11 @@
 import {
-  idOSClientIdle,
+  idOSClientConfiguration,
   type idOSClientLoggedIn,
   type idOSClientWithUserSigner,
   LocalEnclave,
 } from "@idos-network/client";
-import { utf8Decode } from "@idos-network/core";
-import { createWebKwilClient, type KwilActionClient } from "@idos-network/core/kwil-infra";
-import { decrypt, keyDerivation } from "@idos-network/utils/encryption";
+import { keyDerivation } from "@idos-network/utils/encryption";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
-import fetchAdapter from "@vespaiach/axios-fetch-adapter";
-import Axios from "axios";
 import { type HDNodeWallet, Wallet } from "ethers";
 import nacl from "tweetnacl";
 
@@ -20,66 +16,62 @@ class PortManager {
   private ports = new Map<number, chrome.runtime.Port>();
   private idOSClientWithUserSigner: idOSClientWithUserSigner | null = null;
   private idOSLoggedInClient: idOSClientLoggedIn | null = null;
-  private keyPair: nacl.BoxKeyPair | null = null;
-  private wallet: HDNodeWallet | null = null;
-  private store: ChromeExtensionStore | null = null;
-  private kwilClient: KwilActionClient | null = null;
+  private wallet: HDNodeWallet;
+  private store: ChromeExtensionStore;
 
   constructor() {
+    const mnemonicExisting = "lift swear siege over supply crop robust wrist also lava trick dust";
+    // const mnemonicNonExisting = "flush pair armor meadow convince pigeon elbow hurry space news awake shrimp";
+    this.wallet = Wallet.fromPhrase(mnemonicExisting);
+    console.log("🔑 wallet:", this.wallet);
+
+    this.store = new ChromeExtensionStore();
+    console.log("🔑 store:", this.store);
+
     this.initIdos();
   }
 
   private async initIdos() {
-    const mnemonicExisting = "lift swear siege over supply crop robust wrist also lava trick dust";
-    // const mnemonicNonExisting = "flush pair armor meadow convince pigeon elbow hurry space news awake shrimp";
-    this.wallet = Wallet.fromPhrase(mnemonicExisting);
+    // Reference to this klass
+    const self = this;
 
-    console.log("🔑 wallet:", this.wallet);
+    class LocalWalletEnclave extends LocalEnclave {
+      async keys(): Promise<Uint8Array | undefined> {
+        if (!this.userId) {
+          throw new Error("userId is not set");
+        }
 
-    this.store = new ChromeExtensionStore();
+        // Get password from popup
+        const password = await self.showPasswordPopup(
+          this.userId,
+          this.expectedUserEncryptionPublicKey,
+        );
+
+        const secretKey = await keyDerivation(password, this.userId);
+        this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+        return this.keyPair.publicKey;
+      }
+
+      async confirm(message: string): Promise<boolean> {
+        return self.showConfirmPopup(message);
+      }
+    }
+
+    const configuration = new idOSClientConfiguration<LocalWalletEnclave>({
+      nodeUrl: "https://nodes.staging.idos.network",
+      chainId: "idos-staging",
+      store: this.store,
+      enclaveOptions: {},
+      enclaveProvider: LocalWalletEnclave,
+    });
+
+    const idOSClient = await configuration.createClient();
+    console.log("🔑 idOSClient:", idOSClient);
+
+    this.idOSClientWithUserSigner = await idOSClient.withUserSigner(this.wallet);
+    console.log("🔑 idOSClientWithUserSigner:", this.idOSClientWithUserSigner);
 
     try {
-      this.kwilClient = await createWebKwilClient({
-        nodeUrl: "https://nodes.staging.idos.network",
-        chainId: "idos-staging",
-      });
-
-      // Patch request method for old axios version
-      this.patchKwilClient(this.kwilClient);
-
-      console.log("🔑 client:", this.kwilClient);
-
-      const localProvider = {
-        reconfigure: () => {},
-        getEncryptionPublicKey: async (options: any) => {
-          console.log("🔑 getEncryptionPublicKey:", options);
-          const password = await this.showPasswordPopup(
-            options.storage.userId,
-            options.storage.expectedUserEncryptionPublicKey,
-          );
-          const secretKey = await keyDerivation(password, options.storage.userId);
-          this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-          return { encryptionPublicKey: this.keyPair.publicKey };
-        },
-        decrypt: async (message: Uint8Array, senderPublicKey: Uint8Array) => {
-          console.log("🔑 decrypt:", message, senderPublicKey);
-          if (!this.keyPair) {
-            throw new Error("Key pair not initialized");
-          }
-          return utf8Decode(await decrypt(message, this.keyPair, senderPublicKey));
-        },
-      };
-
-      const enclaveProvider = new LocalEnclave({ localProvider });
-      console.log("🔑 enclaveProvider:", enclaveProvider);
-
-      // @ts-expect-error - TODO: fix this
-      const idOSClient = new idOSClientIdle(this.store, this.kwilClient, enclaveProvider);
-      console.log("🔑 idOSClient:", idOSClient);
-
-      this.idOSClientWithUserSigner = await idOSClient.withUserSigner(this.wallet);
-      console.log("🔑 idOSClientWithUserSigner:", this.idOSClientWithUserSigner);
-
       this.tryLogIn();
     } catch (error) {
       console.error("🔑 error:", error);
@@ -101,38 +93,6 @@ class PortManager {
 
   private isLoggedIn() {
     return this.idOSLoggedInClient !== null;
-  }
-
-  private patchKwilClient(kwilClient: any) {
-    kwilClient.client.request = function () {
-      const headers: any = {};
-
-      if (this.cookie) {
-        headers.Cookie = this.cookie;
-      }
-
-      const instance = Axios.create({
-        baseURL: this.config.kwilProvider,
-        timeout: this.config.timeout,
-        maxContentLength: 1024 * 1024 * 512,
-        withCredentials: true,
-        adapter: fetchAdapter,
-        headers,
-      });
-
-      if (this.config.logging) {
-        instance.interceptors.request.use((request) => {
-          this.config.logger!(`Requesting: ${request.baseURL}${request.url}`);
-          return request;
-        });
-
-        instance.interceptors.response.use((response) => {
-          this.config.logger!(`Response:   ${response.config.url} - ${response.status}`);
-          return response;
-        });
-      }
-      return instance;
-    };
   }
 
   // Handle port connections
@@ -186,9 +146,17 @@ class PortManager {
       case "getCredentialContent":
         return await this.handleGetCredentialContent(message.params.id);
 
+      case "confirm":
+        return await this.handleConfirm(message.params.message);
+
       default:
         throw new Error(`Unknown message type: ${message.type}`);
     }
+  }
+
+  private async handleConfirm(message: string) {
+    console.log("🔑 confirm message:", message);
+    return await this.idOSLoggedInClient?.enclaveProvider.confirm(message);
   }
 
   private async handleGetAllCredentials() {
@@ -241,14 +209,31 @@ class PortManager {
 
     return new Promise((resolve, reject) => {
       // Store the promise resolvers for popup response
-      this.pendingPasswordRequests.set(requestId, { resolve, reject });
+      this.pendingPopupRequests.set(requestId, { resolve, reject });
+    });
+  }
+
+  private async showConfirmPopup(message: string): Promise<boolean> {
+    const requestId = crypto.randomUUID();
+
+    chrome.windows.create({
+      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=confirm&requestId=${requestId}&message=${encodeURIComponent(message)}`,
+      type: "popup",
+      width: 470,
+      height: 350,
+      focused: true,
+    });
+
+    return new Promise((resolve, reject) => {
+      // Store the promise resolvers for popup response
+      this.pendingPopupRequests.set(requestId, { resolve, reject });
     });
   }
 
   // Handle popup responses
-  private pendingPasswordRequests = new Map<
+  private pendingPopupRequests = new Map<
     string,
-    { resolve: (value: string) => void; reject: (reason: any) => void }
+    { resolve: (value: any) => void; reject: (reason: any) => void }
   >();
 
   handleConfigRequest(requestId: string) {
@@ -258,9 +243,9 @@ class PortManager {
         requestId,
         address: this.wallet?.address,
         // @ts-expect-error - TODO: fix this
-        network: this.kwilClient?.client.chainId,
+        network: this.idOSClientWithUserSigner?.kwilClient.client.chainId,
         // @ts-expect-error - TODO: fix this
-        node: this.kwilClient?.client.config.kwilProvider,
+        node: this.idOSClientWithUserSigner?.kwilClient.client.config.kwilProvider,
         status: this.idOSLoggedInClient ? "Has profile" : "No profile",
         user: this.idOSLoggedInClient?.user?.id,
       },
@@ -269,9 +254,9 @@ class PortManager {
 
   handlePopupMessage(requestId: string, result: any, error?: string) {
     console.log("🔑 popup message:", requestId, result, error);
-    if (this.pendingPasswordRequests.has(requestId)) {
-      const { resolve, reject } = this.pendingPasswordRequests.get(requestId)!;
-      this.pendingPasswordRequests.delete(requestId);
+    if (this.pendingPopupRequests.has(requestId)) {
+      const { resolve, reject } = this.pendingPopupRequests.get(requestId)!;
+      this.pendingPopupRequests.delete(requestId);
 
       if (error) {
         reject(new Error(error));
