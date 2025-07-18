@@ -1,3 +1,4 @@
+"use client";
 import { type AppKitNetwork, mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
@@ -26,7 +27,6 @@ const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, sepolia];
 const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
-  ssr: true,
 });
 
 createAppKit({
