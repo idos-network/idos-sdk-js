@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   return Response.json({ token: response.token });
 }
 
-export async function getKrakenToken(): Promise<string> {
+async function getKrakenToken(): Promise<string> {
   const payload = {
     api: true,
     clientId: process.env.KRAKEN_CLIENT_ID,
