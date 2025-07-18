@@ -144,7 +144,6 @@ const createKwilClient =
           timeout: this.config.timeout,
           maxContentLength: 1024 * 1024 * 512,
           withCredentials: true,
-          // @ts-expect-error This is expected since we are patching private method
           adapter: fetchAdapter,
           headers,
         });

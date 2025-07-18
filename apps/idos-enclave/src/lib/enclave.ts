@@ -17,10 +17,6 @@ type RequestData = {
   mode?: "new" | "existing";
   theme?: string;
   credentials?: idOSCredential[];
-  privateFieldFilters?: {
-    pick: Record<string, unknown[]>;
-    omit: Record<string, unknown[]>;
-  };
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
 };
@@ -87,15 +83,6 @@ export class Enclave {
 
   async reset() {
     await this.store.reset();
-  }
-
-  safeParse(string: string) {
-    try {
-      const parsed = JSON.parse(string);
-      return parsed;
-    } catch (_error) {
-      return string;
-    }
   }
 
   async storage(userId: string, expectedUserEncryptionPublicKey: string) {
