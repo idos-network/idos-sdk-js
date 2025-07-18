@@ -76,6 +76,34 @@ export const actors = {
     },
   ),
 
+  createMoneriumUser: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumUser = await fetch(`/app/kyc/monerium/user?credentialId=${input.id}`);
+
+    if (moneriumUser.status !== 200) {
+      throw new Error("User was not created, or already exists.");
+    }
+
+    return await moneriumUser.json().then((data) => data.url);
+  }),
+
+  requestMoneriumAuth: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumAuth = await fetch(`/app/kyc/monerium/auth?credentialId=${input.id}`);
+
+    if (moneriumAuth.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return await moneriumAuth.json().then((data) => data.url);
+  }),
+
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");
