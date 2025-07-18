@@ -5,14 +5,11 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import type { ReactNode } from "react";
-import invariant from "tiny-invariant";
 import { WagmiProvider } from "wagmi";
 
 const queryClient = new QueryClient();
 
-const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID;
-
-invariant(projectId, "`NEXT_PUBLIC_REOWN_PROJECT_ID` is not set");
+const projectId = process.env.NEXT_PUBLIC_REOWN_PROJECT_ID ?? "";
 
 // 2. Create a metadata object - optional
 const metadata = {
@@ -27,6 +24,7 @@ const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, sepolia];
 const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
+  ssr: true,
 });
 
 createAppKit({
