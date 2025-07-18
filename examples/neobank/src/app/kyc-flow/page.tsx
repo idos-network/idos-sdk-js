@@ -1,13 +1,16 @@
 "use client";
 
+import { useAppKitAccount } from "@reown/appkit/react";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect } from "react";
 import invariant from "tiny-invariant";
 import { VisibilityIcon } from "@/components/icons";
 import { KycProgressBar } from "@/components/kyc-progress-bar";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
+import { useIdosStore } from "@/stores/idos-store";
 import { TransakProvider } from "../providers/transak";
 
 const Disclaimer = () => (
@@ -44,15 +47,7 @@ const Disclaimer = () => (
 );
 
 const KycIframe = () => {
-  const {
-    kycUrl,
-    completeKyc,
-    setError,
-    selectedKyc,
-    selectedOnRampProvider,
-    findTransakToken: setTransakToken,
-  } = useAppStore();
-  console.log({ kycUrl, selectedKyc });
+  const { kycUrl, completeKyc, setError, selectedKyc } = useAppStore();
 
   const handleIframeMessage = useCallback(
     async (event: MessageEvent) => {
@@ -73,13 +68,6 @@ const KycIframe = () => {
           // ANY OTHER MESSAGE FROM KRAKEN = KYC COMPLETED!
           console.log("KYC completed successfully - any message from Kraken without error/open");
           console.log({ event: event.data });
-          // transak token
-          const oneTimeToken = event.data.oneTimeToken;
-          if (oneTimeToken && selectedOnRampProvider === "transak") {
-            console.log("Transak token:", oneTimeToken);
-            setTransakToken(oneTimeToken);
-          }
-
           await completeKyc();
         }
       } else {
@@ -91,7 +79,7 @@ const KycIframe = () => {
         );
       }
     },
-    [completeKyc, setError, selectedOnRampProvider, setTransakToken],
+    [completeKyc, setError],
   );
 
   useEffect(() => {
@@ -162,17 +150,34 @@ export default function KycFlow() {
     isLoading,
     loadingMessage,
     errorMessage,
+    sharedCredential,
+    setCurrentStep,
   } = useAppStore();
+  const { loggedInClient } = useIdosStore();
+  const router = useRouter();
+  const userId = loggedInClient?.user.id;
+  const { address } = useAppKitAccount();
 
   const handleContinue = async () => {
     await startKyc();
   };
 
   useEffect(() => {
+    if (!userId || !address) return;
     if (currentStep === "provider-flow" && selectedOnRampProvider) {
-      startProviderFlow();
+      startProviderFlow(userId, address);
     }
-  }, [currentStep, selectedOnRampProvider, startProviderFlow]);
+  }, [currentStep, selectedOnRampProvider, startProviderFlow, userId, address]);
+
+  useEffect(() => {
+    if (!sharedCredential) return;
+    setCurrentStep("provider-flow");
+  }, [sharedCredential, setCurrentStep]);
+
+  useEffect(() => {
+    if (currentStep !== "complete") return;
+    router.push("/dashboard");
+  }, [currentStep, router]);
 
   if (isLoading) {
     return (
@@ -224,8 +229,8 @@ export default function KycFlow() {
             </h2>
             <p className="mb-4">Setting up your {selectedOnRampProvider} transaction...</p>
           </div>
-          <OnRampIframe />
-          {selectedOnRampProvider === "transak" && <TransakProvider />}
+
+          {selectedOnRampProvider === "transak" ? <TransakProvider /> : <OnRampIframe />}
         </div>
       </div>
     );

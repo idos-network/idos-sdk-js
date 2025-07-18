@@ -86,7 +86,7 @@ const Provider = ({
 );
 
 export default function ProviderQuotes() {
-  const { selectedOnRampProvider, selectedKyc, setOnRampProvider } = useAppStore();
+  const { selectedOnRampProvider, setOnRampProvider } = useAppStore();
 
   return (
     <div className="mx-auto max-w-2xl flex-1 rounded-2xl bg-card p-6 text-white">

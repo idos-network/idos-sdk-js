@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
   const [usableCredential] = credentials.filter(
     (credential) => credential.issuer_auth_public_key === process.env.NEXT_PUBLIC_IDOS_PUBLIC_KEY,
   );
-  console.log({ credentials });
   const issuerURL = process.env.KRAKEN_ISSUER;
   const publicKeyMultibase = process.env.KRAKEN_PUBLIC_KEY_MULTIBASE;
 
