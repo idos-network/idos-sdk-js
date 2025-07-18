@@ -1,5 +1,4 @@
-import { BaseProvider } from "./base";
-import type { EnclaveOptions, StoredData } from "./types";
+import { BaseProvider, type EnclaveOptions, type StoredData } from "@idos-network/utils/enclave";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
   container: string;
@@ -28,6 +27,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   async load(): Promise<void> {
     await super.load();
     await this.loadEnclave();
+    await this.bindMessageListener();
   }
 
   async reset(): Promise<void> {
@@ -169,6 +169,29 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
       this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
     });
+  }
+
+  private bindMessageListener(): void {
+    window.addEventListener("message", this.onMessage.bind(this));
+  }
+
+  private async onMessage(message: MessageEvent): Promise<void> {
+    if (message.data.type !== "idOS-MPC:signMessage") return;
+
+    if (!this.signer) {
+      throw new Error("Signer is not set");
+    }
+
+    const payload = message.data.payload;
+    const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
+
+    const response = {
+      status: "success",
+      data: signature,
+    };
+
+    message.ports[0].postMessage(response);
+    message.ports[0].close();
   }
 
   async backupPasswordOrSecret(): Promise<void> {

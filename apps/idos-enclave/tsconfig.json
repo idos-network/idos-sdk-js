@@ -27,6 +27,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../../packages/utils/src/mpc"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

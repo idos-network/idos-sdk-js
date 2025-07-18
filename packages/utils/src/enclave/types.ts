@@ -13,3 +13,5 @@ export type EnclaveOptions = {
   mode?: "new" | "existing";
   walletAddress?: string;
 };
+
+export type AuthMethod = "mpc" | "password";

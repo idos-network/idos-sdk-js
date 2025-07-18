@@ -7,8 +7,18 @@ import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveOptions, StoredDat
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
 
+  protected signer?: {
+    signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
+  };
+
   constructor(options: K) {
     this.options = options;
+  }
+
+  setSigner(signer: {
+    signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
+  }): void {
+    this.signer = signer;
   }
 
   async reset(): Promise<void> {
@@ -47,7 +57,11 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   }
 
   async keys(): Promise<Uint8Array | undefined> {
-    throw new Error("Method 'askForKeys' has to be implemented in the subclass.");
+    throw new Error("Method 'keys' has to be implemented in the subclass.");
+  }
+
+  async backupPasswordOrSecret(): Promise<void> {
+    throw new Error("Method 'backupPasswordOrSecret' has to be implemented in the subclass.");
   }
 
   async discoverUserEncryptionPublicKey(

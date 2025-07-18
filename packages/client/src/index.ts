@@ -54,9 +54,11 @@ import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-import { BaseProvider, type EnclaveOptions, IframeEnclave, LocalEnclave } from "./enclave";
 
-export { IframeEnclave, BaseProvider, LocalEnclave };
+import type { BaseProvider } from "@idos-network/utils/enclave";
+
+import { IframeEnclave } from "./enclave/iframe-enclave";
+export { IframeEnclave };
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -180,23 +182,9 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
-    // window.addEventListener("message", this.onMessage.bind(this));
-  }
 
-  async onMessage(message: MessageEvent): Promise<void> {
-    const types = ["idOS-MPC:signMessage"];
-    if (!types.includes(message.data.type)) return;
-
-    console.log("message to sign on client", message);
-    // @ts-ignore type collapse :)
-    const payload = message.data.payload;
-    const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
-    const response = {
-      status: "success",
-      data: signature,
-    };
-    message.ports[0].postMessage(response);
-    message.ports[0].close();
+    // @ts-expect-error - TODO: Fix this
+    this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -519,7 +507,6 @@ export type {
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
-  EnclaveOptions,
 };
 
 export { signNearMessage };

@@ -29,6 +29,10 @@
     "./store": {
       "types": "./dist/store/index.d.ts",
       "import": "./dist/store/index.js"
+    },
+    "./enclave": {
+      "types": "./dist/enclave/index.d.ts",
+      "import": "./dist/enclave/index.js"
     }
   },
   "files": [

@@ -1,13 +1,7 @@
-import {
-  idOSClientConfiguration,
-  type idOSClientLoggedIn,
-  type idOSClientWithUserSigner,
-  LocalEnclave,
-} from "@idos-network/client";
-import { keyDerivation } from "@idos-network/utils/encryption";
+import { idOSClientConfiguration, type idOSClientLoggedIn, type idOSClientWithUserSigner } from "@idos-network/client";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
 import { type HDNodeWallet, Wallet } from "ethers";
-import nacl from "tweetnacl";
+import { AuthMethod, LocalEnclave } from "@idos-network/utils/enclave";
 
 console.log("🚀 idOS background script loaded");
 
@@ -36,20 +30,12 @@ class PortManager {
     const self = this;
 
     class LocalWalletEnclave extends LocalEnclave {
-      async keys(): Promise<Uint8Array | undefined> {
-        if (!this.userId) {
-          throw new Error("userId is not set");
-        }
-
-        // Get password from popup
-        const password = await self.showPasswordPopup(
+      async chooseAuthAndPassword(): Promise<{ authMethod: AuthMethod; password?: string }> {
+        return self.showPasswordPopup(
+          this.allowedAuthMethods,
           this.userId,
           this.expectedUserEncryptionPublicKey,
         );
-
-        const secretKey = await keyDerivation(password, this.userId);
-        this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-        return this.keyPair.publicKey;
       }
 
       async confirm(message: string): Promise<boolean> {
@@ -61,7 +47,9 @@ class PortManager {
       nodeUrl: "https://nodes.staging.idos.network",
       chainId: "idos-staging",
       store: this.store,
-      enclaveOptions: {},
+      enclaveOptions: {
+        allowedAuthMethods: ["password", "mpc"],
+      },
       enclaveProvider: LocalWalletEnclave,
     });
 
@@ -194,13 +182,14 @@ class PortManager {
   }
 
   private async showPasswordPopup(
+    allowedAuthMethods: AuthMethod[],
     userId?: string,
     expectedUserEncryptionPublicKey?: string,
-  ): Promise<string> {
+  ): Promise<{ authMethod: AuthMethod; password?: string }> {
     const requestId = crypto.randomUUID();
 
     chrome.windows.create({
-      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}`,
+      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}&allowedAuthMethods=${allowedAuthMethods}`,
       type: "popup",
       width: 470,
       height: 450,

@@ -33,7 +33,7 @@ export class Client {
     uploadSignature: UploadSignatureMessage,
     signature: Bytes,
     blindedShares: Buffer[],
-  ) {
+  ): Promise<{ status: string }> {
     const engineClients = await this.getEngines();
     console.log(engineClients);
     const promises = [];
