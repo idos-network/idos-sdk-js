@@ -171,7 +171,6 @@ export type {
   idOSGrant,
   Credentials,
   VerifiableCredential,
-  IDDocumentType,
   VerifiableCredentialSubject,
   AvailableIssuerType,
 };

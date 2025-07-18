@@ -10,7 +10,9 @@
   "dependencies": {
     "@gemwallet/api": "catalog:core",
     "@kwilteam/kwil-js": "catalog:core",
-    "es-toolkit": "catalog:core"
+    "es-toolkit": "catalog:core",
+    "@stablelib/base64": "^2.0.1",
+    "@stablelib/utf8": "^2.0.1"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",

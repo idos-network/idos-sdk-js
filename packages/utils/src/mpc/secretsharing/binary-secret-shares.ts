@@ -207,7 +207,7 @@ export class Share {
 // It works only in browsers
 export function getRandomBytes(length: number): Buffer {
   const array = new Uint8Array(length);
-  window.crypto.getRandomValues(array);
+  crypto.getRandomValues(array);
 
   return Buffer.from(array);
 }

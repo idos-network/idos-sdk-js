@@ -15,13 +15,7 @@ export class ChromeExtensionStore implements Store {
   async get<K = any>(key: string): Promise<K | undefined> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     const result = await chrome.storage.local.get(prefixedKey);
-
-    try {
-      return JSON.parse(result[prefixedKey]);
-    } catch (error) {
-      console.error(`Error parsing JSON for key ${prefixedKey}:`, error);
-      return result[prefixedKey];
-    }
+    return result[prefixedKey];
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.

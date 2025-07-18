@@ -3,6 +3,7 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
+    "axios": "0.27.2",
     "@gemwallet/api": "^3.8.0",
     "@kwilteam/kwil-js": "catalog:core",
     "@near-wallet-selector/core": "catalog:near",
@@ -24,7 +25,8 @@
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
     "xrpl": "catalog:xrp",
-    "xumm": "catalog:xrp"
+    "xumm": "catalog:xrp",
+    "@vespaiach/axios-fetch-adapter": "0.3.1"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core"

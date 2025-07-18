@@ -70,7 +70,13 @@ export class LocalStorageStore implements Store {
     this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
   }
 
-  hasRememberDurationElapsed(): boolean {
+  async checkRememberDurationElapsed(): Promise<void> {
+    if (await this.hasRememberDurationElapsed()) {
+      this.reset();
+    }
+  }
+
+  async hasRememberDurationElapsed(): Promise<boolean> {
     const value = this.#getLocalStorage(this.REMEMBER_DURATION_KEY);
     if (!value) return false;
 
