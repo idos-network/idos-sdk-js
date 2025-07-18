@@ -24,7 +24,6 @@ const networks: [AppKitNetwork, ...AppKitNetwork[]] = [mainnet, sepolia];
 const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
-  ssr: true,
 });
 
 createAppKit({
