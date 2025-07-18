@@ -4,6 +4,8 @@ import { useAppKitAccount, useDisconnect } from "@reown/appkit/react";
 import { ChevronLeft, Link } from "lucide-react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import { useAppStore } from "@/stores/app-store";
+import { useIdosStore } from "@/stores/idos-store";
 import { Button } from "../ui/button";
 
 const defaultFooterPaths = ["/", "/pick-kyc-provider"];
@@ -45,6 +47,15 @@ function DisconnectButton({ pathname }: { pathname: string }) {
   const router = useRouter();
   const { address } = useAppKitAccount();
   const { disconnect } = useDisconnect();
+  const { reset: resetIdosStore } = useIdosStore();
+  const { reset: resetAppStore } = useAppStore();
+
+  const handleDisconnect = async () => {
+    resetAppStore();
+    resetIdosStore();
+    await disconnect();
+    router.push("/");
+  };
 
   if (pathname === "/") return null;
 
@@ -52,10 +63,7 @@ function DisconnectButton({ pathname }: { pathname: string }) {
   return (
     <Button
       className="absolute right-10 rounded-full bg-card text-secondary"
-      onClick={async () => {
-        await disconnect();
-        router.push("/");
-      }}
+      onClick={handleDisconnect}
     >
       Disconnect
     </Button>

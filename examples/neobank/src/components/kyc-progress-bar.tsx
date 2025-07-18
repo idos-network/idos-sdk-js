@@ -14,8 +14,9 @@ const StepIcon = ({
   const iconWithProps = Children.map(icon, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
+        // @ts-ignore
         className: isActive ? "fill-black" : "fill-icon-inactive",
-      } as unknown as any);
+      });
     }
     return child;
   });
@@ -57,7 +58,7 @@ const ProgressStep = ({
 };
 
 export const KycProgressBar = () => {
-  const [activeStep, setActiveStep] = useState(1);
+  const [activeStep] = useState(1);
   const steps = [
     {
       title: "Welcome",
