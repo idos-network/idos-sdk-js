@@ -63,7 +63,9 @@ const KycIframe = () => {
           setError(`KYC failed: ${event.data.error}`);
         } else if (event.data.open) {
           console.log("Opening wallet connection:", event.data.open);
-          window.open(event.data.open, event.data.target, event.data.features);
+          if (typeof window !== "undefined") {
+            window.open(event.data.open, event.data.target, event.data.features);
+          }
         } else {
           // ANY OTHER MESSAGE FROM KRAKEN = KYC COMPLETED!
           console.log("KYC completed successfully - any message from Kraken without error/open");
@@ -83,8 +85,10 @@ const KycIframe = () => {
   );
 
   useEffect(() => {
-    window.addEventListener("message", handleIframeMessage);
-    return () => window.removeEventListener("message", handleIframeMessage);
+    if (typeof window !== "undefined") {
+      window.addEventListener("message", handleIframeMessage);
+      return () => window.removeEventListener("message", handleIframeMessage);
+    }
   }, [handleIframeMessage]);
 
   if (!kycUrl) {
@@ -197,7 +201,14 @@ export default function KycFlow() {
           <div className="text-center text-red-600">
             <h2 className="mb-2 font-medium text-xl">Error</h2>
             <p>{errorMessage}</p>
-            <Button onClick={() => window.location.reload()} className="mt-4 bg-red-600 text-white">
+            <Button
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.location.reload();
+                }
+              }}
+              className="mt-4 bg-red-600 text-white"
+            >
               Retry
             </Button>
           </div>
