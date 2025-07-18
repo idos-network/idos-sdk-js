@@ -58,5 +58,5 @@ export function TransakProvider() {
     };
   }, []);
 
-  return <></>;
+  return null;
 }
