@@ -49,13 +49,12 @@ import type {
   Wallet,
 } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import type { BaseProvider } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-
-import type { BaseProvider } from "@idos-network/utils/enclave";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
 export { IframeEnclave };

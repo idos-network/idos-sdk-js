@@ -29,11 +29,11 @@ type RequestName =
 
 export class Enclave extends LocalEnclave {
   private configuration: { mode: string; theme: string; walletAddress: string };
-  
+
   // Origins
   private authorizedOrigins: string[] = [];
   private parentOrigin: string;
-  
+
   // Buttons & UI
   private dialog: Window | null;
   private unlockButton: HTMLButtonElement;
@@ -42,11 +42,15 @@ export class Enclave extends LocalEnclave {
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
     super({
-      allowedAuthMethods: import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "password"] : ["password"],
-      mpcConfiguration:  import.meta.env.VITE_ENABLE_MPC === "true" ? {
-        nodeUrl: import.meta.env.VITE_MPC_READER_NODE_URL,
-        contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
-      } : undefined,
+      allowedAuthMethods:
+        import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "password"] : ["password"],
+      mpcConfiguration:
+        import.meta.env.VITE_ENABLE_MPC === "true"
+          ? {
+              nodeUrl: import.meta.env.VITE_MPC_READER_NODE_URL,
+              contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
+            }
+          : undefined,
     });
 
     this.parentOrigin = parentOrigin;

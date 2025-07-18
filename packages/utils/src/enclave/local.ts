@@ -1,10 +1,10 @@
-import { BaseProvider } from "./base";
-import { decrypt, encrypt, keyDerivation } from "../encryption";
 import * as Base64Codec from "@stablelib/base64";
-import { LocalStorageStore, type Store } from "../store";
-import type { AuthMethod, EnclaveOptions, StoredData } from "./types";
 import nacl from "tweetnacl";
+import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
+import { LocalStorageStore, type Store } from "../store";
+import { BaseProvider } from "./base";
+import type { AuthMethod, EnclaveOptions, StoredData } from "./types";
 
 export interface LocalEnclaveOptions extends EnclaveOptions {
   store?: Store;
@@ -12,7 +12,7 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   mpcConfiguration?: {
     nodeUrl: string;
     contractAddress: string;
-  }
+  };
 }
 
 export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
@@ -40,7 +40,10 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
     if (options.mpcConfiguration) {
-      this.mpcClientInstance = new MPCClient(options.mpcConfiguration.nodeUrl, options.mpcConfiguration.contractAddress);
+      this.mpcClientInstance = new MPCClient(
+        options.mpcConfiguration.nodeUrl,
+        options.mpcConfiguration.contractAddress,
+      );
     }
   }
 
@@ -224,7 +227,6 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
-
     return new Promise((resolve, reject) => {
       const ephemeralKeyPair = nacl.box.keyPair();
       const signerAddress = this.options.walletAddress;

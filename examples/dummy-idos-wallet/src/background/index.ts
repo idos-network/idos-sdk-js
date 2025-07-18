@@ -1,7 +1,11 @@
-import { idOSClientConfiguration, type idOSClientLoggedIn, type idOSClientWithUserSigner } from "@idos-network/client";
+import {
+  idOSClientConfiguration,
+  type idOSClientLoggedIn,
+  type idOSClientWithUserSigner,
+} from "@idos-network/client";
+import { type AuthMethod, LocalEnclave } from "@idos-network/utils/enclave";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
 import { type HDNodeWallet, Wallet } from "ethers";
-import { AuthMethod, LocalEnclave } from "@idos-network/utils/enclave";
 
 console.log("🚀 idOS background script loaded");
 
