@@ -11,7 +11,7 @@ import { KycProgressBar } from "@/components/kyc-progress-bar";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/stores/app-store";
 import { useIdosStore } from "@/stores/idos-store";
-import { TransakProvider } from "../providers/transak";
+import { TransakProvider } from "../../providers/transak";
 
 const Disclaimer = () => (
   <div className="mt-6 flex items-center justify-center">
