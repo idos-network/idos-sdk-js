@@ -1,10 +1,10 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { OptionButton } from "@/components/ui/option-button";
 import { Tag } from "@/components/ui/tag";
+import { type KycProvider, useAppStore } from "@/stores/app-store";
 
 const providers = [
   {
@@ -22,7 +22,7 @@ const providers = [
 ];
 
 export default function KycProviders() {
-  const [selectedProvider, setSelectedProvider] = useState("persona");
+  const { setKycProvider, selectedKyc } = useAppStore();
   return (
     <div className="mx-auto flex h-full w-full max-w-[432px] flex-1 flex-col justify-center">
       <h2 className="mb-10 text-center font-medium text-3xl text-white">
@@ -33,8 +33,10 @@ export default function KycProviders() {
           <OptionButton
             className="max-h-[75px]"
             key={provider.id}
-            selected={selectedProvider === provider.id}
-            onClick={() => setSelectedProvider(provider.id)}
+            selected={selectedKyc === provider.id}
+            onClick={() => {
+              setKycProvider(provider.id as KycProvider);
+            }}
           >
             <div className="flex w-full justify-between">
               <Image src={provider.img} alt={provider.name} width={100} height={100} />
