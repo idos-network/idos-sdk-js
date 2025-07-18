@@ -1,7 +1,7 @@
 import type { VerifiableCredential, VerifiableCredentialSubject } from "@idos-network/consumer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { fetchSharedCredential } from "@/app/services/credentials";
+import { fetchSharedCredential } from "@/services/credentials";
 
 export type OnRampProvider = "transak" | "noah" | "hifi" | null;
 export type KycProvider = "sumsub" | "persona" | null;
