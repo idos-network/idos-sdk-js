@@ -11,10 +11,9 @@ export function IdosProvider() {
   const { initializeClient, login, checkProfile, loggedInClient } = useIdosStore();
   const { findSharedCredential, kycCompleted } = useAppStore();
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: initializing idos process should be triggered once kycCompleted
   useEffect(() => {
-    if (!isConnected || loggedInClient?.user.id) return;
-    if (!kycCompleted) return; // in case of kyc completion re-check user's profile
-
+    if (!isConnected || !singer) return;
     const initialize = async () => {
       if (singer) {
         await initializeClient(singer);
@@ -23,7 +22,7 @@ export function IdosProvider() {
       }
     };
     initialize();
-  }, [singer, initializeClient, login, checkProfile, isConnected, kycCompleted, loggedInClient]);
+  }, [singer, initializeClient, login, checkProfile, isConnected, kycCompleted]);
 
   useEffect(() => {
     if (!loggedInClient?.user.id) return;
@@ -31,7 +30,7 @@ export function IdosProvider() {
   }, [loggedInClient, findSharedCredential]);
 
   return (
-    <div className="relative h-full w-[200px] self-center">
+    <div className="absolute bottom-[5%] z-10 h-[80px] w-[250px] self-center">
       <div id="idOS-enclave" />
     </div>
   );
