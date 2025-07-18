@@ -87,7 +87,7 @@ type NoahResponse = {
   CheckoutSession: NoahCheckoutSession;
 };
 
-export async function createNoahCustomer(
+async function createNoahCustomer(
   userAddress: string,
   credentialSubject: Credentials["credentialSubject"],
 ) {
