@@ -4,15 +4,16 @@ import {
   type idOSClientLoggedIn,
 } from "@idos-network/client";
 import type { idOSCredential, idOSGrant } from "@idos-network/consumer";
+import type { JsonRpcSigner } from "ethers";
 import invariant from "tiny-invariant";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 const _idOSClient = new idOSClientConfiguration({
-  nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL!,
+  nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "",
   enclaveOptions: {
     container: "#idOS-enclave",
-    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL!,
+    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
   },
 });
 
@@ -26,7 +27,6 @@ interface IdosState {
 
   // Credentials
   credentials: idOSCredential[];
-  sharedCredential: idOSCredential | null;
 
   // Retry logic
   findCredentialAttempts: number;
@@ -39,11 +39,14 @@ interface IdosState {
 
   // Error state
   error: string | null;
+
+  // Loading state
+  loadingMessage: string | null;
 }
 
 interface IdosActions {
   // Client management
-  initializeClient: (signer: any) => Promise<void>;
+  initializeClient: (signer: JsonRpcSigner) => Promise<void>;
   login: () => Promise<void>;
 
   // Profile management
@@ -71,13 +74,13 @@ const initialState: IdosState = {
   loggedInClient: null,
   hasProfile: null,
   credentials: [],
-  sharedCredential: null,
   findCredentialAttempts: 0,
   maxFindCredentialAttempts: 40,
   isInitializing: false,
   isLoggingIn: false,
   isFindingCredentials: false,
   error: null,
+  loadingMessage: null,
 };
 
 export const useIdosStore = create<IdosStore>()(
@@ -87,18 +90,20 @@ export const useIdosStore = create<IdosStore>()(
 
       initializeClient: async (signer) => {
         try {
-          set({ isInitializing: true, error: null });
+          set({ isInitializing: true, error: null, loadingMessage: "Initializing idOS client..." });
           const idleClient = await _idOSClient.createClient();
           const withUserSigner = await idleClient.withUserSigner(signer);
 
           set({
             client: withUserSigner,
             isInitializing: false,
+            loadingMessage: null,
           });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : "Failed to initialize client",
             isInitializing: false,
+            loadingMessage: null,
           });
         }
       },
@@ -106,12 +111,12 @@ export const useIdosStore = create<IdosStore>()(
       login: async () => {
         const { client } = get();
         if (!client) {
-          set({ error: "Client not initialized" });
+          set({ error: "Client not initialized", loadingMessage: null });
           return;
         }
 
         try {
-          set({ isLoggingIn: true, error: null });
+          set({ isLoggingIn: true, error: null, loadingMessage: "Logging in..." });
           invariant(client.state === "with-user-signer", "Client is not logged out");
 
           const loggedInClient = await client.logIn();
@@ -119,11 +124,13 @@ export const useIdosStore = create<IdosStore>()(
           set({
             loggedInClient,
             isLoggingIn: false,
+            loadingMessage: null,
           });
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : "Failed to login",
             isLoggingIn: false,
+            loadingMessage: null,
           });
         }
       },
@@ -131,7 +138,7 @@ export const useIdosStore = create<IdosStore>()(
       checkProfile: async () => {
         const { client } = get();
         if (!client) {
-          set({ error: "Client not initialized" });
+          set({ error: "Client not initialized", loadingMessage: null });
           return false;
         }
 
@@ -139,12 +146,13 @@ export const useIdosStore = create<IdosStore>()(
           invariant(client.state === "with-user-signer", "Client is not logged out");
           const hasProfile = await client.hasProfile();
 
-          set({ hasProfile });
+          set({ hasProfile, loadingMessage: null });
           return hasProfile;
         } catch (error) {
           set({
             error: error instanceof Error ? error.message : "Failed to check profile",
             hasProfile: false,
+            loadingMessage: null,
           });
           return false;
         }
@@ -154,7 +162,7 @@ export const useIdosStore = create<IdosStore>()(
         const { loggedInClient, findCredentialAttempts, maxFindCredentialAttempts } = get();
 
         if (!loggedInClient) {
-          set({ error: "Not logged in" });
+          set({ error: "Not logged in", loadingMessage: null });
           return [];
         }
 
@@ -164,13 +172,21 @@ export const useIdosStore = create<IdosStore>()(
         }
 
         try {
-          set({ isFindingCredentials: true, error: null });
-          console.log({ key: process.env.NEXT_PUBLIC_KRAKEN_ISSUER_PUBLIC_KEY });
+          set({
+            isFindingCredentials: true,
+            error: null,
+            loadingMessage: "Finding credentials...",
+          });
+
+          if (!process.env.NEXT_PUBLIC_KRAKEN_ISSUER_PUBLIC_KEY) {
+            console.warn("`process.env.NEXT_PUBLIC_KRAKEN_ISSUER_PUBLIC_KEY` is required");
+            return;
+          }
 
           const credentials = await loggedInClient.filterCredentials({
             acceptedIssuers: [
               {
-                authPublicKey: process.env.NEXT_PUBLIC_KRAKEN_ISSUER_PUBLIC_KEY!,
+                authPublicKey: process.env.NEXT_PUBLIC_KRAKEN_ISSUER_PUBLIC_KEY,
               },
             ],
           });
@@ -178,6 +194,7 @@ export const useIdosStore = create<IdosStore>()(
           set({
             credentials,
             isFindingCredentials: false,
+            loadingMessage: null,
           });
 
           if (credentials.length === 0) {
@@ -191,6 +208,7 @@ export const useIdosStore = create<IdosStore>()(
           set({
             error: error instanceof Error ? error.message : "Failed to find credentials",
             isFindingCredentials: false,
+            loadingMessage: null,
           });
           get().incrementFindAttempts();
           return [];
@@ -221,27 +239,23 @@ export const useIdosStore = create<IdosStore>()(
           process.env.NEXT_PUBLIC_IDOS_PUBLIC_KEY,
           "NEXT_PUBLIC_IDOS_PUBLIC_KEY is not set",
         );
-        console.log({
-          consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_IDOS_ENCRYPTION_PUBLIC_KEY,
-          consumerAuthPublicKey: process.env.NEXT_PUBLIC_IDOS_PUBLIC_KEY,
-        });
 
         try {
           const sharedCredential = await loggedInClient.requestAccessGrant(credentialId, {
             consumerEncryptionPublicKey: process.env.NEXT_PUBLIC_IDOS_ENCRYPTION_PUBLIC_KEY,
             consumerAuthPublicKey: process.env.NEXT_PUBLIC_IDOS_PUBLIC_KEY,
           });
-          return sharedCredential as any;
+          return sharedCredential as unknown;
         } catch (error) {
           const errorMessage =
             error instanceof Error ? error.message : "Failed to share credential";
-          set({ error: errorMessage });
+          set({ error: errorMessage, loadingMessage: null });
           throw new Error(errorMessage);
         }
       },
 
-      setError: (error) => set({ error }),
-      clearError: () => set({ error: null }),
+      setError: (error) => set({ error, loadingMessage: null }),
+      clearError: () => set({ error: null, loadingMessage: null }),
 
       reset: () => set(initialState),
 

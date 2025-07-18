@@ -1,6 +1,7 @@
 import type { VerifiableCredential, VerifiableCredentialSubject } from "@idos-network/consumer";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
+import { fetchSharedCredential } from "@/app/services/credentials";
 
 export type OnRampProvider = "transak" | "noah" | "hifi" | null;
 export type KycProvider = "sumsub" | "persona" | null;
@@ -39,7 +40,7 @@ interface AppState {
   // Provider specific data
   transakToken: string | null;
   hifiTosId: string | null;
-  onRampAccount: any | null;
+  onRampAccount: string | null;
 
   // Error handling
   errorMessage: string | null;
@@ -66,7 +67,7 @@ interface AppActions {
   completeKyc: () => void;
 
   // Provider actions
-  startProviderFlow: () => Promise<void>;
+  startProviderFlow: (userId: string, userAddress: string) => Promise<void>;
 
   // URL setters
   setKycUrl: (url: string | null) => void;
@@ -75,9 +76,10 @@ interface AppActions {
   setNoahUrl: (url: string | null) => void;
 
   // Token/data setters
+  setTransakToken: (token: string | null) => void;
   findTransakToken: (token: string | null) => void;
   setHifiTosId: (id: string | null) => void;
-  setOnRampAccount: (account: any) => void;
+  setOnRampAccount: (account: string) => void;
 
   // Error handling
   setError: (message: string | null) => void;
@@ -97,7 +99,7 @@ type AppStore = AppState & AppActions;
 
 const initialState: AppState = {
   currentStep: "select-provider",
-  selectedOnRampProvider: "transak",
+  selectedOnRampProvider: "hifi",
   selectedKyc: "persona",
   hasExistingCredentials: null,
   credentialId: null,
@@ -166,51 +168,10 @@ export const useAppStore = create<AppStore>()(
       },
 
       completeKyc: async () => {
-        try {
-          set({
-            isLoading: true,
-            loadingMessage: "KYC completed! Searching for your credential...",
-            kycCompleted: true,
-          });
-
-          // Wait a moment for the credential to be processed
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-
-          // Search for the newly created credential
-          const response = await fetch("/api/credentials/check");
-          if (response.ok) {
-            const { hasCredentials, credentialId } = await response.json();
-            if (hasCredentials && credentialId) {
-              set({
-                credentialId,
-                hasExistingCredentials: true,
-                currentStep: "provider-flow",
-                kycUrl: null,
-                isLoading: false,
-                loadingMessage: null,
-              });
-              return;
-            }
-          }
-
-          // If no credential found, proceed anyway but without credential ID
-          console.warn("No credential found after KYC completion");
-          set({
-            currentStep: "provider-flow",
-            kycUrl: null,
-            isLoading: false,
-            loadingMessage: null,
-          });
-        } catch (error) {
-          console.error("Error finding credential after KYC:", error);
-          // Proceed anyway to avoid blocking the flow
-          set({
-            currentStep: "provider-flow",
-            kycUrl: null,
-            isLoading: false,
-            loadingMessage: null,
-          });
-        }
+        set({
+          kycCompleted: true,
+          currentStep: "provider-flow",
+        });
       },
 
       findTransakToken: async (credentialId: string) => {
@@ -221,7 +182,7 @@ export const useAppStore = create<AppStore>()(
       },
 
       // Provider actions
-      startProviderFlow: async () => {
+      startProviderFlow: async (userId, userAddress) => {
         const { selectedOnRampProvider: selectedProvider, credentialId } = get();
 
         try {
@@ -240,23 +201,10 @@ export const useAppStore = create<AppStore>()(
             case "noah": {
               // Direct integration for Noah
               console.log("Starting Noah flow...");
-              const noahResponse = await fetch("/api/providers/noah/link");
-              if (!noahResponse.ok) throw new Error("Failed to get Noah URL");
-              const { url } = await noahResponse.json();
-              console.log("Noah URL received:", url);
-              set({ noahUrl: url });
-              break;
-            }
-
-            case "transak": {
-              // Get sharable token for Transak (using existing credential if available)
-              const transakUrl = credentialId
-                ? `/api/providers/transak/token?credentialId=${credentialId}`
-                : "/api/providers/transak/token";
-              const transakResponse = await fetch(transakUrl);
-              if (!transakResponse.ok) throw new Error("Failed to get Transak token");
-              const { token } = await transakResponse.json();
-              set({ transakToken: token });
+              const { url } = await fetch(
+                `/api/kyc/noah/link?userId=${userId}&credentialId=${credentialId}&address=${userAddress}`,
+              ).then((res) => res.json());
+              set({ onRampUrl: url });
               break;
             }
           }
@@ -275,13 +223,64 @@ export const useAppStore = create<AppStore>()(
 
       // Shared credential
       findSharedCredential: async (userId: string) => {
-        const response = await fetch(`/api/shared-credential?userId=${userId}`).then((res) =>
-          res.json(),
-        );
+        const maxAttempts = 20;
+        const delayMs = 2000;
+
         set({
-          sharedCredential:
-            response.credentialContent as VerifiableCredential<VerifiableCredentialSubject>,
-          credentialId: response.credentialId,
+          isLoading: true,
+          findCredentialAttempts: 0,
+          loadingMessage: "Searching for shared credential...",
+        });
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+          try {
+            set({
+              findCredentialAttempts: attempt,
+              loadingMessage: `Searching for shared credential (attempt ${attempt} of ${maxAttempts})...`,
+            });
+
+            console.log(
+              `Attempting to fetch shared credential for user ${userId} (attempt ${attempt}/${maxAttempts})`,
+            );
+
+            const response = await fetchSharedCredential(userId);
+
+            // Check if we got valid credential data
+            if (response.credentialContent && response.credentialId) {
+              console.log(`Successfully found shared credential on attempt ${attempt}`);
+              set({
+                sharedCredential:
+                  response.credentialContent as VerifiableCredential<VerifiableCredentialSubject>,
+                credentialId: response.credentialId,
+                isLoading: false,
+                loadingMessage: null,
+                hasExistingCredentials: true,
+              });
+              return;
+            }
+
+            // If no credential found but request was successful, continue trying
+            console.log(`No credential found on attempt ${attempt}, will retry...`);
+          } catch (error) {
+            console.warn(
+              `Attempt ${attempt} failed:`,
+              error instanceof Error ? error.message : "Unknown error",
+            );
+          }
+
+          // Wait before next attempt (except on the last attempt)
+          if (attempt < maxAttempts) {
+            await new Promise((resolve) => setTimeout(resolve, delayMs));
+          }
+        }
+
+        // All attempts failed
+        console.error(`Failed to fetch shared credential after ${maxAttempts} attempts`);
+        set({
+          isLoading: false,
+          loadingMessage: null,
+          hasExistingCredentials: false,
+          errorMessage: `Failed to find shared credential after ${maxAttempts} attempts`,
         });
       },
 

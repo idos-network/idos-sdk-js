@@ -10,10 +10,10 @@ export function TransakProvider() {
   console.log({ transakToken, credentialId });
 
   useEffect(() => {
-    if (credentialId) {
+    if (credentialId && !transakToken) {
       findTransakToken(credentialId);
     }
-  }, [credentialId, findTransakToken]);
+  }, [credentialId, findTransakToken, transakToken]);
 
   useEffect(() => {
     if (!transak.current && transakToken) {

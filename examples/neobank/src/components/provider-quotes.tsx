@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useState } from "react";
 import { useBuyStore } from "@/app/dashboard/buy/store";
 import { OptionButton } from "@/components/ui/option-button";
-import { Tag } from "./ui/tag";
+import { Tag } from "@/components/ui/tag";
 
 interface Provider {
   id: string;
