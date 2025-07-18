@@ -35,14 +35,10 @@ export default defineManifest({
       js: ["src/content.js"],
       matches: ["<all_urls>"],
     },
-    {
-      js: ["src/injected-script.ts"],
-      matches: ["<all_urls>"],
-    },
   ],
   web_accessible_resources: [
     {
-      resources: ["src/injected-script.ts", "*.js", "*.css", "public/*"],
+      resources: ["src/injected-script.js", "*.js", "*.css", "public/*"],
       matches: ["<all_urls>"],
     },
   ],

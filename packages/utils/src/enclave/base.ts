@@ -8,7 +8,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
 
   protected signer?: {
-    signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
+    signTypedData: (domain: any, types: any, value: any) => Promise<string>;
   };
 
   constructor(options: K) {

@@ -193,7 +193,7 @@ class PortManager {
     const requestId = crypto.randomUUID();
 
     chrome.windows.create({
-      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}&allowedAuthMethods=${allowedAuthMethods}`,
+      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}&allowedAuthMethods=${JSON.stringify(allowedAuthMethods)}`,
       type: "popup",
       width: 470,
       height: 450,

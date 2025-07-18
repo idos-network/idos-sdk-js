@@ -44,7 +44,10 @@
   "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "typescript": "catalog:build"
+    "typescript": "catalog:build",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.207.0",
+    "ethers": "catalog:ethereum"
   },
   "publishConfig": {
     "access": "public"

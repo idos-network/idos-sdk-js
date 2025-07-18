@@ -16,6 +16,8 @@
     "@idos-network/client": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.207.0",
     "@stablelib/base64": "^2.0.1",
     "ethers": "catalog:ethereum",
     "tweetnacl": "catalog:core"
@@ -35,6 +37,7 @@
     "tailwindcss": "^3.4.3",
     "typescript": "catalog:build",
     "vite": "catalog:build",
+    "vite-plugin-node-polyfills": "0.24.0",
     "vite-tsconfig-paths": "^5.1.4"
   }
 }

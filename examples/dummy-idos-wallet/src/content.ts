@@ -31,7 +31,7 @@ function exposeIdOSAPI() {
   try {
     // Create a script element to inject into the page context
     const script = document.createElement("script");
-    script.src = chrome.runtime.getURL("src/injected-script.ts.js");
+    script.src = chrome.runtime.getURL("src/injected-script.js");
     script.onload = () => {
       script.remove(); // Clean up the script element
     };

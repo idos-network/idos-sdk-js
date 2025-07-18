@@ -54,10 +54,10 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   get mpcClient(): MPCClient {
-    if (!this.mpcClient) {
+    if (!this.mpcClientInstance) {
       throw new Error("MPC client is not initialized");
     }
-    return this.mpcClient;
+    return this.mpcClientInstance;
   }
 
   async load(): Promise<void> {
@@ -209,11 +209,13 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   async ensureMPCPrivateKey(): Promise<Uint8Array<ArrayBufferLike>> {
     if (this.options?.mode !== "new") {
       const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
-      if (downloadStatus !== "ok") {
-        throw Error("A secret might be stored at ZK nodes, but can't be obtained");
+
+      if (downloadStatus === "ok" && downloadedSecret) {
+        return downloadedSecret as any;
       }
 
-      return downloadedSecret as any;
+      // TODO: If user change their mind and want to use MPC instead of password?...
+      // throw Error("A secret might be stored at ZK nodes, but can't be obtained");
     }
 
     const privateKey = nacl.box.keyPair().secretKey;
@@ -227,82 +229,65 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
-    return new Promise((resolve, reject) => {
-      const ephemeralKeyPair = nacl.box.keyPair();
-      const signerAddress = this.options.walletAddress;
-      const downloadRequest = this.mpcClient.downloadRequest(
-        signerAddress,
-        ephemeralKeyPair.publicKey,
-      );
-      const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
+    if (!this.signer) {
+      throw new Error("Signer is not found");
+    }
 
-      const channel = new MessageChannel();
-      channel.port1.onmessage = async (message) => {
-        channel.port1.close();
+    if (!this.userId) {
+      throw new Error("userId is not found");
+    }
 
-        if (!this.userId) {
-          console.error("userId is not found");
-          reject(new Error("userId is not found"));
-          return;
-        }
+    if (!this.options.walletAddress) {
+      throw new Error("walletAddress is not found");
+    }
 
-        const { status, secret } = await this.mpcClient?.downloadSecret(
-          this.userId,
-          downloadRequest,
-          message.data.data,
-          ephemeralKeyPair.secretKey,
-        );
+    const ephemeralKeyPair = nacl.box.keyPair();
+    const signerAddress = this.options.walletAddress;
 
-        return resolve({ status, secret });
-      };
+    const downloadRequest = this.mpcClient.downloadRequest(
+      signerAddress,
+      ephemeralKeyPair.publicKey,
+    );
 
-      const signMessage = {
-        type: "idOS-MPC:signMessage",
-        payload: messageToSign,
-      };
+    const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
 
-      window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
-    });
+    const signedMessage = await this.signer.signTypedData(messageToSign.domain, messageToSign.types, messageToSign.value);
+
+    return this.mpcClient.downloadSecret(
+      this.userId,
+      downloadRequest,
+      signedMessage,
+      ephemeralKeyPair.secretKey,
+    );
   }
 
   async uploadSecret(secret: Uint8Array<ArrayBufferLike>): Promise<{ status: string }> {
-    return new Promise((resolve, reject) => {
-      const signerAddress = this.options.walletAddress;
-      if (!signerAddress) {
-        console.error("signerAddress is not found");
-        return resolve({ status: "no-signer-address" });
-      }
+    if (!this.signer) {
+      throw new Error("Signer is not found");
+    }
 
-      const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret));
-      const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
-      const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
+    if (!this.userId) {
+      throw new Error("userId is not found");
+    }
 
-      const channel = new MessageChannel();
-      channel.port1.onmessage = async (message) => {
-        channel.port1.close();
+    const signerAddress = this.options.walletAddress;
 
-        if (!this.userId) {
-          console.error("userId is not found");
-          reject(new Error("userId is not found"));
-          return;
-        }
+    if (!signerAddress) {
+      console.error("signerAddress is not found");
+      return { status: "no-signer-address" };
+    }
 
-        const { status } = await this.mpcClient?.uploadSecret(
-          this.userId,
-          uploadRequest,
-          message.data.data,
-          blindedShares,
-        );
+    const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret));
+    const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
+    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
 
-        return resolve({ status });
-      };
+    const signedMessage = await this.signer?.signTypedData(messageToSign.domain as any, messageToSign.types as any, messageToSign.value as any);
 
-      const signMessage = {
-        type: "idOS-MPC:signMessage",
-        payload: messageToSign,
-      };
-
-      // window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
-    });
+    return this.mpcClient.uploadSecret(
+      this.userId,
+      uploadRequest,
+      signedMessage,
+      blindedShares,
+    );
   }
 }

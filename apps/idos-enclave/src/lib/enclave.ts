@@ -1,5 +1,4 @@
 import { LocalEnclave } from "@idos-network/utils/enclave";
-import { Client as MPCClient } from "./mpc/client";
 
 type AuthMethod = "mpc" | "password";
 
@@ -139,7 +138,7 @@ export class Enclave extends LocalEnclave {
     }
   }
 
-  async backupPasswordOrSecret() {
+  async backupPasswordOrSecret(): Promise<void> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
 
@@ -147,10 +146,12 @@ export class Enclave extends LocalEnclave {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
+
           await this.openDialog("backupPasswordOrSecret", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           });
-          resolve(true);
+
+          resolve();
         } catch (error) {
           reject(error);
         }

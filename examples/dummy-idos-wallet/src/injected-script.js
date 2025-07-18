@@ -1,11 +1,11 @@
-function injectIdOS(global: any) {
+function injectIdOS(global) {
   // Create the idOS API in the page's window context
   global.idOS = {
     pendingRequests: new Map(),
   };
 
   // Helper function to send requests
-  function sendRequest(action: string, params: any = {}): Promise<any> {
+  function sendRequest(action, params = {}) {
     return new Promise((resolve, reject) => {
       const requestId = crypto.randomUUID();
 
@@ -44,17 +44,17 @@ function injectIdOS(global: any) {
     return sendRequest("getAllCredentials");
   };
 
-  global.idOS.getCredentialContent = async (id: string) => {
+  global.idOS.getCredentialContent = async (id) => {
     console.log("🚀 getCredentialContent called", id);
     return sendRequest("getCredentialContent", { id });
   };
 
-  global.idOS.showCredentialsPopup = async (level: string) => {
+  global.idOS.showCredentialsPopup = async (level) => {
     console.log("🚀 showCredentialsPopup called with level:", level);
     return sendRequest("showCredentialsPopup", { level });
   };
 
-  global.idOS.confirm = async (message: string) => {
+  global.idOS.confirm = async (message) => {
     console.log("🚀 confirm called with message:", message);
     return sendRequest("confirm", { message });
   };
@@ -67,13 +67,10 @@ function injectIdOS(global: any) {
       const { id, result, error } = event.data.data;
       console.log("🔑 Processing response for requestId:", id);
 
-      // @ts-expect-error - pendingRequests is not defined
       if (window.idOS?.pendingRequests?.has(id)) {
-        // @ts-expect-error - pendingRequests is not defined
         const pendingRequest = window.idOS.pendingRequests.get(id);
         if (pendingRequest) {
           const { resolve, reject } = pendingRequest;
-          // @ts-expect-error - pendingRequests is not defined
           window.idOS.pendingRequests.delete(id);
 
           if (error) {

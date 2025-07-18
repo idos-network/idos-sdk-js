@@ -6,6 +6,7 @@ import react from "@vitejs/plugin-react";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 import manifest from "./src/manifest";
 
@@ -18,6 +19,11 @@ export default defineConfig({
       manifest,
       contentScripts: {
         injectCss: true,
+      },
+    }),
+    nodePolyfills({
+      globals: {
+        Buffer: true,
       },
     }),
   ],

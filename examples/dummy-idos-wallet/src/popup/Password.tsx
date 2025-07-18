@@ -11,6 +11,8 @@ export default function Popup(): JSX.Element {
   >(null);
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>("Heslo123!");
+  const [allowedAuthMethods, setAllowedAuthMethods] = useState<string[] | null>(null);
+  const [selectedAuthMethod, setSelectedAuthMethod] = useState<string | null>(null);
 
   useEffect(() => {
     // Parse URL parameters to get credential request details
@@ -18,11 +20,26 @@ export default function Popup(): JSX.Element {
     const requestId = urlParams.get("requestId");
     const userId = urlParams.get("userId") ?? crypto.randomUUID();
     const expectedUserEncryptionPublicKey = urlParams.get("expectedUserEncryptionPublicKey");
+    const allowedAuthMethods = urlParams.get("allowedAuthMethods");
 
     setRequestId(requestId);
     setUserId(userId);
     setExpectedUserEncryptionPublicKey(expectedUserEncryptionPublicKey);
+    setAllowedAuthMethods(allowedAuthMethods ? JSON.parse(allowedAuthMethods) : null);
   }, []);
+
+  useEffect(() => {
+    if (allowedAuthMethods && allowedAuthMethods.length === 1) {
+      setSelectedAuthMethod(allowedAuthMethods[0]);
+    }
+  }, [allowedAuthMethods]);
+
+  useEffect(() => {
+    if (selectedAuthMethod === "mpc") {
+      setPassword(null);
+      handleDeriveKey();
+    }
+  }, [selectedAuthMethod]);
 
   const handleDeriveKey = async () => {
     // TODO: Check if the password matches the expected user encryption public key
@@ -42,7 +59,10 @@ export default function Popup(): JSX.Element {
       type: "IDOS_POPUP_RESPONSE",
       data: {
         requestId,
-        result: password,
+        result: {
+          password,
+          authMethod: selectedAuthMethod,
+        },
       },
     });
 
@@ -107,7 +127,24 @@ export default function Popup(): JSX.Element {
           <strong>User ID:</strong> {userId || "N/A"}
         </div>
 
-        <div
+        {allowedAuthMethods && allowedAuthMethods.length > 1 && !selectedAuthMethod && <div>
+          <strong>Choose your authentication method:</strong>
+          <div className="flex flex-row gap-2 p-10 w-full justify-center">
+            {allowedAuthMethods?.map((method) => (
+              <button
+                type="button"
+                className={`w-1/2 btn btn-soft ${method === "mpc" ? "btn-primary" : "btn-secondary"}`}
+                key={method}
+                onClick={() => setSelectedAuthMethod(method)}
+              >
+                {method[0].toLocaleUpperCase() + method.slice(1)}
+              </button>
+            ))}
+            </div>
+          </div>
+        }
+
+        {selectedAuthMethod === "password" && <div
           style={{
             padding: "16px",
             backgroundColor: "#dbeafe",
@@ -131,52 +168,27 @@ export default function Popup(): JSX.Element {
             }}
           />
           {error && <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{error}</p>}
-        </div>
+        </div>}
       </div>
 
-      <div
-        style={{
-          marginTop: "auto",
-          paddingTop: "16px",
-          borderTop: "1px solid #e5e7eb",
-          display: "flex",
-          gap: "12px",
-          justifyContent: "flex-end",
-        }}
-      >
-        <button
-          type="button"
-          onClick={handleCancel}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#ef4444",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "14px",
-            fontWeight: "500",
-            cursor: "pointer",
-          }}
-        >
-          Reject
-        </button>
-        <button
-          type="button"
-          onClick={handleDeriveKey}
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#3b82f6",
-            color: "white",
-            border: "none",
-            borderRadius: "6px",
-            fontSize: "14px",
-            fontWeight: "500",
-            cursor: "pointer",
-          }}
-        >
-          OK
-        </button>
-      </div>
+      {selectedAuthMethod === "password" &&
+        <div className="flex flex-row gap-2 w-full justify-end border-t-2 pt-2 border-gray-200">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="btn btn-soft btn-secondary"
+          >
+            Reject
+          </button>
+          <button
+            type="button"
+            onClick={handleDeriveKey}
+            className="btn btn-soft btn-primary"
+          >
+            OK
+          </button>
+        </div>
+      }
     </div>
   );
 }
