@@ -4,7 +4,7 @@ import { Providers } from "@/providers";
 import "./globals.css";
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { IdosProvider } from "./providers/idos";
+import { IdosProvider } from "../providers/idos";
 
 const inter = Inter({
   variable: "--font-inter",
