@@ -55,6 +55,8 @@ export type idOSGrant = {
   data_id: string;
   locked_until: string;
   content_hash?: string;
+  inserter_id?: string;
+  inserter_type?: string;
 };
 
 export type DelegatedWriteGrant = {

@@ -47,11 +47,6 @@ const actionButtons: ActionButton[] = [
 ];
 
 export default function ActionToolbar() {
-  const handleActionClick = (actionId: string) => {
-    console.log(`${actionId} clicked`);
-    // Add your action handlers here
-  };
-
   return (
     <div className="">
       <div className="mx-auto max-w-7xl">
