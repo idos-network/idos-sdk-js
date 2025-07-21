@@ -159,7 +159,7 @@ export default function KycFlow() {
   } = useAppStore();
   const { loggedInClient } = useIdosStore();
   const router = useRouter();
-  const userId = loggedInClient?.user.id;
+  const userId = loggedInClient?.user?.id;
   const { address } = useAppKitAccount();
 
   const handleContinue = async () => {
