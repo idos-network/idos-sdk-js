@@ -2,11 +2,6 @@
   "name": "@idos-network/credentials",
   "description": "idOS Credentials JavaScript SDK",
   "version": "0.0.1",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
-  },
   "dependencies": {
     "@digitalbazaar/ed25519-signature-2020": "catalog:core",
     "@digitalbazaar/ed25519-verification-key-2020": "catalog:core",
@@ -16,7 +11,6 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@idos-network/core": "workspace:*",
     "vitest": "catalog:testing",
     "web-streams-polyfill": "catalog:core"
   },

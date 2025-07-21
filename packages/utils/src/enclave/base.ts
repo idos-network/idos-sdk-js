@@ -1,7 +1,8 @@
-import { base64Encode, type idOSCredential, utf8Decode } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
+import { base64Encode, utf8Decode } from "../codecs";
 import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveOptions, StoredData } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {

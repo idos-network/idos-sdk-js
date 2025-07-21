@@ -1,4 +1,4 @@
-import { LocalEnclave } from "@idos-network/utils/enclave";
+import { LocalEnclave } from "@idos-network/utils/enclave/local";
 
 type AuthMethod = "mpc" | "password";
 

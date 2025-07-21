@@ -2,15 +2,26 @@
   "name": "@idos-network/utils",
   "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.0",
+  "clean-package": {
+    "remove": [
+      "devDependencies.@idos-network/credentials"
+    ]
+  },
   "dependencies": {
-    "@idos-network/core": "workspace:*",
-    "@stablelib/utf8": "^2.0.1",
-    "@stablelib/base64": "^2.0.1",
+    "@stablelib/base64": "catalog:core",
+    "@stablelib/binary": "catalog:core",
+    "@stablelib/bytes": "catalog:core",
+    "@stablelib/hex": "catalog:core",
+    "@stablelib/sha256": "catalog:core",
+    "@stablelib/utf8": "catalog:core",
+    "borsh": "catalog:core",
+    "bs58": "catalog:core",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"
   },
   "devDependencies": {
+    "@idos-network/credentials": "workspace:*",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
@@ -30,6 +41,10 @@
     "./store": {
       "types": "./dist/store/index.d.ts",
       "import": "./dist/store/index.js"
+    },
+    "./codecs": {
+      "types": "./dist/codecs/index.d.ts",
+      "import": "./dist/codecs/index.js"
     },
     "./enclave": {
       "types": "./dist/enclave/index.d.ts",

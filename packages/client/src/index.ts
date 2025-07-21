@@ -1,11 +1,4 @@
 import {
-  base64Decode,
-  base64Encode,
-  hexEncodeSha256Hash,
-  utf8Decode,
-  utf8Encode,
-} from "@idos-network/core/codecs";
-import {
   type AddWalletParams,
   addWallet,
   addWallets,
@@ -49,6 +42,13 @@ import type {
   Wallet,
 } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import {
+  base64Decode,
+  base64Encode,
+  hexEncodeSha256Hash,
+  utf8Decode,
+  utf8Encode,
+} from "@idos-network/utils/codecs";
 import type { BaseProvider } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import type { KwilSigner } from "@kwilteam/kwil-js";

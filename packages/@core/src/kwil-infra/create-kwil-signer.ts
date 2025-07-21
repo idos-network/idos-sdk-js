@@ -1,3 +1,4 @@
+import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
@@ -6,7 +7,6 @@ import type { KeyPair as NearKeyPair } from "near-api-js";
 import * as xrpKeypair from "ripple-keypairs";
 import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
-import { bs58Encode, hexDecode, hexEncode } from "../codecs";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
 import type { Wallet } from "../types";
 import {

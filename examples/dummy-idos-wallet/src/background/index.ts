@@ -3,7 +3,8 @@ import {
   type idOSClientLoggedIn,
   type idOSClientWithUserSigner,
 } from "@idos-network/client";
-import { type AuthMethod, LocalEnclave } from "@idos-network/utils/enclave";
+import type { AuthMethod } from "@idos-network/utils/enclave";
+import { LocalEnclave } from "@idos-network/utils/enclave/local";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
 import { type HDNodeWallet, Wallet } from "ethers";
 

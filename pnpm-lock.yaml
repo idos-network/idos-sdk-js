@@ -215,12 +215,9 @@ importers:
       '@idos-network/core':
         specifier: workspace:*
         version: link:../../packages/@core
-      '@stablelib/base64':
-        specifier: ^2.0.1
-        version: 2.0.1
-      '@stablelib/utf8':
-        specifier: ^2.0.1
-        version: 2.0.1
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@tanstack/query-sync-storage-persister':
         specifier: catalog:tanstack
         version: 5.80.6
@@ -1256,6 +1253,9 @@ importers:
       '@gemwallet/api':
         specifier: ^3.8.0
         version: 3.8.0
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../@credentials
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
@@ -1265,24 +1265,6 @@ importers:
       '@near-wallet-selector/core':
         specifier: catalog:near
         version: 8.10.2(near-api-js@4.0.3(encoding@0.1.13))
-      '@stablelib/base64':
-        specifier: catalog:core
-        version: 2.0.1
-      '@stablelib/binary':
-        specifier: catalog:core
-        version: 2.0.1
-      '@stablelib/bytes':
-        specifier: catalog:core
-        version: 2.0.1
-      '@stablelib/hex':
-        specifier: catalog:core
-        version: 2.0.1
-      '@stablelib/sha256':
-        specifier: catalog:core
-        version: 2.0.1
-      '@stablelib/utf8':
-        specifier: catalog:core
-        version: 2.0.1
       '@stellar/stellar-sdk':
         specifier: catalog:stellar
         version: 13.3.0
@@ -1295,12 +1277,6 @@ importers:
       axios:
         specifier: 0.27.2
         version: 0.27.2
-      borsh:
-        specifier: catalog:core
-        version: 2.0.0
-      bs58:
-        specifier: catalog:core
-        version: 6.0.0
       es-toolkit:
         specifier: catalog:core
         version: 1.39.3
@@ -1357,9 +1333,6 @@ importers:
         specifier: catalog:core
         version: 3.25.64
     devDependencies:
-      '@idos-network/core':
-        specifier: workspace:*
-        version: link:../@core
       vitest:
         specifier: catalog:testing
         version: 3.2.2(@edge-runtime/vm@5.0.0)(@types/debug@4.1.12)(@types/node@22.15.30)(jiti@2.4.2)(jsdom@26.1.0(bufferutil@4.0.9)(utf-8-validate@6.0.5))(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0)
@@ -1531,9 +1504,6 @@ importers:
 
   packages/utils:
     dependencies:
-      '@idos-network/core':
-        specifier: workspace:*
-        version: link:../@core
       '@partisiablockchain/abi-client':
         specifier: ^5.207.0
         version: 5.207.0
@@ -1541,11 +1511,29 @@ importers:
         specifier: ^5.149.0
         version: 5.149.0
       '@stablelib/base64':
-        specifier: ^2.0.1
+        specifier: catalog:core
+        version: 2.0.1
+      '@stablelib/binary':
+        specifier: catalog:core
+        version: 2.0.1
+      '@stablelib/bytes':
+        specifier: catalog:core
+        version: 2.0.1
+      '@stablelib/hex':
+        specifier: catalog:core
+        version: 2.0.1
+      '@stablelib/sha256':
+        specifier: catalog:core
         version: 2.0.1
       '@stablelib/utf8':
-        specifier: ^2.0.1
+        specifier: catalog:core
         version: 2.0.1
+      borsh:
+        specifier: catalog:core
+        version: 2.0.0
+      bs58:
+        specifier: catalog:core
+        version: 6.0.0
       ethers:
         specifier: catalog:ethereum
         version: 6.14.3(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -1559,6 +1547,9 @@ importers:
         specifier: ^0.0.3
         version: 0.0.3
     devDependencies:
+      '@idos-network/credentials':
+        specifier: workspace:*
+        version: link:../@credentials
       '@types/chrome':
         specifier: ^0.0.268
         version: 0.0.268
