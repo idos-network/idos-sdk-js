@@ -1,26 +1,38 @@
-import {
-  type idOSClient,
-  idOSClientConfiguration,
-  type idOSClientLoggedIn,
-} from "@idos-network/client";
 import type { idOSCredential, idOSGrant } from "@idos-network/consumer";
 import type { JsonRpcSigner } from "ethers";
 import invariant from "tiny-invariant";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-const _idOSClient = new idOSClientConfiguration({
-  nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "",
-  enclaveOptions: {
-    container: "#idOS-enclave",
-    url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
-  },
-});
+// const _idOSClient = new idOSClientConfiguration({
+//   nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "",
+//   enclaveOptions: {
+//     container: "#idOS-enclave",
+//     url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+//   },
+// });
 
 interface IdosState {
   // Client instances
-  client: idOSClient | null;
-  loggedInClient: idOSClientLoggedIn | null;
+  client:
+    | { state: "idle" }
+    | {
+        state: "with-user-signer";
+        hasProfile: () => Promise<boolean>;
+        logIn: () => Promise<any & { state: "logged-in" }>;
+      }
+    | null;
+  loggedInClient: {
+    state: "logged-in";
+    filterCredentials: (options: {
+      acceptedIssuers: { authPublicKey: string }[];
+    }) => Promise<idOSCredential[]>;
+    getAccessGrantsOwned: () => Promise<idOSGrant[]>;
+    requestAccessGrant: (
+      credentialId: string,
+      options: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
+    ) => Promise<idOSCredential>;
+  } | null;
 
   // User profile
   hasProfile: boolean | null;
@@ -90,8 +102,17 @@ export const useIdosStore = create<IdosStore>()(
 
       initializeClient: async (signer) => {
         try {
+          if (typeof window === "undefined") return;
+          const { idOSClientConfiguration } = await import("@idos-network/client");
+          const idosConfig = new idOSClientConfiguration({
+            nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "",
+            enclaveOptions: {
+              container: "#idOS-enclave",
+              url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+            },
+          });
           set({ isInitializing: true, error: null, loadingMessage: "Initializing idOS client..." });
-          const idleClient = await _idOSClient.createClient();
+          const idleClient = await idosConfig.createClient();
           const withUserSigner = await idleClient.withUserSigner(signer);
 
           set({
