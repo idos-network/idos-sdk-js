@@ -42,12 +42,12 @@ export interface Identity {
 }
 
 export interface PrimaryResidence {
-  Street: string;
+  Street?: string;
   Street2?: string;
-  City: string;
-  PostCode: string;
+  City?: string;
+  PostCode?: string;
   State?: string;
-  Country: string;
+  Country?: string;
 }
 
 export interface NoahLineItem {
@@ -113,16 +113,11 @@ export async function createNoahCustomer(address: string, credentials: Credentia
       },
     ],
     PrimaryResidence: {
-      // biome-ignore lint/style/noNonNullAssertion: We know that the address is present
-      Street: cs.residentialAddressStreet!,
-      // biome-ignore lint/style/noNonNullAssertion: We know that the address is present
-      City: cs.residentialAddressCity!,
-      // biome-ignore lint/style/noNonNullAssertion: We know that the address is present
-      PostCode: cs.residentialAddressPostalCode!,
-      // biome-ignore lint/style/noNonNullAssertion: We know that the address is present
-      State: cs.residentialAddressCountry!,
-      // biome-ignore lint/style/noNonNullAssertion: We know that the address is present
-      Country: cs.residentialAddressCountry!,
+      Street: cs.residentialAddressStreet,
+      City: cs.residentialAddressCity,
+      PostCode: cs.residentialAddressPostalCode,
+      State: cs.residentialAddressState,
+      Country: cs.residentialAddressCountry,
     },
   };
 
