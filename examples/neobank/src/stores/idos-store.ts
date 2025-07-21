@@ -19,11 +19,12 @@ interface IdosState {
     | {
         state: "with-user-signer";
         hasProfile: () => Promise<boolean>;
-        logIn: () => Promise<any & { state: "logged-in" }>;
+        logIn: () => Promise<unknown & { state: "logged-in" }>;
       }
     | null;
   loggedInClient: {
     state: "logged-in";
+    user: { id: string };
     filterCredentials: (options: {
       acceptedIssuers: { authPublicKey: string }[];
     }) => Promise<idOSCredential[]>;
@@ -140,7 +141,7 @@ export const useIdosStore = create<IdosStore>()(
           set({ isLoggingIn: true, error: null, loadingMessage: "Logging in..." });
           invariant(client.state === "with-user-signer", "Client is not logged out");
 
-          const loggedInClient = await client.logIn();
+          const loggedInClient = (await client.logIn()) as unknown as undefined;
 
           set({
             loggedInClient,
