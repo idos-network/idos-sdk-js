@@ -14,6 +14,7 @@
     "@stablelib/hex": "catalog:core",
     "@stablelib/sha256": "catalog:core",
     "@stablelib/utf8": "catalog:core",
+    "es-toolkit": "catalog:core",
     "borsh": "catalog:core",
     "bs58": "catalog:core",
     "scrypt-js": "^3.0.1",
