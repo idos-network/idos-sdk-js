@@ -106,6 +106,8 @@ export const useIdosStore = create<IdosStore>()(
 
       initializeClient: async (signer) => {
         try {
+          // biome-ignore lint/suspicious/noDebugger: testing
+          debugger;
           if (typeof window === "undefined") return;
           const { idOSClientConfiguration } = await import("@idos-network/client");
           const idosConfig = new idOSClientConfiguration({
@@ -135,6 +137,8 @@ export const useIdosStore = create<IdosStore>()(
 
       login: async () => {
         const { client } = get();
+        // biome-ignore lint/suspicious/noDebugger: testing
+        debugger;
         if (!client) {
           set({ error: "Client not initialized", loadingMessage: null });
           return;
