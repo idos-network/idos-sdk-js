@@ -182,13 +182,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     const payload = message.data.payload;
     const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
 
-    const response = {
-      status: "success",
-      data: signature,
-    };
-
-    message.ports[0].postMessage(response);
-    message.ports[0].close();
+    await this.requestToEnclave({
+      signTypedDataResponse: {
+        signature,
+      },
+    });
   }
 
   async backupPasswordOrSecret(): Promise<void> {

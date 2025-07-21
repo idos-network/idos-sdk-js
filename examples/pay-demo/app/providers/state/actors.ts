@@ -9,7 +9,7 @@ export const actors = {
     const config = await createIDOSClient({
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://idos-enclave-nyzf3joy2-idos-engineering.vercel.app",
+        url: "https://idos-enclave-7qs1qxt4w-idos-engineering.vercel.app",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });

@@ -13,6 +13,7 @@ type RequestData = {
   theme?: string;
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
+  signature?: string;
 };
 
 type RequestName =
@@ -24,6 +25,7 @@ type RequestName =
   | "configure"
   | "storage"
   | "backupPasswordOrSecret"
+  | "signTypedDataResponse"
   | "target";
 
 interface EnclaveOptions extends LocalEnclaveOptions {
@@ -40,6 +42,9 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
   private unlockButton: HTMLButtonElement;
   private confirmButton: HTMLButtonElement;
   private backupButton: HTMLButtonElement;
+
+  // Signer resolver
+  private signTypeDataResponseResolver: ((signature: string) => void)[] = [];
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
     super({
@@ -152,17 +157,21 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
   // Override signer method to ask the iframe provider
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
     return new Promise((resolve, _reject) => {
-      window.addEventListener("message", (event) => {
-        if (event.data.type === "idOS:signTypedDataResponse") {
-          resolve(event.data.payload);
-        }
-      });
+      this.signTypeDataResponseResolver.push(resolve);
 
       window.parent.postMessage(
         { type: "idOS:signTypedData", payload: { domain, types, value } },
         this.parentOrigin,
       );
     });
+  }
+
+  async signTypedDataResponse(signature: string): Promise<void> {
+    const resolver = this.signTypeDataResponseResolver.pop();
+
+    if (!resolver) throw new Error("No resolver found");
+
+    resolver(signature);
   }
 
   async backupPasswordOrSecret(): Promise<void> {
@@ -209,6 +218,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           theme,
           expectedUserEncryptionPublicKey,
           walletAddress,
+          signature,
         } = requestData;
 
         const paramBuilder: Record<RequestName, () => unknown[]> = {
@@ -220,6 +230,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           configure: () => [mode, theme, walletAddress],
           storage: () => [userId, expectedUserEncryptionPublicKey],
           backupPasswordOrSecret: () => [],
+          signTypedDataResponse: () => [signature],
           target: () => [],
         };
 
