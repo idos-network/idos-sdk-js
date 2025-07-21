@@ -3,6 +3,7 @@
   "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.0",
   "dependencies": {
+    "@idos-network/core": "workspace:*",
     "@stablelib/utf8": "^2.0.1",
     "@stablelib/base64": "^2.0.1",
     "scrypt-js": "^3.0.1",
