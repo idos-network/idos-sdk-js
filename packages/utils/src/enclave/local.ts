@@ -33,7 +33,7 @@ export class LocalEnclave<
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
 
-  constructor(options: LocalEnclaveOptions) {
+  constructor(options: K) {
     super(options);
 
     // By default, we only allow password auth method
@@ -77,6 +77,9 @@ export class LocalEnclave<
       this.authMethod = undefined;
       await this.reset();
     }
+
+    // Load stored user id
+    this.userId = await this.store.get<string>("user-id");
   }
 
   async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
@@ -208,6 +211,8 @@ export class LocalEnclave<
       throw new Error("userId is not found");
     }
 
+    // I really don't like this, I guess the walletAddress should be stored in the store.
+    // like the userId.
     if (!this.options.walletAddress) {
       throw new Error("walletAddress is not found");
     }
