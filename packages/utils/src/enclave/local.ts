@@ -65,8 +65,7 @@ export class LocalEnclave<
   async load(): Promise<void> {
     await super.load();
 
-    const secretKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
+    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("secret-key");
 
     if (secretKey) await this.setKeyPair(secretKey);
 
@@ -149,7 +148,7 @@ export class LocalEnclave<
     throw new Error("Method 'chooseAuthAndPassword' has to be implemented in the subclass.");
   }
 
-  // chooseAuthAndPassword & confirm method needs to be implemented
+  // chooseAuthAndPassword & confirm & backupPasswordOrSecret method needs to be implemented
 
   async encrypt(
     message: Uint8Array,
@@ -174,45 +173,12 @@ export class LocalEnclave<
   }
 
   async setKeyPair(secretKey: Uint8Array<ArrayBufferLike>): Promise<void> {
+    await this.store.set("secret-key", secretKey);
+
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     await this.storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
     await this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
-  }
-
-  async backupPasswordOrSecret(): Promise<void> {
-    const abortController = new AbortController();
-
-    /*window.addEventListener(
-      "message",
-      async (event) => {
-        if (event.data.type !== "idOS:store") return;
-
-        let status = "";
-
-        try {
-          status = "success";
-        } catch (_) {
-          status = "failure";
-        }
-
-        event.ports[0].postMessage({
-          result: {
-            type: "idOS:store",
-            status,
-          },
-        });
-        event.ports[0].close();
-        abortController.abort();
-      },
-      { signal: abortController.signal },
-    );*/
-
-    try {
-      await this.backupPasswordOrSecret();
-    } catch (error) {
-      console.error(error);
-    }
   }
 
   async ensureMPCPrivateKey(): Promise<Uint8Array<ArrayBufferLike>> {

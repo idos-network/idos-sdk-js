@@ -177,7 +177,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
-    if (message.data.type !== "idOS:signTypedData") return;
+    if (message.data.type !== "idOS:signTypedData" || message.origin !== this.hostUrl.origin)
+      return;
 
     const payload = message.data.payload;
     const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
@@ -190,35 +191,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   async backupPasswordOrSecret(): Promise<void> {
-    const abortController = new AbortController();
     this.showEnclave();
-
-    window.addEventListener(
-      "message",
-      async (event) => {
-        if (event.data.type !== "idOS:store" || event.origin !== this.hostUrl.origin) return;
-
-        let status = "";
-
-        try {
-          status = "success";
-          this.hideEnclave();
-        } catch (_) {
-          status = "failure";
-          this.hideEnclave();
-        }
-
-        event.ports[0].postMessage({
-          result: {
-            type: "idOS:store",
-            status,
-          },
-        });
-        event.ports[0].close();
-        abortController.abort();
-      },
-      { signal: abortController.signal },
-    );
 
     try {
       await this.requestToEnclave({

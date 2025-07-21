@@ -5,9 +5,8 @@ import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
 import Auth from "@/features/auth";
+import PasswordOrKeyBackup from "@/features/backup";
 import Confirmation from "@/features/confirmation";
-import { PasswordOrKeyBackup } from "@/features/recovery/backup";
-import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
 import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
@@ -51,9 +50,9 @@ export function App({ store, enclave }: AppProps) {
     new URLSearchParams(window.location.search).get("userId"),
   );
 
-  const isRecoveryMode = useSignal(false);
   const isBackupMode = useSignal(false);
-  const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
+  const backupAuthMethod = useSignal<AuthMethod | null>(null);
+  const backupSecret = useSignal<string | null>(null);
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -124,6 +123,13 @@ export function App({ store, enclave }: AppProps) {
           previouslyUsedAuthMethod.value = requestData.message?.previouslyUsedAuthMethod;
           break;
 
+        // TODO: Password intent is deprecated, remove it in the future.
+        case "password":
+          method.value = null;
+          allowedAuthMethods.value = ["password"];
+          previouslyUsedAuthMethod.value = "password";
+          break;
+
         case "confirm":
           confirm.value = true;
           origin.value = requestData.message?.origin;
@@ -132,7 +138,8 @@ export function App({ store, enclave }: AppProps) {
 
         case "backupPasswordOrSecret":
           isBackupMode.value = true;
-          backupStatus.value = requestData.message?.status;
+          backupAuthMethod.value = requestData.message?.authMethod;
+          backupSecret.value = requestData.message?.secret;
           break;
       }
 
@@ -142,7 +149,6 @@ export function App({ store, enclave }: AppProps) {
     [
       enclave,
       isBackupMode,
-      backupStatus,
       confirm,
       message,
       origin,
@@ -152,6 +158,8 @@ export function App({ store, enclave }: AppProps) {
       method,
       allowedAuthMethods,
       previouslyUsedAuthMethod,
+      backupAuthMethod,
+      backupSecret,
     ],
   );
 
@@ -186,22 +194,14 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  if (isBackupMode.value) {
+  if (isBackupMode.value && backupAuthMethod.value && backupSecret.value) {
     return (
       <Layout>
         <PasswordOrKeyBackup
-          store={store}
+          authMethod={backupAuthMethod.value}
+          secret={backupSecret.value}
           onSuccess={onSuccess}
-          backupStatus={backupStatus.value}
         />
-      </Layout>
-    );
-  }
-
-  if (isRecoveryMode.value) {
-    return (
-      <Layout>
-        <PasswordOrKeyRecovery onSuccess={onSuccess} />
       </Layout>
     );
   }

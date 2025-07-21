@@ -178,13 +178,22 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
 
+    const secretKey = await this.store.get<Uint8Array<ArrayBufferLike>>("secret-key");
+    const preferredAuthMethod = await this.store.get<AuthMethod>("preferred-auth-method");
+
+    if (!secretKey || !preferredAuthMethod) {
+      // First we need to do the auth
+      await this.keys();
+    }
+
     return new Promise((resolve, reject) => {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
 
           await this.openDialog("backupPasswordOrSecret", {
-            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+            authMethod: preferredAuthMethod,
+            secret: secretKey,
           });
 
           resolve();
@@ -252,23 +261,6 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     });
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
-  private async handleIDOSStore(payload: any) {
-    return new Promise((resolve, reject) => {
-      const { port1, port2 } = new MessageChannel();
-      port1.onmessage = async ({ data: { error, result } }) => {
-        if (error) return reject(error);
-
-        if (result.type === "idOS:store") {
-          resolve(result);
-          port1.close();
-        }
-      };
-
-      window.parent.postMessage({ type: "idOS:store", payload }, this.parentOrigin, [port2]);
-    });
-  }
-
   private async openDialog(
     intent: string,
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
@@ -314,18 +306,6 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           port1.close();
           // this.dialog.close();
           return reject(error);
-        }
-        if (result.type === "idOS:store" && result.status === "pending") {
-          result = await this.handleIDOSStore(result.payload);
-
-          return this.dialog?.postMessage(
-            {
-              intent: "backupPasswordOrSecret",
-              message: { status: result.status },
-              configuration: this.options,
-            },
-            this.dialog.origin,
-          );
         }
 
         port1.close();
