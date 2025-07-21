@@ -5,7 +5,7 @@ import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
 import Auth from "@/features/auth";
-import Confirmation from "@/features/confirmation/confirmation";
+import Confirmation from "@/features/confirmation";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
 import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
 import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";

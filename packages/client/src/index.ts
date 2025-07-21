@@ -34,7 +34,6 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type {
   DelegatedWriteGrant,
-  idOSCredential,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
@@ -42,6 +41,7 @@ import type {
   Wallet,
 } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import type { idOSCredential } from "@idos-network/credentials";
 import {
   base64Decode,
   base64Encode,
@@ -130,12 +130,6 @@ export class idOSClientIdle {
 
     await params.enclaveProvider.load();
 
-    const storedSignerAddress = await params.store.get<string>("signer-address");
-
-    if (storedSignerAddress) {
-      await params.enclaveProvider.reconfigure({ walletAddress: storedSignerAddress });
-    }
-
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
@@ -150,6 +144,12 @@ export class idOSClientIdle {
       signer,
     );
     this.kwilClient.setSigner(kwilSigner);
+
+    const storedSignerAddress = await this.store.get<string>("signer-address");
+
+    if (storedSignerAddress) {
+      await this.enclaveProvider.reconfigure({ walletAddress: storedSignerAddress });
+    }
 
     return new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
   }

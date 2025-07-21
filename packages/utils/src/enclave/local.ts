@@ -15,7 +15,9 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   };
 }
 
-export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
+export class LocalEnclave<
+  K extends LocalEnclaveOptions = LocalEnclaveOptions,
+> extends BaseProvider<K> {
   protected keyPair: nacl.BoxKeyPair | null = null;
   protected authMethod?: AuthMethod;
   protected allowedAuthMethods: AuthMethod[];

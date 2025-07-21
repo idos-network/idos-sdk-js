@@ -1,4 +1,4 @@
-import { LocalEnclave } from "@idos-network/utils/enclave/local";
+import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
 type AuthMethod = "mpc" | "password";
 
@@ -26,9 +26,11 @@ type RequestName =
   | "backupPasswordOrSecret"
   | "target";
 
-export class Enclave extends LocalEnclave {
-  private configuration: { mode: string; theme: string; walletAddress: string };
+interface EnclaveOptions extends LocalEnclaveOptions {
+  walletAddress: string | "";
+}
 
+export class Enclave extends LocalEnclave<EnclaveOptions> {
   // Origins
   private authorizedOrigins: string[] = [];
   private parentOrigin: string;
@@ -50,6 +52,7 @@ export class Enclave extends LocalEnclave {
               contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
             }
           : undefined,
+      walletAddress: "",
     });
 
     this.parentOrigin = parentOrigin;
@@ -59,7 +62,6 @@ export class Enclave extends LocalEnclave {
     this.backupButton = document.querySelector("button#backup") as HTMLButtonElement;
 
     this.dialog = null;
-    this.configuration = { mode: "", theme: "", walletAddress: "" };
 
     this.listenToRequests();
   }
@@ -133,10 +135,14 @@ export class Enclave extends LocalEnclave {
     );
   }
 
-  async configure(mode: "new" | "existing", theme: string, walletAddress: string) {
-    this.configuration = { mode, theme, walletAddress };
+  async configure(mode: "new" | "existing", theme: "light" | "dark", walletAddress: string) {
+    await this.reconfigure({
+      mode,
+      theme,
+      walletAddress,
+    });
 
-    if (mode === "new") {
+    if (this.options.mode === "new") {
       this.unlockButton.classList.add("create");
     } else {
       this.unlockButton.classList.remove("create");
@@ -266,7 +272,7 @@ export class Enclave extends LocalEnclave {
 
     const width = 600;
     const height =
-      this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
+      this.options?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -305,7 +311,7 @@ export class Enclave extends LocalEnclave {
             {
               intent: "backupPasswordOrSecret",
               message: { status: result.status },
-              configuration: this.configuration,
+              configuration: this.options,
             },
             this.dialog.origin,
           );
@@ -318,7 +324,7 @@ export class Enclave extends LocalEnclave {
       };
 
       this.dialog?.postMessage(
-        { intent, message, configuration: this.configuration },
+        { intent, message, configuration: this.options },
         this.dialog?.origin,
         [port2],
       );
