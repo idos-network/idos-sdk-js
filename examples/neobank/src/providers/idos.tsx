@@ -30,7 +30,7 @@ export function IdosProvider() {
   }, [loggedInClient, findSharedCredential]);
 
   return (
-    <div className="absolute bottom-[5%] z-10 h-[80px] w-[250px] self-center">
+    <div className="absolute bottom-[5%] z-[-1] h-[80px] w-[250px] self-center">
       <div id="idOS-enclave" />
     </div>
   );
