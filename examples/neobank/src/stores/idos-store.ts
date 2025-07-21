@@ -136,9 +136,9 @@ export const useIdosStore = create<IdosStore>()(
       },
 
       login: async () => {
-        const { client } = get();
         // biome-ignore lint/suspicious/noDebugger: testing
         debugger;
+        const { client } = get();
         if (!client) {
           set({ error: "Client not initialized", loadingMessage: null });
           return;
