@@ -96,6 +96,9 @@ const initialState: IdosState = {
   loadingMessage: null,
 };
 
+const NODES_URL = process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "";
+const ENCLAVE_URL = process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "";
+console.log({ NODES_URL, ENCLAVE_URL });
 export const useIdosStore = create<IdosStore>()(
   devtools(
     (set, get) => ({
@@ -103,13 +106,15 @@ export const useIdosStore = create<IdosStore>()(
 
       initializeClient: async (signer) => {
         try {
+          // biome-ignore lint/suspicious/noDebugger: testing
+          debugger;
           if (typeof window === "undefined") return;
           const { idOSClientConfiguration } = await import("@idos-network/client");
           const idosConfig = new idOSClientConfiguration({
-            nodeUrl: process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "",
+            nodeUrl: NODES_URL,
             enclaveOptions: {
               container: "#idOS-enclave",
-              url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
+              url: ENCLAVE_URL,
             },
           });
           set({ isInitializing: true, error: null, loadingMessage: "Initializing idOS client..." });
@@ -132,6 +137,8 @@ export const useIdosStore = create<IdosStore>()(
 
       login: async () => {
         const { client } = get();
+        // biome-ignore lint/suspicious/noDebugger: testing
+        debugger;
         if (!client) {
           set({ error: "Client not initialized", loadingMessage: null });
           return;
