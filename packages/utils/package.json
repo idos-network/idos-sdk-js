@@ -33,6 +33,10 @@
     "./enclave": {
       "types": "./dist/enclave/index.d.ts",
       "import": "./dist/enclave/index.js"
+    },
+    "./enclave/local": {
+      "types": "./dist/enclave/local.d.ts",
+      "import": "./dist/enclave/local.js"
     }
   },
   "files": [

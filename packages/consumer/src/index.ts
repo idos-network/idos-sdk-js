@@ -20,7 +20,6 @@ import type { idOSCredential, idOSGrant, PassportingPeer } from "@idos-network/c
 import {
   type AvailableIssuerType,
   type Credentials,
-  type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
   verifyCredentials,

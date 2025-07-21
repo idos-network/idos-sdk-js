@@ -127,68 +127,63 @@ export default function Popup(): JSX.Element {
           <strong>User ID:</strong> {userId || "N/A"}
         </div>
 
-        {allowedAuthMethods && allowedAuthMethods.length > 1 && !selectedAuthMethod && <div>
-          <strong>Choose your authentication method:</strong>
-          <div className="flex flex-row gap-2 p-10 w-full justify-center">
-            {allowedAuthMethods?.map((method) => (
-              <button
-                type="button"
-                className={`w-1/2 btn btn-soft ${method === "mpc" ? "btn-primary" : "btn-secondary"}`}
-                key={method}
-                onClick={() => setSelectedAuthMethod(method)}
-              >
-                {method[0].toLocaleUpperCase() + method.slice(1)}
-              </button>
-            ))}
+        {allowedAuthMethods && allowedAuthMethods.length > 1 && !selectedAuthMethod && (
+          <div>
+            <strong>Choose your authentication method:</strong>
+            <div className="flex flex-row gap-2 p-10 w-full justify-center">
+              {allowedAuthMethods?.map((method) => (
+                <button
+                  type="button"
+                  className={`w-1/2 btn btn-soft ${method === "mpc" ? "btn-primary" : "btn-secondary"}`}
+                  key={method}
+                  onClick={() => setSelectedAuthMethod(method)}
+                >
+                  {method[0].toLocaleUpperCase() + method.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
-        }
+        )}
 
-        {selectedAuthMethod === "password" && <div
-          style={{
-            padding: "16px",
-            backgroundColor: "#dbeafe",
-            borderRadius: "8px",
-            border: "1px solid #3b82f6",
-          }}
-        >
-          <strong>Password:</strong>
-          <input
-            type="password"
-            value={password ?? ""}
-            onChange={(e) => setPassword(e.target.value)}
+        {selectedAuthMethod === "password" && (
+          <div
             style={{
-              width: "100%",
-              marginTop: "8px",
-              padding: "8px 12px",
-              border: "1px solid #d1d5db",
-              borderRadius: "6px",
-              fontSize: "14px",
-              backgroundColor: "white",
+              padding: "16px",
+              backgroundColor: "#dbeafe",
+              borderRadius: "8px",
+              border: "1px solid #3b82f6",
             }}
-          />
-          {error && <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{error}</p>}
-        </div>}
+          >
+            <strong>Password:</strong>
+            <input
+              type="password"
+              value={password ?? ""}
+              onChange={(e) => setPassword(e.target.value)}
+              style={{
+                width: "100%",
+                marginTop: "8px",
+                padding: "8px 12px",
+                border: "1px solid #d1d5db",
+                borderRadius: "6px",
+                fontSize: "14px",
+                backgroundColor: "white",
+              }}
+            />
+            {error && <p style={{ color: "red", fontSize: "12px", marginTop: "4px" }}>{error}</p>}
+          </div>
+        )}
       </div>
 
-      {selectedAuthMethod === "password" &&
+      {selectedAuthMethod === "password" && (
         <div className="flex flex-row gap-2 w-full justify-end border-t-2 pt-2 border-gray-200">
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="btn btn-soft btn-secondary"
-          >
+          <button type="button" onClick={handleCancel} className="btn btn-soft btn-secondary">
             Reject
           </button>
-          <button
-            type="button"
-            onClick={handleDeriveKey}
-            className="btn btn-soft btn-primary"
-          >
+          <button type="button" onClick={handleDeriveKey} className="btn btn-soft btn-primary">
             OK
           </button>
         </div>
-      }
+      )}
     </div>
   );
 }

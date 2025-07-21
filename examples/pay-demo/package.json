@@ -44,7 +44,7 @@
     "tailwindcss": "^4.1.8",
     "typescript": "catalog:build",
     "vite": "catalog:build",
-    "vite-plugin-node-polyfills": "^0.23.0",
+    "vite-plugin-node-polyfills": "0.24.0",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "private": true,

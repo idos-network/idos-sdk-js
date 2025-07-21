@@ -106,11 +106,14 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
       await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
 
     if (!secretKey) {
-      const { authMethod, password } = await this.chooseAuthAndPassword();
+      const { authMethod, password, duration } = await this.chooseAuthAndPassword();
 
       if (!authMethod || !this.allowedAuthMethods.includes(authMethod)) {
         throw new Error(`Invalid auth method: ${authMethod}`);
       }
+
+      // Set or clear the remember duration
+      await this.store.setRememberDuration(duration);
 
       if (authMethod === "password" && password) {
         if (!this.userId) {
@@ -136,7 +139,11 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   // This method needs to be implemented in the subclass
-  async chooseAuthAndPassword(): Promise<{ authMethod: AuthMethod; password?: string }> {
+  async chooseAuthAndPassword(): Promise<{
+    authMethod: AuthMethod;
+    password?: string;
+    duration?: number;
+  }> {
     throw new Error("Method 'chooseAuthAndPassword' has to be implemented in the subclass.");
   }
 
@@ -229,10 +236,6 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
-    if (!this.signer) {
-      throw new Error("Signer is not found");
-    }
-
     if (!this.userId) {
       throw new Error("userId is not found");
     }
@@ -251,7 +254,11 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
 
     const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
 
-    const signedMessage = await this.signer.signTypedData(messageToSign.domain, messageToSign.types, messageToSign.value);
+    const signedMessage = await this.signTypedData(
+      messageToSign.domain,
+      messageToSign.types,
+      messageToSign.value,
+    );
 
     return this.mpcClient.downloadSecret(
       this.userId,
@@ -262,10 +269,6 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
   }
 
   async uploadSecret(secret: Uint8Array<ArrayBufferLike>): Promise<{ status: string }> {
-    if (!this.signer) {
-      throw new Error("Signer is not found");
-    }
-
     if (!this.userId) {
       throw new Error("userId is not found");
     }
@@ -281,13 +284,12 @@ export class LocalEnclave extends BaseProvider<LocalEnclaveOptions> {
     const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
 
-    const signedMessage = await this.signer?.signTypedData(messageToSign.domain as any, messageToSign.types as any, messageToSign.value as any);
-
-    return this.mpcClient.uploadSecret(
-      this.userId,
-      uploadRequest,
-      signedMessage,
-      blindedShares,
+    const signedMessage = await this.signTypedData(
+      messageToSign.domain as any,
+      messageToSign.types as any,
+      messageToSign.value as any,
     );
+
+    return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
   }
 }

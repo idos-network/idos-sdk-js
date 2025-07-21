@@ -7,5 +7,12 @@ export default defineConfig(({ isSsrBuild }) => ({
   build: {
     target: isSsrBuild ? "node22" : "esnext",
   },
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
+  plugins: [
+    tailwindcss(),
+    reactRouter(),
+    tsconfigPaths(),
+  ],
+  resolve: {
+    external: ["@partisiablockchain/abi-client", "@partisiablockchain/blockchain-api-transaction-client"],
+  }
 }));

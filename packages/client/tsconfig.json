@@ -28,5 +28,5 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*", "../utils/src/enclave/types.ts", "../utils/src/enclave/local.ts"]
+  "include": ["./src/**/*"]
 }

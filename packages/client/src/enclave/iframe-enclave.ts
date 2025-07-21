@@ -25,8 +25,9 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   async load(): Promise<void> {
-    await super.load();
+    // Don't call super.load() here, because we want to load the enclave first.
     await this.loadEnclave();
+    await this.reconfigure();
     await this.bindMessageListener();
   }
 
@@ -176,14 +177,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
-    if (message.data.type !== "idOS-MPC:signMessage") return;
-
-    if (!this.signer) {
-      throw new Error("Signer is not set");
-    }
+    if (message.data.type !== "idOS:signTypedData") return;
 
     const payload = message.data.payload;
-    const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
+    const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
 
     const response = {
       status: "success",

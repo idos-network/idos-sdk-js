@@ -76,7 +76,11 @@ export class Enclave extends LocalEnclave {
     return this.authorizedOrigins.includes(this.parentOrigin);
   }
 
-  async chooseAuthAndPassword(): Promise<{ authMethod: AuthMethod; password?: string }> {
+  async chooseAuthAndPassword(): Promise<{
+    authMethod: AuthMethod;
+    password?: string;
+    duration?: number;
+  }> {
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
@@ -86,10 +90,11 @@ export class Enclave extends LocalEnclave {
 
         let authMethod: AuthMethod | undefined;
         let password: string | undefined;
+        let duration: number | undefined;
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
-          ({ authMethod, password } = await this.openDialog("auth", {
+          ({ authMethod, password, duration } = await this.openDialog("auth", {
             allowedAuthMethods: this.allowedAuthMethods,
             previouslyUsedAuthMethod: this.authMethod,
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
@@ -105,7 +110,7 @@ export class Enclave extends LocalEnclave {
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
-        return resolve({ authMethod, password });
+        return resolve({ authMethod, password, duration });
       });
     });
   }
@@ -136,6 +141,22 @@ export class Enclave extends LocalEnclave {
     } else {
       this.unlockButton.classList.remove("create");
     }
+  }
+
+  // Override signer method to ask the iframe provider
+  async signTypedData(domain: any, types: any, value: any): Promise<string> {
+    return new Promise((resolve, _reject) => {
+      window.addEventListener("message", (event) => {
+        if (event.data.type === "idOS:signTypedDataResponse") {
+          resolve(event.data.payload);
+        }
+      });
+
+      window.parent.postMessage(
+        { type: "idOS:signTypedData", payload: { domain, types, value } },
+        this.parentOrigin,
+      );
+    });
   }
 
   async backupPasswordOrSecret(): Promise<void> {
@@ -235,7 +256,12 @@ export class Enclave extends LocalEnclave {
     intent: string,
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
     message?: any,
-  ): Promise<{ authMethod?: AuthMethod; password?: string; confirmed?: boolean }> {
+  ): Promise<{
+    authMethod?: AuthMethod;
+    password?: string;
+    duration?: number;
+    confirmed?: boolean;
+  }> {
     if (!this.userId) throw new Error("Can't open dialog without userId");
 
     const width = 600;

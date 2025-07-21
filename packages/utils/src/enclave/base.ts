@@ -7,9 +7,7 @@ import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveOptions, StoredDat
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
 
-  protected signer?: {
-    signTypedData: (domain: any, types: any, value: any) => Promise<string>;
-  };
+  protected _signMethod?: (domain: any, types: any, value: any) => Promise<string>;
 
   constructor(options: K) {
     this.options = options;
@@ -18,7 +16,15 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   setSigner(signer: {
     signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
   }): void {
-    this.signer = signer;
+    this._signMethod = signer.signTypedData.bind(signer);
+  }
+
+  async signTypedData(domain: any, types: any, value: any): Promise<string> {
+    if (!this._signMethod) {
+      throw new Error("Signer is not set");
+    }
+
+    return this._signMethod(domain, types, value);
   }
 
   async reset(): Promise<void> {

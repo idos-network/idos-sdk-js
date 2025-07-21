@@ -4,9 +4,8 @@ import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
-import AuthMethodChooser from "@/features/auth/auth-method-chooser";
-import { PasswordForm } from "@/features/auth/password-form";
-import { Confirmation } from "@/features/confirmation/confirmation";
+import Auth from "@/features/auth";
+import Confirmation from "@/features/confirmation/confirmation";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
 import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
 import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
@@ -18,7 +17,7 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["password", "confirm", "auth", "backupPasswordOrSecret"];
+const allowedIntents: AllowedIntent[] = ["confirm", "auth", "backupPasswordOrSecret"];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -38,6 +37,8 @@ type AppProps = {
 
 export function App({ store, enclave }: AppProps) {
   const method = useSignal<AuthMethod | null>(null);
+  const allowedAuthMethods = useSignal<AuthMethod[] | null>(null);
+  const previouslyUsedAuthMethod = useSignal<AuthMethod | null>(null);
   const mode = useSignal<UIMode>("existing");
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const confirm = useSignal<boolean>(false);
@@ -119,10 +120,8 @@ export function App({ store, enclave }: AppProps) {
       switch (requestData.intent) {
         case "auth":
           method.value = null;
-          break;
-
-        case "password":
-          method.value = "password";
+          allowedAuthMethods.value = requestData.message?.allowedAuthMethods;
+          previouslyUsedAuthMethod.value = requestData.message?.previouslyUsedAuthMethod;
           break;
 
         case "confirm":
@@ -151,6 +150,8 @@ export function App({ store, enclave }: AppProps) {
       mode,
       encryptionPublicKey,
       method,
+      allowedAuthMethods,
+      previouslyUsedAuthMethod,
     ],
   );
 
@@ -171,24 +172,16 @@ export function App({ store, enclave }: AppProps) {
     onError,
     onSuccess,
     mode: mode.value,
+    allowedAuthMethods: allowedAuthMethods.value ?? [],
+    previouslyUsedAuthMethod: previouslyUsedAuthMethod.value,
+    encryptionPublicKey: encryptionPublicKey.value,
+    userId: userId.value,
   };
 
   if (confirm.value && message.value) {
     return (
       <Layout>
         <Confirmation message={message.value} origin={origin.value} onSuccess={onSuccess} />
-      </Layout>
-    );
-  }
-
-  if (method.value === "password") {
-    return (
-      <Layout>
-        <PasswordForm
-          {...methodProps}
-          encryptionPublicKey={encryptionPublicKey.value}
-          userId={userId.value}
-        />
       </Layout>
     );
   }
@@ -215,15 +208,7 @@ export function App({ store, enclave }: AppProps) {
 
   return (
     <Layout>
-      <AuthMethodChooser
-        {...methodProps}
-        setMethod={(newMethod: AuthMethod) => {
-          if (method.value === null) {
-            // Don't override the method if it's already set
-            method.value = newMethod;
-          }
-        }}
-      />
+      <Auth {...methodProps} />
     </Layout>
   );
 }

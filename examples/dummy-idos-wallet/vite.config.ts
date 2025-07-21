@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-param-reassign */
 
+import { resolve } from "node:path";
 import { crx } from "@crxjs/vite-plugin";
 import react from "@vitejs/plugin-react";
-import { resolve } from "path";
 import { defineConfig } from "vite";
-import tsconfigPaths from "vite-tsconfig-paths";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 import manifest from "./src/manifest";
 

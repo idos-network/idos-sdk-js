@@ -9,5 +9,6 @@ export interface Store {
   // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
   set<K = any>(key: string, value: K): Promise<void>;
   reset(): Promise<void>;
+  setRememberDuration(duration?: number): Promise<void>;
   pipeCodec<T>(codec: PipeCodecArgs<T>): Store;
 }

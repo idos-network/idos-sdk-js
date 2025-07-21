@@ -128,13 +128,13 @@ export class idOSClientIdle {
       chainId: params.chainId,
     });
 
+    await params.enclaveProvider.load();
+
     const storedSignerAddress = await params.store.get<string>("signer-address");
 
     if (storedSignerAddress) {
       await params.enclaveProvider.reconfigure({ walletAddress: storedSignerAddress });
     }
-
-    await params.enclaveProvider.load();
 
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }

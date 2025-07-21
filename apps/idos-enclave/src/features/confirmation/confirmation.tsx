@@ -11,7 +11,7 @@ export interface ConfirmationProps {
 
 const sanitize = (html: string) => DOMPurify.sanitize(html, { ALLOWED_TAGS: [] });
 
-export function Confirmation({ onSuccess, origin, message }: ConfirmationProps) {
+export default function Confirmation({ onSuccess, origin, message }: ConfirmationProps) {
   return (
     <div className="flex flex-col space-y-5 px-3 md:px-0">
       <Heading>Confirmation request</Heading>

@@ -47,12 +47,18 @@ class PortManager {
       }
     }
 
+    console.log(import.meta.env);
+
     const configuration = new idOSClientConfiguration<LocalWalletEnclave>({
-      nodeUrl: "https://nodes.staging.idos.network",
-      chainId: "idos-staging",
+      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      chainId: import.meta.env.VITE_IDOS_CHAIN_ID,
       store: this.store,
       enclaveOptions: {
         allowedAuthMethods: ["password", "mpc"],
+        mpcConfiguration: {
+          nodeUrl: import.meta.env.VITE_IDOS_MPC_NODE_URL,
+          contractAddress: import.meta.env.VITE_IDOS_MPC_CONTRACT_ADDRESS,
+        },
       },
       enclaveProvider: LocalWalletEnclave,
     });
@@ -62,6 +68,8 @@ class PortManager {
 
     this.idOSClientWithUserSigner = await idOSClient.withUserSigner(this.wallet);
     console.log("🔑 idOSClientWithUserSigner:", this.idOSClientWithUserSigner);
+
+    // await idOSClient.enclaveProvider.reset();
 
     try {
       this.tryLogIn();

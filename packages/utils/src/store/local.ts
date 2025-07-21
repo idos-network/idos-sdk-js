@@ -13,9 +13,7 @@ export class LocalStorageStore implements Store {
   constructor(storage: Storage = window.localStorage, keyPrefix = "idOS-") {
     this.storage = storage;
     this.keyPrefix = keyPrefix;
-    if (this.hasRememberDurationElapsed()) {
-      this.reset();
-    }
+    this.checkRememberDurationElapsed();
   }
 
   #setLocalStorage(key: string, value: string): void {
@@ -56,18 +54,20 @@ export class LocalStorageStore implements Store {
     return Promise.resolve(JSON.parse(value) as K);
   }
 
-  setRememberDuration(days?: number | string): void {
+  setRememberDuration(days?: number): Promise<void> {
     const daysNumber =
       !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString());
 
     if (!daysNumber) {
       this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
-      return;
+      return Promise.resolve();
     }
 
     const date = new Date();
     date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
     this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
+
+    return Promise.resolve();
   }
 
   async checkRememberDurationElapsed(): Promise<void> {

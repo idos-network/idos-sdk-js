@@ -5,15 +5,18 @@ let port: chrome.runtime.Port | null = null;
 
 function connectToBackground() {
   port = chrome.runtime.connect({ name: "idos-connection" });
-  
+
   port.onMessage.addListener((message) => {
     console.log("📨 Content script received:", message);
-    
+
     // Forward response to injected script
-    window.postMessage({
-      type: "IDOS_RESPONSE",
-      data: message
-    }, "*");
+    window.postMessage(
+      {
+        type: "IDOS_RESPONSE",
+        data: message,
+      },
+      "*",
+    );
   });
 
   port.onDisconnect.addListener(() => {
@@ -56,7 +59,7 @@ window.addEventListener("message", (event) => {
   }
 
   const { type, data } = event.data;
-  
+
   if (type === "IDOS_REQUEST") {
     console.log("📨 Forwarding request to background:", data);
     port.postMessage({
