@@ -1,5 +1,5 @@
-import { base64Decode } from "@idos-network/core";
 import { idOSIssuer as _idOSIssuer } from "@idos-network/issuer";
+import { base64Decode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 

@@ -4,17 +4,17 @@ import {
   type idOSClient,
   idOSClientConfiguration,
 } from "@idos-network/client";
-import type { DelegatedWriteGrant, KwilSigner } from "@idos-network/core";
-import {
-  base64Decode,
-  type IsleControllerMessage,
-  type IsleMessageHandler,
-  type IsleNodeMessage,
-  type IsleStatus,
-  type IsleTheme,
-  type idOSCredential,
-  utf8Decode,
+import type {
+  DelegatedWriteGrant,
+  IsleControllerMessage,
+  IsleMessageHandler,
+  IsleNodeMessage,
+  IsleStatus,
+  IsleTheme,
+  KwilSigner,
 } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
+import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import { type Config, watchAccount } from "@wagmi/core";
 import { JsonRpcSigner } from "ethers";

@@ -1,3 +1,4 @@
+import { encryptContent } from "@idos-network/core/cryptography";
 import {
   type CreateCredentialByDelegatedWriteGrantParams,
   createCredentialByDelegatedWriteGrant,
@@ -11,7 +12,6 @@ import type { idOSCredential } from "@idos-network/credentials";
 import {
   base64Decode,
   base64Encode,
-  encryptContent,
   hexEncode,
   hexEncodeSha256Hash,
   utf8Encode,

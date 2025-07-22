@@ -6,6 +6,8 @@
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@sanity/comlink": "^3.0.1",
     "@wagmi/core": "^2.16.4",
     "ethers": "catalog:ethereum",

@@ -65,7 +65,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "pnpm install --force && next build",
+    "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start"
   }
