@@ -4,6 +4,8 @@ import type {
   CredentialFields,
   CredentialSubject,
   IDDocumentType,
+  InsertableIDOSCredential,
+  idOSCredential,
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "./utils/types";
@@ -18,4 +20,6 @@ export type {
   IDDocumentType,
   VerifiableCredentialSubject,
   VerifiableCredential,
+  idOSCredential,
+  InsertableIDOSCredential,
 };

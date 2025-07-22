@@ -1,4 +1,4 @@
-import { base64Encode, hexEncodeSha256Hash, NoncedBox, utf8Encode } from "@idos-network/core";
+import { NoncedBox } from "@idos-network/core/cryptography";
 import {
   type CreateAccessGrantByDAGParams,
   createAccessGrantByDag,
@@ -16,7 +16,8 @@ import {
   type KwilActionClient,
   type KwilSignerType,
 } from "@idos-network/core/kwil-infra";
-import type { idOSCredential, idOSGrant, PassportingPeer } from "@idos-network/core/types";
+import type { idOSGrant, PassportingPeer } from "@idos-network/core/types";
+import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
   type Credentials,
@@ -25,6 +26,7 @@ import {
   type VerifiableCredentialSubject,
   verifyCredentials,
 } from "@idos-network/credentials";
+import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 

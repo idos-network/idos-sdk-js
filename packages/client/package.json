@@ -4,17 +4,19 @@
   "version": "1.0.0-rc.1.0",
   "clean-package": {
     "remove": [
-      "devDependencies.@idos-network/core"
+      "devDependencies.@idos-network/core",
+      "devDependencies.@idos-network/credentials"
     ]
   },
   "dependencies": {
     "@gemwallet/api": "catalog:core",
     "@kwilteam/kwil-js": "catalog:core",
-    "es-toolkit": "catalog:core"
+    "@idos-network/utils": "workspace:*",
+    "es-toolkit": "catalog:utils"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "@idos-network/utils": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
