@@ -8,6 +8,7 @@ import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveOptions, StoredDat
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
 
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   protected _signMethod?: (domain: any, types: any, value: any) => Promise<string>;
 
   constructor(options: K) {
@@ -20,6 +21,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     this._signMethod = signer.signTypedData.bind(signer);
   }
 
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
     if (!this._signMethod) {
       throw new Error("Signer is not set");
@@ -89,6 +91,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
   ): Promise<idOSCredential[]> {
+    // biome-ignore lint/suspicious/noExplicitAny: any is fine here
     const matchCriteria = (content: any, criteria: Record<string, unknown[]>) =>
       every(Object.entries(criteria), ([path, targetSet]) =>
         targetSet.includes(get(content, path)),

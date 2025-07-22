@@ -195,7 +195,7 @@ export class LocalEnclave<
       const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
 
       if (downloadStatus === "ok" && downloadedSecret) {
-        return downloadedSecret as any;
+        return downloadedSecret;
       }
 
       // TODO: If user change their mind and want to use MPC instead of password?...
@@ -264,8 +264,11 @@ export class LocalEnclave<
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
 
     const signedMessage = await this.signTypedData(
+      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       messageToSign.domain as any,
+      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       messageToSign.types as any,
+      // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       messageToSign.value as any,
     );
 

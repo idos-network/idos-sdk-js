@@ -15,7 +15,8 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["confirm", "auth", "backupPasswordOrSecret"];
+// TODO: Remove password intent in the future.
+const allowedIntents: AllowedIntent[] = ["confirm", "password", "auth", "backupPasswordOrSecret"];
 
 function Layout({ children }: PropsWithChildren) {
   return (

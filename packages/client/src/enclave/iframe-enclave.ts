@@ -1,3 +1,4 @@
+import type { idOSCredential } from "@idos-network/credentials";
 import { BaseProvider, type EnclaveOptions, type StoredData } from "@idos-network/utils/enclave";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
@@ -62,6 +63,15 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
         userId,
         expectedUserEncryptionPublicKey,
       },
+    });
+  }
+
+  async filterCredentials(
+    credentials: idOSCredential[],
+    privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
+  ): Promise<idOSCredential[]> {
+    return await this.requestToEnclave({
+      filterCredentials: { credentials, privateFieldFilters },
     });
   }
 

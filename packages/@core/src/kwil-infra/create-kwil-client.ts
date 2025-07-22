@@ -128,7 +128,7 @@ const createKwilClient =
       console.warn("🔑 chrome extension detected, patching kwil client");
       // @ts-expect-error This is expected since we are patching private method
       client.client.request = function () {
-        // biome-ignore lint/suspicious/noExplicitAny: This is kwills' code
+        // biome-ignore lint/suspicious/noExplicitAny: This is kwil's code
         const headers: any = {};
 
         // @ts-expect-error This is expected since we are patching private method

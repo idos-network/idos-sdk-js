@@ -3,6 +3,7 @@
   "description": "idOS Enclave",
   "version": "0.1.0",
   "dependencies": {
+    "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",

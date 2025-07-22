@@ -1,4 +1,5 @@
-import { STORAGE_KEYS, StoredData } from "@idos-network/utils/enclave";
+import type { idOSCredential } from "@idos-network/credentials";
+import { STORAGE_KEYS } from "@idos-network/utils/enclave";
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
 type AuthMethod = "mpc" | "password";
@@ -15,6 +16,8 @@ type RequestData = {
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
   signature?: string;
+  credentials?: idOSCredential[];
+  privateFieldFilters?: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> };
 };
 
 type RequestName =
@@ -28,6 +31,7 @@ type RequestName =
   | "storage"
   | "backupPasswordOrSecret"
   | "signTypedDataResponse"
+  | "filterCredentials"
   | "target";
 
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
@@ -168,7 +172,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     }
   }
 
-  // Override signer method to ask the iframe provider
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
     return new Promise((resolve, _reject) => {
       this.signTypeDataResponseResolver.push(resolve);
@@ -248,6 +252,8 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           expectedUserEncryptionPublicKey,
           walletAddress,
           signature,
+          credentials,
+          privateFieldFilters,
         } = requestData;
 
         const paramBuilder: Record<RequestName, () => unknown[]> = {
@@ -262,6 +268,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           signTypedDataResponse: () => [signature],
           target: () => [],
           load: () => [],
+          filterCredentials: () => [credentials, privateFieldFilters],
         };
 
         const paramBuilderFn = paramBuilder[requestName];
