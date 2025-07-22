@@ -2,32 +2,34 @@
  * Chrome extension implementation of the store.
  */
 
+import { durationElapsed, setDuration } from "./duration";
 import type { PipeCodecArgs, Store } from "./interface";
 
 export class ChromeExtensionStore implements Store {
+  readonly REMEMBER_DURATION_KEY = "storage-expiration";
   readonly keyPrefix: string;
 
   constructor(keyPrefix = "idOS-") {
     this.keyPrefix = keyPrefix;
+    this.checkRememberDurationElapsed();
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
   async get<K = any>(key: string): Promise<K | undefined> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     const result = await chrome.storage.local.get(prefixedKey);
-
-    try {
-      return JSON.parse(result[prefixedKey]);
-    } catch (error) {
-      console.error(`Error parsing JSON for key ${prefixedKey}:`, error);
-      return result[prefixedKey];
-    }
+    return result[prefixedKey];
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     return chrome.storage.local.set({ [prefixedKey]: value });
+  }
+
+  delete(key: string): Promise<void> {
+    const prefixedKey = `${this.keyPrefix}${key}`;
+    return chrome.storage.local.remove(prefixedKey);
   }
 
   async reset(): Promise<void> {
@@ -43,6 +45,37 @@ export class ChromeExtensionStore implements Store {
         }
       });
     });
+  }
+
+  async setRememberDuration(days?: number): Promise<void> {
+    const date = setDuration(days);
+
+    if (!date) {
+      await chrome.storage.local.remove(this.REMEMBER_DURATION_KEY);
+    } else {
+      await chrome.storage.local.set({
+        [this.REMEMBER_DURATION_KEY]: JSON.stringify(date.toISOString()),
+      });
+    }
+
+    return Promise.resolve();
+  }
+
+  async checkRememberDurationElapsed(): Promise<void> {
+    if (await this.hasRememberDurationElapsed()) {
+      await this.reset();
+    }
+  }
+
+  async hasRememberDurationElapsed(): Promise<boolean> {
+    const value = await chrome.storage.local.get(this.REMEMBER_DURATION_KEY);
+
+    try {
+      return durationElapsed(value[this.REMEMBER_DURATION_KEY]);
+    } catch (_) {
+      await chrome.storage.local.remove(this.REMEMBER_DURATION_KEY);
+      return false;
+    }
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): ChromeExtensionStore {

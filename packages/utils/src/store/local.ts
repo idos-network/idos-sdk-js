@@ -2,6 +2,7 @@
  * Local storage implementation of the store
  */
 
+import { durationElapsed, setDuration } from "./duration";
 import type { PipeCodecArgs, Store } from "./interface";
 
 export class LocalStorageStore implements Store {
@@ -13,9 +14,7 @@ export class LocalStorageStore implements Store {
   constructor(storage: Storage = window.localStorage, keyPrefix = "idOS-") {
     this.storage = storage;
     this.keyPrefix = keyPrefix;
-    if (this.hasRememberDurationElapsed()) {
-      this.reset();
-    }
+    this.checkRememberDurationElapsed();
   }
 
   #setLocalStorage(key: string, value: string): void {
@@ -56,43 +55,33 @@ export class LocalStorageStore implements Store {
     return Promise.resolve(JSON.parse(value) as K);
   }
 
-  setRememberDuration(days?: number | string): void {
-    const daysNumber =
-      !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString());
+  setRememberDuration(days?: number): Promise<void> {
+    const date = setDuration(days);
 
-    if (!daysNumber) {
+    if (!date) {
       this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
-      return;
+    } else {
+      this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
     }
 
-    const date = new Date();
-    date.setTime(date.getTime() + daysNumber * 24 * 60 * 60 * 1000);
-    this.#setLocalStorage(this.REMEMBER_DURATION_KEY, JSON.stringify(date.toISOString()));
+    return Promise.resolve();
   }
 
-  hasRememberDurationElapsed(): boolean {
+  async checkRememberDurationElapsed(): Promise<void> {
+    if (await this.hasRememberDurationElapsed()) {
+      await this.reset();
+    }
+  }
+
+  async hasRememberDurationElapsed(): Promise<boolean> {
     const value = this.#getLocalStorage(this.REMEMBER_DURATION_KEY);
-    if (!value) return false;
 
-    // If the value doesn't decode right, we're going to assume that somebody messed around with it.
-    // The absence of a value means `false` today. So, we're following suit on the reasoning: consider it absent.
-    // Furthermore, since this is not really a recoverable situation, we're going to clean up that stored value.
-
-    let str: string;
     try {
-      str = JSON.parse(value);
+      return durationElapsed(value);
     } catch (_) {
       this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
       return false;
     }
-
-    const expires = Date.parse(str);
-    if (Number.isNaN(expires)) {
-      this.#removeLocalStorage(this.REMEMBER_DURATION_KEY);
-      return false;
-    }
-
-    return expires < Date.now();
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
@@ -106,6 +95,11 @@ export class LocalStorageStore implements Store {
     }
 
     this.#setLocalStorage(key, JSON.stringify(value));
+    return Promise.resolve();
+  }
+
+  delete(key: string): Promise<void> {
+    this.#removeLocalStorage(key);
     return Promise.resolve();
   }
 
