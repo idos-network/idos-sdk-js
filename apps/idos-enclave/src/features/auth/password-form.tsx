@@ -80,7 +80,6 @@ export interface PasswordFormProps
 export default function PasswordForm({
   mode,
   onSuccess,
-  store,
   encryptionPublicKey,
   userId,
 }: PasswordFormProps) {
@@ -90,10 +89,7 @@ export default function PasswordForm({
   const isLoading = useSignal(false);
 
   async function derivePublicKeyFromPassword(password: string) {
-    // TODO Remove human-user migration code.
-    // TODO: What is a purpose of this store?
-    const salt =
-      (await store.get<string>("user-id")) || (await store.get<string>("human-id")) || userId;
+    const salt = userId;
 
     if (!salt) {
       throw new Error("Salt is invalid, please try again.");

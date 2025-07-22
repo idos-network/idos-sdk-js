@@ -23,14 +23,17 @@ export class MemoryStore implements Store {
       return undefined;
     }
 
-    const prefixedKey = `${this.keyPrefix}${key}`;
-    return this.storage.get(prefixedKey);
+    return this.storage.get(`${this.keyPrefix}${key}`);
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
   set<K = any>(key: string, value: K): Promise<void> {
-    const prefixedKey = `${this.keyPrefix}${key}`;
-    this.storage.set(prefixedKey, value);
+    this.storage.set(`${this.keyPrefix}${key}`, value);
+    return Promise.resolve();
+  }
+
+  delete(key: string): Promise<void> {
+    this.storage.delete(`${this.keyPrefix}${key}`);
     return Promise.resolve();
   }
 

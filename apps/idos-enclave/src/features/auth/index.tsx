@@ -1,4 +1,3 @@
-import type { Store } from "@idos-network/utils/store";
 import { effect, useSignal } from "@preact/signals";
 
 import type { AuthMethod, UIMode } from "@/types";
@@ -10,7 +9,6 @@ export interface AuthMethodProps {
   allowedAuthMethods: AuthMethod[];
   previouslyUsedAuthMethod: AuthMethod | null;
   mode: UIMode;
-  store: Store;
   onSuccess: (result: { authMethod: AuthMethod; password?: string; duration?: number }) => void;
   encryptionPublicKey?: string;
   userId: string | null;
@@ -18,7 +16,6 @@ export interface AuthMethodProps {
 
 export default function AuthMethodChooser({
   mode,
-  store,
   encryptionPublicKey,
   userId,
   onSuccess,
@@ -45,7 +42,6 @@ export default function AuthMethodChooser({
       <PasswordForm
         mode={mode}
         onSuccess={onSuccess}
-        store={store}
         encryptionPublicKey={encryptionPublicKey}
         userId={userId}
       />

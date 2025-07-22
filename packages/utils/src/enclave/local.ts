@@ -4,6 +4,7 @@ import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
+import { STORAGE_KEYS } from "./keys";
 import type { AuthMethod, EnclaveOptions, StoredData } from "./types";
 
 export interface LocalEnclaveOptions extends EnclaveOptions {
@@ -65,12 +66,12 @@ export class LocalEnclave<
   async load(): Promise<void> {
     await super.load();
 
-    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("secret-key");
+    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
 
     if (secretKey) await this.setKeyPair(secretKey);
 
     // Load auth method from store
-    this.authMethod = await this.store.get<AuthMethod>("preferred-auth-method");
+    this.authMethod = await this.store.get<AuthMethod>(STORAGE_KEYS.PREFERRED_AUTH_METHOD);
 
     if (this.authMethod && !this.options.allowedAuthMethods?.includes(this.authMethod)) {
       // We don't allow this auth method, reset the enclave
@@ -79,17 +80,17 @@ export class LocalEnclave<
     }
 
     // Load stored user id
-    this.userId = await this.store.get<string>("user-id");
+    this.userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
   }
 
   async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
-    const storedUserId = await this.store.get<string>("user-id");
+    const storedUserId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
     const storedEncryptionPublicKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-public-key");
+      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY);
 
     if (storedUserId !== userId) await this.store.reset();
 
-    userId && (await this.store.set("user-id", userId));
+    userId && (await this.store.set(STORAGE_KEYS.USER_ID, userId));
 
     // This will be used later in ready method
     this.userId = userId;
@@ -107,7 +108,7 @@ export class LocalEnclave<
 
   async keys(): Promise<Uint8Array | undefined> {
     let secretKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
+      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
 
     if (!secretKey) {
       const { authMethod, password, duration } = await this.chooseAuthAndPassword();
@@ -123,14 +124,17 @@ export class LocalEnclave<
         if (!this.userId) {
           throw new Error("userId is not found");
         }
-
+        
         const salt = this.userId;
         secretKey = await keyDerivation(password, salt);
+
+        // Store the password for backup purposes
+        await this.store.set(STORAGE_KEYS.PASSWORD, password);
       } else if (authMethod === "mpc") {
         secretKey = await this.ensureMPCPrivateKey();
       }
 
-      await this.store.set("preferred-auth-method", authMethod);
+      await this.store.set(STORAGE_KEYS.PREFERRED_AUTH_METHOD, authMethod);
     }
 
     if (!secretKey) {
@@ -176,12 +180,10 @@ export class LocalEnclave<
   }
 
   async setKeyPair(secretKey: Uint8Array<ArrayBufferLike>): Promise<void> {
-    await this.store.set("secret-key", secretKey);
-
     this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
-    await this.storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
-    await this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
+    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, this.keyPair.secretKey);
+    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, this.keyPair.publicKey);
   }
 
   async ensureMPCPrivateKey(): Promise<Uint8Array<ArrayBufferLike>> {

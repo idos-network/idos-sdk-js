@@ -26,6 +26,11 @@ export class ChromeExtensionStore implements Store {
     return chrome.storage.local.set({ [prefixedKey]: value });
   }
 
+  delete(key: string): Promise<void> {
+    const prefixedKey = `${this.keyPrefix}${key}`;
+    return chrome.storage.local.remove(prefixedKey);
+  }
+
   async reset(): Promise<void> {
     return new Promise((resolve) => {
       chrome.storage.local.get(null, (items) => {

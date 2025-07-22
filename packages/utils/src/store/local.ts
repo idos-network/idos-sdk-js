@@ -115,6 +115,11 @@ export class LocalStorageStore implements Store {
     return Promise.resolve();
   }
 
+  delete(key: string): Promise<void> {
+    this.#removeLocalStorage(key);
+    return Promise.resolve();
+  }
+
   async reset(): Promise<void> {
     for (const key of Object.keys(this.storage)) {
       if (key.startsWith(this.keyPrefix)) {

@@ -9,7 +9,7 @@ export const actors = {
     const config = await createIDOSClient({
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://idos-enclave-ch4wzziin-idos-engineering.vercel.app",
+        url: "https://2bfc9cec14ec.ngrok-free.app",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
@@ -67,8 +67,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      // No need to reset the enclave provider, since we are not using the enclave provider
 
       const krakenSharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
@@ -158,8 +156,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      await input.client.enclaveProvider.reset();
 
       const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,

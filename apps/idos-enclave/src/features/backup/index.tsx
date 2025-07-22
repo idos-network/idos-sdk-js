@@ -210,7 +210,7 @@ export default function PasswordOrKeyBackup({
         onCancel={toggleReveal}
         onDone={() => {
           onSuccess({
-            type: "idOS:store",
+            type: "idOS:backupPasswordOrSecret",
             status: "success",
           });
         }}

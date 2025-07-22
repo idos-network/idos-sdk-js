@@ -26,8 +26,15 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
   async load(): Promise<void> {
     // Don't call super.load() here, because we want to load the enclave first.
-    await this.loadEnclave();
+    await this.createAndLoadIframe();
+
+    // Load the enclave from the store (trigger load() method in the iframe)
+    await this.loadEnclaveFromStore();
+
+    // Pass current options
     await this.reconfigure();
+
+    // Bind the message listener to the iframe (in case iframe -> enclave comm)
     await this.bindMessageListener();
   }
 
@@ -91,7 +98,13 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  private async loadEnclave(): Promise<void> {
+  private async loadEnclaveFromStore(): Promise<void> {
+    await this.requestToEnclave({
+      load: {},
+    });
+  }
+
+  private async createAndLoadIframe(): Promise<void> {
     const container =
       document.querySelector(this.container) ||
       throwNewError(Error, `Can't find container with selector ${this.container}`);

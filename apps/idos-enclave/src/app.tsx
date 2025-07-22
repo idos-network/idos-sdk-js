@@ -1,4 +1,3 @@
-import type { Store } from "@idos-network/utils/store";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
@@ -30,11 +29,10 @@ function Layout({ children }: PropsWithChildren) {
 }
 
 type AppProps = {
-  store: Store;
   enclave: Window;
 };
 
-export function App({ store, enclave }: AppProps) {
+export function App({ enclave }: AppProps) {
   const method = useSignal<AuthMethod | null>(null);
   const allowedAuthMethods = useSignal<AuthMethod[] | null>(null);
   const previouslyUsedAuthMethod = useSignal<AuthMethod | null>(null);
@@ -97,21 +95,16 @@ export function App({ store, enclave }: AppProps) {
     }
   });
 
-  effect(() => {
-    if (mode.value === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey.value) {
-      onError("Can't find a public encryption key for this user");
-    }
-  });
-
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
       if (event.source !== enclave) return;
 
       const { data: requestData, ports } = event;
 
-      if (!allowedIntents.includes(requestData.intent))
+      if (!allowedIntents.includes(requestData.intent)) {
+        window.close();
         throw new Error(`Unexpected request from parent: ${requestData.intent}`);
+      }
 
       responsePort.current = ports[0];
       encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
@@ -176,7 +169,6 @@ export function App({ store, enclave }: AppProps) {
   });
 
   const methodProps = {
-    store,
     onError,
     onSuccess,
     mode: mode.value,

@@ -19,6 +19,7 @@ class PortManager {
   private store: ChromeExtensionStore;
 
   constructor() {
+    // await chrome.storage.local.remove("idOS-encryption-secret-key")
     const mnemonicExisting = "lift swear siege over supply crop robust wrist also lava trick dust";
     // const mnemonicNonExisting = "flush pair armor meadow convince pigeon elbow hurry space news awake shrimp";
     this.wallet = Wallet.fromPhrase(mnemonicExisting);

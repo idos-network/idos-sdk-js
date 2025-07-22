@@ -213,6 +213,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       mode: "existing",
       walletAddress: this.walletIdentifier,
     });
+
     const kwilUser = await getUserProfile(this.kwilClient);
 
     return new idOSClientLoggedIn(this, kwilUser);

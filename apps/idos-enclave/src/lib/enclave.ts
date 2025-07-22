@@ -1,3 +1,4 @@
+import { STORAGE_KEYS, StoredData } from "@idos-network/utils/enclave";
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
 type AuthMethod = "mpc" | "password";
@@ -22,11 +23,14 @@ type RequestName =
   | "encrypt"
   | "keys"
   | "reset"
+  | "load"
   | "configure"
   | "storage"
   | "backupPasswordOrSecret"
   | "signTypedDataResponse"
   | "target";
+
+const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
 interface EnclaveOptions extends LocalEnclaveOptions {
   walletAddress: string | "";
@@ -75,8 +79,15 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     await super.load();
 
     this.authorizedOrigins = JSON.parse(
-      (await this.store.get<string>("enclave-authorized-origins")) ?? "[]",
+      (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]",
     );
+
+    if (!this.isAuthorizedOrigin) {
+      this.keyPair = null;
+
+      // Reset secret key to undefined to trigger the dialog to authorize the origin
+      await this.store.delete(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
+    }
   }
 
   get isAuthorizedOrigin() {
@@ -115,7 +126,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
         }
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
+        await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
 
         return resolve({ authMethod, password, duration });
       });
@@ -178,12 +189,13 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
 
-    const secretKey = await this.store.get<Uint8Array<ArrayBufferLike>>("secret-key");
-    const preferredAuthMethod = await this.store.get<AuthMethod>("preferred-auth-method");
+    // We are getting the secret key from the store as a string, we don't want byte array.
+    const secretKey = await this.store.get<string>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
+    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
+    const preferredAuthMethod = await this.store.get<AuthMethod>(STORAGE_KEYS.PREFERRED_AUTH_METHOD);
 
     if (!secretKey || !preferredAuthMethod) {
-      // First we need to do the auth
-      await this.keys();
+      throw new Error("No secrets were found for backup");
     }
 
     return new Promise((resolve, reject) => {
@@ -193,12 +205,15 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
 
           await this.openDialog("backupPasswordOrSecret", {
             authMethod: preferredAuthMethod,
-            secret: secretKey,
+            secret: password ?? secretKey,
           });
 
           resolve();
         } catch (error) {
           reject(error);
+        } finally {
+          this.backupButton.style.display = "none";
+          this.backupButton.disabled = false;
         }
       });
     });
@@ -241,6 +256,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
           backupPasswordOrSecret: () => [],
           signTypedDataResponse: () => [signature],
           target: () => [],
+          load: () => [],
         };
 
         const paramBuilderFn = paramBuilder[requestName];
