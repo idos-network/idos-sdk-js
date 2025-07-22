@@ -66,7 +66,9 @@ export class LocalEnclave<
   async load(): Promise<void> {
     await super.load();
 
-    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
+    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+    );
 
     if (secretKey) await this.setKeyPair(secretKey);
 
@@ -85,8 +87,9 @@ export class LocalEnclave<
 
   async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
     const storedUserId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const storedEncryptionPublicKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY);
+    const storedEncryptionPublicKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+      STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY,
+    );
 
     if (storedUserId !== userId) await this.store.reset();
 
@@ -107,8 +110,9 @@ export class LocalEnclave<
   }
 
   async keys(): Promise<Uint8Array | undefined> {
-    let secretKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
+    let secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+    );
 
     if (!secretKey) {
       const { authMethod, password, duration } = await this.chooseAuthAndPassword();
@@ -124,7 +128,7 @@ export class LocalEnclave<
         if (!this.userId) {
           throw new Error("userId is not found");
         }
-        
+
         const salt = this.userId;
         secretKey = await keyDerivation(password, salt);
 

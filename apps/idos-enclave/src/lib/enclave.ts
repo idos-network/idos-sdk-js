@@ -126,7 +126,10 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
         }
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
+        await this.store.set(
+          ENCLAVE_AUTHORIZED_ORIGINS_KEY,
+          JSON.stringify(this.authorizedOrigins),
+        );
 
         return resolve({ authMethod, password, duration });
       });
@@ -192,7 +195,9 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     // We are getting the secret key from the store as a string, we don't want byte array.
     const secretKey = await this.store.get<string>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
     const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
-    const preferredAuthMethod = await this.store.get<AuthMethod>(STORAGE_KEYS.PREFERRED_AUTH_METHOD);
+    const preferredAuthMethod = await this.store.get<AuthMethod>(
+      STORAGE_KEYS.PREFERRED_AUTH_METHOD,
+    );
 
     if (!secretKey || !preferredAuthMethod) {
       throw new Error("No secrets were found for backup");
