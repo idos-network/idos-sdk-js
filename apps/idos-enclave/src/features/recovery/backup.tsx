@@ -9,7 +9,6 @@ import type { Store } from "@idos-network/utils/store";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
 import { useEffect } from "preact/hooks";
-
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
@@ -187,7 +186,7 @@ export function PasswordOrSecretReveal({
   );
 }
 
-export async function PasswordOrKeyBackup({
+export function PasswordOrKeyBackup({
   store,
   backupStatus,
   onSuccess,
@@ -197,24 +196,34 @@ export async function PasswordOrKeyBackup({
   onSuccess: (result: unknown) => void;
 }) {
   const reveal = useSignal(false);
-  const status = useSignal<"idle" | "pending">("idle");
+  const authMethod = useSignal<"passkey" | "password" | null>(null);
+  const password = useSignal<string | null>(null);
 
-  const authMethod = await store.get<"passkey" | "password">("preferred-auth-method");
-  const password = await store.get<string>("password");
+  useEffect(() => {
+    store.get<"passkey" | "password">("preferred-auth-method").then((method) => {
+      if (method) {
+        authMethod.value = method;
+      }
+    });
+    store.get<string>("password").then((p) => {
+      if (p) {
+        password.value = p;
+      }
+    });
+  }, []);
+
   const passwordOrSecretKey: "password" | "secret key" =
-    authMethod === "password" ? "password" : "secret key";
+    authMethod.value === "password" ? "password" : "secret key";
 
-  const secret = password;
+  const secret = password.value;
 
   const toggleReveal = () => {
     reveal.value = !reveal.value;
   };
 
-  useEffect(() => {
-    if (["failure", "done", "success"].includes(backupStatus)) {
-      status.value = "idle";
-    }
-  }, [backupStatus]);
+  if (!authMethod.value || !password.value) {
+    return <div>Loading...</div>;
+  }
 
   if (reveal.value && secret) {
     return (
