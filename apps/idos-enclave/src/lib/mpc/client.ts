@@ -7,6 +7,7 @@ import { EngineClient } from "./EngineClient";
 import { deserializeState } from "./generated/IdosContract";
 import { BinarySecretShares, getRandomBytes } from "./secretsharing/BinarySecretShares";
 import {
+  type Bytes,
   DOWNLOAD_TYPES,
   type DownloadMessageToSign,
   type DownloadSignatureMessage,
@@ -30,7 +31,7 @@ export class Client {
   public async uploadSecret(
     id: string,
     uploadSignature: UploadSignatureMessage,
-    signature: any,
+    signature: Bytes,
     blindedShares: Buffer[],
   ) {
     const engineClients = await this.getEngines();
@@ -93,7 +94,7 @@ export class Client {
   public downloadRequest(signerAddress: string, publicKey: Uint8Array): DownloadSignatureMessage {
     return {
       recovering_address: signerAddress,
-      timestamp: new Date().getTime(),
+      timestamp: Date.now(),
       public_key: ethers.hexlify(publicKey),
     };
   }
@@ -101,7 +102,7 @@ export class Client {
   public async downloadSecret(
     id: string,
     downloadRequest: DownloadSignatureMessage,
-    signature: any,
+    signature: Bytes,
     secretKey: Uint8Array,
   ): Promise<{ status: string; secret: Buffer | undefined }> {
     const shares = [];
@@ -116,13 +117,13 @@ export class Client {
     if (secretShares.every((item) => item.status === "404")) {
       return { status: "not-stored", secret: undefined };
     }
-    var secret;
+    var secret: Buffer;
     try {
       secret = BinarySecretShares.read(secretShares.map((item) => item.share)).reconstructSecret();
       return { status: "ok", secret };
     } catch (e) {
       console.log("reconstruct error", e);
-      return { status: "error", secret };
+      return { status: "error", secret: undefined };
     }
   }
 
@@ -149,7 +150,7 @@ export class Client {
     return {
       name: "idOS secret store contract",
       version: "1",
-      verifyingContract: "0x" + this.contractAddress.substring(2),
+      verifyingContract: `0x${this.contractAddress.substring(2)}`,
     };
   }
 
@@ -157,6 +158,7 @@ export class Client {
     if (this.engines === undefined) {
       const chainController = new ChainControllerApi(new Configuration({ basePath: this.baseUrl }));
       const rawState = await chainController.getContract({ address: this.contractAddress });
+      // biome-ignore lint/style/noNonNullAssertion: we know serializedContract is present here
       const state = deserializeState(Buffer.from(rawState.serializedContract!, "base64"));
       this.engines = state.nodes.map(
         (value) => new EngineClient(value.endpoint, this.contractAddress),
