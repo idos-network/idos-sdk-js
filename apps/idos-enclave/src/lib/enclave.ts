@@ -192,7 +192,6 @@ export class Enclave {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
           }
         } catch (e) {
-          console.log("error in auth dialog", e)
           return reject(e);
         }
         await this.store.set("preferred-auth-method", authMethod);
