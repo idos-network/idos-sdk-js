@@ -49,6 +49,7 @@ export class IframeEnclave implements EnclaveProvider {
         keys: {},
       })) as Uint8Array;
     } catch (e) {
+      console.log(e);
       if (this.options.throwOnUserCancelUnlock) throw e;
     } finally {
       this.hideEnclave();

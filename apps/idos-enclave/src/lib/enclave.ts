@@ -180,7 +180,7 @@ export class Enclave {
 
     return new Promise((resolve, reject) =>
       this.unlockButton.addEventListener("click", async () => {
-        this.unlockButton.disabled = true;
+      this.unlockButton.disabled = true;
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
@@ -192,6 +192,7 @@ export class Enclave {
             return reject(new Error(`Invalid auth method: ${authMethod}`));
           }
         } catch (e) {
+          console.log("error in auth dialog", e)
           return reject(e);
         }
         await this.store.set("preferred-auth-method", authMethod);

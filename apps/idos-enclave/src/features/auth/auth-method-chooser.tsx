@@ -49,7 +49,7 @@ export default function AuthMethodChooser({
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Button id="auth-method-password" onClick={() => setMethod("password")}>
+        <Button id="auth-method-password" onClick={() => onSuccess({ authMethod: "password" })}>
           Use a password
         </Button>
 
@@ -59,13 +59,9 @@ export default function AuthMethodChooser({
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Button
-          id="auth-method-mpc"
-          onClick={() => {
-            store.set("preferred-auth-method", "mpc");
-            onSuccess({});
-          }}
-        >
+        <Button id="auth-method-mpc" onClick={() => {
+          onSuccess({ authMethod: "mpc" });
+        }}>
           Use an MPC
         </Button>
       </div>
