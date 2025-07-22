@@ -19,7 +19,6 @@ export interface AuthMethodProps<K = Record<string, unknown>> {
 export default function AuthMethodChooser({
   setMethod,
   mode,
-  store,
   onSuccess,
 }: AuthMethodChooserProps) {
   return (

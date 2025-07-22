@@ -1,4 +1,4 @@
-import type { TypedDataField, TypedDataDomain } from "ethers";
+import type { TypedDataDomain, TypedDataField } from "ethers";
 
 export type PbcAddress = string;
 export type Bytes32 = string;
@@ -61,13 +61,13 @@ export interface EncryptedShare {
 }
 
 export type DownloadMessageToSign = {
-    domain: TypedDataDomain,
-    types: Record<string, TypedDataField[]>,
-    value: DownloadSignatureMessage,
-}
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: DownloadSignatureMessage;
+};
 
 export type UploadMessageToSign = {
-    domain: TypedDataDomain,
-    types: Record<string, TypedDataField[]>,
-    value: UploadSignatureMessage,
-}
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: UploadSignatureMessage;
+};
