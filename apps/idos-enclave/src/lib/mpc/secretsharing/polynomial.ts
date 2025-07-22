@@ -1,4 +1,4 @@
-import type { FiniteFieldElement } from "./FiniteFieldElement";
+import type { FiniteFieldElement } from "./finite-field-element";
 
 /** Polynomials with coefficients in a finite field. */
 export class Polynomial<T extends FiniteFieldElement<T>> {
