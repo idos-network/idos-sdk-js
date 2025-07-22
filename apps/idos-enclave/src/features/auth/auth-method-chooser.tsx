@@ -16,7 +16,12 @@ export interface AuthMethodProps<K = Record<string, unknown>> {
   onError: (error: Error) => void;
 }
 
-export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMethodChooserProps) {
+export default function AuthMethodChooser({
+  setMethod,
+  mode,
+  store,
+  onSuccess,
+}: AuthMethodChooserProps) {
   return (
     <div className="flex flex-col space-y-4 px-3 md:px-0">
       {mode === "existing" && (
@@ -50,6 +55,18 @@ export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMe
 
         <Button id="auth-method-mpc" onClick={() => onSuccess({ authMethod: "mpc" })}>
           Use MPC
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Button
+          id="auth-method-mpc"
+          onClick={() => {
+            store.set("preferred-auth-method", "mpc");
+            onSuccess({});
+          }}
+        >
+          Use an MPC
         </Button>
       </div>
     </div>

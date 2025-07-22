@@ -1,8 +1,8 @@
 addgroup
 adduser
 Alexandr
-appkit
 APPKIT
+appkit
 banxa
 barebones
 betanet
@@ -19,6 +19,7 @@ creit
 cryptosuite
 DAG
 Datil
+decryptable
 devnet
 digitalbazaar
 dompurify
@@ -28,6 +29,7 @@ gemwallet
 headlessui
 heroicons
 heroui
+hexlify
 Holyheld
 hono
 idos
@@ -39,7 +41,6 @@ idOSSDK
 incentivized
 informationally
 insertable
-hexlify
 jsigs
 jsonld
 keccak
@@ -58,13 +59,12 @@ nanostores
 Neobank
 Nominatim
 nonced
-partialize
-partisia
-partisiablockchain
 nums
 offchain
 OSDAG
 partialize
+partisia
+partisiablockchain
 passporting
 Payin
 PayinFiat

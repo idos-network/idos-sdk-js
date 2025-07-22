@@ -41,18 +41,19 @@ export class IframeEnclave implements EnclaveProvider {
       },
     })) as StoredData;
 
-    while (!userEncryptionPublicKey) {
-      this.showEnclave();
-      try {
-        userEncryptionPublicKey = (await this.requestToEnclave({
-          keys: {},
-        })) as Uint8Array;
-      } catch (e) {
-        if (this.options.throwOnUserCancelUnlock) throw e;
-      } finally {
-        this.hideEnclave();
-      }
+    userEncryptionPublicKey = new Uint8Array(0);
+    // while (!userEncryptionPublicKey) {
+    this.showEnclave();
+    try {
+      userEncryptionPublicKey = (await this.requestToEnclave({
+        keys: {},
+      })) as Uint8Array;
+    } catch (e) {
+      if (this.options.throwOnUserCancelUnlock) throw e;
+    } finally {
+      this.hideEnclave();
     }
+    // }
 
     return userEncryptionPublicKey as Uint8Array;
   }

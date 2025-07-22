@@ -3,13 +3,23 @@
 // @ts-nocheck
 // noinspection ES6UnusedImports
 import {
+  AbiBitInput,
+  AbiBitOutput,
   AbiByteInput,
   AbiByteOutput,
-  type AbiInput,
-  type AbiOutput,
-  type BlockchainAddress,
-  type BlockchainStateClient,
-  type StateWithClient,
+  AbiInput,
+  AbiOutput,
+  AvlTreeMap,
+  BlockchainAddress,
+  BlockchainPublicKey,
+  BlockchainStateClient,
+  BlsPublicKey,
+  BlsSignature,
+  BN,
+  Hash,
+  Signature,
+  StateWithClient,
+  SecretInputBuilder,
 } from "@partisiablockchain/abi-client";
 
 type Option<K> = K | undefined;
@@ -19,7 +29,7 @@ export class IdosContract {
 
   public constructor(
     client: BlockchainStateClient | undefined,
-    address: BlockchainAddress | undefined,
+    address: BlockchainAddress | undefined
   ) {
     this._address = address;
     this._client = client;
@@ -76,17 +86,18 @@ export function deserializeState(bytes: Buffer): ContractState;
 export function deserializeState(
   bytes: Buffer,
   client: BlockchainStateClient,
-  address: BlockchainAddress,
+  address: BlockchainAddress
 ): ContractState;
 export function deserializeState(
   state: Buffer | StateWithClient,
   client?: BlockchainStateClient,
-  address?: BlockchainAddress,
+  address?: BlockchainAddress
 ): ContractState {
   if (Buffer.isBuffer(state)) {
     const input = AbiByteInput.createLittleEndian(state);
     return new IdosContract(client, address).deserializeContractState(input);
+  } else {
+    const input = AbiByteInput.createLittleEndian(state.bytes);
+    return new IdosContract(state.client, state.address).deserializeContractState(input);
   }
-  const input = AbiByteInput.createLittleEndian(state.bytes);
-  return new IdosContract(state.client, state.address).deserializeContractState(input);
 }
