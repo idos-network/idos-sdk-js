@@ -59,6 +59,9 @@ nanostores
 Neobank
 Nominatim
 nonced
+partialize
+partisia
+partisiablockchain
 nums
 offchain
 OSDAG
