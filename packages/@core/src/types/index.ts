@@ -1,3 +1,4 @@
+import type { idOSCredential } from "@idos-network/credentials";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
@@ -12,23 +13,6 @@ export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejec
 export type idOSUser = {
   id: string;
   recipient_encryption_public_key: string;
-};
-
-export type idOSCredential = {
-  id: string;
-  user_id: string;
-  issuer_auth_public_key: string;
-  original_id?: string;
-  public_notes: string;
-  content: string;
-  encryptor_public_key: string;
-};
-
-export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
-  id?: idOSCredential["id"];
-  content_hash?: string;
-  public_notes_signature: string;
-  broader_signature: string;
 };
 
 export type idOSWallet = {

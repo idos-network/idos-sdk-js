@@ -12,7 +12,8 @@ import {
   Text,
   useToast,
 } from "@chakra-ui/react";
-import type { idOSCredential, idOSGrant } from "@idos-network/core";
+import type { idOSGrant } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 import {
   type DefaultError,
   useMutation,

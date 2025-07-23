@@ -1,5 +1,5 @@
 import { idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
-import { hexDecode } from "@idos-network/core";
+import { hexDecode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 

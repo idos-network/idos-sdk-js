@@ -1,5 +1,22 @@
 import { z } from "zod";
 
+export type idOSCredential = {
+  id: string;
+  user_id: string;
+  issuer_auth_public_key: string;
+  original_id?: string;
+  public_notes: string;
+  content: string;
+  encryptor_public_key: string;
+};
+
+export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
+  id?: idOSCredential["id"];
+  content_hash?: string;
+  public_notes_signature: string;
+  broader_signature: string;
+};
+
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialFieldsSchema: z.ZodObject<
   {

@@ -1,5 +1,6 @@
+import type { idOSCredential } from "@idos-network/credentials";
 import type { KwilActionClient } from "../kwil-infra";
-import type { idOSCredential, idOSGrant } from "../types";
+import type { idOSGrant } from "../types";
 
 /**
  * Returns the shared idOS Credential for the given `dataId`.

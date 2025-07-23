@@ -1,4 +1,3 @@
-export * from "./codecs";
 export * from "./cryptography";
 export * from "./kwil-actions";
 export * from "./kwil-infra";

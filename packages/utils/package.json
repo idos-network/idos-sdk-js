@@ -3,8 +3,15 @@
   "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.0",
   "dependencies": {
-    "@stablelib/utf8": "^2.0.1",
-    "@stablelib/base64": "^2.0.1",
+    "@stablelib/base64": "catalog:utils",
+    "@stablelib/binary": "catalog:utils",
+    "@stablelib/bytes": "catalog:utils",
+    "@stablelib/hex": "catalog:utils",
+    "@stablelib/sha256": "catalog:utils",
+    "@stablelib/utf8": "catalog:utils",
+    "borsh": "catalog:utils",
+    "bs58": "catalog:utils",
+    "es-toolkit": "catalog:utils",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"
@@ -29,6 +36,10 @@
     "./store": {
       "types": "./dist/store/index.d.ts",
       "import": "./dist/store/index.js"
+    },
+    "./codecs": {
+      "types": "./dist/codecs/index.d.ts",
+      "import": "./dist/codecs/index.js"
     }
   },
   "files": [

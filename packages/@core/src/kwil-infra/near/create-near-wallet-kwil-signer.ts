@@ -1,3 +1,12 @@
+import {
+  base64Decode,
+  binaryWriteUint16BE,
+  borshSerialize,
+  bs58Decode,
+  bytesConcat,
+  hexEncode,
+  utf8Decode,
+} from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
 import { KwilSigner } from "@kwilteam/kwil-js";
 import type {
@@ -7,15 +16,6 @@ import type {
 } from "@near-wallet-selector/core";
 import type { connect as connectT } from "near-api-js";
 import type { AccessKeyList } from "near-api-js/lib/providers/provider";
-import {
-  base64Decode,
-  binaryWriteUint16BE,
-  borshSerialize,
-  bs58Decode,
-  bytesConcat,
-  hexEncode,
-  utf8Decode,
-} from "../../codecs";
 import type { KwilActionClient } from "../create-kwil-client";
 import { getNearConnectionConfig } from "./get-config";
 

@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 
 export function CredentialCard({ credential }: { credential: idOSCredential }) {
   const publicNotes = Object.entries(

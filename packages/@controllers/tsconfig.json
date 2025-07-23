@@ -22,5 +22,5 @@
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "../credentials/src/types.d.ts"]
 }

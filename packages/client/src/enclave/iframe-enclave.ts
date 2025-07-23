@@ -1,4 +1,5 @@
-import { base64Encode, type idOSCredential } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
+import { base64Encode } from "@idos-network/utils/codecs";
 
 import type {
   DiscoverUserEncryptionPublicKeyResponse,

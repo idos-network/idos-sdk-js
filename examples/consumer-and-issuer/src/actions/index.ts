@@ -1,11 +1,6 @@
 "use server";
-import {
-  base64Decode,
-  base64Encode,
-  hexDecode,
-  type idOSCredential,
-  toBytes,
-} from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
+import { base64Decode, base64Encode, hexDecode, toBytes } from "@idos-network/utils/codecs";
 import jwt from "jsonwebtoken";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";

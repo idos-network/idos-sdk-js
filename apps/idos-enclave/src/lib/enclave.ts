@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import * as Base64Codec from "@stablelib/base64";

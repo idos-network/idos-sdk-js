@@ -4,13 +4,13 @@ import {
   type EditCredentialAsIssuerParams,
 } from "@idos-network/core";
 import type {
-  idOSCredential,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
   PassportingPeer,
 } from "@idos-network/core/types";
+import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
   buildCredentials,

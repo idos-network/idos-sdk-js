@@ -1,11 +1,11 @@
-import type { KeyPair } from "near-api-js";
 import {
   binaryWriteUint16BE,
   borshSerialize,
   bytesConcat,
   sha256Hash,
   utf8Decode,
-} from "../../codecs";
+} from "@idos-network/utils/codecs";
+import type { KeyPair } from "near-api-js";
 
 export function kwilNep413Signer(
   recipient: string,
