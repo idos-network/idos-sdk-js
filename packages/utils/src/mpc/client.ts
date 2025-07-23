@@ -33,7 +33,7 @@ export class Client {
     uploadSignature: UploadSignatureMessage,
     signature: Bytes,
     blindedShares: Buffer[],
-  ) {
+  ): Promise<{ status: string }> {
     const engineClients = await this.getEngines();
     console.log(engineClients);
     const promises = [];
@@ -121,7 +121,7 @@ export class Client {
     try {
       secret = BinarySecretShares.read(secretShares.map((item) => item.share)).reconstructSecret();
       return { status: "ok", secret };
-    } catch (e) {
+    } catch (_e) {
       return { status: "error", secret: undefined };
     }
   }

@@ -1,14 +1,11 @@
-import type { Store } from "@idos-network/utils/store";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
-import AuthMethodChooser from "@/features/auth/auth-method-chooser";
-import { PasswordForm } from "@/features/auth/password-form";
-import { Confirmation } from "@/features/confirmation/confirmation";
-import { PasswordOrKeyBackup } from "@/features/recovery/backup";
-import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
+import Auth from "@/features/auth";
+import PasswordOrKeyBackup from "@/features/backup";
+import Confirmation from "@/features/confirmation";
 import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
@@ -18,7 +15,8 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["password", "confirm", "auth", "backupPasswordOrSecret"];
+// TODO: Remove password intent in the future.
+const allowedIntents: AllowedIntent[] = ["confirm", "password", "auth", "backupPasswordOrSecret"];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -32,12 +30,13 @@ function Layout({ children }: PropsWithChildren) {
 }
 
 type AppProps = {
-  store: Store;
   enclave: Window;
 };
 
-export function App({ store, enclave }: AppProps) {
+export function App({ enclave }: AppProps) {
   const method = useSignal<AuthMethod | null>(null);
+  const allowedAuthMethods = useSignal<AuthMethod[] | null>(null);
+  const previouslyUsedAuthMethod = useSignal<AuthMethod | null>(null);
   const mode = useSignal<UIMode>("existing");
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const confirm = useSignal<boolean>(false);
@@ -50,9 +49,9 @@ export function App({ store, enclave }: AppProps) {
     new URLSearchParams(window.location.search).get("userId"),
   );
 
-  const isRecoveryMode = useSignal(false);
   const isBackupMode = useSignal(false);
-  const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
+  const backupAuthMethod = useSignal<AuthMethod | null>(null);
+  const backupSecret = useSignal<string | null>(null);
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -97,21 +96,16 @@ export function App({ store, enclave }: AppProps) {
     }
   });
 
-  effect(() => {
-    if (mode.value === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey.value) {
-      onError("Can't find a public encryption key for this user");
-    }
-  });
-
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
       if (event.source !== enclave) return;
 
       const { data: requestData, ports } = event;
 
-      if (!allowedIntents.includes(requestData.intent))
+      if (!allowedIntents.includes(requestData.intent)) {
+        window.close();
         throw new Error(`Unexpected request from parent: ${requestData.intent}`);
+      }
 
       responsePort.current = ports[0];
       encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
@@ -119,10 +113,15 @@ export function App({ store, enclave }: AppProps) {
       switch (requestData.intent) {
         case "auth":
           method.value = null;
+          allowedAuthMethods.value = requestData.message?.allowedAuthMethods;
+          previouslyUsedAuthMethod.value = requestData.message?.previouslyUsedAuthMethod;
           break;
 
+        // TODO: Password intent is deprecated, remove it in the future.
         case "password":
-          method.value = "password";
+          method.value = null;
+          allowedAuthMethods.value = ["password"];
+          previouslyUsedAuthMethod.value = "password";
           break;
 
         case "confirm":
@@ -133,7 +132,8 @@ export function App({ store, enclave }: AppProps) {
 
         case "backupPasswordOrSecret":
           isBackupMode.value = true;
-          backupStatus.value = requestData.message?.status;
+          backupAuthMethod.value = requestData.message?.authMethod;
+          backupSecret.value = requestData.message?.secret;
           break;
       }
 
@@ -143,7 +143,6 @@ export function App({ store, enclave }: AppProps) {
     [
       enclave,
       isBackupMode,
-      backupStatus,
       confirm,
       message,
       origin,
@@ -151,6 +150,10 @@ export function App({ store, enclave }: AppProps) {
       mode,
       encryptionPublicKey,
       method,
+      allowedAuthMethods,
+      previouslyUsedAuthMethod,
+      backupAuthMethod,
+      backupSecret,
     ],
   );
 
@@ -167,10 +170,13 @@ export function App({ store, enclave }: AppProps) {
   });
 
   const methodProps = {
-    store,
     onError,
     onSuccess,
     mode: mode.value,
+    allowedAuthMethods: allowedAuthMethods.value ?? [],
+    previouslyUsedAuthMethod: previouslyUsedAuthMethod.value,
+    encryptionPublicKey: encryptionPublicKey.value,
+    userId: userId.value,
   };
 
   if (confirm.value && message.value) {
@@ -181,49 +187,21 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  if (method.value === "password") {
-    return (
-      <Layout>
-        <PasswordForm
-          {...methodProps}
-          encryptionPublicKey={encryptionPublicKey.value}
-          userId={userId.value}
-        />
-      </Layout>
-    );
-  }
-
-  if (isBackupMode.value) {
+  if (isBackupMode.value && backupAuthMethod.value && backupSecret.value) {
     return (
       <Layout>
         <PasswordOrKeyBackup
-          store={store}
+          authMethod={backupAuthMethod.value}
+          secret={backupSecret.value}
           onSuccess={onSuccess}
-          backupStatus={backupStatus.value}
         />
-      </Layout>
-    );
-  }
-
-  if (isRecoveryMode.value) {
-    return (
-      <Layout>
-        <PasswordOrKeyRecovery onSuccess={onSuccess} />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <AuthMethodChooser
-        {...methodProps}
-        setMethod={(newMethod: AuthMethod) => {
-          if (method.value === null) {
-            // Don't override the method if it's already set
-            method.value = newMethod;
-          }
-        }}
-      />
+      <Auth {...methodProps} />
     </Layout>
   );
 }
