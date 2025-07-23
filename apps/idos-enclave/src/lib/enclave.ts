@@ -85,17 +85,24 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     this.authorizedOrigins = JSON.parse(
       (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]",
     );
-
-    if (!this.isAuthorizedOrigin) {
-      this.keyPair = null;
-
-      // Reset secret key to undefined to trigger the dialog to authorize the origin
-      await this.store.delete(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
-    }
   }
 
-  get isAuthorizedOrigin() {
-    return this.authorizedOrigins.includes(this.parentOrigin);
+  async guardKeys(): Promise<boolean> {
+    if (this.authorizedOrigins.includes(this.parentOrigin)) {
+      return true;
+    }
+
+    const confirmation = await this.confirm(
+      `Do you want to authorize '${this.parentOrigin}' to use the keys?`,
+    );
+
+    if (!confirmation) {
+      return false;
+    }
+
+    this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
+    return true;
   }
 
   async chooseAuthAndPassword(): Promise<{

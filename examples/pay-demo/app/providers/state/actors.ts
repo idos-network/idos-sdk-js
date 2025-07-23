@@ -9,7 +9,7 @@ export const actors = {
     const config = await createIDOSClient({
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://2bfc9cec14ec.ngrok-free.app",
+        url: "https://440456d6b7cb.ngrok-free.app",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });

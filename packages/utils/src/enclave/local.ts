@@ -99,7 +99,7 @@ export class LocalEnclave<
     this.userId = userId;
     this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
 
-    if (userId !== storedUserId) {
+    if (userId !== storedUserId || !(await this.guardKeys())) {
       return { userId: "" };
     }
 
@@ -114,7 +114,7 @@ export class LocalEnclave<
       STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
     );
 
-    if (!secretKey) {
+    if (!secretKey || !(await this.guardKeys())) {
       const { authMethod, password, duration } = await this.chooseAuthAndPassword();
 
       if (!authMethod || !this.allowedAuthMethods.includes(authMethod)) {
@@ -167,6 +167,10 @@ export class LocalEnclave<
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
     if (!this.keyPair) await this.keys();
 
+    if (!(await this.guardKeys())) {
+      throw new Error("User is not authorized to use the keys");
+    }
+
     if (!this.keyPair) throw new Error("Key pair not initialized");
 
     return encrypt(message, this.keyPair.publicKey, receiverPublicKey);
@@ -177,6 +181,10 @@ export class LocalEnclave<
     senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
     if (!this.keyPair) await this.keys();
+
+    if (!(await this.guardKeys())) {
+      throw new Error("User is not authorized to use the keys");
+    }
 
     if (!this.keyPair) throw new Error("Key pair not initialized");
 

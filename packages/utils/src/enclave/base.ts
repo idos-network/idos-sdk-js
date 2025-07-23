@@ -73,6 +73,16 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     throw new Error("Method 'backupPasswordOrSecret' has to be implemented in the subclass.");
   }
 
+  /**
+   * This method authorizes the origin in case of enclave
+   * to use the keys, without user providing the password or MPC again.
+   *
+   * @returns `true` if the user action is authorized, `false` otherwise.
+   */
+  async guardKeys(): Promise<boolean> {
+    return true;
+  }
+
   async discoverUserEncryptionPublicKey(
     userId: string,
   ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
