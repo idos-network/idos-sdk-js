@@ -1,5 +1,4 @@
-// @ts-expect-error
-import * as ascii85 from "ascii85";
+import { base85ToFile } from "@idos-network/credentials";
 import { fileTypeFromBuffer } from "file-type";
 import { verifyFileUrl } from "~/providers/files.server";
 import { getSharedCredential } from "~/providers/idos.server";
@@ -20,8 +19,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     // Decode the file
     const encodedFile = credentials.credentialSubject[decoded.fileType];
-    const instance = new ascii85.default.Ascii85();
-    const file = instance.decode(encodedFile);
+    const file = base85ToFile(encodedFile);
 
     if (!file) {
       throw new Error("File not found");
