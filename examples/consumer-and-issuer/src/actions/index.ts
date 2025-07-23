@@ -14,9 +14,9 @@ import nacl from "tweetnacl";
 import { idOSConsumer } from "@/consumer.config";
 import { idOSIssuer } from "@/issuer.config";
 
-// biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
 const generateCredentials = async (
   issuer: Awaited<ReturnType<typeof idOSIssuer>>,
+  // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
   kycData: Record<string, any>,
   idFrontFile: Buffer,
   selfieFile: Buffer,
@@ -25,7 +25,7 @@ const generateCredentials = async (
   const idDoc = info.idDocs[0];
 
   // TODO: Fix this
-  const issuerHost = process.env.NEXT_PUBLIC_URL;
+  const issuerHost = "https://consumer-and-issuer-demo.playground.idos.network";
 
   const id = crypto.randomUUID();
 
