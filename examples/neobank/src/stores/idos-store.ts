@@ -98,7 +98,7 @@ const initialState: IdosState = {
 
 const NODES_URL = process.env.NEXT_PUBLIC_IDOS_NODE_URL ?? "";
 const ENCLAVE_URL = process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "";
-console.log({ NODES_URL, ENCLAVE_URL });
+
 export const useIdosStore = create<IdosStore>()(
   devtools(
     (set, get) => ({

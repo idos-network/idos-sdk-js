@@ -127,10 +127,6 @@ const createUserAndKYC = async (
   data: VerifiableCredentialSubject,
   url: URL,
 ) => {
-  // stateProvinceRegion is required but we don't have it in the data
-  // so we need to get it from the address
-  console.log({ data, url, signedAgreementId });
-
   const stateProvinceRegion = await getISORegionCodeFromNominatim(
     [
       [
@@ -190,7 +186,7 @@ const createUserAndKYC = async (
   // Get the user ID & create KYC
 
   const userId = createUserResponse.id;
-  console.log({ createUserResponse, signedAgreementId, user, userId });
+  console.log({ createUserResponse, signedAgreementId, user });
 
   const updateKYCRequest: UpdateKYCRequest = {
     firstName: user.firstName,

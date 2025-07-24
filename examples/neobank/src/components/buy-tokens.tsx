@@ -1,16 +1,50 @@
+import { TokenETH, TokenUSDC, TokenUSDT } from "@web3icons/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { TokenAmountInput } from "@/components/token-amount-input";
+import { useAppStore } from "@/stores/app-store";
 import { PaymentMethod } from "./payment-method";
 import { Button } from "./ui/button";
+
+const CURRENCY_PREFIXES = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+};
+
+const currencyOptions = Object.entries(CURRENCY_PREFIXES).map(([value]) => ({
+  value,
+  label: value,
+}));
+
+const buyOptions = [
+  {
+    value: "USDC",
+    label: "USDC",
+    icon: <TokenUSDC />,
+  },
+  {
+    value: "USDT",
+    label: "USDT",
+    icon: <TokenUSDT />,
+  },
+  {
+    value: "ETH",
+    label: "ETH",
+    icon: <TokenETH />,
+  },
+];
 
 export function BuyTokens({
   onCurrencySelected,
 }: {
   onCurrencySelected: (value: boolean) => void;
 }) {
-  const [spendAmount, setSpendAmount] = useState("0");
+  const [spendAmount, setSpendAmount] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState("");
+  const [selectedBuyToken, setSelectedBuyToken] = useState("");
+  const { selectedOnRampProvider } = useAppStore();
+  const prefix = CURRENCY_PREFIXES[selectedCurrency as keyof typeof CURRENCY_PREFIXES];
 
   useEffect(() => {
     onCurrencySelected(!!selectedCurrency);
@@ -25,21 +59,25 @@ export function BuyTokens({
           selectedCurrency={selectedCurrency}
           setSelectedCurrency={setSelectedCurrency}
           label="I want to spend"
+          prefix={prefix}
+          options={currencyOptions}
         />
         <TokenAmountInput
           spendAmount={spendAmount}
           setSpendAmount={setSpendAmount}
-          selectedCurrency={selectedCurrency}
-          setSelectedCurrency={setSelectedCurrency}
+          selectedCurrency={selectedBuyToken}
+          setSelectedCurrency={setSelectedBuyToken}
           label="I want to buy"
+          options={buyOptions}
         />
       </div>
       <PaymentMethod />
-      <Link href="/pick-kyc-provider">
-        <Button disabled={!+spendAmount} className="h-12 w-full rounded-full bg-secondary">
-          Continue
-        </Button>
-      </Link>
+      <Button disabled={!+spendAmount} className="h-12 w-full rounded-full bg-secondary">
+        <Link href="/pick-kyc-provider">
+          Continue{" "}
+          {!!selectedCurrency && selectedOnRampProvider && `with ${selectedOnRampProvider}`}
+        </Link>
+      </Button>
     </div>
   );
 }

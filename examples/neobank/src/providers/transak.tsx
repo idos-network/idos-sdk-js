@@ -7,7 +7,6 @@ import { useAppStore } from "@/stores/app-store";
 export function TransakProvider() {
   const { transakToken, credentialId, findTransakToken, setCurrentStep } = useAppStore();
   const transak = useRef<Transak | null>(null);
-  console.log({ transakToken, credentialId });
 
   useEffect(() => {
     if (credentialId && !transakToken) {

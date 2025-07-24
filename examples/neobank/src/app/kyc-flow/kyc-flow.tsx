@@ -161,7 +161,7 @@ export default function KycFlow() {
   const router = useRouter();
   const userId = loggedInClient?.user?.id;
   const { address } = useAppKitAccount();
-  console.log({ loggedInClient, userId });
+
   const handleContinue = async () => {
     await startKyc();
   };
@@ -264,7 +264,7 @@ export default function KycFlow() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1220px] flex-1 rounded-[40px] bg-secondary p-11">
+    <div className="relative mx-auto flex w-full max-w-[1220px] flex-1 rounded-[40px] bg-secondary p-11">
       <div className="mx-auto flex w-full flex-1 flex-col items-center justify-center">
         <div className="flex h-[100px] w-[100px] items-center justify-center rounded-md bg-info">
           <VisibilityIcon />
@@ -276,7 +276,7 @@ export default function KycFlow() {
         >
           Continue with {selectedOnRampProvider} + {selectedKyc}
         </Button>
-        <div className="mt-auto flex w-full justify-center">
+        <div className="absolute bottom-[5%] left-1/2 mt-auto flex w-full -translate-x-1/2 justify-center">
           <KycProgressBar />
         </div>
       </div>
