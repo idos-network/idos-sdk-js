@@ -21,6 +21,7 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string):
 export interface CreateUserReqParams {
   id: string;
   recipient_encryption_public_key: string;
+  encryption_password_store: string;
 }
 /**
  * Creates a user profile in the idOS.

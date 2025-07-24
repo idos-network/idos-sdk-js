@@ -113,14 +113,14 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 }
 
 interface PasswordOrSecretRevealProps {
-  authMethod: "password" | "secret key";
+  encryptionPasswordMethod: "password" | "secret key";
   secret: string;
   onCancel?: () => void;
   onDone?: () => void;
 }
 
 export function PasswordOrSecretReveal({
-  authMethod,
+  encryptionPasswordMethod,
   secret,
   onCancel,
   onDone,
@@ -137,7 +137,7 @@ export function PasswordOrSecretReveal({
   };
 
   const handleDownload = () => {
-    const content = `idOS ${authMethod}: ${secret}\n`;
+    const content = `idOS ${encryptionPasswordMethod}: ${secret}\n`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -156,25 +156,25 @@ export function PasswordOrSecretReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your {authMethod} is:</Paragraph>
+        <Paragraph>Your {encryptionPasswordMethod} is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
           <div className="flex items-center gap-2">
             <RevealButton
-              aria-label={`${revealButtonLabel} ${authMethod}`}
-              title={`${revealButtonLabel} ${authMethod}`}
+              aria-label={`${revealButtonLabel} ${encryptionPasswordMethod}`}
+              title={`${revealButtonLabel} ${encryptionPasswordMethod}`}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
             <ClipboardCopyButton
-              aria-label={`Copy ${authMethod}`}
-              title={`Copy ${authMethod}`}
+              aria-label={`Copy ${encryptionPasswordMethod}`}
+              title={`Copy ${encryptionPasswordMethod}`}
               onClick={handleCopyToClipboard}
             />
             <DownloadButton
-              aria-label={`Download ${authMethod}`}
-              title={`Download ${authMethod}`}
+              aria-label={`Download ${encryptionPasswordMethod}`}
+              title={`Download ${encryptionPasswordMethod}`}
               onClick={handleDownload}
             />
           </div>
@@ -196,13 +196,13 @@ export function PasswordOrKeyBackup({
   onSuccess: (result: unknown) => void;
 }) {
   const reveal = useSignal(false);
-  const authMethod = useSignal<"passkey" | "password" | null>(null);
+  const encryptionPasswordMethod = useSignal<"passkey" | "password" | null>(null);
   const password = useSignal<string | null>(null);
 
   useEffect(() => {
     store.get<"passkey" | "password">("preferred-auth-method").then((method) => {
       if (method) {
-        authMethod.value = method;
+        encryptionPasswordMethod.value = method;
       }
     });
     store.get<string>("password").then((p) => {
@@ -213,7 +213,7 @@ export function PasswordOrKeyBackup({
   }, []);
 
   const passwordOrSecretKey: "password" | "secret key" =
-    authMethod.value === "password" ? "password" : "secret key";
+    encryptionPasswordMethod.value === "password" ? "password" : "secret key";
 
   const secret = password.value;
 
@@ -221,14 +221,14 @@ export function PasswordOrKeyBackup({
     reveal.value = !reveal.value;
   };
 
-  if (!authMethod.value || !password.value) {
+  if (!encryptionPasswordMethod.value || !password.value) {
     return <div>Loading...</div>;
   }
 
   if (reveal.value && secret) {
     return (
       <PasswordOrSecretReveal
-        {...{ secret, authMethod: passwordOrSecretKey }}
+        {...{ secret, encryptionPasswordMethod: passwordOrSecretKey }}
         onCancel={toggleReveal}
         onDone={() => {
           onSuccess({

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
-import type { AuthMethodProps } from "@/features/auth/auth-method-chooser";
+import type { PasswordSetProps } from "@/types";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -80,7 +80,7 @@ export function PasswordForm({
   store,
   encryptionPublicKey,
   userId,
-}: AuthMethodProps<{ authMethod: string; password: string; duration: number }> & {
+}: PasswordSetProps<{ encryptionPasswordMethod: string; password: string; duration: number }> & {
   encryptionPublicKey?: string;
   userId: string | null;
 }) {
@@ -119,9 +119,11 @@ export function PasswordForm({
 
     hasError.value = false;
     isLoading.value = false;
-    store.set("preferred-auth-method", "password");
-
-    onSuccess({ authMethod: "password", password: password.value, duration: duration.value });
+    onSuccess({
+      encryptionPasswordMethod: "user",
+      password: password.value,
+      duration: duration.value,
+    });
   };
 
   return (

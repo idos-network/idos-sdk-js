@@ -8,7 +8,7 @@ import { every, get } from "es-toolkit/compat";
 import nacl from "tweetnacl";
 import { Client as MPCClient } from "./mpc/client";
 
-type AuthMethod = "mpc" | "password";
+type PasswordMethod = "mpc" | "user";
 
 // Type definitions for request handling
 type RequestData = {
@@ -25,6 +25,7 @@ type RequestData = {
     omit: Record<string, unknown[]>;
   };
   expectedUserEncryptionPublicKey?: string;
+  encryptionPasswordStore?: string;
   walletAddress?: string;
 };
 
@@ -54,6 +55,7 @@ export class Enclave {
   private backupButton: HTMLButtonElement;
   private userId?: string;
   private expectedUserEncryptionPublicKey?: string;
+  private encryptionPasswordStore?: string;
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
     this.parentOrigin = parentOrigin;
@@ -102,7 +104,11 @@ export class Enclave {
     }
   }
 
-  async storage(userId: string, expectedUserEncryptionPublicKey: string) {
+  async storage(
+    userId: string,
+    expectedUserEncryptionPublicKey: string,
+    encryptionPasswordStore: string,
+  ) {
     // In case the user is different, we reset the store.
     if (userId !== (await this.store.get<string>("user-id"))) {
       await this.reset();
@@ -110,8 +116,9 @@ export class Enclave {
 
     userId && (await this.store.set("user-id", userId));
 
-    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
     this.userId = userId;
+    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
+    this.encryptionPasswordStore = encryptionPasswordStore;
 
     if (!this.isAuthorizedOrigin) {
       return {
@@ -127,34 +134,43 @@ export class Enclave {
         (await this.store.get<string>("user-id")) ??
         (await this.store.get<string>("human-id")),
       encryptionPublicKey: await this.storeWithCodec.get<string>("encryption-public-key"),
+      encryptionPasswordStore,
     };
   }
 
   async keys() {
+    console.log("keys");
     let secretKey =
       await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
 
     if (!secretKey) {
-      let preferredAuthMethod: AuthMethod = "password";
+      if (!this.userId) {
+        throw new Error("userId is not found");
+      }
+      if (!this.encryptionPasswordStore) {
+        if (import.meta.env.VITE_ENABLE_MPC === "true") {
+          this.encryptionPasswordStore = await this.ensurePreferredPasswordMethod();
+        } else {
+          this.encryptionPasswordStore = "user";
+        }
+      }
 
-      if (import.meta.env.VITE_ENABLE_MPC === "true")
-        preferredAuthMethod = await this.ensurePreferredAuthMethod();
-
-      switch (preferredAuthMethod) {
-        case "password": {
-          if (!this.userId) {
-            throw new Error("userId is not found");
-          }
-
-          const password = await this.ensurePassword();
-          const salt = this.userId;
-          secretKey = await keyDerivation(password, salt);
+      let password: string;
+      switch (this.encryptionPasswordStore) {
+        case "user": {
+          password = await this.ensureUserPassword();
           break;
         }
         case "mpc":
-          secretKey = await this.ensureMPCPrivateKey();
+          password = await this.ensureMPCPassword();
           break;
+        default:
+          throw new Error(`Invalid encryptionPasswordStore: ${this.encryptionPasswordStore}`);
       }
+      if (!password) throw new Error("Can't get a password");
+
+      const salt = this.userId;
+      secretKey = await keyDerivation(password, salt);
     }
 
     if (!secretKey) {
@@ -163,17 +179,16 @@ export class Enclave {
 
     await this.ensureKeyPair(secretKey);
 
-    return this.keyPair?.publicKey;
+    return {
+      publicKey: this.keyPair?.publicKey,
+      encryptionPasswordStore: this.encryptionPasswordStore,
+    };
   }
 
-  async ensurePreferredAuthMethod(): Promise<AuthMethod> {
-    const allowedAuthMethods: AuthMethod[] = ["mpc", "password"];
-    let authMethod = await this.store.get<AuthMethod>("preferred-auth-method");
+  async ensurePreferredPasswordMethod(): Promise<PasswordMethod> {
+    const allowedPasswordMethods: string[] = ["mpc", "user"];
     let password: string | undefined;
-
-    if (authMethod) {
-      return authMethod;
-    }
+    let encryptionPasswordMethod: string;
 
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
@@ -184,27 +199,35 @@ export class Enclave {
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
-          ({ authMethod, password } = await this.openDialog("auth", {
+          const result = await this.openDialog("choosePasswordMethod", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-          }));
+          });
+          encryptionPasswordMethod = result.encryptionPasswordMethod || ""; // or your preferred default
+          password = result.password;
 
-          if (!authMethod || !allowedAuthMethods.includes(authMethod)) {
-            return reject(new Error(`Invalid auth method: ${authMethod}`));
+          if (
+            !encryptionPasswordMethod ||
+            !allowedPasswordMethods.includes(encryptionPasswordMethod)
+          ) {
+            return reject(
+              new Error(`Invalid encryption password method: ${encryptionPasswordMethod}`),
+            );
           }
         } catch (e) {
           return reject(e);
         }
-        await this.store.set("preferred-auth-method", authMethod);
         if (password) await this.store.set("password", password);
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
         await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
 
-        return authMethod ? resolve(authMethod) : reject();
+        return encryptionPasswordMethod
+          ? resolve(encryptionPasswordMethod as PasswordMethod)
+          : reject();
       }),
     );
   }
 
-  async ensurePassword(): Promise<string> {
+  async ensureUserPassword(): Promise<string> {
     const storedPassword = await this.store.get<string>("password");
 
     if (this.isAuthorizedOrigin && storedPassword) return Promise.resolve(storedPassword);
@@ -220,7 +243,7 @@ export class Enclave {
 
         try {
           // TODO: Add duration
-          ({ password } = await this.openDialog("password", {
+          ({ password } = await this.openDialog("userPassword", {
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
         } catch (e) {
@@ -244,29 +267,30 @@ export class Enclave {
     await this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
   }
 
-  async ensureMPCPrivateKey() {
+  async ensureMPCPassword() {
     if (this.configuration?.mode !== "new") {
       const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
       if (downloadStatus === "ok") {
-        return downloadedSecret;
+        return downloadedSecret as string;
       }
 
       if (downloadStatus === "error") {
         throw Error("A secret might be stored at ZK nodes, but can't be obtained");
       }
+      // TODO: handle other cases
     }
 
-    const privateKey = nacl.box.keyPair().secretKey;
-    const { status: uploadStatus } = await this.uploadSecret(privateKey);
+    const password = generatePassword();
+    const { status: uploadStatus } = await this.uploadSecret(password);
 
     if (uploadStatus !== "success") {
       throw Error(`A secret upload failed with status: ${uploadStatus}`);
     }
 
-    return privateKey;
+    return password;
   }
 
-  async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
+  async downloadSecret(): Promise<{ status: string; secret: string | undefined }> {
     return new Promise((resolve, reject) => {
       const ephemeralKeyPair = nacl.box.keyPair();
       const signerAddress = this.configuration.walletAddress;
@@ -293,7 +317,7 @@ export class Enclave {
           ephemeralKeyPair.secretKey,
         );
 
-        return resolve({ status, secret });
+        return resolve({ status, secret: secret?.toString("utf8") });
       };
 
       const signMessage = {
@@ -305,7 +329,7 @@ export class Enclave {
     });
   }
 
-  async uploadSecret(secret: Uint8Array<ArrayBufferLike>): Promise<{ status: string }> {
+  async uploadSecret(secret: string): Promise<{ status: string }> {
     return new Promise((resolve, reject) => {
       const signerAddress = this.configuration.walletAddress;
       if (!signerAddress) {
@@ -313,7 +337,7 @@ export class Enclave {
         return resolve({ status: "no-signer-address" });
       }
 
-      const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret));
+      const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret, "utf8"));
       const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
       const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
 
@@ -466,6 +490,7 @@ export class Enclave {
           credentials,
           privateFieldFilters,
           expectedUserEncryptionPublicKey,
+          encryptionPasswordStore,
           walletAddress,
         } = requestData;
 
@@ -476,7 +501,7 @@ export class Enclave {
           keys: () => [],
           reset: () => [],
           configure: () => [mode, theme, walletAddress],
-          storage: () => [userId, expectedUserEncryptionPublicKey],
+          storage: () => [userId, expectedUserEncryptionPublicKey, encryptionPasswordStore],
           filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
           target: () => [],
@@ -521,7 +546,11 @@ export class Enclave {
     intent: string,
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
     message?: any,
-  ): Promise<{ authMethod?: AuthMethod; password?: string; confirmed?: boolean }> {
+  ): Promise<{
+    encryptionPasswordMethod?: PasswordMethod;
+    password?: string;
+    confirmed?: boolean;
+  }> {
     if (!this.userId) throw new Error("Can't open dialog without userId");
 
     const width = 600;
@@ -584,4 +613,18 @@ export class Enclave {
       );
     });
   }
+}
+
+function generatePassword(): string {
+  const alphabet =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+  const length = 20;
+  const array = new Uint8Array(length);
+  window.crypto.getRandomValues(array);
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += alphabet[array[i] % alphabet.length];
+  }
+
+  return password;
 }
