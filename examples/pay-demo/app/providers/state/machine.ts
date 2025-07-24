@@ -48,6 +48,7 @@ export const machine = setup({
     getHifiKycStatusAttempts: 0,
     onRampAccount: null,
     moneriumAuthUrl: null,
+    moneriumCode: null,
   },
   states: {
     notConfigured: {
@@ -311,12 +312,12 @@ export const machine = setup({
             id: "createMoneriumUser",
             src: "createMoneriumUser",
             input: ({ context }) => context.sharedCredential,
-          },
-          onDone: {
-            target: "createMoneriumProfile",
-          },
-          onError: {
-            target: "requestMoneriumAuth",
+            onDone: {
+              target: "createMoneriumProfile",
+            },
+            onError: {
+              target: "requestMoneriumAuth",
+            },
           },
         },
         requestMoneriumAuth: {
@@ -334,8 +335,42 @@ export const machine = setup({
             },
           },
         },
-        moneriumAuthUrlFetched: {},
-        createMoneriumProfile: {},
+        moneriumAuthUrlFetched: {
+          on: {
+            accessTokenFromCode: {
+              target: "accessTokenFromCode",
+              actions: ["setMoneriumCode"],
+            },
+          },
+        },
+        accessTokenFromCode: {
+          invoke: {
+            id: "moneriumAccessTokenFromCode",
+            src: "moneriumAccessTokenFromCode",
+            input: ({ context }) => context.moneriumCode,
+            onDone: {
+              target: "createMoneriumProfile",
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        createMoneriumProfile: {
+          invoke: {
+            id: "createMoneriumProfile",
+            src: "createMoneriumProfile",
+            input: ({ context }) => context.sharedCredential,
+            onDone: {
+              target: "dataOrTokenFetched",
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
         error: {
           type: "final",
         },

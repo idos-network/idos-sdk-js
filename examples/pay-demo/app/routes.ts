@@ -8,7 +8,8 @@ export default [
 
   ...prefix("callbacks", [
     route("noah", "routes/callbacks/noah.tsx"),
-    ...prefix("hifi", [route("tos", "routes/callbacks/hifi/tos.tsx")]),
+    route("hifi/tos", "routes/callbacks/hifi/tos.tsx"),
+    route("monerium", "routes/callbacks/monerium.tsx"),
   ]),
 
   ...prefix("app", [
@@ -29,6 +30,8 @@ export default [
         ...prefix("monerium", [
           route("auth", "routes/kyc/monerium/auth.ts"),
           route("user", "routes/kyc/monerium/user.ts"),
+          route("code", "routes/kyc/monerium/code.ts"),
+          route("profile", "routes/kyc/monerium/profile.ts"),
         ]),
       ]),
     ]),

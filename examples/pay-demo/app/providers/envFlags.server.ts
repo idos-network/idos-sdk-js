@@ -21,6 +21,7 @@ export const serverEnvSchema = z.object({
   MONERIUM_CLIENT_ID: z.string(),
   MONERIUM_CLIENT_SECRET: z.string(),
   MONERIUM_AUTH_CODE_FLOW: z.string(),
+  MONERIUM_FORCE_BACK_URL: z.string().optional(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

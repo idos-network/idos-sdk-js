@@ -104,6 +104,36 @@ export const actors = {
     return await moneriumAuth.json().then((data) => data.url);
   }),
 
+  moneriumAccessTokenFromCode: fromPromise(
+    async ({ input }: { input: Context["moneriumCode"] }) => {
+      if (!input) {
+        throw new Error("Monerium code not found");
+      }
+
+      const moneriumAuth = await fetch(`/app/kyc/monerium/code?code=${input}`);
+
+      if (moneriumAuth.status !== 200) {
+        throw new Error("Monerium API is not available. Please try again later.");
+      }
+
+      return true;
+    },
+  ),
+
+  createMoneriumProfile: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumProfile = await fetch(`/app/kyc/monerium/profile?credentialId=${input.id}`);
+
+    if (moneriumProfile.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return true;
+  }),
+
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");
@@ -183,8 +213,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      await input.client.enclaveProvider.reset();
 
       const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
