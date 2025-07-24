@@ -14,7 +14,7 @@ import {
   Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
-import { base64Decode, utf8Decode } from "@idos-network/core";
+import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
 import { useIdOS } from "@/idOS.provider";

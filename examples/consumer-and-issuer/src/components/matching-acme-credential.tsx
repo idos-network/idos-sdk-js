@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, Link, Spinner } from "@heroui/react";
-import type { idOSCredential, PassportingPeer } from "@idos-network/core";
+import type { PassportingPeer } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";

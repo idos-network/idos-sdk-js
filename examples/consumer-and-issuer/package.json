@@ -8,6 +8,8 @@
     "@idos-network/consumer": "workspace:*",
     "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@idos-network/issuer": "workspace:*",
     "@nanostores/react": "^0.8.4",
     "@near-wallet-selector/core": "catalog:near",
@@ -63,7 +65,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "pnpm install --force && next build",
+    "build": "next build",
     "dev": "next dev --turbopack",
     "start": "next start"
   }

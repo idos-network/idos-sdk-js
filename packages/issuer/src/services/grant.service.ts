@@ -1,12 +1,8 @@
-import {
-  base64Encode,
-  hexEncodeSha256Hash,
-  type idOSCredential,
-  type KwilActionClient,
-  NoncedBox,
-  utf8Encode,
-} from "@idos-network/core";
+import { NoncedBox } from "@idos-network/core/cryptography";
 import { createAccessGrantByDag as _createAccessGrantByDag } from "@idos-network/core/kwil-actions";
+import type { KwilActionClient } from "@idos-network/core/kwil-infra";
+import type { idOSCredential } from "@idos-network/credentials";
+import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 
 export type CreateAccessGrantFromDAGParams = {

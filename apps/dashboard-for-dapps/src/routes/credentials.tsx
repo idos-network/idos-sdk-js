@@ -10,8 +10,8 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/core";
-import { base64Encode } from "@idos-network/core/codecs";
+import type { idOSCredential } from "@idos-network/credentials";
+import { base64Encode } from "@idos-network/utils/codecs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";

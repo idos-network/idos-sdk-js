@@ -1,6 +1,11 @@
-import { deserialize as borshDeserialize, serialize as borshSerialize } from "borsh";
+import {
+  borshDeserialize,
+  borshSerialize,
+  bs58Decode,
+  hexDecode,
+  sha256Hash,
+} from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
-import { bs58Decode, hexDecode, sha256Hash } from "../codecs";
 
 interface NEP413Payload {
   tag: number;

@@ -1,5 +1,5 @@
-import type { idOSCredential } from "@idos-network/core";
-import type { EnclaveOptions, EnclaveProvider, UserEncryptionProfileResponse } from "./types";
+import type { idOSCredential } from "@idos-network/credentials";
+import type { EnclaveOptions, EnclaveProvider } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later

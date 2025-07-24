@@ -87,6 +87,11 @@ const Provider = ({
 
 export default function ProviderQuotes() {
   const [selectedProvider, setSelectedProvider] = useState("hifi");
+  // Fetch the quotes data
+  // const quoteQuery = useQuery({
+  //   queryKey: ["quotes"],
+  //   queryFn: () => fetch("/api/quotes").then((res) => res.json()),
+  // });
 
   return (
     <div className="mx-auto max-w-2xl flex-1 rounded-2xl bg-card p-6 text-white">

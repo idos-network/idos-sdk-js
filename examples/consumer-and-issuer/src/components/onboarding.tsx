@@ -1,7 +1,8 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, idOSCredential, PassportingPeer } from "@idos-network/core";
+import type { IsleStatus, PassportingPeer } from "@idos-network/core";
+import type { idOSCredential } from "@idos-network/credentials";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
