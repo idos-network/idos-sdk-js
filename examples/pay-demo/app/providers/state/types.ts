@@ -31,6 +31,7 @@ export interface Context {
   hifiKycStatus: "ACTIVE" | any;
   // biome-ignore lint/suspicious/noExplicitAny: false positive
   onRampAccount: any | null;
+  moneriumCode: string | null;
 }
 
 export interface UserData {

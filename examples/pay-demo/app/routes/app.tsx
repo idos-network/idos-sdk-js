@@ -50,6 +50,11 @@ export default function App() {
     if (message.data.type === "hifi-tos-done") {
       send({ type: "acceptHifiTos", signedAgreementId: message.data.signedAgreementId });
     }
+
+    if (message.data.type === "monerium-callback") {
+      console.log("-> monerium callback", message.data.code);
+      send({ type: "accessTokenFromCode", code: message.data.code });
+    }
   }, []);
 
   useEffect(() => {
