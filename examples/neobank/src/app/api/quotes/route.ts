@@ -1,6 +1,7 @@
 import { goTry } from "go-try";
-import { NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import invariant from "tiny-invariant";
+import type { Provider } from "@/app/types";
 
 type NoahResponse = {
   Items: {
@@ -41,6 +42,7 @@ type HifiResponse = {
 };
 
 type QuoteRateResponse = {
+  name: Provider;
   rate: string;
 };
 
@@ -66,7 +68,7 @@ async function getNoahQuote(): Promise<QuoteRateResponse> {
 
     const rate = result.Items.find((item) => item.PaymentMethodCategory === "Bank")?.Rate ?? "";
 
-    return { rate };
+    return { name: "noah", rate };
   });
 
   if (error) {
@@ -98,7 +100,7 @@ async function getTransakQuote(): Promise<QuoteRateResponse> {
 
   const rate = data.response.conversionPrice?.toString() ?? "";
 
-  return { rate };
+  return { name: "transak", rate };
 }
 
 async function getHifiQuote(): Promise<QuoteRateResponse> {
@@ -128,27 +130,34 @@ async function getHifiQuote(): Promise<QuoteRateResponse> {
 
   const rate = data.conversionRate.toString();
 
-  return { rate };
+  return { name: "hifi", rate };
 }
 
-export async function GET() {
-  const [[noahError, noahData], [transakError, transakData], [hifiError, hifiData]] =
-    await Promise.all([goTry(getNoahQuote), goTry(getTransakQuote), goTry(getHifiQuote)]);
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const provider = searchParams.get("provider") as Provider;
 
-  if (noahError || transakError || hifiError) {
+  const [error, data] = await goTry(async () => {
+    switch (provider) {
+      case "noah":
+        return getNoahQuote();
+      case "transak":
+        return getTransakQuote();
+      case "hifi":
+        return getHifiQuote();
+      default:
+        throw new Error("Invalid provider");
+    }
+  });
+
+  if (error) {
     return NextResponse.json(
       {
-        noahError: noahError?.message,
-        transakError: transakError?.message,
-        hifiError: hifiError?.message,
+        error: error.message,
       },
       { status: 500 },
     );
   }
 
-  return NextResponse.json({
-    noah: { rate: noahData.rate },
-    transak: { rate: transakData.rate },
-    hifi: { rate: hifiData.rate },
-  });
+  return NextResponse.json(data);
 }
