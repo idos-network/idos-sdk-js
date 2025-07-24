@@ -17,6 +17,7 @@
     "@tanstack/react-query": "catalog:tanstack",
     "zustand": "^5.0.0",
     "@web3icons/react": "^4.0.14",
+    "countries-list": "^3.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "go-try": "^3.0.2",

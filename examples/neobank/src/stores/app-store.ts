@@ -32,6 +32,9 @@ interface AppState {
   // KYC URLs
   kycUrl: string | null;
 
+  // Hifi
+  signedAgreementId: string | null;
+
   // OnRamp URLs
   onRampUrl: string | null;
   hifiTosUrl: string | null;
@@ -93,6 +96,9 @@ interface AppActions {
 
   // Shared credential
   findSharedCredential: (userId: string) => void;
+
+  // Hifi
+  setHifiSignedAgreementId: (signedAgreementId: string) => void;
 }
 
 type AppStore = AppState & AppActions;
@@ -101,6 +107,7 @@ const initialState: AppState = {
   currentStep: "select-provider",
   selectedOnRampProvider: "hifi",
   selectedKyc: "persona",
+  signedAgreementId: null,
   hasExistingCredentials: null,
   credentialId: null,
   findCredentialAttempts: 0,
@@ -139,6 +146,8 @@ export const useAppStore = create<AppStore>()(
       setCredentialFound: (credentialId) => set({ credentialId: credentialId }),
       setNoCredentialsFound: () => set({ credentialId: null, hasExistingCredentials: false }),
 
+      // Hifi
+      setHifiSignedAgreementId: (signedAgreementId) => set({ signedAgreementId }),
       // KYC actions
       startKyc: async () => {
         try {
@@ -191,10 +200,23 @@ export const useAppStore = create<AppStore>()(
           switch (selectedProvider) {
             case "hifi": {
               // Start with ToS for Hifi
-              const tosResponse = await fetch("/api/providers/hifi/tos");
-              if (!tosResponse.ok) throw new Error("Failed to get Hifi ToS");
-              const { link } = await tosResponse.json();
-              set({ hifiTosUrl: link });
+              const { signedAgreementId, sharedCredential, credentialId } = get();
+              if (!signedAgreementId) {
+                const tosResponse = await fetch("/api/providers/hifi/tos");
+                if (!tosResponse.ok) throw new Error("Failed to get Hifi ToS");
+                const { link } = await tosResponse.json();
+                window.location.href = link;
+              }
+
+              const userId = await fetch("/api/providers/hifi/user", {
+                method: "POST",
+                body: JSON.stringify({
+                  signedAgreementId,
+                  credentialId,
+                  data: { credentialSubject: sharedCredential },
+                  url: window.location.href,
+                }),
+              });
               break;
             }
 
