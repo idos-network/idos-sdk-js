@@ -30,6 +30,7 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
       await idOSClient.enclaveProvider.ready(
         idOSClient.user.id,
         idOSClient.user.recipient_encryption_public_key,
+        idOSClient.user.encryption_password_store,
       );
 
       if (!credential) {

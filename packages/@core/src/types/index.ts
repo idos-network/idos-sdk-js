@@ -12,6 +12,7 @@ export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejec
 export type idOSUser = {
   id: string;
   recipient_encryption_public_key: string;
+  encryption_password_store: string;
 };
 
 export type idOSCredential = {

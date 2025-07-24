@@ -3,11 +3,13 @@ import type { idOSCredential } from "@idos-network/core";
 export type StoredData = {
   encryptionPublicKey?: Uint8Array;
   userId?: string;
+  encryptionPasswordStore?: string;
 };
 
-export type DiscoverUserEncryptionPublicKeyResponse = {
+export type UserEncryptionProfileResponse = {
   userId: string;
   userEncryptionPublicKey: string;
+  encryptionPasswordStore: string;
 };
 
 export type EnclaveOptions = {
@@ -23,7 +25,11 @@ export interface EnclaveProvider {
   load(walletAddress?: string): Promise<void>;
   reconfigure(options: Omit<EnclaveOptions, "container" | "url">): Promise<void>;
 
-  ready(userId: string, currentUserEncryptionPublicKey?: string): Promise<Uint8Array>;
+  ready(
+    userId: string,
+    currentUserEncryptionPublicKey?: string,
+    encryptionPasswordStore?: string,
+  ): Promise<{ userEncryptionPublicKey: Uint8Array; encryptionPasswordStore: string }>;
   reset(): Promise<void>;
   confirm(message: string): Promise<boolean>;
   encrypt(
@@ -31,7 +37,7 @@ export interface EnclaveProvider {
     receiverPublicKey?: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }>;
   decrypt(message: Uint8Array, senderPublicKey?: Uint8Array): Promise<Uint8Array>;
-  discoverUserEncryptionPublicKey(userId: string): Promise<DiscoverUserEncryptionPublicKeyResponse>;
+  createUserEncryptionProfile(userId: string): Promise<UserEncryptionProfileResponse>;
 
   filterCredentials(
     credentials: idOSCredential[],

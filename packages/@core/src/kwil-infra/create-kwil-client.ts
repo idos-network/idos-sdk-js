@@ -75,6 +75,7 @@ export class KwilActionClient {
     };
 
     const response = await this.client.call(action as CallBody, signer);
+
     return response?.data?.result as T;
   }
 

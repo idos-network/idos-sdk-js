@@ -1,9 +1,5 @@
 import type { idOSCredential } from "@idos-network/core";
-import type {
-  DiscoverUserEncryptionPublicKeyResponse,
-  EnclaveOptions,
-  EnclaveProvider,
-} from "./types";
+import type { EnclaveOptions, EnclaveProvider, UserEncryptionProfileResponse } from "./types";
 
 export class MetaMaskSnapEnclave implements EnclaveProvider {
   // biome-ignore lint/suspicious/noExplicitAny: Types will be added later
@@ -26,7 +22,7 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
     throw new Error("Method not implemented.");
   }
 
-  async discoverUserEncryptionPublicKey(): Promise<DiscoverUserEncryptionPublicKeyResponse> {
+  async createUserEncryptionProfile(): Promise<UserEncryptionProfileResponse> {
     throw new Error("Method not implemented.");
   }
 
@@ -42,13 +38,15 @@ export class MetaMaskSnapEnclave implements EnclaveProvider {
       });
   }
 
-  async ready(userId: string): Promise<Uint8Array> {
+  async ready(
+    userId: string,
+  ): Promise<{ userEncryptionPublicKey: Uint8Array; encryptionPasswordStore: string }> {
     let { encryptionPublicKey } = JSON.parse(await this.invokeSnap("storage", { userId }));
 
     encryptionPublicKey ||= await this.invokeSnap("init");
     encryptionPublicKey &&= Uint8Array.from(Object.values(encryptionPublicKey));
 
-    return encryptionPublicKey;
+    return { userEncryptionPublicKey: encryptionPublicKey, encryptionPasswordStore: "" };
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: Using `any` to avoid type errors.

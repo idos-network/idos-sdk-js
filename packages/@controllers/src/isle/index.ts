@@ -422,6 +422,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     await idosClient.enclaveProvider.ready(
       idosClient.user.id,
       idosClient.user.recipient_encryption_public_key,
+      idosClient.user.encryption_password_store,
     );
     return utf8Decode(
       await idosClient.enclaveProvider.decrypt(

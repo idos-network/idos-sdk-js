@@ -54,7 +54,12 @@ import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "./enclave";
+import {
+  type EnclaveOptions,
+  type EnclaveProvider,
+  IframeEnclave,
+  type UserEncryptionProfileResponse,
+} from "./enclave";
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -191,14 +196,13 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return hasProfile(this.kwilClient, this.walletIdentifier);
   }
 
-  async getUserEncryptionPublicKey(userId: string): Promise<string> {
+  async createUserEncryptionProfile(userId: string): Promise<UserEncryptionProfileResponse> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
       walletAddress: this.walletIdentifier,
     });
-    const { userEncryptionPublicKey } =
-      await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
-    return userEncryptionPublicKey;
+
+    return await this.enclaveProvider.createUserEncryptionProfile(userId);
   }
 
   async logIn(): Promise<idOSClientLoggedIn> {
@@ -281,7 +285,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ready(
+      this.user.id,
+      this.user.recipient_encryption_public_key,
+      this.user.encryption_password_store,
+    );
 
     const plaintext = await this.enclaveProvider.decrypt(
       base64Decode(credential.content),
@@ -300,7 +308,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const originalCredential = await getCredentialById(this.kwilClient, id);
     invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ready(
+      this.user.id,
+      this.user.recipient_encryption_public_key,
+      this.user.encryption_password_store,
+    );
 
     const decryptedContent = await this.enclaveProvider.decrypt(
       base64Decode(originalCredential.content),
@@ -451,7 +463,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       ),
     );
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ready(
+      this.user.id,
+      this.user.recipient_encryption_public_key,
+      this.user.encryption_password_store,
+    );
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       utf8Encode(plaintextContent),

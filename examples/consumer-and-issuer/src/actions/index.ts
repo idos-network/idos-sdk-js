@@ -104,10 +104,12 @@ const publicNotes = {
 export async function createIDOSUserProfile({
   userId,
   recipientEncryptionPublicKey,
+  encryptionPasswordStore,
   wallet,
 }: {
   userId: string;
   recipientEncryptionPublicKey: string;
+  encryptionPasswordStore: string;
   wallet: {
     address: string;
     type: "EVM" | "XRPL" | "NEAR" | "Stellar";
@@ -122,6 +124,7 @@ export async function createIDOSUserProfile({
     {
       id: userId,
       recipient_encryption_public_key: recipientEncryptionPublicKey,
+      encryption_password_store: encryptionPasswordStore,
     },
     {
       address: wallet.address,

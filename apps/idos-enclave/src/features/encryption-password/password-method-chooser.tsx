@@ -1,22 +1,17 @@
-import type { Store } from "@idos-network/utils/store";
-
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
-import type { AuthMethod, UIMode } from "@/types";
+import type { PasswordMethod, PasswordSetProps } from "@/types";
 
-export interface AuthMethodChooserProps extends AuthMethodProps {
-  setMethod: (method: AuthMethod) => void;
+export interface PasswordSetMethodProps extends PasswordSetProps {
+  setMethod: (method: PasswordMethod) => void;
 }
 
-export interface AuthMethodProps<K = Record<string, unknown>> {
-  mode: UIMode;
-  store: Store;
-  onSuccess: (result: K) => void;
-  onError: (error: Error) => void;
-}
-
-export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMethodChooserProps) {
+export default function PasswordSetMethodChooser({
+  setMethod,
+  mode,
+  onSuccess,
+}: PasswordSetMethodProps) {
   return (
     <div className="flex flex-col space-y-4 px-3 md:px-0">
       {mode === "existing" && (
@@ -44,11 +39,11 @@ export default function AuthMethodChooser({ setMethod, mode, onSuccess }: AuthMe
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Button id="auth-method-password" onClick={() => setMethod("password")}>
+        <Button id="auth-method-password" onClick={() => setMethod("user")}>
           Use a password
         </Button>
 
-        <Button id="auth-method-mpc" onClick={() => onSuccess({ authMethod: "mpc" })}>
+        <Button id="auth-method-mpc" onClick={() => onSuccess({ encryptionPasswordMethod: "mpc" })}>
           Use MPC
         </Button>
       </div>

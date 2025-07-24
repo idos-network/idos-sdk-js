@@ -4,12 +4,18 @@ import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 
 import { Header } from "@/components/header";
-import AuthMethodChooser from "@/features/auth/auth-method-chooser";
-import { PasswordForm } from "@/features/auth/password-form";
 import { Confirmation } from "@/features/confirmation/confirmation";
+import { PasswordForm } from "@/features/encryption-password/password-form";
+import PasswordSetMethodChooser from "@/features/encryption-password/password-method-chooser";
 import { PasswordOrKeyBackup } from "@/features/recovery/backup";
 import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
-import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
+import type {
+  AllowedIntent,
+  idOSEnclaveConfiguration,
+  PasswordMethod,
+  Theme,
+  UIMode,
+} from "@/types";
 
 export interface EventData {
   intent: AllowedIntent;
@@ -18,7 +24,12 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["password", "confirm", "auth", "backupPasswordOrSecret"];
+const allowedIntents: AllowedIntent[] = [
+  "userPassword",
+  "confirm",
+  "choosePasswordMethod",
+  "backupPasswordOrSecret",
+];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -37,7 +48,7 @@ type AppProps = {
 };
 
 export function App({ store, enclave }: AppProps) {
-  const method = useSignal<AuthMethod | null>(null);
+  const method = useSignal<PasswordMethod | null>(null);
   const mode = useSignal<UIMode>("existing");
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
   const confirm = useSignal<boolean>(false);
@@ -117,12 +128,12 @@ export function App({ store, enclave }: AppProps) {
       encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
 
       switch (requestData.intent) {
-        case "auth":
+        case "choosePasswordMethod":
           method.value = null;
           break;
 
-        case "password":
-          method.value = "password";
+        case "userPassword":
+          method.value = "user";
           break;
 
         case "confirm":
@@ -181,7 +192,7 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  if (method.value === "password") {
+  if (method.value === "user") {
     return (
       <Layout>
         <PasswordForm
@@ -215,9 +226,9 @@ export function App({ store, enclave }: AppProps) {
 
   return (
     <Layout>
-      <AuthMethodChooser
+      <PasswordSetMethodChooser
         {...methodProps}
-        setMethod={(newMethod: AuthMethod) => {
+        setMethod={(newMethod: PasswordMethod) => {
           if (method.value === null) {
             // Don't override the method if it's already set
             method.value = newMethod;

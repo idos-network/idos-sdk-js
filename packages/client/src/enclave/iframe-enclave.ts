@@ -1,10 +1,10 @@
 import { base64Encode, type idOSCredential } from "@idos-network/core";
 
 import type {
-  DiscoverUserEncryptionPublicKeyResponse,
   EnclaveOptions,
   EnclaveProvider,
   StoredData,
+  UserEncryptionProfileResponse,
 } from "./types";
 
 export class IframeEnclave implements EnclaveProvider {
@@ -33,20 +33,27 @@ export class IframeEnclave implements EnclaveProvider {
     await this.requestToEnclave({ configure: this.options });
   }
 
-  async ready(userId: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
+  async ready(
+    userId: string,
+    expectedUserEncryptionPublicKey?: string,
+    encryptionPasswordStore?: string,
+  ): Promise<{ userEncryptionPublicKey: Uint8Array; encryptionPasswordStore: string }> {
     let { encryptionPublicKey: userEncryptionPublicKey } = (await this.requestToEnclave({
       storage: {
         userId,
         expectedUserEncryptionPublicKey,
+        encryptionPasswordStore,
       },
     })) as StoredData;
+    let passwordStoreType = encryptionPasswordStore;
 
     while (!userEncryptionPublicKey) {
       this.showEnclave();
       try {
-        userEncryptionPublicKey = (await this.requestToEnclave({
-          keys: {},
-        })) as Uint8Array;
+        ({ publicKey: userEncryptionPublicKey, encryptionPasswordStore: passwordStoreType } =
+          await this.requestToEnclave({
+            keys: {},
+          }));
       } catch (e) {
         if (this.options.throwOnUserCancelUnlock) throw e;
       } finally {
@@ -54,7 +61,7 @@ export class IframeEnclave implements EnclaveProvider {
       }
     }
 
-    return userEncryptionPublicKey as Uint8Array;
+    return { userEncryptionPublicKey, encryptionPasswordStore: passwordStoreType ?? "" };
   }
 
   async reset(): Promise<void> {
@@ -217,17 +224,16 @@ export class IframeEnclave implements EnclaveProvider {
     }
   }
 
-  async discoverUserEncryptionPublicKey(
-    userId: string,
-  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
+  async createUserEncryptionProfile(userId: string): Promise<UserEncryptionProfileResponse> {
     if (this.options.mode !== "new")
-      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
+      throw new Error("You can only call `createUserEncryptionProfile` when mode is `new`.");
 
-    const userEncryptionPublicKey = await this.ready(userId);
+    const { userEncryptionPublicKey, encryptionPasswordStore } = await this.ready(userId);
 
     return {
       userId,
       userEncryptionPublicKey: base64Encode(userEncryptionPublicKey),
+      encryptionPasswordStore,
     };
   }
 }
