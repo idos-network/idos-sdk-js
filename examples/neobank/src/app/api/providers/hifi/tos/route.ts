@@ -31,14 +31,14 @@ const fetchTosLink = async (url: URL) => {
   };
 };
 
-export async function GET() {
+export async function GET(request: Request) {
   // Simulate some processing delay
   await new Promise((resolve) => setTimeout(resolve, 800));
 
-  // Mock Hifi ToS URL - in reality this would call the actual Hifi API
-  const { url, idempotencyKey } = await fetchTosLink(
-    new URL("https://localhost:3000/callbacks/hifi"),
-  );
+  const requestUrl = new URL(request.url);
+  const callbackUrl = `${requestUrl.origin}/callbacks/hifi`;
+
+  const { url, idempotencyKey } = await fetchTosLink(new URL(callbackUrl));
   return NextResponse.json({
     link: url,
     idempotencyKey,
