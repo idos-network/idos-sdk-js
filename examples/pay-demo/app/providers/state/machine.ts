@@ -363,12 +363,35 @@ export const machine = setup({
             src: "createMoneriumProfile",
             input: ({ context }) => context.sharedCredential,
             onDone: {
-              target: "dataOrTokenFetched",
+              target: "fetchProfileStatus",
             },
             onError: {
               target: "error",
               actions: ["setErrorMessage"],
             },
+          },
+        },
+        fetchProfileStatus: {
+          invoke: {
+            id: "fetchMoneriumProfileStatus",
+            src: "fetchMoneriumProfileStatus",
+            onDone: [
+              {
+                actions: ["setMoneriumProfileStatus"],
+                target: "dataOrTokenFetched",
+              },
+            ],
+            onError: [
+              {
+                target: "waitForApproval",
+                actions: ["incrementFindCredentialAttempts"],
+              },
+            ],
+          },
+        },
+        waitForApproval: {
+          after: {
+            2000: "fetchProfileStatus",
           },
         },
         error: {

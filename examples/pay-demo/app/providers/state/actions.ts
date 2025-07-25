@@ -29,6 +29,7 @@ export const actions = {
     getHifiKycStatusAttempts: 0,
     onRampAccount: null,
     moneriumCode: null,
+    moneriumProfileStatus: null,
   }),
 
   setClient: assign({
@@ -109,5 +110,9 @@ export const actions = {
 
   setMoneriumCode: assign({
     moneriumCode: ({ event }) => event.code,
+  }),
+
+  setMoneriumProfileStatus: assign({
+    moneriumProfileStatus: ({ event }) => event.output,
   }),
 };

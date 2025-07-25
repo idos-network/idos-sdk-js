@@ -134,6 +134,16 @@ export const actors = {
     return true;
   }),
 
+  fetchMoneriumProfileStatus: fromPromise(async () => {
+    const moneriumProfileStatus = await fetch("/app/kyc/monerium/status");
+
+    if (moneriumProfileStatus.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return await moneriumProfileStatus.json().then((data) => data.status);
+  }),
+
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");

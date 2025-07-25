@@ -9,6 +9,6 @@ export default defineConfig(({ isSsrBuild }) => ({
   },
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
   server: {
-    allowedHosts: ["0011163a1e8e.ngrok-free.app"],
+    allowedHosts: ["dffbd7819cb0.ngrok-free.app"],
   },
 }));
