@@ -73,7 +73,7 @@ export function BuyTokens({
       </div>
       <PaymentMethod />
       <Button disabled={!+spendAmount} className="h-12 w-full rounded-full bg-secondary">
-        <Link href="/pick-kyc-provider">
+        <Link href="/pick-kyc-provider" className="w-full">
           Continue{" "}
           {!!selectedCurrency && selectedOnRampProvider && `with ${selectedOnRampProvider}`}
         </Link>
