@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export const fetchTosLink = async (url: URL) => {
+const fetchTosLink = async (url: URL) => {
   // Cleanup URL
   const returnUrl = new URL(url.toString());
   returnUrl.protocol = "https";
