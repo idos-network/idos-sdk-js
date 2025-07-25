@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -11,18 +10,58 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+export const currencies = [
+  {
+    value: "USD",
+    label: "USD",
+  },
+  {
+    value: "EUR",
+    label: "EUR",
+    disabled: true,
+  },
+  {
+    value: "GBP",
+    label: "GBP",
+    disabled: true,
+  },
+];
+
+export const tokens = [
+  {
+    value: "USDC",
+    label: "USDC",
+  },
+  {
+    value: "USDT",
+    label: "USDT",
+    disabled: true,
+  },
+  {
+    value: "ETH",
+    label: "ETH",
+    disabled: true,
+  },
+];
+
 export function TokenAmountInput({
-  spendAmount,
-  setSpendAmount,
-  selectedCurrency,
-  setSelectedCurrency,
+  value: spendAmount,
+  onValueChange: setSpendAmount,
+  selectedValue,
+  setSelectedValue,
   label,
+  selectOptions,
 }: {
-  spendAmount: string;
-  setSpendAmount: (value: string) => void;
-  selectedCurrency: string;
-  setSelectedCurrency: (value: string) => void;
+  value: string;
+  onValueChange: (value: string) => void;
+  selectedValue: string;
+  setSelectedValue: (value: string) => void;
   label?: string;
+  selectOptions: {
+    value: string;
+    label: string;
+    disabled?: boolean;
+  }[];
 }) {
   return (
     <div className="space-y-2">
@@ -40,15 +79,16 @@ export function TokenAmountInput({
             MozAppearance: "textfield",
           }}
         />
-        <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-          <SelectTrigger className="absolute top-2 right-2 min-h-[50px] w-20 border-0 bg-transparent font-medium text-black">
+        <Select value={selectedValue} onValueChange={setSelectedValue}>
+          <SelectTrigger className="absolute top-2 right-2 min-h-[50px] w-24 border-0 bg-transparent font-medium text-black">
             <SelectValue placeholder="Select" />
-            <ChevronDown className="absolute top-[50%] right-2 h-4 w-4 translate-y-[-50%] text-gray-600" />
           </SelectTrigger>
           <SelectContent className="absolute top-4 left-[100%] w-[50px]">
-            <SelectItem value="USD">USD</SelectItem>
-            <SelectItem value="EUR">EUR</SelectItem>
-            <SelectItem value="GBP">GBP</SelectItem>
+            {selectOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value} disabled={option.disabled}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       </div>
