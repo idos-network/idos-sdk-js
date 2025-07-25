@@ -5,16 +5,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import invariant from "tiny-invariant";
 import { getISORegionCodeFromNominatim } from "@/lib/maps";
 
-export interface KYCStatusResponse {
-  USD_EURO: UsdEuro;
-}
-
-export interface UsdEuro {
-  status: string;
-  message: string;
-}
-
-export interface CreateUserRequest {
+interface CreateUserRequest {
   type: "individual" | "business";
   firstName: string;
   lastName: string;
@@ -24,7 +15,7 @@ export interface CreateUserRequest {
   signedAgreementId?: string;
 }
 
-export interface Address {
+interface Address {
   addressLine1: string;
   addressLine2?: string;
   city: string;
@@ -33,7 +24,7 @@ export interface Address {
   country: string; // alpha-3
 }
 
-export interface UpdateKYCRequest extends Omit<CreateUserRequest, "type"> {
+interface UpdateKYCRequest extends Omit<CreateUserRequest, "type"> {
   phone?: string;
   ipAddress?: string;
   taxIdentificationNumber: string;
@@ -51,18 +42,18 @@ export interface UpdateKYCRequest extends Omit<CreateUserRequest, "type"> {
   additionalIdType?: string;
 }
 
-export interface OnRampRequest {
+interface _OnRampRequest {
   sourceCurrency: string;
   destinationCurrency: string;
   destinationChain: string;
 }
 
-export interface OnRampAccountResponse {
+interface _OnRampAccountResponse {
   message: string;
   account: Account;
 }
 
-export interface Account {
+interface Account {
   virtualAccountId: string;
   userId: string;
   paymentRails: string[];
@@ -74,19 +65,19 @@ export interface Account {
   depositInstructions: DepositInstructions;
 }
 
-export interface DepositInstructions {
+interface DepositInstructions {
   bankName: string;
   routingNumber: string;
   accountNumber: string;
   bankAddress: string;
 }
 
-export interface FileUrlData {
+interface FileUrlData {
   credentialId: string;
   fileType: string;
 }
 
-export const generateFileUrl = (url: URL, credentialId: string, fileType: string) => {
+const generateFileUrl = (url: URL, credentialId: string, fileType: string) => {
   const jwtData: FileUrlData = {
     credentialId,
     fileType,
@@ -111,15 +102,16 @@ export const generateFileUrl = (url: URL, credentialId: string, fileType: string
   return fileUrl.toString();
 };
 
-export const verifyFileUrl = async (token: string) => {
-  invariant(process.env.FILES_PUBLIC_KEY, "FILES_PUBLIC_KEY is not set");
+// TODO: Uncomment this when we have a way to verify the file URL
+// const verifyFileUrl = async (token: string) => {
+//   invariant(process.env.FILES_PUBLIC_KEY, "FILES_PUBLIC_KEY is not set");
 
-  const decoded = jwt.verify(token, process.env.FILES_PUBLIC_KEY, {
-    algorithms: ["ES512"],
-  }) as FileUrlData;
+//   const decoded = jwt.verify(token, process.env.FILES_PUBLIC_KEY, {
+//     algorithms: ["ES512"],
+//   }) as FileUrlData;
 
-  return decoded;
-};
+//   return decoded;
+// };
 
 const createUserAndKYC = async (
   signedAgreementId: string,

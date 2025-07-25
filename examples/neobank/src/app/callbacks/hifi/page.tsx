@@ -1,9 +1,9 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useAppStore } from "@/stores/app-store";
 
-export default function HifiTosCallback() {
+function HifiCallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { setHifiSignedAgreementId } = useAppStore();
@@ -18,5 +18,13 @@ export default function HifiTosCallback() {
     }
   }, [searchParams, router, setHifiSignedAgreementId]);
 
-  return null;
+  return <div>Processing callback...</div>;
+}
+
+export default function HifiTosCallback() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <HifiCallbackContent />
+    </Suspense>
+  );
 }
