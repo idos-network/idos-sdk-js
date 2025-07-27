@@ -1,9 +1,11 @@
 "use client";
 
+import { useQueries } from "@tanstack/react-query";
 import Image from "next/image";
 import { useState } from "react";
+import { useBuyStore } from "@/app/dashboard/buy/store";
 import { OptionButton } from "@/components/ui/option-button";
-import { Tag } from "@/components/ui/tag";
+import { Tag } from "./ui/tag";
 
 interface Provider {
   id: string;
@@ -45,53 +47,82 @@ const providers: Provider[] = [
   },
 ];
 
+// Provider now receives quote and isBestRate as props, but does not render any UI for isBestRate
 const Provider = ({
   img,
   selected,
-  usdc,
-  usd,
   onClick,
-  id,
+
+  quote,
+  isBestRate,
 }: {
   img: React.ReactNode;
   id: string;
-  selected: boolean;
   name: string;
   usdc: string;
   usd: string;
+  selected: boolean;
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  quote: any;
+  isBestRate: boolean;
   onClick: () => void;
-}) => (
-  <OptionButton
-    selected={selected}
-    onClick={onClick}
-    topPart={
-      id === "hifi" && (
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <Tag>BEST RATE</Tag>
-            <Tag>MOST RELIABLE</Tag>
+}) => {
+  const { setRate, spendAmount } = useBuyStore();
+  return (
+    <OptionButton
+      selected={selected}
+      onClick={() => {
+        setRate(quote?.rate);
+        onClick();
+      }}
+      topPart={
+        isBestRate && (
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <Tag>BEST RATE</Tag>
+            </div>
           </div>
+        )
+      }
+    >
+      <div className="flex w-full justify-between">
+        {img}
+        <div className="flex flex-col items-end font-semibold">
+          <div className="font-medium text-green-400 text-sm">
+            {Number(((+spendAmount || 100) * +quote?.rate).toFixed(2)).toFixed(2)} USDC
+          </div>
+          <div className="text-green-400 text-xs">{Number(spendAmount || 100).toFixed(2)} USD</div>
         </div>
-      )
-    }
-  >
-    <div className="flex w-full justify-between">
-      {img}
-      <div className="flex flex-col items-end font-semibold">
-        <div className="font-medium text-sm">{usdc}</div>
-        <div className="text-green-400 text-xs">{usd}</div>
       </div>
-    </div>
-  </OptionButton>
-);
+    </OptionButton>
+  );
+};
 
 export default function ProviderQuotes() {
-  const [selectedProvider, setSelectedProvider] = useState("hifi");
-  // Fetch the quotes data
-  // const quoteQuery = useQuery({
-  //   queryKey: ["quotes"],
-  //   queryFn: () => fetch("/api/quotes").then((res) => res.json()),
-  // });
+  const [selectedProvider, setSelectedProvider] = useState("");
+  const providerIds = providers.map((p) => p.id);
+
+  // Fetch all quotes in parallel
+  const queries = useQueries({
+    queries: providerIds.map((id) => ({
+      queryKey: ["quote", id],
+      queryFn: () => fetch(`/api/quotes?provider=${id}`).then((res) => res.json()),
+    })),
+  });
+
+  // Find the best rate (highest rate)
+  const rates = queries.map((q) => Number(q.data?.rate || 0));
+  const bestRate = Math.max(...rates);
+  const bestProviderIndex = rates.findIndex((r) => r === bestRate && r > 0);
+
+  // Sort providers by rate descending
+  const providersWithRates = providers.map((provider, idx) => ({
+    ...provider,
+    rate: rates[idx],
+    quote: queries[idx].data,
+    isBestRate: idx === bestProviderIndex && bestRate > 0,
+  }));
+  const sortedProviders = [...providersWithRates].sort((a, b) => (b.rate || 0) - (a.rate || 0));
 
   return (
     <div className="mx-auto max-w-2xl flex-1 rounded-2xl bg-card p-6 text-white">
@@ -99,14 +130,15 @@ export default function ProviderQuotes() {
         <h1 className="mb-6 font-medium text-3xl">Provider quotes</h1>
         <p className="font-medium text-muted text-xs">Compare rates from these providers.</p>
       </div>
-
       <div className="flex flex-col gap-4">
-        {providers.map((provider) => (
+        {sortedProviders.map((provider) => (
           <Provider
             key={provider.id}
             {...provider}
             selected={selectedProvider === provider.id}
             onClick={() => setSelectedProvider(provider.id)}
+            quote={provider.quote}
+            isBestRate={provider.isBestRate}
           />
         ))}
       </div>
