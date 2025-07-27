@@ -159,7 +159,6 @@ const createUserAndKYC = async (
     },
     signedAgreementId,
   };
-  console.log({ user, stateProvinceRegion });
 
   const createUserResponse = await fetch(`${process.env.HIFI_API_URL}v2/users`, {
     method: "POST",
@@ -176,9 +175,7 @@ const createUserAndKYC = async (
     });
 
   // Get the user ID & create KYC
-
   const userId = createUserResponse.id;
-  console.log({ createUserResponse, signedAgreementId, user });
 
   const updateKYCRequest: UpdateKYCRequest = {
     firstName: user.firstName,
@@ -204,11 +201,6 @@ const createUserAndKYC = async (
     ).toUpperCase(),
     proofOfAddressUrl: generateFileUrl(url, credentialId, "residentialAddressProofFile") ?? "",
   };
-  console.log({
-    updateKYCRequest,
-    apiUrl: process.env.HIFI_API_URL,
-    hifiApiKey: process.env.HIFI_API_KEY,
-  });
 
   const updateKYCResponse = await fetch(`${process.env.HIFI_API_URL}v2/users/${userId}/kyc`, {
     method: "POST",
@@ -230,30 +222,23 @@ const createUserAndKYC = async (
     throw new Error(`HIFI API returned ${updateKYCResponse.status}: ${errorText}`);
   }
 
-  const result = await updateKYCResponse.json();
+  await updateKYCResponse.json();
 
-  console.log({ result });
-
-  const submitKYCResponse = await fetch(
-    `${process.env.HIFI_API_URL}v2/users/${userId}/kyc/submissions`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HIFI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        rails: "USD_EURO",
-      }),
+  await fetch(`${process.env.HIFI_API_URL}v2/users/${userId}/kyc/submissions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.HIFI_API_KEY}`,
     },
-  )
+    body: JSON.stringify({
+      rails: "USD_EURO",
+    }),
+  })
     .then((res) => res.json())
     .catch((err) => {
       console.log("-> error", JSON.stringify(err, null, 2));
       throw new Error(`Can't submit KYC in HIFI because: ${err.message}`);
     });
-
-  console.log({ submitKYCResponse });
 
   return userId as string;
 };

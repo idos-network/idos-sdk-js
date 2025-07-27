@@ -276,7 +276,7 @@ export default function KycFlow() {
         >
           Continue with {selectedOnRampProvider} + {selectedKyc}
         </Button>
-        <div className="absolute bottom-[5%] left-1/2 mt-auto flex w-full -translate-x-1/2 justify-center">
+        <div className="-translate-x-1/2 absolute bottom-[5%] left-1/2 mt-auto flex w-full justify-center">
           <KycProgressBar />
         </div>
       </div>

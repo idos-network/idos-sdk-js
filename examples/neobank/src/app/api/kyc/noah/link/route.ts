@@ -90,6 +90,7 @@ type NoahResponse = {
 async function createNoahCustomer(
   userAddress: string,
   credentialSubject: Credentials["credentialSubject"],
+  origin: string,
 ) {
   const noahApiKey = process.env.NOAH_API_KEY;
   const noahAPiUrl = process.env.NOAH_API_URL;
@@ -133,7 +134,7 @@ async function createNoahCustomer(
 
   // Cleanup URL
   // @todo: remove this once in production and use server url
-  const returnUrl = new URL("https://consumer-and-issuer-demo.playground.idos.network");
+  const returnUrl = new URL(origin);
   returnUrl.pathname = "/callbacks/noah";
   returnUrl.search = "";
   returnUrl.hash = "";
@@ -173,12 +174,12 @@ async function createNoahCustomer(
     body: JSON.stringify(subject),
   });
 
-  // if (!response.ok) {
-  //   const text = await response.text();
-  //   console.error("Noah error:", text);
-  //   console.error(JSON.stringify(subject, null, 2));
-  //   throw new Error(`Failed to create Noah customer: ${text}`);
-  // }
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Noah error:", text);
+    console.error(JSON.stringify(subject, null, 2));
+    throw new Error(`Failed to create Noah customer: ${text}`);
+  }
 
   const data = (await response.json()) as NoahResponse;
 
@@ -186,6 +187,7 @@ async function createNoahCustomer(
 }
 
 export async function GET(request: NextRequest) {
+  const origin = request.nextUrl.origin;
   const { searchParams } = new URL(request.url);
   const credentialId = searchParams.get("credentialId");
   const userId = searchParams.get("userId");
@@ -200,7 +202,7 @@ export async function GET(request: NextRequest) {
   }
 
   const [credentialError, credential] = await goTry<Credentials["credentialSubject"]>(async () => {
-    return await fetch(`https://localhost:3000/api/shared-credential?userId=${userId}`)
+    return await fetch(`${origin}/api/shared-credential?userId=${userId}`)
       .then((res) => res.json())
       .then((res) => res.credentialContent);
   });
@@ -210,7 +212,7 @@ export async function GET(request: NextRequest) {
   }
 
   const [customerError, customer] = await goTry<NoahResponse>(async () => {
-    return createNoahCustomer(address, credential);
+    return createNoahCustomer(address, credential, origin);
   });
 
   if (customerError) {
