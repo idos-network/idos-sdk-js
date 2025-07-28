@@ -80,6 +80,7 @@ function Stellar() {
       signature: signatureHex,
       public_key: [publicKey],
       message,
+      disconnect: disconnectStellar,
     };
   };
 
@@ -101,9 +102,14 @@ function Stellar() {
     }
   };
 
+  const disconnectStellar = async () => {
+    await stellarKit.disconnect();
+  };
+
   const handleDisconnect = async () => {
     setAddress(null);
     setPublicKey(null);
+    await disconnectStellar();
     connectedWalletType.value = null;
     stepper.reset();
   };

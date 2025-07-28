@@ -62,7 +62,7 @@ function Ethereum() {
   const { open } = useAppKit();
   const { address, isConnected } = useAppKitAccount();
   const { signMessage } = useSignMessage();
-  const { disconnect } = useDisconnect();
+  const { disconnect: disconnectEvm } = useDisconnect();
 
   useEffect(() => {
     if (isConnected && stepper.isFirst) {
@@ -95,6 +95,7 @@ function Ethereum() {
             signature,
             public_key: [address],
             message,
+            disconnect: disconnectEvm,
           };
         },
       },
@@ -102,7 +103,7 @@ function Ethereum() {
   };
 
   const handleDisconnect = async () => {
-    await disconnect();
+    await disconnectEvm();
     connectedWalletType.value = null;
     stepper.reset();
   };
