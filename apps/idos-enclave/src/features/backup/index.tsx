@@ -5,13 +5,12 @@ import {
   ClipboardIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
-
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
-import type { AuthMethod } from "@/types";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);
@@ -113,14 +112,14 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 }
 
 interface PasswordOrSecretRevealProps {
-  authMethod: AuthMethod;
+  encryptionPasswordStore: EncryptionPasswordStore;
   secret: string;
   onCancel?: () => void;
   onDone?: () => void;
 }
 
 export function PasswordOrSecretReveal({
-  authMethod,
+  encryptionPasswordStore,
   secret,
   onCancel,
   onDone,
@@ -137,7 +136,7 @@ export function PasswordOrSecretReveal({
   };
 
   const handleDownload = () => {
-    const content = `idOS ${authMethod}: ${secret}\n`;
+    const content = `idOS ${encryptionPasswordStore}: ${secret}\n`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -156,25 +155,25 @@ export function PasswordOrSecretReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your {authMethod} is:</Paragraph>
+        <Paragraph>Your {encryptionPasswordStore} is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
           <div className="flex items-center gap-2">
             <RevealButton
-              aria-label={`${revealButtonLabel} ${authMethod}`}
-              title={`${revealButtonLabel} ${authMethod}`}
+              aria-label={`${revealButtonLabel} ${encryptionPasswordStore}`}
+              title={`${revealButtonLabel} ${encryptionPasswordStore}`}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
             <ClipboardCopyButton
-              aria-label={`Copy ${authMethod}`}
-              title={`Copy ${authMethod}`}
+              aria-label={`Copy ${encryptionPasswordStore}`}
+              title={`Copy ${encryptionPasswordStore}`}
               onClick={handleCopyToClipboard}
             />
             <DownloadButton
-              aria-label={`Download ${authMethod}`}
-              title={`Download ${authMethod}`}
+              aria-label={`Download ${encryptionPasswordStore}`}
+              title={`Download ${encryptionPasswordStore}`}
               onClick={handleDownload}
             />
           </div>
@@ -188,15 +187,14 @@ export function PasswordOrSecretReveal({
 
 export default function PasswordOrKeyBackup({
   onSuccess,
-  authMethod,
+  encryptionPasswordStore,
   secret,
 }: {
   onSuccess: (result: unknown) => void;
-  authMethod: AuthMethod;
+  encryptionPasswordStore: EncryptionPasswordStore;
   secret?: string;
 }) {
   const reveal = useSignal(false);
-  const passwordOrSecretKey = authMethod === "password" ? "password" : "secret key";
 
   const toggleReveal = () => {
     reveal.value = !reveal.value;
@@ -205,7 +203,7 @@ export default function PasswordOrKeyBackup({
   if (reveal.value && secret) {
     return (
       <PasswordOrSecretReveal
-        authMethod={authMethod}
+        encryptionPasswordStore={encryptionPasswordStore}
         secret={secret}
         onCancel={toggleReveal}
         onDone={() => {
@@ -221,7 +219,7 @@ export default function PasswordOrKeyBackup({
   return (
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
-      <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
+      <Button onClick={toggleReveal}>Reveal your password</Button>
     </div>
   );
 }

@@ -17,6 +17,10 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
       name: "recipient_encryption_public_key",
       type: DataType.Text,
     },
+    {
+      name: "encryption_password_store",
+      type: DataType.Text,
+    },
   ],
   update_user_pub_key_as_inserter: [
     {
@@ -25,6 +29,10 @@ export const actionSchema: Record<string, ActionSchemaElem[]> = {
     },
     {
       name: "recipient_encryption_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryption_password_store",
       type: DataType.Text,
     },
   ],

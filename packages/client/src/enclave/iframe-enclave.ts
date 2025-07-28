@@ -1,5 +1,9 @@
 import type { idOSCredential } from "@idos-network/credentials";
-import { BaseProvider, type EnclaveOptions, type StoredData } from "@idos-network/utils/enclave";
+import {
+  BaseProvider,
+  type EnclaveOptions,
+  type UserEncryptionProfile,
+} from "@idos-network/utils/enclave";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
   container: string;
@@ -25,6 +29,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.iframe.id = "idos-enclave-iframe";
   }
 
+  /** @see parent method */
   async load(): Promise<void> {
     // Don't call super.load() here, because we want to load the enclave first.
     await this.createAndLoadIframe();
@@ -39,15 +44,18 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     await this.bindMessageListener();
   }
 
+  /** @override parent method to call iframe */
   async reset(): Promise<void> {
     this.requestToEnclave({ reset: {} });
   }
 
+  /** @override parent method to call iframe */
   async reconfigure(options: Omit<IframeEnclaveOptions, "container" | "url"> = {}): Promise<void> {
     super.reconfigure(options);
     await this.requestToEnclave({ configure: this.options });
   }
 
+  /** @override parent method to call iframe */
   async confirm(message: string): Promise<boolean> {
     this.showEnclave();
 
@@ -57,15 +65,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
-    return this.requestToEnclave({
-      storage: {
-        userId,
-        expectedUserEncryptionPublicKey,
-      },
-    });
-  }
-
+  /** @override parent method to call iframe */
   async filterCredentials(
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
@@ -75,21 +75,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  async keys(): Promise<Uint8Array | undefined> {
-    this.showEnclave();
-
-    try {
-      return await this.requestToEnclave({
-        keys: {},
-      });
-    } catch (e) {
-      if (this.options.throwOnUserCancelUnlock) throw e;
-      return undefined;
-    } finally {
-      this.hideEnclave();
-    }
-  }
-
+  /** @override parent method to call iframe */
   async encrypt(
     message: Uint8Array,
     receiverPublicKey: Uint8Array,
@@ -99,6 +85,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
+  /** @override parent method to call iframe */
   async decrypt(
     message: Uint8Array,
     senderPublicKey: Uint8Array,
@@ -108,6 +95,34 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
+  /** @see BaseProvider#backupPasswordOrSecret */
+  async backupPasswordOrSecret(): Promise<void> {
+    this.showEnclave();
+
+    try {
+      await this.requestToEnclave({
+        backupPasswordOrSecret: {},
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      this.hideEnclave();
+    }
+  }
+
+  /** @see BaseProvider#ensureUserEncryptionProfile */
+  async ensureUserEncryptionProfile(): Promise<UserEncryptionProfile> {
+    this.showEnclave();
+
+    try {
+      return await this.requestToEnclave({
+        ensureUserEncryptionProfile: {},
+      });
+    } finally {
+      this.hideEnclave();
+    }
+  }
+
   private async loadEnclaveFromStore(): Promise<void> {
     await this.requestToEnclave({
       load: {},
@@ -115,9 +130,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private async createAndLoadIframe(): Promise<void> {
-    const container =
-      document.querySelector(this.container) ||
-      throwNewError(Error, `Can't find container with selector ${this.container}`);
+    const container = document.querySelector(this.container);
+
+    if (!container) {
+      throw new Error(`Can't find container with selector ${this.container}`);
+    }
 
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
@@ -181,7 +198,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  private async requestToEnclave(request: any): Promise<any> {
+  private async requestToEnclave(request: Record<any, unknown>): Promise<any> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
@@ -212,22 +229,4 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       },
     });
   }
-
-  async backupPasswordOrSecret(): Promise<void> {
-    this.showEnclave();
-
-    try {
-      await this.requestToEnclave({
-        backupPasswordOrSecret: {},
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      this.hideEnclave();
-    }
-  }
-}
-
-function throwNewError(ErrorClass: ErrorConstructor, ...args: Parameters<ErrorConstructor>): never {
-  throw new ErrorClass(...args);
 }

@@ -1,8 +1,10 @@
 import type { idOSCredential } from "@idos-network/credentials";
-import { STORAGE_KEYS } from "@idos-network/utils/enclave";
+import type {
+  EncryptionPasswordStore,
+  MPCPasswordContext,
+  PasswordContext,
+} from "@idos-network/utils/enclave";
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
-
-type AuthMethod = "mpc" | "password";
 
 // Type definitions for request handling
 type RequestData = {
@@ -13,6 +15,7 @@ type RequestData = {
   senderPublicKey?: Uint8Array;
   mode?: "new" | "existing";
   theme?: string;
+  encryptionPasswordStore?: EncryptionPasswordStore;
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
   signature?: string;
@@ -20,27 +23,21 @@ type RequestData = {
   privateFieldFilters?: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> };
 };
 
-type RequestName =
+export type RequestName =
   | "confirm"
   | "decrypt"
   | "encrypt"
-  | "keys"
+  | "ensureUserEncryptionProfile"
   | "reset"
   | "load"
   | "configure"
-  | "storage"
   | "backupPasswordOrSecret"
   | "signTypedDataResponse"
-  | "filterCredentials"
-  | "target";
+  | "filterCredentials";
 
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
-interface EnclaveOptions extends LocalEnclaveOptions {
-  walletAddress: string | "";
-}
-
-export class Enclave extends LocalEnclave<EnclaveOptions> {
+export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   // Origins
   private authorizedOrigins: string[] = [];
   private parentOrigin: string;
@@ -56,7 +53,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
     super({
-      allowedAuthMethods:
+      allowedEncryptionStores:
         import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "password"] : ["password"],
       mpcConfiguration:
         import.meta.env.VITE_ENABLE_MPC === "true"
@@ -65,7 +62,6 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
               contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
             }
           : undefined,
-      walletAddress: "",
     });
 
     this.parentOrigin = parentOrigin;
@@ -79,6 +75,7 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     this.listenToRequests();
   }
 
+  /** @see LocalEnclave#load */
   async load(): Promise<void> {
     await super.load();
 
@@ -87,6 +84,14 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     );
   }
 
+  /** @see LocalEnclave#reset */
+  async reset(): Promise<void> {
+    await super.reset();
+
+    this.authorizedOrigins = [];
+  }
+
+  /** @see LocalEnclave#guardKeys */
   async guardKeys(): Promise<boolean> {
     if (this.authorizedOrigins.includes(this.parentOrigin)) {
       return true;
@@ -100,16 +105,13 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
       return false;
     }
 
-    this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
+    await this.acceptParentOrigin();
+
     return true;
   }
 
-  async chooseAuthAndPassword(): Promise<{
-    authMethod: AuthMethod;
-    password?: string;
-    duration?: number;
-  }> {
+  /** @see LocalEnclave#getPasswordContext */
+  async getPasswordContext(): Promise<PasswordContext | MPCPasswordContext> {
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
@@ -117,36 +119,42 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
-        let authMethod: AuthMethod | undefined;
+        let encryptionPasswordStore: EncryptionPasswordStore | undefined;
         let password: string | undefined;
         let duration: number | undefined;
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
-          ({ authMethod, password, duration } = await this.openDialog("auth", {
-            allowedAuthMethods: this.allowedAuthMethods,
-            previouslyUsedAuthMethod: this.authMethod,
-            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-          }));
+          ({ encryptionPasswordStore, password, duration } = await this.openDialog(
+            "getPasswordContext",
+            {
+              allowedEncryptionStores: this.allowedEncryptionStores,
+              encryptionPasswordStore: this.options.encryptionPasswordStore,
+              expectedUserEncryptionPublicKey: this.options.expectedUserEncryptionPublicKey,
+            },
+          ));
 
-          if (!authMethod) {
-            return reject(new Error(`Invalid or empty auth method: ${authMethod}`));
+          if (!encryptionPasswordStore) {
+            return reject(new Error(`Invalid or empty auth method: ${encryptionPasswordStore}`));
           }
         } catch (e) {
           return reject(e);
         }
 
-        this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        await this.store.set(
-          ENCLAVE_AUTHORIZED_ORIGINS_KEY,
-          JSON.stringify(this.authorizedOrigins),
-        );
+        // User providing the password also means that they want to authorize the origin
+        await this.acceptParentOrigin();
 
-        return resolve({ authMethod, password, duration });
+        if (encryptionPasswordStore === "mpc") {
+          return resolve({ encryptionPasswordStore });
+        }
+
+        // biome-ignore lint/style/noNonNullAssertion: This needs to be properly typed.
+        return resolve({ encryptionPasswordStore, password: password!, duration });
       });
     });
   }
 
+  /** @see LocalEnclave#confirm */
   async confirm(message: string): Promise<boolean> {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
@@ -165,11 +173,21 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     );
   }
 
-  async configure(mode: "new" | "existing", theme: "light" | "dark", walletAddress: string) {
+  async configure(
+    mode: "new" | "existing",
+    theme: "light" | "dark",
+    walletAddress: string,
+    userId: string,
+    encryptionPasswordStore: EncryptionPasswordStore,
+    expectedUserEncryptionPublicKey: string,
+  ) {
     await this.reconfigure({
       mode,
       theme,
       walletAddress,
+      userId,
+      encryptionPasswordStore,
+      expectedUserEncryptionPublicKey,
     });
 
     if (this.options.mode === "new") {
@@ -203,25 +221,18 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
 
-    // We are getting the secret key from the store as a string, we don't want byte array.
-    const secretKey = await this.store.get<string>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
-    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
-    const preferredAuthMethod = await this.store.get<AuthMethod>(
-      STORAGE_KEYS.PREFERRED_AUTH_METHOD,
-    );
-
-    if (!secretKey || !preferredAuthMethod) {
-      throw new Error("No secrets were found for backup");
-    }
-
     return new Promise((resolve, reject) => {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
 
+          if (!this.storedEncryptionProfile || !(await this.guardKeys())) {
+            throw new Error("No secrets were found for backup");
+          }
+
           await this.openDialog("backupPasswordOrSecret", {
-            authMethod: preferredAuthMethod,
-            secret: password ?? secretKey,
+            secret: this.storedEncryptionProfile.password,
+            encryptionPasswordStore: this.storedEncryptionProfile.encryptionPasswordStore,
           });
 
           resolve();
@@ -233,6 +244,12 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
         }
       });
     });
+  }
+
+  private async acceptParentOrigin(): Promise<void> {
+    this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+
+    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
   }
 
   private listenToRequests() {
@@ -250,31 +267,37 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
 
         const {
           fullMessage,
-          userId,
           message,
           receiverPublicKey,
           senderPublicKey,
           mode,
           theme,
-          expectedUserEncryptionPublicKey,
           walletAddress,
           signature,
           credentials,
           privateFieldFilters,
+          userId,
+          encryptionPasswordStore,
+          expectedUserEncryptionPublicKey,
         } = requestData;
 
         const paramBuilder: Record<RequestName, () => unknown[]> = {
+          load: () => [],
           confirm: () => [message],
           decrypt: () => [fullMessage, senderPublicKey],
           encrypt: () => [message, receiverPublicKey],
-          keys: () => [],
           reset: () => [],
-          configure: () => [mode, theme, walletAddress],
-          storage: () => [userId, expectedUserEncryptionPublicKey],
-          backupPasswordOrSecret: () => [],
+          configure: () => [
+            mode,
+            theme,
+            walletAddress,
+            userId,
+            encryptionPasswordStore,
+            expectedUserEncryptionPublicKey,
+          ],
+          ensureUserEncryptionProfile: () => [],
           signTypedDataResponse: () => [signature],
-          target: () => [],
-          load: () => [],
+          backupPasswordOrSecret: () => [],
           filterCredentials: () => [credentials, privateFieldFilters],
         };
 
@@ -301,13 +324,11 @@ export class Enclave extends LocalEnclave<EnclaveOptions> {
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
     message?: any,
   ): Promise<{
-    authMethod?: AuthMethod;
+    encryptionPasswordStore?: EncryptionPasswordStore;
     password?: string;
     duration?: number;
     confirmed?: boolean;
   }> {
-    if (!this.userId) throw new Error("Can't open dialog without userId");
-
     const width = 600;
     const height =
       this.options?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;

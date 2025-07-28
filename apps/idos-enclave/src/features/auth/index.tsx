@@ -1,15 +1,18 @@
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { effect, useSignal } from "@preact/signals";
-
-import type { AuthMethod, UIMode } from "@/types";
-
+import type { UIMode } from "@/types";
 import Chooser from "./chooser";
 import PasswordForm from "./password-form";
 
 export interface AuthMethodProps {
-  allowedAuthMethods: AuthMethod[];
-  previouslyUsedAuthMethod: AuthMethod | null;
+  allowedEncryptionStores: EncryptionPasswordStore[];
+  encryptionPasswordStore: EncryptionPasswordStore | null;
   mode: UIMode;
-  onSuccess: (result: { authMethod: AuthMethod; password?: string; duration?: number }) => void;
+  onSuccess: (result: {
+    encryptionPasswordStore: EncryptionPasswordStore;
+    password?: string;
+    duration?: number;
+  }) => void;
   encryptionPublicKey?: string;
   userId: string | null;
 }
@@ -19,25 +22,25 @@ export default function AuthMethodChooser({
   encryptionPublicKey,
   userId,
   onSuccess,
-  allowedAuthMethods,
-  previouslyUsedAuthMethod,
+  allowedEncryptionStores,
+  encryptionPasswordStore,
 }: AuthMethodProps) {
-  const authMethod = useSignal<AuthMethod | null>(null);
+  const currentPasswordStore = useSignal<EncryptionPasswordStore | null>(encryptionPasswordStore);
 
   effect(() => {
-    if (allowedAuthMethods.length === 1) {
-      authMethod.value = allowedAuthMethods[0];
+    if (!currentPasswordStore.value && allowedEncryptionStores.length === 1) {
+      currentPasswordStore.value = allowedEncryptionStores[0];
     }
   });
 
   effect(() => {
-    if (authMethod.value === "mpc" && allowedAuthMethods.includes("mpc")) {
+    if (currentPasswordStore.value === "mpc" && allowedEncryptionStores.includes("mpc")) {
       // There is no next step, no password or duration
-      onSuccess({ authMethod: authMethod.value });
+      onSuccess({ encryptionPasswordStore: currentPasswordStore.value });
     }
   });
 
-  if (authMethod.value === "password") {
+  if (currentPasswordStore.value === "password") {
     return (
       <PasswordForm
         mode={mode}
@@ -50,12 +53,11 @@ export default function AuthMethodChooser({
 
   return (
     <Chooser
-      setMethod={(method) => {
-        authMethod.value = method;
+      setEncryptionPasswordStore={(encryptionPasswordStore) => {
+        currentPasswordStore.value = encryptionPasswordStore;
       }}
       mode={mode}
-      allowedAuthMethods={allowedAuthMethods}
-      previouslyUsedAuthMethod={previouslyUsedAuthMethod}
+      allowedEncryptionStores={allowedEncryptionStores}
     />
   );
 }

@@ -2,8 +2,9 @@ import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-import { base64Encode, utf8Decode } from "../codecs";
-import type { DiscoverUserEncryptionPublicKeyResponse, EnclaveOptions, StoredData } from "./types";
+import { base64Encode, fromBytesToJson } from "../codecs";
+import { decrypt, encrypt } from "../encryption";
+import type { EnclaveOptions, PrivateEncryptionProfile, UserEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
@@ -15,6 +16,11 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     this.options = options;
   }
 
+  /**
+   * Sets the signer for the enclave.
+   *
+   * @param signer - The signer to set, is later used for MPC if allowed.
+   */
   setSigner(signer: {
     signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
   }): void {
@@ -30,45 +36,99 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     return this._signMethod(domain, types, value);
   }
 
-  async reset(): Promise<void> {
-    throw new Error("Reset has to be implemented in the subclass.");
+  /**
+   * Helper method to get the user ID.
+   *
+   * @returns The user ID.
+   */
+  get userId(): string {
+    if (!this.options.userId) {
+      throw new Error("User ID is not present");
+    }
+    return this.options.userId;
   }
 
+  /**
+   * Resets the enclave (storage etc.)
+   */
+  async reset(): Promise<void> {
+    // TODO: Implement this if needed in child classes
+  }
+
+  /**
+   * Reconfigures the enclave (theme etc).
+   *
+   * @param options - The options to reconfigure.
+   */
   async reconfigure(options: Partial<K> = {}): Promise<void> {
     Object.assign(this.options, options);
   }
 
+  /**
+   * Loads the enclave (create iframe, open connection, etc.)
+   */
   async load(): Promise<void> {
-    // Pass a configuration first
     await this.reconfigure();
   }
 
+  /**
+   * Encrypts a message to a receiver.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to encrypt.
+   * @param receiverPublicKey - The public key of the receiver.
+   *
+   * @returns The encrypted message.
+   */
   async encrypt(
-    _message: Uint8Array,
-    _receiverPublicKey?: Uint8Array,
+    message: Uint8Array,
+    receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    throw new Error("Method 'encrypt' has to be implemented in the subclass.");
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return encrypt(message, keyPair.publicKey, receiverPublicKey);
   }
 
+  /**
+   * Decrypts a message from a sender.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to decrypt.
+   * @param senderPublicKey - The public key of the sender.
+   *
+   * @returns The decrypted message.
+   */
   async decrypt(
-    _message: Uint8Array,
-    _senderPublicKey?: Uint8Array,
+    message: Uint8Array,
+    senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    throw new Error("Method 'decrypt' has to be implemented in the subclass.");
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return decrypt(message, keyPair, senderPublicKey);
   }
 
+  /**
+   * Gets the key pair, for old or a new user.
+   * Also reuse the one stored in the store, if possible.
+   *
+   * @returns The key pair.
+   */
+  async getPrivateEncryptionProfile(): Promise<PrivateEncryptionProfile> {
+    throw new Error("Method 'getPrivateEncryptionProfile' has to be implemented in the subclass.");
+  }
+
+  /**
+   * This method is used to confirm the user action.
+   *
+   * @param _message - The message to confirm.
+   *
+   * @returns `true` if the user action is confirmed, `false` otherwise.
+   */
   async confirm(_message: string): Promise<boolean> {
     throw new Error("Method 'confirm' has to be implemented in the subclass.");
   }
 
-  async storage(_userId: string, _expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
-    throw new Error("Method 'storedKeys' has to be implemented in the subclass.");
-  }
-
-  async keys(): Promise<Uint8Array | undefined> {
-    throw new Error("Method 'keys' has to be implemented in the subclass.");
-  }
-
+  /**
+   * This method is used to backup the password or secret.
+   */
   async backupPasswordOrSecret(): Promise<void> {
     throw new Error("Method 'backupPasswordOrSecret' has to be implemented in the subclass.");
   }
@@ -83,20 +143,29 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     return true;
   }
 
-  async discoverUserEncryptionPublicKey(
-    userId: string,
-  ): Promise<DiscoverUserEncryptionPublicKeyResponse> {
-    if (this.options.mode !== "new")
-      throw new Error("You can only call `discoverUserEncryptionPublicKey` when mode is `new`.");
-
-    const userEncryptionPublicKey = await this.ready(userId);
+  /**
+   * Create or get the user encryption profile.
+   *
+   * @returns The user encryption profile.
+   */
+  async ensureUserEncryptionProfile(): Promise<UserEncryptionProfile> {
+    const profile = await this.getPrivateEncryptionProfile();
 
     return {
-      userId,
-      userEncryptionPublicKey: base64Encode(userEncryptionPublicKey),
+      userId: profile.userId,
+      userEncryptionPublicKey: base64Encode(profile.keyPair.publicKey),
+      encryptionPasswordStore: profile.encryptionPasswordStore,
     };
   }
 
+  /**
+   * Filters the credentials based on the private field filters.
+   *
+   * @param credentials - The credentials to filter.
+   * @param privateFieldFilters - The private field filters.
+   *
+   * @returns The filtered credentials without the content.
+   */
   async filterCredentials(
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
@@ -122,7 +191,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         ...credential,
         content: (() => {
           try {
-            JSON.parse(utf8Decode(credential.content));
+            fromBytesToJson(credential.content);
           } catch (_e) {
             throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
           }
@@ -132,20 +201,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)))
       .map((credential) => ({
         ...credential,
-        content: "",
+        content: "", // Content should not leave the enclave
       }));
-  }
-
-  async ready(userId: string, expectedUserEncryptionPublicKey?: string): Promise<Uint8Array> {
-    let { encryptionPublicKey: userEncryptionPublicKey } = await this.storage(
-      userId,
-      expectedUserEncryptionPublicKey,
-    );
-
-    while (!userEncryptionPublicKey) {
-      userEncryptionPublicKey = await this.keys();
-    }
-
-    return userEncryptionPublicKey as Uint8Array;
   }
 }

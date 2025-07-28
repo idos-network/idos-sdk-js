@@ -1,4 +1,5 @@
 import type { idOSCredential } from "@idos-network/credentials";
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
@@ -13,6 +14,7 @@ export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejec
 export type idOSUser = {
   id: string;
   recipient_encryption_public_key: string;
+  encryption_password_store: EncryptionPasswordStore;
 };
 
 export type idOSWallet = {

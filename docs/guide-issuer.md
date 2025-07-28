@@ -144,12 +144,12 @@ return { userId }
 
 ##### Step 2: Getting the user's signing and encryption public keys
 
-Use the `idOSClient.discoverUserEncryptionPublicKey` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
+Use the `idOSClient.createUserEncryptionProfile` function to derive a public key for the user. This key will be used to encrypt and decrypt user's credential content.
 
 ```javascript
 // frontend
 
-const { userEncryptionPublicKey } = await idOSClient.discoverUserEncryptionPublicKey(userId);
+const encryptionProfile = await idOSClient.createUserEncryptionProfile(userId);
 
 const ownershipProofMessage = "Please sign this message to confirm you own this wallet address";
 
@@ -159,7 +159,7 @@ const ownershipProofSignature = await ethereum.request({
 });
 
 // Report it back to your server
-// e.g. await yourServer.report(userEncryptionPublicKey, ownershipProofSignature);
+// e.g. await yourServer.report(encryptionProfile, ownershipProofSignature);
 ```
 
 ##### Step 3: Creating a User Profile
@@ -170,7 +170,8 @@ Once the public key is derived, you can create the user profile in idOS by passi
 
 const user = {
   id: userId,
-  recipient_encryption_public_key: userEncryptionPublicKey,
+  recipient_encryption_public_key: encryptionProfile.userEncryptionPublicKey,
+  encryption_password_store: encryptionProfile.encryptionPasswordStore,
 };
 
 const wallet = {

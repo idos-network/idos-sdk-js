@@ -415,10 +415,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
     invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
-    await idosClient.enclaveProvider.ready(
-      idosClient.user.id,
-      idosClient.user.recipient_encryption_public_key,
-    );
+    await idosClient.enclaveProvider.ensureUserEncryptionProfile();
+
     return utf8Decode(
       await idosClient.enclaveProvider.decrypt(
         base64Decode(credential.content),
