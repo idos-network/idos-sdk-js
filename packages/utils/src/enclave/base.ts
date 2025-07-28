@@ -2,8 +2,14 @@ import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
+<<<<<<< HEAD
 import { fromBytesToJson } from "../codecs";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
+=======
+import { base64Encode, fromBytesToJson } from "../codecs";
+import { decrypt, encrypt } from "../encryption";
+import type { EnclaveOptions, PrivateEncryptionProfile, UserEncryptionProfile } from "./types";
+>>>>>>> 15612d1a (Auth method in kwill)
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
@@ -83,7 +89,8 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     _message: Uint8Array,
     _receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    throw new Error("Method 'encrypt' has to be implemented in the subclass.");
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return encrypt(message, keyPair.publicKey, receiverPublicKey);
   }
 
   /**
@@ -99,7 +106,8 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     _message: Uint8Array,
     _senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    throw new Error("Method 'decrypt' has to be implemented in the subclass.");
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return decrypt(message, keyPair, senderPublicKey);
   }
 
   /**

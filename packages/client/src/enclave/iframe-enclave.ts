@@ -2,7 +2,11 @@ import type { idOSCredential } from "@idos-network/credentials";
 import {
   BaseProvider,
   type EnclaveOptions,
+<<<<<<< HEAD
   type PublicEncryptionProfile,
+=======
+  type UserEncryptionProfile,
+>>>>>>> 15612d1a (Auth method in kwill)
 } from "@idos-network/utils/enclave";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
