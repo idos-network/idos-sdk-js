@@ -14,19 +14,19 @@ export const currencies = [
   {
     value: "USD",
     label: "USD",
-    prefix:"$",
+    prefix: "$",
   },
   {
     value: "EUR",
     label: "EUR",
     disabled: true,
-    prefix:"€",
+    prefix: "€",
   },
   {
     value: "GBP",
     label: "GBP",
     disabled: true,
-    prefix:"£"
+    prefix: "£",
   },
 ];
 
@@ -34,22 +34,21 @@ export const tokens = [
   {
     value: "USDC",
     label: "USDC",
-    prefix:"$",
+    prefix: "$",
   },
   {
     value: "USDT",
     label: "USDT",
     disabled: true,
-    prefix:"$",
+    prefix: "$",
   },
   {
     value: "ETH",
     label: "ETH",
     disabled: true,
-    prefix:"ETH",
+    prefix: "ETH",
   },
 ];
-
 
 interface DropdownOption {
   value: string;
