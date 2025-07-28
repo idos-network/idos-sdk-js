@@ -203,7 +203,7 @@ export const useAppStore = create<AppStore>()(
                 window.location.href = link;
               }
 
-              const userId = await fetch("/api/providers/hifi/user", {
+              await fetch("/api/providers/hifi/user", {
                 method: "POST",
                 body: JSON.stringify({
                   signedAgreementId,
@@ -212,7 +212,6 @@ export const useAppStore = create<AppStore>()(
                   url: window.location.href,
                 }),
               });
-              console.log({ userId });
               break;
             }
 

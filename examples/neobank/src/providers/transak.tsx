@@ -2,10 +2,12 @@
 import { Transak } from "@transak/transak-sdk";
 import { useEffect, useRef } from "react";
 import invariant from "tiny-invariant";
+import { useBuyStore } from "@/app/dashboard/buy/store";
 import { useAppStore } from "@/stores/app-store";
 
 export function TransakProvider() {
   const { transakToken, credentialId, findTransakToken, setCurrentStep } = useAppStore();
+  const { spendAmount, buyAmount, selectedCurrency, selectedToken } = useBuyStore();
   const transak = useRef<Transak | null>(null);
 
   useEffect(() => {
@@ -25,6 +27,10 @@ export function TransakProvider() {
         // @ts-ignore: types are not up to date at Transak side
         kycShareTokenProvider: "SUMSUB",
         kycShareToken: transakToken,
+        defaultCryptoCurrency: selectedToken,
+        defaultCryptoAmount: +buyAmount || 0,
+        defaultFiatCurrency: selectedCurrency,
+        defaultFiatAmount: +spendAmount || 0,
       });
 
       transak.current.init();
@@ -45,7 +51,7 @@ export function TransakProvider() {
         console.log("Transak order failed:", orderData);
       });
     }
-  }, [transakToken, setCurrentStep]);
+  }, [transakToken, setCurrentStep, selectedToken, buyAmount, selectedCurrency, spendAmount]);
 
   // Cleanup Transak on unmount
   useEffect(() => {

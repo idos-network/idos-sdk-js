@@ -164,8 +164,7 @@ async function createNoahCustomer(
       },
     ],
   };
-
-  const response = await fetch(`${noahAPiUrl}v1/checkout/payin/fiat`, {
+  const response = await fetch(`${noahAPiUrl}/v1/checkout/payin/fiat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

@@ -97,10 +97,10 @@ async function getTransakQuote(): Promise<QuoteRateResponse> {
   if (error) {
     throw error;
   }
+  const { conversionPrice, fiatAmount, cryptoAmount } = data.response;
+  const rate = (conversionPrice / fiatAmount) * cryptoAmount;
 
-  const rate = data.response.conversionPrice?.toString() ?? "";
-
-  return { name: "transak", rate };
+  return { name: "transak", rate: rate.toString() };
 }
 
 async function getHifiQuote(): Promise<QuoteRateResponse> {
