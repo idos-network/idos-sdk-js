@@ -89,7 +89,7 @@ export function TokenAmountInput({
         <Input
           type="text"
           placeholder="0"
-          value={spendAmount}
+          value={+spendAmount ? +(+spendAmount).toFixed(2) : spendAmount}
           onChange={(e) => setSpendAmount(e.target.value)}
           className="h-16 border-0 bg-gray-200 pr-40 pl-6 font-medium text-black text-xl placeholder:text-gray-500"
         />

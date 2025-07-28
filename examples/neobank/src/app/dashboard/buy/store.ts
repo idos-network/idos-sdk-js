@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { currencies, tokens } from "@/components/token-amount-input";
 
 export const useBuyStore = create<{
   spendAmount: string;
@@ -38,9 +39,9 @@ export const useBuyStore = create<{
     }
     set({ rate, spendAmount: newSpendAmount, buyAmount: newBuyAmount });
   },
-  selectedCurrency: "",
+  selectedCurrency: currencies[0].value,
   setSelectedCurrency: (selectedCurrency) => set({ selectedCurrency }),
-  selectedToken: "",
+  selectedToken: tokens[0].value,
   setSelectedToken: (selectedToken) => set({ selectedToken }),
   lastChanged: "spend",
   setLastChanged: (field) => set({ lastChanged: field }),
