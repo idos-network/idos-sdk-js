@@ -43,22 +43,32 @@ export function App() {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
       }
-
-      // Send wallet payload back to the parent window
-      if (window.opener) {
-        window.opener.postMessage(
-          {
-            type: "WALLET_SIGNATURE",
-            data: walletPayload.value,
-          },
-          import.meta.env.VITE_DATA_DASHBOARD_URL,
-        );
-
-        // Close the popup window after sending the data
-        window.close();
-      } else {
+      if (!window.opener) {
         console.log("No opener window found");
+        return;
       }
+      walletPayload.value
+        .disconnect()
+        .then(() => {
+          // Send wallet payload back to the parent window
+          window.opener.postMessage(
+            {
+              type: "WALLET_SIGNATURE",
+              // Remove disconnect method from walletPayload
+              data: {
+                ...walletPayload.value,
+                disconnect: undefined,
+              },
+            },
+            import.meta.env.VITE_DATA_DASHBOARD_URL,
+          );
+
+          // Close the popup window after sending the data
+          window.close();
+        })
+        .catch((error) => {
+          console.error("Error disconnecting wallet", error);
+        });
     }
   });
 

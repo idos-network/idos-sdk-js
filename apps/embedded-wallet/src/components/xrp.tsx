@@ -52,6 +52,8 @@ function XRPL() {
       signature,
       public_key: [publicKey ?? ""],
       message,
+      // No need to disconnect xrpl wallet (it does not possess a persistent connection)
+      disconnect: () => Promise.resolve(),
     };
   };
 

@@ -73,13 +73,18 @@ export function NearConnector() {
         signature,
         public_key: (await getNearFullAccessPublicKeys(accountId.value)) || [],
         message,
+        disconnect: disconnectNear,
       };
     }
   };
 
-  const handleDisconnect = async () => {
+  const disconnectNear = async () => {
     const wallet = await selector.wallet();
     await wallet.signOut();
+  };
+
+  const handleDisconnect = async () => {
+    await disconnectNear();
     connectedWalletType.value = null;
     accountId.value = "";
     stepper.reset();

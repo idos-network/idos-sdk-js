@@ -5,6 +5,7 @@ export type WalletPayload = {
   signature: string;
   public_key: string[];
   message: string;
+  disconnect: () => Promise<void>;
 };
 export type WalletType = "evm" | "near" | "xrpl" | "stellar" | null;
 
