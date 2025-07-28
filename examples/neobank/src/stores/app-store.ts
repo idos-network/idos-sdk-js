@@ -212,7 +212,6 @@ export const useAppStore = create<AppStore>()(
                   url: window.location.href,
                 }),
               });
-              console.log({ userId });
               break;
             }
 
