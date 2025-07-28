@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 
+// @todo: since we fixed the _not_found page. should we keep this?
 const KycFlowClient = dynamic(() => import("./kyc-flow"), {
   ssr: false,
   loading: () => (

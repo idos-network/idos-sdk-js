@@ -130,15 +130,10 @@ export const useAppStore = create<AppStore>()(
     (set, get) => ({
       ...initialState,
 
-      // Flow control
       setCurrentStep: (step) => set({ currentStep: step }),
 
       setOnRampProvider: (provider) => {
         set({ selectedOnRampProvider: provider });
-        // Auto-advance to credential check instead of KYC
-        if (provider) {
-          set({ currentStep: "credential-check" });
-        }
       },
 
       setKycProvider: (kyc) => set({ selectedKyc: kyc }),
@@ -148,6 +143,7 @@ export const useAppStore = create<AppStore>()(
 
       // Hifi
       setHifiSignedAgreementId: (signedAgreementId) => set({ signedAgreementId }),
+
       // KYC actions
       startKyc: async () => {
         try {
@@ -190,7 +186,6 @@ export const useAppStore = create<AppStore>()(
         set({ transakToken: token });
       },
 
-      // Provider actions
       startProviderFlow: async (userId, userAddress) => {
         const { selectedOnRampProvider: selectedProvider, credentialId } = get();
 
@@ -217,12 +212,11 @@ export const useAppStore = create<AppStore>()(
                   url: window.location.href,
                 }),
               });
+              console.log({ userId });
               break;
             }
 
             case "noah": {
-              // Direct integration for Noah
-              console.log("Starting Noah flow...");
               const { url } = await fetch(
                 `/api/kyc/noah/link?userId=${userId}&credentialId=${credentialId}&address=${userAddress}`,
               ).then((res) => res.json());
@@ -243,7 +237,6 @@ export const useAppStore = create<AppStore>()(
         }
       },
 
-      // Shared credential
       findSharedCredential: async (userId: string) => {
         const maxAttempts = 20;
         const delayMs = 2000;
