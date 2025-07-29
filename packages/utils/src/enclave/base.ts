@@ -2,14 +2,9 @@ import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-<<<<<<< HEAD
-import { fromBytesToJson } from "../codecs";
-import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
-=======
-import { base64Encode, fromBytesToJson } from "../codecs";
+import { fromBytesToJson, base64Encode } from "../codecs";
 import { decrypt, encrypt } from "../encryption";
-import type { EnclaveOptions, PrivateEncryptionProfile, UserEncryptionProfile } from "./types";
->>>>>>> 15612d1a (Auth method in kwill)
+import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
