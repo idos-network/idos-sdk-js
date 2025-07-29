@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-import { fromBytesToJson, base64Encode } from "../codecs";
+import { fromBytesToJson } from "../codecs";
 import { decrypt, encrypt } from "../encryption";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 

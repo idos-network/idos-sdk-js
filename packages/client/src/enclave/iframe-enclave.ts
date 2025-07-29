@@ -95,7 +95,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  /** @override parent method to call iframe */
+  /** @see BaseProvider#backupUserEncryptionProfile */
   async backupUserEncryptionProfile(): Promise<void> {
     this.showEnclave();
 
