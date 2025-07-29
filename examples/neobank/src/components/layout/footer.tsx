@@ -34,7 +34,7 @@ const HomeFooter = ({ pathname }: { pathname: string }) => {
   return (
     <p className="gap-1 text-neutral-400 text-sm">
       Your account is powered by
-      <Image src="/idOS.svg" alt="idOS" width={20} height={20} className="mx-1 inline-block" />
+      <Image src="/idos-logo.svg" alt="idOS" width={20} height={20} className="mx-1 inline-block" />
       <span className="font-semibold text-neutral-950">idOS</span>, ensuring all your data is
       encrypted and controlled by you.
     </p>
