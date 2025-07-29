@@ -44,7 +44,7 @@ export class LocalEnclave<
     super(options);
 
     // By default, we only allow password auth method
-    this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["password"];
+    this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
     this.store = options.store ?? new LocalStorageStore();
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
@@ -77,15 +77,25 @@ export class LocalEnclave<
       return;
     }
 
-    const encryptionPasswordStore = await this.store.get<EncryptionPasswordStore>(
+    let encryptionPasswordStore = await this.store.get<EncryptionPasswordStore>(
       STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE,
     );
+
+    // Migration from "password" to "user"
+    // TODO: Remove this after a while
+    if ((encryptionPasswordStore as string) === "password") {
+      encryptionPasswordStore = "user";
+    }
+
+    if (!encryptionPasswordStore) {
+      encryptionPasswordStore = "user";
+    }
 
     this.storedEncryptionProfile = {
       userId,
       password,
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
-      encryptionPasswordStore: encryptionPasswordStore ?? "password",
+      encryptionPasswordStore: encryptionPasswordStore ?? "user",
     };
   }
 
@@ -110,7 +120,7 @@ export class LocalEnclave<
 
     const context = await this.getPasswordContext();
 
-    if (context.encryptionPasswordStore === "password") {
+    if (context.encryptionPasswordStore === "user") {
       await this.store.setRememberDuration(context.duration);
 
       password = context.password;

@@ -1,4 +1,4 @@
-export type EncryptionPasswordStore = "mpc" | "password";
+export type EncryptionPasswordStore = "mpc" | "user";
 
 export type UserEncryptionProfile = {
   userId: string;
@@ -23,7 +23,7 @@ export type EnclaveOptions = {
 };
 
 export type PasswordContext = {
-  encryptionPasswordStore: "password";
+  encryptionPasswordStore: "user";
   password: string;
   duration?: number;
 };

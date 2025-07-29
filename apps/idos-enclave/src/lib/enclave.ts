@@ -54,7 +54,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   constructor({ parentOrigin }: { parentOrigin: string }) {
     super({
       allowedEncryptionStores:
-        import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "password"] : ["password"],
+        import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "user"] : ["user"],
       mpcConfiguration:
         import.meta.env.VITE_ENABLE_MPC === "true"
           ? {

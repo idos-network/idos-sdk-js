@@ -40,7 +40,7 @@ export default function AuthMethodChooser({
     }
   });
 
-  if (currentPasswordStore.value === "password") {
+  if (currentPasswordStore.value === "user") {
     return (
       <PasswordForm
         mode={mode}

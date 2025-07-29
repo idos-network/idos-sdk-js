@@ -118,7 +118,7 @@ export default function PasswordForm({
     isLoading.value = false;
 
     onSuccess({
-      encryptionPasswordStore: "password",
+      encryptionPasswordStore: "user",
       password: password.value,
       duration: duration.value,
     });

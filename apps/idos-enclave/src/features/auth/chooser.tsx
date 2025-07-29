@@ -42,8 +42,8 @@ export default function Chooser({
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {allowedEncryptionStores.includes("password") && (
-          <Button id="auth-method-password" onClick={() => setEncryptionPasswordStore("password")}>
+        {allowedEncryptionStores.includes("user") && (
+          <Button id="auth-method-password" onClick={() => setEncryptionPasswordStore("user")}>
             Use a password
           </Button>
         )}
