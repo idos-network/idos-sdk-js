@@ -1,4 +1,3 @@
-import type { idOSCredential } from "@idos-network/credentials";
 import type {
   EncryptionPasswordStore,
   MPCPasswordContext,
@@ -6,7 +5,7 @@ import type {
 } from "@idos-network/utils/enclave";
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
-// Type definitions for request handling
+// Type definitions for request handling - keeping local for now
 type RequestData = {
   fullMessage?: Uint8Array;
   userId?: string;
@@ -19,7 +18,7 @@ type RequestData = {
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
   signature?: string;
-  credentials?: idOSCredential[];
+  credentials?: any[];
   privateFieldFilters?: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> };
 };
 
