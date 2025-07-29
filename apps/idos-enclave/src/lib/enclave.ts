@@ -227,20 +227,18 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         try {
           this.backupButton.disabled = true;
 
-          if (!this.storedEncryptionProfile) {
-            // We need to get the private profile to get the password
-            // also we want to skip the guard check for now, because
-            // the page actually won't be able to use the keys.
-            await this.getPrivateEncryptionProfile(true);
-          }
+          // We need to get the private profile to get the password
+          // also we want to skip the guard check for now, because
+          // the page actually won't be able to use the keys.
+          const profile = await this.getPrivateEncryptionProfile(true);
 
-          if (!this.storedEncryptionProfile) {
+          if (!profile) {
             throw new Error("No secrets were found for backup");
           }
 
           await this.openDialog("backupPasswordContext", {
-            password: this.storedEncryptionProfile.password,
-            encryptionPasswordStore: this.storedEncryptionProfile.encryptionPasswordStore,
+            password: profile.password,
+            encryptionPasswordStore: profile.encryptionPasswordStore,
           });
 
           resolve();
