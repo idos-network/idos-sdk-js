@@ -15,7 +15,6 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-// TODO: Remove password intent in the future.
 const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordOrSecret"];
 
 function Layout({ children }: PropsWithChildren) {
@@ -131,7 +130,7 @@ export function App({ enclave }: AppProps) {
 
         case "backupPasswordOrSecret":
           isBackupMode.value = true;
-          backupEncryptionPasswordStore.value = requestData.message?.authMethod;
+          backupEncryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
           backupSecret.value = requestData.message?.secret;
           break;
       }
