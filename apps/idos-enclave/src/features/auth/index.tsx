@@ -4,7 +4,7 @@ import type { UIMode } from "@/types";
 import Chooser from "./chooser";
 import PasswordForm from "./password-form";
 
-export interface AuthMethodProps {
+export interface AuthProps {
   allowedEncryptionStores: EncryptionPasswordStore[];
   encryptionPasswordStore: EncryptionPasswordStore | null;
   mode: UIMode;
@@ -17,18 +17,22 @@ export interface AuthMethodProps {
   userId: string | null;
 }
 
-export default function AuthMethodChooser({
+export default function Auth({
   mode,
   encryptionPublicKey,
   userId,
   onSuccess,
   allowedEncryptionStores,
   encryptionPasswordStore,
-}: AuthMethodProps) {
-  const currentPasswordStore = useSignal<EncryptionPasswordStore | null>(encryptionPasswordStore);
+}: AuthProps) {
+  const currentPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
 
   effect(() => {
-    if (!currentPasswordStore.value && allowedEncryptionStores.length === 1) {
+    if (currentPasswordStore.value) return;
+
+    if (encryptionPasswordStore) {
+      currentPasswordStore.value = encryptionPasswordStore;
+    } else if (allowedEncryptionStores.length === 1) {
       currentPasswordStore.value = allowedEncryptionStores[0];
     }
   });
