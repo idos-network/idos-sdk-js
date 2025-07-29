@@ -199,7 +199,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       expectedUserEncryptionPublicKey: undefined,
     });
 
-    return this.enclaveProvider.getPublicEncryptionProfile();
+    return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
   async logIn(): Promise<idOSClientLoggedIn> {

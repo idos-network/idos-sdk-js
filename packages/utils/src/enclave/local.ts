@@ -181,8 +181,8 @@ export class LocalEnclave<
     return this.createEncryptionProfileFromPassword(password, this.userId, encryptionPasswordStore);
   }
 
-  /** @see BaseProvider#getPublicEncryptionProfile */
-  async getPublicEncryptionProfile(): Promise<PublicEncryptionProfile> {
+  /** @see BaseProvider#ensureUserEncryptionProfile */
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
     const { keyPair, encryptionPasswordStore, userId } = await this.getPrivateEncryptionProfile();
 
     return {

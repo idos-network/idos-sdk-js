@@ -125,8 +125,8 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    *
    * @returns The public encryption profile.
    */
-  async getPublicEncryptionProfile(): Promise<PublicEncryptionProfile> {
-    throw new Error("Method 'getPublicEncryptionProfile' has to be implemented in the subclass.");
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
+    throw new Error("Method 'ensureUserEncryptionProfile' has to be implemented in the subclass.");
   }
 
   /**
