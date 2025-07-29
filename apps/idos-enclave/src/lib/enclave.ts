@@ -119,6 +119,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
 
+        if (this.options.encryptionPasswordStore === "mpc") {
+          return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
+        }
+
         let encryptionPasswordStore: EncryptionPasswordStore | undefined;
         let password: string | undefined;
         let duration: number | undefined;
@@ -143,10 +147,6 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
         // User providing the password also means that they want to authorize the origin
         await this.acceptParentOrigin();
-
-        if (encryptionPasswordStore === "mpc") {
-          return resolve({ encryptionPasswordStore });
-        }
 
         // biome-ignore lint/style/noNonNullAssertion: This needs to be properly typed.
         return resolve({ encryptionPasswordStore, password: password!, duration });
