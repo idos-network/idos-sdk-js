@@ -49,7 +49,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
-import type { BaseProvider, UserEncryptionProfile } from "@idos-network/utils/enclave";
+import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
@@ -190,7 +190,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return hasProfile(this.kwilClient, this.walletIdentifier);
   }
 
-  async createUserEncryptionProfile(userId: string): Promise<UserEncryptionProfile> {
+  async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
       userId,

@@ -4,7 +4,7 @@ import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import { base64Encode, fromBytesToJson } from "../codecs";
 import { decrypt, encrypt } from "../encryption";
-import type { EnclaveOptions, PrivateEncryptionProfile, UserEncryptionProfile } from "./types";
+import type { EnclaveOptions, PrivateEncryptionProfile, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
@@ -148,7 +148,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    *
    * @returns The user encryption profile.
    */
-  async ensureUserEncryptionProfile(): Promise<UserEncryptionProfile> {
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
     const profile = await this.getPrivateEncryptionProfile();
 
     return {

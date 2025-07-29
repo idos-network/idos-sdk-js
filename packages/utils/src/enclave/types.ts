@@ -1,6 +1,6 @@
 export type EncryptionPasswordStore = "mpc" | "user";
 
-export type UserEncryptionProfile = {
+export type PublicEncryptionProfile = {
   userId: string;
   userEncryptionPublicKey: string;
   encryptionPasswordStore: EncryptionPasswordStore;

@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/credentials";
 import {
   BaseProvider,
   type EnclaveOptions,
-  type UserEncryptionProfile,
+  type PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
@@ -111,7 +111,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   /** @see BaseProvider#ensureUserEncryptionProfile */
-  async ensureUserEncryptionProfile(): Promise<UserEncryptionProfile> {
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
     this.showEnclave();
 
     try {
