@@ -1,7 +1,7 @@
 import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
-import { utf8Decode } from "../codecs";
-import { keyDerivation } from "../encryption";
+import { base64Encode, utf8Decode } from "../codecs";
+import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
@@ -12,6 +12,7 @@ import type {
   MPCPasswordContext,
   PasswordContext,
   PrivateEncryptionProfile,
+  PublicEncryptionProfile,
 } from "./types";
 
 export interface LocalEnclaveOptions extends EnclaveOptions {
@@ -83,11 +84,7 @@ export class LocalEnclave<
 
     // Migration from "password" to "user"
     // TODO: Remove this after a while
-    if ((encryptionPasswordStore as string) === "password") {
-      encryptionPasswordStore = "user";
-    }
-
-    if (!encryptionPasswordStore) {
+    if (!encryptionPasswordStore || (encryptionPasswordStore as string) === "password") {
       encryptionPasswordStore = "user";
     }
 
@@ -95,17 +92,59 @@ export class LocalEnclave<
       userId,
       password,
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
-      encryptionPasswordStore: encryptionPasswordStore ?? "user",
+      encryptionPasswordStore,
     };
+  }
+
+  /**
+   * Encrypts a message to a receiver.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to encrypt.
+   * @param receiverPublicKey - The public key of the receiver.
+   *
+   * @returns The encrypted message.
+   */
+  async encrypt(
+    message: Uint8Array,
+    receiverPublicKey: Uint8Array,
+  ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return encrypt(message, keyPair.publicKey, receiverPublicKey);
+  }
+
+  /**
+   * Decrypts a message from a sender.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to decrypt.
+   * @param senderPublicKey - The public key of the sender.
+   *
+   * @returns The decrypted message.
+   */
+  async decrypt(
+    message: Uint8Array,
+    senderPublicKey: Uint8Array,
+  ): Promise<Uint8Array<ArrayBufferLike>> {
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return decrypt(message, keyPair, senderPublicKey);
   }
 
   /**
    * @see BaseProvider#getPrivateEncryptionProfile
    */
-  async getPrivateEncryptionProfile(): Promise<PrivateEncryptionProfile> {
+  async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
     // In case there is a no key pair, which matches we don't need a new one.
     if (this.storedEncryptionProfile) {
-      if (this.storedEncryptionProfile.userId === this.userId && (await this.guardKeys())) {
+      let canBeUsed = this.storedEncryptionProfile.userId === this.userId;
+
+      if (canBeUsed && !skipGuard) {
+        // When users matches, we also need to check
+        // if origin is authorized to use the keys.
+        canBeUsed = await this.guardKeys();
+      }
+
+      if (canBeUsed) {
         return this.storedEncryptionProfile;
       }
 
@@ -140,6 +179,17 @@ export class LocalEnclave<
     }
 
     return this.createEncryptionProfileFromPassword(password, this.userId, encryptionPasswordStore);
+  }
+
+  /** @see BaseProvider#getPublicEncryptionProfile */
+  async getPublicEncryptionProfile(): Promise<PublicEncryptionProfile> {
+    const { keyPair, encryptionPasswordStore, userId } = await this.getPrivateEncryptionProfile();
+
+    return {
+      userId,
+      userEncryptionPublicKey: base64Encode(keyPair.publicKey),
+      encryptionPasswordStore: encryptionPasswordStore,
+    };
   }
 
   /**

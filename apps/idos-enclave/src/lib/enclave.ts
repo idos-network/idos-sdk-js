@@ -228,6 +228,13 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.backupButton.disabled = true;
 
           if (!this.storedEncryptionProfile) {
+            // We need to get the private profile to get the password
+            // also we want to skip the guard check for now, because
+            // the page actually won't be able to use the keys.
+            await this.getPrivateEncryptionProfile(true);
+          }
+
+          if (!this.storedEncryptionProfile) {
             throw new Error("No secrets were found for backup");
           }
 

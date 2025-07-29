@@ -2,9 +2,8 @@ import type { idOSCredential } from "@idos-network/credentials";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-import { base64Encode, fromBytesToJson } from "../codecs";
-import { decrypt, encrypt } from "../encryption";
-import type { EnclaveOptions, PrivateEncryptionProfile, PublicEncryptionProfile } from "./types";
+import { fromBytesToJson } from "../codecs";
+import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
@@ -52,7 +51,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    * Resets the enclave (storage etc.)
    */
   async reset(): Promise<void> {
-    // TODO: Implement this if needed in child classes
+    // Implement this if needed in child classes
   }
 
   /**
@@ -75,44 +74,32 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    * Encrypts a message to a receiver.
    * This method also checks if the user is authorized to use the keys.
    *
-   * @param message - The message to encrypt.
-   * @param receiverPublicKey - The public key of the receiver.
+   * @param _message - The message to encrypt.
+   * @param _receiverPublicKey - The public key of the receiver.
    *
    * @returns The encrypted message.
    */
   async encrypt(
-    message: Uint8Array,
-    receiverPublicKey: Uint8Array,
+    _message: Uint8Array,
+    _receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    const { keyPair } = await this.getPrivateEncryptionProfile();
-    return encrypt(message, keyPair.publicKey, receiverPublicKey);
+    throw new Error("Method 'encrypt' has to be implemented in the subclass.");
   }
 
   /**
    * Decrypts a message from a sender.
    * This method also checks if the user is authorized to use the keys.
    *
-   * @param message - The message to decrypt.
-   * @param senderPublicKey - The public key of the sender.
+   * @param _message - The message to decrypt.
+   * @param _senderPublicKey - The public key of the sender.
    *
    * @returns The decrypted message.
    */
   async decrypt(
-    message: Uint8Array,
-    senderPublicKey: Uint8Array,
+    _message: Uint8Array,
+    _senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    const { keyPair } = await this.getPrivateEncryptionProfile();
-    return decrypt(message, keyPair, senderPublicKey);
-  }
-
-  /**
-   * Gets the key pair, for old or a new user.
-   * Also reuse the one stored in the store, if possible.
-   *
-   * @returns The key pair.
-   */
-  async getPrivateEncryptionProfile(): Promise<PrivateEncryptionProfile> {
-    throw new Error("Method 'getPrivateEncryptionProfile' has to be implemented in the subclass.");
+    throw new Error("Method 'decrypt' has to be implemented in the subclass.");
   }
 
   /**
@@ -134,6 +121,15 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   }
 
   /**
+   * Gets the public encryption profile.
+   *
+   * @returns The public encryption profile.
+   */
+  async getPublicEncryptionProfile(): Promise<PublicEncryptionProfile> {
+    throw new Error("Method 'getPublicEncryptionProfile' has to be implemented in the subclass.");
+  }
+
+  /**
    * This method authorizes the origin in case of enclave
    * to use the keys, without user providing the password or MPC again.
    *
@@ -141,21 +137,6 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    */
   async guardKeys(): Promise<boolean> {
     return true;
-  }
-
-  /**
-   * Create or get the user encryption profile.
-   *
-   * @returns The user encryption profile.
-   */
-  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
-    const profile = await this.getPrivateEncryptionProfile();
-
-    return {
-      userId: profile.userId,
-      userEncryptionPublicKey: base64Encode(profile.keyPair.publicKey),
-      encryptionPasswordStore: profile.encryptionPasswordStore,
-    };
   }
 
   /**

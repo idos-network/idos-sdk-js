@@ -95,7 +95,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  /** @see BaseProvider#backupUserEncryptionProfile */
+  /** @override parent method to call iframe */
   async backupUserEncryptionProfile(): Promise<void> {
     this.showEnclave();
 
@@ -110,13 +110,13 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     }
   }
 
-  /** @see BaseProvider#ensureUserEncryptionProfile */
-  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
+  /** @override parent method to call iframe */
+  async getPublicEncryptionProfile(): Promise<PublicEncryptionProfile> {
     this.showEnclave();
 
     try {
       return await this.requestToEnclave({
-        ensureUserEncryptionProfile: {},
+        getPublicEncryptionProfile: {},
       });
     } finally {
       this.hideEnclave();

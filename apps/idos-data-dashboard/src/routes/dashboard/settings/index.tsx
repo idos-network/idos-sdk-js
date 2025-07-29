@@ -51,7 +51,6 @@ export function Component() {
               onClick={async () => {
                 if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
 
-                await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
                 await idOSClient.enclaveProvider.backupUserEncryptionProfile();
               }}
             >
