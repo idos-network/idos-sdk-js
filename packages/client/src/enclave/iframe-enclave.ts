@@ -4,6 +4,7 @@ import {
   type EnclaveOptions,
   type PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
+import type { CreateEnclaveRequest, EnclaveRequestName, EnclaveResponse } from "./types";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
   container: string;
@@ -197,8 +198,9 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  private async requestToEnclave(request: Record<any, unknown>): Promise<any> {
+  private async requestToEnclave<T extends EnclaveRequestName>(
+    request: CreateEnclaveRequest<T>,
+  ): Promise<EnclaveResponse<T>> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
