@@ -148,10 +148,6 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         // User providing the password also means that they want to authorize the origin
         await this.acceptParentOrigin();
 
-        if (encryptionPasswordStore === "mpc") {
-          return resolve({ encryptionPasswordStore });
-        }
-
         // biome-ignore lint/style/noNonNullAssertion: This needs to be properly typed.
         return resolve({ encryptionPasswordStore, password: password!, duration });
       });
