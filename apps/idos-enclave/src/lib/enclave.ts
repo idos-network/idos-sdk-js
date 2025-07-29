@@ -227,7 +227,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         try {
           this.backupButton.disabled = true;
 
-          if (!this.storedEncryptionProfile || !(await this.guardKeys())) {
+          if (!this.storedEncryptionProfile) {
             throw new Error("No secrets were found for backup");
           }
 
