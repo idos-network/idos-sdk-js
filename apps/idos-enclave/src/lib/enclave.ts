@@ -31,7 +31,7 @@ export type RequestName =
   | "reset"
   | "load"
   | "configure"
-  | "backupPasswordOrSecret"
+  | "backupUserEncryptionProfile"
   | "signTypedDataResponse"
   | "filterCredentials";
 
@@ -217,7 +217,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     resolver(signature);
   }
 
-  async backupPasswordOrSecret(): Promise<void> {
+  /** @see LocalEnclave#backupUserEncryptionProfile */
+  async backupUserEncryptionProfile(): Promise<void> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
 
@@ -230,8 +231,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
             throw new Error("No secrets were found for backup");
           }
 
-          await this.openDialog("backupPasswordOrSecret", {
-            secret: this.storedEncryptionProfile.password,
+          await this.openDialog("backupPasswordContext", {
+            password: this.storedEncryptionProfile.password,
             encryptionPasswordStore: this.storedEncryptionProfile.encryptionPasswordStore,
           });
 
@@ -246,6 +247,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     });
   }
 
+  /**
+   * Accepts the parent origin and stores it in the authorized origins.
+   * So next time enclave won't ask for permission again.
+   */
   private async acceptParentOrigin(): Promise<void> {
     this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
 
@@ -297,7 +302,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           ],
           ensureUserEncryptionProfile: () => [],
           signTypedDataResponse: () => [signature],
-          backupPasswordOrSecret: () => [],
+          backupUserEncryptionProfile: () => [],
           filterCredentials: () => [credentials, privateFieldFilters],
         };
 
@@ -331,7 +336,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   }> {
     const width = 600;
     const height =
-      this.options?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
+      this.options?.mode === "new" ? 600 : intent === "backupUserEncryptionProfile" ? 520 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({

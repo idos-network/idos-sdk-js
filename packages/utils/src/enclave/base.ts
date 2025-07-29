@@ -127,10 +127,10 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   }
 
   /**
-   * This method is used to backup the password or secret.
+   * This method is used to backup the password context.
    */
-  async backupPasswordOrSecret(): Promise<void> {
-    throw new Error("Method 'backupPasswordOrSecret' has to be implemented in the subclass.");
+  async backupUserEncryptionProfile(): Promise<void> {
+    throw new Error("Method 'backupUserEncryptionProfile' has to be implemented in the subclass.");
   }
 
   /**

@@ -4,7 +4,7 @@ import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
 import { Header } from "@/components/header";
 import Auth from "@/features/auth";
-import PasswordOrKeyBackup from "@/features/backup";
+import BackupPasswordContext from "@/features/backup";
 import Confirmation from "@/features/confirmation";
 import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
@@ -15,7 +15,7 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordOrSecret"];
+const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordContext"];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -56,7 +56,7 @@ export function App({ enclave }: AppProps) {
   // Backup secret mode
   const isBackupMode = useSignal(false);
   const backupEncryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
-  const backupSecret = useSignal<string | null>(null);
+  const backupPassword = useSignal<string | null>(null);
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -128,10 +128,10 @@ export function App({ enclave }: AppProps) {
           message.value = requestData.message?.message;
           break;
 
-        case "backupPasswordOrSecret":
+        case "backupPasswordContext":
           isBackupMode.value = true;
           backupEncryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
-          backupSecret.value = requestData.message?.secret;
+          backupPassword.value = requestData.message?.password;
           break;
       }
 
@@ -150,7 +150,7 @@ export function App({ enclave }: AppProps) {
       encryptionPasswordStore,
       expectedUserEncryptionPublicKey,
       backupEncryptionPasswordStore,
-      backupSecret,
+      backupPassword,
     ],
   );
 
@@ -174,12 +174,12 @@ export function App({ enclave }: AppProps) {
     );
   }
 
-  if (isBackupMode.value && backupEncryptionPasswordStore.value && backupSecret.value) {
+  if (isBackupMode.value && backupEncryptionPasswordStore.value && backupPassword.value) {
     return (
       <Layout>
-        <PasswordOrKeyBackup
+        <BackupPasswordContext
           encryptionPasswordStore={backupEncryptionPasswordStore.value}
-          secret={backupSecret.value}
+          password={backupPassword.value}
           onSuccess={onSuccess}
         />
       </Layout>

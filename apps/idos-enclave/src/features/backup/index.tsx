@@ -111,32 +111,32 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-interface PasswordOrSecretRevealProps {
+interface PasswordRevealProps {
   encryptionPasswordStore: EncryptionPasswordStore;
-  secret: string;
+  password: string;
   onCancel?: () => void;
   onDone?: () => void;
 }
 
-export function PasswordOrSecretReveal({
+export function PasswordReveal({
   encryptionPasswordStore,
-  secret,
+  password,
   onCancel,
   onDone,
-}: PasswordOrSecretRevealProps) {
+}: PasswordRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
   const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(secret);
+      await navigator.clipboard.writeText(password);
     } catch (error) {
       console.error("Failed to copy to clipboard", error);
     }
   };
 
   const handleDownload = () => {
-    const content = `idOS ${encryptionPasswordStore}: ${secret}\n`;
+    const content = `idOS ${encryptionPasswordStore}: ${password}\n`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -157,7 +157,7 @@ export function PasswordOrSecretReveal({
       <div class="flex flex-col gap-1">
         <Paragraph>Your {encryptionPasswordStore} is:</Paragraph>
         <ReadonlyField>
-          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
+          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={password} />
           <div className="flex items-center gap-2">
             <RevealButton
               aria-label={`${revealButtonLabel} ${encryptionPasswordStore}`}
@@ -185,14 +185,14 @@ export function PasswordOrSecretReveal({
   );
 }
 
-export default function PasswordOrKeyBackup({
+export default function BackupPasswordContext({
   onSuccess,
   encryptionPasswordStore,
-  secret,
+  password,
 }: {
   onSuccess: (result: unknown) => void;
   encryptionPasswordStore: EncryptionPasswordStore;
-  secret?: string;
+  password: string;
 }) {
   const reveal = useSignal(false);
 
@@ -200,15 +200,15 @@ export default function PasswordOrKeyBackup({
     reveal.value = !reveal.value;
   };
 
-  if (reveal.value && secret) {
+  if (reveal.value && password) {
     return (
-      <PasswordOrSecretReveal
+      <PasswordReveal
         encryptionPasswordStore={encryptionPasswordStore}
-        secret={secret}
+        password={password}
         onCancel={toggleReveal}
         onDone={() => {
           onSuccess({
-            type: "idOS:backupPasswordOrSecret",
+            type: "idOS:backupUserEncryptionProfile",
             status: "success",
           });
         }}

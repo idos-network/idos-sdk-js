@@ -95,13 +95,13 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     });
   }
 
-  /** @see BaseProvider#backupPasswordOrSecret */
-  async backupPasswordOrSecret(): Promise<void> {
+  /** @see BaseProvider#backupUserEncryptionProfile */
+  async backupUserEncryptionProfile(): Promise<void> {
     this.showEnclave();
 
     try {
       await this.requestToEnclave({
-        backupPasswordOrSecret: {},
+        backupUserEncryptionProfile: {},
       });
     } catch (error) {
       console.error(error);

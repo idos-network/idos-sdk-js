@@ -52,7 +52,7 @@ export function Component() {
                 if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
 
                 await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
-                await idOSClient.enclaveProvider.backupPasswordOrSecret();
+                await idOSClient.enclaveProvider.backupUserEncryptionProfile();
               }}
             >
               Back up your idOS key

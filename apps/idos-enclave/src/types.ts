@@ -8,7 +8,7 @@ export type idOSEnclaveConfiguration = {
   theme?: Theme;
 };
 
-export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordOrSecret";
+export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext";
 
 export interface AuthMethodProps<K = Record<string, unknown>> {
   mode: UIMode;
