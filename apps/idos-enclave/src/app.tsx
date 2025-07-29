@@ -15,7 +15,11 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
+<<<<<<< HEAD
 const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordContext"];
+=======
+const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordOrSecret"];
+>>>>>>> e7a9f494 (fix(enclave): Fix backup password or secret)
 
 function Layout({ children }: PropsWithChildren) {
   return (
