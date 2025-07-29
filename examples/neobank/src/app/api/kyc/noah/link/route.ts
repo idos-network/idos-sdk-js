@@ -87,9 +87,11 @@ type NoahResponse = {
   CheckoutSession: NoahCheckoutSession;
 };
 
-async function createNoahCustomer(address: string, credentials: Credentials, url: URL) {
-  const credentialSubject = credentials.credentialSubject;
-
+async function createNoahCustomer(
+  userAddress: string,
+  credentialSubject: Credentials["credentialSubject"],
+  origin: string,
+) {
   const noahApiKey = process.env.NOAH_API_KEY;
   const noahAPiUrl = process.env.NOAH_API_URL;
 
@@ -122,22 +124,17 @@ async function createNoahCustomer(address: string, credentials: Credentials, url
       },
     ],
     PrimaryResidence: {
-      // biome-ignore lint/style/noNonNullAssertion: false positive
-      Street: credentialSubject.residentialAddressStreet!,
-      // biome-ignore lint/style/noNonNullAssertion: false positive
-      City: credentialSubject.residentialAddressCity!,
-      // biome-ignore lint/style/noNonNullAssertion: false positive
-      PostCode: credentialSubject.residentialAddressPostalCode!,
-      // biome-ignore lint/style/noNonNullAssertion: false positive
-      State: credentialSubject.residentialAddressCountry!,
-      // biome-ignore lint/style/noNonNullAssertion: false positive
-      Country: credentialSubject.residentialAddressCountry!,
+      Street: credentialSubject.residentialAddressStreet ?? "",
+      City: credentialSubject.residentialAddressCity ?? "",
+      PostCode: credentialSubject.residentialAddressPostalCode ?? "",
+      State: "CA",
+      Country: credentialSubject.residentialAddressCountry ?? "",
     },
   };
 
   // Cleanup URL
-  const returnUrl = new URL(url.toString());
-  returnUrl.protocol = "https";
+  // @todo: remove this once in production and use server url
+  const returnUrl = new URL(origin);
   returnUrl.pathname = "/callbacks/noah";
   returnUrl.search = "";
   returnUrl.hash = "";
@@ -150,7 +147,7 @@ async function createNoahCustomer(address: string, credentials: Credentials, url
     FiatAmount: "100",
     ReturnURL: returnUrl.toString(),
     ExternalID: crypto.randomUUID(),
-    CustomerID: address,
+    CustomerID: userAddress,
     Nonce: crypto.randomUUID(),
     LineItems: [
       {
@@ -167,8 +164,7 @@ async function createNoahCustomer(address: string, credentials: Credentials, url
       },
     ],
   };
-
-  const response = await fetch(`${noahAPiUrl}v1/checkout/payin/fiat`, {
+  const response = await fetch(`${noahAPiUrl}/v1/checkout/payin/fiat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -190,24 +186,24 @@ async function createNoahCustomer(address: string, credentials: Credentials, url
 }
 
 export async function GET(request: NextRequest) {
+  const origin = request.nextUrl.origin;
   const { searchParams } = new URL(request.url);
   const credentialId = searchParams.get("credentialId");
-  const inserterId = searchParams.get("inserterId");
+  const userId = searchParams.get("userId");
+  const address = searchParams.get("address");
 
   if (!credentialId) {
     return Response.json({ error: "`credentialId` search param is required" }, { status: 400 });
   }
 
-  if (!inserterId) {
-    return Response.json({ error: "`inserterId` search param is not supported" }, { status: 400 });
+  if (!address) {
+    return Response.json({ error: "`address` search param is not supported" }, { status: 400 });
   }
 
-  const [credentialError, credential] = await goTry<Credentials>(async () => {
-    const url = new URL("/api/shared-credential", request.url);
-    url.searchParams.set("credentialId", credentialId);
-    url.searchParams.set("inserterId", inserterId);
-    const data = await fetch(url);
-    return data.json();
+  const [credentialError, credential] = await goTry<Credentials["credentialSubject"]>(async () => {
+    return await fetch(`${origin}/api/shared-credential?userId=${userId}`)
+      .then((res) => res.json())
+      .then((res) => res.credentialContent);
   });
 
   if (credentialError) {
@@ -215,7 +211,7 @@ export async function GET(request: NextRequest) {
   }
 
   const [customerError, customer] = await goTry<NoahResponse>(async () => {
-    return createNoahCustomer(inserterId, credential, new URL(request.url));
+    return createNoahCustomer(address, credential, origin);
   });
 
   if (customerError) {

@@ -2,10 +2,11 @@
 
 import { useQueries } from "@tanstack/react-query";
 import Image from "next/image";
-import { useState } from "react";
 import { useBuyStore } from "@/app/dashboard/buy/store";
 import { OptionButton } from "@/components/ui/option-button";
-import { Tag } from "./ui/tag";
+import { Tag } from "@/components/ui/tag";
+import { type OnRampProvider, useAppStore } from "@/stores/app-store";
+import { Skeleton } from "./ui/skeleton";
 
 interface Provider {
   id: string;
@@ -52,9 +53,9 @@ const Provider = ({
   img,
   selected,
   onClick,
-
   quote,
   isBestRate,
+  loading,
 }: {
   img: React.ReactNode;
   id: string;
@@ -65,9 +66,10 @@ const Provider = ({
   // biome-ignore lint/suspicious/noExplicitAny: false positive
   quote: any;
   isBestRate: boolean;
+  loading: boolean;
   onClick: () => void;
 }) => {
-  const { setRate, spendAmount } = useBuyStore();
+  const { setRate, spendAmount, selectedToken } = useBuyStore();
   return (
     <OptionButton
       selected={selected}
@@ -89,9 +91,21 @@ const Provider = ({
         {img}
         <div className="flex flex-col items-end font-semibold">
           <div className="font-medium text-green-400 text-sm">
-            {Number(((+spendAmount || 100) * +quote?.rate).toFixed(2)).toFixed(2)} USDC
+            {loading ? (
+              <div className="flex flex-col gap-2">
+                <Skeleton className="h-4 w-12" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ) : (
+              <>
+                {Number(((+spendAmount || 100) * +quote?.rate).toFixed(2)).toFixed(2)}{" "}
+                {selectedToken}
+                <div className="text-green-400 text-xs">
+                  {Number(spendAmount || 100).toFixed(2)} USD
+                </div>
+              </>
+            )}
           </div>
-          <div className="text-green-400 text-xs">{Number(spendAmount || 100).toFixed(2)} USD</div>
         </div>
       </div>
     </OptionButton>
@@ -99,7 +113,7 @@ const Provider = ({
 };
 
 export default function ProviderQuotes() {
-  const [selectedProvider, setSelectedProvider] = useState("");
+  const { selectedOnRampProvider, setOnRampProvider } = useAppStore();
   const providerIds = providers.map((p) => p.id);
 
   // Fetch all quotes in parallel
@@ -131,12 +145,13 @@ export default function ProviderQuotes() {
         <p className="font-medium text-muted text-xs">Compare rates from these providers.</p>
       </div>
       <div className="flex flex-col gap-4">
-        {sortedProviders.map((provider) => (
+        {sortedProviders.map((provider, idx) => (
           <Provider
             key={provider.id}
             {...provider}
-            selected={selectedProvider === provider.id}
-            onClick={() => setSelectedProvider(provider.id)}
+            loading={queries[idx].isLoading}
+            selected={selectedOnRampProvider === provider.id}
+            onClick={() => setOnRampProvider(provider.id as OnRampProvider)}
             quote={provider.quote}
             isBestRate={provider.isBestRate}
           />

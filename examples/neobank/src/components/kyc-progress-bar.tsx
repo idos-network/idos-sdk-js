@@ -1,6 +1,7 @@
 "use client";
-import { Children, cloneElement, isValidElement, useState } from "react";
+import { Children, cloneElement, isValidElement, useMemo } from "react";
 import { CompletedIcon, IdentityVerificationIcon, IdosIcon, WelcomeIcon } from "@/components/icons";
+import { useAppStore } from "@/stores/app-store";
 
 const StepIcon = ({
   icon,
@@ -14,8 +15,9 @@ const StepIcon = ({
   const iconWithProps = Children.map(icon, (child) => {
     if (isValidElement(child)) {
       return cloneElement(child, {
+        // @ts-ignore
         className: isActive ? "fill-black" : "fill-icon-inactive",
-      } as unknown as any);
+      });
     }
     return child;
   });
@@ -57,25 +59,34 @@ const ProgressStep = ({
 };
 
 export const KycProgressBar = () => {
-  const [activeStep, setActiveStep] = useState(1);
-  const steps = [
-    {
-      title: "Welcome",
-      icon: <WelcomeIcon />,
-    },
-    {
-      title: "Identity Verification",
-      icon: <IdentityVerificationIcon />,
-    },
-    {
-      title: "idOS Setup",
-      icon: <IdosIcon />,
-    },
-    {
-      title: "Conclusion",
-      icon: <CompletedIcon />,
-    },
-  ];
+  const { currentStep } = useAppStore();
+  const steps = useMemo(
+    () => [
+      {
+        title: "Welcome",
+        icon: <WelcomeIcon />,
+        isActive: currentStep === "select-provider",
+      },
+      {
+        title: "Identity Verification",
+        icon: <IdentityVerificationIcon />,
+        isActive: currentStep === "kyc-flow",
+      },
+      {
+        title: "idOS Setup",
+        icon: <IdosIcon />,
+        isActive: currentStep === "credential-check",
+      },
+      {
+        title: "Conclusion",
+        icon: <CompletedIcon />,
+        isActive: currentStep === "complete",
+      },
+    ],
+    [currentStep],
+  );
+
+  const activeStep = useMemo(() => steps.findIndex((step) => step.isActive), [steps]);
 
   return (
     <div className="flex w-fit items-center gap-2 rounded-full bg-black p-4">
