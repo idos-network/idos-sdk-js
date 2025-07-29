@@ -3,7 +3,6 @@ import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import { fromBytesToJson } from "../codecs";
-import { decrypt, encrypt } from "../encryption";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
@@ -84,8 +83,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     _message: Uint8Array,
     _receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    const { keyPair } = await this.getPrivateEncryptionProfile();
-    return encrypt(message, keyPair.publicKey, receiverPublicKey);
+    throw new Error("Method 'encrypt' has to be implemented in the subclass.");
   }
 
   /**
@@ -101,8 +99,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     _message: Uint8Array,
     _senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    const { keyPair } = await this.getPrivateEncryptionProfile();
-    return decrypt(message, keyPair, senderPublicKey);
+    throw new Error("Method 'decrypt' has to be implemented in the subclass.");
   }
 
   /**
