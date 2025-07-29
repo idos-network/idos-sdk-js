@@ -27,7 +27,7 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.8",
-    "vite-plugin-node-polyfills": "0.24.0"
+    "vite-plugin-node-polyfills": "catalog:build"
   },
   "private": true,
   "scripts": {

@@ -60,6 +60,7 @@ catalogs:
     "vite": "^6.2.5"
     "typescript": "^5.8.3"
     "tsdown": "^0.12.7"
+    "vite-plugin-node-polyfills": "0.17.0"
 
   testing:
     "vitest": "^3.2.2"

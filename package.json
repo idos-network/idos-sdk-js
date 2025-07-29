@@ -42,9 +42,5 @@
     "postinstall": "lefthook install",
     "preinstall": "npx only-allow pnpm",
     "test": "turbo run test"
-  },
-  "dependencies": {
-    "buffer": "^6.0.3",
-    "vite-plugin-node-polyfills": "0.24.0"
   }
 }
