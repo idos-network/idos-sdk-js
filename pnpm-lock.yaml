@@ -1485,6 +1485,9 @@ importers:
       web-bip39:
         specifier: ^0.0.3
         version: 0.0.3
+      zod:
+        specifier: catalog:core
+        version: 3.25.64
     devDependencies:
       '@idos-network/credentials':
         specifier: workspace:*

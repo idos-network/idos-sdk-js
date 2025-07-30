@@ -5,35 +5,6 @@ import type {
 } from "@idos-network/utils/enclave";
 import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
-// Type definitions for request handling - keeping local for now
-type RequestData = {
-  fullMessage?: Uint8Array;
-  userId?: string;
-  message?: string;
-  receiverPublicKey?: Uint8Array;
-  senderPublicKey?: Uint8Array;
-  mode?: "new" | "existing";
-  theme?: string;
-  encryptionPasswordStore?: EncryptionPasswordStore;
-  expectedUserEncryptionPublicKey?: string;
-  walletAddress?: string;
-  signature?: string;
-  credentials?: any[];
-  privateFieldFilters?: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> };
-};
-
-export type RequestName =
-  | "confirm"
-  | "decrypt"
-  | "encrypt"
-  | "ensureUserEncryptionProfile"
-  | "reset"
-  | "load"
-  | "configure"
-  | "backupUserEncryptionProfile"
-  | "signTypedDataResponse"
-  | "filterCredentials";
-
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
@@ -172,22 +143,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     );
   }
 
-  async configure(
-    mode: "new" | "existing",
-    theme: "light" | "dark",
-    walletAddress: string,
-    userId: string,
-    encryptionPasswordStore: EncryptionPasswordStore,
-    expectedUserEncryptionPublicKey: string,
-  ) {
-    await this.reconfigure({
-      mode,
-      theme,
-      walletAddress,
-      userId,
-      encryptionPasswordStore,
-      expectedUserEncryptionPublicKey,
-    });
+  async reconfigure(options: Partial<LocalEnclaveOptions> = {}) {
+    await super.reconfigure(options);
 
     if (this.options.mode === "new") {
       this.unlockButton.classList.add("create");
@@ -267,55 +224,34 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         event.origin !== this.parentOrigin ||
         // cspell:disable-next-line
         event.data.target === "metamask-inpage"
-      )
+      ) {
         return;
+      }
 
       try {
-        const entries = Object.entries(event.data);
-        const [requestName, requestData] = entries.flat() as [RequestName, RequestData];
+        const { method, data } = event.data;
 
-        const {
-          fullMessage,
-          message,
-          receiverPublicKey,
-          senderPublicKey,
-          mode,
-          theme,
-          walletAddress,
-          signature,
-          credentials,
-          privateFieldFilters,
-          userId,
-          encryptionPasswordStore,
-          expectedUserEncryptionPublicKey,
-        } = requestData;
+        // Whitelisted methods
+        const allowedMethods: (keyof this)[] = [
+          "load",
+          "reconfigure",
+          "confirm",
+          "decrypt",
+          "encrypt",
+          "reset",
+          "ensureUserEncryptionProfile",
+          "signTypedDataResponse",
+          "backupUserEncryptionProfile",
+          "filterCredentials",
+        ];
 
-        const paramBuilder: Record<RequestName, () => unknown[]> = {
-          load: () => [],
-          confirm: () => [message],
-          decrypt: () => [fullMessage, senderPublicKey],
-          encrypt: () => [message, receiverPublicKey],
-          reset: () => [],
-          configure: () => [
-            mode,
-            theme,
-            walletAddress,
-            userId,
-            encryptionPasswordStore,
-            expectedUserEncryptionPublicKey,
-          ],
-          ensureUserEncryptionProfile: () => [],
-          signTypedDataResponse: () => [signature],
-          backupUserEncryptionProfile: () => [],
-          filterCredentials: () => [credentials, privateFieldFilters],
-        };
-
-        const paramBuilderFn = paramBuilder[requestName];
-        if (!paramBuilderFn) throw new Error(`Unexpected request from parent: ${requestName}`);
+        if (!allowedMethods.includes(method)) {
+          throw new Error(`Unexpected request from parent: ${method}`);
+        }
 
         // Type assertion for method call
-        const method = this[requestName as keyof this] as (...args: unknown[]) => Promise<unknown>;
-        const response = await method.bind(this)(...paramBuilderFn());
+        const methodFn = this[method as keyof this] as (...args: unknown[]) => Promise<unknown>;
+        const response = await methodFn.bind(this)(...data);
         event.ports[0].postMessage({ result: response });
       } catch (error) {
         console.error("catch", error);

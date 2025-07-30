@@ -19,7 +19,8 @@
     "es-toolkit": "catalog:utils",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "web-bip39": "^0.0.3"
+    "web-bip39": "^0.0.3",
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@idos-network/credentials": "workspace:*",
