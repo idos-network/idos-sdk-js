@@ -10,48 +10,91 @@ export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
-export type idOSUser = {
-  id: string;
-  recipient_encryption_public_key: string;
-};
+import { z } from "zod";
 
-export type idOSWallet = {
-  id: string;
-  user_id: string;
-  address: string;
-  wallet_type: string;
-  message: string;
-  public_key: string;
-  signature: string;
-};
+// Zod schemas
+export const idOSUserSchema: z.ZodObject<{
+  id: z.ZodString;
+  recipient_encryption_public_key: z.ZodString;
+}> = z.object({
+  id: z.string(),
+  recipient_encryption_public_key: z.string(),
+});
 
-export type idOSUserAttribute = {
-  id: string;
-  attribute_key: string;
-  value: string;
-  user_id?: string;
-};
+export const idOSWalletSchema: z.ZodObject<{
+  id: z.ZodString;
+  user_id: z.ZodString;
+  address: z.ZodString;
+  wallet_type: z.ZodString;
+  message: z.ZodString;
+  public_key: z.ZodString;
+  signature: z.ZodString;
+}> = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  address: z.string(),
+  wallet_type: z.string(),
+  message: z.string(),
+  public_key: z.string(),
+  signature: z.string(),
+});
 
-export type idOSGrant = {
-  id: string;
-  ag_owner_user_id: string;
-  ag_grantee_wallet_identifier: string;
-  data_id: string;
-  locked_until: string;
-  content_hash?: string;
-  inserter_id?: string;
-  inserter_type?: string;
-};
+export const idOSUserAttributeSchema: z.ZodObject<{
+  id: z.ZodString;
+  attribute_key: z.ZodString;
+  value: z.ZodString;
+  user_id: z.ZodOptional<z.ZodString>;
+}> = z.object({
+  id: z.string(),
+  attribute_key: z.string(),
+  value: z.string(),
+  user_id: z.string().optional(),
+});
 
-export type DelegatedWriteGrant = {
-  owner_wallet_identifier: string;
-  grantee_wallet_identifier: string;
-  issuer_public_key: string;
-  id: string;
-  access_grant_timelock: string;
-  not_usable_before: string;
-  not_usable_after: string;
-};
+export const idOSGrantSchema: z.ZodObject<{
+  id: z.ZodString;
+  ag_owner_user_id: z.ZodString;
+  ag_grantee_wallet_identifier: z.ZodString;
+  data_id: z.ZodString;
+  locked_until: z.ZodString;
+  content_hash: z.ZodOptional<z.ZodString>;
+  inserter_id: z.ZodOptional<z.ZodString>;
+  inserter_type: z.ZodOptional<z.ZodString>;
+}> = z.object({
+  id: z.string(),
+  ag_owner_user_id: z.string(),
+  ag_grantee_wallet_identifier: z.string(),
+  data_id: z.string(),
+  locked_until: z.string(),
+  content_hash: z.string().optional(),
+  inserter_id: z.string().optional(),
+  inserter_type: z.string().optional(),
+});
+
+export const DelegatedWriteGrantSchema: z.ZodObject<{
+  owner_wallet_identifier: z.ZodString;
+  grantee_wallet_identifier: z.ZodString;
+  issuer_public_key: z.ZodString;
+  id: z.ZodString;
+  access_grant_timelock: z.ZodString;
+  not_usable_before: z.ZodString;
+  not_usable_after: z.ZodString;
+}> = z.object({
+  owner_wallet_identifier: z.string(),
+  grantee_wallet_identifier: z.string(),
+  issuer_public_key: z.string(),
+  id: z.string(),
+  access_grant_timelock: z.string(),
+  not_usable_before: z.string(),
+  not_usable_after: z.string(),
+});
+
+// Inferred types from Zod schemas
+export type idOSUser = z.infer<typeof idOSUserSchema>;
+export type idOSWallet = z.infer<typeof idOSWalletSchema>;
+export type idOSUserAttribute = z.infer<typeof idOSUserAttributeSchema>;
+export type idOSGrant = z.infer<typeof idOSGrantSchema>;
+export type DelegatedWriteGrant = z.infer<typeof DelegatedWriteGrantSchema>;
 
 /**
  * Following types are specific to the isle `postMessage` protocol.

@@ -16,7 +16,8 @@
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
     "xrpl": "catalog:xrp",
-    "xumm": "catalog:xrp"
+    "xumm": "catalog:xrp",
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core"
