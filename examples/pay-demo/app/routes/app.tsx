@@ -15,11 +15,14 @@ export default function App() {
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
   const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
-  const _userData = MachineContext.useSelector((state) => state.context.data);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
   const onRampAccount = MachineContext.useSelector((state) => state.context.onRampAccount);
+  const moneriumAuthUrl = MachineContext.useSelector((state) => state.context.moneriumAuthUrl);
+  const moneriumProfileIbans = MachineContext.useSelector(
+    (state) => state.context.moneriumProfileIbans,
+  );
 
   const transak = useRef<Transak | null>(null);
 
@@ -50,6 +53,11 @@ export default function App() {
     if (message.data.type === "hifi-tos-done") {
       send({ type: "acceptHifiTos", signedAgreementId: message.data.signedAgreementId });
     }
+
+    if (message.data.type === "monerium-callback") {
+      console.log("-> monerium callback", message.data.code);
+      send({ type: "accessTokenFromCode", code: message.data.code });
+    }
   }, []);
 
   useEffect(() => {
@@ -57,21 +65,8 @@ export default function App() {
     return () => window.removeEventListener("message", messageReceiver);
   }, []);
 
-  useEffect(() => {
-    if (!provider || state !== "accessGranted") return;
-
-    if (provider === "transak") {
-      send({ type: "getSharableToken" });
-    }
-
-    if (provider === "noah") {
-      send({ type: "createNoahCustomer" });
-    }
-
-    if (provider === "hifi") {
-      send({ type: "startHifi" });
-    }
-  }, [state, provider, send]);
+  console.log("-> state", state);
+  console.log("-> provider", provider);
 
   useEffect(() => {
     if (state !== "dataOrTokenFetched" || !provider) return;
@@ -96,7 +91,7 @@ export default function App() {
     }
   }, [sharableToken, state, provider, send]);
 
-  const start = async (provider: "transak" | "noah" | "custom" | "hifi") => {
+  const start = async (provider: "transak" | "noah" | "custom" | "hifi" | "monerium") => {
     send({ type: "configure", provider, address });
   };
 
@@ -129,9 +124,9 @@ export default function App() {
         <button
           type="button"
           className="w-full cursor-pointer rounded-lg bg-purple-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-purple-700"
-          onClick={() => console.log("Custom selected")}
+          onClick={() => start("monerium")}
         >
-          Custom
+          Monerium
         </button>
       </div>
     );
@@ -224,11 +219,57 @@ export default function App() {
     );
   }
 
+  // @ts-expect-error Missing substates?
+  if (state.moneriumFlow && moneriumAuthUrl && state.moneriumFlow === "moneriumAuthUrlFetched") {
+    body = (
+      <div className="w-full">
+        <iframe src={moneriumAuthUrl} width="100%" height="800px" title="KYC" />
+      </div>
+    );
+  }
+
   if (state === "dataOrTokenFetched" && provider === "hifi") {
     body = (
       <div className="w-full text-center">
         <p>KYC completed, you can do a transaction now</p>
         <pre>{JSON.stringify(onRampAccount, null, 2)}</pre>
+        <button
+          type="button"
+          onClick={() => send({ type: "revokeAccessGrant" })}
+          className="mt-10 cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Continue by revoking an access grant
+        </button>
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && provider === "monerium" && moneriumProfileIbans) {
+    body = (
+      <div className="w-full text-center">
+        <p>KYC completed, you now can send a money to one of your IBANs</p>
+        <table className="mt-5 w-full border-1 border-gray-300">
+          <thead>
+            <tr>
+              <th className="border-1 border-gray-300">IBAN</th>
+              <th className="border-1 border-gray-300">BIC</th>
+              <th className="border-1 border-gray-300">Chain</th>
+              <th className="border-1 border-gray-300">State</th>
+              <th className="border-1 border-gray-300">Email Notifications</th>
+            </tr>
+          </thead>
+          <tbody>
+            {moneriumProfileIbans.map((iban) => (
+              <tr key={iban.iban}>
+                <td>{iban.iban}</td>
+                <td>{iban.bic}</td>
+                <td>{iban.chain}</td>
+                <td>{iban.state}</td>
+                <td>{iban.emailNotifications ? "Yes" : "No"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <button
           type="button"
           onClick={() => send({ type: "revokeAccessGrant" })}

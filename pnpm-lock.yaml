@@ -1089,6 +1089,9 @@ importers:
       ascii85:
         specifier: ^1.0.2
         version: 1.0.2
+      base85:
+        specifier: catalog:utils
+        version: 3.2.0
       countries-list:
         specifier: ^3.1.1
         version: 3.1.1

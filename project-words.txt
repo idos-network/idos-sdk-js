@@ -30,6 +30,8 @@ heroicons
 heroui
 Holyheld
 hono
+iban
+ibans
 idos
 idOS
 IDOS
@@ -51,6 +53,7 @@ kwilteam
 LCVJ
 libc
 lucide
+monerium
 multibase
 multicodec
 nacl
@@ -73,6 +76,7 @@ PayinFiat
 permissioned
 Personhood
 pkoch
+PKCE
 pnpx
 preact
 Reown

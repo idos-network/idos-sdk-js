@@ -4,7 +4,17 @@ import type {
   idOSCredential,
 } from "@idos-network/client";
 
-export type Provider = "transak" | "noah" | "custom" | "hifi" | null;
+export type Provider = "transak" | "noah" | "custom" | "hifi" | "monerium" | null;
+
+export interface MoneriumIban {
+  profile: string;
+  address: string;
+  iban: string;
+  bic: string;
+  chain: string;
+  state: string;
+  emailNotifications: boolean;
+}
 
 export interface Context {
   errorMessage?: string | null;
@@ -22,6 +32,7 @@ export interface Context {
   loggedInClient: idOSClientLoggedIn | null;
   data: unknown | null;
   noahUrl: string | null;
+  moneriumAuthUrl: string | null;
   hifiTosUrl: string | null;
   hifiTosId: string | null;
   hifiUrl: string | null;
@@ -30,6 +41,9 @@ export interface Context {
   hifiKycStatus: "ACTIVE" | any;
   // biome-ignore lint/suspicious/noExplicitAny: false positive
   onRampAccount: any | null;
+  moneriumCode: string | null;
+  moneriumProfileStatus: string | null;
+  moneriumProfileIbans: MoneriumIban[] | null;
 }
 
 export interface UserData {

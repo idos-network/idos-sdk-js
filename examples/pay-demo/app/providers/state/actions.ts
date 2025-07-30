@@ -28,6 +28,9 @@ export const actions = {
     hifiKycStatus: null,
     getHifiKycStatusAttempts: 0,
     onRampAccount: null,
+    moneriumCode: null,
+    moneriumProfileStatus: null,
+    moneriumProfileIbans: null,
   }),
 
   setClient: assign({
@@ -100,5 +103,21 @@ export const actions = {
 
   setKrakenDAG: assign({
     krakenDAG: ({ event }) => event.output ?? null,
+  }),
+
+  setMoneriumAuthUrl: assign({
+    moneriumAuthUrl: ({ event }) => event.output,
+  }),
+
+  setMoneriumCode: assign({
+    moneriumCode: ({ event }) => event.code,
+  }),
+
+  setMoneriumProfileStatus: assign({
+    moneriumProfileStatus: ({ event }) => event.output.status,
+  }),
+
+  setMoneriumProfileIbans: assign({
+    moneriumProfileIbans: ({ event }) => event.output.ibans,
   }),
 };

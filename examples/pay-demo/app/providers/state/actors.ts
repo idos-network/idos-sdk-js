@@ -76,6 +76,80 @@ export const actors = {
     },
   ),
 
+  createMoneriumUser: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumUser = await fetch(`/app/kyc/monerium/user?credentialId=${input.id}`);
+
+    if (moneriumUser.status !== 200) {
+      throw new Error("User was not created, or already exists.");
+    }
+
+    return await moneriumUser.json().then((data) => data.url);
+  }),
+
+  requestMoneriumAuth: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumAuth = await fetch(`/app/kyc/monerium/auth?credentialId=${input.id}`);
+
+    if (moneriumAuth.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return await moneriumAuth.json().then((data) => data.url);
+  }),
+
+  moneriumAccessTokenFromCode: fromPromise(
+    async ({ input }: { input: Context["moneriumCode"] }) => {
+      if (!input) {
+        throw new Error("Monerium code not found");
+      }
+
+      const moneriumAuth = await fetch(`/app/kyc/monerium/code?code=${input}`);
+
+      if (moneriumAuth.status !== 200) {
+        throw new Error("Monerium API is not available. Please try again later.");
+      }
+
+      return true;
+    },
+  ),
+
+  createMoneriumProfile: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
+    if (!input) {
+      throw new Error("Credential not found");
+    }
+
+    const moneriumProfile = await fetch(`/app/kyc/monerium/profile?credentialId=${input.id}`);
+
+    if (moneriumProfile.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    return true;
+  }),
+
+  fetchMoneriumProfileStatus: fromPromise(async () => {
+    const moneriumProfileStatus = await fetch("/app/kyc/monerium/status");
+
+    if (moneriumProfileStatus.status !== 200) {
+      throw new Error("Monerium API is not available. Please try again later.");
+    }
+
+    const data = await moneriumProfileStatus.json();
+
+    if (data.state !== "approved") {
+      throw new Error("KYC is not active, please try again later.");
+    }
+
+    return data;
+  }),
+
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
     if (!input) {
       throw new Error("Credential not found");
@@ -155,8 +229,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      await input.client.enclaveProvider.reset();
 
       const sharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
