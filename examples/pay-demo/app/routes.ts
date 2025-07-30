@@ -33,7 +33,6 @@ export default [
           route("code", "routes/kyc/monerium/code.ts"),
           route("profile", "routes/kyc/monerium/profile.ts"),
           route("status", "routes/kyc/monerium/status.ts"),
-          route("order", "routes/kyc/monerium/order.ts"),
         ]),
       ]),
     ]),
