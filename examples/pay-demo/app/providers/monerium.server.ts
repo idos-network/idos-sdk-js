@@ -332,7 +332,7 @@ export const auth = async (data: Credentials, url: URL) => {
   };
 };
 
-export const createOrder = async (profileId: string, address: string, amount: number) => {
+export const createOrder = async (_profileId: string, _address: string, _amount: number) => {
   const apiToken = await getClientToken();
 
   const body = {
