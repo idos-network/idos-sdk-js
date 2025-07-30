@@ -141,7 +141,13 @@ export const actors = {
       throw new Error("Monerium API is not available. Please try again later.");
     }
 
-    return await moneriumProfileStatus.json().then((data) => data.status);
+    const data = await moneriumProfileStatus.json();
+
+    if (data.state !== "approved") {
+      throw new Error("KYC is not active, please try again later.");
+    }
+
+    return data;
   }),
 
   createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {

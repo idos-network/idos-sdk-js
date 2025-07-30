@@ -377,7 +377,7 @@ export const machine = setup({
             src: "fetchMoneriumProfileStatus",
             onDone: [
               {
-                actions: ["setMoneriumProfileStatus"],
+                actions: ["setMoneriumProfileStatus", "setMoneriumProfileIbans"],
                 target: "dataOrTokenFetched",
               },
             ],
@@ -400,6 +400,9 @@ export const machine = setup({
         dataOrTokenFetched: {
           type: "final",
         },
+      },
+      onDone: {
+        target: "dataOrTokenFetched",
       },
     },
     createSharableToken: {

@@ -6,6 +6,16 @@ import type {
 
 export type Provider = "transak" | "noah" | "custom" | "hifi" | "monerium" | null;
 
+export interface MoneriumIban {
+  profile: string;
+  address: string;
+  iban: string;
+  bic: string;
+  chain: string;
+  state: string;
+  emailNotifications: boolean;
+}
+
 export interface Context {
   errorMessage?: string | null;
   walletAddress: string | null;
@@ -32,6 +42,8 @@ export interface Context {
   // biome-ignore lint/suspicious/noExplicitAny: false positive
   onRampAccount: any | null;
   moneriumCode: string | null;
+  moneriumProfileStatus: string | null;
+  moneriumProfileIbans: MoneriumIban[] | null;
 }
 
 export interface UserData {

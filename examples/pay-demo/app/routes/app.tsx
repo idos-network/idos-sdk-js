@@ -20,6 +20,9 @@ export default function App() {
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
   const onRampAccount = MachineContext.useSelector((state) => state.context.onRampAccount);
   const moneriumAuthUrl = MachineContext.useSelector((state) => state.context.moneriumAuthUrl);
+  const moneriumProfileIbans = MachineContext.useSelector(
+    (state) => state.context.moneriumProfileIbans,
+  );
 
   const transak = useRef<Transak | null>(null);
 
@@ -230,6 +233,43 @@ export default function App() {
       <div className="w-full text-center">
         <p>KYC completed, you can do a transaction now</p>
         <pre>{JSON.stringify(onRampAccount, null, 2)}</pre>
+        <button
+          type="button"
+          onClick={() => send({ type: "revokeAccessGrant" })}
+          className="mt-10 cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Continue by revoking an access grant
+        </button>
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && provider === "monerium" && moneriumProfileIbans) {
+    body = (
+      <div className="w-full text-center">
+        <p>KYC completed, you now can send a money to one of your IBANs</p>
+        <table className="mt-5 w-full border-1 border-gray-300">
+          <thead>
+            <tr>
+              <th className="border-1 border-gray-300">IBAN</th>
+              <th className="border-1 border-gray-300">BIC</th>
+              <th className="border-1 border-gray-300">Chain</th>
+              <th className="border-1 border-gray-300">State</th>
+              <th className="border-1 border-gray-300">Email Notifications</th>
+            </tr>
+          </thead>
+          <tbody>
+            {moneriumProfileIbans.map((iban) => (
+              <tr key={iban.iban}>
+                <td>{iban.iban}</td>
+                <td>{iban.bic}</td>
+                <td>{iban.chain}</td>
+                <td>{iban.state}</td>
+                <td>{iban.emailNotifications ? "Yes" : "No"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
         <button
           type="button"
           onClick={() => send({ type: "revokeAccessGrant" })}

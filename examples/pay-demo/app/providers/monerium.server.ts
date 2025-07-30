@@ -262,7 +262,7 @@ export const uploadFile = async (
   return true;
 };
 
-export const status = async (profileId: string) => {
+export const statusAndIban = async (profileId: string) => {
   const apiToken = await getClientToken();
 
   const response = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/profiles/${profileId}`, {
@@ -278,7 +278,33 @@ export const status = async (profileId: string) => {
     throw new Error("Failed to get profile status");
   }
 
-  return await response.json().then((data) => data.state);
+  const state = await response.json().then((data) => data.state);
+
+  if (state !== "approved") {
+    return {
+      state,
+      ibans: [],
+    };
+  }
+
+  const ibanResponse = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/ibans?profile=${profileId}`, {
+    headers: {
+      Authorization: `Bearer ${apiToken}`,
+      Accept: "application/vnd.monerium.api-v2+json",
+    },
+  });
+
+  if (!ibanResponse.ok) {
+    console.error("Response error: ", ibanResponse);
+    throw new Error("Failed to get ibans");
+  }
+
+  const ibans = await ibanResponse.json().then((data) => data.ibans);
+
+  return {
+    state,
+    ibans,
+  };
 };
 
 export const auth = async (data: Credentials, url: URL) => {
@@ -319,19 +345,20 @@ export const createOrder = async (profileId: string, address: string, amount: nu
     counterpart: {
       identifier: {
         standard: "iban",
-        iban: "ME74476888197384741897"
+        iban: "ME74476888197384741897",
       },
       details: {
         firstName: "Satoshi",
         lastName: "Nakamoto",
-        country: "FR"
+        country: "FR",
       },
     },
     message: "Send EUR 1 to CZ6508000000192000145399 at 2024-07-12T12:02:49Z",
-    signature: "0x5rc0b4cb4efbb577cb0c19d1cb23c7cc4912d2138b3267ee4799c88a68e203a5d568bec12f5da2b3a416f9bb03257b472a1605bf489bcdb805c2c029c212d3a5120505f52546da16217f630339cd332d6049f11cf15a1a82939663a58b02d129c40607c0c290ace726c89c35228b6485f5d3796d6c10df5b8a0de196092797bfe7e1f",
+    signature:
+      "0x5rc0b4cb4efbb577cb0c19d1cb23c7cc4912d2138b3267ee4799c88a68e203a5d568bec12f5da2b3a416f9bb03257b472a1605bf489bcdb805c2c029c212d3a5120505f52546da16217f630339cd332d6049f11cf15a1a82939663a58b02d129c40607c0c290ace726c89c35228b6485f5d3796d6c10df5b8a0de196092797bfe7e1f",
     memo: "Powered by Monerium",
-    supportingDocumentId: "a78d8ff2-e51f-11ed-9e13-cacb9390199c"
-  }
+    supportingDocumentId: "a78d8ff2-e51f-11ed-9e13-cacb9390199c",
+  };
 
   const response = await fetch(`${SERVER_ENV.MONERIUM_API_URL}/orders`, {
     method: "POST",
@@ -350,4 +377,4 @@ export const createOrder = async (profileId: string, address: string, amount: nu
   }
 
   return await response.json();
-}
+};

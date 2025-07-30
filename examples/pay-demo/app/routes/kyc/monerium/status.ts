@@ -1,6 +1,6 @@
-import type { Route } from "../+types/status";
+import { statusAndIban } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import { status } from "~/providers/monerium.server";
+import type { Route } from "../+types/status";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
@@ -12,16 +12,9 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    const profileStatus = await status(moneriumProfileId);
+    const profileStatus = await statusAndIban(moneriumProfileId);
 
-    return Response.json(
-      { status: profileStatus },
-      {
-        headers: {
-          "Set-Cookie": await sessionStorage.commitSession(session),
-        },
-      },
-    );
+    return Response.json(profileStatus);
   } catch (error) {
     console.error(error);
     return Response.json({ error: (error as Error).message }, { status: 400 });

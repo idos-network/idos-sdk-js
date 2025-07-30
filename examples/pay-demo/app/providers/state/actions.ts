@@ -30,6 +30,7 @@ export const actions = {
     onRampAccount: null,
     moneriumCode: null,
     moneriumProfileStatus: null,
+    moneriumProfileIbans: null,
   }),
 
   setClient: assign({
@@ -113,6 +114,10 @@ export const actions = {
   }),
 
   setMoneriumProfileStatus: assign({
-    moneriumProfileStatus: ({ event }) => event.output,
+    moneriumProfileStatus: ({ event }) => event.output.status,
+  }),
+
+  setMoneriumProfileIbans: assign({
+    moneriumProfileIbans: ({ event }) => event.output.ibans,
   }),
 };
