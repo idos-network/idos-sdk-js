@@ -112,7 +112,6 @@ export class Client {
       shares.push(engineClient.downloadAndDecrypt(id, downloadRequest, signature, secretKey));
     }
     const secretShares = await Promise.all(shares);
-    console.log({ secretSharesDownloadStatuses: secretShares.map((item) => item.status) });
 
     if (secretShares.every((item) => item.status === "404")) {
       return { status: "not-stored", secret: undefined };
