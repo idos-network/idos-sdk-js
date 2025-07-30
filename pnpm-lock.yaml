@@ -1307,7 +1307,7 @@ importers:
         version: link:../utils
       '@kwilteam/kwil-js':
         specifier: catalog:core
-        version: 0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)
+        version: 0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)(bufferutil@4.0.9)(utf-8-validate@6.0.5)
       es-toolkit:
         specifier: catalog:utils
         version: 1.39.3
@@ -1509,6 +1509,9 @@ importers:
       web-bip39:
         specifier: ^0.0.3
         version: 0.0.3
+      zod:
+        specifier: catalog:core
+        version: 3.25.64
     devDependencies:
       '@idos-network/credentials':
         specifier: workspace:*
@@ -16311,18 +16314,6 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.4
     optional: true
 
-  '@kwilteam/kwil-js@0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)':
-    dependencies:
-      axios: 0.27.2
-      ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
-      jssha: 3.3.1
-      long: 5.3.0
-      uuid: 11.1.0
-    transitivePeerDependencies:
-      - bufferutil
-      - debug
-      - utf-8-validate
-
   '@kwilteam/kwil-js@0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
     dependencies:
       axios: 0.27.2
@@ -29090,7 +29081,7 @@ snapshots:
 
   mlly@1.7.4:
     dependencies:
-      acorn: 8.14.1
+      acorn: 8.15.0
       pathe: 2.0.3
       pkg-types: 1.3.1
       ufo: 1.6.1
@@ -31088,7 +31079,7 @@ snapshots:
   terser@5.39.0:
     dependencies:
       '@jridgewell/source-map': 0.3.6
-      acorn: 8.14.1
+      acorn: 8.15.0
       commander: 2.20.3
       source-map-support: 0.5.21
 

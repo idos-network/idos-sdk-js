@@ -1,4 +1,5 @@
 import type { idOSCredential } from "@idos-network/credentials";
+import { EncryptionPasswordStoresEnum } from "@idos-network/utils/enclave";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
@@ -16,9 +17,11 @@ import { z } from "zod";
 export const idOSUserSchema: z.ZodObject<{
   id: z.ZodString;
   recipient_encryption_public_key: z.ZodString;
+  encryption_password_store: typeof EncryptionPasswordStoresEnum;
 }> = z.object({
   id: z.string(),
   recipient_encryption_public_key: z.string(),
+  encryption_password_store: EncryptionPasswordStoresEnum,
 });
 
 export const idOSWalletSchema: z.ZodObject<{
