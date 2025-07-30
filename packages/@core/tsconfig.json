@@ -16,7 +16,6 @@
     "composite": true,
     "declaration": true,
     "declarationMap": true,
-    "isolatedDeclarations": true,
     "sourceMap": true,
     "inlineSources": true,
 
