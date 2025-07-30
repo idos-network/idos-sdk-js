@@ -557,8 +557,8 @@ export function Onboarding() {
 
       const userId = crypto.randomUUID();
 
-      const userEncryptionPublicKey =
-        await isleController.idosClient.getUserEncryptionPublicKey(userId);
+      const userEncryptionProfile =
+        await isleController.idosClient.createUserEncryptionProfile(userId);
 
       const message = `Sign this message to confirm that you own this wallet address.\nHere's a unique nonce: ${crypto.randomUUID()}`;
       const signature = await isleController.signTx(message);
@@ -568,7 +568,8 @@ export function Onboarding() {
 
       await createIDOSUserProfile({
         userId,
-        recipientEncryptionPublicKey: userEncryptionPublicKey,
+        recipientEncryptionPublicKey: userEncryptionProfile.userEncryptionPublicKey,
+        encryptionPasswordStore: userEncryptionProfile.encryptionPasswordStore,
         wallet: {
           address: address || "",
           type:

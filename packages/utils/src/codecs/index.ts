@@ -1,6 +1,6 @@
 import { encode as hexEncode } from "@stablelib/hex";
 import { hash as sha256Hash } from "@stablelib/sha256";
-import { encode as utf8Encode } from "@stablelib/utf8";
+import { decode as utf8Decode, encode as utf8Encode } from "@stablelib/utf8";
 import bs58 from "bs58";
 
 export { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
@@ -27,4 +27,9 @@ export function bs58Decode(data: string): Uint8Array {
 
 export function toBytes(obj: Parameters<typeof JSON.stringify>[0]): Uint8Array {
   return utf8Encode(JSON.stringify(obj));
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: any is fine here
+export function fromBytesToJson<K = Record<string, any>>(data: Uint8Array): K {
+  return JSON.parse(utf8Decode(data));
 }

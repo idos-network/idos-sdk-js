@@ -1,12 +1,12 @@
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
-
 import { Header } from "@/components/header";
 import Auth from "@/features/auth";
-import PasswordOrKeyBackup from "@/features/backup";
+import BackupPasswordContext from "@/features/backup";
 import Confirmation from "@/features/confirmation";
-import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
+import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
   intent: AllowedIntent;
@@ -15,8 +15,7 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-// TODO: Remove password intent in the future.
-const allowedIntents: AllowedIntent[] = ["confirm", "password", "auth", "backupPasswordOrSecret"];
+const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordContext"];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -34,24 +33,30 @@ type AppProps = {
 };
 
 export function App({ enclave }: AppProps) {
-  const method = useSignal<AuthMethod | null>(null);
-  const allowedAuthMethods = useSignal<AuthMethod[] | null>(null);
-  const previouslyUsedAuthMethod = useSignal<AuthMethod | null>(null);
-  const mode = useSignal<UIMode>("existing");
+  // App configuration
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
-  const confirm = useSignal<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
+  // Password context configuration
+  const mode = useSignal<UIMode>("existing");
+  const allowedEncryptionStores = useSignal<EncryptionPasswordStore[] | null>(null);
+  const encryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
+  const expectedUserEncryptionPublicKey = useSignal<string | null>(null);
+
+  // Confirmation
+  const confirm = useSignal<boolean>(false);
   const origin = useSignal<string | null>(null);
   const message = useSignal<string | null>(null);
-  const encryptionPublicKey = useSignal<string>("");
+
+  // User ID is in search params, not like a message
   const userId = useSignal<string | null>(
     new URLSearchParams(window.location.search).get("userId"),
   );
 
+  // Backup secret mode
   const isBackupMode = useSignal(false);
-  const backupAuthMethod = useSignal<AuthMethod | null>(null);
-  const backupSecret = useSignal<string | null>(null);
+  const backupEncryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
+  const backupPassword = useSignal<string | null>(null);
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -108,20 +113,13 @@ export function App({ enclave }: AppProps) {
       }
 
       responsePort.current = ports[0];
-      encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
 
       switch (requestData.intent) {
-        case "auth":
-          method.value = null;
-          allowedAuthMethods.value = requestData.message?.allowedAuthMethods;
-          previouslyUsedAuthMethod.value = requestData.message?.previouslyUsedAuthMethod;
-          break;
-
-        // TODO: Password intent is deprecated, remove it in the future.
-        case "password":
-          method.value = null;
-          allowedAuthMethods.value = ["password"];
-          previouslyUsedAuthMethod.value = "password";
+        case "getPasswordContext":
+          allowedEncryptionStores.value = requestData.message?.allowedEncryptionStores;
+          encryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
+          expectedUserEncryptionPublicKey.value =
+            requestData.message?.expectedUserEncryptionPublicKey;
           break;
 
         case "confirm":
@@ -130,10 +128,10 @@ export function App({ enclave }: AppProps) {
           message.value = requestData.message?.message;
           break;
 
-        case "backupPasswordOrSecret":
+        case "backupPasswordContext":
           isBackupMode.value = true;
-          backupAuthMethod.value = requestData.message?.authMethod;
-          backupSecret.value = requestData.message?.secret;
+          backupEncryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
+          backupPassword.value = requestData.message?.password;
           break;
       }
 
@@ -148,12 +146,11 @@ export function App({ enclave }: AppProps) {
       origin,
       theme,
       mode,
-      encryptionPublicKey,
-      method,
-      allowedAuthMethods,
-      previouslyUsedAuthMethod,
-      backupAuthMethod,
-      backupSecret,
+      allowedEncryptionStores,
+      encryptionPasswordStore,
+      expectedUserEncryptionPublicKey,
+      backupEncryptionPasswordStore,
+      backupPassword,
     ],
   );
 
@@ -169,16 +166,6 @@ export function App({ enclave }: AppProps) {
     };
   });
 
-  const methodProps = {
-    onError,
-    onSuccess,
-    mode: mode.value,
-    allowedAuthMethods: allowedAuthMethods.value ?? [],
-    previouslyUsedAuthMethod: previouslyUsedAuthMethod.value,
-    encryptionPublicKey: encryptionPublicKey.value,
-    userId: userId.value,
-  };
-
   if (confirm.value && message.value) {
     return (
       <Layout>
@@ -187,12 +174,12 @@ export function App({ enclave }: AppProps) {
     );
   }
 
-  if (isBackupMode.value && backupAuthMethod.value && backupSecret.value) {
+  if (isBackupMode.value && backupEncryptionPasswordStore.value && backupPassword.value) {
     return (
       <Layout>
-        <PasswordOrKeyBackup
-          authMethod={backupAuthMethod.value}
-          secret={backupSecret.value}
+        <BackupPasswordContext
+          encryptionPasswordStore={backupEncryptionPasswordStore.value}
+          password={backupPassword.value}
           onSuccess={onSuccess}
         />
       </Layout>
@@ -201,7 +188,14 @@ export function App({ enclave }: AppProps) {
 
   return (
     <Layout>
-      <Auth {...methodProps} />
+      <Auth
+        allowedEncryptionStores={allowedEncryptionStores.value ?? []}
+        encryptionPasswordStore={encryptionPasswordStore.value}
+        mode={mode.value}
+        onSuccess={onSuccess}
+        encryptionPublicKey={expectedUserEncryptionPublicKey.value ?? undefined}
+        userId={userId.value}
+      />
     </Layout>
   );
 }
