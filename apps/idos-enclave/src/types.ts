@@ -1,7 +1,6 @@
 import type { Store } from "@idos-network/utils/store";
 
 export type UIMode = "new" | "existing" | "confirm";
-export type AuthMethod = "password" | "mpc";
 export type Theme = "dark" | "light";
 
 export type idOSEnclaveConfiguration = {
@@ -9,7 +8,7 @@ export type idOSEnclaveConfiguration = {
   theme?: Theme;
 };
 
-export type AllowedIntent = "password" | "confirm" | "auth" | "backupPasswordOrSecret";
+export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext";
 
 export interface AuthMethodProps<K = Record<string, unknown>> {
   mode: UIMode;

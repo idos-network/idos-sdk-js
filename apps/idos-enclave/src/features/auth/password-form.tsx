@@ -75,7 +75,7 @@ function DurationField({ duration }: DurationFieldProps) {
 }
 
 export interface PasswordFormProps
-  extends Omit<AuthMethodProps, "allowedAuthMethods" | "previouslyUsedAuthMethod"> {}
+  extends Omit<AuthMethodProps, "allowedEncryptionStores" | "encryptionPasswordStore"> {}
 
 export default function PasswordForm({
   mode,
@@ -117,7 +117,11 @@ export default function PasswordForm({
     hasError.value = false;
     isLoading.value = false;
 
-    onSuccess({ authMethod: "password", password: password.value, duration: duration.value });
+    onSuccess({
+      encryptionPasswordStore: "user",
+      password: password.value,
+      duration: duration.value,
+    });
   };
 
   return (

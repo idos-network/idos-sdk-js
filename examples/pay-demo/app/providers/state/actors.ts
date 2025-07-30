@@ -9,7 +9,7 @@ export const actors = {
     const config = await createIDOSClient({
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://440456d6b7cb.ngrok-free.app",
+        url: "https://localhost:5174",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
@@ -19,9 +19,7 @@ export const actors = {
     // @ts-expect-error
     const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
 
-    const withUserSigner = await idleClient.withUserSigner(signer);
-
-    return withUserSigner;
+    return await idleClient.withUserSigner(signer);
   }),
 
   checkProfile: fromPromise(async ({ input }: { input: Context["client"] }) => {

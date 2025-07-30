@@ -1,15 +1,23 @@
 import * as Base64Codec from "@stablelib/base64";
 import nacl from "tweetnacl";
+import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
-import type { AuthMethod, EnclaveOptions, StoredData } from "./types";
+import type {
+  EnclaveOptions,
+  EncryptionPasswordStore,
+  MPCPasswordContext,
+  PasswordContext,
+  PrivateEncryptionProfile,
+  PublicEncryptionProfile,
+} from "./types";
 
 export interface LocalEnclaveOptions extends EnclaveOptions {
   store?: Store;
-  allowedAuthMethods?: AuthMethod[];
+  allowedEncryptionStores?: EncryptionPasswordStore[];
   mpcConfiguration?: {
     nodeUrl: string;
     contractAddress: string;
@@ -19,13 +27,7 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
 export class LocalEnclave<
   K extends LocalEnclaveOptions = LocalEnclaveOptions,
 > extends BaseProvider<K> {
-  protected keyPair: nacl.BoxKeyPair | null = null;
-  protected authMethod?: AuthMethod;
-  protected allowedAuthMethods: AuthMethod[];
-
-  // This is used in the derived class to check if the user password is correct
-  protected userId?: string;
-  protected expectedUserEncryptionPublicKey?: string;
+  protected allowedEncryptionStores: EncryptionPasswordStore[];
 
   // Store for data
   protected store: Store;
@@ -34,11 +36,16 @@ export class LocalEnclave<
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
 
+  // Stored key pair and user id for that key pair
+  // those are most likely loaded from the store
+  // during the load() method.
+  protected storedEncryptionProfile?: PrivateEncryptionProfile;
+
   constructor(options: K) {
     super(options);
 
     // By default, we only allow password auth method
-    this.allowedAuthMethods = options.allowedAuthMethods ?? ["password"];
+    this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
     this.store = options.store ?? new LocalStorageStore();
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
@@ -50,183 +57,232 @@ export class LocalEnclave<
     }
   }
 
+  /** @override parent method to reset the enclave */
   async reset(): Promise<void> {
+    await super.reset();
+    this.storedEncryptionProfile = undefined;
     this.store.reset();
-    this.authMethod = undefined;
-    this.keyPair = null;
   }
 
-  get mpcClient(): MPCClient {
-    if (!this.mpcClientInstance) {
-      throw new Error("MPC client is not initialized");
-    }
-    return this.mpcClientInstance;
-  }
-
+  /** @see parent method extended with loading the profile from the store */
   async load(): Promise<void> {
     await super.load();
 
-    const secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
+    const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
+    const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
       STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
     );
 
-    if (secretKey) await this.setKeyPair(secretKey);
-
-    // Load auth method from store
-    this.authMethod = await this.store.get<AuthMethod>(STORAGE_KEYS.PREFERRED_AUTH_METHOD);
-
-    if (this.authMethod && !this.options.allowedAuthMethods?.includes(this.authMethod)) {
-      // We don't allow this auth method, reset the enclave
-      this.authMethod = undefined;
-      await this.reset();
+    if (!password || !userId || !encryptionSecretKey) {
+      return;
     }
 
-    // Load stored user id
-    this.userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-  }
-
-  async storage(userId: string, expectedUserEncryptionPublicKey?: string): Promise<StoredData> {
-    const storedUserId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const storedEncryptionPublicKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY,
+    let encryptionPasswordStore = await this.store.get<EncryptionPasswordStore>(
+      STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE,
     );
 
-    if (storedUserId !== userId) await this.store.reset();
-
-    userId && (await this.store.set(STORAGE_KEYS.USER_ID, userId));
-
-    // This will be used later in ready method
-    this.userId = userId;
-    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
-
-    if (userId !== storedUserId || !(await this.guardKeys())) {
-      return { userId: "" };
+    // Migration from "password" to "user"
+    // TODO: Remove this after a while
+    if (!encryptionPasswordStore || (encryptionPasswordStore as string) === "password") {
+      encryptionPasswordStore = "user";
     }
 
-    return {
-      userId: storedUserId,
-      encryptionPublicKey: storedEncryptionPublicKey,
+    this.storedEncryptionProfile = {
+      userId,
+      password,
+      keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
+      encryptionPasswordStore,
     };
   }
 
-  async keys(): Promise<Uint8Array | undefined> {
-    let secretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
-    );
-
-    if (!secretKey || !(await this.guardKeys())) {
-      const { authMethod, password, duration } = await this.chooseAuthAndPassword();
-
-      if (!authMethod || !this.allowedAuthMethods.includes(authMethod)) {
-        throw new Error(`Invalid auth method: ${authMethod}`);
-      }
-
-      // Set or clear the remember duration
-      await this.store.setRememberDuration(duration);
-
-      if (authMethod === "password" && password) {
-        if (!this.userId) {
-          throw new Error("userId is not found");
-        }
-
-        const salt = this.userId;
-        secretKey = await keyDerivation(password, salt);
-
-        // Store the password for backup purposes
-        await this.store.set(STORAGE_KEYS.PASSWORD, password);
-      } else if (authMethod === "mpc") {
-        secretKey = await this.ensureMPCPrivateKey();
-      }
-
-      await this.store.set(STORAGE_KEYS.PREFERRED_AUTH_METHOD, authMethod);
-    }
-
-    if (!secretKey) {
-      throw new Error("secretKey is not found");
-    }
-
-    await this.setKeyPair(secretKey);
-
-    return this.keyPair?.publicKey;
-  }
-
-  // This method needs to be implemented in the subclass
-  async chooseAuthAndPassword(): Promise<{
-    authMethod: AuthMethod;
-    password?: string;
-    duration?: number;
-  }> {
-    throw new Error("Method 'chooseAuthAndPassword' has to be implemented in the subclass.");
-  }
-
-  // chooseAuthAndPassword & confirm & backupPasswordOrSecret method needs to be implemented
-
+  /**
+   * Encrypts a message to a receiver.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to encrypt.
+   * @param receiverPublicKey - The public key of the receiver.
+   *
+   * @returns The encrypted message.
+   */
   async encrypt(
     message: Uint8Array,
     receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    if (!this.keyPair) await this.keys();
-
-    if (!(await this.guardKeys())) {
-      throw new Error("User is not authorized to use the keys");
-    }
-
-    if (!this.keyPair) throw new Error("Key pair not initialized");
-
-    return encrypt(message, this.keyPair.publicKey, receiverPublicKey);
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return encrypt(message, keyPair.publicKey, receiverPublicKey);
   }
 
+  /**
+   * Decrypts a message from a sender.
+   * This method also checks if the user is authorized to use the keys.
+   *
+   * @param message - The message to decrypt.
+   * @param senderPublicKey - The public key of the sender.
+   *
+   * @returns The decrypted message.
+   */
   async decrypt(
     message: Uint8Array,
     senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    if (!this.keyPair) await this.keys();
+    const { keyPair } = await this.getPrivateEncryptionProfile();
+    return decrypt(message, keyPair, senderPublicKey);
+  }
 
-    if (!(await this.guardKeys())) {
-      throw new Error("User is not authorized to use the keys");
+  /**
+   * @see BaseProvider#getPrivateEncryptionProfile
+   */
+  async getPrivateEncryptionProfile(skipGuard = false): Promise<PrivateEncryptionProfile> {
+    // In case there is a no key pair, which matches we don't need a new one.
+    if (this.storedEncryptionProfile) {
+      let canBeUsed = this.storedEncryptionProfile.userId === this.userId;
+
+      if (canBeUsed && !skipGuard) {
+        // When users matches, we also need to check
+        // if origin is authorized to use the keys.
+        canBeUsed = await this.guardKeys();
+      }
+
+      if (canBeUsed) {
+        return this.storedEncryptionProfile;
+      }
+
+      // Something did not match, we need to create a new key pair
+      // and reset the enclave.
+      await this.reset();
     }
 
-    if (!this.keyPair) throw new Error("Key pair not initialized");
+    // The stored profile can't be used, or we have to create a new one.
+    let password: string | undefined;
+    let encryptionPasswordStore: EncryptionPasswordStore | undefined;
 
-    return decrypt(message, this.keyPair, senderPublicKey);
+    const context = await this.getPasswordContext();
+
+    if (context.encryptionPasswordStore === "user") {
+      await this.store.setRememberDuration(context.duration);
+
+      password = context.password;
+      encryptionPasswordStore = context.encryptionPasswordStore;
+    }
+
+    if (context.encryptionPasswordStore === "mpc") {
+      // TODO: This is resetting duration, but should?
+      await this.store.setRememberDuration(undefined);
+
+      password = await this.ensureMPCPassword();
+      encryptionPasswordStore = "mpc";
+    }
+
+    if (!password || !encryptionPasswordStore) {
+      throw new Error("Password or encryption password store is not found");
+    }
+
+    return this.createEncryptionProfileFromPassword(password, this.userId, encryptionPasswordStore);
   }
 
-  async setKeyPair(secretKey: Uint8Array<ArrayBufferLike>): Promise<void> {
-    this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+  /** @see BaseProvider#ensureUserEncryptionProfile */
+  async ensureUserEncryptionProfile(): Promise<PublicEncryptionProfile> {
+    const { keyPair, encryptionPasswordStore, userId } = await this.getPrivateEncryptionProfile();
 
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, this.keyPair.secretKey);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, this.keyPair.publicKey);
+    return {
+      userId,
+      userEncryptionPublicKey: base64Encode(keyPair.publicKey),
+      encryptionPasswordStore: encryptionPasswordStore,
+    };
   }
 
-  async ensureMPCPrivateKey(): Promise<Uint8Array<ArrayBufferLike>> {
+  /**
+   * This method needs to check `options` and should derive the password context from it.
+   *
+   * @returns The password context.
+   */
+  async getPasswordContext(): Promise<PasswordContext | MPCPasswordContext> {
+    throw new Error("Method 'getPasswordContext' has to be implemented in the subclass.");
+  }
+
+  /**
+   * Creates and store encryption profile from a password.
+   *
+   * @param password - The password to use.
+   * @param userId - The user id to use.
+   * @param encryptionPasswordStore - The encryption password store to use.
+   *
+   * @returns The encryption profile.
+   */
+  async createEncryptionProfileFromPassword(
+    password: string,
+    userId: string,
+    encryptionPasswordStore: EncryptionPasswordStore,
+  ): Promise<PrivateEncryptionProfile> {
+    const secretKey = await keyDerivation(password, userId);
+
+    const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
+
+    await this.store.set(STORAGE_KEYS.USER_ID, userId);
+    await this.store.set(STORAGE_KEYS.PASSWORD, password);
+    await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
+    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
+    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+
+    this.storedEncryptionProfile = {
+      userId,
+      password,
+      keyPair,
+      encryptionPasswordStore,
+    };
+
+    return this.storedEncryptionProfile;
+  }
+
+  protected async ensureMPCPassword(): Promise<string> {
     if (this.options?.mode !== "new") {
-      const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
+      const { status: downloadStatus, secret: downloadedPassword } = await this.downloadSecret();
 
-      if (downloadStatus === "ok" && downloadedSecret) {
-        return downloadedSecret;
+      if (downloadStatus === "ok" && downloadedPassword) {
+        return utf8Decode(downloadedPassword);
       }
 
       // TODO: If user change their mind and want to use MPC instead of password?...
       // throw Error("A secret might be stored at ZK nodes, but can't be obtained");
     }
 
-    const privateKey = nacl.box.keyPair().secretKey;
-    const { status: uploadStatus } = await this.uploadSecret(privateKey);
+    const password = this.generatePassword();
+    const { status: uploadStatus } = await this.uploadSecret(password);
 
     if (uploadStatus !== "success") {
       throw Error(`A secret upload failed with status: ${uploadStatus}`);
     }
 
-    return privateKey;
+    return password;
   }
 
-  async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
-    if (!this.userId) {
-      throw new Error("userId is not found");
+  private get mpcClient(): MPCClient {
+    if (!this.mpcClientInstance) {
+      throw new Error("MPC client is not initialized");
+    }
+    return this.mpcClientInstance;
+  }
+
+  private generatePassword(): string {
+    const alphabet =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+    const length = 20;
+    const array = new Uint8Array(length);
+    crypto.getRandomValues(array);
+    let password = "";
+    for (let i = 0; i < length; i++) {
+      password += alphabet[array[i] % alphabet.length];
     }
 
+    return password;
+  }
+
+  private async downloadSecret(): Promise<{
+    status: string;
+    secret: Buffer<ArrayBufferLike> | undefined;
+  }> {
     // I really don't like this, I guess the walletAddress should be stored in the store.
-    // like the userId.
     if (!this.options.walletAddress) {
       throw new Error("walletAddress is not found");
     }
@@ -255,11 +311,7 @@ export class LocalEnclave<
     );
   }
 
-  async uploadSecret(secret: Uint8Array<ArrayBufferLike>): Promise<{ status: string }> {
-    if (!this.userId) {
-      throw new Error("userId is not found");
-    }
-
+  private async uploadSecret(secret: string): Promise<{ status: string }> {
     const signerAddress = this.options.walletAddress;
 
     if (!signerAddress) {
@@ -267,7 +319,7 @@ export class LocalEnclave<
       return { status: "no-signer-address" };
     }
 
-    const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret));
+    const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret, "utf8"));
     const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
 

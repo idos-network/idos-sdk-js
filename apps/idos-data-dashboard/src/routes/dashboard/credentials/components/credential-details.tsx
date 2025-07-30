@@ -27,10 +27,7 @@ const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) =
     queryFn: async ({ queryKey: [, credentialId] }) => {
       const credential = await idOSClient.getCredentialOwned(credentialId);
 
-      await idOSClient.enclaveProvider.ready(
-        idOSClient.user.id,
-        idOSClient.user.recipient_encryption_public_key,
-      );
+      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
 
       if (!credential) {
         throw new Error(`"idOSCredential" with id ${credentialId} not found`);
