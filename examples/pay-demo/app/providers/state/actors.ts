@@ -341,14 +341,4 @@ export const actors = {
 
     return data.url;
   }),
-
-  fetchUserData: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
-    if (!input) {
-      throw new Error("Credential not found");
-    }
-
-    const data = await fetch(`/app/kyc/data?credentialId=${input.id}`);
-
-    return await data.json();
-  }),
 };

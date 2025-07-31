@@ -16,6 +16,7 @@ export const machine = setup({
     context: {} as Context,
   },
   actors,
+  // @ts-expect-error I don't know why this is needed
   actions,
   guards: {
     isTransak: ({ context }: { context: Context }) => context.provider === "transak",
@@ -39,7 +40,6 @@ export const machine = setup({
     credential: null,
     sharedCredential: null,
     findCredentialAttempts: 0,
-    data: null,
     noahUrl: null,
     hifiTosUrl: null,
     hifiTosId: null,
@@ -49,6 +49,8 @@ export const machine = setup({
     onRampAccount: null,
     moneriumAuthUrl: null,
     moneriumCode: null,
+    moneriumProfileStatus: null,
+    moneriumProfileIbans: null,
   },
   states: {
     notConfigured: {
@@ -449,20 +451,6 @@ export const machine = setup({
       },
       onDone: {
         target: "dataOrTokenFetched",
-      },
-    },
-    fetchUserData: {
-      invoke: {
-        src: "createSharableToken",
-        input: ({ context }) => context.sharedCredential,
-        onDone: {
-          target: "dataOrTokenFetched",
-          actions: ["setUserData"],
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
       },
     },
     dataOrTokenFetched: {

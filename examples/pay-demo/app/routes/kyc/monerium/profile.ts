@@ -1,7 +1,7 @@
 import { getSharedCredential } from "~/providers/idos.server";
 import { createProfile } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "../+types/profile";
+import type { Route } from "./+types/profile";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);

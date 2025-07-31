@@ -1,26 +1,26 @@
 diff --git a/dist/development/index.js b/dist/development/index.js
-index 4f141ef614ab916be3c2acbef54d4c0065998e05..6c4f051abadedce0dcd0ceb2e7461291b5d8b622 100644
+index b2a208733cc5de90083ad10609aa903635a3f553..1abd490bead115aa8ef52c6a174d6cc1b5a272ea 100644
 --- a/dist/development/index.js
 +++ b/dist/development/index.js
-@@ -10958,7 +10958,7 @@ var createRequestHandler = (build, mode) => {
+@@ -1159,7 +1159,7 @@ var createRequestHandler = (build, mode) => {
        });
      };
      if (_build.future.unstable_middleware) {
 -      if (initialContext == null) {
 +      if (!(initialContext instanceof Map)) {
-         loadContext = new unstable_RouterContextProvider();
+         loadContext = new (0, _chunkK7YFBME3js.unstable_RouterContextProvider)();
        } else {
          try {
 diff --git a/dist/production/index.js b/dist/production/index.js
-index 9adf06eff4c92682ce15ee0df88ea2c021b1da59..e4ce7aca8de337c36c471ab744bfbcd622d9b7e3 100644
+index b4b017bdc4f1f66b2870c01ebc998cc3ba39d1a1..9db210c347aaf787426c58219503ee14019e3f62 100644
 --- a/dist/production/index.js
 +++ b/dist/production/index.js
-@@ -10958,7 +10958,7 @@ var createRequestHandler = (build, mode) => {
+@@ -1159,7 +1159,7 @@ var createRequestHandler = (build, mode) => {
        });
      };
      if (_build.future.unstable_middleware) {
 -      if (initialContext == null) {
 +      if (!(initialContext instanceof Map)) {
-         loadContext = new unstable_RouterContextProvider();
+         loadContext = new (0, _chunk7OQROU2Djs.unstable_RouterContextProvider)();
        } else {
          try {

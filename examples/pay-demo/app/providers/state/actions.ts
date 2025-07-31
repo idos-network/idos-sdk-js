@@ -19,7 +19,6 @@ export const actions = {
     sharedCredential: null,
     krakenDAG: null,
     findCredentialAttempts: 0,
-    data: null,
     errorMessage: null,
     noahUrl: null,
     hifiTosUrl: null,
@@ -59,10 +58,6 @@ export const actions = {
 
   setSharableToken: assign({
     sharableToken: ({ event }) => event.output,
-  }),
-
-  setUserData: assign({
-    data: ({ event }) => event.output,
   }),
 
   setErrorMessage: assign({

@@ -1,6 +1,6 @@
 import { getTokenFromCode } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "../+types/code";
+import type { Route } from "./+types/code";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);

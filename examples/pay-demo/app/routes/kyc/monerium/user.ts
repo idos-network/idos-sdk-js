@@ -1,7 +1,7 @@
 import { getSharedCredential } from "~/providers/idos.server";
 import { createUser } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "../+types/user";
+import type { Route } from "./+types/user";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   try {
     const data = await getSharedCredential(credentialId, user.address);
 
-    const profileId = await createUser(data, user, url);
+    const profileId = await createUser(data);
 
     session.set("moneriumProfileId", profileId);
 
