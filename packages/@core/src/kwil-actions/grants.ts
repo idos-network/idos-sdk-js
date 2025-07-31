@@ -43,7 +43,17 @@ export async function getGrants(
   });
 }
 
-const CreateAccessGrantByDAGParamsSchema = z.object({
+const CreateAccessGrantByDAGParamsSchema: z.ZodObject<
+  {
+    dag_data_id: z.ZodString;
+    dag_owner_wallet_identifier: z.ZodString;
+    dag_grantee_wallet_identifier: z.ZodString;
+    dag_signature: z.ZodString;
+    dag_locked_until: z.ZodNumber;
+    dag_content_hash: z.ZodString;
+  },
+  "strip"
+> = z.object({
   dag_data_id: z.string(),
   dag_owner_wallet_identifier: z.string(),
   dag_grantee_wallet_identifier: z.string(),
@@ -53,7 +63,6 @@ const CreateAccessGrantByDAGParamsSchema = z.object({
 });
 
 export type CreateAccessGrantByDAGParams = z.infer<typeof CreateAccessGrantByDAGParamsSchema>;
-
 /**
  * Creates a new Access Grant from the given Delegated Access Grant payload.
  */

@@ -19,7 +19,13 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string):
   return has_profile;
 }
 
-const CreateUserReqParamsSchema = z.object({
+const CreateUserReqParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    recipient_encryption_public_key: z.ZodString;
+  },
+  "strip"
+> = z.object({
   id: z.string(),
   recipient_encryption_public_key: z.string(),
 });

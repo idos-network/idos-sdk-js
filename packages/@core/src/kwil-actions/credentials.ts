@@ -65,7 +65,13 @@ export async function getAccessGrantsForCredential(
   });
 }
 
-const EditCredentialAsIssuerParamsSchema = z.object({
+const EditCredentialAsIssuerParamsSchema: z.ZodObject<
+  {
+    public_notes_id: z.ZodString;
+    public_notes: z.ZodString;
+  },
+  "strip"
+> = z.object({
   public_notes_id: z.string(),
   public_notes: z.string(),
 });
@@ -113,7 +119,32 @@ export async function getAllCredentials(kwilClient: KwilActionClient): Promise<i
   });
 }
 
-const CreateCredentialByDelegatedWriteGrantParamsSchema = z.object({
+const CreateCredentialByDelegatedWriteGrantParamsSchema: z.ZodObject<
+  {
+    issuer_auth_public_key: z.ZodString;
+    original_encryptor_public_key: z.ZodString;
+    original_credential_id: z.ZodString;
+    original_content: z.ZodString;
+    original_public_notes: z.ZodString;
+    original_public_notes_signature: z.ZodString;
+    original_broader_signature: z.ZodString;
+    copy_encryptor_public_key: z.ZodString;
+    copy_credential_id: z.ZodString;
+    copy_content: z.ZodString;
+    copy_public_notes_signature: z.ZodString;
+    copy_broader_signature: z.ZodString;
+    content_hash: z.ZodString;
+    dwg_owner: z.ZodString;
+    dwg_grantee: z.ZodString;
+    dwg_issuer_public_key: z.ZodString;
+    dwg_id: z.ZodString;
+    dwg_access_grant_timelock: z.ZodString;
+    dwg_not_before: z.ZodString;
+    dwg_not_after: z.ZodString;
+    dwg_signature: z.ZodString;
+  },
+  "strip"
+> = z.object({
   issuer_auth_public_key: z.string(),
   original_encryptor_public_key: z.string(),
   original_credential_id: z.string(),
@@ -189,7 +220,21 @@ export async function getCredentialById(
   return response.find((r) => r.id === id);
 }
 
-const ShareableCredentialSchema = z.object({
+const ShareableCredentialSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    original_credential_id: z.ZodString;
+    public_notes: z.ZodString;
+    public_notes_signature: z.ZodString;
+    broader_signature: z.ZodString;
+    content: z.ZodString;
+    encryptor_public_key: z.ZodString;
+    issuer_auth_public_key: z.ZodString;
+    grantee_wallet_identifier: z.ZodString;
+    locked_until: z.ZodNumber;
+  },
+  "strip"
+> = z.object({
   id: z.string(),
   original_credential_id: z.string(),
   public_notes: z.string(),
@@ -221,7 +266,19 @@ export async function shareCredential(
   return credential;
 }
 
-const CreateCredentialCopyParamsSchema = z.object({
+const CreateCredentialCopyParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    original_credential_id: z.ZodString;
+    public_notes: z.ZodString;
+    public_notes_signature: z.ZodString;
+    broader_signature: z.ZodString;
+    content: z.ZodString;
+    encryptor_public_key: z.ZodString;
+    issuer_auth_public_key: z.ZodString;
+  },
+  "strip"
+> = z.object({
   id: z.string(),
   original_credential_id: z.string(),
   public_notes: z.string(),

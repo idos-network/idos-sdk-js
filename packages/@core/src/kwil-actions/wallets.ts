@@ -2,7 +2,18 @@ import z from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 import type { idOSWallet } from "../types";
 
-const UpsertWalletParamsSchema = z.object({
+const UpsertWalletParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    user_id: z.ZodString;
+    address: z.ZodString;
+    wallet_type: z.ZodString;
+    message: z.ZodString;
+    public_key: z.ZodString;
+    signature: z.ZodString;
+  },
+  "strip"
+> = z.object({
   id: z.string(),
   user_id: z.string(),
   address: z.string(),
@@ -31,12 +42,25 @@ export async function upsertWalletAsInserter(
   return params;
 }
 
-const AddWalletParamsSchema = z.object({
+const AddWalletParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    address: z.ZodString;
+    public_key: z.ZodString;
+    message: z.ZodString;
+    signature: z.ZodString;
+    user_id: z.ZodString;
+    wallet_type: z.ZodString;
+  },
+  "strip"
+> = z.object({
   id: z.string(),
   address: z.string(),
-  public_key: z.string().nullable(),
+  public_key: z.string(),
   message: z.string(),
   signature: z.string(),
+  user_id: z.string(),
+  wallet_type: z.string(),
 });
 
 export type AddWalletParams = z.infer<typeof AddWalletParamsSchema>;
