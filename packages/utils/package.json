@@ -2,6 +2,11 @@
   "name": "@idos-network/utils",
   "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.0",
+  "clean-package": {
+    "remove": [
+      "devDependencies.@idos-network/credentials"
+    ]
+  },
   "dependencies": {
     "@stablelib/base64": "catalog:utils",
     "@stablelib/binary": "catalog:utils",
@@ -14,9 +19,11 @@
     "es-toolkit": "catalog:utils",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
-    "web-bip39": "^0.0.3"
+    "web-bip39": "^0.0.3",
+    "zod": "catalog:core"
   },
   "devDependencies": {
+    "@idos-network/credentials": "workspace:*",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
@@ -40,6 +47,14 @@
     "./codecs": {
       "types": "./dist/codecs/index.d.ts",
       "import": "./dist/codecs/index.js"
+    },
+    "./enclave": {
+      "types": "./dist/enclave/index.d.ts",
+      "import": "./dist/enclave/index.js"
+    },
+    "./enclave/local": {
+      "types": "./dist/enclave/local.d.ts",
+      "import": "./dist/enclave/local.js"
     }
   },
   "files": [
@@ -51,7 +66,10 @@
   "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "typescript": "catalog:build"
+    "typescript": "catalog:build",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.207.0",
+    "ethers": "catalog:ethereum"
   },
   "publishConfig": {
     "access": "public"

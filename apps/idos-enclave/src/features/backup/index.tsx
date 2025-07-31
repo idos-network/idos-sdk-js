@@ -5,10 +5,9 @@ import {
   ClipboardIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
-import type { Store } from "@idos-network/utils/store";
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
-import { useEffect } from "preact/hooks";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
@@ -112,32 +111,32 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
-interface PasswordOrSecretRevealProps {
-  authMethod: "password" | "secret key";
-  secret: string;
+interface PasswordRevealProps {
+  encryptionPasswordStore: EncryptionPasswordStore;
+  password: string;
   onCancel?: () => void;
   onDone?: () => void;
 }
 
-export function PasswordOrSecretReveal({
-  authMethod,
-  secret,
+export function PasswordReveal({
+  encryptionPasswordStore,
+  password,
   onCancel,
   onDone,
-}: PasswordOrSecretRevealProps) {
+}: PasswordRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
 
   const handleCopyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(secret);
+      await navigator.clipboard.writeText(password);
     } catch (error) {
       console.error("Failed to copy to clipboard", error);
     }
   };
 
   const handleDownload = () => {
-    const content = `idOS ${authMethod}: ${secret}\n`;
+    const content = `idOS ${encryptionPasswordStore}: ${password}\n`;
 
     const blob = new Blob([content], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -156,25 +155,25 @@ export function PasswordOrSecretReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your {authMethod} is:</Paragraph>
+        <Paragraph>Your {encryptionPasswordStore} is:</Paragraph>
         <ReadonlyField>
-          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={secret} />
+          <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={password} />
           <div className="flex items-center gap-2">
             <RevealButton
-              aria-label={`${revealButtonLabel} ${authMethod}`}
-              title={`${revealButtonLabel} ${authMethod}`}
+              aria-label={`${revealButtonLabel} ${encryptionPasswordStore}`}
+              title={`${revealButtonLabel} ${encryptionPasswordStore}`}
               onClick={() => {
                 revealSecret.value = !revealSecret.value;
               }}
             />
             <ClipboardCopyButton
-              aria-label={`Copy ${authMethod}`}
-              title={`Copy ${authMethod}`}
+              aria-label={`Copy ${encryptionPasswordStore}`}
+              title={`Copy ${encryptionPasswordStore}`}
               onClick={handleCopyToClipboard}
             />
             <DownloadButton
-              aria-label={`Download ${authMethod}`}
-              title={`Download ${authMethod}`}
+              aria-label={`Download ${encryptionPasswordStore}`}
+              title={`Download ${encryptionPasswordStore}`}
               onClick={handleDownload}
             />
           </div>
@@ -186,53 +185,30 @@ export function PasswordOrSecretReveal({
   );
 }
 
-export function PasswordOrKeyBackup({
-  store,
-  backupStatus,
+export default function BackupPasswordContext({
   onSuccess,
+  encryptionPasswordStore,
+  password,
 }: {
-  store: Store;
-  backupStatus: "done" | "pending" | "success" | "failure";
   onSuccess: (result: unknown) => void;
+  encryptionPasswordStore: EncryptionPasswordStore;
+  password: string;
 }) {
   const reveal = useSignal(false);
-  const authMethod = useSignal<"passkey" | "password" | null>(null);
-  const password = useSignal<string | null>(null);
-
-  useEffect(() => {
-    store.get<"passkey" | "password">("preferred-auth-method").then((method) => {
-      if (method) {
-        authMethod.value = method;
-      }
-    });
-    store.get<string>("password").then((p) => {
-      if (p) {
-        password.value = p;
-      }
-    });
-  }, []);
-
-  const passwordOrSecretKey: "password" | "secret key" =
-    authMethod.value === "password" ? "password" : "secret key";
-
-  const secret = password.value;
 
   const toggleReveal = () => {
     reveal.value = !reveal.value;
   };
 
-  if (!authMethod.value || !password.value) {
-    return <div>Loading...</div>;
-  }
-
-  if (reveal.value && secret) {
+  if (reveal.value && password) {
     return (
-      <PasswordOrSecretReveal
-        {...{ secret, authMethod: passwordOrSecretKey }}
+      <PasswordReveal
+        encryptionPasswordStore={encryptionPasswordStore}
+        password={password}
         onCancel={toggleReveal}
         onDone={() => {
           onSuccess({
-            type: "idOS:store",
+            type: "idOS:backupUserEncryptionProfile",
             status: "success",
           });
         }}
@@ -240,18 +216,10 @@ export function PasswordOrKeyBackup({
     );
   }
 
-  const resultMsgSrc: Record<string, string> = {
-    failure: "An error occurred while updating your attributes. Please try again.",
-    success: `Your ${passwordOrSecretKey} has been encrypted and safely stored in your idOS.`,
-  };
-
-  const resultMsg = resultMsgSrc?.[backupStatus] || "";
-
   return (
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
-      <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
-      {resultMsg ? <Paragraph>{resultMsg}</Paragraph> : null}
+      <Button onClick={toggleReveal}>Reveal your password</Button>
     </div>
   );
 }

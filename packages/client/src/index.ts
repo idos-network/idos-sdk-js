@@ -49,12 +49,15 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
+import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
-import { type EnclaveOptions, type EnclaveProvider, IframeEnclave } from "./enclave";
+
+import { IframeEnclave } from "./enclave/iframe-enclave";
+export { IframeEnclave };
 
 type Properties<T> = {
   // biome-ignore lint/complexity/noBannedTypes: All functions are to be removed.
@@ -67,17 +70,19 @@ export type idOSClient =
   | idOSClientWithUserSigner
   | idOSClientLoggedIn;
 
-export class idOSClientConfiguration {
+export class idOSClientConfiguration<Provider extends BaseProvider = IframeEnclave> {
   readonly state: "configuration";
   readonly chainId?: string;
   readonly nodeUrl: string;
-  readonly enclaveOptions: Omit<EnclaveOptions, "mode">;
+  readonly enclaveOptions: Omit<Provider["options"], "mode">;
   readonly store: Store;
+  readonly enclaveProvider: BaseProvider;
 
   constructor(params: {
     chainId?: string;
     nodeUrl: string;
-    enclaveOptions: Omit<EnclaveOptions, "mode">;
+    enclaveOptions: Omit<Provider["options"], "mode">;
+    enclaveProvider?: new (options: Omit<Provider["options"], "mode">) => Provider;
     store?: Store;
   }) {
     this.state = "configuration";
@@ -85,6 +90,18 @@ export class idOSClientConfiguration {
     this.nodeUrl = params.nodeUrl;
     this.enclaveOptions = params.enclaveOptions;
     this.store = params.store ?? new LocalStorageStore();
+
+    // TODO: This is a mess because of types...
+    if (params.enclaveProvider) {
+      this.enclaveProvider = new params.enclaveProvider({
+        ...params.enclaveOptions,
+        // Some of enclave providers require store to be passed in constructor
+        store: this.store,
+      });
+    } else {
+      // @ts-expect-error - In case of missing "container" in options, enclave will blow up
+      this.enclaveProvider = new IframeEnclave(params.enclaveOptions);
+    }
   }
 
   async createClient(): Promise<idOSClientIdle> {
@@ -96,29 +113,24 @@ export class idOSClientIdle {
   readonly state: "idle";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
 
-  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: EnclaveProvider) {
+  constructor(store: Store, kwilClient: KwilActionClient, enclaveProvider: BaseProvider) {
     this.state = "idle";
     this.store = store;
     this.kwilClient = kwilClient;
     this.enclaveProvider = enclaveProvider;
   }
 
-  static async fromConfig(params: idOSClientConfiguration): Promise<idOSClientIdle> {
-    const store = params.store;
-
+  static async fromConfig(params: idOSClientConfiguration<BaseProvider>): Promise<idOSClientIdle> {
     const kwilClient = await createWebKwilClient({
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
 
-    const storedSignerAddress = await store.get<string>("signer-address");
+    await params.enclaveProvider.load();
 
-    const enclaveProvider = new IframeEnclave({ ...params.enclaveOptions });
-    await enclaveProvider.load(storedSignerAddress);
-
-    return new idOSClientIdle(store, kwilClient, enclaveProvider);
+    return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
@@ -131,6 +143,7 @@ export class idOSClientIdle {
       this.kwilClient,
       signer,
     );
+
     this.kwilClient.setSigner(kwilSigner);
 
     return new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
@@ -145,7 +158,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly state: "with-user-signer";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -163,23 +176,9 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
-    window.addEventListener("message", this.onMessage.bind(this));
-  }
 
-  async onMessage(message: MessageEvent): Promise<void> {
-    const types = ["idOS-MPC:signMessage"];
-    if (!types.includes(message.data.type)) return;
-
-    console.log("message to sign on client", message);
-    // @ts-ignore type collapse :)
-    const payload = message.data.payload;
-    const signature = await this.signer.signTypedData(payload.domain, payload.types, payload.value);
-    const response = {
-      status: "success",
-      data: signature,
-    };
-    message.ports[0].postMessage(response);
-    message.ports[0].close();
+    // @ts-expect-error - TODO: Fix this
+    this.enclaveProvider.setSigner(this.signer);
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -191,24 +190,30 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return hasProfile(this.kwilClient, this.walletIdentifier);
   }
 
-  async getUserEncryptionPublicKey(userId: string): Promise<string> {
+  async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
+      userId,
       walletAddress: this.walletIdentifier,
+      encryptionPasswordStore: undefined,
+      expectedUserEncryptionPublicKey: undefined,
     });
-    const { userEncryptionPublicKey } =
-      await this.enclaveProvider.discoverUserEncryptionPublicKey(userId);
-    return userEncryptionPublicKey;
+
+    return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
+    const kwilUser = await getUserProfile(this.kwilClient);
+
     await this.enclaveProvider.reconfigure({
       mode: "existing",
+      userId: kwilUser.id,
+      expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
+      encryptionPasswordStore: kwilUser.encryption_password_store,
     });
-    const kwilUser = await getUserProfile(this.kwilClient);
 
     return new idOSClientLoggedIn(this, kwilUser);
   }
@@ -218,7 +223,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly state: "logged-in";
   readonly store: Store;
   readonly kwilClient: KwilActionClient;
-  readonly enclaveProvider: EnclaveProvider;
+  readonly enclaveProvider: BaseProvider;
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
@@ -245,7 +250,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
-    return await removeCredential(this.kwilClient, id);
+    return removeCredential(this.kwilClient, id);
   }
 
   async getCredentialById(id: string): Promise<idOSCredential | undefined> {
@@ -281,7 +286,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ensureUserEncryptionProfile();
 
     const plaintext = await this.enclaveProvider.decrypt(
       base64Decode(credential.content),
@@ -289,6 +294,20 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     return hexEncodeSha256Hash(plaintext);
+  }
+
+  async getCredentialContent(id: string): Promise<string> {
+    const credential = await getCredentialById(this.kwilClient, id);
+    invariant(credential, `"idOSCredential" with id ${id} not found`);
+
+    await this.enclaveProvider.ensureUserEncryptionProfile();
+
+    const plaintext = await this.enclaveProvider.decrypt(
+      base64Decode(credential.content),
+      base64Decode(credential.encryptor_public_key),
+    );
+
+    return plaintext as any;
   }
 
   async createCredentialCopy(
@@ -300,12 +319,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     const originalCredential = await getCredentialById(this.kwilClient, id);
     invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ensureUserEncryptionProfile();
 
     const decryptedContent = await this.enclaveProvider.decrypt(
       base64Decode(originalCredential.content),
       base64Decode(originalCredential.encryptor_public_key),
     );
+
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       decryptedContent,
       base64Decode(consumerRecipientEncryptionPublicKey),
@@ -451,7 +471,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       ),
     );
 
-    await this.enclaveProvider.ready(this.user.id, this.user.recipient_encryption_public_key);
+    await this.enclaveProvider.ensureUserEncryptionProfile();
 
     const { content, encryptorPublicKey } = await this.enclaveProvider.encrypt(
       utf8Encode(plaintextContent),
@@ -487,16 +507,14 @@ export type {
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
-  EnclaveOptions,
-  EnclaveProvider,
 };
 
 export { signNearMessage };
 
 export function createIDOSClient(params: {
   nodeUrl: string;
-  enclaveOptions: Omit<EnclaveOptions, "mode">;
-}): idOSClientConfiguration {
+  enclaveOptions: Omit<IframeEnclave["options"], "mode">;
+}): idOSClientConfiguration<IframeEnclave> {
   return new idOSClientConfiguration({
     nodeUrl: params.nodeUrl,
     enclaveOptions: params.enclaveOptions,

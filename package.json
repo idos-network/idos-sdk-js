@@ -15,7 +15,21 @@
       "react-router@7.7.1": "patches/react-router@7.7.1.patch"
     },
     "onlyBuiltDependencies": [
-      "@reown/appkit"
+      "@reown/appkit",
+      "@swc/core",
+      "@tailwindcss/oxide",
+      "blake-hash",
+      "bufferutil",
+      "es5-ext",
+      "esbuild",
+      "keccak",
+      "lefthook",
+      "protobufjs",
+      "secp256k1",
+      "sharp",
+      "tiny-secp256k1",
+      "usb",
+      "utf-8-validate"
     ]
   },
   "private": true,
