@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 import type { DelegatedWriteGrant, idOSGrant } from "../types";
 
@@ -41,14 +42,17 @@ export async function getGrants(
     },
   });
 }
-export interface CreateAccessGrantByDAGParams {
-  dag_data_id: string;
-  dag_owner_wallet_identifier: string;
-  dag_grantee_wallet_identifier: string;
-  dag_signature: string;
-  dag_locked_until: number;
-  dag_content_hash: string;
-}
+
+const CreateAccessGrantByDAGParamsSchema = z.object({
+  dag_data_id: z.string(),
+  dag_owner_wallet_identifier: z.string(),
+  dag_grantee_wallet_identifier: z.string(),
+  dag_signature: z.string(),
+  dag_locked_until: z.number(),
+  dag_content_hash: z.string(),
+});
+
+export type CreateAccessGrantByDAGParams = z.infer<typeof CreateAccessGrantByDAGParamsSchema>;
 
 /**
  * Creates a new Access Grant from the given Delegated Access Grant payload.
@@ -57,10 +61,11 @@ export async function createAccessGrantByDag(
   kwilClient: KwilActionClient,
   params: CreateAccessGrantByDAGParams,
 ): Promise<CreateAccessGrantByDAGParams> {
+  const input = CreateAccessGrantByDAGParamsSchema.parse(params);
   await kwilClient.execute({
     name: "create_ag_by_dag_for_copy",
     description: "Create an Access Grant in idOS",
-    inputs: params,
+    inputs: input,
   });
 
   return params;
