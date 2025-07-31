@@ -5,13 +5,13 @@ import {
   ClipboardIcon,
   EyeIcon,
 } from "@heroicons/react/24/outline";
-import type { Store } from "@idos-network/utils/store";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
-import { useEffect } from "preact/hooks";
+
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
+import type { AuthMethod } from "@/types";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);
@@ -113,7 +113,7 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 }
 
 interface PasswordOrSecretRevealProps {
-  authMethod: "password" | "secret key";
+  authMethod: AuthMethod;
   secret: string;
   onCancel?: () => void;
   onDone?: () => void;
@@ -186,53 +186,31 @@ export function PasswordOrSecretReveal({
   );
 }
 
-export function PasswordOrKeyBackup({
-  store,
-  backupStatus,
+export default function PasswordOrKeyBackup({
   onSuccess,
+  authMethod,
+  secret,
 }: {
-  store: Store;
-  backupStatus: "done" | "pending" | "success" | "failure";
   onSuccess: (result: unknown) => void;
+  authMethod: AuthMethod;
+  secret?: string;
 }) {
   const reveal = useSignal(false);
-  const authMethod = useSignal<"passkey" | "password" | null>(null);
-  const password = useSignal<string | null>(null);
-
-  useEffect(() => {
-    store.get<"passkey" | "password">("preferred-auth-method").then((method) => {
-      if (method) {
-        authMethod.value = method;
-      }
-    });
-    store.get<string>("password").then((p) => {
-      if (p) {
-        password.value = p;
-      }
-    });
-  }, []);
-
-  const passwordOrSecretKey: "password" | "secret key" =
-    authMethod.value === "password" ? "password" : "secret key";
-
-  const secret = password.value;
+  const passwordOrSecretKey = authMethod === "password" ? "password" : "secret key";
 
   const toggleReveal = () => {
     reveal.value = !reveal.value;
   };
 
-  if (!authMethod.value || !password.value) {
-    return <div>Loading...</div>;
-  }
-
   if (reveal.value && secret) {
     return (
       <PasswordOrSecretReveal
-        {...{ secret, authMethod: passwordOrSecretKey }}
+        authMethod={authMethod}
+        secret={secret}
         onCancel={toggleReveal}
         onDone={() => {
           onSuccess({
-            type: "idOS:store",
+            type: "idOS:backupPasswordOrSecret",
             status: "success",
           });
         }}
@@ -240,18 +218,10 @@ export function PasswordOrKeyBackup({
     );
   }
 
-  const resultMsgSrc: Record<string, string> = {
-    failure: "An error occurred while updating your attributes. Please try again.",
-    success: `Your ${passwordOrSecretKey} has been encrypted and safely stored in your idOS.`,
-  };
-
-  const resultMsg = resultMsgSrc?.[backupStatus] || "";
-
   return (
     <div class="flex flex-col gap-5">
       <Heading>Create a backup of your idOS password or secret key.</Heading>
       <Button onClick={toggleReveal}>Reveal your {passwordOrSecretKey}</Button>
-      {resultMsg ? <Paragraph>{resultMsg}</Paragraph> : null}
     </div>
   );
 }

@@ -1,9 +1,5 @@
 import type * as GemWallet from "@gemwallet/api";
-import {
-  type EnclaveOptions,
-  type idOSClient,
-  idOSClientConfiguration,
-} from "@idos-network/client";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type {
   DelegatedWriteGrant,
   IsleControllerMessage,
@@ -50,7 +46,7 @@ interface idOSIsleControllerOptions {
   theme?: IsleTheme;
 
   /** enclave options */
-  enclaveOptions: EnclaveOptions;
+  enclaveOptions: idOSClientConfiguration["enclaveOptions"];
 
   /** wagmi config */
   wagmiConfig: Config;
