@@ -1406,9 +1406,6 @@ importers:
       '@digitalbazaar/vc':
         specifier: catalog:core
         version: 7.2.0(web-streams-polyfill@3.3.3)
-      '@idos-network/utils':
-        specifier: workspace:*
-        version: link:../utils
       '@kwilteam/kwil-js':
         specifier: catalog:core
         version: 0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)(bufferutil@4.0.9)(utf-8-validate@6.0.5)
@@ -1440,6 +1437,9 @@ importers:
       '@idos-network/credentials':
         specifier: workspace:*
         version: link:../@credentials
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../utils
       clean-package:
         specifier: ^2.2.0
         version: 2.2.0
