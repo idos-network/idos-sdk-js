@@ -3,8 +3,12 @@ import {
   type idOSClientLoggedIn,
   type idOSClientWithUserSigner,
 } from "@idos-network/client";
-import type { AuthMethod } from "@idos-network/utils/enclave";
-import { LocalEnclave } from "@idos-network/utils/enclave/local";
+import type {
+  EncryptionPasswordStore,
+  MPCPasswordContext,
+  PasswordContext,
+} from "@idos-network/utils/enclave";
+import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 import { ChromeExtensionStore } from "@idos-network/utils/store";
 import { type HDNodeWallet, Wallet } from "ethers";
 
@@ -39,7 +43,7 @@ class PortManager {
     // Reference to this klass
     const self = this;
 
-    class LocalWalletEnclave extends LocalEnclave {
+    class LocalWalletEnclave extends LocalEnclave<LocalEnclaveOptions> {
       private authorizedOrigins: string[] = [];
 
       async load(): Promise<void> {
@@ -50,12 +54,23 @@ class PortManager {
         );
       }
 
-      async chooseAuthAndPassword(): Promise<{ authMethod: AuthMethod; password?: string }> {
-        return self.showPasswordPopup(
-          this.allowedAuthMethods,
+      /** @see LocalEnclave#reset */
+      async reset(): Promise<void> {
+        await super.reset();
+
+        this.authorizedOrigins = [];
+      }
+
+      async getPasswordContext(): Promise<PasswordContext | MPCPasswordContext> {
+        const res = await self.showPasswordPopup(
+          this.options.allowedEncryptionStores ?? ["user"],
           this.userId,
-          this.expectedUserEncryptionPublicKey,
+          this.options.expectedUserEncryptionPublicKey,
         );
+
+        await this.acceptParentOrigin();
+
+        return res;
       }
 
       async guardKeys(): Promise<boolean> {
@@ -71,12 +86,22 @@ class PortManager {
           return false;
         }
 
+        await this.acceptParentOrigin();
+
+        return true;
+      }
+
+      async acceptParentOrigin(): Promise<void> {
+        if (!self.currentOrigin) {
+          return;
+        }
+
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, self.currentOrigin])];
+
         await this.store.set(
           ENCLAVE_AUTHORIZED_ORIGINS_KEY,
           JSON.stringify(this.authorizedOrigins),
         );
-        return true;
       }
 
       async confirm(message: string): Promise<boolean> {
@@ -89,7 +114,7 @@ class PortManager {
       chainId: import.meta.env.VITE_IDOS_CHAIN_ID,
       store: this.store,
       enclaveOptions: {
-        allowedAuthMethods: ["password", "mpc"],
+        allowedEncryptionStores: ["user", "mpc"],
         mpcConfiguration: {
           nodeUrl: import.meta.env.VITE_IDOS_MPC_NODE_URL,
           contractAddress: import.meta.env.VITE_IDOS_MPC_CONTRACT_ADDRESS,
@@ -242,14 +267,14 @@ class PortManager {
   }
 
   private async showPasswordPopup(
-    allowedAuthMethods: AuthMethod[],
+    allowedEncryptionStores: EncryptionPasswordStore[],
     userId?: string,
     expectedUserEncryptionPublicKey?: string,
-  ): Promise<{ authMethod: AuthMethod; password?: string }> {
+  ): Promise<PasswordContext | MPCPasswordContext> {
     const requestId = crypto.randomUUID();
 
     chrome.windows.create({
-      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}&allowedAuthMethods=${JSON.stringify(allowedAuthMethods)}`,
+      url: `${chrome.runtime.getURL("src/popup/index.html")}?type=password&requestId=${requestId}&userId=${userId}&expectedUserEncryptionPublicKey=${expectedUserEncryptionPublicKey}&allowedEncryptionStores=${JSON.stringify(allowedEncryptionStores)}`,
       type: "popup",
       width: 470,
       height: 450,

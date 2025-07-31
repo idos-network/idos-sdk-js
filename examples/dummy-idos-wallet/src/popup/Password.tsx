@@ -11,8 +11,8 @@ export default function Popup(): JSX.Element {
   >(null);
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
-  const [allowedAuthMethods, setAllowedAuthMethods] = useState<string[] | null>(null);
-  const [selectedAuthMethod, setSelectedAuthMethod] = useState<string | null>(null);
+  const [allowedEncryptionStores, setAllowedEncryptionStores] = useState<string[] | null>(null);
+  const [selectedEncryptionStore, setSelectedEncryptionStore] = useState<string | null>(null);
 
   useEffect(() => {
     // Parse URL parameters to get credential request details
@@ -20,26 +20,28 @@ export default function Popup(): JSX.Element {
     const requestId = urlParams.get("requestId");
     const userId = urlParams.get("userId") ?? crypto.randomUUID();
     const expectedUserEncryptionPublicKey = urlParams.get("expectedUserEncryptionPublicKey");
-    const allowedAuthMethods = urlParams.get("allowedAuthMethods");
+    const allowedEncryptionStores = urlParams.get("allowedEncryptionStores");
 
     setRequestId(requestId);
     setUserId(userId);
     setExpectedUserEncryptionPublicKey(expectedUserEncryptionPublicKey);
-    setAllowedAuthMethods(allowedAuthMethods ? JSON.parse(allowedAuthMethods) : null);
+    setAllowedEncryptionStores(
+      allowedEncryptionStores ? JSON.parse(allowedEncryptionStores) : null,
+    );
   }, []);
 
   useEffect(() => {
-    if (allowedAuthMethods && allowedAuthMethods.length === 1) {
-      setSelectedAuthMethod(allowedAuthMethods[0]);
+    if (allowedEncryptionStores && allowedEncryptionStores.length === 1) {
+      setSelectedEncryptionStore(allowedEncryptionStores[0]);
     }
-  }, [allowedAuthMethods]);
+  }, [allowedEncryptionStores]);
 
   useEffect(() => {
-    if (selectedAuthMethod === "mpc") {
+    if (selectedEncryptionStore === "mpc") {
       setPassword(null);
       handleDeriveKey();
     }
-  }, [selectedAuthMethod]);
+  }, [selectedEncryptionStore]);
 
   const handleDeriveKey = async () => {
     // TODO: Check if the password matches the expected user encryption public key
@@ -61,7 +63,7 @@ export default function Popup(): JSX.Element {
         requestId,
         result: {
           password,
-          authMethod: selectedAuthMethod,
+          encryptionPasswordStore: selectedEncryptionStore,
         },
       },
     });
@@ -127,25 +129,27 @@ export default function Popup(): JSX.Element {
           <strong>User ID:</strong> {userId || "N/A"}
         </div>
 
-        {allowedAuthMethods && allowedAuthMethods.length > 1 && !selectedAuthMethod && (
-          <div>
-            <strong>Choose your authentication method:</strong>
-            <div className="flex w-full flex-row justify-center gap-2 p-10">
-              {allowedAuthMethods?.map((method) => (
-                <button
-                  type="button"
-                  className={`btn btn-soft w-1/2 ${method === "mpc" ? "btn-primary" : "btn-secondary"}`}
-                  key={method}
-                  onClick={() => setSelectedAuthMethod(method)}
-                >
-                  {method[0].toLocaleUpperCase() + method.slice(1)}
-                </button>
-              ))}
+        {allowedEncryptionStores &&
+          allowedEncryptionStores.length > 1 &&
+          !selectedEncryptionStore && (
+            <div>
+              <strong>Choose your authentication method:</strong>
+              <div className="flex w-full flex-row justify-center gap-2 p-10">
+                {allowedEncryptionStores?.map((method) => (
+                  <button
+                    type="button"
+                    className={`btn btn-soft w-1/2 ${method === "mpc" ? "btn-primary" : "btn-secondary"}`}
+                    key={method}
+                    onClick={() => setSelectedEncryptionStore(method)}
+                  >
+                    {method[0].toLocaleUpperCase() + method.slice(1)}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {selectedAuthMethod === "password" && (
+        {selectedEncryptionStore === "user" && (
           <div
             style={{
               padding: "16px",
@@ -174,7 +178,7 @@ export default function Popup(): JSX.Element {
         )}
       </div>
 
-      {selectedAuthMethod === "password" && (
+      {selectedEncryptionStore === "user" && (
         <div className="flex w-full flex-row justify-end gap-2 border-gray-200 border-t-2 pt-2">
           <button type="button" onClick={handleCancel} className="btn btn-soft btn-secondary">
             Reject
