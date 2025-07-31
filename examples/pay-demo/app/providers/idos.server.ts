@@ -18,9 +18,7 @@ export async function getSharedCredential(credentialId: string, inserterId?: str
     throw new Error("Grant not found.");
   }
 
-  // @ts-expect-error Missing types
   if (inserterId && grant.inserter_id !== inserterId) {
-    // @ts-expect-error Missing types
     throw new Error(`Invalid inserter id: ${grant.inserter_id} !== ${inserterId}`);
   }
 

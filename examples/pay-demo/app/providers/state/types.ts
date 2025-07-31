@@ -30,7 +30,6 @@ export interface Context {
   krakenDAG: idOSCredential | null;
   client: idOSClientWithUserSigner | null;
   loggedInClient: idOSClientLoggedIn | null;
-  data: unknown | null;
   noahUrl: string | null;
   moneriumAuthUrl: string | null;
   hifiTosUrl: string | null;
