@@ -21,8 +21,7 @@
     "jsonwebtoken": "^9.0.2",
     "react": "catalog:react",
     "react-dom": "catalog:react",
-    "react-router": "^7.6.3",
-    "react-router-dom": "^7.6.3",
+    "react-router": "^7.7.1",
     "siwe": "^3.0.0",
     "tweetnacl": "catalog:core",
     "viem": "catalog:ethereum",
@@ -40,12 +39,12 @@
     "tailwindcss": "^4.1.8",
     "typescript": "catalog:build",
     "vite": "catalog:build",
-    "vite-plugin-node-polyfills": "^0.23.0",
+    "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "private": true,
   "scripts": {
-    "build": "react-router build",
+    "build": "pnpm run typecheck && react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"

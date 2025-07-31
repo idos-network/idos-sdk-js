@@ -1,0 +1,7 @@
+# .turboignore
+project-words.txt
+biome.jsonc
+cspell.config.yaml
+lefthook.yml
+README.md
+**/*.md
