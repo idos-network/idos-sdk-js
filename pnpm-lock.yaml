@@ -1307,7 +1307,7 @@ importers:
         version: link:../utils
       '@kwilteam/kwil-js':
         specifier: catalog:core
-        version: 0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)(bufferutil@4.0.9)(utf-8-validate@6.0.5)
+        version: 0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)
       es-toolkit:
         specifier: catalog:utils
         version: 1.39.3
@@ -16313,6 +16313,18 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.4
     optional: true
+
+  '@kwilteam/kwil-js@0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)':
+    dependencies:
+      axios: 0.27.2
+      ethers: 6.14.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)
+      jssha: 3.3.1
+      long: 5.3.0
+      uuid: 11.1.0
+    transitivePeerDependencies:
+      - bufferutil
+      - debug
+      - utf-8-validate
 
   '@kwilteam/kwil-js@0.9.4(patch_hash=35a0f9d9fa145180c4b1e12215e19a0191ac8974ff25a8f0651a7de7359b7c5f)(bufferutil@4.0.9)(utf-8-validate@6.0.5)':
     dependencies:

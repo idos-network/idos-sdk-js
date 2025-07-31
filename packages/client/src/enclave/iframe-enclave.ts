@@ -4,6 +4,7 @@ import {
   type EnclaveOptions,
   type PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
+import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
   container: string;
@@ -31,11 +32,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
   /** @see parent method */
   async load(): Promise<void> {
-    // Don't call super.load() here, because we want to load the enclave first.
+    // First we have to create and load the iframe
     await this.createAndLoadIframe();
 
     // Load the enclave from the store (trigger load() method in the iframe)
-    await this.loadEnclaveFromStore();
+    await this.requestToEnclave("load");
 
     // Pass current options
     await this.reconfigure();
@@ -46,23 +47,27 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
   /** @override parent method to call iframe */
   async reset(): Promise<void> {
-    this.requestToEnclave({ reset: {} });
+    this.requestToEnclave("reset");
   }
 
   /** @override parent method to call iframe */
   async reconfigure(options: Omit<IframeEnclaveOptions, "container" | "url"> = {}): Promise<void> {
     super.reconfigure(options);
-    await this.requestToEnclave({ configure: this.options });
+    await this.requestToEnclave("reconfigure", this.options);
   }
 
   /** @override parent method to call iframe */
   async confirm(message: string): Promise<boolean> {
     this.showEnclave();
 
-    return this.requestToEnclave({ confirm: { message } }).then((response) => {
+    try {
+      return await this.requestToEnclave("confirm", message);
+    } catch (error) {
+      console.error(error);
+      return false;
+    } finally {
       this.hideEnclave();
-      return response as boolean;
-    });
+    }
   }
 
   /** @override parent method to call iframe */
@@ -70,9 +75,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
   ): Promise<idOSCredential[]> {
-    return await this.requestToEnclave({
-      filterCredentials: { credentials, privateFieldFilters },
-    });
+    return await this.requestToEnclave("filterCredentials", credentials, privateFieldFilters);
   }
 
   /** @override parent method to call iframe */
@@ -80,9 +83,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     message: Uint8Array,
     receiverPublicKey: Uint8Array,
   ): Promise<{ content: Uint8Array; encryptorPublicKey: Uint8Array }> {
-    return this.requestToEnclave({
-      encrypt: { message, receiverPublicKey },
-    });
+    return this.requestToEnclave("encrypt", message, receiverPublicKey);
   }
 
   /** @override parent method to call iframe */
@@ -90,9 +91,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     message: Uint8Array,
     senderPublicKey: Uint8Array,
   ): Promise<Uint8Array<ArrayBufferLike>> {
-    return this.requestToEnclave({
-      decrypt: { fullMessage: message, senderPublicKey },
-    });
+    return this.requestToEnclave("decrypt", message, senderPublicKey);
   }
 
   /** @override parent method to call iframe */
@@ -100,9 +99,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.showEnclave();
 
     try {
-      await this.requestToEnclave({
-        backupUserEncryptionProfile: {},
-      });
+      await this.requestToEnclave("backupUserEncryptionProfile");
     } catch (error) {
       console.error(error);
     } finally {
@@ -115,18 +112,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.showEnclave();
 
     try {
-      return await this.requestToEnclave({
-        ensureUserEncryptionProfile: {},
-      });
+      return await this.requestToEnclave("ensureUserEncryptionProfile");
     } finally {
       this.hideEnclave();
     }
-  }
-
-  private async loadEnclaveFromStore(): Promise<void> {
-    await this.requestToEnclave({
-      load: {},
-    });
   }
 
   private async createAndLoadIframe(): Promise<void> {
@@ -197,8 +186,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     this.iframe.parentElement!.classList.remove("visible");
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here. We will type it properly later.
-  private async requestToEnclave(request: Record<any, unknown>): Promise<any> {
+  private async requestToEnclave<TMethod extends keyof BaseProviderMethodArgs>(
+    method: TMethod,
+    ...args: BaseProviderMethodArgs[TMethod]
+  ): Promise<BaseProviderMethodReturn[TMethod]> {
     return new Promise((resolve, reject) => {
       const { port1, port2 } = new MessageChannel();
 
@@ -208,7 +199,14 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       };
 
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
-      this.iframe.contentWindow!.postMessage(request, this.hostUrl.origin, [port2]);
+      this.iframe.contentWindow!.postMessage(
+        {
+          method,
+          data: args,
+        },
+        this.hostUrl.origin,
+        [port2],
+      );
     });
   }
 
@@ -223,10 +221,6 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     const payload = message.data.payload;
     const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
 
-    await this.requestToEnclave({
-      signTypedDataResponse: {
-        signature,
-      },
-    });
+    await this.requestToEnclave("signTypedDataResponse", signature);
   }
 }
