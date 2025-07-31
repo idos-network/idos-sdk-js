@@ -1,12 +1,6 @@
 import type { idOSCredential } from "@idos-network/credentials";
-import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
-import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import * as Base64Codec from "@stablelib/base64";
-import * as Utf8Codec from "@stablelib/utf8";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
-import nacl from "tweetnacl";
-import { Client as MPCClient } from "./mpc/client";
+import { STORAGE_KEYS } from "@idos-network/utils/enclave";
+import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
 
 type AuthMethod = "mpc" | "password";
 
@@ -19,13 +13,11 @@ type RequestData = {
   senderPublicKey?: Uint8Array;
   mode?: "new" | "existing";
   theme?: string;
-  credentials?: idOSCredential[];
-  privateFieldFilters?: {
-    pick: Record<string, unknown[]>;
-    omit: Record<string, unknown[]>;
-  };
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
+  signature?: string;
+  credentials?: idOSCredential[];
+  privateFieldFilters?: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> };
 };
 
 type RequestName =
@@ -34,329 +26,128 @@ type RequestName =
   | "encrypt"
   | "keys"
   | "reset"
+  | "load"
   | "configure"
   | "storage"
-  | "filterCredentials"
   | "backupPasswordOrSecret"
+  | "signTypedDataResponse"
+  | "filterCredentials"
   | "target";
 
-export class Enclave {
-  private keyPair!: nacl.BoxKeyPair;
-  private mpcClient: MPCClient;
-  private dialog: Window | null;
-  private configuration: { mode: string; theme: string; walletAddress: string };
+const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
+
+interface EnclaveOptions extends LocalEnclaveOptions {
+  walletAddress: string | "";
+}
+
+export class Enclave extends LocalEnclave<EnclaveOptions> {
+  // Origins
   private authorizedOrigins: string[] = [];
   private parentOrigin: string;
-  private store: Store;
-  private storeWithCodec: Store;
+
+  // Buttons & UI
+  private dialog: Window | null;
   private unlockButton: HTMLButtonElement;
   private confirmButton: HTMLButtonElement;
   private backupButton: HTMLButtonElement;
-  private userId?: string;
-  private expectedUserEncryptionPublicKey?: string;
+
+  // Signer resolver
+  private signTypeDataResponseResolver: ((signature: string) => void)[] = [];
 
   constructor({ parentOrigin }: { parentOrigin: string }) {
+    super({
+      allowedAuthMethods:
+        import.meta.env.VITE_ENABLE_MPC === "true" ? ["mpc", "password"] : ["password"],
+      mpcConfiguration:
+        import.meta.env.VITE_ENABLE_MPC === "true"
+          ? {
+              nodeUrl: import.meta.env.VITE_MPC_READER_NODE_URL,
+              contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
+            }
+          : undefined,
+      walletAddress: "",
+    });
+
     this.parentOrigin = parentOrigin;
-    this.store = new LocalStorageStore();
-    this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
     this.unlockButton = document.querySelector("button#unlock") as HTMLButtonElement;
     this.confirmButton = document.querySelector("button#confirm") as HTMLButtonElement;
     this.backupButton = document.querySelector("button#backup") as HTMLButtonElement;
 
-    this.mpcClient = new MPCClient(
-      import.meta.env.VITE_MPC_READER_NODE_URL,
-      import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
-    );
-
     this.dialog = null;
-    this.configuration = { mode: "", theme: "", walletAddress: "" };
 
     this.listenToRequests();
   }
 
-  async initFromStore() {
+  async load(): Promise<void> {
+    await super.load();
+
     this.authorizedOrigins = JSON.parse(
-      (await this.store.get<string>("enclave-authorized-origins")) ?? "[]",
+      (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]",
+    );
+  }
+
+  async guardKeys(): Promise<boolean> {
+    if (this.authorizedOrigins.includes(this.parentOrigin)) {
+      return true;
+    }
+
+    const confirmation = await this.confirm(
+      `Do you want to authorize '${this.parentOrigin}' to use the keys?`,
     );
 
-    const secretKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
-    if (secretKey) this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-  }
-
-  get isAuthorizedOrigin() {
-    return this.authorizedOrigins.includes(this.parentOrigin);
-  }
-
-  async reset() {
-    await this.store.reset();
-  }
-
-  safeParse(string: string) {
-    try {
-      const parsed = JSON.parse(string);
-      return parsed;
-    } catch (_error) {
-      return string;
-    }
-  }
-
-  async storage(userId: string, expectedUserEncryptionPublicKey: string) {
-    // In case the user is different, we reset the store.
-    if (userId !== (await this.store.get<string>("user-id"))) {
-      await this.reset();
+    if (!confirmation) {
+      return false;
     }
 
-    userId && (await this.store.set("user-id", userId));
-
-    this.expectedUserEncryptionPublicKey = expectedUserEncryptionPublicKey;
-    this.userId = userId;
-
-    if (!this.isAuthorizedOrigin) {
-      return {
-        userId: "",
-        encryptionPublicKey: "",
-      };
-    }
-
-    return {
-      // TODO Remove human-user migration code.
-      userId:
-        this.userId ??
-        (await this.store.get<string>("user-id")) ??
-        (await this.store.get<string>("human-id")),
-      encryptionPublicKey: await this.storeWithCodec.get<string>("encryption-public-key"),
-    };
+    this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
+    await this.store.set(ENCLAVE_AUTHORIZED_ORIGINS_KEY, JSON.stringify(this.authorizedOrigins));
+    return true;
   }
 
-  async keys() {
-    let secretKey =
-      await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>("encryption-private-key");
-
-    if (!secretKey) {
-      let preferredAuthMethod: AuthMethod = "password";
-
-      if (import.meta.env.VITE_ENABLE_MPC === "true")
-        preferredAuthMethod = await this.ensurePreferredAuthMethod();
-
-      switch (preferredAuthMethod) {
-        case "password": {
-          if (!this.userId) {
-            throw new Error("userId is not found");
-          }
-
-          const password = await this.ensurePassword();
-          const salt = this.userId;
-          secretKey = await keyDerivation(password, salt);
-          break;
-        }
-        case "mpc":
-          secretKey = await this.ensureMPCPrivateKey();
-          break;
-      }
-    }
-
-    if (!secretKey) {
-      throw new Error("secretKey is not found");
-    }
-
-    await this.ensureKeyPair(secretKey);
-
-    return this.keyPair?.publicKey;
-  }
-
-  async ensurePreferredAuthMethod(): Promise<AuthMethod> {
-    const allowedAuthMethods: AuthMethod[] = ["mpc", "password"];
-    let authMethod = await this.store.get<AuthMethod>("preferred-auth-method");
-    let password: string | undefined;
-
-    if (authMethod) {
-      return authMethod;
-    }
-
+  async chooseAuthAndPassword(): Promise<{
+    authMethod: AuthMethod;
+    password?: string;
+    duration?: number;
+  }> {
     this.unlockButton.style.display = "block";
     this.unlockButton.disabled = false;
 
-    return new Promise((resolve, reject) =>
+    return new Promise((resolve, reject) => {
       this.unlockButton.addEventListener("click", async () => {
         this.unlockButton.disabled = true;
+
+        let authMethod: AuthMethod | undefined;
+        let password: string | undefined;
+        let duration: number | undefined;
 
         try {
           // Don't remove the empty object, it's used to trigger the dialog
-          ({ authMethod, password } = await this.openDialog("auth", {
+          ({ authMethod, password, duration } = await this.openDialog("auth", {
+            allowedAuthMethods: this.allowedAuthMethods,
+            previouslyUsedAuthMethod: this.authMethod,
             expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
           }));
 
-          if (!authMethod || !allowedAuthMethods.includes(authMethod)) {
-            return reject(new Error(`Invalid auth method: ${authMethod}`));
+          if (!authMethod) {
+            return reject(new Error(`Invalid or empty auth method: ${authMethod}`));
           }
         } catch (e) {
           return reject(e);
         }
-        await this.store.set("preferred-auth-method", authMethod);
-        if (password) await this.store.set("password", password);
-        this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
-
-        return authMethod ? resolve(authMethod) : reject();
-      }),
-    );
-  }
-
-  async ensurePassword(): Promise<string> {
-    const storedPassword = await this.store.get<string>("password");
-
-    if (this.isAuthorizedOrigin && storedPassword) return Promise.resolve(storedPassword);
-
-    this.unlockButton.style.display = "block";
-    this.unlockButton.disabled = false;
-    let password: string | undefined;
-    // let duration: number | undefined;
-
-    return new Promise((resolve, reject) =>
-      this.unlockButton.addEventListener("click", async () => {
-        this.unlockButton.disabled = true;
-
-        try {
-          // TODO: Add duration
-          ({ password } = await this.openDialog("password", {
-            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
-          }));
-        } catch (e) {
-          return reject(e);
-        }
-
-        await this.store.set("password", password);
 
         this.authorizedOrigins = [...new Set([...this.authorizedOrigins, this.parentOrigin])];
-        await this.store.set("enclave-authorized-origins", JSON.stringify(this.authorizedOrigins));
-
-        return password ? resolve(password) : reject();
-      }),
-    );
-  }
-
-  async ensureKeyPair(secretKey: Uint8Array<ArrayBufferLike>) {
-    this.keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-
-    await this.storeWithCodec.set("encryption-private-key", this.keyPair.secretKey);
-    await this.storeWithCodec.set("encryption-public-key", this.keyPair.publicKey);
-  }
-
-  async ensureMPCPrivateKey() {
-    if (this.configuration?.mode !== "new") {
-      const { status: downloadStatus, secret: downloadedSecret } = await this.downloadSecret();
-      if (downloadStatus === "ok") {
-        return downloadedSecret;
-      }
-
-      if (downloadStatus === "error") {
-        throw Error("A secret might be stored at ZK nodes, but can't be obtained");
-      }
-    }
-
-    const privateKey = nacl.box.keyPair().secretKey;
-    const { status: uploadStatus } = await this.uploadSecret(privateKey);
-
-    if (uploadStatus !== "success") {
-      throw Error(`A secret upload failed with status: ${uploadStatus}`);
-    }
-
-    return privateKey;
-  }
-
-  async downloadSecret(): Promise<{ status: string; secret: Buffer | undefined }> {
-    return new Promise((resolve, reject) => {
-      const ephemeralKeyPair = nacl.box.keyPair();
-      const signerAddress = this.configuration.walletAddress;
-      const downloadRequest = this.mpcClient.downloadRequest(
-        signerAddress,
-        ephemeralKeyPair.publicKey,
-      );
-      const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
-
-      const channel = new MessageChannel();
-      channel.port1.onmessage = async (message) => {
-        channel.port1.close();
-
-        if (!this.userId) {
-          console.error("userId is not found");
-          reject(new Error("userId is not found"));
-          return;
-        }
-
-        const { status, secret } = await this.mpcClient.downloadSecret(
-          this.userId,
-          downloadRequest,
-          message.data.data,
-          ephemeralKeyPair.secretKey,
+        await this.store.set(
+          ENCLAVE_AUTHORIZED_ORIGINS_KEY,
+          JSON.stringify(this.authorizedOrigins),
         );
 
-        return resolve({ status, secret });
-      };
-
-      const signMessage = {
-        type: "idOS-MPC:signMessage",
-        payload: messageToSign,
-      };
-
-      window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
+        return resolve({ authMethod, password, duration });
+      });
     });
   }
 
-  async uploadSecret(secret: Uint8Array<ArrayBufferLike>): Promise<{ status: string }> {
-    return new Promise((resolve, reject) => {
-      const signerAddress = this.configuration.walletAddress;
-      if (!signerAddress) {
-        console.error("signerAddress is not found");
-        return resolve({ status: "no-signer-address" });
-      }
-
-      const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret));
-      const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
-      const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
-
-      const channel = new MessageChannel();
-      channel.port1.onmessage = async (message) => {
-        channel.port1.close();
-
-        if (!this.userId) {
-          console.error("userId is not found");
-          reject(new Error("userId is not found"));
-          return;
-        }
-
-        const { status } = await this.mpcClient.uploadSecret(
-          this.userId,
-          uploadRequest,
-          message.data.data,
-          blindedShares,
-        );
-
-        return resolve({ status });
-      };
-
-      const signMessage = {
-        type: "idOS-MPC:signMessage",
-        payload: messageToSign,
-      };
-
-      window.parent.postMessage(signMessage, this.parentOrigin, [channel.port2]);
-    });
-  }
-
-  encrypt(message: Uint8Array, receiverPublicKey = this.keyPair.publicKey) {
-    return encrypt(message, this.keyPair.publicKey, receiverPublicKey);
-  }
-
-  async decrypt(fullMessage: Uint8Array<ArrayBufferLike>, senderPublicKey: Uint8Array) {
-    if (!this.keyPair) await this.keys();
-
-    return decrypt(fullMessage, this.keyPair, senderPublicKey);
-  }
-
-  async confirm(message: string) {
+  async confirm(message: string): Promise<boolean> {
     this.confirmButton.style.display = "block";
     this.confirmButton.disabled = false;
 
@@ -369,80 +160,82 @@ export class Enclave {
           origin: this.parentOrigin,
         });
 
-        resolve(confirmed);
+        resolve(confirmed ?? false);
       }),
     );
   }
 
-  async configure(mode: "new" | "existing", theme: string, walletAddress: string) {
-    this.configuration = { mode, theme, walletAddress };
+  async configure(mode: "new" | "existing", theme: "light" | "dark", walletAddress: string) {
+    await this.reconfigure({
+      mode,
+      theme,
+      walletAddress,
+    });
 
-    if (mode === "new") {
+    if (this.options.mode === "new") {
       this.unlockButton.classList.add("create");
     } else {
       this.unlockButton.classList.remove("create");
     }
   }
 
-  async filterCredentials(
-    credentials: idOSCredential[],
-    privateFieldFilters: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
-    },
-  ) {
-    // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
-    const matchCriteria = (content: any, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
+  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
+  async signTypedData(domain: any, types: any, value: any): Promise<string> {
+    return new Promise((resolve, _reject) => {
+      this.signTypeDataResponseResolver.push(resolve);
+
+      window.parent.postMessage(
+        { type: "idOS:signTypedData", payload: { domain, types, value } },
+        this.parentOrigin,
       );
-
-    const decrypted = await Promise.all(
-      credentials.map(async (credential: idOSCredential) => ({
-        ...credential,
-        content: Utf8Codec.decode(
-          await this.decrypt(
-            Base64Codec.decode(credential.content),
-            Base64Codec.decode(credential.encryptor_public_key),
-          ),
-        ),
-      })),
-    );
-
-    return decrypted
-      .map((credential) => ({
-        ...credential,
-        content: (() => {
-          try {
-            JSON.parse(credential.content);
-          } catch (_e) {
-            throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
-          }
-        })(),
-      }))
-      .filter(({ content }) => matchCriteria(content, privateFieldFilters.pick))
-      .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)));
+    });
   }
 
-  async backupPasswordOrSecret() {
+  async signTypedDataResponse(signature: string): Promise<void> {
+    const resolver = this.signTypeDataResponseResolver.pop();
+
+    if (!resolver) throw new Error("No resolver found");
+
+    resolver(signature);
+  }
+
+  async backupPasswordOrSecret(): Promise<void> {
     this.backupButton.style.display = "block";
     this.backupButton.disabled = false;
+
+    // We are getting the secret key from the store as a string, we don't want byte array.
+    const secretKey = await this.store.get<string>(STORAGE_KEYS.ENCRYPTION_SECRET_KEY);
+    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
+    const preferredAuthMethod = await this.store.get<AuthMethod>(
+      STORAGE_KEYS.PREFERRED_AUTH_METHOD,
+    );
+
+    if (!secretKey || !preferredAuthMethod) {
+      throw new Error("No secrets were found for backup");
+    }
+
     return new Promise((resolve, reject) => {
       this.backupButton.addEventListener("click", async () => {
         try {
           this.backupButton.disabled = true;
+
           await this.openDialog("backupPasswordOrSecret", {
-            expectedUserEncryptionPublicKey: this.expectedUserEncryptionPublicKey,
+            authMethod: preferredAuthMethod,
+            secret: password ?? secretKey,
           });
-          resolve(true);
+
+          resolve();
         } catch (error) {
           reject(error);
+        } finally {
+          this.backupButton.style.display = "none";
+          this.backupButton.disabled = false;
         }
       });
     });
   }
 
-  listenToRequests() {
+  private listenToRequests() {
     window.addEventListener("message", async (event) => {
       if (
         event.origin !== this.parentOrigin ||
@@ -463,10 +256,11 @@ export class Enclave {
           senderPublicKey,
           mode,
           theme,
-          credentials,
-          privateFieldFilters,
           expectedUserEncryptionPublicKey,
           walletAddress,
+          signature,
+          credentials,
+          privateFieldFilters,
         } = requestData;
 
         const paramBuilder: Record<RequestName, () => unknown[]> = {
@@ -477,9 +271,11 @@ export class Enclave {
           reset: () => [],
           configure: () => [mode, theme, walletAddress],
           storage: () => [userId, expectedUserEncryptionPublicKey],
-          filterCredentials: () => [credentials, privateFieldFilters],
           backupPasswordOrSecret: () => [],
+          signTypedDataResponse: () => [signature],
           target: () => [],
+          load: () => [],
+          filterCredentials: () => [credentials, privateFieldFilters],
         };
 
         const paramBuilderFn = paramBuilder[requestName];
@@ -500,33 +296,21 @@ export class Enclave {
     });
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
-  async handleIDOSStore(payload: any) {
-    return new Promise((resolve, reject) => {
-      const { port1, port2 } = new MessageChannel();
-      port1.onmessage = async ({ data: { error, result } }) => {
-        if (error) return reject(error);
-
-        if (result.type === "idOS:store") {
-          resolve(result);
-          port1.close();
-        }
-      };
-
-      window.parent.postMessage({ type: "idOS:store", payload }, this.parentOrigin, [port2]);
-    });
-  }
-
-  async openDialog(
+  private async openDialog(
     intent: string,
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here.
     message?: any,
-  ): Promise<{ authMethod?: AuthMethod; password?: string; confirmed?: boolean }> {
+  ): Promise<{
+    authMethod?: AuthMethod;
+    password?: string;
+    duration?: number;
+    confirmed?: boolean;
+  }> {
     if (!this.userId) throw new Error("Can't open dialog without userId");
 
     const width = 600;
     const height =
-      this.configuration?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
+      this.options?.mode === "new" ? 600 : intent === "backupPasswordOrSecret" ? 520 : 400;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -558,18 +342,6 @@ export class Enclave {
           // this.dialog.close();
           return reject(error);
         }
-        if (result.type === "idOS:store" && result.status === "pending") {
-          result = await this.handleIDOSStore(result.payload);
-
-          return this.dialog?.postMessage(
-            {
-              intent: "backupPasswordOrSecret",
-              message: { status: result.status },
-              configuration: this.configuration,
-            },
-            this.dialog.origin,
-          );
-        }
 
         port1.close();
         this.dialog?.close();
@@ -578,7 +350,7 @@ export class Enclave {
       };
 
       this.dialog?.postMessage(
-        { intent, message, configuration: this.configuration },
+        { intent, message, configuration: this.options },
         this.dialog?.origin,
         [port2],
       );

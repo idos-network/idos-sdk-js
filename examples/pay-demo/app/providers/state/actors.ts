@@ -7,7 +7,10 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: { container: "#idOS-enclave" },
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: "https://440456d6b7cb.ngrok-free.app",
+      },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
@@ -64,8 +67,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      // No need to reset the enclave provider, since we are not using the enclave provider
 
       const krakenSharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
