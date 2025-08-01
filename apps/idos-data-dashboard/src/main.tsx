@@ -23,7 +23,7 @@ const queryClient = new QueryClient({
   },
 });
 
-createWeb3Modal({ wagmiConfig, projectId: projectId });
+createWeb3Modal({ wagmiConfig, projectId });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
