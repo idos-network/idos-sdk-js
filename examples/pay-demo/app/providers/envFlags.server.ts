@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 
 export const serverEnvSchema = z.object({
   IDOS_CONSUMER_SIGNER: z.string(),

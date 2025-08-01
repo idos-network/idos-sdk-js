@@ -1,14 +1,15 @@
 import { NoncedBox } from "@idos-network/core/cryptography";
 import {
-  type CreateAccessGrantByDAGParams,
+  type CreateAccessGrantByDagInput,
   createAccessGrantByDag,
-  type GetGrantsParams,
+  type GetGrantsPaginatedInput,
   getAccessGrantsForCredential,
   getCredentialsSharedByUser,
   getGrants,
   getGrantsCount,
   getPassportingPeers,
   getSharedCredential,
+  type idOSGrant,
 } from "@idos-network/core/kwil-actions";
 import {
   createNodeKwilClient,
@@ -16,7 +17,7 @@ import {
   type KwilActionClient,
   type KwilSignerType,
 } from "@idos-network/core/kwil-infra";
-import type { idOSGrant, PassportingPeer } from "@idos-network/core/types";
+import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
@@ -86,7 +87,7 @@ export class idOSConsumer {
   }
 
   async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential | undefined> {
-    return getSharedCredential(this.#kwilClient, dataId);
+    return getSharedCredential(this.#kwilClient, { id: dataId });
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -101,7 +102,9 @@ export class idOSConsumer {
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
-    return getGrantsCount(this.#kwilClient, { user_id: userId });
+    return getGrantsCount(this.#kwilClient, { user_id: userId ?? undefined }).then(
+      (res) => res.count,
+    );
   }
 
   async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
@@ -112,8 +115,7 @@ export class idOSConsumer {
   }
 
   async getCredentialsSharedByUser(userId: string): Promise<idOSCredential[]> {
-    const credentials = await getCredentialsSharedByUser(this.#kwilClient, userId);
-    return credentials;
+    return getCredentialsSharedByUser(this.#kwilClient, { user_id: userId });
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
@@ -140,7 +142,7 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getAccessGrants(params: GetGrantsParams): Promise<{
+  async getAccessGrants(params: GetGrantsPaginatedInput): Promise<{
     grants: idOSGrant[];
     totalCount: number;
   }> {
@@ -151,9 +153,10 @@ export class idOSConsumer {
   }
 
   async createAccessGrantByDag(
-    params: CreateAccessGrantByDAGParams,
-  ): Promise<CreateAccessGrantByDAGParams> {
-    return createAccessGrantByDag(this.#kwilClient, params);
+    params: CreateAccessGrantByDagInput,
+  ): Promise<CreateAccessGrantByDagInput> {
+    await createAccessGrantByDag(this.#kwilClient, params);
+    return params;
   }
 
   async getPassportingPeers(): Promise<PassportingPeer[]> {
