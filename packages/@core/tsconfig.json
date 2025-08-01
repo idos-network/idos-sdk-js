@@ -12,6 +12,8 @@
     "verbatimModuleSyntax": true,
     "noEmit": true,
 
+    "isolatedDeclarations": false,
+
     // For internal packages
     "composite": true,
     "declaration": true,
