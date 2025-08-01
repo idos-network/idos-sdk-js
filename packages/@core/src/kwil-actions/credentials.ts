@@ -1,4 +1,5 @@
 import type { idOSCredential } from "@idos-network/credentials";
+import { z } from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 import type { idOSGrant } from "../types";
 
@@ -64,10 +65,18 @@ export async function getAccessGrantsForCredential(
   });
 }
 
-export interface EditCredentialAsIssuerParams {
-  public_notes_id: string;
-  public_notes: string;
-}
+const EditCredentialAsIssuerParamsSchema: z.ZodObject<
+  {
+    public_notes_id: z.ZodString;
+    public_notes: z.ZodString;
+  },
+  "strip"
+> = z.object({
+  public_notes_id: z.string(),
+  public_notes: z.string(),
+});
+
+export type EditCredentialAsIssuerParams = z.infer<typeof EditCredentialAsIssuerParamsSchema>;
 
 /**
  * Edits the public notes of an idOSCredential if the signer is a permissioned issuer.
@@ -77,10 +86,11 @@ export async function editCredentialAsIssuer(
   kwilClient: KwilActionClient,
   params: EditCredentialAsIssuerParams,
 ): Promise<EditCredentialAsIssuerParams> {
+  const input = EditCredentialAsIssuerParamsSchema.parse(params);
   await kwilClient.execute({
     name: "edit_public_notes_as_issuer",
     description: "Edit a credential in your idOS profile",
-    inputs: params,
+    inputs: input,
   });
 
   return params;
@@ -109,29 +119,58 @@ export async function getAllCredentials(kwilClient: KwilActionClient): Promise<i
   });
 }
 
-export interface CreateCredentialByDelegatedWriteGrantParams {
-  issuer_auth_public_key: string;
-  original_encryptor_public_key: string;
-  original_credential_id: string;
-  original_content: string;
-  original_public_notes: string;
-  original_public_notes_signature: string;
-  original_broader_signature: string;
-  copy_encryptor_public_key: string;
-  copy_credential_id: string;
-  copy_content: string;
-  copy_public_notes_signature: string;
-  copy_broader_signature: string;
-  content_hash: string;
-  dwg_owner: string;
-  dwg_grantee: string;
-  dwg_issuer_public_key: string;
-  dwg_id: string;
-  dwg_access_grant_timelock: string;
-  dwg_not_before: string;
-  dwg_not_after: string;
-  dwg_signature: string;
-}
+const CreateCredentialByDelegatedWriteGrantParamsSchema: z.ZodObject<
+  {
+    issuer_auth_public_key: z.ZodString;
+    original_encryptor_public_key: z.ZodString;
+    original_credential_id: z.ZodString;
+    original_content: z.ZodString;
+    original_public_notes: z.ZodString;
+    original_public_notes_signature: z.ZodString;
+    original_broader_signature: z.ZodString;
+    copy_encryptor_public_key: z.ZodString;
+    copy_credential_id: z.ZodString;
+    copy_content: z.ZodString;
+    copy_public_notes_signature: z.ZodString;
+    copy_broader_signature: z.ZodString;
+    content_hash: z.ZodString;
+    dwg_owner: z.ZodString;
+    dwg_grantee: z.ZodString;
+    dwg_issuer_public_key: z.ZodString;
+    dwg_id: z.ZodString;
+    dwg_access_grant_timelock: z.ZodString;
+    dwg_not_before: z.ZodString;
+    dwg_not_after: z.ZodString;
+    dwg_signature: z.ZodString;
+  },
+  "strip"
+> = z.object({
+  issuer_auth_public_key: z.string(),
+  original_encryptor_public_key: z.string(),
+  original_credential_id: z.string(),
+  original_content: z.string(),
+  original_public_notes: z.string(),
+  original_public_notes_signature: z.string(),
+  original_broader_signature: z.string(),
+  copy_encryptor_public_key: z.string(),
+  copy_credential_id: z.string(),
+  copy_content: z.string(),
+  copy_public_notes_signature: z.string(),
+  copy_broader_signature: z.string(),
+  content_hash: z.string(),
+  dwg_owner: z.string(),
+  dwg_grantee: z.string(),
+  dwg_issuer_public_key: z.string(),
+  dwg_id: z.string(),
+  dwg_access_grant_timelock: z.string(),
+  dwg_not_before: z.string(),
+  dwg_not_after: z.string(),
+  dwg_signature: z.string(),
+});
+
+export type CreateCredentialByDelegatedWriteGrantParams = z.infer<
+  typeof CreateCredentialByDelegatedWriteGrantParamsSchema
+>;
 
 /**
  * Creates a new credential from a delegated write grant.
@@ -140,10 +179,11 @@ export async function createCredentialByDelegatedWriteGrant(
   kwilClient: KwilActionClient,
   params: CreateCredentialByDelegatedWriteGrantParams,
 ): Promise<CreateCredentialByDelegatedWriteGrantParams> {
+  const input = CreateCredentialByDelegatedWriteGrantParamsSchema.parse(params);
   await kwilClient.execute({
     name: "create_credentials_by_dwg",
     description: "Create a new credential in your idOS profile",
-    inputs: params,
+    inputs: input,
   });
 
   return params;
@@ -180,18 +220,35 @@ export async function getCredentialById(
   return response.find((r) => r.id === id);
 }
 
-export type ShareableCredential = {
-  id: string;
-  original_credential_id: string;
-  public_notes: string;
-  public_notes_signature: string;
-  broader_signature: string;
-  content: string;
-  encryptor_public_key: string;
-  issuer_auth_public_key: string;
-  grantee_wallet_identifier: string;
-  locked_until: number;
-};
+const ShareableCredentialSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    original_credential_id: z.ZodString;
+    public_notes: z.ZodString;
+    public_notes_signature: z.ZodString;
+    broader_signature: z.ZodString;
+    content: z.ZodString;
+    encryptor_public_key: z.ZodString;
+    issuer_auth_public_key: z.ZodString;
+    grantee_wallet_identifier: z.ZodString;
+    locked_until: z.ZodNumber;
+  },
+  "strip"
+> = z.object({
+  id: z.string(),
+  original_credential_id: z.string(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  content: z.string(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+  grantee_wallet_identifier: z.string(),
+  locked_until: z.number(),
+});
+
+export type ShareableCredential = z.infer<typeof ShareableCredentialSchema>;
+
 /**
  * Shares an idOSCredential to the given `userId`.
  */
@@ -199,25 +256,40 @@ export async function shareCredential(
   kwilClient: KwilActionClient,
   credential: ShareableCredential,
 ): Promise<ShareableCredential> {
+  const input = ShareableCredentialSchema.parse(credential);
   await kwilClient.execute({
     name: "share_credential",
     description: "Share a credential with another user on idOS",
-    inputs: credential,
+    inputs: input,
   });
 
   return credential;
 }
 
-export type CreateCredentialCopyParams = {
-  id: string;
-  original_credential_id: string;
-  public_notes: string;
-  public_notes_signature: string;
-  broader_signature: string;
-  content: string;
-  encryptor_public_key: string;
-  issuer_auth_public_key: string;
-};
+const CreateCredentialCopyParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    original_credential_id: z.ZodString;
+    public_notes: z.ZodString;
+    public_notes_signature: z.ZodString;
+    broader_signature: z.ZodString;
+    content: z.ZodString;
+    encryptor_public_key: z.ZodString;
+    issuer_auth_public_key: z.ZodString;
+  },
+  "strip"
+> = z.object({
+  id: z.string(),
+  original_credential_id: z.string(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  content: z.string(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+});
+
+export type CreateCredentialCopyParams = z.infer<typeof CreateCredentialCopyParamsSchema>;
 
 /**
  * Creates a new idOSCredential as a copy of the given `originalCredentialId` without creating an Access Grant
@@ -227,10 +299,11 @@ export async function createCredentialCopy(
   kwilClient: KwilActionClient,
   params: CreateCredentialCopyParams,
 ): Promise<CreateCredentialCopyParams> {
+  const input = CreateCredentialCopyParamsSchema.parse(params);
   await kwilClient.execute({
     name: "create_credential_copy",
     description: "Share a credential with another user on idOS",
-    inputs: params,
+    inputs: input,
   });
 
   return params;
