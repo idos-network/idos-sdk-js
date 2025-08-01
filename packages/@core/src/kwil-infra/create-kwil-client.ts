@@ -5,8 +5,8 @@ import type { DataInfo } from "@kwilteam/kwil-js/dist/core/database";
 import fetchAdapter from "@vespaiach/axios-fetch-adapter";
 import Axios from "axios";
 import invariant from "tiny-invariant";
-import type { ActionSchemaElem } from "../kwil-actions/schema";
-import { actionSchema } from "../kwil-actions/schema";
+import type { ActionSchemaElement } from "../kwil-actions";
+import { actionSchema } from "../kwil-actions";
 
 type CreateKwilClientParams = {
   chainId?: string;
@@ -47,7 +47,7 @@ export class KwilActionClient {
   #createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
 
-    const args = (actionSchema as Record<string, readonly ActionSchemaElem[]>)[actionName];
+    const args = (actionSchema as Record<string, readonly ActionSchemaElement[]>)[actionName];
 
     return args.map(({ name }) => {
       const value = params[name];

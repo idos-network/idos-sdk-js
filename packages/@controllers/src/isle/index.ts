@@ -1,12 +1,12 @@
 import type * as GemWallet from "@gemwallet/api";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type {
-  DelegatedWriteGrant,
   IsleControllerMessage,
   IsleMessageHandler,
   IsleNodeMessage,
   IsleStatus,
   IsleTheme,
+  idOSDelegatedWriteGrant,
   KwilSigner,
 } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials";
@@ -139,7 +139,7 @@ interface idOSIsleController {
   /** Requests a `delegated write grant` for the given `consumer` */
   requestDelegatedWriteGrant: (
     options: RequestDelegatedWriteGrantOptions,
-  ) => Promise<{ signature: string; writeGrant: DelegatedWriteGrant } | undefined>;
+  ) => Promise<{ signature: string; writeGrant: idOSDelegatedWriteGrant } | undefined>;
   /** Requests an access grant for the given `consumer` */
   requestPermission: (options: RequestPermissionOptions) => Promise<void>;
   /** Revokes an access grant for the given `id` */
@@ -258,7 +258,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
 
   const requestDelegatedWriteGrant = async (
     options: RequestDelegatedWriteGrantOptions,
-  ): Promise<{ signature: string; writeGrant: DelegatedWriteGrant } | undefined> => {
+  ): Promise<{ signature: string; writeGrant: idOSDelegatedWriteGrant } | undefined> => {
     invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
     try {

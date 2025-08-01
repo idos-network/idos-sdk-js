@@ -6,7 +6,7 @@ import { goTry } from "go-try";
 import { Hono } from "hono";
 import { env } from "hono/adapter";
 import nacl from "tweetnacl";
-import { z } from "zod";
+import * as z from "zod";
 
 const app = new Hono();
 

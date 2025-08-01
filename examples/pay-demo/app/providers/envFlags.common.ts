@@ -1,4 +1,4 @@
-import z from "zod";
+import * as z from "zod";
 
 export const commonEnvSchema = z.object({
   IDOS_ENCRYPTION_PUBLIC_KEY: z.string(),

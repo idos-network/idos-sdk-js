@@ -12,11 +12,11 @@
     "isolatedModules": true,
     "noEmit": false,
     "emitDeclarationOnly": true,
+    "isolatedDeclarations": true,
 
     // Output configuration
     "declaration": true,
     "declarationMap": true,
-    "isolatedDeclarations": true,
     "sourceMap": false,
     "inlineSources": false,
 

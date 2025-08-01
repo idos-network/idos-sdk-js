@@ -27,7 +27,7 @@
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum",
     "xstate": "^5.19.4",
-    "zod": "^3.25.55"
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@react-router/dev": "^7.6.3",
