@@ -1,0 +1,43 @@
+{
+  "name": "@idos-network/dummy-idos-wallet",
+  "displayName": "idOS Dummy Wallet",
+  "description": "idOS dummy testing wallet for development purposes",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "@idos-network/client": "workspace:*",
+    "@idos-network/utils": "workspace:*",
+    "@idos-network/core": "workspace:*",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@partisiablockchain/abi-client": "^5.207.0",
+    "@stablelib/base64": "^2.0.1",
+    "ethers": "catalog:ethereum",
+    "tweetnacl": "catalog:core"
+  },
+  "devDependencies": {
+    "@crxjs/vite-plugin": "^2.0.2",
+    "@thedutchcoder/postcss-rem-to-px": "^0.0.2",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^22.15.30",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@vitejs/plugin-react": "^4.6.0",
+    "autoprefixer": "^10.4.19",
+    "daisyui": "^4.9.0",
+    "postcss": "^8.4.38",
+    "postcss-prefix-selector": "^1.16.0",
+    "tailwindcss": "^3.4.3",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plugin-node-polyfills": "0.24.0",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
