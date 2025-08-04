@@ -2,6 +2,7 @@ import { resolve } from "node:path";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,7 +24,15 @@ export default defineConfig({
       },
     },
   },
-  plugins: [react(), mkcert()],
+  plugins: [
+    react(),
+    nodePolyfills({
+      globals: {
+        Buffer: true,
+      },
+    }),
+    mkcert(),
+  ],
   resolve: {
     dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
     alias: {

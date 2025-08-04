@@ -8,9 +8,9 @@
     "@emotion/styled": "^11.13.0",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
+    "@idos-network/core": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
-    "@idos-network/core": "workspace:*",
     "@near-wallet-selector/core": "catalog:near",
     "@near-wallet-selector/here-wallet": "catalog:near",
     "@near-wallet-selector/meteor-wallet": "catalog:near",
@@ -48,6 +48,7 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.5",
+    "vite-plugin-node-polyfills": "^0.24.0",
     "vitest": "^1.6.0"
   },
   "private": true,
