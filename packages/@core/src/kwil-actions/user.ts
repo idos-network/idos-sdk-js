@@ -1,5 +1,5 @@
+import { EncryptionPasswordStoresEnum } from "@idos-network/utils/enclave";
 import { z } from "zod";
-import type { EncryptionPasswordStoresEnum } from "@idos-network/utils/enclave";
 import type { KwilActionClient } from "../kwil-infra";
 import type { idOSUser } from "../types";
 
@@ -35,11 +35,6 @@ const CreateUserReqParamsSchema: z.ZodObject<
 
 export type CreateUserReqParams = z.infer<typeof CreateUserReqParamsSchema>;
 
-export interface CreateUserReqParams {
-  id: string;
-  recipient_encryption_public_key: string;
-  encryption_password_store: EncryptionPasswordStore;
-}
 /**
  * Creates a user profile in the idOS.
  */
