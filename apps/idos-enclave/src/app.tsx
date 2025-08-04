@@ -1,15 +1,12 @@
-import type { Store } from "@idos-network/utils/store";
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { effect, useSignal } from "@preact/signals";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useRef } from "preact/hooks";
-
 import { Header } from "@/components/header";
-import AuthMethodChooser from "@/features/auth/auth-method-chooser";
-import { PasswordForm } from "@/features/auth/password-form";
-import { Confirmation } from "@/features/confirmation/confirmation";
-import { PasswordOrKeyBackup } from "@/features/recovery/backup";
-import { PasswordOrKeyRecovery } from "@/features/recovery/recovery";
-import type { AllowedIntent, AuthMethod, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
+import Auth from "@/features/auth";
+import BackupPasswordContext from "@/features/backup";
+import Confirmation from "@/features/confirmation";
+import type { AllowedIntent, idOSEnclaveConfiguration, Theme, UIMode } from "@/types";
 
 export interface EventData {
   intent: AllowedIntent;
@@ -18,7 +15,7 @@ export interface EventData {
   configuration: idOSEnclaveConfiguration;
 }
 
-const allowedIntents: AllowedIntent[] = ["password", "confirm", "auth", "backupPasswordOrSecret"];
+const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backupPasswordContext"];
 
 function Layout({ children }: PropsWithChildren) {
   return (
@@ -32,27 +29,34 @@ function Layout({ children }: PropsWithChildren) {
 }
 
 type AppProps = {
-  store: Store;
   enclave: Window;
 };
 
-export function App({ store, enclave }: AppProps) {
-  const method = useSignal<AuthMethod | null>(null);
-  const mode = useSignal<UIMode>("existing");
+export function App({ enclave }: AppProps) {
+  // App configuration
   const theme = useSignal<Theme | null>(localStorage.getItem("theme") as Theme | null);
-  const confirm = useSignal<boolean>(false);
   const responsePort = useRef<MessagePort | null>(null);
 
+  // Password context configuration
+  const mode = useSignal<UIMode>("existing");
+  const allowedEncryptionStores = useSignal<EncryptionPasswordStore[] | null>(null);
+  const encryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
+  const expectedUserEncryptionPublicKey = useSignal<string | null>(null);
+
+  // Confirmation
+  const confirm = useSignal<boolean>(false);
   const origin = useSignal<string | null>(null);
   const message = useSignal<string | null>(null);
-  const encryptionPublicKey = useSignal<string>("");
+
+  // User ID is in search params, not like a message
   const userId = useSignal<string | null>(
     new URLSearchParams(window.location.search).get("userId"),
   );
 
-  const isRecoveryMode = useSignal(false);
+  // Backup secret mode
   const isBackupMode = useSignal(false);
-  const backupStatus = useSignal<"pending" | "success" | "failure">("pending");
+  const backupEncryptionPasswordStore = useSignal<EncryptionPasswordStore | null>(null);
+  const backupPassword = useSignal<string | null>(null);
 
   const respondToEnclave = useCallback((data: unknown) => {
     if (responsePort.current) {
@@ -97,32 +101,25 @@ export function App({ store, enclave }: AppProps) {
     }
   });
 
-  effect(() => {
-    if (mode.value === "new" || !responsePort.current) return;
-    if (!encryptionPublicKey.value) {
-      onError("Can't find a public encryption key for this user");
-    }
-  });
-
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
       if (event.source !== enclave) return;
 
       const { data: requestData, ports } = event;
 
-      if (!allowedIntents.includes(requestData.intent))
+      if (!allowedIntents.includes(requestData.intent)) {
+        window.close();
         throw new Error(`Unexpected request from parent: ${requestData.intent}`);
+      }
 
       responsePort.current = ports[0];
-      encryptionPublicKey.value = requestData.message?.expectedUserEncryptionPublicKey;
 
       switch (requestData.intent) {
-        case "auth":
-          method.value = null;
-          break;
-
-        case "password":
-          method.value = "password";
+        case "getPasswordContext":
+          allowedEncryptionStores.value = requestData.message?.allowedEncryptionStores;
+          encryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
+          expectedUserEncryptionPublicKey.value =
+            requestData.message?.expectedUserEncryptionPublicKey;
           break;
 
         case "confirm":
@@ -131,9 +128,10 @@ export function App({ store, enclave }: AppProps) {
           message.value = requestData.message?.message;
           break;
 
-        case "backupPasswordOrSecret":
+        case "backupPasswordContext":
           isBackupMode.value = true;
-          backupStatus.value = requestData.message?.status;
+          backupEncryptionPasswordStore.value = requestData.message?.encryptionPasswordStore;
+          backupPassword.value = requestData.message?.password;
           break;
       }
 
@@ -143,14 +141,16 @@ export function App({ store, enclave }: AppProps) {
     [
       enclave,
       isBackupMode,
-      backupStatus,
       confirm,
       message,
       origin,
       theme,
       mode,
-      encryptionPublicKey,
-      method,
+      allowedEncryptionStores,
+      encryptionPasswordStore,
+      expectedUserEncryptionPublicKey,
+      backupEncryptionPasswordStore,
+      backupPassword,
     ],
   );
 
@@ -166,13 +166,6 @@ export function App({ store, enclave }: AppProps) {
     };
   });
 
-  const methodProps = {
-    store,
-    onError,
-    onSuccess,
-    mode: mode.value,
-  };
-
   if (confirm.value && message.value) {
     return (
       <Layout>
@@ -181,48 +174,27 @@ export function App({ store, enclave }: AppProps) {
     );
   }
 
-  if (method.value === "password") {
+  if (isBackupMode.value && backupEncryptionPasswordStore.value && backupPassword.value) {
     return (
       <Layout>
-        <PasswordForm
-          {...methodProps}
-          encryptionPublicKey={encryptionPublicKey.value}
-          userId={userId.value}
-        />
-      </Layout>
-    );
-  }
-
-  if (isBackupMode.value) {
-    return (
-      <Layout>
-        <PasswordOrKeyBackup
-          store={store}
+        <BackupPasswordContext
+          encryptionPasswordStore={backupEncryptionPasswordStore.value}
+          password={backupPassword.value}
           onSuccess={onSuccess}
-          backupStatus={backupStatus.value}
         />
-      </Layout>
-    );
-  }
-
-  if (isRecoveryMode.value) {
-    return (
-      <Layout>
-        <PasswordOrKeyRecovery onSuccess={onSuccess} />
       </Layout>
     );
   }
 
   return (
     <Layout>
-      <AuthMethodChooser
-        {...methodProps}
-        setMethod={(newMethod: AuthMethod) => {
-          if (method.value === null) {
-            // Don't override the method if it's already set
-            method.value = newMethod;
-          }
-        }}
+      <Auth
+        allowedEncryptionStores={allowedEncryptionStores.value ?? []}
+        encryptionPasswordStore={encryptionPasswordStore.value}
+        mode={mode.value}
+        onSuccess={onSuccess}
+        encryptionPublicKey={expectedUserEncryptionPublicKey.value ?? undefined}
+        userId={userId.value}
       />
     </Layout>
   );

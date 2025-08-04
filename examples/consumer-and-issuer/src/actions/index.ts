@@ -1,10 +1,10 @@
 "use server";
 import type { idOSCredential } from "@idos-network/credentials";
 import { base64Decode, base64Encode, hexDecode, toBytes } from "@idos-network/utils/codecs";
+import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import jwt from "jsonwebtoken";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
-
 import { idOSConsumer } from "@/consumer.config";
 import { idOSIssuer } from "@/issuer.config";
 
@@ -100,6 +100,7 @@ export async function createIDOSUserProfile({
   userId,
   recipientEncryptionPublicKey,
   wallet,
+  encryptionPasswordStore,
 }: {
   userId: string;
   recipientEncryptionPublicKey: string;
@@ -110,6 +111,7 @@ export async function createIDOSUserProfile({
     signature: string;
     publicKey: string;
   };
+  encryptionPasswordStore: EncryptionPasswordStore;
 }) {
   const issuer = await idOSIssuer();
 
@@ -117,6 +119,7 @@ export async function createIDOSUserProfile({
     {
       id: userId,
       recipient_encryption_public_key: recipientEncryptionPublicKey,
+      encryption_password_store: encryptionPasswordStore,
     },
     {
       address: wallet.address,

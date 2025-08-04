@@ -1,9 +1,5 @@
 import type * as GemWallet from "@gemwallet/api";
-import {
-  type EnclaveOptions,
-  type idOSClient,
-  idOSClientConfiguration,
-} from "@idos-network/client";
+import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type {
   DelegatedWriteGrant,
   IsleControllerMessage,
@@ -50,7 +46,7 @@ interface idOSIsleControllerOptions {
   theme?: IsleTheme;
 
   /** enclave options */
-  enclaveOptions: EnclaveOptions;
+  enclaveOptions: idOSClientConfiguration["enclaveOptions"];
 
   /** wagmi config */
   wagmiConfig: Config;
@@ -419,10 +415,8 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
   const decryptCredentialContent = async (credential: idOSCredential): Promise<string> => {
     invariant(idosClient.state === "logged-in", "idOS client is not logged in");
 
-    await idosClient.enclaveProvider.ready(
-      idosClient.user.id,
-      idosClient.user.recipient_encryption_public_key,
-    );
+    await idosClient.enclaveProvider.ensureUserEncryptionProfile();
+
     return utf8Decode(
       await idosClient.enclaveProvider.decrypt(
         base64Decode(credential.content),

@@ -7,7 +7,10 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: { container: "#idOS-enclave" },
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: "https://localhost:5174",
+      },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
@@ -16,9 +19,7 @@ export const actors = {
     // @ts-expect-error
     const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
 
-    const withUserSigner = await idleClient.withUserSigner(signer);
-
-    return withUserSigner;
+    return await idleClient.withUserSigner(signer);
   }),
 
   checkProfile: fromPromise(async ({ input }: { input: Context["client"] }) => {
@@ -64,8 +65,6 @@ export const actors = {
       }
 
       const id = input.credential.id;
-
-      // No need to reset the enclave provider, since we are not using the enclave provider
 
       const krakenSharedCredential = await input.client.requestAccessGrant(id, {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,

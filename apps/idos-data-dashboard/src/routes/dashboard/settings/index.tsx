@@ -51,9 +51,7 @@ export function Component() {
               onClick={async () => {
                 if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
 
-                const { id, recipient_encryption_public_key } = idOSClient.user;
-                await idOSClient.enclaveProvider.ready(id, recipient_encryption_public_key);
-                await idOSClient.enclaveProvider.backupPasswordOrSecret();
+                await idOSClient.enclaveProvider.backupUserEncryptionProfile();
               }}
             >
               Back up your idOS key
