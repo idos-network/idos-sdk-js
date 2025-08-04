@@ -18,7 +18,7 @@ export default function Popup(): JSX.Element {
 
     chrome.runtime.onMessage.addListener((request, _sender, sendResponse) => {
       if (request.type === "IDOS_POPUP_CONFIG_RESPONSE") {
-        console.log("🔑 popup config recieved:", request);
+        console.log("🔑 popup config received:", request);
         setAddress(request.data.address);
         setNetwork(request.data.network);
         setNode(request.data.node);

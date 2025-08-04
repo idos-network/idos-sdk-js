@@ -14,6 +14,7 @@ codegen
 comlink
 cooldown
 creit
+crxjs
 cryptosuite
 DAG
 Datil
@@ -48,6 +49,7 @@ jsonld
 keccak
 keypair
 keypairs
+klass
 kwil
 kwild
 kwilteam
@@ -66,6 +68,7 @@ nums
 offchain
 onramp
 onramps
+OSAPI
 OSDAG
 partialize
 partisia
@@ -94,6 +97,7 @@ synpress
 synthetixio
 tailwindcss
 tanstack
+thedutchcoder
 timelock
 timelocks
 transak

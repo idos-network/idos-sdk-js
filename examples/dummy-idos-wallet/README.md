@@ -1,3 +1,3 @@
 # 🚀 idOS dummy wallet
 
-This is an example dummy wallet, to check functionallity of idOS SDK for wallet authors.
+This is an example dummy wallet, to check functionality of idOS SDK for wallet authors.
