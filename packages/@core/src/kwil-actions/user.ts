@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 import type { idOSUser } from "../types";
 
@@ -18,10 +19,19 @@ export async function hasProfile(kwilClient: KwilActionClient, address: string):
   return has_profile;
 }
 
-export interface CreateUserReqParams {
-  id: string;
-  recipient_encryption_public_key: string;
-}
+const CreateUserReqParamsSchema: z.ZodObject<
+  {
+    id: z.ZodString;
+    recipient_encryption_public_key: z.ZodString;
+  },
+  "strip"
+> = z.object({
+  id: z.string(),
+  recipient_encryption_public_key: z.string(),
+});
+
+export type CreateUserReqParams = z.infer<typeof CreateUserReqParamsSchema>;
+
 /**
  * Creates a user profile in the idOS.
  */
@@ -29,10 +39,11 @@ export async function createUser(
   kwilClient: KwilActionClient,
   params: CreateUserReqParams,
 ): Promise<CreateUserReqParams> {
+  const input = CreateUserReqParamsSchema.parse(params);
   await kwilClient.execute({
     name: "add_user_as_inserter",
     description: "Create a user profile in idOS",
-    inputs: params,
+    inputs: input,
   });
 
   return params;
