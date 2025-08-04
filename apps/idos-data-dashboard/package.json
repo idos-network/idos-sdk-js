@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "@chakra-ui/react": "^2.8.2",
-    "@creit.tech/stellar-wallets-kit": "^1.7.5",
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@gemwallet/api": "^3.8.0",
