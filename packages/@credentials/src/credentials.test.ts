@@ -62,37 +62,35 @@ describe("verifiableCredentials", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(ZodError);
       const zodError = error as ZodError;
-      expect(zodError.errors).toHaveLength(4);
+      expect(zodError.issues).toHaveLength(4);
 
       // idDocumentCountry
-      const idDocumentCountryError = zodError.errors.find(
+      const idDocumentCountryError = zodError.issues.find(
         (error) => error.path[0] === "idDocumentCountry",
       );
       expect(idDocumentCountryError).toBeDefined();
       expect(idDocumentCountryError?.message).toContain(
-        "String must contain at most 2 character(s)",
+        "Too big: expected string to have <=2 characters",
       );
 
       // selfieFile
-      const selfieFileError = zodError.errors.find((error) => error.path[0] === "selfieFile");
+      const selfieFileError = zodError.issues.find((error) => error.path[0] === "selfieFile");
       expect(selfieFileError).toBeDefined();
       expect(selfieFileError?.message).toContain("Input not instance of Buffer");
 
       // residentialAddress country
-      const residentialAddressCountryError = zodError.errors.find(
+      const residentialAddressCountryError = zodError.issues.find(
         (error) => error.path[0] === "residentialAddress",
       );
       expect(residentialAddressCountryError).toBeDefined();
       expect(residentialAddressCountryError?.message).toContain(
-        "String must contain at most 2 character(s)",
+        "Too big: expected string to have <=2 characters",
       );
 
       // gender
-      const genderError = zodError.errors.find((error) => error.path[0] === "gender");
+      const genderError = zodError.issues.find((error) => error.path[0] === "gender");
       expect(genderError).toBeDefined();
-      expect(genderError?.message).toContain(
-        "Invalid enum value. Expected 'M' | 'F' | 'OTHER', received 'MALE'",
-      );
+      expect(genderError?.message).toContain('Invalid option: expected one of "M"|"F"|"OTHER"');
     }
   });
 
