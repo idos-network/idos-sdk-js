@@ -3,8 +3,9 @@ import {
   createUser as _createUser,
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
+  type idOSUser,
+  type idOSWallet,
 } from "@idos-network/core/kwil-actions";
-import type { idOSUser, idOSWallet } from "@idos-network/core/types";
 
 export type CreateProfileReqParams = Omit<idOSUser, "id"> & {
   id?: string;

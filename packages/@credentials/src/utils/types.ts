@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 export type idOSCredential = {
   id: string;
@@ -18,16 +18,13 @@ export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"
 };
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialFieldsSchema: z.ZodObject<
-  {
-    id: z.ZodString;
-    level: z.ZodString;
-    issued: z.ZodOptional<z.ZodDate>;
-    approvedAt: z.ZodOptional<z.ZodDate>;
-    expirationDate: z.ZodOptional<z.ZodDate>;
-  },
-  "strip"
-> = z.object({
+export const CredentialFieldsSchema: z.ZodObject<{
+  id: z.ZodString;
+  level: z.ZodString;
+  issued: z.ZodOptional<z.ZodDate>;
+  approvedAt: z.ZodOptional<z.ZodDate>;
+  expirationDate: z.ZodOptional<z.ZodDate>;
+}> = z.object({
   id: z.string(),
 
   /* Level of KYC verification performed (e.g., basic, intermediate, advanced). */
@@ -46,18 +43,15 @@ export const CredentialFieldsSchema: z.ZodObject<
 export type CredentialFields = z.infer<typeof CredentialFieldsSchema>;
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialResidentialAddressSchema: z.ZodObject<
-  {
-    street: z.ZodString;
-    houseNumber: z.ZodOptional<z.ZodString>;
-    additionalAddressInfo: z.ZodOptional<z.ZodString>;
-    region: z.ZodOptional<z.ZodString>;
-    city: z.ZodString;
-    postalCode: z.ZodString;
-    country: z.ZodString;
-  },
-  "strip"
-> = z.object({
+export const CredentialResidentialAddressSchema: z.ZodObject<{
+  street: z.ZodString;
+  houseNumber: z.ZodOptional<z.ZodString>;
+  additionalAddressInfo: z.ZodOptional<z.ZodString>;
+  region: z.ZodOptional<z.ZodString>;
+  city: z.ZodString;
+  postalCode: z.ZodString;
+  country: z.ZodString;
+}> = z.object({
   /* Street address. */
   street: z.string(),
 
@@ -82,49 +76,50 @@ export const CredentialResidentialAddressSchema: z.ZodObject<
 
 export type CredentialResidentialAddress = z.infer<typeof CredentialFieldsSchema>;
 
-export const IDDocumentTypeSchema: z.ZodEnum<["PASSPORT", "DRIVERS", "ID_CARD"]> = z.enum([
-  "PASSPORT",
-  "DRIVERS",
-  "ID_CARD",
-] as const);
+export const IDDocumentTypeSchema: z.ZodEnum<{
+  PASSPORT: "PASSPORT";
+  DRIVERS: "DRIVERS";
+  ID_CARD: "ID_CARD";
+}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD"]);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
-export const GenderSchema: z.ZodEnum<["M", "F", "OTHER"]> = z.enum(["M", "F", "OTHER"] as const);
+export const GenderSchema: z.ZodEnum<{
+  M: "M";
+  F: "F";
+  OTHER: "OTHER";
+}> = z.enum(["M", "F", "OTHER"]);
 export type Gender = z.infer<typeof GenderSchema>;
 
 // https://github.com/colinhacks/zod/issues/3751
-export const CredentialSubjectSchema: z.ZodObject<
-  {
-    id: z.ZodString;
-    applicantId: z.ZodOptional<z.ZodString>;
-    inquiryId: z.ZodOptional<z.ZodString>;
-    firstName: z.ZodString;
-    middleName: z.ZodOptional<z.ZodString>;
-    gender: z.ZodOptional<typeof GenderSchema>;
-    nationality: z.ZodOptional<z.ZodString>;
-    familyName: z.ZodString;
-    maidenName: z.ZodOptional<z.ZodString>;
-    governmentId: z.ZodOptional<z.ZodString>;
-    governmentIdType: z.ZodOptional<z.ZodString>;
-    dateOfBirth: z.ZodDate;
-    placeOfBirth: z.ZodOptional<z.ZodString>;
-    email: z.ZodOptional<z.ZodString>;
-    phoneNumber: z.ZodOptional<z.ZodString>;
-    idDocumentCountry: z.ZodString;
-    idDocumentNumber: z.ZodString;
-    idDocumentType: typeof IDDocumentTypeSchema;
-    idDocumentDateOfIssue: z.ZodOptional<z.ZodDate>;
-    idDocumentDateOfExpiry: z.ZodOptional<z.ZodDate>;
-    idDocumentFrontFile: z.ZodType<Buffer<ArrayBufferLike>>;
-    idDocumentBackFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
-    selfieFile: z.ZodType<Buffer<ArrayBufferLike>>;
-    residentialAddress: z.ZodOptional<typeof CredentialResidentialAddressSchema>;
-    residentialAddressProofCategory: z.ZodOptional<z.ZodString>;
-    residentialAddressProofDateOfIssue: z.ZodOptional<z.ZodDate>;
-    residentialAddressProofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
-  },
-  "strip"
-> = z.object({
+export const CredentialSubjectSchema: z.ZodObject<{
+  id: z.ZodString;
+  applicantId: z.ZodOptional<z.ZodString>;
+  inquiryId: z.ZodOptional<z.ZodString>;
+  firstName: z.ZodString;
+  middleName: z.ZodOptional<z.ZodString>;
+  gender: z.ZodOptional<typeof GenderSchema>;
+  nationality: z.ZodOptional<z.ZodString>;
+  familyName: z.ZodString;
+  maidenName: z.ZodOptional<z.ZodString>;
+  governmentId: z.ZodOptional<z.ZodString>;
+  governmentIdType: z.ZodOptional<z.ZodString>;
+  dateOfBirth: z.ZodDate;
+  placeOfBirth: z.ZodOptional<z.ZodString>;
+  email: z.ZodOptional<z.ZodString>;
+  phoneNumber: z.ZodOptional<z.ZodString>;
+  idDocumentCountry: z.ZodString;
+  idDocumentNumber: z.ZodString;
+  idDocumentType: typeof IDDocumentTypeSchema;
+  idDocumentDateOfIssue: z.ZodOptional<z.ZodDate>;
+  idDocumentDateOfExpiry: z.ZodOptional<z.ZodDate>;
+  idDocumentFrontFile: z.ZodType<Buffer<ArrayBufferLike>>;
+  idDocumentBackFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+  selfieFile: z.ZodType<Buffer<ArrayBufferLike>>;
+  residentialAddress: z.ZodOptional<typeof CredentialResidentialAddressSchema>;
+  residentialAddressProofCategory: z.ZodOptional<z.ZodString>;
+  residentialAddressProofDateOfIssue: z.ZodOptional<z.ZodDate>;
+  residentialAddressProofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
+}> = z.object({
   /* ID(unique credential)	Unique identifier for the credential itself. */
   id: z.string(),
 
