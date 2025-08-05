@@ -20,6 +20,10 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       name: "recipient_encryption_public_key",
       type: DataType.Text,
     },
+    {
+      name: "encryption_password_store",
+      type: DataType.Text,
+    },
   ],
   upsert_wallet_as_inserter: [
     {
@@ -423,9 +427,11 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
 export const idOSUserSchema: z.ZodObject<{
   id: z.ZodUUID;
   recipient_encryption_public_key: z.ZodString;
+  encryption_password_store: z.ZodString;
 }> = z.object({
   id: z.uuid(),
   recipient_encryption_public_key: z.string(),
+  encryption_password_store: z.string(),
 });
 
 export type idOSUser = z.infer<typeof idOSUserSchema>;
@@ -443,9 +449,11 @@ export async function createUser(kwilClient: KwilActionClient, params: idOSUser)
 export const GetUserOutputSchema: z.ZodObject<{
   id: z.ZodUUID;
   recipient_encryption_public_key: z.ZodString;
+  encryption_password_store: z.ZodString;
 }> = z.object({
   id: z.uuid(),
   recipient_encryption_public_key: z.string(),
+  encryption_password_store: z.string(),
 });
 
 export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
