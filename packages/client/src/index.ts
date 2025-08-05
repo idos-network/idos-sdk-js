@@ -217,7 +217,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       encryptionPasswordStore: kwilUser.encryption_password_store,
     });
 
-
     return new idOSClientLoggedIn(this, kwilUser);
   }
 }

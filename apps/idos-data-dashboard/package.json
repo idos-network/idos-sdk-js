@@ -50,7 +50,7 @@
     "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.5",
-    "vite-plugin-node-polyfills": "^0.24.0",
+    "vite-plugin-node-polyfills": "catalog:build",
     "vitest": "^1.6.0"
   },
   "private": true,
