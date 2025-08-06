@@ -42,5 +42,9 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
 
 export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
   const { data: walletClient } = useConnectorClient({ chainId });
-  return useMemo(() => (walletClient ? clientToSigner(walletClient) : undefined), [walletClient]);
+
+  return useMemo(
+    () => (walletClient?.transport.request ? clientToSigner(walletClient) : undefined),
+    [walletClient],
+  );
 }
