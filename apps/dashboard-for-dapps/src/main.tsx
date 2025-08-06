@@ -8,7 +8,7 @@ import { WagmiProvider } from "wagmi";
 
 import { ThemeProvider } from "@/components/ui";
 import { routeTree } from "@/routeTree.gen";
-import { getConfig } from "@/wagmi.config";
+import { wagmiConfig } from "@/wagmi.config";
 
 const root = document.getElementById("root");
 
@@ -49,7 +49,7 @@ declare module "@tanstack/react-router" {
 
 createRoot(root).render(
   <StrictMode>
-    <WagmiProvider config={getConfig()}>
+    <WagmiProvider config={wagmiConfig}>
       <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
         <ThemeProvider forcedTheme="dark">
           <RouterProvider router={router} />

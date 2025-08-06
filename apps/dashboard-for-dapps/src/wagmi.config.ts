@@ -1,34 +1,33 @@
+import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useMemo } from "react";
-import type { Account, Client } from "viem";
-import { type Config, createConfig, http, type Transport, useConnectorClient } from "wagmi";
+import type { Account, Client, Transport } from "viem";
+import { http, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
-import { injected, walletConnect } from "wagmi/connectors";
+
+export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID ?? "";
+
+const metadata = {
+  name: "idOS Dashboard for dapps",
+  description: "idOS Dashboard for dapps",
+  url: "https://dashboard-for-dapps.idos.network/",
+  icons: ["/idos-dashboard-logo.svg"],
+};
 
 export const chains = [mainnet, sepolia] as const;
 
-export const injectedConnector = injected();
-
-export const walletConnectConnector = walletConnect({
-  projectId: import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID,
+export const wagmiConfig = defaultWagmiConfig({
+  // @ts-ignore - wagmi types are outdated
+  chains,
+  projectId,
+  metadata,
+  transports: {
+    // @ts-ignore - wagmi types are outdated
+    [mainnet.id]: http(),
+    // @ts-ignore - wagmi types are outdated
+    [sepolia.id]: http(),
+  },
 });
-
-export function getConfig() {
-  return createConfig({
-    chains,
-    connectors: [injectedConnector, walletConnectConnector],
-    transports: {
-      [mainnet.id]: http(),
-      [sepolia.id]: http(),
-    },
-  });
-}
-
-declare module "wagmi" {
-  interface Register {
-    config: ReturnType<typeof getConfig>;
-  }
-}
 
 export function clientToSigner(client: Client<Transport, Chain, Account>) {
   const { account, chain, transport } = client;
@@ -38,12 +37,10 @@ export function clientToSigner(client: Client<Transport, Chain, Account>) {
     ensAddress: chain.contracts?.ensRegistry?.address,
   };
   const provider = new BrowserProvider(transport, network);
-  const signer = new JsonRpcSigner(provider, account.address);
-  return signer;
+  return new JsonRpcSigner(provider, account.address);
 }
 
-/** Hook to convert a viem Wallet Client to an ethers.js Signer. */
 export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
-  const { data: client } = useConnectorClient<Config>({ chainId });
-  return useMemo(() => (client ? clientToSigner(client) : undefined), [client]);
+  const { data: walletClient } = useConnectorClient({ chainId });
+  return useMemo(() => (walletClient ? clientToSigner(walletClient) : undefined), [walletClient]);
 }
