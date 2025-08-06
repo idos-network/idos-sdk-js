@@ -13,12 +13,12 @@ import { type QueryClient, useQueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useEffect } from "react";
 import { useAccount, useConnect, useDisconnect } from "wagmi";
 
 import { Button } from "@/components/ui";
 import { IDOSClientProvider } from "@/idOS.provider";
-import { injectedConnector, walletConnectConnector } from "@/wagmi.config";
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -34,7 +34,8 @@ export const Route = createRootRouteWithContext<{
 });
 
 function ConnectWallet() {
-  const { connect, isPending } = useConnect();
+  const { isPending } = useConnect();
+  const { open } = useWeb3Modal();
   return (
     <Center h="100dvh" flexDirection="column" gap="4">
       <Heading fontSize="xl">Connect your wallet to continue</Heading>
@@ -42,10 +43,7 @@ function ConnectWallet() {
         <Button loading={true}> Waiting wallet </Button>
       ) : (
         <>
-          <Button onClick={() => connect({ connector: injectedConnector })}>Browser wallet</Button>
-          <Button onClick={() => connect({ connector: walletConnectConnector })}>
-            WalletConnect
-          </Button>
+          <Button onClick={() => open()}>Browser wallet</Button>
         </>
       )}
     </Center>
