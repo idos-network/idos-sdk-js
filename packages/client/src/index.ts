@@ -188,7 +188,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
 
   async hasProfile(): Promise<boolean> {
     return hasProfile(this.kwilClient, { address: this.walletIdentifier }).then(
-      (res) => res.has_profile,
+      (x) => x.has_profile,
     );
   }
 
