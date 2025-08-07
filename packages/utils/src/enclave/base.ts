@@ -23,7 +23,16 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   setSigner(signer: {
     signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
   }): void {
-    this._signMethod = signer.signTypedData.bind(signer);
+    if (signer.signTypedData) {
+      this._signMethod = signer.signTypedData.bind(signer);
+    } else {
+      if ("signMessage" in signer) {
+        // @ts-expect-error - signMessage is not typed
+        this._signMethod = signer.signMessage?.bind(signer);
+      } else {
+        throw new Error("No sign method found in passed signer");
+      }
+    }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
