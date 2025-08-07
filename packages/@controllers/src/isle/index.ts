@@ -3,7 +3,6 @@ import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type {
   DelegatedWriteGrant,
   IsleControllerMessage,
-  IsleMessageHandler,
   IsleNodeMessage,
   IsleStatus,
   IsleTheme,
@@ -12,7 +11,7 @@ import type {
 import type { idOSCredential } from "@idos-network/credentials";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
-import { type Config, watchAccount } from "@wagmi/core";
+import type { Config } from "@wagmi/core";
 import { JsonRpcSigner } from "ethers";
 import { goTry } from "go-try";
 import invariant from "tiny-invariant";
@@ -49,7 +48,7 @@ interface idOSIsleControllerOptions {
   enclaveOptions: idOSClientConfiguration["enclaveOptions"];
 
   /** wagmi config */
-  wagmiConfig: Config;
+  wagmiConfig?: Config;
 
   xummInstance?: Xumm;
   xrpWallets?: {
@@ -189,7 +188,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     enclaveOptions: options.enclaveOptions,
   });
   // Internal state
-  const wagmiConfig = options.wagmiConfig;
   let iframe: HTMLIFrameElement | null = null;
   const controller: Controller = createController({
     targetOrigin: options.targetOrigin,
@@ -661,19 +659,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
     channel.start();
   };
 
-  /**
-   * Sets up a subscription to wallet account changes
-   */
-  const _watchAccountChanges = async (): Promise<void> => {
-    watchAccount(wagmiConfig, {
-      onChange: async (account) => {
-        if (channel) {
-          await handleAccountChange(account);
-        }
-      },
-    });
-  };
-
   const logClientIn = async (): Promise<void> => {
     if (idosClient.state === "logged-in") return;
     invariant(idosClient.state !== "configuration", "idOS client is not configured");
@@ -728,23 +713,6 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         noDismiss,
       });
     }, timeout);
-  };
-
-  /**
-   * Subscribes to messages from the Isle iframe
-   * @returns A cleanup function to remove the subscription
-   */
-  const _on = <T extends IsleNodeMessage["type"]>(
-    type: T,
-    handler: IsleMessageHandler<T>,
-  ): (() => void) => {
-    const cleanup = channel?.on(type, (data) => {
-      handler({ type, data } as unknown as Extract<IsleNodeMessage, { type: T }>);
-    });
-
-    return () => {
-      cleanup?.();
-    };
   };
 
   /**
