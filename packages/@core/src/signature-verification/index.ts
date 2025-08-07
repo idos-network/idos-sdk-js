@@ -11,7 +11,9 @@ export interface WalletSignature {
   public_key: string[];
 }
 
-const getWalletType = (walletPayload: WalletSignature): "evm" | "near" | "xrpl" | "stellar" => {
+export const getWalletType = (
+  walletPayload: WalletSignature,
+): "evm" | "near" | "xrpl" | "stellar" => {
   // Address validation patterns
   const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
   const near_regexp = /^[a-zA-Z0-9._-]+\.(near|testnet|betanet)$/;

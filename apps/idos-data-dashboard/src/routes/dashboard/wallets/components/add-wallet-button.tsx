@@ -1,6 +1,10 @@
 import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
+import {
+  getWalletType,
+  verifySignature,
+  type WalletSignature,
+} from "@idos-network/core/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -12,22 +16,35 @@ const createWalletParamsFactory = ({
   public_key,
   signature,
   message,
+  userId,
+  walletType,
 }: {
   address: string;
   public_key?: string;
   signature: string;
   message: string;
+  userId: string;
+  walletType: string;
 }) => ({
   id: crypto.randomUUID() as string,
   address,
   public_key: public_key ?? null,
   message,
   signature,
+  user_id: userId,
+  wallet_type: walletType,
 });
 
 const createWallet = async (
   idOSClient: idOSClientLoggedIn,
-  params: { address: string; public_key?: string; signature: string; message: string },
+  params: {
+    address: string;
+    public_key?: string;
+    signature: string;
+    message: string;
+    userId: string;
+    walletType: string;
+  },
 ): Promise<idOSWallet> => {
   const walletParams = createWalletParamsFactory(params);
   await idOSClient.addWallet(walletParams);
@@ -47,17 +64,31 @@ const useAddWalletMutation = () => {
   return useMutation<
     idOSWallet[],
     DefaultError,
-    { address: string; publicKeys: string[]; signature: string; message: string }
+    {
+      address: string;
+      publicKeys: string[];
+      signature: string;
+      message: string;
+      walletType: string;
+      userId: string;
+    }
   >({
-    mutationFn: async ({ address, publicKeys, signature, message }) => {
+    mutationFn: async ({ address, publicKeys, signature, message, walletType, userId }) => {
       if (publicKeys.length > 0) {
         return Promise.all(
           publicKeys.map((public_key) =>
-            createWallet(idOSClient, { address, public_key, signature, message }),
+            createWallet(idOSClient, {
+              address,
+              public_key,
+              signature,
+              message,
+              userId,
+              walletType,
+            }),
           ),
         );
       }
-      return [await createWallet(idOSClient, { address, signature, message })];
+      return [await createWallet(idOSClient, { address, signature, message, userId, walletType })];
     },
   });
 };
@@ -74,10 +105,15 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const toast = useToast();
   const queryClient = useQueryClient();
   const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
+  const idOSClient = useIdOS();
 
   const addWallet = async (walletPayload: WalletSignature) => {
-    const isValid = await verifySignature(walletPayload);
+    const userId = idOSClient?.user.id;
 
+    const isValid = await verifySignature(walletPayload);
+    const walletType = getWalletType(walletPayload);
+
+    invariant(userId, "userId is not set, please login first");
     if (!isValid) {
       toast({
         title: "Invalid signature",
@@ -93,6 +129,8 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         publicKeys: walletPayload.public_key || [],
         signature: walletPayload.signature,
         message: walletPayload.message || "Sign this message to prove you own this wallet",
+        walletType,
+        userId,
       },
       {
         onSuccess: async () => {
