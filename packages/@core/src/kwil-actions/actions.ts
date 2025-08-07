@@ -25,6 +25,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_user: [],
   upsert_wallet_as_inserter: [
     {
       name: "id",
@@ -77,12 +78,14 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_wallets: [],
   remove_wallet: [
     {
       name: "id",
       type: DataType.Uuid,
     },
   ],
+  get_credentials: [],
   get_credentials_shared_by_user: [
     {
       name: "user_id",
@@ -307,6 +310,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_attributes: [],
   dwg_message: [
     {
       name: "owner_wallet_identifier",
@@ -343,6 +347,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
+  get_access_grants_owned: [],
   get_access_grants_granted: [
     {
       name: "user_id",
@@ -423,6 +428,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_passporting_peers: [],
 };
 export const idOSUserSchema: z.ZodObject<{
   id: z.ZodUUID;
@@ -459,7 +465,9 @@ export const GetUserOutputSchema: z.ZodObject<{
 export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
 
 export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutput> {
-  return await kwilClient.call({ name: "get_user", inputs: {} });
+  return await kwilClient
+    .call<GetUserOutput[]>({ name: "get_user", inputs: {} })
+    .then((result) => result[0]);
 }
 
 export const idOSWalletSchema: z.ZodObject<{
@@ -546,7 +554,7 @@ export const GetWalletsOutputSchema: z.ZodObject<{
 export type GetWalletsOutput = z.infer<typeof GetWalletsOutputSchema>;
 
 export async function getWallets(kwilClient: KwilActionClient): Promise<GetWalletsOutput[]> {
-  return await kwilClient.call({ name: "get_wallets", inputs: {} });
+  return await kwilClient.call<GetWalletsOutput[]>({ name: "get_wallets", inputs: {} });
 }
 
 export const RemoveWalletInputSchema: z.ZodObject<{
@@ -590,7 +598,7 @@ export type idOSCredentialListItem = z.infer<typeof idOSCredentialListItemSchema
 export async function getCredentials(
   kwilClient: KwilActionClient,
 ): Promise<idOSCredentialListItem[]> {
-  return await kwilClient.call({ name: "get_credentials", inputs: {} });
+  return await kwilClient.call<idOSCredentialListItem[]>({ name: "get_credentials", inputs: {} });
 }
 
 export const GetCredentialsSharedByUserInputSchema: z.ZodObject<{
@@ -630,7 +638,7 @@ export async function getCredentialsSharedByUser(
   params: GetCredentialsSharedByUserInput,
 ): Promise<GetCredentialsSharedByUserOutput[]> {
   const inputs = GetCredentialsSharedByUserInputSchema.parse(params);
-  return await kwilClient.call({
+  return await kwilClient.call<GetCredentialsSharedByUserOutput[]>({
     name: "get_credentials_shared_by_user",
     inputs,
   });
@@ -866,7 +874,7 @@ export async function getCredentialOwned(
   params: GetCredentialOwnedInput,
 ): Promise<idOSCredential[]> {
   const inputs = GetCredentialOwnedInputSchema.parse(params);
-  return await kwilClient.call({
+  return await kwilClient.call<idOSCredential[]>({
     name: "get_credential_owned",
     inputs,
   });
@@ -886,7 +894,7 @@ export async function getSharedCredential(
   params: GetSharedCredentialInput,
 ): Promise<idOSCredential[]> {
   const inputs = GetSharedCredentialInputSchema.parse(params);
-  return await kwilClient.call({
+  return await kwilClient.call<idOSCredential[]>({
     name: "get_credential_shared",
     inputs,
   });
@@ -917,10 +925,12 @@ export async function getCredentialIdByContentHash(
   params: GetCredentialIdByContentHashInput,
 ): Promise<GetCredentialIdByContentHashOutput> {
   const inputs = GetCredentialIdByContentHashInputSchema.parse(params);
-  return await kwilClient.call({
-    name: "get_sibling_credential_id",
-    inputs,
-  });
+  return await kwilClient
+    .call<GetCredentialIdByContentHashOutput[]>({
+      name: "get_sibling_credential_id",
+      inputs,
+    })
+    .then((result) => result[0]);
 }
 
 export const AddAttributeInputSchema: z.ZodObject<{
@@ -964,7 +974,7 @@ export const idOSUserAttributeSchema: z.ZodObject<{
 export type idOSUserAttribute = z.infer<typeof idOSUserAttributeSchema>;
 
 export async function getAttributes(kwilClient: KwilActionClient): Promise<idOSUserAttribute[]> {
-  return await kwilClient.call({ name: "get_attributes", inputs: {} });
+  return await kwilClient.call<idOSUserAttribute[]>({ name: "get_attributes", inputs: {} });
 }
 
 export const idOSDelegatedWriteGrantSchema: z.ZodObject<{
@@ -1008,10 +1018,12 @@ export async function dwgMessage(
   params: idOSDelegatedWriteGrant,
 ): Promise<DwgMessageOutput> {
   const inputs = idOSDelegatedWriteGrantSchema.parse(params);
-  return await kwilClient.call({
-    name: "dwg_message",
-    inputs,
-  });
+  return await kwilClient
+    .call<DwgMessageOutput[]>({
+      name: "dwg_message",
+      inputs,
+    })
+    .then((result) => result[0]);
 }
 
 export const RevokeAccessGrantInputSchema: z.ZodObject<{
@@ -1058,7 +1070,7 @@ export const idOSGrantSchema: z.ZodObject<{
 export type idOSGrant = z.infer<typeof idOSGrantSchema>;
 
 export async function getAccessGrantsOwned(kwilClient: KwilActionClient): Promise<idOSGrant[]> {
-  return await kwilClient.call({ name: "get_access_grants_owned", inputs: {} });
+  return await kwilClient.call<idOSGrant[]>({ name: "get_access_grants_owned", inputs: {} });
 }
 
 export const GetGrantsPaginatedInputSchema: z.ZodObject<{
@@ -1083,7 +1095,7 @@ export async function getGrantsPaginated(
   params: GetGrantsPaginatedInput,
 ): Promise<idOSGrant[]> {
   const inputs = GetGrantsPaginatedInputSchema.parse(params);
-  return await kwilClient.call({
+  return await kwilClient.call<idOSGrant[]>({
     name: "get_access_grants_granted",
     inputs,
   });
@@ -1110,10 +1122,12 @@ export async function getGrantsCount(
   params: GetGrantsCountInput,
 ): Promise<GetGrantsCountOutput> {
   const inputs = GetGrantsCountInputSchema.parse(params);
-  return await kwilClient.call({
-    name: "get_access_grants_granted_count",
-    inputs,
-  });
+  return await kwilClient
+    .call<GetGrantsCountOutput[]>({
+      name: "get_access_grants_granted_count",
+      inputs,
+    })
+    .then((result) => result[0]);
 }
 
 export const DagMessageInputSchema: z.ZodObject<{
@@ -1145,10 +1159,12 @@ export async function dagMessage(
   params: DagMessageInput,
 ): Promise<DagMessageOutput> {
   const inputs = DagMessageInputSchema.parse(params);
-  return await kwilClient.call({
-    name: "dag_message",
-    inputs,
-  });
+  return await kwilClient
+    .call<DagMessageOutput[]>({
+      name: "dag_message",
+      inputs,
+    })
+    .then((result) => result[0]);
 }
 
 export const CreateAccessGrantByDagInputSchema: z.ZodObject<{
@@ -1224,7 +1240,7 @@ export async function getAccessGrantsForCredential(
   params: GetAccessGrantsForCredentialInput,
 ): Promise<GetAccessGrantsForCredentialOutput[]> {
   const inputs = GetAccessGrantsForCredentialInputSchema.parse(params);
-  return await kwilClient.call({
+  return await kwilClient.call<GetAccessGrantsForCredentialOutput[]>({
     name: "get_access_grants_for_credential",
     inputs,
   });
@@ -1255,13 +1271,15 @@ export async function hasProfile(
   params: HasProfileInput,
 ): Promise<HasProfileOutput> {
   const inputs = HasProfileInputSchema.parse(params);
-  return await kwilClient.call(
-    {
-      name: "has_profile",
-      inputs,
-    },
-    undefined, // Signer is not required here
-  );
+  return await kwilClient
+    .call<HasProfileOutput[]>(
+      {
+        name: "has_profile",
+        inputs,
+      },
+      undefined, // Signer is not required here
+    )
+    .then((result) => result[0]);
 }
 
 export const GetPassportingPeersOutputSchema: z.ZodObject<{
@@ -1286,5 +1304,8 @@ export type GetPassportingPeersOutput = z.infer<typeof GetPassportingPeersOutput
 export async function getPassportingPeers(
   kwilClient: KwilActionClient,
 ): Promise<GetPassportingPeersOutput[]> {
-  return await kwilClient.call({ name: "get_passporting_peers", inputs: {} });
+  return await kwilClient.call<GetPassportingPeersOutput[]>({
+    name: "get_passporting_peers",
+    inputs: {},
+  });
 }

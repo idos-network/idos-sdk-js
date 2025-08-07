@@ -9,7 +9,6 @@ export const actors = {
     const config = await createIDOSClient({
       enclaveOptions: {
         container: "#idOS-enclave",
-        url: "https://localhost:5174",
       },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
