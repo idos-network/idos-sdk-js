@@ -7,10 +7,7 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: {
-        container: "#idOS-enclave",
-        url: "https://localhost:5174",
-      },
+      enclaveOptions: { container: "#idOS-enclave" },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
