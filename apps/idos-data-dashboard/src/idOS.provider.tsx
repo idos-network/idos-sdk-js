@@ -1,6 +1,6 @@
 import { Center, Spinner, Text } from "@chakra-ui/react";
-import * as GemWallet from "@gemwallet/api";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
+import type { WalletInfo } from "@idos-network/controllers";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
@@ -10,7 +10,6 @@ import {
   use,
   useCallback,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 import invariant from "tiny-invariant";
@@ -18,7 +17,7 @@ import { useEthersSigner } from "@/core/wagmi";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
-import { createStellarSigner } from "./core/stellar-kit";
+import { walletInfoMapper } from "./core/signers";
 import { useWalletStore } from "./stores/wallet";
 
 const _idOSClient = new idOSClientConfiguration({
@@ -72,58 +71,39 @@ export const useUnsafeIdOS = () => {
 export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [client, setClient] = useState<idOSClient>(_idOSClient);
-  const { signer: evmSigner } = useSigner();
-  const { accountId, selector } = useWalletSelector();
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
-
-  const walletToSignerSrc = useMemo(
-    () => ({
-      evm: evmSigner,
-      near: accountId,
-      Stellar: walletPublicKey,
-    }),
-    [evmSigner, accountId, walletPublicKey],
-  );
+  const { selector } = useWalletSelector();
 
   useEffect(() => {
-    if (!walletType) {
+    if (!walletType || !walletAddress || !walletPublicKey) {
+      setIsLoading(false);
+      return;
+    }
+    const signerSrc = walletInfoMapper({
+      address: walletAddress ?? "",
+      publicKey: walletPublicKey ?? "",
+      selector,
+    })[walletType as keyof typeof walletInfoMapper] as WalletInfo;
+    if (!signerSrc) {
       setIsLoading(false);
       return;
     }
 
     // For every wallet type check for it's working condition specified in walletToSignerSrc
-    if (!walletToSignerSrc[walletType as keyof typeof walletToSignerSrc]) {
-      setIsLoading(false);
-      return;
-    }
-
     const setupClient = async () => {
       try {
         // Always start with a fresh client
         setIsLoading(true);
+        const signer = await signerSrc.signer();
+
         const newClient = await _idOSClient.createClient();
         if (!walletAddress || !walletAddress) {
           setClient(newClient);
           setIsLoading(false);
           return;
         }
-        const nearSigner = accountId ? await selector.wallet() : undefined;
 
-        const stellarSigner = await createStellarSigner(
-          walletPublicKey as string,
-          walletAddress as string,
-        );
-
-        const signerSrc = {
-          evm: evmSigner,
-          near: nearSigner,
-          xrpl: GemWallet,
-          Stellar: stellarSigner,
-        };
-
-        const withSigner = await newClient.withUserSigner(
-          signerSrc[walletType as "evm" | "near" | "xrpl" | "Stellar"],
-        );
+        const withSigner = await newClient.withUserSigner(signer);
 
         // Check if the user has a profile and log in if they do
         if (await withSigner.hasProfile()) {
@@ -141,15 +121,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [
-    evmSigner,
-    accountId,
-    selector,
-    walletType,
-    walletAddress,
-    walletPublicKey,
-    walletToSignerSrc,
-  ]);
+  }, [walletPublicKey, walletAddress, walletType]);
 
   // While loading, show a spinner
   if (isLoading) {

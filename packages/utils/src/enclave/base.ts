@@ -26,9 +26,11 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     if (signer.signTypedData) {
       this._signMethod = signer.signTypedData.bind(signer);
     } else {
-      if ("signMessage" in signer) {
-        // @ts-expect-error - signMessage is not typed
-        this._signMethod = signer.signMessage?.bind(signer);
+      if (["signMessage", "signer"].some((key) => key in signer)) {
+        // @ts-expect-error - signMessage for xrpl and near, signer for stellar
+        this._signMethod = signer.signMessage
+          ? signer.signMessage.bind(signer)
+          : signer.signer?.bind(signer);
       } else {
         throw new Error("No sign method found in passed signer");
       }
