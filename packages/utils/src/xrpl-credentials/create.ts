@@ -2,16 +2,16 @@ import * as Hex from "@stablelib/hex";
 import * as Utf8 from "@stablelib/utf8";
 import { Client, decodeAccountID, Wallet } from "xrpl";
 
-export interface CreateCredentialForOriginalParams {
+export type CreateCredentialForOriginalParams = {
   /** Unique identifier for the credential, like `741a9caf-ec53-42c7-aed6-519950dcded5` */
   credId: string;
   /** Type/category of the credential, like `KYC` */
   credType: string;
   /** XRPL address of the user receiving the credential, like `rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe` */
   userAddress: string;
-}
+};
 
-export interface CreateCredentialForCopyParams {
+export type CreateCredentialForCopyParams = {
   /** Unique identifier for the credential */
   credId: string;
   /** Type/category of the credential */
@@ -22,7 +22,7 @@ export interface CreateCredentialForCopyParams {
   timelockYears: number;
   /** XRPL address of the original credential issuer */
   origCredIssuerAddress: string;
-}
+};
 
 /**
  * This service provides methods to create credentials on the XRPL blockchain.
@@ -40,7 +40,7 @@ export interface CreateCredentialForCopyParams {
  * });
  * ```
  */
-export class XrplService {
+export class XrplCredentialsCreate {
   readonly #client: Client;
   readonly #wallet: Wallet;
 
@@ -48,7 +48,7 @@ export class XrplService {
    * Creates a new XRPL service instance.
    *
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
-   * @param wallet - The XRPL wallet to use for signing transactions
+   * @param seed    - The XRPL wallet seed to use for signing transactions
    */
   constructor(nodeUrl: string, seed: string) {
     this.#client = new Client(nodeUrl);
