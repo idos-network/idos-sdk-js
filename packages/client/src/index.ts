@@ -1,29 +1,37 @@
 import {
-  type AddWalletParams,
+  type AddAttributeInput,
+  type AddWalletInput,
   addWallet,
   addWallets,
-  createAttribute,
+  addAttribute as createAttribute,
   createCredentialCopy,
-  type GetGrantsParams,
+  type DagMessageInput,
+  dagMessage,
+  dwgMessage,
+  type GetGrantsPaginatedInput,
+  type GetWalletsOutput,
   getAccessGrantsOwned,
-  getAllCredentials,
   getAttributes,
-  getCredentialById,
   getCredentialOwned,
+  getCredentials,
   getGrants,
   getGrantsCount,
   getSharedCredential,
-  getUserProfile,
+  getUser,
   getWallets,
   hasProfile,
-  type idOSDAGSignatureParams,
+  type idOSCredential,
+  type idOSCredentialListItem,
+  type idOSDelegatedWriteGrant,
+  type idOSGrant,
+  type idOSUser,
+  type idOSUserAttribute,
+  type idOSWallet,
   removeCredential,
   removeWallet,
   removeWallets,
-  requestDAGMessage,
-  requestDWGMessage,
   revokeAccessGrant,
-  type ShareableCredential,
+  type ShareCredentialInput,
   shareCredential,
 } from "@idos-network/core/kwil-actions";
 import {
@@ -32,16 +40,8 @@ import {
   type KwilActionClient,
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
-import type {
-  DelegatedWriteGrant,
-  idOSGrant,
-  idOSUser,
-  idOSUserAttribute,
-  idOSWallet,
-  Wallet,
-} from "@idos-network/core/types";
+import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
-import type { idOSCredential } from "@idos-network/credentials";
 import {
   base64Decode,
   base64Encode,
@@ -134,7 +134,7 @@ export class idOSClientIdle {
   }
 
   async addressHasProfile(address: string): Promise<boolean> {
-    return hasProfile(this.kwilClient, address);
+    return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
   async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
@@ -187,7 +187,9 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   }
 
   async hasProfile(): Promise<boolean> {
-    return hasProfile(this.kwilClient, this.walletIdentifier);
+    return hasProfile(this.kwilClient, { address: this.walletIdentifier }).then(
+      (x) => x.has_profile,
+    );
   }
 
   async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
@@ -205,7 +207,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
-    const kwilUser = await getUserProfile(this.kwilClient);
+    const kwilUser = await getUser(this.kwilClient);
 
     await this.enclaveProvider.reconfigure({
       mode: "existing",
@@ -245,44 +247,43 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
   }
 
-  async requestDWGMessage(params: DelegatedWriteGrant): Promise<string> {
-    return requestDWGMessage(this.kwilClient, params);
+  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return dwgMessage(this.kwilClient, params).then((res) => res.message);
   }
 
   async removeCredential(id: string): Promise<{ id: string }> {
-    return removeCredential(this.kwilClient, id);
+    await removeCredential(this.kwilClient, { id });
+    return { id };
   }
 
   async getCredentialById(id: string): Promise<idOSCredential | undefined> {
-    return getCredentialById(this.kwilClient, id);
+    return getCredentialOwned(this.kwilClient, { id }).then((res) => res[0]);
   }
 
-  async shareCredential(credential: ShareableCredential): Promise<ShareableCredential> {
-    return shareCredential(this.kwilClient, credential);
+  async shareCredential(credential: ShareCredentialInput): Promise<ShareCredentialInput> {
+    await shareCredential(this.kwilClient, credential);
+    return credential;
   }
 
-  async getAllCredentials(): Promise<idOSCredential[]> {
-    return getAllCredentials(this.kwilClient);
+  async getAllCredentials(): Promise<idOSCredentialListItem[]> {
+    return getCredentials(this.kwilClient);
   }
 
   async getAccessGrantsOwned(): Promise<idOSGrant[]> {
     return getAccessGrantsOwned(this.kwilClient);
   }
 
-  async getCredentialOwned(id: string): Promise<idOSCredential | undefined> {
-    return getCredentialOwned(this.kwilClient, id);
-  }
-
   async getAttributes(): Promise<idOSUserAttribute[]> {
     return getAttributes(this.kwilClient);
   }
 
-  async createAttribute(attribute: idOSUserAttribute): Promise<idOSUserAttribute> {
-    return createAttribute(this.kwilClient, attribute);
+  async createAttribute(attribute: AddAttributeInput): Promise<AddAttributeInput> {
+    await createAttribute(this.kwilClient, attribute);
+    return attribute;
   }
 
   async getCredentialContentSha256Hash(id: string): Promise<string> {
-    const credential = await getCredentialById(this.kwilClient, id);
+    const credential = await this.getCredentialById(id);
 
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
@@ -297,7 +298,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getCredentialContent(id: string): Promise<string> {
-    const credential = await getCredentialById(this.kwilClient, id);
+    const credential = await this.getCredentialById(id);
+
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
@@ -316,7 +318,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     consumerAddress: string,
     lockedUntil: number,
   ): Promise<{ id: string }> {
-    const originalCredential = await getCredentialById(this.kwilClient, id);
+    const originalCredential = await this.getCredentialById(id);
     invariant(originalCredential, `"idOSCredential" with id ${id} not found`);
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
@@ -355,47 +357,56 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return { id: copyId };
   }
 
-  async requestDAGMessage(params: idOSDAGSignatureParams): Promise<string> {
-    return requestDAGMessage(this.kwilClient, params);
+  async requestDAGMessage(params: DagMessageInput): Promise<string> {
+    return dagMessage(this.kwilClient, params).then((res) => res.message);
   }
 
-  async getGrants(params: GetGrantsParams): Promise<{ grants: idOSGrant[]; totalCount: number }> {
+  async getGrants(
+    params: GetGrantsPaginatedInput,
+  ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return {
       grants: await getGrants(this.kwilClient, params),
       totalCount: await this.getGrantsCount(),
     };
   }
 
-  async addWallets(params: AddWalletParams[]): Promise<AddWalletParams[]> {
-    return addWallets(this.kwilClient, params);
+  async addWallets(params: AddWalletInput[]): Promise<AddWalletInput[]> {
+    await addWallets(this.kwilClient, params);
+    return params;
   }
 
   async getGrantsCount(): Promise<number> {
-    return getGrantsCount(this.kwilClient);
+    return getGrantsCount(this.kwilClient, {
+      user_id: null,
+    }).then((res) => res.count);
   }
 
   async getSharedCredential(id: string): Promise<idOSCredential | undefined> {
-    return getSharedCredential(this.kwilClient, id);
+    return getSharedCredential(this.kwilClient, { id }).then((res) => res[0]);
   }
 
-  async revokeAccessGrant(grantId: string): Promise<{ id: string }> {
-    return revokeAccessGrant(this.kwilClient, grantId);
+  async revokeAccessGrant(id: string): Promise<{ id: string }> {
+    await revokeAccessGrant(this.kwilClient, { id });
+    return { id };
   }
 
-  async addWallet(params: AddWalletParams): Promise<AddWalletParams> {
-    return addWallet(this.kwilClient, params);
+  async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
+    await addWallet(this.kwilClient, params);
+    return params;
   }
 
-  async getWallets(): Promise<idOSWallet[]> {
+  async getWallets(): Promise<GetWalletsOutput[]> {
     return getWallets(this.kwilClient);
   }
 
   async removeWallet(id: string): Promise<{ id: string }> {
-    return removeWallet(this.kwilClient, id);
+    await removeWallet(this.kwilClient, { id });
+    return { id };
   }
 
   async removeWallets(ids: string[]): Promise<string[]> {
-    return removeWallets(this.kwilClient, ids);
+    await removeWallets(this.kwilClient, ids);
+    return ids;
   }
 
   async filterCredentials(requirements: {
@@ -459,7 +470,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       consumerAuthPublicKey,
     }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
   ): Promise<idOSCredential> {
-    const credential = await getCredentialById(this.kwilClient, credentialId);
+    const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
@@ -501,7 +512,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 }
 
 export type {
-  DelegatedWriteGrant,
+  idOSDelegatedWriteGrant,
   idOSCredential,
   idOSGrant,
   idOSUser,

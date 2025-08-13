@@ -1,15 +1,12 @@
-import {
-  createNodeKwilClient,
-  createServerKwilSigner,
-  type EditCredentialAsIssuerParams,
-} from "@idos-network/core";
+import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/core";
 import type {
+  EditCredentialAsIssuerParams,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
-  PassportingPeer,
-} from "@idos-network/core/types";
+} from "@idos-network/core/kwil-actions";
+import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
