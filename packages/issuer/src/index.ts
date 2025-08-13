@@ -32,12 +32,19 @@ import {
   type UpsertWalletReqParams,
   UserService,
 } from "./services/user.service";
+import {
+  type CreateCredentialForCopyParams,
+  type CreateCredentialForOriginalParams,
+  XrplService,
+} from "./services/xrpl.service";
 
 type CreateIssuerParams = {
   chainId?: string;
   nodeUrl: string;
   signingKeyPair: SignKeyPair;
   encryptionSecretKey: Uint8Array;
+  xrplNodeUrl?: string;
+  xrplWalletSeed?: string;
 };
 
 export class idOSIssuer {
@@ -45,6 +52,7 @@ export class idOSIssuer {
   readonly #grantService: GrantService;
   readonly #userService: UserService;
   readonly #passportingService: PassportingService;
+  readonly #xrplService: XrplService;
 
   static async init(params: CreateIssuerParams): Promise<idOSIssuer> {
     const kwilClient = await createNodeKwilClient({
@@ -64,8 +72,18 @@ export class idOSIssuer {
     const grantService = new GrantService(kwilClient, params.encryptionSecretKey);
     const userService = new UserService(kwilClient);
     const passportingService = new PassportingService(kwilClient);
+    const xrplService = new XrplService(
+      params.xrplNodeUrl as string,
+      params.xrplWalletSeed as string,
+    );
 
-    return new idOSIssuer(credentialService, grantService, userService, passportingService);
+    return new idOSIssuer(
+      credentialService,
+      grantService,
+      userService,
+      passportingService,
+      xrplService,
+    );
   }
 
   private constructor(
@@ -73,11 +91,13 @@ export class idOSIssuer {
     grantService: GrantService,
     userService: UserService,
     passportingService: PassportingService,
+    xrplService: XrplService,
   ) {
     this.#credentialService = credentialService;
     this.#grantService = grantService;
     this.#userService = userService;
     this.#passportingService = passportingService;
+    this.#xrplService = xrplService;
   }
 
   // User Service facade methods
@@ -152,6 +172,14 @@ export class idOSIssuer {
   async getPassportingPeers(): Promise<PassportingPeer[]> {
     return this.#passportingService.getPassportingPeers();
   }
+
+  async createCredentialForOriginal(params: CreateCredentialForOriginalParams): Promise<any> {
+    return this.#xrplService.createCredentialForOriginal(params);
+  }
+
+  async createCredentialForCopy(params: CreateCredentialForCopyParams): Promise<any> {
+    return this.#xrplService.createCredentialForCopy(params);
+  }
 }
 
 export type {
@@ -164,4 +192,6 @@ export type {
   CredentialSubject,
   AvailableIssuerType,
   Credentials,
+  CreateCredentialForOriginalParams,
+  CreateCredentialForCopyParams,
 };

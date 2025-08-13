@@ -18,7 +18,10 @@
     "jsonld-document-loader": "catalog:core",
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "catalog:core"
+    "web-streams-polyfill": "catalog:core",
+    "xrpl": "catalog:xrp",
+    "@stablelib/utf8": "catalog:utils",
+    "@stablelib/hex": "catalog:utils"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
