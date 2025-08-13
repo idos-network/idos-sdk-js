@@ -533,7 +533,7 @@ export const createIsleController = (options: idOSIsleControllerOptions): idOSIs
         status: "pending",
       });
 
-      const credential = await idosClient.getCredentialOwned(id);
+      const credential = await idosClient.getCredentialById(id);
 
       invariant(credential, `"idOSCredential" with id ${id} not found`);
 

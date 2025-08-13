@@ -273,10 +273,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return getAccessGrantsOwned(this.kwilClient);
   }
 
-  async getCredentialOwned(id: string): Promise<idOSCredential | undefined> {
-    return getCredentialOwned(this.kwilClient, { id }).then((res) => res[0]);
-  }
-
   async getAttributes(): Promise<idOSUserAttribute[]> {
     return getAttributes(this.kwilClient);
   }
@@ -302,7 +298,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getCredentialContent(id: string): Promise<string> {
-    const credential = await getCredentialById(this.kwilClient, id);
+    const credential = await this.getCredentialById(id);
+
     invariant(credential, `"idOSCredential" with id ${id} not found`);
 
     await this.enclaveProvider.ensureUserEncryptionProfile();
