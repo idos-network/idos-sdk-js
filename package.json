@@ -6,7 +6,7 @@
     "turbo": "^2.5.5",
     "vite-plugin-node-polyfills": "^0.24.0"
   },
-  "packageManager": "pnpm@10.13.1",
+  "packageManager": "pnpm@10.14.0",
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3"
