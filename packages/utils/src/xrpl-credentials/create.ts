@@ -10,7 +10,7 @@ export type CreateCredentialForOriginalParams = {
   credId: string;
   /** Type/category of the credential, like `KYC` */
   credType: string;
-  /** XRPL address of the user receiving the credential, like `rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe` */
+  /** XRPL address of the user receiving the credential, like `rPT1Sjq2YGrBMTttX4GZHjKu9dyf6bpAYe` */
   userAddress: string;
 };
 
@@ -46,7 +46,7 @@ export type CreateCredentialForCopyParams = {
  * await xrplService.createCredentialForOriginal({
  *   credId: "741a9caf-ec53-42c7-aed6-519950dcded5",
  *   credType: "KYC",
- *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"
+ *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyf6bpAYe"
  * });
  * ```
  */
@@ -79,7 +79,7 @@ export class XrplCredentialsCreate {
    * await xrplService.createCredentialForOriginal({
    *   credId: "741a9caf-ec53-42c7-aed6-519950dcded5",
    *   credType: "KYC",
-   *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe"
+   *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyf6bpAYe"
    * });
    * ```
    */
@@ -128,7 +128,7 @@ export class XrplCredentialsCreate {
    * const result = await xrplService.createCredentialForCopy({
    *   credId: "741a9caf-ec53-42c7-aed6-519950dcded5",
    *   credType: "KYC",
-   *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyfzbpAYe",
+   *   userAddress: "rPT1Sjq2YGrBMTttX4GZHjKu9dyf6bpAYe",
    *   timelockYears: 5,
    *   origCredIssuerAddress: "rU9C67bZ3ZvjXaJYwYqMqjMq1o4ZbwK3YN"
    * });
