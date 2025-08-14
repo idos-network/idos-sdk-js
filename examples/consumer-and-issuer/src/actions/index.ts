@@ -87,8 +87,8 @@ const generateCredentials = async (
   };
 
   const plainSignedContent = await issuer.buildCredentials(
-    credentialSubject,
     credentialFields,
+    credentialSubject,
     availableIssuer,
   );
 
@@ -280,12 +280,12 @@ export const getCredentialCompliantly = async (credentialId: string) => {
 type PassportingServiceResponse =
   | { success: true; data: idOSCredential }
   | {
-    success: false;
-    error: {
-      cause?: unknown;
-      message: string;
+      success: false;
+      error: {
+        cause?: unknown;
+        message: string;
+      };
     };
-  };
 
 export const invokePassportingService = async (
   url: string,
