@@ -1,0 +1,20 @@
+{
+  "name": "xrpl-server-sign",
+  "version": "0.0.1",
+  "description": "Example application demonstrating XRPL credential creation using idOS SDK",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "npx ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@idos-network/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.30",
+    "typescript": "catalog:build"
+  },
+  "private": true
+}

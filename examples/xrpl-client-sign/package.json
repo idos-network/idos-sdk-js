@@ -1,0 +1,31 @@
+{
+  "name": "xrpl-client-sign",
+  "version": "0.0.1",
+  "description": "React application demonstrating XRPL credential creation using idOS SDK",
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite",
+    "preview": "vite preview",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@idos-network/core": "workspace:*",
+    "@idos-network/utils": "workspace:*",
+    "@gemwallet/api": "catalog:core",
+    "@stablelib/utf8": "catalog:utils",
+    "@stablelib/hex": "catalog:utils",
+    "buffer": "^6.0.3",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "xrpl": "catalog:xrp"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "@vitejs/plugin-react": "^4.2.1",
+    "typescript": "catalog:build",
+    "vite": "catalog:build"
+  },
+  "private": true
+}

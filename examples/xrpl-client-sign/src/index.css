@@ -1,0 +1,154 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f5f5f5;
+}
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  width: 100%;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+}
+
+.description {
+  text-align: center;
+  color: #666;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+.button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+  font-weight: 500;
+}
+
+.button:hover:not(.disabled) {
+  background: #0056b3;
+}
+
+.button.disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.loading {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.result {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 8px;
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 14px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.result.success {
+  background: #f8f9fa;
+  border-left: 4px solid #28a745;
+}
+
+.result.error {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+  color: #721c24;
+}
+
+.result pre {
+  margin: 10px 0 0 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wallet-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.wallet-button {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  transition: background-color 0.2s;
+  font-weight: 500;
+  margin-bottom: 15px;
+}
+
+.wallet-button:hover:not(.disabled) {
+  background: #218838;
+}
+
+.wallet-button.disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.wallet-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.wallet-label {
+  font-weight: 600;
+  color: #495057;
+  font-size: 14px;
+}
+
+.wallet-address {
+  font-family: monospace;
+  background: #e9ecef;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #495057;
+  word-break: break-all;
+}
