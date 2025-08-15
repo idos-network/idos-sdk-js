@@ -51,9 +51,6 @@ export async function buildCredentials(
     credentialSubject,
   };
 
-  if (validate) {
-  }
-
   const suite = new Ed25519Signature2020({ key });
 
   return vc.issue<VerifiableCredentialSubject>({

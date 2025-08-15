@@ -23,7 +23,7 @@ const generateCredentials = async (
 ) => {
   const { info, review, email, phone } = kycData;
   const idDoc = info.idDocs[0];
-  const issuerHost = process.env.VERCEL_URL;
+  const issuerHost = `https://${process.env.VERCEL_URL}`;
 
   const id = crypto.randomUUID();
 
