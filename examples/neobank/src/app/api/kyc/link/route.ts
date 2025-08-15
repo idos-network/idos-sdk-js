@@ -23,9 +23,9 @@ async function generateKrakenUrl(type: KYCType = "sumsub"): Promise<string> {
     level: krakenLevel,
     state: Date.now().toString(),
   };
-
+  console.log({ krakenPrivateKey });
   const token = jwt.sign(payload, krakenPrivateKey, { algorithm: "ES512" });
-
+  console.log({ token });
   return `${krakenApiUrl}/kyc?token=${token}&provider=${type}`;
 }
 
