@@ -23,9 +23,7 @@ const generateCredentials = async (
 ) => {
   const { info, review, email, phone } = kycData;
   const idDoc = info.idDocs[0];
-
-  // TODO: Fix this
-  const issuerHost = "https://consumer-and-issuer-demo.playground.idos.network";
+  const issuerHost = process.env.VERCEL_URL;
 
   const id = crypto.randomUUID();
 
@@ -40,14 +38,14 @@ const generateCredentials = async (
     familyName: info.lastNameEn,
     governmentId: idDoc.number,
     email: email,
-    // @ts-expect-error - TODO: Fix this
-    nationality: info.nationality ? countries3to2[info.nationality] : undefined,
+    nationality: info.nationality
+      ? countries3to2[info.nationality as keyof typeof countries3to2]
+      : undefined,
     phoneNumber: phone,
     governmentIdType: idDoc.idDocType,
     dateOfBirth: new Date(info.dob),
     placeOfBirth: info.placeOfBirth,
-    // @ts-expect-error - TODO: Fix this
-    idDocumentCountry: countries3to2[idDoc.country],
+    idDocumentCountry: countries3to2[idDoc.country as keyof typeof countries3to2],
     idDocumentNumber: idDoc.number,
     idDocumentType: idDoc.idDocType,
     idDocumentDateOfIssue: parseDate(idDoc.issuedDate),
