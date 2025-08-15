@@ -1,5 +1,6 @@
 import type { Credentials, IDDocumentType } from "@idos-network/consumer";
 import { SERVER_ENV } from "./envFlags.server";
+import { getISORegionCodeFromNominatim } from "./maps.server";
 
 function formatDate(dateString?: string | Date): string | undefined {
   if (!dateString) return undefined;
@@ -93,6 +94,22 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     ID_CARD: "NationalIDCard",
   };
 
+  let region = cs.residentialAddressRegion;
+
+  if (!region) {
+    region = await getISORegionCodeFromNominatim(
+      [
+        [cs.residentialAddressStreet, cs.residentialAddressHouseNumber].filter((x) => x).join(" "),
+        cs.residentialAddressCity,
+        cs.residentialAddressPostalCode,
+        cs.residentialAddressCountry,
+        cs.residentialAddressAdditionalAddressInfo,
+      ]
+        .filter((x) => x)
+        .join(", "),
+    );
+  }
+
   const customer: NoahCustomer = {
     Type: "Individual",
     FullName: {
@@ -116,7 +133,7 @@ export async function createNoahCustomer(address: string, credentials: Credentia
       Street: cs.residentialAddressStreet,
       City: cs.residentialAddressCity,
       PostCode: cs.residentialAddressPostalCode,
-      State: cs.residentialAddressState,
+      State: region,
       Country: cs.residentialAddressCountry,
     },
   };
