@@ -1,99 +1,99 @@
 "use server";
-import type { idOSCredential } from "@idos-network/credentials";
+import type {
+  AvailableIssuerType,
+  CredentialFields,
+  CredentialSubject,
+  idOSCredential,
+} from "@idos-network/credentials";
 import { base64Decode, base64Encode, hexDecode, toBytes } from "@idos-network/utils/codecs";
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
+import countries3to2 from "countries-list/minimal/countries.3to2.min.json";
 import jwt from "jsonwebtoken";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 import { idOSConsumer } from "@/consumer.config";
 import { idOSIssuer } from "@/issuer.config";
 
-// biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
-const vcTemplate = (kycData: Record<string, any>) => {
-  const { info, review, agreement } = kycData;
-  const document = info.idDocs[0];
+const generateCredentials = async (
+  issuer: Awaited<ReturnType<typeof idOSIssuer>>,
+  // biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
+  kycData: Record<string, any>,
+  idFrontFile: Buffer,
+  selfieFile: Buffer,
+) => {
+  const { info, review, email, phone } = kycData;
+  const idDoc = info.idDocs[0];
+  const issuerHost = `https://${process.env.VERCEL_URL}`;
 
-  const body = {
-    xsd: "http://www.w3.org/2001/XMLSchema#",
-    aux: "https://raw.githubusercontent.com/trustfractal/claim-schemas/master/aux.xml",
+  const id = crypto.randomUUID();
+
+  const parseDate = (date: string | undefined) => {
+    if (!date) return undefined;
+    return new Date(date);
+  };
+
+  const credentialSubject: CredentialSubject = {
+    id: `urn:uuid:${id}`,
+    firstName: info.firstNameEn,
+    familyName: info.lastNameEn,
+    governmentId: idDoc.number,
+    email: email,
+    nationality: info.nationality
+      ? countries3to2[info.nationality as keyof typeof countries3to2]
+      : undefined,
+    phoneNumber: phone,
+    governmentIdType: idDoc.idDocType,
+    dateOfBirth: new Date(info.dob),
+    placeOfBirth: info.placeOfBirth,
+    idDocumentCountry: countries3to2[idDoc.country as keyof typeof countries3to2],
+    idDocumentNumber: idDoc.number,
+    idDocumentType: idDoc.idDocType,
+    idDocumentDateOfIssue: parseDate(idDoc.issuedDate),
+    idDocumentDateOfExpiry: parseDate(idDoc.validUntil),
+    idDocumentFrontFile: idFrontFile,
+    selfieFile: selfieFile,
+  };
+
+  const credentialFields: CredentialFields = {
+    id: `${issuerHost}/credentials/${id}`,
     level: review.levelName,
-    status: review.reviewResult.reviewAnswer,
-    approved_at: agreement.acceptedAt,
-    phones: "",
-    residential_address: info.placeOfBirth,
-    residential_address_country: info.country,
-    residential_address_proof_category: "",
-    residential_address_proof_date_of_issue: document.issuedDate,
-    date_of_birth: info.dob,
-    full_name: `${info.firstName} ${info.lastName}`,
-    identification_document_country: document.country,
-    identification_document_number: document.number,
-    identification_document_type: document.idDocType,
-    place_of_birth: info.placeOfBirth,
-    identification_document_date_of_issue: document.issuedDate,
-    identification_document_date_of_expiry: document.validUntil,
-
-    identification_document_front_file: "",
-    identification_document_back_file: "",
-    identification_document_selfie_file: "",
-    residential_address_proof_file: "",
+    issued: new Date(),
+    approvedAt: new Date(),
   };
 
-  return {
-    "@context": [
-      "https://www.w3.org/2018/credentials/v1",
-      "https://raw.githubusercontent.com/trustfractal/claim-schemas/686bd9c0b44f8af03831f7dc31f7d6a9b6b5ff5b/verifiable_credential/fractal_id.json-ld",
-      "https://w3id.org/security/suites/ed25519-2020/v1",
-    ],
-    id: crypto.randomUUID(),
-    type: ["VerifiableCredential"],
-    issuer: "https://vc-issuers.fractal.id/idos",
-    level: "human",
-    credentialSubject: {
-      id: crypto.randomUUID(),
-      ...body,
-    },
-    status: "approved",
-    issuanceDate: new Date().toISOString(),
-    approved_at: new Date().toISOString(),
+  const publicNotes = {
+    level: review.levelName,
+    type: "kyc",
+    status: review.reviewResult.reviewAnswer === "GREEN" ? "approved" : "rejected",
+    issuer: "Not-a-bank",
   };
-};
 
-const appendProof = <VC extends Record<string, unknown>>(vc: VC) => {
   invariant(
     process.env.ISSUER_ATTESTATION_SECRET_KEY,
     "`ISSUER_ATTESTATION_SECRET_KEY` is not set",
   );
-  return {
-    ...vc,
-    proof: {
-      type: "Ed25519Signature2020",
-      created: new Date().toISOString(),
-      verificationMethod:
-        "https://vc-issuers.fractal.id/idos#z6MkrkEJxkk6wYAzv6s1LCcXXeiSL1ukhGSBE2wUGQvv6f7V",
-      proofPurpose: "assertionMethod",
-      "@context": ["https://www.w3.org/ns/credentials/v2"],
-      proofValue: base64Encode(
-        nacl.sign.detached(
-          toBytes(vc),
-          base64Decode(process.env.ISSUER_ATTESTATION_SECRET_KEY ?? ""),
-        ),
-      ),
-    },
+  invariant(
+    process.env.ISSUER_ATTESTATION_PUBLIC_KEY,
+    "`ISSUER_ATTESTATION_PUBLIC_KEY` is not set",
+  );
+
+  const availableIssuer: AvailableIssuerType = {
+    id: `${issuerHost}/keys/1`,
+    controller: `${issuerHost}/issuers/1`,
+    publicKeyMultibase: process.env.ISSUER_ATTESTATION_PUBLIC_KEY,
+    privateKeyMultibase: process.env.ISSUER_ATTESTATION_SECRET_KEY,
   };
-};
 
-// biome-ignore lint/suspicious/noExplicitAny: We will use `any` to avoid type errors
-const generateCredential = (kycData: Record<string, any>): Uint8Array => {
-  const vc = appendProof(vcTemplate(kycData));
-  return toBytes(vc);
-};
+  const plainSignedContent = await issuer.buildCredentials(
+    credentialFields,
+    credentialSubject,
+    availableIssuer,
+  );
 
-const publicNotes = {
-  level: "human",
-  type: "human",
-  status: "approved",
-  issuer: "NeoBank",
+  return {
+    plainSignedContent,
+    publicNotes,
+  };
 };
 
 export async function createIDOSUserProfile({
@@ -166,6 +166,30 @@ async function getKYCData(userId: string) {
   return json;
 }
 
+async function getKYCDataFile(
+  userId: string,
+  fileType: "idFront" | "idBack" | "selfie" | "proofOfResidence",
+) {
+  const response = await fetch(
+    `https://kraken.staging.sandbox.fractal.id/public/kyc/${userId}/file/${fileType}`,
+    {
+      headers: {
+        Authorization: `Bearer ${await getKrakenToken()}`,
+      },
+    },
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch KYC file data: ${response.status} ${response.statusText} - ${errorText}`,
+    );
+  }
+
+  const buffer = await response.arrayBuffer();
+  return Buffer.from(buffer);
+}
+
 export async function createCredential(
   userId: string,
   userEncryptionPublicKey: string,
@@ -179,17 +203,23 @@ export async function createCredential(
   signature: string,
 ) {
   const issuer = await idOSIssuer();
-  const kycData = await getKYCData(userId);
-  const vcContent = generateCredential(kycData);
+  const [kycData, idFrontFile, selfieFile] = await Promise.all([
+    getKYCData(userId),
+    getKYCDataFile(userId, "idFront"),
+    getKYCDataFile(userId, "selfie"),
+  ]);
+
+  const { plainSignedContent, publicNotes } = await generateCredentials(
+    issuer,
+    kycData,
+    idFrontFile,
+    selfieFile,
+  );
 
   await issuer.createCredentialByDelegatedWriteGrant(
     {
-      plaintextContent: vcContent,
-      publicNotes: JSON.stringify({
-        ...publicNotes,
-        id: crypto.randomUUID(),
-        type: "KYC DATA",
-      }),
+      plaintextContent: toBytes(plainSignedContent),
+      publicNotes: JSON.stringify(publicNotes),
       recipientEncryptionPublicKey: base64Decode(userEncryptionPublicKey),
     },
     {
