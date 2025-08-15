@@ -1,25 +1,17 @@
 {
   "name": "@idos-network/dummy-idos-wallet",
-  "displayName": "idOS Dummy Wallet",
   "description": "idOS dummy testing wallet for development purposes",
-  "private": true,
   "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
   "dependencies": {
-    "react": "catalog:react",
-    "react-dom": "catalog:react",
     "@idos-network/client": "workspace:*",
-    "@idos-network/utils": "workspace:*",
     "@idos-network/core": "workspace:*",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@idos-network/utils": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
     "@stablelib/base64": "^2.0.1",
     "ethers": "catalog:ethereum",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
     "tweetnacl": "catalog:core"
   },
   "devDependencies": {
@@ -39,5 +31,13 @@
     "vite": "catalog:build",
     "vite-plugin-node-polyfills": "0.24.0",
     "vite-tsconfig-paths": "^5.1.4"
-  }
+  },
+  "displayName": "idOS Dummy Wallet",
+  "private": true,
+  "scripts": {
+    "build": "tsc && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module"
 }
