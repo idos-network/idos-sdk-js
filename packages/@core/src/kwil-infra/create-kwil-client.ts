@@ -124,7 +124,7 @@ const createKwilClient =
 
     // TODO: Remove this when kwil-js upgrade to latest axios version
     // @ts-expect-error This is required to check if we are in chrome-extension environment
-    if (typeof chrome !== "undefined" && chrome.runtime.id) {
+    if (typeof chrome !== "undefined" && chrome.runtime?.id) {
       console.warn("🔑 chrome extension detected, patching kwil client");
       // @ts-expect-error This is expected since we are patching private method
       client.client.request = function () {
