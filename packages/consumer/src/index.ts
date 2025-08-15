@@ -87,7 +87,7 @@ export class idOSConsumer {
   }
 
   async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential | undefined> {
-    return getSharedCredential(this.#kwilClient, { id: dataId });
+    return getSharedCredential(this.#kwilClient, { id: dataId }).then((res) => res[0]);
   }
 
   async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
@@ -102,9 +102,7 @@ export class idOSConsumer {
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
-    return getGrantsCount(this.#kwilClient, { user_id: userId ?? undefined }).then(
-      (res) => res.count,
-    );
+    return getGrantsCount(this.#kwilClient, { user_id: userId ?? null }).then((res) => res.count);
   }
 
   async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
