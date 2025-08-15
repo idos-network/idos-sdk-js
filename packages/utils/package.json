@@ -20,6 +20,7 @@
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3",
+    "xrpl": "catalog:xrp",
     "zod": "catalog:core"
   },
   "devDependencies": {
@@ -55,6 +56,10 @@
     "./enclave/local": {
       "types": "./dist/enclave/local.d.ts",
       "import": "./dist/enclave/local.js"
+    },
+    "./xrpl-credentials": {
+      "types": "./dist/xrpl-credentials/index.d.ts",
+      "import": "./dist/xrpl-credentials/index.js"
     }
   },
   "files": [
