@@ -8,11 +8,5 @@
  * - Managing both original and copy credentials
  */
 
-// Export credential acceptance payload types and functions
-export type { CredentialAcceptPayload } from "./accept";
-export {
-  CopyCredentialAcceptPayload,
-  OriginalCredentialAcceptPayload,
-} from "./accept";
-// Export the main credential creation service
-export { XrplCredentialsCreate } from "./create";
+export * from "./accept";
+export * from "./create";
