@@ -5,6 +5,7 @@
     "@idos-network/client": "workspace:*",
     "@idos-network/consumer": "workspace:*",
     "@idos-network/utils": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "@react-router/node": "^7.6.2",
     "@react-router/serve": "^7.6.2",
     "@reown/appkit": "^1.7.8",
@@ -27,7 +28,7 @@
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum",
     "xstate": "^5.19.4",
-    "zod": "^3.25.55"
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@react-router/dev": "^7.6.3",

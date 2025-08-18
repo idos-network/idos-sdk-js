@@ -16,7 +16,7 @@ export const machine = setup({
     context: {} as Context,
   },
   actors,
-  // @ts-expect-error I don't know why this is needed
+  // @ts-expect-error some issue in xstate types
   actions,
   guards: {
     isTransak: ({ context }: { context: Context }) => context.provider === "transak",
@@ -295,7 +295,7 @@ export const machine = setup({
       invoke: {
         id: "createNoahCustomer",
         src: "createNoahCustomer",
-        input: ({ context }) => context.sharedCredential,
+        input: ({ context }: { context: Context }) => context.sharedCredential,
         onDone: {
           target: "dataOrTokenFetched",
           actions: ["setNoahUrl"],
@@ -313,7 +313,7 @@ export const machine = setup({
           invoke: {
             id: "createMoneriumUser",
             src: "createMoneriumUser",
-            input: ({ context }) => context.sharedCredential,
+            input: ({ context }: { context: Context }) => context.sharedCredential,
             onDone: {
               target: "createMoneriumProfile",
             },
@@ -326,7 +326,7 @@ export const machine = setup({
           invoke: {
             id: "requestMoneriumAuth",
             src: "requestMoneriumAuth",
-            input: ({ context }) => context.sharedCredential,
+            input: ({ context }: { context: Context }) => context.sharedCredential,
             onDone: {
               target: "moneriumAuthUrlFetched",
               actions: ["setMoneriumAuthUrl"],
@@ -349,7 +349,7 @@ export const machine = setup({
           invoke: {
             id: "moneriumAccessTokenFromCode",
             src: "moneriumAccessTokenFromCode",
-            input: ({ context }) => context.moneriumCode,
+            input: ({ context }: { context: Context }) => context.moneriumCode,
             onDone: {
               target: "createMoneriumProfile",
             },
@@ -363,7 +363,7 @@ export const machine = setup({
           invoke: {
             id: "createMoneriumProfile",
             src: "createMoneriumProfile",
-            input: ({ context }) => context.sharedCredential,
+            input: ({ context }: { context: Context }) => context.sharedCredential,
             onDone: {
               target: "fetchProfileStatus",
             },
@@ -414,7 +414,7 @@ export const machine = setup({
           invoke: {
             id: "requestKrakenDAG",
             src: "requestKrakenDAG",
-            input: ({ context }) => ({
+            input: ({ context }: { context: Context }) => ({
               client: context.loggedInClient,
               credential: context.credential,
             }),
@@ -431,7 +431,7 @@ export const machine = setup({
           invoke: {
             id: "createSharableToken",
             src: "createSharableToken",
-            input: ({ context }) => context.krakenDAG,
+            input: ({ context }: { context: Context }) => context.krakenDAG,
             onDone: {
               target: "dataOrTokenFetched",
               actions: ["setSharableToken"],
@@ -464,7 +464,7 @@ export const machine = setup({
       invoke: {
         id: "revokeAccessGrant",
         src: "revokeAccessGrant",
-        input: ({ context }) => ({
+        input: ({ context }: { context: Context }) => ({
           client: context.loggedInClient,
           sharedCredential: context.sharedCredential,
         }),

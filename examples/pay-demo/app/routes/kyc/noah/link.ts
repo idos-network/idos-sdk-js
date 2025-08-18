@@ -33,6 +33,7 @@ export async function loader({ request }: Route.LoaderArgs) {
       },
     );
   } catch (error) {
+    console.error(error);
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }
 }

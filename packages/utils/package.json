@@ -76,6 +76,17 @@
     "@partisiablockchain/abi-client": "^5.207.0",
     "ethers": "catalog:ethereum"
   },
+  "peerDependenciesMeta": {
+    "@partisiablockchain/blockchain-api-transaction-client": {
+      "optional": true
+    },
+    "@partisiablockchain/abi-client": {
+      "optional": true
+    },
+    "ethers": {
+      "optional": true
+    }
+  },
   "publishConfig": {
     "access": "public"
   },

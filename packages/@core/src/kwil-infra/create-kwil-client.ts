@@ -5,8 +5,8 @@ import type { DataInfo } from "@kwilteam/kwil-js/dist/core/database";
 import fetchAdapter from "@vespaiach/axios-fetch-adapter";
 import Axios from "axios";
 import invariant from "tiny-invariant";
-import type { ActionSchemaElem } from "../kwil-actions/schema";
-import { actionSchema } from "../kwil-actions/schema";
+import type { ActionSchemaElement } from "../kwil-actions";
+import { actionSchema } from "../kwil-actions";
 
 type CreateKwilClientParams = {
   chainId?: string;
@@ -47,7 +47,7 @@ export class KwilActionClient {
   #createActionInputs(actionName: string, params: Record<string, unknown> = {}): PositionalParams {
     if (!params || !Object.keys(params).length) return [];
 
-    const args = (actionSchema as Record<string, readonly ActionSchemaElem[]>)[actionName];
+    const args = (actionSchema as Record<string, readonly ActionSchemaElement[]>)[actionName];
 
     return args.map(({ name }) => {
       const value = params[name];
@@ -124,7 +124,7 @@ const createKwilClient =
 
     // TODO: Remove this when kwil-js upgrade to latest axios version
     // @ts-expect-error This is required to check if we are in chrome-extension environment
-    if (typeof chrome !== "undefined" && chrome.runtime.id) {
+    if (typeof chrome !== "undefined" && chrome.runtime?.id) {
       console.warn("🔑 chrome extension detected, patching kwil client");
       // @ts-expect-error This is expected since we are patching private method
       client.client.request = function () {

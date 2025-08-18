@@ -9,6 +9,10 @@ export function fileToBase85(file: Buffer): string {
   return base85.encode(file, "ascii85");
 }
 
+export function base85ToFile(data: string): Buffer | false {
+  return base85.decode(data);
+}
+
 export function capitalizeFirstLetter(str: string): string {
   return str[0].toUpperCase() + str.slice(1);
 }
