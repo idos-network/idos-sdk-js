@@ -7,6 +7,7 @@ export default defineConfig({
     "./src/enclave/index.ts",
     "./src/enclave/local.ts",
     "./src/codecs/index.ts",
+    "./src/xrpl-credentials/index.ts",
   ],
   dts: true,
 });
