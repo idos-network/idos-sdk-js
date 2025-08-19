@@ -472,6 +472,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   ): Promise<idOSCredential> {
     const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
+    console.log({
+      consumerEncryptionPublicKey,
+      consumerAuthPublicKey,
+      credentialId,
+    });
 
     invariant(credential, `"idOSCredential" with id ${credentialId} not found`);
 
