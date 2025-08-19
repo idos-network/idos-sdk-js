@@ -136,6 +136,10 @@ export async function createIDOSUserProfile({
 export async function getKrakenToken(): Promise<string> {
   invariant(process.env.KRAKEN_CLIENT_ID, "`KRAKEN_CLIENT_ID` is not set");
   invariant(process.env.KRAKEN_PRIVATE_KEY, "`KRAKEN_PRIVATE_KEY` is not set");
+  console.log({
+    clientId: process.env.KRAKEN_CLIENT_ID,
+    privateKey: process.env.KRAKEN_PRIVATE_KEY,
+  });
 
   const payload = {
     api: true,
