@@ -1,11 +1,13 @@
 import type { LoaderFunctionArgs } from "react-router";
+import { userContext } from "~/middlewares/auth";
 import { generateKrakenUrl } from "~/providers/kraken.server";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const currentUrl = new URL(request.url);
   const type = currentUrl.searchParams.get("type");
+  const user = context.get(userContext);
 
-  const url = await generateKrakenUrl(type ?? "sumsub");
+  const url = await generateKrakenUrl(type ?? "sumsub", user.address);
 
   return Response.json({ url });
 }
