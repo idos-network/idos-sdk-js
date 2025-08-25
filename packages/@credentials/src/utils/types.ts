@@ -97,6 +97,7 @@ export const CredentialSubjectSchema: z.ZodObject<{
   inquiryId: z.ZodOptional<z.ZodString>;
   firstName: z.ZodString;
   middleName: z.ZodOptional<z.ZodString>;
+  ssn: z.ZodOptional<z.ZodString>;
   gender: z.ZodOptional<typeof GenderSchema>;
   nationality: z.ZodOptional<z.ZodString>;
   familyName: z.ZodString;
@@ -135,6 +136,9 @@ export const CredentialSubjectSchema: z.ZodObject<{
   /* Middle name. */
   middleName: z.string().optional(),
 
+  /* Social-security-number (without dashes) */
+  ssn: z.string().min(9).max(9).optional(),
+
   /* Nationality (ISO 3166-1 alpha-2). */
   nationality: z.string().min(2).max(2).optional(),
 
@@ -160,7 +164,7 @@ export const CredentialSubjectSchema: z.ZodObject<{
   placeOfBirth: z.string().optional(),
 
   /* Email. */
-  email: z.string().email().optional(),
+  email: z.email().optional(),
 
   /* Phone number. */
   phoneNumber: z.string().optional(),
