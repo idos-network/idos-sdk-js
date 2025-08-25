@@ -106,7 +106,7 @@ export const CredentialSubjectSchema: z.ZodObject<{
   governmentIdType: z.ZodOptional<z.ZodString>;
   dateOfBirth: z.ZodDate;
   placeOfBirth: z.ZodOptional<z.ZodString>;
-  email: z.ZodOptional<z.ZodString>;
+  email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
   idDocumentCountry: z.ZodString;
   idDocumentNumber: z.ZodString;
