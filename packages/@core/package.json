@@ -3,14 +3,15 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
-    "axios": "0.27.2",
     "@gemwallet/api": "^3.8.0",
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@kwilteam/kwil-js": "catalog:core",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
-    "@idos-network/utils": "workspace:*",
-    "@idos-network/credentials": "workspace:*",
+    "@vespaiach/axios-fetch-adapter": "0.3.1",
     "@wagmi/core": "2.17.3",
+    "axios": "0.27.2",
     "ethers": "catalog:ethereum",
     "near-api-js": "catalog:near",
     "ripple-binary-codec": "catalog:xrp",
@@ -18,8 +19,7 @@
     "tweetnacl": "catalog:core",
     "xrpl": "catalog:xrp",
     "xumm": "catalog:xrp",
-    "zod": "catalog:core",
-    "@vespaiach/axios-fetch-adapter": "0.3.1"
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core"
