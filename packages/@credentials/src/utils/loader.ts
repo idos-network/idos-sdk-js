@@ -7,9 +7,9 @@ import v1 from "../../assets/v1.json";
 
 export const CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
 export const CONTEXT_IDOS_CREDENTIALS_V1 =
-  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/1356fea6672d22deb07fedc5fa427478b2e1654c/packages/%40credentials/assets/idos-credentials-v1.json";
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/0049d2e93f8913c42398372e2bb65d92bed38ac0/packages/%40credentials/assets/idos-credentials-v1.json";
 export const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
-  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/1356fea6672d22deb07fedc5fa427478b2e1654c/packages/%40credentials/assets/idos-credential-subject-v1.json";
+  "https://raw.githubusercontent.com/idos-network/idos-sdk-js/0049d2e93f8913c42398372e2bb65d92bed38ac0/packages/%40credentials/assets/idos-credential-subject-v1.json";
 export const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
 
 export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {

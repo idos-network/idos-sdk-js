@@ -6,7 +6,7 @@ import { verifyCredentials } from "./verifier";
 
 describe("verifiableCredentials", () => {
   it("should raise an error if the fields are invalid", async () => {
-    expect.assertions(10); // catch
+    expect.assertions(12); // catch
 
     const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
     const issuer = "https://vc-issuers.cool.id/idos";
@@ -37,6 +37,7 @@ describe("verifiableCredentials", () => {
           governmentId: "123-45-6789",
           email: "john.lennon@example.com",
           phoneNumber: "+1234567890",
+          ssn: "203-456",
           dateOfBirth: new Date("2025-02-30"),
           placeOfBirth: "New York, NY",
           idDocumentCountry: "DEU",
@@ -62,7 +63,7 @@ describe("verifiableCredentials", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(ZodError);
       const zodError = error as ZodError;
-      expect(zodError.issues).toHaveLength(4);
+      expect(zodError.issues).toHaveLength(5);
 
       // idDocumentCountry
       const idDocumentCountryError = zodError.issues.find(
@@ -91,6 +92,11 @@ describe("verifiableCredentials", () => {
       const genderError = zodError.issues.find((error) => error.path[0] === "gender");
       expect(genderError).toBeDefined();
       expect(genderError?.message).toContain('Invalid option: expected one of "M"|"F"|"OTHER"');
+
+      // ssn
+      const ssnError = zodError.issues.find((error) => error.path[0] === "ssn");
+      expect(ssnError).toBeDefined();
+      expect(ssnError?.message).toContain("Too small: expected string to have >=9 characters");
     }
   });
 
@@ -124,6 +130,7 @@ describe("verifiableCredentials", () => {
         firstName: "John",
         middleName: "Paul",
         familyName: "Lennon",
+        ssn: "123456789",
         gender: "M",
         nationality: "US",
         governmentIdType: "SSN",
