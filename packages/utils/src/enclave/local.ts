@@ -6,6 +6,7 @@ import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
+import type { AddAddressMessageToSign, AddAddressSignatureMessage } from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
 import type { PipeCodecArgs } from "../store/interface";
 import { BaseProvider } from "./base";
@@ -404,5 +405,21 @@ export class LocalEnclave<
     );
 
     return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
+  }
+
+  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign | undefined> {
+    if (this.options.encryptionPasswordStore !== "mpc") {
+      return undefined;
+    }
+
+    return this.mpcClient.addAddressMessageToSign(address);
+  }
+
+  async addAddressToMpcSecret(
+    userId: string,
+    message: AddAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.mpcClient.addAddress(userId, message, signature);
   }
 }
