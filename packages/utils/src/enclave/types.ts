@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-export const EncryptionPasswordStoresEnum: z.ZodEnum<["mpc", "user"]> = z.enum([
-  "mpc",
-  "user",
-] as const);
+export const EncryptionPasswordStoresEnum: z.ZodEnum<{
+  mpc: "mpc";
+  user: "user";
+}> = z.enum(["mpc", "user"]);
+
 export type EncryptionPasswordStore = z.infer<typeof EncryptionPasswordStoresEnum>;
 
 export type PublicEncryptionProfile = {
