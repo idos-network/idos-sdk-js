@@ -243,6 +243,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           "signTypedDataResponse",
           "backupUserEncryptionProfile",
           "filterCredentials",
+          "addAddressMessageToSign",
+          "addAddressToMpcSecret",
         ];
 
         if (!allowedMethods.includes(method)) {

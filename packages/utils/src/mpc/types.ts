@@ -28,6 +28,20 @@ export const UPDATE_TYPES: Record<string, TypedDataField[]> = {
   ],
 };
 
+export const ADD_ADDRESS_TYPES: Record<string, TypedDataField[]> = {
+  AddAddressSignatureMessage: [
+    { name: "address_to_add", type: "address" },
+    { name: "timestamp", type: "uint64" },
+  ],
+};
+
+export const REMOVE_ADDRESS_TYPES: Record<string, TypedDataField[]> = {
+  RemoveAddressSignatureMessage: [
+    { name: "address_to_remove", type: "address" },
+    { name: "timestamp", type: "uint64" },
+  ],
+};
+
 export interface UploadSignatureMessage {
   share_commitments: Bytes32[];
   recovering_addresses: Address[];
@@ -46,6 +60,13 @@ export interface DownloadSignatureMessage {
 }
 
 export type DownloadRequest = DownloadSignatureMessage;
+
+export interface AddAddressSignatureMessage {
+  address_to_add: Address;
+  timestamp: number;
+}
+
+export type AddAddressRequest = AddAddressSignatureMessage;
 
 export interface UpdateWalletsSignatureMessage {
   recovering_addresses: Address[];
@@ -70,4 +91,10 @@ export type UploadMessageToSign = {
   domain: TypedDataDomain;
   types: Record<string, TypedDataField[]>;
   value: UploadSignatureMessage;
+};
+
+export type AddAddressMessageToSign = {
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: AddAddressSignatureMessage;
 };

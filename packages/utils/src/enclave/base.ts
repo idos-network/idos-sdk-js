@@ -3,6 +3,7 @@ import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import { fromBytesToJson } from "../codecs";
+import type { AddAddressMessageToSign, AddAddressSignatureMessage } from "../mpc/types";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
@@ -195,5 +196,17 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         ...credential,
         content: "", // Content should not leave the enclave
       }));
+  }
+
+  async addAddressMessageToSign(_address: string): Promise<AddAddressMessageToSign | undefined> {
+    throw new Error("Method 'addAddressMessageToSign' has to be implemented in the subclass.");
+  }
+
+  async addAddressToMpcSecret(
+    _userId: string,
+    _message: AddAddressSignatureMessage,
+    _signature: string,
+  ): Promise<string> {
+    throw new Error("Method 'addAddressToMpcSecret' has to be implemented in the subclass.");
   }
 }

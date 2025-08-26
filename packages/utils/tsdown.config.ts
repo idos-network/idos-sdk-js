@@ -6,6 +6,7 @@ export default defineConfig({
     "./src/store/index.ts",
     "./src/enclave/index.ts",
     "./src/enclave/local.ts",
+    "./src/mpc/index.ts",
     "./src/codecs/index.ts",
     "./src/xrpl-credentials/index.ts",
   ],

@@ -4,6 +4,7 @@ import {
   type EnclaveOptions,
   type PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
+import type { AddAddressMessageToSign, AddAddressSignatureMessage } from "@idos-network/utils/mpc";
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
@@ -116,6 +117,18 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     } finally {
       this.hideEnclave();
     }
+  }
+
+  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign> {
+    return this.requestToEnclave("addAddressMessageToSign", address);
+  }
+
+  async addAddressToMpcSecret(
+    userId: string,
+    message: AddAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.requestToEnclave("addAddressToMpcSecret", userId, message, signature);
   }
 
   private async createAndLoadIframe(): Promise<void> {
