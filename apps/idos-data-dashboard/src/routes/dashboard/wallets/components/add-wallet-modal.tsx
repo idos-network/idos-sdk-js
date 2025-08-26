@@ -220,7 +220,8 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
           account: address as `0x${string}`,
         });
         signature = _signature as `0x${string}`;
-      } catch (_error) {
+      } catch (error) {
+        console.error(error);
         toast({
           title: "Error while adding wallet",
           description:

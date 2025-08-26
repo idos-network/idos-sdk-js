@@ -57,11 +57,14 @@ export function putRequest<T>(url: string, object: T, headers?: HeadersInit): Pr
  * @param headers
  * @return a promise containing whether the put succeeded or not.
  */
-export function patchRequest<T>(url: string, object: T, headers?: HeadersInit): Promise<boolean> {
+export function patchRequest<T>(url: string, object: T, headers?: HeadersInit): Promise<string> {
   const options = buildOptions("PATCH", { ...postHeaders, ...headers }, object);
   return fetch(url, options)
-    .then(async (response) => response.ok)
-    .catch(() => false);
+    .then(async (response) => response.status.toString())
+    .catch((error) => {
+      console.error(error);
+      return error;
+    });
 }
 
 /**

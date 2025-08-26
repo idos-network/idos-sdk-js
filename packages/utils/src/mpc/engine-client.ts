@@ -8,6 +8,7 @@ import type {
   PbcAddress,
   Sharing,
   UpdateWalletsRequest,
+  AddAddressRequest
 } from "./types";
 
 export class EngineClient {
@@ -20,7 +21,7 @@ export class EngineClient {
   }
 
   public async sendUpload(id: string, uploadRequest: Sharing, signature: Bytes): Promise<string> {
-    const authHeader: HeadersInit = {
+    const authHeader: Record<string, string> = {
       Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
@@ -37,7 +38,7 @@ export class EngineClient {
     downloadRequest: DownloadRequest,
     signature: Bytes,
   ): Promise<{ status: string; body: EncryptedShare | undefined }> {
-    const authHeader: HeadersInit = {
+    const authHeader: Record<string, string> = {
       Authorization: `eip712 ${signature}`,
     };
     // TODO: remove this once the baseUrl is updated to https
@@ -70,8 +71,8 @@ export class EngineClient {
     return { share: Buffer.from(open.subarray(32)), status };
   }
 
-  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string) {
-    const authHeader: HeadersInit = {
+  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string): Promise<string> {
+    const authHeader: Record<string, string> = {
       Authorization: `eip712 ${signature}`,
     };
     const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
@@ -79,5 +80,30 @@ export class EngineClient {
     if (!ok) {
       throw new Error(`Error updating wallets to ${this.contractAddress} at ${url}`);
     }
+
+    return ok;
   }
+
+  public async sendAddAddress(id: string, addRequest: AddAddressRequest, signature: string): Promise<string>  {
+    const authHeader: Record<string, string> = {
+      Authorization: "eip712 " + signature,
+    };
+    const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id + "/add_address";
+    const status = await patchRequest(url, addRequest, authHeader);
+    if (status !== "200") {
+      throw new Error(`Error adding a wallet to ${id} at ${url}`);
+    }
+    return status;
+  }
+
+  // public async sendRemoveAddress(id: string, removeRequest: RemoveAddressRequest, signature: string) {
+  //   const authHeader: HeadersInit = {
+  //     Authorization: "eip712 " + signature,
+  //   };
+  //   const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id + "/remove_address";
+  //   const ok = await patchRequest(url, removeRequest, authHeader);
+  //   if (!ok) {
+  //     throw new Error(`Error removing address from ${this.contractAddress} at ${url}`);
+  //   }
+  // }
 }
