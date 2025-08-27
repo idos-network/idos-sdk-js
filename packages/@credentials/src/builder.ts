@@ -2,9 +2,9 @@ import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import * as vc from "@digitalbazaar/vc";
 import { type AvailableIssuerType, convertValues, issuerToKey } from "./utils";
 import {
-  CONTEXT_ED25519_SIGNATURE_2020_V1,
-  CONTEXT_IDOS_CREDENTIALS_V1,
-  CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
+  CONTEXT_IDOS_CREDENTIALS,
+  CONTEXT_IDOS_CREDENTIALS_SUBJECT,
+  CONTEXT_IDOS_SIGNATURE,
   CONTEXT_V1,
   defaultDocumentLoader,
 } from "./utils/loader";
@@ -34,7 +34,7 @@ export async function buildCredentials(
   const { residentialAddress, ...subjectData } = subject;
 
   const credentialSubject = {
-    "@context": CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT,
+    "@context": CONTEXT_IDOS_CREDENTIALS_SUBJECT,
     ...convertValues(subjectData),
     // @ts-expect-error - TODO: fix this
     ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
@@ -44,7 +44,7 @@ export async function buildCredentials(
 
   // Create credentials container
   const credential = {
-    "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS_V1, CONTEXT_ED25519_SIGNATURE_2020_V1],
+    "@context": [CONTEXT_V1, CONTEXT_IDOS_CREDENTIALS, CONTEXT_IDOS_SIGNATURE],
     type: ["VerifiableCredential"],
     issuer: key.controller,
     ...convertValues(fields),
