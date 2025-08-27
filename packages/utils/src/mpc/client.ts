@@ -15,10 +15,13 @@ import {
   type Sharing,
   UPLOAD_TYPES,
   ADD_ADDRESS_TYPES,
+  REMOVE_ADDRESS_TYPES,
   type UploadMessageToSign,
   type UploadSignatureMessage,
   type AddAddressSignatureMessage,
   type AddAddressMessageToSign,
+  type RemoveAddressMessageToSign,
+  type RemoveAddressSignatureMessage,
 } from "./types";
 
 export class Client {
@@ -140,12 +143,39 @@ export class Client {
     };
   }
 
+  public removeAddressMessageToSign(addressToRemove: string): RemoveAddressMessageToSign {
+    return {
+      domain: this.getTypedDomain(),
+      types: REMOVE_ADDRESS_TYPES,
+      value: {
+        address_to_remove: addressToRemove,
+        timestamp: new Date().getTime(),
+      }
+    };
+  }
+
   public async addAddress(userId: string, message: AddAddressSignatureMessage, signature: string): Promise<string> {
     const engineClients = await this.getEngines();
     const promises = [];
     for (let i = 0; i < engineClients.length; i++) {
       const engineClient = engineClients[i];
       promises.push(engineClient.sendAddAddress(userId, message, signature));
+    }
+    const statuses = await Promise.all(promises);
+
+    if (statuses.every((item) => item === "200")) {
+      return "success";
+    }
+
+    return "failure";
+  }
+
+  public async removeAddress(userId: string, message: RemoveAddressSignatureMessage, signature: string): Promise<string> {
+    const engineClients = await this.getEngines();
+    const promises = [];
+    for (let i = 0; i < engineClients.length; i++) {
+      const engineClient = engineClients[i];
+      promises.push(engineClient.sendRemoveAddress(userId, message, signature));
     }
     const statuses = await Promise.all(promises);
 
