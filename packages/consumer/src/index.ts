@@ -112,8 +112,11 @@ export class idOSConsumer {
     return accessGrants[0];
   }
 
-  async getCredentialsSharedByUser(userId: string): Promise<idOSCredential[]> {
-    return getCredentialsSharedByUser(this.#kwilClient, { user_id: userId });
+  async getCredentialsSharedByUser(userId: string): Promise<Omit<idOSCredential, "content">[]> {
+    return getCredentialsSharedByUser(this.#kwilClient, {
+      user_id: userId,
+      issuer_auth_public_key: null,
+    });
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
