@@ -60,7 +60,8 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
       async onSuccess() {
         handleClose();
       },
-      async onError(_, __, ctx) {
+      async onError(error, __, ctx) {
+        console.error("Error while deleting wallet:", error);
         queryClient.setQueryData(["wallets"], ctx?.previousWallets);
         toast({
           title: "Error while deleting wallet",

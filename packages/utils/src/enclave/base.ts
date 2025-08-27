@@ -3,7 +3,12 @@ import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import { fromBytesToJson } from "../codecs";
-import type { AddAddressMessageToSign, AddAddressSignatureMessage } from "../mpc/types";
+import type {
+  AddAddressMessageToSign,
+  AddAddressSignatureMessage,
+  RemoveAddressMessageToSign,
+  RemoveAddressSignatureMessage,
+} from "../mpc/types";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
@@ -198,8 +203,12 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       }));
   }
 
-  async addAddressMessageToSign(_address: string): Promise<AddAddressMessageToSign | undefined> {
+  async addAddressMessageToSign(_address: string): Promise<AddAddressMessageToSign> {
     throw new Error("Method 'addAddressMessageToSign' has to be implemented in the subclass.");
+  }
+
+  async removeAddressMessageToSign(_address: string): Promise<RemoveAddressMessageToSign> {
+    throw new Error("Method 'removeAddressMessageToSign' has to be implemented in the subclass.");
   }
 
   async addAddressToMpcSecret(
@@ -208,5 +217,13 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     _signature: string,
   ): Promise<string> {
     throw new Error("Method 'addAddressToMpcSecret' has to be implemented in the subclass.");
+  }
+
+  async removeAddressFromMpcSecret(
+    _userId: string,
+    _message: RemoveAddressSignatureMessage,
+    _signature: string,
+  ): Promise<string> {
+    throw new Error("Method 'removeAddressFromMpcSecret' has to be implemented in the subclass.");
   }
 }

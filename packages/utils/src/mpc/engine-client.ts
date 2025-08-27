@@ -8,7 +8,8 @@ import type {
   PbcAddress,
   Sharing,
   UpdateWalletsRequest,
-  AddAddressRequest
+  AddAddressRequest,
+  RemoveAddressRequest
 } from "./types";
 
 export class EngineClient {
@@ -93,17 +94,20 @@ export class EngineClient {
     if (status !== "200") {
       throw new Error(`Error adding a wallet to ${id} at ${url}`);
     }
+
     return status;
   }
 
-  // public async sendRemoveAddress(id: string, removeRequest: RemoveAddressRequest, signature: string) {
-  //   const authHeader: HeadersInit = {
-  //     Authorization: "eip712 " + signature,
-  //   };
-  //   const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id + "/remove_address";
-  //   const ok = await patchRequest(url, removeRequest, authHeader);
-  //   if (!ok) {
-  //     throw new Error(`Error removing address from ${this.contractAddress} at ${url}`);
-  //   }
-  // }
+  public async sendRemoveAddress(id: string, removeRequest: RemoveAddressRequest, signature: string): Promise<string> {
+    const authHeader: Record<string, string> = {
+      Authorization: "eip712 " + signature,
+    };
+    const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id + "/remove_address";
+    const status = await patchRequest(url, removeRequest, authHeader);
+    if (status !== "200") {
+      throw new Error(`Error removing address from ${id} at ${url}`);
+    }
+
+    return status;
+  }
 }

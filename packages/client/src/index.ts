@@ -29,7 +29,6 @@ import {
   type idOSWallet,
   removeCredential,
   removeWallet,
-  removeWallets,
   revokeAccessGrant,
   type ShareCredentialInput,
   shareCredential,
@@ -393,21 +392,22 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
     await addWallet(this.kwilClient, params);
 
-    const addMessageToSign = await this.enclaveProvider.addAddressMessageToSign(params.address);
-    // addMessageToSign is undefined if MPC is not enabled or if the user is not using MPC
-    if (!addMessageToSign) {
+    // we don't need to add the wallet to MPC if the user is not using MPC
+    if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
+    const messageToSign = await this.enclaveProvider.addAddressMessageToSign(params.address);
+
     const signature = await this.signer.signTypedData(
-      addMessageToSign.domain,
-      addMessageToSign.types,
-      addMessageToSign.value,
+      messageToSign.domain,
+      messageToSign.types,
+      messageToSign.value,
     );
     const result = await this.enclaveProvider.addAddressToMpcSecret(
       this.user.id,
-      addMessageToSign.value,
+      messageToSign.value,
       signature,
     );
     if (result !== "success") {
@@ -422,12 +422,43 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async removeWallet(id: string): Promise<{ id: string }> {
+    const wallets = await this.getWallets();
+    const wallet = wallets.find((wallet) => wallet.id === id);
+    if (!wallet) {
+      throw new Error(`Wallet with id ${id} not found`);
+    }
+
     await removeWallet(this.kwilClient, { id });
+
+    // we don't need to add the wallet to MPC if the user is not using MPC
+    if (this.user.encryption_password_store !== "mpc") {
+      console.log("MPC is not enabled or the user is not using MPC");
+      return { id };
+    }
+
+    const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(wallet.address);
+    const signature = await this.signer.signTypedData(
+      messageToSign.domain,
+      messageToSign.types,
+      messageToSign.value,
+    );
+    const result = await this.enclaveProvider.removeAddressFromMpcSecret(
+      wallet.user_id,
+      messageToSign.value,
+      signature,
+    );
+    if (result !== "success") {
+      console.error(`Failed to add wallet to MPC: ${result}`);
+    }
+
     return { id };
   }
 
   async removeWallets(ids: string[]): Promise<string[]> {
-    await removeWallets(this.kwilClient, ids);
+    for (const id of ids) {
+      await this.removeWallet(id);
+    }
+
     return ids;
   }
 

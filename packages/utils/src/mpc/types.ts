@@ -68,6 +68,13 @@ export interface AddAddressSignatureMessage {
 
 export type AddAddressRequest = AddAddressSignatureMessage;
 
+export interface RemoveAddressSignatureMessage {
+  address_to_remove: Address;
+  timestamp: number;
+}
+
+export type RemoveAddressRequest = RemoveAddressSignatureMessage;
+
 export interface UpdateWalletsSignatureMessage {
   recovering_addresses: Address[];
   timestamp: number;
@@ -97,4 +104,10 @@ export type AddAddressMessageToSign = {
   domain: TypedDataDomain;
   types: Record<string, TypedDataField[]>;
   value: AddAddressSignatureMessage;
+};
+
+export type RemoveAddressMessageToSign = {
+  domain: TypedDataDomain;
+  types: Record<string, TypedDataField[]>;
+  value: RemoveAddressSignatureMessage;
 };
