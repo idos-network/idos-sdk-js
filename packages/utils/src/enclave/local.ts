@@ -3,7 +3,12 @@ import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
-import type { AddAddressMessageToSign, AddAddressSignatureMessage } from "../mpc/types";
+import type {
+  AddAddressMessageToSign,
+  AddAddressSignatureMessage,
+  RemoveAddressMessageToSign,
+  RemoveAddressSignatureMessage,
+} from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
@@ -336,12 +341,12 @@ export class LocalEnclave<
     return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
   }
 
-  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign | undefined> {
-    if (this.options.encryptionPasswordStore !== "mpc") {
-      return undefined;
-    }
-
+  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign> {
     return this.mpcClient.addAddressMessageToSign(address);
+  }
+
+  async removeAddressMessageToSign(address: string): Promise<RemoveAddressMessageToSign> {
+    return this.mpcClient.removeAddressMessageToSign(address);
   }
 
   async addAddressToMpcSecret(
@@ -350,5 +355,13 @@ export class LocalEnclave<
     signature: string,
   ): Promise<string> {
     return this.mpcClient.addAddress(userId, message, signature);
+  }
+
+  async removeAddressFromMpcSecret(
+    userId: string,
+    message: RemoveAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.mpcClient.removeAddress(userId, message, signature);
   }
 }

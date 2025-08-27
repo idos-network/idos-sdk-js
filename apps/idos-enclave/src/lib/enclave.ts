@@ -244,7 +244,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           "backupUserEncryptionProfile",
           "filterCredentials",
           "addAddressMessageToSign",
+          "removeAddressMessageToSign",
           "addAddressToMpcSecret",
+          "removeAddressFromMpcSecret",
         ];
 
         if (!allowedMethods.includes(method)) {
