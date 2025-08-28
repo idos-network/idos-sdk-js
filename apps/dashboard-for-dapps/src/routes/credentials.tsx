@@ -11,11 +11,9 @@ import {
   Text,
 } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/credentials";
-import { base64Encode } from "@idos-network/utils/codecs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
-import ascii85 from "ascii85";
 import { matchSorter } from "match-sorter";
 import { useDeferredValue, useMemo, useState } from "react";
 import invariant from "tiny-invariant";
@@ -43,7 +41,7 @@ import {
 } from "@/components/ui";
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
-import { changeCase, decrypt, openImageInNewTab } from "@/utils";
+import { changeCase, decrypt, isKeyFile, openImageInNewTab, transformBase85Image } from "@/utils";
 
 export const Route = createFileRoute("/credentials")({
   component: Credentials,
@@ -142,22 +140,18 @@ function CredentialDetails({
   const content = hasValidContent ? safeParse(credential?.content) : { credentialSubject: {} };
 
   const subject = Object.entries(content.credentialSubject || {}).filter(
-    ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
+    ([key]) => !["emails", "wallets"].includes(key) && !isKeyFile(key),
   ) as [string, string][];
 
   const emails = content.credentialSubject?.emails || [];
   const wallets = content.credentialSubject?.wallets || [];
+
   const files = (
-    Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
+    Object.entries(content.credentialSubject).filter(([key]) => isKeyFile(key)) as [
       string,
       string,
     ][]
   ).map(([key, value]) => [key, value]);
-
-  function transformBase85Image(src: string) {
-    const prefix = "data:image/jpeg;base85,";
-    return `data:image/png;base64,${base64Encode(ascii85.decode(src.substring(prefix.length)))}`;
-  }
 
   return (
     <DrawerRoot
