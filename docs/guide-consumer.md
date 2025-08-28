@@ -360,7 +360,7 @@ const allowedIssuers = [
   },
 ];
 
-const verificationResult = await idOSConsumer.verifyCredentials(credentials, allowedIssuers);
+const [verificationResult] = await idOSConsumer.verifyCredentials(credentials, allowedIssuers);
 
 console.log("Result: ", verificationResult);
 ```
