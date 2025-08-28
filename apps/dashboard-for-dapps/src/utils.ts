@@ -1,4 +1,5 @@
-import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
+import { base64Decode, base64Encode, utf8Decode } from "@idos-network/utils/codecs";
+import ascii85 from "ascii85";
 import nacl from "tweetnacl";
 
 export function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secretKey: string) {
@@ -15,6 +16,22 @@ export function decrypt(b64FullMessage: string, b64SenderPublicKey: string, secr
   }
 
   return utf8Decode(decrypted);
+}
+
+export function isKeyFile(key: string) {
+  return key.endsWith("_file") || key.endsWith("File");
+}
+
+export function transformBase85Image(src: string) {
+  const prefix = "data:image/jpeg;base85,";
+
+  let data = src;
+
+  if (data.startsWith(prefix)) {
+    data = data.substring(prefix.length);
+  }
+
+  return `data:image/png;base64,${base64Encode(ascii85.decode(data))}`;
 }
 
 export function openImageInNewTab(base64Image: string) {
