@@ -1,15 +1,16 @@
 import { NoncedBox } from "@idos-network/core/cryptography";
 import {
-  type CreateAccessGrantByDagInput,
-  createAccessGrantByDag,
-  type GetGrantsPaginatedInput,
+  type CreateAgByDagForCopyInput,
+  createAgByDagForCopy,
+  type GetAccessGrantsGrantedInput,
   getAccessGrantsForCredential,
+  getAccessGrantsGrantedCount,
+  getCredentialShared,
   getCredentialsSharedByUser,
   getGrants,
-  getGrantsCount,
   getPassportingPeers,
-  getSharedCredential,
   type idOSGrant,
+  type idOSPassportingPeer,
 } from "@idos-network/core/kwil-actions";
 import {
   createNodeKwilClient,
@@ -17,7 +18,6 @@ import {
   type KwilActionClient,
   type KwilSignerType,
 } from "@idos-network/core/kwil-infra";
-import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
@@ -87,12 +87,12 @@ export class idOSConsumer {
     return base64Encode(this.#noncedBox.keyPair.publicKey);
   }
 
-  async getSharedCredentialFromIDOS(dataId: string): Promise<idOSCredential | undefined> {
-    return getSharedCredential(this.#kwilClient, { id: dataId }).then((res) => res[0]);
+  async getCredentialSharedFromIDOS(dataId: string): Promise<idOSCredential | undefined> {
+    return getCredentialShared(this.#kwilClient, { id: dataId }).then((res) => res[0]);
   }
 
-  async getSharedCredentialContentDecrypted(dataId: string): Promise<string> {
-    const credentialCopy = await this.getSharedCredentialFromIDOS(dataId);
+  async getCredentialSharedContentDecrypted(dataId: string): Promise<string> {
+    const credentialCopy = await this.getCredentialSharedFromIDOS(dataId);
 
     invariant(credentialCopy, `Credential with id ${dataId} not found`);
 
@@ -103,7 +103,9 @@ export class idOSConsumer {
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
-    return getGrantsCount(this.#kwilClient, { user_id: userId ?? null }).then((res) => res.count);
+    return getAccessGrantsGrantedCount(this.#kwilClient, { user_id: userId ?? null }).then(
+      (res) => res.count,
+    );
   }
 
   async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
@@ -121,7 +123,7 @@ export class idOSConsumer {
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
-    const credential = await this.getSharedCredentialFromIDOS(credentialId);
+    const credential = await this.getCredentialSharedFromIDOS(credentialId);
 
     invariant(credential, `Credential with id ${credentialId} not found`);
 
@@ -144,7 +146,7 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getAccessGrants(params: GetGrantsPaginatedInput): Promise<{
+  async getAccessGrants(params: GetAccessGrantsGrantedInput): Promise<{
     grants: idOSGrant[];
     totalCount: number;
   }> {
@@ -155,13 +157,13 @@ export class idOSConsumer {
   }
 
   async createAccessGrantByDag(
-    params: CreateAccessGrantByDagInput,
-  ): Promise<CreateAccessGrantByDagInput> {
-    await createAccessGrantByDag(this.#kwilClient, params);
+    params: CreateAgByDagForCopyInput,
+  ): Promise<CreateAgByDagForCopyInput> {
+    await createAgByDagForCopy(this.#kwilClient, params);
     return params;
   }
 
-  async getPassportingPeers(): Promise<PassportingPeer[]> {
+  async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
     return getPassportingPeers(this.#kwilClient);
   }
 

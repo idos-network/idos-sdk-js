@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
-import type { AuthMethodProps } from "@/features/auth";
+import type { AuthProps } from "@/features/auth";
 
 interface PasswordFieldProps extends Omit<TextFieldProps, "value" | "onInput"> {
   hasError?: Signal<boolean>;
@@ -75,7 +75,7 @@ function DurationField({ duration }: DurationFieldProps) {
 }
 
 export interface PasswordFormProps
-  extends Omit<AuthMethodProps, "allowedEncryptionStores" | "encryptionPasswordStore"> {}
+  extends Omit<AuthProps, "allowedEncryptionStores" | "encryptionPasswordStore"> {}
 
 export default function PasswordForm({
   mode,

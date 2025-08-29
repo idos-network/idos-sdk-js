@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Link, Spinner } from "@heroui/react";
-import type { PassportingPeer } from "@idos-network/core";
+import type { idOSPassportingPeer } from "@idos-network/core/kwil-actions";
 import type { idOSCredential } from "@idos-network/credentials";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -25,7 +25,7 @@ const useFetchMatchingCredential = () => {
   const { isleController } = useIsleController();
 
   return useQuery<
-    { credentials: idOSCredential[]; peers: PassportingPeer[] },
+    { credentials: idOSCredential[]; peers: idOSPassportingPeer[] },
     Error,
     (idOSCredential & { passporting_server_url_base: string }) | null
   >({
@@ -34,7 +34,7 @@ const useFetchMatchingCredential = () => {
       invariant(isleController?.idosClient.state === "logged-in");
       const [credentials, peers] = await Promise.all([
         isleController?.idosClient.getAllCredentials(),
-        fetch("/api/passporting-peers").then((res) => res.json()) as Promise<PassportingPeer[]>,
+        fetch("/api/passporting-peers").then((res) => res.json()) as Promise<idOSPassportingPeer[]>,
       ]);
       return { credentials, peers };
     },
@@ -49,7 +49,7 @@ const useFetchMatchingCredential = () => {
       }
 
       const matchingPeer = data.peers.find(
-        (peer: PassportingPeer) =>
+        (peer: idOSPassportingPeer) =>
           peer.issuer_public_key === matchingCredential.issuer_auth_public_key,
       );
 

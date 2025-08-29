@@ -1,4 +1,4 @@
-import { getSharedCredential } from "~/providers/idos.server";
+import { getCredentialShared } from "~/providers/idos.server";
 import { createNoahCustomer } from "~/providers/noah.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "../+types/link";
@@ -15,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    const data = await getSharedCredential(credentialId, user.address);
+    const data = await getCredentialShared(credentialId, user.address);
 
     const response = await createNoahCustomer(user.address, data, url);
 

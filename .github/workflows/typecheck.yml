@@ -1,0 +1,32 @@
+name: Typecheck
+
+on:
+  pull_request:
+    branches:
+      - playground
+      - main
+  push:
+    branches:
+      - playground
+      - main
+
+jobs:
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node_version
+          cache: 'pnpm'
+
+      - run: pnpm install
+
+      - run: pnpm typecheck

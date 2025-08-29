@@ -10,7 +10,7 @@ import type { Polynomial } from "./polynomial";
 export class BinarySecretShares {
   private readonly secretShares: Array<Share | undefined>;
 
-  static readonly ALPHAS = F256.computationAlphas();
+  static readonly ALPHAS: readonly F256[] = F256.computationAlphas();
 
   /**
    * Constructs secret shares from a list of shares. The list contains a share for each
