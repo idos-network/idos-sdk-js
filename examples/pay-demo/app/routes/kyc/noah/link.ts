@@ -17,6 +17,8 @@ export async function loader({ request }: Route.LoaderArgs) {
   try {
     const data = await getCredentialShared(credentialId, user.address);
 
+    // Create noah customer & prepare payin session
+
     const response = await createNoahCustomer(user.address, data, url);
 
     session.set("noahCheckoutSessionID", response.CheckoutSession.CheckoutSessionID);
