@@ -1,3 +1,5 @@
+export type HeadersInit = Record<string, string> | string[][];
+
 const postHeaders: HeadersInit = {
   Accept: "application/json, text/plain, */*",
   "Content-Type": "application/json",
