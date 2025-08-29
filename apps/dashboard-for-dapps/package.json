@@ -41,6 +41,7 @@
   "private": true,
   "scripts": {
     "build": "tsc -b && vite build",
+    "typecheck": "tsc --noEmit",
     "dev": "vite",
     "preview": "vite preview"
   },

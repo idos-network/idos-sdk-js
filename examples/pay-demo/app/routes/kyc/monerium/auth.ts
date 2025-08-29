@@ -1,4 +1,4 @@
-import { getSharedCredential } from "~/providers/idos.server";
+import { getCredentialShared } from "~/providers/idos.server";
 import { auth } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/auth";
@@ -15,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    const data = await getSharedCredential(credentialId, user.address);
+    const data = await getCredentialShared(credentialId, user.address);
 
     const authResult = await auth(data, url);
 

@@ -58,6 +58,7 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "postpack": "clean-package restore",
+    "typecheck": "tsc --noEmit",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
     "release-it": "release-it"

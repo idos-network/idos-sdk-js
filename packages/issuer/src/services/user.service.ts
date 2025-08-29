@@ -1,10 +1,8 @@
 import type { KwilActionClient } from "@idos-network/core";
 import {
-  createUser as _createUser,
-  getUserAsInserter as _getUserAsInserter,
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
-  type GetUserAsInserterInput,
+  addUserAsInserter,
   type idOSUser,
   type idOSWallet,
 } from "@idos-network/core/kwil-actions";
@@ -36,12 +34,12 @@ export class UserService {
   }
 
   async hasProfile(address: string): Promise<boolean> {
-    return (await _hasProfile(this.#kwilClient, { address })).has_profile;
+    return _hasProfile(this.#kwilClient, { address }).then((res) => res.has_profile);
   }
 
   async createUserProfile(params: CreateProfileReqParams): Promise<idOSUser> {
     const payload = this.#ensureEntityId(params);
-    await _createUser(this.#kwilClient, payload);
+    await addUserAsInserter(this.#kwilClient, payload);
     return payload;
   }
 

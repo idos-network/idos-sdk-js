@@ -8,15 +8,15 @@ import {
   type DagMessageInput,
   dagMessage,
   dwgMessage,
-  type GetGrantsPaginatedInput,
+  type GetAccessGrantsGrantedInput,
   type GetWalletsOutput,
+  getAccessGrantsGrantedCount,
   getAccessGrantsOwned,
   getAttributes,
   getCredentialOwned,
+  getCredentialShared,
   getCredentials,
   getGrants,
-  getGrantsCount,
-  getSharedCredential,
   getUser,
   getWallets,
   hasProfile,
@@ -243,8 +243,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       userId: kwilUser.id,
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
-      walletPublicKey: this.walletPublicKey,
-      walletType: this.walletType,
       encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
     });
 
@@ -397,7 +395,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getGrants(
-    params: GetGrantsPaginatedInput,
+    params: GetAccessGrantsGrantedInput,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return {
       grants: await getGrants(this.kwilClient, params),
@@ -411,13 +409,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getGrantsCount(): Promise<number> {
-    return getGrantsCount(this.kwilClient, {
+    return getAccessGrantsGrantedCount(this.kwilClient, {
       user_id: null,
     }).then((res) => res.count);
   }
 
-  async getSharedCredential(id: string): Promise<idOSCredential | undefined> {
-    return getSharedCredential(this.kwilClient, { id }).then((res) => res[0]);
+  async getCredentialShared(id: string): Promise<idOSCredential | undefined> {
+    return getCredentialShared(this.kwilClient, { id }).then((res) => res[0]);
   }
 
   async revokeAccessGrant(id: string): Promise<{ id: string }> {
@@ -519,11 +517,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       pick: Record<string, unknown[]>;
       omit: Record<string, unknown[]>;
     };
-    privateFieldFilters?: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
-    };
-  }): Promise<idOSCredential[]> {
+  }): Promise<idOSCredentialListItem[]> {
     const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
       every(Object.entries(criteria), ([path, targetSet]) =>
         targetSet.includes(get(content, path)),
@@ -557,10 +551,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       });
     }
 
+    /*
+     * TODO: Fix this, getAllCredentials return a credential without content
+     * so the privateFieldFilters won't match anything.
     const privateFieldFilters = requirements.privateFieldFilters;
     if (privateFieldFilters) {
       result = await this.enclaveProvider.filterCredentials(result, privateFieldFilters);
-    }
+    }*/
 
     return result;
   }

@@ -1,7 +1,7 @@
 import { base85ToFile } from "@idos-network/credentials";
 import { fileTypeFromBuffer } from "file-type";
 import { verifyFileUrl } from "~/providers/files.server";
-import { getSharedCredential } from "~/providers/idos.server";
+import { getCredentialShared } from "~/providers/idos.server";
 import type { Route } from "./+types/auth";
 
 // Create a new user session
@@ -15,7 +15,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   try {
     const decoded = await verifyFileUrl(token);
-    const credentials = await getSharedCredential(decoded.credentialId);
+    const credentials = await getCredentialShared(decoded.credentialId);
 
     // Decode the file
     const encodedFile = credentials.credentialSubject[decoded.fileType];
