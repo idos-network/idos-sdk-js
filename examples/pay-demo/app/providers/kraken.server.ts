@@ -45,6 +45,7 @@ export async function getKrakenToken(): Promise<string> {
     api: true,
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
   };
+  console.log({ payload, SERVER_ENV });
 
   return jwt.sign(payload, SERVER_ENV.KRAKEN_PRIVATE_KEY, {
     algorithm: "ES512",
