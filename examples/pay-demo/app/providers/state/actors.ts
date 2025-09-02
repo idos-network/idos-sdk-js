@@ -321,20 +321,31 @@ export const actors = {
     return await onRampAccount.json();
   }),
 
-  createNoahCustomer: fromPromise(async ({ input }: { input: Context["sharedCredential"] }) => {
-    if (!input) {
-      throw new Error("Credential not found");
-    }
+  createNoahCustomer: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        sharedCredential: Context["sharedCredential"];
+        krakenDAG: Context["krakenDAG"];
+      };
+    }) => {
+      if (!input?.sharedCredential || !input?.krakenDAG) {
+        throw new Error("Credential not found");
+      }
 
-    const customer = await fetch(`/app/kyc/noah/link?credentialId=${input.id}`);
+      const customer = await fetch(
+        `/app/kyc/noah/link?credentialId=${input.sharedCredential.id}&krakenDAG=${input.krakenDAG.id}`,
+      );
 
-    if (customer.status !== 200) {
-      const text = await customer.text();
-      throw new Error(`Noah API is not available. Please try again later. (Reason: ${text})`);
-    }
+      if (customer.status !== 200) {
+        const text = await customer.text();
+        throw new Error(`Noah API is not available. Please try again later. (Reason: ${text})`);
+      }
 
-    const data = await customer.json();
+      const data = await customer.json();
 
-    return data.url;
-  }),
+      return data.url;
+    },
+  ),
 };

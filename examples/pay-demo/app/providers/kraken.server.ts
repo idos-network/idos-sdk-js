@@ -3,9 +3,9 @@ import jwt from "jsonwebtoken";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
-export const fetchSharedToken = async (credentialId: string) => {
+export const fetchSharedToken = async (credentialId: string, forClientId: string) => {
   const response = await fetch(
-    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/dag/${credentialId}/sharedToken?forClientId=transak`,
+    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/dag/${credentialId}/sharedToken?forClientId=${forClientId}`,
     {
       method: "GET",
       headers: {
