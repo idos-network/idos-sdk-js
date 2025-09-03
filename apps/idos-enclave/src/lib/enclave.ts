@@ -220,11 +220,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
   private listenToRequests() {
     window.addEventListener("message", async (event) => {
-      if (
-        event.origin !== this.parentOrigin ||
-        // cspell:disable-next-line
-        event.data.target === "metamask-inpage"
-      ) {
+      if (event.origin !== this.parentOrigin || event.ports.length === 0) {
         return;
       }
 
@@ -246,7 +242,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         ];
 
         if (!allowedMethods.includes(method)) {
-          throw new Error(`Unexpected request from parent: ${method}`);
+          console.error(`Unexpected request from parent: ${method}`);
+          return;
         }
 
         // Type assertion for method call
