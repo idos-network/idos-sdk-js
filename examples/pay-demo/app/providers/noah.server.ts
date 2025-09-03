@@ -159,6 +159,51 @@ export async function prefillNoahUser(customerId: string, token: string) {
   return true;
 }
 
+export async function createOnboardingSession(customerId: string, url: URL) {
+  const returnUrl = new URL(url.toString());
+  returnUrl.host = "strnadj.com";
+  returnUrl.protocol = "https";
+  returnUrl.pathname = "/callbacks/noah";
+  returnUrl.search = "";
+  returnUrl.hash = "";
+
+  const request = {
+    ReturnURL: returnUrl.toString(),
+  };
+
+  const path = `/v1/onboarding/${customerId}`;
+
+  const body = Buffer.from(JSON.stringify(request));
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Noah payin error:", text);
+    throw new Error(`Failed to create Noah payin: ${text}`);
+  }
+
+  const data = (await response.json()) as NoahResponse;
+
+  return data;
+
+}
+
 export async function createPayInRequest(customerId: string, url: URL) {
   // Cleanup URL
   const returnUrl = new URL(url.toString());
@@ -215,7 +260,7 @@ export async function createPayInRequest(customerId: string, url: URL) {
 
   if (!response.ok) {
     const text = await response.text();
-    console.error("Noah error:", text);
+    console.error("Noah payin error:", text);
     throw new Error(`Failed to create Noah payin: ${text}`);
   }
 
