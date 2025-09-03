@@ -5,6 +5,8 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { connectedWalletType, walletPayload } from "./state";
 
+console.log("HELLO from staging-embedded-wallet");
+
 function WalletConnector() {
   if (!connectedWalletType.value) {
     return (
