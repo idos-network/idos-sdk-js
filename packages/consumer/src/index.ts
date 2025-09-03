@@ -28,8 +28,8 @@ import {
   type VerifyCredentialsResult,
   verifyCredentials,
 } from "@idos-network/credentials";
+import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
-import type { KwilSigner } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {

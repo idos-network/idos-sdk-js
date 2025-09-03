@@ -5,7 +5,7 @@
   "dependencies": {
     "axios": "0.27.2",
     "@gemwallet/api": "^3.8.0",
-    "@kwilteam/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "catalog:core",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
     "@idos-network/utils": "workspace:*",

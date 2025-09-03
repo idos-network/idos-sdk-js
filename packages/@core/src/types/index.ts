@@ -3,7 +3,7 @@ import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
 
-export { KwilSigner } from "@kwilteam/kwil-js";
+export { KwilSigner } from "@idos-network/kwil-js";
 export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner;
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
