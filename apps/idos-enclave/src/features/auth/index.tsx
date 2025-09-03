@@ -49,8 +49,11 @@ export default function Auth({
       <PasswordForm
         mode={mode}
         onSuccess={onSuccess}
-        encryptionPublicKey={encryptionPublicKey}
-        userId={userId}
+        onCancel={() => {
+          currentPasswordStore.value = null;
+        }}
+        encryptionPublicKey={encryptionPublicKey ?? ""}
+        userId={userId ?? ""}
       />
     );
   }

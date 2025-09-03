@@ -273,9 +273,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     duration?: number;
     confirmed?: boolean;
   }> {
-    const width = 600;
+    const width = 360;
     const height =
-      this.options?.mode === "new" ? 600 : intent === "backupUserEncryptionProfile" ? 520 : 400;
+      this.options?.mode === "new" ? 680 : intent === "backupUserEncryptionProfile" ? 520 : 450;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({

@@ -4,7 +4,7 @@ import { tv } from "tailwind-variants";
 interface ParagraphProps extends HTMLAttributes<HTMLParagraphElement> {}
 
 const text = tv({
-  base: "text-lg text-neutral-500 dark:text-neutral-300",
+  base: "text-sm text-center",
 });
 
 export function Paragraph({ class: _class, className, ...rest }: ParagraphProps) {

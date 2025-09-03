@@ -3,8 +3,8 @@
   "description": "idOS Enclave",
   "version": "0.1.0",
   "dependencies": {
-    "@idos-network/credentials": "workspace:*",
     "@idos-network/core": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
@@ -14,6 +14,7 @@
     "@stablelib/utf8": "^2.0.1",
     "dompurify": "^3.2.5",
     "es-toolkit": "^1.23.0",
+    "lucide-react": "^0.542.0",
     "preact": "^10.26.4",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",
