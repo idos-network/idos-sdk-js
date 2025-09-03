@@ -33,8 +33,16 @@ export default function Chooser({
           <Heading>Create your idOS encryption key</Heading>
 
           <Paragraph>
-            To continue, <span class="text-primary">sign with your wallet</span> (recommended) or
-            create a password
+            To continue,{" "}
+            <a
+              href="https://docs.idos.network/how-it-works/key-flows/encryption-flows"
+              target="_blank"
+              class="text-primary"
+              rel="noopener"
+            >
+              sign with your wallet
+            </a>{" "}
+            (recommended) or create a password
           </Paragraph>
 
           <div class="rounded-xl bg-muted p-4">
