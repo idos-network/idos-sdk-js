@@ -243,6 +243,8 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
         if (!allowedMethods.includes(method)) {
           console.error(`Unexpected request from parent: ${method}`);
+          event.ports[0].postMessage({ error: `Unexpected request: ${method}` });
+          event.ports[0].close();
           return;
         }
 
