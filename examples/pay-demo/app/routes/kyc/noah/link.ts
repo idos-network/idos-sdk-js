@@ -1,6 +1,11 @@
 import { getCredentialShared } from "~/providers/idos.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
-import { createNoahCustomer, createOnboardingSession, createPayInRequest, prefillNoahUser } from "~/providers/noah.server";
+import {
+  createNoahCustomer,
+  createOnboardingSession,
+  createPayInRequest,
+  prefillNoahUser,
+} from "~/providers/noah.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "../+types/link";
 
@@ -31,8 +36,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     const token = await fetchSharedToken(krakenDAG, "noah.com_61413");
 
     // Prefill noah user & create payin request
-    await prefillNoahUser(`USER_STRNADJ_TEST_4`, token);
-    const response = await createOnboardingSession(`USER_STRNADJ_TEST_4`, url);
+    await prefillNoahUser("USER_STRNADJ_TEST_4", token);
+    const response = await createOnboardingSession("USER_STRNADJ_TEST_4", url);
 
     // const response = await createPayInRequest(`USER_STRNADJ_TEST_2`, url);
     // session.set("noahCheckoutSessionID", response.CheckoutSession.CheckoutSessionID);

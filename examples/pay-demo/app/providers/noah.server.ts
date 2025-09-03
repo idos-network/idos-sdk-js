@@ -201,7 +201,6 @@ export async function createOnboardingSession(customerId: string, url: URL) {
   const data = (await response.json()) as NoahResponse;
 
   return data;
-
 }
 
 export async function createPayInRequest(customerId: string, url: URL) {
