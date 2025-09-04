@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import nacl from "tweetnacl";
-import { patchRequest, postRequest, putRequest } from "./api";
+import { patchRequest, postRequest, putRequest, type HeadersInit } from "./api";
 import type {
   Bytes,
   DownloadRequest,
@@ -70,12 +70,14 @@ export class EngineClient {
     return { share: Buffer.from(open.subarray(32)), status };
   }
 
-  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string) {
+  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string): Promise<void> {
     const authHeader: HeadersInit = {
       Authorization: `eip712 ${signature}`,
     };
+
     const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     const ok = await patchRequest(url, updateRequest, authHeader);
+
     if (!ok) {
       throw new Error(`Error updating wallets to ${this.contractAddress} at ${url}`);
     }

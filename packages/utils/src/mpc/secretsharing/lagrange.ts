@@ -90,7 +90,10 @@ function interpolateCheckDegree<T extends FiniteFieldElement<T>>(
 /**
  * Utility for lagrange interpolation.
  */
-export const Lagrange = {
+export const Lagrange: {
+  interpolate: typeof interpolate,
+  interpolateCheckDegree: typeof interpolateCheckDegree,
+} = {
   interpolate,
   interpolateCheckDegree,
 };

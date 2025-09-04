@@ -3,11 +3,11 @@ import * as z from "zod";
 export type idOSCredential = {
   id: string;
   user_id: string;
-  issuer_auth_public_key: string;
-  original_id?: string;
   public_notes: string;
   content: string;
   encryptor_public_key: string;
+  issuer_auth_public_key: string;
+  original_id?: string;
 };
 
 export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {

@@ -89,7 +89,7 @@ const useFetchCredential = (id: string) => {
             idOSClient.state === "logged-in",
             "Invalid idOSClient state when fetching credential",
           );
-          return idOSClient.getSharedCredential(id);
+          return idOSClient.getCredentialShared(id);
         }
       : skipToken,
     enabled: idOSClient.state === "logged-in" && !!id,
