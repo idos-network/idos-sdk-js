@@ -91,6 +91,7 @@ const allowedIssuers = [{
   key,
 ]
 
-const verified = await verifyCredentials(credentials, allowedIssuers);
+const [verified, resultsByIssuer] = await verifyCredentials(credentials, allowedIssuers);
 console.log("Verified: ", verified);
+console.log("Results by issuer: ", resultsByIssuer);
 ```

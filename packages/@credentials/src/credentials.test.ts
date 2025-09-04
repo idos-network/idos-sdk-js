@@ -182,8 +182,13 @@ describe("verifiableCredentials", () => {
 
     const allowedIssuers = [anotherKey, validKey];
 
-    const verified = await verifyCredentials(data, allowedIssuers);
+    const [verified, validResults] = await verifyCredentials(data, allowedIssuers);
     expect(verified).toBe(true);
+
+    const validResultsArray = validResults.values().toArray();
+    expect(validResultsArray).toHaveLength(2);
+    expect(validResultsArray[0].verified).toBe(false);
+    expect(validResultsArray[1].verified).toBe(true);
 
     // Invalid issuer
     const invalidIssuers = [
@@ -194,8 +199,13 @@ describe("verifiableCredentials", () => {
       },
     ];
 
-    const invalidVerified = await verifyCredentials(data, invalidIssuers);
+    const [invalidVerified, invalidResults] = await verifyCredentials(data, invalidIssuers);
     expect(invalidVerified).toBe(false);
+
+    const invalidResultsArray = invalidResults.values().toArray();
+    expect(invalidResultsArray).toHaveLength(1);
+    expect(invalidResultsArray[0].verified).toBe(false);
+    expect(invalidResultsArray[0].error?.errors?.[0]?.message).toContain("not verify any proofs");
 
     // Accepts issuer as issuer object
     const validIssuer = [
@@ -205,7 +215,7 @@ describe("verifiableCredentials", () => {
       },
     ];
 
-    const validIssuerVerified = await verifyCredentials(data, validIssuer);
+    const [validIssuerVerified] = await verifyCredentials(data, validIssuer);
     expect(validIssuerVerified).toBe(true);
   });
 });

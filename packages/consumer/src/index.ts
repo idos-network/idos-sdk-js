@@ -25,6 +25,7 @@ import {
   type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
+  type VerifyCredentialsResult,
   verifyCredentials,
 } from "@idos-network/credentials";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
@@ -167,7 +168,7 @@ export class idOSConsumer {
   async verifyCredentials<K = VerifiableCredentialSubject>(
     credentials: VerifiableCredential<K>,
     issuers: AvailableIssuerType[],
-  ): Promise<boolean> {
+  ): Promise<VerifyCredentialsResult> {
     return verifyCredentials<K>(credentials, issuers);
   }
 }
@@ -178,6 +179,7 @@ export type {
   Credentials,
   VerifiableCredential,
   VerifiableCredentialSubject,
+  VerifyCredentialsResult,
   AvailableIssuerType,
   IDDocumentType,
 };
