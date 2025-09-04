@@ -85,7 +85,8 @@ export type KwilSignerType =
   | XrpKeyPair;
 
 export type SignerAddress = string;
-
+export type SignerPublicKey = string | undefined;
+export type SignerType = string;
 /**
  * Creates a `KwilSigner` and its associated `SignerAddress`.
  *
@@ -151,7 +152,7 @@ export async function createClientKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
   wallet: Wallet,
-): Promise<[KwilSigner, SignerAddress]> {
+): Promise<[KwilSigner, SignerAddress, SignerPublicKey, SignerType]> {
   if ("connect" in wallet && "address" in wallet) {
     //biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
     wallet = wallet as unknown as JsonRpcSigner;
@@ -170,13 +171,20 @@ export async function createClientKwilSigner(
       }
     }
 
-    return [new KwilSigner(wallet, currentAddress), currentAddress];
+    return [new KwilSigner(wallet, currentAddress), currentAddress, undefined, "evm"];
   }
 
   if (looksLikeNearWallet(wallet)) {
-    const accountId = (await wallet.getAccounts())[0].accountId;
+    const accounts = await wallet.getAccounts();
+    console.log({ accounts });
+    const accountId = accounts[0].accountId;
 
-    return [await createNearWalletKwilSigner(wallet, accountId, store, kwilClient), accountId];
+    return [
+      await createNearWalletKwilSigner(wallet, accountId, store, kwilClient),
+      accountId,
+      undefined,
+      "near",
+    ];
   }
 
   if (looksLikeXrpWallet(wallet)) {
@@ -186,15 +194,18 @@ export async function createClientKwilSigner(
     if (!currentAddress) {
       throw new Error("Failed to get XRP address");
     }
+    console.log({ currentAddress, walletPublicKey });
 
     return [
       await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
       currentAddress,
+      walletPublicKey,
+      "xrpl",
     ];
   }
 
   if ("signatureType" in wallet && "publicAddress" in wallet) {
-    return [wallet, wallet.publicAddress];
+    return [wallet, wallet.publicAddress, undefined, "stellar"];
   }
 
   // Force the check that `signer` is `never`.
