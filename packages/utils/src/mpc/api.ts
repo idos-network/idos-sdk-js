@@ -26,6 +26,7 @@ function buildOptions<T>(method: RequestType, headers: Record<string, string>, e
  */
 export function getRequest<R>(url: string): Promise<{ status: string; body: R | undefined }> {
   const options = buildOptions("GET", getHeaders, null);
+  console.log({options});
   return handleFetch<R>(fetch(url, options));
 }
 
@@ -39,9 +40,13 @@ export function getRequest<R>(url: string): Promise<{ status: string; body: R | 
  */
 export function putRequest<T>(url: string, object: T, headers?: Record<string, string>): Promise<string> {
   const options = buildOptions("PUT", { ...postHeaders, ...headers }, object);
+  console.log({options});
   return fetch(url, options)
-    .then(async (response) => {
-      return response.status.toString();
+      .then(async (response) => {
+        const responseClone = response.clone();
+        const responseBody = await responseClone.text();
+        console.log({responseCode: response.status, responseBody});
+        return response.status.toString();
     })
     .catch((error) => {
       console.error(error);
@@ -59,8 +64,14 @@ export function putRequest<T>(url: string, object: T, headers?: Record<string, s
  */
 export function patchRequest<T>(url: string, object: T, headers?: Record<string, string>): Promise<string> {
   const options = buildOptions("PATCH", { ...postHeaders, ...headers }, object);
+  console.log({options});
   return fetch(url, options)
-    .then(async (response) => response.status.toString())
+    .then(async (response) => {
+      const responseClone = response.clone();
+      const responseBody = await responseClone.text();
+      console.log({responseCode: response.status, responseBody});
+      return response.status.toString();
+    })
     .catch((error) => {
       console.error(error);
       return error;
@@ -81,6 +92,7 @@ export function postRequest<T, R>(
   headers?: Record<string, string>,
 ): Promise<{ status: string; body: R | undefined }> {
   const options = buildOptions("POST", { ...postHeaders, ...headers }, object);
+  console.log({options});
   return handleFetch<R>(fetch(url, options));
 }
 
@@ -89,6 +101,10 @@ function handleFetch<T>(
 ): Promise<{ status: string; body: T | undefined }> {
   return promise
     .then(async (response) => {
+      const responseClone = response.clone();
+      const responseBody = await responseClone.text();
+      console.log({responseCode: response.status, responseBody});
+
       if (response.status === 200) {
         const data = (await response.json()) as T;
         return { status: response.status.toString(), body: data };

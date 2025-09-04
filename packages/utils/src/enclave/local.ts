@@ -6,8 +6,10 @@ import { Client as MPCClient } from "../mpc/client";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
+  DownloadMessageToSign,
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
+  UploadMessageToSign,
 } from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
@@ -55,10 +57,14 @@ export class LocalEnclave<
     this.store = options.store ?? new LocalStorageStore();
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
+    console.log({ options });
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
         options.mpcConfiguration.contractAddress,
+        options.walletType,
+        options.walletAddress,
+        options.walletPublicKey,
       );
     }
   }
@@ -68,6 +74,20 @@ export class LocalEnclave<
     await super.reset();
     this.storedEncryptionProfile = undefined;
     this.store.reset();
+  }
+
+  /** @override parent method to reconfigure the enclave */
+  async reconfigure(options: Partial<K> = {}): Promise<void> {
+    await super.reconfigure(options);
+    console.log({ reconfigureOptions: options });
+    // Reconfigure MPC client if any signer information changed
+    if (this.mpcClientInstance && options.walletType && options.walletAddress) {
+      this.mpcClientInstance.reconfigure(
+        options.walletType,
+        options.walletAddress,
+        options.walletPublicKey,
+      );
+    }
   }
 
   /** @see parent method extended with loading the profile from the store */
@@ -294,14 +314,12 @@ export class LocalEnclave<
     }
 
     const ephemeralKeyPair = nacl.box.keyPair();
-    const signerAddress = this.options.walletAddress;
 
-    const downloadRequest = this.mpcClient.downloadRequest(
-      signerAddress,
-      ephemeralKeyPair.publicKey,
-    );
+    const downloadRequest = this.mpcClient.downloadRequest(ephemeralKeyPair.publicKey);
 
-    const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
+    const messageToSign = this.mpcClient.downloadMessageToSign(
+      downloadRequest,
+    ) as DownloadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
@@ -326,8 +344,8 @@ export class LocalEnclave<
     }
 
     const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret, "utf8"));
-    const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
-    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
+    const uploadRequest = this.mpcClient.uploadRequest(blindedShares);
+    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
@@ -341,12 +359,28 @@ export class LocalEnclave<
     return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
   }
 
-  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign> {
-    return this.mpcClient.addAddressMessageToSign(address);
+  async addAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    return this.mpcClient.addAddressMessageToSign(
+      address,
+      publicKey,
+      addressToAddType,
+    ) as AddAddressMessageToSign;
   }
 
-  async removeAddressMessageToSign(address: string): Promise<RemoveAddressMessageToSign> {
-    return this.mpcClient.removeAddressMessageToSign(address);
+  async removeAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    return this.mpcClient.removeAddressMessageToSign(
+      address,
+      publicKey,
+      addressToRemoveType,
+    ) as RemoveAddressMessageToSign;
   }
 
   async addAddressToMpcSecret(
