@@ -422,7 +422,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       params.wallet_type,
     );
 
-    const signature = await this.signer.signTypedData(
+    const signature = await this.enclaveProvider.signTypedData(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
@@ -463,7 +463,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       wallet.public_key,
       wallet.wallet_type,
     );
-    const signature = await this.signer.signTypedData(
+    const signature = await this.enclaveProvider.signTypedData(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
