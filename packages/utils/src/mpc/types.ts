@@ -9,13 +9,13 @@ export type Bytes = string;
 export const UPLOAD_TYPES: Record<string, TypedDataField[]> = {
   UploadSignatureMessage: [
     { name: "share_commitments", type: "bytes32[]" },
-    { name: "recovering_addresses", type: "address[]" },
+    { name: "recovering_addresses", type: "string[]" },
   ],
 };
 
 export const DOWNLOAD_TYPES: Record<string, TypedDataField[]> = {
   DownloadSignatureMessage: [
-    { name: "recovering_address", type: "address" },
+    { name: "recovering_address", type: "string" },
     { name: "timestamp", type: "uint64" },
     { name: "public_key", type: "bytes32" },
   ],
@@ -23,21 +23,23 @@ export const DOWNLOAD_TYPES: Record<string, TypedDataField[]> = {
 
 export const UPDATE_TYPES: Record<string, TypedDataField[]> = {
   UpdateWalletsSignatureMessage: [
-    { name: "recovering_addresses", type: "address[]" },
+    { name: "recovering_addresses", type: "string[]" },
     { name: "timestamp", type: "uint64" },
   ],
 };
 
 export const ADD_ADDRESS_TYPES: Record<string, TypedDataField[]> = {
   AddAddressSignatureMessage: [
-    { name: "address_to_add", type: "address" },
+    { name: "recovering_address", type: "string" },
+    { name: "address_to_add", type: "string" },
     { name: "timestamp", type: "uint64" },
   ],
 };
 
 export const REMOVE_ADDRESS_TYPES: Record<string, TypedDataField[]> = {
   RemoveAddressSignatureMessage: [
-    { name: "address_to_remove", type: "address" },
+    { name: "recovering_address", type: "string" },
+    { name: "address_to_remove", type: "string" },
     { name: "timestamp", type: "uint64" },
   ],
 };
@@ -62,6 +64,7 @@ export interface DownloadSignatureMessage {
 export type DownloadRequest = DownloadSignatureMessage;
 
 export interface AddAddressSignatureMessage {
+  recovering_address: Address;
   address_to_add: Address;
   timestamp: number;
 }
@@ -69,6 +72,7 @@ export interface AddAddressSignatureMessage {
 export type AddAddressRequest = AddAddressSignatureMessage;
 
 export interface RemoveAddressSignatureMessage {
+  recovering_address: Address;
   address_to_remove: Address;
   timestamp: number;
 }

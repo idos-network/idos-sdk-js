@@ -137,15 +137,19 @@ export class idOSClientIdle {
   }
 
   async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
-    const [kwilSigner, walletIdentifier] = await createClientKwilSigner(
-      this.store,
-      this.kwilClient,
-      signer,
-    );
+    const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
+      await createClientKwilSigner(this.store, this.kwilClient, signer);
 
     this.kwilClient.setSigner(kwilSigner);
 
-    return new idOSClientWithUserSigner(this, signer, kwilSigner, walletIdentifier);
+    return new idOSClientWithUserSigner(
+      this,
+      signer,
+      kwilSigner,
+      walletIdentifier,
+      walletPublicKey,
+      walletType,
+    );
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -161,12 +165,16 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
+  readonly walletPublicKey: string | undefined;
+  readonly walletType: string;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
     signer: Wallet,
     kwilSigner: KwilSigner,
     walletIdentifier: string,
+    walletPublicKey: string | undefined,
+    walletType: string,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -175,7 +183,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.signer = signer;
     this.kwilSigner = kwilSigner;
     this.walletIdentifier = walletIdentifier;
-
+    this.walletPublicKey = walletPublicKey;
+    this.walletType = walletType;
     // @ts-expect-error - TODO: Fix this
     this.enclaveProvider.setSigner(this.signer);
   }
@@ -196,6 +205,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       mode: "new",
       userId,
       walletAddress: this.walletIdentifier,
+      walletPublicKey: this.walletPublicKey,
+      walletType: this.walletType,
       encryptionPasswordStore: undefined,
       expectedUserEncryptionPublicKey: undefined,
     });
@@ -213,6 +224,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       userId: kwilUser.id,
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
+      walletPublicKey: this.walletPublicKey,
+      walletType: this.walletType,
       encryptionPasswordStore: kwilUser.encryption_password_store,
     });
 
@@ -228,6 +241,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly signer: Wallet;
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
+  readonly walletPublicKey: string | undefined;
+  readonly walletType: string;
   readonly user: idOSUser;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
@@ -238,6 +253,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.signer = idOSClientWithUserSigner.signer;
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
     this.walletIdentifier = idOSClientWithUserSigner.walletIdentifier;
+    this.walletPublicKey = idOSClientWithUserSigner.walletPublicKey;
+    this.walletType = idOSClientWithUserSigner.walletType;
     this.user = user;
   }
 
@@ -389,16 +406,21 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return { id };
   }
 
-  async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
+  async addWallet(params: AddWalletInput & { wallet_type: string }): Promise<AddWalletInput> {
     await addWallet(this.kwilClient, params);
-
+    console.log({ params });
+    console.log(this.signer);
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
-    const messageToSign = await this.enclaveProvider.addAddressMessageToSign(params.address);
+    const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
+      params.address,
+      params.public_key,
+      params.wallet_type,
+    );
 
     const signature = await this.signer.signTypedData(
       messageToSign.domain,
@@ -435,8 +457,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       console.log("MPC is not enabled or the user is not using MPC");
       return { id };
     }
-
-    const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(wallet.address);
+    console.log({ wallet });
+    const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
+      wallet.address,
+      wallet.public_key,
+      wallet.wallet_type,
+    );
     const signature = await this.signer.signTypedData(
       messageToSign.domain,
       messageToSign.types,

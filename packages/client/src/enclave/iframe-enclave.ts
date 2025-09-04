@@ -124,12 +124,25 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     }
   }
 
-  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign> {
-    return this.requestToEnclave("addAddressMessageToSign", address);
+  async addAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    return this.requestToEnclave("addAddressMessageToSign", address, publicKey, addressToAddType);
   }
 
-  async removeAddressMessageToSign(address: string): Promise<RemoveAddressMessageToSign> {
-    return this.requestToEnclave("removeAddressMessageToSign", address);
+  async removeAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    return this.requestToEnclave(
+      "removeAddressMessageToSign",
+      address,
+      publicKey,
+      addressToRemoveType,
+    );
   }
 
   async addAddressToMpcSecret(
