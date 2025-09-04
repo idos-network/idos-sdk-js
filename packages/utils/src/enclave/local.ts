@@ -9,8 +9,10 @@ import { Client as MPCClient } from "../mpc/client";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
+  DownloadMessageToSign,
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
+  UploadMessageToSign,
 } from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
 import type { PipeCodecArgs } from "../store/interface";
@@ -65,10 +67,14 @@ export class LocalEnclave<
       .pipeCodec(this.userIdObfuscationCodec())
       .pipeCodec(Base64Codec);
 
+    console.log({ options });
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
         options.mpcConfiguration.contractAddress,
+        options.walletType,
+        options.walletAddress,
+        options.walletPublicKey,
       );
     }
   }
@@ -392,14 +398,12 @@ export class LocalEnclave<
     }
 
     const ephemeralKeyPair = nacl.box.keyPair();
-    const signerAddress = this.options.walletAddress;
 
-    const downloadRequest = this.mpcClient.downloadRequest(
-      signerAddress,
-      ephemeralKeyPair.publicKey,
-    );
+    const downloadRequest = this.mpcClient.downloadRequest(ephemeralKeyPair.publicKey);
 
-    const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
+    const messageToSign = this.mpcClient.downloadMessageToSign(
+      downloadRequest,
+    ) as DownloadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
@@ -424,8 +428,8 @@ export class LocalEnclave<
     }
 
     const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret, "utf8"));
-    const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
-    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
+    const uploadRequest = this.mpcClient.uploadRequest(blindedShares);
+    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
@@ -439,12 +443,28 @@ export class LocalEnclave<
     return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
   }
 
-  async addAddressMessageToSign(address: string): Promise<AddAddressMessageToSign> {
-    return this.mpcClient.addAddressMessageToSign(address);
+  async addAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    return this.mpcClient.addAddressMessageToSign(
+      address,
+      publicKey,
+      addressToAddType,
+    ) as AddAddressMessageToSign;
   }
 
-  async removeAddressMessageToSign(address: string): Promise<RemoveAddressMessageToSign> {
-    return this.mpcClient.removeAddressMessageToSign(address);
+  async removeAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    return this.mpcClient.removeAddressMessageToSign(
+      address,
+      publicKey,
+      addressToRemoveType,
+    ) as RemoveAddressMessageToSign;
   }
 
   async addAddressToMpcSecret(
