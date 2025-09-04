@@ -1,6 +1,6 @@
 # XRPL Credentials guide
 
-Our This module provides utilities for creating and managing XRPL Credential transactions. It includes functionality for:
+This module provides utilities for creating and managing XRPL Credential transactions. It includes functionality for:
 * Creating Credentials on the XRPL blockchain
 * Generating Credential acceptance payloads
 * Managing both original and copy credentials
