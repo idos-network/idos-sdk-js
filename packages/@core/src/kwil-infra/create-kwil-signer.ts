@@ -100,6 +100,17 @@ export type SignerAddress = string;
  * the KGW cookie when logging out and re-logging in with a different wallet.
  */
 export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAddress] {
+  if (isXrplKeyPair(signer)) {
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
+        signer.publicKey,
+        "xrpl",
+      ),
+      signer.publicKey,
+    ];
+  }
+
   if (isNaclSignKeyPair(signer)) {
     return [
       new KwilSigner(
@@ -129,17 +140,6 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
         "ed25519",
       ),
       publicKeyString,
-    ];
-  }
-
-  if (isXrplKeyPair(signer)) {
-    return [
-      new KwilSigner(
-        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
-        signer.publicKey,
-        "xrpl",
-      ),
-      signer.publicKey,
     ];
   }
 
