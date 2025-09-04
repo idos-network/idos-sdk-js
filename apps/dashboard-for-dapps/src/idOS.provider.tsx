@@ -32,7 +32,11 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const signer = useEthersSigner();
 
   const initialize = useCallback(async () => {
-    if (!signer?.address || client.state === "logged-in") return;
+    // we can't use client here, since if the wallet has no profile
+    // it will ends up in a loop, so it's fine to use isLoading
+    // as a flag that we already initialize
+    if (!signer?.address || !isLoading) return;
+
     try {
       // Always start with a fresh client
       setIsLoading(true);

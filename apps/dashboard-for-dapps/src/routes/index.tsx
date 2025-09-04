@@ -37,7 +37,7 @@ import {
 } from "@/components/ui";
 import { useSecretKey } from "@/hooks";
 import { useIdOS } from "@/idOS.provider";
-import { changeCase, decrypt, openImageInNewTab } from "@/utils";
+import { changeCase, decrypt, isKeyFile, openImageInNewTab, transformBase85Image } from "@/utils";
 import { safeParse } from "./credentials";
 
 export const Route = createFileRoute("/")({
@@ -116,14 +116,15 @@ function CredentialDetails({
   const hasValidContent = !!result;
 
   const subject = Object.entries(content.credentialSubject).filter(
-    ([key]) => !["emails", "wallets"].includes(key) && !key.endsWith("_file"),
+    ([key]) => !["emails", "wallets"].includes(key) && !isKeyFile(key),
   ) as [string, string][];
 
   const emails: { address: string; verified: boolean }[] = content.credentialSubject?.emails || [];
   const wallets: { address: string; currency: string; verified: boolean }[] =
     content.credentialSubject?.wallets || [];
+
   const files = (
-    Object.entries(content.credentialSubject).filter(([key]) => key.endsWith("_file")) as [
+    Object.entries(content.credentialSubject).filter(([key]) => isKeyFile(key)) as [
       string,
       string,
     ][]
@@ -236,11 +237,11 @@ function CredentialDetails({
                             transition="transform 0.2s"
                             cursor="pointer"
                             _hover={{ transform: "scale(1.02)" }}
-                            onClick={() => openImageInNewTab(value)}
+                            onClick={() => openImageInNewTab(transformBase85Image(value))}
                           >
                             <chakra.button className="button">
                               <Image
-                                src={value}
+                                src={transformBase85Image(value)}
                                 alt="Image from credential"
                                 rounded="md"
                                 loading="lazy"
