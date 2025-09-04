@@ -28,10 +28,26 @@ export class Client {
   private readonly baseUrl: string;
   private readonly contractAddress: PbcAddress;
   private engines: EngineClient[] | undefined;
+  private signerType: string;
+  private signerAddress: string;
+  private signerPublicKey: string | undefined;
 
-  constructor(baseUrl: string, contractAddress: PbcAddress) {
+  constructor(baseUrl: string, contractAddress: PbcAddress, signerType: string, signerAddress: string, signerPublicKey?: string) {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
+    this.signerType = signerType;
+    this.signerAddress = signerAddress;
+    this.signerPublicKey = signerPublicKey;
+  }
+
+    public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
+    if (signerType !== "evm" && signerType !== "xrpl") {
+      throw new Error("Invalid signer type");
+    }
+
+    this.signerType = signerType;
+    this.signerAddress = signerAddress;
+    if (signerPublicKey) this.signerPublicKey = signerPublicKey;
   }
 
   public async uploadSecret(
@@ -79,10 +95,20 @@ export class Client {
 
   public uploadRequest(
     blindedShares: Buffer[],
-    signerAddress: string,
     additionalRecoveringAddresses: string[] = [],
   ): UploadSignatureMessage {
-    const recoveringAddresses = [signerAddress, ...additionalRecoveringAddresses];
+    var address = "";
+    switch (this.signerType) {
+      case "evm":
+        address = `eip712:${this.signerAddress}`;
+        break;
+      case "xrpl":
+        address = `XRPL:${this.signerPublicKey}`;
+        break;
+      default:
+        throw new Error("Invalid signer type");
+    }
+    const recoveringAddresses = [address, ...additionalRecoveringAddresses];
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
       recovering_addresses: recoveringAddresses,
@@ -97,9 +123,20 @@ export class Client {
     };
   }
 
-  public downloadRequest(signerAddress: string, publicKey: Uint8Array): DownloadSignatureMessage {
+  public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
+    var address = "";
+    switch (this.signerType) {
+      case "evm":
+        address = `eip712:${this.signerAddress}`;
+        break;
+      case "xrpl":
+        address = `XRPL:${this.signerPublicKey}`;
+        break;
+      default:
+        throw new Error("Invalid signer type");
+    }
     return {
-      recovering_address: signerAddress,
+      recovering_address: address,
       timestamp: Date.now(),
       public_key: ethers.hexlify(publicKey),
     };
@@ -132,25 +169,77 @@ export class Client {
     }
   }
 
-  public addAddressMessageToSign(addressToAdd: string): AddAddressMessageToSign {
+  public addAddressMessageToSign(addressToAdd: string, publicKey: string | undefined, addressToAddType: string): AddAddressMessageToSign {
+    var address = "";
+    switch (this.signerType) {
+      case "evm":
+        address = `eip712:${this.signerAddress}`;
+        break;
+      case "xrpl":
+        address = `XRPL:${this.signerPublicKey}`;
+        break;
+      default:
+        throw new Error("Invalid signer type");
+    }
+
+    var addressToAddFormatted = "";
+    switch (addressToAddType.toLowerCase()) {
+      case "evm":
+        addressToAddFormatted = `eip712:${addressToAdd}`;
+        break;
+      case "xrpl":
+        addressToAddFormatted = `XRPL:${publicKey}`;
+        break;
+      default:
+        throw new Error("Invalid address to add type");
+    }
+
+    const value = {
+      recovering_address: address,
+      address_to_add: addressToAddFormatted,
+      timestamp: new Date().getTime(),
+    };
     return {
       domain: this.getTypedDomain(),
       types: ADD_ADDRESS_TYPES,
-      value: {
-        address_to_add: addressToAdd,
-        timestamp: new Date().getTime(),
-      }
+      value,
     };
   }
 
-  public removeAddressMessageToSign(addressToRemove: string): RemoveAddressMessageToSign {
+  public removeAddressMessageToSign(addressToRemove: string, publicKey: string | undefined, addressToRemoveType: string): RemoveAddressMessageToSign {
+    var address = "";
+    switch (this.signerType) {
+      case "evm":
+        address = `eip712:${this.signerAddress}`;
+        break;
+      case "xrpl":
+        address = `XRPL:${this.signerPublicKey}`;
+        break;
+      default:
+        throw new Error("Invalid signer type");
+    }
+
+    var addressToRemoveFormatted = "";
+    switch (addressToRemoveType.toLowerCase()) {
+      case "evm":
+        addressToRemoveFormatted = `eip712:${addressToRemove}`;
+        break;
+      case "xrpl":
+        addressToRemoveFormatted = `XRPL:${publicKey}`;
+        break;
+      default:
+        throw new Error("Invalid address to remove type");
+    }
+
+    const value = {
+      recovering_address: address,
+      address_to_remove: addressToRemoveFormatted,
+      timestamp: new Date().getTime(),
+    };
     return {
       domain: this.getTypedDomain(),
       types: REMOVE_ADDRESS_TYPES,
-      value: {
-        address_to_remove: addressToRemove,
-        timestamp: new Date().getTime(),
-      }
+      value,
     };
   }
 
@@ -186,25 +275,6 @@ export class Client {
     return "failure";
   }
 
-  // public async updateWallets(id: string, additionalRecoveringAddresses: string[]) {
-  //   const updateRequest: UpdateWalletsSignatureMessage = {
-  //     recovering_addresses: [await this.signer.getAddress(), ...additionalRecoveringAddresses],
-  //     timestamp: new Date().getTime(),
-  //   };
-  //   const signature = await this.signer.signTypedData(
-  //     this.getTypedDomain(),
-  //     UPDATE_TYPES,
-  //     updateRequest
-  //   );
-  //   const engineClients = await this.getEngines();
-  //   const promises = [];
-  //   for (let i = 0; i < engineClients.length; i++) {
-  //     const engineClient = engineClients[i];
-  //     promises.push(engineClient.sendUpdate(id, updateRequest, signature));
-  //   }
-  //   await Promise.all(promises);
-  // }
-
   private getTypedDomain(): TypedDataDomain {
     return {
       name: "idOS secret store contract",
@@ -220,7 +290,7 @@ export class Client {
       // biome-ignore lint/style/noNonNullAssertion: we know serializedContract is present here
       const state = deserializeState(Buffer.from(rawState.serializedContract!, "base64"));
       this.engines = state.nodes.map(
-        (value) => new EngineClient(value.endpoint, this.contractAddress),
+        (value) => new EngineClient(value.endpoint, this.contractAddress, this.signerType),
       );
     }
     return this.engines;

@@ -203,11 +203,19 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       }));
   }
 
-  async addAddressMessageToSign(_address: string): Promise<AddAddressMessageToSign> {
+  async addAddressMessageToSign(
+    _address: string,
+    _publicKey: string | undefined,
+    _addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
     throw new Error("Method 'addAddressMessageToSign' has to be implemented in the subclass.");
   }
 
-  async removeAddressMessageToSign(_address: string): Promise<RemoveAddressMessageToSign> {
+  async removeAddressMessageToSign(
+    _address: string,
+    _publicKey: string | undefined,
+    _addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
     throw new Error("Method 'removeAddressMessageToSign' has to be implemented in the subclass.");
   }
 
