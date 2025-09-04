@@ -1,6 +1,7 @@
 import { type JsonLDDocumentLoaderInstance, JsonLdDocumentLoader } from "jsonld-document-loader";
 
 import ed25519Signature2020V1 from "../../assets/ed25519-signature-2020-v1.json";
+import idosCredentialSubjectFaceIdV1 from "../../assets/idos-credential-subject-face-id-v1.json";
 import idosCredentialSubjectV1 from "../../assets/idos-credential-subject-v1.json";
 import idosCredentialsV1 from "../../assets/idos-credentials-v1.json";
 import v1 from "../../assets/v1.json";
@@ -14,10 +15,14 @@ export const CONTEXT_IDOS_CREDENTIALS_V1 =
 export const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v1.json";
 
+export const CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID =
+  "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-face-id-v1.json";
+
 // Latest contexts for builder
 export const CONTEXT_IDOS_CREDENTIALS: string = CONTEXT_IDOS_CREDENTIALS_V1;
 export const CONTEXT_IDOS_CREDENTIALS_SUBJECT: string = CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT;
 export const CONTEXT_IDOS_SIGNATURE: string = CONTEXT_ED25519_SIGNATURE_2020_V1;
+export const CONTEXT_IDOS_CREDENTIALS_FACE_ID: string = CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID;
 
 export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   const loader = new JsonLdDocumentLoader();
@@ -26,6 +31,7 @@ export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1, idosCredentialsV1);
   loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT, idosCredentialSubjectV1);
   loader.addStatic(CONTEXT_ED25519_SIGNATURE_2020_V1, ed25519Signature2020V1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID, idosCredentialSubjectFaceIdV1);
 
   // DEPRECATED: Those should be removed
   [

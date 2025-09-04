@@ -11,11 +11,14 @@ import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
   buildCredentials,
+  buildFaceIdCredentials,
   type CredentialFields,
   type CredentialSubject,
   type Credentials,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
+import type { FaceIdCredentials } from "../../@credentials/src/builder";
+import type { CredentialSubjectFaceId } from "../../@credentials/src/utils/types";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,
@@ -146,6 +149,15 @@ export class idOSIssuer {
     return buildCredentials(fields, subject, issuer, validate);
   }
 
+  async buildFaceIdCredentials(
+    fields: CredentialFields,
+    subject: CredentialSubjectFaceId,
+    issuer: AvailableIssuerType,
+    validate = true,
+  ): Promise<FaceIdCredentials> {
+    return buildFaceIdCredentials(fields, subject, issuer, validate);
+  }
+
   async getPassportingPeers(): Promise<PassportingPeer[]> {
     return this.#passportingService.getPassportingPeers();
   }
@@ -161,4 +173,6 @@ export type {
   CredentialSubject,
   AvailableIssuerType,
   Credentials,
+  CredentialSubjectFaceId,
+  FaceIdCredentials,
 };
