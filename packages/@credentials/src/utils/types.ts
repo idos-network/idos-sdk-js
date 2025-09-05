@@ -230,6 +230,14 @@ export interface VerifiedCredentialsProof {
   proofPurpose: string;
 }
 
+export const CredentialSubjectFaceIdSchema: z.ZodObject<{
+  faceBiometricId: z.ZodString;
+}> = z.object({
+  faceBiometricId: z.string(),
+});
+
+export type CredentialSubjectFaceId = z.infer<typeof CredentialSubjectFaceIdSchema>;
+
 export interface VerifiedCredentials<K> {
   "@context": string[];
   type: string[];
