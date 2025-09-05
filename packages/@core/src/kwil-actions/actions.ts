@@ -1,4 +1,4 @@
-import { Utils } from "@kwilteam/kwil-js";
+import { Utils } from "@idos-network/kwil-js";
 import * as z from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 

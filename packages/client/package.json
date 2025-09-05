@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@gemwallet/api": "catalog:core",
-    "@kwilteam/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
     "es-toolkit": "catalog:utils"
   },

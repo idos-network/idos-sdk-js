@@ -42,6 +42,7 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
   base64Encode,
@@ -51,7 +52,6 @@ import {
 } from "@idos-network/utils/codecs";
 import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import type { KwilSigner } from "@kwilteam/kwil-js";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";

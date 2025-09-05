@@ -1,3 +1,4 @@
+import { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
   binaryWriteUint16BE,
@@ -8,7 +9,6 @@ import {
   utf8Decode,
 } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
-import { KwilSigner } from "@kwilteam/kwil-js";
 import type {
   Wallet as NearWallet,
   SignedMessage,
