@@ -90,6 +90,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         this.unlockButton.disabled = true;
 
         if (this.options.encryptionPasswordStore === "mpc") {
+          // We are skipping the dialog for MPC
+          // so the line below is skipped, and the user will be asked
+          // to asked during encryption again... so we should accept origin.
+          await this.acceptParentOrigin();
           return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
         }
 
