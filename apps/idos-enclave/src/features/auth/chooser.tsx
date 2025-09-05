@@ -1,4 +1,5 @@
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
+import { KeyRoundIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
 import { Paragraph } from "@/components/ui/paragraph";
@@ -16,41 +17,62 @@ export default function Chooser({
   setEncryptionPasswordStore,
 }: ChooserProps) {
   return (
-    <div className="flex flex-col space-y-4 px-3 md:px-0">
+    <div className="flex flex-col gap-6">
       {mode === "existing" && (
-        <>
+        <div className="flex flex-col items-center gap-6">
           <Heading>Unlock your idOS key</Heading>
 
           <Paragraph>
             To continue, select the authentication method you chose when creating your idOS profile.
           </Paragraph>
-        </>
+        </div>
       )}
 
       {mode === "new" && (
-        <>
-          <Heading>Create your idOS key</Heading>
+        <div className="flex flex-col gap-6">
+          <Heading>Create your idOS encryption key</Heading>
 
           <Paragraph>
-            This ensures your idOS data is safe and encrypted such that only you can read it.
+            To continue,{" "}
+            <a
+              href="https://docs.idos.network/how-it-works/key-flows/encryption-flows"
+              target="_blank"
+              class="text-primary"
+              rel="noopener"
+            >
+              sign with your wallet
+            </a>{" "}
+            (recommended) or create a password
           </Paragraph>
 
-          <Paragraph>
-            To continue, please choose your preferred authentication method below.
-          </Paragraph>
-        </>
+          <div class="rounded-xl bg-muted p-4">
+            <div class="flex items-center gap-4">
+              <span class="text-primary">
+                <KeyRoundIcon size={32} />
+              </span>
+              <p class="text-xs">
+                This ensures your idOS data is safe and encrypted such that only you or those you
+                grant access to can access it.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {allowedEncryptionStores.includes("user") && (
-          <Button id="auth-method-password" onClick={() => setEncryptionPasswordStore("user")}>
-            Use a password
+      <div className="flex flex-col gap-2.5">
+        {allowedEncryptionStores.includes("mpc") && (
+          <Button id="auth-method-mpc" onClick={() => setEncryptionPasswordStore("mpc")}>
+            Sign with your wallet
           </Button>
         )}
 
-        {allowedEncryptionStores.includes("mpc") && (
-          <Button id="auth-method-mpc" onClick={() => setEncryptionPasswordStore("mpc")}>
-            Use MPC
+        {allowedEncryptionStores.includes("user") && (
+          <Button
+            id="auth-method-password"
+            variant="link"
+            onClick={() => setEncryptionPasswordStore("user")}
+          >
+            Create a password instead
           </Button>
         )}
       </div>

@@ -2,7 +2,7 @@ import type { InputHTMLAttributes } from "preact/compat";
 import { tv, type VariantProps } from "tailwind-variants";
 
 const textField = tv({
-  base: "rounded-md border-2 border-green-400 bg-white font-bold text-neutral-950 text-xl ring-green-400 placeholder:text-neutral-100 focus:border-green-600 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2 dark:bg-neutral-950 dark:text-neutral-50 dark:placeholder:font-normal",
+  base: "rounded-md border-2 border-muted bg-muted text-foreground ring-ring focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 h-12",
 });
 
 type TextFieldVariants = VariantProps<typeof textField>;

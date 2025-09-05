@@ -1,89 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<html lang="en" class="dark">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>idOS Secure Enclave</title>
+<head>
+  <meta charset="UTF-8" />
 
-    <style>
-      button {
-        display: none;
-      }
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>idOS Secure Enclave</title>
 
-      button:before {
-        display: block;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
+  <style>
+    button {
+      display: none;
+    }
 
-      button#unlock::before {
-        content: "🔐 Unlock idOS";
-      }
+    button:before {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-      button#unlock:disabled {
-        background-color: grey;
-      }
+    button#unlock::before {
+      content: "🔐 Unlock idOS";
+    }
 
-      button#unlock:disabled::before {
-        content: "Unlocking...";
-      }
+    button#unlock:disabled {
+      background-color: grey;
+    }
 
-      button#unlock.create::before {
-        content: "🔐 Create idOS Key";
-      }
+    button#unlock:disabled::before {
+      content: "Unlocking...";
+    }
 
-      button#unlock.create:disabled::before {
-        content: "Creating...";
-      }
+    button#unlock.create::before {
+      content: "🔐 Create idOS Key";
+    }
 
-      button#confirm::before {
-        content: "👀 See request";
-      }
+    button#unlock.create:disabled::before {
+      content: "Creating...";
+    }
 
-      button#confirm:disabled {
-        background-color: grey;
-      }
+    button#confirm::before {
+      content: "👀 See request";
+    }
 
-      button#backup:disabled::before {
-        content: "Waiting...";
-      }
-      button#backup::before {
-        content: "💼 Back up idOS key";
-      }
+    button#confirm:disabled {
+      background-color: grey;
+    }
 
-      button#backup:disabled {
-        background-color: grey;
-      }
+    button#backup:disabled::before {
+      content: "Waiting...";
+    }
 
-      button#backup:disabled::before {
-        content: "Waiting...";
-      }
-    </style>
-  </head>
+    button#backup::before {
+      content: "💼 Back up idOS key";
+    }
 
-  <body>
-    <div id="container" class="w-screen h-screen">
-      <button
-        id="unlock"
-        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
-      >
-      </button>
-      <button
-        id="confirm"
-        class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
-      >
-      </button>
-      <button
-        id="backup"
-        class="h-full w-full whitespace-pre rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300"
-      >
-      </button>
-    </div>
+    button#backup:disabled {
+      background-color: grey;
+    }
 
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    button#backup:disabled::before {
+      content: "Waiting...";
+    }
+  </style>
+</head>
+
+<body>
+  <div id="container" class="w-screen h-screen">
+    <button id="unlock"
+      class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300">
+    </button>
+    <button id="confirm"
+      class="h-full w-full rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300">
+    </button>
+    <button id="backup"
+      class="h-full w-full whitespace-pre rounded-lg bg-[#00ffb9] px-[5%] py-[2%] font-medium text-[41cqmin] text-zinc-950 transition-colors hover:bg-green-300">
+    </button>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>

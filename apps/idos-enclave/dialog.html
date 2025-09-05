@@ -1,21 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" class="w-full h-full">
-  <head>
-    <meta charset="utf-8" />
-    <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>"
-    />
+<html lang="en" class="dark">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>idOS Secure Enclave</title>
-  </head>
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>" />
 
-  <body
-    class="h-full w-full bg-neutral-50 text-neutral-950 antialiased dark:bg-neutral-950 dark:text-neutral-50"
-  >
-    <div id="app" class="flex flex-col w-full h-full"></div>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>idOS Secure Enclave</title>
+</head>
 
-    <script type="module" src="/src/dialog.tsx"></script>
-  </body>
+<body class="bg-background text-foreground">
+  <div id="app" class="contents"></div>
+
+  <script type="module" src="/src/dialog.tsx"></script>
+</body>
+
 </html>

@@ -19,11 +19,9 @@ const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backu
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <div>
+    <div className="grid grid-rows-[auto_1fr] p-6 max-w-[360px] mx-auto gap-6">
       <Header />
-      <main className="mt-6 flex flex-1 justify-center">
-        <div className="w-[30rem] text-center">{children}</div>
-      </main>
+      <main>{children}</main>
     </div>
   );
 }
@@ -87,19 +85,6 @@ export function App({ enclave }: AppProps) {
     },
     [onError],
   );
-
-  effect(() => {
-    if (!theme.value) {
-      theme.value = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    } else {
-      localStorage.setItem("theme", theme.value);
-      if (theme.value === "dark") {
-        document.documentElement.classList.add("dark");
-      } else {
-        document.documentElement.classList.remove("dark");
-      }
-    }
-  });
 
   const messageReceiver = useCallback(
     (event: MessageEvent<EventData>) => {
