@@ -1,8 +1,14 @@
-import { buildCredentials, type Credentials } from "./builder";
+import {
+  buildCredentials,
+  buildFaceIdCredentials,
+  type Credentials,
+  type FaceIdCredentials,
+} from "./builder";
 import { type AvailableIssuerType, base85ToFile, fileToBase85 } from "./utils";
 import type {
   CredentialFields,
   CredentialSubject,
+  CredentialSubjectFaceId,
   IDDocumentType,
   InsertableIDOSCredential,
   idOSCredential,
@@ -11,13 +17,15 @@ import type {
 } from "./utils/types";
 import { type VerifyCredentialsResult, verifyCredentials } from "./verifier";
 
-export { buildCredentials, verifyCredentials, base85ToFile, fileToBase85 };
+export { buildCredentials, buildFaceIdCredentials, verifyCredentials, base85ToFile, fileToBase85 };
 
 export type {
   CredentialFields,
   CredentialSubject,
+  CredentialSubjectFaceId,
   AvailableIssuerType,
   Credentials,
+  FaceIdCredentials,
   IDDocumentType,
   VerifiableCredentialSubject,
   VerifiableCredential,
