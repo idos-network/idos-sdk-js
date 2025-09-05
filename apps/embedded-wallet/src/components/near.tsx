@@ -25,7 +25,7 @@ const { useStepper } = defineStepper(
 );
 
 const selector = await setupWalletSelector({
-  network: import.meta.env.DEV ? "testnet" : "mainnet",
+  network: import.meta.env.VITE_IS_TEST ? "testnet" : "mainnet",
   modules: [setupMeteorWallet(), setupHereWallet()],
 });
 
