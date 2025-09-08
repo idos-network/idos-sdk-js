@@ -140,7 +140,21 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
+    console.log("Wallet Type:", walletType);
+    console.log("Wallet Identifier:", walletIdentifier);
+    console.log("Wallet Public Key:", walletPublicKey);
+
     this.kwilClient.setSigner(kwilSigner);
+
+    if (walletType === "near") {
+      const originalSigner = signer;
+      signer = {
+        signMessage: async ( message: string ) => {
+          const signature = await signNearMessage(originalSigner as any, message);
+          return { signedMessage: signature } as any;
+        }
+      } as any;
+    }
 
     return new idOSClientWithUserSigner(
       this,

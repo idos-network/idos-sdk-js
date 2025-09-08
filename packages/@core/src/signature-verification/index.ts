@@ -4,6 +4,8 @@ import { verifyNearSignature } from "./near";
 import { verifyRippleSignature } from "./ripple";
 import { verifyStellarSignature } from "./stellar";
 
+export { verifyNearSignature };
+
 export interface WalletSignature {
   address?: string;
   signature: string;
