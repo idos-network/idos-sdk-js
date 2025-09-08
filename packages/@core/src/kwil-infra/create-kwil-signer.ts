@@ -176,13 +176,12 @@ export async function createClientKwilSigner(
 
   if (looksLikeNearWallet(wallet)) {
     const accounts = await wallet.getAccounts();
-    console.log({ accounts });
-    const accountId = accounts[0].accountId;
+    const {kwilSigner, publicKey} = await createNearWalletKwilSigner(wallet, accounts[0].accountId, store, kwilClient)
 
     return [
-      await createNearWalletKwilSigner(wallet, accountId, store, kwilClient),
-      accountId,
-      undefined,
+      kwilSigner,
+      accounts[0].accountId,
+      publicKey,
       "near",
     ];
   }

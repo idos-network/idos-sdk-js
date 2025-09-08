@@ -57,7 +57,6 @@ export class LocalEnclave<
     this.store = options.store ?? new LocalStorageStore();
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
-    console.log({ options });
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
@@ -79,7 +78,6 @@ export class LocalEnclave<
   /** @override parent method to reconfigure the enclave */
   async reconfigure(options: Partial<K> = {}): Promise<void> {
     await super.reconfigure(options);
-    console.log({ reconfigureOptions: options });
     // Reconfigure MPC client if any signer information changed
     if (this.mpcClientInstance && options.walletType && options.walletAddress) {
       this.mpcClientInstance.reconfigure(
