@@ -176,14 +176,14 @@ export async function createClientKwilSigner(
 
   if (looksLikeNearWallet(wallet)) {
     const accounts = await wallet.getAccounts();
-    const {kwilSigner, publicKey} = await createNearWalletKwilSigner(wallet, accounts[0].accountId, store, kwilClient)
-
-    return [
-      kwilSigner,
+    const { kwilSigner, publicKey } = await createNearWalletKwilSigner(
+      wallet,
       accounts[0].accountId,
-      publicKey,
-      "near",
-    ];
+      store,
+      kwilClient,
+    );
+
+    return [kwilSigner, accounts[0].accountId, publicKey, "near"];
   }
 
   if (looksLikeXrpWallet(wallet)) {
