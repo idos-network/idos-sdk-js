@@ -67,7 +67,6 @@ export class LocalEnclave<
       .pipeCodec(this.userIdObfuscationCodec())
       .pipeCodec(Base64Codec);
 
-    console.log({ options });
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
@@ -86,6 +85,19 @@ export class LocalEnclave<
     this.store.reset();
   }
 
+  /** @override parent method to reconfigure the enclave */
+  async reconfigure(options: Partial<K> = {}): Promise<void> {
+    await super.reconfigure(options);
+    // Reconfigure MPC client if any signer information changed
+    if (this.mpcClientInstance && options.walletType && options.walletAddress) {
+      this.mpcClientInstance.reconfigure(
+        options.walletType,
+        options.walletAddress,
+        options.walletPublicKey,
+      );
+    }
+  }
+
   /**
    * Return a codec that encrypts/decrypts data using a key derived from the provider's user ID.
    *
@@ -93,6 +105,7 @@ export class LocalEnclave<
    */
   private userIdObfuscationCodec(): PipeCodecArgs<string> {
     const self = this;
+
 
     const toKey = (userId: string, salt: Uint8Array) =>
       syncScrypt(Utf8Codec.encode(userId), salt, 16384, 8, 1, nacl.secretbox.keyLength);
