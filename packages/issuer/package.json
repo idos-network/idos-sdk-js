@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK for server environments",
-  "version": "1.0.0-rc.1.0",
+  "version": "1.0.0-rc.1.1",
   "clean-package": {
     "remove": [
       "devDependencies.@idos-network/core",
@@ -12,7 +12,7 @@
     "@digitalbazaar/ed25519-signature-2020": "catalog:core",
     "@digitalbazaar/ed25519-verification-key-2020": "catalog:core",
     "@digitalbazaar/vc": "catalog:core",
-    "@kwilteam/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "catalog:core",
     "base85": "catalog:utils",
     "es-toolkit": "catalog:utils",
     "jsonld-document-loader": "catalog:core",

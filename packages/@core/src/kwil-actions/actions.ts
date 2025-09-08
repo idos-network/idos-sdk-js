@@ -1,4 +1,4 @@
-import { Utils } from "@kwilteam/kwil-js";
+import { Utils } from "@idos-network/kwil-js";
 import * as z from "zod";
 import type { KwilActionClient } from "../kwil-infra";
 
@@ -603,10 +603,10 @@ export async function getCredentials(
 
 export const GetCredentialsSharedByUserInputSchema: z.ZodObject<{
   user_id: z.ZodUUID;
-  issuer_auth_public_key: z.ZodString;
+  issuer_auth_public_key: z.ZodNullable<z.ZodString>;
 }> = z.object({
   user_id: z.uuid(),
-  issuer_auth_public_key: z.string(),
+  issuer_auth_public_key: z.string().nullable(),
 });
 
 export type GetCredentialsSharedByUserInput = z.infer<typeof GetCredentialsSharedByUserInputSchema>;

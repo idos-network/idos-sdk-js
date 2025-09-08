@@ -90,6 +90,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         this.unlockButton.disabled = true;
 
         if (this.options.encryptionPasswordStore === "mpc") {
+          // We are skipping the dialog for MPC
+          // so the line below is skipped, and the user will be asked
+          // to asked during encryption again... so we should accept origin.
+          await this.acceptParentOrigin();
           return resolve({ encryptionPasswordStore: this.options.encryptionPasswordStore });
         }
 
@@ -220,11 +224,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
   private listenToRequests() {
     window.addEventListener("message", async (event) => {
-      if (
-        event.origin !== this.parentOrigin ||
-        // cspell:disable-next-line
-        event.data.target === "metamask-inpage"
-      ) {
+      if (event.origin !== this.parentOrigin || event.ports.length === 0) {
         return;
       }
 
@@ -250,7 +250,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         ];
 
         if (!allowedMethods.includes(method)) {
-          throw new Error(`Unexpected request from parent: ${method}`);
+          console.error(`Unexpected request from parent: ${method}`);
+          event.ports[0].postMessage({ error: `Unexpected request: ${method}` });
+          event.ports[0].close();
+          return;
         }
 
         // Type assertion for method call
@@ -278,9 +281,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
     duration?: number;
     confirmed?: boolean;
   }> {
-    const width = 600;
+    const width = 360;
     const height =
-      this.options?.mode === "new" ? 600 : intent === "backupUserEncryptionProfile" ? 520 : 400;
+      this.options?.mode === "new" ? 680 : intent === "backupUserEncryptionProfile" ? 520 : 450;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({

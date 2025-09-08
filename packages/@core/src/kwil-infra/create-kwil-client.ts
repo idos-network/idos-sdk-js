@@ -1,7 +1,11 @@
-import { type KwilSigner, NodeKwil, WebKwil } from "@kwilteam/kwil-js";
-import type { Config } from "@kwilteam/kwil-js/dist/api_client/config";
-import type { ActionBody, CallBody, PositionalParams } from "@kwilteam/kwil-js/dist/core/action";
-import type { DataInfo } from "@kwilteam/kwil-js/dist/core/database";
+import { type KwilSigner, NodeKwil, WebKwil } from "@idos-network/kwil-js";
+import type { Config } from "@idos-network/kwil-js/dist/api_client/config";
+import type {
+  ActionBody,
+  CallBody,
+  PositionalParams,
+} from "@idos-network/kwil-js/dist/core/action";
+import type { DataInfo } from "@idos-network/kwil-js/dist/core/database";
 import fetchAdapter from "@vespaiach/axios-fetch-adapter";
 import Axios from "axios";
 import invariant from "tiny-invariant";

@@ -6,7 +6,7 @@ import { verifyCredentials } from "./verifier";
 
 describe("verifiableCredentials", () => {
   it("should raise an error if the fields are invalid", async () => {
-    expect.assertions(10); // catch
+    expect.assertions(12); // catch
 
     const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
     const issuer = "https://vc-issuers.cool.id/idos";
@@ -37,6 +37,7 @@ describe("verifiableCredentials", () => {
           governmentId: "123-45-6789",
           email: "john.lennon@example.com",
           phoneNumber: "+1234567890",
+          ssn: "203-456",
           dateOfBirth: new Date("2025-02-30"),
           placeOfBirth: "New York, NY",
           idDocumentCountry: "DEU",
@@ -62,7 +63,7 @@ describe("verifiableCredentials", () => {
     } catch (error) {
       expect(error).toBeInstanceOf(ZodError);
       const zodError = error as ZodError;
-      expect(zodError.issues).toHaveLength(4);
+      expect(zodError.issues).toHaveLength(5);
 
       // idDocumentCountry
       const idDocumentCountryError = zodError.issues.find(
@@ -91,6 +92,11 @@ describe("verifiableCredentials", () => {
       const genderError = zodError.issues.find((error) => error.path[0] === "gender");
       expect(genderError).toBeDefined();
       expect(genderError?.message).toContain('Invalid option: expected one of "M"|"F"|"OTHER"');
+
+      // ssn
+      const ssnError = zodError.issues.find((error) => error.path[0] === "ssn");
+      expect(ssnError).toBeDefined();
+      expect(ssnError?.message).toContain("Too small: expected string to have >=9 characters");
     }
   });
 
@@ -124,6 +130,7 @@ describe("verifiableCredentials", () => {
         firstName: "John",
         middleName: "Paul",
         familyName: "Lennon",
+        ssn: "123456789",
         gender: "M",
         nationality: "US",
         governmentIdType: "SSN",
@@ -175,8 +182,13 @@ describe("verifiableCredentials", () => {
 
     const allowedIssuers = [anotherKey, validKey];
 
-    const verified = await verifyCredentials(data, allowedIssuers);
+    const [verified, validResults] = await verifyCredentials(data, allowedIssuers);
     expect(verified).toBe(true);
+
+    const validResultsArray = validResults.values().toArray();
+    expect(validResultsArray).toHaveLength(2);
+    expect(validResultsArray[0].verified).toBe(false);
+    expect(validResultsArray[1].verified).toBe(true);
 
     // Invalid issuer
     const invalidIssuers = [
@@ -187,8 +199,13 @@ describe("verifiableCredentials", () => {
       },
     ];
 
-    const invalidVerified = await verifyCredentials(data, invalidIssuers);
+    const [invalidVerified, invalidResults] = await verifyCredentials(data, invalidIssuers);
     expect(invalidVerified).toBe(false);
+
+    const invalidResultsArray = invalidResults.values().toArray();
+    expect(invalidResultsArray).toHaveLength(1);
+    expect(invalidResultsArray[0].verified).toBe(false);
+    expect(invalidResultsArray[0].error?.errors?.[0]?.message).toContain("not verify any proofs");
 
     // Accepts issuer as issuer object
     const validIssuer = [
@@ -198,7 +215,7 @@ describe("verifiableCredentials", () => {
       },
     ];
 
-    const validIssuerVerified = await verifyCredentials(data, validIssuer);
+    const [validIssuerVerified] = await verifyCredentials(data, validIssuer);
     expect(validIssuerVerified).toBe(true);
   });
 });

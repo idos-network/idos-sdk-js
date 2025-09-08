@@ -78,16 +78,29 @@ declare module "@digitalbazaar/vc" {
     documentLoader: JsonLDDocumentLoaderInstance;
   }
 
-  export declare function verifyCredential<K>(options: VerifyCredentialOptions<K>): Promise<{
+  export interface VerifyCredentialError {
+    name: string;
+    message: string;
+    stack: string;
+  }
+
+  export interface VerifyCredentialResult {
     verified: boolean;
-    error?: Error;
+    error?: {
+      name: string;
+      errors: VerifyCredentialError[];
+    };
     results: {
       proof: VerifiedCredentialsProof;
     }[];
     purposeResult: {
       valid: boolean;
     };
-  }>;
+  }
+
+  export declare function verifyCredential<K>(
+    options: VerifyCredentialOptions<K>,
+  ): Promise<VerifyCredentialResult>;
 }
 
 declare module "jsonld-document-loader" {

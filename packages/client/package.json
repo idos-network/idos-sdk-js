@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK for browser environments",
-  "version": "1.0.0-rc.1.0",
+  "version": "1.0.0-rc.1.1",
   "clean-package": {
     "remove": [
       "devDependencies.@idos-network/core",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@gemwallet/api": "catalog:core",
-    "@kwilteam/kwil-js": "catalog:core",
+    "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
     "es-toolkit": "catalog:utils"
   },

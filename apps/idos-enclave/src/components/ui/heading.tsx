@@ -8,7 +8,7 @@ interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
 }
 
 const heading = tv({
-  base: "font-bold text-3xl dark:text-neutral-300",
+  base: "font-medium text-lg text-foreground text-center",
 });
 
 export function Heading({ as: Component = "h1", class: _class, className, ...rest }: HeadingProps) {

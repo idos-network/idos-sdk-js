@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     });
 
   // @todo: some users can get their credentials from other issuers. meaning that verificationResult will be false. what should we do about that?
-  const verificationResult = await consumer.verifyCredentials(JSON.parse(credentialContent), [
+  const [verificationResult] = await consumer.verifyCredentials(JSON.parse(credentialContent), [
     {
       issuerURL,
       publicKeyMultibase,

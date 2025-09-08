@@ -25,10 +25,11 @@ import {
   type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
+  type VerifyCredentialsResult,
   verifyCredentials,
 } from "@idos-network/credentials";
+import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
-import type { KwilSigner } from "@kwilteam/kwil-js";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -112,8 +113,11 @@ export class idOSConsumer {
     return accessGrants[0];
   }
 
-  async getCredentialsSharedByUser(userId: string): Promise<idOSCredential[]> {
-    return getCredentialsSharedByUser(this.#kwilClient, { user_id: userId });
+  async getCredentialsSharedByUser(userId: string): Promise<Omit<idOSCredential, "content">[]> {
+    return getCredentialsSharedByUser(this.#kwilClient, {
+      user_id: userId,
+      issuer_auth_public_key: null,
+    });
   }
 
   async getReusableCredentialCompliantly(credentialId: string): Promise<idOSCredential> {
@@ -164,7 +168,7 @@ export class idOSConsumer {
   async verifyCredentials<K = VerifiableCredentialSubject>(
     credentials: VerifiableCredential<K>,
     issuers: AvailableIssuerType[],
-  ): Promise<boolean> {
+  ): Promise<VerifyCredentialsResult> {
     return verifyCredentials<K>(credentials, issuers);
   }
 }
@@ -175,6 +179,7 @@ export type {
   Credentials,
   VerifiableCredential,
   VerifiableCredentialSubject,
+  VerifyCredentialsResult,
   AvailableIssuerType,
   IDDocumentType,
 };

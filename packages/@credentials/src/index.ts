@@ -9,9 +9,10 @@ import type {
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "./utils/types";
-import { verifyCredentials } from "./verifier";
+import { type VerifyCredentialsResult, verifyCredentials } from "./verifier";
 
 export { buildCredentials, verifyCredentials, base85ToFile, fileToBase85 };
+
 export type {
   CredentialFields,
   CredentialSubject,
@@ -22,4 +23,5 @@ export type {
   VerifiableCredential,
   idOSCredential,
   InsertableIDOSCredential,
+  VerifyCredentialsResult,
 };

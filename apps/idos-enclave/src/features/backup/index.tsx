@@ -96,7 +96,7 @@ function ReadonlyInput(
   return (
     <input
       readOnly
-      class="flex-1 border-0 bg-transparent font-semibold outline-none ring-0 focus:outline-none focus:ring-0"
+      class="w-full border-0 bg-transparent font-semibold outline-none ring-0 focus:outline-none focus:ring-0"
       {...props}
     />
   );
@@ -155,7 +155,7 @@ export function PasswordReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your {encryptionPasswordStore} is:</Paragraph>
+        <Paragraph>Your {encryptionPasswordStore.toLocaleUpperCase()} is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={password} />
           <div className="flex items-center gap-2">

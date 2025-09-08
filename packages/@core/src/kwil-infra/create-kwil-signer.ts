@@ -1,6 +1,6 @@
+import { KwilSigner } from "@idos-network/kwil-js";
 import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
-import { KwilSigner } from "@kwilteam/kwil-js";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";
