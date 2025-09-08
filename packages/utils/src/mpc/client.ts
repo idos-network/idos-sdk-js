@@ -41,10 +41,9 @@ export class Client {
   }
 
     public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
-    if (signerType !== "evm" && signerType !== "xrpl") {
+    if (signerType !== "evm" && signerType !== "xrpl" && signerType !== "near") {
       throw new Error("Invalid signer type");
     }
-
     this.signerType = signerType;
     this.signerAddress = signerAddress;
     if (signerPublicKey) this.signerPublicKey = signerPublicKey;
@@ -105,6 +104,9 @@ export class Client {
       case "xrpl":
         address = `XRPL:${this.signerPublicKey}`;
         break;
+      case "near":
+        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -131,6 +133,9 @@ export class Client {
         break;
       case "xrpl":
         address = `XRPL:${this.signerPublicKey}`;
+        break;
+      case "near":
+        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -178,6 +183,9 @@ export class Client {
       case "xrpl":
         address = `XRPL:${this.signerPublicKey}`;
         break;
+      case "near":
+        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -189,6 +197,9 @@ export class Client {
         break;
       case "xrpl":
         addressToAddFormatted = `XRPL:${publicKey}`;
+        break;
+      case "near":
+        addressToAddFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
         break;
       default:
         throw new Error("Invalid address to add type");
@@ -215,6 +226,9 @@ export class Client {
       case "xrpl":
         address = `XRPL:${this.signerPublicKey}`;
         break;
+      case "near":
+        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -226,6 +240,9 @@ export class Client {
         break;
       case "xrpl":
         addressToRemoveFormatted = `XRPL:${publicKey}`;
+        break;
+      case "near":
+        addressToRemoveFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
         break;
       default:
         throw new Error("Invalid address to remove type");

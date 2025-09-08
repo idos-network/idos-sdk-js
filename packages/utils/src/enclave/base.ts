@@ -62,14 +62,12 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     // Handle different signing methods based on wallet type
     if (this._signMethodType === "signTypedData") {
       // EVM wallets: use all 3 arguments
-      console.log("Calling signTypedData with 3 arguments:", { domain, types, value });
       signature = await (
         this._signMethod as (domain: any, types: any, value: any) => Promise<string>
       )(domain, types, value);
     } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
-      // XRPL/Stellar wallets: use only the value as message
+      // XRPL/NEAR/Stellar wallets: use only the value as message
       const messageString = JSON.stringify(value);
-      console.log(`Calling ${this._signMethodType} with 1 argument:`, { message: messageString });
       const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
 
       // Extract signature from response object
@@ -88,7 +86,6 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       throw new Error(`Unknown sign method type: ${this._signMethodType}`);
     }
 
-    console.log("Signing completed, signature:", signature);
     return signature;
   }
 
