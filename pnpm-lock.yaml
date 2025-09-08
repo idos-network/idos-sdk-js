@@ -326,7 +326,7 @@ importers:
         version: 8.10.2(near-api-js@4.0.3(encoding@0.1.13))
       '@preact/signals':
         specifier: ^2.0.2
-        version: 2.2.0(preact@10.26.9)
+        version: 2.2.0(preact@10.27.1)
       '@reown/appkit':
         specifier: catalog:reown
         version: 1.7.13(@types/react@19.1.6)(bufferutil@4.0.9)(encoding@0.1.13)(react@19.1.0)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
@@ -346,8 +346,8 @@ importers:
         specifier: ^4.0.14
         version: 4.0.14(react@19.1.0)(typescript@5.8.3)
       preact:
-        specifier: ^10.26.9
-        version: 10.26.9
+        specifier: ^10.27.1
+        version: 10.27.1
       viem:
         specifier: catalog:ethereum
         version: 2.31.7(bufferutil@4.0.9)(typescript@5.8.3)(utf-8-validate@5.0.10)(zod@3.25.64)
@@ -357,7 +357,7 @@ importers:
     devDependencies:
       '@preact/preset-vite':
         specifier: ^2.10.1
-        version: 2.10.1(@babel/core@7.28.0)(preact@10.26.9)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
+        version: 2.10.1(@babel/core@7.28.0)(preact@10.27.1)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
       '@tailwindcss/vite':
         specifier: ^4.1.11
         version: 4.1.11(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
@@ -11232,8 +11232,8 @@ packages:
   preact@10.26.8:
     resolution: {integrity: sha512-1nMfdFjucm5hKvq0IClqZwK4FJkGXhRrQstOQ3P4vp8HxKrJEMFcY6RdBRVTdfQS/UlnX6gfbPuTvaqx/bDoeQ==}
 
-  preact@10.26.9:
-    resolution: {integrity: sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA==}
+  preact@10.27.1:
+    resolution: {integrity: sha512-V79raXEWch/rbqoNc7nT9E4ep7lu+mI3+sBmfRD4i1M73R3WLYcCtdI0ibxGVf4eQL8ZIz2nFacqEC+rmnOORQ==}
 
   prettier@2.8.8:
     resolution: {integrity: sha512-tdN8qQGvNjw4CHbY+XXk0JgCXn9QiF21a55rBe5LJAU+kDyC4WQn4+awm2Xfk2lQMk5fKup9XgzTZtGkjBdP9Q==}
@@ -13944,7 +13944,7 @@ snapshots:
       eth-json-rpc-filters: 6.0.1
       eventemitter3: 5.0.1
       keccak: 3.0.4
-      preact: 10.26.9
+      preact: 10.27.1
       sha.js: 2.4.12
     transitivePeerDependencies:
       - supports-color
@@ -13954,7 +13954,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       clsx: 1.2.1
       eventemitter3: 5.0.1
-      preact: 10.26.9
+      preact: 10.27.1
     optional: true
 
   '@coinbase/wallet-sdk@4.3.3':
@@ -13962,7 +13962,7 @@ snapshots:
       '@noble/hashes': 1.8.0
       clsx: 1.2.1
       eventemitter3: 5.0.1
-      preact: 10.26.9
+      preact: 10.27.1
 
   '@conventional-changelog/git-client@2.0.0(conventional-commits-filter@5.0.0)(conventional-commits-parser@6.1.0)':
     dependencies:
@@ -17124,12 +17124,12 @@ snapshots:
       - preact
       - supports-color
 
-  '@preact/preset-vite@2.10.1(@babel/core@7.28.0)(preact@10.26.9)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
+  '@preact/preset-vite@2.10.1(@babel/core@7.28.0)(preact@10.27.1)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/plugin-transform-react-jsx': 7.25.9(@babel/core@7.28.0)
       '@babel/plugin-transform-react-jsx-development': 7.25.9(@babel/core@7.28.0)
-      '@prefresh/vite': 2.4.7(preact@10.26.9)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
+      '@prefresh/vite': 2.4.7(preact@10.27.1)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
       '@rollup/pluginutils': 4.2.1
       babel-plugin-transform-hook-names: 1.0.2(@babel/core@7.28.0)
       debug: 4.4.1(supports-color@8.1.1)
@@ -17147,10 +17147,10 @@ snapshots:
       '@preact/signals-core': 1.9.0
       preact: 10.26.8
 
-  '@preact/signals@2.2.0(preact@10.26.9)':
+  '@preact/signals@2.2.0(preact@10.27.1)':
     dependencies:
       '@preact/signals-core': 1.9.0
-      preact: 10.26.9
+      preact: 10.27.1
 
   '@prefresh/babel-plugin@0.5.1': {}
 
@@ -17158,9 +17158,9 @@ snapshots:
     dependencies:
       preact: 10.26.8
 
-  '@prefresh/core@1.5.3(preact@10.26.9)':
+  '@prefresh/core@1.5.3(preact@10.27.1)':
     dependencies:
-      preact: 10.26.9
+      preact: 10.27.1
 
   '@prefresh/utils@1.2.0': {}
 
@@ -17176,14 +17176,14 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@prefresh/vite@2.4.7(preact@10.26.9)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
+  '@prefresh/vite@2.4.7(preact@10.27.1)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))':
     dependencies:
       '@babel/core': 7.27.4
       '@prefresh/babel-plugin': 0.5.1
-      '@prefresh/core': 1.5.3(preact@10.26.9)
+      '@prefresh/core': 1.5.3(preact@10.27.1)
       '@prefresh/utils': 1.2.0
       '@rollup/pluginutils': 4.2.1
-      preact: 10.26.9
+      preact: 10.27.1
       vite: 7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0)
     transitivePeerDependencies:
       - supports-color
@@ -28180,7 +28180,7 @@ snapshots:
 
   preact@10.26.8: {}
 
-  preact@10.26.9: {}
+  preact@10.27.1: {}
 
   prettier@2.8.8: {}
 
