@@ -170,7 +170,7 @@ export async function createNearWalletKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
   recipient = "idos.network",
-): Promise<{kwilSigner: KwilSigner, publicKey: string}> {
+): Promise<{ kwilSigner: KwilSigner; publicKey: string }> {
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
   if (wallet.id === "my-near-wallet") {
@@ -240,5 +240,8 @@ export async function createNearWalletKwilSigner(
 
   const signer = createNearWalletSigner(wallet, recipient);
 
-  return {kwilSigner: new KwilSigner(signer, implicitAddressFromPublicKey(publicKey), "nep413"), publicKey};
+  return {
+    kwilSigner: new KwilSigner(signer, implicitAddressFromPublicKey(publicKey), "nep413"),
+    publicKey,
+  };
 }

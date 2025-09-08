@@ -1,3 +1,4 @@
+import { verifyNearSignature } from "@idos-network/core/signature-verification";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   BaseProvider,
@@ -10,7 +11,6 @@ import type {
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
 } from "@idos-network/utils/mpc";
-import { verifyNearSignature } from "@idos-network/core/signature-verification";
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
@@ -264,8 +264,12 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
     const payload = message.data.payload;
     const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
-    const res = await verifyNearSignature(JSON.stringify(payload.value), signature, this.options.walletPublicKey ?? "");
-    console.log({res});
+    const res = await verifyNearSignature(
+      JSON.stringify(payload.value),
+      signature,
+      this.options.walletPublicKey ?? "",
+    );
+    console.log({ res });
 
     await this.requestToEnclave("signTypedDataResponse", signature);
   }
