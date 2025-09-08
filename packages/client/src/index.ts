@@ -149,10 +149,10 @@ export class idOSClientIdle {
     if (walletType === "near") {
       const originalSigner = signer;
       signer = {
-        signMessage: async ( message: string ) => {
+        signMessage: async (message: string) => {
           const signature = await signNearMessage(originalSigner as any, message);
           return { signedMessage: signature } as any;
-        }
+        },
       } as any;
     }
 
