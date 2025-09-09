@@ -32,6 +32,7 @@ export class Client {
   private signerAddress: string;
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
+  private numNodes: number;
 
   constructor(
     baseUrl: string,
@@ -48,6 +49,7 @@ export class Client {
     this.signerType = signerType;
     this.signerAddress = signerAddress;
     this.signerPublicKey = signerPublicKey;
+    this.numNodes = numNodes;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
@@ -93,7 +95,7 @@ export class Client {
 
   public getBlindedShares(secret: Buffer): Buffer[] {
     // TODO: Make the number of nodes configurable from env variables
-    const secretShares = this.factory.fromPlainText(5, secret);
+    const secretShares = this.factory.fromPlainText(this.numNodes, secret);
     var blindedShares: Buffer[] = [];
     for (let i = 0; i < secretShares.numShares(); i++) {
       blindedShares.push(Client.blindShare(secretShares.getShareBytes(i)));
