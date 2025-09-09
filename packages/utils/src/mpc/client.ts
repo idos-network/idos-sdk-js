@@ -115,6 +115,7 @@ export class Client {
     blindedShares: Buffer[],
     additionalRecoveringAddresses: string[] = [],
   ): UploadSignatureMessage {
+    console.log("UPLOADING TO MPC");
     var address = "";
     switch (this.signerType) {
       case "evm":
