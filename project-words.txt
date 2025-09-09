@@ -89,6 +89,7 @@ sandboxed
 secp
 secretbox
 secretsharing
+shamir
 shardnet
 siwe
 stablelib

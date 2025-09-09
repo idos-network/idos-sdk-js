@@ -5,7 +5,7 @@ import {
 import { ethers, type TypedDataDomain } from "ethers";
 import { EngineClient } from "./engine-client";
 import { deserializeState } from "./generated/IdosContract";
-import { BinarySecretShares, getRandomBytes } from "./secretsharing/binary-secret-shares";
+import { ShamirFactory, getRandomBytes } from "./secretsharing/shamir-secret-shares";
 import {
   type Bytes,
   DOWNLOAD_TYPES,
@@ -31,6 +31,7 @@ export class Client {
   private signerType: string;
   private signerAddress: string;
   private signerPublicKey: string | undefined;
+  private factory: ShamirFactory;
 
   constructor(baseUrl: string, contractAddress: PbcAddress, signerType: string, signerAddress: string, signerPublicKey?: string) {
     this.baseUrl = baseUrl;
@@ -38,6 +39,8 @@ export class Client {
     this.signerType = signerType;
     this.signerAddress = signerAddress;
     this.signerPublicKey = signerPublicKey;
+    // TODO: Make these configurable from env variables
+    this.factory = new ShamirFactory({ numMalicious: 2, numNodes: 5, numToReconstruct: 3 });
   }
 
     public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
@@ -80,8 +83,13 @@ export class Client {
   }
 
   public getBlindedShares(secret: Buffer): Buffer[] {
-    const shares = BinarySecretShares.create(secret).getShares();
-    return shares.map((b) => Client.blindShare(b));
+    // TODO: Make the number of nodes configurable from env variables
+    const secretShares = this.factory.fromPlainText(5, secret);
+    var blindedShares: Buffer[] = [];
+    for (let i = 0; i < secretShares.numShares(); i++) {
+      blindedShares.push(Client.blindShare(secretShares.getShareBytes(i)));
+    }
+    return blindedShares;
   }
 
   public uploadMessageToSign(uploadRequest: UploadSignatureMessage): UploadMessageToSign {
@@ -167,7 +175,7 @@ export class Client {
     }
     var secret: Buffer;
     try {
-      secret = BinarySecretShares.read(secretShares.map((item) => item.share)).reconstructSecret();
+      secret = this.factory.fromSharesBytes(secretShares.map((item) => item.share)).reconstructPlainText();
       return { status: "ok", secret };
     } catch (_e) {
       return { status: "error", secret: undefined };
