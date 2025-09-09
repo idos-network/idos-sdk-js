@@ -33,14 +33,23 @@ export class Client {
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
 
-  constructor(baseUrl: string, contractAddress: PbcAddress, signerType: string, signerAddress: string, signerPublicKey?: string) {
+  constructor(
+    baseUrl: string,
+    contractAddress: PbcAddress,
+    numMalicious: number,
+    numNodes: number,
+    numToReconstruct: number,
+    signerType: string,
+    signerAddress: string,
+    signerPublicKey?: string,
+  ) {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
     this.signerType = signerType;
     this.signerAddress = signerAddress;
     this.signerPublicKey = signerPublicKey;
     // TODO: Make these configurable from env variables
-    this.factory = new ShamirFactory({ numMalicious: 2, numNodes: 5, numToReconstruct: 3 });
+    this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
 
     public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {

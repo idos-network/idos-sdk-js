@@ -33,6 +33,9 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   mpcConfiguration?: {
     nodeUrl: string;
     contractAddress: string;
+    numMalicious: number;
+    numNodes: number;
+    numToReconstruct: number;
   };
 }
 
@@ -71,6 +74,9 @@ export class LocalEnclave<
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
         options.mpcConfiguration.contractAddress,
+        options.mpcConfiguration.numMalicious,
+        options.mpcConfiguration.numNodes,
+        options.mpcConfiguration.numToReconstruct,
         options.walletType,
         options.walletAddress,
         options.walletPublicKey,
