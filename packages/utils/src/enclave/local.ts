@@ -67,8 +67,8 @@ export class LocalEnclave<
         options.mpcConfiguration.numMalicious,
         options.mpcConfiguration.numNodes,
         options.mpcConfiguration.numToReconstruct,
-        options.walletType,
-        options.walletAddress,
+        options.walletType ?? "",
+        options.walletAddress ?? "",
         options.walletPublicKey,
       );
     }
@@ -87,8 +87,8 @@ export class LocalEnclave<
     // Reconfigure MPC client if any signer information changed
     if (this.mpcClientInstance && options.walletType && options.walletAddress) {
       this.mpcClientInstance.reconfigure(
-        options.walletType,
-        options.walletAddress,
+        options.walletType ?? "",
+        options.walletAddress ?? "",
         options.walletPublicKey,
       );
     }
@@ -340,9 +340,7 @@ export class LocalEnclave<
   }
 
   private async uploadSecret(secret: string): Promise<{ status: string }> {
-    const signerAddress = this.options.walletAddress;
-
-    if (!signerAddress) {
+    if (!this.options.walletAddress) {
       console.error("signerAddress is not found");
       return { status: "no-signer-address" };
     }
