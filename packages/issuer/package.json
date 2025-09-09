@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK for server environments",
-  "version": "1.0.0-rc.1.1",
+  "version": "1.0.0-rc.1.2",
   "clean-package": {
     "remove": [
       "devDependencies.@idos-network/core",
