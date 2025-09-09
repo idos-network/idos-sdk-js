@@ -88,6 +88,7 @@ safekeep
 sandboxed
 secp
 secretsharing
+shamir
 shardnet
 siwe
 stablelib

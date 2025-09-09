@@ -1,6 +1,10 @@
-import type { FiniteFieldElement } from "./finite-field-element";
+import { FiniteFieldElement } from "./finite-field-element";
 
-/** Polynomials with coefficients in a finite field. */
+/**
+ *  Polynomials with coefficients in a finite field.
+ *
+ * <p>Copied from <a href="https://gitlab.com/partisiablockchain/language/abi/zk-client"> zk-client</a>.
+ */
 export class Polynomial<T extends FiniteFieldElement<T>> {
   private readonly coefficients: T[];
 
@@ -18,12 +22,12 @@ export class Polynomial<T extends FiniteFieldElement<T>> {
    * @return the constructed polynomial
    */
   static create<T extends FiniteFieldElement<T>>(coefficients: T[], zero: T): Polynomial<T> {
-    return new Polynomial<T>(Polynomial.filterHighZeroes(coefficients, zero));
+    return new Polynomial<T>(this.filterHighZeroes(coefficients, zero));
   }
 
   private static filterHighZeroes<T extends FiniteFieldElement<T>>(
     coefficients: T[],
-    zero: T,
+    zero: T
   ): T[] {
     for (let i = coefficients.length - 1; i >= 0; i--) {
       if (!coefficients[i].isZero()) {

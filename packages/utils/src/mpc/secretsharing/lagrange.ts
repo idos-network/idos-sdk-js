@@ -1,5 +1,7 @@
-import type { FiniteFieldElement } from "./finite-field-element";
+import { FiniteFieldElement } from "./finite-field-element";
 import { Polynomial } from "./polynomial";
+
+// File copied from <a href="https://gitlab.com/partisiablockchain/language/abi/zk-client"> zk-client</a>.
 
 /**
  * Try to interpolate a polynomial that passes through the supplied points.
@@ -15,7 +17,7 @@ function interpolate<T extends FiniteFieldElement<T>>(
   xs: readonly T[],
   ys: T[],
   zero: T,
-  one: T,
+  one: T
 ): Polynomial<T> {
   if (xs.length !== ys.length) {
     throw new Error("xs and ys must be of same size");
@@ -76,21 +78,88 @@ function interpolateCheckDegree<T extends FiniteFieldElement<T>>(
   ys: T[],
   maximalDegree: number,
   zero: T,
-  one: T,
+  one: T
 ): Polynomial<T> {
   const poly = interpolate(xs, ys, zero, one);
   if (poly.degree() > maximalDegree) {
     throw new Error(
-      `Interpolated polynomial has too high degree. Expected maximal=${maximalDegree}, actual=${poly.degree()}`,
+      `Interpolated polynomial has too high degree. Expected maximal=${maximalDegree}, actual=${poly.degree()}`
     );
   }
   return poly;
 }
 
 /**
+ * Try to interpolate a polynomial that passes through at least <code>2 &sdot; maximalDegree + 1
+ * </code> of the supplied points.
+ *
+ * <p>Element lists ({@code xs} and {@code ys}) must have same size.
+ *
+ * @param xs x-coordinates in the points
+ * @param ys y-coordinates in the points
+ * @param maximalDegree the expected maximal degree
+ * @param zero 0 element in the Finite Field.
+ * @param one 1 element in the Finite Field.
+ *
+ * @returns the interpolated polynomial or undefined if unable to interpolate
+ */
+function interpolateIfPossible<T extends FiniteFieldElement<T>>(
+  xs: readonly T[],
+  ys: T[],
+  maximalDegree: number,
+  zero: T,
+  one: T
+): Polynomial<T> | undefined {
+  if (xs.length !== ys.length) {
+    throw new Error("xs and ys must be of same size");
+  }
+  return interpolateIfPossibleInner(xs, ys, maximalDegree, zero, one);
+}
+
+function interpolateIfPossibleInner<T extends FiniteFieldElement<T>>(
+  xs: readonly T[],
+  ys: T[],
+  maximalDegree: number,
+  zero: T,
+  one: T
+): Polynomial<T> | undefined {
+  if (xs.length <= 2 * maximalDegree + 1) {
+    const interpolated = interpolate(xs, ys, zero, one);
+    if (interpolated.degree() > maximalDegree) {
+      return undefined;
+    } else {
+      return interpolated;
+    }
+  } else {
+    for (let removeIndex = 0; removeIndex < xs.length; removeIndex++) {
+      const interpolated = interpolateIfPossibleInner(
+        withoutIndex(xs, removeIndex),
+        withoutIndex(ys, removeIndex),
+        maximalDegree,
+        zero,
+        one
+      );
+      if (interpolated !== undefined) {
+        return interpolated;
+      }
+    }
+    return undefined;
+  }
+}
+
+function withoutIndex<T>(values: readonly T[], removeIndex: number): T[] {
+  return values.filter((_value, index, _array) => index != removeIndex);
+}
+
+/**
  * Utility for lagrange interpolation.
  */
-export const Lagrange = {
+export const Lagrange: {
+  interpolate: typeof interpolate;
+  interpolateCheckDegree: typeof interpolateCheckDegree;
+  interpolateIfPossible: typeof interpolateIfPossible;
+} = {
   interpolate,
   interpolateCheckDegree,
+  interpolateIfPossible,
 };
