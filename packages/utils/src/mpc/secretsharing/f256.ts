@@ -1,6 +1,7 @@
-import type { FiniteFieldElement } from "./finite-field-element";
+import { FiniteFieldElement } from "./finite-field-element";
 import { Polynomial } from "./polynomial";
 
+/** Represents an element in GF(2^8) using the reduction polynomial x^8+x^4+x^3+x+1. */
 export class F256 implements FiniteFieldElement<F256> {
   readonly value: number;
 
@@ -30,8 +31,10 @@ export class F256 implements FiniteFieldElement<F256> {
    * Get the computation alphas for this field.
    * @returns the computation alphas
    */
-  static computationAlphas(): readonly F256[] {
-    return Constants.computationAlphas;
+  static alphas(numNodes: number): readonly F256[] {
+    return Array.from(
+      Array.from({ length: numNodes }, (_value, key) => F256.createElement(key + 1))
+    );
   }
 
   /**
@@ -39,38 +42,39 @@ export class F256 implements FiniteFieldElement<F256> {
    * @param coefficients the coefficients of the polynomial
    */
   static createPoly(coefficients: F256[]): Polynomial<F256> {
-    return Polynomial.create(coefficients, F256.ZERO);
+    return Polynomial.create(coefficients, this.ZERO);
   }
 
+  /** @inheritDoc */
   add(other: F256): F256 {
     return Constants.elements[this.value ^ other.value];
   }
 
+  /** @inheritDoc */
   isEqualTo(other: F256): boolean {
     return this.value === other.value;
   }
 
+  /** @inheritDoc */
   isOne(): boolean {
     return this.value === 1;
   }
 
+  /** @inheritDoc */
   isZero(): boolean {
     return this.value === 0;
   }
 
+  /** @inheritDoc */
   modInverse(): F256 {
     return Constants.elements[Constants.multiplicativeInverse[this.value]];
-    // let p: F256 = this;
-    // for (let i = 0; i < 6; i++) {
-    //   p = p.multiply(p).multiply(this);
-    // }
-    // return p.multiply(p);
   }
 
+  /** @inheritDoc */
   multiply(other: F256): F256 {
     let a = this.value;
     let b = other.value;
-    let m: number;
+    let m;
     let p = 0;
     for (let i = 0; i < 8; i++) {
       p = (p ^ (-(b & 1) & a)) & 0xff;
@@ -81,14 +85,17 @@ export class F256 implements FiniteFieldElement<F256> {
     return Constants.elements[p];
   }
 
+  /** @inheritDoc */
   negate(): F256 {
     return this;
   }
 
+  /** @inheritDoc */
   squareRoot(): F256 {
     throw new Error("Not implemented");
   }
 
+  /** @inheritDoc */
   subtract(other: F256): F256 {
     return this.add(other);
   }
@@ -96,13 +103,6 @@ export class F256 implements FiniteFieldElement<F256> {
 
 const Constants = {
   elements: Array.from({ length: 256 }, (_value, key) => F256.createElement(key)),
-  computationAlphas: [
-    F256.createElement(1),
-    F256.createElement(2),
-    F256.createElement(3),
-    F256.createElement(4),
-    F256.createElement(5),
-  ],
   multiplicativeInverse: [
     0x00, 0x01, 0x8d, 0xf6, 0xcb, 0x52, 0x7b, 0xd1, 0xe8, 0x4f, 0x29, 0xc0, 0xb0, 0xe1, 0xe5, 0xc7,
     0x74, 0xb4, 0xaa, 0x4b, 0x99, 0x2b, 0x60, 0x5f, 0x58, 0x3f, 0xfd, 0xcc, 0xff, 0x40, 0xee, 0xb2,
