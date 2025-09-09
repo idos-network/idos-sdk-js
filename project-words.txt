@@ -86,6 +86,7 @@ Reown
 rippletest
 safekeep
 sandboxed
+sdot
 secp
 secretsharing
 shamir
