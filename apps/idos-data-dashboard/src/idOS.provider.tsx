@@ -25,6 +25,8 @@ const _idOSClient = new idOSClientConfiguration({
   enclaveOptions: {
     container: "#idOS-enclave",
     url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+    walletAddress: "",
+    walletType: "",
   },
 });
 
