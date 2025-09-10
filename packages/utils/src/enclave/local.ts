@@ -345,8 +345,7 @@ export class LocalEnclave<
         return utf8Decode(downloadedPassword);
       }
 
-      // TODO: If user change their mind and want to use MPC instead of password?...
-      // throw Error("A secret might be stored at ZK nodes, but can't be obtained");
+      throw Error("A secret might be stored at MPC ZK nodes, but can't be obtained");
     }
 
     const password = this.generatePassword();
