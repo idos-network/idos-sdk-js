@@ -111,6 +111,12 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
   );
 }
 
+const UserDisclaimer = () => (
+  <span class="text-muted-foreground text-xs block mt-1">
+    Keep your password safe. Ideally in a password manager. Don't store it in plain files or notes.
+  </span>
+);
+
 interface PasswordRevealProps {
   encryptionPasswordStore: EncryptionPasswordStore;
   password: string;
@@ -135,23 +141,6 @@ export function PasswordReveal({
     }
   };
 
-  const handleDownload = () => {
-    const content = `idOS ${encryptionPasswordStore}: ${password}\n`;
-
-    const blob = new Blob([content], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = "idOS_credentials.txt";
-
-    document.body.appendChild(link);
-    link.click();
-
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
@@ -171,13 +160,9 @@ export function PasswordReveal({
               title={`Copy ${encryptionPasswordStore}`}
               onClick={handleCopyToClipboard}
             />
-            <DownloadButton
-              aria-label={`Download ${encryptionPasswordStore}`}
-              title={`Download ${encryptionPasswordStore}`}
-              onClick={handleDownload}
-            />
           </div>
         </ReadonlyField>
+        {encryptionPasswordStore === "user" && <UserDisclaimer />}
       </div>
       {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
       {onDone ? <Button onClick={onDone}>Done</Button> : null}
