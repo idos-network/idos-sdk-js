@@ -132,7 +132,6 @@ export function PasswordReveal({
 }: PasswordRevealProps) {
   const revealSecret = useSignal(false);
   const revealButtonLabel = revealSecret.value ? "Hide" : "View";
-  const authMethod = encryptionPasswordStore === "user" ? "password" : "wallet";
 
   const handleCopyToClipboard = async () => {
     try {
@@ -145,7 +144,7 @@ export function PasswordReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <Paragraph>Your {authMethod.toLocaleUpperCase()} is:</Paragraph>
+        <Paragraph>Your Password is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={password} />
           <div className="flex items-center gap-2">
