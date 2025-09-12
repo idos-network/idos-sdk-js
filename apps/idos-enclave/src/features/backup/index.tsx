@@ -162,7 +162,7 @@ export function PasswordReveal({
             />
           </div>
         </ReadonlyField>
-        {encryptionPasswordStore === "user" && <UserDisclaimer />}
+        <UserDisclaimer />
       </div>
       {onCancel ? <Button onClick={onCancel}>Go back</Button> : null}
       {onDone ? <Button onClick={onDone}>Done</Button> : null}
