@@ -9,6 +9,8 @@ betanet
 biomejs
 Blockhash
 Borsh
+chakra
+chatset
 ciphertext
 codegen
 comlink
@@ -29,10 +31,7 @@ heroicons
 heroui
 hexlify
 Holyheld
-Holyheld
 hono
-chakra
-chatset
 iban
 ibans
 idos
@@ -42,6 +41,7 @@ idOSDAG
 IDOSDAG
 idOSSDK
 incentivized
+indexeddb
 informationally
 insertable
 jsigs
