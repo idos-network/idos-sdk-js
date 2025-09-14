@@ -3,7 +3,8 @@ import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
-import { LocalStorageStore, type Store } from "../store";
+import { createSecureStore, IndexedDBStore, LocalStorageStore, type Store } from "../store";
+import type { SecureIndexedDBStore } from "../store/secure-indexeddb";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
 import type {
@@ -46,7 +47,9 @@ export class LocalEnclave<
 
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
-    this.store = options.store ?? new LocalStorageStore();
+
+    // Use IndexedDB by default for better security, fallback to localStorage if not available
+    this.store = options.store ?? this.createDefaultStore();
     this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
     if (options.mpcConfiguration) {
@@ -55,6 +58,39 @@ export class LocalEnclave<
         options.mpcConfiguration.contractAddress,
       );
     }
+  }
+
+  /**
+   * Check if the current store supports secure key storage
+   */
+  private isSecureStore(): boolean {
+    // biome-ignore lint/suspicious/noExplicitAny: Need to check for secure store methods
+    return (this.store as any).setSecureKeyPair !== undefined;
+  }
+
+  /**
+   * Create the default store with secure storage preference and fallbacks
+   */
+  private createDefaultStore(): Store {
+    try {
+      // Try to use secure storage with WebCrypto first
+      return createSecureStore();
+    } catch (error) {
+      console.warn("Secure storage not available, falling back to regular storage:", error);
+
+      try {
+        // Fallback to regular IndexedDB
+        // biome-ignore lint/suspicious/noExplicitAny: Need to access global IndexedDB
+        if (typeof globalThis !== "undefined" && (globalThis as any).indexedDB) {
+          return new IndexedDBStore();
+        }
+      } catch (indexedDBError) {
+        console.warn("IndexedDB not available, falling back to localStorage:", indexedDBError);
+      }
+    }
+
+    // Final fallback to localStorage
+    return new LocalStorageStore();
   }
 
   /** @override parent method to reset the enclave */
@@ -70,12 +106,35 @@ export class LocalEnclave<
 
     const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
-    );
 
-    if (!password || !userId || !encryptionSecretKey) {
+    if (!password || !userId) {
       return;
+    }
+
+    let keyPair: nacl.BoxKeyPair | null = null;
+
+    // Try to load keys securely first
+    if (this.isSecureStore()) {
+      const secureStore = this.store as SecureIndexedDBStore;
+      keyPair = await secureStore.getSecureKeyPair(`${userId}-encryption`);
+
+      if (keyPair) {
+        console.log("✅ Keys loaded securely from WebCrypto-protected storage");
+      }
+    }
+
+    // Fallback to regular storage if secure loading failed
+    if (!keyPair) {
+      const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+        STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+      );
+
+      if (!encryptionSecretKey) {
+        return;
+      }
+
+      keyPair = nacl.box.keyPair.fromSecretKey(encryptionSecretKey);
+      console.log("⚠️ Keys loaded from regular storage (less secure)");
     }
 
     let encryptionPasswordStore = await this.store.get<EncryptionPasswordStore>(
@@ -91,7 +150,7 @@ export class LocalEnclave<
     this.storedEncryptionProfile = {
       userId,
       password,
-      keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
+      keyPair,
       encryptionPasswordStore,
     };
   }
@@ -219,11 +278,29 @@ export class LocalEnclave<
 
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
+    // Store basic profile data
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.store.set(STORAGE_KEYS.PASSWORD, password);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+
+    // Try to store keys securely if possible
+    if (this.isSecureStore()) {
+      const secureStore = this.store as SecureIndexedDBStore;
+
+      // Store the key pair securely using WebCrypto encryption
+      await secureStore.setSecureKeyPair(`${userId}-encryption`, keyPair);
+
+      // Store public key in regular storage (it's safe to expose)
+      await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+
+      console.log("✅ Keys stored securely using WebCrypto protection");
+    } else {
+      // Fallback to regular storage (less secure but compatible)
+      await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
+      await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+
+      console.warn("⚠️ Keys stored in regular storage (less secure)");
+    }
 
     this.storedEncryptionProfile = {
       userId,
