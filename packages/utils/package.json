@@ -57,6 +57,10 @@
       "types": "./dist/enclave/local.d.ts",
       "import": "./dist/enclave/local.js"
     },
+    "./obfuscation": {
+      "types": "./dist/obfuscation/index.d.ts",
+      "import": "./dist/obfuscation/index.js"
+    },
     "./xrpl-credentials": {
       "types": "./dist/xrpl-credentials/index.d.ts",
       "import": "./dist/xrpl-credentials/index.js"

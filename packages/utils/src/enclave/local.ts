@@ -3,6 +3,7 @@ import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
+import { deobfuscatePassword, obfuscatePassword } from "../obfuscation";
 import { LocalStorageStore, type Store } from "../store";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
@@ -68,13 +69,13 @@ export class LocalEnclave<
   async load(): Promise<void> {
     await super.load();
 
-    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
+    const obfuscatedPassword = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
     const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
       STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
     );
 
-    if (!password || !userId || !encryptionSecretKey) {
+    if (!obfuscatedPassword || !userId || !encryptionSecretKey) {
       return;
     }
 
@@ -86,6 +87,17 @@ export class LocalEnclave<
     // TODO: Remove this after a while
     if (!encryptionPasswordStore || (encryptionPasswordStore as string) === "password") {
       encryptionPasswordStore = "user";
+    }
+
+    let password: string;
+    try {
+      password = deobfuscatePassword(obfuscatedPassword, userId);
+    } catch (error) {
+      console.warn(
+        "Failed to deobfuscate password, trying as plain text for backward compatibility:",
+        error,
+      );
+      password = obfuscatedPassword;
     }
 
     this.storedEncryptionProfile = {
@@ -219,8 +231,10 @@ export class LocalEnclave<
 
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
+    const obfuscatedPassword = obfuscatePassword(password, userId);
+
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
-    await this.store.set(STORAGE_KEYS.PASSWORD, password);
+    await this.store.set(STORAGE_KEYS.PASSWORD, obfuscatedPassword);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
     await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
     await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
