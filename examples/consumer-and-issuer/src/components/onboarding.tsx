@@ -447,10 +447,9 @@ const useFetchMatchingCredential = () => {
       )) as PassportingPeer[];
 
       const credentials = await idOSClient.getAllCredentials();
-
       const matchingCredential = credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "KYC DATA";
+        return publicNotes.type.toLowerCase().includes("kyc");
       });
 
       if (!matchingCredential) {

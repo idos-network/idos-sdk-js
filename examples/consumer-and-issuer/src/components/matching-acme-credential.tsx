@@ -41,7 +41,7 @@ const useFetchMatchingCredential = () => {
     select: (data) => {
       const matchingCredential = data.credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type === "KYC DATA";
+        return publicNotes?.type ? publicNotes.type.toLowerCase().includes("kyc") : false;
       });
 
       if (!matchingCredential) {
