@@ -67,6 +67,7 @@ function isStellarKeyPair(object: unknown): object is StellarKeypair {
 export interface CustomKwilSigner extends KwilSigner {
   publicAddress: string;
   signatureType: string;
+  publicKey: string;
 }
 
 /**
@@ -204,7 +205,7 @@ export async function createClientKwilSigner(
   }
 
   if ("signatureType" in wallet && "publicAddress" in wallet) {
-    return [wallet, wallet.publicAddress, undefined, "stellar"];
+    return [wallet, wallet.publicAddress, wallet.publicKey, "stellar"];
   }
 
   // Force the check that `signer` is `never`.
