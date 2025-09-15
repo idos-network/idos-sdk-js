@@ -1,6 +1,6 @@
 import { encryptContent } from "@idos-network/core/cryptography";
 import {
-  type CreateCredentialByDelegatedWriteGrantParams,
+  type CreateCredentialByDelegatedWriteGrantInput,
   createCredentialByDelegatedWriteGrant,
   type EditCredentialAsIssuerParams,
   editCredentialAsIssuer,
@@ -148,7 +148,7 @@ export class CredentialService {
       }),
     );
 
-    const payload: CreateCredentialByDelegatedWriteGrantParams = {
+    const payload: CreateCredentialByDelegatedWriteGrantInput = {
       issuer_auth_public_key: originalCredential.issuer_auth_public_key,
       original_encryptor_public_key: originalCredential.encryptor_public_key,
       original_credential_id: originalCredential.id,
@@ -192,16 +192,15 @@ export class CredentialService {
   }
 
   async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
-    const id = await getCredentialIdByContentHash(this.#kwilClient, contentHash);
-
-    invariant(id, "Required `idOSCredential` id not found");
-
-    return id;
+    const result = await getCredentialIdByContentHash(this.#kwilClient, {
+      content_hash: contentHash,
+    });
+    invariant(result, "Required `idOSCredential` id not found");
+    return result.id;
   }
 
   async getSharedCredential(id: string): Promise<idOSCredential | null> {
-    const result = await getSharedCredential(this.#kwilClient, id);
-
-    return result ?? null;
+    const result = await getSharedCredential(this.#kwilClient, { id });
+    return result[0] ?? null;
   }
 }
