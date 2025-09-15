@@ -49,7 +49,11 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
-import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/utils/enclave";
+import type {
+  BaseProvider,
+  EncryptionPasswordStore,
+  PublicEncryptionProfile,
+} from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
@@ -136,7 +140,8 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
-  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
+  async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
+    let signer = _signer;
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
@@ -240,7 +245,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       walletAddress: this.walletIdentifier,
       walletPublicKey: this.walletPublicKey,
       walletType: this.walletType,
-      encryptionPasswordStore: kwilUser.encryption_password_store,
+      encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
     });
 
     return new idOSClientLoggedIn(this, kwilUser);
