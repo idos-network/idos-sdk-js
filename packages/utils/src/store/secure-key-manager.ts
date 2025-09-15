@@ -59,8 +59,6 @@ export class WebCryptoKeyManager implements SecureKeyManager {
         return;
       }
 
-      console.log(`🔍 Opening fresh database: ${this.DB_NAME} version ${this.DB_VERSION}`);
-
       const request = idb.open(this.DB_NAME, this.DB_VERSION);
 
       request.onerror = (event) => {
@@ -75,22 +73,12 @@ export class WebCryptoKeyManager implements SecureKeyManager {
 
       // biome-ignore lint/suspicious/noExplicitAny: IndexedDB event types not available
       request.onupgradeneeded = (event: any) => {
-        console.log("🔄 Database upgrade needed - FRESH DATABASE");
         const db = event.target.result;
-
-        console.log("📋 Existing object stores:", Array.from(db.objectStoreNames));
 
         try {
           // Create object stores for fresh database
-          console.log("✅ Creating masterKeys object store");
-          const masterStore = db.createObjectStore("masterKeys");
-          console.log("🔑 masterKeys store created:", masterStore.name);
-
-          console.log("✅ Creating encryptedKeys object store");
-          const encryptedStore = db.createObjectStore("encryptedKeys");
-          console.log("🔐 encryptedKeys store created:", encryptedStore.name);
-
-          console.log("📋 Object stores after creation:", Array.from(db.objectStoreNames));
+          db.createObjectStore("masterKeys");
+          db.createObjectStore("encryptedKeys");
         } catch (error) {
           console.error("❌ Error creating object stores:", error);
           reject(new Error(`Failed to create object stores: ${error}`));
@@ -100,15 +88,10 @@ export class WebCryptoKeyManager implements SecureKeyManager {
 
       request.onsuccess = () => {
         const db = request.result;
-        console.log("✅ Database opened successfully");
-        console.log("📋 Available object stores:", Array.from(db.objectStoreNames));
 
         // Verify both object stores exist
         const hasMasters = db.objectStoreNames.contains("masterKeys");
         const hasEncrypted = db.objectStoreNames.contains("encryptedKeys");
-
-        console.log(`🔍 masterKeys exists: ${hasMasters}`);
-        console.log(`🔍 encryptedKeys exists: ${hasEncrypted}`);
 
         if (!hasMasters || !hasEncrypted) {
           console.error("❌ Required object stores missing after database open");
@@ -167,11 +150,6 @@ export class WebCryptoKeyManager implements SecureKeyManager {
       const db = await this.openDatabase();
 
       return new Promise((resolve, reject) => {
-        console.log("🔍 About to create transaction for masterKeys");
-        console.log("📋 Available stores:", Array.from(db.objectStoreNames));
-        console.log("🔍 Looking for: masterKeys");
-        console.log("✅ Contains masterKeys?", db.objectStoreNames.contains("masterKeys"));
-
         const transaction = db.transaction(["masterKeys"], "readwrite");
         const store = transaction.objectStore("masterKeys");
 
