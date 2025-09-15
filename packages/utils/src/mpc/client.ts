@@ -54,8 +54,8 @@ export class Client {
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
 
-    public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
-    if (signerType !== "evm" && signerType !== "xrpl" && signerType !== "near") {
+  public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
+    if (!["evm", "xrpl", "near", "stellar"].includes(signerType)) {
       throw new Error("Invalid signer type");
     }
     this.signerType = signerType;
