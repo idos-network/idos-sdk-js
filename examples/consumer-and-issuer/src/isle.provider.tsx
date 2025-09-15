@@ -243,7 +243,7 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
               ],
             },
           ],
-          acceptedCredentialType: "KYC DATA",
+          acceptedCredentialType: "kyc",
         },
       });
 

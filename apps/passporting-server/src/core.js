@@ -200,16 +200,18 @@ app.post(
       dag_content_hash,
     } = c.req.valid("json");
 
+    const dag = {
+      dag_data_id,
+      dag_owner_wallet_identifier,
+      dag_grantee_wallet_identifier,
+      dag_signature,
+      dag_locked_until: Number(dag_locked_until),
+      dag_content_hash,
+    }
+
     // Transmit the `DAG` to idOS.
-    const [error, response] = await goTry(() =>
-      issuer.createAccessGrantFromDAG({
-        dag_data_id,
-        dag_owner_wallet_identifier,
-        dag_grantee_wallet_identifier,
-        dag_signature,
-        dag_locked_until,
-        dag_content_hash,
-      }),
+    const [error] = await goTry(() =>
+      issuer.createAccessGrantFromDAG(dag),
     );
 
     if (error) {
