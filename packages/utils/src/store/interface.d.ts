@@ -12,4 +12,5 @@ export interface Store {
   reset(): Promise<void>;
   setRememberDuration(duration?: number): Promise<void>;
   pipeCodec<T>(codec: PipeCodecArgs<T>): Store;
+  pipeEncryption?: (userId: string) => Promise<Store>;
 }

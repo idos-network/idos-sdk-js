@@ -32,6 +32,7 @@ export class LocalEnclave<
   // Store for data
   protected store: Store;
   protected storeWithCodec: Store;
+  protected storeWithEncryption?: Store;
 
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
@@ -57,6 +58,16 @@ export class LocalEnclave<
     }
   }
 
+  /**
+   * Get or create an encrypted store for a specific user
+   */
+  protected async getEncryptedStore(userId: string): Promise<Store> {
+    if (!this.storeWithEncryption && this.store.pipeEncryption) {
+      this.storeWithEncryption = await this.store.pipeEncryption(userId);
+    }
+    return this.storeWithEncryption ?? this.store;
+  }
+
   /** @override parent method to reset the enclave */
   async reset(): Promise<void> {
     await super.reset();
@@ -68,13 +79,8 @@ export class LocalEnclave<
   async load(): Promise<void> {
     await super.load();
 
-    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
-    );
-
-    if (!password || !userId || !encryptionSecretKey) {
+    if (!userId) {
       return;
     }
 
@@ -86,6 +92,34 @@ export class LocalEnclave<
     // TODO: Remove this after a while
     if (!encryptionPasswordStore || (encryptionPasswordStore as string) === "password") {
       encryptionPasswordStore = "user";
+    }
+
+    // Try to load from encrypted storage first
+    const encryptedStore = await this.getEncryptedStore(userId);
+    const passwordBytes = await encryptedStore.get<Uint8Array>(STORAGE_KEYS.PASSWORD);
+    let encryptionSecretKey = await encryptedStore.get<Uint8Array<ArrayBufferLike>>(
+      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+    );
+
+    // Convert password bytes back to string if loaded from encrypted storage
+    let password: string | undefined;
+    if (passwordBytes) {
+      password = new TextDecoder().decode(passwordBytes);
+    }
+
+    // Fallback to regular storage for migration compatibility
+    if (!password || !encryptionSecretKey) {
+      console.warn(
+        "⚠️ Falling back to unencrypted storage - consider migrating and deleting the old storage",
+      );
+      password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
+      encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+        STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+      );
+    }
+
+    if (!password || !encryptionSecretKey) {
+      return;
     }
 
     this.storedEncryptionProfile = {
@@ -216,14 +250,21 @@ export class LocalEnclave<
     encryptionPasswordStore: EncryptionPasswordStore,
   ): Promise<PrivateEncryptionProfile> {
     const secretKey = await keyDerivation(password, userId);
-
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
+    // Get encrypted store for this user
+    const encryptedStore = await this.getEncryptedStore(userId);
+
+    // Store non-sensitive data in regular storage
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
-    await this.store.set(STORAGE_KEYS.PASSWORD, password);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
     await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+
+    // Store sensitive data (password and secret key) in encrypted storage
+    // Convert password string to Uint8Array for encryption
+    const passwordBytes = new TextEncoder().encode(password);
+    await encryptedStore.set(STORAGE_KEYS.PASSWORD, passwordBytes);
+    await encryptedStore.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
 
     this.storedEncryptionProfile = {
       userId,

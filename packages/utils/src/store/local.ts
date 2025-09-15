@@ -3,6 +3,7 @@
  */
 
 import { durationElapsed, setDuration } from "./duration";
+import { UserEncryptionCodec } from "./encryption-codec";
 import type { PipeCodecArgs, Store } from "./interface";
 
 export class LocalStorageStore implements Store {
@@ -109,5 +110,14 @@ export class LocalStorageStore implements Store {
         this.storage.removeItem(key);
       }
     }
+  }
+
+  async pipeEncryption(userId: string): Promise<Store> {
+    const encryptionCodec = UserEncryptionCodec.createUserEncryptionCodec(userId);
+
+    return this.pipeCodec<Uint8Array>({
+      encode: (data: Uint8Array) => encryptionCodec.encode(data),
+      decode: (encoded: string) => encryptionCodec.decode(encoded),
+    });
   }
 }
