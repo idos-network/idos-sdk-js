@@ -449,7 +449,7 @@ const useFetchMatchingCredential = () => {
       const credentials = await idOSClient.getAllCredentials();
       const matchingCredential = credentials.find((credential: idOSCredential) => {
         const publicNotes = credential.public_notes ? JSON.parse(credential.public_notes) : {};
-        return publicNotes.type.toLowerCase().includes("kyc");
+        return publicNotes?.type ? publicNotes.type.toLowerCase().includes("kyc") : false;
       });
 
       if (!matchingCredential) {
