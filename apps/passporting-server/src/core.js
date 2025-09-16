@@ -208,11 +208,13 @@ app.post(
       dag_locked_until: Number(dag_locked_until),
       dag_content_hash,
     }
-
+    console.log({dag});
+    
     // Transmit the `DAG` to idOS.
     const [error] = await goTry(() =>
       issuer.createAccessGrantFromDAG(dag),
     );
+    console.log({error});
 
     if (error) {
       return c.json(
