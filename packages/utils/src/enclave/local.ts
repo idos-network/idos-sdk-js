@@ -31,7 +31,7 @@ export class LocalEnclave<
 
   // Store for data
   protected store: Store;
-  protected storeWithCodec: Store;
+  protected storeBase64: Store;
 
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
@@ -47,7 +47,7 @@ export class LocalEnclave<
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
     this.store = options.store ?? new LocalStorageStore();
-    this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
+    this.storeBase64 = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
 
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
@@ -70,7 +70,7 @@ export class LocalEnclave<
 
     const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
+    const encryptionSecretKey = await this.storeBase64.get<Uint8Array<ArrayBufferLike>>(
       STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
     );
 
@@ -222,8 +222,8 @@ export class LocalEnclave<
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.store.set(STORAGE_KEYS.PASSWORD, password);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+    await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
+    await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
 
     this.storedEncryptionProfile = {
       userId,
