@@ -1,9 +1,13 @@
 import * as Base64Codec from "@stablelib/base64";
+import * as HexCodec from "@stablelib/hex";
+import * as Utf8Codec from "@stablelib/utf8";
+import { syncScrypt } from "scrypt-js";
 import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
 import { LocalStorageStore, type Store } from "../store";
+import type { PipeCodecArgs } from "../store/interface";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
 import type {
@@ -24,6 +28,20 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   };
 }
 
+const migrateAndGetStorageField = async <T>(
+  oldKey: string,
+  newKey: string,
+  oldStore: Store,
+  newStore: Store,
+) => {
+  const value = await oldStore.get<T>(oldKey);
+  if (value === undefined) return newStore.get<T>(newKey);
+
+  await newStore.set<T>(newKey, value);
+  await oldStore.delete(oldKey);
+  return value;
+};
+
 export class LocalEnclave<
   K extends LocalEnclaveOptions = LocalEnclaveOptions,
 > extends BaseProvider<K> {
@@ -32,6 +50,8 @@ export class LocalEnclave<
   // Store for data
   protected store: Store;
   protected storeBase64: Store;
+  protected storeObfuscated: Store;
+  protected storeObfuscatedBase64: Store;
 
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
@@ -47,7 +67,9 @@ export class LocalEnclave<
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
     this.store = options.store ?? new LocalStorageStore();
+    this.storeObfuscated = this.store.pipeCodec(this.userIdObfuscationCodec());
     this.storeBase64 = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
+    this.storeObfuscatedBase64 = this.storeBase64.pipeCodec(this.userIdObfuscationCodec());
 
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
@@ -64,14 +86,62 @@ export class LocalEnclave<
     this.store.reset();
   }
 
+  /**
+   * Return a codec that encrypts/decrypts data using a key derived from the provider's user ID.
+   *
+   * This ensures that data is minimally obfuscated to avoid low-sophistication attacks.
+   */
+  private userIdObfuscationCodec(): PipeCodecArgs<Uint8Array> {
+    const self = this;
+    const nonce = new Uint8Array(nacl.secretbox.nonceLength);
+    const toKey = (userId: string) =>
+      syncScrypt(
+        Utf8Codec.encode(userId),
+        [], // salt
+        16384, // N
+        8, // r
+        1, // p
+        nacl.secretbox.keyLength, // dklen // cspell:disable-line
+      );
+
+    return {
+      encode(data: Uint8Array): string {
+        const payload = nacl.secretbox(data, nonce, toKey(self.userId));
+        return `0x${HexCodec.encode(payload)}`;
+      },
+      decode(payload: string): Uint8Array {
+        if (payload.slice(0, 2) !== "0x") throw new Error(`missing 0x prefix: ${payload}`);
+
+        const result = nacl.secretbox.open(
+          HexCodec.decode(payload.slice(2)),
+          nonce,
+          toKey(self.userId),
+        );
+        if (!result) throw new Error(`Failed to decrypt data: ${payload}`);
+
+        return result;
+      },
+    };
+  }
+
   /** @see parent method extended with loading the profile from the store */
   async load(): Promise<void> {
     await super.load();
 
-    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const encryptionSecretKey = await this.storeBase64.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+
+    const password = await migrateAndGetStorageField<string>(
+      STORAGE_KEYS.DEPRECATED___PASSWORD,
+      STORAGE_KEYS.OBFUSCATED_PASSWORD,
+      this.store,
+      this.storeObfuscated,
+    );
+
+    const encryptionSecretKey = await migrateAndGetStorageField<Uint8Array>(
+      STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY,
+      STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+      this.storeBase64,
+      this.storeObfuscatedBase64,
     );
 
     if (!password || !userId || !encryptionSecretKey) {
@@ -220,9 +290,12 @@ export class LocalEnclave<
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
-    await this.store.set(STORAGE_KEYS.PASSWORD, password);
+    await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
+    await this.storeObfuscatedBase64.set(
+      STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+      keyPair.secretKey,
+    );
     await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
 
     this.storedEncryptionProfile = {
