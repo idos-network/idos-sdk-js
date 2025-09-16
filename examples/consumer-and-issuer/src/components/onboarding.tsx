@@ -433,6 +433,8 @@ function useShareCredentialWithConsumer() {
 
 const useFetchMatchingCredential = () => {
   const { isleController } = useIsleController();
+  // biome-ignore lint/suspicious/noDebugger: quick debugging session
+  debugger;
   invariant(isleController?.idosClient.state === "logged-in", "`isleController` not logged in");
 
   const idOSClient = isleController.idosClient;
