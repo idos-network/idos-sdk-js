@@ -103,6 +103,8 @@ export class LocalEnclave<
     const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
       STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
     );
+    // biome-ignore lint/suspicious/noDebugger: quick debug
+    debugger;
 
     if (!password || !userId || !encryptionSecretKey) {
       return;
