@@ -28,20 +28,6 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   };
 }
 
-const migrateAndGetStorageField = async <T>(
-  oldKey: string,
-  newKey: string,
-  oldStore: Store,
-  newStore: Store,
-) => {
-  const value = await oldStore.get<T>(oldKey);
-  if (value === undefined) return newStore.get<T>(newKey);
-
-  await newStore.set<T>(newKey, value);
-  await oldStore.delete(oldKey);
-  return value;
-};
-
 export class LocalEnclave<
   K extends LocalEnclaveOptions = LocalEnclaveOptions,
 > extends BaseProvider<K> {
@@ -69,7 +55,9 @@ export class LocalEnclave<
     this.store = options.store ?? new LocalStorageStore();
     this.storeObfuscated = this.store.pipeCodec(this.userIdObfuscationCodec());
     this.storeBase64 = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
-    this.storeObfuscatedBase64 = this.storeBase64.pipeCodec(this.userIdObfuscationCodec());
+    this.storeObfuscatedBase64 = this.store
+      .pipeCodec(this.userIdObfuscationCodec())
+      .pipeCodec(Base64Codec);
 
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
@@ -91,57 +79,67 @@ export class LocalEnclave<
    *
    * This ensures that data is minimally obfuscated to avoid low-sophistication attacks.
    */
-  private userIdObfuscationCodec(): PipeCodecArgs<Uint8Array> {
+  private userIdObfuscationCodec(): PipeCodecArgs<string> {
     const self = this;
-    const nonce = new Uint8Array(nacl.secretbox.nonceLength);
-    const toKey = (userId: string) =>
-      syncScrypt(
-        Utf8Codec.encode(userId),
-        [], // salt
-        16384, // N
-        8, // r
-        1, // p
-        nacl.secretbox.keyLength, // dklen // cspell:disable-line
-      );
+
+    const toKey = (userId: string, salt: Uint8Array) =>
+      syncScrypt(Utf8Codec.encode(userId), salt, 16384, 8, 1, nacl.secretbox.keyLength);
 
     return {
-      encode(data: Uint8Array): string {
-        const payload = nacl.secretbox(data, nonce, toKey(self.userId));
-        return `0x${HexCodec.encode(payload)}`;
+      encode(data: string): string {
+        if (!self.options.userId) {
+          throw new Error("User ID required for encryption");
+        }
+
+        const dataBytes = Utf8Codec.encode(data); // Convert string to Uint8Array
+        const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+        const salt = nacl.randomBytes(16);
+        const key = toKey(self.options.userId, salt);
+        const payload = nacl.secretbox(dataBytes, nonce, key);
+
+        // Store salt + nonce + ciphertext
+        const combined = new Uint8Array(salt.length + nonce.length + payload.length);
+        combined.set(salt, 0);
+        combined.set(nonce, salt.length);
+        combined.set(payload, salt.length + nonce.length);
+
+        return `0x${HexCodec.encode(combined)}`;
       },
-      decode(payload: string): Uint8Array {
-        if (payload.slice(0, 2) !== "0x") throw new Error(`missing 0x prefix: ${payload}`);
 
-        const result = nacl.secretbox.open(
-          HexCodec.decode(payload.slice(2)),
-          nonce,
-          toKey(self.userId),
-        );
-        if (!result) throw new Error(`Failed to decrypt data: ${payload}`);
+      decode(payload: string): string {
+        if (!self.options.userId) {
+          throw new Error("User ID required for decryption");
+        }
 
-        return result;
+        if (payload.slice(0, 2) !== "0x") {
+          throw new Error(`missing 0x prefix: ${payload}`);
+        }
+
+        const combined = HexCodec.decode(payload.slice(2));
+        const salt = combined.slice(0, 16);
+        const nonce = combined.slice(16, 16 + nacl.secretbox.nonceLength);
+        const ciphertext = combined.slice(16 + nacl.secretbox.nonceLength);
+
+        const key = toKey(self.options.userId, salt);
+        const result = nacl.secretbox.open(ciphertext, nonce, key);
+
+        if (!result) throw new Error("Failed to decrypt data");
+
+        return Utf8Codec.decode(result); // Convert Uint8Array back to string
       },
     };
   }
-
   /** @see parent method extended with loading the profile from the store */
   async load(): Promise<void> {
     await super.load();
 
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
+    if (userId) this.options.userId = userId;
 
-    const password = await migrateAndGetStorageField<string>(
-      STORAGE_KEYS.DEPRECATED___PASSWORD,
-      STORAGE_KEYS.OBFUSCATED_PASSWORD,
-      this.store,
-      this.storeObfuscated,
-    );
-
-    const encryptionSecretKey = await migrateAndGetStorageField<Uint8Array>(
-      STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY,
+    // Direct retrieval from new storage locations only
+    const password = await this.storeObfuscated.get<string>(STORAGE_KEYS.OBFUSCATED_PASSWORD);
+    const encryptionSecretKey = await this.storeObfuscatedBase64.get<Uint8Array>(
       STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
-      this.storeBase64,
-      this.storeObfuscatedBase64,
     );
 
     if (!password || !userId || !encryptionSecretKey) {
