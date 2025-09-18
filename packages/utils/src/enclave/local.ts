@@ -28,20 +28,6 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   };
 }
 
-const migrateAndGetStorageField = async <T>(
-  oldKey: string,
-  newKey: string,
-  oldStore: Store,
-  newStore: Store,
-) => {
-  const value = await oldStore.get<T>(oldKey);
-  if (value === undefined) return newStore.get<T>(newKey);
-
-  await newStore.set<T>(newKey, value);
-  await oldStore.delete(oldKey);
-  return value;
-};
-
 export class LocalEnclave<
   K extends LocalEnclaveOptions = LocalEnclaveOptions,
 > extends BaseProvider<K> {
