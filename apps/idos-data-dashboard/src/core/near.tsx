@@ -38,7 +38,7 @@ export const WalletSelectorContextProvider: React.FC<{
 
   const initialize = useCallback(async () => {
     const _selector = await setupWalletSelector({
-      network: import.meta.env.DEV ? "testnet" : "mainnet",
+      network: import.meta.env.VITE_NODE_ENV ? "testnet" : "mainnet",
       debug: true,
       modules: [setupMeteorWallet(), setupHereWallet()],
     });
