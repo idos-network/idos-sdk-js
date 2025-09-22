@@ -1,4 +1,7 @@
 import * as Base64Codec from "@stablelib/base64";
+import * as HexCodec from "@stablelib/hex";
+import * as Utf8Codec from "@stablelib/utf8";
+import { syncScrypt } from "scrypt-js";
 import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
@@ -12,6 +15,7 @@ import type {
   UploadMessageToSign,
 } from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
+import type { PipeCodecArgs } from "../store/interface";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
 import type {
@@ -42,7 +46,9 @@ export class LocalEnclave<
 
   // Store for data
   protected store: Store;
-  protected storeWithCodec: Store;
+  protected storeBase64: Store;
+  protected storeObfuscated: Store;
+  protected storeObfuscatedBase64: Store;
 
   // In case of MPC usage
   protected mpcClientInstance?: MPCClient;
@@ -58,7 +64,11 @@ export class LocalEnclave<
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
     this.store = options.store ?? new LocalStorageStore();
-    this.storeWithCodec = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
+    this.storeObfuscated = this.store.pipeCodec(this.userIdObfuscationCodec());
+    this.storeBase64 = this.store.pipeCodec<Uint8Array<ArrayBufferLike>>(Base64Codec);
+    this.storeObfuscatedBase64 = this.store
+      .pipeCodec(this.userIdObfuscationCodec())
+      .pipeCodec(Base64Codec);
 
     if (options.mpcConfiguration) {
       this.mpcClientInstance = new MPCClient(
@@ -94,15 +104,82 @@ export class LocalEnclave<
     }
   }
 
+  /**
+   * Return a codec that encrypts/decrypts data using a key derived from the provider's user ID.
+   *
+   * This ensures that data is minimally obfuscated to avoid low-sophistication attacks.
+   */
+  private userIdObfuscationCodec(): PipeCodecArgs<string> {
+    const self = this;
+
+    const toKey = (userId: string, salt: Uint8Array) =>
+      syncScrypt(Utf8Codec.encode(userId), salt, 16384, 8, 1, nacl.secretbox.keyLength);
+
+    return {
+      encode(data: string): string {
+        if (!self.options.userId) {
+          throw new Error("User ID required for encryption");
+        }
+
+        const dataBytes = Utf8Codec.encode(data); // Convert string to Uint8Array
+        const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+        const salt = nacl.randomBytes(16);
+        const key = toKey(self.options.userId, salt);
+        const payload = nacl.secretbox(dataBytes, nonce, key);
+
+        // Store salt + nonce + ciphertext
+        const combined = new Uint8Array(salt.length + nonce.length + payload.length);
+        combined.set(salt, 0);
+        combined.set(nonce, salt.length);
+        combined.set(payload, salt.length + nonce.length);
+
+        return `0x${HexCodec.encode(combined)}`;
+      },
+
+      decode(payload: string): string {
+        if (!self.options.userId) {
+          throw new Error("User ID required for decryption");
+        }
+
+        if (payload.slice(0, 2) !== "0x") {
+          throw new Error(`missing 0x prefix: ${payload}`);
+        }
+
+        const combined = HexCodec.decode(payload.slice(2));
+        const salt = combined.slice(0, 16);
+        const nonce = combined.slice(16, 16 + nacl.secretbox.nonceLength);
+        const ciphertext = combined.slice(16 + nacl.secretbox.nonceLength);
+
+        const key = toKey(self.options.userId, salt);
+        const result = nacl.secretbox.open(ciphertext, nonce, key);
+
+        if (!result) throw new Error("Failed to decrypt data");
+
+        return Utf8Codec.decode(result); // Convert Uint8Array back to string
+      },
+    };
+  }
   /** @see parent method extended with loading the profile from the store */
   async load(): Promise<void> {
     await super.load();
 
-    const password = await this.store.get<string>(STORAGE_KEYS.PASSWORD);
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
-    const encryptionSecretKey = await this.storeWithCodec.get<Uint8Array<ArrayBufferLike>>(
-      STORAGE_KEYS.ENCRYPTION_SECRET_KEY,
+    if (userId) this.options.userId = userId;
+
+    // Try to load from new obfuscated storage locations first
+    let password = await this.storeObfuscated.get<string>(STORAGE_KEYS.OBFUSCATED_PASSWORD);
+    let encryptionSecretKey = await this.storeObfuscatedBase64.get<Uint8Array>(
+      STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
     );
+
+    // If new format data doesn't exist, try to migrate from legacy format
+    if ((!password || !encryptionSecretKey) && userId) {
+      const migrationResult = await this.migrateLegacyData();
+      if (migrationResult) {
+        password = migrationResult.password;
+        encryptionSecretKey = migrationResult.encryptionSecretKey;
+      }
+    }
 
     if (!password || !userId || !encryptionSecretKey) {
       return;
@@ -124,6 +201,56 @@ export class LocalEnclave<
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
       encryptionPasswordStore,
     };
+  }
+
+  /**
+   * Migrates legacy data from plain-text storage to obfuscated storage.
+   * This method ensures backwards compatibility for users who have data
+   * stored before the obfuscation update.
+   *
+   * @returns The migrated data if successful, undefined if no legacy data found
+   */
+  private async migrateLegacyData(): Promise<
+    | {
+        password: string;
+        encryptionSecretKey: Uint8Array;
+      }
+    | undefined
+  > {
+    try {
+      // Check for legacy password and secret key
+      const legacyPassword = await this.store.get<string>(STORAGE_KEYS.DEPRECATED___PASSWORD);
+      const legacySecretKey = await this.storeBase64.get<Uint8Array>(
+        STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY,
+      );
+
+      // If no legacy data found, return undefined
+      if (!legacyPassword || !legacySecretKey) {
+        return undefined;
+      }
+
+      console.log("🔄 Migrating legacy password and secret key to obfuscated format...");
+
+      // Migrate password to obfuscated storage
+      await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, legacyPassword);
+
+      // Migrate secret key to obfuscated base64 storage
+      await this.storeObfuscatedBase64.set(
+        STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+        legacySecretKey,
+      );
+
+      // Clean up legacy data after successful migration
+      await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
+      await this.storeBase64.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
+
+      return {
+        password: legacyPassword,
+        encryptionSecretKey: legacySecretKey,
+      };
+    } catch (error) {
+      throw new Error(`❌ Failed to migrate legacy data: ${error}`);
+    }
   }
 
   /**
@@ -250,10 +377,13 @@ export class LocalEnclave<
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
-    await this.store.set(STORAGE_KEYS.PASSWORD, password);
+    await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_SECRET_KEY, keyPair.secretKey);
-    await this.storeWithCodec.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
+    await this.storeObfuscatedBase64.set(
+      STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+      keyPair.secretKey,
+    );
+    await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
 
     this.storedEncryptionProfile = {
       userId,
