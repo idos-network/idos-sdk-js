@@ -160,6 +160,8 @@ export class LocalEnclave<
       );
     }
     await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
+    // Even older version.
+    await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_PRIVATE_KEY);
 
     if (!password || !userId || !encryptionSecretKey) {
       return;
@@ -173,6 +175,10 @@ export class LocalEnclave<
     // TODO: Remove this after a while
     if (!encryptionPasswordStore || (encryptionPasswordStore as string) === "password") {
       encryptionPasswordStore = "user";
+      await this.store.set<EncryptionPasswordStore>(
+        STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE,
+        encryptionPasswordStore,
+      );
     }
 
     this.storedEncryptionProfile = {
