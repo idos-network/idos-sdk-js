@@ -25,7 +25,7 @@ export interface WalletSelectorContextValue {
 }
 
 const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
-
+console.log("contractId", contractId);
 const WalletSelectorContext = React.createContext<WalletSelectorContextValue | null>(null);
 
 export const WalletSelectorContextProvider: React.FC<{
