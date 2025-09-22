@@ -16,3 +16,24 @@ Get [our NPM package](https://www.npmjs.com/package/@idos-network/client) and it
 ```bash
 pnpm add @idos-network/client
 ```
+
+## Adding Wallets
+
+The `addWallet` method allows you to add a wallet to a user's idOS profile. The method requires a `wallet_type` parameter to specify the blockchain type:
+
+```js
+await idOSClient.addWallet({
+  id: "unique-wallet-id",
+  address: "0x...", // Wallet address
+  public_key: "0x...", // Public key in hex format
+  message: "Sign this message to prove you own this wallet",
+  signature: "0x...", // Signature of the message
+  wallet_type: "evm" // Required: "evm", "xrpl", "near"
+});
+```
+
+### Supported Wallet Types
+
+- `"evm"` - Ethereum Virtual Machine compatible wallets (Ethereum, Polygon, etc.)
+- `"xrpl"` - XRP Ledger wallets
+- `"near"` - NEAR Protocol wallets

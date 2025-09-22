@@ -123,7 +123,7 @@ export async function createIDOSUserProfile({
     },
     {
       address: wallet.address,
-      wallet_type: wallet.type,
+      wallet_type: wallet.type.toLowerCase(), // Convert to lowercase for consistency
       message: wallet.message,
       signature: wallet.signature,
       public_key: wallet.publicKey ?? "",
