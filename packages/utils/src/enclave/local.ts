@@ -203,16 +203,14 @@ export class LocalEnclave<
 
       // Migrate password to obfuscated storage
       await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, legacyPassword);
+      await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
 
       // Migrate secret key to obfuscated base64 storage
       await this.storeObfuscatedBase64.set(
         STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
         legacySecretKey,
       );
-
-      // Clean up legacy data after successful migration
-      await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
-      await this.storeBase64.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
+      await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
 
       return {
         password: legacyPassword,
@@ -348,11 +346,13 @@ export class LocalEnclave<
 
     await this.store.set(STORAGE_KEYS.USER_ID, userId);
     await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
+    await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
     await this.store.set(STORAGE_KEYS.ENCRYPTION_PASSWORD_STORE, encryptionPasswordStore);
     await this.storeObfuscatedBase64.set(
       STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
       keyPair.secretKey,
     );
+    await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
     await this.storeBase64.set(STORAGE_KEYS.ENCRYPTION_PUBLIC_KEY, keyPair.publicKey);
 
     this.storedEncryptionProfile = {
