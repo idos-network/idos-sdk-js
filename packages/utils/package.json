@@ -25,13 +25,15 @@
   },
   "devDependencies": {
     "@idos-network/credentials": "workspace:*",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^22.15.30",
+    "jsdom": "^22.1.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
-    "typescript": "catalog:build",
     "tsdown": "catalog:build",
-    "@types/chrome": "^0.0.268",
-    "@types/node": "^22.15.30"
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
   },
   "engines": {
     "node": ">=20.0.0"
@@ -71,10 +73,10 @@
   "main": "./dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "typescript": "catalog:build",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
     "@partisiablockchain/abi-client": "^5.207.0",
-    "ethers": "catalog:ethereum"
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "ethers": "catalog:ethereum",
+    "typescript": "catalog:build"
   },
   "peerDependenciesMeta": {
     "@partisiablockchain/blockchain-api-transaction-client": {
@@ -95,7 +97,8 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it"
+    "release-it": "release-it",
+    "test": "vitest"
   },
   "sideEffects": false,
   "type": "module",

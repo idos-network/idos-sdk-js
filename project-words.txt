@@ -87,6 +87,7 @@ rippletest
 safekeep
 sandboxed
 secp
+secretbox
 secretsharing
 shardnet
 siwe
