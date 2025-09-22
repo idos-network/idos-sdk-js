@@ -219,8 +219,7 @@ export class LocalEnclave<
         encryptionSecretKey: legacySecretKey,
       };
     } catch (error) {
-      console.error("❌ Failed to migrate legacy data:", error);
-      return undefined;
+      throw new Error(`❌ Failed to migrate legacy data: ${error}`);
     }
   }
 
