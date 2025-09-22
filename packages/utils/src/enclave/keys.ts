@@ -1,7 +1,9 @@
 export const STORAGE_KEYS = {
-  ENCRYPTION_SECRET_KEY: "encryption-secret-key",
+  DEPRECATED___ENCRYPTION_SECRET_KEY: "encryption-secret-key",
+  OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY: "obfuscated-base64-encryption-secret-key",
   ENCRYPTION_PUBLIC_KEY: "encryption-public-key",
-  PASSWORD: "password",
+  DEPRECATED___PASSWORD: "password",
+  OBFUSCATED_PASSWORD: "obfuscated-password",
   USER_ID: "user-id",
   ENCRYPTION_PASSWORD_STORE: "encryption-password-store",
 };
