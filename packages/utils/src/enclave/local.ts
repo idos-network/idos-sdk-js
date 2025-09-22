@@ -136,20 +136,30 @@ export class LocalEnclave<
     const userId = await this.store.get<string>(STORAGE_KEYS.USER_ID);
     if (userId) this.options.userId = userId;
 
-    // Try to load from new obfuscated storage locations first
     let password = await this.storeObfuscated.get<string>(STORAGE_KEYS.OBFUSCATED_PASSWORD);
+    if (!password) {
+      password = await this.store.get<string>(STORAGE_KEYS.DEPRECATED___PASSWORD);
+      if (!password) return;
+
+      await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, password);
+    }
+    await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
+
     let encryptionSecretKey = await this.storeObfuscatedBase64.get<Uint8Array>(
       STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
     );
+    if (!encryptionSecretKey) {
+      encryptionSecretKey = await this.storeBase64.get<Uint8Array>(
+        STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY,
+      );
+      if (!encryptionSecretKey) return;
 
-    // If new format data doesn't exist, try to migrate from legacy format
-    if ((!password || !encryptionSecretKey) && userId) {
-      const migrationResult = await this.migrateLegacyData();
-      if (migrationResult) {
-        password = migrationResult.password;
-        encryptionSecretKey = migrationResult.encryptionSecretKey;
-      }
+      await this.storeObfuscatedBase64.set(
+        STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
+        encryptionSecretKey,
+      );
     }
+    await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
 
     if (!password || !userId || !encryptionSecretKey) {
       return;
@@ -171,54 +181,6 @@ export class LocalEnclave<
       keyPair: nacl.box.keyPair.fromSecretKey(encryptionSecretKey),
       encryptionPasswordStore,
     };
-  }
-
-  /**
-   * Migrates legacy data from plain-text storage to obfuscated storage.
-   * This method ensures backwards compatibility for users who have data
-   * stored before the obfuscation update.
-   *
-   * @returns The migrated data if successful, undefined if no legacy data found
-   */
-  private async migrateLegacyData(): Promise<
-    | {
-        password: string;
-        encryptionSecretKey: Uint8Array;
-      }
-    | undefined
-  > {
-    try {
-      // Check for legacy password and secret key
-      const legacyPassword = await this.store.get<string>(STORAGE_KEYS.DEPRECATED___PASSWORD);
-      const legacySecretKey = await this.storeBase64.get<Uint8Array>(
-        STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY,
-      );
-
-      // If no legacy data found, return undefined
-      if (!legacyPassword || !legacySecretKey) {
-        return undefined;
-      }
-
-      console.log("🔄 Migrating legacy password and secret key to obfuscated format...");
-
-      // Migrate password to obfuscated storage
-      await this.storeObfuscated.set(STORAGE_KEYS.OBFUSCATED_PASSWORD, legacyPassword);
-      await this.store.delete(STORAGE_KEYS.DEPRECATED___PASSWORD);
-
-      // Migrate secret key to obfuscated base64 storage
-      await this.storeObfuscatedBase64.set(
-        STORAGE_KEYS.OBFUSCATED_BASE64_ENCRYPTION_SECRET_KEY,
-        legacySecretKey,
-      );
-      await this.store.delete(STORAGE_KEYS.DEPRECATED___ENCRYPTION_SECRET_KEY);
-
-      return {
-        password: legacyPassword,
-        encryptionSecretKey: legacySecretKey,
-      };
-    } catch (error) {
-      throw new Error(`❌ Failed to migrate legacy data: ${error}`);
-    }
   }
 
   /**
