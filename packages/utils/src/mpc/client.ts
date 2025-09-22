@@ -111,10 +111,7 @@ export class Client {
     };
   }
 
-  public uploadRequest(
-    blindedShares: Buffer[],
-    additionalRecoveringAddresses: string[] = [],
-  ): UploadSignatureMessage {
+  public uploadRequest(blindedShares: Buffer[]): UploadSignatureMessage {
     console.log("UPLOADING TO MPC");
     var address = "";
     switch (this.signerType) {
@@ -130,10 +127,9 @@ export class Client {
       default:
         throw new Error("Invalid signer type");
     }
-    const recoveringAddresses = [address, ...additionalRecoveringAddresses];
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
-      recovering_addresses: recoveringAddresses,
+      recovering_addresses: [address],
     };
   }
 
