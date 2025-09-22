@@ -38,11 +38,9 @@ describe("verifiableCredentials", () => {
         const zodError = error as ZodError;
         expect(zodError.issues).toHaveLength(1);
 
-        const faceBiometricId = zodError.issues.find(
-          (error) => error.path[0] === "faceBiometricId",
-        );
-        expect(faceBiometricId).toBeDefined();
-        expect(faceBiometricId?.message).toContain(
+        const faceSignUserId = zodError.issues.find((error) => error.path[0] === "faceSignUserId");
+        expect(faceSignUserId).toBeDefined();
+        expect(faceSignUserId?.message).toContain(
           "Invalid input: expected string, received undefined",
         );
       }
@@ -63,7 +61,7 @@ describe("verifiableCredentials", () => {
         controller: `${issuer2}/issuers/1`,
       });
 
-      const faceBiometricId = crypto.randomUUID();
+      const faceSignUserId = crypto.randomUUID();
 
       const data = await buildFaceIdCredentials(
         {
@@ -74,13 +72,13 @@ describe("verifiableCredentials", () => {
           expirationDate: new Date("2030-01-01"),
         },
         {
-          faceBiometricId,
+          faceSignUserId,
         },
         validKey,
       );
 
       // Check if residential address is properly prefixed
-      expect(data.credentialSubject.faceBiometricId).toBe(faceBiometricId);
+      expect(data.credentialSubject.faceSignUserId).toBe(faceSignUserId);
 
       // Check if proof is properly constructed
       expect(data.proof.proofPurpose).toBe("assertionMethod");
@@ -107,8 +105,8 @@ describe("verifiableCredentials", () => {
         controller: `${issuer}/issuers/1`,
       });
 
-      const faceBiometricId = crypto.randomUUID();
-      const faceBiometricId2 = crypto.randomUUID();
+      const faceSignUserId = crypto.randomUUID();
+      const faceSignUserId2 = crypto.randomUUID();
 
       const data = await buildFaceIdCredentials(
         {
@@ -119,7 +117,7 @@ describe("verifiableCredentials", () => {
           expirationDate: new Date("2030-01-01"),
         },
         {
-          faceBiometricId,
+          faceSignUserId,
         },
         validKey,
       );
@@ -130,7 +128,7 @@ describe("verifiableCredentials", () => {
       expect(verified).toBe(true);
 
       // Modify data
-      data.credentialSubject.faceBiometricId = faceBiometricId2;
+      data.credentialSubject.faceSignUserId = faceSignUserId2;
       const [verified2] = await verifyCredentials(data, allowedIssuers);
       expect(verified2).toBe(false);
     });

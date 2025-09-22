@@ -231,9 +231,9 @@ export interface VerifiedCredentialsProof {
 }
 
 export const CredentialSubjectFaceIdSchema: z.ZodObject<{
-  faceBiometricId: z.ZodString;
+  faceSignUserId: z.ZodString;
 }> = z.object({
-  faceBiometricId: z.string(),
+  faceSignUserId: z.string(),
 });
 
 export type CredentialSubjectFaceId = z.infer<typeof CredentialSubjectFaceIdSchema>;
