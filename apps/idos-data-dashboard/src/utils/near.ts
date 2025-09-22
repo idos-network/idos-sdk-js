@@ -15,6 +15,7 @@ export async function getNearFullAccessPublicKeys(
     networkId: import.meta.env.VITE_IDOS_NEAR_DEFAULT_NETWORK,
     nodeUrl: import.meta.env.VITE_IDOS_NEAR_DEFAULT_RPC_URL,
   };
+  console.log("connectionConfig", connectionConfig);
   const nearConnection = await connect(connectionConfig);
 
   try {
