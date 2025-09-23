@@ -1,4 +1,4 @@
-import type { Credentials, IDDocumentType } from "@idos-network/consumer";
+import type { Credential, IDDocumentType } from "@idos-network/consumer";
 import { SERVER_ENV } from "./envFlags.server";
 import { getISORegionCodeFromNominatim } from "./maps.server";
 
@@ -85,7 +85,7 @@ export interface NoahResponse {
   CheckoutSession: NoahCheckoutSession;
 }
 
-export async function createNoahCustomer(address: string, credentials: Credentials, url: URL) {
+export async function createNoahCustomer(address: string, credentials: Credential, url: URL) {
   const cs = credentials.credentialSubject;
 
   const documentTypeMapper: Record<IDDocumentType, NoahIDDocumentType> = {

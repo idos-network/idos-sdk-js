@@ -5,16 +5,13 @@ import { type AvailableIssuerType, issuerToKey } from "./utils";
 import { defaultDocumentLoader } from "./utils/loader";
 import type { VerifiableCredential, VerifiableCredentialSubject } from "./utils/types";
 
-export type VerifyCredentialsResult = [
-  boolean,
-  Map<AvailableIssuerType, vc.VerifyCredentialResult>,
-];
+export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 
-export async function verifyCredentials<K = VerifiableCredentialSubject>(
+export async function verifyCredential<K = VerifiableCredentialSubject>(
   credential: VerifiableCredential<K>,
   issuers: AvailableIssuerType[],
   customDocumentLoader?: JsonLDDocumentLoaderInstance,
-): Promise<VerifyCredentialsResult> {
+): Promise<VerifyCredentialResult> {
   const resultsByIssuer: Map<AvailableIssuerType, vc.VerifyCredentialResult> = new Map();
 
   for (const issuer of issuers) {
