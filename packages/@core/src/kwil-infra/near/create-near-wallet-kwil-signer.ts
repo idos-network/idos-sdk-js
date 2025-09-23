@@ -104,19 +104,11 @@ function createNearWalletSigner(
     };
 
     const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
-    console.log("nep413BorshParams", nep413BorshParams);
-    console.log("nep413BorshPayloadLength", nep413BorshPayload.length);
-    console.log("nep413BorshPayloadHex", hexEncode(nep413BorshPayload));
-    console.log("signatureHex", hexEncode(base64Decode(signature)));
-
     const result = bytesConcat(
       binaryWriteUint16BE(nep413BorshPayload.length),
       nep413BorshPayload,
       base64Decode(signature),
     );
-
-    console.log("Final concatenated result length:", result.length);
-    console.log("Final concatenated result hex:", hexEncode(result));
 
     return result;
   };

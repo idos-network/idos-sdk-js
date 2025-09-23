@@ -60,7 +60,6 @@ export class EngineClient {
     signature: Bytes,
   ): Promise<{ status: string; body: EncryptedShare | undefined }> {
     const authHeader = this.getAuthHeader(signature);
-    console.log({authHeader});
     const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     return await postRequest(url, downloadRequest, authHeader);
   }

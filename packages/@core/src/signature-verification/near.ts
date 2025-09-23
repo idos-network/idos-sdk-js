@@ -3,7 +3,6 @@ import {
   borshSerialize,
   bs58Decode,
   hexDecode,
-  hexEncode,
   sha256Hash,
 } from "@idos-network/utils/codecs";
 import nacl from "tweetnacl";
@@ -73,17 +72,8 @@ export const verifyNearSignature = async (
 
     // Serialize the entire payload (matching Go's borsch.Serialize(*payload))
     const fullPayloadBytes = borshSerialize(payloadSchema, reconstructedPayload);
-    console.log("verifyBorschPayloadParams", reconstructedPayload);
-    console.log("verifyBorschPayloadHex", hexEncode(fullPayloadBytes));
-    console.log("verifyBorschPayloadLength", fullPayloadBytes.length);
-
     // Hash the payload (matching Go's sha256.Sum256(payloadBytes))
     const hash = sha256Hash(fullPayloadBytes);
-    console.log("hashHex", hexEncode(hash));
-    console.log("actualSignatureHex", hexEncode(actualSignature));
-    console.log("publicKeyBytesHex", hexEncode(publicKeyBytes));
-    console.log("publicKey", publicKey);
-
     // Raw ed25519 verification using nacl (matching Go's ed25519.Verify)
     const isValid = nacl.sign.detached.verify(hash, actualSignature, publicKeyBytes);
 
