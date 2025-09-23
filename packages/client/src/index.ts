@@ -427,17 +427,17 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
   async addWallet(params: AddWalletInput & { wallet_type: string }): Promise<AddWalletInput> {
     await addWallet(this.kwilClient, params);
-    console.log({ params });
-    console.log(this.signer);
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
-    if (!params.wallet_type) {
+    if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
+    console.log({ params });
+    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
