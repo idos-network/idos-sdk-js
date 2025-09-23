@@ -5,14 +5,16 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { connectedWalletType, walletPayload } from "./state";
 
+const hiddenWalletType = ((import.meta.env.VITE_HIDDEN_WALLET_TYPE as string) ?? "").split(",");
+
 function WalletConnector() {
   if (!connectedWalletType.value) {
     return (
       <>
-        <EVMConnector />
-        <NearConnector />
-        <XRPLConnector />
-        <StellarConnector />
+        {!hiddenWalletType.includes("evm") && <EVMConnector />}
+        {!hiddenWalletType.includes("near") && <NearConnector />}
+        {!hiddenWalletType.includes("xrpl") && <XRPLConnector />}
+        {!hiddenWalletType.includes("stellar") && <StellarConnector />}
       </>
     );
   }

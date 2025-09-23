@@ -84,7 +84,7 @@ const generateCredentials = async (
     privateKeyMultibase: process.env.ISSUER_ATTESTATION_SECRET_KEY,
   };
 
-  const plainSignedContent = await issuer.buildCredentials(
+  const plainSignedContent = await issuer.buildCredential(
     credentialFields,
     credentialSubject,
     availableIssuer,

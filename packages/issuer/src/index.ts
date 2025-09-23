@@ -10,12 +10,15 @@ import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
-  buildCredentials,
+  buildCredential,
+  buildFaceIdCredential,
+  type Credential,
   type CredentialFields,
   type CredentialSubject,
-  type Credentials,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
+import type { FaceIdCredential } from "../../@credentials/src/builder";
+import type { CredentialSubjectFaceId } from "../../@credentials/src/utils/types";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,
@@ -137,13 +140,22 @@ export class idOSIssuer {
     );
   }
 
-  async buildCredentials(
+  async buildCredential(
     fields: CredentialFields,
     subject: CredentialSubject,
     issuer: AvailableIssuerType,
     validate = true,
-  ): Promise<Credentials> {
-    return buildCredentials(fields, subject, issuer, validate);
+  ): Promise<Credential> {
+    return buildCredential(fields, subject, issuer, validate);
+  }
+
+  async buildFaceIdCredential(
+    fields: CredentialFields,
+    subject: CredentialSubjectFaceId,
+    issuer: AvailableIssuerType,
+    validate = true,
+  ): Promise<FaceIdCredential> {
+    return buildFaceIdCredential(fields, subject, issuer, validate);
   }
 
   async getPassportingPeers(): Promise<PassportingPeer[]> {
@@ -160,5 +172,7 @@ export type {
   CredentialFields,
   CredentialSubject,
   AvailableIssuerType,
-  Credentials,
+  Credential,
+  CredentialSubjectFaceId,
+  FaceIdCredential,
 };

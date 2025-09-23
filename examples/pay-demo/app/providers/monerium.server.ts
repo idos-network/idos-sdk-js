@@ -1,4 +1,4 @@
-import type { Credentials } from "@idos-network/consumer";
+import type { Credential } from "@idos-network/consumer";
 // @ts-expect-error
 import ascii85 from "ascii85";
 import { SERVER_ENV } from "./envFlags.server";
@@ -26,7 +26,7 @@ export const getClientToken = async () => {
   return await response.json().then((data) => data.access_token);
 };
 
-export const createUser = async (data: Credentials) => {
+export const createUser = async (data: Credential) => {
   if (!data.credentialSubject.email) {
     // Email is required, so you have to go to the auth page
     throw new Error("Email is required");
@@ -111,7 +111,7 @@ export interface IdDocument {
   kind: string;
 }
 
-export const createProfile = async (profileId: string, data: Credentials) => {
+export const createProfile = async (profileId: string, data: Credential) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
@@ -307,7 +307,7 @@ export const statusAndIban = async (profileId: string) => {
   };
 };
 
-export const auth = async (data: Credentials, url: URL) => {
+export const auth = async (data: Credential, url: URL) => {
   // Generate PKCE code verifier and challenge
   const { codeChallenge, codeVerifier } = await generateCodeChallenge();
 

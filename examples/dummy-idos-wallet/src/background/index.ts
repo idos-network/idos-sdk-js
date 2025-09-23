@@ -317,9 +317,7 @@ class PortManager {
       data: {
         requestId,
         address: this.wallet?.address,
-        // @ts-expect-error - TODO: fix this
         network: this.idOSClientWithUserSigner?.kwilClient.client.chainId,
-        // @ts-expect-error - TODO: fix this
         node: this.idOSClientWithUserSigner?.kwilClient.client.config.kwilProvider,
         status: this.idOSLoggedInClient ? "Has profile" : "No profile",
         user: this.idOSLoggedInClient?.user?.id,
