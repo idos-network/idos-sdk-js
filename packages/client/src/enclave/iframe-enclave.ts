@@ -254,7 +254,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private bindMessageListener(): void {
-    window.addEventListener("message", this.onMessage.bind(this));
+    if (!this.bound) window.addEventListener("message", this.onMessage.bind(this));
+    this.bound = true;
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
