@@ -40,7 +40,7 @@ import {
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -433,6 +433,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
+    }
+
+    if (!params.wallet_type) {
+      params.wallet_type = getWalletType(params.address);
     }
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
