@@ -26,6 +26,8 @@ export type EnclaveOptions = {
   userId?: string;
   expectedUserEncryptionPublicKey?: string;
   walletAddress?: string;
+  walletPublicKey?: string;
+  walletType?: string;
   encryptionPasswordStore?: EncryptionPasswordStore;
 };
 

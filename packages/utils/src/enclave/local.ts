@@ -6,6 +6,14 @@ import nacl from "tweetnacl";
 import { base64Encode, utf8Decode } from "../codecs";
 import { decrypt, encrypt, keyDerivation } from "../encryption";
 import { Client as MPCClient } from "../mpc/client";
+import type {
+  AddAddressMessageToSign,
+  AddAddressSignatureMessage,
+  DownloadMessageToSign,
+  RemoveAddressMessageToSign,
+  RemoveAddressSignatureMessage,
+  UploadMessageToSign,
+} from "../mpc/types";
 import { LocalStorageStore, type Store } from "../store";
 import type { PipeCodecArgs } from "../store/interface";
 import { BaseProvider } from "./base";
@@ -25,6 +33,9 @@ export interface LocalEnclaveOptions extends EnclaveOptions {
   mpcConfiguration?: {
     nodeUrl: string;
     contractAddress: string;
+    numMalicious: number;
+    numNodes: number;
+    numToReconstruct: number;
   };
 }
 
@@ -63,6 +74,12 @@ export class LocalEnclave<
       this.mpcClientInstance = new MPCClient(
         options.mpcConfiguration.nodeUrl,
         options.mpcConfiguration.contractAddress,
+        options.mpcConfiguration.numMalicious,
+        options.mpcConfiguration.numNodes,
+        options.mpcConfiguration.numToReconstruct,
+        options.walletType ?? "",
+        options.walletAddress ?? "",
+        options.walletPublicKey,
       );
     }
   }
@@ -72,6 +89,19 @@ export class LocalEnclave<
     await super.reset();
     this.storedEncryptionProfile = undefined;
     this.store.reset();
+  }
+
+  /** @override parent method to reconfigure the enclave */
+  async reconfigure(options: Partial<K> = {}): Promise<void> {
+    await super.reconfigure(options);
+    // Reconfigure MPC client if any signer information changed
+    if (this.mpcClientInstance && options.walletType && options.walletAddress) {
+      this.mpcClientInstance.reconfigure(
+        options.walletType ?? "",
+        options.walletAddress ?? "",
+        options.walletPublicKey,
+      );
+    }
   }
 
   /**
@@ -341,8 +371,7 @@ export class LocalEnclave<
         return utf8Decode(downloadedPassword);
       }
 
-      // TODO: If user change their mind and want to use MPC instead of password?...
-      // throw Error("A secret might be stored at ZK nodes, but can't be obtained");
+      throw Error("A secret might be stored at MPC ZK nodes, but can't be obtained");
     }
 
     const password = this.generatePassword();
@@ -386,14 +415,12 @@ export class LocalEnclave<
     }
 
     const ephemeralKeyPair = nacl.box.keyPair();
-    const signerAddress = this.options.walletAddress;
 
-    const downloadRequest = this.mpcClient.downloadRequest(
-      signerAddress,
-      ephemeralKeyPair.publicKey,
-    );
+    const downloadRequest = this.mpcClient.downloadRequest(ephemeralKeyPair.publicKey);
 
-    const messageToSign = this.mpcClient.downloadMessageToSign(downloadRequest);
+    const messageToSign = this.mpcClient.downloadMessageToSign(
+      downloadRequest,
+    ) as DownloadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
@@ -410,16 +437,14 @@ export class LocalEnclave<
   }
 
   private async uploadSecret(secret: string): Promise<{ status: string }> {
-    const signerAddress = this.options.walletAddress;
-
-    if (!signerAddress) {
+    if (!this.options.walletAddress) {
       console.error("signerAddress is not found");
       return { status: "no-signer-address" };
     }
 
     const blindedShares = this.mpcClient.getBlindedShares(Buffer.from(secret, "utf8"));
-    const uploadRequest = this.mpcClient.uploadRequest(blindedShares, signerAddress);
-    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest);
+    const uploadRequest = this.mpcClient.uploadRequest(blindedShares);
+    const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
     const signedMessage = await this.signTypedData(
       // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
@@ -431,5 +456,45 @@ export class LocalEnclave<
     );
 
     return this.mpcClient.uploadSecret(this.userId, uploadRequest, signedMessage, blindedShares);
+  }
+
+  async addAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    return this.mpcClient.addAddressMessageToSign(
+      address,
+      publicKey,
+      addressToAddType,
+    ) as AddAddressMessageToSign;
+  }
+
+  async removeAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    return this.mpcClient.removeAddressMessageToSign(
+      address,
+      publicKey,
+      addressToRemoveType,
+    ) as RemoveAddressMessageToSign;
+  }
+
+  async addAddressToMpcSecret(
+    userId: string,
+    message: AddAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.mpcClient.addAddress(userId, message, signature);
+  }
+
+  async removeAddressFromMpcSecret(
+    userId: string,
+    message: RemoveAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.mpcClient.removeAddress(userId, message, signature);
   }
 }

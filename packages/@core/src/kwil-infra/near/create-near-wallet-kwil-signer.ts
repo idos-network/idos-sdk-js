@@ -104,12 +104,13 @@ function createNearWalletSigner(
     };
 
     const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
-
-    return bytesConcat(
+    const result = bytesConcat(
       binaryWriteUint16BE(nep413BorshPayload.length),
       nep413BorshPayload,
       base64Decode(signature),
     );
+
+    return result;
   };
 }
 
@@ -161,7 +162,7 @@ export async function createNearWalletKwilSigner(
   store: Store,
   kwilClient: KwilActionClient,
   recipient = "idos.network",
-): Promise<KwilSigner> {
+): Promise<{ kwilSigner: KwilSigner; publicKey: string }> {
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
   if (wallet.id === "my-near-wallet") {
@@ -223,7 +224,6 @@ export async function createNearWalletKwilSigner(
 
     const message = "idOS authentication";
     const nonce = Buffer.from(new KwilNonce(32).bytes);
-    // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
 
     await store.set("signer-address", currentAddress);
@@ -232,5 +232,8 @@ export async function createNearWalletKwilSigner(
 
   const signer = createNearWalletSigner(wallet, recipient);
 
-  return new KwilSigner(signer, implicitAddressFromPublicKey(publicKey), "nep413");
+  return {
+    kwilSigner: new KwilSigner(signer, implicitAddressFromPublicKey(publicKey), "nep413"),
+    publicKey,
+  };
 }
