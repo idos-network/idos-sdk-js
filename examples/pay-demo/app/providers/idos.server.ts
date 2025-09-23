@@ -1,4 +1,4 @@
-import { type Credentials, idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
+import { type Credential, idOSConsumer as idOSConsumerClass } from "@idos-network/consumer";
 import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
@@ -26,7 +26,7 @@ export async function getSharedCredential(credentialId: string, inserterId?: str
   const credentialContents: string =
     await idOSConsumer.getSharedCredentialContentDecrypted(credentialId);
 
-  const data = JSON.parse(credentialContents) as Credentials;
+  const data = JSON.parse(credentialContents) as Credential;
 
   // Verify the credential
   const [verificationResult] = await idOSConsumer.verifyCredential(data, [
