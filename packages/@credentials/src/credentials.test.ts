@@ -2,8 +2,9 @@ import crypto from "node:crypto";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
-import { buildCredentials, buildFaceIdCredentials } from "./builder";
-import { verifyCredentials } from "./verifier";
+import { buildCredential, buildFaceIdCredential } from "./builder";
+import { fileToBase85 } from "./utils";
+import { verifyCredential } from "./verifier";
 
 describe("verifiableCredentials", () => {
   describe("face-scan-id", () => {
@@ -19,7 +20,7 @@ describe("verifiableCredentials", () => {
       });
 
       try {
-        await buildFaceIdCredentials(
+        await buildFaceIdCredential(
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
@@ -63,7 +64,7 @@ describe("verifiableCredentials", () => {
 
       const faceSignUserId = crypto.randomUUID();
 
-      const data = await buildFaceIdCredentials(
+      const data = await buildFaceIdCredential(
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
@@ -87,7 +88,7 @@ describe("verifiableCredentials", () => {
 
       const allowedIssuers = [anotherKey, validKey];
 
-      const [verified, validResults] = await verifyCredentials(data, allowedIssuers);
+      const [verified, validResults] = await verifyCredential(data, allowedIssuers);
       expect(verified).toBe(true);
 
       const validResultsArray = validResults.values().toArray();
@@ -108,7 +109,7 @@ describe("verifiableCredentials", () => {
       const faceSignUserId = crypto.randomUUID();
       const faceSignUserId2 = crypto.randomUUID();
 
-      const data = await buildFaceIdCredentials(
+      const data = await buildFaceIdCredential(
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
@@ -124,12 +125,12 @@ describe("verifiableCredentials", () => {
 
       // Check validity
       const allowedIssuers = [validKey];
-      const [verified] = await verifyCredentials(data, allowedIssuers);
+      const [verified] = await verifyCredential(data, allowedIssuers);
       expect(verified).toBe(true);
 
       // Modify data
       data.credentialSubject.faceSignUserId = faceSignUserId2;
-      const [verified2] = await verifyCredentials(data, allowedIssuers);
+      const [verified2] = await verifyCredential(data, allowedIssuers);
       expect(verified2).toBe(false);
     });
   });
@@ -147,7 +148,7 @@ describe("verifiableCredentials", () => {
       });
 
       try {
-        await buildCredentials(
+        await buildCredential(
           {
             id: `${issuer}/credentials/${id}`,
             level: "human",
@@ -183,10 +184,10 @@ describe("verifiableCredentials", () => {
               city: "New York",
               postalCode: "10001",
               country: "USA",
+              proofCategory: "Utility Bill",
+              proofDateOfIssue: new Date("2022-01-01"),
+              proofFile: Buffer.from("Proof of address"),
             },
-            residentialAddressProofCategory: "Utility Bill",
-            residentialAddressProofDateOfIssue: new Date("2022-01-01"),
-            residentialAddressProofFile: Buffer.from("Proof of address"),
           },
           validKey,
         );
@@ -245,7 +246,7 @@ describe("verifiableCredentials", () => {
         controller: `${issuer2}/issuers/1`,
       });
 
-      const data = await buildCredentials(
+      const data = await buildCredential(
         {
           id: `${issuer}/credentials/${id}`,
           level: "human",
@@ -285,10 +286,10 @@ describe("verifiableCredentials", () => {
             city: "New York",
             postalCode: "10001",
             country: "US",
+            proofCategory: "Utility Bill",
+            proofDateOfIssue: new Date("2022-01-01"),
+            proofFile: Buffer.from("Proof of address"),
           },
-          residentialAddressProofCategory: "Utility Bill",
-          residentialAddressProofDateOfIssue: new Date("2022-01-01"),
-          residentialAddressProofFile: Buffer.from("Proof of address"),
         },
         validKey,
       );
@@ -301,6 +302,13 @@ describe("verifiableCredentials", () => {
       expect(data.credentialSubject.residentialAddressPostalCode).toBe("10001");
       expect(data.credentialSubject.residentialAddressCountry).toBe("US");
       expect(data.credentialSubject.residentialAddressRegion).toBe("NY");
+      expect(data.credentialSubject.residentialAddressProofCategory).toBe("Utility Bill");
+      expect(data.credentialSubject.residentialAddressProofDateOfIssue).toEqual(
+        new Date("2022-01-01").toISOString(),
+      );
+      expect(data.credentialSubject.residentialAddressProofFile).toEqual(
+        fileToBase85(Buffer.from("Proof of address")),
+      );
 
       expect(data.credentialSubject.email).toBe("john.lennon@example.com");
       expect(data.credentialSubject.phoneNumber).toBe("+1234567890");
@@ -312,7 +320,7 @@ describe("verifiableCredentials", () => {
 
       const allowedIssuers = [anotherKey, validKey];
 
-      const [verified, validResults] = await verifyCredentials(data, allowedIssuers);
+      const [verified, validResults] = await verifyCredential(data, allowedIssuers);
       expect(verified).toBe(true);
 
       const validResultsArray = validResults.values().toArray();
@@ -329,7 +337,7 @@ describe("verifiableCredentials", () => {
         },
       ];
 
-      const [invalidVerified, invalidResults] = await verifyCredentials(data, invalidIssuers);
+      const [invalidVerified, invalidResults] = await verifyCredential(data, invalidIssuers);
       expect(invalidVerified).toBe(false);
 
       const invalidResultsArray = invalidResults.values().toArray();
@@ -345,7 +353,7 @@ describe("verifiableCredentials", () => {
         },
       ];
 
-      const [validIssuerVerified] = await verifyCredentials(data, validIssuer);
+      const [validIssuerVerified] = await verifyCredential(data, validIssuer);
       expect(validIssuerVerified).toBe(true);
     });
   });

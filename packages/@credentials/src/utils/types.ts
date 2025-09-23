@@ -51,6 +51,9 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   city: z.ZodString;
   postalCode: z.ZodString;
   country: z.ZodString;
+  proofCategory: z.ZodString;
+  proofDateOfIssue: z.ZodOptional<z.ZodDate>;
+  proofFile: z.ZodType<Buffer<ArrayBufferLike>>;
 }> = z.object({
   /* Street address. */
   street: z.string(),
@@ -72,6 +75,15 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
 
   /* Country (ISO 3166-1 alpha-2). */
   country: z.string().min(2).max(2),
+
+  /* Residential Address Proof Category	Type of document provided to verify the address(e.g., utility bill, bank statement). */
+  proofCategory: z.string(),
+
+  /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
+  proofDateOfIssue: z.date().optional(),
+
+  /* Residential Address Proof File	File or URL of the document provided as address proof. */
+  proofFile: z.instanceof(Buffer),
 });
 
 export type CredentialResidentialAddress = z.infer<typeof CredentialFieldsSchema>;
@@ -117,9 +129,6 @@ export const CredentialSubjectSchema: z.ZodObject<{
   idDocumentBackFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
   selfieFile: z.ZodType<Buffer<ArrayBufferLike>>;
   residentialAddress: z.ZodOptional<typeof CredentialResidentialAddressSchema>;
-  residentialAddressProofCategory: z.ZodOptional<z.ZodString>;
-  residentialAddressProofDateOfIssue: z.ZodOptional<z.ZodDate>;
-  residentialAddressProofFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
 }> = z.object({
   /* ID(unique credential)	Unique identifier for the credential itself. */
   id: z.string(),
@@ -193,17 +202,8 @@ export const CredentialSubjectSchema: z.ZodObject<{
   /* (ID Document) Selfie File	Buffer with selfie with the identity document for verification purposes. */
   selfieFile: z.instanceof(Buffer),
 
-  /* Residential Address	Full residential address of the individual - if applicable. */
+  /* Residential Address Full residential address of the individual - if applicable. */
   residentialAddress: CredentialResidentialAddressSchema.optional(),
-
-  /* Residential Address Proof Category	Type of document provided to verify the address(e.g., utility bill, bank statement). */
-  residentialAddressProofCategory: z.string().optional(),
-
-  /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
-  residentialAddressProofDateOfIssue: z.date().optional(),
-
-  /* Residential Address Proof File	File or URL of the document provided as address proof. */
-  residentialAddressProofFile: z.instanceof(Buffer).optional(),
 });
 
 export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
@@ -217,6 +217,9 @@ export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "re
   residentialAddressCity?: string;
   residentialAddressPostalCode?: string;
   residentialAddressCountry?: string;
+  residentialAddressProofCategory?: string;
+  residentialAddressProofDateOfIssue?: string;
+  residentialAddressProofFile?: Buffer<ArrayBufferLike>;
 }
 
 // TODO: This is a stub of the types for @digitalbazaar/vc

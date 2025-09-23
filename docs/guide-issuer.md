@@ -297,7 +297,7 @@ const issuer = {
   privateKeyMultibase: multibaseSigningKeyPair.privateKey,
 }
 
-const credential = await idOSIssuer.buildCredentials(
+const credential = await idOSIssuer.buildCredential(
   credentialFields,
   credentialSubject,
   issuer,

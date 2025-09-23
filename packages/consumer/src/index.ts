@@ -21,12 +21,12 @@ import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
-  type Credentials,
+  type Credential,
   type IDDocumentType,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
-  type VerifyCredentialsResult,
-  verifyCredentials,
+  type VerifyCredentialResult,
+  verifyCredential,
 } from "@idos-network/credentials";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
@@ -165,21 +165,21 @@ export class idOSConsumer {
     return getPassportingPeers(this.#kwilClient);
   }
 
-  async verifyCredentials<K = VerifiableCredentialSubject>(
+  async verifyCredential<K = VerifiableCredentialSubject>(
     credentials: VerifiableCredential<K>,
     issuers: AvailableIssuerType[],
-  ): Promise<VerifyCredentialsResult> {
-    return verifyCredentials<K>(credentials, issuers);
+  ): Promise<VerifyCredentialResult> {
+    return verifyCredential<K>(credentials, issuers);
   }
 }
 
 export type {
   idOSCredential,
   idOSGrant,
-  Credentials,
+  Credential,
   VerifiableCredential,
   VerifiableCredentialSubject,
-  VerifyCredentialsResult,
+  VerifyCredentialResult,
   AvailableIssuerType,
   IDDocumentType,
 };

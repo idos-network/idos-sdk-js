@@ -10,28 +10,28 @@ export const CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
 export const CONTEXT_ED25519_SIGNATURE_2020_V1 = "https://w3id.org/security/suites/ed25519-2020/v1";
 
 // Check .github/workflow/pages.yml how those are deployed
-export const CONTEXT_IDOS_CREDENTIALS_V1 =
+export const CONTEXT_IDOS_CREDENTIAL_V1 =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credentials-v1.json";
-export const CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT =
+export const CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-v1.json";
 
-export const CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID =
+export const CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID =
   "https://idos-network.github.io/idos-sdk-js/credentials/idos-credential-subject-face-id-v1.json";
 
 // Latest contexts for builder
-export const CONTEXT_IDOS_CREDENTIALS: string = CONTEXT_IDOS_CREDENTIALS_V1;
-export const CONTEXT_IDOS_CREDENTIALS_SUBJECT: string = CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT;
+export const CONTEXT_IDOS_CREDENTIAL: string = CONTEXT_IDOS_CREDENTIAL_V1;
+export const CONTEXT_IDOS_CREDENTIAL_SUBJECT: string = CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT;
 export const CONTEXT_IDOS_SIGNATURE: string = CONTEXT_ED25519_SIGNATURE_2020_V1;
-export const CONTEXT_IDOS_CREDENTIALS_FACE_ID: string = CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID;
+export const CONTEXT_IDOS_CREDENTIAL_FACE_ID: string = CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID;
 
 export function buildDocumentLoader(): JsonLDDocumentLoaderInstance {
   const loader = new JsonLdDocumentLoader();
 
   loader.addStatic(CONTEXT_V1, v1);
-  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1, idosCredentialsV1);
-  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1_SUBJECT, idosCredentialSubjectV1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1, idosCredentialsV1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_SUBJECT, idosCredentialSubjectV1);
   loader.addStatic(CONTEXT_ED25519_SIGNATURE_2020_V1, ed25519Signature2020V1);
-  loader.addStatic(CONTEXT_IDOS_CREDENTIALS_V1_FACE_ID, idosCredentialSubjectFaceIdV1);
+  loader.addStatic(CONTEXT_IDOS_CREDENTIAL_V1_FACE_ID, idosCredentialSubjectFaceIdV1);
 
   // DEPRECATED: Those should be removed
   [
