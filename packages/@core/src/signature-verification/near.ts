@@ -72,10 +72,8 @@ export const verifyNearSignature = async (
 
     // Serialize the entire payload (matching Go's borsch.Serialize(*payload))
     const fullPayloadBytes = borshSerialize(payloadSchema, reconstructedPayload);
-
     // Hash the payload (matching Go's sha256.Sum256(payloadBytes))
     const hash = sha256Hash(fullPayloadBytes);
-
     // Raw ed25519 verification using nacl (matching Go's ed25519.Verify)
     const isValid = nacl.sign.detached.verify(hash, actualSignature, publicKeyBytes);
 

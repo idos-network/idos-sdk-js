@@ -86,9 +86,11 @@ Reown
 rippletest
 safekeep
 sandboxed
+sdot
 secp
 secretbox
 secretsharing
+shamir
 shardnet
 siwe
 stablelib

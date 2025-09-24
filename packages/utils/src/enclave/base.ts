@@ -3,6 +3,12 @@ import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
 import { fromBytesToJson } from "../codecs";
+import type {
+  AddAddressMessageToSign,
+  AddAddressSignatureMessage,
+  RemoveAddressMessageToSign,
+  RemoveAddressSignatureMessage,
+} from "../mpc/types";
 import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
@@ -10,6 +16,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   protected _signMethod?: (domain: any, types: any, value: any) => Promise<string>;
+  private _signMethodType?: "signTypedData" | "signMessage" | "signer";
 
   constructor(options: K) {
     this.options = options;
@@ -21,29 +28,65 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    * @param signer - The signer to set, is later used for MPC if allowed.
    */
   setSigner(signer: {
-    signTypedData: (domain: string, types: string[], value: string) => Promise<string>;
+    signTypedData?: (domain: string, types: string[], value: string) => Promise<string>;
+    signMessage?: (message: string) => Promise<any>;
+    signer?: (message: string) => Promise<any>;
   }): void {
     if (signer.signTypedData) {
+      // EVM wallet
       this._signMethod = signer.signTypedData.bind(signer);
+      this._signMethodType = "signTypedData";
+    } else if (signer.signMessage) {
+      // XRPL wallet
+      this._signMethod = signer.signMessage.bind(signer);
+      this._signMethodType = "signMessage";
+    } else if (signer.signer) {
+      // Stellar wallet
+      this._signMethod = signer.signer.bind(signer);
+      this._signMethodType = "signer";
     } else {
-      if (["signMessage", "signer"].some((key) => key in signer)) {
-        // @ts-expect-error - signMessage for xrpl and near, signer for stellar
-        this._signMethod = signer.signMessage
-          ? signer.signMessage.bind(signer)
-          : signer.signer?.bind(signer);
-      } else {
-        throw new Error("No sign method found in passed signer");
-      }
+      throw new Error(
+        "No sign method found in passed signer. Expected signTypedData, signMessage, or signer",
+      );
     }
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
-    if (!this._signMethod) {
+    if (!this._signMethod || !this._signMethodType) {
       throw new Error("Signer is not set");
     }
 
-    return this._signMethod(domain, types, value);
+    let signature: string;
+
+    // Handle different signing methods based on wallet type
+    if (this._signMethodType === "signTypedData") {
+      // EVM wallets: use all 3 arguments
+      signature = await (
+        this._signMethod as (domain: any, types: any, value: any) => Promise<string>
+      )(domain, types, value);
+    } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
+      // XRPL/NEAR/Stellar wallets: use only the value as message
+      const messageString = JSON.stringify(value);
+      const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
+
+      // Extract signature from response object
+      if (typeof response === "string") {
+        signature = response;
+      } else if (response && response.result && response.result.signedMessage) {
+        signature = response.result.signedMessage;
+      } else if (response && response.signedMessage) {
+        signature = response.signedMessage;
+      } else {
+        throw new Error(
+          `Unexpected response format from ${this._signMethodType}: ${JSON.stringify(response)}`,
+        );
+      }
+    } else {
+      throw new Error(`Unknown sign method type: ${this._signMethodType}`);
+    }
+
+    return signature;
   }
 
   /**
@@ -195,5 +238,37 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         ...credential,
         content: "", // Content should not leave the enclave
       }));
+  }
+
+  async addAddressMessageToSign(
+    _address: string,
+    _publicKey: string | undefined,
+    _addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    throw new Error("Method 'addAddressMessageToSign' has to be implemented in the subclass.");
+  }
+
+  async removeAddressMessageToSign(
+    _address: string,
+    _publicKey: string | undefined,
+    _addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    throw new Error("Method 'removeAddressMessageToSign' has to be implemented in the subclass.");
+  }
+
+  async addAddressToMpcSecret(
+    _userId: string,
+    _message: AddAddressSignatureMessage,
+    _signature: string,
+  ): Promise<string> {
+    throw new Error("Method 'addAddressToMpcSecret' has to be implemented in the subclass.");
+  }
+
+  async removeAddressFromMpcSecret(
+    _userId: string,
+    _message: RemoveAddressSignatureMessage,
+    _signature: string,
+  ): Promise<string> {
+    throw new Error("Method 'removeAddressFromMpcSecret' has to be implemented in the subclass.");
   }
 }

@@ -120,7 +120,7 @@ if (!hasProfile) window.location = "https://kyc-provider.example.com/enroll";
 
 #### Creating a profile
 
-If they don't have a profile, you must create one for them. This procedure can only be done by a Permissioned Issuer. Get in touch with us at engineering@idos.network if you're interested in being one.
+If they don't have a profile, you must create one for them. This procedure can only be done by a Permissioned Issuer. If you're interested in being one: securely generate an `ed25516` signing key, grab its public key in hex, and get in touch with us at engineering@idos.network.
 
 To create a user profile in idOS, you need:
 1. **A wallet address** associated with the user.

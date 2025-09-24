@@ -4,6 +4,12 @@ import {
   type EnclaveOptions,
   type PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
+import type {
+  AddAddressMessageToSign,
+  AddAddressSignatureMessage,
+  RemoveAddressMessageToSign,
+  RemoveAddressSignatureMessage,
+} from "@idos-network/utils/mpc";
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
@@ -118,6 +124,43 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     }
   }
 
+  async addAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToAddType: string,
+  ): Promise<AddAddressMessageToSign> {
+    return this.requestToEnclave("addAddressMessageToSign", address, publicKey, addressToAddType);
+  }
+
+  async removeAddressMessageToSign(
+    address: string,
+    publicKey: string | undefined,
+    addressToRemoveType: string,
+  ): Promise<RemoveAddressMessageToSign> {
+    return this.requestToEnclave(
+      "removeAddressMessageToSign",
+      address,
+      publicKey,
+      addressToRemoveType,
+    );
+  }
+
+  async addAddressToMpcSecret(
+    userId: string,
+    message: AddAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.requestToEnclave("addAddressToMpcSecret", userId, message, signature);
+  }
+
+  async removeAddressFromMpcSecret(
+    userId: string,
+    message: RemoveAddressSignatureMessage,
+    signature: string,
+  ): Promise<string> {
+    return this.requestToEnclave("removeAddressFromMpcSecret", userId, message, signature);
+  }
+
   private async createAndLoadIframe(): Promise<void> {
     const container = document.querySelector(this.container);
 
@@ -211,7 +254,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private bindMessageListener(): void {
-    window.addEventListener("message", this.onMessage.bind(this));
+    if (!this.bound) window.addEventListener("message", this.onMessage.bind(this));
+    this.bound = true;
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
@@ -220,7 +264,6 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
     const payload = message.data.payload;
     const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
-
     await this.requestToEnclave("signTypedDataResponse", signature);
   }
 }

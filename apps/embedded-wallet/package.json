@@ -16,7 +16,7 @@
     "@stepperize/react": "^5.1.6",
     "@tanstack/react-query": "catalog:tanstack",
     "@web3icons/react": "^4.0.14",
-    "preact": "^10.26.9",
+    "preact": "^10.27.1",
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum"
   },
