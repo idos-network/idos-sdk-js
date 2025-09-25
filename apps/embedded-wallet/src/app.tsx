@@ -5,7 +5,13 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { connectedWalletType, walletPayload } from "./state";
 
-const hiddenWalletType = ((import.meta.env.VITE_HIDDEN_WALLET_TYPE as string) ?? "").split(",");
+const getHiddenWalletTypes = () => {
+  const params = new URLSearchParams(window.location.search);
+  const hiddenWallets = params.get("hidden_wallets") ?? "";
+  return hiddenWallets ? hiddenWallets.split(",") : [];
+};
+
+const hiddenWalletType = getHiddenWalletTypes();
 
 function WalletConnector() {
   if (!connectedWalletType.value) {
