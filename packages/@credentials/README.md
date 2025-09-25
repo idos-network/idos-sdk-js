@@ -28,11 +28,11 @@ const key = await Ed25519VerificationKey2020.generate({
 ## Issue a credentials
 
 ```javascript
-import { buildCredentials } from "@idos-network/credentials";
+import { buildCredential } from "@idos-network/credentials";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
-const data = await buildCredentials(
+const data = await buildCredential(
   {
     id: `${issuer}/credentials/${id}`,
     level: "human",
@@ -79,7 +79,7 @@ console.log(data);
 ## Verify a credentials
 
 ```javascript
-import { verifyCredentials } from "@idos-network/credentials";
+import { verifyCredential } from "@idos-network/credentials";
 
 // We have a list of issuers we trust to
 const allowedIssuers = [{
@@ -91,7 +91,7 @@ const allowedIssuers = [{
   key,
 ]
 
-const [verified, resultsByIssuer] = await verifyCredentials(credentials, allowedIssuers);
+const [verified, resultsByIssuer] = await verifyCredential(credential, allowedIssuers);
 console.log("Verified: ", verified);
 console.log("Results by issuer: ", resultsByIssuer);
 ```

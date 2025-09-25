@@ -84,7 +84,7 @@ const generateCredentials = async (
     privateKeyMultibase: process.env.ISSUER_ATTESTATION_SECRET_KEY,
   };
 
-  const plainSignedContent = await issuer.buildCredentials(
+  const plainSignedContent = await issuer.buildCredential(
     credentialFields,
     credentialSubject,
     availableIssuer,
@@ -123,7 +123,7 @@ export async function createIDOSUserProfile({
     },
     {
       address: wallet.address,
-      wallet_type: wallet.type,
+      wallet_type: wallet.type.toLowerCase(), // Convert to lowercase for consistency
       message: wallet.message,
       signature: wallet.signature,
       public_key: wallet.publicKey ?? "",

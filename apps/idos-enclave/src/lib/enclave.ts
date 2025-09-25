@@ -30,6 +30,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           ? {
               nodeUrl: import.meta.env.VITE_MPC_READER_NODE_URL,
               contractAddress: import.meta.env.VITE_MPC_CONTRACT_ADDRESS,
+              numMalicious: import.meta.env.VITE_MPC_NUM_MALICIOUS || 2,
+              numNodes: import.meta.env.VITE_MPC_NUM_NODES || 5,
+              numToReconstruct: import.meta.env.VITE_MPC_NUM_TO_RECONSTRUCT || 3,
             }
           : undefined,
     });
@@ -243,6 +246,10 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           "signTypedDataResponse",
           "backupUserEncryptionProfile",
           "filterCredentials",
+          "addAddressMessageToSign",
+          "removeAddressMessageToSign",
+          "addAddressToMpcSecret",
+          "removeAddressFromMpcSecret",
         ];
 
         if (!allowedMethods.includes(method)) {

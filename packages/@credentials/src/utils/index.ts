@@ -3,7 +3,12 @@ import {
   type Ed25519VerificationKey2020Options,
 } from "@digitalbazaar/ed25519-verification-key-2020";
 import * as base85 from "base85";
-import type { CredentialFields, CredentialResidentialAddress, CredentialSubject } from "./types";
+import type {
+  CredentialFields,
+  CredentialResidentialAddress,
+  CredentialSubject,
+  CredentialSubjectFaceId,
+} from "./types";
 
 export function fileToBase85(file: Buffer): string {
   return base85.encode(file, "ascii85");
@@ -74,7 +79,11 @@ export async function issuerToKey(
 }
 
 export function convertValues<
-  K extends CredentialFields | CredentialSubject | CredentialResidentialAddress,
+  K extends
+    | CredentialFields
+    | CredentialSubject
+    | CredentialResidentialAddress
+    | CredentialSubjectFaceId,
 >(fields: K, prefix?: string): Record<string, unknown> {
   const acc: Record<string, unknown> = {};
 

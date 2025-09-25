@@ -1,4 +1,4 @@
-import type { Credentials, IDDocumentType } from "@idos-network/consumer";
+import type { Credential, IDDocumentType } from "@idos-network/consumer";
 import { goTry } from "go-try";
 import { cookies } from "next/headers";
 import type { NextRequest } from "next/server";
@@ -89,7 +89,7 @@ type NoahResponse = {
 
 async function createNoahCustomer(
   userAddress: string,
-  credentialSubject: Credentials["credentialSubject"],
+  credentialSubject: Credential["credentialSubject"],
   origin: string,
 ) {
   const noahApiKey = process.env.NOAH_API_KEY;
@@ -200,7 +200,7 @@ export async function GET(request: NextRequest) {
     return Response.json({ error: "`address` search param is not supported" }, { status: 400 });
   }
 
-  const [credentialError, credential] = await goTry<Credentials["credentialSubject"]>(async () => {
+  const [credentialError, credential] = await goTry<Credential["credentialSubject"]>(async () => {
     return await fetch(`${origin}/api/shared-credential?userId=${userId}`)
       .then((res) => res.json())
       .then((res) => res.credentialContent);

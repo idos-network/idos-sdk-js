@@ -5,14 +5,22 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { connectedWalletType, walletPayload } from "./state";
 
+const getHiddenWalletTypes = () => {
+  const params = new URLSearchParams(window.location.search);
+  const hiddenWallets = params.get("hidden_wallets") ?? "";
+  return hiddenWallets ? hiddenWallets.split(",") : [];
+};
+
+const hiddenWalletType = getHiddenWalletTypes();
+
 function WalletConnector() {
   if (!connectedWalletType.value) {
     return (
       <>
-        <EVMConnector />
-        <NearConnector />
-        <XRPLConnector />
-        <StellarConnector />
+        {!hiddenWalletType.includes("evm") && <EVMConnector />}
+        {!hiddenWalletType.includes("near") && <NearConnector />}
+        {!hiddenWalletType.includes("xrpl") && <XRPLConnector />}
+        {!hiddenWalletType.includes("stellar") && <StellarConnector />}
       </>
     );
   }

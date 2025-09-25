@@ -1,8 +1,11 @@
 import invariant from "tiny-invariant";
+import { getWalletType } from "../utils";
 import { verifyEvmSignature } from "./evm";
 import { verifyNearSignature } from "./near";
 import { verifyRippleSignature } from "./ripple";
 import { verifyStellarSignature } from "./stellar";
+
+export { verifyNearSignature };
 
 export interface WalletSignature {
   address?: string;
@@ -11,29 +14,13 @@ export interface WalletSignature {
   public_key: string[];
 }
 
-export const getWalletType = (
-  walletPayload: WalletSignature,
-): "evm" | "near" | "xrpl" | "stellar" => {
-  // Address validation patterns
-  const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
-  const near_regexp = /^[a-zA-Z0-9._-]+\.(near|testnet|betanet)$/;
-  const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
-  const stellar_regexp = /^G[A-Z0-9]{55}$/;
-
-  if (evm_regexp.test(walletPayload.address ?? "")) return "evm";
-  if (near_regexp.test(walletPayload.address ?? "")) return "near";
-  if (xrp_address_regexp.test(walletPayload.address ?? "")) return "xrpl";
-  if (stellar_regexp.test(walletPayload.address ?? "")) return "stellar";
-  throw new Error("Unsupported wallet address");
-};
-
 export const verifySignature = async (walletPayload: WalletSignature): Promise<boolean> => {
   invariant(walletPayload.address, "Wallet address is required");
   invariant(walletPayload.message, "Wallet message is required");
   invariant(walletPayload.signature, "Wallet signature is required");
 
   try {
-    const walletType = getWalletType(walletPayload);
+    const walletType = getWalletType(walletPayload.address);
     if (walletType === "evm")
       return verifyEvmSignature(
         walletPayload.message,

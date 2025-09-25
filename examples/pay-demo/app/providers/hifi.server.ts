@@ -1,4 +1,4 @@
-import type { Credentials } from "@idos-network/consumer";
+import type { Credential } from "@idos-network/consumer";
 import countries2to3 from "countries-list/minimal/countries.2to3.min.json";
 import { SERVER_ENV } from "./envFlags.server";
 import { generateFileUrl } from "./files.server";
@@ -103,7 +103,7 @@ export interface UpdateKYCRequest extends Omit<CreateUserRequest, "signedAgreeme
 export const createUserAndKYC = async (
   signedAgreementId: string,
   credentialId: string,
-  data: Credentials,
+  data: Credential,
   url: URL,
 ) => {
   // stateProvinceRegion is required but we don't have it in the data
@@ -184,7 +184,7 @@ export const createUserAndKYC = async (
       : generateFileUrl(url, credentialId, "idDocumentFrontFile"), // Send front file if back is not provided
     govIdCountry:
       countries2to3[data.credentialSubject.idDocumentCountry as keyof typeof countries2to3],
-    proofOfAddressType: data.credentialSubject.residentialAddressProofCategory.toUpperCase(),
+    proofOfAddressType: data.credentialSubject.residentialAddressProofCategory?.toUpperCase() ?? "",
     proofOfAddressUrl: generateFileUrl(url, credentialId, "residentialAddressProofFile"),
   };
 

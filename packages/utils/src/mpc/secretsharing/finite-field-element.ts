@@ -1,4 +1,8 @@
-/** A finite field element. */
+/**
+ * A finite field element.
+ *
+ * <p>Copied from <a href="https://gitlab.com/partisiablockchain/language/abi/zk-client"> zk-client</a>.
+ */
 export interface FiniteFieldElement<T> {
   /**
    * Field element addition.
