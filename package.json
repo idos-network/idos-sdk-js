@@ -2,6 +2,8 @@
   "name": "idos-sdk-js",
   "devDependencies": {
     "@biomejs/biome": "2.1.3",
+    "@size-limit/file": "^11.2.0",
+    "@size-limit/time": "^11.2.0",
     "lefthook": "1.12.2",
     "size-limit": "^11.1.6",
     "turbo": "^2.5.5",
@@ -60,7 +62,8 @@
     {
       "name": "@idos-network/issuer",
       "path": "packages/issuer/dist/index.js",
-      "limit": "550 KB"
+      "limit": "550 KB",
+      "running": false
     },
     {
       "name": "@idos-network/utils",
