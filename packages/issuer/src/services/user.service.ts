@@ -35,8 +35,8 @@ export class UserService {
     return entity as T & { id: string };
   }
 
-  async hasProfile(userAddress: string): Promise<boolean> {
-    return _hasProfile(this.#kwilClient, userAddress);
+  async hasProfile(address: string): Promise<boolean> {
+    return (await _hasProfile(this.#kwilClient, { address })).has_profile;
   }
 
   async createUserProfile(params: CreateProfileReqParams): Promise<idOSUser> {
