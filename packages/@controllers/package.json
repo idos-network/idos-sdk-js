@@ -3,6 +3,7 @@
   "description": "Web controllers that can be used to interact with idOS web applications",
   "version": "0.0.1",
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
     "@idos-network/core": "workspace:*",

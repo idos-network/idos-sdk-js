@@ -1,10 +1,16 @@
+import type { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
 import type { idOSCredential } from "@idos-network/credentials";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
 
 export { KwilSigner } from "@idos-network/kwil-js";
-export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner;
+export type Wallet =
+  | EthersWallet
+  | JsonRpcSigner
+  | NearWallet
+  | CustomKwilSigner
+  | StellarWalletsKit;
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];

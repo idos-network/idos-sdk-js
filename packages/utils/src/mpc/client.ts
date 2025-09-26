@@ -63,6 +63,21 @@ export class Client {
     if (signerPublicKey) this.signerPublicKey = signerPublicKey;
   }
 
+  private formatAddress(signerType: string, signerAddress: string, signerPublicKey?: string): string {
+    switch (signerType.toLowerCase()) {
+      case "evm":
+        return `eip712:${signerAddress}`;
+      case "xrpl":
+        return `XRPL:${signerPublicKey}`;
+      case "near":
+        return `NEAR:${signerPublicKey?.replace('ed25519:', '')}`;
+      case "stellar":
+        return `STELLAR:${signerAddress}`;
+      default:
+        throw new Error("Invalid signer type");
+    }
+  }
+
   public async uploadSecret(
     id: string,
     uploadSignature: UploadSignatureMessage,
@@ -113,20 +128,7 @@ export class Client {
 
   public uploadRequest(blindedShares: Buffer[]): UploadSignatureMessage {
     console.log("UPLOADING TO MPC");
-    var address = "";
-    switch (this.signerType) {
-      case "evm":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "xrpl":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "near":
-        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.signerType, this.signerAddress, this.signerPublicKey);
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
       recovering_addresses: [address],
@@ -142,20 +144,7 @@ export class Client {
   }
 
   public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
-    var address = "";
-    switch (this.signerType) {
-      case "evm":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "xrpl":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "near":
-        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.signerType, this.signerAddress, this.signerPublicKey);
     return {
       recovering_address: address,
       timestamp: Date.now(),
@@ -191,35 +180,8 @@ export class Client {
   }
 
   public addAddressMessageToSign(addressToAdd: string, publicKey: string | undefined, addressToAddType: string): AddAddressMessageToSign {
-    var address = "";
-    switch (this.signerType) {
-      case "evm":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "xrpl":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "near":
-        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
-
-    var addressToAddFormatted = "";
-    switch (addressToAddType.toLowerCase()) {
-      case "evm":
-        addressToAddFormatted = `eip712:${addressToAdd}`;
-        break;
-      case "xrpl":
-        addressToAddFormatted = `XRPL:${publicKey}`;
-        break;
-      case "near":
-        addressToAddFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid address to add type");
-    }
+    const address = this.formatAddress(this.signerType, this.signerAddress, this.signerPublicKey);
+    const addressToAddFormatted = this.formatAddress(addressToAddType.toLowerCase(), addressToAdd, publicKey);
 
     const value = {
       recovering_address: address,
@@ -234,35 +196,8 @@ export class Client {
   }
 
   public removeAddressMessageToSign(addressToRemove: string, publicKey: string | undefined, addressToRemoveType: string): RemoveAddressMessageToSign {
-    var address = "";
-    switch (this.signerType) {
-      case "evm":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "xrpl":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "near":
-        address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
-
-    var addressToRemoveFormatted = "";
-    switch (addressToRemoveType.toLowerCase()) {
-      case "evm":
-        addressToRemoveFormatted = `eip712:${addressToRemove}`;
-        break;
-      case "xrpl":
-        addressToRemoveFormatted = `XRPL:${publicKey}`;
-        break;
-      case "near":
-        addressToRemoveFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
-        break;
-      default:
-        throw new Error("Invalid address to remove type");
-    }
+    const address = this.formatAddress(this.signerType, this.signerAddress, this.signerPublicKey);
+    const addressToRemoveFormatted = this.formatAddress(addressToRemoveType.toLowerCase(), addressToRemove, publicKey);
 
     const value = {
       recovering_address: address,

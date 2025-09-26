@@ -14,7 +14,7 @@ export const getWalletType = (address: string): "evm" | "near" | "xrpl" | "stell
   if (near_regexp.test(address)) return "near";
   if (xrp_address_regexp.test(address)) return "xrpl";
   if (stellar_regexp.test(address)) return "stellar";
-  throw new Error("Unsupported wallet address");
+  throw new Error("Unsupported wallet type");
 };
 
 export async function buildInsertableIDOSCredential(

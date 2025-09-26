@@ -140,8 +140,7 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
-  async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
-    let signer = _signer;
+  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
@@ -151,11 +150,11 @@ export class idOSClientIdle {
 
     this.kwilClient.setSigner(kwilSigner);
 
+    let processedSigner = signer;
     if (walletType === "near") {
-      const originalSigner = signer;
-      signer = {
+      processedSigner = {
         signMessage: async (message: string) => {
-          const signature = await signNearMessage(originalSigner as any, message);
+          const signature = await signNearMessage(signer as any, message);
           return { signedMessage: signature } as any;
         },
       } as any;
@@ -163,7 +162,7 @@ export class idOSClientIdle {
 
     return new idOSClientWithUserSigner(
       this,
-      signer,
+      processedSigner,
       kwilSigner,
       walletIdentifier,
       walletPublicKey,

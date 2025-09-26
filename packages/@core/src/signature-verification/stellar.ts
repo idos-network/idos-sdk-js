@@ -1,23 +1,25 @@
+import { sha256Hash } from "@idos-network/utils/codecs";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
 
+// publicKey is a string in hex
+// signature is a string in hex
+// message is a string in UTF-8
 export const verifyStellarSignature = async (
   message: string,
   signature: string,
   publicKey: string,
 ): Promise<boolean> => {
   try {
-    // Convert hex signature to buffer
+    const SIGN_MESSAGE_PREFIX = "Stellar Signed Message:\n";
+    const messageHash = sha256Hash(Buffer.from(SIGN_MESSAGE_PREFIX + message));
+
     const signatureBuffer = Buffer.from(signature, "hex");
 
-    // `Keypair.fromPublicKey()` expects StrKey format, but we're passing as hex (derivePublicKey result).
     const publicKeyBuffer = Buffer.from(publicKey, "hex");
-    const strKeyAddress = StrKey.encodeEd25519PublicKey(publicKeyBuffer);
+    const publicKeyFromStrKey = StrKey.encodeEd25519PublicKey(publicKeyBuffer);
+    const keypair = Keypair.fromPublicKey(publicKeyFromStrKey);
 
-    const keypair = Keypair.fromPublicKey(strKeyAddress);
-
-    const result = keypair.verify(Buffer.from(message), signatureBuffer);
-
-    return result;
+    return keypair.verify(Buffer.from(messageHash), signatureBuffer);
   } catch (error) {
     console.warn("Stellar signature verification failed:", error);
     return false;
