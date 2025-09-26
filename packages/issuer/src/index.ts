@@ -100,6 +100,10 @@ export class idOSIssuer {
     return this.#userService.createUser(user, wallet);
   }
 
+  async getUser(id: string): Promise<idOSUser> {
+    return this.#userService.getUser({ id });
+  }
+
   async createCredentialByDelegatedWriteGrant(
     credentialParams: DelegatedWriteGrantBaseParams,
     delegatedWriteGrant: DelegatedWriteGrantParams,
