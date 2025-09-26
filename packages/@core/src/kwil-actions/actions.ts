@@ -26,6 +26,12 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     },
   ],
   get_user: [],
+  get_user_as_inserter: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   upsert_wallet_as_inserter: [
     {
       name: "id",
@@ -467,6 +473,41 @@ export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
 export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutput> {
   return await kwilClient
     .call<GetUserOutput[]>({ name: "get_user", inputs: {} })
+    .then((result) => result[0]);
+}
+
+export const GetUserAsInserterInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type GetUserAsInserterInput = z.infer<typeof GetUserAsInserterInputSchema>;
+
+export const GetUserAsInserterOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  recipient_encryption_public_key: z.ZodString;
+  encryption_password_store: z.ZodString;
+  inserter: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  recipient_encryption_public_key: z.string(),
+  encryption_password_store: z.string(),
+  inserter: z.string(),
+});
+
+export type GetUserAsInserterOutput = z.infer<typeof GetUserAsInserterOutputSchema>;
+
+export async function getUserAsInserter(
+  kwilClient: KwilActionClient,
+  params: GetUserAsInserterInput,
+): Promise<GetUserAsInserterOutput> {
+  const inputs = GetUserAsInserterInputSchema.parse(params);
+  return await kwilClient
+    .call<GetUserAsInserterOutput[]>({
+      name: "get_user_as_inserter",
+      inputs,
+    })
     .then((result) => result[0]);
 }
 
