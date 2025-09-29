@@ -89,7 +89,7 @@ export class EngineClient {
     return { share: Buffer.from(open.subarray(32)), status };
   }
 
-  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string): Promise<void> {
+  public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string): Promise<string> {
     const authHeader: HeadersInit = {
       Authorization: `eip712 ${signature}`,
     };

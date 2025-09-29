@@ -11,7 +11,7 @@ const getHeaders: Record<string, string> = {
 
 export type RequestType = "GET" | "PUT" | "POST" | "PATCH";
 
-function buildOptions<T>(method: RequestType, headers: Record<string, string>, entityBytes: T) {
+function buildOptions<T>(method: RequestType, headers: HeadersInit, entityBytes: T) {
   const result: RequestInit = { method, headers, body: null };
 
   if (entityBytes != null) {
