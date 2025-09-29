@@ -1,10 +1,5 @@
 import { EyeSlashIcon } from "@heroicons/react/20/solid";
-import {
-  ArrowDownCircleIcon,
-  CheckIcon,
-  ClipboardIcon,
-  EyeIcon,
-} from "@heroicons/react/24/outline";
+import { CheckIcon, ClipboardIcon, EyeIcon } from "@heroicons/react/24/outline";
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { useSignal } from "@preact/signals";
 import type { JSX } from "preact";
@@ -58,33 +53,6 @@ function RevealButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
         <EyeSlashIcon class="h-6 w-6 text-green-700" />
       ) : (
         <EyeIcon class="h-6 w-6" />
-      )}
-    </button>
-  );
-}
-
-function DownloadButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
-  const clicked = useSignal(false);
-
-  const handleClick = (event: JSX.TargetedMouseEvent<HTMLButtonElement>) => {
-    clicked.value = true;
-    props.onClick?.(event);
-    setTimeout(() => {
-      clicked.value = false;
-    }, 2000);
-  };
-
-  return (
-    <button
-      type="button"
-      class="text-green-500 transition-colors hover:text-green-700"
-      {...props}
-      onClick={handleClick}
-    >
-      {clicked.value ? (
-        <CheckIcon class="h-6 w-6 text-green-700" />
-      ) : (
-        <ArrowDownCircleIcon class="h-6 w-6" />
       )}
     </button>
   );
