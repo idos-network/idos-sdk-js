@@ -1,4 +1,6 @@
-const postHeaders: Record<string, string> = {
+export type HeadersInit = Record<string, string> | string[][];
+
+const postHeaders: HeadersInit = {
   Accept: "application/json, text/plain, */*",
   "Content-Type": "application/json",
 };
@@ -9,7 +11,7 @@ const getHeaders: Record<string, string> = {
 
 export type RequestType = "GET" | "PUT" | "POST" | "PATCH";
 
-function buildOptions<T>(method: RequestType, headers: Record<string, string>, entityBytes: T) {
+function buildOptions<T>(method: RequestType, headers: HeadersInit, entityBytes: T) {
   const result: RequestInit = { method, headers, body: null };
 
   if (entityBytes != null) {
@@ -40,11 +42,11 @@ export function getRequest<R>(url: string): Promise<{ status: string; body: R | 
 export function putRequest<T>(url: string, object: T, headers?: Record<string, string>): Promise<string> {
   const options = buildOptions("PUT", { ...postHeaders, ...headers }, object);
   return fetch(url, options)
-      .then(async (response) => {
-        const responseClone = response.clone();
-        const responseBody = await responseClone.text();
-        console.log({responseCode: response.status, responseBody});
-        return response.status.toString();
+    .then(async (response) => {
+      const responseClone = response.clone();
+      const responseBody = await responseClone.text();
+      console.log({ responseCode: response.status, responseBody });
+      return response.status.toString();
     })
     .catch((error) => {
       console.error(error);
@@ -66,7 +68,7 @@ export function patchRequest<T>(url: string, object: T, headers?: Record<string,
     .then(async (response) => {
       const responseClone = response.clone();
       const responseBody = await responseClone.text();
-      console.log({responseCode: response.status, responseBody});
+      console.log({ responseCode: response.status, responseBody });
       return response.status.toString();
     })
     .catch((error) => {
@@ -99,7 +101,7 @@ function handleFetch<T>(
     .then(async (response) => {
       const responseClone = response.clone();
       const responseBody = await responseClone.text();
-      console.log({responseCode: response.status, responseBody});
+      console.log({ responseCode: response.status, responseBody });
 
       if (response.status === 200) {
         const data = (await response.json()) as T;

@@ -199,6 +199,7 @@ export async function createNearWalletKwilSigner(
           callbackUrl,
         } as SignedMessage);
       }
+
       const callbackUrl = window.location.href;
       const nonce = Buffer.from(new KwilNonce(32).clampUTF8);
 

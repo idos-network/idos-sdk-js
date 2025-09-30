@@ -115,10 +115,6 @@ class PortManager {
       store: this.store,
       enclaveOptions: {
         allowedEncryptionStores: ["user", "mpc"],
-        mpcConfiguration: {
-          nodeUrl: import.meta.env.VITE_IDOS_MPC_NODE_URL,
-          contractAddress: import.meta.env.VITE_IDOS_MPC_CONTRACT_ADDRESS,
-        },
       },
       enclaveProvider: LocalWalletEnclave,
     });
@@ -317,7 +313,9 @@ class PortManager {
       data: {
         requestId,
         address: this.wallet?.address,
+        // @ts-expect-error - chainId exists
         network: this.idOSClientWithUserSigner?.kwilClient.client.chainId,
+        // @ts-expect-error - config exists
         node: this.idOSClientWithUserSigner?.kwilClient.client.config.kwilProvider,
         status: this.idOSLoggedInClient ? "Has profile" : "No profile",
         user: this.idOSLoggedInClient?.user?.id,
