@@ -62,6 +62,10 @@
     "./xrpl-credentials": {
       "types": "./dist/xrpl-credentials/index.d.ts",
       "import": "./dist/xrpl-credentials/index.js"
+    },
+    "./mpc": {
+      "types": "./dist/mpc/index.d.ts",
+      "import": "./dist/mpc/index.js"
     }
   },
   "files": [
