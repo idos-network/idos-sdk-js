@@ -1,12 +1,12 @@
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/core";
 import type {
-  EditCredentialAsIssuerParams,
+  EditPublicNotesAsIssuerInput,
   idOSGrant,
+  idOSPassportingPeer,
   idOSUser,
   idOSUserAttribute,
   idOSWallet,
 } from "@idos-network/core/kwil-actions";
-import type { PassportingPeer } from "@idos-network/core/types";
 import type { idOSCredential } from "@idos-network/credentials";
 import {
   type AvailableIssuerType,
@@ -122,7 +122,7 @@ export class idOSIssuer {
   async editCredentialAsIssuer(
     publicNotesId: string,
     publicNotes: string,
-  ): Promise<EditCredentialAsIssuerParams | null> {
+  ): Promise<EditPublicNotesAsIssuerInput | null> {
     return this.#credentialService.editCredentialAsIssuer(publicNotesId, publicNotes);
   }
 
@@ -130,8 +130,8 @@ export class idOSIssuer {
     return this.#credentialService.getCredentialIdByContentHash(contentHash);
   }
 
-  async getSharedCredential(id: string): Promise<idOSCredential | null> {
-    return this.#credentialService.getSharedCredential(id);
+  async getCredentialShared(id: string): Promise<idOSCredential | null> {
+    return this.#credentialService.getCredentialShared(id);
   }
 
   async createAccessGrantFromDAG(
@@ -140,7 +140,7 @@ export class idOSIssuer {
     return this.#grantService.createAccessGrantFromDAG(
       params,
       (contentHash: string) => this.getCredentialIdByContentHash(contentHash),
-      (id: string) => this.getSharedCredential(id),
+      (id: string) => this.getCredentialShared(id),
     );
   }
 
@@ -162,7 +162,7 @@ export class idOSIssuer {
     return buildFaceIdCredential(fields, subject, issuer, validate);
   }
 
-  async getPassportingPeers(): Promise<PassportingPeer[]> {
+  async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
     return this.#passportingService.getPassportingPeers();
   }
 }

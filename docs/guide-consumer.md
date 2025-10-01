@@ -270,7 +270,7 @@ const grants: idOSGrant[] = await idOSClient.getGrants({
 And you can get the credentials contents from the grant via:
 
 ```typescript
-const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
+const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted('GRANT_DATA_ID')
 ```
 
 If you don't have an access grant, you can proceed to filtering the user's credentials and requesting one or more access grants.
@@ -340,7 +340,7 @@ await idOSConsumer.createAccessGrantByDag({
 ### [ backend ] Retrieving and verifying credential
 
 ```typescript
-const credentialContents: string = await idOSConsumer.getSharedCredentialContentDecrypted('GRANT_DATA_ID')
+const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted('GRANT_DATA_ID')
 ```
 
 If you're using passporting:

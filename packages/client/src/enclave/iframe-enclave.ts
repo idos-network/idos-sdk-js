@@ -22,6 +22,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private container: string;
   private iframe: HTMLIFrameElement;
   private hostUrl: URL;
+  private bound = false;
 
   constructor(options: IframeEnclaveOptions) {
     super(options);

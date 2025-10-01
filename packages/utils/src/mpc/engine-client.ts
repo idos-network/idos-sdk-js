@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 import nacl from "tweetnacl";
-import { patchRequest, postRequest, putRequest } from "./api";
+import { patchRequest, postRequest, putRequest, type HeadersInit } from "./api";
 import type {
   Bytes,
   DownloadRequest,
@@ -25,7 +25,7 @@ export class EngineClient {
 
   private getAuthHeader(signature: string): Record<string, string> {
     let prefix: string;
-    console.log({walletType: this.walletType});
+    console.log({ walletType: this.walletType });
     switch (this.walletType) {
       case "evm":
         prefix = "eip712";
@@ -90,9 +90,13 @@ export class EngineClient {
   }
 
   public async sendUpdate(id: string, updateRequest: UpdateWalletsRequest, signature: string): Promise<string> {
-    const authHeader = this.getAuthHeader(signature);
+    const authHeader: HeadersInit = {
+      Authorization: `eip712 ${signature}`,
+    };
+
     const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     const ok = await patchRequest(url, updateRequest, authHeader);
+
     if (!ok) {
       throw new Error(`Error updating wallets to ${this.contractAddress} at ${url}`);
     }
@@ -100,7 +104,7 @@ export class EngineClient {
     return ok;
   }
 
-  public async sendAddAddress(id: string, addRequest: AddAddressRequest, signature: string): Promise<string>  {
+  public async sendAddAddress(id: string, addRequest: AddAddressRequest, signature: string): Promise<string> {
     const authHeader = this.getAuthHeader(signature);
     const url = this.baseUrl + "/offchain/" + this.contractAddress + "/shares/" + id + "/add_address";
     const status = await patchRequest(url, addRequest, authHeader);

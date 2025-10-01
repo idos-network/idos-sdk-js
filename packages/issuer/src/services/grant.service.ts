@@ -1,5 +1,5 @@
 import { NoncedBox } from "@idos-network/core/cryptography";
-import { createAccessGrantByDag as _createAccessGrantByDag } from "@idos-network/core/kwil-actions";
+import { createAgByDagForCopy as _createAgByDagForCopy } from "@idos-network/core/kwil-actions";
 import type { KwilActionClient } from "@idos-network/core/kwil-infra";
 import type { idOSCredential } from "@idos-network/credentials";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
@@ -26,13 +26,13 @@ export class GrantService {
   async createAccessGrantFromDAG(
     params: CreateAccessGrantFromDAGParams,
     getCredentialIdByContentHash: (contentHash: string) => Promise<string | null>,
-    getSharedCredential: (id: string) => Promise<idOSCredential | null>,
+    getCredentialShared: (id: string) => Promise<idOSCredential | null>,
   ): Promise<CreateAccessGrantFromDAGParams | null> {
     const credentialId = await getCredentialIdByContentHash(params.dag_content_hash);
 
     invariant(credentialId, "Missing `idOSCredential` id");
 
-    const credential = await getSharedCredential(credentialId);
+    const credential = await getCredentialShared(credentialId);
 
     invariant(credential, "`idOSCredential` with id `{credentialId}` not found");
 
@@ -48,7 +48,7 @@ export class GrantService {
       throw new Error("Hash mismatch between `DAG` and `idOSCredential` content");
     }
 
-    const result = await _createAccessGrantByDag(this.#kwilClient, params);
+    const result = await _createAgByDagForCopy(this.#kwilClient, params);
 
     return result ?? null;
   }

@@ -1,11 +1,11 @@
 import { encryptContent } from "@idos-network/core/cryptography";
 import {
-  type CreateCredentialByDelegatedWriteGrantParams,
-  createCredentialByDelegatedWriteGrant,
-  type EditCredentialAsIssuerParams,
-  editCredentialAsIssuer,
-  getCredentialIdByContentHash,
-  getSharedCredential,
+  type CreateCredentialsByDwgInput,
+  createCredentialsByDwg,
+  type EditPublicNotesAsIssuerInput,
+  editPublicNotesAsIssuer,
+  getCredentialShared,
+  getSiblingCredentialId,
 } from "@idos-network/core/kwil-actions";
 import type { KwilActionClient } from "@idos-network/core/kwil-infra";
 import type { idOSCredential } from "@idos-network/credentials";
@@ -148,7 +148,7 @@ export class CredentialService {
       }),
     );
 
-    const payload: CreateCredentialByDelegatedWriteGrantParams = {
+    const payload: CreateCredentialsByDwgInput = {
       issuer_auth_public_key: originalCredential.issuer_auth_public_key,
       original_encryptor_public_key: originalCredential.encryptor_public_key,
       original_credential_id: originalCredential.id,
@@ -172,7 +172,7 @@ export class CredentialService {
       dwg_signature: delegatedWriteGrant.signature,
     };
 
-    await createCredentialByDelegatedWriteGrant(this.#kwilClient, payload);
+    await createCredentialsByDwg(this.#kwilClient, payload);
 
     return { originalCredential, copyCredential };
   }
@@ -180,27 +180,29 @@ export class CredentialService {
   async editCredentialAsIssuer(
     publicNotesId: string,
     publicNotes: string,
-  ): Promise<EditCredentialAsIssuerParams | null> {
+  ): Promise<EditPublicNotesAsIssuerInput | null> {
     const payload = {
       public_notes_id: publicNotesId,
       public_notes: publicNotes,
     };
 
-    const result = await editCredentialAsIssuer(this.#kwilClient, payload);
+    await editPublicNotesAsIssuer(this.#kwilClient, payload);
 
-    return result ?? null;
+    return payload;
   }
 
   async getCredentialIdByContentHash(contentHash: string): Promise<string | null> {
-    const id = await getCredentialIdByContentHash(this.#kwilClient, contentHash);
+    const id = await getSiblingCredentialId(this.#kwilClient, { content_hash: contentHash }).then(
+      (res) => res.id,
+    );
 
     invariant(id, "Required `idOSCredential` id not found");
 
     return id;
   }
 
-  async getSharedCredential(id: string): Promise<idOSCredential | null> {
-    const result = await getSharedCredential(this.#kwilClient, id);
+  async getCredentialShared(id: string): Promise<idOSCredential | null> {
+    const result = await getCredentialShared(this.#kwilClient, { id }).then((res) => res[0]);
 
     return result ?? null;
   }

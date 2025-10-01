@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       { status: 400 },
     );
 
-  const credentialContent = await consumer.getSharedCredentialContentDecrypted(usableCredential.id);
+  const credentialContent = await consumer.getCredentialSharedContentDecrypted(usableCredential.id);
 
   if (!credentialContent)
     return NextResponse.json({

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, cn, useDisclosure } from "@heroui/react";
-import type { IsleStatus, PassportingPeer } from "@idos-network/core";
+import type { IsleStatus, idOSPassportingPeer } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
@@ -444,7 +444,7 @@ const useFetchMatchingCredential = () => {
 
       const peers = (await fetch("/api/passporting-peers").then((res) =>
         res.json(),
-      )) as PassportingPeer[];
+      )) as idOSPassportingPeer[];
 
       const credentials = await idOSClient.getAllCredentials();
 
