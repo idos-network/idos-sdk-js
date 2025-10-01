@@ -286,7 +286,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   }> {
     const width = 360;
     const height =
-      this.options?.mode === "new" ? 680 : intent === "backupUserEncryptionProfile" ? 520 : 450;
+      this.options?.mode === "new" ? 480 : intent === "backupUserEncryptionProfile" ? 520 : 450;
     const left = window.screen.width - width;
 
     const popupConfig = Object.entries({
@@ -320,7 +320,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         }
 
         port1.close();
-        this.dialog?.close();
+        // this.dialog?.close();
 
         return resolve(result);
       };
