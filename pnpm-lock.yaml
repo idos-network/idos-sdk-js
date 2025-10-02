@@ -7,8 +7,8 @@ settings:
 catalogs:
   build:
     tsdown:
-      specifier: ^0.13.0
-      version: 0.13.5
+      specifier: ^0.15.6
+      version: 0.15.6
     typescript:
       specifier: ^5.8.3
       version: 5.9.2
@@ -317,7 +317,7 @@ importers:
     dependencies:
       '@creit.tech/stellar-wallets-kit':
         specifier: catalog:stellar
-        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@gemwallet/api':
         specifier: catalog:core
         version: 3.8.0
@@ -399,7 +399,7 @@ importers:
         version: 2.10.9(@emotion/react@11.14.0(@types/react@19.1.13)(react@19.1.1))(@emotion/styled@11.14.1(@emotion/react@11.14.0(@types/react@19.1.13)(react@19.1.1))(@types/react@19.1.13)(react@19.1.1))(@types/react@19.1.13)(framer-motion@10.18.0(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@creit.tech/stellar-wallets-kit':
         specifier: catalog:stellar
-        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@emotion/react':
         specifier: ^11.13.0
         version: 11.14.0(@types/react@19.1.13)(react@19.1.1)
@@ -1287,7 +1287,7 @@ importers:
     dependencies:
       '@creit.tech/stellar-wallets-kit':
         specifier: catalog:stellar
-        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@gemwallet/api':
         specifier: ^3.8.0
         version: 3.8.0
@@ -1330,7 +1330,7 @@ importers:
     dependencies:
       '@creit.tech/stellar-wallets-kit':
         specifier: catalog:stellar
-        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+        version: 1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
       '@gemwallet/api':
         specifier: ^3.8.0
         version: 3.8.0
@@ -1465,7 +1465,7 @@ importers:
         version: 1.3.3
       tsdown:
         specifier: catalog:build
-        version: 0.13.5(typescript@5.9.2)
+        version: 0.15.6(typescript@5.9.2)
 
   packages/consumer:
     dependencies:
@@ -1529,7 +1529,7 @@ importers:
         version: 1.3.3
       tsdown:
         specifier: catalog:build
-        version: 0.13.5(typescript@5.9.2)
+        version: 0.15.6(typescript@5.9.2)
 
   packages/issuer:
     dependencies:
@@ -1590,7 +1590,7 @@ importers:
         version: 1.3.3
       tsdown:
         specifier: catalog:build
-        version: 0.13.5(typescript@5.9.2)
+        version: 0.15.6(typescript@5.9.2)
 
   packages/utils:
     dependencies:
@@ -1669,7 +1669,7 @@ importers:
         version: 1.3.3
       tsdown:
         specifier: catalog:build
-        version: 0.13.5(typescript@5.9.2)
+        version: 0.15.6(typescript@5.9.2)
       typescript:
         specifier: catalog:build
         version: 5.9.2
@@ -11398,15 +11398,18 @@ packages:
     resolution: {integrity: sha512-b5rfL2EZiffmklqZk1W+dvSy97v3V/C7936WxCCgDynaGPp7GE6R2XO7EU9O2LlM/z95rj870IylYnOQs+1Rag==}
     engines: {node: '>= 16'}
 
-  rolldown-plugin-dts@0.15.10:
-    resolution: {integrity: sha512-8cPVAVQUo9tYAoEpc3jFV9RxSil13hrRRg8cHC9gLXxRMNtWPc1LNMSDXzjyD+5Vny49sDZH77JlXp/vlc4I3g==}
+  rolldown-plugin-dts@0.16.11:
+    resolution: {integrity: sha512-9IQDaPvPqTx3RjG2eQCK5GYZITo203BxKunGI80AGYicu1ySFTUyugicAaTZWRzFWh9DSnzkgNeMNbDWBbSs0w==}
     engines: {node: '>=20.18.0'}
     peerDependencies:
+      '@ts-macro/tsc': ^0.3.6
       '@typescript/native-preview': '>=7.0.0-dev.20250601.1'
       rolldown: ^1.0.0-beta.9
       typescript: ^5.0.0
-      vue-tsc: ~3.0.3
+      vue-tsc: ~3.1.0
     peerDependenciesMeta:
+      '@ts-macro/tsc':
+        optional: true
       '@typescript/native-preview':
         optional: true
       typescript:
@@ -12047,8 +12050,8 @@ packages:
       typescript:
         optional: true
 
-  tsdown@0.13.5:
-    resolution: {integrity: sha512-lagBtBSdm1yWBFvAbg3+a2/x7eRNqsf5fv34doXXOGnxRIBlfzYCEVfK6cwOgkTNhORMhdWvaqtXZV3h2x1ojQ==}
+  tsdown@0.15.6:
+    resolution: {integrity: sha512-W6++O3JeV9gm3JY6P/vLiC7zzTcJbZhQxXb+p3AvRMpDOPBIg82yXULyZCcwjsihY/bFG+Qw37HkezZbP7fzUg==}
     engines: {node: '>=20.19.0'}
     hasBin: true
     peerDependencies:
@@ -13684,6 +13687,68 @@ snapshots:
       conventional-commits-parser: 6.2.0
 
   '@creit.tech/stellar-wallets-kit@1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
+    dependencies:
+      '@albedo-link/intent': 0.12.0
+      '@creit.tech/xbull-wallet-connect': 0.4.0
+      '@hot-wallet/sdk': 1.0.11(bufferutil@4.0.9)(encoding@0.1.13)(near-api-js@4.0.3(encoding@0.1.13))(typescript@5.9.2)(utf-8-validate@5.0.10)
+      '@ledgerhq/hw-app-str': 7.0.4
+      '@ledgerhq/hw-transport': 6.31.4
+      '@ledgerhq/hw-transport-webusb': 6.29.4
+      '@lobstrco/signer-extension-api': 1.0.0-beta.0
+      '@ngneat/elf': 2.5.1(rxjs@7.8.1)
+      '@ngneat/elf-devtools': 1.3.0
+      '@ngneat/elf-entities': 5.0.2(@ngneat/elf@2.5.1(rxjs@7.8.1))(rxjs@7.8.1)
+      '@ngneat/elf-persist-state': 1.2.1(rxjs@7.8.1)
+      '@stellar/freighter-api': 5.0.0
+      '@stellar/stellar-base': 14.0.1
+      '@trezor/connect-plugin-stellar': 9.2.1(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(tslib@2.8.1)
+      '@trezor/connect-web': 9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(supports-color@8.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))
+      '@walletconnect/modal': 2.6.2(@types/react@19.1.13)(react@19.1.1)
+      '@walletconnect/sign-client': 2.11.2(bufferutil@4.0.9)(encoding@0.1.13)(utf-8-validate@5.0.10)
+      buffer: 6.0.3
+      events: 3.3.0
+      lit: 3.2.0
+      rxjs: 7.8.1
+    transitivePeerDependencies:
+      - '@azure/app-configuration'
+      - '@azure/cosmos'
+      - '@azure/data-tables'
+      - '@azure/identity'
+      - '@azure/keyvault-secrets'
+      - '@azure/storage-blob'
+      - '@capacitor/preferences'
+      - '@deno/kv'
+      - '@netlify/blobs'
+      - '@planetscale/database'
+      - '@react-native-async-storage/async-storage'
+      - '@solana/sysvars'
+      - '@stellar/stellar-sdk'
+      - '@trezor/connect'
+      - '@types/react'
+      - '@upstash/redis'
+      - '@vercel/blob'
+      - '@vercel/functions'
+      - '@vercel/kv'
+      - aws4fetch
+      - bufferutil
+      - db0
+      - debug
+      - encoding
+      - expo-constants
+      - expo-localization
+      - fastestsmallesttextencoderdecoder
+      - ioredis
+      - near-api-js
+      - react
+      - react-native
+      - supports-color
+      - tslib
+      - typescript
+      - uploadthing
+      - utf-8-validate
+      - ws
+
+  '@creit.tech/stellar-wallets-kit@1.9.5(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(@stellar/stellar-base@14.0.1)(@stellar/stellar-sdk@14.2.0)(@trezor/connect@9.6.2(@solana/sysvars@2.3.0(fastestsmallesttextencoderdecoder@1.0.22)(typescript@5.9.2))(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10)))(@types/react@19.1.13)(bufferutil@4.0.9)(encoding@0.1.13)(fastestsmallesttextencoderdecoder@1.0.22)(near-api-js@4.0.3(encoding@0.1.13))(react@19.1.1)(tslib@2.8.1)(typescript@5.9.2)(utf-8-validate@5.0.10)(ws@8.18.3(bufferutil@4.0.9)(utf-8-validate@5.0.10))':
     dependencies:
       '@albedo-link/intent': 0.12.0
       '@creit.tech/xbull-wallet-connect': 0.4.0
@@ -28722,7 +28787,7 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
-  rolldown-plugin-dts@0.15.10(rolldown@1.0.0-beta.41)(typescript@5.9.2):
+  rolldown-plugin-dts@0.16.11(rolldown@1.0.0-beta.41)(typescript@5.9.2):
     dependencies:
       '@babel/generator': 7.28.3
       '@babel/parser': 7.28.4
@@ -28732,6 +28797,7 @@ snapshots:
       debug: 4.4.3(supports-color@8.1.1)
       dts-resolver: 2.1.2
       get-tsconfig: 4.10.1
+      magic-string: 0.30.19
       rolldown: 1.0.0-beta.41
     optionalDependencies:
       typescript: 5.9.2
@@ -29485,9 +29551,9 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.2
 
-  tsdown@0.13.5(typescript@5.9.2):
+  tsdown@0.15.6(typescript@5.9.2):
     dependencies:
-      ansis: 4.1.0
+      ansis: 4.2.0
       cac: 6.7.14
       chokidar: 4.0.3
       debug: 4.4.3(supports-color@8.1.1)
@@ -29495,7 +29561,7 @@ snapshots:
       empathic: 2.0.0
       hookable: 5.5.3
       rolldown: 1.0.0-beta.41
-      rolldown-plugin-dts: 0.15.10(rolldown@1.0.0-beta.41)(typescript@5.9.2)
+      rolldown-plugin-dts: 0.16.11(rolldown@1.0.0-beta.41)(typescript@5.9.2)
       semver: 7.7.2
       tinyexec: 1.0.1
       tinyglobby: 0.2.15
@@ -29504,6 +29570,7 @@ snapshots:
     optionalDependencies:
       typescript: 5.9.2
     transitivePeerDependencies:
+      - '@ts-macro/tsc'
       - '@typescript/native-preview'
       - oxc-resolver
       - supports-color

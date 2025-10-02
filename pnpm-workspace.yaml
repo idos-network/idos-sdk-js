@@ -60,7 +60,7 @@ catalogs:
   build:
     "vite": "^7.0.6"
     "typescript": "^5.8.3"
-    "tsdown": "^0.13.0"
+    "tsdown": "^0.15.6"
     "vite-plugin-node-polyfills": "0.17.0"
 
   testing:

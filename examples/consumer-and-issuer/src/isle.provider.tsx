@@ -28,7 +28,7 @@ const walletInfoMapper = ({
 }: {
   address: string;
   publicKey: string;
-}): Record<"evm" | "xrpl" | "Stellar", WalletInfo> => ({
+}): Record<"evm" | "xrpl" | "stellar", WalletInfo> => ({
   evm: {
     address,
     publicKey,
@@ -46,7 +46,7 @@ const walletInfoMapper = ({
     type: "xrpl",
     signer: async () => GemWallet,
   },
-  Stellar: {
+  stellar: {
     address,
     publicKey,
     signMethod: async (message: string) => {
@@ -67,7 +67,7 @@ const walletInfoMapper = ({
 
       return signatureHex;
     },
-    type: "Stellar",
+    type: "stellar",
     signer: async () => {
       const signer = new KwilSigner(
         async (msg: Uint8Array): Promise<Uint8Array> => {
