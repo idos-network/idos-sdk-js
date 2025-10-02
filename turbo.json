@@ -6,10 +6,17 @@
       "dependsOn": ["^build"],
       "outputs": ["build/**", "dist/**", ".next/**", "!.next/cache/**"]
     },
+    "build:packages": {
+      "dependsOn": ["^build"],
+      "outputs": ["build/**", "dist/**"]
+    },
     "clean": {},
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "typecheck": {
+      "dependsOn": ["build:packages"]
     },
     "test": {
       "dependsOn": ["^build"]

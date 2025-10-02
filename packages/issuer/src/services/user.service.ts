@@ -1,8 +1,10 @@
 import type { KwilActionClient } from "@idos-network/core";
 import {
-  createUser as _createUser,
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
+  addUserAsInserter,
+  type GetUserAsInserterInput,
+  getUserAsInserter,
   type idOSUser,
   type idOSWallet,
 } from "@idos-network/core/kwil-actions";
@@ -33,13 +35,13 @@ export class UserService {
     return entity as T & { id: string };
   }
 
-  async hasProfile(userAddress: string): Promise<boolean> {
-    return _hasProfile(this.#kwilClient, userAddress);
+  async hasProfile(address: string): Promise<boolean> {
+    return _hasProfile(this.#kwilClient, { address }).then((res) => res.has_profile);
   }
 
   async createUserProfile(params: CreateProfileReqParams): Promise<idOSUser> {
     const payload = this.#ensureEntityId(params);
-    await _createUser(this.#kwilClient, payload);
+    await addUserAsInserter(this.#kwilClient, payload);
     return payload;
   }
 
@@ -47,6 +49,11 @@ export class UserService {
     const payload = this.#ensureEntityId(params);
     await _upsertWalletAsInserter(this.#kwilClient, payload);
     return payload;
+  }
+
+  /// Useful to understand if a user id already exists.
+  async getUser(params: GetUserAsInserterInput): Promise<idOSUser> {
+    return getUserAsInserter(this.#kwilClient, this.#ensureEntityId(params));
   }
 
   async createUser(

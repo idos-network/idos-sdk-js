@@ -155,8 +155,8 @@ function withoutIndex<T>(values: readonly T[], removeIndex: number): T[] {
  * Utility for lagrange interpolation.
  */
 export const Lagrange: {
-  interpolate: typeof interpolate;
-  interpolateCheckDegree: typeof interpolateCheckDegree;
+  interpolate: typeof interpolate,
+  interpolateCheckDegree: typeof interpolateCheckDegree,
   interpolateIfPossible: typeof interpolateIfPossible;
 } = {
   interpolate,

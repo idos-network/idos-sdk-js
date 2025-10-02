@@ -176,15 +176,3 @@ export type IsleNodeMessage =
 export type IsleMessageHandler<T extends IsleNodeMessage["type"]> = (
   message: Extract<IsleNodeMessage, { type: T }>,
 ) => void;
-
-export type PassportingPeer = {
-  id: string;
-  name: string;
-  issuer_public_key: string;
-  passporting_server_url_base: string;
-};
-
-export type PassportingClub = {
-  id: string;
-  name: string;
-};

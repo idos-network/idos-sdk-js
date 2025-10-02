@@ -36,6 +36,7 @@
   "scripts": {
     "build": "turbo run build",
     "build:packages": "pnpm --filter './packages/**' build",
+    "typecheck": "turbo run typecheck",
     "check": "biome check . --write",
     "check:ci": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "clean": "turbo run clean && rm -rf node_modules",

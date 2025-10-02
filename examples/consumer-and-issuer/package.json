@@ -68,6 +68,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
+    "typecheck": "tsc --noEmit",
     "start": "next start"
   }
 }

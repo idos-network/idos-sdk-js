@@ -3,7 +3,7 @@ import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
-export async function getSharedCredential(credentialId: string, inserterId?: string) {
+export async function getCredentialShared(credentialId: string, inserterId?: string) {
   const idOSConsumer = await idOSConsumerClass.init({
     nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     consumerSigner: nacl.sign.keyPair.fromSecretKey(
@@ -24,7 +24,7 @@ export async function getSharedCredential(credentialId: string, inserterId?: str
 
   // Get data
   const credentialContents: string =
-    await idOSConsumer.getSharedCredentialContentDecrypted(credentialId);
+    await idOSConsumer.getCredentialSharedContentDecrypted(credentialId);
 
   const data = JSON.parse(credentialContents) as Credential;
 
