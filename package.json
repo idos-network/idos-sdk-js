@@ -5,6 +5,7 @@
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
     "lefthook": "1.12.2",
+    "patch-package": "^8.0.0",
     "size-limit": "^11.1.6",
     "turbo": "^2.5.5",
     "vite-plugin-node-polyfills": "^0.24.0"
@@ -41,7 +42,7 @@
     "check:ci": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
-    "postinstall": "lefthook install",
+    "postinstall": "lefthook install && patch-package",
     "preinstall": "npx only-allow pnpm",
     "size": "size-limit",
     "test": "turbo run test"
