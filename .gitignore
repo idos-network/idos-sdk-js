@@ -64,3 +64,6 @@ next-env.d.ts
 
 # env files
 examples/consumer-and-issuer/.env
+
+.yalc
+yalc.lock
