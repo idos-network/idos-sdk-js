@@ -315,7 +315,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
           port1.close();
-          // this.dialog.close();
+          this.dialog.close();
           return reject(error);
         }
 
