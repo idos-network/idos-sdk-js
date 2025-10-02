@@ -18,6 +18,7 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
   invariant(walletPayload.address, "Wallet address is required");
   invariant(walletPayload.message, "Wallet message is required");
   invariant(walletPayload.signature, "Wallet signature is required");
+  console.log({ walletPayload });
 
   try {
     const walletType = getWalletType(walletPayload.address);

@@ -106,7 +106,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
 
   const addWallet = async (walletPayload: WalletSignature) => {
     const userId = idOSClient?.user.id;
-
+    console.log({ walletPayload });
     const isValid = await verifySignature(walletPayload);
     const walletType = getWalletType(walletPayload.address!);
 
