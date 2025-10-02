@@ -152,6 +152,38 @@ export const ConnectWallet = () => {
           </VStack>
         </VStack>
         <VStack>
+          <Text>
+            By connecting your wallet you confirm you read our{" "}
+            <Link
+              isExternal
+              href="https://www.idos.network/legal/privacy-policy"
+              target="_blank"
+              color="green.200"
+              display="inline-flex"
+              alignItems="center"
+              gap={2}
+              fontSize="sm"
+              textUnderlineOffset={4}
+              _hover={{ color: "green.400", textDecoration: "underline" }}
+            >
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link
+              isExternal
+              href="https://drive.google.com/file/d/1lzrdgD_dwusE4xsKw_oTUcu8Hq3YU60b/view?usp=sharing"
+              target="_blank"
+              color="green.200"
+              display="inline-flex"
+              alignItems="center"
+              gap={2}
+              fontSize="sm"
+              textUnderlineOffset={4}
+              _hover={{ color: "green.400", textDecoration: "underline" }}
+            >
+              Transparency Document
+            </Link>
+          </Text>
           <Text
             display="flex"
             gap={2}
@@ -165,23 +197,6 @@ export const ConnectWallet = () => {
           </Text>
         </VStack>
       </VStack>
-      <Link
-        isExternal
-        href="https://drive.google.com/file/d/1CypYsXx--xCT05cjEbYE4TCT9ymF698r/view?usp=drive_link"
-        target="_blank"
-        pos="fixed"
-        right={5}
-        bottom={5}
-        color="green.200"
-        display="inline-flex"
-        alignItems="center"
-        gap={2}
-        fontSize="sm"
-        textUnderlineOffset={4}
-        _hover={{ color: "green.400", textDecoration: "underline" }}
-      >
-        Privacy Policy
-      </Link>
     </Box>
   );
 };
