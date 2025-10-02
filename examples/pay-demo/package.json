@@ -6,8 +6,8 @@
     "@idos-network/consumer": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@idos-network/credentials": "workspace:*",
-    "@react-router/node": "^7.6.2",
-    "@react-router/serve": "^7.6.2",
+    "@react-router/node": "7.7.1",
+    "@react-router/serve": "7.7.1",
     "@reown/appkit": "^1.7.8",
     "@reown/appkit-adapter-wagmi": "^1.7.8",
     "@transak/transak-sdk": "^3.2.0",
@@ -22,7 +22,7 @@
     "jsonwebtoken": "^9.0.2",
     "react": "catalog:react",
     "react-dom": "catalog:react",
-    "react-router": "^7.7.1",
+    "react-router": "7.7.1",
     "siwe": "^3.0.0",
     "tweetnacl": "catalog:core",
     "viem": "catalog:ethereum",
@@ -31,7 +31,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.6.3",
+    "@react-router/dev": "7.7.1",
     "@tailwindcss/vite": "^4.1.8",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.15.30",
