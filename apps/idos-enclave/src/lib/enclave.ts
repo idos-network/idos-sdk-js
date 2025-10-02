@@ -320,7 +320,7 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
         }
 
         port1.close();
-        // this.dialog?.close();
+        this.dialog?.close();
 
         return resolve(result);
       };
