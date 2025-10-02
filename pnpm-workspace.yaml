@@ -9,7 +9,7 @@ catalogs:
     "@digitalbazaar/ed25519-verification-key-2020": "^4.2.0"
     "@digitalbazaar/vc": "^7.2.0"
     "@gemwallet/api": "^3.8.0"
-    "@idos-network/kwil-js": "0.1.1"
+    "@idos-network/kwil-js": "0.1.2"
     "jsonld-document-loader": "^2.3.0"
     "tweetnacl": "^1.0.3"
     "tiny-invariant": "^1.3.3"
