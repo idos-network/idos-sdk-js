@@ -26,7 +26,8 @@ jobs:
           node-version-file: .node_version
           cache: 'pnpm'
 
-      - run: pnpm install
+      - name: Reinstall dependencies
+        run: rm -rf node_modules pnpm-lock.yaml && pnpm install
 
       - name: Build
         run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils
