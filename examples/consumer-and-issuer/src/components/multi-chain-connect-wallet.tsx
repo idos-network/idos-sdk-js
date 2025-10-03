@@ -48,7 +48,7 @@ export default function MultiChainConnectWallet({
         const publicKey = await derivePublicKey(address);
         setWalletAddress(address);
         setWalletPublicKey(publicKey);
-        setWalletType("Stellar");
+        setWalletType("stellar");
       },
     });
   };
