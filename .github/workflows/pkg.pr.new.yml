@@ -33,7 +33,7 @@ jobs:
         run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils
         env:
           NODE_ENV: production
-          TSDOWN_NODE_OPTIONS: --noEmit
+          # TSDOWN_NODE_OPTIONS: --noEmit
 
       - name: Release
         run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils' --dry-run
