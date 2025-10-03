@@ -3,7 +3,7 @@
 import * as GemWallet from "@gemwallet/api";
 import type { WalletInfo } from "@idos-network/controllers";
 import { createIsleController } from "@idos-network/controllers";
-import { KwilSigner, signGemWalletTx, signNearMessage } from "@idos-network/core";
+import { signGemWalletTx, signNearMessage } from "@idos-network/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
 import { createContext, type JSX, useContext, useEffect, useState } from "react";
@@ -68,32 +68,7 @@ const walletInfoMapper = ({
       return signatureHex;
     },
     type: "stellar",
-    signer: async () => {
-      const signer = new KwilSigner(
-        async (msg: Uint8Array): Promise<Uint8Array> => {
-          const messageBase64 = Buffer.from(msg).toString("base64");
-          const result = await stellarKit.signMessage(messageBase64);
-
-          let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-          if (signedMessage.length > 64) {
-            signedMessage = Buffer.from(signedMessage.toString(), "base64");
-          }
-          return signedMessage;
-        },
-        publicKey,
-        "ed25519",
-      );
-      try {
-        // @ts-ignore
-        signer.publicAddress = address;
-        // @ts-ignore
-        signer.publicKey = publicKey;
-      } catch (error) {
-        console.log("error setting public address", error);
-      }
-      return signer;
-    },
+    signer: async () => stellarKit,
   },
 });
 

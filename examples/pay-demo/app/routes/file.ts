@@ -28,7 +28,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     const typeFromBuffer = await fileTypeFromBuffer(file);
     const mimeType = typeFromBuffer?.mime ?? "application/pdf";
 
-    return new Response(file, {
+    return new Response(new Uint8Array(file), {
       headers: {
         "Content-Type": mimeType,
         "Content-Length": file.length.toString(),
