@@ -3,7 +3,6 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
-    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",

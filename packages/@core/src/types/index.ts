@@ -1,16 +1,19 @@
-import type { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
 import type { idOSCredential } from "@idos-network/credentials";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";
 
 export { KwilSigner } from "@idos-network/kwil-js";
-export type Wallet =
-  | EthersWallet
-  | JsonRpcSigner
-  | NearWallet
-  | CustomKwilSigner
-  | StellarWalletsKit;
+
+/**
+ * Stellar wallet interface - duck typing approach to avoid importing full StellarWalletsKit
+ */
+export interface StellarWallet {
+  getAddress(): Promise<{ address: string }>;
+  signMessage(message: string): Promise<{ signedMessage: string }>;
+}
+
+export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner | StellarWallet;
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];

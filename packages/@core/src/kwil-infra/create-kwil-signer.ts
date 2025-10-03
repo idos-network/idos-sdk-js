@@ -1,4 +1,3 @@
-import { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
 import { KwilSigner } from "@idos-network/kwil-js";
 import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
@@ -10,7 +9,7 @@ import * as xrpKeypair from "ripple-keypairs";
 import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
-import type { Wallet } from "../types";
+import type { StellarWallet, Wallet } from "../types";
 import {
   createNearWalletKwilSigner,
   implicitAddressFromPublicKey,
@@ -77,6 +76,21 @@ export interface CustomKwilSigner extends KwilSigner {
  */
 function isXrplKeyPair(object: unknown): object is XrpKeyPair {
   return !!object && typeof object === "object" && "privateKey" in object && "publicKey" in object;
+}
+
+/**
+ * Helper function to check if the given object is a Stellar wallet (StellarWalletsKit).
+ * Uses duck typing to avoid importing the full StellarWalletsKit class.
+ */
+function isStellarWallet(object: unknown): object is StellarWallet {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "getAddress" in object &&
+    "signMessage" in object &&
+    typeof object.getAddress === "function" &&
+    typeof object.signMessage === "function"
+  );
 }
 
 export type KwilSignerType =
@@ -209,7 +223,7 @@ export async function createClientKwilSigner(
     ];
   }
 
-  if (wallet instanceof StellarWalletsKit) {
+  if (isStellarWallet(wallet)) {
     // Stellar wallet
     const { address } = await wallet.getAddress();
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
