@@ -28,6 +28,7 @@
       "keccak",
       "lefthook",
       "protobufjs",
+      "rolldown",
       "secp256k1",
       "sharp",
       "tiny-secp256k1",
