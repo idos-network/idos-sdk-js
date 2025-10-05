@@ -12,6 +12,7 @@ dictionaryDefinitions:
     path: ./project-words.txt
     addWords: true
 ignorePaths:
+  - ".github/renovate.json"
   - "**/dist/**"
   - "**/assets/**"
   - "*.svg"
