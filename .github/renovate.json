@@ -1,0 +1,33 @@
+{
+  "extends": ["config:base"],
+  "prConcurrentLimit": 5,
+  "baseBranches": ["main"],
+  "assignees": ["@strnadj", "@ditoglez"],
+  "schedule": ["before 6am on the first day of the month"],
+  "docker": {
+    "enabled": false
+  },
+  "vulnerabilityAlerts": {
+    "labels": ["dependencies", "security"],
+    "assignees": ["@strnadj", "@ditoglez"],
+    "schedule": "at any time"
+  },
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["*"],
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "groupName": "js all dependencies",
+      "groupSlug": "js-all-dependencies",
+      "labels": ["dependencies", "JavaScript"]
+    },
+    {
+      "matchPackagePatterns": ["*"],
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "groupName": "github actions all dependencies",
+      "groupSlug": "gh-all-dependencies",
+      "labels": ["dependencies", "github-actions"]
+    }
+  ]
+}
