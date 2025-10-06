@@ -244,6 +244,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       userId: kwilUser.id,
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
+      walletType: this.walletType,
+      walletPublicKey: this.walletPublicKey,
       encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
     });
 
