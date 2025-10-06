@@ -236,6 +236,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
     const kwilUser = await getUser(this.kwilClient);
+    console.log("LOGGING IN");
+    console.log({ kwilUser, idosClient: this });
 
     await this.enclaveProvider.reconfigure({
       mode: "existing",

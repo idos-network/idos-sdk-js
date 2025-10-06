@@ -55,6 +55,8 @@ export class Client {
   }
 
   public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
+    console.log("RECONFIGURING MPC CLIENT");
+    console.log({signerType, signerAddress, signerPublicKey});
     if (!["evm", "xrpl", "near", "stellar"].includes(signerType)) {
       throw new Error("Invalid signer type");
     }
