@@ -60,6 +60,8 @@ export class LocalEnclave<
 
   constructor(options: K) {
     super(options);
+    console.log("CONSTRUCTOR From local enclave");
+    console.log({ options: this.options });
 
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
@@ -93,6 +95,8 @@ export class LocalEnclave<
 
   /** @override parent method to reconfigure the enclave */
   async reconfigure(options: Partial<K> = {}): Promise<void> {
+    console.log("RECONFIGURING From local enclave");
+    console.log({ options: this.options });
     await super.reconfigure(options);
     // Reconfigure MPC client if any signer information changed
     if (this.mpcClientInstance && options.walletType && options.walletAddress) {

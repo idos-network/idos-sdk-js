@@ -60,6 +60,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   /** @override parent method to call iframe */
   async reconfigure(options: Omit<IframeEnclaveOptions, "container" | "url"> = {}): Promise<void> {
     super.reconfigure(options);
+    console.log("RECONFIGURING From main app");
+    console.log({ options: this.options });
     await this.requestToEnclave("reconfigure", this.options);
   }
 
