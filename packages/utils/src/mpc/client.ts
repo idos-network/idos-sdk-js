@@ -144,6 +144,8 @@ export class Client {
   }
 
   public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
+    console.log("DOWNLOADING FROM MPC");
+    console.log({signerType: this.signerType, signerAddress: this.signerAddress, signerPublicKey: this.signerPublicKey});
     const address = this.formatAddress(this.signerType, this.signerAddress, this.signerPublicKey);
     return {
       recovering_address: address,
