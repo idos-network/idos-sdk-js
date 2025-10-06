@@ -67,6 +67,7 @@ function Stellar() {
     const result = await stellarKit.signMessage(message);
     // Signed message is string in base64, but we need to return hex
     const signature = hexEncode(Buffer.from(result.signedMessage, "base64"));
+    console.log("SIGNATURE", signature);
     walletPayload.value = {
       address,
       signature,

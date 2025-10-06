@@ -236,6 +236,7 @@ export async function createClientKwilSigner(
           msgToSign = msg;
         }
         const result = await wallet.signMessage(msgToSign);
+        console.log("as_kwil_signer", result);
         return Buffer.from(result.signedMessage, "base64");
       },
       Buffer.from(address).toString("hex"),
