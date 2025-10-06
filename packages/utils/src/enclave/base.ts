@@ -59,6 +59,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
   async signTypedData(domain: any, types: any, value: any): Promise<string> {
+    console.log("What is here", this);
     if (!this._signMethod || !this._signMethodType) {
       throw new Error("Signer is not set");
     }
