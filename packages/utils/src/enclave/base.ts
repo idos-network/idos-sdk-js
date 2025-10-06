@@ -75,6 +75,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       // XRPL/NEAR/Stellar wallets: use only the value as message
       const messageString = JSON.stringify(value);
       const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
+      console.log("SIGNATURE from base", response);
 
       // Extract signature from response object
       if (typeof response === "string") {
