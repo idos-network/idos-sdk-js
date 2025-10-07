@@ -131,9 +131,9 @@ export class idOSClientIdle {
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
-
+    console.log("kwilClient", kwilClient);
     await params.enclaveProvider.load();
-
+    console.log("enclaveProvider", params.enclaveProvider);
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
