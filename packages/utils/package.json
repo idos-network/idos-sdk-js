@@ -91,7 +91,6 @@
     "@stellar/stellar-sdk": "catalog:stellar",
     "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
-    "ripple-keypairs": "catalog:xrp",
     "typescript": "catalog:build"
   },
   "peerDependenciesMeta": {
@@ -108,9 +107,6 @@
       "optional": true
     },
     "ethers": {
-      "optional": true
-    },
-    "ripple-keypairs": {
       "optional": true
     }
   },
