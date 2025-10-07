@@ -1,9 +1,7 @@
-import { getCredentialShared } from "~/providers/idos.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
 import {
   createNoahCustomer,
   createOnboardingSession,
-  createPayInRequest,
   prefillNoahUser,
 } from "~/providers/noah.server";
 import { sessionStorage } from "~/providers/sessions.server";
@@ -25,19 +23,21 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   try {
-    const data = await getCredentialShared(credentialId, user.address);
-
-    // Create noah customer & prepare payin session
     // WARNING: We are using address, since we have no user-management
-    // you should implement user management and use user.id as customerID
-    // await createNoahCustomer(`${user.address}-2`, data);
+    // Create noah customer & prepare payin session
+    const customerCreated = await createNoahCustomer(user.address);
+
+    if (!customerCreated) {
+      throw new Error("Failed to create Noah customer");
+    }
 
     // Generate kraken shared token
     const token = await fetchSharedToken(krakenDAG, "noah.com_61413");
 
     // Prefill noah user & create payin request
-    await prefillNoahUser("USER_STRNADJ_TEST_4", token);
-    const response = await createOnboardingSession("USER_STRNADJ_TEST_4", url);
+    await prefillNoahUser(user.address, token);
+
+    const response = await createOnboardingSession(user.address, url);
 
     // const response = await createPayInRequest(`USER_STRNADJ_TEST_2`, url);
     // session.set("noahCheckoutSessionID", response.CheckoutSession.CheckoutSessionID);

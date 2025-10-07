@@ -161,7 +161,6 @@ export async function prefillNoahUser(customerId: string, token: string) {
 
 export async function createOnboardingSession(customerId: string, url: URL) {
   const returnUrl = new URL(url.toString());
-  returnUrl.host = "strnadj.com";
   returnUrl.protocol = "https";
   returnUrl.pathname = "/callbacks/noah";
   returnUrl.search = "";

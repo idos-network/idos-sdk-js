@@ -13,7 +13,7 @@ export async function loader({ request, context }: Route.LoaderArgs) {
 
   try {
     // Call kraken to get the token
-    const token = await fetchSharedToken(credentialId, "transack");
+    const token = await fetchSharedToken(credentialId, "transak");
 
     return Response.json({ token });
   } catch (error) {
