@@ -14,6 +14,7 @@
     "@stablelib/hex": "catalog:utils",
     "@stablelib/sha256": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
+    "@stellar/stellar-base": "catalog:stellar",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
     "es-toolkit": "catalog:utils",
@@ -66,6 +67,14 @@
     "./mpc": {
       "types": "./dist/mpc/index.d.ts",
       "import": "./dist/mpc/index.js"
+    },
+    "./crypto": {
+      "types": "./dist/crypto/index.d.ts",
+      "import": "./dist/crypto/index.js"
+    },
+    "./crypto/signature-verification": {
+      "types": "./dist/crypto/signature-verification/index.d.ts",
+      "import": "./dist/crypto/signature-verification/index.js"
     }
   },
   "files": [
@@ -79,7 +88,10 @@
   "peerDependencies": {
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "@stellar/stellar-sdk": "catalog:stellar",
+    "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
+    "ripple-keypairs": "catalog:xrp",
     "typescript": "catalog:build"
   },
   "peerDependenciesMeta": {
@@ -89,7 +101,16 @@
     "@partisiablockchain/abi-client": {
       "optional": true
     },
+    "@stellar/stellar-sdk": {
+      "optional": true
+    },
+    "@wagmi/core": {
+      "optional": true
+    },
     "ethers": {
+      "optional": true
+    },
+    "ripple-keypairs": {
       "optional": true
     }
   },

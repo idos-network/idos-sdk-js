@@ -40,7 +40,7 @@ import {
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import type { Wallet, WalletType } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
+import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -49,6 +49,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
+import { getWalletType } from "@idos-network/utils/crypto";
 import type {
   BaseProvider,
   EncryptionPasswordStore,

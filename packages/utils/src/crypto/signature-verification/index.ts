@@ -1,5 +1,5 @@
 import invariant from "tiny-invariant";
-import { getWalletType } from "../utils";
+import { getWalletType } from "../index";
 import { verifyEvmSignature } from "./evm";
 import { verifyNearSignature } from "./near";
 import { verifyRippleSignature } from "./ripple";

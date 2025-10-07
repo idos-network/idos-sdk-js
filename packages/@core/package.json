@@ -27,7 +27,6 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./signature-verification": "./src/signature-verification/index.ts",
     "./cryptography": "./src/cryptography/index.ts",
     "./types": "./src/types/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",

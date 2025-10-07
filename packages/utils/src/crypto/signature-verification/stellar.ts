@@ -1,5 +1,5 @@
-import { sha256Hash } from "@idos-network/utils/codecs";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
+import { sha256Hash } from "../../codecs";
 
 // publicKey is a string in hex
 // signature is a string in hex
