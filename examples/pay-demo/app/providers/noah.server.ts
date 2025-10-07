@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import { SERVER_ENV } from "./envFlags.server";
 
 // https://docs.noah.com/api-concepts/authentication/signing#why-exact-bytes-matter
+
 /**
  * Creates a JWT token for authenticating API requests.
  *
