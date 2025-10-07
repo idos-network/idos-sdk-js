@@ -262,6 +262,10 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private async onMessage(message: MessageEvent): Promise<void> {
+    // We can't be sure about the message and the content
+    // so we have to validate it carefully.
+    if (!message || !message.data || typeof message.data !== "object") return;
+
     if (message.data.type !== "idOS:signTypedData" || message.origin !== this.hostUrl.origin)
       return;
 
