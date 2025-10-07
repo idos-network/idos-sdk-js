@@ -2,10 +2,10 @@ import type * as GemWalletAPI from "@gemwallet/api";
 import type * as GemWallet from "@gemwallet/api";
 import { decode } from "xrpl";
 import type { Xumm } from "xumm";
-export type WalletType = "XAMAN" | "GEM";
+export type XRPLWalletType = "XAMAN" | "GEM";
 
 export interface WalletConfig {
-  type: WalletType;
+  type: XRPLWalletType;
   instance: Xumm | typeof GemWalletAPI;
 }
 
