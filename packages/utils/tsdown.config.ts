@@ -13,5 +13,5 @@ export default defineConfig({
     "./src/crypto/signature-verification/index.ts",
   ],
   dts: true,
-  noExternal: ["@wagmi/core", "@stellar/stellar-sdk", "@stellar/stellar-base", "ripple-keypairs"],
+  noExternal: [],
 });

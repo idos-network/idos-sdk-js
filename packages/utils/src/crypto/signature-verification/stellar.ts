@@ -1,3 +1,5 @@
+import { decode as decodeHex } from "@stablelib/hex";
+import { encode as utf8Encode } from "@stablelib/utf8";
 import { Keypair, StrKey } from "@stellar/stellar-sdk";
 import { sha256Hash } from "../../codecs";
 
@@ -11,15 +13,16 @@ export const verifyStellarSignature = async (
 ): Promise<boolean> => {
   try {
     const SIGN_MESSAGE_PREFIX = "Stellar Signed Message:\n";
-    const messageHash = sha256Hash(Buffer.from(SIGN_MESSAGE_PREFIX + message));
+    const prefixedMessage = utf8Encode(SIGN_MESSAGE_PREFIX + message);
+    const messageHash = sha256Hash(prefixedMessage);
 
-    const signatureBuffer = Buffer.from(signature, "hex");
+    const signatureBytes = decodeHex(signature);
+    const publicKeyBytes = decodeHex(publicKey);
 
-    const publicKeyBuffer = Buffer.from(publicKey, "hex");
-    const publicKeyFromStrKey = StrKey.encodeEd25519PublicKey(publicKeyBuffer);
+    const publicKeyFromStrKey = StrKey.encodeEd25519PublicKey(Buffer.from(publicKeyBytes));
     const keypair = Keypair.fromPublicKey(publicKeyFromStrKey);
 
-    return keypair.verify(Buffer.from(messageHash), signatureBuffer);
+    return keypair.verify(Buffer.from(messageHash), Buffer.from(signatureBytes));
   } catch (error) {
     console.warn("Stellar signature verification failed:", error);
     return false;

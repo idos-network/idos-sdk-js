@@ -1,4 +1,5 @@
 import { decode as decodeHex } from "@stablelib/hex";
+import { encode as utf8Encode } from "@stablelib/utf8";
 import nacl from "tweetnacl";
 
 /**
@@ -19,7 +20,7 @@ export const verifyRippleSignature = async (
       ? publicKey.slice(2)
       : publicKey;
 
-    const messageBytes = new Uint8Array(Buffer.from(message));
+    const messageBytes = utf8Encode(message);
     const signatureBytes = decodeHex(signature);
     const publicKeyBytes = decodeHex(cleanPublicKey);
 
