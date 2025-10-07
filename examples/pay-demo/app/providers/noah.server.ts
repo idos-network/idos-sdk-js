@@ -45,15 +45,6 @@ export async function createJwt(opts: {
   return token;
 }
 
-type NoahIDDocumentType =
-  | "AddressProof"
-  | "DrivingLicense"
-  | "ForeignerID"
-  | "NationalIDCard"
-  | "Passport"
-  | "ResidencePermit"
-  | "TaxID";
-
 export interface NoahLineItem {
   Description: string;
   Quantity: string;
