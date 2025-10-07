@@ -14,6 +14,7 @@ export interface StellarWallet {
 }
 
 export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner | StellarWallet;
+export type WalletType = "evm" | "near" | "xrpl" | "stellar";
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];

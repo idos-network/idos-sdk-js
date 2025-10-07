@@ -39,7 +39,7 @@ import {
   type KwilActionClient,
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
-import type { Wallet } from "@idos-network/core/types";
+import type { Wallet, WalletType } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
@@ -203,8 +203,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
-    // @ts-expect-error - TODO: Fix this
-    this.enclaveProvider.setSigner(this.signer);
+    this.enclaveProvider.setMPCSigner(this.signer, this.walletType as WalletType);
   }
 
   async logOut(): Promise<idOSClientIdle> {
