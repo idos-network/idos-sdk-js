@@ -39,7 +39,7 @@ export async function loader({ request }: Route.LoaderArgs) {
 
     const response = await createOnboardingSession(user.address, url);
 
-    // const response = await createPayInRequest(`USER_STRNADJ_TEST_2`, url);
+    // const response = await createPayInRequest(user.address, url);
     // session.set("noahCheckoutSessionID", response.CheckoutSession.CheckoutSessionID);
 
     return Response.json(
