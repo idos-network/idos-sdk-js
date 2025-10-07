@@ -39,7 +39,7 @@ import {
   type KwilActionClient,
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
-import type { Wallet, WalletType } from "@idos-network/core/types";
+import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
@@ -49,7 +49,12 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
-import { getWalletType } from "@idos-network/utils/crypto";
+import {
+  createMessageSigner,
+  getWalletType,
+  type MessageSigner,
+  type WalletType,
+} from "@idos-network/utils/crypto";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
@@ -131,9 +136,7 @@ export class idOSClientIdle {
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
-    console.log("kwilClient", kwilClient);
     await params.enclaveProvider.load();
-    console.log("enclaveProvider", params.enclaveProvider);
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
@@ -160,6 +163,7 @@ export class idOSClientIdle {
         },
       } as any;
     }
+    const messageSigner = createMessageSigner(processedSigner as any, walletType);
 
     return new idOSClientWithUserSigner(
       this,
@@ -168,6 +172,7 @@ export class idOSClientIdle {
       walletIdentifier,
       walletPublicKey,
       walletType,
+      messageSigner,
     );
   }
 
@@ -185,7 +190,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
+  readonly messageSigner: MessageSigner;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -193,7 +199,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     kwilSigner: KwilSigner,
     walletIdentifier: string,
     walletPublicKey: string | undefined,
-    walletType: string,
+    walletType: WalletType,
+    messageSigner: MessageSigner,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -204,7 +211,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
-    this.enclaveProvider.setMPCSigner(this.signer, this.walletType as WalletType);
+    this.messageSigner = messageSigner;
+    this.enclaveProvider.setMPCSigner(this.signer, this.walletType);
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -262,7 +270,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
+  readonly messageSigner: MessageSigner;
   readonly user: idOSUser;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
@@ -274,6 +283,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
     this.walletIdentifier = idOSClientWithUserSigner.walletIdentifier;
     this.walletPublicKey = idOSClientWithUserSigner.walletPublicKey;
+    this.messageSigner = idOSClientWithUserSigner.messageSigner;
     this.walletType = idOSClientWithUserSigner.walletType;
     this.user = user;
   }
@@ -447,7 +457,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       params.wallet_type,
     );
 
-    const signature = await this.enclaveProvider.signTypedData(
+    const signature = await this.enclaveProvider.signMPCMessage(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
@@ -488,7 +498,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       wallet.public_key,
       wallet.wallet_type,
     );
-    const signature = await this.enclaveProvider.signTypedData(
+    const signature = await this.enclaveProvider.signMPCMessage(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,

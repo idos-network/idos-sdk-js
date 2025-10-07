@@ -101,9 +101,11 @@ export type KwilSignerType =
   | StellarKeypair
   | XrpKeyPair;
 
+import type { WalletType } from "@idos-network/utils/crypto";
+
 export type SignerAddress = string;
 export type SignerPublicKey = string | undefined;
-export type SignerType = string;
+export type SignerType = WalletType;
 /**
  * Creates a `KwilSigner` and its associated `SignerAddress`.
  *

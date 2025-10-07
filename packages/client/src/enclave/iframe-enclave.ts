@@ -270,7 +270,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       return;
 
     const payload = message.data.payload;
-    const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
+    const signature = await this.signMPCMessage(payload.domain, payload.types, payload.value);
     await this.requestToEnclave("signTypedDataResponse", signature);
   }
 }

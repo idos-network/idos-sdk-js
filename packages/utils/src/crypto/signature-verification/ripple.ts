@@ -1,3 +1,5 @@
+// TODO: try to get back to use ripple-keypairs again
+
 import { decode as decodeHex } from "@stablelib/hex";
 import { encode as utf8Encode } from "@stablelib/utf8";
 import nacl from "tweetnacl";

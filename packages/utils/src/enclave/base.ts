@@ -32,8 +32,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     this.walletType = walletType;
   }
 
-  // TODO: rename to signMPCMessage
-  async signTypedData(domain: any, types: any, value: any): Promise<string> {
+  async signMPCMessage(domain: any, types: any, value: any): Promise<string> {
     console.log("What is here", this);
     if (!this.signer || !this.walletType) {
       throw new Error("Signer is not set");

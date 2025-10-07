@@ -1,4 +1,6 @@
-export const getWalletType = (address: string): "evm" | "near" | "xrpl" | "stellar" => {
+export type WalletType = "evm" | "near" | "xrpl" | "stellar";
+
+export const getWalletType = (address: string): WalletType => {
   // Address validation patterns
   const evm_regexp = /^0x[0-9a-fA-F]{40}$/;
   const near_regexp = /^[a-zA-Z0-9._-]+\.(near|testnet|betanet)$/;
@@ -11,3 +13,5 @@ export const getWalletType = (address: string): "evm" | "near" | "xrpl" | "stell
   if (stellar_regexp.test(address)) return "stellar";
   throw new Error("Unsupported wallet type");
 };
+
+export { createMessageSigner, type MessageSigner } from "./create-message-signer";
