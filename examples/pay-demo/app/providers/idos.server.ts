@@ -28,16 +28,16 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
 
   const data = JSON.parse(credentialContents) as Credential;
 
+  const issuer = {
+    issuer: SERVER_ENV.KRAKEN_ISSUER,
+    publicKeyMultibase: SERVER_ENV.KRAKEN_PUBLIC_KEY_MULTIBASE,
+  };
+
   // Verify the credential
-  const [verificationResult] = await idOSConsumer.verifyCredential(data, [
-    {
-      issuer: SERVER_ENV.KRAKEN_ISSUER,
-      publicKeyMultibase: SERVER_ENV.KRAKEN_PUBLIC_KEY_MULTIBASE,
-    },
-  ]);
+  const [verificationResult, error] = await idOSConsumer.verifyCredential(data, [issuer]);
 
   if (!verificationResult) {
-    throw new Error("Invalid credential signature.");
+    throw new Error(`Invalid credential signature. ${JSON.stringify(error.get(issuer))}`);
   }
 
   return data;

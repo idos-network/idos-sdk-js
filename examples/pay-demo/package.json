@@ -4,10 +4,10 @@
   "dependencies": {
     "@idos-network/client": "workspace:*",
     "@idos-network/consumer": "workspace:*",
-    "@idos-network/utils": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@react-router/node": "7.7.1",
     "@react-router/serve": "7.7.1",
+    "@idos-network/utils": "workspace:*",
     "@reown/appkit": "^1.7.8",
     "@reown/appkit-adapter-wagmi": "^1.7.8",
     "@transak/transak-sdk": "^3.2.0",
@@ -37,9 +37,11 @@
     "@types/node": "^22.15.30",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
+    "@vitejs/plugin-basic-ssl": "^2.1.0",
     "tailwindcss": "^4.1.8",
     "typescript": "catalog:build",
     "vite": "catalog:build",
+    "vite-plugin-mkcert": "^1.17.9",
     "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4"
   },

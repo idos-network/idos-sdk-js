@@ -194,7 +194,7 @@ export const machine = setup({
             guard: "isMonerium",
           },
           {
-            target: "createNoahCustomer",
+            target: "noahFlow",
             actions: ["setSharedCredential"],
             guard: "isNoah",
           },
@@ -291,19 +291,53 @@ export const machine = setup({
         },
       },
     },
-    createNoahCustomer: {
-      invoke: {
-        id: "createNoahCustomer",
-        src: "createNoahCustomer",
-        input: ({ context }: { context: Context }) => context.sharedCredential,
-        onDone: {
-          target: "dataOrTokenFetched",
-          actions: ["setNoahUrl"],
+    noahFlow: {
+      initial: "requestKrakenDAG",
+      states: {
+        requestKrakenDAG: {
+          invoke: {
+            id: "requestKrakenDAG",
+            src: "requestKrakenDAG",
+            input: ({ context }: { context: Context }) => ({
+              client: context.loggedInClient,
+              credential: context.credential,
+            }),
+            onDone: {
+              target: "createCustomer",
+              actions: ["setKrakenDAG"],
+            },
+            onError: {
+              target: "error",
+            },
+          },
         },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
+        createCustomer: {
+          invoke: {
+            id: "createNoahCustomer",
+            src: "createNoahCustomer",
+            input: ({ context }: { context: Context }) => ({
+              krakenDAG: context.krakenDAG,
+              sharedCredential: context.sharedCredential,
+            }),
+            onDone: {
+              target: "dataOrTokenFetched",
+              actions: ["setNoahUrl"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
         },
+        error: {
+          type: "final",
+        },
+        dataOrTokenFetched: {
+          type: "final",
+        },
+      },
+      onDone: {
+        target: "dataOrTokenFetched",
       },
     },
     moneriumFlow: {

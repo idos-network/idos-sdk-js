@@ -1,54 +1,49 @@
-import type { Credential, IDDocumentType } from "@idos-network/consumer";
+import crypto from "node:crypto";
+import jwt from "jsonwebtoken";
 import { SERVER_ENV } from "./envFlags.server";
-import { getISORegionCodeFromNominatim } from "./maps.server";
 
-function formatDate(dateString?: string | Date): string | undefined {
-  if (!dateString) return undefined;
+// https://docs.noah.com/api-concepts/authentication/signing#why-exact-bytes-matter
 
-  const date = new Date(dateString);
-  return date.toISOString().split("T")[0];
-}
+/**
+ * Creates a JWT token for authenticating API requests.
+ *
+ * @param opts - Options for JWT creation.
+ * @param opts.body - A buffer made from the body of the request. Important to use the exact same body buffer in the request.
+ * @param opts.method - The HTTP method of the request, e.g., GET, POST, PUT, DELETE.
+ * @param opts.path - The path of the request, e.g., /api/v1/customers.
+ * @param opts.privateKey - The private key used to sign the JWT, in PEM format.
+ * @param opts.queryParams - The query parameters of the request.
+ * @returns A signed JWT token as a string.
+ */
+export async function createJwt(opts: {
+  body: Buffer | undefined;
+  method: string;
+  path: string;
+  queryParams: object | undefined;
+}): Promise<string> {
+  const { body, method, path, queryParams } = opts;
+  let bodyHash: string | undefined;
 
-export interface NoahCustomer {
-  Type: "Individual";
-  FullName: FullName;
-  DateOfBirth?: string;
-  Email?: string;
-  PhoneNumber?: string;
-  Identities: Identity[];
-  PrimaryResidence: PrimaryResidence;
-}
+  if (body) {
+    bodyHash = crypto.createHash("sha256").update(body).digest("hex");
+  }
 
-export interface FullName {
-  FirstName: string;
-  LastName: string;
-  MiddleName?: string;
-}
+  const payload = {
+    bodyHash,
+    method,
+    path,
+    queryParams,
+  };
 
-type NoahIDDocumentType =
-  | "AddressProof"
-  | "DrivingLicense"
-  | "ForeignerID"
-  | "NationalIDCard"
-  | "Passport"
-  | "ResidencePermit"
-  | "TaxID";
+  const token = jwt.sign(payload, SERVER_ENV.NOAH_PRIVATE_KEY, {
+    algorithm: "ES384",
+    audience: "https://api.noah.com",
+    expiresIn: "5m",
+  });
 
-export interface Identity {
-  IssuingCountry: string;
-  IDNumber: string;
-  IssuedDate?: string;
-  ExpiryDate?: string;
-  IDType: NoahIDDocumentType;
-}
+  console.log(token);
 
-export interface PrimaryResidence {
-  Street?: string;
-  Street2?: string;
-  City?: string;
-  PostCode?: string;
-  State?: string;
-  Country?: string;
+  return token;
 }
 
 export interface NoahLineItem {
@@ -66,7 +61,6 @@ export interface NoahPayinFiatRequest {
   ReturnURL: string;
   ExternalID: string;
   CustomerID: string;
-  Customer: NoahCustomer;
   Nonce: string;
   LineItems: NoahLineItem[];
 }
@@ -85,59 +79,122 @@ export interface NoahResponse {
   CheckoutSession: NoahCheckoutSession;
 }
 
-export async function createNoahCustomer(address: string, credentials: Credential, url: URL) {
-  const cs = credentials.credentialSubject;
-
-  const documentTypeMapper: Record<IDDocumentType, NoahIDDocumentType> = {
-    PASSPORT: "Passport",
-    DRIVERS: "DrivingLicense",
-    ID_CARD: "NationalIDCard",
+export async function createNoahCustomer(customerId: string) {
+  const request = {
+    Type: "Individual",
   };
 
-  let region = cs.residentialAddressRegion;
+  const body = Buffer.from(JSON.stringify(request));
+  const path = `/v1/customers/${customerId}`;
 
-  if (!region) {
-    region = await getISORegionCodeFromNominatim(
-      [
-        [cs.residentialAddressStreet, cs.residentialAddressHouseNumber].filter((x) => x).join(" "),
-        cs.residentialAddressCity,
-        cs.residentialAddressPostalCode,
-        cs.residentialAddressCountry,
-        cs.residentialAddressAdditionalAddressInfo,
-      ]
-        .filter((x) => x)
-        .join(", "),
-    );
+  const signature = await createJwt({
+    body,
+    method: "PUT",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Noah error:", text);
+    throw new Error(`Failed to create Noah customer: ${text}`);
   }
 
-  const customer: NoahCustomer = {
-    Type: "Individual",
-    FullName: {
-      FirstName: cs.firstName,
-      LastName: cs.familyName,
-      MiddleName: cs.maidenName,
-    },
-    DateOfBirth: formatDate(cs.dateOfBirth),
-    Email: cs.email,
-    PhoneNumber: cs.phoneNumber,
-    Identities: [
-      {
-        IssuingCountry: cs.idDocumentCountry,
-        IDNumber: cs.idDocumentNumber,
-        IssuedDate: formatDate(cs.idDocumentDateOfIssue),
-        ExpiryDate: formatDate(cs.idDocumentDateOfExpiry),
-        IDType: documentTypeMapper[cs.idDocumentType] ?? "Passport",
-      },
-    ],
-    PrimaryResidence: {
-      Street: cs.residentialAddressStreet,
-      City: cs.residentialAddressCity,
-      PostCode: cs.residentialAddressPostalCode,
-      State: region,
-      Country: cs.residentialAddressCountry,
-    },
+  // No body
+  return true;
+}
+
+export async function prefillNoahUser(customerId: string, token: string) {
+  const path = `/v1/onboarding/${customerId}/prefill`;
+
+  const request = {
+    Type: "SumSubToken",
+    Token: token,
   };
 
+  const body = Buffer.from(JSON.stringify(request));
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Noah error:", text);
+    throw new Error(`Failed to set a sumsub token for noah customer: ${text}`);
+  }
+
+  // No body
+  return true;
+}
+
+export async function createOnboardingSession(customerId: string, url: URL) {
+  const returnUrl = new URL(url.toString());
+  returnUrl.protocol = "https";
+  returnUrl.pathname = "/callbacks/noah";
+  returnUrl.search = "";
+  returnUrl.hash = "";
+
+  const request = {
+    ReturnURL: returnUrl.toString(),
+  };
+
+  const path = `/v1/onboarding/${customerId}`;
+
+  const body = Buffer.from(JSON.stringify(request));
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error("Noah payin error:", text);
+    throw new Error(`Failed to create Noah payin: ${text}`);
+  }
+
+  const data = (await response.json()) as NoahResponse;
+
+  return data;
+}
+
+export async function createPayInRequest(customerId: string, url: URL) {
   // Cleanup URL
   const returnUrl = new URL(url.toString());
   returnUrl.protocol = "https";
@@ -145,15 +202,14 @@ export async function createNoahCustomer(address: string, credentials: Credentia
   returnUrl.search = "";
   returnUrl.hash = "";
 
-  const subject: NoahPayinFiatRequest = {
-    Customer: customer,
+  const request: NoahPayinFiatRequest = {
+    CustomerID: customerId,
     PaymentMethodCategory: "Card",
     FiatCurrency: "USD",
     CryptoCurrency: "BTC_TEST",
     FiatAmount: "100",
     ReturnURL: returnUrl.toString(),
     ExternalID: crypto.randomUUID(),
-    CustomerID: address,
     Nonce: crypto.randomUUID(),
     LineItems: [
       {
@@ -171,20 +227,31 @@ export async function createNoahCustomer(address: string, credentials: Credentia
     ],
   };
 
-  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}v1/checkout/payin/fiat`, {
+  const path = "/v1/checkout/payin/fiat";
+
+  const body = Buffer.from(JSON.stringify(request));
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
     },
-    body: JSON.stringify(subject),
+    body,
   });
 
   if (!response.ok) {
     const text = await response.text();
-    console.error("Noah error:", text);
-    console.error(JSON.stringify(subject, null, 2));
-    throw new Error(`Failed to create Noah customer: ${text}`);
+    console.error("Noah payin error:", text);
+    throw new Error(`Failed to create Noah payin: ${text}`);
   }
 
   const data = (await response.json()) as NoahResponse;
