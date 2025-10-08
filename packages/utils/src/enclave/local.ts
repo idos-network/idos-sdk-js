@@ -491,6 +491,7 @@ export class LocalEnclave<
     message: AddAddressSignatureMessage,
     signature: string,
   ): Promise<string> {
+    console.log("Adding address to MPC secret from inside enclave", userId, message, signature);
     return this.mpcClient.addAddress(userId, message, signature);
   }
 

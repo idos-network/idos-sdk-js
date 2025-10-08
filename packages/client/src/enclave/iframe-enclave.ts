@@ -153,6 +153,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     message: AddAddressSignatureMessage,
     signature: string,
   ): Promise<string> {
+    console.log("Adding address to MPC secret from iframe-enclave", userId, message, signature);
     return this.requestToEnclave("addAddressToMpcSecret", userId, message, signature);
   }
 
