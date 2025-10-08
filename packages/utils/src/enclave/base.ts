@@ -57,6 +57,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       // TODO: support other XRPL wallets
       case "xrpl": {
         const xrplResult = await this.signer.signMessage(messageString);
+        console.log("XRPL result", xrplResult);
         signature = xrplResult.signedMessage;
 
         break;

@@ -426,11 +426,15 @@ export class LocalEnclave<
       downloadRequest,
     ) as DownloadMessageToSign;
 
+    console.log("Message to sign", messageToSign);
+    console.log("Signer", this.signer);
+    console.log("Wallet type", this.walletType);
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
     );
+    console.log("Signed message", signedMessage);
 
     return this.mpcClient.downloadSecret(
       this.userId,
@@ -491,7 +495,6 @@ export class LocalEnclave<
     message: AddAddressSignatureMessage,
     signature: string,
   ): Promise<string> {
-    console.log("Adding address to MPC secret from inside enclave", userId, message, signature);
     return this.mpcClient.addAddress(userId, message, signature);
   }
 
