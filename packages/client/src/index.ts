@@ -445,6 +445,9 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       return params;
     }
 
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    await sleep(1000); // Wait 1 second
+
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
