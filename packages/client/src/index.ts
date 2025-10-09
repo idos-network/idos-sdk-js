@@ -445,8 +445,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       return params;
     }
 
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    await sleep(1000); // Wait 1 second
+    // TODO: Remove this once Freighter wallet can handle few consecutive signings without crashing
+    // Wait 1 second for stellar to sign the message. It's a workaround for the issue with Freighter wallet.
+    if (params.wallet_type === "stellar") {
+      const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+      await sleep(500);
+    }
 
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
