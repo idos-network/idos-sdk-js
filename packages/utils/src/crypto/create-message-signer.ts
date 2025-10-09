@@ -9,7 +9,16 @@ interface NonEvmSigner {
   signMessage: (message: string) => Promise<{ signedMessage: string }>;
 }
 
-type AnySigner = EvmSigner | NonEvmSigner | (EvmSigner & NonEvmSigner);
+interface XrplSigner {
+  signMessage: (message: string) => Promise<{ type: string; result: { signedMessage: string } }>;
+}
+
+type AnySigner =
+  | EvmSigner
+  | NonEvmSigner
+  | XrplSigner
+  | (EvmSigner & NonEvmSigner)
+  | (EvmSigner & XrplSigner);
 
 export interface MessageSigner {
   signMessage: (message: string) => Promise<string>;
@@ -38,7 +47,15 @@ export function createMessageSigner(signer: AnySigner, walletType: WalletType): 
 
       throw new Error("EVM signer must have either signMessageAsync or signMessage method");
     }
-    case "xrpl":
+    case "xrpl": {
+      const xrplSigner = signer as XrplSigner;
+      return {
+        signMessage: async (message: string): Promise<string> => {
+          const result = await xrplSigner.signMessage(message);
+          return result.result.signedMessage;
+        },
+      };
+    }
     case "near": {
       const nonEvmSigner = signer as NonEvmSigner;
       return {
