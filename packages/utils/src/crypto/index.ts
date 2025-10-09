@@ -15,3 +15,8 @@ export const getWalletType = (address: string): WalletType => {
 };
 
 export { createMessageSigner, type MessageSigner } from "./create-message-signer";
+export {
+  verifyNearSignature,
+  verifySignature,
+  type WalletSignature,
+} from "./signature-verification";
