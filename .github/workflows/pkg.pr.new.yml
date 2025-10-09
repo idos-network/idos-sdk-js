@@ -35,4 +35,4 @@ jobs:
           NODE_ENV: production
 
       - name: Release
-        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils' --dry-run
+        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils'
