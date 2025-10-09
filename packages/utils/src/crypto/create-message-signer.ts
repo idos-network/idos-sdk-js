@@ -1,7 +1,8 @@
 import type { WalletType } from "./index";
 
 interface EvmSigner {
-  signMessageAsync: (args: { message: string }) => Promise<string>;
+  signMessageAsync?: (args: { message: string }) => Promise<string>;
+  signMessage?: (message: string) => Promise<string>;
 }
 
 interface NonEvmSigner {
@@ -18,11 +19,24 @@ export function createMessageSigner(signer: AnySigner, walletType: WalletType): 
   switch (walletType) {
     case "evm": {
       const evmSigner = signer as EvmSigner;
-      return {
-        signMessage: async (message: string): Promise<string> => {
-          return await evmSigner.signMessageAsync({ message: message });
-        },
-      };
+
+      if (evmSigner.signMessageAsync) {
+        return {
+          signMessage: async (message: string): Promise<string> => {
+            return await evmSigner.signMessageAsync!({ message: message });
+          },
+        };
+      }
+
+      if (evmSigner.signMessage) {
+        return {
+          signMessage: async (message: string): Promise<string> => {
+            return await evmSigner.signMessage!(message);
+          },
+        };
+      }
+
+      throw new Error("EVM signer must have either signMessageAsync or signMessage method");
     }
     case "xrpl":
     case "near": {
