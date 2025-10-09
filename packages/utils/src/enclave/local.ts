@@ -429,6 +429,7 @@ export class LocalEnclave<
     console.log("Message to sign", messageToSign);
     console.log("Signer", this.signer);
     console.log("Wallet type", this.walletType);
+    // @ts-expect-error - signTypedData is implemented in subclass (apps/idos-enclave/src/lib/enclave.ts)
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
       messageToSign.types,
@@ -454,6 +455,8 @@ export class LocalEnclave<
     const uploadRequest = this.mpcClient.uploadRequest(blindedShares);
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
+    // TODO: refactor this. signTypedData lives in apps/idos-enclave/src/lib/enclave.ts. Maybe it is possible to move it to the base or local class?
+    // @ts-expect-error - signTypedData is implemented in subclass (apps/idos-enclave/src/lib/enclave.ts)
     const signedMessage = await this.signTypedData(
       // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       messageToSign.domain as any,
