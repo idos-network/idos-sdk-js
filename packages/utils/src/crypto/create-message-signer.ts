@@ -44,6 +44,7 @@ export function createMessageSigner(signer: AnySigner, walletType: WalletType): 
       return {
         signMessage: async (message: string): Promise<string> => {
           const result = await nonEvmSigner.signMessage(message);
+          console.log("Non-EVM signer result", result);
           return result.signedMessage;
         },
       };
