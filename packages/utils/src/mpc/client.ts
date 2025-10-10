@@ -101,7 +101,7 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
 
-    const successCount = statuses.filter((item) => item === "201").length;
+    const successCount = statuses.filter((item: string) => item == "201").length;
 
     if (successCount == this.numNodes) {
       return { status: "success" };
@@ -229,9 +229,17 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
 
-    if (statuses.every((item) => item === "200")) {
+    const successCount = statuses.filter((item: string) => item == "200").length;
+
+    if (successCount == this.numNodes) {
       return "success";
     }
+
+    if (successCount >= this.numToReconstruct) {
+      console.warn(`Added to ${successCount} shares, not ${this.numNodes}`);
+      return "partial-success";
+    }
+    console.error(`Added to ${successCount} shares, there is no enough shares to will be to reconstruct the secret`);
 
     return "failure";
   }
@@ -245,9 +253,17 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
 
-    if (statuses.every((item) => item === "200")) {
+    const successCount = statuses.filter((item: string) => item == "200").length;
+
+    if (successCount == this.numNodes) {
       return "success";
     }
+
+    if (successCount >= this.numToReconstruct) {
+      console.warn(`Removed from ${successCount} shares, not ${this.numNodes}`);
+      return "partial-success";
+    }
+    console.error(`Removed from ${successCount} shares, secret is kept on nodes`);
 
     return "failure";
   }

@@ -473,8 +473,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.value,
       signature,
     );
-    if (result !== "success") {
-      console.error(`Failed to add wallet to MPC: ${result}`);
+    if (result === "failure") {
+      console.error("Failed to add wallet to MPC");
     }
 
     return params;
@@ -514,8 +514,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.value,
       signature,
     );
-    if (result !== "success") {
-      console.error(`Failed to add wallet to MPC: ${result}`);
+    if (result === "failure") {
+      console.error("Failed to remove the wallet from MPC");
     }
 
     return { id };
