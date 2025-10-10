@@ -452,12 +452,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       params.wallet_type = getWalletType(params.address);
     }
 
-    if (params.wallet_type === "stellar") {
+    if (this.walletType === "stellar") {
       const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
       await sleep(1000);
     }
-    console.log({ params });
-    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
