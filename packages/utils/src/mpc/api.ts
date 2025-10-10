@@ -50,7 +50,7 @@ export function putRequest<T>(url: string, object: T, headers?: Record<string, s
     })
     .catch((error) => {
       console.error(error);
-      return error;
+      return "error";
     });
 }
 

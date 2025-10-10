@@ -60,6 +60,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   /** @override parent method to call iframe */
   async reconfigure(options: Omit<IframeEnclaveOptions, "container" | "url"> = {}): Promise<void> {
     super.reconfigure(options);
+    console.log("RECONFIGURING From main app");
+    console.log({ options: this.options });
     await this.requestToEnclave("reconfigure", this.options);
   }
 
@@ -268,7 +270,8 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       return;
 
     const payload = message.data.payload;
-    const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
+    const signature = await this.signMPCMessage(payload.domain, payload.types, payload.value);
+    console.log("Signature from iframe-enclave", signature);
     await this.requestToEnclave("signTypedDataResponse", signature);
   }
 }

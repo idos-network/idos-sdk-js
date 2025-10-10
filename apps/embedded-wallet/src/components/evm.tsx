@@ -93,7 +93,7 @@ function Ethereum() {
           walletPayload.value = {
             address,
             signature,
-            public_key: [address],
+            public_key: [],
             message,
             disconnect: disconnectEvm,
           };

@@ -1,6 +1,6 @@
 import * as GemWallet from "@gemwallet/api";
 import type { WalletInfo } from "@idos-network/controllers";
-import { KwilSigner, signGemWalletTx, signNearMessage } from "@idos-network/core";
+import { signGemWalletTx, signNearMessage } from "@idos-network/core";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
@@ -22,7 +22,7 @@ export const walletInfoMapper = ({
   address: string;
   publicKey: string;
   selector: WalletSelector;
-}): Record<"evm" | "near" | "xrpl" | "Stellar", WalletInfo> => ({
+}): Record<"evm" | "near" | "xrpl" | "stellar", WalletInfo> => ({
   evm: {
     address,
     publicKey,
@@ -38,7 +38,7 @@ export const walletInfoMapper = ({
       const signature = await signNearMessage(signer, message);
       return signature;
     },
-    signer: () => selector.wallet() as unknown as any,
+    signer: () => selector.wallet() as Promise<any>,
     type: "near",
   },
   xrpl: {
@@ -51,7 +51,7 @@ export const walletInfoMapper = ({
     type: "xrpl",
     signer: async () => GemWallet,
   },
-  Stellar: {
+  stellar: {
     address,
     publicKey,
     signMethod: async (message: string) => {
@@ -72,30 +72,7 @@ export const walletInfoMapper = ({
 
       return signatureHex;
     },
-    type: "Stellar",
-    signer: async () => {
-      const signer = new KwilSigner(
-        async (msg: Uint8Array): Promise<Uint8Array> => {
-          const messageBase64 = Buffer.from(msg).toString("base64");
-          const result = await stellarKit.signMessage(messageBase64);
-
-          let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-          if (signedMessage.length > 64) {
-            signedMessage = Buffer.from(signedMessage.toString(), "base64");
-          }
-          return signedMessage;
-        },
-        publicKey,
-        "ed25519",
-      );
-      try {
-        // @ts-ignore
-        signer.publicAddress = address;
-      } catch (error) {
-        console.log("error setting public address", error);
-      }
-      return signer;
-    },
+    type: "stellar",
+    signer: async () => stellarKit,
   },
 });

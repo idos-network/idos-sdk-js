@@ -13,7 +13,7 @@ export default function DisconnectWallet() {
     <Button
       color="danger"
       onPress={async () => {
-        if (walletType === "Stellar") await stellarKit.disconnect();
+        if (walletType === "stellar") await stellarKit.disconnect();
         if (near.selector.isSignedIn()) {
           const wallet = await near.selector.wallet();
           await wallet.signOut();
