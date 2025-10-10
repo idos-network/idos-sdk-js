@@ -103,7 +103,7 @@ export class Client {
 
     const successCount = statuses.filter((item) => item === "201").length;
 
-    if (successCount === this.numNodes) {
+    if (successCount == this.numNodes) {
       return { status: "success" };
     }
 
