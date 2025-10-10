@@ -82,7 +82,7 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   /* Residential Address Proof Date Of Issue	Date the address proof document was issued. */
   proofDateOfIssue: z.date().optional(),
 
-  /* Residential Address Proof File	File or URL of the document provided as address proof. */
+  /* Residential Address Proof File or URL of the document provided as address proof. */
   proofFile: z.instanceof(Buffer),
 });
 
