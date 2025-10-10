@@ -16,7 +16,8 @@ import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
 export const stellarKit: StellarWalletsKit = new StellarWalletsKit({
-  network: import.meta.env.DEV ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
+  network:
+    import.meta.env.VITE_STELLAR_TESTNET === "true" ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
   selectedWalletId: FREIGHTER_ID,
   modules: [new FreighterModule(), new xBullModule()],
 });
