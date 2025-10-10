@@ -33,6 +33,7 @@ export class Client {
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
   private numNodes: number;
+  private numToReconstruct: number;
 
   constructor(
     baseUrl: string,
@@ -50,6 +51,7 @@ export class Client {
     this.signerAddress = signerAddress;
     this.signerPublicKey = signerPublicKey;
     this.numNodes = numNodes;
+    this.numToReconstruct = numToReconstruct;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
@@ -99,11 +101,14 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
 
-    if (statuses.every((item) => item === "201")) {
+    const successCount = statuses.filter((item) => item === "201").length;
+
+    if (successCount === this.numNodes) {
       return { status: "success" };
     }
 
-    if (statuses.filter((item) => item === "201").length > 0) {
+    if (successCount >= this.numToReconstruct) {
+      console.warn(`Uploaded ${successCount} shares, not ${this.numNodes}`);
       return { status: "partial-success" };
     }
 

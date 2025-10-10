@@ -381,7 +381,7 @@ export class LocalEnclave<
     const password = this.generatePassword();
     const { status: uploadStatus } = await this.uploadSecret(password);
 
-    if (uploadStatus !== "success") {
+    if (uploadStatus === "failure") {
       throw Error(`A secret upload failed with status: ${uploadStatus}`);
     }
 
