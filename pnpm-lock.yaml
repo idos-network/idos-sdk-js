@@ -386,7 +386,7 @@ importers:
         specifier: catalog:build
         version: 0.17.0(rollup@4.46.2)(vite@7.0.6(@types/node@22.15.30)(jiti@2.4.2)(lightningcss@1.30.1)(terser@5.41.0)(tsx@4.19.4)(yaml@2.8.0))
 
-  apps/experiment:
+  apps/facesign-enclave:
     dependencies:
       '@scure/bip32':
         specifier: 1.3.0
@@ -24966,7 +24966,7 @@ snapshots:
   axios@1.8.4(debug@4.4.1):
     dependencies:
       follow-redirects: 1.15.9(debug@4.4.1)
-      form-data: 4.0.2
+      form-data: 4.0.4
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
