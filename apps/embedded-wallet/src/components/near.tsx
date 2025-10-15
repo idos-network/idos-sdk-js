@@ -1,5 +1,4 @@
 import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupHereWallet } from "@near-wallet-selector/here-wallet";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
@@ -26,7 +25,7 @@ const { useStepper } = defineStepper(
 
 const selector = await setupWalletSelector({
   network: import.meta.env.VITE_NEAR_NETWORK,
-  modules: [setupMeteorWallet(), setupHereWallet()],
+  modules: [setupMeteorWallet()],
 });
 
 const modal = setupModal(selector, {
