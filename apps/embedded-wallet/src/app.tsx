@@ -7,7 +7,7 @@ import { connectedWalletType, walletPayload } from "./state";
 
 const getHiddenWalletTypes = () => {
   const params = new URLSearchParams(window.location.search);
-  const hiddenWallets = params.get("hidden_wallets") ?? "";
+  const hiddenWallets = params.get("skip_wallets") ?? "";
   return hiddenWallets ? hiddenWallets.split(",") : [];
 };
 
