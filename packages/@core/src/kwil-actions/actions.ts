@@ -266,6 +266,144 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
+  share_credential: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "locked_until",
+      type: DataType.Int,
+    },
+  ],
+  create_credential_copy: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+  ],
+  share_credential_through_dag: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "issuer_auth_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "encryptor_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "content",
+      type: DataType.Text,
+    },
+    {
+      name: "content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes",
+      type: DataType.Text,
+    },
+    {
+      name: "public_notes_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "broader_signature",
+      type: DataType.Text,
+    },
+    {
+      name: "original_credential_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dag_owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_locked_until",
+      type: DataType.Int,
+    },
+    {
+      name: "dag_signature",
+      type: DataType.Text,
+    },
+  ],
   create_credentials_by_dwg: [
     {
       name: "issuer_auth_public_key",
@@ -364,10 +502,22 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
+  get_credential_shared: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   get_sibling_credential_id: [
     {
       name: "content_hash",
       type: DataType.Text,
+    },
+  ],
+  credential_belongs_to_caller: [
+    {
+      name: "id",
+      type: DataType.Uuid,
     },
   ],
   credential_exist: [
@@ -408,7 +558,108 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_attributes: [],
+  edit_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "attribute_key",
+      type: DataType.Text,
+    },
+    {
+      name: "value",
+      type: DataType.Text,
+    },
+  ],
+  remove_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  share_attribute: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "original_attribute_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "attribute_key",
+      type: DataType.Text,
+    },
+    {
+      name: "value",
+      type: DataType.Text,
+    },
+  ],
+  dwg_message: [
+    {
+      name: "owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "access_grant_timelock",
+      type: DataType.Text,
+    },
+    {
+      name: "not_usable_before",
+      type: DataType.Text,
+    },
+    {
+      name: "not_usable_after",
+      type: DataType.Text,
+    },
+  ],
+  revoke_access_grant: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   get_access_grants_owned: [],
+  get_access_grants_granted: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "page",
+      type: DataType.Int,
+    },
+    {
+      name: "size",
+      type: DataType.Int,
+    },
+  ],
+  get_access_grants_granted_count: [
+    {
+      name: "user_id",
+      type: DataType.Uuid,
+    },
+  ],
+  has_locked_access_grants: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
   dag_message: [
     {
       name: "dag_owner_wallet_identifier",
@@ -428,6 +679,32 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     },
     {
       name: "dag_content_hash",
+      type: DataType.Text,
+    },
+  ],
+  create_ag_by_dag_for_copy: [
+    {
+      name: "dag_owner_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_grantee_wallet_identifier",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_data_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "dag_locked_until",
+      type: DataType.Int,
+    },
+    {
+      name: "dag_content_hash",
+      type: DataType.Text,
+    },
+    {
+      name: "dag_signature",
       type: DataType.Text,
     },
   ],
@@ -457,6 +734,12 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  get_access_grants_for_credential: [
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+  ],
   has_profile: [
     {
       name: "address",
@@ -473,6 +756,75 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
+  delete_passporting_club_as_owner: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  add_passporting_peer_as_owner: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "name",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "passporting_server_url_base",
+      type: DataType.Text,
+    },
+  ],
+  delete_passporting_peer_as_owner: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+  ],
+  update_passporting_peer_as_owner: [
+    {
+      name: "id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "name",
+      type: DataType.Text,
+    },
+    {
+      name: "issuer_public_key",
+      type: DataType.Text,
+    },
+    {
+      name: "passporting_server_url_base",
+      type: DataType.Text,
+    },
+  ],
+  add_peer_to_club_as_owner: [
+    {
+      name: "passporting_club_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "passporting_peer_id",
+      type: DataType.Uuid,
+    },
+  ],
+  delete_peer_from_club_as_owner: [
+    {
+      name: "passporting_club_id",
+      type: DataType.Uuid,
+    },
+    {
+      name: "passporting_peer_id",
+      type: DataType.Uuid,
+    },
+  ],
+  get_passporting_peers: [],
 };
 export const AddInserterAsOwnerInputSchema: z.ZodObject<{
   id: z.ZodUUID;
@@ -1029,10 +1381,6 @@ export const RescindSharedCredentialInputSchema: z.ZodObject<{
 
 export type RescindSharedCredentialInput = z.infer<typeof RescindSharedCredentialInputSchema>;
 
-/**
- *  Passporting scenario
- *  It can be used with EVM-compatible signatures only
- */
 export async function rescindSharedCredential(
   kwilClient: KwilActionClient,
   params: RescindSharedCredentialInput,
@@ -1040,6 +1388,130 @@ export async function rescindSharedCredential(
   const inputs = RescindSharedCredentialInputSchema.parse(params);
   await kwilClient.execute({
     name: "rescind_shared_credential",
+    inputs,
+  });
+}
+
+export const ShareCredentialInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  original_credential_id: z.ZodUUID;
+  public_notes: z.ZodString;
+  public_notes_signature: z.ZodString;
+  broader_signature: z.ZodString;
+  content: z.ZodString;
+  content_hash: z.ZodString;
+  encryptor_public_key: z.ZodString;
+  issuer_auth_public_key: z.ZodString;
+  grantee_wallet_identifier: z.ZodString;
+  locked_until: z.ZodNumber;
+}> = z.object({
+  id: z.uuid(),
+  original_credential_id: z.uuid(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  content: z.string(),
+  content_hash: z.string(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+  grantee_wallet_identifier: z.string(),
+  locked_until: z.number(),
+});
+
+export type ShareCredentialInput = z.infer<typeof ShareCredentialInputSchema>;
+
+export async function shareCredential(
+  kwilClient: KwilActionClient,
+  params: ShareCredentialInput,
+): Promise<void> {
+  const inputs = ShareCredentialInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "share_credential",
+    inputs,
+    description: "Share a credential with creating AG",
+  });
+}
+
+export const CreateCredentialCopyInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  original_credential_id: z.ZodUUID;
+  public_notes: z.ZodString;
+  public_notes_signature: z.ZodString;
+  broader_signature: z.ZodString;
+  content: z.ZodString;
+  encryptor_public_key: z.ZodString;
+  issuer_auth_public_key: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  original_credential_id: z.uuid(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  content: z.string(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+});
+
+export type CreateCredentialCopyInput = z.infer<typeof CreateCredentialCopyInputSchema>;
+
+/**  Passporting scenario */
+export async function createCredentialCopy(
+  kwilClient: KwilActionClient,
+  params: CreateCredentialCopyInput,
+): Promise<void> {
+  const inputs = CreateCredentialCopyInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "create_credential_copy",
+    inputs,
+    description: "Share a credential without AG (access grant)",
+  });
+}
+
+export const ShareCredentialThroughDagInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  user_id: z.ZodUUID;
+  issuer_auth_public_key: z.ZodString;
+  encryptor_public_key: z.ZodString;
+  content: z.ZodString;
+  content_hash: z.ZodString;
+  public_notes: z.ZodString;
+  public_notes_signature: z.ZodString;
+  broader_signature: z.ZodString;
+  original_credential_id: z.ZodUUID;
+  dag_owner_wallet_identifier: z.ZodString;
+  dag_grantee_wallet_identifier: z.ZodString;
+  dag_locked_until: z.ZodNumber;
+  dag_signature: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  issuer_auth_public_key: z.string(),
+  encryptor_public_key: z.string(),
+  content: z.string(),
+  content_hash: z.string(),
+  public_notes: z.string(),
+  public_notes_signature: z.string(),
+  broader_signature: z.string(),
+  original_credential_id: z.uuid(),
+  dag_owner_wallet_identifier: z.string(),
+  dag_grantee_wallet_identifier: z.string(),
+  dag_locked_until: z.number(),
+  dag_signature: z.string(),
+});
+
+export type ShareCredentialThroughDagInput = z.infer<typeof ShareCredentialThroughDagInputSchema>;
+
+/**
+ *  It can be used with EVM-compatible signatures only
+ *  This works for EVM-compatible signatures only
+ */
+export async function shareCredentialThroughDag(
+  kwilClient: KwilActionClient,
+  params: ShareCredentialThroughDagInput,
+): Promise<void> {
+  const inputs = ShareCredentialThroughDagInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "share_credential_through_dag",
     inputs,
     description: "Share a credential through the DAG",
   });
@@ -1096,6 +1568,15 @@ export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgI
 /**
  *  For access grant
  *  Check the content creator (encryptor) of credentials is the issuer that user delegated to issue the credentials
+ *  Get the wallet type and public key for XRPL/NEAR wallets from database
+ *  Will fail if not in the RFC3339 format
+ *  Check the format and precedence
+ *  Check if current block timestamp in time range allowed by write grant.
+ *  @block_timestamp is a timestamp of previous block, which is can be a few seconds earlier
+ *  (max is 6 seconds in current network consensus settings) then a time on a requester's machine.
+ *  Also, if requester's machine has wrong time, it can be an issue.
+ *  Insert original credential
+ *  Insert copy credential
  */
 export async function createCredentialsByDwg(
   kwilClient: KwilActionClient,
@@ -1126,16 +1607,6 @@ export const CredentialExistAsInserterOutputSchema: z.ZodObject<{
 
 export type CredentialExistAsInserterOutput = z.infer<typeof CredentialExistAsInserterOutputSchema>;
 
-/**
- *  Will fail if not in the RFC3339 format
- *  Check the format and precedence
- *  Check if current block timestamp in time range allowed by write grant.
- *  @block_timestamp is a timestamp of previous block, which is can be a few seconds earlier
- *  (max is 6 seconds in current network consensus settings) then a time on a requester's machine.
- *  Also, if requester's machine has wrong time, it can be an issue.
- *  Insert original credential
- *  Insert copy credential
- */
 export async function credentialExistAsInserter(
   kwilClient: KwilActionClient,
   params: CredentialExistAsInserterInput,
@@ -1177,7 +1648,6 @@ export const GetCredentialOwnedOutputSchema: z.ZodObject<{
 
 export type GetCredentialOwnedOutput = z.infer<typeof GetCredentialOwnedOutputSchema>;
 
-/**  As a credential copy doesn't contain PUBLIC notes, we return respective original credential PUBLIC notes */
 export async function getCredentialOwned(
   kwilClient: KwilActionClient,
   params: GetCredentialOwnedInput,
@@ -1185,6 +1655,46 @@ export async function getCredentialOwned(
   const inputs = GetCredentialOwnedInputSchema.parse(params);
   return await kwilClient.call<GetCredentialOwnedOutput[]>({
     name: "get_credential_owned",
+    inputs,
+  });
+}
+
+export const GetCredentialSharedInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type GetCredentialSharedInput = z.infer<typeof GetCredentialSharedInputSchema>;
+
+export const GetCredentialSharedOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  user_id: z.ZodUUID;
+  public_notes: z.ZodString;
+  content: z.ZodString;
+  encryptor_public_key: z.ZodString;
+  issuer_auth_public_key: z.ZodString;
+  inserter: z.ZodNullable<z.ZodString>;
+}> = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  public_notes: z.string(),
+  content: z.string(),
+  encryptor_public_key: z.string(),
+  issuer_auth_public_key: z.string(),
+  inserter: z.string().nullable(),
+});
+
+export type GetCredentialSharedOutput = z.infer<typeof GetCredentialSharedOutputSchema>;
+
+/**  As a credential copy doesn't contain PUBLIC notes, we return respective original credential PUBLIC notes */
+export async function getCredentialShared(
+  kwilClient: KwilActionClient,
+  params: GetCredentialSharedInput,
+): Promise<GetCredentialSharedOutput[]> {
+  const inputs = GetCredentialSharedInputSchema.parse(params);
+  return await kwilClient.call<GetCredentialSharedOutput[]>({
+    name: "get_credential_shared",
     inputs,
   });
 }
@@ -1213,6 +1723,35 @@ export async function getSiblingCredentialId(
   return await kwilClient
     .call<GetSiblingCredentialIdOutput[]>({
       name: "get_sibling_credential_id",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const CredentialBelongsToCallerInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type CredentialBelongsToCallerInput = z.infer<typeof CredentialBelongsToCallerInputSchema>;
+
+export const CredentialBelongsToCallerOutputSchema: z.ZodObject<{
+  belongs: z.ZodBoolean;
+}> = z.object({
+  belongs: z.boolean(),
+});
+
+export type CredentialBelongsToCallerOutput = z.infer<typeof CredentialBelongsToCallerOutputSchema>;
+
+export async function credentialBelongsToCaller(
+  kwilClient: KwilActionClient,
+  params: CredentialBelongsToCallerInput,
+): Promise<CredentialBelongsToCallerOutput> {
+  const inputs = CredentialBelongsToCallerInputSchema.parse(params);
+  return await kwilClient
+    .call<CredentialBelongsToCallerOutput[]>({
+      name: "credential_belongs_to_caller",
       inputs,
     })
     .then((result) => result[0]);
@@ -1286,15 +1825,6 @@ export const AddAttributeInputSchema: z.ZodObject<{
 
 export type AddAttributeInput = z.infer<typeof AddAttributeInputSchema>;
 
-/**
- *  WRITE GRANTS ACTIONS
- *  Must be in yyyy-mm-ddThh:mm:ssZ format
- *  Must be in yyyy-mm-ddThh:mm:ssZ format
- *  Must be in yyyy-mm-ddThh:mm:ssZ format
- *  Will fail if not in the yyyy-mm-ddThh:mm:ssZ format, and not comply to RFC3339
- *  Check the format and precedence
- *  ACCESS GRANTS ACTIONS
- */
 export async function addAttribute(
   kwilClient: KwilActionClient,
   params: AddAttributeInput,
@@ -1302,6 +1832,166 @@ export async function addAttribute(
   const inputs = AddAttributeInputSchema.parse(params);
   await kwilClient.execute({
     name: "add_attribute",
+    inputs,
+    description: "Create a new attribute in your idOS profile",
+  });
+}
+
+export const GetAttributesOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  user_id: z.ZodUUID;
+  attribute_key: z.ZodString;
+  value: z.ZodString;
+  original_id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+  user_id: z.uuid(),
+  attribute_key: z.string(),
+  value: z.string(),
+  original_id: z.uuid(),
+});
+
+export type GetAttributesOutput = z.infer<typeof GetAttributesOutputSchema>;
+
+export async function getAttributes(kwilClient: KwilActionClient): Promise<GetAttributesOutput[]> {
+  return await kwilClient.call<GetAttributesOutput[]>({ name: "get_attributes", inputs: {} });
+}
+
+export const EditAttributeInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  attribute_key: z.ZodString;
+  value: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  attribute_key: z.string(),
+  value: z.string(),
+});
+
+export type EditAttributeInput = z.infer<typeof EditAttributeInputSchema>;
+
+export async function editAttribute(
+  kwilClient: KwilActionClient,
+  params: EditAttributeInput,
+): Promise<void> {
+  const inputs = EditAttributeInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "edit_attribute",
+    inputs,
+    description: "Edit an existing attribute",
+  });
+}
+
+export const RemoveAttributeInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type RemoveAttributeInput = z.infer<typeof RemoveAttributeInputSchema>;
+
+export async function removeAttribute(
+  kwilClient: KwilActionClient,
+  params: RemoveAttributeInput,
+): Promise<void> {
+  const inputs = RemoveAttributeInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "remove_attribute",
+    inputs,
+    description: "Remove an existing attribute",
+  });
+}
+
+export const ShareAttributeInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  original_attribute_id: z.ZodUUID;
+  attribute_key: z.ZodString;
+  value: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  original_attribute_id: z.uuid(),
+  attribute_key: z.string(),
+  value: z.string(),
+});
+
+export type ShareAttributeInput = z.infer<typeof ShareAttributeInputSchema>;
+
+export async function shareAttribute(
+  kwilClient: KwilActionClient,
+  params: ShareAttributeInput,
+): Promise<void> {
+  const inputs = ShareAttributeInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "share_attribute",
+    inputs,
+    description: "Share an attribute",
+  });
+}
+
+export const DwgMessageInputSchema: z.ZodObject<{
+  owner_wallet_identifier: z.ZodString;
+  grantee_wallet_identifier: z.ZodString;
+  issuer_public_key: z.ZodString;
+  id: z.ZodUUID;
+  access_grant_timelock: z.ZodString;
+  not_usable_before: z.ZodString;
+  not_usable_after: z.ZodString;
+}> = z.object({
+  owner_wallet_identifier: z.string(),
+  grantee_wallet_identifier: z.string(),
+  issuer_public_key: z.string(),
+  id: z.uuid(),
+  access_grant_timelock: z.string(),
+  not_usable_before: z.string(),
+  not_usable_after: z.string(),
+});
+
+export type DwgMessageInput = z.infer<typeof DwgMessageInputSchema>;
+
+export const DwgMessageOutputSchema: z.ZodObject<{
+  message: z.ZodString;
+}> = z.object({
+  message: z.string(),
+});
+
+export type DwgMessageOutput = z.infer<typeof DwgMessageOutputSchema>;
+
+/**
+ *  WRITE GRANTS ACTIONS
+ *  Must be in yyyy-mm-ddThh:mm:ssZ format
+ *  Must be in yyyy-mm-ddThh:mm:ssZ format
+ *  Must be in yyyy-mm-ddThh:mm:ssZ format
+ *  Will fail if not in the yyyy-mm-ddThh:mm:ssZ format, and not comply to RFC3339
+ *  Check the format and precedence
+ */
+export async function dwgMessage(
+  kwilClient: KwilActionClient,
+  params: DwgMessageInput,
+): Promise<DwgMessageOutput> {
+  const inputs = DwgMessageInputSchema.parse(params);
+  return await kwilClient
+    .call<DwgMessageOutput[]>({
+      name: "dwg_message",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const RevokeAccessGrantInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type RevokeAccessGrantInput = z.infer<typeof RevokeAccessGrantInputSchema>;
+
+/**  ACCESS GRANTS ACTIONS */
+export async function revokeAccessGrant(
+  kwilClient: KwilActionClient,
+  params: RevokeAccessGrantInput,
+): Promise<void> {
+  const inputs = RevokeAccessGrantInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "revoke_access_grant",
     inputs,
     description: "Revoke an Access Grant from idOS",
   });
@@ -1329,11 +2019,6 @@ export const GetAccessGrantsOwnedOutputSchema: z.ZodObject<{
 
 export type GetAccessGrantsOwnedOutput = z.infer<typeof GetAccessGrantsOwnedOutputSchema>;
 
-/**
- *  As arguments can be undefined (user can not send them at all), we have to have default values: page=1, size=20
- *  Page number starts from 1, as UI usually shows to user in pagination element
- *  Ordering is consistent because we use height as first ordering parameter
- */
 export async function getAccessGrantsOwned(
   kwilClient: KwilActionClient,
 ): Promise<GetAccessGrantsOwnedOutput[]> {
@@ -1341,6 +2026,118 @@ export async function getAccessGrantsOwned(
     name: "get_access_grants_owned",
     inputs: {},
   });
+}
+
+export const GetAccessGrantsGrantedInputSchema: z.ZodObject<{
+  user_id: z.ZodNullable<z.ZodUUID>;
+  page: z.ZodNumber;
+  size: z.ZodNumber;
+}> = z.object({
+  user_id: z.uuid().nullable(),
+  page: z.number(),
+  size: z.number(),
+});
+
+export type GetAccessGrantsGrantedInput = z.infer<typeof GetAccessGrantsGrantedInputSchema>;
+
+export const GetAccessGrantsGrantedOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  ag_owner_user_id: z.ZodUUID;
+  ag_grantee_wallet_identifier: z.ZodString;
+  data_id: z.ZodUUID;
+  locked_until: z.ZodNumber;
+  content_hash: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodString;
+  inserter_id: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  ag_owner_user_id: z.uuid(),
+  ag_grantee_wallet_identifier: z.string(),
+  data_id: z.uuid(),
+  locked_until: z.number(),
+  content_hash: z.string().nullable(),
+  inserter_type: z.string(),
+  inserter_id: z.string(),
+});
+
+export type GetAccessGrantsGrantedOutput = z.infer<typeof GetAccessGrantsGrantedOutputSchema>;
+
+/**
+ *  As arguments can be undefined (user can not send them at all), we have to have default values: page=1, size=20
+ *  Page number starts from 1, as UI usually shows to user in pagination element
+ *  Ordering is consistent because we use height as first ordering parameter
+ */
+export async function getAccessGrantsGranted(
+  kwilClient: KwilActionClient,
+  params: GetAccessGrantsGrantedInput,
+): Promise<GetAccessGrantsGrantedOutput[]> {
+  const inputs = GetAccessGrantsGrantedInputSchema.parse(params);
+  return await kwilClient.call<GetAccessGrantsGrantedOutput[]>({
+    name: "get_access_grants_granted",
+    inputs,
+  });
+}
+
+export const GetAccessGrantsGrantedCountInputSchema: z.ZodObject<{
+  user_id: z.ZodNullable<z.ZodUUID>;
+}> = z.object({
+  user_id: z.uuid().nullable(),
+});
+
+export type GetAccessGrantsGrantedCountInput = z.infer<
+  typeof GetAccessGrantsGrantedCountInputSchema
+>;
+
+export const GetAccessGrantsGrantedCountOutputSchema: z.ZodObject<{
+  count: z.ZodNumber;
+}> = z.object({
+  count: z.number(),
+});
+
+export type GetAccessGrantsGrantedCountOutput = z.infer<
+  typeof GetAccessGrantsGrantedCountOutputSchema
+>;
+
+export async function getAccessGrantsGrantedCount(
+  kwilClient: KwilActionClient,
+  params: GetAccessGrantsGrantedCountInput,
+): Promise<GetAccessGrantsGrantedCountOutput> {
+  const inputs = GetAccessGrantsGrantedCountInputSchema.parse(params);
+  return await kwilClient
+    .call<GetAccessGrantsGrantedCountOutput[]>({
+      name: "get_access_grants_granted_count",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const HasLockedAccessGrantsInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type HasLockedAccessGrantsInput = z.infer<typeof HasLockedAccessGrantsInputSchema>;
+
+export const HasLockedAccessGrantsOutputSchema: z.ZodObject<{
+  has: z.ZodBoolean;
+}> = z.object({
+  has: z.boolean(),
+});
+
+export type HasLockedAccessGrantsOutput = z.infer<typeof HasLockedAccessGrantsOutputSchema>;
+
+export async function hasLockedAccessGrants(
+  kwilClient: KwilActionClient,
+  params: HasLockedAccessGrantsInput,
+): Promise<HasLockedAccessGrantsOutput> {
+  const inputs = HasLockedAccessGrantsInputSchema.parse(params);
+  return await kwilClient
+    .call<HasLockedAccessGrantsOutput[]>({
+      name: "has_locked_access_grants",
+      inputs,
+    })
+    .then((result) => result[0]);
 }
 
 export const DagMessageInputSchema: z.ZodObject<{
@@ -1367,7 +2164,6 @@ export const DagMessageOutputSchema: z.ZodObject<{
 
 export type DagMessageOutput = z.infer<typeof DagMessageOutputSchema>;
 
-/**  Get the wallet type and public key for XRPL/NEAR wallets from database */
 export async function dagMessage(
   kwilClient: KwilActionClient,
   params: DagMessageInput,
@@ -1379,6 +2175,40 @@ export async function dagMessage(
       inputs,
     })
     .then((result) => result[0]);
+}
+
+export const CreateAgByDagForCopyInputSchema: z.ZodObject<{
+  dag_owner_wallet_identifier: z.ZodString;
+  dag_grantee_wallet_identifier: z.ZodString;
+  dag_data_id: z.ZodUUID;
+  dag_locked_until: z.ZodNumber;
+  dag_content_hash: z.ZodString;
+  dag_signature: z.ZodString;
+}> = z.object({
+  dag_owner_wallet_identifier: z.string(),
+  dag_grantee_wallet_identifier: z.string(),
+  dag_data_id: z.uuid(),
+  dag_locked_until: z.number(),
+  dag_content_hash: z.string(),
+  dag_signature: z.string(),
+});
+
+export type CreateAgByDagForCopyInput = z.infer<typeof CreateAgByDagForCopyInputSchema>;
+
+/**
+ *  Get the wallet type and public key for XRPL/NEAR wallets from database
+ *  This works for EVM-compatible signatures only
+ */
+export async function createAgByDagForCopy(
+  kwilClient: KwilActionClient,
+  params: CreateAgByDagForCopyInput,
+): Promise<void> {
+  const inputs = CreateAgByDagForCopyInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "create_ag_by_dag_for_copy",
+    inputs,
+    description: "Create an Access Grant in idOS",
+  });
 }
 
 export const CreateAccessGrantInputSchema: z.ZodObject<{
@@ -1409,6 +2239,51 @@ export async function createAccessGrant(
     name: "create_access_grant",
     inputs,
     description: "Create a new access grant",
+  });
+}
+
+export const GetAccessGrantsForCredentialInputSchema: z.ZodObject<{
+  credential_id: z.ZodUUID;
+}> = z.object({
+  credential_id: z.uuid(),
+});
+
+export type GetAccessGrantsForCredentialInput = z.infer<
+  typeof GetAccessGrantsForCredentialInputSchema
+>;
+
+export const GetAccessGrantsForCredentialOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  ag_owner_user_id: z.ZodUUID;
+  ag_grantee_wallet_identifier: z.ZodString;
+  data_id: z.ZodUUID;
+  locked_until: z.ZodNumber;
+  content_hash: z.ZodNullable<z.ZodString>;
+  inserter_type: z.ZodString;
+  inserter_id: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  ag_owner_user_id: z.uuid(),
+  ag_grantee_wallet_identifier: z.string(),
+  data_id: z.uuid(),
+  locked_until: z.number(),
+  content_hash: z.string().nullable(),
+  inserter_type: z.string(),
+  inserter_id: z.string(),
+});
+
+export type GetAccessGrantsForCredentialOutput = z.infer<
+  typeof GetAccessGrantsForCredentialOutputSchema
+>;
+
+export async function getAccessGrantsForCredential(
+  kwilClient: KwilActionClient,
+  params: GetAccessGrantsForCredentialInput,
+): Promise<GetAccessGrantsForCredentialOutput[]> {
+  const inputs = GetAccessGrantsForCredentialInputSchema.parse(params);
+  return await kwilClient.call<GetAccessGrantsForCredentialOutput[]>({
+    name: "get_access_grants_for_credential",
+    inputs,
   });
 }
 
@@ -1458,10 +2333,7 @@ export const AddPassportingClubAsOwnerInputSchema: z.ZodObject<{
 
 export type AddPassportingClubAsOwnerInput = z.infer<typeof AddPassportingClubAsOwnerInputSchema>;
 
-/**
- *  PASSPORTING CLUB ACTIONS
- *  get clubs the peer belongs to
- */
+/**  PASSPORTING CLUB ACTIONS */
 export async function addPassportingClubAsOwner(
   kwilClient: KwilActionClient,
   params: AddPassportingClubAsOwnerInput,
@@ -1470,6 +2342,176 @@ export async function addPassportingClubAsOwner(
   await kwilClient.execute({
     name: "add_passporting_club_as_owner",
     inputs,
+    description: "Add a new passporting club as owner",
+  });
+}
+
+export const DeletePassportingClubAsOwnerInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type DeletePassportingClubAsOwnerInput = z.infer<
+  typeof DeletePassportingClubAsOwnerInputSchema
+>;
+
+export async function deletePassportingClubAsOwner(
+  kwilClient: KwilActionClient,
+  params: DeletePassportingClubAsOwnerInput,
+): Promise<void> {
+  const inputs = DeletePassportingClubAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "delete_passporting_club_as_owner",
+    inputs,
+    description: "Delete a passporting club as owner",
+  });
+}
+
+export const AddPassportingPeerAsOwnerInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  name: z.ZodString;
+  issuer_public_key: z.ZodString;
+  passporting_server_url_base: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  issuer_public_key: z.string(),
+  passporting_server_url_base: z.string(),
+});
+
+export type AddPassportingPeerAsOwnerInput = z.infer<typeof AddPassportingPeerAsOwnerInputSchema>;
+
+export async function addPassportingPeerAsOwner(
+  kwilClient: KwilActionClient,
+  params: AddPassportingPeerAsOwnerInput,
+): Promise<void> {
+  const inputs = AddPassportingPeerAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "add_passporting_peer_as_owner",
+    inputs,
+    description: "Add a passporting peer as owner",
+  });
+}
+
+export const DeletePassportingPeerAsOwnerInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+}> = z.object({
+  id: z.uuid(),
+});
+
+export type DeletePassportingPeerAsOwnerInput = z.infer<
+  typeof DeletePassportingPeerAsOwnerInputSchema
+>;
+
+export async function deletePassportingPeerAsOwner(
+  kwilClient: KwilActionClient,
+  params: DeletePassportingPeerAsOwnerInput,
+): Promise<void> {
+  const inputs = DeletePassportingPeerAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "delete_passporting_peer_as_owner",
+    inputs,
+    description: "Delete a passporting peer as owner",
+  });
+}
+
+export const UpdatePassportingPeerAsOwnerInputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  name: z.ZodString;
+  issuer_public_key: z.ZodString;
+  passporting_server_url_base: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  issuer_public_key: z.string(),
+  passporting_server_url_base: z.string(),
+});
+
+export type UpdatePassportingPeerAsOwnerInput = z.infer<
+  typeof UpdatePassportingPeerAsOwnerInputSchema
+>;
+
+export async function updatePassportingPeerAsOwner(
+  kwilClient: KwilActionClient,
+  params: UpdatePassportingPeerAsOwnerInput,
+): Promise<void> {
+  const inputs = UpdatePassportingPeerAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "update_passporting_peer_as_owner",
+    inputs,
+    description: "Update a passporting peer as owner",
+  });
+}
+
+export const AddPeerToClubAsOwnerInputSchema: z.ZodObject<{
+  passporting_club_id: z.ZodUUID;
+  passporting_peer_id: z.ZodUUID;
+}> = z.object({
+  passporting_club_id: z.uuid(),
+  passporting_peer_id: z.uuid(),
+});
+
+export type AddPeerToClubAsOwnerInput = z.infer<typeof AddPeerToClubAsOwnerInputSchema>;
+
+export async function addPeerToClubAsOwner(
+  kwilClient: KwilActionClient,
+  params: AddPeerToClubAsOwnerInput,
+): Promise<void> {
+  const inputs = AddPeerToClubAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "add_peer_to_club_as_owner",
+    inputs,
+    description: "Add a peer to a passporting club as owner",
+  });
+}
+
+export const DeletePeerFromClubAsOwnerInputSchema: z.ZodObject<{
+  passporting_club_id: z.ZodUUID;
+  passporting_peer_id: z.ZodUUID;
+}> = z.object({
+  passporting_club_id: z.uuid(),
+  passporting_peer_id: z.uuid(),
+});
+
+export type DeletePeerFromClubAsOwnerInput = z.infer<typeof DeletePeerFromClubAsOwnerInputSchema>;
+
+export async function deletePeerFromClubAsOwner(
+  kwilClient: KwilActionClient,
+  params: DeletePeerFromClubAsOwnerInput,
+): Promise<void> {
+  const inputs = DeletePeerFromClubAsOwnerInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "delete_peer_from_club_as_owner",
+    inputs,
     description: "Delete a peer from a passporting club as owner",
+  });
+}
+
+export const GetPassportingPeersOutputSchema: z.ZodObject<{
+  id: z.ZodUUID;
+  name: z.ZodString;
+  issuer_public_key: z.ZodString;
+  passporting_server_url_base: z.ZodString;
+  club_id: z.ZodUUID;
+  club_name: z.ZodString;
+}> = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  issuer_public_key: z.string(),
+  passporting_server_url_base: z.string(),
+  club_id: z.uuid(),
+  club_name: z.string(),
+});
+
+export type GetPassportingPeersOutput = z.infer<typeof GetPassportingPeersOutputSchema>;
+
+/**  get clubs the peer belongs to */
+export async function getPassportingPeers(
+  kwilClient: KwilActionClient,
+): Promise<GetPassportingPeersOutput[]> {
+  return await kwilClient.call<GetPassportingPeersOutput[]>({
+    name: "get_passporting_peers",
+    inputs: {},
   });
 }
