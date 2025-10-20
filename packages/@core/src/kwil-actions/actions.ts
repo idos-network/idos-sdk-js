@@ -1389,6 +1389,7 @@ export async function rescindSharedCredential(
   await kwilClient.execute({
     name: "rescind_shared_credential",
     inputs,
+    description: "Rescind a shared credential as a grantee",
   });
 }
 
