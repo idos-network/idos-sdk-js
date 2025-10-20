@@ -197,7 +197,7 @@ function deriveCardanoAddress(masterKey: HDKey, path: string): string {
 /**
  * Uncompress a compressed secp256k1 public key (33 bytes -> 65 bytes)
  */
-function uncompressPublicKey(compressed: Uint8Array): Uint8Array {
+export function uncompressPublicKey(compressed: Uint8Array): Uint8Array {
   if (compressed.length === 65) {
     return compressed; // Already uncompressed
   }
@@ -269,7 +269,7 @@ function modPow(base: bigint, exp: bigint, mod: bigint): bigint {
  * Keccak-256 hash function for Ethereum addresses
  * Uses a simplified implementation - for production use @noble/hashes or ethers.js
  */
-function keccak256(data: Uint8Array): string {
+export function keccak256(data: Uint8Array): string {
   // Simplified Keccak implementation
   // For production, use: import { keccak_256 } from '@noble/hashes/sha3';
 

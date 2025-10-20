@@ -1,11 +1,20 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { getEntropy, getPublicKey } from "@/lib/api";
-import { storage } from "@/lib/storage";
+import { useStorageContext } from "@/lib/storage";
 import { faceTec } from "./utils";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setEntropy, entropy } = useStorageContext();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    // If already logged in, redirect to backTo or /wallet
+    if (entropy) {
+      navigate(searchParams.get("backTo") || "/wallet");
+    }
+  }, []);
 
   // Get the FaceTec SDK initials
   useEffect(() => {
@@ -17,9 +26,13 @@ export default function Login() {
         faceTec.onLivenessCheckClick((status, token, errorMessage) => {
           if (status && token) {
             getEntropy(token).then((data) => {
-              storage.set("entropy", data.entropy);
-              storage.set("userId", data.faceSignUserId);
-              navigate("/wallet");
+              // storage.set("entropy", data.entropy);
+              // storage.set("userId", data.faceSignUserId);
+              setEntropy(data.entropy);
+
+              // Redirect to backTo parameter or default to /wallet
+              const backTo = searchParams.get("backTo") || "/wallet";
+              navigate(backTo);
             });
           } else {
             window.alert(errorMessage || "Liveness check failed");

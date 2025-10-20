@@ -1,9 +1,20 @@
-import { NavLink } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import Logo from "@/assets/idos-logo.svg?url";
 import { Heading } from "../../components/ui/heading";
 import { Paragraph } from "../../components/ui/paragraph";
+import { useEffect } from "react";
+import { useStorageContext } from "@/lib/storage";
 
 export default function Home() {
+  const { entropy } = useStorageContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (entropy) {
+      navigate("/wallet");
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <div className="container mx-auto px-4 py-16">
