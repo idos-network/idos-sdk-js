@@ -6,6 +6,10 @@ import { App } from "./app";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Wallet from "./pages/wallet";
+import ErrorPage from "./pages/error";
+import { ProtectedRoute } from "./components/protected-route";
+import Session from "./pages/session";
+import Sign from "./pages/sign";
 
 const router = createBrowserRouter([
   {
@@ -21,8 +25,26 @@ const router = createBrowserRouter([
         Component: Login,
       },
       {
-        path: "wallet",
-        Component: Wallet,
+        path: "error",
+        Component: ErrorPage,
+      },
+      {
+        // Protected routes - require login
+        element: <ProtectedRoute />,
+        children: [
+          {
+            path: "session",
+            Component: Session,
+          },
+          {
+            path: "wallet",
+            Component: Wallet,
+          },
+          {
+            path: "sign",
+            Component: Sign,
+          },
+        ],
       },
     ],
   },
