@@ -1,9 +1,9 @@
 import { NavLink, useNavigate } from "react-router";
 import Logo from "@/assets/idos-logo.svg?url";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
+import { Heading } from "../../components/heading";
+import { Paragraph } from "../../components/paragraph";
 import { useEffect } from "react";
-import { useStorageContext } from "@/lib/storage";
+import { useStorageContext } from "@/contexts/storage";
 
 export default function Home() {
   const { entropy } = useStorageContext();
