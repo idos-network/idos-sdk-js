@@ -45,7 +45,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
         evm: signer,
       };
 
-      const withSigner = await newClient.withUserSigner(signerSrc["evm"]);
+      const withSigner = await newClient.withUserSigner(signerSrc.evm);
 
       // Check if the user has a profile and log in if they do
       if (await withSigner.hasProfile()) {

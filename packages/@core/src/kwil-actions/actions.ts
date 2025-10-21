@@ -260,6 +260,12 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
   ],
+  rescind_shared_credential: [
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+  ],
   share_credential: [
     {
       name: "id",
@@ -980,7 +986,8 @@ export async function updateUserPubKeyAsInserter(
   await kwilClient.execute({
     name: "update_user_pub_key_as_inserter",
     inputs,
-    description: "Update user's encryption key and password store in idOS",
+    description:
+      "Update user's encryption key and password store in idOS as inserter (profile creator)",
   });
 }
 
@@ -1066,7 +1073,7 @@ export async function upsertWalletAsInserter(
   await kwilClient.execute({
     name: "upsert_wallet_as_inserter",
     inputs,
-    description: "Add a wallet to idOS",
+    description: "Add a wallet to idOS by inserter (profile creator)",
   });
 }
 
@@ -1178,7 +1185,8 @@ export async function upsertCredentialAsInserter(
   await kwilClient.execute({
     name: "upsert_credential_as_inserter",
     inputs,
-    description: "Add or update a credential in idOS on behalf of a user",
+    description:
+      "Add or update a credential in idOS on behalf of a user by permissioned profile creator (inserter) ",
   });
 }
 
@@ -1219,15 +1227,15 @@ export const GetCredentialsOutputSchema: z.ZodObject<{
   user_id: z.ZodUUID;
   public_notes: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodString;
-  original_id: z.ZodUUID;
+  inserter: z.ZodNullable<z.ZodString>;
+  original_id: z.ZodNullable<z.ZodUUID>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   public_notes: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string(),
-  original_id: z.uuid(),
+  inserter: z.string().nullable(),
+  original_id: z.uuid().nullable(),
 });
 
 export type GetCredentialsOutput = z.infer<typeof GetCredentialsOutputSchema>;
@@ -1254,16 +1262,16 @@ export const GetCredentialsSharedByUserOutputSchema: z.ZodObject<{
   public_notes: z.ZodString;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodString;
-  original_id: z.ZodUUID;
+  inserter: z.ZodNullable<z.ZodString>;
+  original_id: z.ZodNullable<z.ZodUUID>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   public_notes: z.string(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string(),
-  original_id: z.uuid(),
+  inserter: z.string().nullable(),
+  original_id: z.uuid().nullable(),
 });
 
 export type GetCredentialsSharedByUserOutput = z.infer<
@@ -1341,7 +1349,7 @@ export async function editPublicNotesAsIssuer(
   await kwilClient.execute({
     name: "edit_public_notes_as_issuer",
     inputs,
-    description: "Edit a credential in your idOS profile",
+    description: "Edit public notes in a credential as issuer",
   });
 }
 
@@ -1362,6 +1370,26 @@ export async function removeCredential(
     name: "remove_credential",
     inputs,
     description: "Remove a credential from your idOS profile",
+  });
+}
+
+export const RescindSharedCredentialInputSchema: z.ZodObject<{
+  credential_id: z.ZodUUID;
+}> = z.object({
+  credential_id: z.uuid(),
+});
+
+export type RescindSharedCredentialInput = z.infer<typeof RescindSharedCredentialInputSchema>;
+
+export async function rescindSharedCredential(
+  kwilClient: KwilActionClient,
+  params: RescindSharedCredentialInput,
+): Promise<void> {
+  const inputs = RescindSharedCredentialInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "rescind_shared_credential",
+    inputs,
+    description: "Rescind a shared credential as a grantee",
   });
 }
 
@@ -1401,7 +1429,7 @@ export async function shareCredential(
   await kwilClient.execute({
     name: "share_credential",
     inputs,
-    description: "Share a credential with another idOS user",
+    description: "Share a credential with creating AG",
   });
 }
 
@@ -1436,7 +1464,7 @@ export async function createCredentialCopy(
   await kwilClient.execute({
     name: "create_credential_copy",
     inputs,
-    description: "Share a credential with another user on idOS",
+    description: "Share a credential without AG (access grant)",
   });
 }
 
@@ -1540,7 +1568,7 @@ export type CreateCredentialsByDwgInput = z.infer<typeof CreateCredentialsByDwgI
 
 /**
  *  For access grant
- *  Check the content creator (encryptor) is the issuer that user delegated to issue the credential
+ *  Check the content creator (encryptor) of credentials is the issuer that user delegated to issue the credentials
  *  Get the wallet type and public key for XRPL/NEAR wallets from database
  *  Will fail if not in the RFC3339 format
  *  Check the format and precedence
@@ -1559,7 +1587,8 @@ export async function createCredentialsByDwg(
   await kwilClient.execute({
     name: "create_credentials_by_dwg",
     inputs,
-    description: "Create a new credential in your idOS profile",
+    description:
+      "Add original credential and copy credential with AG on behalf of a user (using delegated write grant given by the user)",
   });
 }
 
@@ -1607,7 +1636,7 @@ export const GetCredentialOwnedOutputSchema: z.ZodObject<{
   content: z.ZodString;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodString;
+  inserter: z.ZodNullable<z.ZodString>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
@@ -1615,7 +1644,7 @@ export const GetCredentialOwnedOutputSchema: z.ZodObject<{
   content: z.string(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string(),
+  inserter: z.string().nullable(),
 });
 
 export type GetCredentialOwnedOutput = z.infer<typeof GetCredentialOwnedOutputSchema>;
@@ -1646,7 +1675,7 @@ export const GetCredentialSharedOutputSchema: z.ZodObject<{
   content: z.ZodString;
   encryptor_public_key: z.ZodString;
   issuer_auth_public_key: z.ZodString;
-  inserter: z.ZodString;
+  inserter: z.ZodNullable<z.ZodString>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
@@ -1654,7 +1683,7 @@ export const GetCredentialSharedOutputSchema: z.ZodObject<{
   content: z.string(),
   encryptor_public_key: z.string(),
   issuer_auth_public_key: z.string(),
-  inserter: z.string(),
+  inserter: z.string().nullable(),
 });
 
 export type GetCredentialSharedOutput = z.infer<typeof GetCredentialSharedOutputSchema>;
@@ -1975,7 +2004,7 @@ export const GetAccessGrantsOwnedOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.ZodString;
   data_id: z.ZodUUID;
   locked_until: z.ZodNumber;
-  content_hash: z.ZodString;
+  content_hash: z.ZodNullable<z.ZodString>;
   inserter_type: z.ZodString;
   inserter_id: z.ZodString;
 }> = z.object({
@@ -1984,7 +2013,7 @@ export const GetAccessGrantsOwnedOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.string(),
   data_id: z.uuid(),
   locked_until: z.number(),
-  content_hash: z.string(),
+  content_hash: z.string().nullable(),
   inserter_type: z.string(),
   inserter_id: z.string(),
 });
@@ -2018,7 +2047,7 @@ export const GetAccessGrantsGrantedOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.ZodString;
   data_id: z.ZodUUID;
   locked_until: z.ZodNumber;
-  content_hash: z.ZodString;
+  content_hash: z.ZodNullable<z.ZodString>;
   inserter_type: z.ZodString;
   inserter_id: z.ZodString;
 }> = z.object({
@@ -2027,7 +2056,7 @@ export const GetAccessGrantsGrantedOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.string(),
   data_id: z.uuid(),
   locked_until: z.number(),
-  content_hash: z.string(),
+  content_hash: z.string().nullable(),
   inserter_type: z.string(),
   inserter_id: z.string(),
 });
@@ -2230,7 +2259,7 @@ export const GetAccessGrantsForCredentialOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.ZodString;
   data_id: z.ZodUUID;
   locked_until: z.ZodNumber;
-  content_hash: z.ZodString;
+  content_hash: z.ZodNullable<z.ZodString>;
   inserter_type: z.ZodString;
   inserter_id: z.ZodString;
 }> = z.object({
@@ -2239,7 +2268,7 @@ export const GetAccessGrantsForCredentialOutputSchema: z.ZodObject<{
   ag_grantee_wallet_identifier: z.string(),
   data_id: z.uuid(),
   locked_until: z.number(),
-  content_hash: z.string(),
+  content_hash: z.string().nullable(),
   inserter_type: z.string(),
   inserter_id: z.string(),
 });
@@ -2362,7 +2391,7 @@ export async function addPassportingPeerAsOwner(
   await kwilClient.execute({
     name: "add_passporting_peer_as_owner",
     inputs,
-    description: "Update a passporting peer as owner",
+    description: "Add a passporting peer as owner",
   });
 }
 

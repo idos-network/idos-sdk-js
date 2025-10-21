@@ -79,9 +79,9 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       // Extract signature from response object
       if (typeof response === "string") {
         signature = response;
-      } else if (response && response.result && response.result.signedMessage) {
+      } else if (response?.result?.signedMessage) {
         signature = response.result.signedMessage;
-      } else if (response && response.signedMessage) {
+      } else if (response?.signedMessage) {
         signature = response.signedMessage;
       } else {
         throw new Error(
