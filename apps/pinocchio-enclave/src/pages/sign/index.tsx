@@ -1,19 +1,27 @@
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
-import { useWallet } from "@/lib/wallet";
+import { Heading } from "../../components/heading";
+import { Paragraph } from "../../components/paragraph";
+import { useWallet } from "@/contexts/wallet";
 import { useState } from "react";
 
-export default function Session() {
-  const { sessionProposals } = useWallet();
+export default function Sign() {
+  const { signProposals, sign } = useWallet();
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const firstProposal = sessionProposals[0];
+  const firstProposal = signProposals[0];
 
   const handleApprove = async () => {
     if (!firstProposal || isProcessing) return;
     setIsProcessing(true);
     try {
-      // await approveSession(firstProposal.id);
+      const signature = await sign(firstProposal.data);
+      console.log("Signature:", signature);
+      window.opener?.postMessage({
+        type: "sign_response",
+        data: {
+          id: firstProposal.id,
+          signature,
+        },
+      }, "*");
     } finally {
       setIsProcessing(false);
     }
@@ -47,10 +55,10 @@ export default function Session() {
               as="h1"
               className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent"
             >
-              Session Approval
+              Sign Approval
             </Heading>
             <Paragraph className="text-lg text-gray-300">
-              Please review the session proposal details below and choose to approve or reject the request.
+              Please review the sign proposal details below and choose to approve or reject the request.
             </Paragraph>
           </div>
 
@@ -59,7 +67,7 @@ export default function Session() {
             <div>
               <h3 className="text-sm font-semibold text-gray-400 mb-2">Application</h3>
               <p className="text-white">{firstProposal.metadata.name}</p>
-              <p className="text-sm text-gray-400">{firstProposal.metadata.description}</p>
+              <p className="text-sm text-gray-400">{firstProposal.data}</p>
             </div>
           </div>
 
@@ -78,7 +86,7 @@ export default function Session() {
               disabled={isProcessing}
               className="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
             >
-              {isProcessing ? "Processing..." : "Approve"}
+              {isProcessing ? "Processing..." : "Sign"}
             </button>
           </div>
         </div>

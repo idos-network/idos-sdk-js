@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { useStorageContext } from "./storage";
-import { HDNodeWallet, Wallet } from "ethers";
+import { type HDNodeWallet, Wallet } from "ethers";
 
 export interface SessionProposal {
   id: number;
