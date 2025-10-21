@@ -11,6 +11,7 @@ import {
   getPassportingPeers,
   type idOSGrant,
   type idOSPassportingPeer,
+  rescindSharedCredential,
 } from "@idos-network/core/kwil-actions";
 import {
   createNodeKwilClient,
@@ -100,6 +101,10 @@ export class idOSConsumer {
       credentialCopy.content,
       credentialCopy.encryptor_public_key,
     );
+  }
+
+  async rescindSharedCredential(credentialId: string): Promise<void> {
+    return rescindSharedCredential(this.#kwilClient, { credential_id: credentialId });
   }
 
   async getGrantsCount(userId: string | null = null): Promise<number> {
