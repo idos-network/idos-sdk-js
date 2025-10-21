@@ -7,7 +7,7 @@ export type idOSCredential = {
   content: string;
   encryptor_public_key: string;
   issuer_auth_public_key: string;
-  original_id?: string;
+  original_id?: string | null;
 };
 
 export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
