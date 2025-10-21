@@ -32,8 +32,9 @@
   "private": true,
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
     "dev": "vite",
+    "clean": "rm -rf dist .turbo",
     "preview": "vite preview"
   },
   "type": "module"
