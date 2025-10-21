@@ -43,7 +43,6 @@
     "build": "tsc -b && vite build",
     "typecheck": "tsc --noEmit",
     "dev": "vite",
-    "clean": "rm -rf dist .turbo",
     "preview": "vite preview"
   },
   "type": "module"
