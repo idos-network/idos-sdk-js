@@ -3,7 +3,7 @@
   "description": "Core utilities and types for idOS SDK's",
   "version": "0.0.1",
   "dependencies": {
-    "axios": "0.27.2",
+    "axios": "0.30.2",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/kwil-js": "catalog:core",
     "@near-wallet-selector/core": "catalog:near",
