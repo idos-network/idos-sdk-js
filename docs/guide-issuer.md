@@ -176,7 +176,7 @@ const user = {
 
 const wallet = {
   address,
-  wallet_type: "EVM", // vs. NEAR
+  wallet_type: "EVM", // Options: "EVM", "NEAR", "XRPL", "STELLAR"
   message: ownershipProofMessage,
   signature: ownershipProofSignature,
   public_key: ethers.SigningKey.recoverPublicKey(

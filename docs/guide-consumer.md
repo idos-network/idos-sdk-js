@@ -114,6 +114,30 @@ const secretKey = "your_32_byte_secret_key_here";
 const signer = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
 ```
 
+#### Stellar Signer Interface
+
+```typescript
+{
+  publicKey: string,
+  sign: (message: Uint8Array) => Uint8Array,
+  signatureType: () => "ed25519",
+  publicAddress: string
+}
+```
+
+**Implementation with @stellar/stellar-sdk:**
+```typescript
+import { Keypair } from "@stellar/stellar-sdk";
+
+// Option 1: Generate from secret key
+const secretKey = "SXXX..."; // Your Stellar secret key
+const signer = Keypair.fromSecret(secretKey);
+
+// The signer object already conforms to the required interface
+```
+
+> **Note for Stellar Signers**: The Stellar Keypair from `@stellar/stellar-sdk` already implements the required interface and can be used directly as the signer.
+
 #### XRPL Signer Interface
 
 ```typescript

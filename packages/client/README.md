@@ -37,3 +37,4 @@ await idOSClient.addWallet({
 - `"evm"` - Ethereum Virtual Machine compatible wallets (Ethereum, Polygon, etc.)
 - `"xrpl"` - XRP Ledger wallets
 - `"near"` - NEAR Protocol wallets
+- `"stellar"` - Stellar network wallets
