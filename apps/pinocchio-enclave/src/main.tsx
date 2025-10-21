@@ -1,15 +1,17 @@
 import "./styles.css";
+
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
+
 import { App } from "./app";
 import Home from "./pages/home";
 import Login from "./pages/login";
 import Wallet from "./pages/wallet";
 import ErrorPage from "./pages/error";
-import { ProtectedRoute } from "./components/protected-route";
 import Session from "./pages/session";
 import Sign from "./pages/sign";
+import ProtectedRoute from "./lib/protected-route";
 
 const router = createBrowserRouter([
   {
@@ -29,8 +31,8 @@ const router = createBrowserRouter([
         Component: ErrorPage,
       },
       {
-        // Protected routes - require login
-        element: <ProtectedRoute />,
+        // Protected routes - require stored encrypted mnemonic
+        Component: ProtectedRoute,
         children: [
           {
             path: "session",

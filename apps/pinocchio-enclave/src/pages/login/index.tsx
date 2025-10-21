@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { getEntropy, getPublicKey } from "@/lib/api";
-import { useStorageContext } from "@/lib/storage";
+import { useStorageContext } from "@/contexts/storage";
 import { faceTec } from "./utils";
 
 export default function Login() {

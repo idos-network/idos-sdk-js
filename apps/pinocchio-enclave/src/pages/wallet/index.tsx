@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { storage } from "@/lib/storage";
+import { storage } from "@/contexts/storage";
 import { copyToClipboard, deriveWallets, type WalletAddress } from "@/lib/wallets";
-import { Heading } from "../../components/ui/heading";
-import { Paragraph } from "../../components/ui/paragraph";
+import { Heading } from "../../components/heading";
+import { Paragraph } from "../../components/paragraph";
 
 export default function Wallet() {
   const entropy = storage.get("entropy");
