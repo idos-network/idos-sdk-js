@@ -130,7 +130,7 @@ const signer = nacl.sign.keyPair.fromSecretKey(hexDecode(secretKey));
 import { Keypair } from "@stellar/stellar-sdk";
 
 // Option 1: Generate from secret key
-const secretKey = "SXXX..."; // Your Stellar secret key
+const secretKey = "Your Stellar secret key";
 const signer = Keypair.fromSecret(secretKey);
 
 // The signer object already conforms to the required interface
