@@ -329,7 +329,7 @@ const credentialPayload = {
   publicNotes: JSON.stringify(credentialsPublicNotes),
 }
 
-await idOSIssuer.createCredentialsByDelegatedWriteGrant(
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
   credentialPayload,
   {
     id: delegatedWriteGrant.id,

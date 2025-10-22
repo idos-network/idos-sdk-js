@@ -277,7 +277,7 @@ grants.filter(g =>
 You can double check that the existing access grant matches your requirements. You will do this on your backend.
 
 ```js
-const grants: IdosGrant[] = await idOSConsumer.getGrants({
+const { grants, totalCount } = await idOSConsumer.getAccessGrants({
   user_id, // idOS user.id, but be sure, that this value is securely passed to your code
 });
 ```
@@ -285,7 +285,8 @@ const grants: IdosGrant[] = await idOSConsumer.getGrants({
 Access Grants queries are paginated by default, but you can modify pagination settings by:
 
 ```js
-const grants: idOSGrant[] = await idOSClient.getGrants({
+const { grants, totalCount } = await idOSConsumer.getAccessGrants({
+  user_id,
   page: 1,
   size: 7,
 });
@@ -294,7 +295,7 @@ const grants: idOSGrant[] = await idOSClient.getGrants({
 And you can get the credentials contents from the grant via:
 
 ```typescript
-const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted('GRANT_DATA_ID')
+const credentialContents: string = await idOSConsumer.getCredentialSharedContentDecrypted(grants[0].data_id)
 ```
 
 If you don't have an access grant, you can proceed to filtering the user's credentials and requesting one or more access grants.
