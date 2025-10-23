@@ -30,6 +30,7 @@
       "protobufjs",
       "rolldown",
       "@rolldown/binding-linux-arm64-gnu",
+      "@rolldown/binding-linux-x64-gnu",
       "secp256k1",
       "sharp",
       "tiny-secp256k1",
