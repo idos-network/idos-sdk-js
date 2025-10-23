@@ -7,6 +7,7 @@
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-router": "^7.7.1",
+    "bip39": "^3.1.0",
     "ethers": "catalog:ethereum",
     "tailwind-variants": "^1.0.0"
   },

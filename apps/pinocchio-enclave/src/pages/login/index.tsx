@@ -1,41 +1,36 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
+import { useKeyStorageContext } from "@/contexts/key";
 import { getEntropy, getPublicKey } from "@/lib/api";
-import { useStorageContext } from "@/contexts/storage";
 import { faceTec } from "./utils";
 
 export default function Login() {
   const navigate = useNavigate();
-  const { setEntropy, entropy } = useStorageContext();
+  const { setMnemonic, isKeyAvailable } = useKeyStorageContext();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
     // If already logged in, redirect to backTo or /wallet
-    if (entropy) {
+    if (isKeyAvailable) {
       navigate(searchParams.get("backTo") || "/wallet");
     }
-  }, []);
+  }, [isKeyAvailable]);
 
   // Get the FaceTec SDK initials
   useEffect(() => {
     getPublicKey().then((publicKey) => {
       faceTec.init(publicKey, (errorMessage) => {
         if (errorMessage) {
-          window.alert(errorMessage);
+          navigate("/error", { state: { message: errorMessage } });
         }
         faceTec.onLivenessCheckClick((status, token, errorMessage) => {
           if (status && token) {
             getEntropy(token).then((data) => {
-              // storage.set("entropy", data.entropy);
-              // storage.set("userId", data.faceSignUserId);
-              setEntropy(data.entropy);
-
-              // Redirect to backTo parameter or default to /wallet
-              const backTo = searchParams.get("backTo") || "/wallet";
-              navigate(backTo);
+              // Redirection will be done in useEffect above
+              setMnemonic(data.entropy);
             });
           } else {
-            window.alert(errorMessage || "Liveness check failed");
+            navigate("/error", { state: { message: errorMessage || "Liveness check failed" } });
           }
         });
       });

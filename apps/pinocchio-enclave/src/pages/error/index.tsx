@@ -17,18 +17,16 @@ export default function ErrorPage() {
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-red-400 to-orange-500 bg-clip-text text-transparent">
             Something went wrong
           </h1>
-          <p className="text-lg text-gray-300 max-w-md mx-auto">
-            {errorMessage}
-          </p>
+          <p className="text-lg text-gray-300 max-w-md mx-auto">{errorMessage}</p>
         </div>
 
         <div className="pt-8">
           <button
             type="button"
             onClick={handleBackToLogin}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-medium transition-colors"
+            className="px-6 py-3 bg-primary hover:bg-primary-dark rounded-lg font-medium transition-colors text-primary-foreground cursor-pointer"
           >
-            Back to Login
+            Back to home
           </button>
         </div>
       </div>

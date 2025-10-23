@@ -1,10 +1,10 @@
+import { useState } from "react";
+import { useRequests } from "@/contexts/requests";
 import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/paragraph";
-import { useWallet } from "@/contexts/wallet";
-import { useState } from "react";
 
 export default function Session() {
-  const { sessionProposals } = useWallet();
+  const { sessionProposals } = useRequests();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const firstProposal = sessionProposals[0];
@@ -13,7 +13,7 @@ export default function Session() {
     if (!firstProposal || isProcessing) return;
     setIsProcessing(true);
     try {
-      // await approveSession(firstProposal.id);
+      firstProposal.callback(true);
     } finally {
       setIsProcessing(false);
     }
@@ -23,7 +23,7 @@ export default function Session() {
     if (!firstProposal || isProcessing) return;
     setIsProcessing(true);
     try {
-      // await rejectSession(firstProposal.id);
+      firstProposal.callback(false);
     } finally {
       setIsProcessing(false);
     }
@@ -50,7 +50,8 @@ export default function Session() {
               Session Approval
             </Heading>
             <Paragraph className="text-lg text-gray-300">
-              Please review the session proposal details below and choose to approve or reject the request.
+              Please review the session proposal details below and choose to approve or reject the
+              request.
             </Paragraph>
           </div>
 
@@ -76,7 +77,7 @@ export default function Session() {
               type="button"
               onClick={handleApprove}
               disabled={isProcessing}
-              className="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+              className="px-8 py-3 bg-primary hover:bg-primary-dark disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
             >
               {isProcessing ? "Processing..." : "Approve"}
             </button>

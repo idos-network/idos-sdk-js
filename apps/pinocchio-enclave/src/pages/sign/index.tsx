@@ -1,10 +1,12 @@
+import { useState } from "react";
+import { useKeyStorageContext } from "@/contexts/key";
+import { useRequests } from "@/contexts/requests";
 import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/paragraph";
-import { useWallet } from "@/contexts/wallet";
-import { useState } from "react";
 
 export default function Sign() {
-  const { signProposals, sign } = useWallet();
+  const { sign } = useKeyStorageContext();
+  const { signProposals } = useRequests();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const firstProposal = signProposals[0];
@@ -14,14 +16,7 @@ export default function Sign() {
     setIsProcessing(true);
     try {
       const signature = await sign(firstProposal.data);
-      console.log("Signature:", signature);
-      window.opener?.postMessage({
-        type: "sign_response",
-        data: {
-          id: firstProposal.id,
-          signature,
-        },
-      }, "*");
+      firstProposal.callback(signature);
     } finally {
       setIsProcessing(false);
     }
@@ -29,9 +24,10 @@ export default function Sign() {
 
   const handleReject = async () => {
     if (!firstProposal || isProcessing) return;
+
     setIsProcessing(true);
     try {
-      // await rejectSession(firstProposal.id);
+      firstProposal.callback(null);
     } finally {
       setIsProcessing(false);
     }
@@ -58,7 +54,8 @@ export default function Sign() {
               Sign Approval
             </Heading>
             <Paragraph className="text-lg text-gray-300">
-              Please review the sign proposal details below and choose to approve or reject the request.
+              Please review the sign proposal details below and choose to approve or reject the
+              request.
             </Paragraph>
           </div>
 
@@ -84,7 +81,7 @@ export default function Sign() {
               type="button"
               onClick={handleApprove}
               disabled={isProcessing}
-              className="px-8 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
+              className="px-8 py-3 bg-primary hover:bg-primary-dark disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-colors"
             >
               {isProcessing ? "Processing..." : "Sign"}
             </button>
