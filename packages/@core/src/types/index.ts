@@ -18,6 +18,7 @@ export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigne
 export type WalletType = "evm" | "near" | "xrpl" | "stellar";
 
 export const CHAIN_TYPES = ["EVM", "NEAR"] as const;
+const WALLET_TYPES = ["evm", "near", "xrpl", "stellar"] as const;
 export type ChainType = (typeof CHAIN_TYPES)[number];
 export type idOSCredentialStatus = "pending" | "contacted" | "approved" | "rejected" | "expired";
 
