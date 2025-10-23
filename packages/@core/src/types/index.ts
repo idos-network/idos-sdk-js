@@ -5,6 +5,7 @@ import type { CustomKwilSigner } from "../kwil-infra";
 
 export { KwilSigner } from "@idos-network/kwil-js";
 
+
 /**
  * Stellar wallet interface - duck typing approach to avoid importing full StellarWalletsKit
  */
