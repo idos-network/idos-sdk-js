@@ -38,7 +38,7 @@ You'll also need a `multibaseSigningKeyPair`, which will be used to sign the W3C
 import { Ed25519VerificationKey2020 } from "https://esm.sh/@digitalcredentials/ed25519-verification-key-2020";
 
 const key = await Ed25519VerificationKey2020.generate();
-console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed) 
+console.log(key.privateKeyMultibase);  // -> z...  (multibase, multicodec-prefixed)
 console.log(key.publicKeyMultibase);
 ```
 
@@ -176,7 +176,7 @@ const user = {
 
 const wallet = {
   address,
-  wallet_type: "EVM", // vs. NEAR
+  wallet_type: "EVM", // Options: "EVM", "NEAR", "XRPL", "STELLAR"
   message: ownershipProofMessage,
   signature: ownershipProofSignature,
   public_key: ethers.SigningKey.recoverPublicKey(
@@ -329,7 +329,7 @@ const credentialPayload = {
   publicNotes: JSON.stringify(credentialsPublicNotes),
 }
 
-await idOSIssuer.createCredentialsByDelegatedWriteGrant(
+await idOSIssuer.createCredentialByDelegatedWriteGrant(
   credentialPayload,
   {
     id: delegatedWriteGrant.id,

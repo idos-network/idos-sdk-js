@@ -6,8 +6,6 @@ import type {
   PositionalParams,
 } from "@idos-network/kwil-js/dist/core/action";
 import type { DataInfo } from "@idos-network/kwil-js/dist/core/database";
-import fetchAdapter from "@vespaiach/axios-fetch-adapter";
-import Axios from "axios";
 import invariant from "tiny-invariant";
 import type { ActionSchemaElement } from "../kwil-actions";
 import { actionSchema } from "../kwil-actions";
@@ -125,50 +123,6 @@ const createKwilClient =
     const client = new KwilActionClient(
       new Cls({ kwilProvider, chainId, timeout: DEFAULT_TIMEOUT }),
     );
-
-    // TODO: Remove this when kwil-js upgrade to latest axios version
-    // @ts-expect-error This is required to check if we are in chrome-extension environment
-    if (typeof chrome !== "undefined" && chrome.runtime?.id) {
-      console.warn("🔑 chrome extension detected, patching kwil client");
-      // @ts-expect-error This is expected since we are patching private method
-      client.client.request = function () {
-        // biome-ignore lint/suspicious/noExplicitAny: This is kwil's code
-        const headers: any = {};
-
-        // @ts-expect-error This is expected since we are patching private method
-        if (this.cookie) {
-          // @ts-expect-error This is expected since we are patching private method
-          headers.Cookie = this.cookie;
-        }
-
-        const instance = Axios.create({
-          // @ts-expect-error This is expected since we are patching private method
-          baseURL: this.config.kwilProvider,
-          // @ts-expect-error This is expected since we are patching private method
-          timeout: this.config.timeout,
-          maxContentLength: 1024 * 1024 * 512,
-          withCredentials: true,
-          adapter: fetchAdapter,
-          headers,
-        });
-
-        // @ts-expect-error This is expected since we are patching private method
-        if (this.config.logging) {
-          instance.interceptors.request.use((request) => {
-            // @ts-expect-error This is expected since we are patching private method
-            this.config.logger(`Requesting: ${request.baseURL}${request.url}`);
-            return request;
-          });
-
-          instance.interceptors.response.use((response) => {
-            // @ts-expect-error This is expected since we are patching private method
-            this.config.logger(`Response:   ${response.config.url} - ${response.status}`);
-            return response;
-          });
-        }
-        return instance;
-      };
-    }
 
     return client;
   };
