@@ -322,7 +322,7 @@ const useIssueCredential = () => {
           "Liveness check (No pictures)",
         ],
 
-        walletIdentifier: ["Stellar", "near"].includes(isleController.signerType)
+        walletIdentifier: ["stellar", "near"].includes(isleController.signerType)
           ? walletPublicKey
           : null,
       });
@@ -392,7 +392,7 @@ function useShareCredentialWithConsumer() {
       // Freighter flags immediate signatures calls as rejected so this is a safeguard
       await new Promise((resolve) => setTimeout(resolve, 300));
       invariant(walletType, "`walletType` is not set");
-      const dag_owner_wallet_identifier = ["Stellar", "near"].includes(walletType)
+      const dag_owner_wallet_identifier = ["stellar", "near"].includes(walletType)
         ? publicKey
         : isleController.idosClient.walletIdentifier || "";
 
@@ -573,7 +573,7 @@ export function Onboarding() {
         wallet: {
           address: address || "",
           type:
-            isleController.signerType === "Stellar"
+            isleController.signerType === "stellar"
               ? "Stellar"
               : (isleController.signerType.toUpperCase() as "EVM" | "XRPL" | "NEAR" | "Stellar"),
           message,

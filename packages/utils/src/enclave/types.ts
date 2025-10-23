@@ -7,6 +7,11 @@ export const EncryptionPasswordStoresEnum: z.ZodEnum<{
 
 export type EncryptionPasswordStore = z.infer<typeof EncryptionPasswordStoresEnum>;
 
+export type WalletType = "evm" | "near" | "xrpl" | "stellar";
+
+// biome-ignore lint/suspicious/noExplicitAny: Wallet is a generic type that can be any wallet implementation
+export type Wallet = any;
+
 export type PublicEncryptionProfile = {
   userId: string;
   userEncryptionPublicKey: string;

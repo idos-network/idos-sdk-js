@@ -92,7 +92,7 @@ const DisconnectButton = () => {
   const { resetWallet, walletType } = useWalletStore();
 
   const handleDisconnect = async () => {
-    if (walletType === "Stellar") await stellarKit.disconnect();
+    if (walletType === "stellar") await stellarKit.disconnect();
     if (walletType === "near") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
     if (walletType === "evm") await disconnectAsync();
     if (client.state === "logged-in") await client.logOut();

@@ -9,14 +9,14 @@ import type {
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
 } from "../mpc/types";
-import type { EnclaveOptions, PublicEncryptionProfile } from "./types";
+import type { EnclaveOptions, PublicEncryptionProfile, Wallet, WalletType } from "./types";
 
 export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
   readonly options: K;
 
   // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
-  protected _signMethod?: (domain: any, types: any, value: any) => Promise<string>;
-  private _signMethodType?: "signTypedData" | "signMessage" | "signer";
+  protected signer?: Wallet;
+  protected walletType?: WalletType;
 
   constructor(options: K) {
     this.options = options;
@@ -27,69 +27,56 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
    *
    * @param signer - The signer to set, is later used for MPC if allowed.
    */
-  setSigner(signer: {
-    signTypedData?: (domain: string, types: string[], value: string) => Promise<string>;
-    signMessage?: (message: string) => Promise<any>;
-    signer?: (message: string) => Promise<any>;
-  }): void {
-    if (signer.signTypedData) {
-      // EVM wallet
-      this._signMethod = signer.signTypedData.bind(signer);
-      this._signMethodType = "signTypedData";
-    } else if (signer.signMessage) {
-      // XRPL wallet
-      this._signMethod = signer.signMessage.bind(signer);
-      this._signMethodType = "signMessage";
-    } else if (signer.signer) {
-      // Stellar wallet
-      this._signMethod = signer.signer.bind(signer);
-      this._signMethodType = "signer";
-    } else {
-      if (["signMessage", "signer"].some((key) => key in signer)) {
-        this._signMethod = signer.signMessage
-          ? // @ts-expect-error - signMessage for xrpl and near, signer for stellar
-            signer.signMessage.bind(signer)
-          : // @ts-expect-error - signMessage for xrpl and near, signer for stellar
-            signer.signer?.bind(signer);
-      } else {
-        throw new Error("No sign method found in passed signer");
-      }
-    }
+  setMPCSigner(signer: Wallet, walletType: WalletType): void {
+    this.signer = signer;
+    this.walletType = walletType;
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
-  async signTypedData(domain: any, types: any, value: any): Promise<string> {
-    if (!this._signMethod || !this._signMethodType) {
+  async signMPCMessage(domain: any, types: any, value: any): Promise<string> {
+    console.log("What is here", this);
+    if (!this.signer || !this.walletType) {
       throw new Error("Signer is not set");
     }
 
     let signature: string;
+    const messageString = JSON.stringify(value);
 
+    // TODO: refactor all places where we sign messages can be unified
     // Handle different signing methods based on wallet type
-    if (this._signMethodType === "signTypedData") {
-      // EVM wallets: use all 3 arguments
-      signature = await (
-        this._signMethod as (domain: any, types: any, value: any) => Promise<string>
-      )(domain, types, value);
-    } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
-      // XRPL/NEAR/Stellar wallets: use only the value as message
-      const messageString = JSON.stringify(value);
-      const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
+    switch (this.walletType) {
+      case "evm": {
+        // EVM wallets: use all 3 arguments
+        if (!this.signer.signTypedData) {
+          throw new Error("EVM signer does not have signTypedData method");
+        }
+        signature = await this.signer.signTypedData(domain, types, value);
 
-      // Extract signature from response object
-      if (typeof response === "string") {
-        signature = response;
-      } else if (response?.result?.signedMessage) {
-        signature = response.result.signedMessage;
-      } else if (response?.signedMessage) {
-        signature = response.signedMessage;
-      } else {
-        throw new Error(
-          `Unexpected response format from ${this._signMethodType}: ${JSON.stringify(response)}`,
-        );
+        break;
       }
-    } else {
-      throw new Error(`Unknown sign method type: ${this._signMethodType}`);
+      // It supports only GemWallet.
+      // TODO: support other XRPL wallets
+      case "xrpl": {
+        const xrplResult = await this.signer.signMessage(messageString);
+        signature = xrplResult.result?.signedMessage;
+
+        break;
+      }
+      case "near": {
+        const nearResult = await this.signer.signMessage(messageString);
+        signature = nearResult.signedMessage;
+
+        break;
+      }
+      case "stellar": {
+        const stellarResult = await this.signer.signMessage(messageString);
+        const signedMessage = Buffer.from(stellarResult.signedMessage, "base64");
+        signature = signedMessage.toString("hex");
+
+        break;
+      }
+
+      default:
+        throw new Error(`Cannot sign message. Unknown wallet type: ${this.walletType}`);
     }
 
     return signature;

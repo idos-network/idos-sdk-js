@@ -60,6 +60,8 @@ export class LocalEnclave<
 
   constructor(options: K) {
     super(options);
+    console.log("CONSTRUCTOR From local enclave");
+    console.log({ options: this.options });
 
     // By default, we only allow password auth method
     this.allowedEncryptionStores = options.allowedEncryptionStores ?? ["user"];
@@ -93,6 +95,8 @@ export class LocalEnclave<
 
   /** @override parent method to reconfigure the enclave */
   async reconfigure(options: Partial<K> = {}): Promise<void> {
+    console.log("RECONFIGURING From local enclave");
+    console.log({ options: this.options });
     await super.reconfigure(options);
     // Reconfigure MPC client if any signer information changed
     if (this.mpcClientInstance && options.walletType && options.walletAddress) {
@@ -377,7 +381,7 @@ export class LocalEnclave<
     const password = this.generatePassword();
     const { status: uploadStatus } = await this.uploadSecret(password);
 
-    if (uploadStatus !== "success") {
+    if (uploadStatus === "failure") {
       throw Error(`A secret upload failed with status: ${uploadStatus}`);
     }
 
@@ -422,11 +426,16 @@ export class LocalEnclave<
       downloadRequest,
     ) as DownloadMessageToSign;
 
+    console.log("Message to sign", messageToSign);
+    console.log("Signer", this.signer);
+    console.log("Wallet type", this.walletType);
+    // @ts-expect-error - signTypedData is implemented in subclass (apps/idos-enclave/src/lib/enclave.ts)
     const signedMessage = await this.signTypedData(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
     );
+    console.log("Signed message", signedMessage);
 
     return this.mpcClient.downloadSecret(
       this.userId,
@@ -446,6 +455,8 @@ export class LocalEnclave<
     const uploadRequest = this.mpcClient.uploadRequest(blindedShares);
     const messageToSign = this.mpcClient.uploadMessageToSign(uploadRequest) as UploadMessageToSign;
 
+    // TODO: refactor this. signTypedData lives in apps/idos-enclave/src/lib/enclave.ts. Maybe it is possible to move it to the base or local class?
+    // @ts-expect-error - signTypedData is implemented in subclass (apps/idos-enclave/src/lib/enclave.ts)
     const signedMessage = await this.signTypedData(
       // biome-ignore lint/suspicious/noExplicitAny: TODO: Change this when we know how to MPC & other chains
       messageToSign.domain as any,

@@ -40,7 +40,7 @@ import {
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
+import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -49,6 +49,12 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
+import {
+  createMessageSigner,
+  getWalletType,
+  type MessageSigner,
+  type WalletType,
+} from "@idos-network/utils/crypto";
 import type {
   BaseProvider,
   EncryptionPasswordStore,
@@ -130,9 +136,7 @@ export class idOSClientIdle {
       nodeUrl: params.nodeUrl,
       chainId: params.chainId,
     });
-
     await params.enclaveProvider.load();
-
     return new idOSClientIdle(params.store, kwilClient, params.enclaveProvider);
   }
 
@@ -140,8 +144,7 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
-  async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
-    let signer = _signer;
+  async withUserSigner(signer: Wallet): Promise<idOSClientWithUserSigner> {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
@@ -151,23 +154,25 @@ export class idOSClientIdle {
 
     this.kwilClient.setSigner(kwilSigner);
 
+    let processedSigner = signer;
     if (walletType === "near") {
-      const originalSigner = signer;
-      signer = {
+      processedSigner = {
         signMessage: async (message: string) => {
-          const signature = await signNearMessage(originalSigner as any, message);
+          const signature = await signNearMessage(signer as any, message);
           return { signedMessage: signature } as any;
         },
       } as any;
     }
+    const messageSigner = createMessageSigner(processedSigner as any, walletType);
 
     return new idOSClientWithUserSigner(
       this,
-      signer,
+      processedSigner,
       kwilSigner,
       walletIdentifier,
       walletPublicKey,
       walletType,
+      messageSigner,
     );
   }
 
@@ -185,7 +190,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
+  readonly messageSigner: MessageSigner;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -193,7 +199,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     kwilSigner: KwilSigner,
     walletIdentifier: string,
     walletPublicKey: string | undefined,
-    walletType: string,
+    walletType: WalletType,
+    messageSigner: MessageSigner,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -204,8 +211,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     this.walletIdentifier = walletIdentifier;
     this.walletPublicKey = walletPublicKey;
     this.walletType = walletType;
-    // @ts-expect-error - TODO: Fix this
-    this.enclaveProvider.setSigner(this.signer);
+    this.messageSigner = messageSigner;
+    this.enclaveProvider.setMPCSigner(this.signer, this.walletType);
   }
 
   async logOut(): Promise<idOSClientIdle> {
@@ -237,6 +244,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
     const kwilUser = await getUser(this.kwilClient);
+    console.log("LOGGING IN");
+    console.log({ kwilUser, idosClient: this });
 
     await this.enclaveProvider.reconfigure({
       mode: "existing",
@@ -244,6 +253,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
       walletType: this.walletType,
+      walletPublicKey: this.walletPublicKey,
       encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
     });
 
@@ -260,7 +270,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
+  readonly messageSigner: MessageSigner;
   readonly user: idOSUser;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
@@ -272,6 +283,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     this.kwilSigner = idOSClientWithUserSigner.kwilSigner;
     this.walletIdentifier = idOSClientWithUserSigner.walletIdentifier;
     this.walletPublicKey = idOSClientWithUserSigner.walletPublicKey;
+    this.messageSigner = idOSClientWithUserSigner.messageSigner;
     this.walletType = idOSClientWithUserSigner.walletType;
     this.user = user;
   }
@@ -425,6 +437,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async addWallet(params: AddWalletInput & { wallet_type: string }): Promise<AddWalletInput> {
+    console.log("Adding wallet", params);
     await addWallet(this.kwilClient, params);
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
@@ -432,11 +445,17 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       return params;
     }
 
+    // TODO: Remove this once Freighter wallet can handle few consecutive signings without crashing
+    // Wait 1 second for stellar to sign the message. It's a workaround for the issue with Freighter wallet.
+
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
-    console.log({ params });
-    console.log(this.signer);
+
+    if (this.walletType === "stellar") {
+      const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+      await sleep(1000);
+    }
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
@@ -444,7 +463,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       params.wallet_type,
     );
 
-    const signature = await this.enclaveProvider.signTypedData(
+    const signature = await this.enclaveProvider.signMPCMessage(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
@@ -454,8 +473,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.value,
       signature,
     );
-    if (result !== "success") {
-      console.error(`Failed to add wallet to MPC: ${result}`);
+    if (result === "failure") {
+      console.error("Failed to add wallet to MPC");
     }
 
     return params;
@@ -485,7 +504,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       wallet.public_key,
       wallet.wallet_type,
     );
-    const signature = await this.enclaveProvider.signTypedData(
+    const signature = await this.enclaveProvider.signMPCMessage(
       messageToSign.domain,
       messageToSign.types,
       messageToSign.value,
@@ -495,8 +514,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.value,
       signature,
     );
-    if (result !== "success") {
-      console.error(`Failed to add wallet to MPC: ${result}`);
+    if (result === "failure") {
+      console.error("Failed to remove the wallet from MPC");
     }
 
     return { id };

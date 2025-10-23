@@ -1,6 +1,7 @@
 import { KwilSigner } from "@idos-network/kwil-js";
 import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
+import { StrKey } from "@stellar/stellar-base";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";
@@ -8,7 +9,7 @@ import * as xrpKeypair from "ripple-keypairs";
 import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
 import nacl from "tweetnacl";
 import type { KwilActionClient } from "../kwil-infra/create-kwil-client";
-import type { Wallet } from "../types";
+import type { StellarWallet, Wallet } from "../types";
 import {
   createNearWalletKwilSigner,
   implicitAddressFromPublicKey,
@@ -77,6 +78,21 @@ function isXrplKeyPair(object: unknown): object is XrpKeyPair {
   return !!object && typeof object === "object" && "privateKey" in object && "publicKey" in object;
 }
 
+/**
+ * Helper function to check if the given object is a Stellar wallet (StellarWalletsKit).
+ * Uses duck typing to avoid importing the full StellarWalletsKit class.
+ */
+function isStellarWallet(object: unknown): object is StellarWallet {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "getAddress" in object &&
+    "signMessage" in object &&
+    typeof object.getAddress === "function" &&
+    typeof object.signMessage === "function"
+  );
+}
+
 export type KwilSignerType =
   | NearKeyPair
   | EthersWallet
@@ -85,9 +101,11 @@ export type KwilSignerType =
   | StellarKeypair
   | XrpKeyPair;
 
+import type { WalletType } from "@idos-network/utils/crypto";
+
 export type SignerAddress = string;
 export type SignerPublicKey = string | undefined;
-export type SignerType = string;
+export type SignerType = WalletType;
 /**
  * Creates a `KwilSigner` and its associated `SignerAddress`.
  *
@@ -155,6 +173,7 @@ export async function createClientKwilSigner(
   wallet: Wallet,
 ): Promise<[KwilSigner, SignerAddress, SignerPublicKey, SignerType]> {
   if ("connect" in wallet && "address" in wallet) {
+    // EVM wallet
     //biome-ignore lint/style/noParameterAssign: we're narrowing the type on purpose.
     wallet = wallet as unknown as JsonRpcSigner;
     const currentAddress = await wallet.getAddress();
@@ -176,6 +195,7 @@ export async function createClientKwilSigner(
   }
 
   if (looksLikeNearWallet(wallet)) {
+    // NEAR wallet
     const accounts = await wallet.getAccounts();
     const { kwilSigner, publicKey } = await createNearWalletKwilSigner(
       wallet,
@@ -188,6 +208,7 @@ export async function createClientKwilSigner(
   }
 
   if (looksLikeXrpWallet(wallet)) {
+    // XRPL wallet
     const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
       wallet,
     )) as { address: string; publicKey: string };
@@ -204,13 +225,27 @@ export async function createClientKwilSigner(
     ];
   }
 
-  if ("signatureType" in wallet && "publicAddress" in wallet) {
-    return [wallet, wallet.publicAddress, wallet.publicKey, "stellar"];
+  if (isStellarWallet(wallet)) {
+    // Stellar wallet
+    const { address } = await wallet.getAddress();
+    const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+    const kwilSigner = new KwilSigner(
+      async (msg: string | Uint8Array): Promise<Uint8Array> => {
+        var msgToSign: string;
+        if (typeof msg !== "string") {
+          msgToSign = new TextDecoder().decode(msg);
+        } else {
+          msgToSign = msg;
+        }
+        const result = await wallet.signMessage(msgToSign);
+        console.log("as_kwil_signer", result);
+        return Buffer.from(result.signedMessage, "base64");
+      },
+      Buffer.from(address).toString("hex"),
+      "sep53",
+    );
+    return [kwilSigner, address, publicKey, "stellar"];
   }
 
-  // Force the check that `signer` is `never`.
-  // If these lines start complaining, that means we're missing an `if` above.
-  return ((_: never) => {
-    throw new Error("Invalid `signer` type");
-  })(wallet);
+  throw new Error("Invalid `signer` type");
 }

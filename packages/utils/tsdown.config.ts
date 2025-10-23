@@ -9,6 +9,9 @@ export default defineConfig({
     "./src/mpc/index.ts",
     "./src/codecs/index.ts",
     "./src/xrpl-credentials/index.ts",
+    "./src/crypto/index.ts",
+    "./src/crypto/signature-verification/index.ts",
   ],
   dts: true,
+  noExternal: [],
 });
