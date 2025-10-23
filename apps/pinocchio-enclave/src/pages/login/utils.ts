@@ -19,7 +19,7 @@ export class FaceTecContainer {
     // Ensure FaceTecSDK is imported & initialized
     this.FaceTecSDK = await this.ensureImportedFaceTecSDK();
     this.FaceTecSDK.setResourceDirectory("/facetec/FaceTecSDK.js/resources");
-    this.FaceTecSDK.setImagesDirectory("/facetec/FaceTecSDK.js/FaceTec_images");
+    this.FaceTecSDK.setImagesDirectory("/public/facetec/FaceTec_images");
 
     if (this.FaceTecSDK.getStatus() === this.FaceTecSDK.FaceTecSDKStatus.NeverInitialized) {
       this.setupCustomization();
@@ -126,7 +126,7 @@ export class FaceTecContainer {
 
     // Set overlay customization
     currentCustomization.overlayCustomization.backgroundColor = TRANSPARENT_COLOR;
-    currentCustomization.overlayCustomization.brandingImage = "idos-face-sign-logo.svg";
+    currentCustomization.overlayCustomization.brandingImage = "/public/idos-logo.svg";
 
     currentCustomization.enterFullScreenCustomization.buttonBackgroundNormalColor = BRANDING_COLOR;
     currentCustomization.enterFullScreenCustomization.buttonBackgroundHighlightColor =

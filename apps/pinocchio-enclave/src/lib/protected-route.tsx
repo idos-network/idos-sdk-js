@@ -1,12 +1,12 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useStorageContext } from "@/contexts/storage";
+import { useKeyStorageContext } from "@/contexts/key";
 
 export default function ProtectedRoute() {
-  const { entropy } = useStorageContext();
+  const { isKeyAvailable } = useKeyStorageContext();
   const location = useLocation();
 
   // If not authenticated (no mnemonic), redirect to login with backTo parameter
-  if (!entropy) {
+  if (!isKeyAvailable) {
     return <Navigate to={`/login?backTo=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
