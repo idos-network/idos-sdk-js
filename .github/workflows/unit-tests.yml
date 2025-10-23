@@ -24,6 +24,6 @@ jobs:
           node-version-file: .node_version
           cache: 'pnpm'
 
-      - run: pnpm install --force
+      - run: pnpm install --frozen-lockfile
 
       - run: pnpm test
