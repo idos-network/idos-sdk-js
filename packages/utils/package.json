@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/utils",
   "description": "idOS Utils JavaScript SDK for enclave environments",
-  "version": "1.0.0-rc.1.0",
+  "version": "1.0.0-rc.1.1",
   "clean-package": {
     "remove": [
       "devDependencies.@idos-network/credentials"
