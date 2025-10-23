@@ -1,5 +1,4 @@
-import invariant from "tiny-invariant";
-import { getWalletType } from "../utils";
+import { getWalletType } from "../index";
 import { verifyEvmSignature } from "./evm";
 import { verifyNearSignature } from "./near";
 import { verifyRippleSignature } from "./ripple";
@@ -14,10 +13,20 @@ export interface WalletSignature {
   public_key: string[];
 }
 
+/**
+ * Simple assertion function that throws an error if condition is false
+ */
+function assert(condition: unknown, message: string): asserts condition {
+  if (!condition) {
+    throw new Error(message);
+  }
+}
+
 export const verifySignature = async (walletPayload: WalletSignature): Promise<boolean> => {
-  invariant(walletPayload.address, "Wallet address is required");
-  invariant(walletPayload.message, "Wallet message is required");
-  invariant(walletPayload.signature, "Wallet signature is required");
+  assert(walletPayload.address, "Wallet address is required");
+  assert(walletPayload.message, "Wallet message is required");
+  assert(walletPayload.signature, "Wallet signature is required");
+  console.log({ walletPayload });
 
   try {
     const walletType = getWalletType(walletPayload.address);

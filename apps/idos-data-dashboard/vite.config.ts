@@ -6,6 +6,9 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  optimizeDeps: {
+    include: ["@near-wallet-selector/here-wallet"],
+  },
   build: {
     target: "esnext",
     rollupOptions: {
@@ -37,6 +40,11 @@ export default defineConfig({
     dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
     alias: {
       "@": resolve(__dirname, "./src"),
+      "@idos-network/utils/crypto/signature-verification": resolve(
+        __dirname,
+        "../../packages/utils/src/crypto/signature-verification/index.ts",
+      ),
+      "@idos-network/utils/crypto": resolve(__dirname, "../../packages/utils/src/crypto/index.ts"),
     },
   },
 });

@@ -1,7 +1,10 @@
 import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
-import { getWalletType } from "@idos-network/core/utils";
+import { getWalletType } from "@idos-network/utils/crypto";
+import {
+  verifySignature,
+  type WalletSignature,
+} from "@idos-network/utils/crypto/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -106,7 +109,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
 
   const addWallet = async (walletPayload: WalletSignature) => {
     const userId = idOSClient?.user.id;
-
+    console.log({ walletPayload });
     const isValid = await verifySignature(walletPayload);
     const walletType = getWalletType(walletPayload.address!);
 

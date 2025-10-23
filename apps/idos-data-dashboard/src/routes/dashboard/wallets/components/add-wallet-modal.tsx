@@ -141,6 +141,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
 
     let address_type: "EVM" | "NEAR" | "XRPL" | "INVALID";
+    console.log("address_type", address);
 
     if (evm_regexp.test(address)) {
       address_type = "EVM";

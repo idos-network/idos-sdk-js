@@ -32,7 +32,7 @@ export const ConnectWallet = () => {
         const publicKey = await derivePublicKey(address);
         setWalletAddress(address);
         setWalletPublicKey(publicKey);
-        setWalletType("Stellar");
+        setWalletType("stellar");
       },
     });
   };

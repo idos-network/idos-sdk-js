@@ -2,7 +2,7 @@
   "name": "consumer-and-issuer-demo",
   "version": "0.0.1",
   "dependencies": {
-    "@creit.tech/stellar-wallets-kit": "^1.7.5",
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "^3.8.0",
     "@heroui/react": "2.6.14",
     "@idos-network/consumer": "workspace:*",
@@ -22,7 +22,7 @@
     "@stellar/stellar-base": "catalog:stellar",
     "@tanstack/react-query": "catalog:tanstack",
     "@uidotdev/usehooks": "^2.4.1",
-    "@wagmi/core": "^2.16.4",
+    "@wagmi/core": "catalog:ethereum",
     "@web3icons/react": "^4.0.14",
     "ethers": "catalog:ethereum",
     "framer-motion": "^11.11.9",

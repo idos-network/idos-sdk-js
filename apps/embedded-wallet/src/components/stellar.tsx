@@ -6,6 +6,7 @@ import {
   WalletNetwork,
   xBullModule,
 } from "@creit.tech/stellar-wallets-kit";
+import { hexEncode } from "@idos-network/utils/codecs";
 import { StrKey } from "@stellar/stellar-base";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -15,7 +16,8 @@ import { connectedWalletType, message, walletPayload } from "../state";
 import { Button } from "./ui/button";
 
 export const stellarKit: StellarWalletsKit = new StellarWalletsKit({
-  network: import.meta.env.DEV ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
+  network:
+    import.meta.env.VITE_STELLAR_TESTNET === "true" ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
   selectedWalletId: FREIGHTER_ID,
   modules: [new FreighterModule(), new xBullModule()],
 });
@@ -62,22 +64,14 @@ function Stellar() {
 
   const handleSignMessage = async () => {
     if (!address || !publicKey) return;
-    // Encode the message as base64 (stellarKit expects this)
-    const messageBase64 = Buffer.from(message).toString("base64");
 
-    const result = await stellarKit.signMessage(messageBase64);
-
-    let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-    if (signedMessage.length > 64) {
-      signedMessage = Buffer.from(signedMessage.toString(), "base64");
-    }
-
-    const signatureHex = signedMessage.toString("hex");
-
+    const result = await stellarKit.signMessage(message);
+    // Signed message is string in base64, but we need to return hex
+    const signature = hexEncode(Buffer.from(result.signedMessage, "base64"));
+    console.log("SIGNATURE", signature);
     walletPayload.value = {
       address,
-      signature: signatureHex,
+      signature,
       public_key: [publicKey],
       message,
       disconnect: disconnectStellar,

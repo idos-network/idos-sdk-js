@@ -1,3 +1,4 @@
+import type { StellarWalletsKit } from "@creit.tech/stellar-wallets-kit";
 import type * as GemWallet from "@gemwallet/api";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type {
@@ -122,8 +123,8 @@ export interface WalletInfo {
   address: string;
   publicKey: string;
   signMethod: (message: string) => Promise<string>;
-  type: "evm" | "xrpl" | "near" | "Stellar";
-  signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm | KwilSigner>;
+  type: "evm" | "xrpl" | "near" | "stellar";
+  signer: () => Promise<JsonRpcSigner | typeof GemWallet | Xumm | KwilSigner | StellarWalletsKit>;
 }
 
 /**

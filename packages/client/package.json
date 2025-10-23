@@ -9,6 +9,7 @@
     ]
   },
   "dependencies": {
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:core",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
