@@ -32,20 +32,21 @@ export class WindowMessageHandler extends BaseHandler {
   messageListener = (event: MessageEvent) => {
     const { type, data } = event.data;
 
-    console.log("WindowMessageHandler received message:", event);
-
     if (type === "session_proposal") {
       this.addSessionProposal({
         ...data,
-        callback: (approved: boolean) => {
+        callback: (approved: boolean, address?: string) => {
+          // TODO: Add iframe support
           window.opener?.postMessage(
             {
               type: "session_proposal_response",
               data: {
                 id: data.id,
                 approved,
+                address,
               },
             },
+            // TODO: restrict origin ?
             "*",
           );
         },
@@ -54,6 +55,7 @@ export class WindowMessageHandler extends BaseHandler {
       this.addSignProposal({
         ...data,
         callback: (signature: string | null) => {
+          // TODO: Add iframe support
           window.opener?.postMessage(
             {
               type: "sign_proposal_response",
@@ -62,6 +64,7 @@ export class WindowMessageHandler extends BaseHandler {
                 signature,
               },
             },
+            // TODO: restrict origin ?
             "*",
           );
         },

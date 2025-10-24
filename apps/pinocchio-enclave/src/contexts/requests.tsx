@@ -8,7 +8,7 @@ export interface SessionProposal {
     name: string;
     description: string;
   };
-  callback: (approved: boolean) => void;
+  callback: (approved: boolean, address?: string) => void;
 }
 
 export interface SignProposal {
@@ -49,8 +49,8 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
     (proposal: SessionProposal) => {
       // Enhance callback to remove from list after decision
       const originalCallback = proposal.callback;
-      proposal.callback = (approved: boolean) => {
-        originalCallback(approved);
+      proposal.callback = (approved: boolean, address?: string) => {
+        originalCallback(approved, address);
         setSessionProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSessionProposals((prev) => [...prev, proposal]);

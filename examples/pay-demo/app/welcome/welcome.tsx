@@ -1,41 +1,7 @@
 import { useSiwe } from "../providers/siwe-provider";
-import { useRef } from "react";
 
 export function Welcome() {
   const { address, isAuthenticated, signIn, signOut } = useSiwe();
-  const windowRef = useRef<Window | null>(null);
-
-  const openEnclave = () => {
-    windowRef.current = window.open("https://localhost:5174", "FaceSign Enclave", "width=350,height=600");
-    windowRef.current?.focus();
-  }
-
-  const sendTestOpen = () => {
-    windowRef.current?.postMessage({
-      type: "session_proposal",
-      data: {
-        id: 1,
-        metadata: {
-          name: "Example DApp",
-          description: "An example decentralized application",
-        }
-      },
-    }, "https://localhost:5174");
-  }
-
-  const signSomething = () => {
-    windowRef.current?.postMessage({
-      type: "sign_proposal",
-      data: {
-        id: 1,
-        data: "Please sign this important message to confirm your identity.",
-        metadata: {
-          name: "Example DApp",
-          description: "An example decentralized application",
-        }
-      },
-    }, "https://localhost:5174");
-  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-white dark:bg-gray-950">
@@ -48,18 +14,6 @@ export function Welcome() {
             Get started by logging in to your account
           </p>
         </header>
-
-        <button onClick={() => openEnclave()}>
-          FaceSign enclave
-        </button>
-
-        <button onClick={() => sendTestOpen()}>
-          Send session approval
-        </button>
-
-        <button onClick={() => signSomething()}>
-          Sign something
-        </button>
 
         <button
           type="button"

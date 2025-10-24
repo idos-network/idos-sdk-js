@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import {
   isKeyAvailable as checkKeyAvailability,
   createKeyPairFromSeed,
-  getKey,
+  getKeys,
   storeKey,
 } from "@/lib/keys";
 
@@ -11,6 +11,7 @@ export interface KeyStorage {
   isKeyAvailable: boolean;
   setMnemonic: (mnemonic: string) => void;
   sign: (data: string) => Promise<string>;
+  getPublicKey: () => Promise<string>;
 }
 
 export const KeyStorageContext = createContext<KeyStorage>({
@@ -19,6 +20,9 @@ export const KeyStorageContext = createContext<KeyStorage>({
     throw new Error("KeyStorageContext not initialized");
   },
   sign: async () => {
+    throw new Error("KeyStorageContext not initialized");
+  },
+  getPublicKey: async () => {
     throw new Error("KeyStorageContext not initialized");
   },
 });
@@ -40,12 +44,16 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
     isKeyAvailable: isKeyAvailable || false,
     setMnemonic: async (mnemonic: string) => {
       const seed = await mnemonicToSeed(mnemonic);
-      const keyPair = await createKeyPairFromSeed(seed);
-      await storeKey(keyPair);
+      const keys = await createKeyPairFromSeed(seed);
+      await storeKey(keys.keyPair, keys.publicKey);
       setIsKeyAvailable(true);
     },
+    getPublicKey: async () => {
+      const { publicKey } = await getKeys();
+      return Buffer.from(publicKey).toString("hex");
+    },
     sign: async (data: string) => {
-      const keyPair = await getKey();
+      const { keyPair } = await getKeys();
 
       return crypto.subtle
         .sign("Ed25519", keyPair, new TextEncoder().encode(data))
