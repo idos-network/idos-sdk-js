@@ -6,6 +6,7 @@
     "@idos-network/consumer": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
+    "@idos-network/kwil-js": "catalog:core",
     "@react-router/node": "^7.6.2",
     "@react-router/serve": "^7.6.2",
     "@tanstack/react-query": "^5.90.5",

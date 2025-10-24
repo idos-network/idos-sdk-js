@@ -39,7 +39,7 @@ export const getEntropy = async (
   token: string,
 ): Promise<{ entropy: string; faceSignUserId: string }> => {
   const response = await entropyService.post<{ entropy: string; faceSignUserId: string }>(
-    "/entropy",
+    "/pinocchio-entropy",
     JSON.stringify({ token }),
     {
       headers: {
