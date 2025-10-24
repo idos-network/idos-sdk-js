@@ -145,10 +145,6 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
-    console.log("Wallet Type:", walletType);
-    console.log("Wallet Identifier:", walletIdentifier);
-    console.log("Wallet Public Key:", walletPublicKey);
-
     this.kwilClient.setSigner(kwilSigner);
 
     if (walletType === "near") {
@@ -231,6 +227,11 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     });
 
     return this.enclaveProvider.ensureUserEncryptionProfile();
+  }
+
+  // TODO: REMOVE THIS METHOD
+  async getUser(): Promise<idOSUser> {
+    return getUser(this.kwilClient);
   }
 
   async logIn(): Promise<idOSClientLoggedIn> {

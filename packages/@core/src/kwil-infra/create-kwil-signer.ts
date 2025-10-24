@@ -208,6 +208,21 @@ export async function createClientKwilSigner(
     return [wallet, wallet.publicAddress, wallet.publicKey, "stellar"];
   }
 
+  // Pinocchio Signer testing
+  // @ts-expect-error Ignore for now
+  if ("address" in wallet && typeof wallet.address === "string") {
+    // @ts-expect-error Ignore for now
+    return [
+      new KwilSigner(
+        (message: Uint8Array) => wallet.signMessage(message),
+        wallet.address,
+        "ed25519",
+      ),
+      wallet.address,
+      "ed25519",
+    ]; // ed25519 is wrong...
+  }
+
   // Force the check that `signer` is `never`.
   // If these lines start complaining, that means we're missing an `if` above.
   return ((_: never) => {

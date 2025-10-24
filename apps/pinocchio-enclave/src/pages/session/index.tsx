@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useKeyStorageContext } from "@/contexts/key";
 import { useRequests } from "@/contexts/requests";
 import { Heading } from "../../components/heading";
 import { Paragraph } from "../../components/paragraph";
 
 export default function Session() {
   const { sessionProposals } = useRequests();
+  const { getPublicKey } = useKeyStorageContext();
   const [isProcessing, setIsProcessing] = useState(false);
 
   const firstProposal = sessionProposals[0];
@@ -13,7 +15,7 @@ export default function Session() {
     if (!firstProposal || isProcessing) return;
     setIsProcessing(true);
     try {
-      firstProposal.callback(true);
+      firstProposal.callback(true, await getPublicKey());
     } finally {
       setIsProcessing(false);
     }
