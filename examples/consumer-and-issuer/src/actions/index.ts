@@ -36,13 +36,11 @@ const generateCredentials = async (
     id: `urn:uuid:${id}`,
     firstName: info.firstNameEn,
     familyName: info.lastNameEn,
-    governmentId: idDoc.number,
     email: email,
     nationality: info.nationality
       ? countries3to2[info.nationality as keyof typeof countries3to2]
       : undefined,
     phoneNumber: phone,
-    governmentIdType: idDoc.idDocType,
     dateOfBirth: new Date(info.dob),
     placeOfBirth: info.placeOfBirth,
     idDocumentCountry: countries3to2[idDoc.country as keyof typeof countries3to2],
