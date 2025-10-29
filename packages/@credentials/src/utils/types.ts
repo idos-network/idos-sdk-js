@@ -105,8 +105,6 @@ export type Gender = z.infer<typeof GenderSchema>;
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialSubjectSchema: z.ZodObject<{
   id: z.ZodString;
-  applicantId: z.ZodOptional<z.ZodString>;
-  inquiryId: z.ZodOptional<z.ZodString>;
   firstName: z.ZodString;
   middleName: z.ZodOptional<z.ZodString>;
   ssn: z.ZodOptional<z.ZodString>;
@@ -114,8 +112,6 @@ export const CredentialSubjectSchema: z.ZodObject<{
   nationality: z.ZodOptional<z.ZodString>;
   familyName: z.ZodString;
   maidenName: z.ZodOptional<z.ZodString>;
-  governmentId: z.ZodOptional<z.ZodString>;
-  governmentIdType: z.ZodOptional<z.ZodString>;
   dateOfBirth: z.ZodDate;
   placeOfBirth: z.ZodOptional<z.ZodString>;
   email: z.ZodOptional<z.ZodEmail>;
@@ -132,12 +128,6 @@ export const CredentialSubjectSchema: z.ZodObject<{
 }> = z.object({
   /* ID(unique credential)	Unique identifier for the credential itself. */
   id: z.string(),
-
-  /* Applicant ID. */
-  applicantId: z.string().optional(),
-
-  /* Inquiry ID. */
-  inquiryId: z.string().optional(),
 
   /* First name. */
   firstName: z.string(),
@@ -159,12 +149,6 @@ export const CredentialSubjectSchema: z.ZodObject<{
 
   /* Maiden name. */
   maidenName: z.string().optional(),
-
-  /* Government ID. */
-  governmentId: z.string().optional(),
-
-  /* Government ID type. */
-  governmentIdType: z.string().optional(),
 
   /* Date of birth. */
   dateOfBirth: z.date(),
