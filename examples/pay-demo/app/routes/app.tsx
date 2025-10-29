@@ -40,7 +40,7 @@ export default function App() {
         // since there are security limitations, especially with
         // opening metamask protocol link in mobile device
         window.open(message.data.open, message.data.target, message.data.features);
-      } else {
+      } else if (message.data.response) {
         send({ type: "kycCompleted" });
       }
     }
@@ -285,7 +285,7 @@ export default function App() {
     <div className="flex flex-col items-center gap-8 p-8">
       <h1 className="font-bold text-3xl text-gray-800">Choose your provider</h1>
       <div className="flex items-center gap-4">
-        <p className="text-gray-600 dark:text-gray-300">You are logged in as {address}</p>
+        <p className="text-gray-600">You are logged in as {address}</p>
         <button
           type="button"
           onClick={signOut}

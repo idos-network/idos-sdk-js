@@ -30,10 +30,14 @@ export type CredentialBuilder<TInput, TOutput = TInput> = (
   validate?: boolean,
 ) => Promise<VerifiableCredential<TOutput>>;
 
+export type CredentialConverter<TInput> = (
+  subject: TInput,
+  validate: boolean,
+  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+) => Record<string, any>;
+
 function genericCredentialBuilder<TInput, TOutput = TInput>(
-  schemaKlass: { parse: (data: TInput) => void },
-  // biome-ignore lint/suspicious/noExplicitAny: Any is expected
-  credentialsSubjectBuilder: (subject: TInput) => Record<string, any>,
+  credentialConverter: CredentialConverter<TInput>,
 ): CredentialBuilder<TInput, TOutput> {
   async function builder(
     fields: CredentialFields,
@@ -44,10 +48,9 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
     if (validate) {
       // This raises an z.ZodError exception if the fields are invalid
       CredentialFieldsSchema.parse(fields);
-      schemaKlass.parse(subject);
     }
 
-    const credentialSubject = credentialsSubjectBuilder(subject);
+    const credentialSubject = credentialConverter(subject, validate);
 
     const key = await issuerToKey(issuer);
 
@@ -72,28 +75,41 @@ function genericCredentialBuilder<TInput, TOutput = TInput>(
   return builder;
 }
 
+export const credentialSubjectConverter: CredentialConverter<CredentialSubject> = (
+  subject,
+  validate,
+) => {
+  if (validate) {
+    CredentialSubjectSchema.parse(subject);
+  }
+
+  const { residentialAddress, ...subjectData } = subject;
+  return {
+    "@context": CONTEXT_IDOS_CREDENTIAL_SUBJECT,
+    ...convertValues(subjectData),
+    // @ts-expect-error - TODO: fix this
+    ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
+  };
+};
+
+export const credentialFaceIdSubjectConverter: CredentialConverter<CredentialSubjectFaceId> = (
+  subject,
+  validate,
+) => {
+  if (validate) {
+    CredentialSubjectFaceIdSchema.parse(subject);
+  }
+
+  return {
+    "@context": CONTEXT_IDOS_CREDENTIAL_FACE_ID,
+    ...convertValues(subject),
+  };
+};
+
 export const buildCredential: CredentialBuilder<CredentialSubject, VerifiableCredentialSubject> =
   genericCredentialBuilder<CredentialSubject, VerifiableCredentialSubject>(
-    CredentialSubjectSchema,
-    (subject: CredentialSubject) => {
-      const { residentialAddress, ...subjectData } = subject;
-
-      return {
-        "@context": CONTEXT_IDOS_CREDENTIAL_SUBJECT,
-        ...convertValues(subjectData),
-        // @ts-expect-error - TODO: fix this
-        ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
-      };
-    },
+    credentialSubjectConverter,
   );
 
 export const buildFaceIdCredential: CredentialBuilder<CredentialSubjectFaceId> =
-  genericCredentialBuilder<CredentialSubjectFaceId>(
-    CredentialSubjectFaceIdSchema,
-    (subject: CredentialSubjectFaceId) => {
-      return {
-        "@context": CONTEXT_IDOS_CREDENTIAL_FACE_ID,
-        ...convertValues(subject),
-      };
-    },
-  );
+  genericCredentialBuilder<CredentialSubjectFaceId>(credentialFaceIdSubjectConverter);

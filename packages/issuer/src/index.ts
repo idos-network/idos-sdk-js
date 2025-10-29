@@ -15,6 +15,8 @@ import {
   type Credential,
   type CredentialFields,
   type CredentialSubject,
+  credentialFaceIdSubjectConverter,
+  credentialSubjectConverter,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
 import type { FaceIdCredential } from "../../@credentials/src/builder";
@@ -153,6 +155,13 @@ export class idOSIssuer {
     return buildCredential(fields, subject, issuer, validate);
   }
 
+  convertCredential(
+    subject: CredentialSubject,
+    // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+  ): Record<string, any> {
+    return credentialSubjectConverter(subject, true);
+  }
+
   async buildFaceIdCredential(
     fields: CredentialFields,
     subject: CredentialSubjectFaceId,
@@ -160,6 +169,13 @@ export class idOSIssuer {
     validate = true,
   ): Promise<FaceIdCredential> {
     return buildFaceIdCredential(fields, subject, issuer, validate);
+  }
+
+  convertFaceIdCredential(
+    subject: CredentialSubjectFaceId,
+    // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+  ): Record<string, any> {
+    return credentialFaceIdSubjectConverter(subject, true);
   }
 
   async getPassportingPeers(): Promise<idOSPassportingPeer[]> {

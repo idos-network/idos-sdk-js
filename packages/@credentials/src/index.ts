@@ -2,6 +2,8 @@ import {
   buildCredential,
   buildFaceIdCredential,
   type Credential,
+  credentialFaceIdSubjectConverter,
+  credentialSubjectConverter,
   type FaceIdCredential,
 } from "./builder";
 import { type AvailableIssuerType, base85ToFile, fileToBase85 } from "./utils";
@@ -17,7 +19,15 @@ import type {
 } from "./utils/types";
 import { type VerifyCredentialResult, verifyCredential } from "./verifier";
 
-export { buildCredential, buildFaceIdCredential, verifyCredential, base85ToFile, fileToBase85 };
+export {
+  buildCredential,
+  buildFaceIdCredential,
+  credentialSubjectConverter,
+  credentialFaceIdSubjectConverter,
+  verifyCredential,
+  base85ToFile,
+  fileToBase85,
+};
 
 export type {
   CredentialFields,
