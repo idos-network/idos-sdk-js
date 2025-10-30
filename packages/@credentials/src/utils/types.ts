@@ -49,7 +49,7 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   additionalAddressInfo: z.ZodOptional<z.ZodString>;
   region: z.ZodOptional<z.ZodString>;
   city: z.ZodString;
-  postalCode: z.ZodString;
+  postalCode: z.ZodOptional<z.ZodString>;
   country: z.ZodString;
   proofCategory: z.ZodString;
   proofDateOfIssue: z.ZodOptional<z.ZodDate>;
@@ -71,7 +71,7 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   city: z.string(),
 
   /* Postal code. */
-  postalCode: z.string(),
+  postalCode: z.string().optional(),
 
   /* Country (ISO 3166-1 alpha-2). */
   country: z.string().min(2).max(2),
@@ -92,7 +92,8 @@ export const IDDocumentTypeSchema: z.ZodEnum<{
   PASSPORT: "PASSPORT";
   DRIVERS: "DRIVERS";
   ID_CARD: "ID_CARD";
-}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD"]);
+  VOTING_CARD: "VOTING_CARD";
+}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD", "VOTING_CARD"]);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
 export const GenderSchema: z.ZodEnum<{
@@ -107,15 +108,15 @@ export const CredentialSubjectSchema: z.ZodObject<{
   id: z.ZodString;
   firstName: z.ZodString;
   middleName: z.ZodOptional<z.ZodString>;
-  ssn: z.ZodOptional<z.ZodString>;
-  gender: z.ZodOptional<typeof GenderSchema>;
   nationality: z.ZodOptional<z.ZodString>;
   familyName: z.ZodString;
   maidenName: z.ZodOptional<z.ZodString>;
-  dateOfBirth: z.ZodDate;
-  placeOfBirth: z.ZodOptional<z.ZodString>;
+  gender: z.ZodOptional<typeof GenderSchema>;
   email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
+  ssn: z.ZodOptional<z.ZodString>;
+  dateOfBirth: z.ZodDate;
+  placeOfBirth: z.ZodOptional<z.ZodString>;
   idDocumentCountry: z.ZodString;
   idDocumentNumber: z.ZodString;
   idDocumentType: typeof IDDocumentTypeSchema;
