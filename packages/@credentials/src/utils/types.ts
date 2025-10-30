@@ -93,7 +93,8 @@ export const IDDocumentTypeSchema: z.ZodEnum<{
   DRIVERS: "DRIVERS";
   ID_CARD: "ID_CARD";
   VOTING_CARD: "VOTING_CARD";
-}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD", "VOTING_CARD"]);
+  PAN_CARD: "PAN_CARD";
+}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD", "VOTING_CARD", "PAN_CARD"]);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
 export const GenderSchema: z.ZodEnum<{
@@ -108,13 +109,13 @@ export const CredentialSubjectSchema: z.ZodObject<{
   id: z.ZodString;
   firstName: z.ZodString;
   middleName: z.ZodOptional<z.ZodString>;
+  ssn: z.ZodOptional<z.ZodString>;
+  gender: z.ZodOptional<typeof GenderSchema>;
   nationality: z.ZodOptional<z.ZodString>;
   familyName: z.ZodString;
   maidenName: z.ZodOptional<z.ZodString>;
-  gender: z.ZodOptional<typeof GenderSchema>;
   email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
-  ssn: z.ZodOptional<z.ZodString>;
   dateOfBirth: z.ZodDate;
   placeOfBirth: z.ZodOptional<z.ZodString>;
   idDocumentCountry: z.ZodString;
