@@ -94,7 +94,8 @@ export const IDDocumentTypeSchema: z.ZodEnum<{
   ID_CARD: "ID_CARD";
   VOTING_CARD: "VOTING_CARD";
   PAN_CARD: "PAN_CARD";
-}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD", "VOTING_CARD", "PAN_CARD"]);
+  INTERNAL_PASSPORT: "INTERNAL_PASSPORT";
+}> = z.enum(["PASSPORT", "DRIVERS", "ID_CARD", "VOTING_CARD", "PAN_CARD", "INTERNAL_PASSPORT"]);
 export type IDDocumentType = z.infer<typeof IDDocumentTypeSchema>;
 
 export const GenderSchema: z.ZodEnum<{
