@@ -104,3 +104,28 @@ export function convertValues<
 
   return acc;
 }
+
+export function deriveLevel(credential: CredentialSubject): string {
+  let level = "basic";
+
+  // Address is a sign for plus+
+  const address = credential.residentialAddress;
+  if (address?.proofFile && address?.city && address?.proofCategory) {
+    level = "plus";
+  }
+
+  const addons: string[] = [];
+  if (credential.selfieFile) {
+    addons.push("liveness");
+  }
+
+  if (credential.email) {
+    addons.push("email");
+  }
+
+  if (credential.phoneNumber) {
+    addons.push("phoneNumber");
+  }
+
+  return [level, ...addons].join("+");
+}
