@@ -17,6 +17,7 @@ import {
   type CredentialSubject,
   credentialFaceIdSubjectConverter,
   credentialSubjectConverter,
+  deriveLevel,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
 import type { FaceIdCredential } from "../../@credentials/src/builder";
@@ -160,6 +161,10 @@ export class idOSIssuer {
     // biome-ignore lint/suspicious/noExplicitAny: any is needed here
   ): Record<string, any> {
     return credentialSubjectConverter(subject, true);
+  }
+
+  deriveCredentialLevel(subject: CredentialSubject): string {
+    return deriveLevel(subject);
   }
 
   async buildFaceIdCredential(

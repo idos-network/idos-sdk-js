@@ -63,7 +63,7 @@ catalogs:
     "vite-plugin-node-polyfills": "0.17.0"
 
   testing:
-    "vitest": "^3.2.2"
+    "vitest": "^4.0.6"
 
   react:
     "react": "^19.1.0"
