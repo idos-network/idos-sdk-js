@@ -6,6 +6,7 @@
     "axios": "1.12.2",
     "react": "catalog:react",
     "react-dom": "catalog:react",
+    "@idos-network/utils": "workspace:*",
     "react-router": "^7.7.1",
     "bip39": "^3.1.0",
     "tweetnacl": "catalog:core",
