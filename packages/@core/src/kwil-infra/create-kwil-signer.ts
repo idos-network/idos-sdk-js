@@ -70,6 +70,17 @@ export interface CustomKwilSigner extends KwilSigner {
   publicKey: string;
 }
 
+function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "publicAddress" in object &&
+    "signatureType" in object &&
+    "publicKey" in object &&
+    "signer" in object
+  );
+}
+
 /**
  * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
  */
@@ -188,13 +199,13 @@ export async function createClientKwilSigner(
   }
 
   if (looksLikeXrpWallet(wallet)) {
-    const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
-      wallet,
-    )) as { address: string; publicKey: string };
-    if (!currentAddress) {
+    const xrpPublicKey = await getXrpPublicKey(wallet);
+
+    if (!xrpPublicKey || !xrpPublicKey.address) {
       throw new Error("Failed to get XRP address");
     }
-    console.log({ currentAddress, walletPublicKey });
+
+    const { address: currentAddress, publicKey: walletPublicKey } = xrpPublicKey;
 
     return [
       await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
@@ -204,23 +215,9 @@ export async function createClientKwilSigner(
     ];
   }
 
-  if ("signatureType" in wallet && "publicAddress" in wallet) {
-    return [wallet, wallet.publicAddress, wallet.publicKey, "stellar"];
-  }
-
-  // Pinocchio Signer testing
-  // @ts-expect-error Ignore for now
-  if ("address" in wallet && typeof wallet.address === "string") {
-    // @ts-expect-error Ignore for now
-    return [
-      new KwilSigner(
-        (message: Uint8Array) => wallet.signMessage(message),
-        wallet.address,
-        "ed25519",
-      ),
-      wallet.address,
-      "ed25519",
-    ]; // ed25519 is wrong...
+  // Stellar or pinocchio
+  if (isCustomKwilSigner(wallet)) {
+    return [wallet, wallet.publicAddress, wallet.publicKey, wallet.signatureType];
   }
 
   // Force the check that `signer` is `never`.
