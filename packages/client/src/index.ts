@@ -229,11 +229,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
-  // TODO: REMOVE THIS METHOD
-  async getUser(): Promise<idOSUser> {
-    return getUser(this.kwilClient);
-  }
-
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
@@ -429,15 +424,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     await addWallet(this.kwilClient, params);
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
-      console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
-    console.log({ params });
-    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
@@ -480,7 +472,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       console.log("MPC is not enabled or the user is not using MPC");
       return { id };
     }
-    console.log({ wallet });
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
       wallet.public_key,
