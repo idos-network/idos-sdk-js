@@ -746,6 +746,9 @@ importers:
 
   apps/pinocchio-enclave:
     dependencies:
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       axios:
         specifier: 1.12.2
         version: 1.12.2(debug@4.4.3)
