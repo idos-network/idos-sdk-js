@@ -13,12 +13,12 @@ export interface SessionProposal {
 
 export interface SignProposal {
   id: number;
-  data: string;
+  data: Uint8Array;
   metadata: {
     name: string;
     description: string;
   };
-  callback: (signature: string | null) => void;
+  callback: (signature: Uint8Array | null) => void;
 }
 
 export interface RequestsContextValue {
@@ -66,7 +66,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
     (proposal: SignProposal) => {
       // Enhance callback to remove from list after decision
       const originalCallback = proposal.callback;
-      proposal.callback = (signature: string | null) => {
+      proposal.callback = (signature: Uint8Array | null) => {
         originalCallback(signature);
         setSignProposals((prev) => prev.filter((p) => p !== proposal));
       };

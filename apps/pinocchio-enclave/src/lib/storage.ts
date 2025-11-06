@@ -28,7 +28,7 @@ export async function storeGet<T>(id: string): Promise<T | undefined> {
 
   return new Promise((resolve, reject) => {
     const req = store.get(id);
-    req.onsuccess = () => resolve(req.result || null);
+    req.onsuccess = () => resolve(req.result?.value || null);
     req.onerror = () => reject(req.error);
   });
 }

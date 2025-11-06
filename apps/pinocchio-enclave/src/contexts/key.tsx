@@ -1,16 +1,11 @@
-import { mnemonicToSeed } from "bip39";
 import { createContext, useContext, useEffect, useState } from "react";
-import {
-  isKeyAvailable as checkKeyAvailability,
-  createKeyPairFromSeed,
-  getKeys,
-  storeKey,
-} from "@/lib/keys";
+import nacl from "tweetnacl";
+import { checkKeyAvailability, getKeyPair, storeMnemnonic } from "@/lib/keys";
 
 export interface KeyStorage {
   isKeyAvailable: boolean;
   setMnemonic: (mnemonic: string) => void;
-  sign: (data: string) => Promise<string>;
+  sign: (data: Uint8Array) => Promise<Uint8Array>;
   getPublicKey: () => Promise<string>;
 }
 
@@ -43,29 +38,24 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
   const contextValue = {
     isKeyAvailable: isKeyAvailable || false,
     setMnemonic: async (mnemonic: string) => {
-      const seed = await mnemonicToSeed(mnemonic);
-      const keys = await createKeyPairFromSeed(seed);
-      await storeKey(keys.keyPair, keys.publicKey);
+      await storeMnemnonic(mnemonic);
       setIsKeyAvailable(true);
     },
     getPublicKey: async () => {
-      const { publicKey } = await getKeys();
+      const { publicKey } = await getKeyPair();
       return Buffer.from(publicKey).toString("hex");
     },
-    sign: async (data: string) => {
-      const { keyPair } = await getKeys();
+    sign: async (data: Uint8Array) => {
+      const keyPair = await getKeyPair();
 
-      return crypto.subtle
-        .sign("Ed25519", keyPair, new TextEncoder().encode(data))
-        .then((signature) => {
-          return Buffer.from(signature).toString("hex");
-        });
+      return nacl.sign.detached(data, keyPair.secretKey);
     },
   };
 
   useEffect(() => {
     // Check if user already has a passkey registered
     checkKeyAvailability().then((available) => {
+      console.log("Key availability:", available);
       setIsKeyAvailable(available);
     });
   }, []);

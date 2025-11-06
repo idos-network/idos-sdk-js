@@ -1,3 +1,4 @@
+import { utf8Decode } from "@idos-network/utils/codecs";
 import { useState } from "react";
 import { useKeyStorageContext } from "@/contexts/key";
 import { useRequests } from "@/contexts/requests";
@@ -64,7 +65,7 @@ export default function Sign() {
             <div>
               <h3 className="text-sm font-semibold text-gray-400 mb-2">Application</h3>
               <p className="text-white">{firstProposal.metadata.name}</p>
-              <p className="text-sm text-gray-400">{firstProposal.data}</p>
+              <p className="text-sm text-gray-400">{utf8Decode(firstProposal.data as any)}</p>
             </div>
           </div>
 
