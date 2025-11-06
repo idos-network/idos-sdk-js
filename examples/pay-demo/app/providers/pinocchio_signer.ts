@@ -11,17 +11,6 @@ interface Metadata {
   description: string;
 }
 
-function hexToUint8Array(hex: string): Uint8Array {
-  // biome-ignore lint/style/noParameterAssign: modifying parameter for convenience
-  if (hex.startsWith("0x")) hex = hex.slice(2); // remove optional 0x prefix
-  if (hex.length % 2 !== 0) throw new Error("Invalid hex string");
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = Number.parseInt(hex.substr(i, 2), 16);
-  }
-  return bytes;
-}
-
 export class PinocchioSignerProvider {
   private window: Window | null = null;
 
@@ -42,7 +31,7 @@ export class PinocchioSignerProvider {
       }
 
       if (event.data.type === "sign_proposal_response") {
-        this.resolveSignMessage?.(hexToUint8Array(event.data.data.signature));
+        this.resolveSignMessage?.(event.data.data.signature);
       }
 
       if (event.data.type === "session_proposal_response") {

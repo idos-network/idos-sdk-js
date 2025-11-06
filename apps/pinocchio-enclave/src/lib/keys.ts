@@ -26,6 +26,16 @@ export async function getKeyPair() {
   return tweetnacl.sign.keyPair.fromSeed(seed.subarray(0, 32));
 }
 
+export async function checkKeyAvailability(): Promise<boolean> {
+  try {
+    await getKeyPair();
+    return true;
+  } catch (e) {
+    console.log("Key availability check failed:", e);
+    return false;
+  }
+}
+
 async function ensureKek() {
   let key = await storeGet<CryptoKey>(DB_KEY_KEK);
 
