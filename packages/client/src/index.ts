@@ -145,10 +145,6 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
-    console.log("Wallet Type:", walletType);
-    console.log("Wallet Identifier:", walletIdentifier);
-    console.log("Wallet Public Key:", walletPublicKey);
-
     this.kwilClient.setSigner(kwilSigner);
 
     if (walletType === "near") {
@@ -428,15 +424,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     await addWallet(this.kwilClient, params);
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
-      console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
-    console.log({ params });
-    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
@@ -479,7 +472,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       console.log("MPC is not enabled or the user is not using MPC");
       return { id };
     }
-    console.log({ wallet });
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
       wallet.public_key,
