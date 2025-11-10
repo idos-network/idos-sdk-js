@@ -1,1 +1,0 @@
-# NeoBank demo app
