@@ -113,7 +113,8 @@ export const CredentialSubjectSchema: z.ZodObject<{
   ssn: z.ZodOptional<z.ZodString>;
   gender: z.ZodOptional<typeof GenderSchema>;
   nationality: z.ZodOptional<z.ZodString>;
-  familyName: z.ZodString;
+  // Indonesian and Indian did not always have family name
+  familyName: z.ZodOptional<z.ZodString>;
   maidenName: z.ZodOptional<z.ZodString>;
   email: z.ZodOptional<z.ZodEmail>;
   phoneNumber: z.ZodOptional<z.ZodString>;
@@ -148,7 +149,7 @@ export const CredentialSubjectSchema: z.ZodObject<{
   gender: GenderSchema.optional(),
 
   /* Family name. */
-  familyName: z.string(),
+  familyName: z.string().optional(),
 
   /* Maiden name. */
   maidenName: z.string().optional(),
