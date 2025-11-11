@@ -250,6 +250,8 @@ describe("verifiableCredentials", () => {
           {
             id: `uuid:${id}`,
             ssn: "123456789",
+            firstName: "",
+            familyName: undefined,
             gender: "M",
             nationality: "US",
             email: "john.lennon@example.com",
