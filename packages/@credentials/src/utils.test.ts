@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveLevel } from "./utils";
+import { deriveLevel, matchLevelOrHigher } from "./utils";
 import type { CredentialSubject } from "./utils/types";
 
 const defaultCredential: CredentialSubject = {
@@ -13,6 +13,28 @@ const defaultCredential: CredentialSubject = {
   idDocumentFrontFile: Buffer.from("ID Document Front"),
   selfieFile: Buffer.alloc(0),
 };
+
+describe("matchLevelOrHigher", () => {
+  [
+    ["basic", [], "basic+liveness", true],
+    ["plus", [], "plus+liveness", true],
+    ["plus", [], "basic", false],
+    ["plus", ["liveness"], "plus", false],
+    ["basic", ["email"], "basic+liveness+email+phoneNumber", true],
+    ["plus", ["email", "phoneNumber"], "plus+liveness+email+phoneNumber", true],
+    ["plus", ["email", "phoneNumber"], "plus+phoneNumber", false],
+  ].forEach(([level, requiredAddons, testLevel, expected]) => {
+    it(`level=${level} requiredAddons=[${(requiredAddons as string[]).join(",")}] testLevel=${testLevel} => ${expected}`, () => {
+      expect(
+        matchLevelOrHigher(
+          level as "basic" | "plus",
+          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
+          testLevel as string,
+        ),
+      ).toBe(expected as boolean);
+    });
+  });
+});
 
 describe("deriveLevel", () => {
   it("basic only", () => {

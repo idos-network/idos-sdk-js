@@ -129,3 +129,17 @@ export function deriveLevel(credential: CredentialSubject): string {
 
   return [level, ...addons].join("+");
 }
+
+export function matchLevelOrHigher(
+  level: "basic" | "plus",
+  requiredAddons: ("liveness" | "email" | "phoneNumber")[],
+  currentLevel: string,
+): boolean {
+  const [currentBaseLevel, ...currentAddons] = currentLevel.split("+");
+
+  if (level === "plus" && currentBaseLevel !== "plus") {
+    return false;
+  }
+
+  return requiredAddons.every((addon) => currentAddons.includes(addon));
+}

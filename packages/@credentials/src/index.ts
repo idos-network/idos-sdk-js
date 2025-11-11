@@ -6,7 +6,13 @@ import {
   credentialSubjectConverter,
   type FaceIdCredential,
 } from "./builder";
-import { type AvailableIssuerType, base85ToFile, deriveLevel, fileToBase85 } from "./utils";
+import {
+  type AvailableIssuerType,
+  base85ToFile,
+  deriveLevel,
+  fileToBase85,
+  matchLevelOrHigher,
+} from "./utils";
 import type {
   CredentialFields,
   CredentialSubject,
@@ -28,6 +34,7 @@ export {
   base85ToFile,
   fileToBase85,
   deriveLevel,
+  matchLevelOrHigher,
 };
 
 export type {
