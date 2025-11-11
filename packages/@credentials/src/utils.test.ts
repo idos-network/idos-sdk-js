@@ -7,6 +7,11 @@ const defaultCredential: CredentialSubject = {
   firstName: "John",
   familyName: "Doe",
   idDocumentType: "PASSPORT",
+  dateOfBirth: new Date("1990-01-01"),
+  idDocumentCountry: "US",
+  idDocumentNumber: "123456789",
+  idDocumentFrontFile: Buffer.from("ID Document Front"),
+  selfieFile: Buffer.alloc(0),
 };
 
 describe("deriveLevel", () => {
@@ -14,6 +19,7 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
+        selfieFile: undefined,
       }),
     ).toBe("basic");
   });
@@ -22,7 +28,6 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
       }),
     ).toBe("basic+liveness");
   });
@@ -31,9 +36,8 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
-        selfieFile: Buffer.from("Selfie"),
         residentialAddress: {
-          streetAddress: "123 Main St",
+          street: "123 Main St",
           city: "Anytown",
           postalCode: "12345",
           country: "US",
@@ -52,7 +56,7 @@ describe("deriveLevel", () => {
         phoneNumber: "+1234567890",
         email: "john.doe@example.com",
         residentialAddress: {
-          streetAddress: "123 Main St",
+          street: "123 Main St",
           city: "Anytown",
           postalCode: "12345",
           country: "US",

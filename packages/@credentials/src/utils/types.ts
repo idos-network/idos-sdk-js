@@ -108,7 +108,8 @@ export type Gender = z.infer<typeof GenderSchema>;
 // https://github.com/colinhacks/zod/issues/3751
 export const CredentialSubjectSchema: z.ZodObject<{
   id: z.ZodString;
-  firstName: z.ZodString;
+  // Indonesian and Indian did not always have first name
+  firstName: z.ZodOptional<z.ZodString>;
   middleName: z.ZodOptional<z.ZodString>;
   ssn: z.ZodOptional<z.ZodString>;
   gender: z.ZodOptional<typeof GenderSchema>;
@@ -129,70 +130,76 @@ export const CredentialSubjectSchema: z.ZodObject<{
   idDocumentBackFile: z.ZodOptional<z.ZodType<Buffer<ArrayBufferLike>>>;
   selfieFile: z.ZodType<Buffer<ArrayBufferLike>>;
   residentialAddress: z.ZodOptional<typeof CredentialResidentialAddressSchema>;
-}> = z.object({
-  /* ID(unique credential)	Unique identifier for the credential itself. */
-  id: z.string(),
+}> = z
+  .object({
+    /* ID(unique credential)	Unique identifier for the credential itself. */
+    id: z.string(),
 
-  /* First name. */
-  firstName: z.string(),
+    /* First name. */
+    firstName: z.string().optional(),
 
-  /* Middle name. */
-  middleName: z.string().optional(),
+    /* Middle name. */
+    middleName: z.string().optional(),
 
-  /* Social-security-number (without dashes) */
-  ssn: z.string().min(9).max(9).optional(),
+    /* Social-security-number (without dashes) */
+    ssn: z.string().min(9).max(9).optional(),
 
-  /* Nationality (ISO 3166-1 alpha-2). */
-  nationality: z.string().min(2).max(2).optional(),
+    /* Nationality (ISO 3166-1 alpha-2). */
+    nationality: z.string().min(2).max(2).optional(),
 
-  /* Gender (M or F, empty if not provided). */
-  gender: GenderSchema.optional(),
+    /* Gender (M or F, empty if not provided). */
+    gender: GenderSchema.optional(),
 
-  /* Family name. */
-  familyName: z.string().optional(),
+    /* Family name. */
+    familyName: z.string().optional(),
 
-  /* Maiden name. */
-  maidenName: z.string().optional(),
+    /* Maiden name. */
+    maidenName: z.string().optional(),
 
-  /* Date of birth. */
-  dateOfBirth: z.date(),
+    /* Date of birth. */
+    dateOfBirth: z.date(),
 
-  /* Place of birth. */
-  placeOfBirth: z.string().optional(),
+    /* Place of birth. */
+    placeOfBirth: z.string().optional(),
 
-  /* Email. */
-  email: z.email().optional(),
+    /* Email. */
+    email: z.email().optional(),
 
-  /* Phone number. */
-  phoneNumber: z.string().optional(),
+    /* Phone number. */
+    phoneNumber: z.string().optional(),
 
-  /* Country that issued the identity document (ISO 3166-1 alpha-2). */
-  idDocumentCountry: z.string().min(2).max(2),
+    /* Country that issued the identity document (ISO 3166-1 alpha-2). */
+    idDocumentCountry: z.string().min(2).max(2),
 
-  /* ID Document Number	Unique number on the identity document. */
-  idDocumentNumber: z.string(),
+    /* ID Document Number	Unique number on the identity document. */
+    idDocumentNumber: z.string(),
 
-  /* ID Document Type	Type of identity document(e.g., Passport, Driver's License, National ID). */
-  idDocumentType: IDDocumentTypeSchema,
+    /* ID Document Type	Type of identity document(e.g., Passport, Driver's License, National ID). */
+    idDocumentType: IDDocumentTypeSchema,
 
-  /* ID Document Date of Issue	Date the identity document was issued. */
-  idDocumentDateOfIssue: z.date().optional(),
+    /* ID Document Date of Issue	Date the identity document was issued. */
+    idDocumentDateOfIssue: z.date().optional(),
 
-  /* ID Document Date of Expiry	Expiration date of the identity document - if applicable. */
-  idDocumentDateOfExpiry: z.date().optional(),
+    /* ID Document Date of Expiry	Expiration date of the identity document - if applicable. */
+    idDocumentDateOfExpiry: z.date().optional(),
 
-  /* ID Document Front File	Buffer with file representing the front of the identity document. */
-  idDocumentFrontFile: z.instanceof(Buffer),
+    /* ID Document Front File	Buffer with file representing the front of the identity document. */
+    idDocumentFrontFile: z.instanceof(Buffer),
 
-  /* ID Document Back File	Buffer with file representing the back of the identity document - if applicable. */
-  idDocumentBackFile: z.instanceof(Buffer).optional(),
+    /* ID Document Back File	Buffer with file representing the back of the identity document - if applicable. */
+    idDocumentBackFile: z.instanceof(Buffer).optional(),
 
-  /* (ID Document) Selfie File	Buffer with selfie with the identity document for verification purposes. */
-  selfieFile: z.instanceof(Buffer),
+    /* (ID Document) Selfie File	Buffer with selfie with the identity document for verification purposes. */
+    selfieFile: z.instanceof(Buffer),
 
-  /* Residential Address Full residential address of the individual - if applicable. */
-  residentialAddress: CredentialResidentialAddressSchema.optional(),
-});
+    /* Residential Address Full residential address of the individual - if applicable. */
+    residentialAddress: CredentialResidentialAddressSchema.optional(),
+  })
+  .refine(
+    // At least one of firstName or familyName must be presentme,
+    (data) => data.firstName || data.familyName,
+    { message: "At least one of firstName or familyName must be provided" },
+  );
 
 export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
 
