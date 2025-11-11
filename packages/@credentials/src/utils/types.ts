@@ -196,7 +196,7 @@ export const CredentialSubjectSchema: z.ZodObject<{
     residentialAddress: CredentialResidentialAddressSchema.optional(),
   })
   .refine(
-    // At least one of firstName or familyName must be presentme,
+    // At least one of firstName or familyName must be present,
     (data) => data.firstName || data.familyName,
     { message: "At least one of firstName or familyName must be provided" },
   );
