@@ -227,6 +227,60 @@ describe("verifiableCredentials", () => {
       }
     });
 
+    it("test refinement (at least one of firstName or familyName must be provided)", async () => {
+      const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
+      const issuer = "https://vc-issuers.cool.id/idos";
+
+      const validKey = await Ed25519VerificationKey2020.generate({
+        id: `${issuer}/keys/1`,
+        controller: `${issuer}/issuers/1`,
+      });
+
+      expect.assertions(3); // catch
+
+      try {
+        await buildCredential(
+          {
+            id: `${issuer}/credentials/${id}`,
+            level: "human",
+            issued: new Date("2022-01-01"),
+            approvedAt: new Date("2022-01-01"),
+            expirationDate: new Date("2030-01-01"),
+          },
+          {
+            id: `uuid:${id}`,
+            ssn: "123456789",
+            firstName: "",
+            familyName: undefined,
+            gender: "M",
+            nationality: "US",
+            email: "john.lennon@example.com",
+            phoneNumber: "+1234567890",
+            dateOfBirth: new Date("1980-01-01"),
+            placeOfBirth: "New York, NY",
+            idDocumentCountry: "US",
+            idDocumentNumber: "123456789",
+            idDocumentType: "PASSPORT",
+            idDocumentDateOfIssue: new Date("2022-01-01"),
+            idDocumentDateOfExpiry: new Date("2025-01-01"),
+            idDocumentFrontFile: Buffer.from("Front of ID document"),
+            idDocumentBackFile: Buffer.from("Back of ID document"),
+            selfieFile: Buffer.from("Selfie"),
+          },
+          validKey,
+        );
+      } catch (error) {
+        expect(error).toBeInstanceOf(ZodError);
+        const zodError = error as ZodError;
+        expect(zodError.issues).toHaveLength(1);
+
+        const refinementError = zodError.issues.find(
+          (error) => error.message === "At least one of firstName or familyName must be provided",
+        );
+        expect(refinementError).toBeDefined();
+      }
+    });
+
     it("should create and verify a verifiable vc", async () => {
       const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
       const issuer = "https://vc-issuers.cool.id/idos";
