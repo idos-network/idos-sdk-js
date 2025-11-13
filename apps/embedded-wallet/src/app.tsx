@@ -13,6 +13,20 @@ const getHiddenWalletTypes = () => {
 
 const hiddenWalletType = getHiddenWalletTypes();
 
+const getOpenerOrigin = () => {
+  try {
+    if (!document.referrer) {
+      console.warn("Document referrer is empty; unable to derive opener origin");
+      return null;
+    }
+
+    return new URL(document.referrer).origin;
+  } catch (error) {
+    console.warn("Failed to derive opener origin from document referrer", error);
+    return null;
+  }
+};
+
 function WalletConnector() {
   if (!connectedWalletType.value) {
     return (
@@ -47,14 +61,17 @@ function WalletConnector() {
 export function App() {
   effect(() => {
     if (walletPayload.value) {
-      if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
-        console.warn("VITE_DATA_DASHBOARD_URL is not set");
-        return;
-      }
       if (!window.opener) {
         console.log("No opener window found");
         return;
       }
+
+      const targetOrigin = getOpenerOrigin();
+      if (!targetOrigin) {
+        console.warn("Target origin is not available; aborting `postMessage`");
+        return;
+      }
+
       walletPayload.value
         .disconnect()
         .then(() => {
@@ -68,7 +85,7 @@ export function App() {
                 disconnect: undefined,
               },
             },
-            import.meta.env.VITE_DATA_DASHBOARD_URL,
+            targetOrigin,
           );
 
           // Close the popup window after sending the data
