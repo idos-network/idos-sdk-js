@@ -156,13 +156,6 @@ export class idOSIssuer {
     return buildCredential(fields, subject, issuer, validate);
   }
 
-  convertCredential(
-    subject: CredentialSubject,
-    // biome-ignore lint/suspicious/noExplicitAny: any is needed here
-  ): Record<string, any> {
-    return credentialSubjectConverter(subject, true);
-  }
-
   deriveCredentialLevel(subject: CredentialSubject): string {
     return deriveLevel(subject);
   }
@@ -176,16 +169,25 @@ export class idOSIssuer {
     return buildFaceIdCredential(fields, subject, issuer, validate);
   }
 
-  convertFaceIdCredential(
-    subject: CredentialSubjectFaceId,
-    // biome-ignore lint/suspicious/noExplicitAny: any is needed here
-  ): Record<string, any> {
-    return credentialFaceIdSubjectConverter(subject, true);
-  }
-
   async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
     return this.#passportingService.getPassportingPeers();
   }
+}
+
+// TODO: Temporary we should expose @credentials package
+export function convertCredential(
+  subject: CredentialSubject,
+  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+): Record<string, any> {
+  return credentialSubjectConverter(subject, true);
+}
+
+// TODO: Temporary we should expose @credentials package
+export function convertFaceIdCredential(
+  subject: CredentialSubjectFaceId,
+  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
+): Record<string, any> {
+  return credentialFaceIdSubjectConverter(subject, true);
 }
 
 export type {
