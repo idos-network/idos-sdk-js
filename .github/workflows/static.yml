@@ -36,12 +36,12 @@ jobs:
       - name: Prepare deploy folder
         run: |
           mkdir -p public/credentials
-          cp -r packages/@credentials/assets/* public/credentials/
+          cp -r packages/credentials/assets/* public/credentials/
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: 'public'
+          path: "public"
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

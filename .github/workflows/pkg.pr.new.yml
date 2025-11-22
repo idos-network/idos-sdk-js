@@ -1,11 +1,11 @@
-name: 'pkg.pr.new'
+name: "pkg.pr.new"
 on:
   push:
     branches:
       - playground
       - main
     tags:
-      - '!**'
+      - "!**"
   pull_request:
     branches:
       - playground
@@ -24,12 +24,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node_version
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - run: pnpm install
 
       - name: Build
-        run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils
+        run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils --filter=@idos-network/credentials
 
       - name: Release
-        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils'
+        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils' './packages/credentials'

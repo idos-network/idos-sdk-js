@@ -19,6 +19,7 @@ describe("deriveLevel", () => {
     expect(
       deriveLevel({
         ...defaultCredential,
+        // @ts-expect-error - to test absence of selfieFile
         selfieFile: undefined,
       }),
     ).toBe("basic");
