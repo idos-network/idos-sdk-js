@@ -115,7 +115,9 @@ export const createProfile = async (profileId: string, data: Credential) => {
   const apiToken = await getClientToken();
 
   const personal: Personal = {
+    // @ts-expect-error Demo
     firstName: data.credentialSubject.firstName,
+    // @ts-expect-error Demo
     lastName: data.credentialSubject.familyName,
     // biome-ignore lint/style/noNonNullAssertion: This is ok, we are choosing plus+liveness
     address: data.credentialSubject.residentialAddressStreet!,
@@ -126,9 +128,10 @@ export const createProfile = async (profileId: string, data: Credential) => {
     // biome-ignore lint/style/noNonNullAssertion: This is ok, we are choosing plus+liveness
     country: data.credentialSubject.residentialAddressCountry!,
     // biome-ignore lint/style/noNonNullAssertion: This is ok, we are choosing plus+liveness
-    countryState: data.credentialSubject.residentialAddressState!,
+    countryState: data.credentialSubject.residentialAddressCountry!,
     nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
-    birthday: data.credentialSubject.dateOfBirth?.split("T")[0],
+    // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+    birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
     idDocument: {
       number: data.credentialSubject.idDocumentNumber,
       kind: data.credentialSubject.idDocumentType.toLowerCase(),
@@ -159,22 +162,26 @@ export const createProfile = async (profileId: string, data: Credential) => {
     uploadFile(
       profileId,
       apiToken,
-      data.credentialSubject.idDocumentFrontFile,
+      // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+      data.credentialSubject.idDocumentFrontFile!,
       "idDocument",
       "front",
     ),
     uploadFile(
       profileId,
       apiToken,
-      data.credentialSubject.idDocumentBackFile,
+      // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+      data.credentialSubject.idDocumentBackFile!,
       "idDocument",
       "back",
     ),
-    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile, "facialSimilarity"),
+    // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+    uploadFile(profileId, apiToken, data.credentialSubject.selfieFile!, "facialSimilarity"),
     uploadFile(
       profileId,
       apiToken,
-      data.credentialSubject.proofOfResidencyFile,
+      // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+      data.credentialSubject.residentialAddressProofFile!,
       "proofOfResidency",
     ),
   ]);
@@ -321,7 +328,8 @@ export const auth = async (data: Credential, url: URL) => {
   params.set("client_id", SERVER_ENV.MONERIUM_AUTH_CODE_FLOW);
   params.set("code_challenge", codeChallenge);
   params.set("code_challenge_method", "S256");
-  params.set("email", data.credentialSubject.email);
+  // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+  params.set("email", data.credentialSubject.email!);
   params.set("redirect_uri", returnUrl.toString());
 
   const authUrl = new URL(`${SERVER_ENV.MONERIUM_API_URL}/auth?${params.toString()}`);

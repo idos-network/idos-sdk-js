@@ -42,9 +42,7 @@ function ConnectWallet() {
       {isPending ? (
         <Button loading={true}> Waiting wallet </Button>
       ) : (
-        <>
-          <Button onClick={() => open()}>Browser wallet</Button>
-        </>
+        <Button onClick={() => open()}>Browser wallet</Button>
       )}
     </Center>
   );

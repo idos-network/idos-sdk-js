@@ -15,6 +15,7 @@ export default defineConfig({
   plugins: [
     react(),
     tsconfigPaths(),
+    // @ts-ignore - manifest import
     crx({
       manifest,
       contentScripts: {

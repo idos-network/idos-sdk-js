@@ -14,6 +14,7 @@
     "@digitalbazaar/vc": "catalog:core",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
+    "@idos-network/credentials": "workspace:*",
     "base85": "catalog:utils",
     "jsonld-document-loader": "catalog:core",
     "ripple-keypairs": "catalog:xrp",
@@ -22,7 +23,6 @@
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
-    "@idos-network/credentials": "workspace:*",
     "clean-package": "^2.2.0",
     "release-it": "^19.0.2",
     "release-it-pnpm": "^4.6.5",
