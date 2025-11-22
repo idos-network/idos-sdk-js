@@ -130,7 +130,8 @@ export const createProfile = async (profileId: string, data: Credential) => {
     // biome-ignore lint/style/noNonNullAssertion: This is ok, we are choosing plus+liveness
     countryState: data.credentialSubject.residentialAddressCountry!,
     nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
-    birthday: data.credentialSubject.dateOfBirth?.toDateString().split("T")[0],
+    // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+    birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
     idDocument: {
       number: data.credentialSubject.idDocumentNumber,
       kind: data.credentialSubject.idDocumentType.toLowerCase(),

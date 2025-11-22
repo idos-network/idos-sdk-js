@@ -215,13 +215,24 @@ export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
 export interface VerifiableCredentialSubject
   extends Omit<
     CredentialSubject,
-    "residentialAddress" | "idDocumentBackFile" | "idDocumentFrontFile" | "selfieFile"
+    | "residentialAddress"
+    | "idDocumentBackFile"
+    | "idDocumentFrontFile"
+    | "selfieFile"
+    | "idDocumentDateOfIssue"
+    | "idDocumentDateOfExpiry"
+    | "dateOfBirth"
   > {
   "@context": string;
   // Files are strings in verifiable credentials, but as an input they should be buffers
   idDocumentFrontFile?: string;
   idDocumentBackFile?: string;
   selfieFile?: string;
+  // Dates are strings in verifiable credentials
+  dateOfBirth?: string;
+  idDocumentDateOfIssue?: string;
+  idDocumentDateOfExpiry?: string;
+  // This is the residential address flattened fields
   residentialAddressStreet?: string;
   residentialAddressHouseNumber?: string;
   residentialAddressAdditionalAddressInfo?: string;
@@ -230,6 +241,7 @@ export interface VerifiableCredentialSubject
   residentialAddressPostalCode?: string;
   residentialAddressCountry?: string;
   residentialAddressProofCategory?: string;
+  // Dates are strings in verifiable credentials
   residentialAddressProofDateOfIssue?: string;
   // Files are strings in verifiable credentials, but as an input they should be buffers
   residentialAddressProofFile?: string;
