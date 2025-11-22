@@ -34,7 +34,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     const typeFromBuffer = await fileTypeFromBuffer(file);
     const mimeType = typeFromBuffer?.mime ?? "application/pdf";
 
-    // @ts-expect-error Response init object type
     return new Response(file, {
       headers: {
         "Content-Type": mimeType,
