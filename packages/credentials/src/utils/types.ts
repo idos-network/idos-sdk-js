@@ -212,8 +212,16 @@ export const CredentialSubjectSchema: z.ZodObject<{
 
 export type CredentialSubject = z.infer<typeof CredentialSubjectSchema>;
 
-export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "residentialAddress"> {
+export interface VerifiableCredentialSubject
+  extends Omit<
+    CredentialSubject,
+    "residentialAddress" | "idDocumentBackFile" | "idDocumentFrontFile" | "selfieFile"
+  > {
   "@context": string;
+  // Files are strings in verifiable credentials, but as an input they should be buffers
+  idDocumentFrontFile?: string;
+  idDocumentBackFile?: string;
+  selfieFile?: string;
   residentialAddressStreet?: string;
   residentialAddressHouseNumber?: string;
   residentialAddressAdditionalAddressInfo?: string;
@@ -223,7 +231,8 @@ export interface VerifiableCredentialSubject extends Omit<CredentialSubject, "re
   residentialAddressCountry?: string;
   residentialAddressProofCategory?: string;
   residentialAddressProofDateOfIssue?: string;
-  residentialAddressProofFile?: Buffer<ArrayBufferLike>;
+  // Files are strings in verifiable credentials, but as an input they should be buffers
+  residentialAddressProofFile?: string;
 }
 
 // TODO: This is a stub of the types for @digitalbazaar/vc
