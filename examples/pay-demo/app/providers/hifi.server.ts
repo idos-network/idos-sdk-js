@@ -127,10 +127,14 @@ export const createUserAndKYC = async (
 
   const user: CreateUserRequest = {
     type: "individual",
+    // @ts-expect-error Demo
     firstName: data.credentialSubject.firstName,
+    // @ts-expect-error Demo
     lastName: data.credentialSubject.familyName,
+    // @ts-expect-error Demo
     email: data.credentialSubject.email,
-    dateOfBirth: data.credentialSubject.dateOfBirth.split("T")[0],
+    // @ts-expect-error Demo
+    dateOfBirth: data.credentialSubject.dateOfBirth?.split("T")[0],
     address: {
       // biome-ignore lint/style/noNonNullAssertion: false positive
       addressLine1: data.credentialSubject.residentialAddressStreet!,
@@ -170,14 +174,14 @@ export const createUserAndKYC = async (
 
   const updateKYCRequest: UpdateKYCRequest = {
     ...user,
-    // @ts-expect-error Missing types
     signedAgreementId: undefined,
     phone: data.credentialSubject.phoneNumber ?? "+420606707808",
     // TODO: Get this from the data
     taxIdentificationNumber: "123456789",
     govIdType: data.credentialSubject.idDocumentType.toUpperCase(),
     govIdNumber: data.credentialSubject.idDocumentNumber,
-    govIdIssuanceDate: data.credentialSubject.idDocumentDateOfIssue?.split("T")[0],
+    // @ts-expect-error Demo
+    govIdIssuanceDate: data.credentialSubject.idDocumentDateOfIssue?.toString()?.split("T")[0],
     govIdFrontUrl: generateFileUrl(url, credentialId, "idDocumentFrontFile"),
     govIdBackUrl: data.credentialSubject.idDocumentBackFile
       ? generateFileUrl(url, credentialId, "idDocumentBackFile")
