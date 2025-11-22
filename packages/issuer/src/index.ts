@@ -15,13 +15,11 @@ import {
   type Credential,
   type CredentialFields,
   type CredentialSubject,
-  credentialFaceIdSubjectConverter,
-  credentialSubjectConverter,
+  type CredentialSubjectFaceId,
   deriveLevel,
+  type FaceIdCredential,
 } from "@idos-network/credentials";
 import type { SignKeyPair } from "tweetnacl";
-import type { FaceIdCredential } from "../../@credentials/src/builder";
-import type { CredentialSubjectFaceId } from "../../@credentials/src/utils/types";
 import {
   CredentialService,
   type DelegatedWriteGrantBaseParams,
@@ -172,22 +170,6 @@ export class idOSIssuer {
   async getPassportingPeers(): Promise<idOSPassportingPeer[]> {
     return this.#passportingService.getPassportingPeers();
   }
-}
-
-// TODO: Temporary we should expose @credentials package
-export function convertCredential(
-  subject: CredentialSubject,
-  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
-): Record<string, any> {
-  return credentialSubjectConverter(subject, true);
-}
-
-// TODO: Temporary we should expose @credentials package
-export function convertFaceIdCredential(
-  subject: CredentialSubjectFaceId,
-  // biome-ignore lint/suspicious/noExplicitAny: any is needed here
-): Record<string, any> {
-  return credentialFaceIdSubjectConverter(subject, true);
 }
 
 export type {

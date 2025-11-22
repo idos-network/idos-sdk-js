@@ -10,13 +10,13 @@
 > - <https://www.idos.network/legal/transparency-document>
 
 ## SDKs
-| Folder                                    | Contents                                     |
-|:------------------------------------------|:---------------------------------------------|
+| Folder                                   | Contents                                     |
+| :--------------------------------------- | :------------------------------------------- |
 | **[`📁 consumer`](./packages/consumer/)** | idOS JavaScript SDK for consumers            |
 | **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers              |
 | **[`📁 client`](./packages/client)**      | idOS JavaScript SDK for browser environments |
 
-`@core`, `@controllers` and `@credentials` are internal packages.
+`@core` and `@controllers` are internal packages.
 
 ## Auxiliary Applications
 | Folder                                                 | Contents                                                                                                                                |
