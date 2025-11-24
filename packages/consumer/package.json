@@ -4,19 +4,13 @@
   "version": "1.0.0-rc.1.2",
   "clean-package": {
     "remove": [
-      "devDependencies.@idos-network/core",
-      "devDependencies.@idos-network/credentials"
+      "devDependencies.@idos-network/core"
     ]
   },
   "dependencies": {
-    "@digitalbazaar/ed25519-signature-2020": "catalog:core",
-    "@digitalbazaar/ed25519-verification-key-2020": "catalog:core",
-    "@digitalbazaar/vc": "catalog:core",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
     "@idos-network/credentials": "workspace:*",
-    "base85": "catalog:utils",
-    "jsonld-document-loader": "catalog:core",
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
     "web-streams-polyfill": "catalog:core"
