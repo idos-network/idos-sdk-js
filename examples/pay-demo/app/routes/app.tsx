@@ -294,11 +294,7 @@ export default function App() {
           Logout
         </button>
       </div>
-      <div className="w-full">
-        {body}
-
-        <div id="idOS-enclave" className={provider ? "m-auto block w-fit" : "hidden"} />
-      </div>
+      <div className="w-full">{body}</div>
     </div>
   );
 }

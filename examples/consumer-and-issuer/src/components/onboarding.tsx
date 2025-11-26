@@ -475,30 +475,9 @@ const useFetchMatchingCredential = () => {
 };
 
 function SecureEnclaveRoot() {
-  const { isleController } = useIsleController();
-  return (
-    <div
-      id="idOS-enclave-root"
-      className="invisible fixed top-0 left-0 z-[10000] flex aspect-square h-full w-full flex-col items-center justify-center bg-black/30 opacity-0 backdrop-blur-sm transition-[opacity,visibility] duration-150 ease-in [&:has(#idOS-enclave.visible)]:visible [&:has(#idOS-enclave.visible)]:opacity-100"
-    >
-      <div className="absolute top-[50%] left-[50%] z-[2] flex h-fit w-11/12 translate-x-[-50%] translate-y-[-50%] flex-col gap-4 overflow-hidden rounded-lg bg-white p-6 shadow-md lg:w-[460px]">
-        <h3 className="font-semibold text-2xl">
-          {isleController?.idosClient.state === "logged-in"
-            ? "Unlock your idOS key"
-            : "Create your idOS key"}
-        </h3>
-        <p className="text-neutral-500 text-sm">
-          {isleController?.idosClient.state === "logged-in"
-            ? "You will be asked to enter your password to unlock your idOS key."
-            : "This key is the key to your idOS data. Be careful not to lose it: you'll need it later to view or share your idOS data."}
-        </p>
-
-        <div className="relative h-full w-[200px] self-center">
-          <div id="idOS-enclave" />
-        </div>
-      </div>
-    </div>
-  );
+  // The iframe enclave now manages its own modal display, so this component is no longer needed
+  // but kept for backwards compatibility
+  return null;
 }
 function AcmeCardProvider({ onExit }: { onExit: () => void }) {
   return (

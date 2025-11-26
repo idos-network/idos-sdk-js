@@ -88,7 +88,6 @@ function RootComponent() {
           <Outlet />
         </IDOSClientProvider>
       </chakra.main>
-      <chakra.div id="idOS-enclave" hidden />
       <ReactQueryDevtools buttonPosition="bottom-left" />
       <TanStackRouterDevtools position="bottom-right" />
     </Grid>

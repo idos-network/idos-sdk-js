@@ -79,9 +79,7 @@ pnpm add @idos-network/issuer
 import { createIDOSClient, type idOSClient } from "@idos-network/client";
 
 const idOSClient = createIDOSClient({
-  enclaveOptions: {
-    container: "#idOS-enclave",
-  },
+  enclaveOptions: {},
 });
 ```
 

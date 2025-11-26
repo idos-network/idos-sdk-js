@@ -102,7 +102,6 @@ export class idOSClientConfiguration<Provider extends BaseProvider = IframeEncla
         store: this.store,
       });
     } else {
-      // @ts-expect-error - In case of missing "container" in options, enclave will blow up
       this.enclaveProvider = new IframeEnclave(params.enclaveOptions);
     }
   }

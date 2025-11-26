@@ -6,6 +6,7 @@ export type Theme = "dark" | "light";
 export type idOSEnclaveConfiguration = {
   mode?: UIMode;
   theme?: Theme;
+  userId?: string;
 };
 
 export type AllowedIntent = "confirm" | "getPasswordContext" | "backupPasswordContext";
