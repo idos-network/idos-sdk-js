@@ -2,12 +2,8 @@
   "name": "@idos-network/utils",
   "description": "idOS Utils JavaScript SDK for enclave environments",
   "version": "1.0.0-rc.1.1",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/credentials"
-    ]
-  },
   "dependencies": {
+    "@idos-network/credentials": "workspace:*",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/binary": "catalog:utils",
     "@stablelib/bytes": "catalog:utils",
@@ -24,7 +20,6 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@idos-network/credentials": "workspace:*",
     "@types/chrome": "^0.0.268",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
