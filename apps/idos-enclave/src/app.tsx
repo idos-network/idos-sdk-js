@@ -56,7 +56,7 @@ function Layout({ children, onClose }: LayoutProps) {
   return (
     <dialog ref={dialogRef} className="m-0 p-0 border-none bg-transparent">
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <div className="relative flex flex-col gap-6 w-full max-w-md bg-zinc-900 p-6 border border-zinc-700 rounded-xl shadow-2xl animate-slideIn">
+        <div className="relative flex flex-col gap-6 w-full max-w-[380px] bg-zinc-900 p-6 border border-zinc-700 rounded-xl shadow-2xl animate-slideIn">
           <button
             type="button"
             aria-label="Close idOS enclave"
