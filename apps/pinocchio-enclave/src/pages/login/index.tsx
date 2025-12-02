@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useKeyStorageContext } from "@/contexts/key";
-import { getEntropy, getPublicKey } from "@/lib/api";
+import { getEntropy } from "@/lib/api";
 import { faceTec } from "./utils";
 
 export default function Login() {
@@ -18,22 +18,19 @@ export default function Login() {
 
   // Get the FaceTec SDK initials
   useEffect(() => {
-    getPublicKey().then((publicKey) => {
-      faceTec.init(publicKey, (errorMessage) => {
-        if (errorMessage) {
-          navigate("/error", { state: { message: errorMessage } });
-        }
-        faceTec.onLivenessCheckClick((status, token, errorMessage) => {
-          if (status && token) {
-            getEntropy(token).then((data) => {
-              // Redirection will be done in useEffect above
-              setMnemonic(data.entropy);
-            });
-          } else {
-            navigate("/error", { state: { message: errorMessage || "Liveness check failed" } });
-          }
+    faceTec.init((errorMessage, token) => {
+      if (errorMessage) {
+        return navigate("/error", { state: { message: errorMessage } });
+      }
+
+      if (token) {
+        getEntropy(token).then((data) => {
+          // Redirection will be done in useEffect above
+          setMnemonic(data.entropy);
         });
-      });
+      } else {
+        console.error("Unexpected state: neither errorMessage nor token is set");
+      }
     });
   }, []);
 

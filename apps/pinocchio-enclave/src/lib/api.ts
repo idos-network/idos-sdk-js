@@ -13,13 +13,23 @@ const entropyService = axios.create({
   timeout: 10000,
 });
 
-export const getSessionToken = async (deviceIdentifier: string): Promise<string> => {
-  const response = await faceSignService.post<{ sessionToken: string }>(
-    "/session-token",
-    JSON.stringify({
-      key: env.VITE_FACETEC_DEVICE_KEY_IDENTIFIER,
-      deviceIdentifier,
-    }),
+export interface LoginResponse {
+  responseBlob: string;
+  success: boolean;
+  didError?: boolean;
+  result: {
+    livenessProven: boolean;
+    ageV2GroupEnumInt: number;
+  };
+  error: boolean;
+  faceSignUserId?: string;
+  token?: string;
+}
+
+export const login = async (requestBlob: string): Promise<LoginResponse> => {
+  const response = await faceSignService.post<LoginResponse>(
+    "/pinocchio",
+    JSON.stringify({ requestBlob }),
     {
       headers: {
         "Content-Type": "application/json",
@@ -27,11 +37,6 @@ export const getSessionToken = async (deviceIdentifier: string): Promise<string>
     },
   );
 
-  return response.data.sessionToken;
-};
-
-export const getPublicKey = async (): Promise<string> => {
-  const response = await faceSignService.get<string>("/sdk/public-key");
   return response.data;
 };
 

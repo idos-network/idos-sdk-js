@@ -1,7 +1,11 @@
-import type { FaceTecSDK } from "../../../public/facetec/FaceTecSDK.js/FaceTecSDK.js";
+import type {
+  FaceTecInitializationError,
+  FaceTecSDKInstance,
+  FaceTecSessionStatus,
+} from "../../assets/facetec/FaceTecPublicApi.d";
+import type { FaceTecSDK } from "../../assets/facetec/FaceTecSDK";
 import { env } from "../../env.js";
-import { getSessionToken } from "../../lib/api.js";
-import { LivenessCheckProcessor } from "./processor.js";
+import { SessionRequestProcessor } from "./processor.js";
 
 const TRANSPARENT_COLOR = "transparent";
 const BRANDING_COLOR = "#00fbb9";
@@ -11,47 +15,37 @@ const BUTTON_TEXT_COLOR = "#1a1a1a";
 
 export class FaceTecContainer {
   private FaceTecSDK: typeof FaceTecSDK | null = null;
+  private faceTecSDKInstance!: FaceTecSDKInstance;
+  private callback: ((errorMessage?: string, token?: string) => void) | null = null;
 
   public init = async (
-    publicKey: string,
-    onDone: (errorMessage?: string) => void,
+    callback: (errorMessage?: string, token?: string) => void,
   ): Promise<void> => {
     // Ensure FaceTecSDK is imported & initialized
     this.FaceTecSDK = await this.ensureImportedFaceTecSDK();
     this.FaceTecSDK.setResourceDirectory("/facetec/FaceTecSDK.js/resources");
     this.FaceTecSDK.setImagesDirectory("/public/facetec/FaceTec_images");
 
-    if (this.FaceTecSDK.getStatus() === this.FaceTecSDK.FaceTecSDKStatus.NeverInitialized) {
+    this.callback = callback;
+
+    if (this.faceTecSDKInstance) {
       this.setupCustomization();
+      return this.startLivenessCheck();
     }
 
-    const afterInitialization = () => {
-      if (!this.FaceTecSDK) {
-        return onDone("FaceTecSDK is not available");
-      }
-
-      const faceTecStatus = this.FaceTecSDK.getStatus();
-      if (faceTecStatus === this.FaceTecSDK.FaceTecSDKStatus.Initialized) {
-        onDone();
-      } else if (faceTecStatus === this.FaceTecSDK.FaceTecSDKStatus.NeverInitialized) {
-        window.console.info("FaceTecSDK: Never Initialized ... initializing");
-        // No reason to call onDone here, initialization is in progress
-      } else if (faceTecStatus === this.FaceTecSDK.FaceTecSDKStatus.StillLoadingResources) {
-        window.console.info("FaceTecSDK: Loading resources ...");
-        // No reason to call onDone here, initialization is in progress
-      } else if (faceTecStatus === this.FaceTecSDK.FaceTecSDKStatus.DeviceLockedOut) {
-        onDone("Device is locked out due to too many failed attempts. Please try again later.");
-      } else {
-        onDone(
-          `FaceTec initialization error: ${this.FaceTecSDK.getFriendlyDescriptionForFaceTecSDKStatus(faceTecStatus)}`,
-        );
-      }
-    };
-
-    this.FaceTecSDK.initializeInDevelopmentMode(
+    this.FaceTecSDK.initializeWithSessionRequest(
       env.VITE_FACETEC_DEVICE_KEY_IDENTIFIER,
-      publicKey,
-      afterInitialization,
+      new SessionRequestProcessor(),
+      {
+        onSuccess: (newFaceTecSdkInstance: FaceTecSDKInstance) => {
+          this.faceTecSDKInstance = newFaceTecSdkInstance;
+          this.setupCustomization();
+          this.startLivenessCheck();
+        },
+        onError: (errorMessage: FaceTecInitializationError) => {
+          this.callback?.(this.descriptionForInitializationError(errorMessage));
+        },
+      },
     );
   };
 
@@ -138,27 +132,78 @@ export class FaceTecContainer {
     this.FaceTecSDK.setCustomization(currentCustomization);
   };
 
-  public onLivenessCheckClick = (
-    onDone: (status: boolean, token?: string, errorMessage?: string) => void,
-  ): void => {
-    if (!this.FaceTecSDK) {
+  public startLivenessCheck(): void {
+    if (!this.faceTecSDKInstance) {
       console.error("FaceTecSDK is not available");
       return;
     }
 
-    this.getSessionToken((sessionToken: string) => {
-      new LivenessCheckProcessor(sessionToken, onDone);
-    });
-  };
+    this.faceTecSDKInstance.start3DLiveness(
+      new SessionRequestProcessor((result, lastRecievedToken) => {
+        // biome-ignore lint/style/noNonNullAssertion: This was checked above
+        if (
+          result.status === this.FaceTecSDK!.FaceTecSessionStatus.SessionCompleted &&
+          lastRecievedToken
+        ) {
+          this.callback?.(undefined, lastRecievedToken);
+        } else {
+          this.callback?.(this.descriptionForSessionStatus(result.status));
+        }
+      }),
+    );
+  }
 
-  private getSessionToken = (callback: (sessionToken: string) => void): void => {
+  public descriptionForInitializationError(enumValue: FaceTecInitializationError): string {
     if (!this.FaceTecSDK) {
-      console.error("FaceTecSDK is not available");
-      return;
+      return "FaceTecSDK is not available";
     }
 
-    getSessionToken(this.FaceTecSDK.createFaceTecAPIUserAgentString("")).then(callback);
-  };
+    switch (enumValue) {
+      case this.FaceTecSDK.FaceTecInitializationError.RejectedByServer:
+        return "The FaceTec SDK Server could not validate this application.";
+      case this.FaceTecSDK.FaceTecInitializationError.RequestAborted:
+        return "The provided FaceTecSessionRequestProcessor called abortOnCatastrophicError() and the application could not be validated.";
+      case this.FaceTecSDK.FaceTecInitializationError.DeviceNotSupported:
+        return "This device/platform/browser/version combination is not supported by the FaceTec Browser SDK.";
+      case this.FaceTecSDK.FaceTecInitializationError.ResourcesCouldNotBeLoadedOnLastInit:
+        return "FaceTec SDK could not load resources.";
+      case this.FaceTecSDK.FaceTecInitializationError.GetUserMediaRemoteHTTPNotSupported:
+        return "Browser Camera APIs are only supported on localhost or https.";
+      case this.FaceTecSDK.FaceTecInitializationError.UnknownInternalError:
+        return "An unknown and unexpected error occurred.";
+      default:
+        return `Unexpected FaceTecInitializationError Value: ${enumValue}`;
+    }
+  }
+
+  public descriptionForSessionStatus(enumValue: FaceTecSessionStatus): string {
+    if (!this.FaceTecSDK) {
+      return "FaceTecSDK is not available";
+    }
+
+    switch (enumValue) {
+      case this.FaceTecSDK.FaceTecSessionStatus.SessionCompleted:
+        return "The Session was performed successfully.";
+      case this.FaceTecSDK.FaceTecSessionStatus.RequestAborted:
+        return "The application called abortOnCatastrophicError().";
+      case this.FaceTecSDK.FaceTecSessionStatus.UserCancelledFaceScan:
+        return "The user cancelled before performing enough Scans to Succeed.";
+      case this.FaceTecSDK.FaceTecSessionStatus.UserCancelledIDScan:
+        return "The user cancelled before performing enough Scans to Complete.";
+      case this.FaceTecSDK.FaceTecSessionStatus.LockedOut:
+        return "FaceTec Browser SDK is in a lockout state.";
+      case this.FaceTecSDK.FaceTecSessionStatus.CameraError:
+        return "Session cancelled because selected camera is not active.";
+      case this.FaceTecSDK.FaceTecSessionStatus.CameraPermissionsDenied:
+        return "The user did not enable the camera after prompting for camera permissions or camera permissions were previously denied.";
+      case this.FaceTecSDK.FaceTecSessionStatus.IFrameNotAllowedWithoutPermission:
+        return "The Session was cancelled because you do not have permission to run the FaceTec Browser SDK in an iFrame. Please contact FaceTec to request the needed code";
+      case this.FaceTecSDK.FaceTecSessionStatus.UnknownInternalError:
+        return "The Session was cancelled because of an Unknown Error.";
+      default:
+        return `Unexpected FaceTecSessionStatus Value: ${enumValue}`;
+    }
+  }
 }
 
 const faceTec = new FaceTecContainer();
