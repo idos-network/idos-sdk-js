@@ -94,11 +94,11 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc --noEmit",
     "dev": "tsdown  --watch",
     "publint": "pnpx publint --strict",
     "release-it": "release-it",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",

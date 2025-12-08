@@ -66,10 +66,14 @@ catalogs:
     "vitest": "^4.0.6"
 
   react:
-    "react": "^19.1.0"
-    "react-dom": "^19.1.0"
-    "@types/react": "^19.1.0"
-    "@types/react-dom": "^19.1.1"
+    "react": "^19.1.4"
+    "react-dom": "^19.1.4"
+    "@types/react": "^19.1.4"
+    "@types/react-dom": "^19.1.4"
+
+  preact:
+    "preact": "^10.27.2"
+    "@preact/signals": "^2.5.1"
 
   tanstack:
     "@tanstack/react-query": "^5.72.1"

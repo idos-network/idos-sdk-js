@@ -8,14 +8,14 @@
     "@idos-network/utils": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
-    "@preact/signals": "^2.0.2",
+    "@preact/signals": "catalog:preact",
     "@rollup/plugin-inject": "^5.0.5",
     "@stablelib/base64": "^2.0.1",
     "@stablelib/utf8": "^2.0.1",
     "dompurify": "^3.2.5",
     "es-toolkit": "^1.23.0",
     "lucide-react": "^0.542.0",
-    "preact": "^10.26.4",
+    "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",
     "tweetnacl": "^1.0.3",
@@ -40,9 +40,9 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsc --noEmit",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module"
 }

@@ -5,9 +5,9 @@
   "dependencies": {
     "@gemwallet/api": "^3.8.0",
     "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/utils": "workspace:*",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
-    "@idos-network/utils": "workspace:*",
     "@wagmi/core": "2.17.3",
     "ethers": "catalog:ethereum",
     "near-api-js": "catalog:near",
