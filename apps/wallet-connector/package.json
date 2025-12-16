@@ -1,0 +1,44 @@
+{
+  "name": "wallet-connector",
+  "version": "0.0.0",
+  "dependencies": {
+    "@base-ui/react": "^1.0.0",
+    "@creit.tech/stellar-wallets-kit": "catalog:stellar",
+    "@gemwallet/api": "catalog:core",
+    "@idos-network/core": "workspace:*",
+    "@near-wallet-selector/core": "catalog:near",
+    "@near-wallet-selector/here-wallet": "catalog:near",
+    "@near-wallet-selector/meteor-wallet": "catalog:near",
+    "@near-wallet-selector/modal-ui": "catalog:near",
+    "@stellar/stellar-base": "catalog:stellar",
+    "@tanstack/react-query": "catalog:tanstack",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.561.0",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "tailwind-merge": "^3.4.0",
+    "viem": "catalog:ethereum",
+    "wagmi": "catalog:ethereum"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.11",
+    "@types/node": "^24.10.1",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react-swc": "^4.2.2",
+    "tailwindcss": "^4.1.11",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plugin-mkcert": "^1.17.8",
+    "vite-plugin-node-polyfills": "catalog:build"
+  },
+  "private": true,
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module"
+}
