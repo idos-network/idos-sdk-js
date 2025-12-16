@@ -8,8 +8,8 @@
     ]
   },
   "dependencies": {
-    "@idos-network/kwil-js": "catalog:core",
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
     "es-toolkit": "catalog:utils",
     "ripple-keypairs": "catalog:xrp",
@@ -52,10 +52,10 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "postpack": "clean-package restore",
-    "typecheck": "tsc --noEmit",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it"
+    "release-it": "release-it",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",

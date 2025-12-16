@@ -9,8 +9,8 @@
     "@idos-network/controllers": "workspace:*",
     "@idos-network/core": "workspace:*",
     "@idos-network/credentials": "workspace:*",
-    "@idos-network/utils": "workspace:*",
     "@idos-network/issuer": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@nanostores/react": "^0.8.4",
     "@near-wallet-selector/core": "catalog:near",
     "@near-wallet-selector/here-wallet": "catalog:near",
@@ -24,6 +24,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "@wagmi/core": "^2.16.4",
     "@web3icons/react": "^4.0.14",
+    "countries-list": "^3.1.1",
     "ethers": "catalog:ethereum",
     "framer-motion": "^11.11.9",
     "go-try": "^3.0.2",
@@ -31,11 +32,10 @@
     "lucide-react": "^0.453.0",
     "nanostores": "^0.11.4",
     "near-api-js": "catalog:near",
-    "next": "15.3.5",
+    "next": "15.3.8",
     "next-themes": "^0.4.4",
     "react": "catalog:react",
     "react-confetti": "^6.4.0",
-    "countries-list": "^3.1.1",
     "react-dom": "catalog:react",
     "react-icons": "^5.4.0",
     "tiny-invariant": "catalog:core",
@@ -68,7 +68,7 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
-    "typecheck": "tsc --noEmit",
-    "start": "next start"
+    "start": "next start",
+    "typecheck": "tsc --noEmit"
   }
 }

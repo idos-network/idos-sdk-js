@@ -8,9 +8,9 @@
     ]
   },
   "dependencies": {
+    "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
-    "@idos-network/credentials": "workspace:*",
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
     "web-streams-polyfill": "catalog:core"
@@ -48,11 +48,11 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "typecheck": "tsc --noEmit",
     "postpack": "clean-package restore",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it"
+    "release-it": "release-it",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module",
   "types": "./dist/index.d.ts"

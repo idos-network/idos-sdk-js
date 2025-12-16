@@ -9,14 +9,14 @@
     "@near-wallet-selector/here-wallet": "catalog:near",
     "@near-wallet-selector/meteor-wallet": "catalog:near",
     "@near-wallet-selector/modal-ui": "catalog:near",
-    "@preact/signals": "^2.0.2",
+    "@preact/signals": "catalog:preact",
     "@reown/appkit": "catalog:reown",
     "@reown/appkit-adapter-wagmi": "catalog:reown",
     "@stellar/stellar-base": "catalog:stellar",
     "@stepperize/react": "^5.1.6",
     "@tanstack/react-query": "catalog:tanstack",
     "@web3icons/react": "^4.0.14",
-    "preact": "^10.27.1",
+    "preact": "catalog:preact",
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum"
   },
@@ -31,10 +31,10 @@
   },
   "private": true,
   "scripts": {
-    "typecheck": "tsc --noEmit",
     "build": "tsc -b && vite build",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module"
 }

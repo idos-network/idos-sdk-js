@@ -49,11 +49,11 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "typecheck": "tsc --noEmit",
     "postpack": "clean-package restore",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it"
+    "release-it": "release-it",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",
