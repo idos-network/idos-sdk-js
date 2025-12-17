@@ -12,6 +12,7 @@ import {
   deriveLevel,
   fileToBase85,
   matchLevelOrHigher,
+  pickHighestMatchingLevel,
 } from "./utils";
 import type {
   CredentialFields,
@@ -35,6 +36,7 @@ export {
   fileToBase85,
   deriveLevel,
   matchLevelOrHigher,
+  pickHighestMatchingLevel,
 };
 
 export type {

@@ -24,7 +24,6 @@ import {
   type Credential,
   type IDDocumentType,
   type idOSCredential,
-  matchLevelOrHigher,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
   type VerifyCredentialResult,
@@ -178,14 +177,6 @@ export class idOSConsumer {
     issuers: AvailableIssuerType[],
   ): Promise<VerifyCredentialResult> {
     return verifyCredential<K>(credentials, issuers);
-  }
-
-  matchCredentialLevelOrHigher(
-    userLevel: "basic" | "plus",
-    requiredAddons: ("liveness" | "email" | "phoneNumber")[],
-    credentialLevel: string,
-  ): boolean {
-    return matchLevelOrHigher(userLevel, requiredAddons, credentialLevel);
   }
 }
 

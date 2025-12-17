@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveLevel, matchLevelOrHigher } from "./utils";
+import { deriveLevel, matchLevelOrHigher, pickHighestMatchingLevel } from "./utils";
 import type { CredentialSubject } from "./utils/types";
 
 const defaultCredential: CredentialSubject = {
@@ -32,6 +32,40 @@ describe("matchLevelOrHigher", () => {
           testLevel as string,
         ),
       ).toBe(expected as boolean);
+    });
+  });
+});
+
+describe("pickHighestMatchingLevel", () => {
+  [
+    [
+      ["basic+liveness", "plus+liveness+email", "plus+liveness+email+phoneNumber"],
+      "plus",
+      ["email"],
+      "plus+liveness+email+phoneNumber",
+    ],
+    [
+      ["basic+liveness", "plus+liveness+email", "plus+liveness+email+phoneNumber"],
+      "plus",
+      ["email", "phoneNumber"],
+      "plus+liveness+email+phoneNumber",
+    ],
+    [
+      ["basic+liveness", "plus+liveness+email", "plus+liveness+email"],
+      "plus",
+      ["email", "phoneNumber"],
+      null,
+    ],
+    [["basic+liveness", "plus+liveness"], "basic", ["liveness"], "plus+liveness"],
+  ].forEach(([levels, requiredLevel, requiredAddons, expected]) => {
+    it(`levels=${levels} requiredLevel=${requiredLevel} requiredAddons=[${(requiredAddons as string[]).join(",")}] => ${expected}`, () => {
+      expect(
+        pickHighestMatchingLevel(
+          levels as string[],
+          requiredLevel as "basic" | "plus",
+          requiredAddons as ("liveness" | "email" | "phoneNumber")[],
+        ),
+      ).toBe(expected);
     });
   });
 });

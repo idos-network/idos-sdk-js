@@ -105,8 +105,11 @@ export function convertValues<
   return acc;
 }
 
+type BaseLevel = "basic" | "plus";
+type Addon = "liveness" | "email" | "phoneNumber";
+
 export function deriveLevel(credential: CredentialSubject): string {
-  let level = "basic";
+  let level: BaseLevel = "basic";
 
   // Address is a sign for plus+
   const address = credential.residentialAddress;
@@ -114,7 +117,7 @@ export function deriveLevel(credential: CredentialSubject): string {
     level = "plus";
   }
 
-  const addons: string[] = [];
+  const addons: Addon[] = [];
   if (credential.selfieFile) {
     addons.push("liveness");
   }
@@ -130,16 +133,54 @@ export function deriveLevel(credential: CredentialSubject): string {
   return [level, ...addons].join("+");
 }
 
+function parseLevel(level: string): {
+  base: BaseLevel;
+  addons: Addon[];
+} {
+  const [base, ...addons] = level.split("+") as [BaseLevel, ...Addon[]];
+  return { base, addons };
+}
+
 export function matchLevelOrHigher(
-  level: "basic" | "plus",
-  requiredAddons: ("liveness" | "email" | "phoneNumber")[],
+  level: BaseLevel,
+  requiredAddons: Addon[],
   currentLevel: string,
 ): boolean {
-  const [currentBaseLevel, ...currentAddons] = currentLevel.split("+");
+  const { base: currentBaseLevel, addons: currentAddons } = parseLevel(currentLevel);
 
+  // TODO: Consider pop+ or uniueness+ scenarios
   if (level === "plus" && currentBaseLevel !== "plus") {
     return false;
   }
 
   return requiredAddons.every((addon) => currentAddons.includes(addon));
+}
+
+function levelScore(level: string) {
+  const { base, addons } = parseLevel(level);
+  let score = 0;
+
+  if (base === "plus") {
+    score += 100;
+  }
+
+  score += addons.length * 10;
+
+  return score;
+}
+
+export function pickHighestMatchingLevel(
+  levels: string[],
+  requiredLevel: BaseLevel,
+  requiredAddons: Addon[],
+): string | null {
+  return (
+    levels
+      .filter((currentLevel) => matchLevelOrHigher(requiredLevel, requiredAddons, currentLevel))
+      .sort((a, b) => {
+        const aAddons = levelScore(a);
+        const bAddons = levelScore(b);
+        return bAddons - aAddons; // descending
+      })[0] ?? null
+  );
 }
