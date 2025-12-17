@@ -1,10 +1,12 @@
 import { mainnet, sepolia } from "@reown/appkit/networks";
-import { createAppKit, useAppKit } from "@reown/appkit/react";
+import { createAppKit, useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useAccount, useDisconnect, useSignMessage, WagmiProvider } from "wagmi";
+import { useEffect } from "react";
+import { useDisconnect, useSignMessage, WagmiProvider } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { message } from "@/lib/constants";
+import { useStore } from "@/state";
 
 const projectId =
   import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
@@ -38,10 +40,20 @@ createAppKit({
 const queryClient = new QueryClient();
 
 function Connector() {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useAppKitAccount();
   const { open } = useAppKit();
   const { signMessageAsync } = useSignMessage();
   const { disconnectAsync } = useDisconnect();
+  const setWallet = useStore((state) => state.setWallet);
+  const setAccountId = useStore((state) => state.setAccountId);
+
+  useEffect(() => {
+    if (!isConnected || !address) {
+      return;
+    }
+    setAccountId(address);
+    setWallet("evm");
+  }, [isConnected, address, setWallet, setAccountId]);
 
   const handleSignMessage = async () => {
     try {
@@ -54,6 +66,8 @@ function Connector() {
 
   const handleDisconnect = async () => {
     await disconnectAsync();
+    setAccountId(null);
+    setWallet(null);
   };
 
   if (!isConnected) {

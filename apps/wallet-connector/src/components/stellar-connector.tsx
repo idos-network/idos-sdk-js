@@ -8,8 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { StrKey } from "@stellar/stellar-base";
-import { useState } from "react";
 import { message } from "@/lib/constants";
+import { useStore } from "@/state";
 
 const stellarKit: StellarWalletsKit = new StellarWalletsKit({
   network: import.meta.env.DEV ? WalletNetwork.TESTNET : WalletNetwork.PUBLIC,
@@ -25,15 +25,22 @@ async function derivePublicKey(address: string) {
 }
 
 function Connector() {
-  const [accountId, setAccountId] = useState("");
+  const accountId = useStore((state) => state.accountId);
+  const setWallet = useStore((state) => state.setWallet);
+  const setAccountId = useStore((state) => state.setAccountId);
 
   const handleConnect = async () => {
     try {
       await stellarKit.openModal({
         onWalletSelected: async (option: StellarSupportedWallet) => {
           stellarKit.setWallet(option.id);
+
           const { address } = await stellarKit.getAddress();
-          setAccountId(address);
+          console.log({ address });
+          if (address) {
+            setAccountId(address);
+            setWallet("stellar");
+          }
         },
       });
     } catch (error) {
@@ -59,7 +66,8 @@ function Connector() {
 
   const handleDisconnect = async () => {
     await stellarKit.disconnect();
-    setAccountId("");
+    setAccountId(null);
+    setWallet(null);
   };
 
   if (!accountId) {
@@ -78,7 +86,9 @@ function Connector() {
       </p>
       <div className="flex flex-col gap-2">
         <p className="text-center text-muted-foreground text-sm">Connected as:</p>
-        <p className="text-center text-muted-foreground text-sm">{accountId}</p>
+        <p className="text-center text-muted-foreground text-sm">
+          {accountId.slice(0, 20)}...{accountId.slice(-4)}
+        </p>
       </div>
       <Button onClick={handleSignMessage}>Sign a message</Button>
       <Button onClick={handleDisconnect}>Disconnect</Button>

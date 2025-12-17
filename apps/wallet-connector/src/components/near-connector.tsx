@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { useEffect, useState } from "react";
 import { message } from "@/lib/constants";
+import { useStore } from "@/state";
 
 const selector = await setupWalletSelector({
   network: import.meta.env.DEV ? "testnet" : "mainnet",
@@ -19,17 +20,27 @@ const modal = setupModal(selector, {
 
 function Connector() {
   const [isConnected, setIsConnected] = useState(false);
-  const [accountId, setAccountId] = useState("");
+  const accountId = useStore((state) => state.accountId);
+  const setWallet = useStore((state) => state.setWallet);
+  const setAccountId = useStore((state) => state.setAccountId);
 
   useEffect(() => {
     const subscription = selector.store.observable.subscribe(() => {
-      setIsConnected(selector.isSignedIn());
-      const accountId = selector.store.getState().accounts[0]?.accountId || "";
-      setAccountId(accountId);
+      const isSignedIn = selector.isSignedIn();
+      if (isSignedIn) {
+        setIsConnected(true);
+        const accountId = selector.store.getState().accounts[0]?.accountId || "";
+        setAccountId(accountId);
+        setWallet("near");
+      } else {
+        setIsConnected(false);
+        setAccountId(null);
+        setWallet(null);
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, [accountId]);
+  }, [setWallet, setAccountId]);
 
   const handleSignMessage = async () => {
     try {
@@ -44,6 +55,9 @@ function Connector() {
   const handleDisconnect = async () => {
     const wallet = await selector.wallet();
     await wallet.signOut();
+    setAccountId(null);
+    setWallet(null);
+    setIsConnected(false);
   };
 
   if (!isConnected) {

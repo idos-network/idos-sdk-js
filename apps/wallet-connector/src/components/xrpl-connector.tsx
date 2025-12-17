@@ -1,10 +1,12 @@
 import { getAddress, isInstalled, signMessage } from "@gemwallet/api";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { message } from "@/lib/constants";
+import { useStore } from "@/state";
 
 function Connector() {
-  const [accountId, setAccountId] = useState("");
+  const accountId = useStore((state) => state.accountId);
+  const setWallet = useStore((state) => state.setWallet);
+  const setAccountId = useStore((state) => state.setAccountId);
 
   const handleConnect = async () => {
     try {
@@ -16,7 +18,10 @@ function Connector() {
 
       const { result } = await getAddress();
 
-      setAccountId(result?.address ?? "");
+      if (result?.address) {
+        setAccountId(result.address);
+        setWallet("xrpl");
+      }
     } catch (error) {
       console.error("Connection failed:", error);
     }
@@ -33,7 +38,8 @@ function Connector() {
   };
 
   const handleDisconnect = async () => {
-    setAccountId("");
+    setAccountId(null);
+    setWallet(null);
   };
 
   if (!accountId) {
@@ -52,7 +58,9 @@ function Connector() {
       </p>
       <div className="flex flex-col gap-2">
         <p className="text-center text-muted-foreground text-sm">Connected as:</p>
-        <p className="text-center text-muted-foreground text-sm">{accountId}</p>
+        <p className="text-center text-muted-foreground text-sm">
+          {accountId.slice(0, 20)}...{accountId.slice(-4)}
+        </p>
       </div>
       <Button onClick={handleSignMessage}>Sign a message</Button>
       <Button onClick={handleDisconnect}>Disconnect</Button>
