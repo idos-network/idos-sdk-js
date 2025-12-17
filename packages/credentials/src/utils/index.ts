@@ -148,7 +148,7 @@ export function matchLevelOrHigher(
 ): boolean {
   const { base: currentBaseLevel, addons: currentAddons } = parseLevel(currentLevel);
 
-  // TODO: Consider pop+ or uniueness+ scenarios
+  // TODO: Consider pop+ or uniqueness+ scenarios
   if (level === "plus" && currentBaseLevel !== "plus") {
     return false;
   }
