@@ -1,5 +1,6 @@
 import { EVMConnector } from "@/components/evm-connector";
 import { NearConnector } from "@/components/near-connector";
+import { StellarConnector } from "@/components/stellar-connector";
 
 function App() {
   return (
@@ -7,6 +8,7 @@ function App() {
       <div className="flex flex-col gap-4">
         <EVMConnector />
         <NearConnector />
+        <StellarConnector />
       </div>
     </div>
   );
