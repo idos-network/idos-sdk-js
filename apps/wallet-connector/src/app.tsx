@@ -1,6 +1,7 @@
 import { EVMConnector } from "@/components/evm-connector";
 import { NearConnector } from "@/components/near-connector";
 import { StellarConnector } from "@/components/stellar-connector";
+import { XRPLConnector } from "@/components/xrpl-connector";
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
         <EVMConnector />
         <NearConnector />
         <StellarConnector />
+        <XRPLConnector />
       </div>
     </div>
   );
