@@ -1,10 +1,12 @@
 import { EVMConnector } from "@/components/evm-connector";
+import { NearConnector } from "@/components/near-connector";
 
 function App() {
   return (
     <div className="grid h-full place-content-center gap-6 p-6">
       <div className="flex flex-col gap-4">
         <EVMConnector />
+        <NearConnector />
       </div>
     </div>
   );
