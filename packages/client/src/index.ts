@@ -41,7 +41,7 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
-import { matchLevelOrHigher } from "@idos-network/credentials";
+import { matchLevelOrHigher } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -541,6 +541,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
     const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
+
     if (publicNotesFieldFilters || credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
         let publicNotes: Record<string, string>;

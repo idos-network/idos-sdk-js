@@ -2,7 +2,7 @@
 
 import { Button, cn, useDisclosure } from "@heroui/react";
 import type { IsleStatus, idOSPassportingPeer } from "@idos-network/core";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { useStore } from "@nanostores/react";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

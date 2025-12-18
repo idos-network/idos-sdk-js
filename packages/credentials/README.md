@@ -28,7 +28,7 @@ const key = await Ed25519VerificationKey2020.generate({
 ## Issue a credentials
 
 ```javascript
-import { buildCredential } from "@idos-network/credentials";
+import { buildCredential } from "@idos-network/credentials/builder";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
@@ -99,7 +99,7 @@ console.log("Results by issuer: ", resultsByIssuer);
 ## Derive level
 
 ```javascript
-import { deriveLevel } from "@idos-network/credentials";
+import { deriveLevel } from "@idos-network/credentials/utils";
 
 const level = deriveLevel({
   id: "uuid:1234",
@@ -118,7 +118,7 @@ const level = deriveLevel({
 ## Filtering and matching levels
 
 ```javascript
-import { pickHighestMatchingLevel, matchLevelOrHigher } from "@idos-network/credentials";
+import { pickHighestMatchingLevel, matchLevelOrHigher } from "@idos-network/credentials/utils";
 
 const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness")
 // matched = true

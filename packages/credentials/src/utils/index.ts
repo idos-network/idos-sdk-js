@@ -8,7 +8,7 @@ import type {
   CredentialResidentialAddress,
   CredentialSubject,
   CredentialSubjectFaceId,
-} from "./types";
+} from "../types";
 
 export function fileToBase85(file: Buffer): string {
   return base85.encode(file, "ascii85");

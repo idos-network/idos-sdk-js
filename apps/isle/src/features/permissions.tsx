@@ -11,7 +11,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LuCheck, LuChevronRight } from "react-icons/lu";
 

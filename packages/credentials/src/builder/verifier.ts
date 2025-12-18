@@ -1,9 +1,9 @@
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import * as vc from "@digitalbazaar/vc";
 import type { JsonLDDocumentLoaderInstance } from "jsonld-document-loader";
-import { type AvailableIssuerType, issuerToKey } from "./utils";
-import { defaultDocumentLoader } from "./utils/loader";
-import type { VerifiableCredential, VerifiableCredentialSubject } from "./utils/types";
+import type { VerifiableCredential, VerifiableCredentialSubject } from "../types";
+import { type AvailableIssuerType, issuerToKey } from "../utils";
+import { defaultDocumentLoader } from "./loader";
 
 export type VerifyCredentialResult = [boolean, Map<AvailableIssuerType, vc.VerifyCredentialResult>];
 

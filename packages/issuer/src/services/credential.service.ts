@@ -8,7 +8,7 @@ import {
   getSiblingCredentialId,
 } from "@idos-network/core/kwil-actions";
 import type { KwilActionClient } from "@idos-network/core/kwil-infra";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import {
   base64Decode,
   base64Encode,

@@ -1,7 +1,7 @@
 import { NoncedBox } from "@idos-network/core/cryptography";
 import { createAgByDagForCopy as _createAgByDagForCopy } from "@idos-network/core/kwil-actions";
 import type { KwilActionClient } from "@idos-network/core/kwil-infra";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 

@@ -7,18 +7,19 @@ import type {
   idOSUserAttribute,
   idOSWallet,
 } from "@idos-network/core/kwil-actions";
-import type { idOSCredential } from "@idos-network/credentials";
 import {
-  type AvailableIssuerType,
   buildCredential,
   buildFaceIdCredential,
   type Credential,
-  type CredentialFields,
-  type CredentialSubject,
-  type CredentialSubjectFaceId,
-  deriveLevel,
   type FaceIdCredential,
-} from "@idos-network/credentials";
+} from "@idos-network/credentials/builder";
+import type {
+  CredentialFields,
+  CredentialSubject,
+  CredentialSubjectFaceId,
+  idOSCredential,
+} from "@idos-network/credentials/types";
+import { type AvailableIssuerType, deriveLevel } from "@idos-network/credentials/utils";
 import type { SignKeyPair } from "tweetnacl";
 import {
   CredentialService,

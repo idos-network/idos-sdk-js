@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { deriveLevel, matchLevelOrHigher, pickHighestMatchingLevel } from "./utils";
-import type { CredentialSubject } from "./utils/types";
+import type { CredentialSubject } from "../types";
+import { deriveLevel, matchLevelOrHigher, pickHighestMatchingLevel } from "./";
 
 const defaultCredential: CredentialSubject = {
   id: "uuid:1234",

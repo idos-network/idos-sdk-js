@@ -1,4 +1,4 @@
-import { base85ToFile } from "@idos-network/credentials";
+import { base85ToFile } from "@idos-network/credentials/utils";
 import { fileTypeFromBuffer } from "file-type";
 import { verifyFileUrl } from "~/providers/files.server";
 import { getCredentialShared } from "~/providers/idos.server";

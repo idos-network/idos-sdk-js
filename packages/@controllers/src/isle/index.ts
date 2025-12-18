@@ -8,7 +8,7 @@ import type {
   idOSDelegatedWriteGrant,
   KwilSigner,
 } from "@idos-network/core";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { type ChannelInstance, type Controller, createController } from "@sanity/comlink";
 import type { Config } from "@wagmi/core";
