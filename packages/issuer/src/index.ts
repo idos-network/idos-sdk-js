@@ -14,12 +14,13 @@ import {
   type FaceIdCredential,
 } from "@idos-network/credentials/builder";
 import type {
+  AvailableIssuerType,
   CredentialFields,
   CredentialSubject,
   CredentialSubjectFaceId,
   idOSCredential,
 } from "@idos-network/credentials/types";
-import { type AvailableIssuerType, deriveLevel } from "@idos-network/credentials/utils";
+import { deriveLevel } from "@idos-network/credentials/utils";
 import type { SignKeyPair } from "tweetnacl";
 import {
   CredentialService,

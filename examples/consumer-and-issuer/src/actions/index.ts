@@ -1,10 +1,10 @@
 "use server";
 import type {
+  AvailableIssuerType,
   CredentialFields,
   CredentialSubject,
   idOSCredential,
 } from "@idos-network/credentials/types";
-import type { AvailableIssuerType } from "@idos-network/credentials/utils";
 import { base64Decode, base64Encode, hexDecode, toBytes } from "@idos-network/utils/codecs";
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import countries3to2 from "countries-list/minimal/countries.3to2.min.json";

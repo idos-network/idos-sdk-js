@@ -1,6 +1,7 @@
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import * as vc from "@digitalbazaar/vc";
 import {
+  type AvailableIssuerType,
   type CredentialFields,
   CredentialFieldsSchema,
   type CredentialSubject,
@@ -10,7 +11,7 @@ import {
   type VerifiableCredential,
   type VerifiableCredentialSubject,
 } from "../types";
-import { type AvailableIssuerType, convertValues, issuerToKey } from "../utils";
+import { convertValues, issuerToKey } from "../utils";
 import {
   CONTEXT_IDOS_CREDENTIAL,
   CONTEXT_IDOS_CREDENTIAL_FACE_ID,

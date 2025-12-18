@@ -22,12 +22,12 @@ import {
 import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
 import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
 import type {
+  AvailableIssuerType,
   IDDocumentType,
   idOSCredential,
   VerifiableCredential,
   VerifiableCredentialSubject,
 } from "@idos-network/credentials/types";
-import type { AvailableIssuerType } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
