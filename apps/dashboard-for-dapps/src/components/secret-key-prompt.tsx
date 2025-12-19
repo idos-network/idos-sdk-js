@@ -1,5 +1,5 @@
 import { Stack, Text } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { useRef, useState } from "react";
 
 import {

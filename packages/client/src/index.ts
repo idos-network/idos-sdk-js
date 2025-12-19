@@ -41,6 +41,7 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
+import { matchLevelOrHigher } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -435,8 +436,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     if (!params.wallet_type || params.wallet_type === "unknown") {
       params.wallet_type = getWalletType(params.address);
     }
-    console.log({ params });
-    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
@@ -479,7 +478,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       console.log("MPC is not enabled or the user is not using MPC");
       return { id };
     }
-    console.log({ wallet });
+
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
       wallet.public_key,
@@ -518,6 +517,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       pick: Record<string, unknown[]>;
       omit: Record<string, unknown[]>;
     };
+    credentialLevelOrHigherFilter?: {
+      userLevel: "basic" | "plus";
+      requiredAddons: ("liveness" | "email" | "phoneNumber")[];
+    };
   }): Promise<idOSCredentialListItem[]> {
     const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
       every(Object.entries(criteria), ([path, targetSet]) =>
@@ -537,18 +540,41 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     });
 
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
-    if (publicNotesFieldFilters) {
+    const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
+
+    if (publicNotesFieldFilters || credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
         let publicNotes: Record<string, string>;
+
         try {
           publicNotes = JSON.parse(credential.public_notes);
         } catch (_) {
           throw new Error(`Credential ${credential.id} has non-JSON public notes".replace("{}`);
         }
-        return (
-          matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
-          negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))
-        );
+
+        let match = true;
+
+        if (publicNotesFieldFilters) {
+          match =
+            matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
+            negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))();
+        }
+
+        if (match && credentialLevelOrHigherFilter) {
+          if (!publicNotes.level) {
+            throw new Error(
+              `Credential ${credential.id} is missing "level" field in public notes".replace("{}`,
+            );
+          }
+
+          match = matchLevelOrHigher(
+            credentialLevelOrHigherFilter.userLevel,
+            credentialLevelOrHigherFilter.requiredAddons,
+            publicNotes.level,
+          );
+        }
+
+        return match;
       });
     }
 

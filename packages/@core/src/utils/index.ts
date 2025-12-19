@@ -1,4 +1,4 @@
-import type { InsertableIDOSCredential } from "@idos-network/credentials";
+import type { InsertableIDOSCredential } from "@idos-network/credentials/types";
 import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";

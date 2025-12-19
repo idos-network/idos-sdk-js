@@ -1,4 +1,4 @@
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { CustomKwilSigner } from "../kwil-infra";

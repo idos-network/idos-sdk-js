@@ -1,9 +1,9 @@
-import { effect } from "@preact/signals";
+import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
 import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
-import { connectedWalletType, walletPayload } from "./state";
+import { useWalletState } from "./state";
 
 const getHiddenWalletTypes = () => {
   const params = new URLSearchParams(window.location.search);
@@ -14,7 +14,9 @@ const getHiddenWalletTypes = () => {
 const hiddenWalletType = getHiddenWalletTypes();
 
 function WalletConnector() {
-  if (!connectedWalletType.value) {
+  const { connectedWalletType } = useWalletState();
+
+  if (!connectedWalletType) {
     return (
       <>
         {!hiddenWalletType.includes("evm") && <EVMConnector />}
@@ -25,19 +27,19 @@ function WalletConnector() {
     );
   }
 
-  if (connectedWalletType.value === "evm") {
+  if (connectedWalletType === "evm") {
     return <EVMConnector />;
   }
 
-  if (connectedWalletType.value === "near") {
+  if (connectedWalletType === "near") {
     return <NearConnector />;
   }
 
-  if (connectedWalletType.value === "xrpl") {
+  if (connectedWalletType === "xrpl") {
     return <XRPLConnector />;
   }
 
-  if (connectedWalletType.value === "stellar") {
+  if (connectedWalletType === "stellar") {
     return <StellarConnector />;
   }
 
@@ -45,8 +47,10 @@ function WalletConnector() {
 }
 
 export function App() {
-  effect(() => {
-    if (walletPayload.value) {
+  const { walletPayload } = useWalletState();
+
+  useEffect(() => {
+    if (walletPayload) {
       if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
@@ -55,7 +59,8 @@ export function App() {
         console.log("No opener window found");
         return;
       }
-      walletPayload.value
+
+      walletPayload
         .disconnect()
         .then(() => {
           // Send wallet payload back to the parent window
@@ -64,7 +69,7 @@ export function App() {
               type: "WALLET_SIGNATURE",
               // Remove disconnect method from walletPayload
               data: {
-                ...walletPayload.value,
+                ...walletPayload,
                 disconnect: undefined,
               },
             },
@@ -74,16 +79,16 @@ export function App() {
           // Close the popup window after sending the data
           window.close();
         })
-        .catch((error) => {
+        .catch((error: any) => {
           console.error("Error disconnecting wallet", error);
         });
     }
-  });
+  }, [walletPayload]);
 
   return (
-    <div class="grid h-full place-content-center">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col items-stretch justify-center gap-4">
+    <div className="grid h-full place-content-center">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-stretch justify-center gap-4">
           <WalletConnector />
         </div>
       </div>

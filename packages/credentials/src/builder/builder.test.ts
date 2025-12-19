@@ -2,8 +2,8 @@ import crypto from "node:crypto";
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 import { describe, expect, it } from "vitest";
 import { ZodError } from "zod";
-import { buildCredential, buildFaceIdCredential } from "./builder";
-import { fileToBase85 } from "./utils";
+import { fileToBase85 } from "../utils";
+import { buildCredential, buildFaceIdCredential } from ".";
 import { verifyCredential } from "./verifier";
 
 describe("verifiableCredentials", () => {

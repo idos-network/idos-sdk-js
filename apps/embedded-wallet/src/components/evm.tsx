@@ -4,9 +4,9 @@ import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenETH } from "@web3icons/react";
-import { useEffect } from "preact/hooks";
+import { useEffect } from "react";
 import { useSignMessage, WagmiProvider } from "wagmi";
-import { connectedWalletType, message, walletPayload } from "../state";
+import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
 const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
@@ -63,18 +63,19 @@ function Ethereum() {
   const { address, isConnected } = useAppKitAccount();
   const { signMessage } = useSignMessage();
   const { disconnect: disconnectEvm } = useDisconnect();
+  const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
     if (isConnected && stepper.isFirst) {
-      connectedWalletType.value = "evm";
+      setConnectedWalletType("evm");
       stepper.next();
     }
   }, [isConnected, stepper]);
 
   // Handle external disconnections
   useEffect(() => {
-    if (!isConnected && connectedWalletType.value === "evm") {
-      connectedWalletType.value = null;
+    if (!isConnected && connectedWalletType === "evm") {
+      setConnectedWalletType(null);
       stepper.reset();
     }
   }, [isConnected, stepper]);
@@ -90,13 +91,13 @@ function Ethereum() {
             return;
           }
 
-          walletPayload.value = {
+          setWalletPayload({
             address,
             signature,
             public_key: [address],
             message,
             disconnect: disconnectEvm,
-          };
+          });
         },
       },
     );
@@ -104,14 +105,14 @@ function Ethereum() {
 
   const handleDisconnect = async () => {
     await disconnectEvm();
-    connectedWalletType.value = null;
+    setConnectedWalletType(null);
     stepper.reset();
   };
 
   return (
-    <div class="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {stepper.when("connect", () => (
-        <div class="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <Button onClick={() => open()}>
             Connect with EVM
             <TokenETH variant="mono" size={24} />
@@ -119,12 +120,12 @@ function Ethereum() {
         </div>
       ))}
       {stepper.when("sign-message", (step) => (
-        <div class="flex flex-col gap-4">
-          <h1 class="text-center font-bold text-2xl">{step.title}</h1>
-          <p class="text-center text-neutral-400 text-sm">{step.description}</p>
-          <div class="flex flex-col gap-2">
-            <p class="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p class="text-center text-neutral-400 text-sm">{address}</p>
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
+          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
+            <p className="text-center text-neutral-400 text-sm">{address}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

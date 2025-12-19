@@ -1,7 +1,7 @@
 import { defineConfig } from "tsdown";
 
 export default defineConfig({
-  entry: ["./src/index.ts"],
+  entry: ["./src/utils/index.ts", "./src/builder/index.ts", "./src/types/index.ts"],
   dts: true,
   external: [
     "@digitalbazaar/ed25519-signature-2020",

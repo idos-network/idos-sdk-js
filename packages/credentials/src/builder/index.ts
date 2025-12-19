@@ -1,15 +1,7 @@
 import { Ed25519Signature2020 } from "@digitalbazaar/ed25519-signature-2020";
 import * as vc from "@digitalbazaar/vc";
-import { type AvailableIssuerType, convertValues, issuerToKey } from "./utils";
 import {
-  CONTEXT_IDOS_CREDENTIAL,
-  CONTEXT_IDOS_CREDENTIAL_FACE_ID,
-  CONTEXT_IDOS_CREDENTIAL_SUBJECT,
-  CONTEXT_IDOS_SIGNATURE,
-  CONTEXT_V1,
-  defaultDocumentLoader,
-} from "./utils/loader";
-import {
+  type AvailableIssuerType,
   type CredentialFields,
   CredentialFieldsSchema,
   type CredentialSubject,
@@ -18,7 +10,18 @@ import {
   CredentialSubjectSchema,
   type VerifiableCredential,
   type VerifiableCredentialSubject,
-} from "./utils/types";
+} from "../types";
+import { convertValues, issuerToKey } from "../utils";
+import {
+  CONTEXT_IDOS_CREDENTIAL,
+  CONTEXT_IDOS_CREDENTIAL_FACE_ID,
+  CONTEXT_IDOS_CREDENTIAL_SUBJECT,
+  CONTEXT_IDOS_SIGNATURE,
+  CONTEXT_V1,
+  defaultDocumentLoader,
+} from "./loader";
+import type { VerifyCredentialResult } from "./verifier";
+import { verifyCredential } from "./verifier";
 
 export type Credential = VerifiableCredential<VerifiableCredentialSubject>;
 export type FaceIdCredential = VerifiableCredential<CredentialSubjectFaceId>;
@@ -113,3 +116,6 @@ export const buildCredential: CredentialBuilder<CredentialSubject, VerifiableCre
 
 export const buildFaceIdCredential: CredentialBuilder<CredentialSubjectFaceId> =
   genericCredentialBuilder<CredentialSubjectFaceId>(credentialFaceIdSubjectConverter);
+
+export type { VerifyCredentialResult };
+export { verifyCredential };

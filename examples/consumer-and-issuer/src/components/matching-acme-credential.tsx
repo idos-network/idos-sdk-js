@@ -2,7 +2,7 @@
 
 import { Button, Link, Spinner } from "@heroui/react";
 import type { idOSPassportingPeer } from "@idos-network/core/kwil-actions";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { useAppKitAccount } from "@reown/appkit/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";

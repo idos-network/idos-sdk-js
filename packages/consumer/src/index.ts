@@ -19,16 +19,15 @@ import {
   type KwilActionClient,
   type KwilSignerType,
 } from "@idos-network/core/kwil-infra";
-import type { idOSCredential } from "@idos-network/credentials";
-import {
-  type AvailableIssuerType,
-  type Credential,
-  type IDDocumentType,
-  type VerifiableCredential,
-  type VerifiableCredentialSubject,
-  type VerifyCredentialResult,
-  verifyCredential,
-} from "@idos-network/credentials";
+import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
+import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import type {
+  AvailableIssuerType,
+  IDDocumentType,
+  idOSCredential,
+  VerifiableCredential,
+  VerifiableCredentialSubject,
+} from "@idos-network/credentials/types";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
 import invariant from "tiny-invariant";
