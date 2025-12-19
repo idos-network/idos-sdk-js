@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { useDisconnect, useSignMessage, WagmiProvider } from "wagmi";
 import { Button } from "@/components/ui/button";
 import { message } from "@/lib/constants";
+import { closeWindowIfPopup, sendToParent } from "@/lib/utils";
 import { useStore } from "@/state";
 
 const projectId =
@@ -58,7 +59,23 @@ function Connector() {
   const handleSignMessage = async () => {
     try {
       const signature = await signMessageAsync({ message });
-      console.log(signature);
+
+      if (!address) {
+        throw new Error("`adress` is not set");
+      }
+
+      sendToParent({
+        type: "idOS_WALLET_CONNECTOR:MESSAGE_SIGNED",
+        payload: {
+          address,
+          signature,
+          public_key: [address],
+          message,
+        },
+      });
+
+      await handleDisconnect();
+      closeWindowIfPopup();
     } catch (error) {
       console.error(error);
     }

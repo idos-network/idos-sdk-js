@@ -1,4 +1,4 @@
-import { signNearMessage } from "@idos-network/core";
+import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { useEffect, useState } from "react";
 import { message } from "@/lib/constants";
+import { closeWindowIfPopup, sendToParent } from "@/lib/utils";
 import { useStore } from "@/state";
 
 const selector = await setupWalletSelector({
@@ -46,7 +47,23 @@ function Connector() {
     try {
       const wallet = await selector.wallet();
       const signature = await signNearMessage(wallet, message);
-      console.log(signature);
+
+      if (!accountId) {
+        throw new Error("`accountId` is not set");
+      }
+
+      sendToParent({
+        type: "idOS_WALLET_CONNECTOR:MESSAGE_SIGNED",
+        payload: {
+          address: accountId,
+          signature,
+          public_key: (await getNearFullAccessPublicKeys(accountId)) || [],
+          message,
+        },
+      });
+
+      await handleDisconnect();
+      closeWindowIfPopup();
     } catch (error) {
       console.error(error);
     }

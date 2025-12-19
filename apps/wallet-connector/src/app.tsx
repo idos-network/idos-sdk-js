@@ -2,6 +2,7 @@ import { EVMConnector } from "@/components/evm-connector";
 import { NearConnector } from "@/components/near-connector";
 import { StellarConnector } from "@/components/stellar-connector";
 import { XRPLConnector } from "@/components/xrpl-connector";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { useStore } from "@/state";
 
 function Center({ children }: { children: React.ReactNode }) {
@@ -14,6 +15,18 @@ function Center({ children }: { children: React.ReactNode }) {
 
 function App() {
   const connectedWallet = useStore((state) => state.connectedWallet);
+  const { isMobile } = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <Center>
+        <EVMConnector />
+        <p className="text-center text-accent-foreground text-sm">
+          In order to add more wallets to your idOS profile, please use a desktop browser.
+        </p>
+      </Center>
+    );
+  }
 
   if (connectedWallet === "evm") {
     return (

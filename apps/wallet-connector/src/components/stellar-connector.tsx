@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import "@near-wallet-selector/modal-ui/styles.css";
 import { StrKey } from "@stellar/stellar-base";
 import { message } from "@/lib/constants";
+import { closeWindowIfPopup, sendToParent } from "@/lib/utils";
 import { useStore } from "@/state";
 
 const stellarKit: StellarWalletsKit = new StellarWalletsKit({
@@ -34,9 +35,8 @@ function Connector() {
       await stellarKit.openModal({
         onWalletSelected: async (option: StellarSupportedWallet) => {
           stellarKit.setWallet(option.id);
-
           const { address } = await stellarKit.getAddress();
-          console.log({ address });
+
           if (address) {
             setAccountId(address);
             setWallet("stellar");
@@ -58,7 +58,25 @@ function Connector() {
         signedMessageInBase64 = Buffer.from(signedMessageInBase64.toString(), "base64");
       }
       const signature = signedMessageInBase64.toString("hex");
-      console.log(signature);
+
+      if (!accountId) {
+        throw new Error("`accountId` is not set");
+      }
+
+      const publicKey = await derivePublicKey(accountId);
+
+      sendToParent({
+        type: "idOS_WALLET_CONNECTOR:MESSAGE_SIGNED",
+        payload: {
+          address: accountId,
+          signature,
+          public_key: [publicKey],
+          message,
+        },
+      });
+
+      await handleDisconnect();
+      closeWindowIfPopup();
     } catch (error) {
       console.error("Signing message failed:", error);
     }

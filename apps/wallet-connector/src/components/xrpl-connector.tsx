@@ -1,6 +1,7 @@
-import { getAddress, isInstalled, signMessage } from "@gemwallet/api";
+import { getAddress, getPublicKey, isInstalled, signMessage } from "@gemwallet/api";
 import { Button } from "@/components/ui/button";
 import { message } from "@/lib/constants";
+import { closeWindowIfPopup, sendToParent } from "@/lib/utils";
 import { useStore } from "@/state";
 
 function Connector() {
@@ -31,7 +32,34 @@ function Connector() {
     try {
       const { result } = await signMessage(message);
       const signature = result?.signedMessage;
-      console.log(signature);
+
+      if (!accountId) {
+        throw new Error("`accountId` is not set");
+      }
+
+      if (!signature) {
+        throw new Error("`signature` is not set");
+      }
+
+      const { result: publicKeyResult } = await getPublicKey();
+      const publicKey = publicKeyResult?.publicKey;
+
+      if (!publicKey) {
+        throw new Error("`publicKey` is not set");
+      }
+
+      sendToParent({
+        type: "idOS_WALLET_CONNECTOR:MESSAGE_SIGNED",
+        payload: {
+          address: accountId,
+          signature,
+          public_key: [publicKey],
+          message,
+        },
+      });
+
+      await handleDisconnect();
+      closeWindowIfPopup();
     } catch (error) {
       console.error("Signing message failed:", error);
     }
