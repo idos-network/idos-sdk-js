@@ -5,7 +5,8 @@ import type { Account, Client, Transport } from "viem";
 import { http, useConnectorClient } from "wagmi";
 import { type Chain, mainnet, sepolia } from "wagmi/chains";
 
-export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+export const projectId =
+  import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
 
 const metadata = {
   name: "idOS Dashboard",

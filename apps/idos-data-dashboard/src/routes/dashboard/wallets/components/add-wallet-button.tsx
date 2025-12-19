@@ -1,4 +1,18 @@
-import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
+import {
+  Button,
+  Center,
+  IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Spinner,
+  useBreakpointValue,
+  useDisclosure,
+  useToast,
+} from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
 import { getWalletType } from "@idos-network/core/utils";
@@ -98,10 +112,12 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [walletPayload, setWalletPayload] = useState<WalletSignature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
+  const [isIframeLoading, setIsIframeLoading] = useState(true);
+  const { isOpen: isModalOpen, onOpen: onModalOpen, onClose: onModalClose } = useDisclosure();
   const addWalletMutation = useAddWalletMutation();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
+  const isMobile = useBreakpointValue({ base: true, lg: false }, { ssr: false }) ?? false;
   const idOSClient = useIdOS();
 
   const addWallet = async (walletPayload: WalletSignature) => {
@@ -137,6 +153,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
           });
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
           onWalletAdded?.();
+          // Close modal if open (mobile)
+          if (isModalOpen) {
+            onModalClose();
+          }
         },
         onError: (error) => {
           console.error(error);
@@ -155,7 +175,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from the embedded wallet app
+      // Only accept messages from the wallet connector app
       const allowedOrigin = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
       if (!allowedOrigin) {
         console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
@@ -166,15 +186,45 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       const allowedOriginUrl = new URL(allowedOrigin);
       const allowedOriginString = allowedOriginUrl.origin;
 
+      // Debug logging
+      console.log("Message received:", {
+        origin: event.origin,
+        expectedOrigin: allowedOriginString,
+        messageType: event.data?.type,
+        data: event.data,
+      });
+
       if (event.origin !== allowedOriginString) {
         console.warn(
           `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
         );
         return;
       }
-      if (event.data?.type === "WALLET_SIGNATURE") {
+
+      // Handle messages from wallet-connector app
+      if (event.data?.type === "idOS_WALLET_CONNECTOR:MESSAGE_SIGNED") {
+        const payload = event.data.payload;
+        // Map the payload to WalletSignature format
+        setWalletPayload({
+          address: payload.address,
+          signature: payload.signature,
+          public_key: payload.public_key || [],
+          message: payload.message,
+        });
+        setIsLoading(false);
+        // Close modal if open (mobile)
+        if (isModalOpen) {
+          onModalClose();
+        }
+      }
+      // Also handle legacy WALLET_SIGNATURE format for backward compatibility
+      else if (event.data?.type === "WALLET_SIGNATURE") {
         setWalletPayload(event.data.data);
         setIsLoading(false);
+        // Close modal if open (mobile)
+        if (isModalOpen) {
+          onModalClose();
+        }
       }
     };
 
@@ -183,7 +233,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     return () => {
       abortController.abort();
     };
-  }, []);
+  }, [isModalOpen]);
 
   useEffect(() => {
     if (!popupWindow) return;
@@ -247,11 +297,89 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     }
   };
 
+  const handleOpenWalletModal = () => {
+    invariant(
+      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
+      "VITE_EMBEDDED_WALLET_APP_URL is not set",
+    );
+    setIsIframeLoading(true);
+    setIsLoading(true);
+    onModalOpen();
+  };
+
+  const handleIframeLoad = () => {
+    setIsIframeLoading(false);
+  };
+
+  const handleClose = () => {
+    setIsLoading(false);
+    setIsIframeLoading(true);
+    setWalletPayload(null);
+    onModalClose();
+  };
+
+  const walletConnectorUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
+
   if (isMobile) {
     return (
-      <IconButton id="add-wallet-button" colorScheme="green" aria-label="Add wallet">
-        <PlusIcon size={24} />
-      </IconButton>
+      <>
+        <IconButton
+          id="add-wallet-button"
+          colorScheme="green"
+          aria-label="Add wallet"
+          onClick={handleOpenWalletModal}
+          isLoading={isLoading}
+        >
+          <PlusIcon size={24} />
+        </IconButton>
+        <Modal
+          isOpen={isModalOpen}
+          onClose={handleClose}
+          size={{
+            base: "full",
+            lg: "xl",
+          }}
+          isCentered={false}
+        >
+          <ModalOverlay />
+          <ModalContent bg="neutral.900" rounded="xl">
+            <ModalHeader>Connect Wallet</ModalHeader>
+            <ModalCloseButton />
+            <ModalBody p={0} position="relative" display="grid">
+              {isIframeLoading && (
+                <Center
+                  position="absolute"
+                  top={0}
+                  left={0}
+                  right={0}
+                  bottom={0}
+                  bg="neutral.950"
+                  zIndex={1}
+                >
+                  <Spinner size="xl" color="green.500" />
+                </Center>
+              )}
+              {walletConnectorUrl && (
+                <iframe
+                  src={walletConnectorUrl}
+                  onLoad={handleIframeLoad}
+                  style={{
+                    display: "flex",
+                    width: "100%",
+                    height: "100%",
+                    minHeight: "600px",
+                    border: "none",
+                    flex: 1,
+                    opacity: isIframeLoading ? 0 : 1,
+                    transition: "opacity 0.2s ease-in-out",
+                  }}
+                  title="Wallet Connector"
+                />
+              )}
+            </ModalBody>
+          </ModalContent>
+        </Modal>
+      </>
     );
   }
 
@@ -260,7 +388,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       id="add-wallet-button"
       colorScheme="green"
       leftIcon={<PlusIcon size={24} />}
-      hideBelow="lg"
       onClick={handleOpenWalletPopup}
       isLoading={isLoading}
     >
