@@ -1,3 +1,4 @@
+import { forwardRef } from "preact/compat";
 import type { InputHTMLAttributes } from "preact/compat";
 import { tv, type VariantProps } from "tailwind-variants";
 
@@ -8,16 +9,19 @@ const textField = tv({
 type TextFieldVariants = VariantProps<typeof textField>;
 export interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement>, TextFieldVariants {}
 
-export function TextField({ class: class_, className, ...props }: TextFieldProps) {
-  return (
-    <input
-      className={textField({
-        // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
-        class: class_,
-        // @ts-ignore
-        className,
-      })}
-      {...props}
-    />
-  );
-}
+export const TextField = forwardRef<HTMLInputElement, TextFieldProps>(
+  ({ class: class_, className, ...props }, ref) => {
+    return (
+      <input
+        ref={ref}
+        className={textField({
+          // @ts-ignore: there is a mismatch between what `preact` types for `class` and what `tailwind-variants` expects.
+          class: class_,
+          // @ts-ignore
+          className,
+        })}
+        {...props}
+      />
+    );
+  },
+);

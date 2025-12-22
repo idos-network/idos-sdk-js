@@ -13,13 +13,11 @@ import type {
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {
-  container: string;
   url?: string;
   throwOnUserCancelUnlock?: boolean;
 }
 
 export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
-  private container: string;
   private iframe: HTMLIFrameElement;
   private hostUrl: URL;
   private bound = false;
@@ -27,12 +25,9 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   constructor(options: IframeEnclaveOptions) {
     super(options);
 
-    if (!this.options.container) {
-      throw new Error("container is required");
-    }
-
-    this.container = this.options.container;
     this.hostUrl = new URL(this.options.url ?? "https://enclave.idos.network");
+
+    // Create iframe
     this.iframe = document.createElement("iframe");
     this.iframe.id = "idos-enclave-iframe";
   }
@@ -163,12 +158,6 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private async createAndLoadIframe(): Promise<void> {
-    const container = document.querySelector(this.container);
-
-    if (!container) {
-      throw new Error(`Can't find container with selector ${this.container}`);
-    }
-
     // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy#directives
     const permissionsPolicies = ["publickey-credentials-get", "storage-access"];
 
@@ -185,29 +174,69 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe#referrerpolicy
     const referrerPolicy = "origin";
 
-    const styles = {
-      "aspect-ratio": "4/1",
-      "background-color": "transparent",
-      border: "none",
-      display: "block",
+    // Iframe styles - full screen with backdrop
+    const iframeStyles = {
+      position: "fixed",
+      inset: "0",
       width: "100%",
+      height: "100%",
+      border: "none",
+      "background-color": "transparent",
+      "z-index": "999999",
+      opacity: "0",
+      "pointer-events": "none",
+      transition: "opacity 0.3s ease, background-color 0.3s ease",
+      display: "block",
+      outline: "none", // Remove focus outline
     };
 
+    // Configure iframe
     this.iframe.allow = permissionsPolicies.join("; ");
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
-    this.iframe.src = this.hostUrl.toString();
-    for (const [k, v] of Object.entries(styles)) {
+
+    // Ensure userId is available to the enclave app via search params
+    const iframeUrl = new URL(this.hostUrl.toString());
+    if (this.options.userId) {
+      iframeUrl.searchParams.set("userId", this.options.userId);
+    }
+    this.iframe.src = iframeUrl.toString();
+    this.iframe.tabIndex = 0; // Make iframe focusable
+    this.iframe.setAttribute("aria-hidden", "true"); // Hidden by default
+
+    // Apply iframe styles
+    for (const [k, v] of Object.entries(iframeStyles)) {
       this.iframe.style.setProperty(k, v);
     }
 
-    let el: HTMLElement | null;
+    // Clean up any existing instances
+    let existingIframe: HTMLElement | null;
     // biome-ignore lint/suspicious/noAssignInExpressions: it's on purpose
-    while ((el = document.getElementById(this.iframe.id))) {
+    while ((existingIframe = document.getElementById(this.iframe.id))) {
       console.log("reinstalling idOS iframe...");
-      container.removeChild(el);
+      document.body.removeChild(existingIframe);
     }
-    container.appendChild(this.iframe);
+
+    // Watch for aria-hidden being set externally and override it when visible
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.attributeName === "aria-hidden" ||
+          mutation.attributeName === "data-aria-hidden"
+        ) {
+          if (this.iframe.style.opacity === "1") {
+            // If the enclave is visible, make sure aria-hidden is removed
+            this.iframe.removeAttribute("aria-hidden");
+            this.iframe.removeAttribute("data-aria-hidden");
+          }
+        }
+      });
+    });
+
+    observer.observe(this.iframe, { attributes: true });
+
+    // Append iframe directly to body
+    document.body.appendChild(this.iframe);
 
     return new Promise((resolve) =>
       this.iframe.addEventListener(
@@ -221,13 +250,24 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   }
 
   private showEnclave(): void {
-    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
-    this.iframe.parentElement!.classList.add("visible");
+    this.iframe.style.opacity = "1";
+    this.iframe.style.backgroundColor = "rgba(0, 0, 0, 0.5)";
+    this.iframe.style.pointerEvents = "auto";
+
+    // Remove aria-hidden to allow interactions
+    this.iframe.removeAttribute("aria-hidden");
+    this.iframe.removeAttribute("data-aria-hidden");
+    this.iframe.setAttribute("aria-modal", "true");
   }
 
   private hideEnclave(): void {
-    // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
-    this.iframe.parentElement!.classList.remove("visible");
+    this.iframe.style.opacity = "0";
+    this.iframe.style.backgroundColor = "transparent";
+    this.iframe.style.pointerEvents = "none";
+
+    // Set aria-hidden when hidden
+    this.iframe.setAttribute("aria-hidden", "true");
+    this.iframe.removeAttribute("aria-modal");
   }
 
   private async requestToEnclave<TMethod extends keyof BaseProviderMethodArgs>(
@@ -239,7 +279,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
 
       port1.onmessage = ({ data }) => {
         port1.close();
-        data.error ? reject(data.error) : resolve(data.result);
+        if (data.error) {
+          reject(data.error);
+        } else {
+          resolve(data.result);
+        }
       };
 
       // biome-ignore lint/style/noNonNullAssertion: Make the explosion visible.
@@ -264,11 +308,17 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     // so we have to validate it carefully.
     if (!message || !message.data || typeof message.data !== "object") return;
 
-    if (message.data.type !== "idOS:signTypedData" || message.origin !== this.hostUrl.origin)
-      return;
+    if (message.origin !== this.hostUrl.origin) return;
 
-    const payload = message.data.payload;
-    const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
-    await this.requestToEnclave("signTypedDataResponse", signature);
+    if (message.data.type === "idOS:signTypedData") {
+      const payload = message.data.payload;
+      const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
+      await this.requestToEnclave("signTypedDataResponse", signature);
+      return;
+    }
+
+    if (message.data.type === "idOS:enclaveClose") {
+      this.hideEnclave();
+    }
   }
 }
