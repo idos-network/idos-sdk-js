@@ -24,7 +24,7 @@ import { useRef } from "react";
 import { useIdOS } from "@/idOS.provider";
 
 import { timelockToMs } from "../../utils/time";
-import { useFetchGrants, useRevokeGrants } from "../shared";
+import { safeParse, useFetchGrants, useRevokeGrants } from "../shared";
 
 type DeleteCredentialProps = {
   isOpen: boolean;
@@ -159,7 +159,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const [currentToRevoke] = state;
   const { ag_grantee_wallet_identifier } = currentToRevoke ?? {};
 
-  const meta = JSON.parse(credential.public_notes);
+  const meta = safeParse<{ type?: string; issuer?: string }>(credential.public_notes);
 
   return (
     <AlertDialog
