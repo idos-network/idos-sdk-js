@@ -23,6 +23,8 @@ export const machine = setup({
     isMonerium: ({ context }: { context: Context }) => context.provider === "monerium",
     isNoah: ({ context }: { context: Context }) => context.provider === "noah",
     isHifi: ({ context }: { context: Context }) => context.provider === "hifi",
+    isUpgradeFlow: ({ context }: { context: Context }) => context.provider === "upgrade",
+    isNotUpgradeFlow: ({ context }: { context: Context }) => context.provider !== "upgrade",
   },
 }).createMachine({
   id: "idos",
@@ -51,6 +53,8 @@ export const machine = setup({
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+    availableCredentials: null,
+    upgradableCredential: null,
   },
   states: {
     notConfigured: {
@@ -130,10 +134,18 @@ export const machine = setup({
         id: "loginClient",
         src: "loginClient",
         input: ({ context }) => context.client,
-        onDone: {
-          target: "findCredential",
-          actions: ["setLoggedInClient"],
-        },
+        onDone: [
+          {
+            target: "findCredential",
+            actions: ["setLoggedInClient"],
+            guard: "isNotUpgradeFlow",
+          },
+          {
+            target: "upgradeFlow",
+            actions: ["setLoggedInClient"],
+            guard: "isUpgradeFlow",
+          },
+        ],
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
@@ -288,6 +300,54 @@ export const machine = setup({
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
+        },
+      },
+    },
+    upgradeFlow: {
+      initial: "fetchAvailableCredentials",
+      states: {
+        fetchAvailableCredentials: {
+          invoke: {
+            id: "fetchAvailableCredentials",
+            src: "fetchAvailableCredentials",
+            input: ({ context }: { context: Context }) => context.loggedInClient,
+            onDone: {
+              target: "selectCredential",
+              actions: ["setAvailableCredentials"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        selectCredential: {
+          on: {
+            selectCredential: {
+              target: "requestKrakenDAG",
+              actions: ["setUpgradableCredential"],
+            },
+          },
+        },
+        requestKrakenDAG: {
+          invoke: {
+            id: "requestKrakenDAG",
+            src: "requestKrakenDAG",
+            input: ({ context }: { context: Context }) => ({
+              client: context.loggedInClient,
+              credential: context.upgradableCredential,
+            }),
+            onDone: {
+              target: "error",
+              actions: ["setKrakenUrl"],
+            },
+            onError: {
+              target: "error",
+            },
+          },
+        },
+        error: {
+          type: "final",
         },
       },
     },

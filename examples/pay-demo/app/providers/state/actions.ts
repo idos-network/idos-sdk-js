@@ -30,6 +30,10 @@ export const actions = {
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+
+    // Upgradable credentials
+    availableCredentials: null,
+    upgradableCredential: null,
   }),
 
   setClient: assign({
@@ -46,6 +50,14 @@ export const actions = {
 
   setCredential: assign({
     credential: ({ event }) => event.output,
+  }),
+
+  setAvailableCredentials: assign({
+    availableCredentials: ({ event }) => event.output,
+  }),
+
+  setUpgradableCredential: assign({
+    upgradableCredential: ({ event }) => event.credential,
   }),
 
   incrementFindCredentialAttempts: assign({

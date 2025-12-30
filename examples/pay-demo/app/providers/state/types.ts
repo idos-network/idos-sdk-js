@@ -4,7 +4,7 @@ import type {
   idOSCredential,
 } from "@idos-network/client";
 
-export type Provider = "transak" | "noah" | "custom" | "hifi" | "monerium" | null;
+export type Provider = "transak" | "noah" | "custom" | "hifi" | "monerium" | "upgrade" | null;
 
 export interface MoneriumIban {
   profile: string;
@@ -43,6 +43,10 @@ export interface Context {
   moneriumCode: string | null;
   moneriumProfileStatus: string | null;
   moneriumProfileIbans: MoneriumIban[] | null;
+
+  // Upgradable credentials
+  availableCredentials: idOSCredential[] | null;
+  upgradableCredential: { credential: idOSCredential; level: string } | null;
 }
 
 export interface UserData {

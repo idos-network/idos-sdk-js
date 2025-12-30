@@ -7,7 +7,10 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: { container: "#idOS-enclave", url: "https://enclave.staging.idos.network/" },
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: "https://enclave.playground.idos.network/",
+      },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
@@ -41,6 +44,17 @@ export const actors = {
     return await input.logIn();
   }),
 
+  fetchAvailableCredentials: fromPromise(
+    async ({ input }: { input: Context["loggedInClient"] }) => {
+      if (!input) {
+        throw new Error("Client not found");
+      }
+
+      const credentials = await input.getAllCredentials();
+      return credentials.filter((credential) => !credential.original_id);
+    },
+  ),
+
   startKYC: fromPromise(async ({ input }: { input: Context["kycType"] }) => {
     const kycUrl = await fetch(`/app/kyc/link?type=${input}`);
     const kycUrlData = await kycUrl.json();
@@ -67,6 +81,8 @@ export const actors = {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
       });
+
+      console.log("Kraken Shared Credential:", krakenSharedCredential);
 
       return krakenSharedCredential;
     },

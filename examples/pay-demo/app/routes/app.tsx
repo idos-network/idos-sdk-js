@@ -23,6 +23,9 @@ export default function App() {
   const moneriumProfileIbans = MachineContext.useSelector(
     (state) => state.context.moneriumProfileIbans,
   );
+  const availableCredentials = MachineContext.useSelector(
+    (state) => state.context.availableCredentials,
+  );
 
   const transak = useRef<Transak | null>(null);
 
@@ -91,7 +94,7 @@ export default function App() {
     }
   }, [sharableToken, state, provider, send]);
 
-  const start = async (provider: "transak" | "noah" | "custom" | "hifi" | "monerium") => {
+  const start = async (provider: "transak" | "noah" | "upgrade" | "hifi" | "monerium") => {
     send({ type: "configure", provider, address });
   };
 
@@ -128,6 +131,60 @@ export default function App() {
         >
           Monerium
         </button>
+        <button
+          type="button"
+          className="w-full cursor-pointer rounded-lg bg-gray-600 px-6 py-3 font-semibold text-lg text-white transition-colors hover:bg-gray-700"
+          onClick={() => start("upgrade")}
+        >
+          Upgrade credentials
+        </button>
+      </div>
+    );
+  }
+
+  // @ts-expect-error Missing substates?
+  if (state.upgradeFlow && state.upgradeFlow === "selectCredential") {
+    body = (
+      <div className="w-full text-center">
+        <p>Available credentials to upgrade</p>
+        <table className="mt-5 w-full border-1 border-gray-300">
+          <thead>
+            <tr>
+              <th className="border-1 border-gray-300">ID</th>
+              <th className="border-1 border-gray-300">LEVEL</th>
+              <th className="border-1 border-gray-300">Upgrade to</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {availableCredentials?.map((creds) => {
+              const level = JSON.parse(creds.public_notes).level;
+              const canUpgradeTo = level.startsWith("basic")
+                ? level.replace("basic", "plus")
+                : null;
+
+              return (
+                <tr key={creds.id}>
+                  <td>{creds.id}</td>
+                  <td>{level}</td>
+                  <td>{canUpgradeTo ?? "Can't"}</td>
+                  <td>
+                    <button
+                      type="button"
+                      disabled={!canUpgradeTo}
+                      onClick={() =>
+                        send({ type: "selectCredential", credential: creds, level: canUpgradeTo })
+                      }
+                      className="cursor-pointer rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition-colors hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      Upgrade
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     );
   }
