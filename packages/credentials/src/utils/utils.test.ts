@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { CredentialSubject } from "../types";
-import { deriveLevel, matchLevelOrHigher, pickHighestMatchingLevel } from "./";
+import type { CredentialSubject, idOSCredential } from "../types";
+import {
+  deriveLevel,
+  highestMatchingCredential,
+  matchLevelOrHigher,
+  pickHighestMatchingLevel,
+} from "./";
 
 const defaultCredential: CredentialSubject = {
   id: "uuid:1234",
@@ -67,6 +72,123 @@ describe("pickHighestMatchingLevel", () => {
         ),
       ).toBe(expected);
     });
+  });
+});
+
+describe("highestMatchingCredential", () => {
+  it("choose basic, because plus did not match constraints", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "basic+liveness+email",
+          issuer: "custom-issuer",
+          status: "approved",
+        }),
+      },
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness",
+          issuer: "custom-issuer",
+          status: "pending",
+        }),
+      },
+    ] as unknown as idOSCredential[];
+
+    const matchedCredentials = highestMatchingCredential(credentials, "basic", {
+      addons: ["email"],
+      publicNotesConstraint: { status: "approved" },
+    });
+
+    expect(matchedCredentials).toEqual(credentials[0]);
+  });
+
+  it("choose plus+liveness+email+phoneNumber because it has better score", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness+email+phoneNumber",
+        }),
+      },
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness+email",
+        }),
+      },
+    ] as unknown as idOSCredential[];
+
+    const matchedCredentials = highestMatchingCredential(credentials, "basic", {
+      addons: ["email"],
+    });
+
+    expect(matchedCredentials).toEqual(credentials[0]);
+  });
+
+  it("choose plus+liveness because it has better score", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "basic+liveness+email+phoneNumber",
+        }),
+      },
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness",
+        }),
+      },
+    ] as unknown as idOSCredential[];
+
+    const matchedCredentials = highestMatchingCredential(credentials, "basic", {
+      addons: ["liveness"],
+    });
+
+    expect(matchedCredentials).toEqual(credentials[1]);
+  });
+
+  it("choose basic+liveness+email because plus has no email", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness",
+        }),
+      },
+      {
+        public_notes: JSON.stringify({
+          level: "basic+liveness+email",
+        }),
+      },
+    ] as unknown as idOSCredential[];
+
+    const matchedCredentials = highestMatchingCredential(credentials, "basic", {
+      addons: ["email"],
+    });
+
+    expect(matchedCredentials).toEqual(credentials[1]);
+  });
+
+  it("choose nothing because it did not match the constraints", () => {
+    const credentials = [
+      {
+        public_notes: JSON.stringify({
+          level: "plus+liveness",
+          status: "pending",
+          type: "kyc",
+        }),
+      },
+      {
+        public_notes: JSON.stringify({
+          level: "basic+liveness+email",
+          status: "pending",
+          type: "kyc",
+        }),
+      },
+    ] as unknown as idOSCredential[];
+
+    const matchedCredentials = highestMatchingCredential(credentials, "basic", {
+      addons: ["liveness"],
+      publicNotesConstraint: { status: "approved", type: "kyc" },
+    });
+
+    expect(matchedCredentials).toBeUndefined();
   });
 });
 
