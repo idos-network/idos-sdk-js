@@ -9,7 +9,6 @@ import type {
   CredentialSubject,
   CredentialSubjectFaceId,
   CustomIssuerType,
-  idOSCredential,
 } from "../types";
 
 export function fileToBase85(file: Buffer): string {
@@ -170,8 +169,8 @@ export function pickHighestMatchingLevel(
   );
 }
 
-export function highestMatchingCredential(
-  credentials: idOSCredential[],
+export function highestMatchingCredential<K extends { public_notes: string }>(
+  credentials: K[],
   requiredLevel: BaseLevel,
   {
     addons: requiredAddons = [],
@@ -180,7 +179,7 @@ export function highestMatchingCredential(
     addons?: Addon[];
     publicNotesConstraint?: Record<string, number | string>;
   },
-): idOSCredential | undefined {
+): K | undefined {
   const matchingCredentials = credentials
     .map((credential) => {
       const publicNotes = JSON.parse(credential.public_notes || "{}");

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { CredentialSubject, idOSCredential } from "../types";
+import type { CredentialSubject } from "../types";
 import {
   deriveLevel,
   highestMatchingCredential,
@@ -92,7 +92,7 @@ describe("highestMatchingCredential", () => {
           status: "pending",
         }),
       },
-    ] as unknown as idOSCredential[];
+    ];
 
     const matchedCredentials = highestMatchingCredential(credentials, "basic", {
       addons: ["email"],
@@ -114,7 +114,7 @@ describe("highestMatchingCredential", () => {
           level: "plus+liveness+email",
         }),
       },
-    ] as unknown as idOSCredential[];
+    ];
 
     const matchedCredentials = highestMatchingCredential(credentials, "basic", {
       addons: ["email"],
@@ -135,7 +135,7 @@ describe("highestMatchingCredential", () => {
           level: "plus+liveness",
         }),
       },
-    ] as unknown as idOSCredential[];
+    ];
 
     const matchedCredentials = highestMatchingCredential(credentials, "basic", {
       addons: ["liveness"],
@@ -156,7 +156,7 @@ describe("highestMatchingCredential", () => {
           level: "basic+liveness+email",
         }),
       },
-    ] as unknown as idOSCredential[];
+    ];
 
     const matchedCredentials = highestMatchingCredential(credentials, "basic", {
       addons: ["email"],
@@ -181,7 +181,7 @@ describe("highestMatchingCredential", () => {
           type: "kyc",
         }),
       },
-    ] as unknown as idOSCredential[];
+    ];
 
     const matchedCredentials = highestMatchingCredential(credentials, "basic", {
       addons: ["liveness"],
