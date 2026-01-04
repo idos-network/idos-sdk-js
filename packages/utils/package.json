@@ -20,7 +20,7 @@
     "zod": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
+    "@types/chrome": "^0.1.0",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
     "release-it": "^19.0.2",

@@ -26,7 +26,7 @@
     "@web3modal/wagmi": "^4.2.3",
     "ethers": "catalog:ethereum",
     "framer-motion": "^10.18.0",
-    "lucide-react": "^0.299.0",
+    "lucide-react": "^0.562.0",
     "near-api-js": "catalog:near",
     "react": "catalog:react",
     "react-dom": "catalog:react",
@@ -38,7 +38,7 @@
     "zustand": "^5.0.0"
   },
   "devDependencies": {
-    "@near-js/types": "^0.2.1",
+    "@near-js/types": "^0.3.0",
     "@playwright/test": "^1.45.3",
     "@testing-library/react": "^14.3.1",
     "@types/node": "^20.14.12",
