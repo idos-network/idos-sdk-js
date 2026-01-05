@@ -35,32 +35,32 @@
   },
   "exports": {
     "./encryption": {
-      "types": "./dist/encryption/index.d.ts",
-      "import": "./dist/encryption/index.js"
+      "types": "./dist/encryption/index.d.mts",
+      "import": "./dist/encryption/index.mjs"
     },
     "./store": {
-      "types": "./dist/store/index.d.ts",
-      "import": "./dist/store/index.js"
+      "types": "./dist/store/index.d.mts",
+      "import": "./dist/store/index.mjs"
     },
     "./codecs": {
-      "types": "./dist/codecs/index.d.ts",
-      "import": "./dist/codecs/index.js"
+      "types": "./dist/codecs/index.d.mts",
+      "import": "./dist/codecs/index.mjs"
     },
     "./enclave": {
-      "types": "./dist/enclave/index.d.ts",
-      "import": "./dist/enclave/index.js"
+      "types": "./dist/enclave/index.d.mts",
+      "import": "./dist/enclave/index.mjs"
     },
     "./enclave/local": {
-      "types": "./dist/enclave/local.d.ts",
-      "import": "./dist/enclave/local.js"
+      "types": "./dist/enclave/local.d.mts",
+      "import": "./dist/enclave/local.mjs"
     },
     "./xrpl-credentials": {
-      "types": "./dist/xrpl-credentials/index.d.ts",
-      "import": "./dist/xrpl-credentials/index.js"
+      "types": "./dist/xrpl-credentials/index.d.mts",
+      "import": "./dist/xrpl-credentials/index.mjs"
     },
     "./mpc": {
-      "types": "./dist/mpc/index.d.ts",
-      "import": "./dist/mpc/index.js"
+      "types": "./dist/mpc/index.d.mts",
+      "import": "./dist/mpc/index.mjs"
     }
   },
   "files": [
