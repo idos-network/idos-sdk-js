@@ -118,7 +118,7 @@ const level = deriveLevel({
 ## Filtering and matching levels
 
 ```javascript
-import { pickHighestMatchingLevel, matchLevelOrHigher } from "@idos-network/credentials/utils";
+import { pickHighestMatchingLevel, matchLevelOrHigher, highestMatchingCredential } from "@idos-network/credentials/utils";
 
 const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness")
 // matched = true
@@ -135,5 +135,19 @@ const pickedLevel = pickHighestMatchingLevel(
   ["liveness", "email"],
 );
 // pickedLevel = plus+liveness+email+phoneNumber
+
+const pickedCredential = highestMatchingCredential(
+  [...idOSCredentials],
+  "basic",
+  {
+    addons: ["email", "liveness"],
+    publicNotesConstraint: {
+      status: "approved",
+      type: "kyc",
+    }
+  }
+);
+// pickedCredential => for example plus+email+liveness etc...
+// don't forget to verify credentials signature before usage!
 
 ```
