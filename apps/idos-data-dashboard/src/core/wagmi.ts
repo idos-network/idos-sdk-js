@@ -17,14 +17,11 @@ const metadata = {
 export const chains = [mainnet, sepolia] as const;
 
 export const wagmiConfig = defaultWagmiConfig({
-  // @ts-expect-error - wagmi types are outdated
   chains,
   projectId,
   metadata,
   transports: {
-    // @ts-expect-error - wagmi types are outdated
     [mainnet.id]: http(),
-    // @ts-expect-error - wagmi types are outdated
     [sepolia.id]: http(),
   },
 });
