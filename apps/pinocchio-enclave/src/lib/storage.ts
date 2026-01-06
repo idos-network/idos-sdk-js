@@ -12,6 +12,7 @@ async function openDatabase() {
       } catch (e) {
         // ignore
       }
+      db.deleteObjectStore(DB_STORE_NAME);
       db.createObjectStore(DB_STORE_NAME, { keyPath: "name" });
     };
     req.onsuccess = (ev) => {

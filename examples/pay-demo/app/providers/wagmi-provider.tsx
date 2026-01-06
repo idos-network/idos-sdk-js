@@ -1,11 +1,14 @@
+import { createConfig, http, injected, WagmiProvider } from 'wagmi'
+import { walletConnect } from '@wagmi/connectors'
+import { mainnet, sepolia } from 'wagmi/chains'
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { walletConnect } from "@wagmi/connectors";
-import { createConfig, http, injected, WagmiProvider } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
 
 export const config = createConfig({
   chains: [mainnet, sepolia],
-  connectors: [injected(), walletConnect({ projectId: "121e6ce4ff36ecf2dcf60edd2f3ac2a1" })],
+  connectors: [
+    injected(),
+    walletConnect({ projectId: '121e6ce4ff36ecf2dcf60edd2f3ac2a1' }),
+  ],
   transports: {
     [mainnet.id]: http(),
     [sepolia.id]: http(),
