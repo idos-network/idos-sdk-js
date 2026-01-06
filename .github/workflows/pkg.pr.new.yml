@@ -19,14 +19,12 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          run_install: false
+          run_install: true
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node_version
           cache: "pnpm"
-
-      - run: pnpm install
 
       - name: Build
         run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils --filter=@idos-network/credentials

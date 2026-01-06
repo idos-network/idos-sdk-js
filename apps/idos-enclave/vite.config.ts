@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import preact from "@preact/preset-vite";
 import tailwindcss from "@tailwindcss/vite";
@@ -6,6 +7,8 @@ import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 
+const require = createRequire(import.meta.url);
+
 export default defineConfig({
   define: {
     global: "window",
@@ -13,9 +16,12 @@ export default defineConfig({
   resolve: {
     alias: {
       buffer: "buffer",
-      react: "preact/compat",
-      "react-dom": "preact/compat",
+      react: require.resolve("preact/compat"),
+      "react-dom": require.resolve("preact/compat"),
     },
+  },
+  optimizeDeps: {
+    include: ["preact/compat"],
   },
   build: {
     rollupOptions: {
