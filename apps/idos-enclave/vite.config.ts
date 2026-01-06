@@ -13,6 +13,8 @@ export default defineConfig({
   resolve: {
     alias: {
       buffer: "buffer",
+      react: "preact/compat",
+      "react-dom": "preact/compat",
     },
   },
   build: {
