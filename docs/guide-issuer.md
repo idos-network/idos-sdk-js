@@ -180,7 +180,7 @@ const wallet = {
   message: ownershipProofMessage,
   signature: ownershipProofSignature,
   public_key: ethers.SigningKey.recoverPublicKey(
-    ethers.id(ownershipProofMessage)
+    ethers.id(ownershipProofMessage),
     ownershipProofSignature,
   ),
 };
