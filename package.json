@@ -8,7 +8,10 @@
     "size-limit": "^11.1.6",
     "turbo": "^2.5.5"
   },
-  "packageManager": "pnpm@10.15.0",
+  "optionalDependencies": {
+    "@rolldown/binding-linux-x64-gnu": "1.0.0-beta.57"
+  },
+  "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3"
