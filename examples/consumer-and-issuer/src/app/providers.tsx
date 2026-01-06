@@ -47,7 +47,7 @@ export function AppKitProvider({
   initialState,
 }: React.PropsWithChildren<{ initialState?: State }>) {
   return (
-    // @ts-ignore wagmi config is not typed for some reason
+    // @ts-expect-error wagmi config is not typed for some reason
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </WagmiProvider>
