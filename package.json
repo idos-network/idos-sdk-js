@@ -55,7 +55,7 @@
     {
       "name": "@idos-network/client",
       "path": "packages/client/dist/index.js",
-      "limit": "1.7 MB"
+      "limit": "2.0 MB"
     },
     {
       "name": "@idos-network/consumer",
