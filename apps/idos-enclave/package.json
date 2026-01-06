@@ -14,7 +14,7 @@
     "@stablelib/utf8": "^2.0.1",
     "dompurify": "^3.2.5",
     "es-toolkit": "^1.23.0",
-    "lucide-react": "^0.562.0",
+    "lucide-preact": "^0.562.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",

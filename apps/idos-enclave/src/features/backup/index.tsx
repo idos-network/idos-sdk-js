@@ -1,6 +1,6 @@
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { useSignal } from "@preact/signals";
-import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import type { JSX } from "preact";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";

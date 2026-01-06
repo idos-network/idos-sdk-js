@@ -583,9 +583,9 @@ importers:
       es-toolkit:
         specifier: ^1.23.0
         version: 1.43.0
-      lucide-react:
+      lucide-preact:
         specifier: ^0.562.0
-        version: 0.562.0(react@19.2.3)
+        version: 0.562.0(preact@10.28.1)
       preact:
         specifier: catalog:preact
         version: 10.28.1
@@ -9727,6 +9727,11 @@ packages:
 
   lru_map@0.4.1:
     resolution: {integrity: sha512-I+lBvqMMFfqaV8CJCISjI3wbjmwVu/VyOoU7+qtu9d7ioW5klMgsTTiUOUp+DJvfTTzKXoPbyC6YfgkNcyPSOg==}
+
+  lucide-preact@0.562.0:
+    resolution: {integrity: sha512-1LOH/QVkxZ0zMspMPcVAbEfmwKHM3llG8ikA8j2M7GaMKRHZLn32PohXnvmsqDMhrCBsBc9pt1ybPCUYteywtQ==}
+    peerDependencies:
+      preact: ^10.27.2
 
   lucide-react@0.453.0:
     resolution: {integrity: sha512-kL+RGZCcJi9BvJtzg2kshO192Ddy9hv3ij+cPrVPWSRzgCWCVazoQJxOjAwgK53NomL07HB7GPHW120FimjNhQ==}
@@ -29253,6 +29258,10 @@ snapshots:
   lru-cache@7.18.3: {}
 
   lru_map@0.4.1: {}
+
+  lucide-preact@0.562.0(preact@10.28.1):
+    dependencies:
+      preact: 10.28.1
 
   lucide-react@0.453.0(react@19.2.3):
     dependencies:
