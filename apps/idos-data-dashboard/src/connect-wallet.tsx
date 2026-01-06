@@ -3,7 +3,7 @@ import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
 import { StrKey } from "@stellar/stellar-base";
-import { TokenIcon } from "@web3icons/react";
+import { TokenIcon } from "@web3icons/react/dynamic";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";

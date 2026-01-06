@@ -37,7 +37,6 @@ const initialState: WalletState = {
 };
 
 export const useWalletStore = create<WalletStore>()(
-  // @ts-ignore: @todo: check why it's complaining
   persist(
     (set) => ({
       ...initialState,

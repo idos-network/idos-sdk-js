@@ -5,7 +5,7 @@ import { Button } from "@heroui/react";
 import { getNearFullAccessPublicKeys } from "@idos-network/core";
 import { useAppKit, useAppKitAccount } from "@reown/appkit/react";
 import { StrKey } from "@stellar/stellar-base";
-import { TokenIcon } from "@web3icons/react";
+import { TokenIcon } from "@web3icons/react/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import invariant from "tiny-invariant";

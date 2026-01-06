@@ -74,7 +74,7 @@ export default function App() {
     if (provider === "transak" && !transak.current && sharableToken) {
       transak.current = new Transak({
         apiKey: "479983ae-3b37-4ac0-84f2-f42873b1a638", // (Required)
-        // @ts-ignore - Transak SDK is not typed correctly
+        // @ts-expect-error - Transak SDK is not typed correctly
         environment: "STAGING", // (Required),
         kycShareTokenProvider: "SUMSUB",
         kycShareToken: sharableToken,
