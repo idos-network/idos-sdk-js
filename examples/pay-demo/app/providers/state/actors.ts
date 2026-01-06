@@ -1,7 +1,7 @@
 import { createIDOSClient } from "@idos-network/client";
-import { ethers } from "ethers";
 import { fromPromise } from "xstate";
 import { COMMON_ENV } from "../envFlags.common";
+import { PinocchioSignerProvider } from "../pinocchio_signer";
 import type { Context } from "./types";
 
 export const actors = {
@@ -13,16 +13,28 @@ export const actors = {
 
     const idleClient = await config.createClient();
 
-    // @ts-expect-error
-    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+    const pinocchioSigner = new PinocchioSignerProvider({
+      name: "Pay Demo DApp",
+      description: "A demo dapp for idOS PayDemo using Pinocchio Signer",
+    });
 
-    return await idleClient.withUserSigner(signer);
+    // This is required to initialize the signer and get the address
+    // kwilSigner won't work without address
+    await pinocchioSigner.init();
+
+    return await idleClient.withUserSigner(pinocchioSigner);
   }),
 
   checkProfile: fromPromise(async ({ input }: { input: Context["client"] }) => {
     if (!input) {
       throw new Error("Client not found");
     }
+
+    console.log("Checking profile for client:", input);
+
+    // THIS is triggering AUTH request
+    const user = await input.getUser();
+    console.log("User fetched:", user);
 
     const hasProfile = await input.hasProfile();
 

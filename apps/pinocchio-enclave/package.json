@@ -1,0 +1,38 @@
+{
+  "name": "pinocchio-sign",
+  "description": "idOS Pinocchio Sign",
+  "version": "0.1.0",
+  "dependencies": {
+    "axios": "1.12.2",
+    "react": "catalog:react",
+    "react-dom": "catalog:react",
+    "@idos-network/utils": "workspace:*",
+    "react-router": "^7.7.1",
+    "bip39": "^3.1.0",
+    "tweetnacl": "catalog:core",
+    "tailwind-variants": "^1.0.0"
+  },
+  "devDependencies": {
+    "@heroicons/react": "^2.2.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/vite": "^4.1.1",
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react",
+    "tailwindcss": "^4.1.1",
+    "typescript": "catalog:build",
+    "vite": "catalog:build",
+    "vite-plugin-html": "^3.2.2",
+    "vite-plugin-mkcert": "^1.17.8",
+    "vite-plugin-node-polyfills": "catalog:build",
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "license": "MIT",
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "type": "module"
+}

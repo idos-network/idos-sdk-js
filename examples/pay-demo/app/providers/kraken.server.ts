@@ -31,7 +31,7 @@ export const generateKrakenUrl = async (type: string, walletAddress: string) => 
   const payload = {
     clientId: SERVER_ENV.KRAKEN_CLIENT_ID,
     kyc: true,
-    level: COMMON_ENV.KRAKEN_LEVEL,
+    level: COMMON_ENV.KRAKEN_LEVEL, // plus+liveness+phoneNumber+email+idos
     state: Date.now().toString(),
   };
 
