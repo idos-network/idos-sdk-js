@@ -640,6 +640,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 export type {
   idOSDelegatedWriteGrant,
   idOSCredential,
+  idOSCredentialListItem,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
