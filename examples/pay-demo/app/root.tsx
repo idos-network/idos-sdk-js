@@ -11,6 +11,7 @@ import type { Route } from "./+types/root";
 import { SiweProvider } from "./providers/siwe-provider";
 import "./app.css";
 import { MachineProvider } from "./providers/state";
+import { WagmiProviderWrapper } from "./providers/wagmi-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -45,11 +46,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <SiweProvider>
-      <MachineProvider>
-        <Outlet />
-      </MachineProvider>
-    </SiweProvider>
+    <WagmiProviderWrapper>
+      <SiweProvider>
+        <MachineProvider>
+          <Outlet />
+        </MachineProvider>
+      </SiweProvider>
+    </WagmiProviderWrapper>
   );
 }
 
