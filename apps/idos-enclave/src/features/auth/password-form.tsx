@@ -19,17 +19,20 @@ function PasswordField({ hasError, password, ...props }: PasswordFieldProps) {
     <div class="flex flex-col gap-1">
       <TextField
         id="idos-password-input"
-        autoFocus
         type="password"
         required={true}
         value={password.value}
         onInput={(e) => {
           password.value = (e.target as HTMLInputElement).value;
+          // Clear error as soon as the user starts typing again
+          if (hasError) {
+            hasError.value = false;
+          }
         }}
         {...props}
       />
       {hasError?.value ? (
-        <p class="tex-sm text-left font-semibold text-red-500">Invalid password.</p>
+        <p class="text-sm text-left font-semibold text-red-500 h-4">Invalid password.</p>
       ) : null}
     </div>
   );
@@ -103,9 +106,16 @@ export default function PasswordForm({
       throw new Error("Salt is invalid, please try again.");
     }
 
+    console.log("[idOS Enclave] Deriving key", {
+      userId: salt,
+      passwordLength: password.length,
+    });
+
     const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
-    return encode(keyPair.publicKey);
+    const derived = encode(keyPair.publicKey);
+    console.log("[idOS Enclave] Derived public key (base64)", derived);
+    return derived;
   }
 
   const onSubmit = async (e: Event) => {
@@ -113,23 +123,48 @@ export default function PasswordForm({
     e.stopPropagation();
     isLoading.value = true;
 
-    if (encryptionPublicKey) {
-      const derivedPK = await derivePublicKeyFromPassword(password.value);
-      if (derivedPK !== encryptionPublicKey) {
-        hasError.value = true;
-        isLoading.value = false;
-        return;
+    try {
+      if (encryptionPublicKey) {
+        console.log("[idOS Enclave] Submitting password form", {
+          mode,
+          hasEncryptionPublicKey: !!encryptionPublicKey,
+        });
+
+        let derivedPK: string;
+        try {
+          derivedPK = await derivePublicKeyFromPassword(password.value);
+        } catch (error) {
+          console.error("[idOS Enclave] Error during key derivation", error);
+          hasError.value = true;
+          isLoading.value = false;
+          return;
+        }
+
+        console.log("[idOS Enclave] Comparing keys", {
+          derivedPK,
+          encryptionPublicKey,
+          match: derivedPK === encryptionPublicKey,
+        });
+
+        if (derivedPK !== encryptionPublicKey) {
+          hasError.value = true;
+          isLoading.value = false;
+          return;
+        }
       }
+
+      hasError.value = false;
+      onSuccess({
+        encryptionPasswordStore: "user",
+        password: password.value,
+        duration: duration.value,
+      });
+    } catch (error) {
+      console.error("[idOS Enclave] Unexpected error in password submit", error);
+      hasError.value = true;
+      // Only clear loading state on error; on success the dialog will close
+      isLoading.value = false;
     }
-
-    hasError.value = false;
-    isLoading.value = false;
-
-    onSuccess({
-      encryptionPasswordStore: "user",
-      password: password.value,
-      duration: duration.value,
-    });
   };
 
   const showPassword = useSignal(false);
@@ -156,7 +191,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute right-2 top-6 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -212,7 +247,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute right-2 top-6 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
