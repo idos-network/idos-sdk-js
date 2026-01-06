@@ -204,7 +204,7 @@ describe("verifiableCredentials", () => {
         // selfieFile
         const selfieFileError = zodError.issues.find((error) => error.path[0] === "selfieFile");
         expect(selfieFileError).toBeDefined();
-        expect(selfieFileError?.message).toContain("Input not instance of Buffer");
+        expect(selfieFileError?.message).toContain("expected Buffer, received undefined");
 
         // residentialAddress country
         const residentialAddressCountryError = zodError.issues.find(
