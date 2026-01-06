@@ -32,7 +32,7 @@ export const createStellarSigner = async (walletPublicKey: string, walletAddress
     walletPublicKey as string,
     "ed25519",
   );
-  // @ts-ignore
+  // @ts-expect-error
   stellarSigner.publicAddress = walletAddress;
   return stellarSigner;
 };

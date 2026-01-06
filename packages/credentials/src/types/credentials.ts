@@ -86,7 +86,7 @@ export const CredentialResidentialAddressSchema: z.ZodObject<{
   proofFile: z.instanceof(Buffer),
 });
 
-export type CredentialResidentialAddress = z.infer<typeof CredentialFieldsSchema>;
+export type CredentialResidentialAddress = z.infer<typeof CredentialResidentialAddressSchema>;
 
 export const IDDocumentTypeSchema: z.ZodEnum<{
   PASSPORT: "PASSPORT";

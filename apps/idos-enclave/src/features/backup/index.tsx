@@ -1,7 +1,6 @@
-import { EyeSlashIcon } from "@heroicons/react/20/solid";
-import { CheckIcon, ClipboardIcon, EyeIcon } from "@heroicons/react/24/outline";
 import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
 import { useSignal } from "@preact/signals";
+import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import type { JSX } from "preact";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -49,11 +48,7 @@ function RevealButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
       {...props}
       onClick={handleClick}
     >
-      {clicked.value ? (
-        <EyeSlashIcon class="h-6 w-6 text-green-700" />
-      ) : (
-        <EyeIcon class="h-6 w-6" />
-      )}
+      {clicked.value ? <EyeOffIcon class="h-6 w-6 text-green-700" /> : <EyeIcon class="h-6 w-6" />}
     </button>
   );
 }

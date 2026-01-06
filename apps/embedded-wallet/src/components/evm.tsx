@@ -9,7 +9,8 @@ import { useSignMessage, WagmiProvider } from "wagmi";
 import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
-const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+const projectId =
+  import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID || "b56e18d47c72ab683b10814fe9495694";
 
 export const networks = [mainnet, sepolia];
 

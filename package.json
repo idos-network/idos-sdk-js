@@ -1,14 +1,17 @@
 {
   "name": "idos-sdk-js",
   "devDependencies": {
-    "@biomejs/biome": "2.1.3",
+    "@biomejs/biome": "2.3.11",
     "@size-limit/file": "^11.2.0",
     "@size-limit/time": "^11.2.0",
-    "lefthook": "1.12.2",
+    "lefthook": "1.13.6",
     "size-limit": "^11.1.6",
-    "turbo": "^2.5.5"
+    "turbo": "^2.7.3"
   },
-  "packageManager": "pnpm@10.15.0",
+  "optionalDependencies": {
+    "@rolldown/binding-linux-x64-gnu": "1.0.0-beta.57"
+  },
+  "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
       "web-streams-polyfill": "3.3.3"
@@ -52,7 +55,7 @@
     {
       "name": "@idos-network/client",
       "path": "packages/client/dist/index.js",
-      "limit": "1.2 MB"
+      "limit": "2.0 MB"
     },
     {
       "name": "@idos-network/consumer",

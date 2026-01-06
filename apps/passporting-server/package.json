@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@hono/node-server": "^1.13.7",
-    "@hono/zod-validator": "^0.4.2",
+    "@hono/zod-validator": "^0.7.0",
     "@idos-network/issuer": "workspace:*",
     "@stablelib/base64": "^1.0.1",
     "@stablelib/hex": "^1.0.1",
