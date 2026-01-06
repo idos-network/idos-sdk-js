@@ -6,7 +6,7 @@
     "@size-limit/time": "^11.2.0",
     "lefthook": "1.13.6",
     "size-limit": "^11.1.6",
-    "turbo": "^2.5.5"
+    "turbo": "^2.7.3"
   },
   "optionalDependencies": {
     "@rolldown/binding-linux-x64-gnu": "1.0.0-beta.57"
