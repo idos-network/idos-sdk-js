@@ -23,8 +23,9 @@ const { useStepper } = defineStepper(
 );
 
 const selector = await setupWalletSelector({
-  network: import.meta.env.VITE_NEAR_NETWORK,
-  modules: [setupMeteorWallet()],
+  network: (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") || "testnet",
+  // biome-ignore lint/suspicious/noExplicitAny: false posirive
+  modules: [setupMeteorWallet() as any],
 });
 
 const modal = setupModal(selector, {
@@ -48,7 +49,7 @@ export function NearConnector() {
   useEffect(() => {
     const subscription = selector.store.observable.subscribe(() => {
       setSignedIn(selector.isSignedIn());
-      setAccountId(selector.store.getState().accounts[0].accountId || "");
+      setAccountId(selector.store.getState().accounts[0]?.accountId || "");
 
       // Handle external disconnections
       if (!selector.isSignedIn() && connectedWalletType === "near") {
@@ -63,7 +64,8 @@ export function NearConnector() {
 
   const handleSignMessage = async () => {
     const wallet = await selector.wallet();
-    const signature = await signNearMessage(wallet, message);
+    // biome-ignore lint/suspicious/noExplicitAny: false positive
+    const signature = await signNearMessage(wallet as any, message);
 
     if (signature) {
       setWalletPayload({

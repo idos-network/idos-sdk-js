@@ -8,104 +8,70 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as CredentialsRouteImport } from './routes/credentials'
+import { Route as IndexRouteImport } from './routes/index'
 
-import { Route as rootRoute } from "./routes/__root";
-import { Route as CredentialsImport } from "./routes/credentials";
-import { Route as IndexImport } from "./routes/index";
-
-// Create/Update Routes
-
-const CredentialsRoute = CredentialsImport.update({
-  id: "/credentials",
-  path: "/credentials",
-  getParentRoute: () => rootRoute,
-} as any);
-
-const IndexRoute = IndexImport.update({
-  id: "/",
-  path: "/",
-  getParentRoute: () => rootRoute,
-} as any);
-
-// Populate the FileRoutesByPath interface
-
-declare module "@tanstack/react-router" {
-  interface FileRoutesByPath {
-    "/": {
-      id: "/";
-      path: "/";
-      fullPath: "/";
-      preLoaderRoute: typeof IndexImport;
-      parentRoute: typeof rootRoute;
-    };
-    "/credentials": {
-      id: "/credentials";
-      path: "/credentials";
-      fullPath: "/credentials";
-      preLoaderRoute: typeof CredentialsImport;
-      parentRoute: typeof rootRoute;
-    };
-  }
-}
-
-// Create and export the route tree
+const CredentialsRoute = CredentialsRouteImport.update({
+  id: '/credentials',
+  path: '/credentials',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof IndexRoute;
-  "/credentials": typeof CredentialsRoute;
+  '/': typeof IndexRoute
+  '/credentials': typeof CredentialsRoute
 }
-
 export interface FileRoutesByTo {
-  "/": typeof IndexRoute;
-  "/credentials": typeof CredentialsRoute;
+  '/': typeof IndexRoute
+  '/credentials': typeof CredentialsRoute
 }
-
 export interface FileRoutesById {
-  __root__: typeof rootRoute;
-  "/": typeof IndexRoute;
-  "/credentials": typeof CredentialsRoute;
+  __root__: typeof rootRouteImport
+  '/': typeof IndexRoute
+  '/credentials': typeof CredentialsRoute
 }
-
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath;
-  fullPaths: "/" | "/credentials";
-  fileRoutesByTo: FileRoutesByTo;
-  to: "/" | "/credentials";
-  id: "__root__" | "/" | "/credentials";
-  fileRoutesById: FileRoutesById;
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/credentials'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/credentials'
+  id: '__root__' | '/' | '/credentials'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  IndexRoute: typeof IndexRoute
+  CredentialsRoute: typeof CredentialsRoute
 }
 
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute;
-  CredentialsRoute: typeof CredentialsRoute;
+declare module '@tanstack/react-router' {
+  interface FileRoutesByPath {
+    '/credentials': {
+      id: '/credentials'
+      path: '/credentials'
+      fullPath: '/credentials'
+      preLoaderRoute: typeof CredentialsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CredentialsRoute: CredentialsRoute,
-};
-
-export const routeTree = rootRoute
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>();
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "__root.tsx",
-      "children": [
-        "/",
-        "/credentials"
-      ]
-    },
-    "/": {
-      "filePath": "index.tsx"
-    },
-    "/credentials": {
-      "filePath": "credentials.tsx"
-    }
-  }
 }
-ROUTE_MANIFEST_END */
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
