@@ -11,7 +11,7 @@ export const fetchSharedToken = async (credentialId: string, forClientId: string
       headers: {
         Authorization: `Bearer ${await getKrakenToken()}`,
       },
-      // @ts-ignore - Node.js specific option
+      // @ts-expect-error - Node.js specific option
       agent: new https.Agent({
         rejectUnauthorized: false,
         checkServerIdentity: () => undefined, // This will bypass the certificate chain verification

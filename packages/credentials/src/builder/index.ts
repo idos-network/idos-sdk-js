@@ -90,7 +90,6 @@ export const credentialSubjectConverter: CredentialConverter<CredentialSubject> 
   return {
     "@context": CONTEXT_IDOS_CREDENTIAL_SUBJECT,
     ...convertValues(subjectData),
-    // @ts-expect-error - TODO: fix this
     ...(residentialAddress ? convertValues(residentialAddress, "residentialAddress") : {}),
   };
 };

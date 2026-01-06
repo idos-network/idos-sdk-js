@@ -90,7 +90,7 @@ export const walletInfoMapper = ({
         "ed25519",
       );
       try {
-        // @ts-ignore
+        // @ts-expect-error
         signer.publicAddress = address;
       } catch (error) {
         console.log("error setting public address", error);

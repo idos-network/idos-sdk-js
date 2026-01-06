@@ -72,7 +72,7 @@ function createNearWalletSigner(
     const {
       nonce = nonceSuggestion,
       signature,
-      // @ts-ignore Signatures don't seem to be updated for NEP413 yet.
+      // @ts-expect-error Signatures don't seem to be updated for NEP413 yet.
       callbackUrl,
       // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     } = (await (

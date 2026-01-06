@@ -40,7 +40,8 @@ export const WalletSelectorContextProvider: React.FC<{
     const _selector = await setupWalletSelector({
       network: import.meta.env.DEV ? "testnet" : "mainnet",
       debug: true,
-      modules: [setupMeteorWallet(), setupHereWallet()],
+      // biome-ignore lint/suspicious/noExplicitAny: false positive
+      modules: [setupMeteorWallet() as any, setupHereWallet()],
     });
 
     const _modal = setupModal(_selector, {
