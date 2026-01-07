@@ -31,7 +31,7 @@
     "vitest": "catalog:testing"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.12.0"
   },
   "exports": {
     "./encryption": {
