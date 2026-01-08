@@ -228,6 +228,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
+  async getUser(): Promise<idOSUser> {
+    return getUser(this.kwilClient);
+  }
+
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
