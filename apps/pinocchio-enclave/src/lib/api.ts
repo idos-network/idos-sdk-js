@@ -28,11 +28,11 @@ export interface LoginResponse {
 
 export const login = async (requestBlob: string): Promise<LoginResponse> => {
   const response = await faceSignService.post<LoginResponse>(
-    "/match",
+    "/pinocchio",
     JSON.stringify({
       requestBlob,
-      groupName: "jan-testing",
-      externalUserId: "3423d432-96d6-494b-8bd3-4b1ec1c808fb",
+      // groupName: "jan-testing",
+      // externalUserId: "3423d432-96d6-494b-8bd3-4b1ec1c808fb",
     }),
     {
       headers: {

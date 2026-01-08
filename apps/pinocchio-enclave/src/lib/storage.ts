@@ -7,7 +7,11 @@ async function openDatabase() {
 
     req.onupgradeneeded = (ev) => {
       const db = (ev.target as IDBOpenDBRequest).result;
-      db.deleteObjectStore(DB_STORE_NAME);
+      try {
+        db.deleteObjectStore(DB_STORE_NAME);
+      } catch (e) {
+        // ignore
+      }
       db.createObjectStore(DB_STORE_NAME, { keyPath: "name" });
     };
     req.onsuccess = (ev) => {
