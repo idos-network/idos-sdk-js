@@ -23,8 +23,6 @@
     "@types/chrome": "^0.1.0",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
@@ -96,7 +94,6 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },

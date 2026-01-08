@@ -19,8 +19,6 @@
   "devDependencies": {
     "@idos-network/core": "workspace:*",
     "clean-package": "^2.2.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
@@ -54,7 +52,6 @@
     "postpack": "clean-package restore",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it",
     "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
