@@ -18,7 +18,7 @@ export class ChromeExtensionStore implements Store {
   async get<K = any>(key: string): Promise<K | undefined> {
     const prefixedKey = `${this.keyPrefix}${key}`;
     const result = await chrome.storage.local.get(prefixedKey);
-    return result[prefixedKey];
+    return result[prefixedKey] as K | undefined;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
@@ -71,7 +71,7 @@ export class ChromeExtensionStore implements Store {
     const value = await chrome.storage.local.get(this.REMEMBER_DURATION_KEY);
 
     try {
-      return durationElapsed(value[this.REMEMBER_DURATION_KEY]);
+      return durationElapsed(value[this.REMEMBER_DURATION_KEY] as string | null);
     } catch (_) {
       await chrome.storage.local.remove(this.REMEMBER_DURATION_KEY);
       return false;
@@ -79,17 +79,18 @@ export class ChromeExtensionStore implements Store {
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): ChromeExtensionStore {
-    return {
-      ...this,
-      // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      get: async (key: string): Promise<any> => {
-        const result = await this.get(key);
-        if (result) return decode(result);
-      },
-      // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      set: async (key: string, value: any): Promise<void> => {
-        await this.set(key, encode(value));
-      },
+    const store = Object.create(Object.getPrototypeOf(this));
+    Object.assign(store, this);
+
+    store.get = async (key: string): Promise<T | undefined> => {
+      const result = await this.get(key);
+      if (result) return decode(result);
     };
+
+    store.set = async (key: string, value: T): Promise<void> => {
+      await this.set(key, encode(value));
+    };
+
+    return store;
   }
 }

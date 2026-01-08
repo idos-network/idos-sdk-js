@@ -8,9 +8,6 @@
     "size-limit": "^11.1.6",
     "turbo": "^2.7.3"
   },
-  "optionalDependencies": {
-    "@rolldown/binding-linux-x64-gnu": "1.0.0-beta.57"
-  },
   "packageManager": "pnpm@10.27.0",
   "pnpm": {
     "overrides": {
@@ -21,6 +18,8 @@
     },
     "onlyBuiltDependencies": [
       "@reown/appkit",
+      "@rolldown/binding-linux-x64-gnu",
+      "@rolldown/binding-linux-x64-musl",
       "@swc/core",
       "@tailwindcss/oxide",
       "blake-hash",
@@ -30,6 +29,7 @@
       "keccak",
       "lefthook",
       "protobufjs",
+      "rolldown",
       "secp256k1",
       "sharp",
       "tiny-secp256k1",
@@ -59,18 +59,18 @@
     },
     {
       "name": "@idos-network/consumer",
-      "path": "packages/consumer/dist/index.js",
+      "path": "packages/consumer/dist/index.mjs",
       "limit": "500 KB"
     },
     {
       "name": "@idos-network/issuer",
-      "path": "packages/issuer/dist/index.js",
+      "path": "packages/issuer/dist/index.mjs",
       "limit": "550 KB",
       "running": false
     },
     {
       "name": "@idos-network/utils",
-      "path": "packages/utils/dist/**/*.js",
+      "path": "packages/utils/dist/**/*.mjs",
       "limit": "20 KB"
     }
   ]
