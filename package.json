@@ -13,9 +13,6 @@
     "overrides": {
       "web-streams-polyfill": "3.3.3"
     },
-    "patchedDependencies": {
-      "react-router@7.7.1": "patches/react-router@7.7.1.patch"
-    },
     "onlyBuiltDependencies": [
       "@reown/appkit",
       "@rolldown/binding-linux-x64-gnu",

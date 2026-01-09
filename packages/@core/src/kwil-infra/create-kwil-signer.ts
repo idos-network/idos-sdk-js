@@ -217,7 +217,25 @@ export async function createClientKwilSigner(
 
   // Stellar or pinocchio
   if (isCustomKwilSigner(wallet)) {
-    return [wallet, wallet.publicAddress, wallet.publicKey, wallet.signatureType];
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.log("error logoutKGW", error);
+      }
+
+    return [
+      new KwilSigner(
+        // @ts-expect-error
+        async (msg: Uint8Array) => wallet.signMessage(msg),
+        wallet.publicAddress,
+        // This is pinocchio, not sure about stelar
+        "ed25519",
+      ),
+      wallet.publicAddress,
+      wallet.publicKey,
+      // @ts-expect-error Missing types
+      wallet.walletType,
+    ]
   }
 
   // Force the check that `signer` is `never`.

@@ -55,7 +55,7 @@ export class Client {
   }
 
   public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
-    if (!["evm", "xrpl", "near", "stellar"].includes(signerType)) {
+    if (!["evm", "xrpl", "near", "stellar", "pinocchio"].includes(signerType)) {
       throw new Error("Invalid signer type");
     }
     this.signerType = signerType;
@@ -124,6 +124,9 @@ export class Client {
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
+      case "pinocchio":
+        address = `XRPL:${this.signerAddress}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -152,6 +155,9 @@ export class Client {
         break;
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
+        break;
+      case "pinocchio":
+        address = `XRPL:${this.signerAddress}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -202,6 +208,9 @@ export class Client {
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
+      case "pinocchio":
+        address = `XRPL:${this.signerAddress}`; // NEAR also uses ed25519 signatures
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -216,6 +225,9 @@ export class Client {
         break;
       case "near":
         addressToAddFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
+        break;
+      case "pinocchio":
+        addressToAddFormatted = `XRPL:${addressToAdd}`;
         break;
       default:
         throw new Error("Invalid address to add type");

@@ -7,7 +7,7 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: { container: "#idOS-enclave", url: "https://enclave.staging.idos.network/" },
+      enclaveOptions: { container: "#idOS-enclave", url: "https://localhost:5175/" },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
@@ -31,14 +31,24 @@ export const actors = {
     }
 
     console.log("Checking profile for client:", input);
+    let user;
+    let hasProfile;
 
-    // THIS is triggering AUTH request
-    const user = await input.getUser();
-    console.log("User fetched:", user);
+    try {
+      // THIS is triggering AUTH request
+      user = await input.getUser();
+      console.log("User fetched:", user);
 
-    const hasProfile = await input.hasProfile();
+      hasProfile = await input.hasProfile();
+    } catch (error) {
+      console.error("Error fetching user or profile:", error);
+      throw new Error("Failed to fetch user or profile");
+    }
 
     if (!hasProfile) {
+      const userId = crypto.randomUUID();
+      const userEncryptionProfile = await input.createUserEncryptionProfile(userId);
+      console.log("Creating profile with encryption profile:", userEncryptionProfile);
       throw new Error("No profile found");
     }
 

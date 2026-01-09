@@ -25,7 +25,6 @@ export class EngineClient {
 
   private getAuthHeader(signature: string): Record<string, string> {
     let prefix: string;
-    console.log({ walletType: this.walletType });
     switch (this.walletType) {
       case "evm":
         prefix = "eip712";
@@ -36,9 +35,14 @@ export class EngineClient {
       case "xrpl":
         prefix = "XRPL";
         break;
+      case "pinocchio":
+        return {
+          Authorization: `XRPL ED${signature}`,
+        }
       default:
         prefix = "eip712"; // fallback to eip712 for unknown types
     }
+
     return {
       Authorization: `${prefix} ${signature}`,
     };

@@ -2,7 +2,7 @@ import type { idOSCredential } from "@idos-network/credentials/types";
 import * as Base64Codec from "@stablelib/base64";
 import { negate } from "es-toolkit";
 import { every, get } from "es-toolkit/compat";
-import { fromBytesToJson } from "../codecs";
+import { fromBytesToJson, hexEncode } from "../codecs";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
@@ -83,6 +83,8 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         signature = response.result.signedMessage;
       } else if (response?.signedMessage) {
         signature = response.signedMessage;
+      } else if (response instanceof Uint8Array && response.length === 64) {
+        return hexEncode(response);
       } else {
         throw new Error(
           `Unexpected response format from ${this._signMethodType}: ${JSON.stringify(response)}`,
