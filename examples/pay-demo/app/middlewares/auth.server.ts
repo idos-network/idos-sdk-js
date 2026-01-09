@@ -1,11 +1,11 @@
-import { redirect, unstable_createContext } from "react-router";
+import { redirect, createContext } from "react-router";
 import type { SessionUser } from "~/interfaces";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "../+types/root";
 
-export const userContext = unstable_createContext<SessionUser>();
+export const userContext = createContext<SessionUser>();
 
-export const authMiddleware: Route.unstable_MiddlewareFunction = async (
+export const authMiddleware: Route.MiddlewareFunction = async (
   { context, request },
   next,
 ) => {

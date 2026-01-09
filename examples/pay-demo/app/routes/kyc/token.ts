@@ -1,4 +1,4 @@
-import { userContext } from "~/middlewares/auth";
+import { userContext } from "~/middlewares/auth.server";
 import { fetchSharedToken } from "~/providers/kraken.server";
 import type { Route } from "./+types/token";
 
