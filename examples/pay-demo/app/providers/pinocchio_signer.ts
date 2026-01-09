@@ -45,7 +45,7 @@ export class PinocchioSignerProvider {
     // Ask for connection (like metamask does)
     const sessionProposal = await this.sessionProposal();
 
-    this.address = sessionProposal.address;
+    this.publicAddress = sessionProposal.address;
 
     return Promise.resolve(sessionProposal.address);
   }
@@ -83,6 +83,7 @@ export class PinocchioSignerProvider {
     this.window?.close();
     this.window = null;
 
+    // @ts-expect-error
     return signature;
   }
 
