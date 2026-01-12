@@ -72,7 +72,7 @@ catalogs:
     "@types/react-dom": "^19.1.4"
 
   preact:
-    "preact": "^10.27.2"
+    "preact": "^10.28.2"
     "@preact/signals": "^2.5.1"
 
   tanstack:
