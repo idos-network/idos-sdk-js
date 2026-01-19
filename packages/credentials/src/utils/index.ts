@@ -231,7 +231,7 @@ export function publicNotesFieldFilter<K extends { public_notes: string; id: str
   try {
     publicNotes = JSON.parse(credential.public_notes);
   } catch (_) {
-    throw new Error(`Credential ${credential.id} has non-JSON public notes".replace("{}`);
+    throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
   }
 
   if (Object.keys(pick).length > 0 && !matchCriteria(publicNotes, pick)) {
