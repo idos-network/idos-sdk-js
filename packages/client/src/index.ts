@@ -560,8 +560,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     if (
       publicNotesFieldFilters &&
-      Object.keys(publicNotesFieldFilters.pick).length > 0 &&
-      Object.keys(publicNotesFieldFilters.omit).length > 0
+      (Object.keys(publicNotesFieldFilters.pick).length > 0 ||
+        Object.keys(publicNotesFieldFilters.omit).length > 0)
     ) {
       result = result.filter((credential) => {
         return publicNotesFieldFilter(
@@ -576,8 +576,8 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     // it's most "expensive", since it requires a roundtrip to the nodes and roundtrip to enclave.
     if (
       privateFieldFilters &&
-      Object.keys(privateFieldFilters.pick).length > 0 &&
-      Object.keys(privateFieldFilters.omit).length > 0
+      (Object.keys(privateFieldFilters.pick).length > 0 ||
+        Object.keys(privateFieldFilters.omit).length > 0)
     ) {
       const fullCredentials = await Promise.all(
         result.map((credential) => this.getCredentialById(credential.id)),
