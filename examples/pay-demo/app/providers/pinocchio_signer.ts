@@ -21,7 +21,7 @@ export class PinocchioSignerProvider {
 
   public publicAddress = "";
   public signatureType = "ed25519";
-  public walletType = "pinocchio"; 
+  public walletType = "pinocchio";
   public publicKey = "";
 
   constructor(private metadata: Metadata) {}
