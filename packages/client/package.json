@@ -11,8 +11,7 @@
     "@gemwallet/api": "catalog:core",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/credentials": "workspace:*",
-    "@idos-network/utils": "workspace:*",
-    "es-toolkit": "catalog:utils"
+    "@idos-network/utils": "workspace:*"
   },
   "devDependencies": {
     "@idos-network/core": "workspace:*",
