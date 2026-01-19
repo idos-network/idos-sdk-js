@@ -583,7 +583,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         result.map((credential) => this.getCredentialById(credential.id)),
       );
 
-      // Check for undefineds, it will be sign of some internal error
+      // Check for undefined, it will be sign of some internal error
       invariant(
         fullCredentials.every((cred) => cred !== undefined),
         "Some credentials could not be fetched in full form for private field filtering",
