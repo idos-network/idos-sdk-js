@@ -1,5 +1,8 @@
 import * as z from "zod";
 
+// This is a copy `GetCredentialSharedOutputSchema`
+// but it can't be used directly from @core since circular dependencies.
+// we want to solve that.
 export type idOSCredential = {
   id: string;
   user_id: string;
@@ -7,7 +10,7 @@ export type idOSCredential = {
   content: string;
   encryptor_public_key: string;
   issuer_auth_public_key: string;
-  original_id?: string | null;
+  inserter?: string | null;
 };
 
 export type InsertableIDOSCredential = Omit<idOSCredential, "id" | "original_id"> & {
