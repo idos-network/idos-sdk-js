@@ -118,7 +118,7 @@ export function deriveLevel(credential: CredentialSubject): string {
   return [level, ...addons].join("+");
 }
 
-function parseLevel(level: string): {
+export function parseLevel(level: string): {
   base: BaseLevel;
   addons: Addon[];
 } {
@@ -141,7 +141,7 @@ export function matchLevelOrHigher(
   return requiredAddons.every((addon) => currentAddons.includes(addon));
 }
 
-function levelScore(level: string) {
+export function levelScore(level: string): number {
   const { base, addons } = parseLevel(level);
   let score = 0;
 
