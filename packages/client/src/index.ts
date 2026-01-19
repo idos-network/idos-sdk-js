@@ -41,7 +41,7 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
-import { matchLevelOrHigher } from "@idos-network/credentials/utils";
+import { matchLevelOrHigher, publicNotesFieldFilter } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -56,8 +56,6 @@ import type {
   PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -514,19 +512,14 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       authPublicKey: string;
     }[];
     publicNotesFieldFilters?: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
+      pick: Parameters<typeof publicNotesFieldFilter>[1];
+      omit: Parameters<typeof publicNotesFieldFilter>[2];
     };
     credentialLevelOrHigherFilter?: {
       userLevel: "basic" | "plus";
       requiredAddons: ("liveness" | "email" | "phoneNumber")[];
     };
   }): Promise<idOSCredentialListItem[]> {
-    const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
-      );
-
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
       (cred) => !cred.original_id && !!cred.public_notes,
@@ -555,9 +548,11 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         let match = true;
 
         if (publicNotesFieldFilters) {
-          match =
-            matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
-            negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))();
+          match = publicNotesFieldFilter(
+            credential,
+            publicNotesFieldFilters.pick,
+            publicNotesFieldFilters.omit,
+          );
         }
 
         if (match && credentialLevelOrHigherFilter) {

@@ -13,7 +13,6 @@
     "@stablelib/base64": "^2.0.1",
     "@stablelib/utf8": "^2.0.1",
     "dompurify": "^3.2.5",
-    "es-toolkit": "^1.23.0",
     "lucide-preact": "^0.562.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
