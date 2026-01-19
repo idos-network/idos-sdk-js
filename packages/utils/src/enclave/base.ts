@@ -211,6 +211,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
   ): Promise<idOSCredential[]> {
+    // TODO: Migrate to credentials SDK
     // biome-ignore lint/suspicious/noExplicitAny: any is fine here
     const matchCriteria = (content: any, criteria: Record<string, unknown[]>) =>
       every(Object.entries(criteria), ([path, targetSet]) =>
