@@ -1,7 +1,6 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
+import { recordFilter } from "@idos-network/credentials/utils";
 import * as Base64Codec from "@stablelib/base64";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
 import { fromBytesToJson } from "../codecs";
 import type {
   AddAddressMessageToSign,
@@ -211,39 +210,50 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
     credentials: idOSCredential[],
     privateFieldFilters: { pick: Record<string, unknown[]>; omit: Record<string, unknown[]> },
   ): Promise<idOSCredential[]> {
-    // TODO: Migrate to credentials SDK
-    // biome-ignore lint/suspicious/noExplicitAny: any is fine here
-    const matchCriteria = (content: any, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
-      );
+    if (
+      Object.keys(privateFieldFilters.pick).length === 0 &&
+      Object.keys(privateFieldFilters.omit).length === 0
+    ) {
+      // No filtering needed
+      return credentials.map((credential) => ({
+        ...credential,
+        content: "", // Content should never leave the enclave!!!
+      }));
+    }
 
     const decrypted = await Promise.all(
-      credentials.map(async (credential: idOSCredential) => ({
-        ...credential,
-        content: await this.decrypt(
+      credentials.map(async (credential: idOSCredential) => {
+        const content = await this.decrypt(
           Base64Codec.decode(credential.content),
           Base64Codec.decode(credential.encryptor_public_key),
-        ),
-      })),
+        );
+
+        let json: Record<string, unknown>;
+
+        try {
+          json = fromBytesToJson(content);
+        } catch (_e) {
+          throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
+        }
+
+        return {
+          ...credential,
+          content: json,
+        };
+      }),
     );
 
     return decrypted
+      .filter(({ content }) =>
+        recordFilter(
+          content as Record<string, unknown>,
+          privateFieldFilters.pick,
+          privateFieldFilters.omit,
+        ),
+      )
       .map((credential) => ({
         ...credential,
-        content: (() => {
-          try {
-            fromBytesToJson(credential.content);
-          } catch (_e) {
-            throw new Error(`Credential ${credential.id} decrypted contents are not valid JSON`);
-          }
-        })(),
-      }))
-      .filter(({ content }) => matchCriteria(content, privateFieldFilters.pick))
-      .filter(({ content }) => negate(() => matchCriteria(content, privateFieldFilters.omit)))
-      .map((credential) => ({
-        ...credential,
-        content: "", // Content should not leave the enclave
+        content: "", // Content should never leave the enclave!!!
       }));
   }
 

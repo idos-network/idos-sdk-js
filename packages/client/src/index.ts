@@ -41,7 +41,7 @@ import {
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
 import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
-import { matchLevelOrHigher, publicNotesFieldFilter } from "@idos-network/credentials/utils";
+import { matchLevelOrHigher, recordFilter } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -512,12 +512,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       authPublicKey: string;
     }[];
     publicNotesFieldFilters?: {
-      pick: Parameters<typeof publicNotesFieldFilter>[1];
-      omit: Parameters<typeof publicNotesFieldFilter>[2];
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
     };
     privateFieldFilters?: {
-      pick: Parameters<typeof publicNotesFieldFilter>[1];
-      omit: Parameters<typeof publicNotesFieldFilter>[1];
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
     };
     credentialLevelOrHigherFilter?: {
       userLevel: "basic" | "plus";
@@ -564,8 +564,16 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         Object.keys(publicNotesFieldFilters.omit).length > 0)
     ) {
       result = result.filter((credential) => {
-        return publicNotesFieldFilter(
-          credential,
+        let publicNotes: Record<string, string>;
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return recordFilter(
+          publicNotes,
           publicNotesFieldFilters.pick,
           publicNotesFieldFilters.omit,
         );
