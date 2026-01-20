@@ -589,7 +589,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
-    }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
+      locked_until = 0,
+    }: {
+      consumerEncryptionPublicKey: string;
+      consumerAuthPublicKey: string;
+      locked_until?: number;
+    },
   ): Promise<idOSCredential> {
     const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
@@ -622,7 +627,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       original_credential_id: credential.id,
       id: crypto.randomUUID(),
       grantee_wallet_identifier: consumerAuthPublicKey,
-      locked_until: 0,
+      locked_until,
       content_hash: contentHash,
     };
 

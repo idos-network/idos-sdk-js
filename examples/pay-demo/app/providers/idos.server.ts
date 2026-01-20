@@ -21,7 +21,7 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   const grant = grants.find((g) => g.inserter_id === inserterId);
 
   if (inserterId && !grant) {
-    throw new Error(`Invalid inserter id: ${grants[0].inserter_id} !== ${inserterId}`);
+    throw new Error(`Inserter with id ${inserterId} was not found in grants.`);
   }
 
   // Get data

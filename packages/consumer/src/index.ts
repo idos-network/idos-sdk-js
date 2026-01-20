@@ -129,9 +129,15 @@ export class idOSConsumer {
 
     invariant(credential, `Credential with id ${credentialId} not found`);
 
-    const accessGrant = await this.getAccessGrantsForCredential(credentialId);
+    const accessGrants = await this.getAccessGrantsForCredential(credentialId);
 
-    invariant(accessGrant, `Access grant with id ${credentialId} not found`);
+    invariant(
+      accessGrants.length > 0,
+      `Access grants for credential with id ${credentialId} not found`,
+    );
+
+    // @todo Solve this, there can be more than 1 grant
+    const accessGrant = accessGrants[0];
 
     // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
     const credentialContent = await this.#noncedBox.decrypt(
