@@ -1334,6 +1334,12 @@ importers:
       '@stablelib/utf8':
         specifier: catalog:utils
         version: 2.0.1
+      '@stellar/stellar-sdk':
+        specifier: catalog:stellar
+        version: 13.3.0
+      '@wagmi/core':
+        specifier: 2.22.1
+        version: 2.22.1(@tanstack/query-core@5.90.16)(@types/react@19.2.7)(immer@10.1.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.43.5(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.5)(zod@4.3.4))
       borsh:
         specifier: catalog:utils
         version: 2.0.0
@@ -1343,6 +1349,9 @@ importers:
       ethers:
         specifier: catalog:ethereum
         version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
+      ripple-keypairs:
+        specifier: catalog:xrp
+        version: 2.0.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       scrypt-js:
         specifier: ^3.0.1
         version: 3.0.1
