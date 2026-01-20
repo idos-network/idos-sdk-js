@@ -1340,9 +1340,6 @@ importers:
       bs58:
         specifier: catalog:utils
         version: 6.0.0
-      es-toolkit:
-        specifier: catalog:utils
-        version: 1.43.0
       ethers:
         specifier: catalog:ethereum
         version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)

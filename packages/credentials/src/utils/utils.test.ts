@@ -5,7 +5,7 @@ import {
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
-  publicNotesFieldFilter,
+  recordFilter,
 } from "./";
 
 const defaultCredential: CredentialSubject = {
@@ -20,7 +20,7 @@ const defaultCredential: CredentialSubject = {
   selfieFile: Buffer.alloc(0),
 };
 
-describe("publicNotesFieldFilter", () => {
+describe("recordFilter", () => {
   [
     [
       { level: "basic+liveness", status: "approved", issuer: "issuer-a", type: "kyc" },
@@ -47,10 +47,22 @@ describe("publicNotesFieldFilter", () => {
       true,
     ],
     [{ level: "plus+liveness", status: "approved", issuer: "issuer-a", type: "kyc" }, {}, {}, true],
+    [
+      { credentialSubject: { nationality: "CZ" } },
+      { "credentialSubject.nationality": ["CZ", "DE"] },
+      {},
+      true,
+    ],
+    [
+      { credentialSubject: { nationality: "CZ" } },
+      {},
+      { "credentialSubject.nationality": ["CZ", "DE"] },
+      false,
+    ],
   ].forEach(([publicNotes, pick, omit, expected]) => {
     it(`publicNotes=${JSON.stringify(publicNotes)}, pick=${JSON.stringify(pick)}, omit=${JSON.stringify(omit)} => ${expected}`, () => {
-      const result = publicNotesFieldFilter(
-        { public_notes: JSON.stringify(publicNotes), id: "uuid:1234" },
+      const result = recordFilter(
+        publicNotes as Record<string, unknown>,
         pick as Record<string, unknown[]>,
         omit as Record<string, unknown[]>,
       );

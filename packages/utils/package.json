@@ -12,7 +12,6 @@
     "@stablelib/utf8": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
-    "es-toolkit": "catalog:utils",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3",
