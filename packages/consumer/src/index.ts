@@ -112,11 +112,9 @@ export class idOSConsumer {
     );
   }
 
-  async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
+  async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant[]> {
     const params = { credential_id: credentialId };
-    const accessGrants = await getAccessGrantsForCredential(this.#kwilClient, params);
-
-    return accessGrants[0];
+    return getAccessGrantsForCredential(this.#kwilClient, params);
   }
 
   async getCredentialsSharedByUser(userId: string): Promise<Omit<idOSCredential, "content">[]> {

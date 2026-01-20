@@ -12,14 +12,16 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
     recipientEncryptionPrivateKey: SERVER_ENV.IDOS_RECIPIENT_ENC_PRIVATE_KEY,
   });
 
-  const grant = await idOSConsumer.getAccessGrantsForCredential(credentialId);
+  const grants = await idOSConsumer.getAccessGrantsForCredential(credentialId);
 
-  if (!grant) {
+  if (!grants || grants.length === 0) {
     throw new Error("Grant not found.");
   }
 
-  if (inserterId && grant.inserter_id !== inserterId) {
-    throw new Error(`Invalid inserter id: ${grant.inserter_id} !== ${inserterId}`);
+  const grant = grants.find((g) => g.inserter_id === inserterId);
+
+  if (inserterId && !grant) {
+    throw new Error(`Invalid inserter id: ${grants[0].inserter_id} !== ${inserterId}`);
   }
 
   // Get data
