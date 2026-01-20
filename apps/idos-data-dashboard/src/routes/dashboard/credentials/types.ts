@@ -1,5 +1,5 @@
-import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSCredentialListItem } from "@idos-network/client";
 
-export type idOSCredentialWithShares = idOSCredential & {
+export type idOSCredentialWithShares = idOSCredentialListItem & {
   shares: string[];
 };

@@ -218,28 +218,20 @@ export function highestMatchingCredential<K extends { public_notes: string }>(
   return matchingCredentials[0];
 }
 
-export function publicNotesFieldFilter<K extends { public_notes: string; id: string }>(
-  credential: K,
+export function recordFilter(
+  rec: Record<string, unknown>,
   pick: Record<string, unknown[]>,
   omit: Record<string, unknown[]>,
 ): boolean {
   const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
     every(Object.entries(criteria), ([path, targetSet]) => targetSet.includes(get(content, path)));
 
-  let publicNotes: Record<string, string>;
-
-  try {
-    publicNotes = JSON.parse(credential.public_notes);
-  } catch (_) {
-    throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
-  }
-
-  if (Object.keys(pick).length > 0 && !matchCriteria(publicNotes, pick)) {
+  if (Object.keys(pick).length > 0 && !matchCriteria(rec, pick)) {
     // Fast fail on pick criteria
     return false;
   }
 
-  if (Object.keys(omit).length > 0 && matchCriteria(publicNotes, omit)) {
+  if (Object.keys(omit).length > 0 && matchCriteria(rec, omit)) {
     // Fast fail on omit criteria
     return false;
   }
