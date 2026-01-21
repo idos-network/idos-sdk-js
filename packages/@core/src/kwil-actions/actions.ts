@@ -208,7 +208,7 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Uuid,
     },
     {
-      name: "issuer_auth_public_key",
+      name: "original_issuer_auth_public_key",
       type: DataType.Text,
     },
   ],
@@ -1239,10 +1239,10 @@ export async function getCredentials(
 
 export const GetCredentialsSharedByUserInputSchema: z.ZodObject<{
   user_id: z.ZodUUID;
-  issuer_auth_public_key: z.ZodNullable<z.ZodString>;
+  original_issuer_auth_public_key: z.ZodNullable<z.ZodString>;
 }> = z.object({
   user_id: z.uuid(),
-  issuer_auth_public_key: z.string().nullable(),
+  original_issuer_auth_public_key: z.string().nullable(),
 });
 
 export type GetCredentialsSharedByUserInput = z.infer<typeof GetCredentialsSharedByUserInputSchema>;
@@ -2505,9 +2505,9 @@ export async function requestWithdrawal(
 }
 
 export const GetAllowanceOutputSchema: z.ZodObject<{
-  allowance: z.ZodNumber;
+  gas_allowance: z.ZodNumber;
 }> = z.object({
-  allowance: z.number(),
+  gas_allowance: z.number(),
 });
 
 export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
