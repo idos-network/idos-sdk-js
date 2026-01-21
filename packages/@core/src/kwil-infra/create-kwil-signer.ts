@@ -73,8 +73,15 @@ export interface CustomKwilSigner extends KwilSigner {
 /**
  * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
  */
-function isXrplKeyPair(object: unknown): object is XrpKeyPair {
-  return !!object && typeof object === "object" && "privateKey" in object && "publicKey" in object;
+function isXrplKeyPair(signer: unknown): signer is XrpKeyPair {
+  return (
+    !!signer &&
+    typeof signer === "object" &&
+    "privateKey" in signer &&
+    "publicKey" in signer &&
+    "signer_type" in signer &&
+    signer.signer_type === "xrpl"
+  );
 }
 
 export type KwilSignerType =
@@ -95,6 +102,17 @@ export type SignerType = string;
  * the KGW cookie when logging out and re-logging in with a different wallet.
  */
 export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, SignerAddress] {
+  if (isXrplKeyPair(signer)) {
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
+        signer.publicKey,
+        "xrpl",
+      ),
+      signer.publicKey,
+    ];
+  }
+
   if (isNaclSignKeyPair(signer)) {
     return [
       new KwilSigner(
@@ -124,17 +142,6 @@ export function createServerKwilSigner(signer: KwilSignerType): [KwilSigner, Sig
         "ed25519",
       ),
       publicKeyString,
-    ];
-  }
-
-  if (isXrplKeyPair(signer)) {
-    return [
-      new KwilSigner(
-        async (msg: Uint8Array) => hexDecode(xrpKeypair.sign(hexEncode(msg), signer.privateKey)),
-        signer.publicKey,
-        "xrpl",
-      ),
-      signer.publicKey,
     ];
   }
 
