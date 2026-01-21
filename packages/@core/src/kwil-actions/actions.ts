@@ -7,7 +7,7 @@ export const DataType: typeof Utils.DataType = Utils.DataType;
 
 export type ActionSchemaElement = {
   name: string;
-  type: typeof DataType.Uuid | typeof DataType.Text | typeof DataType.Int;
+  type: typeof DataType.Uuid | typeof DataType.Text | typeof DataType.Int | typeof DataType.Boolean;
 };
 
 export const actionSchema: Record<string, ActionSchemaElement[]> = {
@@ -43,8 +43,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
-  get_inserter: [],
-  get_inserter_or_null: [],
   add_user_as_inserter: [
     {
       name: "id",
@@ -514,18 +512,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
-  credential_belongs_to_caller: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-  ],
-  credential_exist: [
-    {
-      name: "id",
-      type: DataType.Uuid,
-    },
-  ],
   add_attribute_as_inserter: [
     {
       name: "id",
@@ -708,32 +694,6 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
       type: DataType.Text,
     },
   ],
-  create_access_grant: [
-    {
-      name: "grantee_wallet_identifier",
-      type: DataType.Text,
-    },
-    {
-      name: "data_id",
-      type: DataType.Uuid,
-    },
-    {
-      name: "locked_until",
-      type: DataType.Int,
-    },
-    {
-      name: "content_hash",
-      type: DataType.Text,
-    },
-    {
-      name: "inserter_type",
-      type: DataType.Text,
-    },
-    {
-      name: "inserter_id",
-      type: DataType.Text,
-    },
-  ],
   get_access_grants_for_credential: [
     {
       name: "credential_id",
@@ -825,6 +785,58 @@ export const actionSchema: Record<string, ActionSchemaElement[]> = {
     },
   ],
   get_passporting_peers: [],
+  check_balance: [
+    {
+      name: "address",
+      type: DataType.Text,
+    },
+    {
+      name: "token",
+      type: DataType.Text,
+    },
+  ],
+  get_wallet_with_balance: [
+    {
+      name: "token",
+      type: DataType.Text,
+    },
+  ],
+  request_withdrawal: [
+    {
+      name: "token",
+      type: DataType.Text,
+    },
+  ],
+  get_allowance: [],
+  action_costing_gas: [],
+  action_costing_idos_token: [
+    {
+      name: "amount",
+      type: DataType.Int,
+    },
+  ],
+  get_issuer_fee: [
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+  ],
+  action_costing_fee: [
+    {
+      name: "credential_id",
+      type: DataType.Uuid,
+    },
+  ],
+  request_balance_withdrawal: [
+    {
+      name: "token",
+      type: DataType.Text,
+    },
+    {
+      name: "evm_address_to",
+      type: DataType.Text,
+    },
+  ],
 };
 export const AddInserterAsOwnerInputSchema: z.ZodObject<{
   id: z.ZodUUID;
@@ -911,36 +923,6 @@ export async function deleteDelegateAsOwner(
   });
 }
 
-export const GetInserterOutputSchema: z.ZodObject<{
-  name: z.ZodString;
-}> = z.object({
-  name: z.string(),
-});
-
-export type GetInserterOutput = z.infer<typeof GetInserterOutputSchema>;
-
-export async function getInserter(kwilClient: KwilActionClient): Promise<GetInserterOutput> {
-  return await kwilClient
-    .call<GetInserterOutput[]>({ name: "get_inserter", inputs: {} })
-    .then((result) => result[0]);
-}
-
-export const GetInserterOrNullOutputSchema: z.ZodObject<{
-  name: z.ZodString;
-}> = z.object({
-  name: z.string(),
-});
-
-export type GetInserterOrNullOutput = z.infer<typeof GetInserterOrNullOutputSchema>;
-
-export async function getInserterOrNull(
-  kwilClient: KwilActionClient,
-): Promise<GetInserterOrNullOutput> {
-  return await kwilClient
-    .call<GetInserterOrNullOutput[]>({ name: "get_inserter_or_null", inputs: {} })
-    .then((result) => result[0]);
-}
-
 export const AddUserAsInserterInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   recipient_encryption_public_key: z.ZodString;
@@ -1005,7 +987,10 @@ export type GetUserOutput = z.infer<typeof GetUserOutputSchema>;
 
 export async function getUser(kwilClient: KwilActionClient): Promise<GetUserOutput> {
   return await kwilClient
-    .call<GetUserOutput[]>({ name: "get_user", inputs: {} })
+    .call<GetUserOutput[]>({
+      name: "get_user",
+      inputs: {},
+    })
     .then((result) => result[0]);
 }
 
@@ -1128,7 +1113,10 @@ export const GetWalletsOutputSchema: z.ZodObject<{
 export type GetWalletsOutput = z.infer<typeof GetWalletsOutputSchema>;
 
 export async function getWallets(kwilClient: KwilActionClient): Promise<GetWalletsOutput[]> {
-  return await kwilClient.call<GetWalletsOutput[]>({ name: "get_wallets", inputs: {} });
+  return await kwilClient.call<GetWalletsOutput[]>({
+    name: "get_wallets",
+    inputs: {},
+  });
 }
 
 export const RemoveWalletInputSchema: z.ZodObject<{
@@ -1243,7 +1231,10 @@ export type GetCredentialsOutput = z.infer<typeof GetCredentialsOutputSchema>;
 export async function getCredentials(
   kwilClient: KwilActionClient,
 ): Promise<GetCredentialsOutput[]> {
-  return await kwilClient.call<GetCredentialsOutput[]>({ name: "get_credentials", inputs: {} });
+  return await kwilClient.call<GetCredentialsOutput[]>({
+    name: "get_credentials",
+    inputs: {},
+  });
 }
 
 export const GetCredentialsSharedByUserInputSchema: z.ZodObject<{
@@ -1729,64 +1720,6 @@ export async function getSiblingCredentialId(
     .then((result) => result[0]);
 }
 
-export const CredentialBelongsToCallerInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-}> = z.object({
-  id: z.uuid(),
-});
-
-export type CredentialBelongsToCallerInput = z.infer<typeof CredentialBelongsToCallerInputSchema>;
-
-export const CredentialBelongsToCallerOutputSchema: z.ZodObject<{
-  belongs: z.ZodBoolean;
-}> = z.object({
-  belongs: z.boolean(),
-});
-
-export type CredentialBelongsToCallerOutput = z.infer<typeof CredentialBelongsToCallerOutputSchema>;
-
-export async function credentialBelongsToCaller(
-  kwilClient: KwilActionClient,
-  params: CredentialBelongsToCallerInput,
-): Promise<CredentialBelongsToCallerOutput> {
-  const inputs = CredentialBelongsToCallerInputSchema.parse(params);
-  return await kwilClient
-    .call<CredentialBelongsToCallerOutput[]>({
-      name: "credential_belongs_to_caller",
-      inputs,
-    })
-    .then((result) => result[0]);
-}
-
-export const CredentialExistInputSchema: z.ZodObject<{
-  id: z.ZodUUID;
-}> = z.object({
-  id: z.uuid(),
-});
-
-export type CredentialExistInput = z.infer<typeof CredentialExistInputSchema>;
-
-export const CredentialExistOutputSchema: z.ZodObject<{
-  credential_exist: z.ZodBoolean;
-}> = z.object({
-  credential_exist: z.boolean(),
-});
-
-export type CredentialExistOutput = z.infer<typeof CredentialExistOutputSchema>;
-
-export async function credentialExist(
-  kwilClient: KwilActionClient,
-  params: CredentialExistInput,
-): Promise<CredentialExistOutput> {
-  const inputs = CredentialExistInputSchema.parse(params);
-  return await kwilClient
-    .call<CredentialExistOutput[]>({
-      name: "credential_exist",
-      inputs,
-    })
-    .then((result) => result[0]);
-}
-
 export const AddAttributeAsInserterInputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
@@ -1855,7 +1788,10 @@ export const GetAttributesOutputSchema: z.ZodObject<{
 export type GetAttributesOutput = z.infer<typeof GetAttributesOutputSchema>;
 
 export async function getAttributes(kwilClient: KwilActionClient): Promise<GetAttributesOutput[]> {
-  return await kwilClient.call<GetAttributesOutput[]>({ name: "get_attributes", inputs: {} });
+  return await kwilClient.call<GetAttributesOutput[]>({
+    name: "get_attributes",
+    inputs: {},
+  });
 }
 
 export const EditAttributeInputSchema: z.ZodObject<{
@@ -2212,37 +2148,6 @@ export async function createAgByDagForCopy(
   });
 }
 
-export const CreateAccessGrantInputSchema: z.ZodObject<{
-  grantee_wallet_identifier: z.ZodString;
-  data_id: z.ZodUUID;
-  locked_until: z.ZodNumber;
-  content_hash: z.ZodString;
-  inserter_type: z.ZodString;
-  inserter_id: z.ZodString;
-}> = z.object({
-  grantee_wallet_identifier: z.string(),
-  data_id: z.uuid(),
-  locked_until: z.number(),
-  content_hash: z.string(),
-  inserter_type: z.string(),
-  inserter_id: z.string(),
-});
-
-export type CreateAccessGrantInput = z.infer<typeof CreateAccessGrantInputSchema>;
-
-/**  data_id is an id of a copy. It always has a user. So if no user found then there is no credential found. */
-export async function createAccessGrant(
-  kwilClient: KwilActionClient,
-  params: CreateAccessGrantInput,
-): Promise<void> {
-  const inputs = CreateAccessGrantInputSchema.parse(params);
-  await kwilClient.execute({
-    name: "create_access_grant",
-    inputs,
-    description: "Create a new access grant",
-  });
-}
-
 export const GetAccessGrantsForCredentialInputSchema: z.ZodObject<{
   credential_id: z.ZodUUID;
 }> = z.object({
@@ -2514,5 +2419,203 @@ export async function getPassportingPeers(
   return await kwilClient.call<GetPassportingPeersOutput[]>({
     name: "get_passporting_peers",
     inputs: {},
+  });
+}
+
+export const CheckBalanceInputSchema: z.ZodObject<{
+  address: z.ZodString;
+  token: z.ZodString;
+}> = z.object({
+  address: z.string(),
+  token: z.string(),
+});
+
+export type CheckBalanceInput = z.infer<typeof CheckBalanceInputSchema>;
+
+export const CheckBalanceOutputSchema: z.ZodObject<{
+  balance: z.ZodNumber;
+}> = z.object({
+  balance: z.number(),
+});
+
+export type CheckBalanceOutput = z.infer<typeof CheckBalanceOutputSchema>;
+
+/**  GAS AND FEES */
+export async function checkBalance(
+  kwilClient: KwilActionClient,
+  params: CheckBalanceInput,
+): Promise<CheckBalanceOutput> {
+  const inputs = CheckBalanceInputSchema.parse(params);
+  return await kwilClient
+    .call<CheckBalanceOutput[]>({
+      name: "check_balance",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const GetWalletWithBalanceInputSchema: z.ZodObject<{
+  token: z.ZodString;
+}> = z.object({
+  token: z.string(),
+});
+
+export type GetWalletWithBalanceInput = z.infer<typeof GetWalletWithBalanceInputSchema>;
+
+export const GetWalletWithBalanceOutputSchema: z.ZodObject<{
+  wallet_address: z.ZodString;
+}> = z.object({
+  wallet_address: z.string(),
+});
+
+export type GetWalletWithBalanceOutput = z.infer<typeof GetWalletWithBalanceOutputSchema>;
+
+export async function getWalletWithBalance(
+  kwilClient: KwilActionClient,
+  params: GetWalletWithBalanceInput,
+): Promise<GetWalletWithBalanceOutput> {
+  const inputs = GetWalletWithBalanceInputSchema.parse(params);
+  return await kwilClient
+    .call<GetWalletWithBalanceOutput[]>({
+      name: "get_wallet_with_balance",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const RequestWithdrawalInputSchema: z.ZodObject<{
+  token: z.ZodString;
+}> = z.object({
+  token: z.string(),
+});
+
+export type RequestWithdrawalInput = z.infer<typeof RequestWithdrawalInputSchema>;
+
+/**  we use lock_admin()+issue() because bridge() is tied to @caller */
+export async function requestWithdrawal(
+  kwilClient: KwilActionClient,
+  params: RequestWithdrawalInput,
+): Promise<void> {
+  const inputs = RequestWithdrawalInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "request_withdrawal",
+    inputs,
+    description: "Request a withdrawal of all tokens from idOS to user's EVM wallet",
+  });
+}
+
+export const GetAllowanceOutputSchema: z.ZodObject<{
+  allowance: z.ZodNumber;
+}> = z.object({
+  allowance: z.number(),
+});
+
+export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
+
+export async function getAllowance(kwilClient: KwilActionClient): Promise<GetAllowanceOutput> {
+  return await kwilClient
+    .call<GetAllowanceOutput[]>({
+      name: "get_allowance",
+      inputs: {},
+    })
+    .then((result) => result[0]);
+}
+
+export async function actionCostingGas(kwilClient: KwilActionClient): Promise<void> {
+  await kwilClient.execute({
+    name: "action_costing_gas",
+    inputs: {},
+    description: "Get cost of action for 1.2 gas",
+  });
+}
+
+export const ActionCostingIdosTokenInputSchema: z.ZodObject<{
+  amount: z.ZodNumber;
+}> = z.object({
+  amount: z.number(),
+});
+
+export type ActionCostingIdosTokenInput = z.infer<typeof ActionCostingIdosTokenInputSchema>;
+
+export async function actionCostingIdosToken(
+  kwilClient: KwilActionClient,
+  params: ActionCostingIdosTokenInput,
+): Promise<void> {
+  const inputs = ActionCostingIdosTokenInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "action_costing_idos_token",
+    inputs,
+    description: "Action that captures IDOS tokens from the caller",
+  });
+}
+
+export const GetIssuerFeeInputSchema: z.ZodObject<{
+  credential_id: z.ZodUUID;
+}> = z.object({
+  credential_id: z.uuid(),
+});
+
+export type GetIssuerFeeInput = z.infer<typeof GetIssuerFeeInputSchema>;
+
+export const GetIssuerFeeOutputSchema: z.ZodObject<{
+  issuer_fee: z.ZodNumber;
+}> = z.object({
+  issuer_fee: z.number(),
+});
+
+export type GetIssuerFeeOutput = z.infer<typeof GetIssuerFeeOutputSchema>;
+
+export async function getIssuerFee(
+  kwilClient: KwilActionClient,
+  params: GetIssuerFeeInput,
+): Promise<GetIssuerFeeOutput> {
+  const inputs = GetIssuerFeeInputSchema.parse(params);
+  return await kwilClient
+    .call<GetIssuerFeeOutput[]>({
+      name: "get_issuer_fee",
+      inputs,
+    })
+    .then((result) => result[0]);
+}
+
+export const ActionCostingFeeInputSchema: z.ZodObject<{
+  credential_id: z.ZodUUID;
+}> = z.object({
+  credential_id: z.uuid(),
+});
+
+export type ActionCostingFeeInput = z.infer<typeof ActionCostingFeeInputSchema>;
+
+export async function actionCostingFee(
+  kwilClient: KwilActionClient,
+  params: ActionCostingFeeInput,
+): Promise<void> {
+  const inputs = ActionCostingFeeInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "action_costing_fee",
+    inputs,
+    description: "Capture fee from credentials",
+  });
+}
+
+export const RequestBalanceWithdrawalInputSchema: z.ZodObject<{
+  token: z.ZodString;
+  evm_address_to: z.ZodString;
+}> = z.object({
+  token: z.string(),
+  evm_address_to: z.string(),
+});
+
+export type RequestBalanceWithdrawalInput = z.infer<typeof RequestBalanceWithdrawalInputSchema>;
+
+export async function requestBalanceWithdrawal(
+  kwilClient: KwilActionClient,
+  params: RequestBalanceWithdrawalInput,
+): Promise<void> {
+  const inputs = RequestBalanceWithdrawalInputSchema.parse(params);
+  await kwilClient.execute({
+    name: "request_balance_withdrawal",
+    inputs,
+    description: "Request a withdrawal of all tokens from idOS to specified EVM address",
   });
 }
