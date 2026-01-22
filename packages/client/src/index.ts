@@ -621,7 +621,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       consumerAuthPublicKey: string;
       lockedUntil?: number;
     },
-  ): Promise<idOSCredential> {
+  ): Promise<ShareCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
@@ -641,7 +641,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerEncryptionPublicKey),
     );
 
-    const insertableCredential = {
+    const insertableCredential: ShareCredentialInput = {
       ...credential,
       ...(await buildInsertableIDOSCredential(
         credential.user_id,
