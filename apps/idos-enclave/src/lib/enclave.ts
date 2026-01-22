@@ -7,13 +7,26 @@ import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/encl
 
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
+/**
+ * Safely parses JSON string with fallback value
+ * @param json - JSON string to parse
+ * @param fallback - Fallback value if parsing fails
+ * @returns Parsed value or fallback
+ */
+function safeParse<T>(json: string | null | undefined, fallback: T): T {
+  try {
+    return json ? JSON.parse(json) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   // Origins
   private authorizedOrigins: string[] = [];
   private parentOrigin: string;
 
   // Buttons & UI
-  private dialog: Window | null;
   private unlockButton: HTMLButtonElement;
   private confirmButton: HTMLButtonElement;
   private backupButton: HTMLButtonElement;
@@ -39,11 +52,19 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
 
     this.parentOrigin = parentOrigin;
 
-    this.unlockButton = document.querySelector("button#unlock") as HTMLButtonElement;
-    this.confirmButton = document.querySelector("button#confirm") as HTMLButtonElement;
-    this.backupButton = document.querySelector("button#backup") as HTMLButtonElement;
+    const unlockButton = document.querySelector<HTMLButtonElement>("button#unlock");
+    const confirmButton = document.querySelector<HTMLButtonElement>("button#confirm");
+    const backupButton = document.querySelector<HTMLButtonElement>("button#backup");
 
-    this.dialog = null;
+    if (!unlockButton || !confirmButton || !backupButton) {
+      throw new Error(
+        "Enclave buttons not found. Ensure HTML contains #unlock, #confirm, and #backup buttons.",
+      );
+    }
+
+    this.unlockButton = unlockButton;
+    this.confirmButton = confirmButton;
+    this.backupButton = backupButton;
 
     this.listenToRequests();
   }
@@ -52,8 +73,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   async load(): Promise<void> {
     await super.load();
 
-    this.authorizedOrigins = JSON.parse(
-      (await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY)) ?? "[]",
+    this.authorizedOrigins = safeParse(
+      await this.store.get<string>(ENCLAVE_AUTHORIZED_ORIGINS_KEY),
+      [],
     );
   }
 
@@ -300,10 +322,14 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       .join(",");
 
     const dialogURL = new URL(`/dialog.html?userId=${this.userId}`, window.location.origin);
-    this.dialog = window.open(dialogURL, "idos-dialog", popupConfig);
+    const dialog = window.open(dialogURL, "idos-dialog", popupConfig);
+
+    if (!dialog) {
+      throw new Error("Failed to open dialog. Popup may be blocked by browser.");
+    }
 
     await new Promise((resolve) =>
-      this.dialog?.addEventListener("idOS-Enclave:ready", resolve, { once: true }),
+      dialog.addEventListener("idOS-Enclave:ready", resolve, { once: true }),
     );
 
     return new Promise((resolve, reject) => {
@@ -315,21 +341,17 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
           this.confirmButton.disabled = false;
           this.backupButton.disabled = false;
           port1.close();
-          this.dialog?.close();
+          dialog.close();
           return reject(error);
         }
 
         port1.close();
-        this.dialog?.close();
+        dialog.close();
 
         return resolve(result);
       };
 
-      this.dialog?.postMessage(
-        { intent, message, configuration: this.options },
-        this.dialog?.origin,
-        [port2],
-      );
+      dialog.postMessage({ intent, message, configuration: this.options }, dialog.origin, [port2]);
     });
   }
 }
