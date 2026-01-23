@@ -40,7 +40,7 @@ import {
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
+import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
 import { matchLevelOrHigher, recordFilter } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
@@ -56,6 +56,7 @@ import type {
   PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
+import { getWalletType } from "@idos-network/utils/wallets";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
