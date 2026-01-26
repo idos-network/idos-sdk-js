@@ -1,4 +1,4 @@
-import { HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
 import { tv } from "tailwind-variants";
 
 type HeadingLevel = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
@@ -12,10 +12,5 @@ const heading = tv({
 });
 
 export function Heading({ as: Component = "h1", className, ...rest }: HeadingProps) {
-  return (
-    <Component
-      className={heading({ class: className })}
-      {...rest}
-    />
-  );
+  return <Component className={heading({ class: className })} {...rest} />;
 }
