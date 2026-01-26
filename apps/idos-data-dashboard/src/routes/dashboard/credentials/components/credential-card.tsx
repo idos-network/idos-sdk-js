@@ -2,7 +2,7 @@ import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
 import { useEffect } from "react";
-import { useFetchGrants } from "../shared";
+import { safeParse, useFetchGrants } from "../shared";
 import type { idOSCredentialWithShares } from "../types";
 
 type CredentialCardProps = {
@@ -18,7 +18,7 @@ export const CredentialCard = ({
   onManageGrants,
   onDelete,
 }: CredentialCardProps) => {
-  const publicFields = JSON.parse(credential.public_notes);
+  const publicFields = safeParse(credential.public_notes);
   const shares = useFetchGrants({ credentialId: credential.id });
 
   const meta = Object.entries(publicFields)
