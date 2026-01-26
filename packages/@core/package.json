@@ -24,12 +24,10 @@
   },
   "exports": {
     ".": "./src/index.ts",
-    "./signature-verification": "./src/signature-verification/index.ts",
     "./cryptography": "./src/cryptography/index.ts",
     "./types": "./src/types/index.ts",
     "./kwil-actions": "./src/kwil-actions/index.ts",
     "./kwil-infra": "./src/kwil-infra/index.ts",
-    "./store": "./src/store/index.ts",
     "./utils": "./src/utils/index.ts"
   },
   "license": "MIT",

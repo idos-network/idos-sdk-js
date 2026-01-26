@@ -12,7 +12,6 @@
     "@stablelib/utf8": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
-    "es-toolkit": "catalog:utils",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3",
@@ -23,15 +22,13 @@
     "@types/chrome": "^0.1.0",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.19.0"
   },
   "exports": {
     "./encryption": {
@@ -61,6 +58,14 @@
     "./mpc": {
       "types": "./dist/mpc/index.d.mts",
       "import": "./dist/mpc/index.mjs"
+    },
+    "./signature-verification": {
+      "types": "./dist/signature-verification/index.d.mts",
+      "import": "./dist/signature-verification/index.mjs"
+    },
+    "./wallets": {
+      "types": "./dist/wallets/index.d.mts",
+      "import": "./dist/wallets/index.mjs"
     }
   },
   "files": [
@@ -75,7 +80,10 @@
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
     "ethers": "catalog:ethereum",
-    "typescript": "catalog:build"
+    "typescript": "catalog:build",
+    "@wagmi/core": "2.22.1",
+    "ripple-keypairs": "catalog:xrp",
+    "@stellar/stellar-sdk": "catalog:stellar"
   },
   "peerDependenciesMeta": {
     "@partisiablockchain/blockchain-api-transaction-client": {
@@ -85,6 +93,15 @@
       "optional": true
     },
     "ethers": {
+      "optional": true
+    },
+    "@wagmi/core": {
+      "optional": true
+    },
+    "ripple-keypairs": {
+      "optional": true
+    },
+    "@stellar/stellar-sdk": {
       "optional": true
     }
   },
@@ -96,7 +113,6 @@
     "build": "tsdown",
     "dev": "tsdown  --watch",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it",
     "test": "vitest",
     "typecheck": "tsc --noEmit"
   },

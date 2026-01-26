@@ -68,6 +68,7 @@ export const useListCredentials = () => {
     queryKey: ["credentials-list"],
     queryFn: async () => {
       invariant(idOS.state === "logged-in", "Invalid `idOSClient` state when fetching credentials");
+
       const credentials = await idOS.getAllCredentials();
 
       const promiseList = credentials?.map(async (credential) => {

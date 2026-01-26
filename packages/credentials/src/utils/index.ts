@@ -1,6 +1,7 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
 
 import * as base85 from "base85";
+import { every, get } from "es-toolkit/compat";
 
 import type {
   AvailableIssuerType,
@@ -117,7 +118,7 @@ export function deriveLevel(credential: CredentialSubject): string {
   return [level, ...addons].join("+");
 }
 
-function parseLevel(level: string): {
+export function parseLevel(level: string): {
   base: BaseLevel;
   addons: Addon[];
 } {
@@ -140,7 +141,7 @@ export function matchLevelOrHigher(
   return requiredAddons.every((addon) => currentAddons.includes(addon));
 }
 
-function levelScore(level: string) {
+export function levelScore(level: string): number {
   const { base, addons } = parseLevel(level);
   let score = 0;
 
@@ -215,4 +216,25 @@ export function highestMatchingCredential<K extends { public_notes: string }>(
     .map(({ credential }) => credential);
 
   return matchingCredentials[0];
+}
+
+export function recordFilter(
+  rec: Record<string, unknown>,
+  pick: Record<string, unknown[]>,
+  omit: Record<string, unknown[]>,
+): boolean {
+  const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
+    every(Object.entries(criteria), ([path, targetSet]) => targetSet.includes(get(content, path)));
+
+  if (Object.keys(pick).length > 0 && !matchCriteria(rec, pick)) {
+    // Fast fail on pick criteria
+    return false;
+  }
+
+  if (Object.keys(omit).length > 0 && matchCriteria(rec, omit)) {
+    // Fast fail on omit criteria
+    return false;
+  }
+
+  return true;
 }

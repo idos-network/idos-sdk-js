@@ -2,6 +2,9 @@ name: Unit Tests
 
 on:
   pull_request:
+    branches:
+      - playground
+      - main
   push:
     branches:
       - playground

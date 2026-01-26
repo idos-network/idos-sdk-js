@@ -5,6 +5,7 @@ import {
   highestMatchingCredential,
   matchLevelOrHigher,
   pickHighestMatchingLevel,
+  recordFilter,
 } from "./";
 
 const defaultCredential: CredentialSubject = {
@@ -18,6 +19,58 @@ const defaultCredential: CredentialSubject = {
   idDocumentFrontFile: Buffer.from("ID Document Front"),
   selfieFile: Buffer.alloc(0),
 };
+
+describe("recordFilter", () => {
+  [
+    [
+      { level: "basic+liveness", status: "approved", issuer: "issuer-a", type: "kyc" },
+      { level: ["basic+liveness", "plus+liveness"], status: ["approved"] },
+      {},
+      true,
+    ],
+    [
+      { level: "plus+liveness", status: "approved", issuer: "issuer-a", type: "kyc" },
+      { level: ["basic+liveness"], status: ["approved"] },
+      {},
+      false,
+    ],
+    [
+      { level: "basic+liveness", status: "approved", issuer: "issuer-a", type: "kyc" },
+      { level: ["basic+liveness"], status: ["approved"] },
+      { issuer: ["issuer-b", "issuer-a"] },
+      false,
+    ],
+    [
+      { level: "basic+liveness", status: "approved", issuer: "issuer-a", type: "kyc" },
+      { level: ["basic+liveness"], status: ["approved"] },
+      { issuer: ["issuer-b"] },
+      true,
+    ],
+    [{ level: "plus+liveness", status: "approved", issuer: "issuer-a", type: "kyc" }, {}, {}, true],
+    [
+      { credentialSubject: { nationality: "CZ" } },
+      { "credentialSubject.nationality": ["CZ", "DE"] },
+      {},
+      true,
+    ],
+    [
+      { credentialSubject: { nationality: "CZ" } },
+      {},
+      { "credentialSubject.nationality": ["CZ", "DE"] },
+      false,
+    ],
+  ].forEach(([publicNotes, pick, omit, expected]) => {
+    it(`publicNotes=${JSON.stringify(publicNotes)}, pick=${JSON.stringify(pick)}, omit=${JSON.stringify(omit)} => ${expected}`, () => {
+      const result = recordFilter(
+        publicNotes as Record<string, unknown>,
+        pick as Record<string, unknown[]>,
+        omit as Record<string, unknown[]>,
+      );
+
+      expect(result).toBe(expected);
+    });
+  });
+});
 
 describe("matchLevelOrHigher", () => {
   [

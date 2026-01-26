@@ -64,7 +64,7 @@ console.log(credentials);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```
 
-More details on https://github.com/idos-network/idos-sdk-js/blob/main/packages/idos-sdk-js#quickstart
+More details on https://github.com/idos-network/idos-sdk-js/blob/main/docs
 
 ## Support
 

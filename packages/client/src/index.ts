@@ -40,8 +40,8 @@ import {
   signNearMessage,
 } from "@idos-network/core/kwil-infra";
 import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
-import { matchLevelOrHigher } from "@idos-network/credentials/utils";
+import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
+import { matchLevelOrHigher, recordFilter } from "@idos-network/credentials/utils";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -56,8 +56,7 @@ import type {
   PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
+import { getWalletType } from "@idos-network/utils/wallets";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -514,19 +513,18 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       authPublicKey: string;
     }[];
     publicNotesFieldFilters?: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
+    };
+    privateFieldFilters?: {
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
     };
     credentialLevelOrHigherFilter?: {
       userLevel: "basic" | "plus";
       requiredAddons: ("liveness" | "email" | "phoneNumber")[];
     };
   }): Promise<idOSCredentialListItem[]> {
-    const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
-      );
-
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
       (cred) => !cred.original_id && !!cred.public_notes,
@@ -541,50 +539,74 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
     const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
+    const privateFieldFilters = requirements.privateFieldFilters;
 
-    if (publicNotesFieldFilters || credentialLevelOrHigherFilter) {
+    if (credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
         let publicNotes: Record<string, string>;
 
         try {
           publicNotes = JSON.parse(credential.public_notes);
         } catch (_) {
-          throw new Error(`Credential ${credential.id} has non-JSON public notes".replace("{}`);
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
         }
 
-        let match = true;
-
-        if (publicNotesFieldFilters) {
-          match =
-            matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
-            negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))();
-        }
-
-        if (match && credentialLevelOrHigherFilter) {
-          if (!publicNotes.level) {
-            throw new Error(
-              `Credential ${credential.id} is missing "level" field in public notes".replace("{}`,
-            );
-          }
-
-          match = matchLevelOrHigher(
-            credentialLevelOrHigherFilter.userLevel,
-            credentialLevelOrHigherFilter.requiredAddons,
-            publicNotes.level,
-          );
-        }
-
-        return match;
+        return matchLevelOrHigher(
+          credentialLevelOrHigherFilter.userLevel,
+          credentialLevelOrHigherFilter.requiredAddons,
+          publicNotes.level,
+        );
       });
     }
 
-    /*
-     * TODO: Fix this, getAllCredentials return a credential without content
-     * so the privateFieldFilters won't match anything.
-    const privateFieldFilters = requirements.privateFieldFilters;
-    if (privateFieldFilters) {
-      result = await this.enclaveProvider.filterCredentials(result, privateFieldFilters);
-    }*/
+    if (
+      publicNotesFieldFilters &&
+      (Object.keys(publicNotesFieldFilters.pick).length > 0 ||
+        Object.keys(publicNotesFieldFilters.omit).length > 0)
+    ) {
+      result = result.filter((credential) => {
+        let publicNotes: Record<string, string>;
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return recordFilter(
+          publicNotes,
+          publicNotesFieldFilters.pick,
+          publicNotesFieldFilters.omit,
+        );
+      });
+    }
+
+    // Private field filtering requires decryption and the full idOS credential content
+    // it's most "expensive", since it requires a roundtrip to the nodes and roundtrip to enclave.
+    if (
+      privateFieldFilters &&
+      (Object.keys(privateFieldFilters.pick).length > 0 ||
+        Object.keys(privateFieldFilters.omit).length > 0)
+    ) {
+      const fullCredentials = await Promise.all(
+        result.map((credential) => this.getCredentialById(credential.id)),
+      );
+
+      // Check for undefined, it will be sign of some internal error
+      invariant(
+        fullCredentials.every((cred) => cred !== undefined),
+        "Some credentials could not be fetched in full form for private field filtering",
+      );
+
+      const matches = await this.enclaveProvider.filterCredentials(
+        fullCredentials,
+        privateFieldFilters,
+      );
+
+      result = result.filter((credential) =>
+        matches.some((matchedCredential) => matchedCredential.id === credential.id),
+      );
+    }
 
     return result;
   }
@@ -594,8 +616,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
-    }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
-  ): Promise<idOSCredential> {
+      lockedUntil = 0,
+    }: {
+      consumerEncryptionPublicKey: string;
+      consumerAuthPublicKey: string;
+      lockedUntil?: number;
+    },
+  ): Promise<ShareCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
@@ -615,7 +642,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerEncryptionPublicKey),
     );
 
-    const insertableCredential = {
+    const insertableCredential: ShareCredentialInput = {
       ...credential,
       ...(await buildInsertableIDOSCredential(
         credential.user_id,
@@ -627,7 +654,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       original_credential_id: credential.id,
       id: crypto.randomUUID(),
       grantee_wallet_identifier: consumerAuthPublicKey,
-      locked_until: 0,
+      locked_until: lockedUntil,
       content_hash: contentHash,
     };
 

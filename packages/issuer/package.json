@@ -11,7 +11,6 @@
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
-    "es-toolkit": "catalog:utils",
     "ripple-keypairs": "catalog:xrp",
     "tweetnacl": "catalog:core",
     "web-streams-polyfill": "catalog:core"
@@ -19,13 +18,11 @@
   "devDependencies": {
     "@idos-network/core": "workspace:*",
     "clean-package": "^2.2.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.19.0"
   },
   "exports": {
     ".": {
@@ -54,7 +51,6 @@
     "postpack": "clean-package restore",
     "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it",
     "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,

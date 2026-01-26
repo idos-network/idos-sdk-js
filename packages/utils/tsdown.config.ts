@@ -9,6 +9,8 @@ export default defineConfig({
     "./src/mpc/index.ts",
     "./src/codecs/index.ts",
     "./src/xrpl-credentials/index.ts",
+    "./src/signature-verification/index.ts",
+    "./src/wallets/index.ts",
   ],
   external: [
     "@digitalbazaar/ed25519-signature-2020",
@@ -16,5 +18,6 @@ export default defineConfig({
     "@digitalbazaar/vc",
     "base85",
     "jsonld-document-loader",
+    "@wagmi/core",
   ],
 });

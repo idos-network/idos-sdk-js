@@ -1,7 +1,7 @@
 import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
-import { getWalletType } from "@idos-network/core/utils";
+import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
+import { getWalletType } from "@idos-network/utils/wallets";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
