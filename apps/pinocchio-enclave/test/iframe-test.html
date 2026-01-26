@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pinocchio Enclave - Iframe Test</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 450px;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .controls {
+      background: white;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .controls h2 {
+      margin-bottom: 20px;
+      color: #333;
+      font-size: 1.5rem;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    #status {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 15px;
+      margin-top: 15px;
+      min-height: 60px;
+      color: #333;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .iframe-container {
+      background: white;
+      border-radius: 12px;
+      padding: 10px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    iframe {
+      width: 100%;
+      height: 700px;
+      border: none;
+      border-radius: 8px;
+      display: block;
+    }
+
+    .info {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      color: white;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .log {
+      max-height: 200px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 15px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+    }
+
+    .log-entry {
+      padding: 4px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-entry.sent {
+      color: #0066cc;
+    }
+
+    .log-entry.received {
+      color: #00aa00;
+    }
+
+    @media (max-width: 768px) {
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .iframe-container {
+        order: -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎭 Pinocchio Enclave - Iframe Test</h1>
+    
+    <div class="info">
+      <strong>Test Instructions:</strong> This page tests the iframe embedding of Pinocchio Enclave.
+      Wait for the "Enclave Ready" status, then request a session. After session approval, you can request signatures.
+    </div>
+
+    <div class="content">
+      <div class="controls">
+        <h2>Controls</h2>
+        
+        <div class="button-group">
+          <button id="request-session" disabled>1. Request Session</button>
+          <button id="request-signature" disabled>2. Request Signature</button>
+          <button id="clear-log">Clear Log</button>
+        </div>
+
+        <div>
+          <strong>Status:</strong>
+          <div id="status">Waiting for enclave to load...</div>
+        </div>
+
+        <div>
+          <strong>Message Log:</strong>
+          <div id="log" class="log"></div>
+        </div>
+      </div>
+
+      <div class="iframe-container">
+        <iframe 
+          id="pinocchio-enclave"
+          src="https://localhost:5173" 
+          sandbox="allow-scripts allow-same-origin allow-storage-access-by-user-activation"
+          allow="cross-origin-isolated">
+        </iframe>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const iframe = document.getElementById('pinocchio-enclave');
+    const statusDiv = document.getElementById('status');
+    const logDiv = document.getElementById('log');
+    const requestSessionBtn = document.getElementById('request-session');
+    const requestSignatureBtn = document.getElementById('request-signature');
+    const clearLogBtn = document.getElementById('clear-log');
+    
+    let enclaveReady = false;
+    let sessionApproved = false;
+    let publicKey = null;
+    let proposalIdCounter = 0;
+
+    // Logging helper
+    function log(message, type = 'info') {
+      const timestamp = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      entry.textContent = `[${timestamp}] ${message}`;
+      logDiv.appendChild(entry);
+      logDiv.scrollTop = logDiv.scrollHeight;
+    }
+
+    // Update status
+    function updateStatus(message, color = '#333') {
+      statusDiv.textContent = message;
+      statusDiv.style.color = color;
+      log(message);
+    }
+
+    // Listen for messages from the enclave
+    window.addEventListener('message', (event) => {
+      // In production, verify origin:
+      // if (event.origin !== 'https://enclave.idos.network') return;
+      
+      log(`Received: ${event.data.type}`, 'received');
+      console.log('Message from enclave:', event.data);
+
+      const { type, data } = event.data;
+
+      switch (type) {
+        case 'pinocchio_ready':
+          enclaveReady = true;
+          updateStatus('✅ Enclave ready! You can now request a session.', '#00aa00');
+          requestSessionBtn.disabled = false;
+          break;
+
+        case 'session_proposal_response':
+          if (data.approved) {
+            sessionApproved = true;
+            publicKey = data.address;
+            updateStatus(`✅ Session approved! Public key: ${publicKey}`, '#00aa00');
+            requestSignatureBtn.disabled = false;
+          } else {
+            updateStatus('❌ Session rejected by user', '#cc0000');
+          }
+          break;
+
+        case 'sign_proposal_response':
+          if (data.signature) {
+            const sigHex = Array.from(data.signature).map(b => b.toString(16).padStart(2, '0')).join('');
+            updateStatus(`✅ Signature received: ${sigHex.substring(0, 32)}...`, '#00aa00');
+          } else {
+            updateStatus('❌ Signature request rejected by user', '#cc0000');
+          }
+          break;
+
+        default:
+          log(`Unknown message type: ${type}`);
+      }
+    });
+
+    // Request session
+    requestSessionBtn.addEventListener('click', () => {
+      if (!enclaveReady) {
+        alert('Enclave not ready yet. Please wait.');
+        return;
+      }
+
+      const proposalId = ++proposalIdCounter;
+      const message = {
+        type: 'session_proposal',
+        data: {
+          id: proposalId,
+          metadata: {
+            name: 'Iframe Test Page',
+            description: 'Testing iframe embedding - requesting access to signing key'
+          }
+        }
+      };
+
+      iframe.contentWindow.postMessage(message, '*');
+      log(`Sent: session_proposal (id: ${proposalId})`, 'sent');
+      updateStatus('Waiting for user to approve session...', '#0066cc');
+    });
+
+    // Request signature
+    requestSignatureBtn.addEventListener('click', () => {
+      if (!sessionApproved) {
+        alert('Session not approved yet. Please request and approve a session first.');
+        return;
+      }
+
+      const proposalId = ++proposalIdCounter;
+      const timestamp = new Date().toISOString();
+      const dataToSign = new TextEncoder().encode(`Test signature at ${timestamp}`);
+      
+      const message = {
+        type: 'sign_proposal',
+        data: {
+          id: proposalId,
+          data: Array.from(dataToSign),
+          metadata: {
+            name: 'Iframe Test Page',
+            description: `Sign test message: "${timestamp}"`
+          }
+        }
+      };
+
+      iframe.contentWindow.postMessage(message, '*');
+      log(`Sent: sign_proposal (id: ${proposalId})`, 'sent');
+      updateStatus('Waiting for user to approve signature...', '#0066cc');
+    });
+
+    // Clear log
+    clearLogBtn.addEventListener('click', () => {
+      logDiv.innerHTML = '';
+    });
+
+    // Initial log
+    log('Test page loaded. Waiting for enclave...');
+  </script>
+</body>
+</html>

@@ -91,7 +91,9 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
     });
 
     return () => {
-      handlers.current.forEach((handler) => handler.destruct());
+      handlers.current.forEach((handler) => {
+        handler.destruct();
+      });
     };
   }, []);
 

@@ -8,10 +8,5 @@ const text = tv({
 });
 
 export function Paragraph({ className, ...rest }: ParagraphProps) {
-  return (
-    <p
-      className={text({ class: className })}
-      {...rest}
-    />
-  );
+  return <p className={text({ class: className })} {...rest} />;
 }

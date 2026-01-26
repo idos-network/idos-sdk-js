@@ -76,7 +76,8 @@ export class FaceTecContainer {
   private setupCustomization = (): void => {
     if (!this.FaceTecSDK) return;
 
-    const currentCustomization = new this.FaceTecSDK.FaceTecCustomization();
+    const iFrameFeatureFlag = [{ ac_ziif: "991d6c1c-5e5c-4e32-89c7-1ddfac46572e" }];
+    const currentCustomization = new this.FaceTecSDK.FaceTecCustomization(iFrameFeatureFlag);
 
     // Set Frame Customization
     currentCustomization.frameCustomization.borderCornerRadius = "20px";

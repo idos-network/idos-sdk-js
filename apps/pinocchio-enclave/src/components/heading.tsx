@@ -12,10 +12,5 @@ const heading = tv({
 });
 
 export function Heading({ as: Component = "h1", className, ...rest }: HeadingProps) {
-  return (
-    <Component
-      className={heading({ class: className })}
-      {...rest}
-    />
-  );
+  return <Component className={heading({ class: className })} {...rest} />;
 }
