@@ -13,6 +13,7 @@ import {
   useState,
 } from "react";
 import invariant from "tiny-invariant";
+import { useAccount } from "wagmi";
 import { useEthersSigner } from "@/core/wagmi";
 import Layout from "./components/layout";
 import { ConnectWallet } from "./connect-wallet";
@@ -73,12 +74,18 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [client, setClient] = useState<idOSClient>(_idOSClient);
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
   const { selector } = useWalletSelector();
+  const { status: evmStatus } = useAccount();
 
   useEffect(() => {
+    // general wallet check
     if (!walletType || !walletAddress || !walletPublicKey) {
       setIsLoading(false);
       return;
     }
+
+    // evm wallet check
+    if (walletType === "evm" && evmStatus !== "connected") return;
+
     const signerSrc = walletInfoMapper({
       address: walletAddress ?? "",
       publicKey: walletPublicKey ?? "",
@@ -121,7 +128,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     };
 
     setupClient();
-  }, [walletPublicKey, walletAddress, walletType]);
+  }, [walletPublicKey, walletAddress, walletType, evmStatus]);
 
   // While loading, show a spinner
   if (isLoading) {
