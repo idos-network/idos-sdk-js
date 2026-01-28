@@ -97,6 +97,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
       }}
       isCentered={isCentered}
       scrollBehavior="inside"
+      trapFocus={false}
     >
       <ModalOverlay />
       <ModalContent bg="neutral.900" rounded="xl">

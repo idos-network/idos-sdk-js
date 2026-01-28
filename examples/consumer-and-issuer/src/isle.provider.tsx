@@ -191,7 +191,6 @@ export function IsleProvider({ children, containerId }: IsleProviderProps) {
           encryptionPublicKey: process.env.NEXT_PUBLIC_ISSUER_ENCRYPTION_PUBLIC_KEY ?? "",
         },
         enclaveOptions: {
-          container: "#idOS-enclave",
           url: process.env.NEXT_PUBLIC_IDOS_ENCLAVE_URL ?? "",
         },
 
