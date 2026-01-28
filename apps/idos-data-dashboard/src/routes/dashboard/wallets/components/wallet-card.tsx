@@ -1,4 +1,4 @@
-import { Button, HStack, Image, Text, Tooltip, VStack } from "@chakra-ui/react";
+import { Button, HStack, Image, Stack, Text, Tooltip, VStack } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
 
 type WalletCardProps = {
@@ -9,7 +9,15 @@ type WalletCardProps = {
 
 export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) => {
   return (
-    <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
+    <Stack
+      direction={{ base: "column", md: "row" }}
+      align="center"
+      justify="space-between"
+      gap={5}
+      p={5}
+      bg="neutral.900"
+      rounded="xl"
+    >
       <HStack gap={5}>
         <Image src="/idos-dashboard-logo-dark.svg" alt="Wallet image" w={50} h={50} />
         <VStack align="stretch" gap={0} overflow="hidden">
@@ -34,10 +42,11 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
           id={`delete-wallet-${address}`}
           leftIcon={<XIcon size={20} />}
           onClick={() => onDelete(address)}
+          w={{ base: "full", md: "auto" }}
         >
           Delete
         </Button>
       </Tooltip>
-    </HStack>
+    </Stack>
   );
 };
