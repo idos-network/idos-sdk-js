@@ -56,7 +56,6 @@ import type {
   PublicEncryptionProfile,
 } from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import { getWalletType } from "@idos-network/utils/wallets";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -424,21 +423,22 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return { id };
   }
 
-  async addWallet(params: AddWalletInput & { wallet_type: string }): Promise<AddWalletInput> {
+  async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
     await addWallet(this.kwilClient, params);
+
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
-    if (!params.wallet_type || params.wallet_type === "unknown") {
-      params.wallet_type = getWalletType(params.address);
+    if (!params.wallet_type) {
+      throw new Error("Wallet type is required for MPC users");
     }
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
-      params.public_key,
+      params.public_key ?? undefined,
       params.wallet_type,
     );
 
@@ -447,11 +447,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.types,
       messageToSign.value,
     );
+
     const result = await this.enclaveProvider.addAddressToMpcSecret(
       this.user.id,
       messageToSign.value,
       signature,
     );
+
     if (result !== "success") {
       console.error(`Failed to add wallet to MPC: ${result}`);
     }
