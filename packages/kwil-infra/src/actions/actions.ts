@@ -2428,6 +2428,7 @@ export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
 
 <<<<<<< HEAD:packages/kwil-infra/src/actions/actions.ts
 <<<<<<< HEAD:packages/kwil-infra/src/actions/actions.ts
+<<<<<<< HEAD:packages/kwil-infra/src/actions/actions.ts
 /**  FaceSign should not be able to call this */
 =======
 /**  Pinocchio should not be able to call this */
@@ -2435,6 +2436,8 @@ export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
 =======
 /**  FaceSign should not be able to call this */
 >>>>>>> 7a7b588b (feat(rename) Rename required by Julian):packages/@core/src/kwil-actions/actions.ts
+=======
+>>>>>>> e0e949d1 (feat(facesign) Init enclave):packages/@core/src/kwil-actions/actions.ts
 export async function getAllowance(kwilClient: KwilActionClient): Promise<GetAllowanceOutput> {
   return await kwilClient
     .call<GetAllowanceOutput[]>({
