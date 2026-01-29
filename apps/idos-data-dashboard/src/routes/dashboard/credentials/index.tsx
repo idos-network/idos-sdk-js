@@ -1,12 +1,4 @@
-import {
-  Heading,
-  HStack,
-  IconButton,
-  List,
-  ListItem,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
+import { IconButton, List, ListItem, useDisclosure } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { useState } from "react";
@@ -123,26 +115,9 @@ export function Component() {
   if (idOSClient.state !== "logged-in") return <NoCredentials />;
 
   return (
-    <VStack align="stretch" flex={1} gap={2.5}>
-      <HStack
-        justifyContent="space-between"
-        h={{
-          base: 14,
-          lg: 20,
-        }}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-      >
-        <Heading
-          as="h1"
-          fontSize={{
-            base: "x-large",
-            lg: "xx-large",
-          }}
-        >
-          Credentials
-        </Heading>
+    <div className="flex flex-col items-stretch flex-1 gap-2.5">
+      <div className="flex justify-between items-center p-5 bg-neutral-900 rounded-xl">
+        <h1 className="block text-2xl! md:text-3xl! font-bold!">Credentials</h1>
         <IconButton
           aria-label="Refresh credentials"
           icon={<RotateCw size={18} />}
@@ -152,9 +127,9 @@ export function Component() {
             });
           }}
         />
-      </HStack>
+      </div>
       <Credentials />
-    </VStack>
+    </div>
   );
 }
 Component.displayName = "Credentials";

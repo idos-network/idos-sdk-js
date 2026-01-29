@@ -1,15 +1,4 @@
-import {
-  Center,
-  Container,
-  chakra,
-  HStack,
-  Image,
-  List,
-  Show,
-  Spinner,
-  Stack,
-  Text,
-} from "@chakra-ui/react";
+import { Container, chakra, Image, List, Spinner } from "@chakra-ui/react";
 import type { idOSCredential } from "@idos-network/credentials/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -171,11 +160,11 @@ function CredentialDetails({
         </DrawerHeader>
         <DrawerBody>
           {!hasValidContent ? (
-            <Text color="red.500">
+            <span className="text-red-500">
               Can't decrypt credential — please make sure you're using the right encryption key
-            </Text>
+            </span>
           ) : (
-            <Stack>
+            <div className="flex flex-col gap-4">
               <DataListRoot orientation="horizontal" divideY="1px">
                 {subject.map(([key, value]) => (
                   <DataListItem
@@ -293,7 +282,7 @@ function CredentialDetails({
                   />
                 ) : null}
               </DataListRoot>
-            </Stack>
+            </div>
           )}
         </DrawerBody>
         <DrawerFooter>
@@ -341,7 +330,7 @@ function SearchResults({
   };
 
   return (
-    <Stack gap="4">
+    <div className="flex flex-col gap-4">
       {paginatedResults.map((credential) => {
         const publicFields = Object.entries(safeParse(credential.public_notes)) as [
           string,
@@ -349,7 +338,7 @@ function SearchResults({
         ][];
 
         return (
-          <Stack key={credential.id} gap="6" bg="gray.900" p="6" rounded="md">
+          <div key={credential.id} className="flex flex-col gap-6 bg-gray-900 p-6 rounded-md">
             <DataListRoot orientation="horizontal" divideY="1px">
               {publicFields.map(([key, value]) => (
                 <DataListItem
@@ -386,12 +375,12 @@ function SearchResults({
             >
               Credential details
             </Button>
-          </Stack>
+          </div>
         );
       })}
 
-      <Show when={totalPages > 1}>
-        <Center>
+      {totalPages > 1 && (
+        <div className="flex justify-center">
           <PaginationRoot
             count={results.length}
             defaultPage={1}
@@ -399,14 +388,14 @@ function SearchResults({
             page={page}
             onPageChange={(details) => handlePageChange(details.page)}
           >
-            <HStack>
+            <div className="flex items-center gap-2">
               <PaginationPrevTrigger />
               <PaginationItems />
               <PaginationNextTrigger />
-            </HStack>
+            </div>
           </PaginationRoot>
-        </Center>
-      </Show>
+        </div>
+      )}
 
       {credential && (
         <CredentialDetails
@@ -418,7 +407,7 @@ function SearchResults({
           }}
         />
       )}
-    </Stack>
+    </div>
   );
 }
 
@@ -471,33 +460,26 @@ function Credentials() {
 
   return (
     <Container h="100%">
-      <Stack gap="4" h="100%">
+      <div className="flex flex-col gap-4 h-full">
         {
           <>
             {credentialsList.isFetching ? (
-              <Center h="100%" flexDirection="column" gap="2">
+              <div className="flex h-full flex-col gap-2">
                 <Spinner />
-                <Text>Fetching credentials...</Text>
-              </Center>
+                <span>Fetching credentials...</span>
+              </div>
             ) : decryptedCredentials.isFetching ? (
-              <Center h="100%" flexDirection="column" gap="2">
+              <div className="flex h-full flex-col gap-2">
                 <Spinner />
-                <Text>Decrypting credentials...</Text>
-              </Center>
+                <span>Decrypting credentials...</span>
+              </div>
             ) : (
-              <Stack gap="4">
-                <HStack justifyContent={{ base: "space-between" }}>
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between">
                   <Button onClick={() => setSecretKey("")} variant="subtle" colorPalette="gray">
                     Reset Secret Key
                   </Button>
-                  <HStack
-                    gap="4"
-                    alignSelf={{ md: "flex-end" }}
-                    w={{
-                      base: "full",
-                      md: "md",
-                    }}
-                  >
+                  <div className="flex gap-4 self-end w-full md:w-md">
                     <SearchField
                       value={filter}
                       onChange={handleSearchChange}
@@ -515,15 +497,15 @@ function Credentials() {
                       colorPalette="gray"
                       onClick={handleRefresh}
                     />
-                  </HStack>
-                </HStack>
+                  </div>
+                </div>
                 <SearchResults
                   results={results}
                   toggleSecretKeyPrompt={toggleSecretKeyPrompt}
                   openCredentialDetails={openCredentialDetails}
                   toggleCredentialDetails={toggleCredentialDetails}
                 />
-              </Stack>
+              </div>
             )}
             <SecretKeyPrompt
               credentialSample={results[0]}
@@ -535,7 +517,7 @@ function Credentials() {
             />
           </>
         }
-      </Stack>
+      </div>
     </Container>
   );
 }
