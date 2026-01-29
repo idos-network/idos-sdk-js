@@ -1,4 +1,4 @@
-import type { idOSWallet } from "@idos-network/core";
+import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";

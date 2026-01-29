@@ -1,5 +1,5 @@
 import * as GemWallet from "@gemwallet/api";
-import { getGemWalletPublicKey, signGemWalletTx } from "@idos-network/core";
+import { getGemWalletPublicKey, signGemWalletTx } from "@idos-network/kwil-infra/xrp-utils";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXRP } from "@web3icons/react";

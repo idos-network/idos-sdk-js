@@ -25,6 +25,7 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+facesign
 gemwallet
 headlessui
 heroicons

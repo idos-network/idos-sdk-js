@@ -1,5 +1,5 @@
-import type { idOSGrant } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials/types";
+import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 import {
   type DefaultError,
   useMutation,
@@ -20,10 +20,11 @@ import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 import { timelockToMs } from "../../utils/time";
 import { safeParse, useFetchGrants, useRevokeGrants } from "../shared";
+import type { idOSCredentialWithShares } from "../types";
 
 type DeleteCredentialProps = {
   isOpen: boolean;
-  credential: idOSCredential;
+  credential: idOSCredentialWithShares;
   onClose: () => void;
 };
 

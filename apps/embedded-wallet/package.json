@@ -4,7 +4,6 @@
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:core",
-    "@idos-network/core": "workspace:*",
     "@near-wallet-selector/core": "catalog:near",
     "@near-wallet-selector/here-wallet": "catalog:near",
     "@near-wallet-selector/meteor-wallet": "catalog:near",
@@ -14,6 +13,7 @@
     "@stellar/stellar-base": "catalog:stellar",
     "@stepperize/react": "^5.1.6",
     "@tanstack/react-query": "catalog:tanstack",
+    "@idos-network/kwil-infra": "workspace:*",
     "@web3icons/react": "^4.0.14",
     "react": "catalog:react",
     "react-dom": "catalog:react",

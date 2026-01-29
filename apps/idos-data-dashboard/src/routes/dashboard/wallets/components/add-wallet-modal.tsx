@@ -1,6 +1,8 @@
 import * as GemWallet from "@gemwallet/api";
 import type { idOSWallet } from "@idos-network/client";
-import { getXrpPublicKey, type WalletType } from "@idos-network/core";
+import { getNearFullAccessPublicKeys } from "@idos-network/kwil-infra";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
+import { getXrpPublicKey } from "@idos-network/kwil-infra/xrp-utils";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { PlusIcon } from "lucide-react";
@@ -20,7 +22,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
-import { getNearFullAccessPublicKeys } from "@/utils/near";
 import { createWallet, createWalletParamsFactory } from "./add-wallet-button";
 
 type AddWalletProps = {

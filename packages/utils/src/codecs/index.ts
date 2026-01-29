@@ -5,6 +5,9 @@ import bs58 from "bs58";
 
 export { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
 
+import { decode as base64Decode, encode as base64Encode } from "@stablelib/base64";
+import type { PipeCodecArgs } from "../store/interface";
+
 export { writeUint16BE as binaryWriteUint16BE } from "@stablelib/binary";
 export { concat as bytesConcat } from "@stablelib/bytes";
 export { decode as hexDecode } from "@stablelib/hex";
@@ -33,3 +36,9 @@ export function toBytes(obj: Parameters<typeof JSON.stringify>[0]): Uint8Array {
 export function fromBytesToJson<K = Record<string, any>>(data: Uint8Array): K {
   return JSON.parse(utf8Decode(data));
 }
+
+// Codecs for store pipeline
+export const base64Codec: PipeCodecArgs<Uint8Array<ArrayBufferLike>> = {
+  encode: base64Encode,
+  decode: base64Decode,
+};

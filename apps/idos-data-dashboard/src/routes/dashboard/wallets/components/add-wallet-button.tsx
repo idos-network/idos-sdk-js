@@ -1,6 +1,9 @@
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import type { AddWalletInput, WalletType } from "@idos-network/core";
-import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
+import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
+import {
+  verifySignature,
+  type WalletSignature,
+} from "@idos-network/kwil-infra/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";

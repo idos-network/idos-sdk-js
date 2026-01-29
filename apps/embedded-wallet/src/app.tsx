@@ -1,4 +1,4 @@
-import type { WalletType } from "@idos-network/core";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";

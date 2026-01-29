@@ -1,6 +1,5 @@
-import * as Base64Codec from "@stablelib/base64";
-
 import nacl from "tweetnacl";
+import { base64Encode } from "../codecs";
 import { idOSKeyDerivation } from "./idOSKeyDerivation";
 
 export function keyDerivation(
@@ -23,10 +22,10 @@ export function encrypt(
     throw Error(
       `Couldn't encrypt. ${JSON.stringify(
         {
-          message: Base64Codec.encode(message),
-          nonce: Base64Codec.encode(nonce),
-          receiverPublicKey: Base64Codec.encode(receiverPublicKey),
-          localPublicKey: Base64Codec.encode(publicKey),
+          message: base64Encode(message),
+          nonce: base64Encode(nonce),
+          receiverPublicKey: base64Encode(receiverPublicKey),
+          localPublicKey: base64Encode(publicKey),
         },
         null,
         2,
@@ -53,11 +52,11 @@ export async function decrypt(
     throw Error(
       `Couldn't decrypt. ${JSON.stringify(
         {
-          fullMessage: Base64Codec.encode(fullMessage),
-          message: Base64Codec.encode(message),
-          nonce: Base64Codec.encode(nonce),
-          senderPublicKey: Base64Codec.encode(senderPublicKey),
-          localPublicKey: Base64Codec.encode(keyPair.publicKey),
+          fullMessage: base64Encode(fullMessage),
+          message: base64Encode(message),
+          nonce: base64Encode(nonce),
+          senderPublicKey: base64Encode(senderPublicKey),
+          localPublicKey: base64Encode(keyPair.publicKey),
         },
         null,
         2,

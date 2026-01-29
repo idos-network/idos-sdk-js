@@ -1,4 +1,4 @@
-import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
+import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import { useSignal } from "@preact/signals";
 import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import type { JSX } from "preact";
