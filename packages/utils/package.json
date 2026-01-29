@@ -59,6 +59,10 @@
       "types": "./dist/mpc/index.d.mts",
       "import": "./dist/mpc/index.mjs"
     },
+    "./facesign": {
+      "types": "./dist/facesign/index.d.mts",
+      "import": "./dist/facesign/index.mjs"
+    },
     "./signature-verification": {
       "types": "./dist/signature-verification/index.d.mts",
       "import": "./dist/signature-verification/index.mjs"
@@ -77,7 +81,7 @@
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
     "ethers": "catalog:ethereum",
     "typescript": "catalog:build",
-    "@wagmi/core": "2.22.1",
+    "@wagmi/core": "catalog:ethereum",
     "ripple-keypairs": "catalog:xrp",
     "@stellar/stellar-sdk": "catalog:stellar"
   },

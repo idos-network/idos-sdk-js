@@ -55,7 +55,7 @@ export class Client {
   }
 
   public reconfigure(signerType: string, signerAddress: string, signerPublicKey?: string): void {
-    if (!["evm", "xrpl", "near", "stellar"].includes(signerType)) {
+    if (!["evm", "xrpl", "near", "stellar", "facesign"].includes(signerType)) {
       throw new Error("Invalid signer type");
     }
     this.signerType = signerType;
@@ -124,6 +124,9 @@ export class Client {
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
+      case "facesign":
+        address = `FACESIGN:${this.signerAddress}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -152,6 +155,9 @@ export class Client {
         break;
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
+        break;
+      case "facesign":
+        address = `FACESIGN:${this.signerAddress}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -202,6 +208,9 @@ export class Client {
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
+      case "facesign":
+        address = `FACESIGN:${this.signerAddress}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -216,6 +225,9 @@ export class Client {
         break;
       case "near":
         addressToAddFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
+        break;
+      case "facesign":
+        addressToAddFormatted = `FACESIGN:${addressToAdd}`;
         break;
       default:
         throw new Error("Invalid address to add type");
@@ -245,6 +257,9 @@ export class Client {
       case "near":
         address = `NEAR:${this.signerPublicKey?.replace('ed25519:', '')}`;
         break;
+      case "facesign":
+        address = `FACESIGN:${this.signerPublicKey}`;
+        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -259,6 +274,9 @@ export class Client {
         break;
       case "near":
         addressToRemoveFormatted = `NEAR:${publicKey?.replace('ed25519:', '')}`;
+        break;
+      case "facesign":
+        addressToRemoveFormatted = `FACESIGN:${publicKey}`;
         break;
       default:
         throw new Error("Invalid address to remove type");

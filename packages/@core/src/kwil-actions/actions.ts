@@ -2419,7 +2419,6 @@ export const GetAllowanceOutputSchema: z.ZodObject<{
 
 export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
 
-/**  FaceSign should not be able to call this */
 export async function getAllowance(kwilClient: KwilActionClient): Promise<GetAllowanceOutput> {
   return await kwilClient
     .call<GetAllowanceOutput[]>({
