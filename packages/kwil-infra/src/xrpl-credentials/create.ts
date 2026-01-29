@@ -97,7 +97,11 @@ export class XrplCredentialsCreate {
         // Encode credential type as hex string (required by XRPL)
         CredentialType: hexEncode(utf8Encode(credType)),
         // Encode credential ID as hex URI (required by XRPL)
+<<<<<<< HEAD
         URI: hexEncode(utf8Encode(credId)),
+=======
+        URI: hexEncode(Buffer.from(credId)),
+>>>>>>> 923a407c (feat(core) Remove core package)
       },
       {
         wallet: this.#wallet,
@@ -165,7 +169,11 @@ export class XrplCredentialsCreate {
         // Use the composite credential type with metadata
         CredentialType: hexEncode(type),
         // Encode credential ID as hex URI (required by XRPL)
+<<<<<<< HEAD
         URI: hexEncode(utf8Encode(credId)),
+=======
+        URI: hexEncode(Buffer.from(credId)),
+>>>>>>> 923a407c (feat(core) Remove core package)
       },
       {
         wallet: this.#wallet,
