@@ -1,4 +1,17 @@
 import {
+  buildInsertableIDOSCredential,
+  matchLevelOrHigher,
+  recordFilter,
+} from "@idos-network/credentials/utils";
+import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/enclave";
+import {
+  createClientKwilSigner,
+  createWebKwilClient,
+  type KwilActionClient,
+  signNearMessage,
+  type Wallet,
+} from "@idos-network/kwil-infra";
+import {
   type AddAttributeInput,
   type AddWalletInput,
   addWallet,
@@ -32,16 +45,8 @@ import {
   revokeAccessGrant,
   type ShareCredentialInput,
   shareCredential,
-} from "@idos-network/core/kwil-actions";
-import {
-  createClientKwilSigner,
-  createWebKwilClient,
-  type KwilActionClient,
-  signNearMessage,
-} from "@idos-network/core/kwil-infra";
-import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential } from "@idos-network/core/utils";
-import { matchLevelOrHigher, recordFilter } from "@idos-network/credentials/utils";
+  type WalletType,
+} from "@idos-network/kwil-infra/actions";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -50,11 +55,6 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
-import type {
-  BaseProvider,
-  EncryptionPasswordStore,
-  PublicEncryptionProfile,
-} from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
 import invariant from "tiny-invariant";
 
@@ -144,13 +144,9 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
-    console.log("Wallet Type:", walletType);
-    console.log("Wallet Identifier:", walletIdentifier);
-    console.log("Wallet Public Key:", walletPublicKey);
-
     this.kwilClient.setSigner(kwilSigner);
 
-    if (walletType === "near") {
+    if (walletType === "NEAR") {
       const originalSigner = signer;
       signer = {
         signMessage: async (message: string) => {
@@ -184,7 +180,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -192,7 +188,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     kwilSigner: KwilSigner,
     walletIdentifier: string,
     walletPublicKey: string | undefined,
-    walletType: string,
+    walletType: WalletType,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -243,7 +239,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
       walletType: this.walletType,
-      encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
+      encryptionPasswordStore: kwilUser.encryption_password_store,
     });
 
     return new idOSClientLoggedIn(this, kwilUser);
@@ -259,7 +255,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
   readonly user: idOSUser;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
@@ -367,13 +363,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     const insertableCredential = {
-      ...(await buildInsertableIDOSCredential(
+      ...buildInsertableIDOSCredential(
         originalCredential.user_id,
         "",
         base64Encode(content),
-        consumerRecipientEncryptionPublicKey,
         base64Encode(encryptorPublicKey),
-      )),
+      ),
       grantee_wallet_identifier: consumerAddress,
       locked_until: lockedUntil,
     };
@@ -395,7 +390,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getGrants(
-    params: GetAccessGrantsGrantedInput,
+    params: Partial<GetAccessGrantsGrantedInput>,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return {
       grants: await getGrants(this.kwilClient, params),
@@ -482,7 +477,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
-      wallet.public_key,
+      wallet.public_key ?? undefined,
       wallet.wallet_type,
     );
     const signature = await this.enclaveProvider.signTypedData(
@@ -646,13 +641,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const insertableCredential: ShareCredentialInput = {
       ...credential,
-      ...(await buildInsertableIDOSCredential(
+      ...buildInsertableIDOSCredential(
         credential.user_id,
         "",
         base64Encode(content),
-        consumerAuthPublicKey,
         base64Encode(encryptorPublicKey),
-      )),
+      ),
       original_credential_id: credential.id,
       id: crypto.randomUUID(),
       grantee_wallet_identifier: consumerAuthPublicKey,

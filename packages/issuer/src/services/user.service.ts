@@ -1,4 +1,4 @@
-import type { KwilActionClient } from "@idos-network/core";
+import type { KwilActionClient } from "@idos-network/kwil-infra";
 import {
   hasProfile as _hasProfile,
   upsertWalletAsInserter as _upsertWalletAsInserter,
@@ -7,7 +7,7 @@ import {
   getUserAsInserter,
   type idOSUser,
   type idOSWallet,
-} from "@idos-network/core/kwil-actions";
+} from "@idos-network/kwil-infra/actions";
 
 export type CreateProfileReqParams = Omit<idOSUser, "id"> & {
   id?: string;

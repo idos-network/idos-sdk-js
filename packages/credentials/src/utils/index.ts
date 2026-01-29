@@ -1,7 +1,9 @@
 import { Ed25519VerificationKey2020 } from "@digitalbazaar/ed25519-verification-key-2020";
-
+import { base64Decode, base64Encode, hexEncode, utf8Encode } from "@idos-network/utils/codecs";
 import * as base85 from "base85";
 import { every, get } from "es-toolkit/compat";
+import invariant from "tiny-invariant";
+import nacl from "tweetnacl";
 
 import type {
   AvailableIssuerType,
@@ -10,6 +12,7 @@ import type {
   CredentialSubject,
   CredentialSubjectFaceId,
   CustomIssuerType,
+  InsertableIDOSCredential,
 } from "../types";
 
 export function fileToBase85(file: Buffer): string {
@@ -237,4 +240,38 @@ export function recordFilter(
   }
 
   return true;
+}
+
+export function buildInsertableIDOSCredential(
+  userId: string,
+  publicNotes: string,
+  content: string,
+  encryptorPublicKey: string,
+): InsertableIDOSCredential {
+  invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
+
+  const ephemeralAuthenticationKeyPair = nacl.sign.keyPair();
+
+  const publicNotesSignature = nacl.sign.detached(
+    utf8Encode(publicNotes),
+    ephemeralAuthenticationKeyPair.secretKey,
+  );
+
+  return {
+    user_id: userId,
+    content,
+
+    public_notes: publicNotes,
+    public_notes_signature: base64Encode(publicNotesSignature),
+
+    broader_signature: base64Encode(
+      nacl.sign.detached(
+        Uint8Array.from([...publicNotesSignature, ...base64Decode(content)]),
+        ephemeralAuthenticationKeyPair.secretKey,
+      ),
+    ),
+
+    issuer_auth_public_key: hexEncode(ephemeralAuthenticationKeyPair.publicKey, true),
+    encryptor_public_key: encryptorPublicKey,
+  };
 }

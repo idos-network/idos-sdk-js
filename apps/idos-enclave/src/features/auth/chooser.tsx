@@ -1,4 +1,4 @@
-import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
+import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import { KeyRoundIcon } from "lucide-preact";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";

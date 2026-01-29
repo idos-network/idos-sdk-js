@@ -2,13 +2,9 @@
   "name": "@idos-network/issuer",
   "description": "idOS Issuer JavaScript SDK for server environments",
   "version": "1.0.0-rc.1.2",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
-  },
   "dependencies": {
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
     "ripple-keypairs": "catalog:xrp",
@@ -16,8 +12,6 @@
     "web-streams-polyfill": "catalog:core"
   },
   "devDependencies": {
-    "@idos-network/core": "workspace:*",
-    "clean-package": "^2.2.0",
     "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
@@ -48,8 +42,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
     "publint": "pnpx publint --strict",
     "typecheck": "tsc --noEmit"
   },

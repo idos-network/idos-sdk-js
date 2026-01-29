@@ -25,6 +25,8 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+facesign
+GABC
 gemwallet
 headlessui
 heroicons
@@ -92,6 +94,7 @@ sdot
 secp
 secretbox
 secretsharing
+Shadcn
 shamir
 shardnet
 siwe
@@ -126,5 +129,6 @@ webauthn
 websdk
 Xaman
 xrpl
+xsig
+xsignature
 XUMM
-Shadcn

@@ -15,44 +15,65 @@ pnpm build
 
 ## Encryption & decryption idOS
 
-## Storage
+Helpers for key derivation and NaCl box encryption used by idOS.
 
-## Enclave provider
+```ts
+import nacl from "tweetnacl";
+import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
 
-In case you want to build your own enclave (like in a browser-extension) you should use the base or local provider like this:
+const sender = nacl.box.keyPair();
+const receiver = nacl.box.keyPair();
 
-```typescript
-import { type AuthMethod, LocalEnclave } from "@idos-network/utils/enclave";
+const derivedKey = await keyDerivation("SuperSecretPassword!", "9f51b3b2-4cbe-4c2b-8ea3-0b0c1b2f1a11");
+const message = new TextEncoder().encode("hello");
 
-class ChromeExtensionEnclave extends LocalEnclave {
-  async chooseAuthAndPassword(): Promise<{ authMethod: AuthMethod; password?: string }> {
-    return self.showPasswordPopup(
-      this.allowedAuthMethods,
-      this.userId,
-      this.expectedUserEncryptionPublicKey,
-    );
-  }
-
-  async confirm(message: string): Promise<boolean> {
-    return self.showConfirmPopup(message);
-  }
-
-  private async chooseAuthAndPassword() {
-    // Open popup and prompt user to choose an authentication method and eventually password
-  }
-}
+const { content, encryptorPublicKey } = encrypt(message, sender.publicKey, receiver.publicKey);
+const decrypted = await decrypt(content, receiver, encryptorPublicKey);
 ```
 
-NOTE: Chrome extension background workers won't support classic local storage, you should use in-memory or dedicated chrome extension storage:
+## Storage
 
-```typescript
-import { ChromeExtensionStore } from "@idos-network/utils/store";
+Storage abstractions with optional expiration handling and codec piping.
 
-const configuration = new idOSClientConfiguration<ChromeExtensionEnclave>({
-  nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-  chainId: import.meta.env.VITE_IDOS_CHAIN_ID,
-  store: new ChromeExtensionStore(),
-  enclaveOptions: {},
-  enclaveProvider: ChromeExtensionEnclave,
-});
+```ts
+import { LocalStorageStore } from "@idos-network/utils/store";
+import { base64Codec } from "@idos-network/utils/codecs";
+
+const store = new LocalStorageStore().pipeCodec(base64Codec);
+await store.set("secret", new Uint8Array([1, 2, 3]));
+const secret = await store.get<Uint8Array>("secret");
+
+await store.setRememberDuration(7); // days
+
+```
+
+## Cryptography
+
+NaCl box helpers and a convenience wrapper for nonce-prefixed, base64 messages.
+
+```ts
+import nacl from "tweetnacl";
+import { encryptContent, NoncedBox } from "@idos-network/utils/cryptography";
+import { base64Encode } from "@idos-network/utils/codecs";
+
+const sender = nacl.box.keyPair();
+const recipient = nacl.box.keyPair();
+const message = new TextEncoder().encode("hello");
+
+const fullMessage = encryptContent(message, recipient.publicKey, sender.secretKey);
+
+const box = new NoncedBox(recipient);
+const plaintext = await box.decrypt(base64Encode(fullMessage), base64Encode(sender.publicKey));
+```
+
+## Codecs
+
+Common encoding helpers used across idOS.
+
+```ts
+import { fromBytesToJson, hexEncodeSha256Hash, toBytes } from "@idos-network/utils/codecs";
+
+const data = toBytes({ hello: "world" });
+const hashHex = hexEncodeSha256Hash(data);
+const parsed = fromBytesToJson<{ hello: string }>(data);
 ```

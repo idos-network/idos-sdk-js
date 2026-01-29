@@ -14,18 +14,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v4
         with:
-          run_install: true
+          run_install: false
 
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node_version
-          cache: "pnpm"
+          cache: 'pnpm'
+
+      - run: pnpm install
 
       - name: Build
-        run: pnpm build --filter=@idos-network/issuer --filter=@idos-network/client --filter=@idos-network/consumer --filter=@idos-network/utils --filter=@idos-network/credentials
+        run: pnpm build:packages
 
       - name: Release
-        run: pnpx pkg-pr-new publish --pnpm './packages/issuer' './packages/client' './packages/consumer' './packages/utils' './packages/credentials'
+        run: pnpx pkg-pr-new publish --pnpm './packages/*'
