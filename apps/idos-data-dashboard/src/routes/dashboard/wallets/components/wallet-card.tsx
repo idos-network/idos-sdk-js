@@ -1,4 +1,4 @@
-import { Button, HStack, Image, Text, Tooltip, VStack } from "@chakra-ui/react";
+import { Button, Image, Tooltip } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
 
 type WalletCardProps = {
@@ -9,16 +9,14 @@ type WalletCardProps = {
 
 export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) => {
   return (
-    <HStack align="center" justify="space-between" gap={5} p={5} bg="neutral.900" rounded="xl">
-      <HStack gap={5}>
+    <div className="flex items-center justify-between gap-5 p-5 bg-neutral-900 rounded-xl">
+      <div className="flex items-center gap-5">
         <Image src="/idos-dashboard-logo-dark.svg" alt="Wallet image" w={50} h={50} />
-        <VStack align="stretch" gap={0} overflow="hidden">
-          <Text color="neutral.600">Address</Text>
-          <Text isTruncated maxW={200}>
-            {address}
-          </Text>
-        </VStack>
-      </HStack>
+        <div className="flex flex-col items-stretch gap-0 overflow-hidden">
+          <span className="block text-neutral-600">Address</span>
+          <span className="block truncate max-w-[200px]">{address}</span>
+        </div>
+      </div>
       <Tooltip
         hasArrow
         bg="neutral.500"
@@ -38,6 +36,6 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
           Delete
         </Button>
       </Tooltip>
-    </HStack>
+    </div>
   );
 };

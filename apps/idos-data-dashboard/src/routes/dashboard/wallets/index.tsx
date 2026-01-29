@@ -1,13 +1,4 @@
-import {
-  Heading,
-  HStack,
-  IconButton,
-  List,
-  ListItem,
-  Text,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
+import { IconButton, List, ListItem, useDisclosure } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
@@ -46,9 +37,9 @@ const NoWallets = () => {
 
 const LinkWalletError = () => {
   return (
-    <Text color="red.500" fontSize="sm">
+    <span className="block text-red-500 text-sm">
       You can't link a wallet to an account with no wallets. You'll be redirected back...
-    </Text>
+    </span>
   );
 };
 
@@ -129,28 +120,11 @@ export function Component() {
   }
 
   return (
-    <VStack align="stretch" flex={1} gap={2.5}>
-      <HStack
-        justifyContent="space-between"
-        h={{
-          base: 14,
-          lg: 20,
-        }}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-      >
-        <Heading
-          as="h1"
-          fontSize={{
-            base: "x-large",
-            lg: "xx-large",
-          }}
-        >
-          Wallets
-        </Heading>
+    <div className="flex flex-col items-stretch gap-2.5 flex-1">
+      <div className="flex items-center justify-between h-14 lg:h-20 p-5 bg-neutral-900 rounded-xl">
+        <h1 className="block text-2xl! lg:text-3xl! font-bold!">Wallets</h1>
         {hasProfile ? (
-          <HStack>
+          <div className="flex items-center gap-2.5">
             {import.meta.env.VITE_ADD_WALLET_USING_POPUP === "true" ? (
               <AddWalletButton />
             ) : (
@@ -165,14 +139,14 @@ export function Component() {
                 });
               }}
             />
-          </HStack>
+          </div>
         ) : (
           false
         )}
-      </HStack>
+      </div>
       {hasProfile ? <WalletsList /> : <NoWallets />}
       {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
-    </VStack>
+    </div>
   );
 }
 Component.displayName = "Wallets";
