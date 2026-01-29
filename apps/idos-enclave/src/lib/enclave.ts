@@ -2,8 +2,8 @@ import type {
   EncryptionPasswordStore,
   MPCPasswordContext,
   PasswordContext,
-} from "@idos-network/utils/enclave";
-import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/utils/enclave/local";
+} from "@idos-network/enclave";
+import { LocalEnclave, type LocalEnclaveOptions } from "@idos-network/enclave/local";
 
 const ENCLAVE_AUTHORIZED_ORIGINS_KEY = "enclave-authorized-origins";
 
