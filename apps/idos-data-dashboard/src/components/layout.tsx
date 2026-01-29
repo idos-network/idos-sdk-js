@@ -1,7 +1,5 @@
 import {
-  Box,
   Button,
-  Center,
   Link as ChakraLink,
   Drawer,
   DrawerBody,
@@ -10,16 +8,10 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  Flex,
-  HStack,
   IconButton,
   Image,
   type LinkProps,
-  List,
-  ListItem,
-  Text,
   useDisclosure,
-  VStack,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -45,23 +37,20 @@ const Link = (props: NavLinkProps & LinkProps) => {
 const ConnectedWallet = () => {
   const { address } = useAccount();
   return (
-    <HStack alignItems="center" gap={5} h={20}>
-      <Center flexShrink={0} w={50} h={50} bg="neutral.800" rounded="lg">
-        <Image
+    <div className="flex items-center gap-5 h-20">
+      <div className="flex-shrink-0 w-[50px] h-[50px] bg-neutral-800 rounded-lg flex items-center justify-center">
+        <img
           alt={`Connected wallet ${address}`}
           src="/idos-dashboard-logo-dark.svg"
-          w={50}
-          h={50}
+          className="w-[50px] h-[50px]"
           loading="eager"
         />
-      </Center>
-      <Box>
-        <Text>Connected Wallet</Text>
-        <Text maxW={180} color="neutral.600" isTruncated>
-          {address}
-        </Text>
-      </Box>
-    </HStack>
+      </div>
+      <div>
+        <div className="text-neutral-100">Connected Wallet</div>
+        <div className="max-w-[180px] text-neutral-600 truncate">{address}</div>
+      </div>
+    </div>
   );
 };
 
@@ -122,18 +111,16 @@ const Breadcrumbs = () => {
 
   const items = ["Dashboard", ...crumbs];
   return (
-    <List display="flex" alignItems="center" gap={[2.5, 5]}>
+    <ul className="flex items-center gap-2.5 lg:gap-5">
       {items.map((item, index) => {
         return (
-          <ListItem key={item} display="flex" alignItems="center" gap={[2.5, 5]}>
-            <Text as="span" fontSize="small" px={4} py={2} bg="neutral.800" rounded="full">
-              {item}
-            </Text>
+          <li key={item} className="flex items-center gap-2.5 lg:gap-5">
+            <span className="text-sm px-4 py-2 bg-neutral-800 rounded-full">{item}</span>
             {index !== items.length - 1 ? <ChevronRightIcon size={18} /> : null}
-          </ListItem>
+          </li>
         );
       })}
-    </List>
+    </ul>
   );
 };
 
@@ -147,83 +134,62 @@ export default function Layout({
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Flex minH="100dvh">
-      <VStack
-        as="nav"
-        alignItems="stretch"
-        pos="sticky"
-        top="0"
-        height="100dvh"
-        w={380}
-        hideBelow="lg"
-      >
-        <VStack alignItems="stretch" flex={1} p={5} gap={5}>
+    <div className="flex min-h-screen">
+      <nav className="sticky top-0 h-screen w-[380px] hidden lg:flex flex-col items-stretch">
+        <div className="flex flex-col items-stretch flex-1 p-5 gap-5">
           <Link to="/" display="flex" alignItems="center" h={100}>
-            <Image
+            <img
               src="/idos-dashboard-logo.svg"
               alt="idOS Dashboard logo"
-              w={160}
-              h="auto"
               loading="eager"
+              className="w-40 h-auto"
             />
           </Link>
-          <VStack alignItems="stretch" flex={1} gap={2.5}>
-            <Box px={5} bg="neutral.900" rounded="xl">
+          <div className="flex flex-col items-stretch flex-1 gap-2.5">
+            <div className="px-5 bg-neutral-900 rounded-xl">
               <ConnectedWallet />
-            </Box>
-            <VStack as="nav" alignItems="stretch" flex={1} p={5} bg="neutral.900" rounded="xl">
-              <List display="flex" flexDir="column" gap={1.5}>
-                <ListItem>
+            </div>
+            <nav className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
+              <ul className="flex flex-col gap-1.5">
+                <li>
                   <ListItemLink to="/">
                     <KeyRoundIcon size={24} strokeWidth="1.5" />
-                    <Text as="span">Credentials</Text>
+                    <span>Credentials</span>
                   </ListItemLink>
-                </ListItem>
+                </li>
                 {hasAccount ? (
-                  <ListItem>
+                  <li>
                     <ListItemLink to="/wallets">
                       <Wallet2Icon size={24} strokeWidth="1.5" />
-                      <Text as="span">Wallets</Text>
+                      <span>Wallets</span>
                     </ListItemLink>
-                  </ListItem>
+                  </li>
                 ) : null}
-              </List>
-              <VStack mt="auto" gap={5} alignItems="stretch">
+              </ul>
+              <div className="mt-auto flex flex-col gap-5 items-stretch">
                 {hasAccount ? (
-                  <List display="flex" flex={1} flexDir="column" gap={1.5}>
+                  <ul className="flex flex-1 flex-col gap-1.5">
                     <ListItemLink to="/settings">
                       <CogIcon size={24} strokeWidth="1" />
-                      <Text as="span">Settings</Text>
+                      <span>Settings</span>
                     </ListItemLink>
-                  </List>
+                  </ul>
                 ) : null}
                 <DisconnectButton />
-              </VStack>
-            </VStack>
-          </VStack>
-        </VStack>
-      </VStack>
-      <VStack as="main" alignItems="stretch" flex={1} p={5} gap={0}>
-        <Flex
-          as="header"
-          alignItems="center"
-          justifyContent="space-between"
-          h={{
-            base: 10,
-            lg: 120,
-          }}
-          mb={{
-            base: 5,
-            lg: 0,
-          }}
-        >
+              </div>
+            </nav>
+          </div>
+        </div>
+      </nav>
+      <div className="flex flex-col items-stretch flex-1 p-5 gap-0">
+        <div className="flex items-center justify-between h-10 lg:h-[120px] mb-5 lg:mb-0">
           <IconButton aria-label="Open menu" onClick={onOpen} hideFrom="lg">
             <MenuIcon size={24} strokeWidth="1.5" />
           </IconButton>
           <Breadcrumbs />
-        </Flex>
+        </div>
         {children}
-      </VStack>
+      </div>
       <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
         <DrawerOverlay />
         <DrawerContent bg="neutral.900">
@@ -240,39 +206,39 @@ export default function Layout({
             </Link>
           </DrawerHeader>
           <DrawerBody>
-            <Box mb={5}>
+            <div className="mb-5">
               <ConnectedWallet />
-            </Box>
-            <List display="flex" flexDir="column" gap={1.5}>
-              <ListItem>
+            </div>
+            <ul className="flex flex-col gap-1.5">
+              <li>
                 <ListItemLink to="/">
                   <KeyRoundIcon size={24} strokeWidth="2.5" />
-                  <Text as="span">Credentials</Text>
+                  <span>Credentials</span>
                 </ListItemLink>
-              </ListItem>
-              <ListItem>
+              </li>
+              <li>
                 <ListItemLink to="/wallets">
                   <Wallet2Icon size={24} strokeWidth="1.5" />
-                  <Text as="span">Wallets</Text>
+                  <span>Wallets</span>
                 </ListItemLink>
-              </ListItem>
-            </List>
+              </li>
+            </ul>
           </DrawerBody>
           <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
             {hasAccount ? (
-              <List display="flex" flex={1} flexDir="column" gap={1.5}>
+              <ul className="flex flex-1 flex-col gap-1.5">
                 <ListItemLink to="/settings">
                   <CogIcon size={24} strokeWidth="1" />
-                  <Text as="span">Settings</Text>
+                  <span>Settings</span>
                 </ListItemLink>
-              </List>
+              </ul>
             ) : null}
 
             {/* <DisconnectButton /> */}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <Flex pos="fixed" right={5} bottom={5} gap="2" bg="neutral.900" p={5} rounded="lg">
+      <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg">
         <Button
           as={ChakraLink}
           isExternal
@@ -297,7 +263,7 @@ export default function Layout({
         >
           User Agreement <ExternalLinkIcon size={16} />
         </Button>
-      </Flex>
-    </Flex>
+      </div>
+    </div>
   );
 }
