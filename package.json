@@ -48,6 +48,10 @@
     "test": "turbo run test",
     "typecheck": "turbo run typecheck"
   },
+  "resolutions": {
+    "@types/react": "catalog:react",
+    "@types/react-dom": "catalog:react"
+  },
   "size-limit": [
     {
       "name": "@idos-network/client",
