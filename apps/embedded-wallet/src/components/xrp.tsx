@@ -37,18 +37,11 @@ function XRPL() {
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
-    console.log("Ripple mounted!");
-  }, []);
-
-  useEffect(() => {
-    console.log(
-      `Running first useEffect with address: ${address} and connectedWalletType: ${connectedWalletType}`,
-    );
-    if (connectedWalletType === "XRPL" && address === null) {
+    if (!address && connectedWalletType === "XRPL") {
       setConnectedWalletType(null);
       stepper.reset();
     }
-  }, [address, connectedWalletType, stepper]);
+  }, [address, stepper]);
 
   const handleSignMessage = async () => {
     const signature = await signGemWalletTx(GemWallet, message);
@@ -77,15 +70,10 @@ function XRPL() {
 
       const { publicKey: pk, address: addr } = result;
 
-      if (pk && addr) {
-        queueMicrotask(() => {
-          console.log(`Setting address: ${addr} and publicKey: ${pk}`);
-          setPublicKey(pk);
-          setAddress(addr);
-          setConnectedWalletType("XRPL");
-          stepper.next();
-        });
-      }
+      setPublicKey(pk);
+      setAddress(addr);
+      setConnectedWalletType("XRPL");
+      stepper.next();
     } catch (error) {
       console.error("Connection failed:", error);
     }
