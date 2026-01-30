@@ -68,14 +68,14 @@ function Ethereum() {
 
   useEffect(() => {
     if (isConnected && stepper.isFirst) {
-      setConnectedWalletType("evm");
+      setConnectedWalletType("EVM");
       stepper.next();
     }
   }, [isConnected, stepper]);
 
   // Handle external disconnections
   useEffect(() => {
-    if (!isConnected && connectedWalletType === "evm") {
+    if (!isConnected && connectedWalletType === "EVM") {
       setConnectedWalletType(null);
       stepper.reset();
     }
