@@ -37,11 +37,14 @@ function XRPL() {
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
+    console.log(
+      `Running first useEffect with address: ${address} and connectedWalletType: ${connectedWalletType}`,
+    );
     if (connectedWalletType === "XRPL" && address === null) {
       setConnectedWalletType(null);
       stepper.reset();
     }
-  }, [address]);
+  }, [address, connectedWalletType, stepper]);
 
   const handleSignMessage = async () => {
     const signature = await signGemWalletTx(GemWallet, message);
@@ -71,6 +74,7 @@ function XRPL() {
       const { publicKey: pk, address: addr } = result;
 
       if (pk && addr) {
+        console.log(`Setting address: ${addr} and publicKey: ${pk}`);
         setPublicKey(pk);
         setAddress(addr);
         setConnectedWalletType("XRPL");
