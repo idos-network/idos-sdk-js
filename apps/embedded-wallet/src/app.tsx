@@ -5,7 +5,7 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { useWalletState } from "./state";
 
-const getHiddenWalletTypes = () => {
+const getHiddenWalletTypes = (): string[] => {
   const params = new URLSearchParams(window.location.search);
   const hiddenWallets = params.get("skip_wallets") ?? "";
   return hiddenWallets ? hiddenWallets.split(",") : [];
@@ -27,19 +27,19 @@ function WalletConnector() {
     );
   }
 
-  if (connectedWalletType === "evm") {
+  if (connectedWalletType === "EVM") {
     return <EVMConnector />;
   }
 
-  if (connectedWalletType === "near") {
+  if (connectedWalletType === "NEAR") {
     return <NearConnector />;
   }
 
-  if (connectedWalletType === "xrpl") {
+  if (connectedWalletType === "XRPL") {
     return <XRPLConnector />;
   }
 
-  if (connectedWalletType === "stellar") {
+  if (connectedWalletType === "Stellar") {
     return <StellarConnector />;
   }
 
@@ -47,10 +47,10 @@ function WalletConnector() {
 }
 
 export function App() {
-  const { walletPayload } = useWalletState();
+  const { walletPayload, connectedWalletType } = useWalletState();
 
   useEffect(() => {
-    if (walletPayload) {
+    if (walletPayload && connectedWalletType) {
       if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
@@ -70,6 +70,8 @@ export function App() {
               // Remove disconnect method from walletPayload
               data: {
                 ...walletPayload,
+                // TODO: Use WalletSignature from utils later
+                wallet_type: connectedWalletType,
                 disconnect: undefined,
               },
             },
@@ -83,7 +85,7 @@ export function App() {
           console.error("Error disconnecting wallet", error);
         });
     }
-  }, [walletPayload]);
+  }, [walletPayload, connectedWalletType]);
 
   return (
     <div className="grid h-full place-content-center">

@@ -163,8 +163,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         console.warn(
           `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
         );
-        // TODO Temporary ignore this
-        //  return;
+        return;
       }
       if (event.data?.type === "WALLET_SIGNATURE") {
         setWalletPayload(event.data.data);
