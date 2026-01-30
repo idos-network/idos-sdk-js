@@ -97,8 +97,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         console.warn(
           `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
-        // TODO Temporary ignore this
-        //  return;
+        return;
       }
       if (event.data?.type === "WALLET_SIGNATURE") {
         setWalletPayload(event.data.data);
