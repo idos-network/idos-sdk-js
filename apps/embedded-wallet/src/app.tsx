@@ -1,3 +1,4 @@
+import type { WalletType } from "@idos-network/core";
 import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
@@ -16,34 +17,26 @@ const hiddenWalletType = getHiddenWalletTypes();
 function WalletConnector() {
   const { connectedWalletType } = useWalletState();
 
-  if (!connectedWalletType) {
-    return (
-      <>
-        {!hiddenWalletType.includes("evm") && <EVMConnector />}
-        {!hiddenWalletType.includes("near") && <NearConnector />}
-        {!hiddenWalletType.includes("xrpl") && <XRPLConnector />}
-        {!hiddenWalletType.includes("stellar") && <StellarConnector />}
-      </>
-    );
-  }
+  const showWallet = (walletType: WalletType) => {
+    if (hiddenWalletType.includes(walletType.toLowerCase())) {
+      return false;
+    }
 
-  if (connectedWalletType === "EVM") {
-    return <EVMConnector />;
-  }
+    if (connectedWalletType && connectedWalletType !== walletType) {
+      return false;
+    }
 
-  if (connectedWalletType === "NEAR") {
-    return <NearConnector />;
-  }
+    return true;
+  };
 
-  if (connectedWalletType === "XRPL") {
-    return <XRPLConnector />;
-  }
-
-  if (connectedWalletType === "Stellar") {
-    return <StellarConnector />;
-  }
-
-  return null;
+  return (
+    <>
+      {showWallet("EVM") && <EVMConnector />}
+      {showWallet("NEAR") && <NearConnector />}
+      {showWallet("XRPL") && <XRPLConnector />}
+      {showWallet("Stellar") && <StellarConnector />}
+    </>
+  );
 }
 
 export function App() {
