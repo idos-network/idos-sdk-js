@@ -107,13 +107,11 @@ export async function createIDOSUserProfile({
     type: "EVM" | "XRPL" | "NEAR" | "Stellar";
     message: string;
     signature: string;
-    publicKey: string;
+    publicKey: string | undefined;
   };
   encryptionPasswordStore: EncryptionPasswordStore;
 }) {
   const issuer = await idOSIssuer();
-
-  console.log("Creating user with wallet:", wallet);
 
   const user = await issuer.createUser(
     {
@@ -126,7 +124,7 @@ export async function createIDOSUserProfile({
       wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: wallet.publicKey ?? "",
+      public_key: wallet.type === "EVM" ? "" : wallet.publicKey,
     },
   );
 
