@@ -21,6 +21,10 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
   invariant(walletPayload.signature, "Wallet signature is required");
   invariant(walletPayload.wallet_type, "Wallet type is required");
 
+  if (walletPayload.wallet_type !== "EVM") {
+    invariant(walletPayload.public_key?.[0], "Wallet public_key is required for non-EVM wallets");
+  }
+
   try {
     switch (walletPayload.wallet_type) {
       case "EVM":
