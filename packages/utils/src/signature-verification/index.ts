@@ -10,7 +10,7 @@ export interface WalletSignature {
   address?: string;
   signature: string;
   message?: string;
-  // TODO: This is a copy & paste from core, this should be resolved when @core dissapears
+  // TODO: This is a copy & paste from core, this should be resolved when @core disappears
   wallet_type: "EVM" | "NEAR" | "XRPL" | "Stellar" | "Pinocchio";
   public_key: string[];
 }
