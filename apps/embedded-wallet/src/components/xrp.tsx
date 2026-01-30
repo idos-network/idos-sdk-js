@@ -74,11 +74,13 @@ function XRPL() {
       const { publicKey: pk, address: addr } = result;
 
       if (pk && addr) {
-        console.log(`Setting address: ${addr} and publicKey: ${pk}`);
-        setPublicKey(pk);
-        setAddress(addr);
-        setConnectedWalletType("XRPL");
-        stepper.next();
+        queueMicrotask(() => {
+          console.log(`Setting address: ${addr} and publicKey: ${pk}`);
+          setPublicKey(pk);
+          setAddress(addr);
+          setConnectedWalletType("XRPL");
+          stepper.next();
+        });
       }
     } catch (error) {
       console.error("Connection failed:", error);
