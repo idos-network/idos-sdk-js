@@ -14,7 +14,9 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
         <Image src="/idos-dashboard-logo-dark.svg" alt="Wallet image" w={50} h={50} />
         <div className="flex flex-col items-stretch gap-0 overflow-hidden">
           <span className="block text-neutral-600">Address</span>
-          <span className="block truncate max-w-[200px]">{address}</span>
+          <span className="block truncate max-w-[200px]" title={address}>
+            {address}
+          </span>
         </div>
       </div>
       <Tooltip

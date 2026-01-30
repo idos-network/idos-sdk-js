@@ -37,7 +37,7 @@ const NoWallets = () => {
 
 const LinkWalletError = () => {
   return (
-    <span className="block text-red-500 text-sm">
+    <span role="alert" className="block text-red-500 text-sm">
       You can't link a wallet to an account with no wallets. You'll be redirected back...
     </span>
   );

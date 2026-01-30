@@ -1,6 +1,5 @@
 import {
   Button,
-  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -150,10 +149,11 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
             </div>
           ) : null}
           {grants.isError ? (
-            <span className="block text-red-500">Something went wrong, please retry.</span>
+            <span role="alert" className="block text-red-500">
+              Something went wrong, please retry.
+            </span>
           ) : null}
           {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : false}
-          <Code />
         </ModalBody>
         <ModalFooter gap={2.5}>
           {grants.isError ? <Button onClick={() => grants.refetch()}>Retry</Button> : false}

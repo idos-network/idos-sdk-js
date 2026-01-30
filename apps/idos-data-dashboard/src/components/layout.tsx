@@ -116,7 +116,7 @@ const Breadcrumbs = () => {
         return (
           <li key={item} className="flex items-center gap-2.5 lg:gap-5">
             <span className="text-sm px-4 py-2 bg-neutral-800 rounded-full">{item}</span>
-            {index !== items.length - 1 ? <ChevronRightIcon size={18} /> : null}
+            {index !== items.length - 1 ? <ChevronRightIcon size={18} aria-hidden="true" /> : null}
           </li>
         );
       })}
@@ -216,12 +216,14 @@ export default function Layout({
                   <span>Credentials</span>
                 </ListItemLink>
               </li>
-              <li>
-                <ListItemLink to="/wallets">
-                  <Wallet2Icon size={24} strokeWidth="1.5" />
-                  <span>Wallets</span>
-                </ListItemLink>
-              </li>
+              {hasAccount && (
+                <li>
+                  <ListItemLink to="/wallets">
+                    <Wallet2Icon size={24} strokeWidth="1.5" />
+                    <span>Wallets</span>
+                  </ListItemLink>
+                </li>
+              )}
             </ul>
           </DrawerBody>
           <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
@@ -233,8 +235,6 @@ export default function Layout({
                 </ListItemLink>
               </ul>
             ) : null}
-
-            {/* <DisconnectButton /> */}
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
