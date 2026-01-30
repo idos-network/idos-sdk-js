@@ -113,6 +113,8 @@ export async function createIDOSUserProfile({
 }) {
   const issuer = await idOSIssuer();
 
+  console.log("Creating user with wallet:", wallet);
+
   const user = await issuer.createUser(
     {
       id: userId,
