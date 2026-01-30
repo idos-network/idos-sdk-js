@@ -37,6 +37,10 @@ function XRPL() {
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
+    console.log("Ripple mounted!");
+  }, []);
+
+  useEffect(() => {
     console.log(
       `Running first useEffect with address: ${address} and connectedWalletType: ${connectedWalletType}`,
     );
