@@ -1,5 +1,4 @@
 import {
-  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -19,6 +18,7 @@ import {
 } from "@chakra-ui/react";
 
 import type { idOSGrant } from "@idos-network/core";
+import { Button } from "@/components/ui/button";
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrant } from "../shared";
 
@@ -95,9 +95,8 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   <Button
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
-                    variant="outline"
-                    colorScheme="red"
-                    isDisabled={timelockToMs(+grant.locked_until) >= Date.now()}
+                    variant="destructiveOutline"
+                    disabled={timelockToMs(+grant.locked_until) >= Date.now()}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.data_id === grant.data_id
                     }
@@ -156,8 +155,16 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
           {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : false}
         </ModalBody>
         <ModalFooter gap={2.5}>
-          {grants.isError ? <Button onClick={() => grants.refetch()}>Retry</Button> : false}
-          <Button onClick={onClose}>Close</Button>
+          {grants.isError ? (
+            <Button variant="secondary" size="lg" onClick={() => grants.refetch()}>
+              Retry
+            </Button>
+          ) : (
+            false
+          )}
+          <Button variant="secondary" size="lg" onClick={onClose}>
+            Close
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

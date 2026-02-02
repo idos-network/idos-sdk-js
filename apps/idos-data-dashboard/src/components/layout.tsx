@@ -1,6 +1,4 @@
 import {
-  Button,
-  Link as ChakraLink,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -10,7 +8,6 @@ import {
   DrawerOverlay,
   IconButton,
   Image,
-  type LinkProps,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -23,16 +20,15 @@ import {
   MenuIcon,
   Wallet2Icon,
 } from "lucide-react";
-import { NavLink, type NavLinkProps, useMatches } from "react-router-dom";
+import { type NavLinkProps, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 import { useWalletSelector } from "@/core/near";
 import stellarKit from "@/core/stellar-kit";
 import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
+import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/stores/wallet";
-
-const Link = (props: NavLinkProps & LinkProps) => {
-  return <ChakraLink as={NavLink} {...props} />;
-};
+import { Button } from "./ui/button";
+import { Link, type LinkProps as ShadcnLinkProps } from "./ui/link";
 
 const ConnectedWallet = () => {
   const { address } = useAccount();
@@ -54,20 +50,12 @@ const ConnectedWallet = () => {
   );
 };
 
-const ListItemLink = (props: NavLinkProps & LinkProps) => {
+const ListItemLink = (props: NavLinkProps & ShadcnLinkProps) => {
   return (
     <Link
       {...props}
-      px={6}
-      py={3}
-      display="flex"
-      alignItems="center"
-      gap={5}
-      rounded="xl"
-      _hover={{ bg: "neutral.950" }}
-      _activeLink={{
-        bg: "neutral.950",
-      }}
+      variant="nav"
+      className={cn("px-6 py-3 flex items-center gap-5 [&:hover]:!bg-neutral-950", props.className)}
     />
   );
 };
@@ -92,12 +80,8 @@ const DisconnectButton = () => {
   };
 
   return (
-    <Button
-      id="disconnect-wallet-btn"
-      colorScheme="green"
-      leftIcon={<LogOutIcon size={24} strokeWidth="1.5" />}
-      onClick={handleDisconnect}
-    >
+    <Button id="disconnect-wallet-btn" variant="default" onClick={handleDisconnect}>
+      <LogOutIcon size={24} strokeWidth="1.5" />
       Disconnect wallet
     </Button>
   );
@@ -137,7 +121,7 @@ export default function Layout({
     <div className="flex min-h-screen">
       <nav className="sticky top-0 h-screen w-[380px] hidden lg:flex flex-col items-stretch">
         <div className="flex flex-col items-stretch flex-1 p-5 gap-5">
-          <Link to="/" display="flex" alignItems="center" h={100}>
+          <Link to="/" className="flex items-center h-[100px]">
             <img
               src="/idos-dashboard-logo.svg"
               alt="idOS Dashboard logo"
@@ -195,7 +179,7 @@ export default function Layout({
         <DrawerContent bg="neutral.900">
           <DrawerCloseButton />
           <DrawerHeader>
-            <Link to="/" display="flex" alignItems="center" h={100}>
+            <Link to="/" className="flex items-center h-[100px]">
               <Image
                 src="/idos-dashboard-logo.svg"
                 alt="idOS Dashboard logo"
@@ -238,30 +222,26 @@ export default function Layout({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg">
-        <Button
-          as={ChakraLink}
-          isExternal
-          href="https://drive.google.com/file/d/1CypYsXx--xCT05cjEbYE4TCT9ymF698r/view?usp=drive_link"
-          target="_blank"
-          color="green.200"
-          display="inline-flex"
-          alignItems="center"
-          gap={2}
-        >
-          Privacy Policy <ExternalLinkIcon size={16} />
+      <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg flex items-stretch">
+        <Button variant="secondary" size="lg" className="flex items-center gap-2 !text-green-200">
+          <a
+            href="https://www.idos.network/legal/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2"
+          >
+            Privacy Policy <ExternalLinkIcon size={16} />
+          </a>
         </Button>
-        <Button
-          as={ChakraLink}
-          isExternal
-          href="https://drive.google.com/file/d/1OIoC1Y0TwBf-fR5g6FtZyvmjyv5iWY67/view?usp=drive_link"
-          target="_blank"
-          color="green.200"
-          display="inline-flex"
-          alignItems="center"
-          gap={2}
-        >
-          User Agreement <ExternalLinkIcon size={16} />
+        <Button variant="secondary" size="lg" className="flex items-center gap-2 !text-green-200">
+          <a
+            href="https://drive.google.com/file/d/1OIoC1Y0TwBf-fR5g6FtZyvmjyv5iWY67/view?usp=drive_link"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2"
+          >
+            User Agreement <ExternalLinkIcon size={16} />
+          </a>
         </Button>
       </div>
     </div>

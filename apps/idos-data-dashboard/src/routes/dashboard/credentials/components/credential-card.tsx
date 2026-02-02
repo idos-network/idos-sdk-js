@@ -1,7 +1,8 @@
-import { Button, ButtonGroup, GridItem, SimpleGrid } from "@chakra-ui/react";
+import { ButtonGroup, GridItem, SimpleGrid } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
 import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { useFetchGrants } from "../shared";
 import type { idOSCredentialWithShares } from "../types";
 
@@ -55,21 +56,30 @@ export const CredentialCard = ({
             lg: "row",
           }}
         >
-          <Button id={`view-details-${credential.id}`} onClick={() => onViewDetails(credential.id)}>
+          <Button
+            id={`view-details-${credential.id}`}
+            variant="secondary"
+            size="lg"
+            onClick={() => onViewDetails(credential.id)}
+          >
             View details
           </Button>
           <Button
+            size="lg"
+            variant="secondary"
             id={`manage-grants-${credential.id}`}
-            leftIcon={<KeyRoundIcon size={16} />}
             onClick={() => onManageGrants(credential.id)}
           >
+            <KeyRoundIcon size={16} />
             Manage grants
           </Button>
           <Button
+            size="lg"
+            variant="secondary"
             id={`delete-credential-${credential.id}`}
-            leftIcon={<XIcon size={16} />}
             onClick={() => onDelete(credential)}
           >
+            <XIcon size={16} />
             Delete
           </Button>
         </ButtonGroup>

@@ -1,4 +1,4 @@
-import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
 import { getWalletType } from "@idos-network/utils/wallets";
@@ -6,6 +6,7 @@ import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
 const createWalletParamsFactory = ({
@@ -101,7 +102,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const addWalletMutation = useAddWalletMutation();
   const toast = useToast();
   const queryClient = useQueryClient();
-  const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
   const idOSClient = useIdOS();
 
   const addWallet = async (walletPayload: WalletSignature) => {
@@ -247,24 +247,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     }
   };
 
-  if (isMobile) {
-    return (
-      <IconButton id="add-wallet-button" colorScheme="green" aria-label="Add wallet">
-        <PlusIcon size={24} />
-      </IconButton>
-    );
-  }
-
   return (
-    <Button
-      id="add-wallet-button"
-      colorScheme="green"
-      leftIcon={<PlusIcon size={24} />}
-      hideBelow="lg"
-      onClick={handleOpenWalletPopup}
-      isLoading={isLoading}
-    >
-      Add wallet
+    <Button size="lg" onClick={handleOpenWalletPopup} isLoading={isLoading}>
+      <PlusIcon size={24} />
+      <span className="hidden md:block">Add wallet</span>
     </Button>
   );
 }

@@ -1,11 +1,11 @@
-import { IconButton, List, ListItem, useDisclosure } from "@chakra-ui/react";
+import { List, ListItem, useDisclosure } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { RotateCw } from "lucide-react";
+import { RotateCwIcon } from "lucide-react";
 import { useState } from "react";
-
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
@@ -118,15 +118,18 @@ export function Component() {
     <div className="flex flex-col items-stretch flex-1 gap-2.5">
       <div className="flex justify-between items-center p-5 bg-neutral-900 rounded-xl">
         <h1 className="block text-2xl! md:text-3xl! font-bold!">Credentials</h1>
-        <IconButton
+
+        <Button
+          variant="secondary"
           aria-label="Refresh credentials"
-          icon={<RotateCw size={18} />}
           onClick={() => {
             queryClient.refetchQueries({
               queryKey: ["credentials"],
             });
           }}
-        />
+        >
+          <RotateCwIcon size={18} />
+        </Button>
       </div>
       <Credentials />
     </div>
