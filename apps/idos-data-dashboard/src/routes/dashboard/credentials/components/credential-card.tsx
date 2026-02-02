@@ -1,4 +1,4 @@
-import { Button, ButtonGroup, GridItem, SimpleGrid, Stack, Text } from "@chakra-ui/react";
+import { Button, ButtonGroup, GridItem, SimpleGrid } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
 import { useEffect } from "react";
@@ -30,24 +30,22 @@ export const CredentialCard = ({
   }, [shares]);
 
   return (
-    <Stack gap={14} p={5} bg="neutral.900" rounded="xl">
+    <div className="flex flex-col gap-16 p-5 bg-neutral-900 rounded-xl">
       <SimpleGrid columns={[2, 6]} spacing={10}>
         {meta.map(([key, value]) => (
           <GridItem key={key}>
-            <Text mb={5} color="neutral.500" fontSize="sm" textTransform="capitalize">
-              {key}
-            </Text>
-            <Text>{value}</Text>
+            <span className="block mb-5 text-neutral-500 text-sm capitalize">{key}</span>
+            <span>{value}</span>
           </GridItem>
         ))}
         <GridItem>
-          <Text mb={5} color="neutral.500" fontSize="sm">
-            Shares
-          </Text>
-          <Text data-testid="shares-count">{shares.data?.length || 0}</Text>
+          <span className="block mb-5 text-neutral-500 text-sm">Shares</span>
+          <span data-testid="shares-count" className="block">
+            {shares.data?.length || 0}
+          </span>
         </GridItem>
       </SimpleGrid>
-      <Stack flexDir={["column", "row"]} gap={5}>
+      <div className="flex md:flex-row flex-col gap-5">
         <ButtonGroup
           w="full"
           spacing={0}
@@ -75,7 +73,7 @@ export const CredentialCard = ({
             Delete
           </Button>
         </ButtonGroup>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   );
 };

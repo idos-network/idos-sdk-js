@@ -1,6 +1,5 @@
 import {
   Button,
-  Center,
   Code,
   Modal,
   ModalBody,
@@ -10,8 +9,6 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
-  Stack,
-  Text,
   useBreakpointValue,
 } from "@chakra-ui/react";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
@@ -104,16 +101,16 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
         <ModalCloseButton onClick={onClose} />
         <ModalBody display="flex">
           {credential.isLoading ? (
-            <Center flex={1}>
+            <div className="flex flex-1 items-center justify-center">
               <Spinner />
-            </Center>
+            </div>
           ) : null}
 
           {credential.isError ? (
-            <Stack>
-              <Text color="red.500">Unable to fetch credential details.</Text>
-              <Text color="red.500">{credential.error.message}</Text>
-            </Stack>
+            <div className="flex flex-col gap-2.5">
+              <p className="text-red-500">Unable to fetch credential details.</p>
+              <p className="text-red-500">{credential.error.message}</p>
+            </div>
           ) : null}
 
           {credential.isSuccess ? (

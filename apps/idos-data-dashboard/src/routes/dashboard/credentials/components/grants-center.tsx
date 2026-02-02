@@ -1,7 +1,5 @@
 import {
   Button,
-  Center,
-  Code,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -10,17 +8,14 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
-  Stack,
   Table,
   TableContainer,
   Tbody,
   Td,
-  Text,
   Th,
   Thead,
   Tr,
   useBreakpointValue,
-  VStack,
 } from "@chakra-ui/react";
 
 import type { idOSGrant } from "@idos-network/core";
@@ -52,7 +47,11 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   const revokeGrant = useRevokeGrant(credentialId);
 
   if (grants.length === 0) {
-    return <Text id="no-grants">You have not shared this credential with anyone.</Text>;
+    return (
+      <span className="block" id="no-grants">
+        You have not shared this credential with anyone.
+      </span>
+    );
   }
 
   const onRevoke = (grant: idOSGrant) => {
@@ -60,14 +59,14 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   };
 
   return (
-    <VStack align="stretch" gap={8}>
-      <Stack gap={2}>
-        <Text>Credentials Grants Access Center</Text>
-        <Text color="neutral.500">
+    <div className="flex flex-col items-stretch gap-8">
+      <div className="flex flex-col gap-2">
+        <span className="block">Credentials Grants Access Center</span>
+        <span className="block text-neutral-500">
           This is where you can manage your credentials grants. You can choose which access is
           revoked or granted.
-        </Text>
-      </Stack>
+        </span>
+      </div>
       <TableContainer rounded="lg" bg="neutral.800" border="1px solid" borderColor="neutral.700">
         <Table id={`grants-for-${credentialId}`} variant="simple" w="100%">
           <Thead>
@@ -85,12 +84,12 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 data-grant={JSON.stringify(grant)}
               >
                 <Td maxW={140}>
-                  <Text isTruncated>{grant.ag_grantee_wallet_identifier}</Text>
+                  <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>
                 </Td>
                 <Td>
-                  <Text>
+                  <span className="block">
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
-                  </Text>
+                  </span>
                 </Td>
                 <Td isNumeric>
                   <Button
@@ -112,7 +111,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
           </Tbody>
         </Table>
       </TableContainer>
-    </VStack>
+    </div>
   );
 };
 
@@ -145,13 +144,16 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
         <ModalCloseButton onClick={onClose} />
         <ModalBody display="flex" alignItems="center">
           {grants.isLoading ? (
-            <Center flex={1}>
+            <div className="flex flex-1 items-center justify-center">
               <Spinner />
-            </Center>
+            </div>
           ) : null}
-          {grants.isError ? <Text color="red.500">Something went wrong, please retry.</Text> : null}
+          {grants.isError ? (
+            <span role="alert" className="block text-red-500">
+              Something went wrong, please retry.
+            </span>
+          ) : null}
           {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : false}
-          <Code />
         </ModalBody>
         <ModalFooter gap={2.5}>
           {grants.isError ? <Button onClick={() => grants.refetch()}>Retry</Button> : false}

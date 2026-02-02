@@ -9,7 +9,6 @@ import {
   Button,
   Code,
   Spinner,
-  Text,
   useToast,
 } from "@chakra-ui/react";
 import type { idOSGrant } from "@idos-network/core";
@@ -186,24 +185,19 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           <AlertDialogBody>
             {revokeGrants.isPending ? (
               <>
-                <Text mb={1}>Revoking grant for consumer:</Text>
+                <span className="block mb-1">Revoking grant for consumer:</span>
                 <Code px={2} py={1} rounded="md" fontSize="sm" bg="neutral.800">
                   {ag_grantee_wallet_identifier}
                 </Code>
               </>
             ) : deleteCredential.isPending ? (
-              <Text>
+              <span className="block">
                 Deleting credential of type{" "}
-                <Text as="span" color="green.200" fontWeight="semibold">
-                  {meta.type}
-                </Text>{" "}
-                from issuer{" "}
-                <Text as="span" color="green.200" fontWeight="semibold">
-                  {meta.issuer}
-                </Text>
-              </Text>
+                <span className="block text-green-200 font-semibold">{meta.type}</span> from issuer{" "}
+                <span className="block text-green-200 font-semibold">{meta.issuer}</span>
+              </span>
             ) : (
-              <Text>Do you want to delete this credential from the idOS?</Text>
+              <span className="block">Do you want to delete this credential from the idOS?</span>
             )}
           </AlertDialogBody>
           <AlertDialogFooter>

@@ -1,4 +1,4 @@
-import { Box, Button, Heading, HStack, Stack, Text, VStack } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { FileLockIcon } from "lucide-react";
 import { useIdOS } from "@/idOS.provider";
 
@@ -6,45 +6,15 @@ export function Component() {
   const idOSClient = useIdOS();
 
   return (
-    <VStack align="stretch" flex={1} gap={5}>
-      <HStack
-        justifyContent="space-between"
-        h={{
-          base: 14,
-          lg: 20,
-        }}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-      >
-        <Heading
-          as="h1"
-          fontSize={{
-            base: "x-large",
-            lg: "xx-large",
-          }}
-        >
-          Settings
-        </Heading>
-      </HStack>
-      <Stack direction="column" gap={2.5}>
-        <Heading as="h2" size="md">
-          Back up your password or secret key
-        </Heading>
-        <Box p={5} bg="neutral.900" rounded="xl">
-          <Stack
-            alignItems={{
-              base: "stretch",
-              md: "center",
-            }}
-            justifyContent="space-between"
-            direction={{
-              base: "column",
-              md: "row",
-            }}
-            spacing={5}
-          >
-            <Text>Create a backup of your idOS password or secret key</Text>
+    <div className="flex flex-col items-stretch gap-5 flex-1">
+      <div className="flex items-center justify-between h-14 lg:h-20 p-5 bg-neutral-900 rounded-xl">
+        <h1 className="block text-2xl! lg:text-3xl! font-bold!">Settings</h1>
+      </div>
+      <div className="flex flex-col items-stretch gap-2.5">
+        <h2 className="block text-lg! font-bold!">Back up your password or secret key</h2>
+        <div className="p-5 bg-neutral-900 rounded-xl">
+          <div className="flex items-stretch md:items-center justify-between gap-5 flex-col md:flex-row">
+            <p>Create a backup of your idOS password or secret key</p>
             <Button
               colorScheme="green"
               leftIcon={<FileLockIcon size={20} />}
@@ -56,10 +26,10 @@ export function Component() {
             >
               Back up your idOS key
             </Button>
-          </Stack>
-        </Box>
-      </Stack>
-    </VStack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

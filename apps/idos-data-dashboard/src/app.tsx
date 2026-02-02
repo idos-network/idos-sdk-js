@@ -4,6 +4,7 @@ import { Outlet, useSearchParams } from "react-router-dom";
 import { useDisconnect } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
+import "@/styles/index.css";
 
 export default function App() {
   const [searchParams] = useSearchParams();
