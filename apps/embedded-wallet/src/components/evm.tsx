@@ -95,7 +95,7 @@ function Ethereum() {
           setWalletPayload({
             address,
             signature,
-            public_key: [address],
+            public_key: [],
             message,
             disconnect: disconnectEvm,
           });

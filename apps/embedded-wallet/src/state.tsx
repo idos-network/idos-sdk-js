@@ -4,7 +4,7 @@ import { createContext, type ReactNode, useContext, useMemo, useState } from "re
 export type WalletPayload = {
   address: string;
   signature: string;
-  public_key: string[];
+  public_key?: string[];
   message: string;
   disconnect: () => Promise<void>;
 };

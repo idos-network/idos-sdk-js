@@ -142,7 +142,6 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
         await open();
         return;
       }
-      publicKeys = [address];
     }
 
     if (walletType === "XRPL") {
@@ -211,7 +210,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     addWallet.mutate(
       {
         address,
-        publicKeys: publicKeys.length > 0 ? publicKeys : [address],
+        publicKeys,
         signature,
         message,
         walletType,
