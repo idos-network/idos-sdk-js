@@ -117,7 +117,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
-        publicKeys: walletPayload.public_key || [],
+        publicKeys: walletPayload.public_key,
         signature: walletPayload.signature,
         message: walletPayload.message || "Sign this message to prove you own this wallet",
         walletType: walletPayload.wallet_type,
