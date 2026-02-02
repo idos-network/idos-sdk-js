@@ -149,7 +149,7 @@ export default function Layout({
             <div className="px-5 bg-neutral-900 rounded-xl">
               <ConnectedWallet />
             </div>
-            <nav className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
+            <div className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
               <ul className="flex flex-col gap-1.5">
                 <li>
                   <ListItemLink to="/">
@@ -177,7 +177,7 @@ export default function Layout({
                 ) : null}
                 <DisconnectButton />
               </div>
-            </nav>
+            </div>
           </div>
         </div>
       </nav>
