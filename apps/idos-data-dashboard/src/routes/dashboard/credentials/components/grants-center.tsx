@@ -114,7 +114,7 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
         <DialogHeader>
           <DialogTitle>Grants center</DialogTitle>
         </DialogHeader>
-        <div className="">
+        <div>
           {grants.isLoading ? (
             <div className="flex flex-1 items-center justify-center">
               <Spinner className="size-8" />

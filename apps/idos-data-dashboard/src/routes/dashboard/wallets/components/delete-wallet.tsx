@@ -88,7 +88,6 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
             variant="destructive"
             onClick={() => handleDeleteWallet(wallets)}
             isLoading={deleteWallet.isPending}
-            disabled={deleteWallet.isPending}
           >
             {deleteWallet.isError ? "Retry" : "Delete"}
           </Button>
