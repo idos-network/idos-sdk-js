@@ -11,10 +11,6 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
-  --color-trueGray-700: oklch(0.2809 0 0);
-  --color-whiteAlpha-300: oklch(0.3562 0 0);
-  --color-whiteAlpha-200: oklch(0.1448 0 0);
-  --color-whiteAlpha-100: oklch(0.1448 0 0);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -23,8 +19,11 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-hover: var(--primary-hover);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-hover: var(--secondary-hover);
+  --color-hover-subtle: var(--hover-subtle);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -53,16 +52,19 @@
 
 :root {
   --radius: 0.625rem;
+  --primary: oklch(0.8857 0.1873 164.56);
+  --primary-foreground: oklch(0.145 0 0);
+  --primary-hover: oklch(0.82 0.17 164.56);
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(1 0 0 / 8%);
+  --secondary-foreground: oklch(1 0 0);
+  --secondary-hover: oklch(1 0 0 / 16%);
+  --hover-subtle: oklch(0.1448 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
@@ -95,8 +97,11 @@
   --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
+  --primary-hover: oklch(0.85 0 0);
+  --secondary: oklch(1 0 0 / 8%);
+  --secondary-foreground: oklch(1 0 0);
+  --secondary-hover: oklch(1 0 0 / 16%);
+  --hover-subtle: oklch(0.1448 0 0);
   --muted: oklch(0.269 0 0);
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
