@@ -1,5 +1,4 @@
 import {
-  Button,
   Code,
   Modal,
   ModalBody,
@@ -14,6 +13,7 @@ import {
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
@@ -130,17 +130,15 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
         </ModalBody>
         <ModalFooter gap={2.5}>
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
-          <Button onClick={onClose}>Close</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
           {credential.isSuccess ? (
-            <Button
-              id={`download-credential-${credential.data?.id}`}
-              as="a"
-              href={jsonLink}
-              colorScheme="green"
-              leftIcon={<DownloadIcon />}
-              download={downloadFileName}
-            >
-              Download as .json
+            <Button id={`download-credential-${credential.data?.id}`} variant="default">
+              <a href={jsonLink} download={downloadFileName} className="flex gap-2 items-center">
+                <DownloadIcon size={24} />
+                Download as .json
+              </a>
             </Button>
           ) : null}
         </ModalFooter>

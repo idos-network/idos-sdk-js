@@ -1,5 +1,5 @@
-import { Button } from "@chakra-ui/react";
 import { FileLockIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
 export function Component() {
@@ -16,15 +16,15 @@ export function Component() {
           <div className="flex items-stretch md:items-center justify-between gap-5 flex-col md:flex-row">
             <p>Create a backup of your idOS password or secret key</p>
             <Button
-              colorScheme="green"
-              leftIcon={<FileLockIcon size={20} />}
+              variant="default"
               onClick={async () => {
                 if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
 
                 await idOSClient.enclaveProvider.backupUserEncryptionProfile();
               }}
             >
-              Back up your idOS key
+              <FileLockIcon size={20} />
+              <span>Back up your idOS key</span>
             </Button>
           </div>
         </div>

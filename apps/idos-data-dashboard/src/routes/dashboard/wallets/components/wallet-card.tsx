@@ -1,5 +1,6 @@
-import { Button, Image, Tooltip } from "@chakra-ui/react";
+import { Image, Tooltip } from "@chakra-ui/react";
 import { XIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type WalletCardProps = {
   address: string;
@@ -30,11 +31,12 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
         placement="auto"
       >
         <Button
-          isDisabled={isDisabled}
+          variant="secondary"
+          disabled={isDisabled}
           id={`delete-wallet-${address}`}
-          leftIcon={<XIcon size={20} />}
           onClick={() => onDelete(address)}
         >
+          <XIcon size={20} />
           Delete
         </Button>
       </Tooltip>

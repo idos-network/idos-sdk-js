@@ -6,7 +6,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
-  Button,
   Code,
   Spinner,
   useToast,
@@ -20,6 +19,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
 import { timelockToMs } from "../../utils/time";
@@ -174,7 +174,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
     >
       <AlertDialogOverlay>
         <AlertDialogContent bg="neutral.900" rounded="xl">
-          <AlertDialogHeader>
+          <AlertDialogHeader className="mx-1">
             {revokeGrants.isPending
               ? "Revoking grants"
               : deleteCredential.isPending
@@ -200,17 +200,16 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
               <span className="block">Do you want to delete this credential from the idOS?</span>
             )}
           </AlertDialogBody>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="flex gap-2 items-center">
             {!(revokeGrants.isPending || deleteCredential.isPending) ? (
-              <Button ref={cancelRef} onClick={handleClose}>
+              <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
                 Cancel
               </Button>
             ) : null}
 
             <Button
               id={`confirm-delete-credential-${credential.id}`}
-              colorScheme="red"
-              ml={3}
+              variant="destructive"
               onClick={handleDeleteCredential}
               isLoading={revokeGrants.isPending || deleteCredential.isPending}
             >

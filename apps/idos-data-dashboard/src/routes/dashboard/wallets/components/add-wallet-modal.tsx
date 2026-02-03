@@ -1,5 +1,4 @@
 import {
-  Button,
   FormControl,
   FormLabel,
   Input,
@@ -24,6 +23,7 @@ import type { FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 
@@ -282,13 +282,12 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     <>
       <Button
         id="add-wallet-button"
-        colorScheme="green"
-        leftIcon={<PlusIcon size={24} />}
-        hideBelow="lg"
         onClick={onOpen}
         isLoading={addWallet.isPending}
+        aria-label="Add wallet"
       >
-        Add wallet
+        <PlusIcon size={24} />
+        <span className="sr-only md:not-sr-only">Add wallet</span>
       </Button>
       <Modal
         isOpen={isOpen}
@@ -319,12 +318,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button
-                id="add-wallet-form-submit"
-                colorScheme="green"
-                type="submit"
-                isLoading={addWallet.isPending}
-              >
+              <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>
                 {addWallet.isError ? "Try again" : "Add wallet"}
               </Button>
             </ModalFooter>
