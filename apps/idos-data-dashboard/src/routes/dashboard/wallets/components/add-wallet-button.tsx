@@ -248,7 +248,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   };
 
   return (
-    <Button size="lg" onClick={handleOpenWalletPopup} isLoading={isLoading}>
+    <Button onClick={handleOpenWalletPopup} isLoading={isLoading}>
       <PlusIcon size={24} />
       <span className="sr-only md:not-sr-only">Add wallet</span>
     </Button>

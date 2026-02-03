@@ -282,7 +282,6 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     <>
       <Button
         id="add-wallet-button"
-        size="lg"
         onClick={onOpen}
         isLoading={addWallet.isPending}
         aria-label="Add wallet"
@@ -319,12 +318,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
               </FormControl>
             </ModalBody>
             <ModalFooter>
-              <Button
-                id="add-wallet-form-submit"
-                size="lg"
-                type="submit"
-                isLoading={addWallet.isPending}
-              >
+              <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>
                 {addWallet.isError ? "Try again" : "Add wallet"}
               </Button>
             </ModalFooter>

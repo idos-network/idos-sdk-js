@@ -202,7 +202,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           </AlertDialogBody>
           <AlertDialogFooter className="flex gap-2 items-center">
             {!(revokeGrants.isPending || deleteCredential.isPending) ? (
-              <Button ref={cancelRef} variant="secondary" size="lg" onClick={handleClose}>
+              <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
                 Cancel
               </Button>
             ) : null}
@@ -210,7 +210,6 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
             <Button
               id={`confirm-delete-credential-${credential.id}`}
               variant="destructive"
-              size="lg"
               onClick={handleDeleteCredential}
               isLoading={revokeGrants.isPending || deleteCredential.isPending}
             >

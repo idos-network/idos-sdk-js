@@ -59,13 +59,11 @@ export const CredentialCard = ({
           <Button
             id={`view-details-${credential.id}`}
             variant="secondary"
-            size="lg"
             onClick={() => onViewDetails(credential.id)}
           >
             View details
           </Button>
           <Button
-            size="lg"
             variant="secondary"
             id={`manage-grants-${credential.id}`}
             onClick={() => onManageGrants(credential.id)}
@@ -74,7 +72,6 @@ export const CredentialCard = ({
             Manage grants
           </Button>
           <Button
-            size="lg"
             variant="secondary"
             id={`delete-credential-${credential.id}`}
             onClick={() => onDelete(credential)}

@@ -156,13 +156,13 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
         </ModalBody>
         <ModalFooter gap={2.5}>
           {grants.isError ? (
-            <Button variant="secondary" size="lg" onClick={() => grants.refetch()}>
+            <Button variant="secondary" onClick={() => grants.refetch()}>
               Retry
             </Button>
           ) : (
             false
           )}
-          <Button variant="secondary" size="lg" onClick={onClose}>
+          <Button variant="secondary" onClick={onClose}>
             Close
           </Button>
         </ModalFooter>

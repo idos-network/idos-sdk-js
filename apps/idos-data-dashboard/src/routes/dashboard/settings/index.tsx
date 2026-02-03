@@ -16,7 +16,6 @@ export function Component() {
           <div className="flex items-stretch md:items-center justify-between gap-5 flex-col md:flex-row">
             <p>Create a backup of your idOS password or secret key</p>
             <Button
-              size="lg"
               variant="default"
               onClick={async () => {
                 if (idOSClient.state !== "logged-in") throw new Error("User not authenticated");
