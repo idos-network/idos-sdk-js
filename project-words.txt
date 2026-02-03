@@ -126,3 +126,4 @@ websdk
 Xaman
 xrpl
 XUMM
+Shadcn

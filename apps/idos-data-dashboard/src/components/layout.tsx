@@ -34,7 +34,7 @@ const ConnectedWallet = () => {
   const { address } = useAccount();
   return (
     <div className="flex items-center gap-5 h-20">
-      <div className="flex-shrink-0 w-[50px] h-[50px] bg-neutral-800 rounded-lg flex items-center justify-center">
+      <div className="shrink-0 w-[50px] h-[50px] bg-neutral-800 rounded-lg flex items-center justify-center">
         <img
           alt={`Connected wallet ${address}`}
           src="/idos-dashboard-logo-dark.svg"
@@ -55,7 +55,7 @@ const ListItemLink = (props: NavLinkProps & ShadcnLinkProps) => {
     <Link
       {...props}
       variant="nav"
-      className={cn("px-6 py-3 flex items-center gap-5 [&:hover]:!bg-neutral-950", props.className)}
+      className={cn("px-6 py-3 flex items-center gap-5 [&:hover]:bg-neutral-950!", props.className)}
     />
   );
 };
@@ -223,25 +223,39 @@ export default function Layout({
         </DrawerContent>
       </Drawer>
       <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg flex items-stretch">
-        <Button variant="secondary" size="lg" className="flex items-center gap-2 !text-green-200">
-          <a
-            href="https://www.idos.network/legal/privacy-policy"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            Privacy Policy <ExternalLinkIcon size={16} />
-          </a>
+        <Button
+          variant="secondary"
+          size="lg"
+          className="flex items-center gap-2 text-green-200!"
+          nativeButton={false}
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: just making types happy
+            <a
+              href="https://www.idos.network/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            />
+          }
+        >
+          Privacy Policy <ExternalLinkIcon size={16} />
         </Button>
-        <Button variant="secondary" size="lg" className="flex items-center gap-2 !text-green-200">
-          <a
-            href="https://drive.google.com/file/d/1OIoC1Y0TwBf-fR5g6FtZyvmjyv5iWY67/view?usp=drive_link"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2"
-          >
-            User Agreement <ExternalLinkIcon size={16} />
-          </a>
+        <Button
+          variant="secondary"
+          size="lg"
+          className="flex items-center gap-2 text-green-200!"
+          nativeButton={false}
+          render={
+            // biome-ignore lint/a11y/useAnchorContent: just making types happy
+            <a
+              href="https://www.idos.network/legal/user-agreement"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2"
+            />
+          }
+        >
+          User Agreement <ExternalLinkIcon size={16} />
         </Button>
       </div>
     </div>

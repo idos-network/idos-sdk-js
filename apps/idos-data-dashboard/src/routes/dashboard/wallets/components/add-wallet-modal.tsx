@@ -280,9 +280,15 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
 
   return (
     <>
-      <Button id="add-wallet-button" size="lg" onClick={onOpen} isLoading={addWallet.isPending}>
+      <Button
+        id="add-wallet-button"
+        size="lg"
+        onClick={onOpen}
+        isLoading={addWallet.isPending}
+        aria-label="Add wallet"
+      >
         <PlusIcon size={24} />
-        <span className="hidden md:block">Add wallet</span>
+        <span className="sr-only md:not-sr-only">Add wallet</span>
       </Button>
       <Modal
         isOpen={isOpen}

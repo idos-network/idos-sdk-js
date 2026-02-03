@@ -1,4 +1,4 @@
-import { NavLink, useLocation, type NavLinkProps } from "react-router-dom";
+import { NavLink, type NavLinkProps } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -28,12 +28,11 @@ export interface LinkProps
 }
 
 function Link({ className, variant, ...props }: LinkProps) {
-  const { pathname } = useLocation()
   return (
     <NavLink
-      className={cn(
+      className={({ isActive }) => cn(
         linkVariants({ variant }),
-        pathname === props.to && "!bg-neutral-950",
+        isActive && "bg-neutral-950!",
         className
       )}
       {...props}

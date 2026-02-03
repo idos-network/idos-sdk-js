@@ -3,6 +3,9 @@ import { Button as ButtonPrimitive } from "@base-ui/react/button"
 import { cva, type VariantProps } from "class-variance-authority"
 import { Loader2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { Ref } from "react"
+
+import { forwardRef } from "react"
 const buttonVariants = cva(
     "!px-4 focus-visible:border-ring !font-semibold bg-inherit focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 rounded-md border border-transparent bg-clip-padding text-sm font-medium focus-visible:ring-[3px] aria-invalid:ring-[3px] [&_svg:not([class*='size-'])]:size-4 inline-flex items-center justify-center whitespace-nowrap transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0 [&_svg]:shrink-0 outline-none group/button select-none",
     {
@@ -39,7 +42,7 @@ export interface ButtonProps
     isLoading?: boolean;
 }
 
-function Button({
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button({
     className,
     variant = "default",
     size,
@@ -47,7 +50,7 @@ function Button({
     disabled,
     children,
     ...props
-}: ButtonProps) {
+}: ButtonProps, ref: Ref<HTMLButtonElement>) {
     const spinnerSizeClass =
         size === "xs"
             ? "h-3 w-3"
@@ -63,6 +66,7 @@ function Button({
             className={cn(buttonVariants({ variant, size, className }))}
             disabled={disabled || isLoading}
             {...props}
+            ref={ref}
         >
             {isLoading && (
                 <Loader2
@@ -74,4 +78,5 @@ function Button({
         </ButtonPrimitive>
     );
 }
+);
 export { Button, buttonVariants }
