@@ -1,5 +1,4 @@
 import {
-  Button,
   Image,
   Modal,
   ModalBody,
@@ -15,6 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { useIdOS } from "@/idOS.provider";
+import { Button } from "./ui/button";
 
 type ProfOfPersonhoodProps = {
   isOpen: boolean;
@@ -117,14 +117,12 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
         </ModalBody>
         <ModalFooter placeContent="center">
           <Button
-            rightIcon={<ArrowUpRightIcon size={24} />}
-            flex={{
-              base: 1,
-              lg: "none",
-            }}
+            className="flex-1 lg:flex-none flex gap-1 items-center"
+            variant="secondary"
             onClick={() => window.location.assign(fractalProofUrl(idOSClient.walletIdentifier))}
           >
             Verify with Fractal ID
+            <ArrowUpRightIcon size={24} />
           </Button>
         </ModalFooter>
       </ModalContent>

@@ -6,13 +6,12 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogOverlay,
-  Button,
   useToast,
 } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
-
+import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
 type DeleteWalletProps = {
@@ -91,16 +90,16 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
           <AlertDialogHeader>Delete wallet</AlertDialogHeader>
           <AlertDialogCloseButton />
           <AlertDialogBody>Do you want to delete this wallet from the idOS?</AlertDialogBody>
-          <AlertDialogFooter>
-            <Button ref={cancelRef} onClick={handleClose}>
+          <AlertDialogFooter className="flex gap-2 items-center">
+            <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
             <Button
               id={`confirm-delete-wallet-${wallets[0].address}`}
-              colorScheme="red"
-              ml={3}
+              variant="destructive"
               onClick={() => handleDeleteWallet(wallets)}
               isLoading={deleteWallet.isPending}
+              disabled={deleteWallet.isPending}
             >
               {deleteWallet.isError ? "Retry" : "Delete"}
             </Button>

@@ -1,4 +1,4 @@
-import { Box, Button, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
+import { Box, Heading, Image, Link, Text, VStack } from "@chakra-ui/react";
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
 import { getGemWalletPublicKey } from "@idos-network/core";
@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import { useWalletSelector } from "@/core/near";
+import { Button } from "./components/ui/button";
 import stellarKit from "./core/stellar-kit";
 import { useWalletStore } from "./stores/wallet";
 
@@ -110,17 +111,28 @@ export const ConnectWallet = () => {
             }}
             gap={3}
           >
-            <Button size="lg" justifyContent="space-between" onClick={() => open()}>
+            <Button
+              className="justify-between"
+              size="xl"
+              variant="secondary"
+              onClick={() => open()}
+            >
               Connect a wallet
               <Image alt="NEAR logo" src="/wallet-connect.svg" w={8} h={8} mr={1} />
             </Button>
-            <Button size="lg" justifyContent="space-between" onClick={() => modal.show()}>
+            <Button
+              className="justify-between"
+              size="xl"
+              variant="secondary"
+              onClick={() => modal.show()}
+            >
               Connect with NEAR
               <Image alt="NEAR logo" src="/near.svg" w={10} h={10} />
             </Button>
             <Button
-              size="lg"
-              justifyContent="space-between"
+              className="justify-between"
+              size="xl"
+              variant="secondary"
               onClick={() => {
                 GemWallet.isInstalled().then((res) => {
                   if (res.result.isInstalled) {
@@ -143,11 +155,14 @@ export const ConnectWallet = () => {
               Connect with XRP
               <Image alt="XRP logo" src="/xrp.svg" w={10} h={10} />
             </Button>
-            <Button size="lg" justifyContent="space-between" onClick={connectStellarWallet}>
+            <Button
+              className="justify-between"
+              size="xl"
+              variant="secondary"
+              onClick={connectStellarWallet}
+            >
               Connect with Stellar
-              <Box display="flex" alignItems="center" mr={1}>
-                <TokenIcon symbol="xlm" size={34} />
-              </Box>
+              <TokenIcon symbol="xlm" className="min-w-10 min-h-10" />
             </Button>
           </VStack>
         </VStack>
