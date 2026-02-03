@@ -1,19 +1,16 @@
-import {
-  Code,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Code } from "@chakra-ui/react";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { useIdOS } from "@/idOS.provider";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
@@ -54,16 +51,6 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     credentialId,
   });
 
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
-
   const jsonLink = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(credential.data),
   )}`;
@@ -85,24 +72,15 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     : "credential.json";
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={{
-        base: "full",
-        lg: "2xl",
-      }}
-      isCentered={isCentered}
-      scrollBehavior="inside"
-    >
-      <ModalOverlay />
-      <ModalContent bg="neutral.900" rounded="xl">
-        <ModalHeader>Credential details</ModalHeader>
-        <ModalCloseButton onClick={onClose} />
-        <ModalBody display="flex">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Credential details</DialogTitle>
+        </DialogHeader>
+        <div className="flex max-w-full overflow-auto">
           {credential.isLoading ? (
             <div className="flex flex-1 items-center justify-center">
-              <Spinner />
+              <Spinner className="size-8" />
             </div>
           ) : null}
 
@@ -127,9 +105,9 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
               {credentialContent}
             </Code>
           ) : null}
-        </ModalBody>
-        <ModalFooter gap={2.5}>
-          {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
+        </div>
+        <DialogFooter className="gap-2.5">
+          {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : null}
           <Button variant="secondary" onClick={onClose}>
             Close
           </Button>
@@ -141,8 +119,8 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
               </a>
             </Button>
           ) : null}
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

@@ -1,17 +1,15 @@
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  useToast,
-} from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useIdOS } from "@/idOS.provider";
 
 type DeleteWalletProps = {
@@ -75,37 +73,27 @@ export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) =>
   if (!wallets || wallets.length === 0) return null;
 
   return (
-    <AlertDialog
-      isOpen={isOpen}
-      size={{
-        base: "full",
-        lg: "lg",
-      }}
-      isCentered
-      leastDestructiveRef={cancelRef}
-      onClose={handleClose}
-    >
-      <AlertDialogOverlay>
-        <AlertDialogContent bg="neutral.900" rounded="xl">
-          <AlertDialogHeader>Delete wallet</AlertDialogHeader>
-          <AlertDialogCloseButton />
-          <AlertDialogBody>Do you want to delete this wallet from the idOS?</AlertDialogBody>
-          <AlertDialogFooter className="flex gap-2 items-center">
-            <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button
-              id={`confirm-delete-wallet-${wallets[0].address}`}
-              variant="destructive"
-              onClick={() => handleDeleteWallet(wallets)}
-              isLoading={deleteWallet.isPending}
-              disabled={deleteWallet.isPending}
-            >
-              {deleteWallet.isError ? "Retry" : "Delete"}
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+      <DialogContent className="max-w-full lg:max-w-lg bg-neutral-900" showCloseButton={true}>
+        <DialogHeader>
+          <DialogTitle>Delete wallet</DialogTitle>
+        </DialogHeader>
+        <div>Do you want to delete this wallet from the idOS?</div>
+        <DialogFooter className="flex gap-2 items-center">
+          <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button
+            id={`confirm-delete-wallet-${wallets[0].address}`}
+            variant="destructive"
+            onClick={() => handleDeleteWallet(wallets)}
+            isLoading={deleteWallet.isPending}
+            disabled={deleteWallet.isPending}
+          >
+            {deleteWallet.isError ? "Retry" : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
