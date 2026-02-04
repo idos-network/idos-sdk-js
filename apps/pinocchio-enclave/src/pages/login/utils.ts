@@ -139,13 +139,13 @@ export class FaceTecContainer {
     }
 
     this.faceTecSDKInstance.start3DLiveness(
-      new SessionRequestProcessor((result, lastRecievedToken) => {
+      new SessionRequestProcessor((result, lastReceivedToken) => {
         // biome-ignore lint/style/noNonNullAssertion: This was checked above
         if (
           result.status === this.FaceTecSDK!.FaceTecSessionStatus.SessionCompleted &&
-          lastRecievedToken
+          lastReceivedToken
         ) {
-          this.callback?.(undefined, lastRecievedToken);
+          this.callback?.(undefined, lastReceivedToken);
         } else {
           this.callback?.(this.descriptionForSessionStatus(result.status));
         }

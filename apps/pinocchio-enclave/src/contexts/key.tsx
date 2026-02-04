@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import nacl from "tweetnacl";
-import { checkKeyAvailability, getKeyPair, storeMnemnonic } from "@/lib/keys";
+import { checkKeyAvailability, getKeyPair, storeMnemonic } from "@/lib/keys";
 
 export interface KeyStorage {
   isKeyAvailable: boolean;
@@ -38,7 +38,7 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
   const contextValue = {
     isKeyAvailable: isKeyAvailable || false,
     setMnemonic: async (mnemonic: string) => {
-      await storeMnemnonic(mnemonic);
+      await storeMnemonic(mnemonic);
       setIsKeyAvailable(true);
     },
     getPublicKey: async () => {

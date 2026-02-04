@@ -5,7 +5,7 @@ import { storeGet, storeSet } from "./storage";
 export const DB_KEY_KEK = "kek";
 export const DB_KEY_MNEMONIC = "mnemonic";
 
-export async function storeMnemnonic(mnemonic: string) {
+export async function storeMnemonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));
 }
 

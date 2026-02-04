@@ -5,13 +5,13 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
 import { App } from "./app";
+import ProtectedRoute from "./lib/protected-route";
+import ErrorPage from "./pages/error";
 import Home from "./pages/home";
 import Login from "./pages/login";
-import Wallet from "./pages/wallet";
-import ErrorPage from "./pages/error";
 import Session from "./pages/session";
 import Sign from "./pages/sign";
-import ProtectedRoute from "./lib/protected-route";
+import Wallet from "./pages/wallet";
 
 const router = createBrowserRouter([
   {

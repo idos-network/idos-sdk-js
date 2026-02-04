@@ -228,7 +228,7 @@ export async function createClientKwilSigner(
         // @ts-expect-error
         async (msg: Uint8Array) => wallet.signMessage(msg),
         wallet.publicAddress,
-        // This is pinocchio, not sure about stelar
+        // This is pinocchio, not sure about stellar
         "ed25519",
       ),
       wallet.publicAddress,

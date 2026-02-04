@@ -9,14 +9,14 @@ import type {
 
 export type SessionRequestProcessorCallback = (
   result: FaceTecSessionResult,
-  lastRecievedToken?: string,
+  lastReceivedToken?: string,
 ) => void;
 
 // This is an example self-contained class to perform Liveness Checks with the FaceTec SDK.
 // You may choose to further componentize parts of this in your own Apps based on your specific requirements.
 //
 export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
-  private lastRecievedToken: string | undefined = undefined;
+  private lastReceivedToken: string | undefined = undefined;
 
   constructor(private callback?: SessionRequestProcessorCallback) {}
 
@@ -28,8 +28,8 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
     sessionRequestCallback: FaceTecSessionRequestProcessorCallback,
   ): void => {
     login(sessionRequestBlob)
-      .then(({ responseBlob, token }) => {
-        this.lastRecievedToken = token;
+      .then(({ responseBlob, entropyToken }) => {
+        this.lastReceivedToken = entropyToken;
 
         if (responseBlob) {
           this.onResponseBlobReceived(responseBlob, sessionRequestCallback);
@@ -76,6 +76,6 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
   // For demonstration purposes, we are handling next steps in the SampleAppController.
   public onFaceTecExit = (faceTecSessionResult: FaceTecSessionResult): void => {
     console.log("DONE");
-    this.callback?.(faceTecSessionResult, this.lastRecievedToken);
+    this.callback?.(faceTecSessionResult, this.lastReceivedToken);
   };
 }

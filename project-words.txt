@@ -25,6 +25,8 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+facetec
+facesign
 gemwallet
 headlessui
 heroicons
@@ -122,6 +124,7 @@ vite
 vitest
 wagmi
 webauthn
+webservice
 websdk
 Xaman
 xrpl

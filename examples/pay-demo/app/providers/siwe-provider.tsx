@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { useAccount, useConnect, useSignMessage, useWalletClient } from "wagmi";
 import { getAddress, type WalletClient } from "viem";
+import { useAccount, useConnect, useSignMessage, useWalletClient } from "wagmi";
 
 interface SiweContextType {
   address: string | null;
@@ -32,7 +32,9 @@ export function SiweProvider({ children }: { children: React.ReactNode }) {
       // Connect wallet if not already connected
       let address = wagmiAddress;
       if (!isConnected) {
-        const injectedConnector = connectors.find((c) => c.id === 'injected' || c.id === "walletConnect");
+        const injectedConnector = connectors.find(
+          (c) => c.id === "injected" || c.id === "walletConnect",
+        );
         if (!injectedConnector) {
           throw new Error("Please install MetaMask or another wallet");
         }
@@ -86,7 +88,7 @@ export function SiweProvider({ children }: { children: React.ReactNode }) {
         isAuthenticated,
         signIn,
         signOut,
-        walletClient
+        walletClient,
       }}
     >
       {children}
