@@ -1,4 +1,4 @@
-import { Button, Stack, Text } from "@chakra-ui/react";
+import { Button } from "@/components/ui/button";
 
 type DataErrorProps = {
   onRetry: () => void;
@@ -6,24 +6,11 @@ type DataErrorProps = {
 
 export const DataError = ({ onRetry }: DataErrorProps) => {
   return (
-    <Stack
-      align={{
-        base: "stretch",
-        lg: "center",
-      }}
-      gap={2.5}
-      flexDir={{
-        base: "column",
-        lg: "row",
-      }}
-      p={5}
-      bg="neutral.900"
-      rounded="xl"
-    >
-      <Text color="red.500">Something went wrong, please retry.</Text>
-      <Button size="sm" variant="outline" onClick={onRetry}>
+    <div className="flex items-center flex-col lg:flex-row  gap-2.5 p-5 bg-neutral-900 rounded-xl">
+      <span className="text-red-500">Something went wrong, please retry.</span>
+      <Button variant="secondary" onClick={onRetry}>
         Retry
       </Button>
-    </Stack>
+    </div>
   );
 };

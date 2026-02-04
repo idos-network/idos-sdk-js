@@ -1,4 +1,3 @@
-import { ButtonGroup, GridItem, SimpleGrid } from "@chakra-ui/react";
 import { KeyRoundIcon, XIcon } from "lucide-react";
 
 import { useEffect } from "react";
@@ -32,30 +31,22 @@ export const CredentialCard = ({
 
   return (
     <div className="flex flex-col gap-16 p-5 bg-neutral-900 rounded-xl">
-      <SimpleGrid columns={[2, 6]} spacing={10}>
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-10">
         {meta.map(([key, value]) => (
-          <GridItem key={key}>
+          <div key={key} className="flex flex-col items-stretch gap-2">
             <span className="block mb-5 text-neutral-500 text-sm capitalize">{key}</span>
             <span>{value}</span>
-          </GridItem>
+          </div>
         ))}
-        <GridItem>
+        <div>
           <span className="block mb-5 text-neutral-500 text-sm">Shares</span>
           <span data-testid="shares-count" className="block">
             {shares.data?.length || 0}
           </span>
-        </GridItem>
-      </SimpleGrid>
+        </div>
+      </div>
       <div className="flex md:flex-row flex-col gap-5">
-        <ButtonGroup
-          w="full"
-          spacing={0}
-          gap={4}
-          flexDir={{
-            base: "column",
-            lg: "row",
-          }}
-        >
+        <div className="w-full flex flex-col lg:flex-row gap-4">
           <Button
             id={`view-details-${credential.id}`}
             variant="secondary"
@@ -79,7 +70,7 @@ export const CredentialCard = ({
             <XIcon size={16} />
             Delete
           </Button>
-        </ButtonGroup>
+        </div>
       </div>
     </div>
   );

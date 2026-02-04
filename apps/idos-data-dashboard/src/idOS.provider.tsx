@@ -1,4 +1,3 @@
-import { Center, Spinner, Text } from "@chakra-ui/react";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import type { WalletInfo } from "@idos-network/controllers";
 import type { Wallet } from "@near-wallet-selector/core";
@@ -16,6 +15,7 @@ import invariant from "tiny-invariant";
 import { useAccount } from "wagmi";
 import { useEthersSigner } from "@/core/wagmi";
 import Layout from "./components/layout";
+import { Spinner } from "./components/ui/spinner";
 import { ConnectWallet } from "./connect-wallet";
 import { useWalletSelector } from "./core/near";
 import { walletInfoMapper } from "./core/signers";
@@ -133,9 +133,9 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   // While loading, show a spinner
   if (isLoading) {
     return (
-      <Center h="100dvh">
-        <Spinner />
-      </Center>
+      <div className="h-screen flex items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
     );
   }
 
@@ -148,7 +148,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   if (client.state !== "logged-in") {
     return (
       <Layout hasAccount={false}>
-        <Text>No account found</Text>
+        <span className="text-sm font-medium block">No account found</span>
       </Layout>
     );
   }

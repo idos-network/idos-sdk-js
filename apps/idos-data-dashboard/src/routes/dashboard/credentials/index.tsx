@@ -1,4 +1,4 @@
-import { List, ListItem, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCwIcon } from "lucide-react";
 import { useState } from "react";
@@ -70,18 +70,18 @@ const Credentials = () => {
   if (credentials.isSuccess) {
     return (
       <>
-        <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
+        <ul id="credentials-list" className="flex flex-col gap-2.5 flex-1">
           {credentials.data.map((credential) => (
-            <ListItem key={credential.id} id={credential.id}>
+            <li key={credential.id} id={credential.id} className="list-none">
               <CredentialCard
                 credential={credential}
                 onViewDetails={setCredentialDetailsId}
                 onManageGrants={handleManageGrants}
                 onDelete={handleDelete}
               />
-            </ListItem>
+            </li>
           ))}
-        </List>
+        </ul>
         {credentialDetailsId ? (
           <CredentialDetails
             credentialId={credentialDetailsId}

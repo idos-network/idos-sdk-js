@@ -1,5 +1,6 @@
-import { Box, Button, Heading, Stack, Text, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 import { ProfOfPersonhood } from "./proof-of-personhood";
 
@@ -13,26 +14,21 @@ export const NoData = ({ title, subtitle, cta }: NoDataProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Stack gap={6} p={5} bg="neutral.900" rounded="xl">
-      <Heading fontSize="2xl" fontWeight="medium">
-        {title}
-      </Heading>
+    <div className="flex flex-col items-stretch gap-6 p-5 bg-neutral-900 rounded-xl">
+      <h1 className="text-2xl! font-medium">{title}</h1>
 
-      {subtitle ? (
-        <Text color="neutral.600" fontSize="2xl">
-          {subtitle}
-        </Text>
-      ) : null}
+      {subtitle ? <span className="text-neutral-600 text-2xl">{subtitle}</span> : null}
 
       {cta ? (
-        <Box>
-          <Button colorScheme="green" leftIcon={<PlusIcon size={24} />} onClick={onOpen}>
+        <div>
+          <Button onClick={onOpen}>
+            <PlusIcon size={24} />
             {cta}
           </Button>
-        </Box>
+        </div>
       ) : null}
 
       <ProfOfPersonhood isOpen={isOpen} onClose={onClose} />
-    </Stack>
+    </div>
   );
 };

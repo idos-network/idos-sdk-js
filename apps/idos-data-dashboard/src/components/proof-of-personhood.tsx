@@ -1,5 +1,4 @@
 import {
-  Image,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -7,10 +6,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  SimpleGrid,
-  Text,
   useBreakpointValue,
-  VStack,
 } from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { useIdOS } from "@/idOS.provider";
@@ -67,53 +63,32 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
         <ModalHeader textAlign="center">Add Proof of Personhood</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <SimpleGrid
-            columns={{
-              base: 1,
-              lg: 3,
-            }}
-            spacing={5}
-          >
-            <VStack
-              justifyContent="space-between"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+            <div className="flex justify-between p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+              <img
                 src="/flow-1-icon.svg"
                 alt="Prove that you are a unique human being"
-                w="auto"
-                h="90px"
+                className="w-auto h-[90px]"
               />
-              <Text color="neutral.500">Prove that you are a unique human being</Text>
-            </VStack>
-            <VStack
-              justifyContent="center"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image src="/flow-2-icon.svg" alt="It only takes 1 minute!" w="auto" h="90px" />
-              <Text color="neutral.500">It only takes 1 minute!</Text>
-            </VStack>
-            <VStack
-              justifyContent="space-between"
-              placeContent="center"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image src="/flow-3-icon.svg" alt="Prove it with Fractal ID" w="auto" h="90px" />
-              <Text color="neutral.500">Prove it with Fractal ID</Text>
-            </VStack>
-          </SimpleGrid>
+              <span className="text-neutral-500">Prove that you are a unique human being</span>
+            </div>
+            <div className="flex justify-center p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+              <img
+                src="/flow-2-icon.svg"
+                alt="It only takes 1 minute!"
+                className="w-auto h-[90px]"
+              />
+              <span className="text-neutral-500">It only takes 1 minute!</span>
+            </div>
+            <div className="flex justify-between p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+              <img
+                src="/flow-3-icon.svg"
+                alt="Prove it with Fractal ID"
+                className="w-auto h-[90px]"
+              />
+              <span className="text-neutral-500">Prove it with Fractal ID</span>
+            </div>
+          </div>
         </ModalBody>
         <ModalFooter placeContent="center">
           <Button
