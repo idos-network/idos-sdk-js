@@ -22,17 +22,42 @@ export interface LoginResponse {
     ageV2GroupEnumInt: number;
   };
   error: boolean;
+
   faceSignUserId?: string;
-  token?: string;
+
+  // User match (already onboarded)
+  entropyToken?: string;
+
+  // New user - ask in UI to confirm account creation, then call confirmNewUser with the confirmationToken
+  confirmationToken?: string;
+}
+
+export interface ConfirmUserResponse {
+  faceSignUserId: string;
+  entropyToken: string;
 }
 
 export const login = async (requestBlob: string): Promise<LoginResponse> => {
   const response = await faceSignService.post<LoginResponse>(
-    "/pinocchio",
+    "/facesign-wallet",
     JSON.stringify({
       requestBlob,
-      // groupName: "jan-testing",
-      // externalUserId: "3423d432-96d6-494b-8bd3-4b1ec1c808fb",
+    }),
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  return response.data;
+};
+
+export const confirmNewUser = async (confirmationToken: string): Promise<ConfirmUserResponse> => {
+  const response = await faceSignService.post<ConfirmUserResponse>(
+    "/facesign-wallet/confirmation",
+    JSON.stringify({
+      confirmationToken,
     }),
     {
       headers: {
@@ -48,7 +73,7 @@ export const getEntropy = async (
   token: string,
 ): Promise<{ entropy: string; faceSignUserId: string }> => {
   const response = await entropyService.post<{ entropy: string; faceSignUserId: string }>(
-    "/pinocchio-entropy",
+    "/facesign-wallet/entropy",
     JSON.stringify({ token }),
     {
       headers: {
