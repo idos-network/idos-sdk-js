@@ -1,24 +1,15 @@
-import {
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useBreakpointValue,
-} from "@chakra-ui/react";
+import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
 
 import type { idOSGrant } from "@idos-network/core";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrant } from "../shared";
 
@@ -115,36 +106,18 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
 };
 
 export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProps) => {
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
-
   const grants = useFetchGrants({ credentialId });
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={{
-        base: "full",
-        lg: "2xl",
-      }}
-      isCentered={isCentered}
-    >
-      <ModalOverlay />
-      <ModalContent bg="neutral.900" rounded="xl">
-        <ModalHeader>Grants center</ModalHeader>
-        <ModalCloseButton onClick={onClose} />
-        <ModalBody display="flex" alignItems="center">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Grants center</DialogTitle>
+        </DialogHeader>
+        <div>
           {grants.isLoading ? (
             <div className="flex flex-1 items-center justify-center">
-              <Spinner />
+              <Spinner className="size-8" />
             </div>
           ) : null}
           {grants.isError ? (
@@ -152,21 +125,19 @@ export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProp
               Something went wrong, please retry.
             </span>
           ) : null}
-          {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : false}
-        </ModalBody>
-        <ModalFooter gap={2.5}>
+          {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : null}
+        </div>
+        <DialogFooter className="gap-2.5">
           {grants.isError ? (
             <Button variant="secondary" onClick={() => grants.refetch()}>
               Retry
             </Button>
-          ) : (
-            false
-          )}
+          ) : null}
           <Button variant="secondary" onClick={onClose}>
             Close
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

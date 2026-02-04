@@ -1,18 +1,4 @@
-import {
-  FormControl,
-  FormLabel,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  useBreakpointValue,
-  useDisclosure,
-  useToast,
-} from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, useDisclosure, useToast } from "@chakra-ui/react";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey } from "@idos-network/core";
@@ -24,6 +10,13 @@ import { useSearchParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 
@@ -113,16 +106,6 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
 
   const [searchParams] = useSearchParams();
   const publicKeyParam = searchParams.get("publicKey");
-
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
 
   const queryClient = useQueryClient();
 
@@ -289,21 +272,13 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
         <PlusIcon size={24} />
         <span className="sr-only md:not-sr-only">Add wallet</span>
       </Button>
-      <Modal
-        isOpen={isOpen}
-        onClose={handleClose}
-        size={{
-          base: "full",
-          lg: "xl",
-        }}
-        isCentered={isCentered}
-      >
-        <ModalOverlay />
-        <ModalContent bg="neutral.900" rounded="xl">
+      <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+        <DialogContent>
           <form name="add-wallet-form" onSubmit={handleSubmit}>
-            <ModalHeader>Insert wallet address</ModalHeader>
-            <ModalCloseButton onClick={handleClose} />
-            <ModalBody>
+            <DialogHeader>
+              <DialogTitle>Insert wallet address</DialogTitle>
+            </DialogHeader>
+            <div className="py-2">
               <FormControl>
                 <FormLabel fontSize="sm" htmlFor="address">
                   Wallet address
@@ -316,15 +291,15 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
                   defaultValue={defaultValue}
                 />
               </FormControl>
-            </ModalBody>
-            <ModalFooter>
+            </div>
+            <DialogFooter>
               <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>
                 {addWallet.isError ? "Try again" : "Add wallet"}
               </Button>
-            </ModalFooter>
+            </DialogFooter>
           </form>
-        </ModalContent>
-      </Modal>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
