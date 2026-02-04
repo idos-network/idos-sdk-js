@@ -2,9 +2,7 @@ name: Unit Tests
 
 on:
   pull_request:
-    branches:
-      - playground
-      - main
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - playground
@@ -25,7 +23,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .node_version
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - run: pnpm install
 
