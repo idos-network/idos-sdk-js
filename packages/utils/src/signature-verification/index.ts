@@ -11,7 +11,7 @@ export interface WalletSignature {
   signature: string;
   message?: string;
   // TODO: This is a copy & paste from core, this should be resolved when @core disappears
-  wallet_type: "EVM" | "NEAR" | "XRPL" | "Stellar" | "Pinocchio";
+  wallet_type: "EVM" | "NEAR" | "XRPL" | "Stellar" | "FaceSign";
   public_key: string[];
 }
 
