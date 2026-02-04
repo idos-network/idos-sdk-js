@@ -63,7 +63,7 @@ export const ConnectWallet = () => {
         backgroundRepeat: "repeat",
       }}
     >
-      <div className="fixed inset-y-0 right-0 w-full lg:w-[728px] h-full p-5 bg-neutral-900 flex flex-col items-stretch md:items-center">
+      <div className="fixed inset-y-0 right-0 w-full lg:w-[728px] h-full p-5 bg-neutral-900 flex flex-col items-stretch md:items-center  overflow-y-auto">
         <div className="flex flex-col items-stretch md:items-center gap-5 flex-1 place-content-center">
           <img
             src="/idos-dashboard-logo.svg"
@@ -78,7 +78,7 @@ export const ConnectWallet = () => {
 
           <h2 className="text-sm font-normal text-center">Connect your wallet to get started.</h2>
 
-          <div className="flex flex-col items-stretch min-w-[360px] lg:min-w-[400px] gap-3">
+          <div className="flex flex-col items-stretch w-full max-w-[400px] min-w-0 gap-3 mx-aut">
             <Button
               className="justify-between"
               size="xl"
@@ -157,7 +157,7 @@ export const ConnectWallet = () => {
           </span>
           <span className="flex gap-2 items-center place-content-center font-semibold text-sm">
             <span className="text-sm font-semibold">POWERED BY</span>
-            <img src="/idos-logo.svg" alt="idOS logo" className="w-17 h-auto" />
+            <img src="/idos-logo.svg" alt="idOS logo" className="w-[68px] h-auto" />
           </span>
         </div>
       </div>
