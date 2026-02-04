@@ -7,9 +7,7 @@ on:
     tags:
       - "!**"
   pull_request:
-    branches:
-      - playground
-      - main
+    types: [opened, synchronize, reopened]
 
 jobs:
   continuous-release:
