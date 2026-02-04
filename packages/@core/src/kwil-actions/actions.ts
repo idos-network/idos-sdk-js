@@ -2419,11 +2419,6 @@ export const GetAllowanceOutputSchema: z.ZodObject<{
 
 export type GetAllowanceOutput = z.infer<typeof GetAllowanceOutputSchema>;
 
-<<<<<<< HEAD
-/**  FaceSign should not be able to call this */
-=======
-/**  Pinocchio should not be able to call this */
->>>>>>> 359d20da (feat(schema) Sync schema and use types for wallet type)
 export async function getAllowance(kwilClient: KwilActionClient): Promise<GetAllowanceOutput> {
   return await kwilClient
     .call<GetAllowanceOutput[]>({
