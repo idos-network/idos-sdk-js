@@ -70,7 +70,9 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
                 alt="Prove that you are a unique human being"
                 className="w-auto h-[90px]"
               />
-              <span className="text-neutral-500">Prove that you are a unique human being</span>
+              <span className="text-neutral-500" role="alert">
+                Prove that you are a unique human being
+              </span>
             </div>
             <div className="flex justify-center p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
               <img
@@ -78,7 +80,9 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
                 alt="It only takes 1 minute!"
                 className="w-auto h-[90px]"
               />
-              <span className="text-neutral-500">It only takes 1 minute!</span>
+              <span className="text-neutral-500" role="alert">
+                It only takes 1 minute!
+              </span>
             </div>
             <div className="flex justify-between p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
               <img
@@ -86,7 +90,9 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
                 alt="Prove it with Fractal ID"
                 className="w-auto h-[90px]"
               />
-              <span className="text-neutral-500">Prove it with Fractal ID</span>
+              <span className="text-neutral-500" role="alert">
+                Prove it with Fractal ID
+              </span>
             </div>
           </div>
         </ModalBody>

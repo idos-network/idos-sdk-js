@@ -65,7 +65,7 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
             <tr className="border-b!">
               <th className="text-neutral-500 text-left">Consumer</th>
               <th className="text-neutral-500 text-left">Locked until</th>
-              <th className="text-neutral-500 text-left" />
+              <th />
             </tr>
           </thead>
           <tbody>
