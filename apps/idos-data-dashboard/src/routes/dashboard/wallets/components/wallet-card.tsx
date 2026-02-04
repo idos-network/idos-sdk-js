@@ -20,7 +20,7 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
           </span>
         </div>
       </div>
-      <Tooltip disabled={isDisabled}>
+      <Tooltip disabled={!isDisabled}>
         <TooltipTrigger>
           <Button
             disabled={isDisabled}
