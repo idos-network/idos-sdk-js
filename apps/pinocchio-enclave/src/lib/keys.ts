@@ -1,14 +1,9 @@
-import { utf8Decode, utf8Encode } from "@idos-network/utils/codecs";
-import { mnemonicToSeedSync } from "bip39";
-import tweetnacl from "tweetnacl";
+import { utf8Encode } from "@idos-network/utils/codecs";
+import { mnemonicToKeyPair } from "@idos-network/utils/facesign";
 import { storeGet, storeSet } from "./storage";
 
 export const DB_KEY_KEK = "kek";
 export const DB_KEY_MNEMONIC = "mnemonic";
-
-export async function mnemonicToSeed(mnemonic: string) {
-  return mnemonicToSeedSync(mnemonic);
-}
 
 export async function storeMnemnonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));
@@ -21,9 +16,7 @@ export async function getKeyPair() {
     throw new Error("No mnemonic stored");
   }
 
-  const seed = mnemonicToSeedSync(utf8Decode(mnemonicBytes));
-
-  return tweetnacl.sign.keyPair.fromSeed(seed.subarray(0, 32));
+  return mnemonicToKeyPair(mnemonicBytes);
 }
 
 export async function checkKeyAvailability(): Promise<boolean> {

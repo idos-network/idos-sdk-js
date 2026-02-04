@@ -59,6 +59,10 @@
       "types": "./dist/mpc/index.d.mts",
       "import": "./dist/mpc/index.mjs"
     },
+    "./facesign": {
+      "types": "./dist/facesign/index.d.mts",
+      "import": "./dist/facesign/index.mjs"
+    },
     "./signature-verification": {
       "types": "./dist/signature-verification/index.d.mts",
       "import": "./dist/signature-verification/index.mjs"
