@@ -1,8 +1,8 @@
-import { Code } from "@chakra-ui/react";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Code } from "@/components/ui/code";
 import {
   Dialog,
   DialogContent,
@@ -91,20 +91,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
             </div>
           ) : null}
 
-          {credential.isSuccess ? (
-            <Code
-              id="credential-details"
-              overflowX="auto"
-              maxW="100%"
-              px={5}
-              py={1}
-              whiteSpace="pre"
-              bg="neutral.950"
-              rounded="xl"
-            >
-              {credentialContent}
-            </Code>
-          ) : null}
+          {credential.isSuccess ? <Code id="credential-details">{credentialContent}</Code> : null}
         </div>
         <DialogFooter className="gap-2.5">
           {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : null}
