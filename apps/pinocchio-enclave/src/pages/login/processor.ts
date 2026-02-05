@@ -9,11 +9,7 @@ import type {
 
 export type SessionRequestProcessorCallback = (
   result: FaceTecSessionResult,
-<<<<<<< HEAD
   lastReceivedToken?: string,
-=======
-  lastRecievedToken?: string,
->>>>>>> 3d8ebe34 (feat(pinocchio) Init enclave)
 ) => void;
 
 // This is an example self-contained class to perform Liveness Checks with the FaceTec SDK.
