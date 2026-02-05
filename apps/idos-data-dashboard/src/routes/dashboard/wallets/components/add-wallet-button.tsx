@@ -1,4 +1,3 @@
-import { useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
 import { getWalletType } from "@idos-network/utils/wallets";
@@ -7,6 +6,7 @@ import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
 const createWalletParamsFactory = ({
@@ -100,7 +100,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
-  const toast = useToast();
   const queryClient = useQueryClient();
   const idOSClient = useIdOS();
 
@@ -134,6 +133,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
           toast({
             title: "Wallet added",
             description: "The wallet has been added to your idOS profile",
+            status: "success",
           });
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
           onWalletAdded?.();

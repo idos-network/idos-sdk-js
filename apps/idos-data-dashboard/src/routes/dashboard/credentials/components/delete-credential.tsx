@@ -1,4 +1,3 @@
-import { useToast } from "@chakra-ui/react";
 import type { idOSGrant } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials/types";
 import {
@@ -17,8 +16,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
-
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrants } from "../shared";
 
@@ -57,7 +56,6 @@ const useDeleteCredentialMutation = () => {
 };
 
 export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredentialProps) => {
-  const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteCredential = useDeleteCredentialMutation();
   const grants = useFetchGrants({

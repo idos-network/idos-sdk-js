@@ -35,6 +35,7 @@
     "react-dom": "catalog:react",
     "react-router-dom": "^6.25.1",
     "ripple-binary-codec": "catalog:xrp",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "vaul": "^1.1.2",

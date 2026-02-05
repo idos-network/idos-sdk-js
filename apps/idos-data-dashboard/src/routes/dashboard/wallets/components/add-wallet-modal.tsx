@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Input, useDisclosure, useToast } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input, useDisclosure } from "@chakra-ui/react";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey } from "@idos-network/core";
@@ -17,6 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 
@@ -98,7 +99,6 @@ const useAddWalletMutation = () => {
 };
 
 export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!defaultValue });
   const { signMessageAsync } = useSignMessage();
   const { open } = useWeb3Modal();
@@ -161,6 +161,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
         toast({
           title: "Error while adding wallet",
           description: "Unexpected wallet address.",
+          status: "error",
         });
         return;
       }
@@ -171,6 +172,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
           toast({
             title: "Error while adding wallet",
             description: "Public key doesn't match the wallet address.",
+            status: "error",
           });
         }
       } else {

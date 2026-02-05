@@ -1,10 +1,10 @@
-import { useToast } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { Outlet, useSearchParams } from "react-router-dom";
 import { useDisconnect } from "wagmi";
 
 import { useIdOS } from "@/idOS.provider";
 import "@/styles/index.css";
+import { toast } from "@/components/ui/sonner";
 
 export default function App() {
   const [searchParams] = useSearchParams();
@@ -12,7 +12,6 @@ export default function App() {
   const callbackUrl = searchParams.get("callbackUrl") || undefined;
   const { disconnectAsync } = useDisconnect();
   const idOSClient = useIdOS();
-  const toast = useToast();
 
   useEffect(() => {
     async function checkProfile() {

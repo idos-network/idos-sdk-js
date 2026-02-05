@@ -8,6 +8,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom"
 import { WagmiProvider } from "wagmi";
 
 import App from "@/app";
+import { Toaster } from "@/components/ui/sonner";
 import { WalletSelectorContextProvider } from "@/core/near";
 import { projectId, wagmiConfig } from "@/core/wagmi";
 import { IDOSClientProvider } from "@/idOS.provider";
@@ -32,6 +33,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
         {/* @ts-ignore: TODO: fix wagmi types */}
         <WagmiProvider config={wagmiConfig}>
           <QueryClientProvider client={queryClient}>
+            <Toaster position="bottom-center" />
             <RouterProvider
               router={createBrowserRouter([
                 {
