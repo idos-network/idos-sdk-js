@@ -1,4 +1,3 @@
-import { ChakraBaseProvider } from "@chakra-ui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createWeb3Modal } from "@web3modal/wagmi/react";
@@ -12,7 +11,6 @@ import { Toaster } from "@/components/ui/sonner";
 import { WalletSelectorContextProvider } from "@/core/near";
 import { projectId, wagmiConfig } from "@/core/wagmi";
 import { IDOSClientProvider } from "@/idOS.provider";
-import { theme } from "@/theme";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,60 +26,58 @@ createWeb3Modal({ wagmiConfig, projectId });
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <ChakraBaseProvider theme={theme}>
-      <WalletSelectorContextProvider>
-        {/* @ts-ignore: TODO: fix wagmi types */}
-        <WagmiProvider config={wagmiConfig}>
-          <QueryClientProvider client={queryClient}>
-            <Toaster position="bottom-center" />
-            <RouterProvider
-              router={createBrowserRouter([
-                {
-                  path: "/",
-                  element: (
-                    <IDOSClientProvider>
-                      <App />
-                    </IDOSClientProvider>
-                  ),
-                  children: [
-                    {
-                      lazy: () => import("@/routes/dashboard"),
-                      children: [
-                        {
-                          index: true,
-                          lazy: () => import("@/routes/dashboard/credentials"),
-                          handle: {
-                            crumb: () => "Credentials",
-                          },
+    <WalletSelectorContextProvider>
+      {/* @ts-ignore: TODO: fix wagmi types */}
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <Toaster position="bottom-center" />
+          <RouterProvider
+            router={createBrowserRouter([
+              {
+                path: "/",
+                element: (
+                  <IDOSClientProvider>
+                    <App />
+                  </IDOSClientProvider>
+                ),
+                children: [
+                  {
+                    lazy: () => import("@/routes/dashboard"),
+                    children: [
+                      {
+                        index: true,
+                        lazy: () => import("@/routes/dashboard/credentials"),
+                        handle: {
+                          crumb: () => "Credentials",
                         },
-                        {
-                          path: "/wallets",
-                          lazy: () => import("@/routes/dashboard/wallets"),
-                          handle: {
-                            crumb: () => "Wallets",
-                          },
+                      },
+                      {
+                        path: "/wallets",
+                        lazy: () => import("@/routes/dashboard/wallets"),
+                        handle: {
+                          crumb: () => "Wallets",
                         },
-                        {
-                          path: "/settings",
-                          lazy: () => import("@/routes/dashboard/settings"),
-                          handle: {
-                            crumb: () => "Settings",
-                          },
+                      },
+                      {
+                        path: "/settings",
+                        lazy: () => import("@/routes/dashboard/settings"),
+                        handle: {
+                          crumb: () => "Settings",
                         },
-                        {
-                          path: "/success",
-                          element: <Navigate to="/" />,
-                        },
-                      ],
-                    },
-                  ],
-                },
-              ])}
-            />
-            <ReactQueryDevtools buttonPosition="bottom-left" />
-          </QueryClientProvider>
-        </WagmiProvider>
-      </WalletSelectorContextProvider>
-    </ChakraBaseProvider>
+                      },
+                      {
+                        path: "/success",
+                        element: <Navigate to="/" />,
+                      },
+                    ],
+                  },
+                ],
+              },
+            ])}
+          />
+          <ReactQueryDevtools buttonPosition="bottom-left" />
+        </QueryClientProvider>
+      </WagmiProvider>
+    </WalletSelectorContextProvider>
   </React.StrictMode>,
 );
