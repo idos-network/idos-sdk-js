@@ -175,7 +175,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           {revokeGrants.isPending ? (
             <>
               <span className="block mb-1">Revoking grant for consumer:</span>
-              <Code>{ag_grantee_wallet_identifier}</Code>
+              <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
             </>
           ) : deleteCredential.isPending ? (
             <span className="block">

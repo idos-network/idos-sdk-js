@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const codeVariants = cva(
-  "font-mono text-[1em] ",
+  "text-[1em] ",
   {
     variants: {
       variant: {
