@@ -18,7 +18,6 @@ export async function getKeyPair() {
 
   return mnemonicToKeyPair(mnemonicBytes);
 }
-
 export async function checkKeyAvailability(): Promise<boolean> {
   try {
     await getKeyPair();

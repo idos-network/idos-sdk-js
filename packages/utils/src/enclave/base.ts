@@ -71,7 +71,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         this._signMethod as (domain: any, types: any, value: any) => Promise<string>
       )(domain, types, value);
     } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
-      // XRPL/NEAR/Stellar wallets: use only the value as message
+      // XRPL/NEAR/Stellar/FaceSign wallets: use only the value as message
       const messageString = JSON.stringify(value);
       const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
 

@@ -21,6 +21,16 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    // Enable CORS for iframe embedding during development
+    cors: true,
+    headers: {
+      // Allow iframe embedding from any origin in development
+      "Access-Control-Allow-Origin": "*",
+      // Note: Removed CSP frame-ancestors to allow file:// protocol for testing
+      // In production, add specific frame-ancestors via server configuration
+    },
+  },
   plugins: [
     mkcert(),
     tailwindcss(),

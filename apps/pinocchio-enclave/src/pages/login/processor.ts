@@ -30,7 +30,6 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
     login(sessionRequestBlob)
       .then(({ responseBlob, entropyToken }) => {
         this.lastReceivedToken = entropyToken;
-
         if (responseBlob) {
           this.onResponseBlobReceived(responseBlob, sessionRequestCallback);
         } else {

@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from "react";
-import { getAddress, type WalletClient } from "viem";
 import { useAccount, useConnect, useSignMessage, useWalletClient } from "wagmi";
+import { getAddress, type WalletClient } from "viem";
 
 interface SiweContextType {
   address: string | null;

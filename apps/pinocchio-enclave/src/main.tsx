@@ -5,10 +5,10 @@ import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 
 import { App } from "./app";
-import ProtectedRoute from "./lib/protected-route";
 import ErrorPage from "./pages/error";
 import Home from "./pages/home";
 import Login from "./pages/login";
+import ProtectedRoute from "./lib/protected-route";
 import Session from "./pages/session";
 import Sign from "./pages/sign";
 import Wallet from "./pages/wallet";

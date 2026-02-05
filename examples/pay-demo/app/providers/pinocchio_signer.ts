@@ -19,9 +19,9 @@ export class PinocchioSignerProvider {
   private resolveSignMessage: ((signature: Uint8Array) => void) | null = null;
   private resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
 
-  public publicAddress = "";
   public signatureType = "ed25519";
   public walletType = "pinocchio";
+  public publicAddress = "";
   public publicKey = "";
 
   constructor(private metadata: Metadata) {}
@@ -45,6 +45,7 @@ export class PinocchioSignerProvider {
     // Ask for connection (like metamask does)
     const sessionProposal = await this.sessionProposal();
 
+    this.publicKey = sessionProposal.address; // For pinocchio, we use address as public key
     this.publicAddress = sessionProposal.address;
 
     return Promise.resolve(sessionProposal.address);
@@ -57,8 +58,9 @@ export class PinocchioSignerProvider {
   async signMessage(message: Uint8Array): Promise<string> {
     await this.openEnclave();
 
+    let messageToSign: Uint8Array = message;
     if (typeof message === "string") {
-      message = new TextEncoder().encode(`Stellar Signed Message:\n${message}`);
+      messageToSign = new TextEncoder().encode(message);
     }
 
     const signature: Uint8Array = await new Promise((resolve) => {
@@ -70,7 +72,7 @@ export class PinocchioSignerProvider {
             type: "sign_proposal",
             data: {
               id: crypto.randomUUID(),
-              data: message,
+              data: messageToSign,
               metadata: this.metadata,
             },
           },
