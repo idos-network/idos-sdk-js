@@ -4,8 +4,6 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@creit.tech/stellar-wallets-kit": "^1.7.5",
-    "@emotion/react": "^11.13.0",
-    "@emotion/styled": "^11.13.0",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
     "@idos-network/controllers": "workspace:*",
