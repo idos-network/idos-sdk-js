@@ -7,7 +7,7 @@ type ToastParams = {
     description: string;
     status: "success" | "error" | "info" | "warning";
     duration?:number;
-    position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+    position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
 }
 
 export const toast = (params: ToastParams)=>{
@@ -53,6 +53,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         classNames: {
           toast: "cn-toast min-w-[450px]! flex items-center gap-5!",
+          // @heads-up: selectors depend on Sonner's internal DOM structure. If Sonner updates its markup, these will break silently.
           error: "bg-red-300! text-neutral-900! border-none! [&>div>div:first-child]:font-semibold [&>div>div:first-child]:text-lg [&>div>div:last-child]:text-neutral-900! [&>div>div:last-child]:font-normal",
           success: "!bg-primary !text-primary-foreground border-none! [&>div>div:first-child]:font-semibold [&>div>div:first-child]:text-xl [&>div>div:last-child]:text-neutral-900! [&>div>div:last-child]:font-normal",
         },

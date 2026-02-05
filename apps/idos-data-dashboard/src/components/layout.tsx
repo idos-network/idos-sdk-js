@@ -9,7 +9,7 @@ import {
   Wallet2Icon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { type NavLinkProps, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 import { useWalletSelector } from "@/core/near";
@@ -109,14 +109,14 @@ export default function Layout({
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { pathname } = useLocation();
-  const [prevPathname, setPrevPathname] = useState(pathname);
+  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    if (prevPathname !== pathname) {
+    if (prevPathnameRef.current !== pathname) {
       if (isOpen) onClose();
-      setPrevPathname(pathname);
+      prevPathnameRef.current = pathname;
     }
-  }, [pathname, prevPathname, isOpen, onClose]);
+  }, [pathname, isOpen, onClose]);
 
   return (
     <div className="flex min-h-screen">

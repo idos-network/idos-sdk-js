@@ -163,6 +163,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
           title: "Error while adding wallet",
           description: "Unexpected wallet address.",
           status: "error",
+          position: "bottom-right",
         });
         return;
       }
@@ -174,6 +175,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
             title: "Error while adding wallet",
             description: "Public key doesn't match the wallet address.",
             status: "error",
+            position: "bottom-right",
           });
         }
       } else {
@@ -282,7 +284,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
               <DialogTitle>Insert wallet address</DialogTitle>
             </DialogHeader>
             <div className="py-2">
-              <form>
+              <div className="flex flex-col gap-2">
                 <label className="text-sm block mb-2" htmlFor="address">
                   Wallet address
                 </label>
@@ -293,7 +295,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
                   required={true}
                   defaultValue={defaultValue}
                 />
-              </form>
+              </div>
             </div>
             <DialogFooter>
               <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>
