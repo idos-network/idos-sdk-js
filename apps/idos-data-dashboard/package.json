@@ -3,7 +3,6 @@
   "version": "0.0.1",
   "dependencies": {
     "@base-ui/react": "^1.1.0",
-    "@chakra-ui/react": "^2.8.2",
     "@creit.tech/stellar-wallets-kit": "^1.7.5",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",

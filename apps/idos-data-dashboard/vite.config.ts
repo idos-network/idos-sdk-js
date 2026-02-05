@@ -13,13 +13,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom", "react-router-dom"],
-          vendor: [
-            "@chakra-ui/react",
-            "@tanstack/react-query",
-            "@emotion/react",
-            "@emotion/styled",
-            "framer-motion",
-          ],
+          vendor: ["@tanstack/react-query", "@emotion/react", "@emotion/styled", "framer-motion"],
           web3: ["wagmi", "viem"],
         },
       },
