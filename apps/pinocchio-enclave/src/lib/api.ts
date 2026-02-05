@@ -39,7 +39,7 @@ export interface ConfirmUserResponse {
 
 export const login = async (requestBlob: string): Promise<LoginResponse> => {
   const response = await faceSignService.post<LoginResponse>(
-    "/facesign-wallet",
+    "/facesign",
     JSON.stringify({
       requestBlob,
     }),
@@ -55,7 +55,7 @@ export const login = async (requestBlob: string): Promise<LoginResponse> => {
 
 export const confirmNewUser = async (confirmationToken: string): Promise<ConfirmUserResponse> => {
   const response = await faceSignService.post<ConfirmUserResponse>(
-    "/facesign-wallet/confirmation",
+    "/facesign/confirmation",
     JSON.stringify({
       confirmationToken,
     }),
@@ -73,7 +73,7 @@ export const getEntropy = async (
   token: string,
 ): Promise<{ entropy: string; faceSignUserId: string }> => {
   const response = await entropyService.post<{ entropy: string; faceSignUserId: string }>(
-    "/facesign-wallet/entropy",
+    "/facesign/entropy",
     JSON.stringify({ token }),
     {
       headers: {
