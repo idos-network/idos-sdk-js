@@ -1,4 +1,3 @@
-import { useDisclosure } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronRightIcon,
@@ -15,6 +14,7 @@ import { type NavLinkProps, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 import { useWalletSelector } from "@/core/near";
 import stellarKit from "@/core/stellar-kit";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/stores/wallet";

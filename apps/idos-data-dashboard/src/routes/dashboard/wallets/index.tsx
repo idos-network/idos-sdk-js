@@ -1,4 +1,3 @@
-import { useDisclosure } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
@@ -10,6 +9,7 @@ import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { Button } from "@/components/ui/button";
 import { useWalletSelector } from "@/core/near";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { AddWalletButton } from "./components/add-wallet-button";
 import { AddWalletUsingModal } from "./components/add-wallet-modal";
@@ -147,7 +147,7 @@ export function Component() {
           false
         )}
       </div>
-      {hasProfile ? <WalletsList /> : <NoWallets />}
+      {!hasProfile ? <WalletsList /> : <NoWallets />}
       {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
     </div>
   );

@@ -1,4 +1,4 @@
-import { FormControl, FormLabel, Input, useDisclosure } from "@chakra-ui/react";
+import { FormControl, FormLabel, Input } from "@chakra-ui/react";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey } from "@idos-network/core";
@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 

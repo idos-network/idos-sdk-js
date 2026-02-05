@@ -1,4 +1,3 @@
-import { useDisclosure } from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCwIcon } from "lucide-react";
 import { useState } from "react";
@@ -6,6 +5,7 @@ import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
 import { Button } from "@/components/ui/button";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";

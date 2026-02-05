@@ -1,6 +1,6 @@
-import { useDisclosure } from "@chakra-ui/react";
 import { PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import useDisclosure from "@/hooks/useDisclosure";
 
 import { ProfOfPersonhood } from "./proof-of-personhood";
 
