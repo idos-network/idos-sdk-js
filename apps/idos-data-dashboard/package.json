@@ -22,7 +22,7 @@
     "@stellar/stellar-base": "catalog:stellar",
     "@tanstack/react-query": "catalog:tanstack",
     "@tanstack/react-query-devtools": "catalog:tanstack",
-    "@wagmi/core": "^2.16.4",
+    "@wagmi/core": "catalog:ethereum",
     "@web3icons/react": "^4.0.14",
     "@web3modal/wagmi": "^4.2.3",
     "class-variance-authority": "^0.7.1",

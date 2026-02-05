@@ -23,3 +23,6 @@ ignorePaths:
   - ".turboignore"
   - "cspell.config.yaml"
   - "**/.gitignore"
+  - "**/FaceTecSDK.js/**"
+  - "**/tsconfig.tsbuildinfo"
+  - "**/playwright-report/**"

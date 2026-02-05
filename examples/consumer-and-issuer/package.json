@@ -22,7 +22,7 @@
     "@stellar/stellar-base": "catalog:stellar",
     "@tanstack/react-query": "catalog:tanstack",
     "@uidotdev/usehooks": "^2.4.1",
-    "@wagmi/core": "^2.16.4",
+    "@wagmi/core": "catalog:ethereum",
     "@web3icons/react": "^4.0.14",
     "countries-list": "^3.1.1",
     "ethers": "catalog:ethereum",
@@ -61,7 +61,7 @@
     "ripple-keypairs": "catalog:xrp",
     "supports-color": "^8.1.1",
     "tailwindcss": "^3.4.14",
-    "typescript": "^5.4.5",
+    "typescript": "catalog:build",
     "utf-8-validate": "^5.0.2"
   },
   "private": true,

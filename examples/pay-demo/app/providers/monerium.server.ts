@@ -130,7 +130,7 @@ export const createProfile = async (profileId: string, data: Credential) => {
     // biome-ignore lint/style/noNonNullAssertion: This is ok, we are choosing plus+liveness
     countryState: data.credentialSubject.residentialAddressCountry!,
     nationality: data.credentialSubject.nationality ?? "DE", // TODO: Check this out
-    // biome-ignore lint/style/noNonNullAssertion: This is ok (demo)
+    // biome-ignore lint/suspicious/noNonNullAssertedOptionalChain: This is ok (demo)
     birthday: data.credentialSubject.dateOfBirth?.split("T")[0]!,
     idDocument: {
       number: data.credentialSubject.idDocumentNumber,

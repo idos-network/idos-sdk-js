@@ -9,7 +9,7 @@
     "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@sanity/comlink": "^3.0.1",
-    "@wagmi/core": "^2.16.4",
+    "@wagmi/core": "catalog:ethereum",
     "ethers": "catalog:ethereum",
     "go-try": "^3.0.2",
     "xumm": "^1.8.0"
@@ -24,7 +24,7 @@
   },
   "license": "MIT",
   "peerDependencies": {
-    "typescript": "^5.7.3"
+    "typescript": "catalog:build"
   },
   "private": true,
   "sideEffects": false,

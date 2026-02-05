@@ -17,9 +17,13 @@
       "!**/*/.next/**/*",
       "!**/.react-router/**/*",
       "!**/.cache-synpress/**/*",
+      "!**/.turbo/**/*",
       "!packages/utils/src/mpc/**/*.ts",
-      "!**/*.css"
-    ]
+      "!**/*.css",
+      "!apps/facesign-enclave/src/assets/facetec/**/*",
+      "!**/playwright-report/**/*"
+    ],
+    "ignoreUnknown": true
   },
   "linter": {
     "enabled": true,

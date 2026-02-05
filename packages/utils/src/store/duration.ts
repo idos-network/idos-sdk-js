@@ -1,6 +1,6 @@
 export const setDuration = (days?: number): Date | undefined => {
   const daysNumber =
-    !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString());
+    !days || Number.isNaN(Number(days)) ? undefined : Number.parseInt(days.toString(), 10);
 
   if (!daysNumber) {
     return;

@@ -1,5 +1,5 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { userContext } from "~/middlewares/auth";
+import { userContext } from "~/middlewares/auth.server";
 import { generateKrakenUrl } from "~/providers/kraken.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {

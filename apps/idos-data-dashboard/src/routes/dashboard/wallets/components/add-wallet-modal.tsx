@@ -142,6 +142,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
         await open();
         return;
       }
+      publicKeys = [];
     }
 
     if (walletType === "XRPL") {
