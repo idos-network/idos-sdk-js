@@ -35,9 +35,9 @@ export class EngineClient {
       case "xrpl":
         prefix = "XRPL";
         break;
-      case "pinocchio":
+      case "facesign":
         return {
-          Authorization: `XRPL ED${signature}`,
+          Authorization: `FACESIGN ${signature}`,
         }
       default:
         prefix = "eip712"; // fallback to eip712 for unknown types
