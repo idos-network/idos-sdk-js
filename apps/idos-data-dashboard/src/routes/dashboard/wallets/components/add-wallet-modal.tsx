@@ -1,4 +1,3 @@
-import { FormControl, FormLabel, Input } from "@chakra-ui/react";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey } from "@idos-network/core";
@@ -17,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
@@ -282,10 +282,10 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
               <DialogTitle>Insert wallet address</DialogTitle>
             </DialogHeader>
             <div className="py-2">
-              <FormControl>
-                <FormLabel fontSize="sm" htmlFor="address">
+              <form>
+                <label className="text-sm block mb-2" htmlFor="address">
                   Wallet address
-                </FormLabel>
+                </label>
                 <Input
                   id="address"
                   name="address"
@@ -293,7 +293,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
                   required={true}
                   defaultValue={defaultValue}
                 />
-              </FormControl>
+              </form>
             </div>
             <DialogFooter>
               <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>
