@@ -1,4 +1,3 @@
-import { useToast } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
@@ -10,6 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
 type DeleteWalletProps = {
@@ -42,7 +42,6 @@ const useDeleteWalletMutation = () => {
 };
 
 export const DeleteWallet = ({ isOpen, wallets, onClose }: DeleteWalletProps) => {
-  const toast = useToast();
   const queryClient = useQueryClient();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteWallet = useDeleteWalletMutation();
