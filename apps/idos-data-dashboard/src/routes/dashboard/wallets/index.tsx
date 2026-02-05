@@ -147,7 +147,7 @@ export function Component() {
           false
         )}
       </div>
-      {!hasProfile ? <WalletsList /> : <NoWallets />}
+      {hasProfile ? <WalletsList /> : <NoWallets />}
       {walletToAdd && !hasProfile ? <LinkWalletError /> : null}
     </div>
   );
