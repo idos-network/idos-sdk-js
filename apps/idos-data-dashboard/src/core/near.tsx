@@ -1,4 +1,3 @@
-import { Center, Spinner } from "@chakra-ui/react";
 import type { Account, WalletSelector } from "@near-wallet-selector/core";
 import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupHereWallet } from "@near-wallet-selector/here-wallet";
@@ -8,6 +7,7 @@ import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
 import type { ReactNode } from "react";
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { Spinner } from "@/components/ui/spinner";
 
 declare global {
   interface Window {
@@ -100,9 +100,9 @@ export const WalletSelectorContextProvider: React.FC<{
 
   if (loading) {
     return (
-      <Center h="100dvh">
-        <Spinner />
-      </Center>
+      <div className="h-screen flex items-center justify-center">
+        <Spinner className="size-6" />
+      </div>
     );
   }
 

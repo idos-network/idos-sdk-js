@@ -1,5 +1,3 @@
-import { Table, TableContainer, Tbody, Td, Th, Thead, Tr } from "@chakra-ui/react";
-
 import type { idOSGrant } from "@idos-network/core";
 import { Button } from "@/components/ui/button";
 import {
@@ -58,31 +56,34 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
           revoked or granted.
         </span>
       </div>
-      <TableContainer rounded="lg" bg="neutral.800" border="1px solid" borderColor="neutral.700">
-        <Table id={`grants-for-${credentialId}`} variant="simple" w="100%">
-          <Thead>
-            <Tr>
-              <Th color="neutral.500">Consumer</Th>
-              <Th color="neutral.500">Locked until</Th>
-              <Th />
-            </Tr>
-          </Thead>
-          <Tbody>
+      <div className="rounded-lg bg-neutral-800 border! border-neutral-700">
+        <table
+          className="w-full border-collapse table [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
+          id={`grants-for-${credentialId}`}
+        >
+          <thead>
+            <tr className="border-b!">
+              <th className="text-neutral-500 text-left">Consumer</th>
+              <th className="text-neutral-500 text-left">Locked until</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
             {grants.map((grant) => (
-              <Tr
+              <tr
                 key={generateGrantId(grant)}
                 id={`grant-${generateGrantId(grant)}`}
                 data-grant={JSON.stringify(grant)}
               >
-                <Td maxW={140}>
+                <td className="max-w-[140px]">
                   <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>
-                </Td>
-                <Td>
+                </td>
+                <td>
                   <span className="block">
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
                   </span>
-                </Td>
-                <Td isNumeric>
+                </td>
+                <td className="text-right">
                   <Button
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
@@ -95,12 +96,12 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   >
                     Revoke
                   </Button>
-                </Td>
-              </Tr>
+                </td>
+              </tr>
             ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

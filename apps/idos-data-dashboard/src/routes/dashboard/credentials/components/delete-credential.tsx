@@ -1,4 +1,4 @@
-import { Code, useToast } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 import type { idOSGrant } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials/types";
 import {
@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-query";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { Code } from "@/components/ui/code";
 import {
   Dialog,
   DialogContent,
@@ -174,9 +175,7 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           {revokeGrants.isPending ? (
             <>
               <span className="block mb-1">Revoking grant for consumer:</span>
-              <Code px={2} py={1} rounded="md" fontSize="sm" bg="neutral.800">
-                {ag_grantee_wallet_identifier}
-              </Code>
+              <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
             </>
           ) : deleteCredential.isPending ? (
             <span className="block">

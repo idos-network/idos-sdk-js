@@ -6,8 +6,6 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerOverlay,
-  IconButton,
-  Image,
   useDisclosure,
 } from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -167,9 +165,14 @@ export default function Layout({
       </nav>
       <div className="flex flex-col items-stretch flex-1 p-5 gap-0">
         <div className="flex items-center justify-between h-10 lg:h-[120px] mb-5 lg:mb-0">
-          <IconButton aria-label="Open menu" onClick={onOpen} hideFrom="lg">
+          <Button
+            variant="secondary"
+            aria-label="Open menu"
+            onClick={onOpen}
+            className="block lg:hidden"
+          >
             <MenuIcon size={24} strokeWidth="1.5" />
-          </IconButton>
+          </Button>
           <Breadcrumbs />
         </div>
         {children}
@@ -179,12 +182,11 @@ export default function Layout({
         <DrawerContent bg="neutral.900">
           <DrawerCloseButton />
           <DrawerHeader>
-            <Link to="/" className="flex items-center h-[100px]">
-              <Image
+            <Link to="/" className="flex items-center h-[100px] bg-transparent!">
+              <img
                 src="/idos-dashboard-logo.svg"
                 alt="idOS Dashboard logo"
-                w={120}
-                h="auto"
+                className="w-[120px] h-auto"
                 loading="eager"
               />
             </Link>

@@ -1,4 +1,4 @@
-import { IconButton, List, ListItem, useDisclosure } from "@chakra-ui/react";
+import { useDisclosure } from "@chakra-ui/react";
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RotateCw } from "lucide-react";
@@ -8,6 +8,7 @@ import { useAccount } from "wagmi";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
+import { Button } from "@/components/ui/button";
 import { useWalletSelector } from "@/core/near";
 import { useIdOS } from "@/idOS.provider";
 import { AddWalletButton } from "./components/add-wallet-button";
@@ -81,17 +82,17 @@ const WalletsList = () => {
 
     return (
       <>
-        <List id="wallets-list" display="flex" flexDir="column" gap={2.5} flex={1}>
+        <ul id="wallets-list" className="flex flex-col gap-2.5 flex-1">
           {addresses.map((walletAddress) => (
-            <ListItem key={walletAddress}>
+            <li key={walletAddress} className="list-none">
               <WalletCard
                 address={walletAddress}
                 onDelete={handleDelete}
                 isDisabled={address?.toLowerCase() === walletAddress.toLowerCase()}
               />
-            </ListItem>
+            </li>
           ))}
-        </List>
+        </ul>
         <DeleteWallet isOpen={isOpen} wallets={walletsToDelete} onClose={handleClose} />
       </>
     );
@@ -130,15 +131,17 @@ export function Component() {
             ) : (
               <AddWalletUsingModal defaultValue={walletToAdd} />
             )}
-            <IconButton
+            <Button
               aria-label="Refresh wallets"
-              icon={<RotateCw size={18} />}
+              variant="secondary"
               onClick={() => {
                 queryClient.refetchQueries({
                   queryKey: ["wallets"],
                 });
               }}
-            />
+            >
+              <RotateCw size={18} />
+            </Button>
           </div>
         ) : (
           false
