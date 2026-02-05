@@ -37,6 +37,7 @@
     "ripple-binary-codec": "catalog:xrp",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
+    "vaul": "^1.1.2",
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum",
     "xumm": "catalog:xrp",
