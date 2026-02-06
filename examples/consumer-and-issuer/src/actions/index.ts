@@ -107,7 +107,7 @@ export async function createIDOSUserProfile({
     type: "EVM" | "XRPL" | "NEAR" | "Stellar";
     message: string;
     signature: string;
-    publicKey: string;
+    publicKey: string | undefined;
   };
   encryptionPasswordStore: EncryptionPasswordStore;
 }) {
@@ -121,10 +121,10 @@ export async function createIDOSUserProfile({
     },
     {
       address: wallet.address,
-      wallet_type: wallet.type.toLowerCase(), // Convert to lowercase for consistency
+      wallet_type: wallet.type,
       message: wallet.message,
       signature: wallet.signature,
-      public_key: wallet.publicKey ?? "",
+      public_key: wallet.type === "EVM" ? "" : wallet.publicKey,
     },
   );
 

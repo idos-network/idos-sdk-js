@@ -62,10 +62,6 @@
     "./signature-verification": {
       "types": "./dist/signature-verification/index.d.mts",
       "import": "./dist/signature-verification/index.mjs"
-    },
-    "./wallets": {
-      "types": "./dist/wallets/index.d.mts",
-      "import": "./dist/wallets/index.mjs"
     }
   },
   "files": [

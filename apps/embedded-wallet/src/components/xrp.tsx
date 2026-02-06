@@ -37,7 +37,7 @@ function XRPL() {
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
-    if (!address && connectedWalletType === "xrpl") {
+    if (!address && connectedWalletType === "XRPL") {
       setConnectedWalletType(null);
       stepper.reset();
     }
@@ -72,8 +72,7 @@ function XRPL() {
 
       setPublicKey(pk);
       setAddress(addr);
-
-      setConnectedWalletType("xrpl");
+      setConnectedWalletType("XRPL");
       stepper.next();
     } catch (error) {
       console.error("Connection failed:", error);

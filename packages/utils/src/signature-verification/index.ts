@@ -1,5 +1,4 @@
 import invariant from "tiny-invariant";
-import { getWalletType } from "../wallets";
 import { verifyEvmSignature } from "./evm";
 import { verifyNearSignature } from "./near";
 import { verifyRippleSignature } from "./ripple";
@@ -11,6 +10,8 @@ export interface WalletSignature {
   address?: string;
   signature: string;
   message?: string;
+  // TODO: This is a copy & paste from core, this should be resolved when @core disappears
+  wallet_type: "EVM" | "NEAR" | "XRPL" | "Stellar" | "FaceSign";
   public_key: string[];
 }
 
@@ -18,35 +19,41 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
   invariant(walletPayload.address, "Wallet address is required");
   invariant(walletPayload.message, "Wallet message is required");
   invariant(walletPayload.signature, "Wallet signature is required");
+  invariant(walletPayload.wallet_type, "Wallet type is required");
+
+  if (walletPayload.wallet_type !== "EVM") {
+    invariant(walletPayload.public_key?.[0], "Wallet public_key is required for non-EVM wallets");
+  }
 
   try {
-    const walletType = getWalletType(walletPayload.address);
-    if (walletType === "evm")
-      return verifyEvmSignature(
-        walletPayload.message,
-        walletPayload.signature as `0x${string}`,
-        walletPayload.address as `0x${string}`,
-      );
-    if (walletType === "near")
-      return verifyNearSignature(
-        walletPayload.message,
-        walletPayload.signature,
-        walletPayload.public_key[0],
-      );
-    if (walletType === "xrpl")
-      return verifyRippleSignature(
-        walletPayload.message,
-        walletPayload.signature,
-        walletPayload.public_key[0],
-      );
-    if (walletType === "stellar")
-      return await verifyStellarSignature(
-        walletPayload.message,
-        walletPayload.signature,
-        walletPayload.public_key[0],
-      );
-
-    return false;
+    switch (walletPayload.wallet_type) {
+      case "EVM":
+        return verifyEvmSignature(
+          walletPayload.message,
+          walletPayload.signature as `0x${string}`,
+          walletPayload.address as `0x${string}`,
+        );
+      case "NEAR":
+        return verifyNearSignature(
+          walletPayload.message,
+          walletPayload.signature,
+          walletPayload.public_key[0],
+        );
+      case "XRPL":
+        return verifyRippleSignature(
+          walletPayload.message,
+          walletPayload.signature,
+          walletPayload.public_key[0],
+        );
+      case "Stellar":
+        return await verifyStellarSignature(
+          walletPayload.message,
+          walletPayload.signature,
+          walletPayload.public_key[0],
+        );
+      default:
+        throw new Error(`Unsupported wallet type: ${walletPayload.wallet_type}`);
+    }
   } catch (error) {
     console.warn("Error verifying signature", error);
     return false;
