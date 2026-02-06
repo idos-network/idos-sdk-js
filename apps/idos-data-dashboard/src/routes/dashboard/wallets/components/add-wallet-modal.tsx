@@ -1,4 +1,3 @@
-import { FormControl, FormLabel, Input, useDisclosure, useToast } from "@chakra-ui/react";
 import * as GemWallet from "@gemwallet/api";
 import type { idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey, type WalletType } from "@idos-network/core";
@@ -17,6 +16,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/sonner";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 import { createWallet, createWalletParamsFactory } from "./add-wallet-button";
@@ -76,7 +78,6 @@ const useAddWalletMutation = () => {
 };
 
 export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
-  const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure({ defaultIsOpen: !!defaultValue });
   const { signMessageAsync } = useSignMessage();
   const { open } = useWeb3Modal();
@@ -135,6 +136,8 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
         toast({
           title: "Error while adding wallet",
           description: "Unexpected wallet address.",
+          status: "error",
+          position: "bottom-right",
         });
         return;
       }
@@ -145,6 +148,8 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
           toast({
             title: "Error while adding wallet",
             description: "Public key doesn't match the wallet address.",
+            status: "error",
+            position: "bottom-right",
           });
         }
       } else {
@@ -254,10 +259,10 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
               <DialogTitle>Insert wallet address</DialogTitle>
             </DialogHeader>
             <div className="py-2">
-              <FormControl>
-                <FormLabel fontSize="sm" htmlFor="address">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm block mb-2" htmlFor="address">
                   Wallet address
-                </FormLabel>
+                </label>
                 <Input
                   id="address"
                   name="address"
@@ -265,7 +270,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
                   required={true}
                   defaultValue={defaultValue}
                 />
-              </FormControl>
+              </div>
             </div>
             <DialogFooter>
               <Button id="add-wallet-form-submit" type="submit" isLoading={addWallet.isPending}>

@@ -114,6 +114,7 @@ typesafety
 uidotdev
 Upserts
 usehooks
+vaul
 vercel
 vespaiach
 viem

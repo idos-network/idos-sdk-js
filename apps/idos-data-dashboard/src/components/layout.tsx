@@ -1,13 +1,3 @@
-import {
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerOverlay,
-  useDisclosure,
-} from "@chakra-ui/react";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   ChevronRightIcon,
@@ -17,15 +7,19 @@ import {
   LogOutIcon,
   MenuIcon,
   Wallet2Icon,
+  XIcon,
 } from "lucide-react";
-import { type NavLinkProps, useMatches } from "react-router-dom";
+import { useEffect, useRef } from "react";
+import { type NavLinkProps, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 import { useWalletSelector } from "@/core/near";
 import stellarKit from "@/core/stellar-kit";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
 import { cn } from "@/lib/utils";
 import { useWalletStore } from "@/stores/wallet";
 import { Button } from "./ui/button";
+import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
 import { Link, type LinkProps as ShadcnLinkProps } from "./ui/link";
 
 const ConnectedWallet = () => {
@@ -114,6 +108,15 @@ export default function Layout({
   hasAccount: boolean;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const { pathname } = useLocation();
+  const prevPathnameRef = useRef(pathname);
+
+  useEffect(() => {
+    if (prevPathnameRef.current !== pathname) {
+      if (isOpen) onClose();
+      prevPathnameRef.current = pathname;
+    }
+  }, [pathname, isOpen, onClose]);
 
   return (
     <div className="flex min-h-screen">
@@ -177,11 +180,14 @@ export default function Layout({
         </div>
         {children}
       </div>
-      <Drawer isOpen={isOpen} placement="left" onClose={onClose}>
-        <DrawerOverlay />
-        <DrawerContent bg="neutral.900">
-          <DrawerCloseButton />
-          <DrawerHeader>
+      <Drawer open={isOpen} onOpenChange={(open) => (open ? onOpen() : onClose())} direction="left">
+        <DrawerContent className="bg-neutral-900">
+          <DrawerHeader className="relative">
+            <DrawerClose asChild>
+              <Button variant="ghost" className="absolute right-4 top-4" aria-label="Close menu">
+                <XIcon size={20} />
+              </Button>
+            </DrawerClose>
             <Link to="/" className="flex items-center h-[100px] bg-transparent!">
               <img
                 src="/idos-dashboard-logo.svg"
@@ -191,7 +197,7 @@ export default function Layout({
               />
             </Link>
           </DrawerHeader>
-          <DrawerBody>
+          <div className="p-4 flex-1 overflow-y-auto">
             <div className="mb-5">
               <ConnectedWallet />
             </div>
@@ -211,8 +217,8 @@ export default function Layout({
                 </li>
               )}
             </ul>
-          </DrawerBody>
-          <DrawerFooter alignItems="stretch" justifyContent="start" flexDir="column" gap={5}>
+          </div>
+          <DrawerFooter className="flex-col items-stretch gap-5">
             {hasAccount ? (
               <ul className="flex flex-1 flex-col gap-1.5">
                 <ListItemLink to="/settings">
@@ -221,6 +227,7 @@ export default function Layout({
                 </ListItemLink>
               </ul>
             ) : null}
+            <DisconnectButton />
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
