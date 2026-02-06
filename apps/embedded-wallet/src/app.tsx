@@ -1,3 +1,4 @@
+import type { WalletType } from "@idos-network/core";
 import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
@@ -5,7 +6,7 @@ import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
 import { useWalletState } from "./state";
 
-const getHiddenWalletTypes = () => {
+const getHiddenWalletTypes = (): string[] => {
   const params = new URLSearchParams(window.location.search);
   const hiddenWallets = params.get("skip_wallets") ?? "";
   return hiddenWallets ? hiddenWallets.split(",") : [];
@@ -16,41 +17,33 @@ const hiddenWalletType = getHiddenWalletTypes();
 function WalletConnector() {
   const { connectedWalletType } = useWalletState();
 
-  if (!connectedWalletType) {
-    return (
-      <>
-        {!hiddenWalletType.includes("evm") && <EVMConnector />}
-        {!hiddenWalletType.includes("near") && <NearConnector />}
-        {!hiddenWalletType.includes("xrpl") && <XRPLConnector />}
-        {!hiddenWalletType.includes("stellar") && <StellarConnector />}
-      </>
-    );
-  }
+  const showWallet = (walletType: WalletType) => {
+    if (hiddenWalletType.includes(walletType.toLowerCase())) {
+      return false;
+    }
 
-  if (connectedWalletType === "evm") {
-    return <EVMConnector />;
-  }
+    if (connectedWalletType && connectedWalletType !== walletType) {
+      return false;
+    }
 
-  if (connectedWalletType === "near") {
-    return <NearConnector />;
-  }
+    return true;
+  };
 
-  if (connectedWalletType === "xrpl") {
-    return <XRPLConnector />;
-  }
-
-  if (connectedWalletType === "stellar") {
-    return <StellarConnector />;
-  }
-
-  return null;
+  return (
+    <>
+      {showWallet("EVM") && <EVMConnector />}
+      {showWallet("NEAR") && <NearConnector />}
+      {showWallet("XRPL") && <XRPLConnector />}
+      {showWallet("Stellar") && <StellarConnector />}
+    </>
+  );
 }
 
 export function App() {
-  const { walletPayload } = useWalletState();
+  const { walletPayload, connectedWalletType } = useWalletState();
 
   useEffect(() => {
-    if (walletPayload) {
+    if (walletPayload && connectedWalletType) {
       if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
@@ -70,6 +63,8 @@ export function App() {
               // Remove disconnect method from walletPayload
               data: {
                 ...walletPayload,
+                // TODO: Use WalletSignature from utils later
+                wallet_type: connectedWalletType,
                 disconnect: undefined,
               },
             },
@@ -83,7 +78,7 @@ export function App() {
           console.error("Error disconnecting wallet", error);
         });
     }
-  }, [walletPayload]);
+  }, [walletPayload, connectedWalletType]);
 
   return (
     <div className="grid h-full place-content-center">

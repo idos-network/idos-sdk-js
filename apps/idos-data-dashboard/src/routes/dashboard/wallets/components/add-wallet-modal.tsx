@@ -1,6 +1,6 @@
 import * as GemWallet from "@gemwallet/api";
-import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { getXrpPublicKey } from "@idos-network/core";
+import type { idOSWallet } from "@idos-network/client";
+import { getXrpPublicKey, type WalletType } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { PlusIcon } from "lucide-react";
@@ -21,40 +21,10 @@ import { toast } from "@/components/ui/sonner";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
+import { createWallet, createWalletParamsFactory } from "./add-wallet-button";
 
 type AddWalletProps = {
   defaultValue?: string;
-};
-
-const createWalletParamsFactory = ({
-  address,
-  public_key,
-  signature,
-  message,
-}: {
-  address: string;
-  public_key?: string;
-  signature?: string;
-  message: string;
-}) => ({
-  id: crypto.randomUUID() as string,
-  address,
-  public_key: public_key ?? null,
-  message,
-  signature: signature ?? "",
-});
-
-const createWallet = async (
-  idOSClient: idOSClientLoggedIn,
-  params: { address: string; public_key?: string; signature?: string; message: string },
-): Promise<idOSWallet> => {
-  const walletParams = createWalletParamsFactory(params);
-  await idOSClient.addWallet(walletParams);
-
-  const insertedWallet = (await idOSClient.getWallets()).find((w) => w.id === walletParams.id);
-  invariant(insertedWallet, "insertedWallet is undefined, idOSClient.addWallet must have failed");
-
-  return insertedWallet;
 };
 
 const useAddWalletMutation = () => {
@@ -65,29 +35,37 @@ const useAddWalletMutation = () => {
     // biome-ignore lint/suspicious/noExplicitAny: Will need to be fixed in the future.
     any,
     DefaultError,
-    { address: string; publicKeys: string[]; signature: string; message: string },
+    {
+      address: string;
+      publicKeys: string[];
+      signature: string;
+      message: string;
+      walletType: WalletType;
+    },
     { previousWallets: idOSWallet[] }
   >({
-    mutationFn: async ({ address, publicKeys, signature, message }) => {
+    mutationFn: async ({ address, publicKeys, signature, message, walletType }) => {
       if (publicKeys.length > 0) {
         return Promise.all(
-          publicKeys.map((public_key) =>
-            createWallet(idOSClient, { address, public_key, signature, message }),
+          publicKeys.map((publicKey) =>
+            createWallet(idOSClient, { address, publicKey, signature, message, walletType }),
           ),
         );
       }
-      return [await createWallet(idOSClient, { address, message, signature })];
+      return [await createWallet(idOSClient, { address, message, signature, walletType })];
     },
 
-    onMutate: async ({ address, publicKeys, signature, message }) => {
+    onMutate: async ({ address, publicKeys, signature, message, walletType }) => {
       await queryClient.cancelQueries({ queryKey: ["wallets"] });
       const previousWallets = queryClient.getQueryData<idOSWallet[]>(["wallets"]) ?? [];
 
-      const wallets = publicKeys.map((public_key) =>
-        createWalletParamsFactory({ address, public_key, signature, message }),
+      const wallets = publicKeys.map((publicKey) =>
+        createWalletParamsFactory({ address, publicKey, signature, message, walletType }),
       );
       const payload =
-        wallets.length > 0 ? wallets : [createWalletParamsFactory({ address, signature, message })];
+        wallets.length > 0
+          ? wallets
+          : [createWalletParamsFactory({ address, signature, message, walletType })];
 
       queryClient.setQueryData<idOSWallet[]>(["wallets"], (old = []) => [
         ...old,
@@ -124,27 +102,15 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     const near_regexp = /^[a-zA-Z0-9._-]+\.near$/;
     const xrp_address_regexp = /^r[0-9a-zA-Z]{24,34}$/;
 
-    let address_type: "EVM" | "NEAR" | "XRPL" | "INVALID";
+    let walletType: WalletType;
 
     if (evm_regexp.test(address)) {
-      address_type = "EVM";
+      walletType = "EVM";
     } else if (near_regexp.test(address)) {
-      address_type = "NEAR";
+      walletType = "NEAR";
     } else if (xrp_address_regexp.test(address)) {
-      address_type = "XRPL";
+      walletType = "XRPL";
     } else {
-      address_type = "INVALID";
-    }
-    if (address_type === "EVM") {
-      if (!connectedEvmAddress) {
-        handleClose();
-        await open();
-        return;
-      }
-      publicKeys = [address];
-    }
-
-    if (address_type === "INVALID") {
       toast({
         title: "Invalid wallet address",
         description: "Please enter a valid EVM, NEAR, or XRPL wallet address/public key.",
@@ -154,7 +120,15 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
       return;
     }
 
-    if (address_type === "XRPL") {
+    if (walletType === "EVM") {
+      if (!connectedEvmAddress) {
+        handleClose();
+        await open();
+        return;
+      }
+    }
+
+    if (walletType === "XRPL") {
       const result = await getXrpPublicKey(GemWallet);
       invariant(result?.address, "Failed to get XRPL address");
       // validate passed public key in case user is not connected to intended wallet
@@ -183,7 +157,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
       }
     }
 
-    if (address_type === "NEAR") {
+    if (walletType === "NEAR") {
       publicKeys = (await getNearFullAccessPublicKeys(address)) || [];
 
       if (!publicKeys.length) {
@@ -201,7 +175,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     const message = "Please sign this message to add this wallet to your idOS account.";
 
     // @todo: handle other blockchain signing mechanism
-    if (address_type === "EVM") {
+    if (walletType === "EVM") {
       try {
         const _signature = await signMessageAsync({
           message,
@@ -224,9 +198,10 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
     addWallet.mutate(
       {
         address,
-        publicKeys: publicKeys.length > 0 ? publicKeys : [address],
+        publicKeys,
         signature,
         message,
+        walletType,
       },
       {
         async onSuccess(wallets: idOSWallet[]) {

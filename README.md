@@ -23,17 +23,7 @@
 | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
 | [`📁 dashboard-for-dapps`](./apps/dashboard-for-dapps/) | Dashboard for dApp developers to access data that users shared with them. <br> Deployed at <https://dashboard-for-dapps.idos.network/>. |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard)  | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>.                     |
-| [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                |
-| [`📁 isle`](./apps/isle)                                | Full-featured standard UI for dApps to include in their application.                                                                    |
-| [`📁 passporting-server`](./apps/passporting-server)   | Backend service for credential passporting between [Obliged Entities](./docs/glossary.md#obliged-entities).                             |
-
-`idos-sdk-e2e` are the end-to-end tests.
-
-## Examples
-| Folder                                                     | Contents                                                                                                  |
-| :--------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| [`📁 consumer-and-issuer`](./examples/consumer-and-issuer/) | Example implementation showing and application that's both the consumer and the issuer                    |
-| [`📁 passporting`](./examples/passporting)                  | Demo of credential passporting between different [Obliged Entities](./docs/glossary.md#obliged-entities). |
+| [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                                         |
 
 ## Installation
 

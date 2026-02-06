@@ -10,7 +10,6 @@ export default defineConfig({
     "./src/codecs/index.ts",
     "./src/xrpl-credentials/index.ts",
     "./src/signature-verification/index.ts",
-    "./src/wallets/index.ts",
   ],
   external: [
     "@digitalbazaar/ed25519-signature-2020",
