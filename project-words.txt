@@ -114,6 +114,7 @@ typesafety
 uidotdev
 Upserts
 usehooks
+vaul
 vercel
 vespaiach
 viem
@@ -126,3 +127,4 @@ websdk
 Xaman
 xrpl
 XUMM
+Shadcn

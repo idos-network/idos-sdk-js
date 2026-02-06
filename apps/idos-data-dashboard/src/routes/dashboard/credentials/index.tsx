@@ -1,19 +1,11 @@
-import {
-  Heading,
-  HStack,
-  IconButton,
-  List,
-  ListItem,
-  useDisclosure,
-  VStack,
-} from "@chakra-ui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { RotateCw } from "lucide-react";
+import { RotateCwIcon } from "lucide-react";
 import { useState } from "react";
-
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
 import { NoData } from "@/components/no-data";
+import { Button } from "@/components/ui/button";
+import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { CredentialCard } from "./components/credential-card";
 import { CredentialDetails } from "./components/credential-details";
@@ -78,18 +70,18 @@ const Credentials = () => {
   if (credentials.isSuccess) {
     return (
       <>
-        <List id="credentials-list" display="flex" flexDir="column" gap={2.5} flex={1}>
+        <ul id="credentials-list" className="flex flex-col gap-2.5 flex-1">
           {credentials.data.map((credential) => (
-            <ListItem key={credential.id} id={credential.id}>
+            <li key={credential.id} id={credential.id} className="list-none">
               <CredentialCard
                 credential={credential}
                 onViewDetails={setCredentialDetailsId}
                 onManageGrants={handleManageGrants}
                 onDelete={handleDelete}
               />
-            </ListItem>
+            </li>
           ))}
-        </List>
+        </ul>
         {credentialDetailsId ? (
           <CredentialDetails
             credentialId={credentialDetailsId}
@@ -123,38 +115,24 @@ export function Component() {
   if (idOSClient.state !== "logged-in") return <NoCredentials />;
 
   return (
-    <VStack align="stretch" flex={1} gap={2.5}>
-      <HStack
-        justifyContent="space-between"
-        h={{
-          base: 14,
-          lg: 20,
-        }}
-        p={5}
-        bg="neutral.900"
-        rounded="xl"
-      >
-        <Heading
-          as="h1"
-          fontSize={{
-            base: "x-large",
-            lg: "xx-large",
-          }}
-        >
-          Credentials
-        </Heading>
-        <IconButton
+    <div className="flex flex-col items-stretch flex-1 gap-2.5">
+      <div className="flex justify-between items-center p-5 bg-neutral-900 rounded-xl">
+        <h1 className="block text-2xl! md:text-3xl! font-bold!">Credentials</h1>
+
+        <Button
+          variant="secondary"
           aria-label="Refresh credentials"
-          icon={<RotateCw size={18} />}
           onClick={() => {
             queryClient.refetchQueries({
               queryKey: ["credentials"],
             });
           }}
-        />
-      </HStack>
+        >
+          <RotateCwIcon size={18} />
+        </Button>
+      </div>
       <Credentials />
-    </VStack>
+    </div>
   );
 }
 Component.displayName = "Credentials";

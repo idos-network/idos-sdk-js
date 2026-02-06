@@ -41,7 +41,7 @@ export function NearConnector() {
 
   useEffect(() => {
     if (isSignedIn && stepper.isFirst) {
-      setConnectedWalletType("near");
+      setConnectedWalletType("NEAR");
       stepper.next();
     }
   }, [isSignedIn, stepper]);
@@ -52,7 +52,7 @@ export function NearConnector() {
       setAccountId(selector.store.getState().accounts[0]?.accountId || "");
 
       // Handle external disconnections
-      if (!selector.isSignedIn() && connectedWalletType === "near") {
+      if (!selector.isSignedIn() && connectedWalletType === "NEAR") {
         setConnectedWalletType(null);
         setAccountId("");
         stepper.reset();

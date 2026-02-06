@@ -1,20 +1,7 @@
-import {
-  Button,
-  Image,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  SimpleGrid,
-  Text,
-  useBreakpointValue,
-  VStack,
-} from "@chakra-ui/react";
 import { ArrowUpRightIcon } from "lucide-react";
 import { useIdOS } from "@/idOS.provider";
+import { Button } from "./ui/button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 
 type ProfOfPersonhoodProps = {
   isOpen: boolean;
@@ -38,96 +25,59 @@ const fractalProofUrl = (address: string) => {
 };
 
 export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => {
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
-
   const idOSClient = useIdOS();
 
   if (!idOSClient.walletIdentifier) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      size={{
-        base: "full",
-        lg: "2xl",
-      }}
-      isCentered={isCentered}
-      onClose={onClose}
-    >
-      <ModalOverlay />
-      <ModalContent bg="neutral.900" rounded="xl">
-        <ModalHeader textAlign="center">Add Proof of Personhood</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <SimpleGrid
-            columns={{
-              base: 1,
-              lg: 3,
-            }}
-            spacing={5}
-          >
-            <VStack
-              justifyContent="space-between"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image
-                src="/flow-1-icon.svg"
-                alt="Prove that you are a unique human being"
-                w="auto"
-                h="90px"
-              />
-              <Text color="neutral.500">Prove that you are a unique human being</Text>
-            </VStack>
-            <VStack
-              justifyContent="center"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image src="/flow-2-icon.svg" alt="It only takes 1 minute!" w="auto" h="90px" />
-              <Text color="neutral.500">It only takes 1 minute!</Text>
-            </VStack>
-            <VStack
-              justifyContent="space-between"
-              placeContent="center"
-              p={5}
-              bg="neutral.800"
-              border="1px solid"
-              borderColor="neutral.700"
-              rounded="lg"
-            >
-              <Image src="/flow-3-icon.svg" alt="Prove it with Fractal ID" w="auto" h="90px" />
-              <Text color="neutral.500">Prove it with Fractal ID</Text>
-            </VStack>
-          </SimpleGrid>
-        </ModalBody>
-        <ModalFooter placeContent="center">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="w-full max-w-full lg:max-w-[700px]!">
+        <DialogHeader className="text-center">
+          <DialogTitle>Add Proof of Personhood</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+            <img
+              src="/flow-1-icon.svg"
+              alt="Prove that you are a unique human being"
+              className="w-auto h-[90px] max-w-[90px]!"
+            />
+            <span className="text-neutral-500" role="alert">
+              Prove that you are a unique human being
+            </span>
+          </div>
+          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+            <img
+              src="/flow-2-icon.svg"
+              alt="It only takes 1 minute!"
+              className="w-auto h-[90px] max-w-[90px]!"
+            />
+            <span className="text-neutral-500" role="alert">
+              It only takes 1 minute!
+            </span>
+          </div>
+          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+            <img
+              src="/flow-3-icon.svg"
+              alt="Prove it with Fractal ID"
+              className="w-auto h-[90px] max-w-[90px]!"
+            />
+            <span className="text-neutral-500" role="alert">
+              Prove it with Fractal ID
+            </span>
+          </div>
+        </div>
+        <DialogFooter className="justify-center">
           <Button
-            rightIcon={<ArrowUpRightIcon size={24} />}
-            flex={{
-              base: 1,
-              lg: "none",
-            }}
+            className="flex-1 lg:flex-none flex gap-1 items-center"
+            variant="secondary"
             onClick={() => window.location.assign(fractalProofUrl(idOSClient.walletIdentifier))}
           >
             Verify with Fractal ID
+            <ArrowUpRightIcon size={24} />
           </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

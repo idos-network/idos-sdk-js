@@ -1,17 +1,3 @@
-import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogCloseButton,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
-  Button,
-  Code,
-  Spinner,
-  Text,
-  useToast,
-} from "@chakra-ui/react";
 import type { idOSGrant } from "@idos-network/core";
 import type { idOSCredential } from "@idos-network/credentials/types";
 import {
@@ -21,8 +7,17 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Code } from "@/components/ui/code";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
-
 import { timelockToMs } from "../../utils/time";
 import { safeParse, useFetchGrants, useRevokeGrants } from "../shared";
 
@@ -61,7 +56,6 @@ const useDeleteCredentialMutation = () => {
 };
 
 export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredentialProps) => {
-  const toast = useToast();
   const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteCredential = useDeleteCredentialMutation();
   const grants = useFetchGrants({
@@ -91,7 +85,6 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
       toast({
         title: "Revoking grants",
         description: "Revoking grants that have been shared with others...",
-        icon: <Spinner size="sm" />,
         position: "bottom-right",
         duration: 3000,
         status: "error",
@@ -102,7 +95,6 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
           toast({
             title: "Grant revocation successful",
             description: "All grants have been successfully revoked. Deleting credential...",
-            icon: <Spinner size="sm" />,
             position: "bottom-right",
             status: "success",
           });
@@ -162,69 +154,54 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
   const meta = safeParse<{ type?: string; issuer?: string }>(credential.public_notes);
 
   return (
-    <AlertDialog
+    <Dialog
       data-testid="delete-credential-dialog"
-      isOpen={isOpen}
-      size={{
-        base: "full",
-        lg: "lg",
-      }}
-      isCentered
-      leastDestructiveRef={cancelRef}
-      onClose={handleClose}
+      open={isOpen}
+      onOpenChange={(open) => !open && handleClose()}
     >
-      <AlertDialogOverlay>
-        <AlertDialogContent bg="neutral.900" rounded="xl">
-          <AlertDialogHeader>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
             {revokeGrants.isPending
               ? "Revoking grants"
               : deleteCredential.isPending
                 ? "Deleting credential"
                 : "Delete credential"}
-          </AlertDialogHeader>
-          <AlertDialogCloseButton />
-          <AlertDialogBody>
-            {revokeGrants.isPending ? (
-              <>
-                <Text mb={1}>Revoking grant for consumer:</Text>
-                <Code px={2} py={1} rounded="md" fontSize="sm" bg="neutral.800">
-                  {ag_grantee_wallet_identifier}
-                </Code>
-              </>
-            ) : deleteCredential.isPending ? (
-              <Text>
-                Deleting credential of type{" "}
-                <Text as="span" color="green.200" fontWeight="semibold">
-                  {meta.type}
-                </Text>{" "}
-                from issuer{" "}
-                <Text as="span" color="green.200" fontWeight="semibold">
-                  {meta.issuer}
-                </Text>
-              </Text>
-            ) : (
-              <Text>Do you want to delete this credential from the idOS?</Text>
-            )}
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            {!(revokeGrants.isPending || deleteCredential.isPending) ? (
-              <Button ref={cancelRef} onClick={handleClose}>
-                Cancel
-              </Button>
-            ) : null}
-
-            <Button
-              id={`confirm-delete-credential-${credential.id}`}
-              colorScheme="red"
-              ml={3}
-              onClick={handleDeleteCredential}
-              isLoading={revokeGrants.isPending || deleteCredential.isPending}
-            >
-              {deleteCredential.isError ? "Retry" : "Delete"}
+          </DialogTitle>
+        </DialogHeader>
+        <div>
+          {revokeGrants.isPending ? (
+            <>
+              <span className="block mb-1">Revoking grant for consumer:</span>
+              <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
+            </>
+          ) : deleteCredential.isPending ? (
+            <span className="block">
+              Deleting credential of type{" "}
+              <span className="block text-green-200 font-semibold">{meta.type}</span> from issuer{" "}
+              <span className="block text-green-200 font-semibold">{meta.issuer}</span>
+            </span>
+          ) : (
+            <span className="block">Do you want to delete this credential from the idOS?</span>
+          )}
+        </div>
+        <DialogFooter className="flex gap-2 items-center">
+          {!(revokeGrants.isPending || deleteCredential.isPending) ? (
+            <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
+              Cancel
             </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialogOverlay>
-    </AlertDialog>
+          ) : null}
+
+          <Button
+            id={`confirm-delete-credential-${credential.id}`}
+            variant="destructive"
+            onClick={handleDeleteCredential}
+            isLoading={revokeGrants.isPending || deleteCredential.isPending}
+          >
+            {deleteCredential.isError ? "Retry" : "Delete"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
