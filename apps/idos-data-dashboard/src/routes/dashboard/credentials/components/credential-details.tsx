@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useIdOS } from "@/idOS.provider";
+import { safeParse } from "../shared";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const idOSClient = useIdOS();
@@ -65,7 +66,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
       })()
     : "No content to display";
 
-  const meta = credential.data?.public_notes ? JSON.parse(credential.data.public_notes) : {};
+  const meta = safeParse<{ type?: string; issuer?: string }>(credential.data?.public_notes);
 
   const downloadFileName = credential.data?.public_notes
     ? `${meta.type || "credential"}_${meta.issuer || "unknown"}.json`
