@@ -42,8 +42,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
     "publint": "pnpx publint --strict",
     "typecheck": "tsc --noEmit"
   },
