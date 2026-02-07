@@ -67,17 +67,18 @@ export class MemoryStore implements Store {
   }
 
   pipeCodec<T>({ encode, decode }: PipeCodecArgs<T>): MemoryStore {
-    return {
-      ...this,
-      // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      get: async (key: string): Promise<any> => {
-        const result = await this.get(key);
-        if (result) return decode(result);
-      },
-      // biome-ignore lint/suspicious/noExplicitAny: `any` is fine here.
-      set: async (key: string, value: any): Promise<void> => {
-        await this.set(key, encode(value));
-      },
+    const store = Object.create(Object.getPrototypeOf(this));
+    Object.assign(store, this);
+
+    store.get = async (key: string): Promise<T | undefined> => {
+      const result = await this.get(key);
+      if (result) return decode(result);
     };
+
+    store.set = async (key: string, value: T): Promise<void> => {
+      await this.set(key, encode(value));
+    };
+
+    return store;
   }
 }
