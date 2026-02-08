@@ -1,12 +1,3 @@
-import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/core";
-import type {
-  EditPublicNotesAsIssuerInput,
-  idOSGrant,
-  idOSPassportingPeer,
-  idOSUser,
-  idOSUserAttribute,
-  idOSWallet,
-} from "@idos-network/core/kwil-actions";
 import {
   buildCredential,
   buildFaceIdCredential,
@@ -21,6 +12,15 @@ import type {
   idOSCredential,
 } from "@idos-network/credentials/types";
 import { deriveLevel } from "@idos-network/credentials/utils";
+import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
+import type {
+  EditPublicNotesAsIssuerInput,
+  idOSGrant,
+  idOSPassportingPeer,
+  idOSUser,
+  idOSUserAttribute,
+  idOSWallet,
+} from "@idos-network/kwil-infra/actions";
 import type { SignKeyPair } from "tweetnacl";
 import {
   CredentialService,
@@ -55,7 +55,7 @@ export class idOSIssuer {
       chainId: params.chainId,
     });
 
-    const [signer] = createServerKwilSigner(params.signingKeyPair);
+    const [signer] = await createServerKwilSigner(params.signingKeyPair);
     kwilClient.setSigner(signer);
 
     const credentialService = new CredentialService(

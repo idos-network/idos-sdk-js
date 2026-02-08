@@ -104,7 +104,7 @@ To initialize the idOS Consumer SDK, you need to pass in something as a `consume
 **Implementation with tweetnacl:**
 ```typescript
 import nacl from "tweetnacl";
-import { hexDecode } from "@idos-network/core";
+import { hexDecode } from "@idos-network/utils/codecs";
 
 // Option 1: Generate a new key pair
 const signer = nacl.sign.keyPair();

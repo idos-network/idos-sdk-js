@@ -1,0 +1,80 @@
+{
+  "name": "@idos-network/enclave",
+  "description": "idOS Enclave JavaScript SDK",
+  "version": "1.0.0-rc.1.1",
+  "dependencies": {
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/utils": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "scrypt-js": "^3.0.1",
+    "tweetnacl": "catalog:core",
+    "zod": "catalog:core"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.0",
+    "@types/node": "^22.15.30",
+    "jsdom": "^22.1.0",
+    "tsdown": "catalog:build",
+    "typescript": "catalog:build",
+    "vitest": "catalog:testing"
+  },
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./encryption": {
+      "types": "./dist/encryption/index.d.mts",
+      "import": "./dist/encryption/index.mjs"
+    },
+    "./local": {
+      "types": "./dist/local.d.mts",
+      "import": "./dist/local.mjs"
+    },
+    "./mpc": {
+      "types": "./dist/mpc/index.d.mts",
+      "import": "./dist/mpc/index.mjs"
+    }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "homepage": "https://idos.network",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "module": "dist/index.js",
+  "peerDependencies": {
+    "@partisiablockchain/abi-client": "^5.207.0",
+    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
+    "ethers": "catalog:ethereum"
+  },
+  "peerDependenciesMeta": {
+    "@partisiablockchain/blockchain-api-transaction-client": {
+      "optional": true
+    },
+    "@partisiablockchain/abi-client": {
+      "optional": true
+    },
+    "ethers": {
+      "optional": true
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": "https://github.com/idos-network/idos-sdk-js",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown  --watch",
+    "publint": "pnpx publint --strict",
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "./dist/index.d.ts"
+}

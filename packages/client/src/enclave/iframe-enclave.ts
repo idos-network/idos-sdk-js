@@ -3,13 +3,13 @@ import {
   BaseProvider,
   type EnclaveOptions,
   type PublicEncryptionProfile,
-} from "@idos-network/utils/enclave";
+} from "@idos-network/enclave";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
   RemoveAddressMessageToSign,
   RemoveAddressSignatureMessage,
-} from "@idos-network/utils/mpc";
+} from "@idos-network/enclave/mpc";
 import type { BaseProviderMethodArgs, BaseProviderMethodReturn } from "./helpers";
 
 export interface IframeEnclaveOptions extends EnclaveOptions {

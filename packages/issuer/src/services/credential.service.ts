@@ -1,4 +1,5 @@
-import { encryptContent } from "@idos-network/core/cryptography";
+import type { idOSCredential } from "@idos-network/credentials/types";
+import type { KwilActionClient } from "@idos-network/kwil-infra";
 import {
   type CreateCredentialsByDwgInput,
   createCredentialsByDwg,
@@ -6,9 +7,7 @@ import {
   editPublicNotesAsIssuer,
   getCredentialShared,
   getSiblingCredentialId,
-} from "@idos-network/core/kwil-actions";
-import type { KwilActionClient } from "@idos-network/core/kwil-infra";
-import type { idOSCredential } from "@idos-network/credentials/types";
+} from "@idos-network/kwil-infra/actions";
 import {
   base64Decode,
   base64Encode,
@@ -16,6 +15,7 @@ import {
   hexEncodeSha256Hash,
   utf8Encode,
 } from "@idos-network/utils/codecs";
+import { encryptContent } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 import nacl from "tweetnacl";
 

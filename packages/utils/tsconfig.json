@@ -29,5 +29,12 @@
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true
   },
-  "include": ["./src/**/*"]
+  "include": [
+    "./src/**/*",
+    "../enclave/src/encryption",
+    "src/store",
+    "../enclave/src/encryption",
+    "../enclave/src/mpc",
+    "../kwil-infra/src/xrpl-credentials"
+  ]
 }

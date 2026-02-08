@@ -62,8 +62,8 @@ const DisconnectButton = () => {
 
   const handleDisconnect = async () => {
     if (walletType === "Stellar") await stellarKit.disconnect();
-    if (walletType === "near") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
-    if (walletType === "evm") await disconnectAsync();
+    if (walletType === "NEAR") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (walletType === "EVM") await disconnectAsync();
     if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);
     setAccounts([]);

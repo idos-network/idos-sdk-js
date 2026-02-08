@@ -1,4 +1,4 @@
-import type { idOSGrant } from "@idos-network/core";
+import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

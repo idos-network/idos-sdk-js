@@ -1,5 +1,5 @@
-import type { KwilActionClient } from "@idos-network/core";
-import { getPassportingPeers, type idOSPassportingPeer } from "@idos-network/core/kwil-actions";
+import type { KwilActionClient } from "@idos-network/kwil-infra";
+import { getPassportingPeers, type idOSPassportingPeer } from "@idos-network/kwil-infra/actions";
 
 export class PassportingService {
   constructor(private readonly kwilClient: KwilActionClient) {}

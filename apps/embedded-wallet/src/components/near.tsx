@@ -2,7 +2,7 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/core";
+import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/kwil-infra";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
 import { useEffect, useState } from "react";

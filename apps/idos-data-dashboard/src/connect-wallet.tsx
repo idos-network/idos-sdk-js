@@ -1,6 +1,6 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import * as GemWallet from "@gemwallet/api";
-import { getGemWalletPublicKey } from "@idos-network/core";
+import { getGemWalletPublicKey } from "@idos-network/kwil-infra/xrp-utils";
 import { StrKey } from "@stellar/stellar-base";
 import { TokenIcon } from "@web3icons/react/dynamic";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
@@ -39,7 +39,7 @@ export const ConnectWallet = () => {
 
   useEffect(() => {
     if (evmConnected) {
-      setWalletType("evm");
+      setWalletType("EVM");
       setWalletAddress(address ?? null);
       setWalletPublicKey(address ?? null);
     }
@@ -47,7 +47,7 @@ export const ConnectWallet = () => {
 
   useEffect(() => {
     if (accountId) {
-      setWalletType("near");
+      setWalletType("NEAR");
       setWalletAddress(accountId ?? null);
       setWalletPublicKey(accountId ?? null);
     }
@@ -106,7 +106,7 @@ export const ConnectWallet = () => {
                   if (res.result.isInstalled) {
                     getGemWalletPublicKey(GemWallet).then((publicKey) => {
                       invariant(publicKey, "Public key is required");
-                      setWalletType("xrpl");
+                      setWalletType("XRPL");
                       setWalletAddress(publicKey.address ?? null);
                       setWalletPublicKey(publicKey.publicKey ?? null);
                     });

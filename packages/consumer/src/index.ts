@@ -1,4 +1,18 @@
-import { NoncedBox } from "@idos-network/core/cryptography";
+import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
+import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import type {
+  AvailableIssuerType,
+  IDDocumentType,
+  idOSCredential,
+  VerifiableCredential,
+  VerifiableCredentialSubject,
+} from "@idos-network/credentials/types";
+import {
+  createNodeKwilClient,
+  createServerKwilSigner,
+  type KwilActionClient,
+  type KwilSignerType,
+} from "@idos-network/kwil-infra";
 import {
   type CreateAgByDagForCopyInput,
   createAgByDagForCopy,
@@ -12,24 +26,10 @@ import {
   type idOSGrant,
   type idOSPassportingPeer,
   rescindSharedCredential,
-} from "@idos-network/core/kwil-actions";
-import {
-  createNodeKwilClient,
-  createServerKwilSigner,
-  type KwilActionClient,
-  type KwilSignerType,
-} from "@idos-network/core/kwil-infra";
-import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
-import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
-import type {
-  AvailableIssuerType,
-  IDDocumentType,
-  idOSCredential,
-  VerifiableCredential,
-  VerifiableCredentialSubject,
-} from "@idos-network/credentials/types";
+} from "@idos-network/kwil-infra/actions";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
+import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -56,7 +56,7 @@ export class idOSConsumer {
       chainId,
     });
 
-    const [signer, address] = createServerKwilSigner(consumerSigner);
+    const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
     return new idOSConsumer(
@@ -157,13 +157,13 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getAccessGrants(params: GetAccessGrantsGrantedInput): Promise<{
+  async getAccessGrants(params: Partial<GetAccessGrantsGrantedInput>): Promise<{
     grants: idOSGrant[];
     totalCount: number;
   }> {
     return {
       grants: await getGrants(this.#kwilClient, params),
-      totalCount: await this.getGrantsCount(params.user_id),
+      totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
   }
 

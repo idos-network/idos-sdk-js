@@ -5,8 +5,8 @@
   "dependencies": {
     "@chakra-ui/react": "^3.15.1",
     "@idos-network/client": "workspace:*",
-    "@idos-network/core": "workspace:*",
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@tanstack/query-sync-storage-persister": "catalog:tanstack",
     "@tanstack/react-query": "catalog:tanstack",

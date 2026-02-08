@@ -5,7 +5,7 @@ import {
   WalletNetwork,
   xBullModule,
 } from "@creit.tech/stellar-wallets-kit";
-import { KwilSigner } from "@idos-network/core";
+import { KwilSigner } from "@idos-network/kwil-infra";
 
 const stellarKit: StellarWalletsKit = new StellarWalletsKit({
   // @todo: pass ENV variable here

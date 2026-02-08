@@ -1,4 +1,4 @@
-import type { idOSWallet } from "@idos-network/core";
+import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { Button } from "@/components/ui/button";
