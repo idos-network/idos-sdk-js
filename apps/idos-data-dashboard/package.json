@@ -26,7 +26,7 @@
     "clsx": "^2.1.1",
     "ethers": "catalog:ethereum",
     "framer-motion": "^10.18.0",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.563.0",
     "near-api-js": "catalog:near",
     "react": "catalog:react",
     "react-dom": "catalog:react",
