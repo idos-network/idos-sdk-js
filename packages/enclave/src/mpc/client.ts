@@ -301,7 +301,7 @@ export class Client {
     const value = {
       recovering_address: address,
       address_to_remove: addressToRemoveFormatted,
-      timestamp: new Date().getTime(),
+      timestamp: Date.now(),
     };
     return {
       domain: this.getTypedDomain(),

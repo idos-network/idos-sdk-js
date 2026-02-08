@@ -367,7 +367,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         originalCredential.user_id,
         "",
         base64Encode(content),
-        consumerRecipientEncryptionPublicKey,
         base64Encode(encryptorPublicKey),
       )),
       grantee_wallet_identifier: consumerAddress,
@@ -478,7 +477,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
-      wallet.public_key,
+      wallet.public_key ?? undefined,
       wallet.wallet_type,
     );
     const signature = await this.enclaveProvider.signTypedData(
@@ -646,7 +645,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
         credential.user_id,
         "",
         base64Encode(content),
-        consumerAuthPublicKey,
         base64Encode(encryptorPublicKey),
       )),
       original_credential_id: credential.id,

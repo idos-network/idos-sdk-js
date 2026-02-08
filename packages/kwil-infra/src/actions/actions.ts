@@ -1054,20 +1054,20 @@ export const GetWalletsOutputSchema: z.ZodObject<{
   id: z.ZodUUID;
   user_id: z.ZodUUID;
   address: z.ZodString;
-  public_key: z.ZodString;
+  public_key: z.ZodNullable<z.ZodString>;
   wallet_type: z.ZodType<WalletType>;
   message: z.ZodString;
   signature: z.ZodString;
-  inserter: z.ZodString;
+  inserter: z.ZodNullable<z.ZodString>;
 }> = z.object({
   id: z.uuid(),
   user_id: z.uuid(),
   address: z.string(),
-  public_key: z.string(),
+  public_key: z.string().nullable(),
   wallet_type: walletTypeSchema,
   message: z.string(),
   signature: z.string(),
-  inserter: z.string(),
+  inserter: z.string().nullable(),
 });
 
 export type GetWalletsOutput = z.infer<typeof GetWalletsOutputSchema>;

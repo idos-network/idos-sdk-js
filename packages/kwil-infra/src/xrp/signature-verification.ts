@@ -7,8 +7,8 @@ export const verifyRippleSignature = async (
 
   try {
     xrpKeypair = await import("ripple-keypairs");
-  } catch (_e) {
-    throw new Error("Can't load ripple-keypairs");
+  } catch (e) {
+    throw new Error("Can't load ripple-keypairs", { cause: e });
   }
 
   const messageHex = Buffer.from(message).toString("hex");

@@ -246,10 +246,8 @@ export async function buildInsertableIDOSCredential(
   userId: string,
   publicNotes: string,
   content: string,
-  recipientEncryptionPublicKey: string,
   encryptorPublicKey: string,
 ): Promise<InsertableIDOSCredential> {
-  invariant(recipientEncryptionPublicKey, "Missing `recipientEncryptionPublicKey`");
   invariant(encryptorPublicKey, "Missing `encryptorPublicKey`");
 
   const ephemeralAuthenticationKeyPair = nacl.sign.keyPair();

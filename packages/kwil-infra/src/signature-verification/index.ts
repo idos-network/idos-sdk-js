@@ -6,11 +6,11 @@ import { verifyEvmSignature } from "./evm";
 import { verifyStellarSignature } from "./stellar";
 
 export interface WalletSignature {
-  address?: string;
+  address: string;
   signature: string;
-  message?: string;
+  message: string;
   wallet_type: WalletType;
-  public_key: string[];
+  public_key?: string[];
 }
 
 export const verifySignature = async (walletPayload: WalletSignature): Promise<boolean> => {
@@ -35,20 +35,25 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
         return verifyNearSignature(
           walletPayload.message,
           walletPayload.signature,
+          // @ts-expect-error - this has been checked above
           walletPayload.public_key[0],
         );
       case "XRPL":
         return verifyRippleSignature(
           walletPayload.message,
           walletPayload.signature,
+          // @ts-expect-error - this has been checked above
           walletPayload.public_key[0],
         );
       case "Stellar":
         return await verifyStellarSignature(
           walletPayload.message,
           walletPayload.signature,
+          // @ts-expect-error - this has been checked above
           walletPayload.public_key[0],
         );
+      case "FaceSign":
+        throw new Error("FaceSign signature verification not implemented");
       default:
         throw new Error(`Unsupported wallet type: ${walletPayload.wallet_type}`);
     }

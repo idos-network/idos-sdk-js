@@ -32,9 +32,7 @@ export class F256 implements FiniteFieldElement<F256> {
    * @returns the computation alphas
    */
   static alphas(numNodes: number): readonly F256[] {
-    return Array.from(
-      Array.from({ length: numNodes }, (_value, key) => F256.createElement(key + 1)),
-    );
+    return Array.from({ length: numNodes }, (_value, key) => F256.createElement(key + 1));
   }
 
   /**

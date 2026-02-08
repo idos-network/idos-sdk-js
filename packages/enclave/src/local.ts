@@ -8,10 +8,9 @@ import {
   utf8Encode,
 } from "@idos-network/utils/codecs";
 import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
+import { LocalStorageStore, type PipeCodecArgs, type Store } from "@idos-network/utils/store";
 import { syncScrypt } from "scrypt-js";
 import nacl from "tweetnacl";
-import { LocalStorageStore, type Store } from "../../utils/src/store";
-import type { PipeCodecArgs } from "../../utils/src/store/interface";
 import { BaseProvider } from "./base";
 import { STORAGE_KEYS } from "./keys";
 import { Client as MPCClient } from "./mpc/client";
