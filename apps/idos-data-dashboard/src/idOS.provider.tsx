@@ -77,7 +77,6 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { status: evmStatus } = useAccount();
 
   const evmIsConnecting = walletType === "evm" && evmStatus === "connecting";
-  const evmIsConnected = walletType === "evm" && evmStatus === "connected";
 
   useEffect(() => {
     // general wallet check
@@ -146,7 +145,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If no signer is available, show the connect wallet screen
-  if (!walletType || !walletAddress || !evmIsConnected) {
+  if (!walletType || !walletAddress) {
     return <ConnectWallet />;
   }
 

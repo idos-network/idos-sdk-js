@@ -5,9 +5,9 @@ export const Route = createFileRoute("/dashboard/wallets")({
   component: WalletsSection,
   validateSearch: (search: Record<string, unknown>) => {
     return {
-      "add-wallet": (search["add-wallet"] as string) || undefined,
-      callbackUrl: (search.callbackUrl as string) || undefined,
-      publicKey: (search.publicKey as string) || undefined,
+      "add-wallet": search["add-wallet"],
+      callbackUrl: search.callbackUrl,
+      publicKey: search.publicKey,
     };
   },
 });
