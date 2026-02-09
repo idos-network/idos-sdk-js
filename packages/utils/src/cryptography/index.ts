@@ -71,6 +71,20 @@ function decryptContent(
   return decrypted;
 }
 
+export function generatePassword(): string {
+  const alphabet =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+  const length = 20;
+  const array = new Uint8Array(length);
+  crypto.getRandomValues(array);
+  let password = "";
+  for (let i = 0; i < length; i++) {
+    password += alphabet[array[i] % alphabet.length];
+  }
+
+  return password;
+}
+
 export class NoncedBox {
   readonly keyPair: nacl.BoxKeyPair;
 
