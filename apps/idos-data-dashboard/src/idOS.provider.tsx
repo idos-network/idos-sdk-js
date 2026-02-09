@@ -76,6 +76,9 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { selector } = useWalletSelector();
   const { status: evmStatus } = useAccount();
 
+  const evmIsConnecting = walletType === "evm" && evmStatus === "connecting";
+  const evmIsConnected = walletType === "evm" && evmStatus === "connected";
+
   useEffect(() => {
     // general wallet check
     if (!walletType || !walletAddress || !walletPublicKey) {
@@ -84,7 +87,10 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     }
 
     // evm wallet check
-    if (walletType === "evm" && evmStatus !== "connected") return;
+    if (walletType === "evm" && evmStatus !== "connected") {
+      setIsLoading(false);
+      return;
+    }
 
     const signerSrc = walletInfoMapper({
       address: walletAddress ?? "",
@@ -131,7 +137,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }, [walletPublicKey, walletAddress, walletType, evmStatus]);
 
   // While loading, show a spinner
-  if (isLoading) {
+  if (isLoading || evmIsConnecting) {
     return (
       <div className="h-screen flex items-center justify-center">
         <Spinner className="size-6" />
@@ -140,7 +146,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }
 
   // If no signer is available, show the connect wallet screen
-  if (!walletType || !walletAddress) {
+  if (!walletType || !walletAddress || !evmIsConnected) {
     return <ConnectWallet />;
   }
 

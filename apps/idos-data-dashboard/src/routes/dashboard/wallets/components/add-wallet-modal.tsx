@@ -2,10 +2,10 @@ import * as GemWallet from "@gemwallet/api";
 import type { idOSWallet } from "@idos-network/client";
 import { getXrpPublicKey, type WalletType } from "@idos-network/core";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSearch } from "@tanstack/react-router";
 import { useWeb3Modal } from "@web3modal/wagmi/react";
 import { PlusIcon } from "lucide-react";
 import type { FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
 import invariant from "tiny-invariant";
 import { useAccount, useSignMessage } from "wagmi";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
+import { Route as WalletsRoute } from "@/routes/dashboard/wallets";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 import { createWallet, createWalletParamsFactory } from "./add-wallet-button";
 
@@ -83,8 +84,8 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
   const { open } = useWeb3Modal();
   const { address: connectedEvmAddress } = useAccount();
 
-  const [searchParams] = useSearchParams();
-  const publicKeyParam = searchParams.get("publicKey");
+  const search = useSearch({ from: WalletsRoute.fullPath });
+  const publicKeyParam = search.publicKey;
 
   const queryClient = useQueryClient();
 
