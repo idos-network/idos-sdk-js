@@ -172,20 +172,20 @@ export const DeleteCredential = ({ isOpen, credential, onClose }: DeleteCredenti
         <div>
           {revokeGrants.isPending ? (
             <>
-              <span className="block mb-1">Revoking grant for consumer:</span>
+              <span className="mb-1 block">Revoking grant for consumer:</span>
               <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
             </>
           ) : deleteCredential.isPending ? (
             <span className="block">
               Deleting credential of type{" "}
-              <span className="block text-green-200 font-semibold">{meta.type}</span> from issuer{" "}
-              <span className="block text-green-200 font-semibold">{meta.issuer}</span>
+              <span className="block font-semibold text-green-200">{meta.type}</span> from issuer{" "}
+              <span className="block font-semibold text-green-200">{meta.issuer}</span>
             </span>
           ) : (
             <span className="block">Do you want to delete this credential from the idOS?</span>
           )}
         </div>
-        <DialogFooter className="flex gap-2 items-center">
+        <DialogFooter className="flex items-center gap-2">
           {!(revokeGrants.isPending || deleteCredential.isPending) ? (
             <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
               Cancel

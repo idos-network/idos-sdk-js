@@ -14,10 +14,10 @@ export const NoData = ({ title, subtitle, cta }: NoDataProps) => {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <div className="flex flex-col items-stretch gap-6 p-5 bg-neutral-900 rounded-xl">
-      <h1 className="text-2xl! font-medium">{title}</h1>
+    <div className="flex flex-col items-stretch gap-6 rounded-xl bg-neutral-900 p-5">
+      <h1 className="font-medium text-2xl!">{title}</h1>
 
-      {subtitle ? <span className="text-neutral-600 text-2xl">{subtitle}</span> : null}
+      {subtitle ? <span className="text-2xl text-neutral-600">{subtitle}</span> : null}
 
       {cta ? (
         <div>

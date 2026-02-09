@@ -260,7 +260,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
             </DialogHeader>
             <div className="py-2">
               <div className="flex flex-col gap-2">
-                <label className="text-sm block mb-2" htmlFor="address">
+                <label className="mb-2 block text-sm" htmlFor="address">
                   Wallet address
                 </label>
                 <Input

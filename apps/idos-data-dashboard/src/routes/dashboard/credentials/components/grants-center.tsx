@@ -56,15 +56,15 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
           revoked or granted.
         </span>
       </div>
-      <div className="rounded-lg bg-neutral-800 border! border-neutral-700">
+      <div className="border! rounded-lg border-neutral-700 bg-neutral-800">
         <table
-          className="w-full border-collapse table [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
+          className="table w-full border-collapse [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
           id={`grants-for-${credentialId}`}
         >
           <thead>
             <tr className="border-b!">
-              <th className="text-neutral-500 text-left">Consumer</th>
-              <th className="text-neutral-500 text-left">Locked until</th>
+              <th className="text-left text-neutral-500">Consumer</th>
+              <th className="text-left text-neutral-500">Locked until</th>
               <th />
             </tr>
           </thead>
