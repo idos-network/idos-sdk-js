@@ -133,7 +133,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   // While loading, show a spinner
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
       </div>
     );
@@ -148,7 +148,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   if (client.state !== "logged-in") {
     return (
       <Layout hasAccount={false}>
-        <span className="text-sm font-medium block">No account found</span>
+        <span className="block font-medium text-sm">No account found</span>
       </Layout>
     );
   }

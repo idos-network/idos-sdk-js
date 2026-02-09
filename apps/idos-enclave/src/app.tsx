@@ -19,7 +19,7 @@ const allowedIntents: AllowedIntent[] = ["confirm", "getPasswordContext", "backu
 
 function Layout({ children }: PropsWithChildren) {
   return (
-    <div className="grid grid-rows-[auto_1fr] p-6 max-w-[360px] mx-auto gap-6">
+    <div className="mx-auto grid max-w-[360px] grid-rows-[auto_1fr] gap-6 p-6">
       <Header />
       <main>{children}</main>
     </div>

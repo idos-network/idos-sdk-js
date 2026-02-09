@@ -36,31 +36,31 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
           <DialogTitle>Add Proof of Personhood</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
-          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800 p-5">
             <img
               src="/flow-1-icon.svg"
               alt="Prove that you are a unique human being"
-              className="w-auto h-[90px] max-w-[90px]!"
+              className="h-[90px] w-auto max-w-[90px]!"
             />
             <span className="text-neutral-500" role="alert">
               Prove that you are a unique human being
             </span>
           </div>
-          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800 p-5">
             <img
               src="/flow-2-icon.svg"
               alt="It only takes 1 minute!"
-              className="w-auto h-[90px] max-w-[90px]!"
+              className="h-[90px] w-auto max-w-[90px]!"
             />
             <span className="text-neutral-500" role="alert">
               It only takes 1 minute!
             </span>
           </div>
-          <div className="flex justify-center items-center flex-col gap-3 p-5 bg-neutral-800 border border-neutral-700 rounded-lg">
+          <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-neutral-700 bg-neutral-800 p-5">
             <img
               src="/flow-3-icon.svg"
               alt="Prove it with Fractal ID"
-              className="w-auto h-[90px] max-w-[90px]!"
+              className="h-[90px] w-auto max-w-[90px]!"
             />
             <span className="text-neutral-500" role="alert">
               Prove it with Fractal ID
@@ -69,7 +69,7 @@ export const ProfOfPersonhood = ({ isOpen, onClose }: ProfOfPersonhoodProps) => 
         </div>
         <DialogFooter className="justify-center">
           <Button
-            className="flex-1 lg:flex-none flex gap-1 items-center"
+            className="flex flex-1 items-center gap-1 lg:flex-none"
             variant="secondary"
             onClick={() => window.location.assign(fractalProofUrl(idOSClient.walletIdentifier))}
           >

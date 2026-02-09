@@ -69,12 +69,6 @@ export class CredentialService {
     this.#encryptionSecretKey = encryptionSecretKey;
   }
 
-  #buildInsertableIDOSCredential(args: BuildInsertableIDOSCredentialArgs): InsertableIDOSCredential;
-
-  #buildInsertableIDOSCredential(
-    args: Omit<BuildInsertableIDOSCredentialArgs, "userId">,
-  ): Omit<InsertableIDOSCredential, "user_id">;
-
   #buildInsertableIDOSCredential({
     userId,
     publicNotes,

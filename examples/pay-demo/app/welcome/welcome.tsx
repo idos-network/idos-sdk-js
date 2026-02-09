@@ -7,10 +7,8 @@ export function Welcome() {
     <main className="flex min-h-screen items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-8 p-8">
         <header className="flex flex-col items-center gap-6">
-          <h1 className="text-center font-bold text-3xl text-gray-900 ">
-            Welcome to idOS Pay Demo
-          </h1>
-          <p className="text-center text-gray-600 ">Get started by logging in to your account</p>
+          <h1 className="text-center font-bold text-3xl text-gray-900">Welcome to idOS Pay Demo</h1>
+          <p className="text-center text-gray-600">Get started by logging in to your account</p>
         </header>
 
         <button

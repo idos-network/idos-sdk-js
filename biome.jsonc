@@ -26,7 +26,7 @@
     "rules": {
       "recommended": true,
       "nursery": {
-        "useSortedClasses": "off"
+        "useSortedClasses": "error"
       },
       "correctness": {
         "noUnusedImports": "error"
