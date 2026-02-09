@@ -41,7 +41,7 @@
   "scripts": {
     "build": "turbo run build",
     "build:packages": "pnpm --filter './packages/**' build",
-    "check": "biome check . --write --unsafe",
+    "check": "biome check . --write",
     "check:ci": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "clean": "turbo run clean && rm -rf node_modules",
     "dev": "turbo run dev",
