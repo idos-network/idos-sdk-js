@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
@@ -12,7 +13,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          react: ["react", "react-dom", "react-router-dom"],
+          react: ["react", "react-dom"],
           vendor: ["@tanstack/react-query", "framer-motion"],
           web3: ["wagmi", "viem"],
         },
@@ -20,6 +21,10 @@ export default defineConfig({
     },
   },
   plugins: [
+    tanstackRouter({
+      autoCodeSplitting: true,
+      target: "react",
+    }),
     react(),
     tailwindcss(),
     nodePolyfills({
