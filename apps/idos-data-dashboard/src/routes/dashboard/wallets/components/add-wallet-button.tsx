@@ -148,20 +148,15 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from the embedded wallet app
-      const allowedOrigin = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-      if (!allowedOrigin) {
+      const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
+      if (!envUrl) {
         console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
         return;
       }
-
-      // Extract origin from the full URL
-      const allowedOriginUrl = new URL(allowedOrigin);
-      const allowedOriginString = allowedOriginUrl.origin;
-
-      if (event.origin !== allowedOriginString) {
+      const allowedOrigins = envUrl.split(",").map((url: string) => new URL(url.trim()).origin);
+      if (!allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
+          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${allowedOrigins.join(", ")}`,
         );
         return;
       }
@@ -200,10 +195,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
-    invariant(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
-      "VITE_EMBEDDED_WALLET_APP_URL is not set",
-    );
+    const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
+    invariant(envUrl, "VITE_EMBEDDED_WALLET_APP_URL is not set");
+
+    const popupUrl = envUrl.split(",")[0]?.trim() ?? envUrl;
 
     setIsLoading(true);
 
@@ -214,7 +209,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
+      popupUrl,
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
