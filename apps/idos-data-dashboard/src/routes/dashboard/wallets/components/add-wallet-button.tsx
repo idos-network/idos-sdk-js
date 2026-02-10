@@ -10,9 +10,9 @@ import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
-  const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-  invariant(envUrl && typeof envUrl === "string", "VITE_EMBEDDED_WALLET_APP_URL is not set");
-  const entries = envUrl
+  const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
+  invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
+  const entries = envUrls
     .split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
@@ -27,14 +27,14 @@ function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] 
       }
     } catch {
       console.warn(
-        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URL contains invalid URL, skipping:",
+        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URLS contains invalid URL, skipping:",
         entry,
       );
     }
   }
   invariant(
     popupUrl !== undefined && allowedOrigins.length > 0,
-    "VITE_EMBEDDED_WALLET_APP_URL must contain at least one valid URL",
+    "VITE_EMBEDDED_WALLET_APP_URLS must contain at least one valid URL",
   );
   return { popupUrl, allowedOrigins };
 }
