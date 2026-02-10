@@ -589,10 +589,10 @@ importers:
         specifier: ^5.0.5
         version: 5.0.5(rollup@4.46.2)
       '@stablelib/base64':
-        specifier: ^2.0.1
+        specifier: catalog:utils
         version: 2.0.1
       '@stablelib/utf8':
-        specifier: ^2.0.1
+        specifier: catalog:utils
         version: 2.0.1
       dompurify:
         specifier: ^3.2.5
