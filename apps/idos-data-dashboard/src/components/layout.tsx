@@ -91,7 +91,7 @@ const Breadcrumbs = () => {
   const matches = routerState.matches;
 
   const crumbs = matches
-    .filter((match) => match.routeId !== "__root__" && match.routeId !== "/dashboard")
+    .filter((match) => match.routeId !== "__root__" && match.routeId !== "/")
     .map((match) => getBreadcrumbLabel(match.routeId))
     .filter(Boolean);
 
@@ -132,7 +132,7 @@ export default function Layout({
     <div className="flex min-h-screen">
       <nav className="sticky top-0 h-screen w-[380px] hidden lg:flex flex-col items-stretch">
         <div className="flex flex-col items-stretch flex-1 p-5 gap-5">
-          <Link to="/dashboard" className="flex items-center h-[100px]">
+          <Link to="/" className="flex items-center h-[100px]">
             <img
               src="/idos-dashboard-logo.svg"
               alt="idOS Dashboard logo"
@@ -147,14 +147,14 @@ export default function Layout({
             <div className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
               <ul className="flex flex-col gap-1.5">
                 <li>
-                  <ListItemLink to="/dashboard">
+                  <ListItemLink to="/">
                     <KeyRoundIcon size={24} strokeWidth="1.5" />
                     <span>Credentials</span>
                   </ListItemLink>
                 </li>
                 {hasAccount ? (
                   <li>
-                    <ListItemLink to="/dashboard/wallets">
+                    <ListItemLink to="/wallets">
                       <Wallet2Icon size={24} strokeWidth="1.5" />
                       <span>Wallets</span>
                     </ListItemLink>
@@ -164,7 +164,7 @@ export default function Layout({
               <div className="mt-auto flex flex-col gap-5 items-stretch">
                 {hasAccount ? (
                   <ul className="flex flex-1 flex-col gap-1.5">
-                    <ListItemLink to="/dashboard/settings">
+                    <ListItemLink to="/settings">
                       <CogIcon size={24} strokeWidth="1" />
                       <span>Settings</span>
                     </ListItemLink>
@@ -198,7 +198,7 @@ export default function Layout({
                 <XIcon size={20} />
               </Button>
             </DrawerClose>
-            <Link to="/dashboard" className="flex items-center h-[100px] bg-transparent!">
+            <Link to="/" className="flex items-center h-[100px] bg-transparent!">
               <img
                 src="/idos-dashboard-logo.svg"
                 alt="idOS Dashboard logo"
@@ -213,14 +213,14 @@ export default function Layout({
             </div>
             <ul className="flex flex-col gap-1.5">
               <li>
-                <ListItemLink to="/dashboard">
+                <ListItemLink to="/">
                   <KeyRoundIcon size={24} strokeWidth="2.5" />
                   <span>Credentials</span>
                 </ListItemLink>
               </li>
               {hasAccount && (
                 <li>
-                  <ListItemLink to="/dashboard/wallets">
+                  <ListItemLink to="/wallets">
                     <Wallet2Icon size={24} strokeWidth="1.5" />
                     <span>Wallets</span>
                   </ListItemLink>
@@ -231,7 +231,7 @@ export default function Layout({
           <DrawerFooter className="flex-col items-stretch gap-5">
             {hasAccount ? (
               <ul className="flex flex-1 flex-col gap-1.5">
-                <ListItemLink to="/dashboard/settings">
+                <ListItemLink to="/settings">
                   <CogIcon size={24} strokeWidth="1" />
                   <span>Settings</span>
                 </ListItemLink>

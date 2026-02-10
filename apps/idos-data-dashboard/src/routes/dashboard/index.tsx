@@ -1,6 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { CredentialsSection } from "./credentials";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/dashboard/")({
-  component: CredentialsSection,
+  component: () => <Navigate to="/credentials" />,
 });

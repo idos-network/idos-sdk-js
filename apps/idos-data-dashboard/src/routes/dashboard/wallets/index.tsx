@@ -101,9 +101,9 @@ const WalletsList = () => {
 
 export function WalletsSection() {
   const idOSClient = useIdOS();
-  const search = useSearch({ from: "/dashboard/wallets" });
+  const search = useSearch({ from: "/wallets" });
   const walletToAdd = search["add-wallet"] as string | undefined;
-  const callbackUrl = search["callbackUrl"] as string | undefined;
+  const callbackUrl = search.callbackUrl as string | undefined;
   const queryClient = useQueryClient();
 
   const hasProfile = !!idOSClient.user.id;

@@ -20,7 +20,6 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
-import { Route as WalletsRoute } from "@/routes/dashboard/wallets";
 import { getNearFullAccessPublicKeys } from "@/utils/near";
 import { createWallet, createWalletParamsFactory } from "./add-wallet-button";
 
@@ -84,7 +83,7 @@ export const AddWalletUsingModal = ({ defaultValue }: AddWalletProps) => {
   const { open } = useWeb3Modal();
   const { address: connectedEvmAddress } = useAccount();
 
-  const search = useSearch({ from: WalletsRoute.fullPath });
+  const search = useSearch({ from: "/wallets" });
   const publicKeyParam = search.publicKey;
 
   const queryClient = useQueryClient();

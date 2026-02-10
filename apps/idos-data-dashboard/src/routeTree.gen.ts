@@ -9,16 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as WalletsRouteImport } from './routes/wallets'
+import { Route as SuccessRouteImport } from './routes/success'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as CredentialsRouteImport } from './routes/credentials'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
-import { Route as DashboardWalletsRouteImport } from './routes/dashboard/wallets'
-import { Route as DashboardSuccessRouteImport } from './routes/dashboard/success'
-import { Route as DashboardSettingsRouteImport } from './routes/dashboard/settings'
 
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const WalletsRoute = WalletsRouteImport.update({
+  id: '/wallets',
+  path: '/wallets',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SuccessRoute = SuccessRouteImport.update({
+  id: '/success',
+  path: '/success',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CredentialsRoute = CredentialsRouteImport.update({
+  id: '/credentials',
+  path: '/credentials',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -27,88 +42,100 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardWalletsRoute = DashboardWalletsRouteImport.update({
-  id: '/wallets',
-  path: '/wallets',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSuccessRoute = DashboardSuccessRouteImport.update({
-  id: '/success',
-  path: '/success',
-  getParentRoute: () => DashboardRoute,
-} as any)
-const DashboardSettingsRoute = DashboardSettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => DashboardRoute,
+  id: '/dashboard/',
+  path: '/dashboard/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/success': typeof DashboardSuccessRoute
-  '/dashboard/wallets': typeof DashboardWalletsRoute
+  '/credentials': typeof CredentialsRoute
+  '/settings': typeof SettingsRoute
+  '/success': typeof SuccessRoute
+  '/wallets': typeof WalletsRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/success': typeof DashboardSuccessRoute
-  '/dashboard/wallets': typeof DashboardWalletsRoute
+  '/credentials': typeof CredentialsRoute
+  '/settings': typeof SettingsRoute
+  '/success': typeof SuccessRoute
+  '/wallets': typeof WalletsRoute
   '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/dashboard': typeof DashboardRouteWithChildren
-  '/dashboard/settings': typeof DashboardSettingsRoute
-  '/dashboard/success': typeof DashboardSuccessRoute
-  '/dashboard/wallets': typeof DashboardWalletsRoute
+  '/credentials': typeof CredentialsRoute
+  '/settings': typeof SettingsRoute
+  '/success': typeof SuccessRoute
+  '/wallets': typeof WalletsRoute
   '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/dashboard'
-    | '/dashboard/settings'
-    | '/dashboard/success'
-    | '/dashboard/wallets'
+    | '/credentials'
+    | '/settings'
+    | '/success'
+    | '/wallets'
     | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/dashboard/settings'
-    | '/dashboard/success'
-    | '/dashboard/wallets'
+    | '/credentials'
+    | '/settings'
+    | '/success'
+    | '/wallets'
     | '/dashboard'
   id:
     | '__root__'
     | '/'
-    | '/dashboard'
-    | '/dashboard/settings'
-    | '/dashboard/success'
-    | '/dashboard/wallets'
+    | '/credentials'
+    | '/settings'
+    | '/success'
+    | '/wallets'
     | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  DashboardRoute: typeof DashboardRouteWithChildren
+  CredentialsRoute: typeof CredentialsRoute
+  SettingsRoute: typeof SettingsRoute
+  SuccessRoute: typeof SuccessRoute
+  WalletsRoute: typeof WalletsRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/wallets': {
+      id: '/wallets'
+      path: '/wallets'
+      fullPath: '/wallets'
+      preLoaderRoute: typeof WalletsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/success': {
+      id: '/success'
+      path: '/success'
+      fullPath: '/success'
+      preLoaderRoute: typeof SuccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/credentials': {
+      id: '/credentials'
+      path: '/credentials'
+      fullPath: '/credentials'
+      preLoaderRoute: typeof CredentialsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -120,56 +147,21 @@ declare module '@tanstack/react-router' {
     }
     '/dashboard/': {
       id: '/dashboard/'
-      path: '/'
+      path: '/dashboard'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardIndexRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/wallets': {
-      id: '/dashboard/wallets'
-      path: '/wallets'
-      fullPath: '/dashboard/wallets'
-      preLoaderRoute: typeof DashboardWalletsRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/success': {
-      id: '/dashboard/success'
-      path: '/success'
-      fullPath: '/dashboard/success'
-      preLoaderRoute: typeof DashboardSuccessRouteImport
-      parentRoute: typeof DashboardRoute
-    }
-    '/dashboard/settings': {
-      id: '/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardSettingsRouteImport
-      parentRoute: typeof DashboardRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface DashboardRouteChildren {
-  DashboardSettingsRoute: typeof DashboardSettingsRoute
-  DashboardSuccessRoute: typeof DashboardSuccessRoute
-  DashboardWalletsRoute: typeof DashboardWalletsRoute
-  DashboardIndexRoute: typeof DashboardIndexRoute
-}
-
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardSettingsRoute: DashboardSettingsRoute,
-  DashboardSuccessRoute: DashboardSuccessRoute,
-  DashboardWalletsRoute: DashboardWalletsRoute,
-  DashboardIndexRoute: DashboardIndexRoute,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  DashboardRoute: DashboardRouteWithChildren,
+  CredentialsRoute: CredentialsRoute,
+  SettingsRoute: SettingsRoute,
+  SuccessRoute: SuccessRoute,
+  WalletsRoute: WalletsRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
