@@ -47,6 +47,29 @@ export class Client {
   ) {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
+
+    // @deprecated
+    // Remove this method after a while
+    if (["evm", "xrpl", "near", "facesign", "stellar"].includes(walletType as string)) {
+      console.warn("Deprecated wallet type", walletType, ", please upgrade to latest SDK version");
+      switch (walletType as string) {
+        case "evm":
+          walletType = "EVM";
+          break;
+        case "xrpl":
+          walletType = "XRPL";
+          break;
+        case "near":
+          walletType = "NEAR";
+          break;
+        case "stellar":
+          walletType = "Stellar";
+          break;
+        case "facesign":
+          walletType = "FaceSign";
+          break;
+      }
+    }
     this.walletType = walletType;
     this.signerAddress = signerAddress;
     this.signerPublicKey = signerPublicKey;
@@ -60,6 +83,29 @@ export class Client {
     signerAddress: string,
     signerPublicKey?: string,
   ): void {
+    // @deprecated
+    // Remove this method after a while
+    if (["evm", "xrpl", "near", "facesign", "stellar"].includes(walletType as string)) {
+      console.warn("Deprecated wallet type", walletType, ", please upgrade to latest SDK version");
+      switch (walletType as string) {
+        case "evm":
+          walletType = "EVM";
+          break;
+        case "xrpl":
+          walletType = "XRPL";
+          break;
+        case "near":
+          walletType = "NEAR";
+          break;
+        case "stellar":
+          walletType = "Stellar";
+          break;
+        case "facesign":
+          walletType = "FaceSign";
+          break;
+      }
+    }
+    
     if (!WALLET_TYPES.includes(walletType)) {
       throw new Error("Invalid signer type");
     }
