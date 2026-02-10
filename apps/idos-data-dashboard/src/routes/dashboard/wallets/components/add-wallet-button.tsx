@@ -9,6 +9,38 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
+function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
+  const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
+  invariant(envUrl && typeof envUrl === "string", "VITE_EMBEDDED_WALLET_APP_URL is not set");
+  const entries = envUrl
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  const allowedOrigins: string[] = [];
+  let popupUrl: string | undefined;
+  for (const entry of entries) {
+    try {
+      const origin = new URL(entry).origin;
+      allowedOrigins.push(origin);
+      if (popupUrl === undefined) {
+        popupUrl = entry;
+      }
+    } catch {
+      console.warn(
+        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URL contains invalid URL, skipping:",
+        entry,
+      );
+    }
+  }
+  invariant(
+    popupUrl !== undefined && allowedOrigins.length > 0,
+    "VITE_EMBEDDED_WALLET_APP_URL must contain at least one valid URL",
+  );
+  return { popupUrl, allowedOrigins };
+}
+
+const EMBEDDED_WALLET_CONFIG = parseEmbeddedWalletEnv();
+
 export const createWalletParamsFactory = ({
   address,
   publicKey,
@@ -148,15 +180,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-      if (!envUrl) {
-        console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
-        return;
-      }
-      const allowedOrigins = envUrl.split(",").map((url: string) => new URL(url.trim()).origin);
-      if (!allowedOrigins.includes(event.origin)) {
+      if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${allowedOrigins.join(", ")}`,
+          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
@@ -195,11 +221,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
-    const envUrl = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-    invariant(envUrl, "VITE_EMBEDDED_WALLET_APP_URL is not set");
-
-    const popupUrl = envUrl.split(",")[0]?.trim() ?? envUrl;
-
     setIsLoading(true);
 
     // Calculate center position for the popup
@@ -209,7 +230,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
-      popupUrl,
+      EMBEDDED_WALLET_CONFIG.popupUrl,
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
