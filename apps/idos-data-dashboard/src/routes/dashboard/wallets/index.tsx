@@ -12,7 +12,6 @@ import { useWalletSelector } from "@/core/near";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { AddWalletButton } from "./components/add-wallet-button";
-import { AddWalletUsingModal } from "./components/add-wallet-modal";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -126,11 +125,7 @@ export function WalletsSection() {
         <h1 className="block text-2xl! lg:text-3xl! font-bold!">Wallets</h1>
         {hasProfile ? (
           <div className="flex items-center gap-2.5">
-            {import.meta.env.VITE_ADD_WALLET_USING_POPUP === "true" ? (
-              <AddWalletButton />
-            ) : (
-              <AddWalletUsingModal defaultValue={walletToAdd} />
-            )}
+            <AddWalletButton />
             <Button
               aria-label="Refresh wallets"
               variant="secondary"
