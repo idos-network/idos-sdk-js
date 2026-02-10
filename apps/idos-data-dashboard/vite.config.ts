@@ -14,7 +14,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           react: ["react", "react-dom"],
-          vendor: ["@tanstack/react-query", "framer-motion"],
+          vendor: ["@tanstack/react-query"],
           web3: ["wagmi", "viem"],
         },
       },
