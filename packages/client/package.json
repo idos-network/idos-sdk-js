@@ -29,9 +29,6 @@
   "homepage": "https://idos.network",
   "license": "MIT",
   "module": "dist/index.js",
-  "peerDependencies": {
-    "typescript": "catalog:build"
-  },
   "publishConfig": {
     "access": "public"
   },

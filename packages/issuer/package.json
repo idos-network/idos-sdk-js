@@ -7,9 +7,7 @@
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
-    "ripple-keypairs": "catalog:xrp",
-    "tweetnacl": "catalog:core",
-    "web-streams-polyfill": "catalog:core"
+    "tweetnacl": "catalog:core"
   },
   "devDependencies": {
     "tiny-invariant": "catalog:core",

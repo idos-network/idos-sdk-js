@@ -797,9 +797,6 @@ importers:
       tiny-invariant:
         specifier: catalog:core
         version: 1.3.3
-      typescript:
-        specifier: catalog:build
-        version: 5.9.3
     devDependencies:
       tsdown:
         specifier: catalog:build
@@ -819,27 +816,9 @@ importers:
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
-      ethers:
-        specifier: catalog:ethereum
-        version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
-      near-api-js:
-        specifier: catalog:near
-        version: 4.0.3(encoding@0.1.13)
-      ripple-keypairs:
-        specifier: catalog:xrp
-        version: 2.0.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       tiny-invariant:
         specifier: catalog:core
         version: 1.3.3
-      tweetnacl:
-        specifier: catalog:core
-        version: 1.0.3
-      typescript:
-        specifier: catalog:build
-        version: 5.9.3
-      web-streams-polyfill:
-        specifier: 3.3.3
-        version: 3.3.3
     devDependencies:
       tsdown:
         specifier: catalog:build
@@ -957,18 +936,12 @@ importers:
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
-      ripple-keypairs:
-        specifier: catalog:xrp
-        version: 2.0.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       tweetnacl:
         specifier: catalog:core
         version: 1.0.3
       typescript:
         specifier: catalog:build
         version: 5.9.3
-      web-streams-polyfill:
-        specifier: 3.3.3
-        version: 3.3.3
     devDependencies:
       tiny-invariant:
         specifier: catalog:core
@@ -985,9 +958,24 @@ importers:
       '@idos-network/utils':
         specifier: workspace:*
         version: link:../utils
+      '@near-wallet-selector/core':
+        specifier: catalog:near
+        version: 8.10.2(near-api-js@4.0.3(encoding@0.1.13))
       '@stellar/stellar-sdk':
         specifier: catalog:stellar
         version: 13.3.0
+      '@wagmi/core':
+        specifier: catalog:ethereum
+        version: 2.22.1(@tanstack/query-core@5.90.16)(@types/react@19.2.7)(immer@10.1.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.43.5(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.5)(zod@4.3.4))
+      ethers:
+        specifier: catalog:ethereum
+        version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
+      near-api-js:
+        specifier: catalog:near
+        version: 4.0.3(encoding@0.1.13)
+      ripple-keypairs:
+        specifier: catalog:xrp
+        version: 2.0.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       tiny-invariant:
         specifier: catalog:core
         version: 1.3.3
@@ -1004,27 +992,12 @@ importers:
       '@gemwallet/api':
         specifier: ^3.8.0
         version: 3.8.0
-      '@near-wallet-selector/core':
-        specifier: catalog:near
-        version: 8.10.2(near-api-js@4.0.3(encoding@0.1.13))
       '@types/node':
         specifier: ^22.15.30
         version: 22.19.3
-      '@wagmi/core':
-        specifier: catalog:ethereum
-        version: 2.22.1(@tanstack/query-core@5.90.16)(@types/react@19.2.7)(immer@10.1.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.43.5(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@6.0.5)(zod@4.3.4))
-      ethers:
-        specifier: catalog:ethereum
-        version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       jsdom:
         specifier: ^22.1.0
         version: 22.1.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
-      near-api-js:
-        specifier: catalog:near
-        version: 4.0.3(encoding@0.1.13)
-      ripple-keypairs:
-        specifier: catalog:xrp
-        version: 2.0.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
       tsdown:
         specifier: catalog:build
         version: 0.18.4(typescript@5.9.3)

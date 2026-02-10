@@ -7,5 +7,4 @@ export default defineConfig({
     "./src/signature-verification/index.ts",
     "./src/xrp/utils.ts",
   ],
-  external: ["@wagmi/core"],
 });

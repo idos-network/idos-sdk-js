@@ -1,7 +1,7 @@
 {
   "name": "@idos-network/kwil-infra",
   "description": "Infrastructure and wallets for idOS",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.1.1",
   "dependencies": {
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
@@ -12,13 +12,8 @@
   },
   "devDependencies": {
     "@gemwallet/api": "^3.8.0",
-    "@near-wallet-selector/core": "catalog:near",
     "@types/node": "^22.15.30",
-    "@wagmi/core": "catalog:ethereum",
-    "ethers": "catalog:ethereum",
     "jsdom": "^22.1.0",
-    "near-api-js": "catalog:near",
-    "ripple-keypairs": "catalog:xrp",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing",
@@ -56,6 +51,7 @@
   "license": "MIT",
   "peerDependencies": {
     "near-api-js": "catalog:near",
+    "ethers": "catalog:ethereum",
     "@wagmi/core": "catalog:ethereum",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
