@@ -31,6 +31,20 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
   // Override
 }
 ```
+
 ## MPC
 
-TODO: Write a doc about MPC
+```typescript
+import { idOSClientConfiguration } from "@idos-network/client";
+import { ChromeExtensionStore } from "@idos-network/utils/store";
+import { Enclave as ChromeExtensionEnclave } from "./enclave"; // The custom Enclave from the example above
+
+const configuration = new idOSClientConfiguration<ChromeExtensionEnclave>({
+  nodeUrl: "https://nodes.idos.network",
+  enclaveOptions: {
+    // Your enclave options here
+  },
+  enclaveProvider: ChromeExtensionEnclave,
+  store: new ChromeExtensionStore(),
+});
+```
