@@ -1,8 +1,8 @@
 import type { idOSWallet } from "@idos-network/core";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Navigate, useSearch } from "@tanstack/react-router";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -99,11 +99,11 @@ const WalletsList = () => {
   }
 };
 
-export function Component() {
+export function WalletsSection() {
   const idOSClient = useIdOS();
-  const [searchParams] = useSearchParams();
-  const walletToAdd = searchParams.get("add-wallet") || undefined;
-  const callbackUrl = searchParams.get("callbackUrl") || undefined;
+  const search = useSearch({ from: "/wallets" });
+  const walletToAdd = search["add-wallet"] as string | undefined;
+  const callbackUrl = search.callbackUrl as string | undefined;
   const queryClient = useQueryClient();
 
   const hasProfile = !!idOSClient.user.id;
@@ -152,4 +152,3 @@ export function Component() {
     </div>
   );
 }
-Component.displayName = "Wallets";
