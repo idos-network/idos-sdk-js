@@ -1,14 +1,9 @@
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-<<<<<<< HEAD
 import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
 import {
   verifySignature,
   type WalletSignature,
 } from "@idos-network/kwil-infra/signature-verification";
-=======
-import type { AddWalletInput, WalletType } from "@idos-network/core";
-import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
->>>>>>> 3984249b (feat(schema) Sync schema and use types for wallet type)
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -17,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
-<<<<<<< HEAD
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
   const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
   invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
@@ -50,8 +44,6 @@ function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] 
 
 const EMBEDDED_WALLET_CONFIG = parseEmbeddedWalletEnv();
 
-=======
->>>>>>> 3984249b (feat(schema) Sync schema and use types for wallet type)
 export const createWalletParamsFactory = ({
   address,
   publicKey,
@@ -159,11 +151,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
-<<<<<<< HEAD
         publicKeys: walletPayload.public_key ?? [],
-=======
-        publicKeys: walletPayload.public_key,
->>>>>>> 1705eb9b (fix(publicKey) For EVM wallets)
         signature: walletPayload.signature,
         message: walletPayload.message || "Sign this message to prove you own this wallet",
         walletType: walletPayload.wallet_type,
