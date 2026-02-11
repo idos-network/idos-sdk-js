@@ -161,9 +161,6 @@ export class Client {
       case "FaceSign":
         address = `FACESIGN:${this.signerPublicKey}`;
         break;
-      case "facesign":
-        address = `FACESIGN:${this.signerAddress}`;
-        break;
       default:
         throw new Error("Invalid signer type");
     }
@@ -273,9 +270,6 @@ export class Client {
       case "facesign":
         addressToAddFormatted = `FACESIGN:${publicKey}`;
         break;
-      case "facesign":
-        addressToAddFormatted = `FACESIGN:${addressToAdd}`;
-        break;
       default:
         throw new Error("Invalid address to add type");
     }
@@ -327,9 +321,6 @@ export class Client {
         break;
       case "near":
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
-        break;
-      case "facesign":
-        addressToRemoveFormatted = `FACESIGN:${publicKey}`;
         break;
       case "facesign":
         addressToRemoveFormatted = `FACESIGN:${publicKey}`;
