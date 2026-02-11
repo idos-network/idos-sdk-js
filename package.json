@@ -69,6 +69,21 @@
       "running": false
     },
     {
+      "name": "@idos-network/credentials",
+      "path": "packages/credentials/dist/**/*.mjs",
+      "limit": "20 KB"
+    },
+    {
+      "name": "@idos-network/enclave",
+      "path": "packages/enclave/dist/**/*.mjs",
+      "limit": "20 KB"
+    },
+    {
+      "name": "@idos-network/kwil-infra",
+      "path": "packages/kwil-infra/dist/**/*.mjs",
+      "limit": "20 KB"
+    },
+    {
       "name": "@idos-network/utils",
       "path": "packages/utils/dist/**/*.mjs",
       "limit": "20 KB"

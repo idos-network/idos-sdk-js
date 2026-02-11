@@ -1,5 +1,4 @@
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
-import type { WalletInfo } from "@idos-network/controllers";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
@@ -76,7 +75,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { selector } = useWalletSelector();
   const { status: evmStatus } = useAccount();
 
-  const evmIsConnecting = walletType === "evm" && evmStatus === "connecting";
+  const evmIsConnecting = walletType === "EVM" && evmStatus === "connecting";
 
   useEffect(() => {
     // general wallet check
@@ -86,7 +85,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     }
 
     // evm wallet check
-    if (walletType === "evm" && evmStatus !== "connected") {
+    if (walletType === "EVM" && evmStatus !== "connected") {
       setIsLoading(false);
       return;
     }
@@ -95,7 +94,8 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
       address: walletAddress ?? "",
       publicKey: walletPublicKey ?? "",
       selector,
-    })[walletType as keyof typeof walletInfoMapper] as WalletInfo;
+    })[walletType];
+
     if (!signerSrc) {
       setIsLoading(false);
       return;

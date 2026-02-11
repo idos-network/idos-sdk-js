@@ -2,21 +2,15 @@
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK for browser environments",
   "version": "1.0.0-rc.1.2",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core"
-    ]
-  },
   "dependencies": {
-    "@gemwallet/api": "catalog:core",
-    "@idos-network/kwil-js": "catalog:core",
     "@idos-network/credentials": "workspace:*",
-    "@idos-network/utils": "workspace:*"
+    "@idos-network/enclave": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/kwil-js": "catalog:core",
+    "@idos-network/utils": "workspace:*",
+    "tiny-invariant": "catalog:core"
   },
   "devDependencies": {
-    "@idos-network/core": "workspace:*",
-    "clean-package": "^2.2.0",
-    "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
   "engines": {
@@ -35,9 +29,6 @@
   "homepage": "https://idos.network",
   "license": "MIT",
   "module": "dist/index.js",
-  "peerDependencies": {
-    "typescript": "catalog:build"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -45,8 +36,6 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
     "publint": "pnpx publint --strict",
     "typecheck": "tsc --noEmit"
   },

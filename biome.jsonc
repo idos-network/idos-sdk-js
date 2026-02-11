@@ -17,9 +17,12 @@
       "!**/*/.next/**/*",
       "!**/.react-router/**/*",
       "!**/.cache-synpress/**/*",
-      "!packages/utils/src/mpc/**/*.ts",
-      "!**/*.css"
-    ]
+      "!packages/enclave/src/mpc/**/*.ts",
+      "!**/*.css",
+      "!**/.turbo/**/*",
+      "!**/playwright-report/**/*"
+    ],
+    "ignoreUnknown": true
   },
   "linter": {
     "enabled": true,
