@@ -4,20 +4,23 @@ import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
 
 export const fetchSharedToken = async (credentialId: string, forClientId: string) => {
-  const response = await fetch(
-    `${SERVER_ENV.KRAKEN_API_URL}/public/kyc/dag/${credentialId}/sharedToken?forClientId=${forClientId}`,
-    {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${await getKrakenToken()}`,
-      },
-      // @ts-expect-error - Node.js specific option
-      agent: new https.Agent({
-        rejectUnauthorized: false,
-        checkServerIdentity: () => undefined, // This will bypass the certificate chain verification
-      }),
+  const response = await fetch(`${SERVER_ENV.KRAKEN_API_URL}/public/kyc/sharedToken`, {
+    method: "POST",
+    body: JSON.stringify({
+      credentialId,
+      forClientId,
+      skipCheck: true,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${await getKrakenToken()}`,
     },
-  );
+    // @ts-expect-error - Node.js specific option
+    agent: new https.Agent({
+      rejectUnauthorized: false,
+      checkServerIdentity: () => undefined, // This will bypass the certificate chain verification
+    }),
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch shared token (${response.statusText}).`);
