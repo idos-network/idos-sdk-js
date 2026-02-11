@@ -1,4 +1,5 @@
 import { createIDOSClient } from "@idos-network/client";
+import { parseLevel } from "@idos-network/credentials/utils";
 import { ethers } from "ethers";
 import { fromPromise } from "xstate";
 import { COMMON_ENV } from "../envFlags.common";
@@ -169,48 +170,28 @@ export const actors = {
       throw new Error("Client not found");
     }
 
+    const { base: level, addons } = parseLevel(COMMON_ENV.KRAKEN_LEVEL);
+
     const credentials = await input.filterCredentials({
       acceptedIssuers: [
         {
           // Kraken
-          authPublicKey: COMMON_ENV.KRAKEN_ISSUER_PUBLIC_KEY,
+          authPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
         },
       ],
+      credentialLevelOrHigherFilter: {
+        userLevel: level,
+        requiredAddons: addons,
+      },
     });
 
-    // Compare credentials as arrays
-    const pickArray = COMMON_ENV.KRAKEN_LEVEL.split("+").sort();
+    // TODO: Add missing sort by level score
 
-    const filteredCredentials = credentials.filter((credential) => {
-      const publicNotes = JSON.parse(credential.public_notes);
-
-      if (!publicNotes || !publicNotes.level) {
-        return false;
-      }
-
-      const credentialLevelArray = publicNotes.level.split("+").sort();
-
-      // Size must match
-      if (credentialLevelArray.length !== pickArray.length) {
-        return false;
-      }
-
-      // Arrays are sorted, so we can compare them element by element
-      // it's quicker than using every()
-      for (let i = 0; i < pickArray.length; i++) {
-        if (credentialLevelArray[i] !== pickArray[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    if (filteredCredentials.length === 0) {
+    if (credentials.length === 0) {
       throw new Error("No credentials found, start the KYC process");
     }
 
-    return filteredCredentials[0];
+    return credentials[0];
   }),
 
   requestAccessGrant: fromPromise(
