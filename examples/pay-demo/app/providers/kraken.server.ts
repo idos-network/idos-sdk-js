@@ -9,7 +9,7 @@ export const fetchSharedToken = async (credentialId: string, forClientId: string
     body: JSON.stringify({
       credentialId,
       forClientId,
-      skipCheck: true,
+      skipCheck: false,
     }),
     headers: {
       "Content-Type": "application/json",
