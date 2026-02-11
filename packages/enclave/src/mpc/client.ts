@@ -274,6 +274,7 @@ export class Client {
     }
 
     var addressToAddFormatted = "";
+    // @deprecated toLowerCase remove when we have updated the SDK
     switch (addressToAddType.toLowerCase()) {
       case "evm":
         addressToAddFormatted = `eip712:${addressToAdd}`;
@@ -328,17 +329,18 @@ export class Client {
     }
 
     var addressToRemoveFormatted = "";
-    switch (addressToRemoveType) {
-      case "EVM":
+    // @deprecated toLowerCase remove when we have updated the SDK
+    switch (addressToRemoveType.toLowerCase()) {
+      case "evm":
         addressToRemoveFormatted = `eip712:${addressToRemove}`;
         break;
-      case "XRPL":
+      case "xrpl":
         addressToRemoveFormatted = `XRPL:${publicKey}`;
         break;
-      case "NEAR":
+      case "near":
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
-      case "FaceSign":
+      case "facesign":
         addressToRemoveFormatted = `FACESIGN:${addressToRemove}`;
         break;
       default:
