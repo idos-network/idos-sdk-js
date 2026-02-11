@@ -85,7 +85,10 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     }
 
     // evm wallet check
-    if (walletType === "EVM" && evmStatus !== "connected") return;
+    if (walletType === "EVM" && evmStatus !== "connected") {
+      setIsLoading(false);
+      return;
+    }
 
     const signerSrc = walletInfoMapper({
       address: walletAddress ?? "",
