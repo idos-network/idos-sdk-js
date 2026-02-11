@@ -26,6 +26,7 @@ export const actors = {
     // kwilSigner won't work without address
     await facesignSigner.init();
 
+    // @ts-expect-error - TODO: Fix this
     return await idleClient.withUserSigner(facesignSigner);
   }),
 
