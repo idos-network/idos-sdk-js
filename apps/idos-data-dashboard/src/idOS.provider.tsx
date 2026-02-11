@@ -75,7 +75,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { selector } = useWalletSelector();
   const { status: evmStatus } = useAccount();
 
-  const evmIsConnecting = walletType === "evm" && evmStatus === "connecting";
+  const evmIsConnecting = walletType === "EVM" && evmStatus === "connecting";
 
   useEffect(() => {
     // general wallet check
