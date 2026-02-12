@@ -32,7 +32,10 @@
       "tiny-secp256k1",
       "usb",
       "utf-8-validate"
-    ]
+    ],
+    "patchedDependencies": {
+      "react-router": "patches/react-router.patch"
+    }
   },
   "private": true,
   "scripts": {
