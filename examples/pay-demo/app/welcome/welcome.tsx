@@ -24,9 +24,7 @@ export function Welcome() {
             size="lg"
             onClick={() => (isAuthenticated ? signOut() : signIn())}
           >
-            {isAuthenticated
-              ? `Disconnect (${address?.slice(0, 6)}...${address?.slice(-4)})`
-              : "Connect Wallet"}
+            {isAuthenticated ? "Disconnect" : "Connect Wallet"}
           </Button>
 
           <footer className="text-center text-xs text-muted-foreground">
