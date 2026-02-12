@@ -1,8 +1,8 @@
 import { createIDOSClient } from "@idos-network/client";
 import { parseLevel } from "@idos-network/credentials/utils";
-import { ethers } from "ethers";
 import { fromPromise } from "xstate";
 import { COMMON_ENV } from "../envFlags.common";
+import { FaceSignSignerProvider } from "../facesign_signer";
 import type { Context } from "./types";
 
 export const actors = {
@@ -17,10 +17,17 @@ export const actors = {
 
     const idleClient = await config.createClient();
 
-    // @ts-expect-error
-    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+    const facesignSigner = new FaceSignSignerProvider({
+      name: "Pay Demo DApp",
+      description: "A demo dapp for idOS PayDemo using FaceSign Signer",
+    });
 
-    return await idleClient.withUserSigner(signer);
+    // This is required to initialize the signer and get the address
+    // kwilSigner won't work without address
+    await facesignSigner.init();
+
+    // @ts-expect-error - TODO: Fix this
+    return await idleClient.withUserSigner(facesignSigner);
   }),
 
   checkProfile: fromPromise(async ({ input }: { input: Context["client"] }) => {
@@ -28,9 +35,23 @@ export const actors = {
       throw new Error("Client not found");
     }
 
-    const hasProfile = await input.hasProfile();
+    let hasProfile: boolean;
+
+    try {
+      // THIS is triggering AUTH request
+      const user = await input.getUser();
+      console.log("User fetched:", user);
+
+      hasProfile = await input.hasProfile();
+    } catch (error) {
+      console.error("Error fetching user or profile:", error);
+      throw new Error("Failed to fetch user or profile");
+    }
 
     if (!hasProfile) {
+      const userId = crypto.randomUUID();
+      const userEncryptionProfile = await input.createUserEncryptionProfile(userId);
+      console.log("Creating profile with encryption profile:", userEncryptionProfile);
       throw new Error("No profile found");
     }
 
