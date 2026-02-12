@@ -42,6 +42,7 @@ export class EngineClient {
       default:
         prefix = "eip712"; // fallback to eip712 for unknown types
     }
+
     return {
       Authorization: `${prefix} ${signature}`,
     };

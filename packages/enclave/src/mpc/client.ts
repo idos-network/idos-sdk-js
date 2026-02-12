@@ -177,7 +177,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -209,7 +209,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -267,7 +267,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -286,7 +286,7 @@ export class Client {
         addressToAddFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "facesign":
-        addressToAddFormatted = `FACESIGN:${addressToAdd}`;
+        addressToAddFormatted = `FACESIGN:${publicKey}`;
         break;
       default:
         throw new Error("Invalid address to add type");
@@ -322,7 +322,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -341,7 +341,7 @@ export class Client {
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "facesign":
-        addressToRemoveFormatted = `FACESIGN:${addressToRemove}`;
+        addressToRemoveFormatted = `FACESIGN:${publicKey}`;
         break;
       default:
         throw new Error("Invalid address to remove type");

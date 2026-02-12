@@ -1,7 +1,22 @@
 import nacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
 import { base64Encode } from "../codecs/index.js";
-import { encryptContent, NoncedBox } from "./index.js";
+import { encryptContent, generatePassword, NoncedBox } from "./index.js";
+
+describe("generatePassword", () => {
+  it("generates a password", () => {
+    const password = generatePassword();
+    expect(password).toBeDefined();
+    expect(password.length).toBe(20);
+
+    // generate different passwords
+    const password2 = generatePassword();
+    const password3 = generatePassword();
+    expect(password2).not.toBe(password);
+    expect(password3).not.toBe(password);
+    expect(password3).not.toBe(password2);
+  });
+});
 
 describe("cryptography", () => {
   const helloMessage = new Uint8Array([104, 101, 108, 108, 111]);

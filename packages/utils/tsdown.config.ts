@@ -6,5 +6,6 @@ export default defineConfig({
     "./src/codecs/index.ts",
     "./src/cryptography/index.ts",
     "./src/encryption/index.ts",
+    "./src/facesign/index.ts",
   ],
 });
