@@ -1,20 +1,23 @@
-import tweetnacl from "tweetnacl";
 import { describe, expect, it } from "vitest";
-import { mnemonicToSeed } from "web-bip39";
-import { utf8Encode } from "../codecs/index.js";
+import { hexEncode, utf8Encode } from "../codecs/index.js";
 import { mnemonicToKeyPair } from "./index.js";
 
 describe("mnemonicToKeyPair", () => {
   const mnemonic =
     "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about";
+  const expectedPublicKeyHex = "c5785e1865b708938aff8161d573006496663b1aa10834e396dc566869a2c66a";
+  const expectedSecretKeyHexPrefix =
+    "5eb00bbddcf069084889a8ab9155568165f5c453ccb85e70811aaed6f6da5fc1";
 
   it("derives a deterministic key pair from a mnemonic string", async () => {
     const keyPair = await mnemonicToKeyPair(mnemonic);
-    const seed = await mnemonicToSeed(mnemonic);
-    const expected = tweetnacl.sign.keyPair.fromSeed(seed.subarray(0, 32));
 
-    expect(keyPair.publicKey).toEqual(expected.publicKey);
-    expect(keyPair.secretKey).toEqual(expected.secretKey);
+    expect(hexEncode(keyPair.publicKey).toLowerCase()).toBe(expectedPublicKeyHex.toLowerCase());
+    expect(
+      hexEncode(keyPair.secretKey)
+        .toLowerCase()
+        .startsWith(expectedSecretKeyHexPrefix.toLowerCase()),
+    ).toBe(true);
   });
 
   it("accepts Uint8Array input and matches string result", async () => {

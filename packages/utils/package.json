@@ -13,7 +13,7 @@
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
     "tiny-invariant": "catalog:core",
-    "web-bip39": "^0.0.3",
+    "@scure/bip39": "2.0.1",
     "tweetnacl": "catalog:core"
   },
   "devDependencies": {

@@ -15,6 +15,7 @@ describe("generatePassword", () => {
     expect(password2).not.toBe(password);
     expect(password3).not.toBe(password);
     expect(password3).not.toBe(password2);
+    expect(password).toMatch(/^[a-zA-Z0-9!@#$%^&*()_+\-=[\]{}|;:,.<>?]+$/);
   });
 });
 

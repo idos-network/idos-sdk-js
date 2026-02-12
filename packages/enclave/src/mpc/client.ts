@@ -24,12 +24,15 @@ import {
   type UploadMessageToSign,
   type UploadSignatureMessage,
 } from "./types";
+import invariant from "tiny-invariant";
 
 export class Client {
   private readonly baseUrl: string;
   private readonly contractAddress: PbcAddress;
   private engines: EngineClient[] | undefined;
+  // @ts-expect-error - we are initializing the wallet type in reconfigure
   private walletType: WalletType;
+  // @ts-expect-error - we are initializing the signer address in reconfigure
   private signerAddress: string;
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
@@ -48,31 +51,8 @@ export class Client {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
 
-    // @deprecated
-    // Remove this method after a while
-    if (["evm", "xrpl", "near", "facesign", "stellar"].includes(walletType as string)) {
-      console.warn("Deprecated wallet type", walletType, ", please upgrade to latest SDK version");
-      switch (walletType as string) {
-        case "evm":
-          walletType = "EVM";
-          break;
-        case "xrpl":
-          walletType = "XRPL";
-          break;
-        case "near":
-          walletType = "NEAR";
-          break;
-        case "stellar":
-          walletType = "Stellar";
-          break;
-        case "facesign":
-          walletType = "FaceSign";
-          break;
-      }
-    }
-    this.walletType = walletType;
-    this.signerAddress = signerAddress;
-    this.signerPublicKey = signerPublicKey;
+    this.reconfigure(walletType, signerAddress, signerPublicKey);
+    
     this.numNodes = numNodes;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
@@ -106,9 +86,12 @@ export class Client {
       }
     }
     
-    if (!WALLET_TYPES.includes(walletType)) {
-      throw new Error("Invalid signer type");
-    }
+    invariant(!WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
+    invariant(
+      ["XRPL", "NEAR", "FaceSign"].includes(walletType) && !signerPublicKey,
+      "Signer public key is required for XRPL, NEAR and FaceSign",
+    );
+
     this.walletType = walletType;
     // Reset engines to force re-creation of them since they are using old signer information
     this.engines = undefined;

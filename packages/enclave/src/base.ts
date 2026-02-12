@@ -82,6 +82,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       } else if (response?.signedMessage) {
         signature = response.signedMessage;
       } else if (response instanceof Uint8Array && response.length === 64) {
+        // ed25519 signature size
         return hexEncode(response);
       } else {
         throw new Error(

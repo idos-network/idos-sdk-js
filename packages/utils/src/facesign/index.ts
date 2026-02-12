@@ -1,5 +1,5 @@
+import { mnemonicToSeed } from "@scure/bip39";
 import tweetnacl from "tweetnacl";
-import { mnemonicToSeed } from "web-bip39";
 import { utf8Decode } from "../codecs";
 
 export async function mnemonicToKeyPair(
