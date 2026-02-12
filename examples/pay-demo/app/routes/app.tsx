@@ -49,10 +49,12 @@ export default function App() {
           <h2 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h2>
           <p className="text-sm text-muted-foreground">Overview of your financial activity.</p>
         </div>
-        <Button variant="outline">Download Report</Button>
       </div>
 
       <div className="mx-auto max-w-4xl space-y-6">
+        <div className="flex justify-end">
+          <Button variant="outline">Download Report</Button>
+        </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
             <Card key={stat.title} className="shadow-sm transition-shadow hover:shadow-md">
