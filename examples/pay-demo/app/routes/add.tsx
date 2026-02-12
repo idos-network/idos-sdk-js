@@ -43,8 +43,8 @@ export default function AddFunds() {
   const transakWidgetUrl = MachineContext.useSelector((s) => s.context.transakWidgetUrl);
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
 
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
   const messageReceiver = useCallback(
+    // biome-ignore lint/suspicious/noExplicitAny: message event type
     (message: any) => {
       // KYC iframe messages
       if (message.origin.replace(/\/$/, "") === COMMON_ENV.KRAKEN_API_URL.replace(/\/$/, "")) {
@@ -79,47 +79,12 @@ export default function AddFunds() {
     send({ type: "configure", provider: "transak", address });
   };
 
-  // --- KYC type selection ---
-  if (state === "chooseKYCType") {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">
-              Choose your identity verification provider
-            </p>
-          </div>
-        </div>
-
-        <Card className="mx-auto max-w-md shadow-sm">
-          <CardHeader>
-            <CardTitle>Identity Verification</CardTitle>
-            <CardDescription>Select a KYC provider to verify your identity</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => send({ type: "startKYC", kycType: "sumsub" })}
-            >
-              Sumsub
-            </Button>
-            <Button
-              className="w-full"
-              size="lg"
-              variant="outline"
-              onClick={() => send({ type: "startKYC", kycType: "persona" })}
-            >
-              Persona
-            </Button>
-          </CardContent>
-        </Card>
-
-        <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-      </div>
-    );
-  }
+  // --- Auto-select Persona for KYC ---
+  useEffect(() => {
+    if (state === "chooseKYCType") {
+      send({ type: "startKYC", kycType: "persona" });
+    }
+  }, [state, send]);
 
   // --- KYC iframe ---
   if (state === "waitForKYC" && kycUrl) {
