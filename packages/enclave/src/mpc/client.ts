@@ -24,13 +24,14 @@ import {
   type UploadMessageToSign,
   type UploadSignatureMessage,
 } from "./types";
+import invariant from "tiny-invariant";
 
 export class Client {
   private readonly baseUrl: string;
   private readonly contractAddress: PbcAddress;
   private engines: EngineClient[] | undefined;
-  private walletType: WalletType;
-  private signerAddress: string;
+  private walletType!: WalletType;
+  private signerAddress!: string;
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
   private numNodes: number;
@@ -48,31 +49,8 @@ export class Client {
     this.baseUrl = baseUrl;
     this.contractAddress = contractAddress;
 
-    // @deprecated
-    // Remove this method after a while
-    if (["evm", "xrpl", "near", "facesign", "stellar"].includes(walletType as string)) {
-      console.warn("Deprecated wallet type", walletType, ", please upgrade to latest SDK version");
-      switch (walletType as string) {
-        case "evm":
-          walletType = "EVM";
-          break;
-        case "xrpl":
-          walletType = "XRPL";
-          break;
-        case "near":
-          walletType = "NEAR";
-          break;
-        case "stellar":
-          walletType = "Stellar";
-          break;
-        case "facesign":
-          walletType = "FaceSign";
-          break;
-      }
-    }
-    this.walletType = walletType;
-    this.signerAddress = signerAddress;
-    this.signerPublicKey = signerPublicKey;
+    this.reconfigure(walletType, signerAddress, signerPublicKey);
+    
     this.numNodes = numNodes;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
@@ -106,9 +84,13 @@ export class Client {
       }
     }
     
-    if (!WALLET_TYPES.includes(walletType)) {
-      throw new Error("Invalid signer type");
-    }
+    invariant(WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
+    invariant(
+      // XRPL, NEAR and FaceSign require a public key, EVM does not
+      (["XRPL", "NEAR", "FaceSign"].includes(walletType) && signerPublicKey) || walletType === "EVM",
+      "Signer public key is required for XRPL, NEAR and FaceSign",
+    );
+
     this.walletType = walletType;
     // Reset engines to force re-creation of them since they are using old signer information
     this.engines = undefined;
@@ -177,7 +159,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -209,7 +191,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -267,7 +249,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -286,7 +268,7 @@ export class Client {
         addressToAddFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "facesign":
-        addressToAddFormatted = `FACESIGN:${addressToAdd}`;
+        addressToAddFormatted = `FACESIGN:${publicKey}`;
         break;
       default:
         throw new Error("Invalid address to add type");
@@ -322,7 +304,7 @@ export class Client {
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
       case "FaceSign":
-        address = `FACESIGN:${this.signerAddress}`;
+        address = `FACESIGN:${this.signerPublicKey}`;
         break;
       default:
         throw new Error("Invalid signer type");
@@ -341,7 +323,7 @@ export class Client {
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "facesign":
-        addressToRemoveFormatted = `FACESIGN:${addressToRemove}`;
+        addressToRemoveFormatted = `FACESIGN:${publicKey}`;
         break;
       default:
         throw new Error("Invalid address to remove type");

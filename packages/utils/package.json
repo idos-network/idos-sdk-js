@@ -12,6 +12,8 @@
     "@stablelib/utf8": "catalog:utils",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
+    "tiny-invariant": "catalog:core",
+    "@scure/bip39": "2.0.1",
     "tweetnacl": "catalog:core"
   },
   "devDependencies": {
@@ -41,6 +43,10 @@
     "./encryption": {
       "types": "./dist/encryption/index.d.mts",
       "import": "./dist/encryption/index.mjs"
+    },
+    "./facesign": {
+      "types": "./dist/facesign/index.d.mts",
+      "import": "./dist/facesign/index.mjs"
     }
   },
   "files": [

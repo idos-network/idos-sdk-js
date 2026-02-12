@@ -1,6 +1,6 @@
 import type { idOSCredential } from "@idos-network/credentials/types";
 import { recordFilter } from "@idos-network/credentials/utils";
-import { base64Decode, fromBytesToJson } from "@idos-network/utils/codecs";
+import { base64Decode, fromBytesToJson, hexEncode } from "@idos-network/utils/codecs";
 import type {
   AddAddressMessageToSign,
   AddAddressSignatureMessage,
@@ -70,7 +70,7 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         this._signMethod as (domain: any, types: any, value: any) => Promise<string>
       )(domain, types, value);
     } else if (this._signMethodType === "signMessage" || this._signMethodType === "signer") {
-      // XRPL/NEAR/Stellar wallets: use only the value as message
+      // XRPL/NEAR/Stellar/FaceSign wallets: use only the value as message
       const messageString = JSON.stringify(value);
       const response = await (this._signMethod as (message: any) => Promise<any>)(messageString);
 
@@ -81,6 +81,9 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
         signature = response.result.signedMessage;
       } else if (response?.signedMessage) {
         signature = response.signedMessage;
+      } else if (response instanceof Uint8Array && response.length === 64) {
+        // ed25519 signature size
+        return hexEncode(response);
       } else {
         throw new Error(
           `Unexpected response format from ${this._signMethodType}: ${JSON.stringify(response)}`,
