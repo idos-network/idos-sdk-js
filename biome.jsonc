@@ -20,7 +20,9 @@
       "!packages/enclave/src/mpc/**/*.ts",
       "!**/*.css",
       "!**/.turbo/**/*",
-      "!**/playwright-report/**/*"
+      "!**/playwright-report/**/*",
+      "!**/facesign-enclave/src/assets/facetec/**/*",
+      "!**/facesign-enclave/public/facetec/**/*"
     ],
     "ignoreUnknown": true
   },
