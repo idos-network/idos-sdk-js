@@ -90,6 +90,7 @@ Reown
 rippletest
 safekeep
 sandboxed
+scure
 sdot
 secp
 secretbox
