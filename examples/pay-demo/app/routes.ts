@@ -18,6 +18,8 @@ export default [
 
       ...prefix("kyc", [
         route("token", "routes/kyc/token.ts"),
+        route("credential-status", "routes/kyc/credential-status.ts"),
+        route("widget-url", "routes/kyc/widget-url.ts"),
         route("link", "routes/kyc/link.ts"),
         ...prefix("noah", [route("link", "routes/kyc/noah/link.ts")]),
         ...prefix("hifi", [

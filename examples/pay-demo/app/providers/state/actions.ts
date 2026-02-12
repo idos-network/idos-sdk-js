@@ -30,6 +30,9 @@ export const actions = {
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+    transakTokenData: null,
+    transakWidgetUrl: null,
+    checkCredentialStatusAttempts: 0,
   }),
 
   setClient: assign({
@@ -114,5 +117,17 @@ export const actions = {
 
   setMoneriumProfileIbans: assign({
     moneriumProfileIbans: ({ event }) => event.output.ibans,
+  }),
+
+  setTransakTokenData: assign({
+    transakTokenData: ({ event }) => event.output,
+  }),
+
+  setTransakWidgetUrl: assign({
+    transakWidgetUrl: ({ event }) => event.output,
+  }),
+
+  incrementCheckCredentialStatusAttempts: assign({
+    checkCredentialStatusAttempts: ({ context }) => context.checkCredentialStatusAttempts + 1,
   }),
 };

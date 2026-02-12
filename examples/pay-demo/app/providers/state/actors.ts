@@ -155,15 +155,73 @@ export const actors = {
       throw new Error("Credential not found");
     }
 
-    const kycUrl = await fetch(`/app/kyc/token?credentialId=${input.id}`);
+    const response = await fetch(`/app/kyc/token?credentialId=${input.id}`);
 
-    if (kycUrl.status !== 200) {
+    if (response.status !== 200) {
       throw new Error("KYC API is not available. Please try again later.");
     }
 
-    const tokenData = await kycUrl.json();
-    return tokenData.token;
+    const tokenData = await response.json();
+    // Return the full token response (id, kycStatus, token, forClientId)
+    return tokenData;
   }),
+
+  checkCredentialStatus: fromPromise(async ({ input }: { input: Context["transakTokenData"] }) => {
+    if (!input) {
+      throw new Error("Transak token data not found");
+    }
+
+    const response = await fetch(`/app/kyc/credential-status?credentialId=${input.id}`);
+
+    if (response.status !== 200) {
+      throw new Error("Failed to check credential status.");
+    }
+
+    const data = await response.json();
+
+    if (data.kycStatus?.toLowerCase() === "pending") {
+      throw new Error("KYC status is still pending");
+    }
+
+    return data;
+  }),
+
+  fetchTransakWidgetUrl: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        walletAddress: Context["walletAddress"];
+        transakTokenData: Context["transakTokenData"];
+        sharedCredential: Context["sharedCredential"];
+      };
+    }) => {
+      if (!input.walletAddress || !input.transakTokenData || !input.sharedCredential) {
+        throw new Error("Missing required data for Transak widget URL");
+      }
+
+      const response = await fetch("/app/kyc/widget-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: input.walletAddress,
+          fiatAmount: "100",
+          kycShareToken: input.transakTokenData.token,
+          credentialId: input.sharedCredential.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error ?? "Failed to create Transak widget URL");
+      }
+
+      const data = await response.json();
+      return data.widgetUrl;
+    },
+  ),
 
   findCredential: fromPromise(async ({ input }: { input: Context["loggedInClient"] }) => {
     if (!input) {

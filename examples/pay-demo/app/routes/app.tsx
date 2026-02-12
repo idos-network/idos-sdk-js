@@ -1,5 +1,4 @@
-import { Transak } from "@transak/transak-sdk";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect } from "react";
 import { useUser } from "~/layouts/app";
 import { COMMON_ENV } from "~/providers/envFlags.common";
 import { useSiwe } from "~/providers/siwe-provider";
@@ -14,7 +13,6 @@ export default function App() {
   const state = MachineContext.useSelector((state) => state.value);
   const provider = MachineContext.useSelector((state) => state.context.provider);
   const kycUrl = MachineContext.useSelector((state) => state.context.kycUrl);
-  const sharableToken = MachineContext.useSelector((state) => state.context.sharableToken);
   const noahUrl = MachineContext.useSelector((state) => state.context.noahUrl);
   const errorMessage = MachineContext.useSelector((state) => state.context.errorMessage);
   const hifiTosUrl = MachineContext.useSelector((state) => state.context.hifiTosUrl);
@@ -23,8 +21,7 @@ export default function App() {
   const moneriumProfileIbans = MachineContext.useSelector(
     (state) => state.context.moneriumProfileIbans,
   );
-
-  const transak = useRef<Transak | null>(null);
+  const transakWidgetUrl = MachineContext.useSelector((state) => state.context.transakWidgetUrl);
 
   console.log("-> state", state);
 
@@ -58,6 +55,17 @@ export default function App() {
       console.log("-> monerium callback", message.data.code);
       send({ type: "accessTokenFromCode", code: message.data.code });
     }
+
+    // Transak iframe messages
+    if (message?.data?.event_id === "TRANSAK_ORDER_SUCCESSFUL") {
+      console.log("Transak order successful:", message?.data?.data);
+      send({ type: "revokeAccessGrant" });
+    }
+
+    if (message?.data?.event_id === "TRANSAK_WIDGET_CLOSE") {
+      console.log("Transak widget closed");
+      send({ type: "revokeAccessGrant" });
+    }
   }, []);
 
   useEffect(() => {
@@ -67,29 +75,6 @@ export default function App() {
 
   console.log("-> state", state);
   console.log("-> provider", provider);
-
-  useEffect(() => {
-    if (state !== "dataOrTokenFetched" || !provider) return;
-
-    if (provider === "transak" && !transak.current && sharableToken) {
-      transak.current = new Transak({
-        apiKey: "479983ae-3b37-4ac0-84f2-f42873b1a638", // (Required)
-        // @ts-expect-error - Transak SDK is not typed correctly
-        environment: "STAGING", // (Required),
-        kycShareTokenProvider: "SUMSUB",
-        kycShareToken: sharableToken,
-      });
-
-      transak.current.init();
-
-      Transak.on(Transak.EVENTS.TRANSAK_WIDGET_CLOSE, (orderData) => {
-        console.log(orderData);
-        transak.current?.close();
-        send({ type: "revokeAccessGrant" });
-        transak.current = null;
-      });
-    }
-  }, [sharableToken, state, provider, send]);
 
   const start = async (provider: "transak" | "noah" | "custom" | "hifi" | "monerium") => {
     send({ type: "configure", provider, address });
@@ -181,6 +166,9 @@ export default function App() {
     error: "Error",
     requestKrakenDAG: "Requesting access grant for KYC provider...",
     createToken: "Create a sharable token for provider...",
+    checkCredentialStatus: "Waiting for KYC approval from Transak...",
+    waitForCredentialStatus: "Waiting for KYC approval from Transak...",
+    fetchWidgetUrl: "Loading Transak widget...",
   };
 
   if (messages[state as keyof typeof messages]) {
@@ -199,6 +187,31 @@ export default function App() {
         {/* @ts-expect-error Missing substates? */}
         <p>{messages[state.createSharableToken as keyof typeof messages]}</p>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+      </div>
+    );
+  }
+
+  if (state === "dataOrTokenFetched" && transakWidgetUrl && provider === "transak") {
+    body = (
+      <div
+        style={{
+          position: "relative",
+          width: "500px",
+          height: "80dvh",
+          margin: "auto",
+          boxShadow: "0 0 15px #1461db",
+          borderRadius: "15px",
+          overflow: "hidden",
+        }}
+      >
+        <iframe
+          id="transakIframe"
+          src={transakWidgetUrl}
+          allow="camera;microphone;payment"
+          referrerPolicy="strict-origin-when-cross-origin"
+          style={{ height: "100%", width: "100%", border: "none" }}
+          title="Transak"
+        />
       </div>
     );
   }

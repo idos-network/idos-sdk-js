@@ -1,6 +1,6 @@
 import { userContext } from "~/middlewares/auth";
-import { fetchSharedToken } from "~/providers/kraken.server";
-import type { Route } from "./+types/token";
+import { fetchCredentialStatus } from "~/providers/kraken.server";
+import type { Route } from "./+types/credential-status";
 
 export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
@@ -12,10 +12,8 @@ export async function loader({ request, context }: Route.LoaderArgs) {
   }
 
   try {
-    // Call kraken to get the full token response (id, kycStatus, token, forClientId)
-    const tokenData = await fetchSharedToken(credentialId, "transak");
-
-    return Response.json(tokenData);
+    const status = await fetchCredentialStatus(credentialId);
+    return Response.json(status);
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

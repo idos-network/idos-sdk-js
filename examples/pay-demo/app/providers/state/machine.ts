@@ -51,6 +51,9 @@ export const machine = setup({
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+    transakTokenData: null,
+    transakWidgetUrl: null,
+    checkCredentialStatusAttempts: 0,
   },
   states: {
     notConfigured: {
@@ -467,8 +470,55 @@ export const machine = setup({
             src: "createSharableToken",
             input: ({ context }: { context: Context }) => context.krakenDAG,
             onDone: {
+              target: "checkCredentialStatus",
+              actions: ["setTransakTokenData"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        checkCredentialStatus: {
+          invoke: {
+            id: "checkCredentialStatus",
+            src: "checkCredentialStatus",
+            input: ({ context }: { context: Context }) => context.transakTokenData,
+            onDone: {
+              target: "fetchWidgetUrl",
+              actions: ["setTransakTokenData"],
+            },
+            onError: [
+              {
+                guard: ({ context }: { context: Context }) =>
+                  context.checkCredentialStatusAttempts >= 60,
+                target: "error",
+                actions: ["setErrorMessage"],
+              },
+              {
+                target: "waitForCredentialStatus",
+                actions: ["incrementCheckCredentialStatusAttempts"],
+              },
+            ],
+          },
+        },
+        waitForCredentialStatus: {
+          after: {
+            5000: "checkCredentialStatus",
+          },
+        },
+        fetchWidgetUrl: {
+          invoke: {
+            id: "fetchTransakWidgetUrl",
+            src: "fetchTransakWidgetUrl",
+            input: ({ context }: { context: Context }) => ({
+              walletAddress: context.walletAddress,
+              transakTokenData: context.transakTokenData,
+              sharedCredential: context.sharedCredential,
+            }),
+            onDone: {
               target: "dataOrTokenFetched",
-              actions: ["setSharableToken"],
+              actions: ["setTransakWidgetUrl"],
             },
             onError: {
               target: "error",

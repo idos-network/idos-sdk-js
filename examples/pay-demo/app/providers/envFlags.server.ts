@@ -23,6 +23,10 @@ export const serverEnvSchema = z.object({
   MONERIUM_CLIENT_SECRET: z.string(),
   MONERIUM_AUTH_CODE_FLOW: z.string(),
   MONERIUM_FORCE_BACK_URL: z.string().optional(),
+  TRANSAK_API_KEY: z.string(),
+  TRANSAK_API_SECRET: z.string(),
+  TRANSAK_API_BASE_URL: z.string(),
+  TRANSAK_GATEWAY_BASE_URL: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

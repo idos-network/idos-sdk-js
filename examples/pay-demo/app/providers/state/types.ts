@@ -16,6 +16,13 @@ export interface MoneriumIban {
   emailNotifications: boolean;
 }
 
+export interface TransakTokenData {
+  id: string;
+  kycStatus: string;
+  token: string;
+  forClientId: string;
+}
+
 export interface Context {
   errorMessage?: string | null;
   walletAddress: string | null;
@@ -43,6 +50,9 @@ export interface Context {
   moneriumCode: string | null;
   moneriumProfileStatus: string | null;
   moneriumProfileIbans: MoneriumIban[] | null;
+  transakTokenData: TransakTokenData | null;
+  transakWidgetUrl: string | null;
+  checkCredentialStatusAttempts: number;
 }
 
 export interface UserData {
