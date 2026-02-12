@@ -451,7 +451,7 @@ importers:
         specifier: ^1.159.4
         version: 1.159.4(@tanstack/react-router@1.159.4(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(@tanstack/router-core@1.159.4)(csstype@3.2.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@wagmi/core':
-        specifier: ^2.16.4
+        specifier: catalog:ethereum
         version: 2.22.1(@tanstack/query-core@5.90.16)(@types/react@19.2.7)(immer@10.1.1)(react@19.2.3)(typescript@5.9.3)(use-sync-external-store@1.6.0(react@19.2.3))(viem@2.43.5(bufferutil@4.1.0)(typescript@5.9.3)(utf-8-validate@5.0.10)(zod@3.25.76))
       '@web3icons/react':
         specifier: ^4.0.14
@@ -1035,9 +1035,15 @@ importers:
       scrypt-js:
         specifier: ^3.0.1
         version: 3.0.1
+      tiny-invariant:
+        specifier: catalog:core
+        version: 1.3.3
       tweetnacl:
         specifier: catalog:core
         version: 1.0.3
+      web-bip39:
+        specifier: ^0.0.3
+        version: 0.0.3
     devDependencies:
       '@types/chrome':
         specifier: ^0.1.0
