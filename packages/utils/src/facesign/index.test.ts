@@ -27,4 +27,22 @@ describe("mnemonicToKeyPair", () => {
     expect(bytesKeyPair.publicKey).toEqual(stringKeyPair.publicKey);
     expect(bytesKeyPair.secretKey).toEqual(stringKeyPair.secretKey);
   });
+
+  it("rejects invalid mnemonic", async () => {
+    await expect(mnemonicToKeyPair("invalid mnemonic string not listed")).rejects.toThrow(
+      "Invalid BIP-39 mnemonic",
+    );
+  });
+
+  it("rejects invalid mnemonic in Uint8Array", async () => {
+    await expect(
+      mnemonicToKeyPair(
+        new Uint8Array([
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+          0x00, 0x00,
+        ]),
+      ),
+    ).rejects.toThrow("Invalid BIP-39 mnemonic");
+  });
 });

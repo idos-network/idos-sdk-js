@@ -1,4 +1,5 @@
-import { mnemonicToSeed } from "@scure/bip39";
+import { mnemonicToSeed, validateMnemonic } from "@scure/bip39";
+import { wordlist } from "@scure/bip39/wordlists/english.js";
 import tweetnacl from "tweetnacl";
 import { utf8Decode } from "../codecs";
 
@@ -11,6 +12,10 @@ export async function mnemonicToKeyPair(
     stringMnemonic = mnemonic;
   } else {
     stringMnemonic = utf8Decode(mnemonic);
+  }
+
+  if (!validateMnemonic(stringMnemonic, wordlist)) {
+    throw new Error("Invalid BIP-39 mnemonic");
   }
 
   const seed = await mnemonicToSeed(stringMnemonic);
