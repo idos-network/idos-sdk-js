@@ -1,4 +1,4 @@
-import { scrypt } from "scrypt-js";
+import { scrypt } from "@noble/hashes/scrypt.js";
 import { utf8Encode } from "../codecs";
 
 /*
@@ -75,5 +75,5 @@ export const idOSKeyDerivation = async ({
   const passwordBytes = utf8Encode(password);
   const saltBytes = utf8Encode(salt);
 
-  return scrypt(passwordBytes, saltBytes, n, r, p, dkLen);
+  return scrypt(passwordBytes, saltBytes, { N: n, r, p, dkLen });
 };
