@@ -1,28 +1,39 @@
+import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { useSiwe } from "../providers/siwe-provider";
 
 export function Welcome() {
   const { address, isAuthenticated, signIn, signOut } = useSiwe();
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-8 p-8">
-        <header className="flex flex-col items-center gap-6">
-          <h1 className="text-center font-bold text-3xl text-gray-900 ">
-            Welcome to idOS Pay Demo
-          </h1>
-          <p className="text-center text-gray-600 ">Get started by logging in to your account</p>
-        </header>
+    <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-md shadow-xl">
+        <CardContent className="space-y-6 p-6">
+          <header className="flex flex-col items-center text-center">
+            <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md">
+              <span className="text-xl font-bold">N</span>
+            </div>
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">NeoFinance</h1>
+            <p className="mx-auto mt-2 max-w-xs text-sm text-muted-foreground">
+              The modern way to hold, move, and grow your money with complete freedom.
+            </p>
+          </header>
 
-        <button
-          type="button"
-          className="cursor-pointer rounded-lg bg-blue-600 px-8 py-4 font-semibold text-lg text-white transition-colors hover:bg-blue-700"
-          onClick={() => (isAuthenticated ? signOut() : signIn())}
-        >
-          {isAuthenticated
-            ? `Disconnect (${address?.slice(0, 6)}...${address?.slice(-4)})`
-            : "Login to continue"}
-        </button>
-      </div>
+          <Button
+            className="w-full"
+            size="lg"
+            onClick={() => (isAuthenticated ? signOut() : signIn())}
+          >
+            {isAuthenticated
+              ? `Disconnect (${address?.slice(0, 6)}...${address?.slice(-4)})`
+              : "Connect Wallet"}
+          </Button>
+
+          <footer className="text-center text-xs text-muted-foreground">
+            Powered by <span className="font-medium text-foreground">idOS</span>
+          </footer>
+        </CardContent>
+      </Card>
     </main>
   );
 }

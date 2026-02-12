@@ -15,6 +15,11 @@ export default [
   ...prefix("app", [
     layout("layouts/app.tsx", [
       index("routes/app.tsx"),
+      route("add", "routes/add.tsx"),
+      route("withdraw", "routes/withdraw.tsx"),
+      route("send", "routes/send.tsx"),
+      route("receive", "routes/receive.tsx"),
+      route("profile", "routes/profile.tsx"),
 
       ...prefix("kyc", [
         route("token", "routes/kyc/token.ts"),

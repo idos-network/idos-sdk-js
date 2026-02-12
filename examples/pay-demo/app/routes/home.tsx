@@ -5,7 +5,7 @@ import type { Route } from "./+types/home";
 
 export function meta() {
   return [
-    { title: "idOS Pay Demo" },
+    { title: "NeoFinance | idOS Demo" },
     { name: "description", content: "Welcome to idOS Pay Demo!" },
   ];
 }
