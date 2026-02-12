@@ -88,7 +88,8 @@ export class Client {
     
     invariant(WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
     invariant(
-      ["XRPL", "NEAR", "FaceSign"].includes(walletType) && signerPublicKey,
+      // XRPL, NEAR and FaceSign require a public key, EVM does not
+      (["XRPL", "NEAR", "FaceSign"].includes(walletType) && signerPublicKey) || walletType === "EVM",
       "Signer public key is required for XRPL, NEAR and FaceSign",
     );
 
