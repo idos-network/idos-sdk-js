@@ -5,7 +5,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ isSsrBuild }) => ({
   build: {
-    target: isSsrBuild ? "node22" : "esnext",
+    rollupOptions: isSsrBuild ? { input: "./server/app.ts" } : undefined,
   },
   plugins: [tailwindcss(), reactRouter(), tsconfigPaths()],
 }));
