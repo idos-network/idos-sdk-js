@@ -240,6 +240,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       walletAddress: this.walletIdentifier,
       walletType: this.walletType,
       encryptionPasswordStore: kwilUser.encryption_password_store,
+      walletPublicKey: this.walletPublicKey,
     });
 
     return new idOSClientLoggedIn(this, kwilUser);
