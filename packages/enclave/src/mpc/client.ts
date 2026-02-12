@@ -30,10 +30,8 @@ export class Client {
   private readonly baseUrl: string;
   private readonly contractAddress: PbcAddress;
   private engines: EngineClient[] | undefined;
-  // @ts-expect-error - we are initializing the wallet type in reconfigure
-  private walletType: WalletType;
-  // @ts-expect-error - we are initializing the signer address in reconfigure
-  private signerAddress: string;
+  private walletType!: WalletType;
+  private signerAddress!: string;
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
   private numNodes: number;
