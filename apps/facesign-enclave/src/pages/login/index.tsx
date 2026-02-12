@@ -18,16 +18,19 @@ export default function Login() {
 
   // Get the FaceTec SDK initials
   useEffect(() => {
-    faceTec.init((errorMessage, token) => {
+    faceTec.init((errorMessage, attestationToken, newUserConfirmationToken) => {
       if (errorMessage) {
         return navigate("/error", { state: { message: errorMessage } });
       }
 
-      if (token) {
-        getEntropy(token).then((data) => {
+      if (attestationToken) {
+        getEntropy(attestationToken).then((data) => {
           // Redirection will be done in useEffect above
           setMnemonic(data.entropy);
         });
+      } else if (newUserConfirmationToken) {
+        // TODO: Missing UI for new user confirmation
+        return navigate("/new-user-confirmation", { state: { newUserConfirmationToken } });
       } else {
         console.error("Unexpected state: neither errorMessage nor token is set");
       }

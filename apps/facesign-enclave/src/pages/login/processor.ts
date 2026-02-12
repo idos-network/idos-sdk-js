@@ -1,6 +1,6 @@
 // Core
 
-import { login } from "@/lib/api.js";
+import { isLoginResponse, isNewUserResponse, login } from "@/lib/api.js";
 import type {
   FaceTecSessionRequestProcessor,
   FaceTecSessionRequestProcessorCallback,
@@ -9,14 +9,16 @@ import type {
 
 export type SessionRequestProcessorCallback = (
   result: FaceTecSessionResult,
-  lastReceivedToken?: string,
+  lastReceivedAttestationToken?: string,
+  lastRecievedNewUserConfirmationToken?: string,
 ) => void;
 
 // This is an example self-contained class to perform Liveness Checks with the FaceTec SDK.
 // You may choose to further componentize parts of this in your own Apps based on your specific requirements.
 //
 export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
-  private lastReceivedToken: string | undefined = undefined;
+  private lastReceivedAttestationToken: string | undefined = undefined;
+  private lastRecievedNewUserConfirmationToken: string | undefined = undefined;
 
   constructor(private callback?: SessionRequestProcessorCallback) {}
 
@@ -28,10 +30,15 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
     sessionRequestCallback: FaceTecSessionRequestProcessorCallback,
   ): void => {
     login(sessionRequestBlob)
-      .then(({ responseBlob, entropyToken }) => {
-        this.lastReceivedToken = entropyToken;
-        if (responseBlob) {
-          this.onResponseBlobReceived(responseBlob, sessionRequestCallback);
+      .then((response) => {
+        if (isLoginResponse(response)) {
+          this.lastReceivedAttestationToken = response.userAttestmentToken;
+        } else if (isNewUserResponse(response)) {
+          this.lastRecievedNewUserConfirmationToken = response.newUserConfirmationToken;
+        }
+
+        if (response.responseBlob) {
+          this.onResponseBlobReceived(response.responseBlob, sessionRequestCallback);
         } else {
           this.onCatastrophicNetworkError(sessionRequestCallback);
         }
@@ -75,6 +82,10 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
   // For demonstration purposes, we are handling next steps in the SampleAppController.
   public onFaceTecExit = (faceTecSessionResult: FaceTecSessionResult): void => {
     console.log("DONE");
-    this.callback?.(faceTecSessionResult, this.lastReceivedToken);
+    this.callback?.(
+      faceTecSessionResult,
+      this.lastReceivedAttestationToken,
+      this.lastRecievedNewUserConfirmationToken,
+    );
   };
 }

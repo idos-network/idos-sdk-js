@@ -19,7 +19,11 @@ export class FaceTecContainer {
   private callback: ((errorMessage?: string, token?: string) => void) | null = null;
 
   public init = async (
-    callback: (errorMessage?: string, token?: string) => void,
+    callback: (
+      errorMessage?: string,
+      attestationToken?: string,
+      newUserConfirmationToken?: string,
+    ) => void,
   ): Promise<void> => {
     // Ensure FaceTecSDK is imported & initialized
     this.FaceTecSDK = await this.ensureImportedFaceTecSDK();
