@@ -10,7 +10,7 @@ import type {
 export type SessionRequestProcessorCallback = (
   result: FaceTecSessionResult,
   lastReceivedAttestationToken?: string,
-  lastRecievedNewUserConfirmationToken?: string,
+  lastReceivedNewUserConfirmationToken?: string,
 ) => void;
 
 // This is an example self-contained class to perform Liveness Checks with the FaceTec SDK.
@@ -18,7 +18,7 @@ export type SessionRequestProcessorCallback = (
 //
 export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
   private lastReceivedAttestationToken: string | undefined = undefined;
-  private lastRecievedNewUserConfirmationToken: string | undefined = undefined;
+  private lastReceivedNewUserConfirmationToken: string | undefined = undefined;
 
   constructor(private callback?: SessionRequestProcessorCallback) {}
 
@@ -34,7 +34,7 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
         if (isLoginResponse(response)) {
           this.lastReceivedAttestationToken = response.userAttestmentToken;
         } else if (isNewUserResponse(response)) {
-          this.lastRecievedNewUserConfirmationToken = response.newUserConfirmationToken;
+          this.lastReceivedNewUserConfirmationToken = response.newUserConfirmationToken;
         }
 
         if (response.responseBlob) {
@@ -85,7 +85,7 @@ export class SessionRequestProcessor implements FaceTecSessionRequestProcessor {
     this.callback?.(
       faceTecSessionResult,
       this.lastReceivedAttestationToken,
-      this.lastRecievedNewUserConfirmationToken,
+      this.lastReceivedNewUserConfirmationToken,
     );
   };
 }
