@@ -80,20 +80,26 @@ const mapCredentialSubjectToTransakUserData = (
 });
 
 export async function getTransakAccessToken(): Promise<string> {
-  const response = (await fetch(
-    `${SERVER_ENV.TRANSAK_API_BASE_URL}/partners/api/v2/refresh-token`,
-    {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        "content-type": "application/json",
-        "api-secret": SERVER_ENV.TRANSAK_API_SECRET,
-      },
-      body: JSON.stringify({
-        apiKey: SERVER_ENV.TRANSAK_API_KEY,
-      }),
+  const tokenRes = await fetch(`${SERVER_ENV.TRANSAK_API_BASE_URL}/partners/api/v2/refresh-token`, {
+    method: "POST",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "api-secret": SERVER_ENV.TRANSAK_API_SECRET,
     },
-  ).then((res) => res.json())) as TransakAccessTokenResponse;
+    body: JSON.stringify({
+      apiKey: SERVER_ENV.TRANSAK_API_KEY,
+    }),
+  });
+
+  if (!tokenRes.ok) {
+    const text = await tokenRes.text();
+    throw new Error(
+      `Transak token request failed with status ${tokenRes.status}: ${text.slice(0, 200)}`,
+    );
+  }
+
+  const response = (await tokenRes.json()) as TransakAccessTokenResponse;
 
   if (response.error || !response.data?.accessToken) {
     throw new Error(
@@ -162,7 +168,7 @@ export async function createTransakWidgetUrl({
     landingPage: "HomePage",
   });
 
-  const response = (await fetch(`${SERVER_ENV.TRANSAK_GATEWAY_BASE_URL}/api/v2/auth/session`, {
+  const widgetRes = await fetch(`${SERVER_ENV.TRANSAK_GATEWAY_BASE_URL}/api/v2/auth/session`, {
     method: "POST",
     headers: {
       accept: "application/json",
@@ -170,7 +176,16 @@ export async function createTransakWidgetUrl({
       "access-token": transakAccessToken,
     },
     body,
-  }).then((res) => res.json())) as CreateTransakWidgetUrlResponse;
+  });
+
+  if (!widgetRes.ok) {
+    const text = await widgetRes.text();
+    throw new Error(
+      `Transak widget request failed with status ${widgetRes.status}: ${text.slice(0, 200)}`,
+    );
+  }
+
+  const response = (await widgetRes.json()) as CreateTransakWidgetUrlResponse;
 
   if (!response.data?.widgetUrl) {
     throw new Error(`Failed to create Transak widget URL: ${JSON.stringify(response)}`);
