@@ -16,9 +16,14 @@ import { Separator } from "~/components/ui/separator";
 interface DueTosProps {
   onAccept: () => void;
   isLoading?: boolean;
+  tosUrl?: string;
+  privacyPolicyUrl?: string;
 }
 
-export function DueTos({ onAccept, isLoading = false }: DueTosProps) {
+const DEFAULT_TOS_URL = "https://due.network/terms";
+const DEFAULT_PRIVACY_URL = "https://due.network/privacy";
+
+export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }: DueTosProps) {
   const [accepted, setAccepted] = useState(false);
 
   return (
@@ -93,7 +98,7 @@ export function DueTos({ onAccept, isLoading = false }: DueTosProps) {
               <span>
                 Full documents available at{" "}
                 <a
-                  href="https://due.network/terms"
+                  href={tosUrl ?? DEFAULT_TOS_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-info-foreground underline underline-offset-2"
@@ -102,7 +107,7 @@ export function DueTos({ onAccept, isLoading = false }: DueTosProps) {
                 </a>{" "}
                 and{" "}
                 <a
-                  href="https://due.network/privacy"
+                  href={privacyPolicyUrl ?? DEFAULT_PRIVACY_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-info-foreground underline underline-offset-2"

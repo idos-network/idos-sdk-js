@@ -42,8 +42,6 @@ export default function AddFunds() {
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
   const transakWidgetUrl = MachineContext.useSelector((s) => s.context.transakWidgetUrl);
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
-  const dueTosLinks = MachineContext.useSelector((s) => s.context.dueTosLinks);
-  const dueKycLink = MachineContext.useSelector((s) => s.context.dueKycLink);
 
   const messageReceiver = useCallback(
     // biome-ignore lint/suspicious/noExplicitAny: message event type
@@ -80,13 +78,6 @@ export default function AddFunds() {
     send({ type: "RESET" });
     send({ type: "configure", provider: "transak", address });
   };
-
-  const handleStartDue = () => {
-    send({ type: "RESET" });
-    send({ type: "configure", provider: "due", address });
-  };
-
-  console.log(state);
 
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
@@ -150,52 +141,6 @@ export default function AddFunds() {
         </Card>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-      </div>
-    );
-  }
-
-  // Due TOS?!
-  if (typeof state === "object" && "dueFlow" in state && state.dueFlow === "acceptTosWaiting") {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your purchase</p>
-          </div>
-        </div>
-        Here are the links: {dueTosLinks?.tos} and {dueTosLinks?.privacyPolicy}
-        <button type="button" onClick={() => send({ type: "acceptTos" })}>
-          Accept TOS
-        </button>
-      </div>
-    );
-  }
-
-  // Due KYC iframe
-  if (
-    typeof state === "object" &&
-    "dueFlow" in state &&
-    state.dueFlow === "finishKyc" &&
-    dueKycLink
-  ) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Finish your KYC</h2>
-          </div>
-        </div>
-
-        <iframe
-          src={dueKycLink}
-          width="100%"
-          height="700px"
-          title="KYC"
-          className="rounded-2xl"
-          sandbox="allow-popups allow-forms allow-scripts allow-same-origin"
-          allow="camera; microphone; geolocation; clipboard-write"
-        />
       </div>
     );
   }
@@ -291,9 +236,6 @@ export default function AddFunds() {
 
           <Button className="w-full" size="lg" onClick={handleStart}>
             Continue with Transak
-          </Button>
-          <Button className="w-full" size="lg" onClick={handleStartDue}>
-            Continue with Due
           </Button>
         </CardContent>
       </Card>
