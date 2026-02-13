@@ -186,7 +186,7 @@ export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProp
 
         <div className="flex flex-col gap-2">
           <Label>Country</Label>
-          <Select value={country} onValueChange={setCountry} disabled={isLoading}>
+          <Select value={country} onValueChange={(v) => setCountry(v ?? "")} disabled={isLoading}>
             <SelectTrigger>
               <SelectValue placeholder="Select country" />
             </SelectTrigger>
