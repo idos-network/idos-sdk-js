@@ -130,7 +130,7 @@ export default function Withdraw() {
   if (
     typeof state === "object" &&
     "dueFlow" in state &&
-    state.dueFlow === "finishKyc" &&
+    (state.dueFlow === "checkKycStatus" || state.dueFlow === "waitForKycToBeDone") &&
     dueKycLink
   ) {
     return (

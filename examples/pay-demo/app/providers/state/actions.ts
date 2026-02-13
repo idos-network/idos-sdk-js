@@ -36,6 +36,9 @@ export const actions = {
     dueTokenData: null,
     dueTosLinks: null,
     dueTosToken: null,
+    dueKycLink: null,
+    dueKycAttempts: 0,
+    dueKycDone: false,
   }),
 
   setClient: assign({
@@ -130,9 +133,14 @@ export const actions = {
     dueTokenData: ({ event }) => event.output,
   }),
 
-  setDueTosLinks: assign({
+  setDueAccount: assign({
     dueTosLinks: ({ event }) => event.output?.tos.documentLinks,
     dueTosToken: ({ event }) => event.output?.tos.token,
+    dueKycDone: ({ event }) => event.output?.kyc?.status === "passed",
+  }),
+
+  setDueKycDone: assign({
+    dueKycDone: () => true,
   }),
 
   setTransakWidgetUrl: assign({
@@ -141,6 +149,10 @@ export const actions = {
 
   setDueKycLink: assign({
     dueKycLink: ({ event }) => event.output?.link,
+  }),
+
+  incrementDueKycAttempts: assign({
+    dueKycAttempts: ({ context }) => context.dueKycAttempts + 1,
   }),
 
   incrementCheckCredentialStatusAttempts: assign({
