@@ -61,6 +61,8 @@ export interface Context {
   } | null;
   dueTosToken: string | null;
   dueKycLink: string | null;
+  dueKycDone: boolean;
+  dueKycAttempts: number;
 
   // Timers
   checkCredentialStatusAttempts: number;

@@ -16,7 +16,7 @@ export interface StatusLogEntry {
 }
 
 export interface KycInfo {
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "approved" | "rejected" | "passed";
   link: string;
 }
 
