@@ -418,7 +418,7 @@ export const machine = setup({
         },
         waitForKycToBeDone: {
           after: {
-            2000: "checkKycStatus",
+            5000: "checkKycStatus",
           },
           always: {
             guard: ({ context }) => context.dueKycAttempts >= 100,
