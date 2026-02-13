@@ -27,6 +27,9 @@ export const serverEnvSchema = z.object({
   TRANSAK_API_SECRET: z.string(),
   TRANSAK_API_BASE_URL: z.string(),
   TRANSAK_GATEWAY_BASE_URL: z.string(),
+  DUE_API_URL: z.string(),
+  DUE_API_KEY: z.string(),
+  DUE_HTTP_URL: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

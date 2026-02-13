@@ -33,6 +33,9 @@ export const actions = {
     transakTokenData: null,
     transakWidgetUrl: null,
     checkCredentialStatusAttempts: 0,
+    dueTokenData: null,
+    dueTosLinks: null,
+    dueTosToken: null,
   }),
 
   setClient: assign({
@@ -123,8 +126,21 @@ export const actions = {
     transakTokenData: ({ event }) => event.output,
   }),
 
+  setDueTokenData: assign({
+    dueTokenData: ({ event }) => event.output,
+  }),
+
+  setDueTosLinks: assign({
+    dueTosLinks: ({ event }) => event.output?.tos.documentLinks,
+    dueTosToken: ({ event }) => event.output?.tos.token,
+  }),
+
   setTransakWidgetUrl: assign({
     transakWidgetUrl: ({ event }) => event.output,
+  }),
+
+  setDueKycLink: assign({
+    dueKycLink: ({ event }) => event.output?.link,
   }),
 
   incrementCheckCredentialStatusAttempts: assign({

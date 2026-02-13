@@ -33,6 +33,10 @@ export default [
           route("account", "routes/kyc/hifi/account.ts"),
           route("status", "routes/kyc/hifi/status.ts"),
         ]),
+        ...prefix("due", [
+          route("account", "routes/kyc/due/account.ts"),
+          route("confirm", "routes/kyc/due/confirm.ts"),
+        ]),
         ...prefix("monerium", [
           route("auth", "routes/kyc/monerium/auth.ts"),
           route("user", "routes/kyc/monerium/user.ts"),
