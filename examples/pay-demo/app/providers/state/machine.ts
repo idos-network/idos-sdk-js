@@ -58,6 +58,8 @@ export const machine = setup({
     dueTosLinks: null,
     dueTosToken: null,
     dueKycLink: null,
+    dueKycDone: false,
+    dueKycAttempts: 0,
     checkCredentialStatusAttempts: 0,
   },
   states: {
@@ -351,7 +353,7 @@ export const machine = setup({
             }),
             onDone: {
               target: "acceptTosWaiting",
-              actions: ["setDueTosLinks"],
+              actions: ["setDueAccount"],
             },
             onError: {
               target: "error",
@@ -361,9 +363,16 @@ export const machine = setup({
         },
         acceptTosWaiting: {
           on: {
-            acceptTos: {
-              target: "confirmTosAccepted",
-            },
+            acceptTos: [
+              {
+                target: "confirmTosAccepted",
+                guard: ({ context }: { context: Context }) => !context.dueKycDone,
+              },
+              {
+                target: "checkKycStatus",
+                guard: ({ context }: { context: Context }) => context.dueKycDone,
+              },
+            ],
           },
         },
         confirmTosAccepted: {
@@ -375,7 +384,7 @@ export const machine = setup({
               dueTosToken: context.dueTosToken,
             }),
             onDone: {
-              target: "finishKyc",
+              target: "checkKycStatus",
               actions: ["setDueKycLink"],
             },
             onError: {
@@ -384,18 +393,43 @@ export const machine = setup({
             },
           },
         },
-        finishKyc: {
-          on: {
-            // Now waiting
-            done: {
-              target: "dataOrTokenFetched",
-            },
+        checkKycStatus: {
+          invoke: {
+            id: "checkDueKycStatus",
+            src: "checkDueKycStatus",
+            onDone: [
+              {
+                actions: ["setDueKycDone"],
+                target: "finishedKyc",
+              },
+            ],
+            onError: [
+              {
+                guard: ({ context }) => context.dueKycDone === false,
+                target: "waitForKycToBeDone",
+                actions: ["incrementDueKycAttempts"],
+              },
+              {
+                guard: ({ context }) => context.dueKycDone === true,
+                target: "finishedKyc",
+              },
+            ],
+          },
+        },
+        waitForKycToBeDone: {
+          after: {
+            2000: "checkKycStatus",
+          },
+          always: {
+            guard: ({ context }) => context.dueKycAttempts >= 100,
+            target: "error",
+            actions: ["setErrorMessage"],
           },
         },
         error: {
           type: "final",
         },
-        dataOrTokenFetched: {
+        finishedKyc: {
           type: "final",
         },
       },

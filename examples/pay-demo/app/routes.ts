@@ -36,6 +36,7 @@ export default [
         ...prefix("due", [
           route("account", "routes/kyc/due/account.ts"),
           route("confirm", "routes/kyc/due/confirm.ts"),
+          route("done", "routes/kyc/due/done.ts"),
         ]),
         ...prefix("monerium", [
           route("auth", "routes/kyc/monerium/auth.ts"),

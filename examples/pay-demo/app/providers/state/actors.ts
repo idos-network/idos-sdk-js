@@ -443,4 +443,14 @@ export const actors = {
       return await dueAccount.json();
     },
   ),
+
+  checkDueKycStatus: fromPromise(async () => {
+    const dueKycStatus = await fetch("/app/kyc/due/done");
+
+    if (dueKycStatus.status !== 200) {
+      throw new Error("Due KYC is not done.");
+    }
+
+    return await dueKycStatus.json();
+  }),
 };
