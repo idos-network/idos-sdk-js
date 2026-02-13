@@ -23,6 +23,7 @@ export const machine = setup({
     isMonerium: ({ context }: { context: Context }) => context.provider === "monerium",
     isNoah: ({ context }: { context: Context }) => context.provider === "noah",
     isHifi: ({ context }: { context: Context }) => context.provider === "hifi",
+    isDue: ({ context }: { context: Context }) => context.provider === "due",
   },
 }).createMachine({
   id: "idos",
@@ -53,6 +54,10 @@ export const machine = setup({
     moneriumProfileIbans: null,
     transakTokenData: null,
     transakWidgetUrl: null,
+    dueTokenData: null,
+    dueTosLinks: null,
+    dueTosToken: null,
+    dueKycLink: null,
     checkCredentialStatusAttempts: 0,
   },
   states: {
@@ -206,6 +211,11 @@ export const machine = setup({
             actions: ["setSharedCredential"],
             guard: "isHifi",
           },
+          {
+            target: "dueFlow",
+            actions: ["setSharedCredential"],
+            guard: "isDue",
+          },
         ],
         onError: {
           target: "error",
@@ -292,6 +302,105 @@ export const machine = setup({
           target: "error",
           actions: ["setErrorMessage"],
         },
+      },
+    },
+    dueFlow: {
+      initial: "requestKrakenDAG",
+      states: {
+        requestKrakenDAG: {
+          invoke: {
+            id: "requestKrakenDAG",
+            src: "requestKrakenDAG",
+            input: ({ context }: { context: Context }) => ({
+              client: context.loggedInClient,
+              credential: context.credential,
+            }),
+            onDone: {
+              target: "createToken",
+              actions: ["setKrakenDAG"],
+            },
+            onError: {
+              target: "error",
+            },
+          },
+        },
+        createToken: {
+          invoke: {
+            id: "createSharableToken",
+            src: "createSharableToken",
+            input: ({ context }: { context: Context }) => ({
+              dag: context.krakenDAG,
+              provider: "due.network_53224",
+            }),
+            onDone: {
+              target: "createDueAccount",
+              actions: ["setDueTokenData"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        createDueAccount: {
+          invoke: {
+            id: "createDueAccount",
+            src: "createDueAccount",
+            input: ({ context }: { context: Context }) => ({
+              sharedCredential: context.sharedCredential,
+            }),
+            onDone: {
+              target: "acceptTosWaiting",
+              actions: ["setDueTosLinks"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        acceptTosWaiting: {
+          on: {
+            acceptTos: {
+              target: "confirmTosAccepted",
+            },
+          },
+        },
+        confirmTosAccepted: {
+          invoke: {
+            id: "acceptDueTosAndShareToken",
+            src: "acceptDueTosAndShareToken",
+            input: ({ context }: { context: Context }) => ({
+              dueTokenData: context.dueTokenData,
+              dueTosToken: context.dueTosToken,
+            }),
+            onDone: {
+              target: "finishKyc",
+              actions: ["setDueKycLink"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        finishKyc: {
+          on: {
+            // Now waiting
+            done: {
+              target: "dataOrTokenFetched",
+            },
+          },
+        },
+        error: {
+          type: "final",
+        },
+        dataOrTokenFetched: {
+          type: "final",
+        },
+      },
+      onDone: {
+        target: "dataOrTokenFetched",
       },
     },
     noahFlow: {
@@ -468,7 +577,10 @@ export const machine = setup({
           invoke: {
             id: "createSharableToken",
             src: "createSharableToken",
-            input: ({ context }: { context: Context }) => context.krakenDAG,
+            input: ({ context }: { context: Context }) => ({
+              dag: context.krakenDAG,
+              provider: "transak",
+            }),
             onDone: {
               target: "checkCredentialStatus",
               actions: ["setTransakTokenData"],

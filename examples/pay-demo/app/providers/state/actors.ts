@@ -150,21 +150,25 @@ export const actors = {
     return data;
   }),
 
-  createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
-    if (!input) {
-      throw new Error("Credential not found");
-    }
+  createSharableToken: fromPromise(
+    async ({ input }: { input: { dag: Context["krakenDAG"]; provider: string } }) => {
+      if (!input) {
+        throw new Error("Credential not found");
+      }
 
-    const response = await fetch(`/app/kyc/token?credentialId=${input.id}`);
+      const response = await fetch(
+        `/app/kyc/token?credentialId=${input.dag?.id}&provider=${input.provider}`,
+      );
 
-    if (response.status !== 200) {
-      throw new Error("KYC API is not available. Please try again later.");
-    }
+      if (response.status !== 200) {
+        throw new Error("KYC API is not available. Please try again later.");
+      }
 
-    const tokenData = await response.json();
-    // Return the full token response (id, kycStatus, token, forClientId)
-    return tokenData;
-  }),
+      const tokenData = await response.json();
+      // Return the full token response (id, kycStatus, token, forClientId)
+      return tokenData;
+    },
+  ),
 
   checkCredentialStatus: fromPromise(async ({ input }: { input: Context["transakTokenData"] }) => {
     if (!input) {
@@ -388,6 +392,55 @@ export const actors = {
       const data = await customer.json();
 
       return data.url;
+    },
+  ),
+
+  createDueAccount: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        sharedCredential: Context["sharedCredential"];
+      };
+    }) => {
+      if (!input) {
+        throw new Error("Due token data not found");
+      }
+
+      const dueAccount = await fetch(
+        `/app/kyc/due/account?credentialId=${input.sharedCredential?.id}`,
+      );
+
+      if (dueAccount.status !== 200) {
+        throw new Error("Due API is not available. Please try again later.");
+      }
+
+      return await dueAccount.json();
+    },
+  ),
+
+  acceptDueTosAndShareToken: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        dueTokenData: Context["dueTokenData"];
+        dueTosToken: Context["dueTosToken"];
+      };
+    }) => {
+      if (!input) {
+        throw new Error("Due token data not found");
+      }
+
+      const dueAccount = await fetch(
+        `/app/kyc/due/confirm?tosToken=${input.dueTosToken}&sumSubToken=${input.dueTokenData?.token}`,
+      );
+
+      if (dueAccount.status !== 200) {
+        throw new Error("Due API is not available. Please try again later.");
+      }
+
+      return await dueAccount.json();
     },
   ),
 };
