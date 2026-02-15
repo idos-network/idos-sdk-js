@@ -13,7 +13,7 @@
     "@stablelib/base64": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
     "dompurify": "^3.2.5",
-    "lucide-preact": "^0.562.0",
+    "lucide-preact": "^0.564.0",
     "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",
