@@ -8,8 +8,8 @@ export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
-  url: "https://dashboard.idos.network",
-  icons: ["/dashboard-logo.svg"],
+  url: import.meta.env.DEV ? window.origin : "https://dashboard.idos.network",
+  icons: ["/logo.svg"],
 };
 
 export const networks = [mainnet, sepolia] as [typeof mainnet, typeof sepolia];
@@ -21,13 +21,15 @@ export const wagmiAdapter = new WagmiAdapter({
 
 export const wagmiConfig = wagmiAdapter.wagmiConfig;
 
-const appKit = createAppKit({
+export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   networks,
   metadata,
   projectId,
   features: {
     analytics: true,
+    email: false,
+    socials: false,
   },
 });
 

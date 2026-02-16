@@ -14,9 +14,9 @@ export function ConnectWallet() {
       }}
     >
       <div className="fixed inset-y-0 right-0 w-full lg:w-[728px] h-full p-5 bg-neutral-900 flex flex-col items-stretch md:items-center  overflow-y-auto">
-        <div className="flex flex-col items-stretch md:items-center gap-5 flex-1 place-content-center">
+        <div className="flex flex-col items-stretch md:items-center gap-8 flex-1 place-content-center">
           <img
-            src="/dashboard-logo.svg"
+            src="/logo.svg"
             alt="idOS Dashboard logo"
             className="w-52 h-auto mx-auto"
             loading="eager"
@@ -26,7 +26,7 @@ export function ConnectWallet() {
             Manage your data and grants effortlessly with the idOS Dashboard.
           </h1>
 
-          <h2 className="text-sm font-normal text-center">Connect your wallet to get started.</h2>
+          <p className="font-normal text-center">Connect your wallet to get started.</p>
 
           <div className="flex flex-col items-stretch w-full max-w-[400px] min-w-0 gap-3 mx-aut">
             <Button
@@ -67,11 +67,11 @@ export function ConnectWallet() {
             </Button>
           </div>
         </div>
-        <div className="flex flex-col items-stretch gap-2">
+        <div className="flex flex-col items-stretch gap-4">
           <span className="text-sm font-semibold">
             By connecting your wallet you confirm you read our{" "}
             <a
-              className="text-green-200 hover:text-green-400 inline-flex items-center text-sm hover:underline-offset-4  gap-2 hover:underline"
+              className="text-primary inline-flex items-center text-sm hover:underline-offset-4  gap-2 hover:underline"
               href="https://www.idos.network/legal/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
@@ -80,7 +80,7 @@ export function ConnectWallet() {
             </a>{" "}
             and{" "}
             <a
-              className="text-green-200 hover:text-green-400 inline-flex items-center text-sm hover:underline-offset-4  gap-2 hover:underline"
+              className="text-primary inline-flex items-center text-sm hover:underline-offset-4  gap-2 hover:underline"
               href="https://drive.google.com/file/d/1lzrdgD_dwusE4xsKw_oTUcu8Hq3YU60b/view?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
@@ -89,7 +89,7 @@ export function ConnectWallet() {
             </a>
           </span>
           <span className="flex gap-2 items-center place-content-center font-semibold text-sm">
-            <span className="text-sm font-semibold">POWERED BY</span>
+            <span className="text-sm font-semibold">Powered by</span>
             <img src="/logo.svg" alt="idOS logo" className="w-[68px] h-auto" />
           </span>
         </div>

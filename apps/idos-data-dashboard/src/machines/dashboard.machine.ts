@@ -209,6 +209,22 @@ export const dashboardMachine = setup({
             error: ({ event }) => event.error,
           }),
         },
+        CONNECT_EVM: {
+          target: "connecting",
+          actions: assign({ walletType: () => "EVM" as const }),
+        },
+        CONNECT_NEAR: {
+          target: "connecting",
+          actions: assign({ walletType: () => "NEAR" as const }),
+        },
+        CONNECT_STELLAR: {
+          target: "connecting",
+          actions: assign({ walletType: () => "Stellar" as const }),
+        },
+        CONNECT_XRPL: {
+          target: "connecting",
+          actions: assign({ walletType: () => "XRPL" as const }),
+        },
       },
     },
 

@@ -4,9 +4,9 @@ import { getGemWalletPublicKey } from "@idos-network/kwil-infra/xrp-utils";
 import { StrKey } from "@stellar/stellar-base";
 import { watchAccount } from "@wagmi/core";
 import { fromCallback } from "xstate";
-import { initializeNearSelector, openNearModal } from "@/core/near";
+import { getNearModal, initializeNearSelector, openNearModal } from "@/core/near";
 import stellarKit from "@/core/stellar-kit";
-import { getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
+import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, DashboardEvent } from "../dashboard.machine";
 
 const derivePublicKey = async (address: string): Promise<string> => {
@@ -30,10 +30,15 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
 
         openEvmModal();
 
+        let connected = false;
+        let modalOpened = false;
+
         const unwatch = watchAccount(wagmiConfig, {
           onChange(account) {
             if (account.isConnected && account.address) {
+              connected = true;
               unwatch();
+              unsubscribeState();
               sendBack({
                 type: "WALLET_CONNECTED",
                 walletAddress: account.address,
@@ -44,8 +49,24 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
           },
         });
 
+        const unsubscribeState = appKit.subscribeState((state) => {
+          if (state.open) {
+            modalOpened = true;
+          }
+
+          if (modalOpened && !state.open && !connected) {
+            unwatch();
+            unsubscribeState();
+            sendBack({
+              type: "WALLET_CONNECT_ERROR",
+              error: "Connection cancelled",
+            });
+          }
+        });
+
         return () => {
           unwatch();
+          unsubscribeState();
         };
       }
 
@@ -74,8 +95,12 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
 
             openNearModal(selector);
 
+            let signedIn = false;
+
             const subscription = selector.on("signedIn", ({ accounts }) => {
+              signedIn = true;
               subscription.remove();
+              hideSubscription?.remove();
               const accountId = accounts[0]?.accountId;
               if (accountId) {
                 sendBack({
@@ -92,8 +117,21 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
               }
             });
 
+            const modal = getNearModal();
+            const hideSubscription = modal?.on("onHide", ({ hideReason }) => {
+              if (!signedIn && hideReason === "user-triggered") {
+                subscription.remove();
+                hideSubscription?.remove();
+                sendBack({
+                  type: "WALLET_CONNECT_ERROR",
+                  error: "Connection cancelled",
+                });
+              }
+            });
+
             cleanup = () => {
               subscription.remove();
+              hideSubscription?.remove();
             };
           })
           .catch((err) => {
@@ -109,8 +147,11 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
       }
 
       case "Stellar": {
+        let walletSelected = false;
+
         stellarKit.openModal({
           onWalletSelected: async (option: ISupportedWallet) => {
+            walletSelected = true;
             try {
               stellarKit.setWallet(option.id);
               const { address } = await stellarKit.getAddress();
@@ -125,6 +166,14 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
               sendBack({
                 type: "WALLET_CONNECT_ERROR",
                 error: err instanceof Error ? err.message : "Failed to connect Stellar wallet",
+              });
+            }
+          },
+          onClosed: () => {
+            if (!walletSelected) {
+              sendBack({
+                type: "WALLET_CONNECT_ERROR",
+                error: "Connection cancelled",
               });
             }
           },

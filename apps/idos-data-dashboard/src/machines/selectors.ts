@@ -6,12 +6,11 @@ type DashboardSnapshot = SnapshotFrom<typeof dashboardMachine>;
 
 export const selectIsLoading = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("idle") ||
-  snapshot.matches("connecting") ||
   snapshot.matches("reconnecting") ||
   snapshot.matches("initializingIdOS");
 
 export const selectIsDisconnected = (snapshot: DashboardSnapshot): boolean =>
-  snapshot.matches("disconnected");
+  snapshot.matches("disconnected") || snapshot.matches("connecting");
 
 export const selectIsLoggedIn = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("loggedIn");
