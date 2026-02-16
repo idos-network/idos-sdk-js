@@ -114,7 +114,6 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
     <Dialog
       data-test-id="delete-credential-dialog"
       open={isOpen}
-      a
       onOpenChange={(open) => !open && handleClose()}
     >
       <DialogContent>
