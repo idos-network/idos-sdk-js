@@ -1,0 +1,44 @@
+import type { idOSClientLoggedIn } from "@idos-network/client";
+import type { SnapshotFrom } from "xstate";
+import type { dashboardMachine } from "./dashboard.machine";
+
+type DashboardSnapshot = SnapshotFrom<typeof dashboardMachine>;
+
+export const selectIsLoading = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("idle") ||
+  snapshot.matches("connecting") ||
+  snapshot.matches("reconnecting") ||
+  snapshot.matches("initializingIdOS");
+
+export const selectIsDisconnected = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("disconnected");
+
+export const selectIsLoggedIn = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("loggedIn");
+
+export const selectHasAccount = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("loggedIn") && snapshot.context.idOSClient.state === "logged-in";
+
+export const selectIsNoProfile = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("noProfile");
+
+export const selectIsError = (snapshot: DashboardSnapshot): boolean => snapshot.matches("error");
+
+export const selectIsDisconnecting = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("disconnecting");
+
+export const selectWalletAddress = (snapshot: DashboardSnapshot): string | null =>
+  snapshot.context.walletAddress;
+
+export const selectWalletType = (snapshot: DashboardSnapshot): string | null =>
+  snapshot.context.walletType;
+
+export const selectLoggedInClient = (snapshot: DashboardSnapshot): idOSClientLoggedIn | null => {
+  const client = snapshot.context.idOSClient;
+  if (client.state === "logged-in") return client;
+  return null;
+};
+
+export const selectError = (snapshot: DashboardSnapshot): string | null => snapshot.context.error;
+
+export const selectMachineState = (snapshot: DashboardSnapshot): string => snapshot.value as string;

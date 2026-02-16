@@ -1,0 +1,32 @@
+import { fromPromise } from "xstate";
+import stellarKit from "@/core/stellar-kit";
+import { disconnectEvm } from "@/core/wagmi";
+import { queryClient } from "@/query-client";
+import type { DisconnectWalletInput } from "../dashboard.machine";
+
+export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async ({ input }) => {
+  const { walletType, nearSelector, idOSClient } = input;
+
+  try {
+    if (walletType === "Stellar") {
+      await stellarKit.disconnect();
+    }
+
+    if (walletType === "NEAR" && nearSelector?.isSignedIn()) {
+      const wallet = await nearSelector.wallet();
+      await wallet.signOut();
+    }
+
+    if (walletType === "EVM") {
+      await disconnectEvm();
+    }
+
+    if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
+      await idOSClient.logOut();
+    }
+  } catch (error) {
+    console.error("Error during disconnect:", error);
+  }
+
+  queryClient.removeQueries();
+});

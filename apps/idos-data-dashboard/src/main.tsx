@@ -1,25 +1,14 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { createWeb3Modal } from "@web3modal/wagmi/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
+import "@/machines/dashboard.actor";
 import { Toaster } from "@/components/ui/sonner";
-import { WalletSelectorContextProvider } from "@/core/near";
-import { projectId, wagmiConfig } from "@/core/wagmi";
+import { wagmiAdapter } from "@/core/wagmi";
+import { queryClient } from "@/query-client";
 import { routeTree } from "./routeTree.gen";
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 0,
-      refetchOnWindowFocus: false,
-      staleTime: Number.POSITIVE_INFINITY,
-    },
-  },
-});
 
 // Create a new router instance
 const router = createRouter({
@@ -40,19 +29,13 @@ declare module "@tanstack/react-router" {
   }
 }
 
-createWeb3Modal({ wagmiConfig, projectId });
-
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
-    <WalletSelectorContextProvider>
-      {/* @ts-ignore: TODO: fix wagmi types */}
-      <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={queryClient}>
-          <Toaster position="bottom-center" />
-          <RouterProvider router={router} />
-          <ReactQueryDevtools buttonPosition="bottom-left" />
-        </QueryClientProvider>
-      </WagmiProvider>
-    </WalletSelectorContextProvider>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <Toaster position="bottom-center" />
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </WagmiProvider>
   </React.StrictMode>,
 );

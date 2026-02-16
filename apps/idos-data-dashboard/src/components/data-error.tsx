@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
 
-type DataErrorProps = {
+interface DataErrorProps {
   onRetry: () => void;
-};
+}
 
-export const DataError = ({ onRetry }: DataErrorProps) => {
+export function DataError({ onRetry }: DataErrorProps) {
   return (
     <div className="flex items-center flex-col lg:flex-row  gap-2.5 p-5 bg-neutral-900 rounded-xl">
       <span className="text-red-500" role="alert">
@@ -15,4 +15,4 @@ export const DataError = ({ onRetry }: DataErrorProps) => {
       </Button>
     </div>
   );
-};
+}
