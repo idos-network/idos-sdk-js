@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "dependencies": {
     "@idos-network/utils": "workspace:*",
-    "axios": "1.12.2",
+    "axios": "1.13.5",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-router": "^7.7.1",
