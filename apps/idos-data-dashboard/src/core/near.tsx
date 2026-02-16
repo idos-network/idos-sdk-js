@@ -20,6 +20,10 @@ const isTestnet = import.meta.env.DEV ? "testnet" : "mainnet";
 
 const connector = new NearConnector({
   features: isTestnet ? { testnet: true } : undefined,
+  network: isTestnet ? "testnet" : "mainnet",
+  logger: {
+    log: (args: any) => console.log(args),
+  },
 });
 
 export const WalletSelectorContextProvider: React.FC<{
@@ -40,7 +44,18 @@ export const WalletSelectorContextProvider: React.FC<{
       setWallet(null);
       setAccounts([]);
     });
+
+    connector.wallet().then(async (wallet) => {
+      wallet.getAccounts().then((t) => {
+        setAccounts(t);
+        setWallet(wallet);
+      });
+    });
   }, []);
+
+  console.log("accounts", accounts);
+  console.log("wallet", wallet);
+  console.log("loading", loading);
 
   const walletSelectorContextValue = useMemo<WalletSelectorContextValue>(
     () => ({
