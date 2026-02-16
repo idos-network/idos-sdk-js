@@ -27,7 +27,7 @@ export const WalletSelectorContextProvider: React.FC<{
 }> = ({ children }) => {
   const [wallet, setWallet] = useState<NearWalletBase | null>(null);
   const [accounts, setAccounts] = useState<Array<Account>>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   useEffect(() => {
     connector.on("wallet:signIn", async (t) => {
