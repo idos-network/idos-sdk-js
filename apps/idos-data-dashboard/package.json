@@ -27,7 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "ethers": "catalog:ethereum",
-    "lucide-react": "^0.562.0",
+    "lucide-react": "^0.564.0",
     "near-api-js": "catalog:near",
     "react": "catalog:react",
     "react-dom": "catalog:react",
