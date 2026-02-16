@@ -25,3 +25,4 @@ ignorePaths:
   - "**/.gitignore"
   - "**/tsconfig.tsbuildinfo"
   - "**/playwright-report/**"
+  - "apps/facesign-enclave/public/facetec/**"
