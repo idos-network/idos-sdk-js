@@ -21,7 +21,7 @@ export const WalletCard = ({ address, isDisabled, onDelete }: WalletCardProps) =
         </div>
       </div>
       <Tooltip disabled={!isDisabled}>
-        <TooltipTrigger>
+        <TooltipTrigger render={<span className="inline-block" />}>
           <Button
             disabled={isDisabled}
             variant="secondary"

@@ -1,6 +1,12 @@
 import * as GemWallet from "@gemwallet/api";
-import type { WalletInfo } from "@idos-network/controllers";
-import { KwilSigner, signGemWalletTx, signNearMessage } from "@idos-network/core";
+import {
+  type CustomKwilSigner,
+  KwilSigner,
+  signNearMessage,
+  type Wallet,
+} from "@idos-network/kwil-infra";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
+import { signGemWalletTx } from "@idos-network/kwil-infra/xrp-utils";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
@@ -14,6 +20,14 @@ const getEvmSigner = async (wagmiConfig: Config) => {
   return signer;
 };
 
+export interface WalletInfo {
+  address: string;
+  publicKey: string;
+  type: WalletType;
+  signMethod: (message: string) => Promise<string>;
+  signer: () => Promise<Wallet>;
+}
+
 export const walletInfoMapper = ({
   address,
   publicKey,
@@ -22,15 +36,15 @@ export const walletInfoMapper = ({
   address: string;
   publicKey: string;
   selector: WalletSelector;
-}): Record<"evm" | "near" | "xrpl" | "Stellar", WalletInfo> => ({
-  evm: {
+}): { [key in WalletType]: WalletInfo } => ({
+  EVM: {
     address,
     publicKey,
     signMethod: (message: string) => signMessage(wagmiConfig, { message: message }),
-    type: "evm",
+    type: "EVM",
     signer: async () => await getEvmSigner(wagmiConfig),
   },
-  near: {
+  NEAR: {
     address,
     publicKey,
     signMethod: async (message: string) => {
@@ -38,17 +52,18 @@ export const walletInfoMapper = ({
       const signature = await signNearMessage(signer, message);
       return signature;
     },
-    signer: () => selector.wallet() as unknown as any,
-    type: "near",
+    signer: () => selector.wallet() as Promise<Wallet>,
+    type: "NEAR",
   },
-  xrpl: {
+  XRPL: {
     signMethod: async (message: string) => {
       const signature = await signGemWalletTx(GemWallet, message);
       return signature as string;
     },
     address,
     publicKey,
-    type: "xrpl",
+    type: "XRPL",
+    // @ts-expect-error We need to fix the typing here
     signer: async () => GemWallet,
   },
   Stellar: {
@@ -88,9 +103,8 @@ export const walletInfoMapper = ({
         },
         publicKey,
         "ed25519",
-      );
+      ) as CustomKwilSigner;
       try {
-        // @ts-expect-error
         signer.publicAddress = address;
       } catch (error) {
         console.log("error setting public address", error);

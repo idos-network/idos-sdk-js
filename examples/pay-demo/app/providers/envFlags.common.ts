@@ -5,7 +5,6 @@ export const commonEnvSchema = z.object({
   IDOS_NODE_URL: z.string(),
   IDOS_PUBLIC_KEY: z.string(),
   KRAKEN_API_URL: z.string(),
-  KRAKEN_ISSUER_PUBLIC_KEY: z.string(),
   KRAKEN_LEVEL: z.string(),
   KRAKEN_ENCRYPTION_PUBLIC_KEY: z.string(),
   KRAKEN_PUBLIC_KEY: z.string(),

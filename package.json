@@ -13,9 +13,6 @@
     "overrides": {
       "web-streams-polyfill": "3.3.3"
     },
-    "patchedDependencies": {
-      "react-router@7.7.1": "patches/react-router@7.7.1.patch"
-    },
     "onlyBuiltDependencies": [
       "@reown/appkit",
       "@rolldown/binding-linux-x64-gnu",
@@ -67,6 +64,21 @@
       "path": "packages/issuer/dist/index.mjs",
       "limit": "550 KB",
       "running": false
+    },
+    {
+      "name": "@idos-network/credentials",
+      "path": "packages/credentials/dist/**/*.mjs",
+      "limit": "20 KB"
+    },
+    {
+      "name": "@idos-network/enclave",
+      "path": "packages/enclave/dist/**/*.mjs",
+      "limit": "20 KB"
+    },
+    {
+      "name": "@idos-network/kwil-infra",
+      "path": "packages/kwil-infra/dist/**/*.mjs",
+      "limit": "20 KB"
     },
     {
       "name": "@idos-network/utils",

@@ -1,5 +1,4 @@
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
-import type { WalletInfo } from "@idos-network/controllers";
 import type { Wallet } from "@near-wallet-selector/core";
 import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
@@ -76,6 +75,8 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const { selector } = useWalletSelector();
   const { status: evmStatus } = useAccount();
 
+  const evmIsConnecting = walletType === "EVM" && evmStatus === "connecting";
+
   useEffect(() => {
     // general wallet check
     if (!walletType || !walletAddress || !walletPublicKey) {
@@ -84,13 +85,17 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     }
 
     // evm wallet check
-    if (walletType === "evm" && evmStatus !== "connected") return;
+    if (walletType === "EVM" && evmStatus !== "connected") {
+      setIsLoading(false);
+      return;
+    }
 
     const signerSrc = walletInfoMapper({
       address: walletAddress ?? "",
       publicKey: walletPublicKey ?? "",
       selector,
-    })[walletType as keyof typeof walletInfoMapper] as WalletInfo;
+    })[walletType];
+
     if (!signerSrc) {
       setIsLoading(false);
       return;
@@ -131,7 +136,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   }, [walletPublicKey, walletAddress, walletType, evmStatus]);
 
   // While loading, show a spinner
-  if (isLoading) {
+  if (isLoading || evmIsConnecting) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />

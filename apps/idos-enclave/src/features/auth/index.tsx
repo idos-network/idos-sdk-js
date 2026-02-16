@@ -1,4 +1,4 @@
-import type { EncryptionPasswordStore } from "@idos-network/utils/enclave";
+import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import { effect, useSignal } from "@preact/signals";
 import type { UIMode } from "@/types";
 import Chooser from "./chooser";

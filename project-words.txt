@@ -25,6 +25,9 @@ digitalbazaar
 dompurify
 dotenvx
 encryptor
+facesign
+facetec
+GABC
 gemwallet
 headlessui
 heroicons
@@ -88,10 +91,12 @@ Reown
 rippletest
 safekeep
 sandboxed
+scure
 sdot
 secp
 secretbox
 secretsharing
+Shadcn
 shamir
 shardnet
 siwe
@@ -124,7 +129,10 @@ vitest
 wagmi
 webauthn
 websdk
+wordlist
+wordlists
 Xaman
 xrpl
+xsig
+xsignature
 XUMM
-Shadcn

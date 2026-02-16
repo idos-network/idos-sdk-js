@@ -1,4 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
+import { useRouterState } from "@tanstack/react-router";
 import {
   ChevronRightIcon,
   CogIcon,
@@ -10,7 +11,6 @@ import {
   XIcon,
 } from "lucide-react";
 import { useEffect, useRef } from "react";
-import { type NavLinkProps, useLocation, useMatches } from "react-router-dom";
 import { useAccount, useDisconnect } from "wagmi";
 import { useWalletSelector } from "@/core/near";
 import stellarKit from "@/core/stellar-kit";
@@ -42,7 +42,7 @@ const ConnectedWallet = () => {
   );
 };
 
-const ListItemLink = (props: NavLinkProps & ShadcnLinkProps) => {
+const ListItemLink = (props: ShadcnLinkProps) => {
   return (
     <Link
       {...props}
@@ -62,8 +62,8 @@ const DisconnectButton = () => {
 
   const handleDisconnect = async () => {
     if (walletType === "Stellar") await stellarKit.disconnect();
-    if (walletType === "near") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
-    if (walletType === "evm") await disconnectAsync();
+    if (walletType === "NEAR") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (walletType === "EVM") await disconnectAsync();
     if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);
     setAccounts([]);
@@ -79,11 +79,21 @@ const DisconnectButton = () => {
   );
 };
 
+const getBreadcrumbLabel = (routeId: string) => {
+  if (routeId === "/dashboard/") return "Credentials";
+  const paths = routeId.split("/");
+  const lastPath = paths[paths.length - 1];
+  return lastPath.charAt(0).toUpperCase() + lastPath.slice(1);
+};
+
 const Breadcrumbs = () => {
-  const matches = useMatches();
+  const routerState = useRouterState();
+  const matches = routerState.matches;
+
   const crumbs = matches
-    .filter((match) => Boolean((match.handle as { crumb: () => string })?.crumb))
-    .map((match) => (match.handle as { crumb: () => string })?.crumb());
+    .filter((match) => match.routeId !== "__root__" && match.routeId !== "/")
+    .map((match) => getBreadcrumbLabel(match.routeId))
+    .filter(Boolean);
 
   const items = ["Dashboard", ...crumbs];
   return (
@@ -108,7 +118,7 @@ export default function Layout({
   hasAccount: boolean;
 }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { pathname } = useLocation();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
   const prevPathnameRef = useRef(pathname);
 
   useEffect(() => {

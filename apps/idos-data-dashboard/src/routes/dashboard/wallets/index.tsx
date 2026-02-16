@@ -1,8 +1,8 @@
-import type { idOSWallet } from "@idos-network/core";
+import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Navigate, useSearch } from "@tanstack/react-router";
 import { RotateCw } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
 import { useAccount } from "wagmi";
 import { DataError } from "@/components/data-error";
 import { DataLoading } from "@/components/data-loading";
@@ -12,7 +12,6 @@ import { useWalletSelector } from "@/core/near";
 import useDisclosure from "@/hooks/useDisclosure";
 import { useIdOS } from "@/idOS.provider";
 import { AddWalletButton } from "./components/add-wallet-button";
-import { AddWalletUsingModal } from "./components/add-wallet-modal";
 import { DeleteWallet } from "./components/delete-wallet";
 import { WalletCard } from "./components/wallet-card";
 
@@ -99,11 +98,11 @@ const WalletsList = () => {
   }
 };
 
-export function Component() {
+export function WalletsSection() {
   const idOSClient = useIdOS();
-  const [searchParams] = useSearchParams();
-  const walletToAdd = searchParams.get("add-wallet") || undefined;
-  const callbackUrl = searchParams.get("callbackUrl") || undefined;
+  const search = useSearch({ from: "/wallets" });
+  const walletToAdd = search["add-wallet"] as string | undefined;
+  const callbackUrl = search.callbackUrl as string | undefined;
   const queryClient = useQueryClient();
 
   const hasProfile = !!idOSClient.user.id;
@@ -126,11 +125,7 @@ export function Component() {
         <h1 className="block font-bold! text-2xl! lg:text-3xl!">Wallets</h1>
         {hasProfile ? (
           <div className="flex items-center gap-2.5">
-            {import.meta.env.VITE_ADD_WALLET_USING_POPUP === "true" ? (
-              <AddWalletButton />
-            ) : (
-              <AddWalletUsingModal defaultValue={walletToAdd} />
-            )}
+            <AddWalletButton />
             <Button
               aria-label="Refresh wallets"
               variant="secondary"
@@ -152,4 +147,3 @@ export function Component() {
     </div>
   );
 }
-Component.displayName = "Wallets";

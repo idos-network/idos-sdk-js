@@ -30,6 +30,7 @@ catalogs:
 
   ethereum:
     "wagmi": "^2.14.16"
+    "@wagmi/core": "^2.16.4"
     "viem": "^2.14.0"
     "ethers": "^6.14.0"
 

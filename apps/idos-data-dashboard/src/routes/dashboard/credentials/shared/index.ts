@@ -1,4 +1,4 @@
-import type { idOSGrant } from "@idos-network/core";
+import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useIdOS } from "@/idOS.provider";
 

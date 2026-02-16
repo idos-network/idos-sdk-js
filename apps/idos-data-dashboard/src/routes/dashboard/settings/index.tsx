@@ -2,7 +2,7 @@ import { FileLockIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useIdOS } from "@/idOS.provider";
 
-export function Component() {
+export function SettingsSection() {
   const idOSClient = useIdOS();
 
   return (
@@ -32,5 +32,3 @@ export function Component() {
     </div>
   );
 }
-
-Component.displayName = "Settings";

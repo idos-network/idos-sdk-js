@@ -108,7 +108,7 @@ const Credentials = () => {
   }
 };
 
-export function Component() {
+export function CredentialsSection() {
   const idOSClient = useIdOS();
   const queryClient = useQueryClient();
 
@@ -135,4 +135,3 @@ export function Component() {
     </div>
   );
 }
-Component.displayName = "Credentials";

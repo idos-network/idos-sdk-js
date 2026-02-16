@@ -4,7 +4,7 @@ import type {
   idOSCredential,
 } from "@idos-network/client";
 
-export type Provider = "transak" | "noah" | "custom" | "hifi" | "monerium" | null;
+export type Provider = "transak" | "due" | "noah" | "custom" | "hifi" | "monerium" | null;
 
 export interface MoneriumIban {
   profile: string;
@@ -14,6 +14,13 @@ export interface MoneriumIban {
   chain: string;
   state: string;
   emailNotifications: boolean;
+}
+
+export interface SharedTokenData {
+  id: string;
+  kycStatus: string;
+  token: string;
+  forClientId: string;
 }
 
 export interface Context {
@@ -43,6 +50,22 @@ export interface Context {
   moneriumCode: string | null;
   moneriumProfileStatus: string | null;
   moneriumProfileIbans: MoneriumIban[] | null;
+  transakTokenData: SharedTokenData | null;
+  transakWidgetUrl: string | null;
+
+  // Due flow
+  dueTokenData: SharedTokenData | null;
+  dueTosLinks: {
+    tos: string;
+    privacyPolicy: string;
+  } | null;
+  dueTosToken: string | null;
+  dueKycLink: string | null;
+  dueKycDone: boolean;
+  dueKycAttempts: number;
+
+  // Timers
+  checkCredentialStatusAttempts: number;
 }
 
 export interface UserData {

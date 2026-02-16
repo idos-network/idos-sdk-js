@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: any is fine here. */
-import type { BaseProvider } from "@idos-network/utils/enclave";
+import type { BaseProvider } from "@idos-network/enclave";
 
 type BaseProviderInstance = typeof BaseProvider.prototype & {
   // Custom method from enclave to ensure <-> iframe communication

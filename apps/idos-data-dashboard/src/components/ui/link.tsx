@@ -1,4 +1,4 @@
-import { NavLink, type NavLinkProps } from "react-router-dom";
+import { Link as TanStackLink, type LinkProps as TanStackLinkProps, useMatchRoute } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
@@ -22,15 +22,19 @@ const linkVariants = cva(
 );
 
 export interface LinkProps
-  extends NavLinkProps,
+  extends Omit<TanStackLinkProps, "className">,
   VariantProps<typeof linkVariants> {
   className?: string;
 }
 
-function Link({ className, variant, ...props }: LinkProps) {
+function Link({ className, variant, to, ...props }: LinkProps) {
+  const matchRoute = useMatchRoute();
+  const isActive = to ? matchRoute({ to }) : false;
+
   return (
-    <NavLink
-      className={({ isActive }) => cn(
+    <TanStackLink
+      to={to}
+      className={cn(
         linkVariants({ variant }),
         isActive && "bg-neutral-950!",
         className

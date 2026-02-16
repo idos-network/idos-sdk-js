@@ -1,4 +1,4 @@
-import type { WalletType } from "@idos-network/core";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
@@ -74,7 +74,7 @@ export function App() {
           // Close the popup window after sending the data
           window.close();
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error("Error disconnecting wallet", error);
         });
     }

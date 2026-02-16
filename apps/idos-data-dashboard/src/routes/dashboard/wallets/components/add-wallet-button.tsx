@@ -1,6 +1,9 @@
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import type { AddWalletInput, WalletType } from "@idos-network/core";
-import { verifySignature, type WalletSignature } from "@idos-network/utils/signature-verification";
+import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
+import {
+  verifySignature,
+  type WalletSignature,
+} from "@idos-network/kwil-infra/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -8,6 +11,38 @@ import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
+
+function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
+  const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
+  invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
+  const entries = envUrls
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  const allowedOrigins: string[] = [];
+  let popupUrl: string | undefined;
+  for (const entry of entries) {
+    try {
+      const origin = new URL(entry).origin;
+      allowedOrigins.push(origin);
+      if (popupUrl === undefined) {
+        popupUrl = entry;
+      }
+    } catch {
+      console.warn(
+        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URLS contains invalid URL, skipping:",
+        entry,
+      );
+    }
+  }
+  invariant(
+    popupUrl !== undefined && allowedOrigins.length > 0,
+    "VITE_EMBEDDED_WALLET_APP_URLS must contain at least one valid URL",
+  );
+  return { popupUrl, allowedOrigins };
+}
+
+const EMBEDDED_WALLET_CONFIG = parseEmbeddedWalletEnv();
 
 export const createWalletParamsFactory = ({
   address,
@@ -116,7 +151,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
-        publicKeys: walletPayload.public_key,
+        publicKeys: walletPayload.public_key ?? [],
         signature: walletPayload.signature,
         message: walletPayload.message || "Sign this message to prove you own this wallet",
         walletType: walletPayload.wallet_type,
@@ -148,20 +183,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from the embedded wallet app
-      const allowedOrigin = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-      if (!allowedOrigin) {
-        console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
-        return;
-      }
-
-      // Extract origin from the full URL
-      const allowedOriginUrl = new URL(allowedOrigin);
-      const allowedOriginString = allowedOriginUrl.origin;
-
-      if (event.origin !== allowedOriginString) {
+      if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
+          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
@@ -200,11 +224,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
-    invariant(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
-      "VITE_EMBEDDED_WALLET_APP_URL is not set",
-    );
-
     setIsLoading(true);
 
     // Calculate center position for the popup
@@ -214,7 +233,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
+      EMBEDDED_WALLET_CONFIG.popupUrl,
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
