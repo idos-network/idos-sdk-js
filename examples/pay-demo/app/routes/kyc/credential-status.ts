@@ -1,4 +1,4 @@
-import { userContext } from "~/middlewares/auth";
+import { userContext } from "~/middlewares/auth.server";
 import { fetchCredentialStatus } from "~/providers/kraken.server";
 import type { Route } from "./+types/credential-status";
 

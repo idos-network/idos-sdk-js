@@ -1,4 +1,4 @@
-import { userContext } from "~/middlewares/auth";
+import { userContext } from "~/middlewares/auth.server";
 import { createTransakWidgetUrl } from "~/providers/transak.server";
 import type { Route } from "./+types/widget-url";
 
