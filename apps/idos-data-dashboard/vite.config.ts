@@ -35,7 +35,7 @@ export default defineConfig({
     mkcert(),
   ],
   resolve: {
-    dedupe: ["ethers", "near-api-js", "@near-wallet-selector/core"],
+    dedupe: ["ethers", "near-api-js", "@hot-labs/near-connect"],
     alias: {
       "@": resolve(__dirname, "./src"),
     },

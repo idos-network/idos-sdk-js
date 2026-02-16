@@ -1,101 +1,57 @@
-import type { Account, WalletSelector } from "@near-wallet-selector/core";
-import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupHereWallet } from "@near-wallet-selector/here-wallet";
-import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
-import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
-import { setupModal } from "@near-wallet-selector/modal-ui";
-import "@near-wallet-selector/modal-ui/styles.css";
+import { NearConnector } from "@hot-labs/near-connect";
+import type { Account, NearWalletBase } from "@hot-labs/near-connect/build/types";
 import type { ReactNode } from "react";
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
 
-declare global {
-  interface Window {
-    selector: WalletSelector;
-    modal: WalletSelectorModal;
-  }
-}
-
 export interface WalletSelectorContextValue {
-  selector: WalletSelector;
-  modal: WalletSelectorModal;
+  wallet: NearWalletBase;
+  connector: NearConnector;
   accounts: Array<Account>;
   accountId: string | null;
   setAccounts: (accounts: Array<Account>) => void;
 }
 
-const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+// const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
 
 const WalletSelectorContext = React.createContext<WalletSelectorContextValue | null>(null);
+
+const isTestnet = import.meta.env.DEV ? "testnet" : "mainnet";
+
+const connector = new NearConnector({
+  features: isTestnet ? { testnet: true } : undefined,
+});
 
 export const WalletSelectorContextProvider: React.FC<{
   children: ReactNode;
 }> = ({ children }) => {
-  const [selector, setSelector] = useState<WalletSelector | null>(null);
-  const [modal, setModal] = useState<WalletSelectorModal | null>(null);
+  const [wallet, setWallet] = useState<NearWalletBase | null>(null);
   const [accounts, setAccounts] = useState<Array<Account>>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  const initialize = useCallback(async () => {
-    const _selector = await setupWalletSelector({
-      network: import.meta.env.DEV ? "testnet" : "mainnet",
-      debug: true,
-      // biome-ignore lint/suspicious/noExplicitAny: false positive
-      modules: [setupMeteorWallet() as any, setupHereWallet()],
+  useEffect(() => {
+    connector.on("wallet:signIn", async (t) => {
+      setWallet(await connector.wallet());
+      setAccounts(t.accounts);
+      setLoading(false);
     });
 
-    const _modal = setupModal(_selector, {
-      contractId,
-      methodNames: [],
+    connector.on("wallet:signOut", () => {
+      setWallet(null);
+      setAccounts([]);
     });
-
-    // this is added for debugging purpose only
-    // for more information (https://github.com/near/wallet-selector/pull/764#issuecomment-1498073367)
-    window.selector = _selector;
-    window.modal = _modal;
-
-    setSelector(_selector);
-    setModal(_modal);
-    setLoading(false);
   }, []);
-
-  useEffect(() => {
-    initialize().catch((err) => {
-      console.error(err);
-      alert("Failed to initialize wallet selector");
-    });
-  }, [initialize]);
-
-  useEffect(() => {
-    if (!selector) {
-      return;
-    }
-
-    const subscription = selector.on("signedIn", ({ accounts }) => {
-      setAccounts(accounts);
-    });
-
-    const onHideSubscription = modal?.on("onHide", ({ hideReason }) => {
-      console.log(`The reason for hiding the modal ${hideReason}`);
-    });
-
-    return () => {
-      subscription.remove();
-      onHideSubscription?.remove();
-    };
-  }, [selector, modal]);
 
   const walletSelectorContextValue = useMemo<WalletSelectorContextValue>(
     () => ({
       // biome-ignore lint/style/noNonNullAssertion: TBD
-      selector: selector!,
-      // biome-ignore lint/style/noNonNullAssertion: TBD
-      modal: modal!,
+      wallet: wallet!,
       accounts,
+      connector,
       accountId: accounts?.[0]?.accountId ?? null,
       setAccounts,
     }),
-    [selector, modal, accounts],
+    [wallet, accounts],
   );
 
   if (loading) {

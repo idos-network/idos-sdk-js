@@ -1,4 +1,5 @@
 import * as GemWallet from "@gemwallet/api";
+import type { NearWalletBase } from "@hot-labs/near-connect";
 import {
   type CustomKwilSigner,
   KwilSigner,
@@ -7,7 +8,6 @@ import {
 } from "@idos-network/kwil-infra";
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { signGemWalletTx } from "@idos-network/kwil-infra/xrp-utils";
-import type { WalletSelector } from "@near-wallet-selector/core";
 import { type Config, getWalletClient, signMessage } from "@wagmi/core";
 import { BrowserProvider } from "ethers";
 import stellarKit from "./stellar-kit";
@@ -31,11 +31,11 @@ export interface WalletInfo {
 export const walletInfoMapper = ({
   address,
   publicKey,
-  selector,
+  nearWallet,
 }: {
   address: string;
   publicKey: string;
-  selector: WalletSelector;
+  nearWallet: NearWalletBase;
 }): { [key in WalletType]: WalletInfo } => ({
   EVM: {
     address,
@@ -48,11 +48,10 @@ export const walletInfoMapper = ({
     address,
     publicKey,
     signMethod: async (message: string) => {
-      const signer = await selector.wallet();
-      const signature = await signNearMessage(signer, message);
+      const signature = await signNearMessage(nearWallet, message);
       return signature;
     },
-    signer: () => selector.wallet() as unknown as any,
+    signer: async () => await nearWallet,
     type: "NEAR",
   },
   XRPL: {

@@ -30,14 +30,9 @@ export const detectNearNetwork = (accountId: string): keyof typeof NEAR_NETWORKS
 };
 
 // Function to get connection config based on account ID
-export const getNearConnectionConfig = (
-  accountId: string,
-): { networkId: string; nodeUrl: string } => {
+export const getNearNodeUrl = (accountId: string): string => {
   const network = detectNearNetwork(accountId);
   const networkConfig = NEAR_NETWORKS[network];
 
-  return {
-    networkId: networkConfig.networkId,
-    nodeUrl: networkConfig.nodeUrl,
-  };
+  return networkConfig.nodeUrl;
 };

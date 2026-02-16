@@ -1,6 +1,5 @@
+import type { NearWalletBase as NearWallet } from "@hot-labs/near-connect";
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
-import type { Wallet } from "@near-wallet-selector/core";
-import type { SignMessageMethod } from "@near-wallet-selector/core/src/lib/wallet";
 import type { JsonRpcSigner } from "ethers";
 import {
   createContext,
@@ -29,15 +28,13 @@ const _idOSClient = new idOSClientConfiguration({
 });
 
 export const useSigner = () => {
-  const [signer, setSigner] = useState<(Wallet & SignMessageMethod) | JsonRpcSigner | undefined>(
-    undefined,
-  );
+  const [signer, setSigner] = useState<NearWallet | JsonRpcSigner | undefined>(undefined);
   const ethSigner = useEthersSigner();
-  const { selector } = useWalletSelector();
+  const { wallet } = useWalletSelector();
 
   const initialize = useCallback(async () => {
-    if (selector.isSignedIn()) {
-      setSigner(await selector.wallet());
+    if (!wallet) {
+      setSigner(wallet);
       return;
     }
 
@@ -47,7 +44,7 @@ export const useSigner = () => {
     }
 
     setSigner(undefined);
-  }, [ethSigner, selector]);
+  }, [ethSigner, wallet]);
 
   useEffect(() => {
     initialize();
@@ -72,7 +69,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [client, setClient] = useState<idOSClient>(_idOSClient);
   const { walletType, walletAddress, walletPublicKey } = useWalletStore();
-  const { selector } = useWalletSelector();
+  const { wallet } = useWalletSelector();
   const { status: evmStatus } = useAccount();
 
   const evmIsConnecting = walletType === "EVM" && evmStatus === "connecting";
@@ -93,7 +90,7 @@ export function IDOSClientProvider({ children }: PropsWithChildren) {
     const signerSrc = walletInfoMapper({
       address: walletAddress ?? "",
       publicKey: walletPublicKey ?? "",
-      selector,
+      nearWallet: wallet,
     })[walletType];
 
     if (!signerSrc) {

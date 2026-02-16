@@ -54,7 +54,7 @@ const ListItemLink = (props: ShadcnLinkProps) => {
 
 const DisconnectButton = () => {
   const { disconnectAsync } = useDisconnect();
-  const { selector, setAccounts } = useWalletSelector();
+  const { wallet, setAccounts } = useWalletSelector();
   const queryClient = useQueryClient();
   const { setSigner } = useSigner();
   const client = useUnsafeIdOS();
@@ -62,7 +62,7 @@ const DisconnectButton = () => {
 
   const handleDisconnect = async () => {
     if (walletType === "Stellar") await stellarKit.disconnect();
-    if (walletType === "NEAR") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
+    if (walletType === "NEAR") if (wallet) await await wallet.signOut();
     if (walletType === "EVM") await disconnectAsync();
     if (client.state === "logged-in") await client.logOut();
     setSigner(undefined);

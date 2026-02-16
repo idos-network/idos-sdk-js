@@ -19,7 +19,7 @@ const derivePublicKey = async (address: string) => {
 
 export const ConnectWallet = () => {
   const { open } = useWeb3Modal();
-  const { modal } = useWalletSelector();
+  const { connector } = useWalletSelector();
   const { address, isConnected: evmConnected } = useAccount();
   const { setWalletType, setWalletAddress, setWalletPublicKey } = useWalletStore();
   const { accountId } = useWalletSelector();
@@ -92,7 +92,7 @@ export const ConnectWallet = () => {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => modal.show()}
+              onClick={() => connector.connect()}
             >
               Connect with NEAR
               <img alt="NEAR logo" src="/near.svg" className="w-10 h-10" />

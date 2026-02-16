@@ -1,11 +1,8 @@
-import { setupWalletSelector } from "@near-wallet-selector/core";
-import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
-import { setupModal } from "@near-wallet-selector/modal-ui";
-import "@near-wallet-selector/modal-ui/styles.css";
+import { NearConnector } from "@hot-labs/near-connect";
 import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/kwil-infra";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
@@ -22,49 +19,51 @@ const { useStepper } = defineStepper(
   },
 );
 
-const selector = await setupWalletSelector({
-  network: (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") || "testnet",
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
-  modules: [setupMeteorWallet() as any],
+const isTestnet = (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") === "testnet";
+
+const connector = new NearConnector({
+  features: isTestnet ? { testnet: true } : undefined,
 });
 
-const modal = setupModal(selector, {
-  contractId: "",
-  methodNames: [],
-});
-
-export function NearConnector() {
+export function NearWalletConnector() {
   const stepper = useStepper();
-  const [isSignedIn, setSignedIn] = useState(false);
   const [accountId, setAccountId] = useState("");
   const { connectedWalletType, setWalletPayload, setConnectedWalletType } = useWalletState();
+  const connectedWalletTypeRef = useRef(connectedWalletType);
+
+  // Keep ref in sync with state for use in event handlers
+  useEffect(() => {
+    connectedWalletTypeRef.current = connectedWalletType;
+  }, [connectedWalletType]);
 
   useEffect(() => {
-    if (isSignedIn && stepper.isFirst) {
+    const handleSignIn = (event: { accounts: Array<{ accountId: string }> }) => {
+      const newAccountId = event.accounts[0]?.accountId || "";
+      setAccountId(newAccountId);
       setConnectedWalletType("NEAR");
       stepper.next();
-    }
-  }, [isSignedIn, stepper]);
+    };
 
-  useEffect(() => {
-    const subscription = selector.store.observable.subscribe(() => {
-      setSignedIn(selector.isSignedIn());
-      setAccountId(selector.store.getState().accounts[0]?.accountId || "");
-
-      // Handle external disconnections
-      if (!selector.isSignedIn() && connectedWalletType === "NEAR") {
+    const handleSignOut = () => {
+      if (connectedWalletTypeRef.current === "NEAR") {
         setConnectedWalletType(null);
         setAccountId("");
         stepper.reset();
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, [stepper, accountId, isSignedIn]);
+    connector.on("wallet:signIn", handleSignIn);
+    connector.on("wallet:signOut", handleSignOut);
+
+    return () => {
+      connector.off("wallet:signIn", handleSignIn);
+      connector.off("wallet:signOut", handleSignOut);
+    };
+  }, [stepper, setConnectedWalletType]);
 
   const handleSignMessage = async () => {
-    const wallet = await selector.wallet();
-    // biome-ignore lint/suspicious/noExplicitAny: false positive
+    const wallet = await connector.wallet();
+    // biome-ignore lint/suspicious/noExplicitAny: near-connect wallet API is compatible with signNearMessage
     const signature = await signNearMessage(wallet as any, message);
 
     if (signature) {
@@ -79,7 +78,7 @@ export function NearConnector() {
   };
 
   const disconnectNear = async () => {
-    const wallet = await selector.wallet();
+    const wallet = await connector.wallet();
     await wallet.signOut();
   };
 
@@ -94,7 +93,7 @@ export function NearConnector() {
     <div className="flex max-w-xl flex-col gap-2">
       {stepper.when("connect", () => (
         <div className="flex flex-col gap-4">
-          <Button onClick={() => modal.show()}>
+          <Button onClick={() => connector.connect()}>
             Connect with NEAR
             <TokenNEAR variant="mono" size={24} />
           </Button>
