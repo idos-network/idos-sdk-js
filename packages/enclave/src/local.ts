@@ -7,6 +7,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
+import { generatePassword } from "@idos-network/utils/cryptography";
 import { decrypt, encrypt, keyDerivation } from "@idos-network/utils/encryption";
 import { LocalStorageStore, type PipeCodecArgs, type Store } from "@idos-network/utils/store";
 import { syncScrypt } from "scrypt-js";
@@ -378,7 +379,7 @@ export class LocalEnclave<
       throw Error("A secret might be stored at MPC ZK nodes, but can't be obtained");
     }
 
-    const password = this.generatePassword();
+    const password = generatePassword();
     const { status: uploadStatus } = await this.uploadSecret(password);
 
     if (uploadStatus !== "success") {
@@ -393,20 +394,6 @@ export class LocalEnclave<
       throw new Error("MPC client is not initialized");
     }
     return this.mpcClientInstance;
-  }
-
-  private generatePassword(): string {
-    const alphabet =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
-    const length = 20;
-    const array = new Uint8Array(length);
-    crypto.getRandomValues(array);
-    let password = "";
-    for (let i = 0; i < length; i++) {
-      password += alphabet[array[i] % alphabet.length];
-    }
-
-    return password;
   }
 
   private async downloadSecret(): Promise<{

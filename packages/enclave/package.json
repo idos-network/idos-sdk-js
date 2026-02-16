@@ -8,6 +8,7 @@
     "@idos-network/kwil-infra": "workspace:*",
     "scrypt-js": "^3.0.1",
     "tweetnacl": "catalog:core",
+    "tiny-invariant": "catalog:core",
     "zod": "catalog:core"
   },
   "devDependencies": {

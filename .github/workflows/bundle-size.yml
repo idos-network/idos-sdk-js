@@ -6,15 +6,8 @@ on:
       - playground
       - main
     paths:
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
-  push:
-    branches:
-      - playground
-      - main
-    paths:
-      - 'packages/**'
-      - 'pnpm-lock.yaml'
+      - "packages/**"
+      - "pnpm-lock.yaml"
 
 permissions:
   contents: read

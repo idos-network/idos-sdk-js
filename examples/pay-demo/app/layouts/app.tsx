@@ -1,10 +1,10 @@
 import { Outlet, useRouteLoaderData } from "react-router";
 import { Header } from "~/components/header";
 import { Sidebar } from "~/components/sidebar";
-import { authMiddleware, userContext } from "~/middlewares/auth";
+import { authMiddleware, userContext } from "~/middlewares/auth.server";
 import type { Route } from "./+types/app";
 
-export const unstable_middleware = [authMiddleware];
+export const middleware = [authMiddleware];
 
 export async function loader({ context }: Route.LoaderArgs) {
   const user = context.get(userContext);

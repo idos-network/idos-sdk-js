@@ -16,7 +16,7 @@ function RootComponent() {
       <IDOSClientProvider>
         <LayoutWrapper />
       </IDOSClientProvider>
-      {!import.meta.env.DEV && (
+      {import.meta.env.DEV && (
         <TanStackDevtools
           config={{
             position: "bottom-right",

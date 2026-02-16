@@ -26,6 +26,7 @@ dompurify
 dotenvx
 encryptor
 facesign
+facetec
 GABC
 gemwallet
 headlessui
@@ -90,6 +91,7 @@ Reown
 rippletest
 safekeep
 sandboxed
+scure
 sdot
 secp
 secretbox
@@ -127,6 +129,8 @@ vitest
 wagmi
 webauthn
 websdk
+wordlist
+wordlists
 Xaman
 xrpl
 xsig
