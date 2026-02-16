@@ -13,6 +13,7 @@ import "./app.css";
 import { MachineProvider } from "./providers/state";
 
 export const links: Route.LinksFunction = () => [
+  { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
   {
     rel: "preconnect",

@@ -1,11 +1,12 @@
-import { effect } from "@preact/signals";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
+import { useEffect } from "react";
 import { EVMConnector } from "./components/evm";
 import { NearConnector } from "./components/near";
 import { StellarConnector } from "./components/stellar";
 import { XRPLConnector } from "./components/xrp";
-import { connectedWalletType, walletPayload } from "./state";
+import { useWalletState } from "./state";
 
-const getHiddenWalletTypes = () => {
+const getHiddenWalletTypes = (): string[] => {
   const params = new URLSearchParams(window.location.search);
   const hiddenWallets = params.get("skip_wallets") ?? "";
   return hiddenWallets ? hiddenWallets.split(",") : [];
@@ -14,39 +15,35 @@ const getHiddenWalletTypes = () => {
 const hiddenWalletType = getHiddenWalletTypes();
 
 function WalletConnector() {
-  if (!connectedWalletType.value) {
-    return (
-      <>
-        {!hiddenWalletType.includes("evm") && <EVMConnector />}
-        {!hiddenWalletType.includes("near") && <NearConnector />}
-        {!hiddenWalletType.includes("xrpl") && <XRPLConnector />}
-        {!hiddenWalletType.includes("stellar") && <StellarConnector />}
-      </>
-    );
-  }
+  const { connectedWalletType } = useWalletState();
 
-  if (connectedWalletType.value === "evm") {
-    return <EVMConnector />;
-  }
+  const showWallet = (walletType: WalletType) => {
+    if (hiddenWalletType.includes(walletType.toLowerCase())) {
+      return false;
+    }
 
-  if (connectedWalletType.value === "near") {
-    return <NearConnector />;
-  }
+    if (connectedWalletType && connectedWalletType !== walletType) {
+      return false;
+    }
 
-  if (connectedWalletType.value === "xrpl") {
-    return <XRPLConnector />;
-  }
+    return true;
+  };
 
-  if (connectedWalletType.value === "stellar") {
-    return <StellarConnector />;
-  }
-
-  return null;
+  return (
+    <>
+      {showWallet("EVM") && <EVMConnector />}
+      {showWallet("NEAR") && <NearConnector />}
+      {showWallet("XRPL") && <XRPLConnector />}
+      {showWallet("Stellar") && <StellarConnector />}
+    </>
+  );
 }
 
 export function App() {
-  effect(() => {
-    if (walletPayload.value) {
+  const { walletPayload, connectedWalletType } = useWalletState();
+
+  useEffect(() => {
+    if (walletPayload && connectedWalletType) {
       if (!import.meta.env.VITE_DATA_DASHBOARD_URL) {
         console.warn("VITE_DATA_DASHBOARD_URL is not set");
         return;
@@ -55,7 +52,8 @@ export function App() {
         console.log("No opener window found");
         return;
       }
-      walletPayload.value
+
+      walletPayload
         .disconnect()
         .then(() => {
           // Send wallet payload back to the parent window
@@ -64,7 +62,9 @@ export function App() {
               type: "WALLET_SIGNATURE",
               // Remove disconnect method from walletPayload
               data: {
-                ...walletPayload.value,
+                ...walletPayload,
+                // TODO: Use WalletSignature from utils later
+                wallet_type: connectedWalletType,
                 disconnect: undefined,
               },
             },
@@ -74,16 +74,16 @@ export function App() {
           // Close the popup window after sending the data
           window.close();
         })
-        .catch((error) => {
+        .catch((error: any) => {
           console.error("Error disconnecting wallet", error);
         });
     }
-  });
+  }, [walletPayload, connectedWalletType]);
 
   return (
-    <div class="grid h-full place-content-center">
-      <div class="flex flex-col gap-4">
-        <div class="flex flex-col items-stretch justify-center gap-4">
+    <div className="grid h-full place-content-center">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-stretch justify-center gap-4">
           <WalletConnector />
         </div>
       </div>

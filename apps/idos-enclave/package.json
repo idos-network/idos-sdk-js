@@ -3,26 +3,24 @@
   "description": "idOS Enclave",
   "version": "0.1.0",
   "dependencies": {
-    "@idos-network/core": "workspace:*",
+    "@idos-network/enclave": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
     "@partisiablockchain/abi-client": "^5.207.0",
     "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
-    "@preact/signals": "^2.0.2",
+    "@preact/signals": "catalog:preact",
     "@rollup/plugin-inject": "^5.0.5",
-    "@stablelib/base64": "^2.0.1",
-    "@stablelib/utf8": "^2.0.1",
+    "@stablelib/base64": "catalog:utils",
+    "@stablelib/utf8": "catalog:utils",
     "dompurify": "^3.2.5",
-    "es-toolkit": "^1.23.0",
-    "lucide-react": "^0.542.0",
-    "preact": "^10.26.4",
+    "lucide-preact": "^0.564.0",
+    "preact": "catalog:preact",
     "scrypt-js": "^3.0.1",
     "tailwind-variants": "^1.0.0",
     "tweetnacl": "^1.0.3",
     "web-bip39": "^0.0.3"
   },
   "devDependencies": {
-    "@heroicons/react": "^2.2.0",
     "@preact/preset-vite": "^2.10.1",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.1",
@@ -40,9 +38,9 @@
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "vite build",
-    "typecheck": "tsc --noEmit",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module"
 }

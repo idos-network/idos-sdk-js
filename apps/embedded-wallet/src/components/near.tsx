@@ -2,12 +2,11 @@ import { setupWalletSelector } from "@near-wallet-selector/core";
 import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
-import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/core";
-import { useSignal } from "@preact/signals";
+import { getNearFullAccessPublicKeys, signNearMessage } from "@idos-network/kwil-infra";
 import { defineStepper } from "@stepperize/react";
 import { TokenNEAR } from "@web3icons/react";
-import { useEffect } from "preact/hooks";
-import { connectedWalletType, message, walletPayload } from "../state";
+import { useEffect, useState } from "react";
+import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
 const { useStepper } = defineStepper(
@@ -24,8 +23,9 @@ const { useStepper } = defineStepper(
 );
 
 const selector = await setupWalletSelector({
-  network: import.meta.env.VITE_NEAR_NETWORK,
-  modules: [setupMeteorWallet()],
+  network: (import.meta.env.VITE_NEAR_NETWORK as "testnet" | "mainnet") || "testnet",
+  // biome-ignore lint/suspicious/noExplicitAny: false positive
+  modules: [setupMeteorWallet() as any],
 });
 
 const modal = setupModal(selector, {
@@ -35,26 +35,26 @@ const modal = setupModal(selector, {
 
 export function NearConnector() {
   const stepper = useStepper();
-  const isSignedIn = useSignal(false);
-  const accountId = useSignal<string>("");
+  const [isSignedIn, setSignedIn] = useState(false);
+  const [accountId, setAccountId] = useState("");
+  const { connectedWalletType, setWalletPayload, setConnectedWalletType } = useWalletState();
 
   useEffect(() => {
-    if (isSignedIn.value && stepper.isFirst) {
-      connectedWalletType.value = "near";
+    if (isSignedIn && stepper.isFirst) {
+      setConnectedWalletType("NEAR");
       stepper.next();
     }
-  }, [isSignedIn.value, stepper]);
+  }, [isSignedIn, stepper]);
 
   useEffect(() => {
     const subscription = selector.store.observable.subscribe(() => {
-      isSignedIn.value = selector.isSignedIn();
-      console.log(isSignedIn.value);
-      accountId.value = selector.store.getState().accounts[0].accountId || "";
+      setSignedIn(selector.isSignedIn());
+      setAccountId(selector.store.getState().accounts[0]?.accountId || "");
 
       // Handle external disconnections
-      if (!selector.isSignedIn() && connectedWalletType.value === "near") {
-        connectedWalletType.value = null;
-        accountId.value = "";
+      if (!selector.isSignedIn() && connectedWalletType === "NEAR") {
+        setConnectedWalletType(null);
+        setAccountId("");
         stepper.reset();
       }
     });
@@ -64,16 +64,17 @@ export function NearConnector() {
 
   const handleSignMessage = async () => {
     const wallet = await selector.wallet();
-    const signature = await signNearMessage(wallet, message);
+    // biome-ignore lint/suspicious/noExplicitAny: false positive
+    const signature = await signNearMessage(wallet as any, message);
 
     if (signature) {
-      walletPayload.value = {
-        address: accountId.value,
+      setWalletPayload({
+        address: accountId,
         signature,
-        public_key: (await getNearFullAccessPublicKeys(accountId.value)) || [],
+        public_key: (await getNearFullAccessPublicKeys(accountId)) || [],
         message,
         disconnect: disconnectNear,
-      };
+      });
     }
   };
 
@@ -84,15 +85,15 @@ export function NearConnector() {
 
   const handleDisconnect = async () => {
     await disconnectNear();
-    connectedWalletType.value = null;
-    accountId.value = "";
+    setConnectedWalletType(null);
+    setAccountId("");
     stepper.reset();
   };
 
   return (
-    <div class="flex max-w-xl flex-col gap-2">
+    <div className="flex max-w-xl flex-col gap-2">
       {stepper.when("connect", () => (
-        <div class="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <Button onClick={() => modal.show()}>
             Connect with NEAR
             <TokenNEAR variant="mono" size={24} />
@@ -100,12 +101,12 @@ export function NearConnector() {
         </div>
       ))}
       {stepper.when("sign-message", (step) => (
-        <div class="flex flex-col gap-4">
-          <h1 class="text-center font-bold text-2xl">{step.title}</h1>
-          <p class="text-center text-neutral-400 text-sm">{step.description}</p>
-          <div class="flex flex-col gap-2">
-            <p class="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p class="text-center text-neutral-400 text-sm">{accountId}</p>
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
+          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
+            <p className="text-center text-neutral-400 text-sm">{accountId}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

@@ -1,52 +1,85 @@
-import { Button, IconButton, useBreakpointValue, useToast } from "@chakra-ui/react";
 import type { idOSClientLoggedIn, idOSWallet } from "@idos-network/client";
-import { verifySignature, type WalletSignature } from "@idos-network/core/signature-verification";
-import { getWalletType } from "@idos-network/core/utils";
+import type { AddWalletInput, WalletType } from "@idos-network/kwil-infra/actions";
+import {
+  verifySignature,
+  type WalletSignature,
+} from "@idos-network/kwil-infra/signature-verification";
 import { type DefaultError, useMutation, useQueryClient } from "@tanstack/react-query";
 import { PlusIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import invariant from "tiny-invariant";
+import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/sonner";
 import { useIdOS } from "@/idOS.provider";
 
-const createWalletParamsFactory = ({
+function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
+  const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
+  invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
+  const entries = envUrls
+    .split(",")
+    .map((s: string) => s.trim())
+    .filter(Boolean);
+  const allowedOrigins: string[] = [];
+  let popupUrl: string | undefined;
+  for (const entry of entries) {
+    try {
+      const origin = new URL(entry).origin;
+      allowedOrigins.push(origin);
+      if (popupUrl === undefined) {
+        popupUrl = entry;
+      }
+    } catch {
+      console.warn(
+        "[Add wallet] VITE_EMBEDDED_WALLET_APP_URLS contains invalid URL, skipping:",
+        entry,
+      );
+    }
+  }
+  invariant(
+    popupUrl !== undefined && allowedOrigins.length > 0,
+    "VITE_EMBEDDED_WALLET_APP_URLS must contain at least one valid URL",
+  );
+  return { popupUrl, allowedOrigins };
+}
+
+const EMBEDDED_WALLET_CONFIG = parseEmbeddedWalletEnv();
+
+export const createWalletParamsFactory = ({
   address,
-  public_key,
+  publicKey,
   signature,
   message,
-  userId,
   walletType,
 }: {
   address: string;
-  public_key?: string;
+  publicKey?: string;
   signature: string;
   message: string;
-  userId: string;
-  walletType: string;
-}) => ({
+  walletType: WalletType;
+}): AddWalletInput => ({
   id: crypto.randomUUID() as string,
   address,
-  public_key: public_key ?? null,
+  wallet_type: walletType,
+  public_key: publicKey ?? null,
   message,
   signature,
-  user_id: userId,
-  wallet_type: walletType,
 });
 
-const createWallet = async (
+export const createWallet = async (
   idOSClient: idOSClientLoggedIn,
   params: {
     address: string;
-    public_key?: string;
+    publicKey?: string;
     signature: string;
     message: string;
-    userId: string;
-    walletType: string;
+    walletType: WalletType;
   },
 ): Promise<idOSWallet> => {
   const walletParams = createWalletParamsFactory(params);
   await idOSClient.addWallet(walletParams);
 
   const insertedWallet = (await idOSClient.getWallets()).find((w) => w.id === walletParams.id);
+
   invariant(
     insertedWallet,
     "`insertedWallet` is `undefined`, `idOSClient.addWallet` must have failed",
@@ -66,26 +99,24 @@ const useAddWalletMutation = () => {
       publicKeys: string[];
       signature: string;
       message: string;
-      walletType: string;
-      userId: string;
+      walletType: WalletType;
     }
   >({
-    mutationFn: async ({ address, publicKeys, signature, message, walletType, userId }) => {
+    mutationFn: async ({ address, publicKeys, signature, message, walletType }) => {
       if (publicKeys.length > 0) {
         return Promise.all(
-          publicKeys.map((public_key) =>
+          publicKeys.map((publicKey) =>
             createWallet(idOSClient, {
               address,
-              public_key,
+              publicKey,
               signature,
               message,
-              userId,
               walletType,
             }),
           ),
         );
       }
-      return [await createWallet(idOSClient, { address, signature, message, userId, walletType })];
+      return [await createWallet(idOSClient, { address, signature, message, walletType })];
     },
   });
 };
@@ -99,16 +130,13 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
-  const toast = useToast();
   const queryClient = useQueryClient();
-  const isMobile = useBreakpointValue({ base: true, md: false }, { ssr: false }) ?? false;
   const idOSClient = useIdOS();
 
   const addWallet = async (walletPayload: WalletSignature) => {
     const userId = idOSClient?.user.id;
 
     const isValid = await verifySignature(walletPayload);
-    const walletType = getWalletType(walletPayload.address!);
 
     invariant(userId, "userId is not set, please login first");
     if (!isValid) {
@@ -123,17 +151,17 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     addWalletMutation.mutate(
       {
         address: walletPayload.address || "unknown",
-        publicKeys: walletPayload.public_key || [],
+        publicKeys: walletPayload.public_key ?? [],
         signature: walletPayload.signature,
         message: walletPayload.message || "Sign this message to prove you own this wallet",
-        walletType,
-        userId,
+        walletType: walletPayload.wallet_type,
       },
       {
         onSuccess: async () => {
           toast({
             title: "Wallet added",
             description: "The wallet has been added to your idOS profile",
+            status: "success",
           });
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
           onWalletAdded?.();
@@ -155,20 +183,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
-      // Only accept messages from the embedded wallet app
-      const allowedOrigin = import.meta.env.VITE_EMBEDDED_WALLET_APP_URL;
-      if (!allowedOrigin) {
-        console.warn("VITE_EMBEDDED_WALLET_APP_URL is not configured");
-        return;
-      }
-
-      // Extract origin from the full URL
-      const allowedOriginUrl = new URL(allowedOrigin);
-      const allowedOriginString = allowedOriginUrl.origin;
-
-      if (event.origin !== allowedOriginString) {
+      if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected: ${allowedOriginString}`,
+          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
@@ -207,11 +224,6 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [walletPayload]);
 
   const handleOpenWalletPopup = () => {
-    invariant(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
-      "VITE_EMBEDDED_WALLET_APP_URL is not set",
-    );
-
     setIsLoading(true);
 
     // Calculate center position for the popup
@@ -221,7 +233,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const top = (window.screen.height - popupHeight) / 2;
 
     const popup = window.open(
-      import.meta.env.VITE_EMBEDDED_WALLET_APP_URL,
+      EMBEDDED_WALLET_CONFIG.popupUrl,
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );
@@ -247,24 +259,10 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     }
   };
 
-  if (isMobile) {
-    return (
-      <IconButton id="add-wallet-button" colorScheme="green" aria-label="Add wallet">
-        <PlusIcon size={24} />
-      </IconButton>
-    );
-  }
-
   return (
-    <Button
-      id="add-wallet-button"
-      colorScheme="green"
-      leftIcon={<PlusIcon size={24} />}
-      hideBelow="lg"
-      onClick={handleOpenWalletPopup}
-      isLoading={isLoading}
-    >
-      Add wallet
+    <Button onClick={handleOpenWalletPopup} isLoading={isLoading}>
+      <PlusIcon size={24} />
+      <span className="sr-only md:not-sr-only">Add wallet</span>
     </Button>
   );
 }

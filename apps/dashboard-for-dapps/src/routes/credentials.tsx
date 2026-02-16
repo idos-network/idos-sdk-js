@@ -10,7 +10,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import type { idOSCredential } from "@idos-network/credentials";
+import type { idOSCredential } from "@idos-network/credentials/types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useToggle } from "@uidotdev/usehooks";
@@ -68,6 +68,7 @@ export const useListCredentials = () => {
     queryKey: ["credentials-list"],
     queryFn: async () => {
       invariant(idOS.state === "logged-in", "Invalid `idOSClient` state when fetching credentials");
+
       const credentials = await idOS.getAllCredentials();
 
       const promiseList = credentials?.map(async (credential) => {

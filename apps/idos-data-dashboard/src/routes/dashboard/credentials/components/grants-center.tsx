@@ -1,29 +1,13 @@
+import type { idOSGrant } from "@idos-network/kwil-infra/actions";
+import { Button } from "@/components/ui/button";
 import {
-  Button,
-  Center,
-  Code,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Stack,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  useBreakpointValue,
-  VStack,
-} from "@chakra-ui/react";
-
-import type { idOSGrant } from "@idos-network/core";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { timelockToMs } from "../../utils/time";
 import { useFetchGrants, useRevokeGrant } from "../shared";
 
@@ -52,7 +36,11 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   const revokeGrant = useRevokeGrant(credentialId);
 
   if (grants.length === 0) {
-    return <Text id="no-grants">You have not shared this credential with anyone.</Text>;
+    return (
+      <span className="block" id="no-grants">
+        You have not shared this credential with anyone.
+      </span>
+    );
   }
 
   const onRevoke = (grant: idOSGrant) => {
@@ -60,45 +48,47 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
   };
 
   return (
-    <VStack align="stretch" gap={8}>
-      <Stack gap={2}>
-        <Text>Credentials Grants Access Center</Text>
-        <Text color="neutral.500">
+    <div className="flex flex-col items-stretch gap-8">
+      <div className="flex flex-col gap-2">
+        <span className="block">Credentials Grants Access Center</span>
+        <span className="block text-neutral-500">
           This is where you can manage your credentials grants. You can choose which access is
           revoked or granted.
-        </Text>
-      </Stack>
-      <TableContainer rounded="lg" bg="neutral.800" border="1px solid" borderColor="neutral.700">
-        <Table id={`grants-for-${credentialId}`} variant="simple" w="100%">
-          <Thead>
-            <Tr>
-              <Th color="neutral.500">Consumer</Th>
-              <Th color="neutral.500">Locked until</Th>
-              <Th />
-            </Tr>
-          </Thead>
-          <Tbody>
+        </span>
+      </div>
+      <div className="rounded-lg bg-neutral-800 border! border-neutral-700">
+        <table
+          className="w-full border-collapse table [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
+          id={`grants-for-${credentialId}`}
+        >
+          <thead>
+            <tr className="border-b!">
+              <th className="text-neutral-500 text-left">Consumer</th>
+              <th className="text-neutral-500 text-left">Locked until</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
             {grants.map((grant) => (
-              <Tr
+              <tr
                 key={generateGrantId(grant)}
                 id={`grant-${generateGrantId(grant)}`}
                 data-grant={JSON.stringify(grant)}
               >
-                <Td maxW={140}>
-                  <Text isTruncated>{grant.ag_grantee_wallet_identifier}</Text>
-                </Td>
-                <Td>
-                  <Text>
+                <td className="max-w-[140px]">
+                  <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>
+                </td>
+                <td>
+                  <span className="block">
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
-                  </Text>
-                </Td>
-                <Td isNumeric>
+                  </span>
+                </td>
+                <td className="text-right">
                   <Button
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
-                    variant="outline"
-                    colorScheme="red"
-                    isDisabled={timelockToMs(+grant.locked_until) >= Date.now()}
+                    variant="destructiveOutline"
+                    disabled={timelockToMs(+grant.locked_until) >= Date.now()}
                     isLoading={
                       revokeGrant.isPending && revokeGrant.variables?.data_id === grant.data_id
                     }
@@ -106,58 +96,49 @@ const Shares = ({ credentialId, grants }: { credentialId: string; grants: idOSGr
                   >
                     Revoke
                   </Button>
-                </Td>
-              </Tr>
+                </td>
+              </tr>
             ))}
-          </Tbody>
-        </Table>
-      </TableContainer>
-    </VStack>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 };
 
 export const GrantsCenter = ({ credentialId, isOpen, onClose }: GrantsCenterProps) => {
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
-
   const grants = useFetchGrants({ credentialId });
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={{
-        base: "full",
-        lg: "2xl",
-      }}
-      isCentered={isCentered}
-    >
-      <ModalOverlay />
-      <ModalContent bg="neutral.900" rounded="xl">
-        <ModalHeader>Grants center</ModalHeader>
-        <ModalCloseButton onClick={onClose} />
-        <ModalBody display="flex" alignItems="center">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Grants center</DialogTitle>
+        </DialogHeader>
+        <div>
           {grants.isLoading ? (
-            <Center flex={1}>
-              <Spinner />
-            </Center>
+            <div className="flex flex-1 items-center justify-center">
+              <Spinner className="size-8" />
+            </div>
           ) : null}
-          {grants.isError ? <Text color="red.500">Something went wrong, please retry.</Text> : null}
-          {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : false}
-          <Code />
-        </ModalBody>
-        <ModalFooter gap={2.5}>
-          {grants.isError ? <Button onClick={() => grants.refetch()}>Retry</Button> : false}
-          <Button onClick={onClose}>Close</Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          {grants.isError ? (
+            <span role="alert" className="block text-red-500">
+              Something went wrong, please retry.
+            </span>
+          ) : null}
+          {grants.isSuccess ? <Shares credentialId={credentialId} grants={grants.data} /> : null}
+        </div>
+        <DialogFooter className="gap-2.5">
+          {grants.isError ? (
+            <Button variant="secondary" onClick={() => grants.refetch()}>
+              Retry
+            </Button>
+          ) : null}
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

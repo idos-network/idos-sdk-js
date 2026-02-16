@@ -11,7 +11,7 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "@idos-network/core/kwil-actions";
+import { GET_GRANTS_DEFAULT_RECORDS_PER_PAGE } from "@idos-network/kwil-infra/actions";
 import { skipToken, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useDebounce, useToggle } from "@uidotdev/usehooks";

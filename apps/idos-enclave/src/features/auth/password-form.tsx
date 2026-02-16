@@ -1,7 +1,7 @@
 import { keyDerivation } from "@idos-network/utils/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
-import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import nacl from "tweetnacl";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";

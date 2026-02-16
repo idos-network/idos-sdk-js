@@ -1,4 +1,18 @@
-import { NoncedBox } from "@idos-network/core/cryptography";
+import type { VerifyCredentialResult } from "@idos-network/credentials/builder";
+import { type Credential, verifyCredential } from "@idos-network/credentials/builder";
+import type {
+  AvailableIssuerType,
+  IDDocumentType,
+  idOSCredential,
+  VerifiableCredential,
+  VerifiableCredentialSubject,
+} from "@idos-network/credentials/types";
+import {
+  createNodeKwilClient,
+  createServerKwilSigner,
+  type KwilActionClient,
+  type KwilSignerType,
+} from "@idos-network/kwil-infra";
 import {
   type CreateAgByDagForCopyInput,
   createAgByDagForCopy,
@@ -12,25 +26,10 @@ import {
   type idOSGrant,
   type idOSPassportingPeer,
   rescindSharedCredential,
-} from "@idos-network/core/kwil-actions";
-import {
-  createNodeKwilClient,
-  createServerKwilSigner,
-  type KwilActionClient,
-  type KwilSignerType,
-} from "@idos-network/core/kwil-infra";
-import type { idOSCredential } from "@idos-network/credentials";
-import {
-  type AvailableIssuerType,
-  type Credential,
-  type IDDocumentType,
-  type VerifiableCredential,
-  type VerifiableCredentialSubject,
-  type VerifyCredentialResult,
-  verifyCredential,
-} from "@idos-network/credentials";
+} from "@idos-network/kwil-infra/actions";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
+import { NoncedBox } from "@idos-network/utils/cryptography";
 import invariant from "tiny-invariant";
 
 export type idOSConsumerConfig = {
@@ -57,7 +56,7 @@ export class idOSConsumer {
       chainId,
     });
 
-    const [signer, address] = createServerKwilSigner(consumerSigner);
+    const [signer, address] = await createServerKwilSigner(consumerSigner);
     kwilClient.setSigner(signer);
 
     return new idOSConsumer(
@@ -113,17 +112,18 @@ export class idOSConsumer {
     );
   }
 
-  async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant> {
+  async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant[]> {
     const params = { credential_id: credentialId };
-    const accessGrants = await getAccessGrantsForCredential(this.#kwilClient, params);
-
-    return accessGrants[0];
+    return getAccessGrantsForCredential(this.#kwilClient, params);
   }
 
-  async getCredentialsSharedByUser(userId: string): Promise<Omit<idOSCredential, "content">[]> {
+  async getCredentialsSharedByUser(
+    userId: string,
+    original_issuer_auth_public_key: string | null = null,
+  ): Promise<Omit<idOSCredential, "content">[]> {
     return getCredentialsSharedByUser(this.#kwilClient, {
       user_id: userId,
-      issuer_auth_public_key: null,
+      original_issuer_auth_public_key,
     });
   }
 
@@ -132,9 +132,15 @@ export class idOSConsumer {
 
     invariant(credential, `Credential with id ${credentialId} not found`);
 
-    const accessGrant = await this.getAccessGrantsForCredential(credentialId);
+    const accessGrants = await this.getAccessGrantsForCredential(credentialId);
 
-    invariant(accessGrant, `Access grant with id ${credentialId} not found`);
+    invariant(
+      accessGrants.length > 0,
+      `Access grants for credential with id ${credentialId} not found`,
+    );
+
+    // @todo Solve this, there can be more than 1 grant
+    const accessGrant = accessGrants[0];
 
     // @todo: ensure the AG they used was inserted by a known OE. This will be done by querying the registry and matching the `inserter_id` in the AG with the id of the OE.
     const credentialContent = await this.#noncedBox.decrypt(
@@ -151,13 +157,13 @@ export class idOSConsumer {
     return credential;
   }
 
-  async getAccessGrants(params: GetAccessGrantsGrantedInput): Promise<{
+  async getAccessGrants(params: Partial<GetAccessGrantsGrantedInput>): Promise<{
     grants: idOSGrant[];
     totalCount: number;
   }> {
     return {
       grants: await getGrants(this.#kwilClient, params),
-      totalCount: await this.getGrantsCount(params.user_id),
+      totalCount: await this.getGrantsCount(params.user_id ?? null),
     };
   }
 

@@ -32,7 +32,7 @@ const idOSConsumer = await idOSConsumerClass.init({
 const { grants, totalCount } = await idOSConsumer.getAccessGrants({ user_id });
 
 // Retrieve and decrypt credential content
-const content = await idOSConsumer.getSharedCredentialContentDecrypted(grants[0].data_id);
+const content = await idOSConsumer.getCredentialSharedContentDecrypted(grants[0].data_id);
 ```
 
 ## Documentation

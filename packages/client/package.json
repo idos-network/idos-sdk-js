@@ -2,29 +2,19 @@
   "name": "@idos-network/client",
   "description": "idOS Client JavaScript SDK for browser environments",
   "version": "1.0.0-rc.1.2",
-  "clean-package": {
-    "remove": [
-      "devDependencies.@idos-network/core",
-      "devDependencies.@idos-network/credentials"
-    ]
-  },
   "dependencies": {
-    "@gemwallet/api": "catalog:core",
+    "@idos-network/credentials": "workspace:*",
+    "@idos-network/enclave": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/kwil-js": "catalog:core",
     "@idos-network/utils": "workspace:*",
-    "es-toolkit": "catalog:utils"
+    "tiny-invariant": "catalog:core"
   },
   "devDependencies": {
-    "@idos-network/core": "workspace:*",
-    "@idos-network/credentials": "workspace:*",
-    "clean-package": "^2.2.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
-    "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.19.0"
   },
   "exports": {
     ".": {
@@ -39,9 +29,6 @@
   "homepage": "https://idos.network",
   "license": "MIT",
   "module": "dist/index.js",
-  "peerDependencies": {
-    "typescript": "catalog:build"
-  },
   "publishConfig": {
     "access": "public"
   },
@@ -49,11 +36,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown  --watch",
-    "typecheck": "tsc --noEmit",
-    "postpack": "clean-package restore",
-    "prepack": "clean-package",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it"
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",

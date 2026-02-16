@@ -1,4 +1,5 @@
 import { createIDOSClient } from "@idos-network/client";
+import { parseLevel } from "@idos-network/credentials/utils";
 import { ethers } from "ethers";
 import { fromPromise } from "xstate";
 import { COMMON_ENV } from "../envFlags.common";
@@ -7,7 +8,7 @@ import type { Context } from "./types";
 export const actors = {
   createClient: fromPromise(async () => {
     const config = await createIDOSClient({
-      enclaveOptions: { url: "https://enclave.staging.idos.network/" },
+      enclaveOptions: { url: "https://enclave.playground.idos.network/" },
       nodeUrl: COMMON_ENV.IDOS_NODE_URL,
     });
 
@@ -146,68 +147,110 @@ export const actors = {
     return data;
   }),
 
-  createSharableToken: fromPromise(async ({ input }: { input: Context["krakenDAG"] }) => {
+  createSharableToken: fromPromise(
+    async ({ input }: { input: { dag: Context["krakenDAG"]; provider: string } }) => {
+      if (!input) {
+        throw new Error("Credential not found");
+      }
+
+      const response = await fetch(
+        `/app/kyc/token?credentialId=${input.dag?.id}&provider=${input.provider}`,
+      );
+
+      if (response.status !== 200) {
+        throw new Error("KYC API is not available. Please try again later.");
+      }
+
+      const tokenData = await response.json();
+      // Return the full token response (id, kycStatus, token, forClientId)
+      return tokenData;
+    },
+  ),
+
+  checkCredentialStatus: fromPromise(async ({ input }: { input: Context["transakTokenData"] }) => {
     if (!input) {
-      throw new Error("Credential not found");
+      throw new Error("Transak token data not found");
     }
 
-    const kycUrl = await fetch(`/app/kyc/token?credentialId=${input.id}`);
+    const response = await fetch(`/app/kyc/credential-status?credentialId=${input.id}`);
 
-    if (kycUrl.status !== 200) {
-      throw new Error("KYC API is not available. Please try again later.");
+    if (response.status !== 200) {
+      throw new Error("Failed to check credential status.");
     }
 
-    const tokenData = await kycUrl.json();
-    return tokenData.token;
+    const data = await response.json();
+
+    if (data.kycStatus?.toLowerCase() === "pending") {
+      throw new Error("KYC status is still pending");
+    }
+
+    return data;
   }),
+
+  fetchTransakWidgetUrl: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        walletAddress: Context["walletAddress"];
+        transakTokenData: Context["transakTokenData"];
+        sharedCredential: Context["sharedCredential"];
+      };
+    }) => {
+      if (!input.walletAddress || !input.transakTokenData || !input.sharedCredential) {
+        throw new Error("Missing required data for Transak widget URL");
+      }
+
+      const response = await fetch("/app/kyc/widget-url", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: input.walletAddress,
+          fiatAmount: "100",
+          kycShareToken: input.transakTokenData.token,
+          credentialId: input.sharedCredential.id,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error ?? "Failed to create Transak widget URL");
+      }
+
+      const data = await response.json();
+      return data.widgetUrl;
+    },
+  ),
 
   findCredential: fromPromise(async ({ input }: { input: Context["loggedInClient"] }) => {
     if (!input) {
       throw new Error("Client not found");
     }
 
+    const { base: level, addons } = parseLevel(COMMON_ENV.KRAKEN_LEVEL);
+
     const credentials = await input.filterCredentials({
       acceptedIssuers: [
         {
           // Kraken
-          authPublicKey: COMMON_ENV.KRAKEN_ISSUER_PUBLIC_KEY,
+          authPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
         },
       ],
+      credentialLevelOrHigherFilter: {
+        userLevel: level,
+        requiredAddons: addons,
+      },
     });
 
-    // Compare credentials as arrays
-    const pickArray = COMMON_ENV.KRAKEN_LEVEL.split("+").sort();
+    // TODO: Add missing sort by level score
 
-    const filteredCredentials = credentials.filter((credential) => {
-      const publicNotes = JSON.parse(credential.public_notes);
-
-      if (!publicNotes || !publicNotes.level) {
-        return false;
-      }
-
-      const credentialLevelArray = publicNotes.level.split("+").sort();
-
-      // Size must match
-      if (credentialLevelArray.length !== pickArray.length) {
-        return false;
-      }
-
-      // Arrays are sorted, so we can compare them element by element
-      // it's quicker than using every()
-      for (let i = 0; i < pickArray.length; i++) {
-        if (credentialLevelArray[i] !== pickArray[i]) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-
-    if (filteredCredentials.length === 0) {
+    if (credentials.length === 0) {
       throw new Error("No credentials found, start the KYC process");
     }
 
-    return filteredCredentials[0];
+    return credentials[0];
   }),
 
   requestAccessGrant: fromPromise(
@@ -348,4 +391,63 @@ export const actors = {
       return data.url;
     },
   ),
+
+  createDueAccount: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        sharedCredential: Context["sharedCredential"];
+      };
+    }) => {
+      if (!input) {
+        throw new Error("Due token data not found");
+      }
+
+      const dueAccount = await fetch(
+        `/app/kyc/due/account?credentialId=${input.sharedCredential?.id}`,
+      );
+
+      if (dueAccount.status !== 200) {
+        throw new Error("Due API is not available. Please try again later.");
+      }
+
+      return await dueAccount.json();
+    },
+  ),
+
+  acceptDueTosAndShareToken: fromPromise(
+    async ({
+      input,
+    }: {
+      input: {
+        dueTokenData: Context["dueTokenData"];
+        dueTosToken: Context["dueTosToken"];
+      };
+    }) => {
+      if (!input) {
+        throw new Error("Due token data not found");
+      }
+
+      const dueAccount = await fetch(
+        `/app/kyc/due/confirm?tosToken=${input.dueTosToken}&sumSubToken=${input.dueTokenData?.token}`,
+      );
+
+      if (dueAccount.status !== 200) {
+        throw new Error("Due API is not available. Please try again later.");
+      }
+
+      return await dueAccount.json();
+    },
+  ),
+
+  checkDueKycStatus: fromPromise(async () => {
+    const dueKycStatus = await fetch("/app/kyc/due/done");
+
+    if (dueKycStatus.status !== 200) {
+      throw new Error("Due KYC is not done.");
+    }
+
+    return await dueKycStatus.json();
+  }),
 };

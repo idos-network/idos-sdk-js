@@ -10,8 +10,8 @@ import { StrKey } from "@stellar/stellar-base";
 import { defineStepper } from "@stepperize/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TokenXLM } from "@web3icons/react";
-import { useEffect, useState } from "preact/hooks";
-import { connectedWalletType, message, walletPayload } from "../state";
+import { useEffect, useState } from "react";
+import { message, useWalletState } from "../state";
 import { Button } from "./ui/button";
 
 export const stellarKit: StellarWalletsKit = new StellarWalletsKit({
@@ -52,10 +52,11 @@ function Stellar() {
   const stepper = useStepper();
   const [publicKey, setPublicKey] = useState<string | null>(null);
   const [address, setAddress] = useState<string | null>(null);
+  const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
-    if (!address && connectedWalletType.value === "stellar") {
-      connectedWalletType.value = null;
+    if (!address && connectedWalletType === "Stellar") {
+      setConnectedWalletType(null);
       stepper.reset();
     }
   }, [address, stepper]);
@@ -75,13 +76,13 @@ function Stellar() {
 
     const signatureHex = signedMessage.toString("hex");
 
-    walletPayload.value = {
+    setWalletPayload({
       address,
       signature: signatureHex,
       public_key: [publicKey],
       message,
       disconnect: disconnectStellar,
-    };
+    });
   };
 
   const handleConnect = async () => {
@@ -93,7 +94,7 @@ function Stellar() {
           const publicKey = await derivePublicKey(address);
           setAddress(address);
           setPublicKey(publicKey);
-          connectedWalletType.value = "stellar";
+          setConnectedWalletType("Stellar");
           stepper.next();
         },
       });
@@ -110,14 +111,14 @@ function Stellar() {
     setAddress(null);
     setPublicKey(null);
     await disconnectStellar();
-    connectedWalletType.value = null;
+    setConnectedWalletType(null);
     stepper.reset();
   };
 
   return (
-    <div class="flex flex-col gap-2">
+    <div className="flex flex-col gap-2">
       {stepper.when("connect", () => (
-        <div class="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
           <Button onClick={handleConnect}>
             Connect with Stellar
             <TokenXLM variant="mono" size={24} />
@@ -125,12 +126,12 @@ function Stellar() {
         </div>
       ))}
       {stepper.when("sign-message", (step) => (
-        <div class="flex flex-col gap-4">
-          <h1 class="text-center font-bold text-2xl">{step.title}</h1>
-          <p class="text-center text-neutral-400 text-sm">{step.description}</p>
-          <div class="flex flex-col gap-2">
-            <p class="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p class="text-center text-neutral-400 text-sm">{address}</p>
+        <div className="flex flex-col gap-4">
+          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
+          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+          <div className="flex flex-col gap-2">
+            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
+            <p className="text-center text-neutral-400 text-sm">{address}</p>
           </div>
           <Button onClick={handleSignMessage}>Sign a message</Button>
           <Button onClick={handleDisconnect}>Disconnect</Button>

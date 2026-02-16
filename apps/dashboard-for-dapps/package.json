@@ -5,14 +5,15 @@
   "dependencies": {
     "@chakra-ui/react": "^3.15.1",
     "@idos-network/client": "workspace:*",
-    "@idos-network/core": "workspace:*",
-    "@idos-network/utils": "workspace:*",
     "@idos-network/credentials": "workspace:*",
+    "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@tanstack/query-sync-storage-persister": "catalog:tanstack",
     "@tanstack/react-query": "catalog:tanstack",
     "@tanstack/react-query-persist-client": "catalog:tanstack",
     "@tanstack/react-router": "catalog:tanstack",
     "@uidotdev/usehooks": "^2.4.1",
+    "@web3modal/wagmi": "^4.2.3",
     "ascii85": "^1.0.2",
     "ethers": "catalog:ethereum",
     "match-sorter": "^8.0.0",
@@ -22,8 +23,7 @@
     "react-icons": "^5.5.0",
     "tweetnacl": "catalog:core",
     "viem": "catalog:ethereum",
-    "wagmi": "catalog:ethereum",
-    "@web3modal/wagmi": "^4.2.3"
+    "wagmi": "catalog:ethereum"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "catalog:tanstack",
@@ -41,9 +41,9 @@
   "private": true,
   "scripts": {
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit",
     "dev": "vite",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
   },
   "type": "module"
 }

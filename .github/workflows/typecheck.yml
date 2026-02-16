@@ -2,9 +2,7 @@ name: Typecheck
 
 on:
   pull_request:
-    branches:
-      - playground
-      - main
+    types: [opened, synchronize, reopened]
   push:
     branches:
       - playground
@@ -14,7 +12,7 @@ jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.head_ref }}
 
@@ -22,11 +20,13 @@ jobs:
         with:
           run_install: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version-file: .node_version
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - run: pnpm install
+
+      - run: pnpm build:packages
 
       - run: pnpm typecheck

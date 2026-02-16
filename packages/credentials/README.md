@@ -28,7 +28,7 @@ const key = await Ed25519VerificationKey2020.generate({
 ## Issue a credentials
 
 ```javascript
-import { buildCredential } from "@idos-network/credentials";
+import { buildCredential } from "@idos-network/credentials/builder";
 
 const id = "z6MkszZtxCmA2Ce4vUV132PCuLQmwnaDD5mw2L23fGNnsiX3";
 
@@ -94,4 +94,60 @@ const allowedIssuers = [{
 const [verified, resultsByIssuer] = await verifyCredential(credential, allowedIssuers);
 console.log("Verified: ", verified);
 console.log("Results by issuer: ", resultsByIssuer);
+```
+
+## Derive level
+
+```javascript
+import { deriveLevel } from "@idos-network/credentials/utils";
+
+const level = deriveLevel({
+  id: "uuid:1234",
+  firstName: "John",
+  familyName: "Doe",
+  idDocumentType: "PASSPORT",
+  dateOfBirth: new Date("1990-01-01"),
+  idDocumentCountry: "US",
+  idDocumentNumber: "123456789",
+  idDocumentFrontFile: Buffer.from("ID Document Front"),
+});
+
+// level = "basic"
+```
+
+## Filtering and matching levels
+
+```javascript
+import { pickHighestMatchingLevel, matchLevelOrHigher, highestMatchingCredential } from "@idos-network/credentials/utils";
+
+const matched = matchLevelOrHigher("basic", ["liveness"], "basic+liveness")
+// matched = true
+
+const matched = matchLevelOrHigher("basic", ["liveness+email"], "basic+liveness")
+// matched = false
+
+const matched = matchLevelOrHigher("basic", ["liveness+email"], "plus+liveness")
+// matched = true
+
+const pickedLevel = pickHighestMatchingLevel(
+  ["basic+liveness", "plus+liveness+email", "plus+liveness+email+phoneNumber"],
+  "plus",
+  ["liveness", "email"],
+);
+// pickedLevel = plus+liveness+email+phoneNumber
+
+const pickedCredential = highestMatchingCredential(
+  [...idOSCredentials],
+  "basic",
+  {
+    addons: ["email", "liveness"],
+    publicNotesConstraint: {
+      status: "approved",
+      type: "kyc",
+    }
+  }
+);
+// pickedCredential => for example plus+email+liveness etc...
+// don't forget to verify credentials signature before usage!
+
 ```

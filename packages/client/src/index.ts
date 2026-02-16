@@ -1,4 +1,17 @@
 import {
+  buildInsertableIDOSCredential,
+  matchLevelOrHigher,
+  recordFilter,
+} from "@idos-network/credentials/utils";
+import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/enclave";
+import {
+  createClientKwilSigner,
+  createWebKwilClient,
+  type KwilActionClient,
+  signNearMessage,
+  type Wallet,
+} from "@idos-network/kwil-infra";
+import {
   type AddAttributeInput,
   type AddWalletInput,
   addWallet,
@@ -32,15 +45,8 @@ import {
   revokeAccessGrant,
   type ShareCredentialInput,
   shareCredential,
-} from "@idos-network/core/kwil-actions";
-import {
-  createClientKwilSigner,
-  createWebKwilClient,
-  type KwilActionClient,
-  signNearMessage,
-} from "@idos-network/core/kwil-infra";
-import type { Wallet } from "@idos-network/core/types";
-import { buildInsertableIDOSCredential, getWalletType } from "@idos-network/core/utils";
+  type WalletType,
+} from "@idos-network/kwil-infra/actions";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -49,14 +55,7 @@ import {
   utf8Decode,
   utf8Encode,
 } from "@idos-network/utils/codecs";
-import type {
-  BaseProvider,
-  EncryptionPasswordStore,
-  PublicEncryptionProfile,
-} from "@idos-network/utils/enclave";
 import { LocalStorageStore, type Store } from "@idos-network/utils/store";
-import { negate } from "es-toolkit";
-import { every, get } from "es-toolkit/compat";
 import invariant from "tiny-invariant";
 
 import { IframeEnclave } from "./enclave/iframe-enclave";
@@ -144,13 +143,9 @@ export class idOSClientIdle {
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
       await createClientKwilSigner(this.store, this.kwilClient, signer);
 
-    console.log("Wallet Type:", walletType);
-    console.log("Wallet Identifier:", walletIdentifier);
-    console.log("Wallet Public Key:", walletPublicKey);
-
     this.kwilClient.setSigner(kwilSigner);
 
-    if (walletType === "near") {
+    if (walletType === "NEAR") {
       const originalSigner = signer;
       signer = {
         signMessage: async (message: string) => {
@@ -184,7 +179,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
 
   constructor(
     idOSClientIdle: idOSClientIdle,
@@ -192,7 +187,7 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     kwilSigner: KwilSigner,
     walletIdentifier: string,
     walletPublicKey: string | undefined,
-    walletType: string,
+    walletType: WalletType,
   ) {
     this.state = "with-user-signer";
     this.store = idOSClientIdle.store;
@@ -243,7 +238,8 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
       expectedUserEncryptionPublicKey: kwilUser.recipient_encryption_public_key,
       walletAddress: this.walletIdentifier,
       walletType: this.walletType,
-      encryptionPasswordStore: kwilUser.encryption_password_store as EncryptionPasswordStore,
+      encryptionPasswordStore: kwilUser.encryption_password_store,
+      walletPublicKey: this.walletPublicKey,
     });
 
     return new idOSClientLoggedIn(this, kwilUser);
@@ -259,7 +255,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   readonly kwilSigner: KwilSigner;
   readonly walletIdentifier: string;
   readonly walletPublicKey: string | undefined;
-  readonly walletType: string;
+  readonly walletType: WalletType;
   readonly user: idOSUser;
 
   constructor(idOSClientWithUserSigner: idOSClientWithUserSigner, user: idOSUser) {
@@ -367,13 +363,12 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     );
 
     const insertableCredential = {
-      ...(await buildInsertableIDOSCredential(
+      ...buildInsertableIDOSCredential(
         originalCredential.user_id,
         "",
         base64Encode(content),
-        consumerRecipientEncryptionPublicKey,
         base64Encode(encryptorPublicKey),
-      )),
+      ),
       grantee_wallet_identifier: consumerAddress,
       locked_until: lockedUntil,
     };
@@ -395,7 +390,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
   }
 
   async getGrants(
-    params: GetAccessGrantsGrantedInput,
+    params: Partial<GetAccessGrantsGrantedInput>,
   ): Promise<{ grants: idOSGrant[]; totalCount: number }> {
     return {
       grants: await getGrants(this.kwilClient, params),
@@ -423,23 +418,22 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return { id };
   }
 
-  async addWallet(params: AddWalletInput & { wallet_type: string }): Promise<AddWalletInput> {
+  async addWallet(params: AddWalletInput): Promise<AddWalletInput> {
     await addWallet(this.kwilClient, params);
+
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
       console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
-    if (!params.wallet_type || params.wallet_type === "unknown") {
-      params.wallet_type = getWalletType(params.address);
+    if (!params.wallet_type) {
+      throw new Error("Wallet type is required for MPC users");
     }
-    console.log({ params });
-    console.log(this.signer);
 
     const messageToSign = await this.enclaveProvider.addAddressMessageToSign(
       params.address,
-      params.public_key,
+      params.public_key ?? undefined,
       params.wallet_type,
     );
 
@@ -448,11 +442,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       messageToSign.types,
       messageToSign.value,
     );
+
     const result = await this.enclaveProvider.addAddressToMpcSecret(
       this.user.id,
       messageToSign.value,
       signature,
     );
+
     if (result !== "success") {
       console.error(`Failed to add wallet to MPC: ${result}`);
     }
@@ -478,10 +474,10 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       console.log("MPC is not enabled or the user is not using MPC");
       return { id };
     }
-    console.log({ wallet });
+
     const messageToSign = await this.enclaveProvider.removeAddressMessageToSign(
       wallet.address,
-      wallet.public_key,
+      wallet.public_key ?? undefined,
       wallet.wallet_type,
     );
     const signature = await this.enclaveProvider.signTypedData(
@@ -514,15 +510,18 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       authPublicKey: string;
     }[];
     publicNotesFieldFilters?: {
-      pick: Record<string, unknown[]>;
-      omit: Record<string, unknown[]>;
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
+    };
+    privateFieldFilters?: {
+      pick: Parameters<typeof recordFilter>[1];
+      omit: Parameters<typeof recordFilter>[2];
+    };
+    credentialLevelOrHigherFilter?: {
+      userLevel: "basic" | "plus";
+      requiredAddons: ("liveness" | "email" | "phoneNumber")[];
     };
   }): Promise<idOSCredentialListItem[]> {
-    const matchCriteria = (content: Record<string, unknown>, criteria: Record<string, unknown[]>) =>
-      every(Object.entries(criteria), ([path, targetSet]) =>
-        targetSet.includes(get(content, path)),
-      );
-
     const credentials = await this.getAllCredentials();
     const originalCredentials = credentials.filter(
       (cred) => !cred.original_id && !!cred.public_notes,
@@ -536,28 +535,75 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     });
 
     const publicNotesFieldFilters = requirements.publicNotesFieldFilters;
-    if (publicNotesFieldFilters) {
+    const credentialLevelOrHigherFilter = requirements.credentialLevelOrHigherFilter;
+    const privateFieldFilters = requirements.privateFieldFilters;
+
+    if (credentialLevelOrHigherFilter) {
       result = result.filter((credential) => {
         let publicNotes: Record<string, string>;
+
         try {
           publicNotes = JSON.parse(credential.public_notes);
         } catch (_) {
-          throw new Error(`Credential ${credential.id} has non-JSON public notes".replace("{}`);
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
         }
-        return (
-          matchCriteria(publicNotes, publicNotesFieldFilters.pick) &&
-          negate(() => matchCriteria(publicNotes, publicNotesFieldFilters.omit))
+
+        return matchLevelOrHigher(
+          credentialLevelOrHigherFilter.userLevel,
+          credentialLevelOrHigherFilter.requiredAddons,
+          publicNotes.level,
         );
       });
     }
 
-    /*
-     * TODO: Fix this, getAllCredentials return a credential without content
-     * so the privateFieldFilters won't match anything.
-    const privateFieldFilters = requirements.privateFieldFilters;
-    if (privateFieldFilters) {
-      result = await this.enclaveProvider.filterCredentials(result, privateFieldFilters);
-    }*/
+    if (
+      publicNotesFieldFilters &&
+      (Object.keys(publicNotesFieldFilters.pick).length > 0 ||
+        Object.keys(publicNotesFieldFilters.omit).length > 0)
+    ) {
+      result = result.filter((credential) => {
+        let publicNotes: Record<string, string>;
+
+        try {
+          publicNotes = JSON.parse(credential.public_notes);
+        } catch (_) {
+          throw new Error(`Credential ${credential.id} has non-JSON public notes.`);
+        }
+
+        return recordFilter(
+          publicNotes,
+          publicNotesFieldFilters.pick,
+          publicNotesFieldFilters.omit,
+        );
+      });
+    }
+
+    // Private field filtering requires decryption and the full idOS credential content
+    // it's most "expensive", since it requires a roundtrip to the nodes and roundtrip to enclave.
+    if (
+      privateFieldFilters &&
+      (Object.keys(privateFieldFilters.pick).length > 0 ||
+        Object.keys(privateFieldFilters.omit).length > 0)
+    ) {
+      const fullCredentials = await Promise.all(
+        result.map((credential) => this.getCredentialById(credential.id)),
+      );
+
+      // Check for undefined, it will be sign of some internal error
+      invariant(
+        fullCredentials.every((cred) => cred !== undefined),
+        "Some credentials could not be fetched in full form for private field filtering",
+      );
+
+      const matches = await this.enclaveProvider.filterCredentials(
+        fullCredentials,
+        privateFieldFilters,
+      );
+
+      result = result.filter((credential) =>
+        matches.some((matchedCredential) => matchedCredential.id === credential.id),
+      );
+    }
 
     return result;
   }
@@ -567,8 +613,13 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     {
       consumerEncryptionPublicKey,
       consumerAuthPublicKey,
-    }: { consumerEncryptionPublicKey: string; consumerAuthPublicKey: string },
-  ): Promise<idOSCredential> {
+      lockedUntil = 0,
+    }: {
+      consumerEncryptionPublicKey: string;
+      consumerAuthPublicKey: string;
+      lockedUntil?: number;
+    },
+  ): Promise<ShareCredentialInput> {
     const credential = await this.getCredentialById(credentialId);
     const contentHash = await this.getCredentialContentSha256Hash(credentialId);
 
@@ -588,19 +639,18 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       base64Decode(consumerEncryptionPublicKey),
     );
 
-    const insertableCredential = {
+    const insertableCredential: ShareCredentialInput = {
       ...credential,
-      ...(await buildInsertableIDOSCredential(
+      ...buildInsertableIDOSCredential(
         credential.user_id,
         "",
         base64Encode(content),
-        consumerAuthPublicKey,
         base64Encode(encryptorPublicKey),
-      )),
+      ),
       original_credential_id: credential.id,
       id: crypto.randomUUID(),
       grantee_wallet_identifier: consumerAuthPublicKey,
-      locked_until: 0,
+      locked_until: lockedUntil,
       content_hash: contentHash,
     };
 
@@ -613,6 +663,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 export type {
   idOSDelegatedWriteGrant,
   idOSCredential,
+  idOSCredentialListItem,
   idOSGrant,
   idOSUser,
   idOSUserAttribute,

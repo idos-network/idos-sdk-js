@@ -1,66 +1,52 @@
 {
   "name": "@idos-network/utils",
-  "description": "idOS Utils JavaScript SDK for enclave environments",
+  "description": "idOS Utils for JavaScript SDK",
   "version": "1.0.0-rc.1.1",
   "dependencies": {
-    "@idos-network/credentials": "workspace:*",
     "@stablelib/base64": "catalog:utils",
     "@stablelib/binary": "catalog:utils",
     "@stablelib/bytes": "catalog:utils",
     "@stablelib/hex": "catalog:utils",
     "@stablelib/sha256": "catalog:utils",
     "@stablelib/utf8": "catalog:utils",
+    "@noble/hashes": "^2.0.1",
     "borsh": "catalog:utils",
     "bs58": "catalog:utils",
-    "es-toolkit": "catalog:utils",
-    "scrypt-js": "^3.0.1",
-    "tweetnacl": "^1.0.3",
-    "web-bip39": "^0.0.3",
-    "xrpl": "catalog:xrp",
-    "zod": "catalog:core"
+    "tiny-invariant": "catalog:core",
+    "@scure/bip39": "2.0.1",
+    "tweetnacl": "catalog:core"
   },
   "devDependencies": {
-    "@types/chrome": "^0.0.268",
+    "@types/chrome": "^0.1.0",
     "@types/node": "^22.15.30",
     "jsdom": "^22.1.0",
-    "release-it": "^19.0.2",
-    "release-it-pnpm": "^4.6.5",
-    "tiny-invariant": "catalog:core",
     "tsdown": "catalog:build",
     "typescript": "catalog:build",
     "vitest": "catalog:testing"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.19.0"
   },
   "exports": {
-    "./encryption": {
-      "types": "./dist/encryption/index.d.ts",
-      "import": "./dist/encryption/index.js"
-    },
     "./store": {
-      "types": "./dist/store/index.d.ts",
-      "import": "./dist/store/index.js"
+      "types": "./dist/store/index.d.mts",
+      "import": "./dist/store/index.mjs"
     },
     "./codecs": {
-      "types": "./dist/codecs/index.d.ts",
-      "import": "./dist/codecs/index.js"
+      "types": "./dist/codecs/index.d.mts",
+      "import": "./dist/codecs/index.mjs"
     },
-    "./enclave": {
-      "types": "./dist/enclave/index.d.ts",
-      "import": "./dist/enclave/index.js"
+    "./cryptography": {
+      "types": "./dist/cryptography/index.d.mts",
+      "import": "./dist/cryptography/index.mjs"
     },
-    "./enclave/local": {
-      "types": "./dist/enclave/local.d.ts",
-      "import": "./dist/enclave/local.js"
+    "./encryption": {
+      "types": "./dist/encryption/index.d.mts",
+      "import": "./dist/encryption/index.mjs"
     },
-    "./xrpl-credentials": {
-      "types": "./dist/xrpl-credentials/index.d.ts",
-      "import": "./dist/xrpl-credentials/index.js"
-    },
-    "./mpc": {
-      "types": "./dist/mpc/index.d.ts",
-      "import": "./dist/mpc/index.js"
+    "./facesign": {
+      "types": "./dist/facesign/index.d.mts",
+      "import": "./dist/facesign/index.mjs"
     }
   },
   "files": [
@@ -71,34 +57,16 @@
   "license": "MIT",
   "main": "./dist/index.js",
   "module": "dist/index.js",
-  "peerDependencies": {
-    "@partisiablockchain/abi-client": "^5.207.0",
-    "@partisiablockchain/blockchain-api-transaction-client": "^5.149.0",
-    "ethers": "catalog:ethereum",
-    "typescript": "catalog:build"
-  },
-  "peerDependenciesMeta": {
-    "@partisiablockchain/blockchain-api-transaction-client": {
-      "optional": true
-    },
-    "@partisiablockchain/abi-client": {
-      "optional": true
-    },
-    "ethers": {
-      "optional": true
-    }
-  },
   "publishConfig": {
     "access": "public"
   },
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
     "build": "tsdown",
-    "typecheck": "tsc --noEmit",
-    "dev": "tsdown  --watch",
+    "dev": "tsdown --watch",
     "publint": "pnpx publint --strict",
-    "release-it": "release-it",
-    "test": "vitest"
+    "test": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "sideEffects": false,
   "type": "module",

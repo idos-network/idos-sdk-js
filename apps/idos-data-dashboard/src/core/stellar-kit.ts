@@ -5,7 +5,7 @@ import {
   WalletNetwork,
   xBullModule,
 } from "@creit.tech/stellar-wallets-kit";
-import { KwilSigner } from "@idos-network/core";
+import { KwilSigner } from "@idos-network/kwil-infra";
 
 const stellarKit: StellarWalletsKit = new StellarWalletsKit({
   // @todo: pass ENV variable here
@@ -32,7 +32,7 @@ export const createStellarSigner = async (walletPublicKey: string, walletAddress
     walletPublicKey as string,
     "ed25519",
   );
-  // @ts-ignore
+  // @ts-expect-error
   stellarSigner.publicAddress = walletAddress;
   return stellarSigner;
 };

@@ -1,23 +1,18 @@
-import {
-  Button,
-  Center,
-  Code,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Stack,
-  Text,
-  useBreakpointValue,
-} from "@chakra-ui/react";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { useQuery } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Code } from "@/components/ui/code";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { useIdOS } from "@/idOS.provider";
+import { safeParse } from "../shared";
 
 const useFetchCredentialDetails = ({ credentialId }: { credentialId: string }) => {
   const idOSClient = useIdOS();
@@ -57,16 +52,6 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
     credentialId,
   });
 
-  const isCentered = useBreakpointValue(
-    {
-      base: false,
-      md: true,
-    },
-    {
-      fallback: "base",
-    },
-  );
-
   const jsonLink = `data:text/json;chatset=utf-8,${encodeURIComponent(
     JSON.stringify(credential.data),
   )}`;
@@ -81,74 +66,49 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
       })()
     : "No content to display";
 
-  const meta = credential.data?.public_notes ? JSON.parse(credential.data.public_notes) : {};
+  const meta = safeParse<{ type?: string; issuer?: string }>(credential.data?.public_notes);
 
   const downloadFileName = credential.data?.public_notes
     ? `${meta.type || "credential"}_${meta.issuer || "unknown"}.json`
     : "credential.json";
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      size={{
-        base: "full",
-        lg: "2xl",
-      }}
-      isCentered={isCentered}
-      scrollBehavior="inside"
-      trapFocus={false}
-    >
-      <ModalOverlay />
-      <ModalContent bg="neutral.900" rounded="xl">
-        <ModalHeader>Credential details</ModalHeader>
-        <ModalCloseButton onClick={onClose} />
-        <ModalBody display="flex">
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Credential details</DialogTitle>
+        </DialogHeader>
+        <div className="flex max-w-full overflow-auto">
           {credential.isLoading ? (
-            <Center flex={1}>
-              <Spinner />
-            </Center>
+            <div className="flex flex-1 items-center justify-center">
+              <Spinner className="size-8" />
+            </div>
           ) : null}
 
           {credential.isError ? (
-            <Stack>
-              <Text color="red.500">Unable to fetch credential details.</Text>
-              <Text color="red.500">{credential.error.message}</Text>
-            </Stack>
+            <div className="flex flex-col gap-2.5">
+              <p className="text-red-500">Unable to fetch credential details.</p>
+              <p className="text-red-500">{credential.error.message}</p>
+            </div>
           ) : null}
 
+          {credential.isSuccess ? <Code id="credential-details">{credentialContent}</Code> : null}
+        </div>
+        <DialogFooter className="gap-2.5">
+          {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : null}
+          <Button variant="secondary" onClick={onClose}>
+            Close
+          </Button>
           {credential.isSuccess ? (
-            <Code
-              id="credential-details"
-              overflowX="auto"
-              maxW="100%"
-              px={5}
-              py={1}
-              whiteSpace="pre"
-              bg="neutral.950"
-              rounded="xl"
-            >
-              {credentialContent}
-            </Code>
-          ) : null}
-        </ModalBody>
-        <ModalFooter gap={2.5}>
-          {credential.isError ? <Button onClick={() => credential.refetch()}>Retry</Button> : false}
-          <Button onClick={onClose}>Close</Button>
-          {credential.isSuccess ? (
-            <Button
-              id={`download-credential-${credential.data?.id}`}
-              as="a"
-              href={jsonLink}
-              colorScheme="green"
-              leftIcon={<DownloadIcon />}
-              download={downloadFileName}
-            >
-              Download as .json
+            <Button id={`download-credential-${credential.data?.id}`} variant="default">
+              <a href={jsonLink} download={downloadFileName} className="flex gap-2 items-center">
+                <DownloadIcon size={24} />
+                Download as .json
+              </a>
             </Button>
           ) : null}
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };

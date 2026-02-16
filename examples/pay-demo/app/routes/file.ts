@@ -1,4 +1,4 @@
-import { base85ToFile } from "@idos-network/credentials";
+import { base85ToFile } from "@idos-network/credentials/utils";
 import { fileTypeFromBuffer } from "file-type";
 import { verifyFileUrl } from "~/providers/files.server";
 import { getCredentialShared } from "~/providers/idos.server";
@@ -34,7 +34,8 @@ export async function loader({ request }: Route.LoaderArgs) {
     const typeFromBuffer = await fileTypeFromBuffer(file);
     const mimeType = typeFromBuffer?.mime ?? "application/pdf";
 
-    return new Response(file, {
+    // biome-ignore lint/suspicious/noExplicitAny: false positive as of now.
+    return new Response(file as any, {
       headers: {
         "Content-Type": mimeType,
         "Content-Length": file.length.toString(),

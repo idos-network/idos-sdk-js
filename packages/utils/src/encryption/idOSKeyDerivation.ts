@@ -1,5 +1,5 @@
-import { encode } from "@stablelib/utf8";
-import { scrypt } from "scrypt-js";
+import { scrypt } from "@noble/hashes/scrypt.js";
+import { utf8Encode } from "../codecs";
 
 /*
  * normalizePassword
@@ -72,8 +72,8 @@ export const idOSKeyDerivation = async ({
   if (!validateSalt(salt)) throw new Error("Invalid salt");
 
   password = normalizePassword(password);
-  const passwordBytes = encode(password);
-  const saltBytes = encode(salt);
+  const passwordBytes = utf8Encode(password);
+  const saltBytes = utf8Encode(salt);
 
-  return scrypt(passwordBytes, saltBytes, n, r, p, dkLen);
+  return scrypt(passwordBytes, saltBytes, { N: n, r, p, dkLen });
 };

@@ -16,24 +16,12 @@
 | **[`📁 issuer`](./packages/issuer)**      | idOS JavaScript SDK for issuers              |
 | **[`📁 client`](./packages/client)**      | idOS JavaScript SDK for browser environments |
 
-`@core` and `@controllers` are internal packages.
-
 ## Auxiliary Applications
 | Folder                                                 | Contents                                                                                                                                |
 | :----------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------- |
 | [`📁 dashboard-for-dapps`](./apps/dashboard-for-dapps/) | Dashboard for dApp developers to access data that users shared with them. <br> Deployed at <https://dashboard-for-dapps.idos.network/>. |
 | [`📁 idos-data-dashboard`](./apps/idos-data-dashboard)  | Interface for users to visualize and manage their idOS profile. <br> Deployed at <https://dashboard.idos.network/>.                     |
 | [`📁 idos-enclave`](./apps/idos-enclave)                | A secure browser context for password input, key derivation, encryption, and decryption.                                                |
-| [`📁 isle`](./apps/isle)                                | Full-featured standard UI for dApps to include in their application.                                                                    |
-| [`📁 passporting-server`](./apps/idos-data-dashboard)   | Backend service for credential passporting between [Obliged Entities](./docs/glossary.md#obliged-entities).                             |
-
-`idos-sdk-e2e` are the end-to-end tests.
-
-## Examples
-| Folder                                                     | Contents                                                                                                  |
-| :--------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- |
-| [`📁 consumer-and-issuer`](./examples/consumer-and-issuer/) | Example implementation showing and application that's both the consumer and the issuer                    |
-| [`📁 passporting`](./examples/passporting)                  | Demo of credential passporting between different [Obliged Entities](./docs/glossary.md#obliged-entities). |
 
 ## Installation
 
@@ -68,7 +56,7 @@ console.log(credentials);
 // [{ id: "4f4d...", issuer: "Fractal ID", type: "KYC"}, ...]
 ```
 
-More details on https://github.com/idos-network/idos-sdk-js/blob/main/packages/idos-sdk-js#quickstart
+More details on https://github.com/idos-network/idos-sdk-js/blob/main/docs
 
 ## Support
 

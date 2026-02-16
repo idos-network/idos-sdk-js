@@ -104,7 +104,7 @@ To initialize the idOS Consumer SDK, you need to pass in something as a `consume
 **Implementation with tweetnacl:**
 ```typescript
 import nacl from "tweetnacl";
-import { hexDecode } from "@idos-network/core";
+import { hexDecode } from "@idos-network/utils/codecs";
 
 // Option 1: Generate a new key pair
 const signer = nacl.sign.keyPair();
@@ -245,7 +245,7 @@ const signer = await provider.getSigner();
 
 ### [ frontend ] Checking if you user has an idOS profile
 
-Get your user's address from the signer above and confirm they have an idOS profile. If not, redirect them to your Issuer. If you have an IDV integration, you can yourself be the issuer. See the [Issuer Guide](issuer.md) for more information.
+Get your user's address from the signer above and confirm they have an idOS profile. If not, redirect them to your Issuer. If you have an IDV integration, you can yourself be the issuer. See the [Issuer Guide](guide-issuer.md) for more information.
 
 ```js
 const address = await signer.getAddress();
