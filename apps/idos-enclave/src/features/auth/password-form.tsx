@@ -1,7 +1,7 @@
 import { keyDerivation } from "@idos-network/utils/encryption";
 import { type Signal, useSignal } from "@preact/signals";
 import { encode } from "@stablelib/base64";
-import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
+import { CheckIcon, CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import nacl from "tweetnacl";
 import { Button } from "@/components/ui/button";
 import { Heading } from "@/components/ui/heading";
@@ -252,6 +252,21 @@ export default function PasswordForm({
             </div>
           </div>
 
+          <div class="mt-6">
+            <label
+              class="flex cursor-pointer select-none items-center gap-3"
+              for="understand-checkbox"
+            >
+              <input id="understand-checkbox" type="checkbox" class="sr-only peer" checked />
+              <span class="flex size-12 items-center justify-center rounded-full border border-zinc-700 bg-zinc-950 transition-colors peer-checked:border-[#00FFB9] peer-checked:bg-[#00FFB9] [&>svg]:opacity-0 peer-checked:[&>svg]:opacity-100">
+                <CheckIcon class="size-7 text-black" strokeWidth={3} />
+              </span>
+              <span class="text-sm text-muted-foreground leading-snug">
+                I understand that idOS cannot reset or recover my password if I lose it.
+              </span>
+            </label>
+          </div>
+
           <div class="flex items-center justify-between gap-3">
             <Button type="button" variant="secondary" onClick={onCancel} class="flex-1">
               Cancel
@@ -265,12 +280,7 @@ export default function PasswordForm({
         <>
           <Heading>Unlock your idOS key</Heading>
 
-          <Paragraph>Please enter your idOS password below:</Paragraph>
-
           <div class="flex flex-col gap-4">
-            <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">
-              Password
-            </label>
             <div class="relative">
               <PasswordField
                 id="idos-password-input"
