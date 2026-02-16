@@ -1,7 +1,16 @@
-import type { Wallet } from "@idos-network/kwil-infra";
-import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
-import type { WalletSelector } from "@near-wallet-selector/core";
-import { getWalletClient } from "@wagmi/core";
+import * as GemWallet from "@gemwallet/api";
+import type { NearWalletBase } from "@hot-labs/near-connect";
+import {
+  type CustomKwilSigner,
+  KwilSigner,
+  signNearMessage,
+  type Wallet,
+} from "@idos-network/kwil-infra";
+import type { WalletType } from "@idos-network/kwil-infra/actions";
+import { signGemWalletTx } from "@idos-network/kwil-infra/xrp-utils";
+import { type Config, getWalletClient, signMessage } from "@wagmi/core";
+import { BrowserProvider } from "ethers";
+import stellarKit from "./stellar-kit";
 import { wagmiConfig } from "./wagmi";
 
 let faceSignProvider: FaceSignSignerProvider | null = null;
