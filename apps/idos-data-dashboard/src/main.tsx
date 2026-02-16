@@ -5,6 +5,7 @@ import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
 import "@/machines/dashboard.actor";
+import { ErrorCard } from "@/components/error-card";
 import { Toaster } from "@/components/ui/sonner";
 import { wagmiAdapter } from "@/core/wagmi";
 import { queryClient } from "@/query-client";
@@ -17,6 +18,7 @@ const router = createRouter({
   scrollRestoration: true,
   defaultStructuralSharing: true,
   defaultPreloadStaleTime: 0,
+  defaultErrorComponent: ErrorCard,
   context: {
     queryClient,
   },

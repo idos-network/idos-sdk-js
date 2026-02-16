@@ -44,7 +44,9 @@ function ConnectedWallet() {
       </div>
       <div>
         <div className="text-neutral-100">Connected Wallet</div>
-        <div className="max-w-[180px] text-neutral-600 truncate">{address}</div>
+        <code className="max-w-[180px] text-neutral-600 truncate">
+          {address?.slice(0, 6)}...{address?.slice(-4)}
+        </code>
       </div>
     </div>
   );
@@ -96,7 +98,7 @@ function Breadcrumbs() {
               <BreadcrumbItem>
                 <BreadcrumbPage>{item}</BreadcrumbPage>
               </BreadcrumbItem>
-              {!isLast && <BreadcrumbSeparator />}
+              {!isLast ? <BreadcrumbSeparator /> : null}
             </Fragment>
           );
         })}

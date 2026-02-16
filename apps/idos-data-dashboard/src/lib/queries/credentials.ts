@@ -1,14 +1,13 @@
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
-import { useIDOS } from "@/core/idOS";
+import { getIdOSClient } from "@/core/idOS";
 
-export function useFetchCredentials() {
-  const idOSClient = useIDOS();
-
-  return useQuery({
+export function credentialsQueryOptions() {
+  return queryOptions({
     queryKey: ["credentials"],
     queryFn: async () => {
+      const idOSClient = getIdOSClient();
       const credentials = await idOSClient.getAllCredentials();
       return credentials.map((credential) => ({
         ...credential,
@@ -22,12 +21,15 @@ export function useFetchCredentials() {
   });
 }
 
-export function useFetchCredentialDetails({ credentialId }: { credentialId: string }) {
-  const idOSClient = useIDOS();
+export function useFetchCredentials() {
+  return useSuspenseQuery(credentialsQueryOptions());
+}
 
+export function useFetchCredentialDetails({ credentialId }: { credentialId: string }) {
   return useQuery({
     queryKey: ["credential_details", credentialId],
     queryFn: async ({ queryKey: [, credentialId] }) => {
+      const idOSClient = getIdOSClient();
       const credential = await idOSClient.getCredentialById(credentialId);
 
       await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
@@ -45,18 +47,17 @@ export function useFetchCredentialDetails({ credentialId }: { credentialId: stri
 
       return credential;
     },
-    enabled: idOSClient.state === "logged-in",
   });
 }
 
 export function useFetchGrants({ credentialId }: { credentialId: string }) {
-  const idOSClient = useIDOS();
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
   return useQuery({
     queryKey: ["grants", credentialId],
     queryFn: async () => {
+      const idOSClient = getIdOSClient();
       return idOSClient.getAccessGrantsOwned();
     },
     retry: 1,

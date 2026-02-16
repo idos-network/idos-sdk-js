@@ -1,6 +1,7 @@
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { useSelector } from "@xstate/react";
 
@@ -17,7 +18,7 @@ import { dashboardActor } from "@/machines/dashboard.actor";
 import { selectIsDisconnected, selectIsLoading, selectIsNoProfile } from "@/machines/selectors";
 import "@/styles/index.css";
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   component: RootComponent,
 });
 
