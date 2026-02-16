@@ -20,11 +20,11 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   try {
     // Generate kraken shared token
-    const token = await fetchSharedToken(krakenDAG, "noah.com_61413");
+    const tokenData = await fetchSharedToken(krakenDAG, "noah.com_61413");
 
     // WARNING: We are using address, since we have no user-management
     // Prefill noah user & create payin request
-    await prefillNoahUser(user.address, token);
+    await prefillNoahUser(user.address, tokenData.token);
 
     const response = await createOnboardingSession(user.address, url);
 

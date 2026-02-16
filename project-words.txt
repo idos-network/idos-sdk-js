@@ -26,6 +26,7 @@ dompurify
 dotenvx
 encryptor
 facesign
+facetec
 GABC
 gemwallet
 headlessui
