@@ -98,6 +98,7 @@ export default function PasswordForm({
   const duration = useSignal(7);
   const hasError = useSignal(false);
   const isLoading = useSignal(false);
+  const fatalError = useSignal(false);
 
   async function derivePublicKeyFromPassword(password: string) {
     const salt = userId;
@@ -114,7 +115,6 @@ export default function PasswordForm({
     const secretKey = await keyDerivation(password, salt);
     const keyPair = nacl.box.keyPair.fromSecretKey(secretKey);
     const derived = encode(keyPair.publicKey);
-    console.log("[idOS Enclave] Derived public key (base64)", derived);
     return derived;
   }
 
@@ -124,7 +124,27 @@ export default function PasswordForm({
     isLoading.value = true;
 
     try {
-      if (encryptionPublicKey) {
+      // Check if encryptionPublicKey is missing or empty when verification is required
+      const isEncryptionPublicKeyEmpty =
+        !encryptionPublicKey || encryptionPublicKey === "" || encryptionPublicKey.trim() === "";
+
+      // If mode indicates an existing account (not "new"), verification is required
+      const requiresVerification = mode !== "new";
+
+      if (requiresVerification && isEncryptionPublicKeyEmpty) {
+        console.error(
+          "[idOS Enclave] encryptionPublicKey is missing or empty but verification is required",
+          {
+            mode,
+            encryptionPublicKey,
+          },
+        );
+        hasError.value = true;
+        isLoading.value = false;
+        return;
+      }
+
+      if (encryptionPublicKey && !isEncryptionPublicKeyEmpty) {
         console.log("[idOS Enclave] Submitting password form", {
           mode,
           hasEncryptionPublicKey: !!encryptionPublicKey,
@@ -154,14 +174,28 @@ export default function PasswordForm({
       }
 
       hasError.value = false;
-      onSuccess({
-        encryptionPasswordStore: "user",
-        password: password.value,
-        duration: duration.value,
-      });
+
+      // Call onSuccess in its own try-catch to distinguish errors from password validation
+      try {
+        onSuccess({
+          encryptionPasswordStore: "user",
+          password: password.value,
+          duration: duration.value,
+        });
+      } catch (error) {
+        console.error("[idOS Enclave] onSuccess handler error", error);
+        fatalError.value = true;
+        isLoading.value = false;
+        // Rethrow to prevent the outer catch from treating this as a password error
+        throw error;
+      }
     } catch (error) {
-      console.error("[idOS Enclave] Unexpected error in password submit", error);
-      hasError.value = true;
+      // Only catch unexpected errors from password validation logic
+      // Errors from onSuccess are already handled above and rethrown
+      if (!fatalError.value) {
+        console.error("[idOS Enclave] Unexpected error in password submit", error);
+        hasError.value = true;
+      }
       // Only clear loading state on error; on success the dialog will close
       isLoading.value = false;
     }

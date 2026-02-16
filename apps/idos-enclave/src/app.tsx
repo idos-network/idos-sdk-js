@@ -1,6 +1,6 @@
 import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import { effect, useSignal } from "@preact/signals";
-import { XIcon } from "lucide-react";
+import { XIcon } from "lucide-preact";
 import type { PropsWithChildren } from "preact/compat";
 import { useCallback, useEffect, useRef } from "preact/hooks";
 import { Header } from "@/components/header";
@@ -139,7 +139,13 @@ export function App({ enclave }: AppProps) {
       const { data: requestData, ports } = event;
 
       // Ignore messages that don't have the expected structure (e.g., from browser extensions)
-      if (!requestData || typeof requestData !== "object" || !requestData.intent) {
+      if (
+        !requestData ||
+        typeof requestData !== "object" ||
+        !requestData.intent ||
+        !requestData.configuration ||
+        typeof requestData.configuration !== "object"
+      ) {
         return;
       }
 
@@ -276,7 +282,7 @@ export function App({ enclave }: AppProps) {
   }
 
   // Default: getPasswordContext (unlock/create)
-  if (!hasUserActivated.value) {
+  if (currentIntent.value && !hasUserActivated.value) {
     const isNew = mode.value === "new";
 
     return (
@@ -299,16 +305,22 @@ export function App({ enclave }: AppProps) {
     );
   }
 
-  return (
-    <Layout onClose={onCancel}>
-      <Auth
-        allowedEncryptionStores={allowedEncryptionStores.value ?? []}
-        encryptionPasswordStore={encryptionPasswordStore.value}
-        mode={mode.value}
-        onSuccess={onSuccess}
-        encryptionPublicKey={expectedUserEncryptionPublicKey.value ?? undefined}
-        userId={userId.value}
-      />
-    </Layout>
-  );
+  // Only render Auth component if we have an active intent
+  if (currentIntent.value) {
+    return (
+      <Layout onClose={onCancel}>
+        <Auth
+          allowedEncryptionStores={allowedEncryptionStores.value ?? []}
+          encryptionPasswordStore={encryptionPasswordStore.value}
+          mode={mode.value}
+          onSuccess={onSuccess}
+          encryptionPublicKey={expectedUserEncryptionPublicKey.value ?? undefined}
+          userId={userId.value}
+        />
+      </Layout>
+    );
+  }
+
+  // No intent received yet, don't render anything
+  return null;
 }

@@ -82,7 +82,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       port1.onmessage = async ({ data: { error, result } }) => {
         if (error) {
           port1.close();
-          return reject(error);
+          // Ensure error is an Error-like object
+          const errorObj = typeof error === "string" ? new Error(error) : error;
+          return reject(errorObj);
         }
 
         const { encryptionPasswordStore, password, duration } = result;
@@ -187,7 +189,9 @@ export class Enclave extends LocalEnclave<LocalEnclaveOptions> {
       port1.onmessage = ({ data: { error, result } }) => {
         port1.close();
         if (error) {
-          return reject(error);
+          // Ensure error is an Error-like object
+          const errorObj = typeof error === "string" ? new Error(error) : error;
+          return reject(errorObj);
         }
         resolve(result);
       };

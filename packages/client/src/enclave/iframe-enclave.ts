@@ -21,6 +21,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
   private iframe: HTMLIFrameElement;
   private hostUrl: URL;
   private bound = false;
+  private observer?: MutationObserver | null = null;
 
   constructor(options: IframeEnclaveOptions) {
     super(options);
@@ -218,7 +219,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     }
 
     // Watch for aria-hidden being set externally and override it when visible
-    const observer = new MutationObserver((mutations) => {
+    this.observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
           mutation.attributeName === "aria-hidden" ||
@@ -233,7 +234,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       });
     });
 
-    observer.observe(this.iframe, { attributes: true });
+    this.observer.observe(this.iframe, { attributes: true });
 
     // Append iframe directly to body
     document.body.appendChild(this.iframe);
@@ -247,6 +248,11 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
         { once: true },
       ),
     );
+  }
+
+  destroy(): void {
+    this.observer?.disconnect();
+    this.iframe.remove();
   }
 
   private showEnclave(): void {
@@ -311,10 +317,16 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     if (message.origin !== this.hostUrl.origin) return;
 
     if (message.data.type === "idOS:signTypedData") {
-      const payload = message.data.payload;
-      const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
-      await this.requestToEnclave("signTypedDataResponse", signature);
-      return;
+      try {
+        const payload = message.data.payload;
+        const signature = await this.signTypedData(payload.domain, payload.types, payload.value);
+        await this.requestToEnclave("signTypedDataResponse", signature);
+        return;
+      } catch (error) {
+        console.error(error);
+        await this.requestToEnclave("signTypedDataResponse", JSON.stringify(error));
+        return;
+      }
     }
 
     if (message.data.type === "idOS:enclaveClose") {

@@ -10,6 +10,8 @@ const hasParentWindow = enclaveWindow !== window.top;
 if (!hasParentWindow) {
   window.location.replace("https://idos.network");
 } else {
+  const documentReferrer = document.referrer;
+  if (!documentReferrer) throw new Error("Document referrer not found.");
   const parentOrigin = new URL(document.referrer).origin;
 
   // Initialize the enclave
