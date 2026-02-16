@@ -30,6 +30,15 @@ export const actions = {
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+    transakTokenData: null,
+    transakWidgetUrl: null,
+    checkCredentialStatusAttempts: 0,
+    dueTokenData: null,
+    dueTosLinks: null,
+    dueTosToken: null,
+    dueKycLink: null,
+    dueKycAttempts: 0,
+    dueKycDone: false,
   }),
 
   setClient: assign({
@@ -114,5 +123,39 @@ export const actions = {
 
   setMoneriumProfileIbans: assign({
     moneriumProfileIbans: ({ event }) => event.output.ibans,
+  }),
+
+  setTransakTokenData: assign({
+    transakTokenData: ({ event }) => event.output,
+  }),
+
+  setDueTokenData: assign({
+    dueTokenData: ({ event }) => event.output,
+  }),
+
+  setDueAccount: assign({
+    dueTosLinks: ({ event }) => event.output?.tos.documentLinks,
+    dueTosToken: ({ event }) => event.output?.tos.token,
+    dueKycDone: ({ event }) => event.output?.kyc?.status === "passed",
+  }),
+
+  setDueKycDone: assign({
+    dueKycDone: () => true,
+  }),
+
+  setTransakWidgetUrl: assign({
+    transakWidgetUrl: ({ event }) => event.output,
+  }),
+
+  setDueKycLink: assign({
+    dueKycLink: ({ event }) => event.output?.link,
+  }),
+
+  incrementDueKycAttempts: assign({
+    dueKycAttempts: ({ context }) => context.dueKycAttempts + 1,
+  }),
+
+  incrementCheckCredentialStatusAttempts: assign({
+    checkCredentialStatusAttempts: ({ context }) => context.checkCredentialStatusAttempts + 1,
   }),
 };

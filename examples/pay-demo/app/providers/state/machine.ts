@@ -23,6 +23,7 @@ export const machine = setup({
     isMonerium: ({ context }: { context: Context }) => context.provider === "monerium",
     isNoah: ({ context }: { context: Context }) => context.provider === "noah",
     isHifi: ({ context }: { context: Context }) => context.provider === "hifi",
+    isDue: ({ context }: { context: Context }) => context.provider === "due",
   },
 }).createMachine({
   id: "idos",
@@ -51,6 +52,15 @@ export const machine = setup({
     moneriumCode: null,
     moneriumProfileStatus: null,
     moneriumProfileIbans: null,
+    transakTokenData: null,
+    transakWidgetUrl: null,
+    dueTokenData: null,
+    dueTosLinks: null,
+    dueTosToken: null,
+    dueKycLink: null,
+    dueKycDone: false,
+    dueKycAttempts: 0,
+    checkCredentialStatusAttempts: 0,
   },
   states: {
     notConfigured: {
@@ -203,6 +213,11 @@ export const machine = setup({
             actions: ["setSharedCredential"],
             guard: "isHifi",
           },
+          {
+            target: "dueFlow",
+            actions: ["setSharedCredential"],
+            guard: "isDue",
+          },
         ],
         onError: {
           target: "error",
@@ -289,6 +304,137 @@ export const machine = setup({
           target: "error",
           actions: ["setErrorMessage"],
         },
+      },
+    },
+    dueFlow: {
+      initial: "requestKrakenDAG",
+      states: {
+        requestKrakenDAG: {
+          invoke: {
+            id: "requestKrakenDAG",
+            src: "requestKrakenDAG",
+            input: ({ context }: { context: Context }) => ({
+              client: context.loggedInClient,
+              credential: context.credential,
+            }),
+            onDone: {
+              target: "createToken",
+              actions: ["setKrakenDAG"],
+            },
+            onError: {
+              target: "error",
+            },
+          },
+        },
+        createToken: {
+          invoke: {
+            id: "createSharableToken",
+            src: "createSharableToken",
+            input: ({ context }: { context: Context }) => ({
+              dag: context.krakenDAG,
+              provider: "due.network_53224",
+            }),
+            onDone: {
+              target: "createDueAccount",
+              actions: ["setDueTokenData"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        createDueAccount: {
+          invoke: {
+            id: "createDueAccount",
+            src: "createDueAccount",
+            input: ({ context }: { context: Context }) => ({
+              sharedCredential: context.sharedCredential,
+            }),
+            onDone: {
+              target: "acceptTosWaiting",
+              actions: ["setDueAccount"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        acceptTosWaiting: {
+          on: {
+            acceptTos: [
+              {
+                target: "confirmTosAccepted",
+                guard: ({ context }: { context: Context }) => !context.dueKycDone,
+              },
+              {
+                target: "checkKycStatus",
+                guard: ({ context }: { context: Context }) => context.dueKycDone,
+              },
+            ],
+          },
+        },
+        confirmTosAccepted: {
+          invoke: {
+            id: "acceptDueTosAndShareToken",
+            src: "acceptDueTosAndShareToken",
+            input: ({ context }: { context: Context }) => ({
+              dueTokenData: context.dueTokenData,
+              dueTosToken: context.dueTosToken,
+            }),
+            onDone: {
+              target: "checkKycStatus",
+              actions: ["setDueKycLink"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        checkKycStatus: {
+          invoke: {
+            id: "checkDueKycStatus",
+            src: "checkDueKycStatus",
+            onDone: [
+              {
+                actions: ["setDueKycDone"],
+                target: "finishedKyc",
+              },
+            ],
+            onError: [
+              {
+                guard: ({ context }) => context.dueKycDone === false,
+                target: "waitForKycToBeDone",
+                actions: ["incrementDueKycAttempts"],
+              },
+              {
+                guard: ({ context }) => context.dueKycDone === true,
+                target: "finishedKyc",
+              },
+            ],
+          },
+        },
+        waitForKycToBeDone: {
+          after: {
+            5000: "checkKycStatus",
+          },
+          always: {
+            guard: ({ context }) => context.dueKycAttempts >= 100,
+            target: "error",
+            actions: ["setErrorMessage"],
+          },
+        },
+        error: {
+          type: "final",
+        },
+        finishedKyc: {
+          type: "final",
+        },
+      },
+      onDone: {
+        target: "dataOrTokenFetched",
       },
     },
     noahFlow: {
@@ -465,10 +611,60 @@ export const machine = setup({
           invoke: {
             id: "createSharableToken",
             src: "createSharableToken",
-            input: ({ context }: { context: Context }) => context.krakenDAG,
+            input: ({ context }: { context: Context }) => ({
+              dag: context.krakenDAG,
+              provider: "transak",
+            }),
+            onDone: {
+              target: "checkCredentialStatus",
+              actions: ["setTransakTokenData"],
+            },
+            onError: {
+              target: "error",
+              actions: ["setErrorMessage"],
+            },
+          },
+        },
+        checkCredentialStatus: {
+          invoke: {
+            id: "checkCredentialStatus",
+            src: "checkCredentialStatus",
+            input: ({ context }: { context: Context }) => context.transakTokenData,
+            onDone: {
+              target: "fetchWidgetUrl",
+              actions: ["setTransakTokenData"],
+            },
+            onError: [
+              {
+                guard: ({ context }: { context: Context }) =>
+                  context.checkCredentialStatusAttempts >= 60,
+                target: "error",
+                actions: ["setErrorMessage"],
+              },
+              {
+                target: "waitForCredentialStatus",
+                actions: ["incrementCheckCredentialStatusAttempts"],
+              },
+            ],
+          },
+        },
+        waitForCredentialStatus: {
+          after: {
+            5000: "checkCredentialStatus",
+          },
+        },
+        fetchWidgetUrl: {
+          invoke: {
+            id: "fetchTransakWidgetUrl",
+            src: "fetchTransakWidgetUrl",
+            input: ({ context }: { context: Context }) => ({
+              walletAddress: context.walletAddress,
+              transakTokenData: context.transakTokenData,
+              sharedCredential: context.sharedCredential,
+            }),
             onDone: {
               target: "dataOrTokenFetched",
-              actions: ["setSharableToken"],
+              actions: ["setTransakWidgetUrl"],
             },
             onError: {
               target: "error",
