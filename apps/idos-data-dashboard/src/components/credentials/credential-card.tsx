@@ -59,11 +59,11 @@ export function CredentialCard({
   }, [shares]);
 
   return (
-    <div className="flex flex-col gap-12 rounded-xl bg-neutral-900 p-5">
+    <div className="flex flex-col gap-12 rounded-xl bg-card p-5">
       <div className="grid grid-cols-2 gap-5 lg:grid-cols-6">
         {meta.map(([key, value]) => (
           <div key={key} className="flex flex-col gap-2">
-            <span className="text-neutral-500 text-sm capitalize">{key}</span>
+            <span className="text-muted-foreground text-sm capitalize">{key}</span>
             {key === "status" ? (
               <Badge
                 variant={statusVariantMap[value.toLowerCase()] ?? "default"}
@@ -77,21 +77,19 @@ export function CredentialCard({
           </div>
         ))}
         <div className="flex flex-col gap-2">
-          <span className="text-neutral-500 text-sm">Shares</span>
+          <span className="text-muted-foreground text-sm">Shares</span>
           <span data-test-id="shares-count">{shares.data?.length || 0}</span>
         </div>
       </div>
       <div className="flex flex-col gap-4 lg:flex-row">
         <Button
           id={`view-details-${credential.id}`}
-          variant="secondary"
           size="lg"
           onClick={() => onViewDetails(credential.id)}
         >
           View details
         </Button>
         <Button
-          variant="secondary"
           size="lg"
           id={`manage-grants-${credential.id}`}
           onClick={() => onManageGrants(credential.id)}
@@ -100,7 +98,6 @@ export function CredentialCard({
           Manage grants
         </Button>
         <Button
-          variant="secondary"
           size="lg"
           id={`delete-credential-${credential.id}`}
           onClick={() => onDelete(credential)}

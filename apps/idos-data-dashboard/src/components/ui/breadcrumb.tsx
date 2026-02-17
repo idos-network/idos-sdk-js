@@ -57,7 +57,7 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<"span">) {
     <span
       aria-current="page"
       aria-disabled="true"
-      className={cn("px-4 py-2 bg-neutral-800 rounded-full font-normal text-foreground", className)}
+      className={cn("px-4 py-2 bg-muted rounded-full font-normal text-foreground", className)}
       data-slot="breadcrumb-page"
       role="link"
       {...props}

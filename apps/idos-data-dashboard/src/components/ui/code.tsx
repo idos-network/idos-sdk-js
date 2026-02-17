@@ -7,10 +7,10 @@ const codeVariants = cva(
   {
     variants: {
       variant: {
-        solid: "overflow-x-auto max-w-full px-4 py-2 whitespace-pre bg-neutral-950 rounded-lg",
-        outline: "border border-neutral-700 text-neutral-100 px-1.5 py-0.5 rounded",
-        subtle: "bg-neutral-800/50 text-neutral-200 px-1.5 py-0.5 rounded",
-        ghost: "text-neutral-100",
+        solid: "overflow-x-auto max-w-full px-4 py-2 whitespace-pre bg-hover-subtle rounded-lg",
+        outline: "border border-border text-card-foreground px-1.5 py-0.5 rounded",
+        subtle: "bg-muted/50 text-card-foreground px-1.5 py-0.5 rounded",
+        ghost: "text-card-foreground",
       },
       size: {
         sm: "text-xs",

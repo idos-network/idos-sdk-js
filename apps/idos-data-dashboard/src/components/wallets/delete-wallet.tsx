@@ -46,7 +46,7 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-full bg-neutral-900 lg:max-w-lg" showCloseButton={true}>
+      <DialogContent className="max-w-full bg-card lg:max-w-lg" showCloseButton={true}>
         <DialogHeader>
           <DialogTitle>Delete wallet</DialogTitle>
         </DialogHeader>

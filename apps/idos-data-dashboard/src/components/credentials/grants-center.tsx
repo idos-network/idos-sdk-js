@@ -48,20 +48,20 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
     <div className="flex flex-col items-stretch gap-8">
       <div className="flex flex-col gap-2">
         <span className="block">Credentials Grants Access Center</span>
-        <span className="block text-neutral-500">
+        <span className="block text-muted-foreground">
           This is where you can manage your credentials grants. You can choose which access is
           revoked or granted.
         </span>
       </div>
-      <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-800">
+      <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-border bg-muted">
         <table
           className="table w-full border-collapse [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
           id={`grants-for-${credentialId}`}
         >
-          <thead className="sticky top-0 z-10 bg-neutral-800">
+          <thead className="sticky top-0 z-10 bg-muted">
             <tr className="border-b">
-              <th className="text-left text-neutral-500">Consumer</th>
-              <th className="text-left text-neutral-500">Locked until</th>
+              <th className="text-left text-muted-foreground">Consumer</th>
+              <th className="text-left text-muted-foreground">Locked until</th>
               <th />
             </tr>
           </thead>

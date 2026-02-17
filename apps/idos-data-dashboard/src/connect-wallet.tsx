@@ -12,12 +12,20 @@ export function ConnectWallet() {
         backgroundRepeat: "repeat",
       }}
     >
-      <div className="fixed inset-y-0 right-0 flex h-full w-full flex-col items-stretch overflow-y-auto bg-neutral-900 p-5 md:items-center lg:w-[728px]">
+      <div className="fixed inset-y-0 right-0 flex h-full w-full flex-col items-stretch overflow-y-auto bg-card p-5 md:items-center lg:w-[728px]">
         <div className="flex flex-1 flex-col place-content-center items-stretch gap-8 md:items-center">
+          <img
+            src="/logo-light.svg"
+            alt="idOS Dashboard logo"
+            className="mx-auto h-auto dark:hidden"
+            width={208}
+            height={62}
+            loading="eager"
+          />
           <img
             src="/logo.svg"
             alt="idOS Dashboard logo"
-            className="mx-auto h-auto"
+            className="mx-auto hidden h-auto dark:block"
             width={208}
             height={62}
             loading="eager"
@@ -91,7 +99,20 @@ export function ConnectWallet() {
           </span>
           <span className="flex place-content-center items-center gap-2 font-semibold text-sm">
             <span className="font-semibold text-sm">Powered by</span>
-            <img src="/logo.svg" alt="idOS logo" width={68} height={22} />
+            <img
+              src="/logo-light.svg"
+              alt="idOS logo"
+              width={68}
+              height={22}
+              className="dark:hidden"
+            />
+            <img
+              src="/logo.svg"
+              alt="idOS logo"
+              width={68}
+              height={22}
+              className="hidden dark:block"
+            />
           </span>
         </div>
       </div>

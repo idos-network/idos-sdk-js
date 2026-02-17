@@ -10,11 +10,11 @@ interface WalletCardProps {
 
 export function WalletCard({ address, isDisabled, onDelete }: WalletCardProps) {
   return (
-    <div className="flex items-center justify-between gap-5 rounded-xl bg-neutral-900 p-5">
+    <div className="flex items-center justify-between gap-5 rounded-xl bg-card p-5">
       <div className="flex items-center gap-5">
         <img src="/wallet.svg" alt="Wallet logo" className="h-12 w-12" />
         <div className="flex flex-col items-stretch gap-0 overflow-hidden">
-          <span className="block text-neutral-600">Address</span>
+          <span className="block text-muted-foreground">Address</span>
           <span className="block max-w-[200px] truncate" title={address}>
             {address}
           </span>
@@ -34,8 +34,8 @@ export function WalletCard({ address, isDisabled, onDelete }: WalletCardProps) {
         </TooltipTrigger>
         <TooltipContent
           side="left"
-          className="bg-neutral-500"
-          arrowClassName="bg-neutral-500 fill-neutral-500"
+          className="bg-muted-foreground"
+          arrowClassName="bg-muted-foreground fill-muted-foreground"
         >
           Please connect another wallet to delete this one
         </TooltipContent>
