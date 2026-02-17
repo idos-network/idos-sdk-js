@@ -64,7 +64,7 @@ describe("verifySignature", () => {
       address: "GABC",
       signature: "sig",
       message: "hello",
-      wallet_type: "Stellar",
+      wallet_type: "stellar",
       public_key: ["GABC"],
     });
 

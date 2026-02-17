@@ -237,21 +237,13 @@ export async function createClientKwilSigner(
     ];
   }
   if (isStellarWallet(wallet)) {
-    // we need to narrow type to stellarwallet in the if statement
-    const stellarWallet = wallet as StellarWallet;
     // Stellar wallet
-    const { address } = await stellarWallet.getAddress();
+    const { address } = await wallet.getAddress();
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
     const kwilSigner = new KwilSigner(
       async (msg: string | Uint8Array): Promise<Uint8Array> => {
-        var msgToSign: string;
-        if (typeof msg !== "string") {
-          msgToSign = new TextDecoder().decode(msg);
-        } else {
-          msgToSign = msg;
-        }
-        const result = await stellarWallet.signMessage(msgToSign);
-        console.log("as_kwil_signer", result);
+        const msgToSign = typeof msg !== "string" ? new TextDecoder().decode(msg) : msg;
+        const result = await wallet.signMessage(msgToSign);
         return Buffer.from(result.signedMessage, "base64");
       },
       Buffer.from(address).toString("hex"),
