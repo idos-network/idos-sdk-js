@@ -7,6 +7,9 @@ import {
 } from "@tanstack/react-router";
 import { useSelector } from "@xstate/react";
 import {
+  ArchiveIcon,
+  ArrowUpRightFromSquare,
+  CircleDollarSignIcon,
   CogIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
@@ -141,9 +144,36 @@ export function Layout({ children }: PropsWithChildren) {
                     <span>Wallets</span>
                   </ListItemLink>
                 </li>
+
+                <li>
+                  <a
+                    // @todo: change to the actual staking app once we have a domain
+                    href="https://idos-staking-app.vercel.app/"
+                    className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+                    <span>Staking</span>
+                    <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+                  </a>
+                </li>
               </ul>
               <div className="mt-auto flex flex-col gap-5 items-stretch">
                 <ul className="flex flex-1 flex-col gap-1.5">
+                  <li>
+                    <a
+                      // @todo: change to the actual staking app once we have a domain
+                      href="https://app.idos.network/"
+                      className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <ArchiveIcon size={24} strokeWidth="1.5" />
+                      <span>Legacy</span>
+                      <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+                    </a>
+                  </li>
                   <ListItemLink to="/settings">
                     <CogIcon size={24} strokeWidth="1" />
                     <span>Settings</span>
@@ -206,14 +236,41 @@ export function Layout({ children }: PropsWithChildren) {
                   <span>Wallets</span>
                 </ListItemLink>
               </li>
+
+              <li>
+                <a
+                  href="https://idos-staking-app.vercel.app/"
+                  className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+                  <span>Staking</span>
+                  <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+                </a>
+              </li>
             </ul>
           </div>
           <DrawerFooter className="flex-col items-stretch gap-5">
             <ul className="flex flex-1 flex-col gap-1.5">
-              <ListItemLink to="/settings">
-                <CogIcon size={24} strokeWidth="1" />
-                <span>Settings</span>
-              </ListItemLink>
+              <li>
+                <a
+                  href="https://app.idos.network/"
+                  className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <ArchiveIcon size={24} strokeWidth="1.5" />
+                  <span>Legacy</span>
+                  <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+                </a>
+              </li>
+              <li>
+                <ListItemLink to="/settings">
+                  <CogIcon size={24} strokeWidth="1" />
+                  <span>Settings</span>
+                </ListItemLink>
+              </li>
             </ul>
 
             <DisconnectButton />
