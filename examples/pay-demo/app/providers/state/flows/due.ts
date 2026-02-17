@@ -77,15 +77,16 @@ export const flow = {
     },
 
     requestRelayAG: {
+      description: "Requesting access grant for KYC provider...",
       invoke: {
         id: "requestRelayAG",
         src: "requestRelayAG",
         input: ({ context }: { context: Context }) => ({
           client: context.loggedInClient,
-          credential: context.credentialId,
+          credentialId: context.credentialId,
         }),
         onDone: {
-          target: "startKyc",
+          target: "shareDueToken",
           actions: ["setRelayAG"],
         },
         onError: {
@@ -94,10 +95,10 @@ export const flow = {
       },
     },
 
-    startKyc: {
+    shareDueToken: {
       invoke: {
-        id: "startKyc",
-        src: "startKyc",
+        id: "shareDueToken",
+        src: "shareDueToken",
         input: ({ context }: { context: Context }) => ({
           ag: context.relayAG,
         }),
@@ -193,20 +194,6 @@ export const actions = {
 
 // Due actors
 export const actors = {
-  createSharableToken: fromPromise(async ({ input }: { input: { ag: Context["relayAG"] } }) => {
-    if (!input.ag) {
-      throw new Error("Credential not found");
-    }
-
-    const response = await fetch(`/app/kyc/due/kyc?agId=${input.ag?.id}`);
-
-    if (response.status !== 200) {
-      throw new Error("KYC API is not available. Please try again later.");
-    }
-
-    return response.json();
-  }),
-
   createDueAccount: fromPromise(async () => {
     const dueAccount = await fetch("/app/kyc/due/account", {
       method: "POST",
@@ -217,6 +204,24 @@ export const actors = {
     }
 
     return await dueAccount.json();
+  }),
+
+  shareDueToken: fromPromise(async ({ input }: { input: { ag: Context["relayAG"] } }) => {
+    const dueToken = await fetch("/app/kyc/due/kyc", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        dagId: input.ag?.id,
+      }),
+    });
+
+    if (dueToken.status !== 200) {
+      throw new Error("Can't share due token, try again later.");
+    }
+
+    return await dueToken.json();
   }),
 
   acceptDueTos: fromPromise(async () => {

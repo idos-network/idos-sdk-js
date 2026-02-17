@@ -1,8 +1,19 @@
-import { getDownloadUrl, put } from "@vercel/blob";
+import { neon } from "@neondatabase/serverless";
 import { SERVER_ENV } from "~/providers/envFlags.server";
 import type { TosDocumentLinks } from "./due.server";
 
-const SERVER_URL = "https://tgu0ikcqdj22uiwr.public.blob.vercel-storage.com";
+const sql = neon(SERVER_ENV.DATABASE_URL);
+
+async function ensureTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS users (
+      address TEXT PRIMARY KEY,
+      due_id TEXT,
+      data JSONB NOT NULL,
+      updated_at TIMESTAMP DEFAULT NOW()
+    )
+  `;
+}
 
 export interface UserItem {
   id: string;
@@ -23,7 +34,8 @@ export interface UserItem {
 }
 
 export interface SharedKycItem {
-  id: string;
+  originalId: string;
+  sharedId: string;
 }
 
 export interface TransakUserItem {
@@ -46,47 +58,38 @@ export interface DueUserItem {
 }
 
 export async function getUserItem(address: string): Promise<UserItem | null> {
-  const item = getDownloadUrl(`${SERVER_URL}/${SERVER_ENV.BLOB_PREFIX}/${address}.json`);
-  const response = await fetch(item);
+  await ensureTable();
 
-  console.log("response", response);
+  const rows = await sql`
+    SELECT data FROM users WHERE address = ${address} LIMIT 1
+  `;
 
-  if (!response.ok) return null;
+  if (rows.length === 0) return null;
 
-  return JSON.parse(await response.text()) as UserItem;
+  return rows[0].data as UserItem;
 }
 
-export async function setUserItem(item: UserItem): Promise<string> {
-  const response = await put(
-    `${SERVER_ENV.BLOB_PREFIX}/${item.address}.json`,
-    JSON.stringify(item),
-    {
-      access: "public",
-      contentType: "application/json",
-      allowOverwrite: true,
-    },
-  );
+export async function setUserItem(item: UserItem): Promise<void> {
+  await ensureTable();
 
-  return response.downloadUrl;
-}
+  const dueId = item.due?.accountId ?? null;
 
-// Due mapping address to dueId
-export async function setDueMap(userAddress: string, dueId: string): Promise<string> {
-  const response = await put(`${SERVER_ENV.BLOB_PREFIX}/due/${dueId}.txt`, userAddress, {
-    access: "public",
-    contentType: "text/plain",
-    allowOverwrite: true,
-  });
-
-  return response.downloadUrl;
+  await sql`
+    INSERT INTO users (address, due_id, data, updated_at)
+    VALUES (${item.address}, ${dueId}, ${JSON.stringify(item)}, NOW())
+    ON CONFLICT (address)
+    DO UPDATE SET due_id = ${dueId}, data = ${JSON.stringify(item)}, updated_at = NOW()
+  `;
 }
 
 export async function getUserByDueId(dueId: string): Promise<UserItem | null> {
-  const item = getDownloadUrl(`${SERVER_URL}/${SERVER_ENV.BLOB_PREFIX}/due/${dueId}.txt`);
-  const response = await fetch(item);
+  await ensureTable();
 
-  if (!response.ok) return null;
+  const rows = await sql`
+    SELECT data FROM users WHERE due_id = ${dueId} LIMIT 1
+  `;
 
-  const userAddress = await response.text();
-  return getUserItem(userAddress);
+  if (rows.length === 0) return null;
+
+  return rows[0].data as UserItem;
 }

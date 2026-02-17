@@ -31,10 +31,12 @@ export async function loader({ request }: Route.LoaderArgs) {
   // If they matches
   if (!userItem.sharedKyc) {
     userItem.sharedKyc = {
-      id: credential.id,
+      sharedId: credential.id,
+      originalId: credential.original_id!,
     };
   } else {
-    userItem.sharedKyc.id = credential.id;
+    userItem.sharedKyc.sharedId = credential.id;
+    userItem.sharedKyc.originalId = credential.original_id!;
   }
 
   await setUserItem(userItem);

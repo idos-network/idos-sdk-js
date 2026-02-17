@@ -27,7 +27,8 @@ export const actions = {
       userId: event.output.idOSUserId ?? null,
 
       // Shared credential stuff
-      credentialId: event.output.sharedKyc?.id ?? null,
+      credentialId: event.output.sharedKyc?.originalId ?? null,
+      sharedCredentialId: event.output.sharedKyc?.sharedId ?? null,
 
       // Due stuff
       dueTosAccepted: event.output.due?.tosAccepted,
@@ -38,7 +39,11 @@ export const actions = {
   }),
 
   setErrorMessage: assign({
-    errorMessage: ({ event }) => event.error?.message,
+    errorMessage: ({ event }) => {
+      console.log("setErrorMessage");
+      console.log("event", event);
+      return event.error?.message ?? null;
+    },
   }),
 
   setSharableToken: assign({

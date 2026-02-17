@@ -1,7 +1,7 @@
 import { type CreateAccountResponse, createAccount, getAccount } from "~/providers/due.server";
 import { getCredentialShared } from "~/providers/idos.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import { getUserItem, setDueMap, setUserItem } from "~/providers/store.server";
+import { getUserItem, setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/account";
 
 export async function action({ request }: Route.ActionArgs) {
@@ -17,7 +17,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const userItem = await getUserItem(user.address);
-  if (!userItem || !userItem.sharedKyc?.id) {
+  if (!userItem || !userItem.sharedKyc?.sharedId) {
     return Response.json({ error: "User item or shared credential not found" }, { status: 400 });
   }
 
@@ -31,7 +31,7 @@ export async function action({ request }: Route.ActionArgs) {
         throw new Error("Can't get due account, try again later.");
       }
     } else {
-      const data = await getCredentialShared(userItem.sharedKyc.id, user.address);
+      const data = await getCredentialShared(userItem.sharedKyc.sharedId, user.address);
 
       accountResponse = await createAccount({
         type: "individual",
@@ -50,9 +50,6 @@ export async function action({ request }: Route.ActionArgs) {
         kycStatus: "new",
         tosAccepted: false,
       };
-
-      // This is for webhooks to know which user to update
-      await setDueMap(user.address, accountResponse.id);
     }
 
     userItem.due.tosLinks = accountResponse.tos.documentLinks;

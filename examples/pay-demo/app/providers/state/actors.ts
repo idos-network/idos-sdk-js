@@ -41,6 +41,7 @@ export const actors = {
     }: {
       input: { client: Context["loggedInClient"]; credentialId: Context["credentialId"] };
     }) => {
+      console.log("input", input);
       if (!input.client) {
         throw new Error("Client not found");
       }
@@ -49,12 +50,10 @@ export const actors = {
         throw new Error("No credential found");
       }
 
-      const krakenSharedCredential = await input.client.requestAccessGrant(input.credentialId, {
+      return input.client.requestAccessGrant(input.credentialId, {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
       });
-
-      return krakenSharedCredential;
     },
   ),
 };

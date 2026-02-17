@@ -8,13 +8,17 @@ export interface CredentialContext {
   userId: string | null;
   loggedInClient: idOSClientLoggedIn | null;
   credentialId: string | null;
+  sharedCredentialId: string | null;
   findCredentialAttempts: number;
 }
 
 export const emptyContext: CredentialContext = {
   userId: null,
   loggedInClient: null,
+  // This credential is our
   credentialId: null,
+  // This credential is DAG id
+  sharedCredentialId: null,
   findCredentialAttempts: 0,
 };
 
@@ -99,9 +103,9 @@ export const flow = {
             actions: ["incrementFindCredentialAttempts"],
           },
           {
+            // If we are not able to find a credential, we should go to kyc
             guard: ({ context }: { context: Context }) => context.kycUrl === null,
-            target: "error",
-            actions: ["setErrorMessage"],
+            target: "credentialNotFound",
           },
         ],
       },
@@ -142,6 +146,9 @@ export const flow = {
       type: "final" as const,
     },
     credentialFound: {
+      type: "final" as const,
+    },
+    credentialNotFound: {
       type: "final" as const,
     },
   },
@@ -239,19 +246,17 @@ export const actors = {
     async ({
       input,
     }: {
-      input: { client: Context["loggedInClient"]; credential: Context["credential"] };
+      input: { client: Context["loggedInClient"]; credentialId: Context["credentialId"] };
     }) => {
       if (!input.client) {
         throw new Error("Client not found");
       }
 
-      if (!input.credential) {
+      if (!input.credentialId) {
         throw new Error("No credential found");
       }
 
-      const id = input.credential.id;
-
-      const sharedCredential = await input.client.requestAccessGrant(id, {
+      const sharedCredential = await input.client.requestAccessGrant(input.credentialId, {
         consumerEncryptionPublicKey: COMMON_ENV.IDOS_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.IDOS_PUBLIC_KEY,
       });

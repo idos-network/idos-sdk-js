@@ -33,9 +33,8 @@ export async function action({ request }: Route.ActionArgs) {
 
   const body = await request.json();
 
-  console.log("body", body);
-
   userItem.idOSUserId = body.userId;
+
   await setUserItem(userItem);
 
   return Response.json(user);

@@ -1,5 +1,6 @@
-import { confirmTos, getKycStatus, shareToken } from "~/providers/due.server";
+import { getKycStatus, shareToken } from "~/providers/due.server";
 import { SERVER_ENV } from "~/providers/envFlags.server";
+import { fetchSharedToken } from "~/providers/kraken.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import { getUserItem, setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/kyc";
@@ -34,34 +35,48 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: "DAG ID is required" }, { status: 400 });
   }
 
-  if (userItem.due.kycStatus === "new") {
-    try {
-      await shareToken(userItem.due.accountId, sharedToken);
+  console.log("body", body);
 
-      userItem.due.kycStatus = "created";
-      await setUserItem(userItem);
-    } catch (error) {
-      return Response.json({ error: (error as Error).message }, { status: 400 });
+  // Get share token from idOS relay for due
+  let token: string | null = null;
+
+  try {
+    const sharedToken = await fetchSharedToken(body.dagId, "due.network_53224");
+
+    if (!sharedToken || !sharedToken.token) {
+      throw new Error("Shared token can't be created.");
     }
+
+    token = sharedToken.token;
+  } catch (error) {
+    return Response.json({ error: (error as Error).message }, { status: 400 });
   }
 
-  // Check KYC status and get link
-  if (userItem.due.kycStatus === "created") {
-    try {
-      const response = await getKycStatus(userItem.due.accountId);
+  // Share token with Due
+  try {
+    await shareToken(userItem.due.accountId, token);
 
-      if (response.status === "resubmission_required") {
-        userItem.due.kycStatus = "resubmission_required";
-        userItem.due.kycLink = `${SERVER_ENV.DUE_HTTP_URL}${response.externalLink}`;
-      } else {
-        userItem.due.kycStatus = response.status;
-      }
-
-      await setUserItem(userItem);
-    } catch (error) {
-      return Response.json({ error: (error as Error).message }, { status: 400 });
-    }
+    userItem.due.kycStatus = "created";
+    await setUserItem(userItem);
+  } catch (error) {
+    return Response.json({ error: (error as Error).message }, { status: 400 });
   }
 
-  return Response.json(userItem);
+  // Fetch KYC status from Due
+  try {
+    const response = await getKycStatus(userItem.due.accountId);
+
+    if (response.status === "resubmission_required") {
+      userItem.due.kycStatus = "resubmission_required";
+      userItem.due.kycLink = `${SERVER_ENV.DUE_HTTP_URL}${response.externalLink}`;
+    } else {
+      userItem.due.kycStatus = response.status;
+    }
+
+    await setUserItem(userItem);
+
+    return Response.json(userItem);
+  } catch (error) {
+    return Response.json({ error: (error as Error).message }, { status: 400 });
+  }
 }

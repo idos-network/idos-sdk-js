@@ -14,7 +14,9 @@ import { TransferConfirm } from "~/components/withdraw/transfer-confirm";
 import { TransferStatusTracker } from "~/components/withdraw/transfer-status";
 import { useUser } from "~/layouts/app";
 import { COMMON_ENV } from "~/providers/envFlags.common";
+import { sessionStorage } from "~/providers/sessions.server";
 import { MachineContext } from "~/providers/state";
+import { getUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/withdraw";
 
 type TransferStep = "recipient" | "quote" | "confirm" | "signing" | "status" | "done";
@@ -23,18 +25,40 @@ export function meta(_args: Route.MetaArgs) {
   return [{ title: "NeoFinance | idOS Demo" }];
 }
 
-const loadingMessages: Record<string, string> = {
-  findCredential: "Finding credential...",
-  requestAccessGrant: "Requesting access grant...",
-  waitForCredential: "Waiting for credential verification...",
-  login: "Logging in...",
-  requestKrakenDAG: "Requesting access grant for KYC provider...",
-  createToken: "Creating a sharable token for provider...",
-  createDueAccount: "Creating your Due account...",
-  confirmTosAccepted: "Confirming terms and sharing KYC data...",
+export async function loader({ request }: Route.LoaderArgs) {
+  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+  const user = session.get("user");
+  const userData = await getUserItem(user?.address);
+  return { userData };
+}
+
+const loadingMessages: Record<string, string | Record<string, string>> = {
+  syncWithUserData: "Syncing user data...",
+  moveToProviderFlow: "Processing provider configurations...",
+  idOSFlow: {
+    checkProfile: "Checking profile...",
+    createClient: "Creating client...",
+  },
+  kycFlow: {
+    start: "Creating a idOS relay link...",
+  },
+  credentialFlow: {
+    login: "Logging in into idOS...",
+    checkSharedCredentials: "Checking if we have shared credentials...",
+    requestAccessGrant: "Requesting access grant for credential...",
+    findCredential: "Finding credential...",
+  },
+  dueFlow: {
+    createDueAccount: "Creating your Due account...",
+    requestRelayAG: "Requesting access grant for idOS relay...",
+    shareDueToken: "Sharing a KYC with Due...",
+    confirmTosAccepted: "TOS has been accepted...",
+  },
 };
 
-export default function Withdraw() {
+export default function Withdraw({ loaderData }: Route.ComponentProps) {
+  const { userData } = loaderData;
+
   const { address } = useUser();
   const { send } = MachineContext.useActorRef();
 
@@ -45,6 +69,7 @@ export default function Withdraw() {
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
   const dueTosLinks = MachineContext.useSelector((s) => s.context.dueTosLinks);
   const dueKycLink = MachineContext.useSelector((s) => s.context.dueKycLink);
+  const dueKycStatus = MachineContext.useSelector((s) => s.context.dueKycStatus);
 
   // --- Local state for the demo transfer flow ---
   const [transferStep, setTransferStep] = useState<TransferStep>("recipient");
@@ -74,9 +99,6 @@ export default function Withdraw() {
     [send],
   );
 
-  console.log("state", state);
-  console.log("context", context);
-
   useEffect(() => {
     window.addEventListener("message", messageReceiver);
     return () => window.removeEventListener("message", messageReceiver);
@@ -89,8 +111,8 @@ export default function Withdraw() {
 
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
-    if (state === "chooseKYCType") {
-      send({ type: "startKYC", kycType: "persona" });
+    if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
+      send({ type: "start", kycType: "sumsub" });
     }
   }, [state, send]);
 
@@ -113,7 +135,7 @@ export default function Withdraw() {
   }, [transferStep, transferStatus]);
 
   // --- KYC iframe (Kraken/Persona identity verification) ---
-  if (state === "waitForKYC" && kycUrl) {
+  if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "waitForKYC" && kycUrl) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -142,80 +164,55 @@ export default function Withdraw() {
     );
   }
 
-  // --- Due TOS acceptance ---
-  if (typeof state === "object" && "dueFlow" in state && state.dueFlow === "acceptTosWaiting") {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
-            <p className="text-muted-foreground text-sm">
-              Accept Due's terms to continue with your withdrawal
-            </p>
-          </div>
-        </div>
-
-        <DueTos
-          onAccept={() => send({ type: "acceptTos" })}
-          tosUrl={dueTosLinks?.tos}
-          privacyPolicyUrl={dueTosLinks?.privacyPolicy}
-        />
-
-        <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-      </div>
-    );
-  }
-
-  // --- Due KYC iframe (fallback when Sumsub sharing is insufficient) ---
-  if (
-    typeof state === "object" &&
-    "dueFlow" in state &&
-    (state.dueFlow === "checkKycStatus" || state.dueFlow === "waitForKycToBeDone") &&
-    dueKycLink
-  ) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
-            <p className="text-muted-foreground text-sm">Complete your verification through Due</p>
-          </div>
-        </div>
-
-        <DueKyc kycUrl={dueKycLink} />
-
-        <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-      </div>
-    );
-  }
-
-  // --- Due transfer flow (after KYC is done) ---
-  if (state === "dataOrTokenFetched" && provider === "due") {
-    // Error during the Due flow
-    if (errorMessage) {
+  // -- Due Flow --
+  if (typeof state === "object" && "dueFlow" in state) {
+    if (state.dueFlow === "showTos") {
       return (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
-              <p className="text-muted-foreground text-sm">An error occurred</p>
+              <p className="text-muted-foreground text-sm">
+                Accept Due's terms to continue with your withdrawal
+              </p>
             </div>
           </div>
 
-          <FlowError message={errorMessage} onRetry={handleStartDue} />
+          <DueTos
+            onAccept={() => send({ type: "acceptTos" })}
+            tosUrl={dueTosLinks?.tos}
+            privacyPolicyUrl={dueTosLinks?.privacyPolicy}
+          />
 
           <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
         </div>
       );
     }
 
-    const recipientName =
-      recipient?.accountType === "individual"
-        ? `${recipient.firstName} ${recipient.lastName}`
-        : (recipient?.companyName ?? "");
+    // --- Due KYC iframe (fallback when Sumsub sharing is insufficient) ---
+    if (dueKycLink && dueKycStatus === "resubmission_required") {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+              <p className="text-muted-foreground text-sm">
+                Complete your verification through Due
+              </p>
+            </div>
+          </div>
 
-    switch (transferStep) {
-      case "recipient":
+          <DueKyc kycUrl={dueKycLink} />
+
+          <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
+        </div>
+      );
+    }
+
+    // --- Due transfer flow (after KYC is done) ---
+    if (state.dueFlow === "dueFlowDone") {
+      // Error during the Due flow
+      if (errorMessage) {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -223,25 +220,18 @@ export default function Withdraw() {
                 <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-muted-foreground text-sm">
-                  Enter your bank account details to receive funds
-                </p>
+                <p className="text-muted-foreground text-sm">An error occurred</p>
               </div>
             </div>
 
-            <RecipientForm
-              onSubmit={(data) => {
-                setRecipient(data);
-                setQuoteExpiry(new Date(Date.now() + 2 * 60 * 1000).toISOString());
-                setTransferStep("quote");
-              }}
-            />
+            <FlowError message={errorMessage} onRetry={handleStartDue} />
 
             <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
           </div>
         );
+      }
 
-      case "quote":
+      if (dueKycStatus === "pending") {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -249,25 +239,14 @@ export default function Withdraw() {
                 <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-muted-foreground text-sm">Review your transfer details</p>
+                <p className="text-muted-foreground text-sm">KYC is in progress, please wait...</p>
               </div>
             </div>
-
-            <QuoteDisplay
-              source={{ currency: "USDC", amount: "100.00", fee: "0.25" }}
-              destination={{ currency: "EUR", amount: "92.45", fee: "0.00" }}
-              fxRate={0.927}
-              expiresAt={quoteExpiry}
-              onConfirm={() => setTransferStep("confirm")}
-              onCancel={() => setTransferStep("recipient")}
-              onRefresh={() => setQuoteExpiry(new Date(Date.now() + 2 * 60 * 1000).toISOString())}
-            />
-
-            <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
           </div>
         );
+      }
 
-      case "confirm":
+      if (dueKycStatus === "failed") {
         return (
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -275,98 +254,175 @@ export default function Withdraw() {
                 <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-muted-foreground text-sm">Confirm and sign the transaction</p>
+                <p className="text-muted-foreground text-sm">KYC has failed...</p>
               </div>
             </div>
-
-            <TransferConfirm
-              source={{ currency: "USDC", amount: "100.00" }}
-              destination={{ currency: "EUR", amount: "92.45" }}
-              recipientName={recipientName}
-              recipientIban={recipient?.iban ?? ""}
-              isLoading={signingWallet}
-              onSign={async () => {
-                try {
-                  setSigningWallet(true);
-                  const message = [
-                    "Due Transfer Authorization",
-                    "",
-                    "Send: 100.00 USDC",
-                    "Receive: 92.45 EUR",
-                    `Recipient: ${recipientName}`,
-                    `IBAN: ${recipient?.iban ?? ""}`,
-                    `Date: ${new Date().toISOString()}`,
-                  ].join("\n");
-
-                  await window.ethereum?.request({
-                    method: "personal_sign",
-                    params: [message, address],
-                  });
-
-                  setTransferStep("signing");
-                  setTransferStatus("awaiting_funds");
-                } catch (err) {
-                  console.error("Signature rejected:", err);
-                } finally {
-                  setSigningWallet(false);
-                }
-              }}
-            />
-
-            <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
           </div>
         );
+      }
 
-      case "signing":
-      case "status":
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-bold text-2xl text-foreground tracking-tight">
-                  Withdraw Funds
-                </h2>
-                <p className="text-muted-foreground text-sm">Transfer in progress</p>
+      const recipientName =
+        recipient?.accountType === "individual"
+          ? `${recipient.firstName} ${recipient.lastName}`
+          : (recipient?.companyName ?? "");
+
+      switch (transferStep) {
+        case "recipient":
+          return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                    Withdraw Funds
+                  </h2>
+                  <p className="text-muted-foreground text-sm">
+                    Enter your bank account details to receive funds
+                  </p>
+                </div>
               </div>
+
+              <RecipientForm
+                onSubmit={(data) => {
+                  setRecipient(data);
+                  setQuoteExpiry(new Date(Date.now() + 2 * 60 * 1000).toISOString());
+                  setTransferStep("quote");
+                }}
+              />
+
+              <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
             </div>
+          );
 
-            <TransferStatusTracker
-              status={transferStatus}
-              source={{ currency: "USDC", amount: "100.00" }}
-              destination={{ currency: "EUR", amount: "92.45" }}
-              recipientName={recipientName}
-              onDone={() => setTransferStep("done")}
-            />
-
-            <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-          </div>
-        );
-
-      case "done":
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-bold text-2xl text-foreground tracking-tight">
-                  Withdraw Funds
-                </h2>
-                <p className="text-muted-foreground text-sm">Transfer complete</p>
+        case "quote":
+          return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                    Withdraw Funds
+                  </h2>
+                  <p className="text-muted-foreground text-sm">Review your transfer details</p>
+                </div>
               </div>
+
+              <QuoteDisplay
+                source={{ currency: "USDC", amount: "100.00", fee: "0.25" }}
+                destination={{ currency: "EUR", amount: "92.45", fee: "0.00" }}
+                fxRate={0.927}
+                expiresAt={quoteExpiry}
+                onConfirm={() => setTransferStep("confirm")}
+                onCancel={() => setTransferStep("recipient")}
+                onRefresh={() => setQuoteExpiry(new Date(Date.now() + 2 * 60 * 1000).toISOString())}
+              />
+
+              <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
             </div>
+          );
 
-            <FlowSuccess
-              title="Transfer Complete"
-              message={`92.45 EUR has been sent to ${recipientName}. The funds should arrive in your bank account shortly.`}
-            />
+        case "confirm":
+          return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                    Withdraw Funds
+                  </h2>
+                  <p className="text-muted-foreground text-sm">Confirm and sign the transaction</p>
+                </div>
+              </div>
 
-            <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
-          </div>
-        );
+              <TransferConfirm
+                source={{ currency: "USDC", amount: "100.00" }}
+                destination={{ currency: "EUR", amount: "92.45" }}
+                recipientName={recipientName}
+                recipientIban={recipient?.iban ?? ""}
+                isLoading={signingWallet}
+                onSign={async () => {
+                  try {
+                    setSigningWallet(true);
+                    const message = [
+                      "Due Transfer Authorization",
+                      "",
+                      "Send: 100.00 USDC",
+                      "Receive: 92.45 EUR",
+                      `Recipient: ${recipientName}`,
+                      `IBAN: ${recipient?.iban ?? ""}`,
+                      `Date: ${new Date().toISOString()}`,
+                    ].join("\n");
+
+                    await window.ethereum?.request({
+                      method: "personal_sign",
+                      params: [message, address],
+                    });
+
+                    setTransferStep("signing");
+                    setTransferStatus("awaiting_funds");
+                  } catch (err) {
+                    console.error("Signature rejected:", err);
+                  } finally {
+                    setSigningWallet(false);
+                  }
+                }}
+              />
+
+              <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
+            </div>
+          );
+
+        case "signing":
+        case "status":
+          return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                    Withdraw Funds
+                  </h2>
+                  <p className="text-muted-foreground text-sm">Transfer in progress</p>
+                </div>
+              </div>
+
+              <TransferStatusTracker
+                status={transferStatus}
+                source={{ currency: "USDC", amount: "100.00" }}
+                destination={{ currency: "EUR", amount: "92.45" }}
+                recipientName={recipientName}
+                onDone={() => setTransferStep("done")}
+              />
+
+              <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
+            </div>
+          );
+
+        case "done":
+          return (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="font-bold text-2xl text-foreground tracking-tight">
+                    Withdraw Funds
+                  </h2>
+                  <p className="text-muted-foreground text-sm">Transfer complete</p>
+                </div>
+              </div>
+
+              <FlowSuccess
+                title="Transfer Complete"
+                message={`92.45 EUR has been sent to ${recipientName}. The funds should arrive in your bank account shortly.`}
+              />
+
+              <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
+            </div>
+          );
+      }
     }
   }
 
   // --- Top-level error ---
-  if (state === "error") {
+  if (
+    state === "error" ||
+    (typeof state === "object" && "dueFlow" in state && state.dueFlow === "error")
+  ) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -384,13 +440,18 @@ export default function Withdraw() {
   }
 
   // --- Loading / intermediate states ---
-  const stateKey = state as string;
+  let message: string | null = null;
 
-  // Handle dueFlow sub-states
-  // @ts-expect-error Missing substates?
-  const dueSubState = state.dueFlow as string | undefined;
+  if (typeof state === "object") {
+    const key = Object.keys(state)[0];
 
-  const message = loadingMessages[stateKey] ?? (dueSubState ? loadingMessages[dueSubState] : null);
+    if (loadingMessages[key]) {
+      // @ts-expect-error Missing substates?
+      message = loadingMessages[key][state[key]];
+    }
+  } else if (typeof state === "string" && typeof loadingMessages[state] === "string") {
+    message = loadingMessages[state];
+  }
 
   if (message) {
     return (
@@ -409,6 +470,32 @@ export default function Withdraw() {
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
+      </div>
+    );
+  }
+
+  if (userData && userData.due?.kycStatus === "pending") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">KYC is in progress, please wait...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (userData && userData.due?.kycStatus === "failed") {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">KYC has failed...</p>
+          </div>
+        </div>
       </div>
     );
   }

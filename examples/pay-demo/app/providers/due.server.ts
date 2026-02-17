@@ -155,10 +155,10 @@ export const shareToken = async (
 
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error(`[Due#confirmTos] Error ${response.status} (${response.statusText}):`, errorBody);
+    console.error(`[Due#shareToken] Error ${response.status} (${response.statusText}):`, errorBody);
 
     throw new Error(
-      `Failed to confirm TOS (${response.status} ${response.statusText}): ${errorBody}`,
+      `Failed to share token with due (${response.status} ${response.statusText}): ${errorBody}`,
     );
   }
 

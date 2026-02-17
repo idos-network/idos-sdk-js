@@ -3,12 +3,8 @@ import { actions } from "./actions";
 import { actors } from "./actors";
 import { flow as credentialFlow } from "./flows/credentials";
 import { flow as dueFlow } from "./flows/due";
-import { flow as hifiFlow } from "./flows/hifi";
 import { flow as idosFlow } from "./flows/idos";
 import { flow as kycFlow } from "./flows/kyc";
-import { flow as moneriumFlow } from "./flows/monerium";
-import { flow as noahFlow } from "./flows/noah";
-import { flow as transakFlow } from "./flows/transack";
 import { type Context, emptyContext } from "./types";
 
 /**
@@ -73,13 +69,8 @@ export const machine = setup({
           target: "error",
         },
         {
-          // we have credentials (all is ready)
-          guard: ({ context }) => context.profile && context.credentialId !== null,
-          target: "moveToProviderFlow",
-        },
-        {
-          // we don't have credentials, so we need to check for them (or create if needed)
-          guard: ({ context }) => context.profile && context.credentialId === null,
+          // we maybe have credentials, but we need to check them and do the login
+          guard: ({ context }) => context.profile,
           target: "credentialFlow",
         },
         {
