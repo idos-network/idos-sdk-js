@@ -101,6 +101,8 @@ Shadcn
 shamir
 shardnet
 siwe
+stablecoin
+stablecoins
 stablelib
 stepperize
 substates
