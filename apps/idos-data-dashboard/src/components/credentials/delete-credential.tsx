@@ -39,7 +39,9 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
     select: (mutation) => mutation.state.variables as idOSGrant,
   });
 
-  if (!credential) return null;
+  if (!credential) {
+    return null;
+  }
 
   const hasTimeLock =
     grants.data?.length &&

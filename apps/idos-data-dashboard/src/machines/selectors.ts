@@ -34,7 +34,10 @@ export const selectWalletType = (snapshot: DashboardSnapshot): string | null =>
 
 export const selectLoggedInClient = (snapshot: DashboardSnapshot): idOSClientLoggedIn | null => {
   const client = snapshot.context.idOSClient;
-  if (client.state === "logged-in") return client;
+  if (client.state === "logged-in") {
+    return client;
+  }
+
   return null;
 };
 

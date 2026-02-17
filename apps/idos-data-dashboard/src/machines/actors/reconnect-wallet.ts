@@ -1,7 +1,6 @@
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
-import { initializeNearSelector } from "@/core/near";
 import { getEvmAccount, wagmiConfig } from "@/core/wagmi";
 import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.machine";
 
@@ -26,6 +25,7 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
       }
 
       case "NEAR": {
+        const { initializeNearSelector } = await import("@/core/near");
         nearSelector = await initializeNearSelector();
         if (!nearSelector.isSignedIn()) {
           throw new Error("NEAR wallet session expired");

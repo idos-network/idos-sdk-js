@@ -62,7 +62,9 @@ export function useFetchGrants({ credentialId }: { credentialId: string }) {
     },
     retry: 1,
     select(grants) {
-      if (!credentials || !grants) return [];
+      if (!credentials || !grants) {
+        return [];
+      }
 
       const _credentials = credentials
         .filter((credential) => credential.original_id === credentialId)

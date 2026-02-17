@@ -1,13 +1,10 @@
-import * as GemWallet from "@gemwallet/api";
 import type { Wallet } from "@idos-network/kwil-infra";
-import { KwilSigner } from "@idos-network/kwil-infra";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { getWalletClient } from "@wagmi/core";
-import { BrowserProvider } from "ethers";
-import stellarKit from "./stellar-kit";
 import { wagmiConfig } from "./wagmi";
 
 export async function createEvmSigner(): Promise<Wallet> {
+  const { BrowserProvider } = await import("ethers");
   const walletClient = await getWalletClient(wagmiConfig);
   const provider = new BrowserProvider(walletClient.transport);
   return provider.getSigner();
@@ -19,6 +16,7 @@ export async function createNearSigner(selector: WalletSelector): Promise<Wallet
 }
 
 export async function createXrplSigner(): Promise<Wallet> {
+  const GemWallet = await import("@gemwallet/api");
   // @ts-expect-error GemWallet type mismatch between versions
   return GemWallet as Wallet;
 }
@@ -27,6 +25,9 @@ export async function createStellarSigner(
   walletPublicKey: string,
   walletAddress: string,
 ): Promise<Wallet> {
+  const { default: stellarKit } = await import("./stellar-kit");
+  const { KwilSigner } = await import("@idos-network/kwil-infra");
+
   const stellarSigner = new KwilSigner(
     async (msg: Uint8Array): Promise<Uint8Array> => {
       const messageBase64 = Buffer.from(msg).toString("base64");

@@ -41,7 +41,9 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
     });
   };
 
-  if (!wallets || wallets.length === 0) return null;
+  if (!wallets || wallets.length === 0) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>

@@ -119,7 +119,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, []);
 
   useEffect(() => {
-    if (!popupWindow) return;
+    if (!popupWindow) {
+      return;
+    }
 
     const checkPopupClosed = setInterval(() => {
       if (popupWindow.closed) {
@@ -135,7 +137,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   }, [popupWindow]);
 
   useEffect(() => {
-    if (!walletPayload) return;
+    if (!walletPayload) {
+      return;
+    }
     addWallet(walletPayload);
   }, [walletPayload]);
 

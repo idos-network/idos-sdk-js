@@ -1,5 +1,4 @@
 import { fromPromise } from "xstate";
-import stellarKit from "@/core/stellar-kit";
 import { disconnectEvm } from "@/core/wagmi";
 import { queryClient } from "@/query-client";
 import type { DisconnectWalletInput } from "../dashboard.machine";
@@ -9,6 +8,7 @@ export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async (
 
   try {
     if (walletType === "Stellar") {
+      const { default: stellarKit } = await import("@/core/stellar-kit");
       await stellarKit.disconnect();
     }
 

@@ -19,7 +19,9 @@ let _selector: WalletSelector | null = null;
 let _modal: WalletSelectorModal | null = null;
 
 export async function initializeNearSelector(): Promise<WalletSelector> {
-  if (_selector) return _selector;
+  if (_selector) {
+    return _selector;
+  }
 
   _selector = await setupWalletSelector({
     network: import.meta.env.DEV ? "testnet" : "mainnet",

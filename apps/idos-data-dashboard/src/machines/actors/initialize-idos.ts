@@ -19,7 +19,9 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         signer = await createEvmSigner();
         break;
       case "NEAR":
-        if (!nearSelector) throw new Error("NEAR selector not available");
+        if (!nearSelector) {
+          throw new Error("NEAR selector not available");
+        }
         signer = await createNearSigner(nearSelector);
         break;
       case "Stellar":

@@ -42,9 +42,15 @@ export function CredentialCard({
   const meta = entries.sort(([a], [b]) => {
     const ai = fieldOrder.indexOf(a);
     const bi = fieldOrder.indexOf(b);
-    if (ai !== -1 && bi !== -1) return ai - bi;
-    if (ai !== -1) return -1;
-    if (bi !== -1) return 1;
+    if (ai !== -1 && bi !== -1) {
+      return ai - bi;
+    }
+    if (ai !== -1) {
+      return -1;
+    }
+    if (bi !== -1) {
+      return 1;
+    }
     return 0;
   });
 

@@ -77,7 +77,9 @@ function getPersistedWallet(): {
 } | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
+    if (!raw) {
+      return null;
+    }
     const parsed = JSON.parse(raw);
     if (parsed.walletType && parsed.walletAddress && parsed.walletPublicKey) {
       return parsed;
@@ -184,7 +186,9 @@ export const dashboardMachine = setup({
       invoke: {
         src: "connectWallet",
         input: ({ context }): ConnectWalletInput => {
-          if (!context.walletType) throw new Error("walletType not set");
+          if (!context.walletType) {
+            throw new Error("walletType not set");
+          }
           return {
             walletType: context.walletType,
             nearSelector: context.nearSelector,
@@ -231,7 +235,9 @@ export const dashboardMachine = setup({
     reconnecting: {
       entry: assign(() => {
         const persisted = getPersistedWallet();
-        if (!persisted) return {};
+        if (!persisted) {
+          return {};
+        }
         return {
           walletType: persisted.walletType,
           walletAddress: persisted.walletAddress,

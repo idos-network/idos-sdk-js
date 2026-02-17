@@ -20,10 +20,7 @@ export const Route = createFileRoute("/")({
   staticData: { breadcrumb: "Credentials" },
   pendingComponent: CredentialsPending,
   errorComponent: CredentialsError,
-  loader: ({ context: { queryClient, idOSClient } }) => {
-    if (!idOSClient) return;
-    return queryClient.ensureQueryData(credentialsQueryOptions());
-  },
+  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(credentialsQueryOptions()),
 });
 
 function CredentialsList() {

@@ -24,10 +24,7 @@ export const Route = createFileRoute("/wallets")({
       publicKey: search.publicKey,
     };
   },
-  loader: ({ context: { queryClient, idOSClient } }) => {
-    if (!idOSClient) return;
-    return queryClient.ensureQueryData(walletsQueryOptions());
-  },
+  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(walletsQueryOptions()),
 });
 
 function WalletsList() {
@@ -39,7 +36,9 @@ function WalletsList() {
   const handleDelete = (walletAddress: string) => {
     const toDelete = wallets[walletAddress];
 
-    if (!toDelete) return;
+    if (!toDelete) {
+      return;
+    }
 
     setWalletToDelete(toDelete);
     onOpen();

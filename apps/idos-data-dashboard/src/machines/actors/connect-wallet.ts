@@ -1,17 +1,8 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
-import * as GemWallet from "@gemwallet/api";
-import { getGemWalletPublicKey } from "@idos-network/kwil-infra/xrp-utils";
-import { StrKey } from "@stellar/stellar-base";
 import { watchAccount } from "@wagmi/core";
 import { fromCallback } from "xstate";
-import { getNearModal, initializeNearSelector, openNearModal } from "@/core/near";
-import stellarKit from "@/core/stellar-kit";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, DashboardEvent } from "../dashboard.machine";
-
-const derivePublicKey = async (address: string): Promise<string> => {
-  return Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
-};
 
 export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
   ({ sendBack, input }) => {
@@ -71,75 +62,75 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
       }
 
       case "NEAR": {
-        const selectorPromise = input.nearSelector
-          ? Promise.resolve(input.nearSelector)
-          : initializeNearSelector();
-
         let cleanup: (() => void) | undefined;
 
-        selectorPromise
-          .then((selector) => {
-            if (selector.isSignedIn()) {
-              const accounts = selector.store.getState().accounts;
-              const accountId = accounts[0]?.accountId;
-              if (accountId) {
-                sendBack({
-                  type: "WALLET_CONNECTED",
-                  walletAddress: accountId,
-                  walletPublicKey: accountId,
-                  nearSelector: selector,
-                });
-                return;
-              }
+        (async () => {
+          const { getNearModal, initializeNearSelector, openNearModal } = await import(
+            "@/core/near"
+          );
+
+          const selector = input.nearSelector ?? (await initializeNearSelector());
+
+          if (selector.isSignedIn()) {
+            const accounts = selector.store.getState().accounts;
+            const accountId = accounts[0]?.accountId;
+            if (accountId) {
+              sendBack({
+                type: "WALLET_CONNECTED",
+                walletAddress: accountId,
+                walletPublicKey: accountId,
+                nearSelector: selector,
+              });
+              return;
             }
+          }
 
-            openNearModal(selector);
+          openNearModal(selector);
 
-            let signedIn = false;
+          let signedIn = false;
 
-            const subscription = selector.on("signedIn", ({ accounts }) => {
-              signedIn = true;
-              subscription.remove();
-              hideSubscription?.remove();
-              const accountId = accounts[0]?.accountId;
-              if (accountId) {
-                sendBack({
-                  type: "WALLET_CONNECTED",
-                  walletAddress: accountId,
-                  walletPublicKey: accountId,
-                  nearSelector: selector,
-                });
-              } else {
-                sendBack({
-                  type: "WALLET_CONNECT_ERROR",
-                  error: "No NEAR account found after sign-in",
-                });
-              }
-            });
-
-            const modal = getNearModal();
-            const hideSubscription = modal?.on("onHide", ({ hideReason }) => {
-              if (!signedIn && hideReason === "user-triggered") {
-                subscription.remove();
-                hideSubscription?.remove();
-                sendBack({
-                  type: "WALLET_CONNECT_ERROR",
-                  error: "Connection cancelled",
-                });
-              }
-            });
-
-            cleanup = () => {
-              subscription.remove();
-              hideSubscription?.remove();
-            };
-          })
-          .catch((err) => {
-            sendBack({
-              type: "WALLET_CONNECT_ERROR",
-              error: err instanceof Error ? err.message : "Failed to initialize NEAR",
-            });
+          const subscription = selector.on("signedIn", ({ accounts }) => {
+            signedIn = true;
+            subscription.remove();
+            hideSubscription?.remove();
+            const accountId = accounts[0]?.accountId;
+            if (accountId) {
+              sendBack({
+                type: "WALLET_CONNECTED",
+                walletAddress: accountId,
+                walletPublicKey: accountId,
+                nearSelector: selector,
+              });
+            } else {
+              sendBack({
+                type: "WALLET_CONNECT_ERROR",
+                error: "No NEAR account found after sign-in",
+              });
+            }
           });
+
+          const modal = getNearModal();
+          const hideSubscription = modal?.on("onHide", ({ hideReason }) => {
+            if (!signedIn && hideReason === "user-triggered") {
+              subscription.remove();
+              hideSubscription?.remove();
+              sendBack({
+                type: "WALLET_CONNECT_ERROR",
+                error: "Connection cancelled",
+              });
+            }
+          });
+
+          cleanup = () => {
+            subscription.remove();
+            hideSubscription?.remove();
+          };
+        })().catch((err) => {
+          sendBack({
+            type: "WALLET_CONNECT_ERROR",
+            error: err instanceof Error ? err.message : "Failed to initialize NEAR",
+          });
+        });
 
         return () => {
           cleanup?.();
@@ -147,36 +138,48 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
       }
 
       case "Stellar": {
-        let walletSelected = false;
+        (async () => {
+          const { default: stellarKit } = await import("@/core/stellar-kit");
+          const { StrKey } = await import("@stellar/stellar-base");
 
-        stellarKit.openModal({
-          onWalletSelected: async (option: ISupportedWallet) => {
-            walletSelected = true;
-            try {
-              stellarKit.setWallet(option.id);
-              const { address } = await stellarKit.getAddress();
-              const publicKey = await derivePublicKey(address);
-              sendBack({
-                type: "WALLET_CONNECTED",
-                walletAddress: address,
-                walletPublicKey: publicKey,
-                nearSelector: input.nearSelector,
-              });
-            } catch (err) {
-              sendBack({
-                type: "WALLET_CONNECT_ERROR",
-                error: err instanceof Error ? err.message : "Failed to connect Stellar wallet",
-              });
-            }
-          },
-          onClosed: () => {
-            if (!walletSelected) {
-              sendBack({
-                type: "WALLET_CONNECT_ERROR",
-                error: "Connection cancelled",
-              });
-            }
-          },
+          let walletSelected = false;
+
+          stellarKit.openModal({
+            onWalletSelected: async (option: ISupportedWallet) => {
+              walletSelected = true;
+              try {
+                stellarKit.setWallet(option.id);
+                const { address } = await stellarKit.getAddress();
+                const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString(
+                  "hex",
+                );
+                sendBack({
+                  type: "WALLET_CONNECTED",
+                  walletAddress: address,
+                  walletPublicKey: publicKey,
+                  nearSelector: input.nearSelector,
+                });
+              } catch (err) {
+                sendBack({
+                  type: "WALLET_CONNECT_ERROR",
+                  error: err instanceof Error ? err.message : "Failed to connect Stellar wallet",
+                });
+              }
+            },
+            onClosed: () => {
+              if (!walletSelected) {
+                sendBack({
+                  type: "WALLET_CONNECT_ERROR",
+                  error: "Connection cancelled",
+                });
+              }
+            },
+          });
+        })().catch((err) => {
+          sendBack({
+            type: "WALLET_CONNECT_ERROR",
+            error: err instanceof Error ? err.message : "Failed to load Stellar wallet",
+          });
         });
         return;
       }
@@ -184,6 +187,9 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
       case "XRPL": {
         (async () => {
           try {
+            const GemWallet = await import("@gemwallet/api");
+            const { getGemWalletPublicKey } = await import("@idos-network/kwil-infra/xrp-utils");
+
             const res = await GemWallet.isInstalled();
             if (!res.result.isInstalled) {
               window.open(
@@ -197,7 +203,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
               return;
             }
 
-            // @ts-expect-error GemWallet type mismatch between versions
             const publicKey = await getGemWalletPublicKey(GemWallet);
             if (!publicKey) {
               sendBack({
