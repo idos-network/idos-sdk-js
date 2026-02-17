@@ -53,7 +53,6 @@ export default defineConfig({
 
           // Icons
           if (id.includes("lucide-react")) return "icons";
-          if (id.includes("@web3icons/")) return "web3-icons";
         },
       },
     },
