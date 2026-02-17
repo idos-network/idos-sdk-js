@@ -81,7 +81,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <App />
-        <Toaster position="bottom-center" />
+        <Toaster position="bottom-right" duration={3000} />
       </QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>,

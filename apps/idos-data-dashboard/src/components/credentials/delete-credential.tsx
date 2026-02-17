@@ -57,22 +57,17 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
     if (grants.data && grants.data.length > 0) {
       toast.error("Revoking grants", {
         description: "Revoking grants that have been shared with others...",
-        position: "bottom-right",
-        duration: 3000,
       });
 
       await revokeGrants.mutateAsync(grants.data ?? [], {
         onSuccess() {
           toast.success("Grant revocation successful", {
             description: "All grants have been successfully revoked. Deleting credential...",
-            position: "bottom-right",
           });
         },
         onError() {
           toast.error("Error while revoking grants", {
             description: "An unexpected error. Please try again.",
-            duration: 3000,
-            position: "bottom-right",
           });
         },
       });
@@ -84,7 +79,6 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
       toast.error("Error while deleting credential", {
         description:
           "This credential has a locked grant. You can't delete it until the grant locked until date is passed.",
-        position: "bottom-right",
       });
       return;
     }
@@ -94,14 +88,11 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
         handleClose();
         toast.success("Credential successfully removed", {
           description: "Credential has been successfully removed",
-          position: "bottom-right",
         });
       },
       onError() {
         toast.error("Error while deleting credential", {
           description: "An unexpected error. Please try again.",
-          duration: 3000,
-          position: "bottom-right",
         });
       },
     });
