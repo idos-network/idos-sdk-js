@@ -67,7 +67,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
         },
         onError() {
           toast.error("Error while revoking grants", {
-            description: "An unexpected error ocurred. Please try again.",
+            description: "An unexpected error occurred. Please try again.",
           });
         },
       });
@@ -92,7 +92,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
       },
       onError() {
         toast.error("Error while deleting credential", {
-          description: "An unexpected error ocurred. Please try again.",
+          description: "An unexpected error occurred. Please try again.",
         });
       },
     });
