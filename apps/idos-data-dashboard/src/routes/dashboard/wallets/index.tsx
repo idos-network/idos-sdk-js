@@ -81,7 +81,7 @@ const WalletsList = () => {
 
     return (
       <>
-        <ul id="wallets-list" className="flex flex-col gap-2.5 flex-1">
+        <ul id="wallets-list" className="flex flex-1 flex-col gap-2.5">
           {addresses.map((walletAddress) => (
             <li key={walletAddress} className="list-none">
               <WalletCard
@@ -120,9 +120,9 @@ export function WalletsSection() {
   }
 
   return (
-    <div className="flex flex-col items-stretch gap-2.5 flex-1">
-      <div className="flex items-center justify-between h-14 lg:h-20 p-5 bg-neutral-900 rounded-xl">
-        <h1 className="block text-2xl! lg:text-3xl! font-bold!">Wallets</h1>
+    <div className="flex flex-1 flex-col items-stretch gap-2.5">
+      <div className="flex h-14 items-center justify-between rounded-xl bg-neutral-900 p-5 lg:h-20">
+        <h1 className="block font-bold! text-2xl! lg:text-3xl!">Wallets</h1>
         {hasProfile ? (
           <div className="flex items-center gap-2.5">
             <AddWalletButton />

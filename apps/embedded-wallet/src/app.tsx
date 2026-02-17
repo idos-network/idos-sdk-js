@@ -74,7 +74,7 @@ export function App() {
           // Close the popup window after sending the data
           window.close();
         })
-        .catch((error: any) => {
+        .catch((error: unknown) => {
           console.error("Error disconnecting wallet", error);
         });
     }

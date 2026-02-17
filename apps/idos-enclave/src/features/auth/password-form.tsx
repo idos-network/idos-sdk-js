@@ -156,7 +156,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -212,7 +212,7 @@ export default function PasswordForm({
               />
               <button
                 type="button"
-                class="absolute right-2 top-1/2 -translate-y-1/2 cursor-pointer bg-muted p-2"
+                class="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer bg-muted p-2"
                 onClick={() => {
                   showPassword.value = !showPassword.value;
                 }}
@@ -227,7 +227,7 @@ export default function PasswordForm({
             <DurationField duration={duration} />
           </div>
 
-          <p class="text-muted-foreground text-sm text-center">
+          <p class="text-center text-muted-foreground text-sm">
             Make sure to store it securely — you’ll need it to view or share your data later.
           </p>
 

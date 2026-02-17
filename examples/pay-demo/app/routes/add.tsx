@@ -92,8 +92,8 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your identity verification</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your identity verification</p>
           </div>
         </div>
 
@@ -122,8 +122,8 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your purchase</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your purchase</p>
           </div>
         </div>
 
@@ -159,15 +159,15 @@ export default function AddFunds() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-            <p className="text-sm text-muted-foreground">Processing your request</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+            <p className="text-muted-foreground text-sm">Processing your request</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
           <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">{message}</p>
-          {errorMessage && <p className="mt-2 text-sm text-destructive">{errorMessage}</p>}
+          <p className="text-muted-foreground text-sm">{message}</p>
+          {errorMessage && <p className="mt-2 text-destructive text-sm">{errorMessage}</p>}
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -180,8 +180,8 @@ export default function AddFunds() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Add Funds</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Add Funds</h2>
+          <p className="text-muted-foreground text-sm">
             Buy crypto with your credit card or bank transfer
           </p>
         </div>
@@ -217,19 +217,19 @@ export default function AddFunds() {
           <div className="rounded-lg border border-border bg-muted/50 p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-card shadow-sm overflow-hidden p-1">
+                <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-border bg-card p-1 shadow-sm">
                   <CreditCard className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div>
                   <div className="font-medium text-foreground">Transak</div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     Global cards &amp; bank transfers
                   </div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-medium text-foreground">&asymp; 100 USDC</div>
-                <div className="text-xs font-medium text-success-foreground">Best rate</div>
+                <div className="font-medium text-success-foreground text-xs">Best rate</div>
               </div>
             </div>
           </div>

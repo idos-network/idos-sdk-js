@@ -30,23 +30,23 @@ export const CredentialCard = ({
   }, [shares]);
 
   return (
-    <div className="flex flex-col gap-16 p-5 bg-neutral-900 rounded-xl">
-      <div className="grid grid-cols-2 lg:grid-cols-6 gap-10">
+    <div className="flex flex-col gap-16 rounded-xl bg-neutral-900 p-5">
+      <div className="grid grid-cols-2 gap-10 lg:grid-cols-6">
         {meta.map(([key, value]) => (
           <div key={key} className="flex flex-col items-stretch gap-2">
-            <span className="block mb-5 text-neutral-500 text-sm capitalize">{key}</span>
+            <span className="mb-5 block text-neutral-500 text-sm capitalize">{key}</span>
             <span>{value}</span>
           </div>
         ))}
         <div>
-          <span className="block mb-5 text-neutral-500 text-sm">Shares</span>
+          <span className="mb-5 block text-neutral-500 text-sm">Shares</span>
           <span data-testid="shares-count" className="block">
             {shares.data?.length || 0}
           </span>
         </div>
       </div>
-      <div className="flex md:flex-row flex-col gap-5">
-        <div className="w-full flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col gap-5 md:flex-row">
+        <div className="flex w-full flex-col gap-4 lg:flex-row">
           <Button
             id={`view-details-${credential.id}`}
             variant="secondary"

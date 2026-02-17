@@ -1,5 +1,5 @@
 import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
-import { Client, decodeAccountID, Wallet } from "xrpl";
+import { Client, decodeAccountID, type TxResponse, Wallet } from "xrpl";
 
 /**
  * Parameters for creating an original credential on XRPL
@@ -82,7 +82,9 @@ export class XrplCredentialsCreate {
    * });
    * ```
    */
-  async createCredentialForOriginal(params: CreateCredentialForOriginalParams): Promise<any> {
+  async createCredentialForOriginal(
+    params: CreateCredentialForOriginalParams,
+  ): Promise<TxResponse> {
     const { credId, credType, userAddress } = params;
 
     // Connect to the XRPL node
@@ -133,7 +135,7 @@ export class XrplCredentialsCreate {
    * });
    * ```
    */
-  async createCredentialForCopy(params: CreateCredentialForCopyParams): Promise<any> {
+  async createCredentialForCopy(params: CreateCredentialForCopyParams): Promise<TxResponse> {
     const { credId, credType, userAddress, timelockYears, origCredIssuerAddress } = params;
 
     // Validate timelockYears is a non-negative integer

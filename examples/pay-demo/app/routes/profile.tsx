@@ -16,8 +16,8 @@ export default function Profile() {
     <div className="flex min-h-full flex-col space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Your Profile</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Your Profile</h2>
+          <p className="text-muted-foreground text-sm">
             Manage your identity and connected wallets
           </p>
         </div>
@@ -31,7 +31,7 @@ export default function Profile() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-4">
-              <div className="flex items-center justify-between border-b border-border pb-4">
+              <div className="flex items-center justify-between border-border border-b pb-4">
                 <div className="flex items-center gap-3">
                   <div className="rounded-full bg-success/10 p-2 text-success-foreground">
                     <User className="h-4 w-4" />
@@ -58,10 +58,10 @@ export default function Profile() {
               </div>
 
               <div className="mt-4 rounded-lg border border-border bg-muted p-4">
-                <div className="mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                <div className="mb-2 flex items-center gap-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   <HardDrive className="h-3 w-3" /> Credential Data
                 </div>
-                <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-xs text-muted-foreground">
+                <pre className="max-h-40 overflow-auto whitespace-pre-wrap break-all font-mono text-muted-foreground text-xs">
                   {JSON.stringify(
                     { type: "VerifiableCredential", issuer: "did:idos:123", status: "active" },
                     null,
@@ -82,10 +82,10 @@ export default function Profile() {
             <div className="space-y-3">
               <div className="flex items-center justify-between rounded-lg border border-border bg-muted/50 p-3">
                 <div className="flex items-center gap-3 overflow-hidden">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground text-xs">
                     W
                   </div>
-                  <div className="truncate font-mono text-sm text-muted-foreground">{ADDRESS}</div>
+                  <div className="truncate font-mono text-muted-foreground text-sm">{ADDRESS}</div>
                 </div>
                 <Badge variant="info" className="ml-2 shrink-0">
                   Primary
@@ -101,8 +101,8 @@ export default function Profile() {
       </div>
 
       <div className="mt-auto pt-8 text-center">
-        <p className="mb-1 text-xs text-muted-foreground">Decentralized Identity powered by</p>
-        <div className="text-lg font-bold tracking-tight text-foreground">idOS</div>
+        <p className="mb-1 text-muted-foreground text-xs">Decentralized Identity powered by</p>
+        <div className="font-bold text-foreground text-lg tracking-tight">idOS</div>
       </div>
     </div>
   );

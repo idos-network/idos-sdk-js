@@ -100,7 +100,7 @@ export const WalletSelectorContextProvider: React.FC<{
 
   if (loading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
       </div>
     );

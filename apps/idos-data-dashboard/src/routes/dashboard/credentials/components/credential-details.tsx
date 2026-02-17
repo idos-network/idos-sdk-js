@@ -101,7 +101,7 @@ export const CredentialDetails = ({ isOpen, credentialId, onClose }: CredentialD
           </Button>
           {credential.isSuccess ? (
             <Button id={`download-credential-${credential.data?.id}`} variant="default">
-              <a href={jsonLink} download={downloadFileName} className="flex gap-2 items-center">
+              <a href={jsonLink} download={downloadFileName} className="flex items-center gap-2">
                 <DownloadIcon size={24} />
                 Download as .json
               </a>

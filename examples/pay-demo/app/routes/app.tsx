@@ -46,8 +46,8 @@ export default function App() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Dashboard</h2>
-          <p className="text-sm text-muted-foreground">Overview of your financial activity.</p>
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground text-sm">Overview of your financial activity.</p>
         </div>
       </div>
 
@@ -59,21 +59,21 @@ export default function App() {
           {stats.map((stat) => (
             <Card key={stat.title} className="shadow-sm transition-shadow hover:shadow-md">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
+                <CardTitle className="font-medium text-muted-foreground text-sm">
                   {stat.title}
                 </CardTitle>
                 <stat.icon className={`h-4 w-4 ${stat.iconClass ?? "text-muted-foreground"}`} />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.change}</p>
+                <div className="font-bold text-2xl text-foreground">{stat.value}</div>
+                <p className="text-muted-foreground text-xs">{stat.change}</p>
               </CardContent>
             </Card>
           ))}
         </div>
 
         <div className="grid gap-4 lg:grid-cols-7">
-          <Card className="lg:col-span-4 shadow-sm">
+          <Card className="shadow-sm lg:col-span-4">
             <CardHeader>
               <CardTitle>Revenue Overview</CardTitle>
               <CardDescription>Your spending patterns over the last 30 days.</CardDescription>
@@ -86,7 +86,7 @@ export default function App() {
                     className="group relative flex w-full cursor-pointer flex-col justify-end gap-2 transition-opacity hover:opacity-80"
                   >
                     <div style={{ height: `${h}%` }} className="w-full rounded-t-md bg-primary" />
-                    <span className="absolute -bottom-4 left-0 right-0 text-center text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
+                    <span className="absolute right-0 -bottom-4 left-0 text-center text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100">
                       {i + 1}
                     </span>
                   </div>
@@ -95,7 +95,7 @@ export default function App() {
             </CardContent>
           </Card>
 
-          <Card className="lg:col-span-3 shadow-sm">
+          <Card className="shadow-sm lg:col-span-3">
             <CardHeader>
               <CardTitle>Recent Transactions</CardTitle>
               <CardDescription>You made 265 transactions this month.</CardDescription>
@@ -106,16 +106,16 @@ export default function App() {
                   <div key={tx.email} className="flex items-center justify-between gap-4">
                     <div className="flex min-w-0 items-center gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
-                        <span className="text-xs font-medium text-foreground">{tx.initials}</span>
+                        <span className="font-medium text-foreground text-xs">{tx.initials}</span>
                       </div>
-                      <div className="min-w-0 grid gap-0.5">
-                        <p className="truncate text-sm font-medium leading-none text-foreground">
+                      <div className="grid min-w-0 gap-0.5">
+                        <p className="truncate font-medium text-foreground text-sm leading-none">
                           {tx.name}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">{tx.email}</p>
+                        <p className="truncate text-muted-foreground text-xs">{tx.email}</p>
                       </div>
                     </div>
-                    <div className="shrink-0 text-sm font-medium text-foreground">{tx.amount}</div>
+                    <div className="shrink-0 font-medium text-foreground text-sm">{tx.amount}</div>
                   </div>
                 ))}
               </div>

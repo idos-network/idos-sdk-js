@@ -129,8 +129,7 @@ export const confirmTos = async (token: string, ipAddress: string): Promise<void
     );
   }
 
-  const data = (await response.json()) as any;
-  return data;
+  await response.json();
 };
 
 export interface ShareTokenResponse {

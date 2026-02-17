@@ -52,7 +52,7 @@ export const walletInfoMapper = ({
       const signature = await signNearMessage(signer, message);
       return signature;
     },
-    signer: () => selector.wallet() as unknown as any,
+    signer: () => selector.wallet() as Promise<Wallet>,
     type: "NEAR",
   },
   XRPL: {

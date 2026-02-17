@@ -25,18 +25,18 @@ import { Link, type LinkProps as ShadcnLinkProps } from "./ui/link";
 const ConnectedWallet = () => {
   const { address } = useAccount();
   return (
-    <div className="flex items-center gap-5 h-20">
-      <div className="shrink-0 w-[50px] h-[50px] bg-neutral-800 rounded-lg flex items-center justify-center">
+    <div className="flex h-20 items-center gap-5">
+      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-neutral-800">
         <img
           alt={`Connected wallet ${address}`}
           src="/idos-dashboard-logo-dark.svg"
-          className="w-[50px] h-[50px]"
+          className="h-[50px] w-[50px]"
           loading="eager"
         />
       </div>
       <div>
         <div className="text-neutral-100">Connected Wallet</div>
-        <div className="max-w-[180px] text-neutral-600 truncate">{address}</div>
+        <div className="max-w-[180px] truncate text-neutral-600">{address}</div>
       </div>
     </div>
   );
@@ -47,7 +47,7 @@ const ListItemLink = (props: ShadcnLinkProps) => {
     <Link
       {...props}
       variant="nav"
-      className={cn("px-6 py-3 flex items-center gap-5 [&:hover]:bg-neutral-950!", props.className)}
+      className={cn("flex items-center gap-5 px-6 py-3 [&:hover]:bg-neutral-950!", props.className)}
     />
   );
 };
@@ -101,7 +101,7 @@ const Breadcrumbs = () => {
       {items.map((item, index) => {
         return (
           <li key={item} className="flex items-center gap-2.5 lg:gap-5">
-            <span className="text-sm px-4 py-2 bg-neutral-800 rounded-full">{item}</span>
+            <span className="rounded-full bg-neutral-800 px-4 py-2 text-sm">{item}</span>
             {index !== items.length - 1 ? <ChevronRightIcon size={18} aria-hidden="true" /> : null}
           </li>
         );
@@ -130,21 +130,21 @@ export default function Layout({
 
   return (
     <div className="flex min-h-screen">
-      <nav className="sticky top-0 h-screen w-[380px] hidden lg:flex flex-col items-stretch">
-        <div className="flex flex-col items-stretch flex-1 p-5 gap-5">
-          <Link to="/" className="flex items-center h-[100px]">
+      <nav className="sticky top-0 hidden h-screen w-[380px] flex-col items-stretch lg:flex">
+        <div className="flex flex-1 flex-col items-stretch gap-5 p-5">
+          <Link to="/" className="flex h-[100px] items-center">
             <img
               src="/idos-dashboard-logo.svg"
               alt="idOS Dashboard logo"
               loading="eager"
-              className="w-40 h-auto"
+              className="h-auto w-40"
             />
           </Link>
-          <div className="flex flex-col items-stretch flex-1 gap-2.5">
-            <div className="px-5 bg-neutral-900 rounded-xl">
+          <div className="flex flex-1 flex-col items-stretch gap-2.5">
+            <div className="rounded-xl bg-neutral-900 px-5">
               <ConnectedWallet />
             </div>
-            <div className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
+            <div className="flex flex-1 flex-col items-stretch rounded-xl bg-neutral-900 p-5">
               <ul className="flex flex-col gap-1.5">
                 <li>
                   <ListItemLink to="/">
@@ -161,7 +161,7 @@ export default function Layout({
                   </li>
                 ) : null}
               </ul>
-              <div className="mt-auto flex flex-col gap-5 items-stretch">
+              <div className="mt-auto flex flex-col items-stretch gap-5">
                 {hasAccount ? (
                   <ul className="flex flex-1 flex-col gap-1.5">
                     <ListItemLink to="/settings">
@@ -176,8 +176,8 @@ export default function Layout({
           </div>
         </div>
       </nav>
-      <div className="flex flex-col items-stretch flex-1 p-5 gap-0">
-        <div className="flex items-center justify-between h-10 lg:h-[120px] mb-5 lg:mb-0">
+      <div className="flex flex-1 flex-col items-stretch gap-0 p-5">
+        <div className="mb-5 flex h-10 items-center justify-between lg:mb-0 lg:h-[120px]">
           <Button
             variant="secondary"
             aria-label="Open menu"
@@ -194,20 +194,20 @@ export default function Layout({
         <DrawerContent className="bg-neutral-900">
           <DrawerHeader className="relative">
             <DrawerClose asChild>
-              <Button variant="ghost" className="absolute right-4 top-4" aria-label="Close menu">
+              <Button variant="ghost" className="absolute top-4 right-4" aria-label="Close menu">
                 <XIcon size={20} />
               </Button>
             </DrawerClose>
-            <Link to="/" className="flex items-center h-[100px] bg-transparent!">
+            <Link to="/" className="flex h-[100px] items-center bg-transparent!">
               <img
                 src="/idos-dashboard-logo.svg"
                 alt="idOS Dashboard logo"
-                className="w-[120px] h-auto"
+                className="h-auto w-[120px]"
                 loading="eager"
               />
             </Link>
           </DrawerHeader>
-          <div className="p-4 flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-5">
               <ConnectedWallet />
             </div>
@@ -241,7 +241,7 @@ export default function Layout({
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg flex items-stretch">
+      <div className="fixed right-5 bottom-5 flex items-stretch gap-2 rounded-lg bg-neutral-900 p-5">
         <Button
           variant="secondary"
           className="flex items-center gap-2 text-green-200!"

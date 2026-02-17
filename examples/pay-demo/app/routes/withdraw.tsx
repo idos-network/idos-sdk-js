@@ -114,8 +114,8 @@ export default function Withdraw() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your identity verification</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your identity verification</p>
           </div>
         </div>
 
@@ -144,8 +144,8 @@ export default function Withdraw() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-            <p className="text-sm text-muted-foreground">
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">
               Accept Due's terms to continue with your withdrawal
             </p>
           </div>
@@ -173,8 +173,8 @@ export default function Withdraw() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-            <p className="text-sm text-muted-foreground">Complete your verification through Due</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">Complete your verification through Due</p>
           </div>
         </div>
 
@@ -193,8 +193,8 @@ export default function Withdraw() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-              <p className="text-sm text-muted-foreground">An error occurred</p>
+              <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+              <p className="text-muted-foreground text-sm">An error occurred</p>
             </div>
           </div>
 
@@ -216,10 +216,10 @@ export default function Withdraw() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Enter your bank account details to receive funds
                 </p>
               </div>
@@ -242,10 +242,10 @@ export default function Withdraw() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-sm text-muted-foreground">Review your transfer details</p>
+                <p className="text-muted-foreground text-sm">Review your transfer details</p>
               </div>
             </div>
 
@@ -268,10 +268,10 @@ export default function Withdraw() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-sm text-muted-foreground">Confirm and sign the transaction</p>
+                <p className="text-muted-foreground text-sm">Confirm and sign the transaction</p>
               </div>
             </div>
 
@@ -319,10 +319,10 @@ export default function Withdraw() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-sm text-muted-foreground">Transfer in progress</p>
+                <p className="text-muted-foreground text-sm">Transfer in progress</p>
               </div>
             </div>
 
@@ -343,10 +343,10 @@ export default function Withdraw() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-foreground">
+                <h2 className="font-bold text-2xl text-foreground tracking-tight">
                   Withdraw Funds
                 </h2>
-                <p className="text-sm text-muted-foreground">Transfer complete</p>
+                <p className="text-muted-foreground text-sm">Transfer complete</p>
               </div>
             </div>
 
@@ -367,8 +367,8 @@ export default function Withdraw() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-            <p className="text-sm text-muted-foreground">An error occurred</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">An error occurred</p>
           </div>
         </div>
 
@@ -393,15 +393,15 @@ export default function Withdraw() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-            <p className="text-sm text-muted-foreground">Processing your request</p>
+            <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+            <p className="text-muted-foreground text-sm">Processing your request</p>
           </div>
         </div>
 
         <div className="flex flex-col items-center justify-center py-20">
           <div className="mb-4 h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-primary" />
-          <p className="text-sm text-muted-foreground">{message}</p>
-          {errorMessage && <p className="mt-2 text-sm text-destructive">{errorMessage}</p>}
+          <p className="text-muted-foreground text-sm">{message}</p>
+          {errorMessage && <p className="mt-2 text-destructive text-sm">{errorMessage}</p>}
         </div>
 
         <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -414,8 +414,8 @@ export default function Withdraw() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight text-foreground">Withdraw Funds</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="font-bold text-2xl text-foreground tracking-tight">Withdraw Funds</h2>
+          <p className="text-muted-foreground text-sm">
             Transfer back to your bank account via Due
           </p>
         </div>
@@ -435,7 +435,7 @@ export default function Withdraw() {
                   <NumberFieldInput className="text-left text-lg" />
                 </NumberFieldGroup>
               </NumberField>
-              <div className="flex items-center justify-center rounded-md border border-input bg-muted px-4 text-sm font-medium">
+              <div className="flex items-center justify-center rounded-md border border-input bg-muted px-4 font-medium text-sm">
                 USDC
               </div>
             </div>
@@ -449,12 +449,12 @@ export default function Withdraw() {
                 </div>
                 <div>
                   <div className="font-medium text-foreground">Due</div>
-                  <div className="text-xs text-muted-foreground">SEPA Instant Transfer</div>
+                  <div className="text-muted-foreground text-xs">SEPA Instant Transfer</div>
                 </div>
               </div>
               <div className="text-right">
                 <div className="font-medium text-foreground">&asymp; &euro;92.00</div>
-                <div className="text-xs font-medium text-success-foreground">
+                <div className="font-medium text-success-foreground text-xs">
                   Rate: 1 USDC = &euro;0.92
                 </div>
               </div>
