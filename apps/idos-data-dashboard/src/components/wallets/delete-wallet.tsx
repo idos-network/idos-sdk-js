@@ -34,7 +34,7 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
       onError(error) {
         console.error("Error while deleting wallet:", error);
         toast.error("Error while deleting wallet", {
-          description: "An unexpected error. Please try again.",
+          description: "An unexpected error ocurred. Please try again.",
         });
       },
     });
