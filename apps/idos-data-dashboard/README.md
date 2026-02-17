@@ -56,9 +56,6 @@ The idOS Data Dashboard is a web application that allows users to manage their d
 | `VITE_IDOS_ENCLAVE_URL` | Yes | URL of the idOS secure enclave for credential decryption. |
 | `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes | NEAR contract ID for the idOS access grants contract. |
 | `VITE_EMBEDDED_WALLET_APP_URLS` | Yes | Comma-separated URLs for the embedded wallet add flow popup. |
-| `VITE_FRACTAL_PROOF_URL_BASE` | No | Base URL for Fractal proof verification. |
-| `VITE_FRACTAL_PROOF_URL_CLIENT_ID` | No | Client ID for Fractal proof verification. |
-| `VITE_FRACTAL_PROOF_URL_REDIRECT_URI` | No | Redirect URI for Fractal proof verification. |
 
 ## Available scripts
 
@@ -75,7 +72,7 @@ Run these from the `apps/idos-data-dashboard` directory:
 
 The application separates concerns into three layers:
 
-```
+```text
 XState (auth & wallet state)
     |
     v
@@ -102,7 +99,7 @@ idOS Client SDK (data access)
 
 The XState `dashboardMachine` manages the full wallet lifecycle:
 
-```
+```text
 idle --> reconnecting --> initializingIdOS --> loggedIn
   \                                       \-> noProfile
    \-> disconnected --> connecting --> initializingIdOS
@@ -112,7 +109,7 @@ It handles wallet connection, reconnection from `localStorage`, idOS client init
 
 ## Project structure
 
-```
+```text
 src/
 ├── machines/               # XState state machine
 │   ├── actors/             # Actor implementations (connect, disconnect, reconnect, init)

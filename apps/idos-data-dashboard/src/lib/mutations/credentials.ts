@@ -34,8 +34,14 @@ export function useRevokeGrants() {
 
   return useMutation({
     mutationFn: async (grants: idOSGrant[]) => {
-      for (const grant of grants) {
-        await revokeGrant.mutateAsync(grant, { onError() {} });
+      const results = await Promise.allSettled(
+        grants.map((grant) => revokeGrant.mutateAsync(grant)),
+      );
+
+      const failures = results.filter((r): r is PromiseRejectedResult => r.status === "rejected");
+
+      if (failures.length > 0) {
+        throw new Error(`Failed to revoke ${failures.length} of ${grants.length} grants`);
       }
     },
     mutationKey: ["revokeGrants"],

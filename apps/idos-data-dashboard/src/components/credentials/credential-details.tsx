@@ -71,11 +71,18 @@ export function CredentialDetails({ isOpen, credentialId, onClose }: CredentialD
             Close
           </Button>
           {credential.isSuccess ? (
-            <Button id={`download-credential-${credential.data?.id}`} variant="default">
-              <a href={jsonLink} download={downloadFileName} className="flex items-center gap-2">
-                <DownloadIcon size={24} />
-                Download as .json
-              </a>
+            <Button
+              id={`download-credential-${credential.data?.id}`}
+              variant="default"
+              onClick={() => {
+                const a = document.createElement("a");
+                a.href = jsonLink;
+                a.download = downloadFileName;
+                a.click();
+              }}
+            >
+              <DownloadIcon size={24} />
+              Download as .json
             </Button>
           ) : null}
         </DialogFooter>

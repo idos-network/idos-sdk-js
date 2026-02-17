@@ -1,5 +1,5 @@
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
-import type { WalletType } from "@idos-network/kwil-infra/actions";
+import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { assign, fromCallback, fromPromise, setup } from "xstate";
 
@@ -81,8 +81,19 @@ function getPersistedWallet(): {
       return null;
     }
     const parsed = JSON.parse(raw);
-    if (parsed.walletType && parsed.walletAddress && parsed.walletPublicKey) {
-      return parsed;
+    if (
+      typeof parsed === "object" &&
+      parsed !== null &&
+      typeof parsed.walletAddress === "string" &&
+      typeof parsed.walletPublicKey === "string" &&
+      typeof parsed.walletType === "string" &&
+      WALLET_TYPES.includes(parsed.walletType)
+    ) {
+      return {
+        walletType: parsed.walletType as WalletType,
+        walletAddress: parsed.walletAddress,
+        walletPublicKey: parsed.walletPublicKey,
+      };
     }
     return null;
   } catch {
@@ -143,6 +154,14 @@ export const dashboardMachine = setup({
     clearPersistedWallet: () => {
       persistWallet(null, null, null);
     },
+    resetWalletState: assign({
+      walletType: () => null,
+      walletAddress: () => null,
+      walletPublicKey: () => null,
+      nearSelector: () => null,
+      error: () => null,
+      idOSClient: () => idOSConfig as idOSClient,
+    }),
   },
 }).createMachine({
   id: "dashboard",
@@ -347,31 +366,11 @@ export const dashboardMachine = setup({
         }),
         onDone: {
           target: "disconnected",
-          actions: [
-            assign({
-              walletType: () => null,
-              walletAddress: () => null,
-              walletPublicKey: () => null,
-              nearSelector: () => null,
-              error: () => null,
-              idOSClient: () => idOSConfig as idOSClient,
-            }),
-            "clearPersistedWallet",
-          ],
+          actions: ["resetWalletState", "clearPersistedWallet"],
         },
         onError: {
           target: "disconnected",
-          actions: [
-            assign({
-              walletType: () => null,
-              walletAddress: () => null,
-              walletPublicKey: () => null,
-              nearSelector: () => null,
-              error: () => null,
-              idOSClient: () => idOSConfig as idOSClient,
-            }),
-            "clearPersistedWallet",
-          ],
+          actions: ["resetWalletState", "clearPersistedWallet"],
         },
       },
     },

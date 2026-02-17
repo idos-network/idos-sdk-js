@@ -1,5 +1,3 @@
-"use client"
-
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -55,7 +53,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast",
+          toast: "rounded-xl shadow-lg",
         },
       }}
       {...props}

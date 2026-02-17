@@ -55,7 +55,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
 
   const handleRevokeGrants = async () => {
     if (grants.data && grants.data.length > 0) {
-      toast.error("Revoking grants", {
+      toast.loading("Revoking grants", {
         description: "Revoking grants that have been shared with others...",
       });
 
@@ -82,20 +82,20 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
       });
       return;
     }
-    await handleRevokeGrants();
-    await deleteCredential.mutateAsync(credential, {
-      onSuccess() {
-        handleClose();
-        toast.success("Credential successfully removed", {
-          description: "Credential has been successfully removed",
-        });
-      },
-      onError() {
-        toast.error("Error while deleting credential", {
-          description: "An unexpected error occurred. Please try again.",
-        });
-      },
-    });
+
+    try {
+      await handleRevokeGrants();
+      await deleteCredential.mutateAsync(credential);
+      handleClose();
+      toast.success("Credential successfully removed", {
+        description: "Credential has been successfully removed",
+      });
+    } catch (error) {
+      console.error("Failed to delete credential:", error);
+      toast.error("Error while deleting credential", {
+        description: "An unexpected error occurred. Please try again.",
+      });
+    }
   };
 
   const [currentToRevoke] = state;

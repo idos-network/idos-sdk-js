@@ -21,12 +21,14 @@ export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async (
       await disconnectEvm();
     }
 
+    // XRPL (GemWallet) has no persistent session to disconnect.
+
     if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
       await idOSClient.logOut();
     }
   } catch (error) {
-    console.error("Error during disconnect:", error);
+    console.error(`Error during ${walletType} disconnect:`, error);
   }
 
-  queryClient.removeQueries();
+  queryClient.clear();
 });

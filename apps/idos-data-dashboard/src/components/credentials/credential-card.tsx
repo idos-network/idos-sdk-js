@@ -1,6 +1,4 @@
 import { KeyRoundIcon, XIcon } from "lucide-react";
-
-import { useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useFetchGrants } from "@/lib/queries/credentials";
@@ -35,10 +33,9 @@ export function CredentialCard({
   const shares = useFetchGrants({ credentialId: credential.id });
 
   const fieldOrder = ["type", "status", "issuer", "level"];
-  const entries = Object.entries(publicFields).filter(([key]) => key !== "id") as [
-    string,
-    string,
-  ][];
+  const entries = Object.entries(publicFields)
+    .filter(([key]) => key !== "id")
+    .map(([key, value]) => [key, typeof value === "string" ? value : String(value ?? "")] as const);
   const meta = entries.sort(([a], [b]) => {
     const ai = fieldOrder.indexOf(a);
     const bi = fieldOrder.indexOf(b);
@@ -53,10 +50,6 @@ export function CredentialCard({
     }
     return 0;
   });
-
-  useEffect(() => {
-    shares.refetch();
-  }, [shares]);
 
   return (
     <div className="flex flex-col gap-12 rounded-xl bg-card p-5">

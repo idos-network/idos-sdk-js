@@ -21,6 +21,11 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
         if (!reconnectedAccount.isConnected || !reconnectedAccount.address) {
           throw new Error("EVM reconnection failed");
         }
+        if (reconnectedAccount.address.toLowerCase() !== input.walletAddress.toLowerCase()) {
+          throw new Error(
+            `EVM reconnection address mismatch: expected ${input.walletAddress}, got ${reconnectedAccount.address}`,
+          );
+        }
         return { nearSelector: null };
       }
 
@@ -35,6 +40,8 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
 
       case "Stellar":
       case "XRPL":
+        // Stellar and XRPL wallets do not persist sessions, so reconnection is a no-op.
+        // Users must manually reconnect these wallets after a page refresh.
         return { nearSelector: null };
 
       default:

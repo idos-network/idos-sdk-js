@@ -5,6 +5,13 @@ import { disconnect, type GetAccountReturnType, getAccount } from "@wagmi/core";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
+if (!projectId) {
+  throw new Error(
+    "Missing VITE_WALLET_CONNECT_PROJECT_ID environment variable. " +
+      "Get a project ID at https://cloud.reown.com/ and add it to your .env file.",
+  );
+}
+
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",

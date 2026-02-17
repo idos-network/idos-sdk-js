@@ -72,10 +72,10 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 id={`grant-${generateGrantId(grant)}`}
                 data-grant={JSON.stringify(grant)}
               >
-                <td className="max-w-[140px]">
+                <td className="w-full max-w-0">
                   <span className="block truncate">{grant.ag_grantee_wallet_identifier}</span>
                 </td>
-                <td>
+                <td className="w-0 whitespace-nowrap">
                   <span className="block">
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
                   </span>
@@ -87,9 +87,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     size="sm"
                     variant="destructive-outline"
                     disabled={timelockToMs(+grant.locked_until) >= Date.now()}
-                    isLoading={
-                      revokeGrant.isPending && revokeGrant.variables?.data_id === grant.data_id
-                    }
+                    isLoading={revokeGrant.isPending && revokeGrant.variables?.id === grant.id}
                     onClick={() => onRevoke(grant)}
                   >
                     Revoke

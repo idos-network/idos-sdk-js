@@ -35,6 +35,11 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "
 
 function ConnectedWallet() {
   const address = useSelector(dashboardActor, selectWalletAddress);
+
+  if (!address) {
+    return null;
+  }
+
   return (
     <div className="flex h-20 items-center gap-5">
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
@@ -50,14 +55,14 @@ function ConnectedWallet() {
       <div>
         <div className="text-card-foreground">Connected Wallet</div>
         <code className="max-w-[180px] truncate text-muted-foreground">
-          {address?.slice(0, 6)}...{address?.slice(-4)}
+          {address.slice(0, 6)}...{address.slice(-4)}
         </code>
       </div>
     </div>
   );
 }
 
-function ListItemLink({ to, children }: LinkProps) {
+function ListItemLink({ to, children }: { to: LinkProps["to"]; children: React.ReactNode }) {
   const matchRoute = useMatchRoute();
   const isActive = matchRoute({ to });
   return (
@@ -70,6 +75,66 @@ function ListItemLink({ to, children }: LinkProps) {
     >
       {children}
     </Link>
+  );
+}
+
+const externalLinkClasses = "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle";
+
+function MainNavLinks() {
+  return (
+    <ul className="flex flex-col gap-1.5">
+      <li>
+        <ListItemLink to="/">
+          <KeyRoundIcon size={24} strokeWidth="1.5" />
+          <span>Credentials</span>
+        </ListItemLink>
+      </li>
+      <li>
+        <ListItemLink to="/wallets">
+          <Wallet2Icon size={24} strokeWidth="1.5" />
+          <span>Wallets</span>
+        </ListItemLink>
+      </li>
+      <li>
+        <a
+          // @todo: change to the actual staking app once we have a domain
+          href="https://idos-staking-app.vercel.app/"
+          className={externalLinkClasses}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+          <span>Staking</span>
+          <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+        </a>
+      </li>
+    </ul>
+  );
+}
+
+function FooterNavLinks() {
+  return (
+    <ul className="flex flex-1 flex-col gap-1.5">
+      <li>
+        <a
+          // @todo: update to the actual Legacy app domain if/when it changes
+          href="https://app.idos.network/"
+          className={externalLinkClasses}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ArchiveIcon size={24} strokeWidth="1.5" />
+          <span>Legacy</span>
+          <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+        </a>
+      </li>
+      <li>
+        <ListItemLink to="/settings">
+          <CogIcon size={24} strokeWidth="1" />
+          <span>Settings</span>
+        </ListItemLink>
+      </li>
+    </ul>
   );
 }
 
@@ -99,7 +164,7 @@ function Breadcrumbs() {
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <Fragment key={item}>
+            <Fragment key={`${item}-${index}`}>
               <BreadcrumbItem>
                 <BreadcrumbPage>{item}</BreadcrumbPage>
               </BreadcrumbItem>
@@ -147,56 +212,9 @@ export function Layout({ children }: PropsWithChildren) {
               <ConnectedWallet />
             </div>
             <div className="flex flex-1 flex-col items-stretch rounded-xl bg-card p-5">
-              <ul className="flex flex-col gap-1.5">
-                <li>
-                  <ListItemLink to="/">
-                    <KeyRoundIcon size={24} strokeWidth="1.5" />
-                    <span>Credentials</span>
-                  </ListItemLink>
-                </li>
-
-                <li>
-                  <ListItemLink to="/wallets">
-                    <Wallet2Icon size={24} strokeWidth="1.5" />
-                    <span>Wallets</span>
-                  </ListItemLink>
-                </li>
-
-                <li>
-                  <a
-                    // @todo: change to the actual staking app once we have a domain
-                    href="https://idos-staking-app.vercel.app/"
-                    className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    <CircleDollarSignIcon size={24} strokeWidth="1.5" />
-                    <span>Staking</span>
-                    <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-                  </a>
-                </li>
-              </ul>
+              <MainNavLinks />
               <div className="mt-auto flex flex-col items-stretch gap-5">
-                <ul className="flex flex-1 flex-col gap-1.5">
-                  <li>
-                    <a
-                      // @todo: change to the actual staking app once we have a domain
-                      href="https://app.idos.network/"
-                      className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <ArchiveIcon size={24} strokeWidth="1.5" />
-                      <span>Legacy</span>
-                      <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-                    </a>
-                  </li>
-                  <ListItemLink to="/settings">
-                    <CogIcon size={24} strokeWidth="1" />
-                    <span>Settings</span>
-                  </ListItemLink>
-                </ul>
-
+                <FooterNavLinks />
                 <DisconnectButton />
               </div>
             </div>
@@ -254,56 +272,10 @@ export function Layout({ children }: PropsWithChildren) {
             <div className="mb-5">
               <ConnectedWallet />
             </div>
-            <ul className="flex flex-col gap-1.5">
-              <li>
-                <ListItemLink to="/">
-                  <KeyRoundIcon size={24} strokeWidth="2.5" />
-                  <span>Credentials</span>
-                </ListItemLink>
-              </li>
-
-              <li>
-                <ListItemLink to="/wallets">
-                  <Wallet2Icon size={24} strokeWidth="1.5" />
-                  <span>Wallets</span>
-                </ListItemLink>
-              </li>
-
-              <li>
-                <a
-                  href="https://idos-staking-app.vercel.app/"
-                  className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <CircleDollarSignIcon size={24} strokeWidth="1.5" />
-                  <span>Staking</span>
-                  <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-                </a>
-              </li>
-            </ul>
+            <MainNavLinks />
           </div>
           <DrawerFooter className="flex-col items-stretch gap-5">
-            <ul className="flex flex-1 flex-col gap-1.5">
-              <li>
-                <a
-                  href="https://app.idos.network/"
-                  className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <ArchiveIcon size={24} strokeWidth="1.5" />
-                  <span>Legacy</span>
-                  <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-                </a>
-              </li>
-              <li>
-                <ListItemLink to="/settings">
-                  <CogIcon size={24} strokeWidth="1" />
-                  <span>Settings</span>
-                </ListItemLink>
-              </li>
-            </ul>
+            <FooterNavLinks />
 
             <DisconnectButton />
 

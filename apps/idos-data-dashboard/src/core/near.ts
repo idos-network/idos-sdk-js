@@ -25,8 +25,8 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
 
   _selector = await setupWalletSelector({
     network: import.meta.env.DEV ? "testnet" : "mainnet",
-    debug: true,
-    // biome-ignore lint/suspicious/noExplicitAny: false positive
+    debug: import.meta.env.DEV,
+    // oxlint-disable-next-line typescript/no-explicit-any -- setupMeteorWallet type mismatch
     modules: [setupMeteorWallet() as any, setupHereWallet()],
   });
 
@@ -35,8 +35,10 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
     methodNames: [],
   });
 
-  window.selector = _selector;
-  window.modal = _modal;
+  if (import.meta.env.DEV) {
+    window.selector = _selector;
+    window.modal = _modal;
+  }
 
   return _selector;
 }

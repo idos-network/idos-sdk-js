@@ -212,9 +212,17 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
               return;
             }
 
+            if (!publicKey.address) {
+              sendBack({
+                type: "WALLET_CONNECT_ERROR",
+                error: "XRPL wallet returned no address",
+              });
+              return;
+            }
+
             sendBack({
               type: "WALLET_CONNECTED",
-              walletAddress: publicKey.address ?? "",
+              walletAddress: publicKey.address,
               walletPublicKey: publicKey.publicKey ?? "",
               nearSelector: input.nearSelector,
             });

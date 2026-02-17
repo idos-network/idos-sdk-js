@@ -50,6 +50,7 @@ export const createWallet = async (
 
 export function useAddWalletMutation() {
   const idOSClient = useIDOS();
+  const queryClient = useQueryClient();
 
   return useMutation<
     idOSWallet[],
@@ -78,6 +79,7 @@ export function useAddWalletMutation() {
       }
       return [await createWallet(idOSClient, { address, signature, message, walletType })];
     },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["wallets"] }),
   });
 }
 

@@ -30,7 +30,7 @@ export const Route = createFileRoute("/wallets")({
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const [walletsToDelete, setWalletToDelete] = useState<idOSWallet[] | undefined>([]);
+  const [walletsToDelete, setWalletsToDelete] = useState<idOSWallet[]>([]);
   const address = useSelector(dashboardActor, selectWalletAddress);
 
   const handleDelete = (walletAddress: string) => {
@@ -40,12 +40,12 @@ function WalletsList() {
       return;
     }
 
-    setWalletToDelete(toDelete);
+    setWalletsToDelete(toDelete);
     onOpen();
   };
 
   const handleClose = () => {
-    setWalletToDelete([]);
+    setWalletsToDelete([]);
     onClose();
   };
 

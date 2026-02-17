@@ -8,7 +8,6 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
-import { useIDOS } from "@/core/idOS";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
@@ -53,14 +52,9 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
   const [popupWindow, setPopupWindow] = useState<Window | null>(null);
   const addWalletMutation = useAddWalletMutation();
   const queryClient = useQueryClient();
-  const idOSClient = useIDOS();
 
   const addWallet = async (walletPayload: WalletSignature) => {
-    const userId = idOSClient?.user.id;
-
     const isValid = await verifySignature(walletPayload);
-
-    invariant(userId, "userId is not set, please login first");
     if (!isValid) {
       toast.error("Invalid signature", {
         description: "The signature does not match the wallet address",

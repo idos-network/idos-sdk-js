@@ -33,6 +33,8 @@ const router = createRouter({
   defaultErrorComponent: ErrorCard,
   context: {
     queryClient,
+    // The actual idOSClient instance is injected at runtime via <RouterProvider context={...} />,
+    // which only mounts after authentication completes. This placeholder satisfies the type system.
     idOSClient: undefined as unknown as idOSClientLoggedIn,
   },
 });

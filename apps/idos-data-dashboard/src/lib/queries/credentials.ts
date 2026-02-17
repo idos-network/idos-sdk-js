@@ -28,15 +28,16 @@ export function useFetchCredentials() {
 export function useFetchCredentialDetails({ credentialId }: { credentialId: string }) {
   return useQuery({
     queryKey: ["credential_details", credentialId],
-    queryFn: async ({ queryKey: [, credentialId] }) => {
+    enabled: !!credentialId,
+    queryFn: async () => {
       const idOSClient = getIdOSClient();
       const credential = await idOSClient.getCredentialById(credentialId);
-
-      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
 
       if (!credential) {
         throw new Error(`"idOSCredential" with id ${credentialId} not found`);
       }
+
+      await idOSClient.enclaveProvider.ensureUserEncryptionProfile();
 
       const decryptedContent = await idOSClient.enclaveProvider.decrypt(
         base64Decode(credential.content),
@@ -60,6 +61,7 @@ export function useFetchGrants({ credentialId }: { credentialId: string }) {
       const idOSClient = getIdOSClient();
       return idOSClient.getAccessGrantsOwned();
     },
+    enabled: !!credentialId,
     retry: 1,
     select(grants) {
       if (!credentials || !grants) {
