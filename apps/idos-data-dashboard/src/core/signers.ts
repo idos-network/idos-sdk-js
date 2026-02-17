@@ -1,10 +1,5 @@
 import * as GemWallet from "@gemwallet/api";
-import {
-  type CustomKwilSigner,
-  KwilSigner,
-  signNearMessage,
-  type Wallet,
-} from "@idos-network/kwil-infra";
+import { signNearMessage, type Wallet } from "@idos-network/kwil-infra";
 import type { WalletType } from "@idos-network/kwil-infra/actions";
 import { signGemWalletTx } from "@idos-network/kwil-infra/xrp-utils";
 import type { WalletSelector } from "@near-wallet-selector/core";
@@ -66,7 +61,7 @@ export const walletInfoMapper = ({
     // @ts-expect-error We need to fix the typing here
     signer: async () => GemWallet,
   },
-  Stellar: {
+  stellar: {
     address,
     publicKey,
     signMethod: async (message: string) => {
@@ -87,29 +82,7 @@ export const walletInfoMapper = ({
 
       return signatureHex;
     },
-    type: "Stellar",
-    signer: async () => {
-      const signer = new KwilSigner(
-        async (msg: Uint8Array): Promise<Uint8Array> => {
-          const messageBase64 = Buffer.from(msg).toString("base64");
-          const result = await stellarKit.signMessage(messageBase64);
-
-          let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-          if (signedMessage.length > 64) {
-            signedMessage = Buffer.from(signedMessage.toString(), "base64");
-          }
-          return signedMessage;
-        },
-        publicKey,
-        "ed25519",
-      ) as CustomKwilSigner;
-      try {
-        signer.publicAddress = address;
-      } catch (error) {
-        console.log("error setting public address", error);
-      }
-      return signer;
-    },
+    type: "stellar",
+    signer: async () => stellarKit,
   },
 });
