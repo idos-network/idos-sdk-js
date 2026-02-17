@@ -17,11 +17,13 @@ export function ConnectWallet() {
           <img
             src="/logo.svg"
             alt="idOS Dashboard logo"
-            className="w-52 h-auto mx-auto"
+            className="h-auto mx-auto"
+            width={208}
+            height={62}
             loading="eager"
           />
 
-          <h1 className="text-xl! font-normal text-center">
+          <h1 className="text-xl font-normal text-center">
             Manage your data and grants effortlessly with the idOS Dashboard.
           </h1>
 
@@ -89,7 +91,7 @@ export function ConnectWallet() {
           </span>
           <span className="flex gap-2 items-center place-content-center font-semibold text-sm">
             <span className="text-sm font-semibold">Powered by</span>
-            <img src="/logo.svg" alt="idOS logo" className="w-[68px] h-auto" />
+            <img src="/logo.svg" alt="idOS logo" width={68} height={22} />
           </span>
         </div>
       </div>
