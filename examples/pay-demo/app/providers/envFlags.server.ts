@@ -30,6 +30,7 @@ export const serverEnvSchema = z.object({
   DUE_API_URL: z.string(),
   DUE_API_KEY: z.string(),
   DUE_HTTP_URL: z.string(),
+  BLOB_PREFIX: z.string(),
 });
 
 export type ServerEnv = z.infer<typeof serverEnvSchema>;

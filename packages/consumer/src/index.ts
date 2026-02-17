@@ -26,6 +26,7 @@ import {
   type idOSGrant,
   type idOSPassportingPeer,
   rescindSharedCredential,
+  WalletType,
 } from "@idos-network/kwil-infra/actions";
 import type { KwilSigner } from "@idos-network/kwil-js";
 import { base64Encode, hexEncodeSha256Hash, utf8Encode } from "@idos-network/utils/codecs";
@@ -115,6 +116,11 @@ export class idOSConsumer {
   async getAccessGrantsForCredential(credentialId: string): Promise<idOSGrant[]> {
     const params = { credential_id: credentialId };
     return getAccessGrantsForCredential(this.#kwilClient, params);
+  }
+
+  async getUserIdFromWallet(walletType: WalletType, walletAddress: string): Promise<string | null> {
+
+
   }
 
   async getCredentialsSharedByUser(

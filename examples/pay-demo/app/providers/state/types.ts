@@ -1,20 +1,25 @@
-import type {
-  idOSClientLoggedIn,
-  idOSClientWithUserSigner,
-  idOSCredential,
-} from "@idos-network/client";
+// Import context types from all flows
+import { emptyContext as idOsEmptyContext, type idOSContext } from "./flows/idos";
+import {
+  emptyContext as credentialEmptyContext,
+  type CredentialContext,
+} from "./flows/credentials";
+import { emptyContext as kycEmptyContext, type KycContext } from "./flows/kyc";
+import { emptyContext as dueEmptyContext, type DueContext } from "./flows/due";
+import { emptyContext as transakEmptyContext, type TransakContext } from "./flows/transack";
+import { emptyContext as hifiEmptyContext, type HifiContext } from "./flows/hifi";
+import {
+  emptyContext as moneriumEmptyContext,
+  type MoneriumContext,
+  type MoneriumIban,
+} from "./flows/monerium";
+import { emptyContext as noahEmptyContext, type NoahContext } from "./flows/noah";
+import type { idOSClientLoggedIn } from "@idos-network/client";
+
+// Re-export types from flows
+export type { MoneriumIban };
 
 export type Provider = "transak" | "due" | "noah" | "custom" | "hifi" | "monerium" | null;
-
-export interface MoneriumIban {
-  profile: string;
-  address: string;
-  iban: string;
-  bic: string;
-  chain: string;
-  state: string;
-  emailNotifications: boolean;
-}
 
 export interface SharedTokenData {
   id: string;
@@ -23,52 +28,49 @@ export interface SharedTokenData {
   forClientId: string;
 }
 
-export interface Context {
+// Compose Context from all flow contexts
+export type Context = CoreContext &
+  idOSContext &
+  CredentialContext &
+  KycContext &
+  DueContext &
+  TransakContext &
+  HifiContext &
+  MoneriumContext &
+  NoahContext;
+
+// Core context that doesn't belong to any specific flow
+export interface CoreContext {
+  // Generic context stuff
   errorMessage?: string | null;
-  walletAddress: string | null;
+
+  // Withdrawal or add funds provider
   provider: Provider;
-  findCredentialAttempts: number;
-  kycType: "sumsub" | "persona" | null;
-  kycUrl: string | null;
-  profile: boolean | null;
-  sharableToken: string | null;
-  credential: idOSCredential | null;
-  sharedCredential: idOSCredential | null;
-  krakenDAG: idOSCredential | null;
-  client: idOSClientWithUserSigner | null;
-  loggedInClient: idOSClientLoggedIn | null;
-  noahUrl: string | null;
-  moneriumAuthUrl: string | null;
-  hifiTosUrl: string | null;
-  hifiTosId: string | null;
-  hifiUrl: string | null;
-  getHifiKycStatusAttempts: number;
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
-  hifiKycStatus: "ACTIVE" | any;
-  // biome-ignore lint/suspicious/noExplicitAny: false positive
-  onRampAccount: any | null;
-  moneriumCode: string | null;
-  moneriumProfileStatus: string | null;
-  moneriumProfileIbans: MoneriumIban[] | null;
-  transakTokenData: SharedTokenData | null;
-  transakWidgetUrl: string | null;
 
-  // Due flow
-  dueTokenData: SharedTokenData | null;
-  dueTosLinks: {
-    tos: string;
-    privacyPolicy: string;
-  } | null;
-  dueTosToken: string | null;
-  dueKycLink: string | null;
-  dueKycDone: boolean;
-  dueKycAttempts: number;
-
-  // Timers
-  checkCredentialStatusAttempts: number;
+  // Relay access grant
+  relayAG: Awaited<ReturnType<idOSClientLoggedIn["requestAccessGrant"]>> | null;
 }
 
 export interface UserData {
   // Add your user data type here
   [key: string]: unknown;
 }
+
+export const emptyContext: Context = {
+  // Core context
+  errorMessage: null,
+  provider: null,
+
+  // Relay access grant
+  relayAG: null,
+
+  // Flow-specific contexts
+  ...idOsEmptyContext,
+  ...credentialEmptyContext,
+  ...kycEmptyContext,
+  ...dueEmptyContext,
+  ...transakEmptyContext,
+  ...hifiEmptyContext,
+  ...moneriumEmptyContext,
+  ...noahEmptyContext,
+};

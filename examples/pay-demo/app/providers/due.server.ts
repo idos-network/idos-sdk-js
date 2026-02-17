@@ -184,11 +184,12 @@ export const getResubmissionInfo = async (
   return response.json();
 };
 
-export interface GetLinkResponse {
+export interface GetKycStatusResponse {
   externalLink: string;
+  status: "pending" | "resubmission_required" | "passed" | "failed";
 }
 
-export const getLink = async (accountId: string): Promise<GetLinkResponse> => {
+export const getKycStatus = async (accountId: string): Promise<GetKycStatusResponse> => {
   const response = await fetch(`${SERVER_ENV.DUE_API_URL}kyc`, {
     method: "GET",
     headers: {

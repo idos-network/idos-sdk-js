@@ -39,6 +39,7 @@ export default function Withdraw() {
   const { send } = MachineContext.useActorRef();
 
   const state = MachineContext.useSelector((s) => s.value);
+  const context = MachineContext.useSelector((s) => s.context);
   const provider = MachineContext.useSelector((s) => s.context.provider);
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
@@ -72,6 +73,9 @@ export default function Withdraw() {
     },
     [send],
   );
+
+  console.log("state", state);
+  console.log("context", context);
 
   useEffect(() => {
     window.addEventListener("message", messageReceiver);

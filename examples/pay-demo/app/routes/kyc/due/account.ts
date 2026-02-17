@@ -1,47 +1,68 @@
-import { createAccount, getAccount } from "~/providers/due.server";
+import { createAccount, getAccount, type CreateAccountResponse } from "~/providers/due.server";
 import { getCredentialShared } from "~/providers/idos.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/account";
+import { getUserItem, setDueMap, setUserItem } from "~/providers/store.server";
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const url = new URL(request.url);
+export async function action({ request }: Route.ActionArgs) {
+  if (request.method !== "POST") {
+    return Response.json({ error: "Method not allowed" }, { status: 405 });
+  }
+
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const user = session.get("user");
-  const credentialId = url.searchParams.get("credentialId");
 
-  if (!user || !credentialId) {
-    return Response.json({ error: "user and credentialId are required" }, { status: 400 });
+  if (!user) {
+    return Response.json({ error: "User is required" }, { status: 400 });
   }
 
-  if (session.get("dueAccountId")) {
-    const account = await getAccount(session.get("dueAccountId") as string);
-
-    if (account.status === "active") {
-      return Response.json(account);
-    }
-
-    return Response.json(account);
+  const userItem = await getUserItem(user.address);
+  if (!userItem || !userItem.sharedKyc?.id) {
+    return Response.json({ error: "User item or shared credential not found" }, { status: 400 });
   }
+
+  let accountResponse: CreateAccountResponse | null = null;
 
   try {
-    const data = await getCredentialShared(credentialId, user.address);
+    if (userItem?.due?.accountId) {
+      accountResponse = await getAccount(userItem.due.accountId);
 
-    const response = await createAccount({
-      type: "individual",
-      category: "employed",
-      name: `${data.credentialSubject.firstName} ${data.credentialSubject.familyName}`,
-      email: data.credentialSubject.email as string,
-      country: data.credentialSubject.nationality ?? data.credentialSubject.idDocumentCountry,
-    });
+      if (!accountResponse) {
+        throw new Error("Can't get due account, try again later.");
+      }
+    } else {
+      const data = await getCredentialShared(userItem.sharedKyc.id, user.address);
+
+      accountResponse = await createAccount({
+        type: "individual",
+        category: "employed",
+        name: `${data.credentialSubject.firstName} ${data.credentialSubject.familyName}`,
+        email: data.credentialSubject.email as string,
+        country: data.credentialSubject.nationality ?? data.credentialSubject.idDocumentCountry,
+      });
+
+      if (!accountResponse) {
+        throw new Error("Can't create due account, try again later.");
+      }
+
+      userItem.due = {
+        accountId: accountResponse.id,
+        kycStatus: "new",
+        tosAccepted: false,
+      }
+
+      // This is for webhooks to know which user to update
+      await setDueMap(user.address, accountResponse.id);
+    }
+
+    userItem.due.tosLinks = accountResponse.tos.documentLinks;
+    userItem.due.tosToken = accountResponse.tos.token;
+    userItem.due.tosAccepted = accountResponse.tos.status === "accepted";
 
     // Set Due account ID in session
-    session.set("dueAccountId", response.id);
+    await setUserItem(userItem);
 
-    return Response.json(response, {
-      headers: {
-        "Set-Cookie": await sessionStorage.commitSession(session),
-      },
-    });
+    return Response.json(userItem);
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

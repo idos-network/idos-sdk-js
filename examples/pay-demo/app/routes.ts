@@ -10,9 +10,13 @@ export default [
     route("noah", "routes/callbacks/noah.tsx"),
     route("hifi/tos", "routes/callbacks/hifi/tos.tsx"),
     route("monerium", "routes/callbacks/monerium.tsx"),
+    route("due", "routes/callbacks/due.ts"),
   ]),
 
   ...prefix("app", [
+    route("current", "routes/current.ts"),
+    route("credential/shared", "routes/credential/shared.ts"),
+
     layout("layouts/app.tsx", [
       index("routes/app.tsx"),
       route("add", "routes/add.tsx"),
@@ -35,8 +39,8 @@ export default [
         ]),
         ...prefix("due", [
           route("account", "routes/kyc/due/account.ts"),
-          route("confirm", "routes/kyc/due/confirm.ts"),
-          route("done", "routes/kyc/due/done.ts"),
+          route("kyc", "routes/kyc/due/kyc.ts"),
+          route("tos", "routes/kyc/due/tos.ts"),
         ]),
         ...prefix("monerium", [
           route("auth", "routes/kyc/monerium/auth.ts"),

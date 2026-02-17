@@ -1,7 +1,15 @@
-import { assign, setup } from "xstate";
+import { setup } from "xstate";
 import { actions } from "./actions";
 import { actors } from "./actors";
-import type { Context } from "./types";
+import { flow as dueFlow } from "./flows/due";
+import { flow as moneriumFlow } from "./flows/monerium";
+import { flow as noahFlow } from "./flows/noah";
+import { emptyContext, type Context } from "./types";
+import { flow as transakFlow } from "./flows/transack";
+import { flow as kycFlow } from "./flows/kyc";
+import { flow as hifiFlow } from "./flows/hifi";
+import { flow as idosFlow } from "./flows/idos";
+import { flow as credentialFlow } from "./flows/credentials";
 
 /**
  * State machine for managing idOS authentication and credential flow
@@ -24,60 +32,30 @@ export const machine = setup({
     isNoah: ({ context }: { context: Context }) => context.provider === "noah",
     isHifi: ({ context }: { context: Context }) => context.provider === "hifi",
     isDue: ({ context }: { context: Context }) => context.provider === "due",
+    hasError: ({ context }: { context: Context }) => context.errorMessage !== null,
   },
 }).createMachine({
   id: "idos",
   initial: "notConfigured",
-  context: {
-    walletAddress: null,
-    provider: null,
-    kycUrl: null,
-    krakenDAG: null,
-    kycType: null,
-    client: null,
-    profile: null,
-    loggedInClient: null,
-    sharableToken: null,
-    credential: null,
-    sharedCredential: null,
-    findCredentialAttempts: 0,
-    noahUrl: null,
-    hifiTosUrl: null,
-    hifiTosId: null,
-    hifiUrl: null,
-    hifiKycStatus: null,
-    getHifiKycStatusAttempts: 0,
-    onRampAccount: null,
-    moneriumAuthUrl: null,
-    moneriumCode: null,
-    moneriumProfileStatus: null,
-    moneriumProfileIbans: null,
-    transakTokenData: null,
-    transakWidgetUrl: null,
-    dueTokenData: null,
-    dueTosLinks: null,
-    dueTosToken: null,
-    dueKycLink: null,
-    dueKycDone: false,
-    dueKycAttempts: 0,
-    checkCredentialStatusAttempts: 0,
-  },
+  context: emptyContext,
   states: {
     notConfigured: {
       on: {
         configure: {
           actions: ["configure"],
-          target: "createClient",
+          target: "syncWithUserData",
         },
       },
     },
-    createClient: {
+
+    // Sync with current user data
+    syncWithUserData: {
       invoke: {
-        id: "createClient",
-        src: "createClient",
+        id: "fetchCurrentUser",
+        src: "fetchCurrentUser",
         onDone: {
-          target: "checkProfile",
-          actions: ["setClient"],
+          target: "idOSFlow",
+          actions: ["setCurrentUser"],
         },
         onError: {
           target: "error",
@@ -85,137 +63,80 @@ export const machine = setup({
         },
       },
     },
-    checkProfile: {
-      invoke: {
-        id: "checkProfile",
-        src: "checkProfile",
-        input: ({ context }) => context.client,
-        onDone: {
-          target: "login",
-          actions: assign({
-            profile: true,
-          }),
-        },
-        onError: {
-          target: "chooseKYCType",
-          actions: assign({
-            profile: false,
-          }),
-        },
-      },
-    },
-    chooseKYCType: {
-      on: {
-        startKYC: {
-          target: "startKYC",
-          actions: ["setKycType"],
-        },
-      },
-    },
-    startKYC: {
-      invoke: {
-        id: "startKYC",
-        src: "startKYC",
-        input: ({ context }) => context.kycType,
-        onDone: {
-          target: "waitForKYC",
-          actions: "setKycUrl",
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
-      },
-    },
-    waitForKYC: {
-      on: {
-        kycCompleted: {
-          target: "login",
-          actions: "setKycUrl",
-        },
-      },
-    },
-    login: {
-      invoke: {
-        id: "loginClient",
-        src: "loginClient",
-        input: ({ context }) => context.client,
-        onDone: {
-          target: "findCredential",
-          actions: ["setLoggedInClient"],
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
-      },
-    },
-    findCredential: {
-      invoke: {
-        id: "findCredential",
-        src: "findCredential",
-        input: ({ context }) => context.loggedInClient,
-        onDone: [
-          {
-            actions: ["setCredential"],
-            target: "requestAccessGrant",
-          },
-        ],
-        onError: [
-          {
-            guard: ({ context }) => context.kycUrl !== null,
-            target: "waitForCredential",
-            actions: ["incrementFindCredentialAttempts"],
-          },
-          {
-            guard: ({ context }) => context.kycUrl === null,
-            target: "chooseKYCType",
-          },
-        ],
-      },
-    },
-    waitForCredential: {
-      after: {
-        2000: "findCredential",
-      },
-      always: {
-        guard: ({ context }) => context.findCredentialAttempts >= 40,
+
+    // Check for profile
+    idOSFlow: idosFlow,
+    idOSDone: {
+      always: [{
+        guard: "hasError",
         target: "error",
-        actions: ["setErrorMessage"],
-      },
+      }, {
+        // we have credentials (all is ready)
+        guard: ({ context }) => context.profile && context.credentialId !== null,
+        target: "moveToProviderFlow",
+      }, {
+        // we don't have credentials, so we need to check for them (or create if needed)
+        guard: ({ context }) => context.profile && context.credentialId === null,
+        target: "credentialFlow",
+      }, {
+        // No profile no credentials
+        guard: ({ context }) => !context.profile,
+        target: "kycFlow",
+      }],
     },
-    requestAccessGrant: {
+
+    // After KYC is done check credentials flow
+    // this is to ensure we have credentials ready
+    credentialFlow,
+    credentialFlowDone: {
+      always: [{
+        guard: "hasError",
+        target: "error",
+      },{
+        // We have credentials, so we can move to provider flow
+        guard: ({ context }) => context.credentialId !== null,
+        target: "moveToProviderFlow",
+      }, {
+        // We are missing credentials, so we need to create them
+        guard: ({ context }) => context.credentialId === null,
+        target: "kycFlow",
+      }],
+    },
+
+    // KYC
+    kycFlow,
+
+    // Decision flow what to do next (by provider)
+    // Kyc (potentially credential sharing flow should ends up here)
+    moveToProviderFlow: {
       invoke: {
-        id: "requestAccessGrant",
-        src: "requestAccessGrant",
-        input: ({ context }) => ({
-          client: context.loggedInClient,
-          credential: context.credential,
-        }),
+        // Update context from current user data
+        id: "fetchCurrentUser",
+        src: "fetchCurrentUser",
         onDone: [
-          {
-            target: "createSharableToken",
-            actions: ["setSharedCredential"],
+         /* {
+            target: "transakFlow",
+            actions: ["setCurrentUser"],
             guard: "isTransak",
           },
           {
             target: "moneriumFlow",
-            actions: ["setSharedCredential"],
+            actions: ["setCurrentUser"],
             guard: "isMonerium",
           },
           {
             target: "noahFlow",
-            actions: ["setSharedCredential"],
+            actions: ["setCurrentUser"],
             guard: "isNoah",
           },
           {
             target: "startHifi",
-            actions: ["setSharedCredential"],
+            actions: ["setCurrentUser"],
             guard: "isHifi",
-          },
+          },*/
           {
             target: "dueFlow",
-            actions: ["setSharedCredential"],
+            actions: ["setCurrentUser"],
             guard: "isDue",
           },
         ],
@@ -225,369 +146,15 @@ export const machine = setup({
         },
       },
     },
-    startHifi: {
-      invoke: {
-        id: "createHifiTocLink",
-        src: "createHifiTocLink",
-        onDone: {
-          target: "hifiTosFetched",
-          actions: ["setHifiTosUrl"],
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
-      },
-    },
-    hifiTosFetched: {
-      on: {
-        acceptHifiTos: {
-          target: "verifyHifiTos",
-          actions: ["setHifiTosId"],
-        },
-      },
-    },
-    verifyHifiTos: {
-      invoke: {
-        id: "verifyHifiTos",
-        src: "verifyHifiTos",
-        input: ({ context }) => ({
-          hifiTosId: context.hifiTosId,
-          sharedCredential: context.sharedCredential,
-        }),
-        onDone: {
-          target: "getHifiKycStatus",
-          actions: ["setHifiUrl"],
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
-      },
-    },
-    getHifiKycStatus: {
-      invoke: {
-        id: "getHifiKycStatus",
-        src: "getHifiKycStatus",
-        onDone: [
-          {
-            target: "createOnRampAccount",
-          },
-        ],
-        onError: [
-          {
-            target: "waitForHifiKycStatus",
-            actions: ["incrementGetHifiKycStatusAttempts"],
-          },
-        ],
-      },
-    },
-    waitForHifiKycStatus: {
-      after: {
-        2000: "getHifiKycStatus",
-      },
-      always: {
-        guard: ({ context }) => context.getHifiKycStatusAttempts >= 40,
-        target: "error",
-        actions: ["setErrorMessage"],
-      },
-    },
-    createOnRampAccount: {
-      invoke: {
-        id: "createOnRampAccount",
-        src: "createOnRampAccount",
-        onDone: {
-          target: "dataOrTokenFetched",
-          actions: ["setOnRampAccount"],
-        },
-        onError: {
-          target: "error",
-          actions: ["setErrorMessage"],
-        },
-      },
-    },
-    dueFlow: {
-      initial: "requestKrakenDAG",
-      states: {
-        requestKrakenDAG: {
-          invoke: {
-            id: "requestKrakenDAG",
-            src: "requestKrakenDAG",
-            input: ({ context }: { context: Context }) => ({
-              client: context.loggedInClient,
-              credential: context.credential,
-            }),
-            onDone: {
-              target: "createToken",
-              actions: ["setKrakenDAG"],
-            },
-            onError: {
-              target: "error",
-            },
-          },
-        },
-        createToken: {
-          invoke: {
-            id: "createSharableToken",
-            src: "createSharableToken",
-            input: ({ context }: { context: Context }) => ({
-              dag: context.krakenDAG,
-              provider: "due.network_53224",
-            }),
-            onDone: {
-              target: "createDueAccount",
-              actions: ["setDueTokenData"],
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        createDueAccount: {
-          invoke: {
-            id: "createDueAccount",
-            src: "createDueAccount",
-            input: ({ context }: { context: Context }) => ({
-              sharedCredential: context.sharedCredential,
-            }),
-            onDone: {
-              target: "acceptTosWaiting",
-              actions: ["setDueAccount"],
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        acceptTosWaiting: {
-          on: {
-            acceptTos: [
-              {
-                target: "confirmTosAccepted",
-                guard: ({ context }: { context: Context }) => !context.dueKycDone,
-              },
-              {
-                target: "checkKycStatus",
-                guard: ({ context }: { context: Context }) => context.dueKycDone,
-              },
-            ],
-          },
-        },
-        confirmTosAccepted: {
-          invoke: {
-            id: "acceptDueTosAndShareToken",
-            src: "acceptDueTosAndShareToken",
-            input: ({ context }: { context: Context }) => ({
-              dueTokenData: context.dueTokenData,
-              dueTosToken: context.dueTosToken,
-            }),
-            onDone: {
-              target: "checkKycStatus",
-              actions: ["setDueKycLink"],
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        checkKycStatus: {
-          invoke: {
-            id: "checkDueKycStatus",
-            src: "checkDueKycStatus",
-            onDone: [
-              {
-                actions: ["setDueKycDone"],
-                target: "finishedKyc",
-              },
-            ],
-            onError: [
-              {
-                guard: ({ context }) => context.dueKycDone === false,
-                target: "waitForKycToBeDone",
-                actions: ["incrementDueKycAttempts"],
-              },
-              {
-                guard: ({ context }) => context.dueKycDone === true,
-                target: "finishedKyc",
-              },
-            ],
-          },
-        },
-        waitForKycToBeDone: {
-          after: {
-            5000: "checkKycStatus",
-          },
-          always: {
-            guard: ({ context }) => context.dueKycAttempts >= 100,
-            target: "error",
-            actions: ["setErrorMessage"],
-          },
-        },
-        error: {
-          type: "final",
-        },
-        finishedKyc: {
-          type: "final",
-        },
-      },
-      onDone: {
-        target: "dataOrTokenFetched",
-      },
-    },
-    noahFlow: {
-      initial: "requestKrakenDAG",
-      states: {
-        requestKrakenDAG: {
-          invoke: {
-            id: "requestKrakenDAG",
-            src: "requestKrakenDAG",
-            input: ({ context }: { context: Context }) => ({
-              client: context.loggedInClient,
-              credential: context.credential,
-            }),
-            onDone: {
-              target: "createCustomer",
-              actions: ["setKrakenDAG"],
-            },
-            onError: {
-              target: "error",
-            },
-          },
-        },
-        createCustomer: {
-          invoke: {
-            id: "createNoahCustomer",
-            src: "createNoahCustomer",
-            input: ({ context }: { context: Context }) => ({
-              krakenDAG: context.krakenDAG,
-              sharedCredential: context.sharedCredential,
-            }),
-            onDone: {
-              target: "dataOrTokenFetched",
-              actions: ["setNoahUrl"],
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        error: {
-          type: "final",
-        },
-        dataOrTokenFetched: {
-          type: "final",
-        },
-      },
-      onDone: {
-        target: "dataOrTokenFetched",
-      },
-    },
-    moneriumFlow: {
-      initial: "createMoneriumUser",
-      states: {
-        createMoneriumUser: {
-          invoke: {
-            id: "createMoneriumUser",
-            src: "createMoneriumUser",
-            input: ({ context }: { context: Context }) => context.sharedCredential,
-            onDone: {
-              target: "createMoneriumProfile",
-            },
-            onError: {
-              target: "requestMoneriumAuth",
-            },
-          },
-        },
-        requestMoneriumAuth: {
-          invoke: {
-            id: "requestMoneriumAuth",
-            src: "requestMoneriumAuth",
-            input: ({ context }: { context: Context }) => context.sharedCredential,
-            onDone: {
-              target: "moneriumAuthUrlFetched",
-              actions: ["setMoneriumAuthUrl"],
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        moneriumAuthUrlFetched: {
-          on: {
-            accessTokenFromCode: {
-              target: "accessTokenFromCode",
-              actions: ["setMoneriumCode"],
-            },
-          },
-        },
-        accessTokenFromCode: {
-          invoke: {
-            id: "moneriumAccessTokenFromCode",
-            src: "moneriumAccessTokenFromCode",
-            input: ({ context }: { context: Context }) => context.moneriumCode,
-            onDone: {
-              target: "createMoneriumProfile",
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        createMoneriumProfile: {
-          invoke: {
-            id: "createMoneriumProfile",
-            src: "createMoneriumProfile",
-            input: ({ context }: { context: Context }) => context.sharedCredential,
-            onDone: {
-              target: "fetchProfileStatus",
-            },
-            onError: {
-              target: "error",
-              actions: ["setErrorMessage"],
-            },
-          },
-        },
-        fetchProfileStatus: {
-          invoke: {
-            id: "fetchMoneriumProfileStatus",
-            src: "fetchMoneriumProfileStatus",
-            onDone: [
-              {
-                actions: ["setMoneriumProfileStatus", "setMoneriumProfileIbans"],
-                target: "dataOrTokenFetched",
-              },
-            ],
-            onError: [
-              {
-                target: "waitForApproval",
-                actions: ["incrementFindCredentialAttempts"],
-              },
-            ],
-          },
-        },
-        waitForApproval: {
-          after: {
-            2000: "fetchProfileStatus",
-          },
-        },
-        error: {
-          type: "final",
-        },
-        dataOrTokenFetched: {
-          type: "final",
-        },
-      },
-      onDone: {
-        target: "dataOrTokenFetched",
-      },
-    },
-    createSharableToken: {
+
+    // Provider flows
+    dueFlow,
+    // transakFlow: createTransakFlow(),
+    // noahFlow: createNoahFlow(),
+    //moneriumFlow: createMoneriumFlow(),
+    // hifiFlow: createHifiFlow(),
+
+    /*createSharableToken: {
       initial: "requestKrakenDAG",
       states: {
         requestKrakenDAG: {
@@ -682,7 +249,7 @@ export const machine = setup({
       onDone: {
         target: "dataOrTokenFetched",
       },
-    },
+    },*/
     dataOrTokenFetched: {
       on: {
         revokeAccessGrant: {
