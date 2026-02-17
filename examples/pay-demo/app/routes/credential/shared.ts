@@ -1,7 +1,7 @@
-import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "./+types/shared";
-import { getUserItem, setUserItem } from "~/providers/store.server";
 import { getUsableCredentialByUser } from "~/providers/idos.server";
+import { sessionStorage } from "~/providers/sessions.server";
+import { getUserItem, setUserItem } from "~/providers/store.server";
+import type { Route } from "./+types/shared";
 
 // Get available shared credentials for the user (and issuer)
 // eventually store them
@@ -38,7 +38,6 @@ export async function loader({ request }: Route.LoaderArgs) {
   }
 
   await setUserItem(userItem);
-
 
   return Response.json(userItem);
 }

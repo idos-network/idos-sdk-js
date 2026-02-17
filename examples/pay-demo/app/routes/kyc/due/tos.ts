@@ -1,7 +1,7 @@
-import { confirmTos, } from "~/providers/due.server";
+import { confirmTos } from "~/providers/due.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "./+types/tos";
 import { getUserItem, setUserItem } from "~/providers/store.server";
+import type { Route } from "./+types/tos";
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method !== "POST") {
@@ -21,16 +21,16 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   try {
-  if (!userItem.due.tosAccepted) {
-    const ip =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip") ||
-      "unknown";
+    if (!userItem.due.tosAccepted) {
+      const ip =
+        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
 
-    await confirmTos(userItem.due.tosToken, ip);
-    userItem.due.tosAccepted = true;
-    await setUserItem(userItem);
-  }
+      await confirmTos(userItem.due.tosToken, ip);
+      userItem.due.tosAccepted = true;
+      await setUserItem(userItem);
+    }
 
     return Response.json(userItem);
   } catch (error) {

@@ -1,8 +1,8 @@
-import { createAccount, getAccount, type CreateAccountResponse } from "~/providers/due.server";
+import { type CreateAccountResponse, createAccount, getAccount } from "~/providers/due.server";
 import { getCredentialShared } from "~/providers/idos.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "./+types/account";
 import { getUserItem, setDueMap, setUserItem } from "~/providers/store.server";
+import type { Route } from "./+types/account";
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method !== "POST") {
@@ -49,7 +49,7 @@ export async function action({ request }: Route.ActionArgs) {
         accountId: accountResponse.id,
         kycStatus: "new",
         tosAccepted: false,
-      }
+      };
 
       // This is for webhooks to know which user to update
       await setDueMap(user.address, accountResponse.id);

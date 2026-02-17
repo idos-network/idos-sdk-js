@@ -1,4 +1,4 @@
-import { put, getDownloadUrl } from "@vercel/blob";
+import { getDownloadUrl, put } from "@vercel/blob";
 import { SERVER_ENV } from "~/providers/envFlags.server";
 import type { TosDocumentLinks } from "./due.server";
 
@@ -57,11 +57,15 @@ export async function getUserItem(address: string): Promise<UserItem | null> {
 }
 
 export async function setUserItem(item: UserItem): Promise<string> {
-  const response = await put(`${SERVER_ENV.BLOB_PREFIX}/${item.address}.json`, JSON.stringify(item), {
-    access: "public",
-    contentType: "application/json",
-    allowOverwrite: true,
-  });
+  const response = await put(
+    `${SERVER_ENV.BLOB_PREFIX}/${item.address}.json`,
+    JSON.stringify(item),
+    {
+      access: "public",
+      contentType: "application/json",
+      allowOverwrite: true,
+    },
+  );
 
   return response.downloadUrl;
 }

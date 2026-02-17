@@ -7,7 +7,7 @@ export interface DueKycEvent {
   data: {
     id: string;
     status: "passed" | "failed";
-  }
+  };
 }
 
 export async function action({ request }: Route.ActionArgs) {

@@ -1,11 +1,9 @@
-import { assign, fromPromise } from "xstate";
-import { ethers } from "ethers";
-import type { Context } from "../types";
+import type { idOSClientWithUserSigner } from "@idos-network/client";
 import { createIDOSClient } from "@idos-network/client";
+import { ethers } from "ethers";
+import { assign, fromPromise } from "xstate";
 import { COMMON_ENV } from "~/providers/envFlags.common";
-import type {
-  idOSClientWithUserSigner,
-} from "@idos-network/client";
+import type { Context } from "../types";
 
 export interface idOSContext {
   profile: boolean;
@@ -17,7 +15,7 @@ export const emptyContext: idOSContext = {
   profile: false,
   walletAddress: null,
   client: null,
-}
+};
 
 // idOS Flow
 export const flow = {
@@ -75,7 +73,7 @@ export const actions = {
   setClient: assign({
     client: ({ event }) => event.output,
   }),
-}
+};
 
 // idOS actors
 export const actors = {
@@ -109,4 +107,4 @@ export const actors = {
 
     return hasProfile;
   }),
-}
+};

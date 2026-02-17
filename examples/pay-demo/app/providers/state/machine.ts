@@ -1,15 +1,15 @@
 import { setup } from "xstate";
 import { actions } from "./actions";
 import { actors } from "./actors";
+import { flow as credentialFlow } from "./flows/credentials";
 import { flow as dueFlow } from "./flows/due";
-import { flow as moneriumFlow } from "./flows/monerium";
-import { flow as noahFlow } from "./flows/noah";
-import { emptyContext, type Context } from "./types";
-import { flow as transakFlow } from "./flows/transack";
-import { flow as kycFlow } from "./flows/kyc";
 import { flow as hifiFlow } from "./flows/hifi";
 import { flow as idosFlow } from "./flows/idos";
-import { flow as credentialFlow } from "./flows/credentials";
+import { flow as kycFlow } from "./flows/kyc";
+import { flow as moneriumFlow } from "./flows/monerium";
+import { flow as noahFlow } from "./flows/noah";
+import { flow as transakFlow } from "./flows/transack";
+import { type Context, emptyContext } from "./types";
 
 /**
  * State machine for managing idOS authentication and credential flow
@@ -67,40 +67,49 @@ export const machine = setup({
     // Check for profile
     idOSFlow: idosFlow,
     idOSDone: {
-      always: [{
-        guard: "hasError",
-        target: "error",
-      }, {
-        // we have credentials (all is ready)
-        guard: ({ context }) => context.profile && context.credentialId !== null,
-        target: "moveToProviderFlow",
-      }, {
-        // we don't have credentials, so we need to check for them (or create if needed)
-        guard: ({ context }) => context.profile && context.credentialId === null,
-        target: "credentialFlow",
-      }, {
-        // No profile no credentials
-        guard: ({ context }) => !context.profile,
-        target: "kycFlow",
-      }],
+      always: [
+        {
+          guard: "hasError",
+          target: "error",
+        },
+        {
+          // we have credentials (all is ready)
+          guard: ({ context }) => context.profile && context.credentialId !== null,
+          target: "moveToProviderFlow",
+        },
+        {
+          // we don't have credentials, so we need to check for them (or create if needed)
+          guard: ({ context }) => context.profile && context.credentialId === null,
+          target: "credentialFlow",
+        },
+        {
+          // No profile no credentials
+          guard: ({ context }) => !context.profile,
+          target: "kycFlow",
+        },
+      ],
     },
 
     // After KYC is done check credentials flow
     // this is to ensure we have credentials ready
     credentialFlow,
     credentialFlowDone: {
-      always: [{
-        guard: "hasError",
-        target: "error",
-      },{
-        // We have credentials, so we can move to provider flow
-        guard: ({ context }) => context.credentialId !== null,
-        target: "moveToProviderFlow",
-      }, {
-        // We are missing credentials, so we need to create them
-        guard: ({ context }) => context.credentialId === null,
-        target: "kycFlow",
-      }],
+      always: [
+        {
+          guard: "hasError",
+          target: "error",
+        },
+        {
+          // We have credentials, so we can move to provider flow
+          guard: ({ context }) => context.credentialId !== null,
+          target: "moveToProviderFlow",
+        },
+        {
+          // We are missing credentials, so we need to create them
+          guard: ({ context }) => context.credentialId === null,
+          target: "kycFlow",
+        },
+      ],
     },
 
     // KYC
@@ -114,7 +123,7 @@ export const machine = setup({
         id: "fetchCurrentUser",
         src: "fetchCurrentUser",
         onDone: [
-         /* {
+          /* {
             target: "transakFlow",
             actions: ["setCurrentUser"],
             guard: "isTransak",

@@ -1,9 +1,12 @@
-import { type Credential, idOSConsumer as idOSConsumerClass, type idOSCredential } from "@idos-network/consumer";
+import {
+  type Credential,
+  idOSConsumer as idOSConsumerClass,
+  type idOSCredential,
+} from "@idos-network/consumer";
+import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
 import nacl from "tweetnacl";
 import { COMMON_ENV } from "./envFlags.common";
 import { SERVER_ENV } from "./envFlags.server";
-import { highestMatchingCredential, parseLevel } from "@idos-network/credentials/utils";
-
 
 export async function initIdOSConsumer() {
   return await idOSConsumerClass.init({
@@ -51,7 +54,9 @@ export async function getCredentialShared(credentialId: string, inserterId?: str
   return data;
 }
 
-export async function getUsableCredentialByUser(userId: string): Promise<Omit<idOSCredential, "content"> | undefined> {
+export async function getUsableCredentialByUser(
+  userId: string,
+): Promise<Omit<idOSCredential, "content"> | undefined> {
   const idOSConsumer = await initIdOSConsumer();
 
   const credentials = await idOSConsumer.getCredentialsSharedByUser(userId);

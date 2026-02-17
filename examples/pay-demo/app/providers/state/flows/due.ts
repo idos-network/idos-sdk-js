@@ -18,7 +18,7 @@ export interface DueContext {
 export const emptyContext: DueContext = {
   dueKycStatus: "new",
   dueAccountId: null,
-  
+
   dueTosAccepted: false,
   dueKycLink: null,
   dueTokenData: null,
@@ -36,21 +36,29 @@ export const flow = {
         {
           description: "Due flow is done, we can move forward or wait for KYC to be done",
           target: "dueFlowDone",
-          guard: ({ context }: { context: Context }) => ["pending", "failed", "passed"].includes(context.dueKycStatus),
-        }, {
+          guard: ({ context }: { context: Context }) =>
+            ["pending", "failed", "passed"].includes(context.dueKycStatus),
+        },
+        {
           description: "New due flow",
-          target: "createDueAccount", 
+          target: "createDueAccount",
           guard: ({ context }: { context: Context }) => context.dueAccountId === null,
-        }, {
+        },
+        {
           description: "We have an account, but we are missing T&C",
           target: "showTos",
-          guard: ({ context }: { context: Context }) => context.dueAccountId !== null && !context.dueTosAccepted,
-        }, {
+          guard: ({ context }: { context: Context }) =>
+            context.dueAccountId !== null && !context.dueTosAccepted,
+        },
+        {
           description: "We have an account, but we need KYC",
           target: "requestRelayAG",
-          guard: ({ context }: { context: Context }) => context.dueAccountId !== null && context.dueTosAccepted && context.dueKycStatus === "new",
-        }
-      ]
+          guard: ({ context }: { context: Context }) =>
+            context.dueAccountId !== null &&
+            context.dueTosAccepted &&
+            context.dueKycStatus === "new",
+        },
+      ],
     },
 
     createDueAccount: {
@@ -118,15 +126,18 @@ export const flow = {
       invoke: {
         id: "acceptDueTos",
         src: "acceptDueTos",
-        onDone: [{
-          target: "requestRelayAG",
-          actions: ["setCurrentUser"],
-          guard: ({ context }: { context: Context }) => context.dueKycStatus === "new",
-        }, {
-          target: "checkKycStatus",
-          actions: ["setCurrentUser"],
-          guard: ({ context }: { context: Context }) => context.dueKycStatus !== "new",
-        }],
+        onDone: [
+          {
+            target: "requestRelayAG",
+            actions: ["setCurrentUser"],
+            guard: ({ context }: { context: Context }) => context.dueKycStatus === "new",
+          },
+          {
+            target: "checkKycStatus",
+            actions: ["setCurrentUser"],
+            guard: ({ context }: { context: Context }) => context.dueKycStatus !== "new",
+          },
+        ],
         onError: {
           target: "error",
           actions: ["setErrorMessage"],
@@ -182,57 +193,44 @@ export const actions = {
 
 // Due actors
 export const actors = {
-  createSharableToken: fromPromise(
-    async ({ input }: { input: { ag: Context["relayAG"] } }) => {
-      if (!input.ag) {
-        throw new Error("Credential not found");
-      }
+  createSharableToken: fromPromise(async ({ input }: { input: { ag: Context["relayAG"] } }) => {
+    if (!input.ag) {
+      throw new Error("Credential not found");
+    }
 
-      const response = await fetch(
-        `/app/kyc/due/kyc?agId=${input.ag?.id}`,
-      );
+    const response = await fetch(`/app/kyc/due/kyc?agId=${input.ag?.id}`);
 
-      if (response.status !== 200) {
-        throw new Error("KYC API is not available. Please try again later.");
-      }
+    if (response.status !== 200) {
+      throw new Error("KYC API is not available. Please try again later.");
+    }
 
-      return response.json();
-    },
-  ),
+    return response.json();
+  }),
 
-  createDueAccount: fromPromise(
-    async () => {
-      const dueAccount = await fetch( "/app/kyc/due/account", {
-        method: "POST",
-      });
+  createDueAccount: fromPromise(async () => {
+    const dueAccount = await fetch("/app/kyc/due/account", {
+      method: "POST",
+    });
 
-      if (dueAccount.status !== 200) {
-        throw new Error("Can't create due account, try again later.");
-      }
+    if (dueAccount.status !== 200) {
+      throw new Error("Can't create due account, try again later.");
+    }
 
-      return await dueAccount.json();
-    },
-  ),
+    return await dueAccount.json();
+  }),
 
-  acceptDueTos: fromPromise(
-    async () => {
-      const dueAccount = await fetch(
-        "/app/kyc/due/tos",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        },
-      );
+  acceptDueTos: fromPromise(async () => {
+    const dueAccount = await fetch("/app/kyc/due/tos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      if (dueAccount.status !== 200) {
-        throw new Error("Due API is not available. Please try again later.");
-      }
+    if (dueAccount.status !== 200) {
+      throw new Error("Due API is not available. Please try again later.");
+    }
 
-      return dueAccount.json();
-    },
-  ),
-
-
+    return dueAccount.json();
+  }),
 };

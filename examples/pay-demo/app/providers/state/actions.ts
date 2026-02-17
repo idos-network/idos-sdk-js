@@ -1,16 +1,15 @@
 import { assign } from "xstate";
-import { emptyContext, type Context } from "./types";
 import type { UserItem } from "./../store.server";
-
+import { actions as credentialActions } from "./flows/credentials";
+import { actions as dueActions } from "./flows/due";
+import { actions as hifiActions } from "./flows/hifi";
 // Import actions from all flows
 import { actions as idosActions } from "./flows/idos";
-import { actions as credentialActions } from "./flows/credentials";
 import { actions as kycActions } from "./flows/kyc";
-import { actions as dueActions } from "./flows/due";
-import { actions as transakActions } from "./flows/transack";
-import { actions as hifiActions } from "./flows/hifi";
 import { actions as moneriumActions } from "./flows/monerium";
 import { actions as noahActions } from "./flows/noah";
+import { actions as transakActions } from "./flows/transack";
+import { type Context, emptyContext } from "./types";
 
 export const actions = {
   // Core actions
@@ -31,7 +30,7 @@ export const actions = {
       credentialId: event.output.sharedKyc?.id ?? null,
 
       // Due stuff
-      dueTosAccepted: event.output.due?.tosAccepted ,
+      dueTosAccepted: event.output.due?.tosAccepted,
       dueKycStatus: event.output.due?.kycStatus,
       dueKycLink: event.output.due?.kycLink ?? null,
       dueAccountId: event.output.due?.accountId ?? null,
@@ -50,7 +49,6 @@ export const actions = {
   setRelayAG: assign({
     relayAG: ({ event }) => event.output ?? null,
   }),
-
 
   // Flow-specific actions
   ...idosActions,

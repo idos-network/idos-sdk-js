@@ -1,15 +1,16 @@
 // Import actors from all flows
-import { actors as idosActors } from "./flows/idos";
+
+import { fromPromise } from "xstate";
+import { COMMON_ENV } from "../envFlags.common";
 import { actors as credentialActors } from "./flows/credentials";
-import { actors as kycActors } from "./flows/kyc";
 import { actors as dueActors } from "./flows/due";
-import { actors as transakActors } from "./flows/transack";
 import { actors as hifiActors } from "./flows/hifi";
+import { actors as idosActors } from "./flows/idos";
+import { actors as kycActors } from "./flows/kyc";
 import { actors as moneriumActors } from "./flows/monerium";
 import { actors as noahActors } from "./flows/noah";
-import { fromPromise } from "xstate";
+import { actors as transakActors } from "./flows/transack";
 import type { Context } from "./types";
-import { COMMON_ENV } from "../envFlags.common";
 
 export const actors = {
   // Flow-specific actors
@@ -21,7 +22,6 @@ export const actors = {
   ...hifiActors,
   ...moneriumActors,
   ...noahActors,
-
 
   // Generic actors
   fetchCurrentUser: fromPromise(async () => {

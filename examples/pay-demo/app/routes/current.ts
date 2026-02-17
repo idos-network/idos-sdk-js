@@ -1,6 +1,6 @@
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "./+types/current";
 import { getUserItem, setUserItem } from "~/providers/store.server";
+import type { Route } from "./+types/current";
 
 // Get current user
 export async function loader({ request }: Route.LoaderArgs) {
@@ -17,7 +17,6 @@ export async function loader({ request }: Route.LoaderArgs) {
 
   return Response.json(userItem);
 }
-
 
 export async function action({ request }: Route.ActionArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));

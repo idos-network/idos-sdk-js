@@ -1,8 +1,8 @@
 import { confirmTos, getKycStatus, shareToken } from "~/providers/due.server";
 import { SERVER_ENV } from "~/providers/envFlags.server";
 import { sessionStorage } from "~/providers/sessions.server";
-import type { Route } from "./+types/kyc";
 import { getUserItem, setUserItem } from "~/providers/store.server";
+import type { Route } from "./+types/kyc";
 
 export async function action({ request }: Route.ActionArgs) {
   if (request.method !== "POST") {
@@ -17,8 +17,16 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   const userItem = await getUserItem(user.address);
-  if (!userItem || !userItem.due?.accountId || !userItem.due.tosAccepted || userItem.due.kycStatus !== "new") {
-    return Response.json({ error: "User or due account not found or did not meet conditions" }, { status: 400 });
+  if (
+    !userItem ||
+    !userItem.due?.accountId ||
+    !userItem.due.tosAccepted ||
+    userItem.due.kycStatus !== "new"
+  ) {
+    return Response.json(
+      { error: "User or due account not found or did not meet conditions" },
+      { status: 400 },
+    );
   }
 
   const body = await request.json();
@@ -45,10 +53,10 @@ export async function action({ request }: Route.ActionArgs) {
       if (response.status === "resubmission_required") {
         userItem.due.kycStatus = "resubmission_required";
         userItem.due.kycLink = `${SERVER_ENV.DUE_HTTP_URL}${response.externalLink}`;
-      } else { 
+      } else {
         userItem.due.kycStatus = response.status;
       }
-      
+
       await setUserItem(userItem);
     } catch (error) {
       return Response.json({ error: (error as Error).message }, { status: 400 });
