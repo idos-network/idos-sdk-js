@@ -8,7 +8,6 @@ import { WalletCard } from "@/components/wallets/wallet-card";
 import { WalletsError } from "@/components/wallets/wallets-error";
 import { WalletsPending } from "@/components/wallets/wallets-pending";
 import useDisclosure from "@/hooks/use-disclosure";
-import { authLoader } from "@/lib/auth-loader";
 import { useFetchWallets, walletsQueryOptions } from "@/lib/queries/wallets";
 import { dashboardActor } from "@/machines/dashboard.actor";
 import { selectWalletAddress } from "@/machines/selectors";
@@ -25,7 +24,10 @@ export const Route = createFileRoute("/wallets")({
       publicKey: search.publicKey,
     };
   },
-  loader: authLoader((queryClient) => queryClient.ensureQueryData(walletsQueryOptions())),
+  loader: ({ context: { queryClient, idOSClient } }) => {
+    if (!idOSClient) return;
+    return queryClient.ensureQueryData(walletsQueryOptions());
+  },
 });
 
 function WalletsList() {

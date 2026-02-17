@@ -7,7 +7,6 @@ import { CredentialsPending } from "@/components/credentials/credentials-pending
 import { DeleteCredential } from "@/components/credentials/delete-credential";
 import { GrantsCenter } from "@/components/credentials/grants-center";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
-import { authLoader } from "@/lib/auth-loader";
 import { credentialsQueryOptions, useFetchCredentials } from "@/lib/queries/credentials";
 
 type ActiveDialog =
@@ -21,7 +20,10 @@ export const Route = createFileRoute("/")({
   staticData: { breadcrumb: "Credentials" },
   pendingComponent: CredentialsPending,
   errorComponent: CredentialsError,
-  loader: authLoader((queryClient) => queryClient.ensureQueryData(credentialsQueryOptions())),
+  loader: ({ context: { queryClient, idOSClient } }) => {
+    if (!idOSClient) return;
+    return queryClient.ensureQueryData(credentialsQueryOptions());
+  },
 });
 
 function CredentialsList() {

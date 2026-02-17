@@ -1,3 +1,4 @@
+import type { idOSClientLoggedIn } from "@idos-network/client";
 import { TanStackDevtools } from "@tanstack/react-devtools";
 import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
@@ -15,11 +16,24 @@ import { Layout } from "@/components/layout";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
 import { dashboardActor } from "@/machines/dashboard.actor";
-import { selectIsDisconnected, selectIsLoading, selectIsNoProfile } from "@/machines/selectors";
+import {
+  selectIsDisconnected,
+  selectIsLoading,
+  selectIsNoProfile,
+  selectLoggedInClient,
+} from "@/machines/selectors";
 import "@/styles/index.css";
 
-export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+  idOSClient: idOSClientLoggedIn | null;
+}>()({
   component: RootComponent,
+  beforeLoad: () => {
+    return {
+      idOSClient: selectLoggedInClient(dashboardActor.getSnapshot()),
+    };
+  },
 });
 
 function AppContent() {
