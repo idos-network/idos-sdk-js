@@ -36,6 +36,9 @@ export class EngineClient {
       case "XRPL":
         prefix = "XRPL";
         break;
+      case "stellar":
+        prefix = "STELLAR";
+        break;
       case "FaceSign":
         prefix = "FACESIGN";
         break;

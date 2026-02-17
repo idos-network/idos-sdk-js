@@ -76,7 +76,7 @@ export class Client {
           walletType = "NEAR";
           break;
         case "stellar":
-          walletType = "Stellar";
+          walletType = "stellar";
           break;
         case "facesign":
           walletType = "FaceSign";
@@ -86,9 +86,10 @@ export class Client {
     
     invariant(WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
     invariant(
-      // XRPL, NEAR and FaceSign require a public key, EVM does not
-      (["XRPL", "NEAR", "FaceSign"].includes(walletType) && signerPublicKey) || walletType === "EVM",
-      "Signer public key is required for XRPL, NEAR and FaceSign",
+      // XRPL, NEAR, stellar and FaceSign require a public key, EVM does not
+      (["XRPL", "NEAR", "stellar", "FaceSign"].includes(walletType) && signerPublicKey) ||
+        walletType === "EVM",
+      "Signer public key is required for XRPL, NEAR, stellar and FaceSign",
     );
 
     this.walletType = walletType;
@@ -158,6 +159,9 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
+      case "stellar":
+        address = `STELLAR:${this.signerPublicKey}`;
+        break;
       case "FaceSign":
         address = `FACESIGN:${this.signerPublicKey}`;
         break;
@@ -189,6 +193,9 @@ export class Client {
         break;
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
+        break;
+      case "stellar":
+        address = `STELLAR:${this.signerPublicKey}`;
         break;
       case "FaceSign":
         address = `FACESIGN:${this.signerPublicKey}`;
@@ -248,6 +255,9 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
+      case "stellar":
+        address = `STELLAR:${this.signerPublicKey}`;
+        break;
       case "FaceSign":
         address = `FACESIGN:${this.signerPublicKey}`;
         break;
@@ -266,6 +276,9 @@ export class Client {
         break;
       case "near":
         addressToAddFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
+        break;
+      case "stellar":
+        addressToAddFormatted = `STELLAR:${publicKey}`;
         break;
       case "facesign":
         addressToAddFormatted = `FACESIGN:${publicKey}`;
@@ -303,6 +316,9 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
+      case "stellar":
+        address = `STELLAR:${this.signerPublicKey}`;
+        break;
       case "FaceSign":
         address = `FACESIGN:${this.signerPublicKey}`;
         break;
@@ -321,6 +337,9 @@ export class Client {
         break;
       case "near":
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
+        break;
+      case "stellar":
+        addressToRemoveFormatted = `STELLAR:${publicKey}`;
         break;
       case "facesign":
         addressToRemoveFormatted = `FACESIGN:${publicKey}`;
