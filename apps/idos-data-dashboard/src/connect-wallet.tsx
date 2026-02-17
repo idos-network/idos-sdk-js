@@ -78,7 +78,7 @@ export const ConnectWallet = () => {
 
           <h2 className="text-center font-normal text-sm">Connect your wallet to get started.</h2>
 
-          <div className="mx-aut flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
+          <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
             <Button
               className="justify-between"
               size="xl"
