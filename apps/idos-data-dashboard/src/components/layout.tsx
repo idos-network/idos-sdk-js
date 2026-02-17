@@ -41,6 +41,8 @@ function ConnectedWallet() {
         <img
           alt={`Connected wallet ${address}`}
           src="/wallet.svg"
+          width={50}
+          height={50}
           className="h-[50px] w-[50px]"
           loading="eager"
         />
@@ -126,12 +128,16 @@ export function Layout({ children }: PropsWithChildren) {
             <img
               src="/logo-light.svg"
               alt="idOS logo"
+              width={160}
+              height={52}
               loading="eager"
               className="h-auto w-40 dark:hidden"
             />
             <img
               src="/logo.svg"
               alt="idOS logo"
+              width={160}
+              height={52}
               loading="eager"
               className="hidden h-auto w-40 dark:block"
             />
@@ -229,12 +235,16 @@ export function Layout({ children }: PropsWithChildren) {
               <img
                 src="/logo-light.svg"
                 alt="idOS logo"
+                width={120}
+                height={39}
                 className="h-auto w-[120px] dark:hidden"
                 loading="eager"
               />
               <img
                 src="/logo.svg"
                 alt="idOS logo"
+                width={120}
+                height={39}
                 className="hidden h-auto w-[120px] dark:block"
                 loading="eager"
               />

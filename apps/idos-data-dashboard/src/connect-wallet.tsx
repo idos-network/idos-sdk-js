@@ -45,7 +45,13 @@ export function ConnectWallet() {
               onClick={() => dashboardActor.send({ type: "CONNECT_EVM" })}
             >
               Connect a wallet
-              <img alt="EVM logo" src="/wallet-connect.svg" className="h-9 w-9" />
+              <img
+                alt="EVM logo"
+                src="/wallet-connect.svg"
+                width={36}
+                height={36}
+                className="h-9 w-9"
+              />
             </Button>
             <Button
               className="justify-between"
@@ -54,7 +60,7 @@ export function ConnectWallet() {
               onClick={() => dashboardActor.send({ type: "CONNECT_NEAR" })}
             >
               Connect with NEAR
-              <img alt="NEAR logo" src="/near.svg" className="h-10 w-10" />
+              <img alt="NEAR logo" src="/near.svg" width={40} height={40} className="h-10 w-10" />
             </Button>
             <Button
               className="justify-between"
@@ -63,7 +69,7 @@ export function ConnectWallet() {
               onClick={() => dashboardActor.send({ type: "CONNECT_XRPL" })}
             >
               Connect with XRP
-              <img alt="XRP logo" src="/xrp.svg" className="h-10 w-10" />
+              <img alt="XRP logo" src="/xrp.svg" width={40} height={40} className="h-10 w-10" />
             </Button>
             <Button
               className="justify-between"
@@ -72,7 +78,13 @@ export function ConnectWallet() {
               onClick={() => dashboardActor.send({ type: "CONNECT_STELLAR" })}
             >
               Connect with Stellar
-              <img alt="Stellar logo" src="/stellar.svg" className="h-10 w-10" />
+              <img
+                alt="Stellar logo"
+                src="/stellar.svg"
+                width={40}
+                height={40}
+                className="h-10 w-10"
+              />
             </Button>
           </div>
         </div>

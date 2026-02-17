@@ -84,12 +84,14 @@ export function CredentialCard({
       <div className="flex flex-col gap-4 lg:flex-row">
         <Button
           id={`view-details-${credential.id}`}
+          variant="secondary"
           size="lg"
           onClick={() => onViewDetails(credential.id)}
         >
           View details
         </Button>
         <Button
+          variant="secondary"
           size="lg"
           id={`manage-grants-${credential.id}`}
           onClick={() => onManageGrants(credential.id)}
@@ -98,6 +100,7 @@ export function CredentialCard({
           Manage grants
         </Button>
         <Button
+          variant="secondary"
           size="lg"
           id={`delete-credential-${credential.id}`}
           onClick={() => onDelete(credential)}

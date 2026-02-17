@@ -82,6 +82,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                 </td>
                 <td className="w-0 whitespace-nowrap text-right">
                   <Button
+                    className="min-w-[80px]"
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"
                     variant="destructive-outline"
@@ -108,7 +109,7 @@ export function GrantsCenter({ credentialId, isOpen, onClose }: GrantsCenterProp
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Grants center</DialogTitle>
         </DialogHeader>
