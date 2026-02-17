@@ -10,12 +10,12 @@ interface WalletCardProps {
 
 export function WalletCard({ address, isDisabled, onDelete }: WalletCardProps) {
   return (
-    <div className="flex items-center justify-between gap-5 p-5 bg-neutral-900 rounded-xl">
+    <div className="flex items-center justify-between gap-5 rounded-xl bg-neutral-900 p-5">
       <div className="flex items-center gap-5">
-        <img src="/wallet.svg" alt="Wallet logo" className="w-12 h-12" />
+        <img src="/wallet.svg" alt="Wallet logo" className="h-12 w-12" />
         <div className="flex flex-col items-stretch gap-0 overflow-hidden">
           <span className="block text-neutral-600">Address</span>
-          <span className="block truncate max-w-[200px]" title={address}>
+          <span className="block max-w-[200px] truncate" title={address}>
             {address}
           </span>
         </div>

@@ -34,7 +34,7 @@ export function TransferConfirm({
   isLoading = false,
 }: TransferConfirmProps) {
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
         <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-warning/10 text-warning-foreground">
           <Wallet className="h-6 w-6" />
@@ -46,8 +46,8 @@ export function TransferConfirm({
       <CardContent className="flex flex-col gap-4">
         <div className="flex items-center justify-between rounded-lg bg-muted/50 p-4">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground">Sending</span>
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-muted-foreground text-xs">Sending</span>
+            <span className="font-semibold text-foreground text-lg">
               {source.amount} {source.currency}
             </span>
           </div>
@@ -55,8 +55,8 @@ export function TransferConfirm({
           <ArrowRight className="h-5 w-5 text-muted-foreground" />
 
           <div className="flex flex-col items-end gap-1">
-            <span className="text-xs text-muted-foreground">Receiving</span>
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-muted-foreground text-xs">Receiving</span>
+            <span className="font-semibold text-foreground text-lg">
               {destination.amount} {destination.currency}
             </span>
           </div>
@@ -69,13 +69,13 @@ export function TransferConfirm({
           </div>
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">IBAN</span>
-            <span className="font-mono text-sm text-foreground">{maskIban(recipientIban)}</span>
+            <span className="font-mono text-foreground text-sm">{maskIban(recipientIban)}</span>
           </div>
         </div>
 
         <div className="flex items-start gap-3 rounded-lg bg-info/10 px-4 py-3">
           <Info className="mt-0.5 h-4 w-4 shrink-0 text-info-foreground" />
-          <p className="text-sm text-info-foreground">
+          <p className="text-info-foreground text-sm">
             You will be asked to sign a transaction with your wallet. This authorizes the transfer
             of funds.
           </p>

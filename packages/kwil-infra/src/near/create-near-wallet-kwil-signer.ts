@@ -226,7 +226,9 @@ export async function createNearWalletKwilSigner(
 
     const message = "idOS authentication";
     const nonce = Buffer.from(new KwilNonce(32).bytes);
-    ({ publicKey } = (await wallet.signMessage({ message, recipient, nonce }))!);
+    const signResult = await wallet.signMessage({ message, recipient, nonce });
+    if (!signResult) throw new Error("signMessage returned no result");
+    ({ publicKey } = signResult);
 
     await store.set("signer-address", currentAddress);
     await store.set("signer-public-key", publicKey);

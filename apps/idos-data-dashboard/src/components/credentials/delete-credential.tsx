@@ -122,20 +122,20 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
         <div>
           {revokeGrants.isPending ? (
             <div className="flex flex-col items-stretch gap-2">
-              <span className="block mb-1">Revoking grant for consumer:</span>
+              <span className="mb-1 block">Revoking grant for consumer:</span>
               <Code>{ag_grantee_wallet_identifier ?? "wallet-identifier-not-available"}</Code>
             </div>
           ) : deleteCredential.isPending ? (
             <div>
               Deleting credential of type{" "}
-              <span className="text-green-200 font-semibold">{meta.type}</span> from issuer{" "}
-              <span className="text-green-200 font-semibold">{meta.issuer}</span>
+              <span className="font-semibold text-green-200">{meta.type}</span> from issuer{" "}
+              <span className="font-semibold text-green-200">{meta.issuer}</span>
             </div>
           ) : (
             <span className="block">Do you want to delete this credential from the idOS?</span>
           )}
         </div>
-        <DialogFooter className="flex gap-2 items-center">
+        <DialogFooter className="flex items-center gap-2">
           {!(revokeGrants.isPending || deleteCredential.isPending) ? (
             <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
               Cancel

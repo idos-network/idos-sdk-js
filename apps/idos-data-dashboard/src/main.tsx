@@ -51,7 +51,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <div className="h-screen flex items-center justify-center">
+      <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
       </div>
     );
@@ -64,7 +64,7 @@ function App() {
   if (isNoProfile) {
     return (
       <Layout>
-        <span className="text-sm font-medium block">No account found</span>
+        <span className="block font-medium text-sm">No account found</span>
       </Layout>
     );
   }

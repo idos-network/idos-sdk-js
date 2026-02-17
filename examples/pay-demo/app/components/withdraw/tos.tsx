@@ -27,7 +27,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
   const [accepted, setAccepted] = useState(false);
 
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
         <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-success/10 text-success-foreground">
           <ShieldCheck className="h-6 w-6" />
@@ -38,7 +38,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
 
       <CardContent className="flex flex-col gap-4">
         <ScrollArea className="h-64 rounded-lg border border-border bg-muted/30 p-4">
-          <div className="flex flex-col gap-4 pr-3 text-sm text-muted-foreground">
+          <div className="flex flex-col gap-4 pr-3 text-muted-foreground text-sm">
             <p>
               By using Due's services, you agree to the following terms and conditions governing the
               use of our payment platform, including fund transfers to bank accounts.
@@ -133,7 +133,7 @@ export function DueTos({ onAccept, isLoading = false, tosUrl, privacyPolicyUrl }
           />
           <label
             htmlFor="due-tos-accept"
-            className="cursor-pointer text-sm leading-tight text-muted-foreground"
+            className="cursor-pointer text-muted-foreground text-sm leading-tight"
           >
             I have read and agree to Due's{" "}
             <span className="font-medium text-foreground underline underline-offset-2">

@@ -46,12 +46,12 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-full lg:max-w-lg bg-neutral-900" showCloseButton={true}>
+      <DialogContent className="max-w-full bg-neutral-900 lg:max-w-lg" showCloseButton={true}>
         <DialogHeader>
           <DialogTitle>Delete wallet</DialogTitle>
         </DialogHeader>
         <div>Do you want to delete this wallet from the idOS?</div>
-        <DialogFooter className="flex gap-2 items-center">
+        <DialogFooter className="flex items-center gap-2">
           <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
             Cancel
           </Button>

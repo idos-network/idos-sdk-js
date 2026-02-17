@@ -36,18 +36,18 @@ import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "
 function ConnectedWallet() {
   const address = useSelector(dashboardActor, selectWalletAddress);
   return (
-    <div className="flex items-center gap-5 h-20">
-      <div className="shrink-0 w-[50px] h-[50px] bg-neutral-800 rounded-lg flex items-center justify-center">
+    <div className="flex h-20 items-center gap-5">
+      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-neutral-800">
         <img
           alt={`Connected wallet ${address}`}
           src="/wallet.svg"
-          className="w-[50px] h-[50px]"
+          className="h-[50px] w-[50px]"
           loading="eager"
         />
       </div>
       <div>
         <div className="text-neutral-100">Connected Wallet</div>
-        <code className="max-w-[180px] text-neutral-600 truncate">
+        <code className="max-w-[180px] truncate text-neutral-600">
           {address?.slice(0, 6)}...{address?.slice(-4)}
         </code>
       </div>
@@ -62,7 +62,7 @@ function ListItemLink({ to, children }: LinkProps) {
     <Link
       to={to}
       className={cn(
-        "px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950 active:bg-neutral-950",
+        "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-neutral-950 active:bg-neutral-950",
         isActive && "bg-neutral-950",
       )}
     >
@@ -120,16 +120,16 @@ export function Layout({ children }: PropsWithChildren) {
 
   return (
     <div className="flex min-h-screen lg:gap-5">
-      <nav className="sticky top-0 h-screen w-[380px] hidden lg:flex flex-col items-stretch">
-        <div className="flex flex-col items-stretch flex-1 p-5 pr-0 gap-5">
-          <Link to="/" className="flex items-center h-[100px]">
-            <img src="/logo.svg" alt="idOS logo" loading="eager" className="w-40 h-auto" />
+      <nav className="sticky top-0 hidden h-screen w-[380px] flex-col items-stretch lg:flex">
+        <div className="flex flex-1 flex-col items-stretch gap-5 p-5 pr-0">
+          <Link to="/" className="flex h-[100px] items-center">
+            <img src="/logo.svg" alt="idOS logo" loading="eager" className="h-auto w-40" />
           </Link>
-          <div className="flex flex-col items-stretch flex-1 gap-5">
-            <div className="px-5 bg-neutral-900 rounded-xl">
+          <div className="flex flex-1 flex-col items-stretch gap-5">
+            <div className="rounded-xl bg-neutral-900 px-5">
               <ConnectedWallet />
             </div>
-            <div className="flex flex-col items-stretch flex-1 p-5 bg-neutral-900 rounded-xl">
+            <div className="flex flex-1 flex-col items-stretch rounded-xl bg-neutral-900 p-5">
               <ul className="flex flex-col gap-1.5">
                 <li>
                   <ListItemLink to="/">
@@ -149,7 +149,7 @@ export function Layout({ children }: PropsWithChildren) {
                   <a
                     // @todo: change to the actual staking app once we have a domain
                     href="https://idos-staking-app.vercel.app/"
-                    className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                    className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-neutral-950"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -159,13 +159,13 @@ export function Layout({ children }: PropsWithChildren) {
                   </a>
                 </li>
               </ul>
-              <div className="mt-auto flex flex-col gap-5 items-stretch">
+              <div className="mt-auto flex flex-col items-stretch gap-5">
                 <ul className="flex flex-1 flex-col gap-1.5">
                   <li>
                     <a
                       // @todo: change to the actual staking app once we have a domain
                       href="https://app.idos.network/"
-                      className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                      className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-neutral-950"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -186,8 +186,8 @@ export function Layout({ children }: PropsWithChildren) {
           </div>
         </div>
       </nav>
-      <div className="flex flex-col items-stretch flex-1 p-5 lg:pl-0 gap-5">
-        <div className="flex items-center justify-between h-10 lg:h-[100px] mb-5 lg:mb-0">
+      <div className="flex flex-1 flex-col items-stretch gap-5 p-5 lg:pl-0">
+        <div className="mb-5 flex h-10 items-center justify-between lg:mb-0 lg:h-[100px]">
           <Button
             variant="secondary"
             aria-label="Open menu"
@@ -207,18 +207,18 @@ export function Layout({ children }: PropsWithChildren) {
             <DrawerClose asChild>
               <Button
                 variant="ghost"
-                className="absolute right-4 top-4"
+                className="absolute top-4 right-4"
                 aria-label="Close menu"
                 size="icon"
               >
                 <XIcon size={20} />
               </Button>
             </DrawerClose>
-            <Link to="/" className="flex items-center h-[100px]">
-              <img src="/logo.svg" alt="idOS logo" className="w-[120px] h-auto" loading="eager" />
+            <Link to="/" className="flex h-[100px] items-center">
+              <img src="/logo.svg" alt="idOS logo" className="h-auto w-[120px]" loading="eager" />
             </Link>
           </DrawerHeader>
-          <div className="p-4 flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto p-4">
             <div className="mb-5">
               <ConnectedWallet />
             </div>
@@ -240,7 +240,7 @@ export function Layout({ children }: PropsWithChildren) {
               <li>
                 <a
                   href="https://idos-staking-app.vercel.app/"
-                  className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                  className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-neutral-950"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -256,7 +256,7 @@ export function Layout({ children }: PropsWithChildren) {
               <li>
                 <a
                   href="https://app.idos.network/"
-                  className="px-6 py-3 flex items-center gap-5 rounded-xl hover:bg-neutral-950"
+                  className="flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-neutral-950"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -282,7 +282,7 @@ export function Layout({ children }: PropsWithChildren) {
                 rel="noopener noreferrer"
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
-                  "flex-1 flex items-center gap-2 text-green-200",
+                  "flex flex-1 items-center gap-2 text-green-200",
                 )}
               >
                 Privacy Policy <ExternalLinkIcon size={14} />
@@ -293,7 +293,7 @@ export function Layout({ children }: PropsWithChildren) {
                 rel="noopener noreferrer"
                 className={cn(
                   buttonVariants({ variant: "secondary", size: "sm" }),
-                  "flex-1 flex items-center gap-2 text-green-200",
+                  "flex flex-1 items-center gap-2 text-green-200",
                 )}
               >
                 User Agreement <ExternalLinkIcon size={14} />
@@ -302,7 +302,7 @@ export function Layout({ children }: PropsWithChildren) {
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <div className="fixed right-5 bottom-5 gap-2 bg-neutral-900 p-5 rounded-lg hidden lg:flex items-stretch">
+      <div className="fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg bg-neutral-900 p-5 lg:flex">
         <a
           href="https://www.idos.network/legal/privacy-policy"
           target="_blank"

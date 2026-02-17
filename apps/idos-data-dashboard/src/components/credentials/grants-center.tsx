@@ -53,15 +53,15 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
           revoked or granted.
         </span>
       </div>
-      <div className="max-h-[30vh] overflow-y-auto rounded-lg bg-neutral-800 border border-neutral-700">
+      <div className="max-h-[30vh] overflow-y-auto rounded-lg border border-neutral-700 bg-neutral-800">
         <table
-          className="w-full border-collapse table [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
+          className="table w-full border-collapse [&_td]:px-4 [&_td]:py-3 [&_th]:px-4 [&_th]:py-3"
           id={`grants-for-${credentialId}`}
         >
-          <thead className="sticky top-0 bg-neutral-800 z-10">
+          <thead className="sticky top-0 z-10 bg-neutral-800">
             <tr className="border-b">
-              <th className="text-neutral-500 text-left">Consumer</th>
-              <th className="text-neutral-500 text-left">Locked until</th>
+              <th className="text-left text-neutral-500">Consumer</th>
+              <th className="text-left text-neutral-500">Locked until</th>
               <th />
             </tr>
           </thead>
@@ -80,7 +80,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
                     {+grant.locked_until ? timelockToDate(+grant.locked_until) : "No timelock"}
                   </span>
                 </td>
-                <td className="text-right w-0 whitespace-nowrap">
+                <td className="w-0 whitespace-nowrap text-right">
                   <Button
                     id={`revoke-grant-${generateGrantId(grant)}`}
                     size="sm"

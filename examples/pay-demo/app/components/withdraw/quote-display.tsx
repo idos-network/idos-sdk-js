@@ -55,7 +55,7 @@ export function QuoteDisplay({
   const seconds = secondsLeft % 60;
 
   return (
-    <Card className="mx-auto max-w-2xl shadow-sm gap-5">
+    <Card className="mx-auto max-w-2xl gap-5 shadow-sm">
       <CardHeader>
         <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-info/10 text-info-foreground">
           <RefreshCw className="h-6 w-6" />
@@ -67,16 +67,16 @@ export function QuoteDisplay({
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">You send</span>
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-muted-foreground text-sm">You send</span>
+            <span className="font-semibold text-foreground text-lg">
               {source.amount} {source.currency}
             </span>
           </div>
 
           {Number(source.fee) > 0 && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Source fee</span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-xs">Source fee</span>
+              <span className="text-muted-foreground text-sm">
                 -{source.fee} {source.currency}
               </span>
             </div>
@@ -91,16 +91,16 @@ export function QuoteDisplay({
 
         <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground">Recipient gets</span>
-            <span className="text-lg font-semibold text-foreground">
+            <span className="text-muted-foreground text-sm">Recipient gets</span>
+            <span className="font-semibold text-foreground text-lg">
               {destination.amount} {destination.currency}
             </span>
           </div>
 
           {Number(destination.fee) > 0 && (
             <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Destination fee</span>
-              <span className="text-sm text-muted-foreground">
+              <span className="text-muted-foreground text-xs">Destination fee</span>
+              <span className="text-muted-foreground text-sm">
                 -{destination.fee} {destination.currency}
               </span>
             </div>

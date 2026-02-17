@@ -75,7 +75,7 @@ function ReadonlyField(props: JSX.HTMLAttributes<HTMLDivElement>) {
 }
 
 const UserDisclaimer = () => (
-  <span class="text-muted-foreground text-xs block mt-1">
+  <span class="mt-1 block text-muted-foreground text-xs">
     Keep your password safe. Ideally in a password manager. Don't store it in plain files or notes.
   </span>
 );

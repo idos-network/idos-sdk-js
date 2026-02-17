@@ -9,7 +9,7 @@ export function ErrorCard({ onRetry, reset }: ErrorCardProps) {
   const handler = onRetry ?? reset;
 
   return (
-    <div className="flex items-center flex-col lg:flex-row  gap-2.5 p-5 bg-neutral-900 rounded-xl h-20">
+    <div className="flex h-20 flex-col items-center gap-2.5 rounded-xl bg-neutral-900 p-5 lg:flex-row">
       <span className="text-red-500" role="alert">
         Something went wrong, please retry.
       </span>
