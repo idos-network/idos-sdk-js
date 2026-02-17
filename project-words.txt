@@ -96,6 +96,7 @@ sdot
 secp
 secretbox
 secretsharing
+sepa
 Shadcn
 shamir
 shardnet

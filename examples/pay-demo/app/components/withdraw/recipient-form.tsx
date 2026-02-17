@@ -74,6 +74,7 @@ interface RecipientFormProps {
 export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProps) {
   const [accountType, setAccountType] = useState<"individual" | "business">("individual");
   const [firstName, setFirstName] = useState("Julian");
+  /* spellchecker: ignore */
   const [lastName, setLastName] = useState("Leitoff");
   const [companyName, setCompanyName] = useState("");
   const [email, setEmail] = useState("julian@idos.network");
