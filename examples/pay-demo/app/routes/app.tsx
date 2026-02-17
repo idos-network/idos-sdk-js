@@ -1,9 +1,8 @@
 import { ArrowDownLeft, ArrowUpRight, ScanLine, Wallet } from "lucide-react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import type { Route } from "./+types/app";
 
-export function meta(_args: Route.MetaArgs) {
+export function meta() {
   return [{ title: "NeoFinance | idOS Demo" }];
 }
 
