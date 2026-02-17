@@ -19,7 +19,6 @@
     "@tanstack/react-query": "catalog:tanstack",
     "@tanstack/react-router": "^1.159.4",
     "@wagmi/core": "catalog:ethereum",
-    "@web3icons/react": "^4.0.14",
     "@xstate/react": "^6.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

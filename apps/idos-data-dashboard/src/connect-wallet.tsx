@@ -1,4 +1,3 @@
-import { TokenXLM } from "@web3icons/react";
 import { Button } from "@/components/ui/button";
 import { dashboardActor } from "@/machines/dashboard.actor";
 
@@ -63,7 +62,7 @@ export function ConnectWallet() {
               onClick={() => dashboardActor.send({ type: "CONNECT_STELLAR" })}
             >
               Connect with Stellar
-              <TokenXLM size={40} className="min-w-10 min-h-10" />
+              <img alt="Stellar logo" src="/stellar.svg" className="w-10 h-10" />
             </Button>
           </div>
         </div>
