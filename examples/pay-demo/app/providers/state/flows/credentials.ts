@@ -38,12 +38,14 @@ export const flow = {
           {
             target: "storeUserId",
             actions: ["setLoggedInClient"],
-            guard: ({ context }: { context: Context }) => !context.userId,
+            guard: ({ context }: { context: Context }) =>
+              context.userId === null || context.userId === undefined,
           },
           {
             target: "checkSharedCredentials",
             actions: ["setLoggedInClient"],
-            guard: ({ context }: { context: Context }) => context.userId,
+            guard: ({ context }: { context: Context }) =>
+              context.userId !== null && context.userId !== undefined,
           },
         ],
         onError: {

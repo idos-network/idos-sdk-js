@@ -73,7 +73,6 @@ export const flow = {
         src: "createDueAccount",
         onDone: {
           target: "showTos",
-          actions: ["setDueAccount"],
         },
         onError: {
           target: "error",

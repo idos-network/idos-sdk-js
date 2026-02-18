@@ -7,12 +7,13 @@ import type { Route } from "./+types/shared";
 // eventually store them
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
+  const user = session.get("user");
 
-  if (!session.get("user")) {
+  if (!user) {
     return Response.json({ error: "No session found" }, { status: 401 });
   }
 
-  const userItem = await getUserItem(session.get("user")!.address);
+  const userItem = await getUserItem(user.address);
   if (!userItem || !userItem.idOSUserId) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }

@@ -28,7 +28,16 @@ export function meta(_args: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const user = session.get("user");
-  const userData = await getUserItem(user!.address!);
+
+  if (!user) {
+    return Response.json({ error: "No session found" }, { status: 401 });
+  }
+
+  const userData = await getUserItem(user.address);
+  if (!userData) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
   return { userData };
 }
 

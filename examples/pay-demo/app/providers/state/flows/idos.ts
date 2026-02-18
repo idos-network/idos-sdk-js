@@ -28,6 +28,7 @@ export const flow = {
       invoke: {
         id: "createClient",
         src: "createClient",
+        input: () => ({}), // no input needed, but required by xstate
         onDone: {
           target: "checkProfile",
           actions: ["setClient"],
@@ -57,16 +58,16 @@ export const flow = {
       },
     },
     done: {
-      type: "final",
+      type: "final" as const,
     },
     error: {
-      type: "final",
+      type: "final" as const,
     },
   },
   onDone: {
     target: "idOSDone",
   },
-};
+} as const;
 
 // idOS actions
 export const actions = {

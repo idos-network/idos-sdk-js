@@ -1,7 +1,7 @@
 import { userContext } from "~/middlewares/auth.server";
+import { getUserItem } from "~/providers/store.server";
 import { createTransakWidgetUrl } from "~/providers/transak.server";
 import type { Route } from "./+types/widget-url";
-import { getUserItem } from "~/providers/store.server";
 
 export async function action({ request, context }: Route.ActionArgs) {
   const user = context.get(userContext);
@@ -18,11 +18,8 @@ export async function action({ request, context }: Route.ActionArgs) {
   try {
     const { walletAddress, fiatAmount, kycShareToken } = await request.json();
 
-    if (!walletAddress || !kycShareToken) {
-      return Response.json(
-        { error: "walletAddress, kycShareToken are required" },
-        { status: 400 },
-      );
+    if (!walletAddress || !kycShareToken || !userData.sharedKyc?.sharedId) {
+      return Response.json({ error: "walletAddress, kycShareToken are required" }, { status: 400 });
     }
 
     const referrerDomain = new URL(request.url).origin;
@@ -31,8 +28,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       walletAddress,
       fiatAmount: fiatAmount ?? "100",
       kycShareToken,
-      // biome-ignore lint/style/noNonNullAssertion: sharedId is required
-      credentialId: userData.sharedKyc?.sharedId!,
+      credentialId: userData.sharedKyc.sharedId,
       referrerDomain,
     });
 

@@ -25,7 +25,6 @@ export default function AddFunds() {
   const { send } = MachineContext.useActorRef();
 
   const state = MachineContext.useSelector((s) => s.value);
-  const currentState = MachineContext.useSelector((s) => s);
   const meta = MachineContext.useSelector((s) => s.getMeta());
   const provider = MachineContext.useSelector((s) => s.context.provider);
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
