@@ -27,7 +27,9 @@ export const flow = {
   initial: "login",
   states: {
     login: {
-      description: "We have to log in to idOS first",
+      meta: {
+        description: "Logging in to idOS...",
+      },
       invoke: {
         id: "loginClient",
         src: "loginClient",
@@ -67,7 +69,9 @@ export const flow = {
     },
 
     checkSharedCredentials: {
-      description: "Check if we already have a shared credential (as consumer)",
+      meta: {
+        description: "Checking if we have shared credentials...",
+      },
       invoke: {
         id: "checkSharedCredentials",
         src: "checkSharedCredentials",
@@ -84,7 +88,9 @@ export const flow = {
     },
 
     findCredential: {
-      description: "Find credential in user's profile and request access grant",
+      meta: {
+        description: "Finding credential...",
+      },
       invoke: {
         id: "findCredential",
         src: "findCredential",
@@ -125,6 +131,9 @@ export const flow = {
     },
 
     requestAccessGrant: {
+      meta: {
+        description: "Requesting access grant for credential...",
+      },
       invoke: {
         id: "requestAccessGrant",
         src: "requestAccessGrant",
@@ -262,29 +271,6 @@ export const actors = {
       });
 
       return sharedCredential;
-    },
-  ),
-
-  revokeAccessGrant: fromPromise(
-    async ({
-      input,
-    }: {
-      input: { client: Context["loggedInClient"]; sharedCredential: Context["sharedCredential"] };
-    }) => {
-      if (!input.client || !input.sharedCredential) {
-        throw new Error("Client or access grant not found");
-      }
-
-      const accessGrants = await input.client.getAccessGrantsOwned();
-      const accessGrant = accessGrants.find((ag) => ag.data_id === input.sharedCredential?.id);
-
-      if (!accessGrant) {
-        throw new Error("Access grant not found");
-      }
-
-      await input.client.revokeAccessGrant(accessGrant.id);
-
-      return true;
     },
   ),
 };

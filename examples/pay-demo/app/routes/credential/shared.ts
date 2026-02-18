@@ -17,7 +17,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  if (userItem.sharedKyc?.id) {
+  if (userItem.sharedKyc?.sharedId) {
     return Response.json(userItem);
   }
 

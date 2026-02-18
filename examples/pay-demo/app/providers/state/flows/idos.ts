@@ -22,6 +22,9 @@ export const flow = {
   initial: "createClient",
   states: {
     createClient: {
+      meta: {
+        description: "Creating idOS client...",
+      },
       invoke: {
         id: "createClient",
         src: "createClient",
@@ -36,19 +39,20 @@ export const flow = {
       },
     },
     checkProfile: {
+      meta: {
+        description: "Checking idOS profile...",
+      },
       invoke: {
         id: "checkProfile",
         src: "checkProfile",
-        input: ({ context }: { context: Context }) => context.client,
+        input: ({ context }: { context: Context }) => ({ client: context.client }),
         onDone: {
           target: "done",
           actions: ["setProfile"],
         },
         onError: {
           target: "done",
-          actions: assign({
-            profile: false,
-          }),
+          actions: ["setNoProfile"],
         },
       },
     },
@@ -62,12 +66,16 @@ export const flow = {
   onDone: {
     target: "idOSDone",
   },
-} as const;
+};
 
 // idOS actions
 export const actions = {
   setProfile: assign({
     profile: ({ event }) => event.output,
+  }),
+
+  setNoProfile: assign({
+    profile: false,
   }),
 
   setClient: assign({
@@ -94,12 +102,12 @@ export const actors = {
     return await idleClient.withUserSigner(signer);
   }),
 
-  checkProfile: fromPromise(async ({ input }: { input: Context["client"] }) => {
-    if (!input) {
+  checkProfile: fromPromise(async ({ input }: { input: { client: Context["client"] } }) => {
+    if (!input.client) {
       throw new Error("Client not found");
     }
 
-    const hasProfile = await input.hasProfile();
+    const hasProfile = await input.client.hasProfile();
 
     if (!hasProfile) {
       throw new Error("No profile found");

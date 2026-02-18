@@ -32,6 +32,9 @@ export const flow = {
   initial: "start",
   states: {
     start: {
+      meta: {
+        description: "Starting Due flow...",
+      },
       always: [
         {
           description: "Due flow is done, we can move forward or wait for KYC to be done",
@@ -62,6 +65,9 @@ export const flow = {
     },
 
     createDueAccount: {
+      meta: {
+        description: "Creating your Due account...",
+      },
       invoke: {
         id: "createDueAccount",
         src: "createDueAccount",
@@ -77,7 +83,9 @@ export const flow = {
     },
 
     requestRelayAG: {
-      description: "Requesting access grant for KYC provider...",
+      meta: {
+        description: "Requesting access grant for idOS relay...",
+      },
       invoke: {
         id: "requestRelayAG",
         src: "requestRelayAG",
@@ -96,6 +104,9 @@ export const flow = {
     },
 
     shareDueToken: {
+      meta: {
+        description: "Sharing a KYC with Due...",
+      },
       invoke: {
         id: "shareDueToken",
         src: "shareDueToken",
@@ -124,6 +135,9 @@ export const flow = {
     },
 
     confirmTosAccepted: {
+      meta: {
+        description: "TOS has been accepted...",
+      },
       invoke: {
         id: "acceptDueTos",
         src: "acceptDueTos",

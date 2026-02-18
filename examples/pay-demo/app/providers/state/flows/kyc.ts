@@ -24,6 +24,9 @@ export const flow = {
       },
     },
     start: {
+      meta: {
+        description: "Creating an idOS relay link...",
+      },
       invoke: {
         id: "getKycLink",
         src: "getKycLink",

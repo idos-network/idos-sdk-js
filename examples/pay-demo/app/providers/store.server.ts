@@ -21,7 +21,9 @@ export interface UserItem {
   message: string;
   signature: string;
   lastSignedIn: string;
-  idOSUserId: string;
+
+  // idOS this has been set during the login
+  idOSUserId?: string;
 
   // Shared kyc (so we won't ask again)
   sharedKyc?: SharedKycItem;

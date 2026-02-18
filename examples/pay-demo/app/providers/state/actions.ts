@@ -2,13 +2,10 @@ import { assign } from "xstate";
 import type { UserItem } from "./../store.server";
 import { actions as credentialActions } from "./flows/credentials";
 import { actions as dueActions } from "./flows/due";
-import { actions as hifiActions } from "./flows/hifi";
 // Import actions from all flows
 import { actions as idosActions } from "./flows/idos";
 import { actions as kycActions } from "./flows/kyc";
-import { actions as moneriumActions } from "./flows/monerium";
-import { actions as noahActions } from "./flows/noah";
-import { actions as transakActions } from "./flows/transack";
+import { actions as transakActions } from "./flows/transak";
 import { type Context, emptyContext } from "./types";
 
 export const actions = {
@@ -61,7 +58,4 @@ export const actions = {
   ...kycActions,
   ...dueActions,
   ...transakActions,
-  ...hifiActions,
-  ...moneriumActions,
-  ...noahActions,
 };

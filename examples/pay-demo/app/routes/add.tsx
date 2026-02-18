@@ -20,24 +20,13 @@ export function meta(_args: Route.MetaArgs) {
   return [{ title: "NeoFinance | idOS Demo" }];
 }
 
-const loadingMessages: Record<string, string> = {
-  findCredential: "Finding credential...",
-  requestAccessGrant: "Requesting access grant...",
-  waitForCredential: "Waiting for credential verification...",
-  login: "Logging in...",
-  error: "An error occurred",
-  requestKrakenDAG: "Requesting access grant for KYC provider...",
-  createToken: "Creating a sharable token for provider...",
-  checkCredentialStatus: "Waiting for KYC approval from Transak...",
-  waitForCredentialStatus: "Waiting for KYC approval from Transak...",
-  fetchWidgetUrl: "Loading Transak widget...",
-};
-
 export default function AddFunds() {
   const { address } = useUser();
   const { send } = MachineContext.useActorRef();
 
   const state = MachineContext.useSelector((s) => s.value);
+  const currentState = MachineContext.useSelector((s) => s);
+  const meta = MachineContext.useSelector((s) => s.getMeta());
   const provider = MachineContext.useSelector((s) => s.context.provider);
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
   const transakWidgetUrl = MachineContext.useSelector((s) => s.context.transakWidgetUrl);
@@ -59,11 +48,11 @@ export default function AddFunds() {
 
       // Transak iframe messages
       if (message?.data?.event_id === "TRANSAK_ORDER_SUCCESSFUL") {
-        send({ type: "revokeAccessGrant" });
+        // send({ type: "revokeAccessGrant" });
       }
 
       if (message?.data?.event_id === "TRANSAK_WIDGET_CLOSE") {
-        send({ type: "revokeAccessGrant" });
+        // send({ type: "revokeAccessGrant" });
       }
     },
     [send],
@@ -81,13 +70,13 @@ export default function AddFunds() {
 
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
-    if (state === "chooseKYCType") {
+    if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
       send({ type: "startKYC", kycType: "persona" });
     }
   }, [state, send]);
 
   // --- KYC iframe ---
-  if (state === "waitForKYC" && kycUrl) {
+  if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "waitForKYC" && kycUrl) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -117,7 +106,13 @@ export default function AddFunds() {
   }
 
   // --- Transak widget ---
-  if (state === "dataOrTokenFetched" && transakWidgetUrl && provider === "transak") {
+  if (
+    typeof state === "object" &&
+    "transakFlow" in state &&
+    state.transakFlow === "transakWidgetUrlFetched" &&
+    transakWidgetUrl &&
+    provider === "transak"
+  ) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
@@ -146,14 +141,7 @@ export default function AddFunds() {
   }
 
   // --- Loading / intermediate states ---
-  const stateKey = state as string;
-
-  // Handle createSharableToken sub-states
-  // @ts-expect-error Missing substates?
-  const subState = state.createSharableToken as string | undefined;
-
-  const message = loadingMessages[stateKey] ?? (subState ? loadingMessages[subState] : null);
-
+  const message = Object.values(meta)[0]?.description ?? null;
   if (message) {
     return (
       <div className="space-y-6">

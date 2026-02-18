@@ -28,33 +28,9 @@ export function meta(_args: Route.MetaArgs) {
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
   const user = session.get("user");
-  const userData = await getUserItem(user?.address);
+  const userData = await getUserItem(user!.address!);
   return { userData };
 }
-
-const loadingMessages: Record<string, string | Record<string, string>> = {
-  syncWithUserData: "Syncing user data...",
-  moveToProviderFlow: "Processing provider configurations...",
-  idOSFlow: {
-    checkProfile: "Checking profile...",
-    createClient: "Creating client...",
-  },
-  kycFlow: {
-    start: "Creating a idOS relay link...",
-  },
-  credentialFlow: {
-    login: "Logging in into idOS...",
-    checkSharedCredentials: "Checking if we have shared credentials...",
-    requestAccessGrant: "Requesting access grant for credential...",
-    findCredential: "Finding credential...",
-  },
-  dueFlow: {
-    createDueAccount: "Creating your Due account...",
-    requestRelayAG: "Requesting access grant for idOS relay...",
-    shareDueToken: "Sharing a KYC with Due...",
-    confirmTosAccepted: "TOS has been accepted...",
-  },
-};
 
 export default function Withdraw({ loaderData }: Route.ComponentProps) {
   const { userData } = loaderData;
@@ -63,8 +39,8 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   const { send } = MachineContext.useActorRef();
 
   const state = MachineContext.useSelector((s) => s.value);
-  const context = MachineContext.useSelector((s) => s.context);
   const provider = MachineContext.useSelector((s) => s.context.provider);
+  const meta = MachineContext.useSelector((s) => s.getMeta());
   const kycUrl = MachineContext.useSelector((s) => s.context.kycUrl);
   const errorMessage = MachineContext.useSelector((s) => s.context.errorMessage);
   const dueTosLinks = MachineContext.useSelector((s) => s.context.dueTosLinks);
@@ -440,19 +416,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   }
 
   // --- Loading / intermediate states ---
-  let message: string | null = null;
-
-  if (typeof state === "object") {
-    const key = Object.keys(state)[0];
-
-    if (loadingMessages[key]) {
-      // @ts-expect-error Missing substates?
-      message = loadingMessages[key][state[key]];
-    }
-  } else if (typeof state === "string" && typeof loadingMessages[state] === "string") {
-    message = loadingMessages[state];
-  }
-
+  const message = Object.values(meta)[0]?.description ?? null;
   if (message) {
     return (
       <div className="space-y-6">

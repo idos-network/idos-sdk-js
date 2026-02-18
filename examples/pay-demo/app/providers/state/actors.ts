@@ -4,12 +4,9 @@ import { fromPromise } from "xstate";
 import { COMMON_ENV } from "../envFlags.common";
 import { actors as credentialActors } from "./flows/credentials";
 import { actors as dueActors } from "./flows/due";
-import { actors as hifiActors } from "./flows/hifi";
 import { actors as idosActors } from "./flows/idos";
 import { actors as kycActors } from "./flows/kyc";
-import { actors as moneriumActors } from "./flows/monerium";
-import { actors as noahActors } from "./flows/noah";
-import { actors as transakActors } from "./flows/transack";
+import { actors as transakActors } from "./flows/transak";
 import type { Context } from "./types";
 
 export const actors = {
@@ -19,9 +16,6 @@ export const actors = {
   ...kycActors,
   ...dueActors,
   ...transakActors,
-  ...hifiActors,
-  ...moneriumActors,
-  ...noahActors,
 
   // Generic actors
   fetchCurrentUser: fromPromise(async () => {
@@ -54,6 +48,24 @@ export const actors = {
         consumerEncryptionPublicKey: COMMON_ENV.KRAKEN_ENCRYPTION_PUBLIC_KEY,
         consumerAuthPublicKey: COMMON_ENV.KRAKEN_PUBLIC_KEY,
       });
+    },
+  ),
+
+  createRelayShareToken: fromPromise(
+    async ({ input }: { input: { dag: Context["relayAG"]; provider: string } }) => {
+      if (!input) {
+        throw new Error("Credential not found");
+      }
+
+      const response = await fetch(
+        `/app/kyc/token?credentialId=${input.dag?.id}&provider=${input.provider}`,
+      );
+
+      if (response.status !== 200) {
+        throw new Error("KYC API is not available. Please try again later.");
+      }
+
+      return response.json();
     },
   ),
 };

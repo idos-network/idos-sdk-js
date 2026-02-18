@@ -1,6 +1,7 @@
 import { userContext } from "~/middlewares/auth.server";
 import { createTransakWidgetUrl } from "~/providers/transak.server";
 import type { Route } from "./+types/widget-url";
+import { getUserItem } from "~/providers/store.server";
 
 export async function action({ request, context }: Route.ActionArgs) {
   const user = context.get(userContext);
@@ -9,12 +10,17 @@ export async function action({ request, context }: Route.ActionArgs) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  try {
-    const { walletAddress, fiatAmount, kycShareToken, credentialId } = await request.json();
+  const userData = await getUserItem(user.address);
+  if (!userData) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
 
-    if (!walletAddress || !kycShareToken || !credentialId) {
+  try {
+    const { walletAddress, fiatAmount, kycShareToken } = await request.json();
+
+    if (!walletAddress || !kycShareToken) {
       return Response.json(
-        { error: "walletAddress, kycShareToken, and credentialId are required" },
+        { error: "walletAddress, kycShareToken are required" },
         { status: 400 },
       );
     }
@@ -25,7 +31,8 @@ export async function action({ request, context }: Route.ActionArgs) {
       walletAddress,
       fiatAmount: fiatAmount ?? "100",
       kycShareToken,
-      credentialId,
+      // biome-ignore lint/style/noNonNullAssertion: sharedId is required
+      credentialId: userData.sharedKyc?.sharedId!,
       referrerDomain,
     });
 

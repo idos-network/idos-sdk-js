@@ -27,6 +27,7 @@ dotenvx
 encryptor
 facesign
 facetec
+frontmost
 GABC
 gemwallet
 headlessui
@@ -67,6 +68,7 @@ multicodec
 nacl
 nanostores
 Neobank
+neondatabase
 Nominatim
 nonced
 nums
