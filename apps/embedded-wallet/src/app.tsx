@@ -34,7 +34,7 @@ function WalletConnector() {
       {showWallet("EVM") && <EVMConnector />}
       {showWallet("NEAR") && <NearConnector />}
       {showWallet("XRPL") && <XRPLConnector />}
-      {showWallet("stellar") && <StellarConnector />}
+      {showWallet("Stellar") && <StellarConnector />}
     </>
   );
 }

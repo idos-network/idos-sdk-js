@@ -55,7 +55,7 @@ function Stellar() {
   const { connectedWalletType, setConnectedWalletType, setWalletPayload } = useWalletState();
 
   useEffect(() => {
-    if (!address && connectedWalletType === "stellar") {
+    if (!address && connectedWalletType === "Stellar") {
       setConnectedWalletType(null);
       stepper.reset();
     }
@@ -85,7 +85,7 @@ function Stellar() {
           const publicKey = await derivePublicKey(address);
           setAddress(address);
           setPublicKey(publicKey);
-          setConnectedWalletType("stellar");
+          setConnectedWalletType("Stellar");
           stepper.next();
         },
       });

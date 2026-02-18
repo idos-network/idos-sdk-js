@@ -249,7 +249,7 @@ export async function createClientKwilSigner(
       Buffer.from(address).toString("hex"),
       "sep53",
     );
-    return [kwilSigner, address, publicKey, "stellar"];
+    return [kwilSigner, address, publicKey, "Stellar"];
   }
 
   // Force the check that `signer` is `never`.

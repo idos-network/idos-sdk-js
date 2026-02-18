@@ -45,7 +45,7 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
           // @ts-expect-error - this has been checked above
           walletPayload.public_key[0],
         );
-      case "stellar":
+      case "Stellar":
         return await verifyStellarSignature(
           walletPayload.message,
           walletPayload.signature,

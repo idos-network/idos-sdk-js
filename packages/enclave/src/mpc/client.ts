@@ -76,7 +76,7 @@ export class Client {
           walletType = "NEAR";
           break;
         case "stellar":
-          walletType = "stellar";
+          walletType = "Stellar";
           break;
         case "facesign":
           walletType = "FaceSign";
@@ -86,10 +86,10 @@ export class Client {
     
     invariant(WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
     invariant(
-      // XRPL, NEAR, stellar and FaceSign require a public key, EVM does not
-      (["XRPL", "NEAR", "stellar", "FaceSign"].includes(walletType) && signerPublicKey) ||
+      // XRPL, NEAR, Stellar and FaceSign require a public key, EVM does not
+      (["XRPL", "NEAR", "Stellar", "FaceSign"].includes(walletType) && signerPublicKey) ||
         walletType === "EVM",
-      "Signer public key is required for XRPL, NEAR, stellar and FaceSign",
+      "Signer public key is required for XRPL, NEAR, Stellar and FaceSign",
     );
 
     this.walletType = walletType;
@@ -159,7 +159,7 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
-      case "stellar":
+      case "Stellar":
         address = `STELLAR:${this.signerPublicKey}`;
         break;
       case "FaceSign":
@@ -194,7 +194,7 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
-      case "stellar":
+      case "Stellar":
         address = `STELLAR:${this.signerPublicKey}`;
         break;
       case "FaceSign":
@@ -255,7 +255,7 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
-      case "stellar":
+      case "Stellar":
         address = `STELLAR:${this.signerPublicKey}`;
         break;
       case "FaceSign":
@@ -316,7 +316,7 @@ export class Client {
       case "NEAR":
         address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
         break;
-      case "stellar":
+      case "Stellar":
         address = `STELLAR:${this.signerPublicKey}`;
         break;
       case "FaceSign":
