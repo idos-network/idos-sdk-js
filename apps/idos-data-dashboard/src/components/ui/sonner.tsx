@@ -1,61 +1,59 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
-import {toast as sonnerToast} from "sonner"
+import { useEffect, useState } from "react"
 
-type ToastParams = {
-    title: string;
-    description: string;
-    status: "success" | "error" | "info" | "warning";
-    duration?:number;
-    position?: "top-left" | "top-right" | "bottom-left" | "bottom-right" | "top-center" | "bottom-center";
-}
+function useTheme(): "dark" | "light" {
+  const [theme, setTheme] = useState<"dark" | "light">(() =>
+    document.documentElement.classList.contains("dark") ? "dark" : "light"
+  );
 
-export const toast = (params: ToastParams)=>{
-    sonnerToast[params.status](params.title, {
-        description: params.description,
-        duration: params.duration,
-        position: params.position,
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
     });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+
+  return theme;
 }
 
 const Toaster = ({ ...props }: ToasterProps) => {
+  const theme = useTheme();
 
   return (
     <Sonner
+      theme={theme}
       className="toaster group"
       icons={{
         success: (
-          <CircleCheckIcon className="size-7" />
+          <CircleCheckIcon className="size-4" />
         ),
         info: (
-          <InfoIcon className="size-7" />
+          <InfoIcon className="size-4" />
         ),
         warning: (
-          <TriangleAlertIcon className="size-7" />
+          <TriangleAlertIcon className="size-4" />
         ),
         error: (
-          <OctagonXIcon className="size-7" />
+          <OctagonXIcon className="size-4" />
         ),
         loading: (
-          <Loader2Icon className="size-7 animate-spin" />
+          <Loader2Icon className="size-4 animate-spin" />
         ),
       }}
       style={
         {
           "--normal-bg": "var(--popover)",
-          "--error-bg": "var(--destructive)",
-          "--error-text": "var(--destructive-foreground)",
           "--normal-text": "var(--popover-foreground)",
           "--normal-border": "var(--border)",
           "--border-radius": "var(--radius)",
+          "--width": "420px",
         } as React.CSSProperties
       }
       toastOptions={{
         classNames: {
-          toast: "cn-toast min-w-[450px]! flex items-center gap-5!",
-          // @heads-up: selectors depend on Sonner's internal DOM structure. If Sonner updates its markup, these will break silently.
-          error: "bg-red-300! text-neutral-900! border-none! [&>div>div:first-child]:font-semibold [&>div>div:first-child]:text-lg [&>div>div:last-child]:text-neutral-900! [&>div>div:last-child]:font-normal",
-          success: "!bg-primary !text-primary-foreground border-none! [&>div>div:first-child]:font-semibold [&>div>div:first-child]:text-xl [&>div>div:last-child]:text-neutral-900! [&>div>div:last-child]:font-normal",
+          toast: "rounded-xl shadow-lg",
         },
       }}
       {...props}
