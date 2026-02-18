@@ -283,14 +283,7 @@ export const dashboardMachine = setup({
         },
         onError: {
           target: "disconnected",
-          actions: [
-            "clearPersistedWallet",
-            assign({
-              walletType: () => null,
-              walletAddress: () => null,
-              walletPublicKey: () => null,
-            }),
-          ],
+          actions: ["resetWalletState", "clearPersistedWallet"],
         },
       },
     },
