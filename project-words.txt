@@ -140,4 +140,5 @@ Xaman
 xrpl
 xsig
 xsignature
+xstate
 XUMM

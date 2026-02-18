@@ -1,12 +1,11 @@
 import { assign, fromPromise } from "xstate";
-import type { Context, SharedTokenData } from "../types";
+import type { Context } from "../types";
 
 export interface DueContext {
   dueKycStatus: "new" | "created" | "resubmission_required" | "pending" | "passed" | "failed";
   dueAccountId: string | null;
   dueTosAccepted: boolean;
   dueKycLink: string | null;
-  dueTokenData: SharedTokenData | null;
   dueTosLinks: {
     tos: string;
     privacyPolicy: string;
@@ -21,7 +20,6 @@ export const emptyContext: DueContext = {
 
   dueTosAccepted: false,
   dueKycLink: null,
-  dueTokenData: null,
   dueTosLinks: null,
   dueTosToken: null,
   dueKycAttempts: 0,
