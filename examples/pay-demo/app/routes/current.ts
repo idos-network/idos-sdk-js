@@ -1,42 +1,21 @@
-import { sessionStorage } from "~/providers/sessions.server";
-import { getUserItem, setUserItem } from "~/providers/store.server";
+import { authMiddleware, userContext } from "~/middlewares/auth.server";
+import { setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/current";
 
-// Get current user
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+export const middleware = [authMiddleware];
 
-  if (!user) {
-    return Response.json({ error: "No session found" }, { status: 401 });
-  }
-
-  const userItem = await getUserItem(user.address);
-  if (!userItem) {
-    return Response.json({ error: "User not found" }, { status: 404 });
-  }
-
-  return Response.json(userItem);
+export async function loader({ context }: Route.LoaderArgs) {
+  const user = context.get(userContext);
+  return Response.json(user);
 }
 
-export async function action({ request }: Route.ActionArgs) {
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
-
-  if (!user) {
-    return Response.json({ error: "User not found" }, { status: 404 });
-  }
-
-  const userItem = await getUserItem(user.address);
-  if (!userItem) {
-    return Response.json({ error: "User not found" }, { status: 404 });
-  }
-
+export async function action({ request, context }: Route.ActionArgs) {
+  const user = context.get(userContext);
   const body = await request.json();
 
-  userItem.idOSUserId = body.userId;
+  user.idOSUserId = body.userId;
 
-  await setUserItem(userItem);
+  await setUserItem(user);
 
   return Response.json(user);
 }

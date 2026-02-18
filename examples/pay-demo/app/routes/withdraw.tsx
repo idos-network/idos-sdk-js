@@ -13,10 +13,9 @@ import { DueTos } from "~/components/withdraw/tos";
 import { TransferConfirm } from "~/components/withdraw/transfer-confirm";
 import { TransferStatusTracker } from "~/components/withdraw/transfer-status";
 import { useUser } from "~/layouts/app";
+import { userContext } from "~/middlewares/auth.server";
 import { COMMON_ENV } from "~/providers/envFlags.common";
-import { sessionStorage } from "~/providers/sessions.server";
 import { MachineContext } from "~/providers/state";
-import { getUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/withdraw";
 
 type TransferStep = "recipient" | "quote" | "confirm" | "signing" | "status" | "done";
@@ -25,19 +24,8 @@ export function meta(_args: Route.MetaArgs) {
   return [{ title: "NeoFinance | idOS Demo" }];
 }
 
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
-
-  if (!user) {
-    return Response.json({ error: "No session found" }, { status: 401 });
-  }
-
-  const userData = await getUserItem(user.address);
-  if (!userData) {
-    return Response.json({ error: "User not found" }, { status: 404 });
-  }
-
+export async function loader({ context }: Route.LoaderArgs) {
+  const userData = context.get(userContext);
   return { userData };
 }
 

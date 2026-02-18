@@ -5,13 +5,11 @@ import type { Route } from "./+types/code";
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
-
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
   const codeVerifier = session.get("moneriumCodeVerifier");
 
-  if (!code || !user || !codeVerifier) {
-    return Response.json({ error: "code or user or codeVerifier is required" }, { status: 400 });
+  if (!code || !codeVerifier) {
+    return Response.json({ error: "code or codeVerifier is required" }, { status: 400 });
   }
 
   try {

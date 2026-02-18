@@ -36,6 +36,7 @@ export async function loader({ request }: Route.LoaderArgs) {
     isAuthenticated: false,
   };
 
+  // @ts-expect-error - this is fine, since user is not yet authenticated
   session.set("user", user);
 
   return new Response(JSON.stringify({ user }), {

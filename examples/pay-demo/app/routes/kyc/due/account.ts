@@ -1,37 +1,31 @@
+import { userContext } from "~/middlewares/auth.server";
 import { type CreateAccountResponse, createAccount, getAccount } from "~/providers/due.server";
 import { getCredentialShared } from "~/providers/idos.server";
-import { sessionStorage } from "~/providers/sessions.server";
-import { getUserItem, setUserItem } from "~/providers/store.server";
+import { setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/account";
 
-export async function action({ request }: Route.ActionArgs) {
+export async function action({ request, context }: Route.ActionArgs) {
   if (request.method !== "POST") {
     return Response.json({ error: "Method not allowed" }, { status: 405 });
   }
 
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+  const user = context.get(userContext);
 
-  if (!user) {
-    return Response.json({ error: "User is required" }, { status: 400 });
-  }
-
-  const userItem = await getUserItem(user.address);
-  if (!userItem || !userItem.sharedKyc?.sharedId) {
+  if (!user.sharedKyc?.sharedId) {
     return Response.json({ error: "User item or shared credential not found" }, { status: 400 });
   }
 
   let accountResponse: CreateAccountResponse | null = null;
 
   try {
-    if (userItem?.due?.accountId) {
-      accountResponse = await getAccount(userItem.due.accountId);
+    if (user.due?.accountId) {
+      accountResponse = await getAccount(user.due.accountId);
 
       if (!accountResponse) {
         throw new Error("Can't get due account, try again later.");
       }
     } else {
-      const data = await getCredentialShared(userItem.sharedKyc.sharedId, user.address);
+      const data = await getCredentialShared(user.sharedKyc.sharedId, user.address);
 
       accountResponse = await createAccount({
         type: "individual",
@@ -45,21 +39,20 @@ export async function action({ request }: Route.ActionArgs) {
         throw new Error("Can't create due account, try again later.");
       }
 
-      userItem.due = {
+      user.due = {
         accountId: accountResponse.id,
         kycStatus: "new",
         tosAccepted: false,
       };
     }
 
-    userItem.due.tosLinks = accountResponse.tos.documentLinks;
-    userItem.due.tosToken = accountResponse.tos.token;
-    userItem.due.tosAccepted = accountResponse.tos.status === "accepted";
+    user.due.tosLinks = accountResponse.tos.documentLinks;
+    user.due.tosToken = accountResponse.tos.token;
+    user.due.tosAccepted = accountResponse.tos.status === "accepted";
 
-    // Set Due account ID in session
-    await setUserItem(userItem);
+    await setUserItem(user);
 
-    return Response.json(userItem);
+    return Response.json(user);
   } catch (error) {
     return Response.json({ error: (error as Error).message }, { status: 400 });
   }

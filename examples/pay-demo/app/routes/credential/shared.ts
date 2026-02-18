@@ -1,46 +1,38 @@
+import { authMiddleware, userContext } from "~/middlewares/auth.server";
 import { getUsableCredentialByUser } from "~/providers/idos.server";
-import { sessionStorage } from "~/providers/sessions.server";
-import { getUserItem, setUserItem } from "~/providers/store.server";
+import { setUserItem } from "~/providers/store.server";
 import type { Route } from "./+types/shared";
 
-// Get available shared credentials for the user (and issuer)
-// eventually store them
-export async function loader({ request }: Route.LoaderArgs) {
-  const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+export const middleware = [authMiddleware];
 
-  if (!user) {
-    return Response.json({ error: "No session found" }, { status: 401 });
-  }
+export async function loader({ context }: Route.LoaderArgs) {
+  const user = context.get(userContext);
 
-  const userItem = await getUserItem(user.address);
-  if (!userItem || !userItem.idOSUserId) {
+  if (!user.idOSUserId) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  if (userItem.sharedKyc?.sharedId) {
-    return Response.json(userItem);
+  if (user.sharedKyc?.sharedId) {
+    return Response.json(user);
   }
 
-  // Get credentials shared by user
-  const credential = await getUsableCredentialByUser(userItem.idOSUserId);
+  const credential = await getUsableCredentialByUser(user.idOSUserId);
 
   if (!credential) {
     return Response.json({ error: "No credentials found" }, { status: 404 });
   }
 
-  // If they matches
-  if (!userItem.sharedKyc) {
-    userItem.sharedKyc = {
+  if (!user.sharedKyc) {
+    user.sharedKyc = {
       sharedId: credential.id,
       originalId: credential.original_id!,
     };
   } else {
-    userItem.sharedKyc.sharedId = credential.id;
-    userItem.sharedKyc.originalId = credential.original_id!;
+    user.sharedKyc.sharedId = credential.id;
+    user.sharedKyc.originalId = credential.original_id!;
   }
 
-  await setUserItem(userItem);
+  await setUserItem(user);
 
-  return Response.json(userItem);
+  return Response.json(user);
 }
