@@ -96,19 +96,15 @@ function MainNavLinks() {
           <span>Wallets</span>
         </ListItemLink>
       </li>
-      <li>
-        <a
-          // @todo: change to the actual staking app once we have a domain
-          href="https://idos-staking-app.vercel.app/"
-          className={externalLinkClasses}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <CircleDollarSignIcon size={24} strokeWidth="1.5" />
-          <span>Staking</span>
-          <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
-        </a>
-      </li>
+      {import.meta.env.DEV ? (
+        <li>
+          <a href="#/" className={externalLinkClasses} target="_blank" rel="noopener noreferrer">
+            <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+            <span>Staking</span>
+            <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+          </a>
+        </li>
+      ) : null}
     </ul>
   );
 }
