@@ -73,13 +73,13 @@ interface RecipientFormProps {
 
 export function RecipientForm({ onSubmit, isLoading = false }: RecipientFormProps) {
   const [accountType, setAccountType] = useState<"individual" | "business">("individual");
-  const [firstName, setFirstName] = useState("Julian");
+  const [firstName, setFirstName] = useState("");
   /* cspell:disable-next-line */
-  const [lastName, setLastName] = useState("Leitoff");
+  const [lastName, setLastName] = useState("");
   const [companyName, setCompanyName] = useState("");
-  const [email, setEmail] = useState("julian@idos.network");
-  const [country, setCountry] = useState("DE");
-  const [iban, setIban] = useState("DE89 3704 0044 0532 0130 00");
+  const [email, setEmail] = useState("");
+  const [country, setCountry] = useState("");
+  const [iban, setIban] = useState("");
 
   const isValid =
     accountType === "individual"
