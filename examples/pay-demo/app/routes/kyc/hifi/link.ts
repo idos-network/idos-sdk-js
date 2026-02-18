@@ -1,24 +1,23 @@
+import { userContext } from "~/middlewares/auth.server";
 import { createUserAndKYC } from "~/providers/hifi.server";
 import { getCredentialShared } from "~/providers/idos.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "../+types/link";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const credentialId = url.searchParams.get("credentialId");
   const signedAgreementId = url.searchParams.get("signedAgreementId");
-
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+  const user = context.get(userContext);
 
-  if (!credentialId || !user || !signedAgreementId) {
+  if (!credentialId || !signedAgreementId) {
     return Response.json(
-      { error: "credentialId, user or signedAgreementId is required" },
+      { error: "credentialId or signedAgreementId is required" },
       { status: 400 },
     );
   }
 
-  // Check if the user accepted the right TOS
   if (session.get("hifiTosId") !== signedAgreementId) {
     return Response.json({ error: "User did not accept the right TOS" }, { status: 400 });
   }

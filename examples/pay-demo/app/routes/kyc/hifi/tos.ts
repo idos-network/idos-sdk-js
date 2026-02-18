@@ -4,13 +4,7 @@ import type { Route } from "./+types/tos";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const url = new URL(request.url);
-
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
-
-  if (!user) {
-    return Response.json({ error: "user is required" }, { status: 400 });
-  }
 
   try {
     const link = await fetchTosLink(url);
