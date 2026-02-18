@@ -7,6 +7,7 @@
     "@idos-network/consumer": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/utils": "workspace:*",
+    "@neondatabase/serverless": "^1.0.2",
     "@react-router/node": "^7.12.0",
     "@react-router/serve": "^7.12.0",
     "@reown/appkit": "^1.7.8",

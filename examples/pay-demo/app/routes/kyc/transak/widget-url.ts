@@ -5,18 +5,11 @@ import type { Route } from "./+types/widget-url";
 export async function action({ request, context }: Route.ActionArgs) {
   const user = context.get(userContext);
 
-  if (!user) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   try {
-    const { walletAddress, fiatAmount, kycShareToken, credentialId } = await request.json();
+    const { walletAddress, fiatAmount, kycShareToken } = await request.json();
 
-    if (!walletAddress || !kycShareToken || !credentialId) {
-      return Response.json(
-        { error: "walletAddress, kycShareToken, and credentialId are required" },
-        { status: 400 },
-      );
+    if (!walletAddress || !kycShareToken || !user.sharedKyc?.sharedId) {
+      return Response.json({ error: "walletAddress, kycShareToken are required" }, { status: 400 });
     }
 
     const referrerDomain = new URL(request.url).origin;
@@ -25,7 +18,7 @@ export async function action({ request, context }: Route.ActionArgs) {
       walletAddress,
       fiatAmount: fiatAmount ?? "100",
       kycShareToken,
-      credentialId,
+      credentialId: user.sharedKyc.sharedId,
       referrerDomain,
     });
 
