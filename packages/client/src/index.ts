@@ -51,6 +51,7 @@ import type { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
   base64Encode,
+  hexEncode,
   hexEncodeSha256Hash,
   utf8Decode,
   utf8Encode,
@@ -155,6 +156,28 @@ export class idOSClientIdle {
             message,
           );
           return { signedMessage: signature } as { signedMessage: string };
+        },
+      } as unknown as Wallet;
+    } else if (walletType === "Stellar") {
+      const originalSigner = signer as Wallet & {
+        signMessage: (message: string) => Promise<{ signedMessage: string }>;
+      };
+      signer = {
+        // MPC engine expects Stellar signatures in hex form.
+        signer: async (message: string) => {
+          const result = await originalSigner.signMessage(message);
+          let signatureBytes = base64Decode(result.signedMessage);
+
+          // Some Stellar wallets return a base64-encoded string as bytes; normalize it.
+          if (signatureBytes.length > 64) {
+            try {
+              signatureBytes = base64Decode(utf8Decode(signatureBytes));
+            } catch {
+              // Keep initial decode if fallback fails.
+            }
+          }
+
+          return hexEncode(signatureBytes);
         },
       } as unknown as Wallet;
     }
@@ -495,7 +518,7 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
       signature,
     );
     if (result !== "success") {
-      console.error(`Failed to add wallet to MPC: ${result}`);
+      console.error(`Failed to remove wallet from MPC: ${result}`);
     }
 
     return { id };

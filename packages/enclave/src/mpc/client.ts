@@ -35,6 +35,7 @@ export class Client {
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
   private numNodes: number;
+  private numToReconstruct: number;
 
   constructor(
     baseUrl: string,
@@ -52,6 +53,7 @@ export class Client {
     this.reconfigure(walletType, signerAddress, signerPublicKey);
     
     this.numNodes = numNodes;
+    this.numToReconstruct = numToReconstruct;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
@@ -116,12 +118,14 @@ export class Client {
       promises.push(engineClient.sendUpload(id, uploadRequest, signature));
     }
     const statuses = await Promise.all(promises);
-
-    if (statuses.every((item) => item === "201")) {
+    
+    const successCount = statuses.filter((item) => item === "201").length;
+    
+    if (successCount === this.numNodes) {
       return { status: "success" };
     }
-
-    if (statuses.filter((item) => item === "201").length > 0) {
+    
+    if (successCount >= this.numToReconstruct) {
       return { status: "partial-success" };
     }
 
@@ -181,28 +185,23 @@ export class Client {
       value: downloadRequest,
     };
   }
-
-  public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "Stellar":
-        address = `STELLAR:${this.signerPublicKey}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
+  private formatAddress(signerType: string, signerAddress: string, signerPublicKey?: string): string {
+    switch (signerType.toLowerCase()) {
+      case "evm":
+        return `eip712:${signerAddress}`;
+      case "xrpl":
+        return `XRPL:${signerPublicKey}`;
+      case "near":
+        return `NEAR:${signerPublicKey?.replace('ed25519:', '')}`;
+      case "stellar":
+        return `STELLAR:${signerAddress}`;
       default:
         throw new Error("Invalid signer type");
     }
+  }
+
+  public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
     return {
       recovering_address: address,
       timestamp: Date.now(),
@@ -392,8 +391,8 @@ export class Client {
       promises.push(engineClient.sendRemoveAddress(userId, message, signature));
     }
     const statuses = await Promise.all(promises);
-
-    if (statuses.every((item) => item === "200")) {
+    const successCount = statuses.filter((item: string) => item == "200").length;
+    if (successCount === this.numNodes) {
       return "success";
     }
 
