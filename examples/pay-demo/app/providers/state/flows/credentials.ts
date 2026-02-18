@@ -56,6 +56,9 @@ export const flow = {
     },
 
     storeUserId: {
+      meta: {
+        description: "Storing user ID...",
+      },
       invoke: {
         id: "storeUserId",
         src: "storeUserId",
@@ -120,6 +123,9 @@ export const flow = {
     },
 
     waitForCredential: {
+      meta: {
+        description: "Waiting for credentials to be written in idOS...",
+      },
       after: {
         // In case of proper setup of idOS relay app, we should have a shared credential ready by now
         // in other cases we have to check in users space if credentials are available

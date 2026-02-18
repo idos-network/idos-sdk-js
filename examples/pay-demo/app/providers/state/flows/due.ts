@@ -158,6 +158,9 @@ export const flow = {
     },
 
     checkKycStatus: {
+      meta: {
+        description: "Checking DUE KYC status...",
+      },
       invoke: {
         id: "fetchCurrentUser",
         src: "fetchCurrentUser",
@@ -171,6 +174,9 @@ export const flow = {
     waitForKycToBeDone: {
       after: {
         5000: "checkKycStatus",
+      },
+      meta: {
+        description: "Checking DUE KYC status...",
       },
       always: [
         {

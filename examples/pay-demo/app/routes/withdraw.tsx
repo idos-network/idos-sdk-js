@@ -85,7 +85,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   // --- Auto-select Persona for KYC ---
   useEffect(() => {
     if (typeof state === "object" && "kycFlow" in state && state.kycFlow === "chooseType") {
-      send({ type: "start", kycType: "sumsub" });
+      send({ type: "start", kycType: "persona" });
     }
   }, [state, send]);
 
