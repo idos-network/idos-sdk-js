@@ -1,5 +1,4 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
-import { useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,7 +17,6 @@ interface DeleteWalletProps {
 }
 
 export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
-  const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteWallet = useDeleteWalletMutation();
 
   const handleClose = () => {
@@ -52,7 +50,7 @@ export function DeleteWallet({ isOpen, wallets, onClose }: DeleteWalletProps) {
         </DialogHeader>
         <div>Do you want to delete this wallet from the idOS?</div>
         <DialogFooter className="flex items-center gap-2">
-          <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
+          <Button variant="secondary" onClick={handleClose}>
             Cancel
           </Button>
           <Button

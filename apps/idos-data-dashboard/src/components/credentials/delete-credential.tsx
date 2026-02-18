@@ -1,6 +1,5 @@
 import type { idOSGrant } from "@idos-network/kwil-infra/actions";
 import { useMutationState } from "@tanstack/react-query";
-import { useRef } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
@@ -24,7 +23,6 @@ interface DeleteCredentialProps {
 }
 
 export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredentialProps) {
-  const cancelRef = useRef<HTMLButtonElement | null>(null);
   const deleteCredential = useDeleteCredentialMutation();
   const grants = useFetchGrants({
     credentialId: credential?.id ?? "",
@@ -133,7 +131,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
         </div>
         <DialogFooter className="flex items-center gap-2">
           {!(revokeGrants.isPending || deleteCredential.isPending) ? (
-            <Button ref={cancelRef} variant="secondary" onClick={handleClose}>
+            <Button variant="secondary" onClick={handleClose}>
               Cancel
             </Button>
           ) : null}
