@@ -23,7 +23,7 @@ export function CredentialDetails({ isOpen, credentialId, onClose }: CredentialD
     credentialId,
   });
 
-  const jsonLink = `data:text/json;chatset=utf-8,${encodeURIComponent(
+  const jsonLink = `data:text/json;charset=utf-8,${encodeURIComponent(
     JSON.stringify(credential.data),
   )}`;
 
