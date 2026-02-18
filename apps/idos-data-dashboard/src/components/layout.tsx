@@ -1,7 +1,15 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useRouterState } from "@tanstack/react-router";
 import {
-  ChevronRightIcon,
+  Link,
+  type LinkProps,
+  useMatches,
+  useMatchRoute,
+  useRouterState,
+} from "@tanstack/react-router";
+import { useSelector } from "@xstate/react";
+import {
+  ArchiveIcon,
+  ArrowUpRightFromSquare,
+  CircleDollarSignIcon,
   CogIcon,
   ExternalLinkIcon,
   KeyRoundIcon,
@@ -10,199 +18,261 @@ import {
   Wallet2Icon,
   XIcon,
 } from "lucide-react";
-import { useEffect, useRef } from "react";
-import { useAccount, useDisconnect } from "wagmi";
-import { useWalletSelector } from "@/core/near";
-import stellarKit from "@/core/stellar-kit";
-import useDisclosure from "@/hooks/useDisclosure";
-import { useSigner, useUnsafeIdOS } from "@/idOS.provider";
+import { Fragment, type PropsWithChildren, useEffect } from "react";
+import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
-import { useWalletStore } from "@/stores/wallet";
-import { Button } from "./ui/button";
+import { dashboardActor } from "@/machines/dashboard.actor";
+import { selectWalletAddress } from "@/machines/selectors";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "./ui/breadcrumb";
+import { Button, buttonVariants } from "./ui/button";
 import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
-import { Link, type LinkProps as ShadcnLinkProps } from "./ui/link";
 
-const ConnectedWallet = () => {
-  const { address } = useAccount();
+function ConnectedWallet() {
+  const address = useSelector(dashboardActor, selectWalletAddress);
+
+  if (!address) {
+    return null;
+  }
+
   return (
     <div className="flex h-20 items-center gap-5">
-      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-neutral-800">
+      <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
         <img
           alt={`Connected wallet ${address}`}
-          src="/idos-dashboard-logo-dark.svg"
+          src="/wallet.svg"
+          width={50}
+          height={50}
           className="h-[50px] w-[50px]"
           loading="eager"
         />
       </div>
       <div>
-        <div className="text-neutral-100">Connected Wallet</div>
-        <div className="max-w-[180px] truncate text-neutral-600">{address}</div>
+        <div className="text-card-foreground">Connected Wallet</div>
+        <code className="max-w-[180px] truncate text-muted-foreground">
+          {address.slice(0, 6)}...{address.slice(-4)}
+        </code>
       </div>
     </div>
   );
-};
+}
 
-const ListItemLink = (props: ShadcnLinkProps) => {
+function ListItemLink({ to, children }: { to: LinkProps["to"]; children: React.ReactNode }) {
+  const matchRoute = useMatchRoute();
+  const isActive = matchRoute({ to });
   return (
     <Link
-      {...props}
-      variant="nav"
-      className={cn("flex items-center gap-5 px-6 py-3 [&:hover]:bg-neutral-950!", props.className)}
-    />
+      to={to}
+      className={cn(
+        "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle active:bg-hover-subtle",
+        isActive && "bg-hover-subtle",
+      )}
+    >
+      {children}
+    </Link>
   );
-};
+}
 
-const DisconnectButton = () => {
-  const { disconnectAsync } = useDisconnect();
-  const { selector, setAccounts } = useWalletSelector();
-  const queryClient = useQueryClient();
-  const { setSigner } = useSigner();
-  const client = useUnsafeIdOS();
-  const { resetWallet, walletType } = useWalletStore();
+const externalLinkClasses = "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle";
 
-  const handleDisconnect = async () => {
-    if (walletType === "stellar") await stellarKit.disconnect();
-    if (walletType === "NEAR") if (selector.isSignedIn()) await (await selector.wallet()).signOut();
-    if (walletType === "EVM") await disconnectAsync();
-    if (client.state === "logged-in") await client.logOut();
-    setSigner(undefined);
-    setAccounts([]);
-    queryClient.removeQueries();
-    resetWallet();
+function MainNavLinks() {
+  return (
+    <ul className="flex flex-col gap-1.5">
+      <li>
+        <ListItemLink to="/">
+          <KeyRoundIcon size={24} strokeWidth="1.5" />
+          <span>Credentials</span>
+        </ListItemLink>
+      </li>
+      <li>
+        <ListItemLink to="/wallets">
+          <Wallet2Icon size={24} strokeWidth="1.5" />
+          <span>Wallets</span>
+        </ListItemLink>
+      </li>
+      {import.meta.env.DEV ? (
+        <li>
+          <a href="#/" className={externalLinkClasses} target="_blank" rel="noopener noreferrer">
+            <CircleDollarSignIcon size={24} strokeWidth="1.5" />
+            <span>Staking</span>
+            <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+          </a>
+        </li>
+      ) : null}
+    </ul>
+  );
+}
+
+function FooterNavLinks() {
+  return (
+    <ul className="flex flex-1 flex-col gap-1.5">
+      <li>
+        <a
+          // @todo: update to the actual Legacy app domain if/when it changes
+          href="https://app.idos.network/"
+          className={externalLinkClasses}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <ArchiveIcon size={24} strokeWidth="1.5" />
+          <span>Legacy</span>
+          <ArrowUpRightFromSquare size={16} strokeWidth="1.5" className="ml-auto" />
+        </a>
+      </li>
+      <li>
+        <ListItemLink to="/settings">
+          <CogIcon size={24} strokeWidth="1" />
+          <span>Settings</span>
+        </ListItemLink>
+      </li>
+    </ul>
+  );
+}
+
+function DisconnectButton() {
+  const handleDisconnect = () => {
+    dashboardActor.send({ type: "DISCONNECT" });
   };
 
   return (
-    <Button id="disconnect-wallet-btn" variant="default" onClick={handleDisconnect}>
+    <Button id="disconnect-wallet-btn" size="lg" onClick={handleDisconnect}>
       <LogOutIcon size={24} strokeWidth="1.5" />
       Disconnect wallet
     </Button>
   );
-};
+}
 
-const getBreadcrumbLabel = (routeId: string) => {
-  if (routeId === "/dashboard/") return "Credentials";
-  const paths = routeId.split("/");
-  const lastPath = paths[paths.length - 1];
-  return lastPath.charAt(0).toUpperCase() + lastPath.slice(1);
-};
-
-const Breadcrumbs = () => {
-  const routerState = useRouterState();
-  const matches = routerState.matches;
-
+function Breadcrumbs() {
+  const matches = useMatches();
   const crumbs = matches
-    .filter((match) => match.routeId !== "__root__" && match.routeId !== "/")
-    .map((match) => getBreadcrumbLabel(match.routeId))
-    .filter(Boolean);
+    .filter((match) => match.staticData?.breadcrumb)
+    .map((match) => ({
+      label: match.staticData.breadcrumb as string,
+      to: match.pathname,
+    }));
 
-  const items = ["Dashboard", ...crumbs];
+  const items = [{ label: "Dashboard", to: "/" }, ...crumbs];
   return (
-    <ul className="flex items-center gap-2.5 lg:gap-5">
-      {items.map((item, index) => {
-        return (
-          <li key={item} className="flex items-center gap-2.5 lg:gap-5">
-            <span className="rounded-full bg-neutral-800 px-4 py-2 text-sm">{item}</span>
-            {index !== items.length - 1 ? <ChevronRightIcon size={18} aria-hidden="true" /> : null}
-          </li>
-        );
-      })}
-    </ul>
+    <Breadcrumb>
+      <BreadcrumbList>
+        {items.map((item, index) => {
+          const isLast = index === items.length - 1;
+          return (
+            <Fragment key={`${item.label}-${index}`}>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink
+                    className="rounded-full bg-muted px-4 py-2 font-normal text-foreground"
+                    render={<Link to={item.to} />}
+                  >
+                    {item.label}
+                  </BreadcrumbLink>
+                )}
+              </BreadcrumbItem>
+              {!isLast ? <BreadcrumbSeparator /> : null}
+            </Fragment>
+          );
+        })}
+      </BreadcrumbList>
+    </Breadcrumb>
   );
-};
+}
 
-export default function Layout({
-  children,
-  hasAccount,
-}: {
-  children?: React.ReactNode;
-  hasAccount: boolean;
-}) {
+export function Layout({ children }: PropsWithChildren) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
-  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => {
-    if (prevPathnameRef.current !== pathname) {
-      if (isOpen) onClose();
-      prevPathnameRef.current = pathname;
-    }
-  }, [pathname, isOpen, onClose]);
+    onClose();
+  }, [pathname, onClose]);
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen lg:gap-5">
       <nav className="sticky top-0 hidden h-screen w-[380px] flex-col items-stretch lg:flex">
-        <div className="flex flex-1 flex-col items-stretch gap-5 p-5">
+        <div className="flex flex-1 flex-col items-stretch gap-5 p-5 pr-0">
           <Link to="/" className="flex h-[100px] items-center">
             <img
-              src="/idos-dashboard-logo.svg"
-              alt="idOS Dashboard logo"
+              src="/logo-light.svg"
+              alt="idOS logo"
+              width={160}
+              height={52}
               loading="eager"
-              className="h-auto w-40"
+              className="h-auto w-40 dark:hidden"
+            />
+            <img
+              src="/logo.svg"
+              alt="idOS logo"
+              width={160}
+              height={52}
+              loading="eager"
+              className="hidden h-auto w-40 dark:block"
             />
           </Link>
-          <div className="flex flex-1 flex-col items-stretch gap-2.5">
-            <div className="rounded-xl bg-neutral-900 px-5">
+          <div className="flex flex-1 flex-col items-stretch gap-5">
+            <div className="rounded-xl bg-card px-5">
               <ConnectedWallet />
             </div>
-            <div className="flex flex-1 flex-col items-stretch rounded-xl bg-neutral-900 p-5">
-              <ul className="flex flex-col gap-1.5">
-                <li>
-                  <ListItemLink to="/">
-                    <KeyRoundIcon size={24} strokeWidth="1.5" />
-                    <span>Credentials</span>
-                  </ListItemLink>
-                </li>
-                {hasAccount ? (
-                  <li>
-                    <ListItemLink to="/wallets">
-                      <Wallet2Icon size={24} strokeWidth="1.5" />
-                      <span>Wallets</span>
-                    </ListItemLink>
-                  </li>
-                ) : null}
-              </ul>
+            <div className="flex flex-1 flex-col items-stretch rounded-xl bg-card p-5">
+              <MainNavLinks />
               <div className="mt-auto flex flex-col items-stretch gap-5">
-                {hasAccount ? (
-                  <ul className="flex flex-1 flex-col gap-1.5">
-                    <ListItemLink to="/settings">
-                      <CogIcon size={24} strokeWidth="1" />
-                      <span>Settings</span>
-                    </ListItemLink>
-                  </ul>
-                ) : null}
+                <FooterNavLinks />
                 <DisconnectButton />
               </div>
             </div>
           </div>
         </div>
       </nav>
-      <div className="flex flex-1 flex-col items-stretch gap-0 p-5">
-        <div className="mb-5 flex h-10 items-center justify-between lg:mb-0 lg:h-[120px]">
+      <div className="flex flex-1 flex-col items-stretch gap-5 p-5 lg:pl-0">
+        <div className="mb-5 flex h-10 items-center justify-between lg:mb-0 lg:h-[100px]">
           <Button
             variant="secondary"
             aria-label="Open menu"
             onClick={onOpen}
-            className="block lg:hidden"
+            size="icon-lg"
+            className="lg:hidden"
           >
-            <MenuIcon size={24} strokeWidth="1.5" />
+            <MenuIcon />
           </Button>
           <Breadcrumbs />
         </div>
         {children}
       </div>
       <Drawer open={isOpen} onOpenChange={(open) => (open ? onOpen() : onClose())} direction="left">
-        <DrawerContent className="bg-neutral-900">
+        <DrawerContent className="bg-card">
           <DrawerHeader className="relative">
             <DrawerClose asChild>
-              <Button variant="ghost" className="absolute top-4 right-4" aria-label="Close menu">
+              <Button
+                variant="ghost"
+                className="absolute top-4 right-4"
+                aria-label="Close menu"
+                size="icon"
+              >
                 <XIcon size={20} />
               </Button>
             </DrawerClose>
-            <Link to="/" className="flex h-[100px] items-center bg-transparent!">
+            <Link to="/" className="flex h-[100px] items-center">
               <img
-                src="/idos-dashboard-logo.svg"
-                alt="idOS Dashboard logo"
-                className="h-auto w-[120px]"
+                src="/logo-light.svg"
+                alt="idOS logo"
+                width={120}
+                height={39}
+                className="h-auto w-[120px] dark:hidden"
+                loading="eager"
+              />
+              <img
+                src="/logo.svg"
+                alt="idOS logo"
+                width={120}
+                height={39}
+                className="hidden h-auto w-[120px] dark:block"
                 loading="eager"
               />
             </Link>
@@ -211,67 +281,68 @@ export default function Layout({
             <div className="mb-5">
               <ConnectedWallet />
             </div>
-            <ul className="flex flex-col gap-1.5">
-              <li>
-                <ListItemLink to="/">
-                  <KeyRoundIcon size={24} strokeWidth="2.5" />
-                  <span>Credentials</span>
-                </ListItemLink>
-              </li>
-              {hasAccount && (
-                <li>
-                  <ListItemLink to="/wallets">
-                    <Wallet2Icon size={24} strokeWidth="1.5" />
-                    <span>Wallets</span>
-                  </ListItemLink>
-                </li>
-              )}
-            </ul>
+            <MainNavLinks />
           </div>
           <DrawerFooter className="flex-col items-stretch gap-5">
-            {hasAccount ? (
-              <ul className="flex flex-1 flex-col gap-1.5">
-                <ListItemLink to="/settings">
-                  <CogIcon size={24} strokeWidth="1" />
-                  <span>Settings</span>
-                </ListItemLink>
-              </ul>
-            ) : null}
+            <FooterNavLinks />
+
             <DisconnectButton />
+
+            <div className="flex gap-2">
+              <a
+                href="https://www.idos.network/legal/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: "secondary", size: "sm" }),
+                  "flex flex-1 items-center gap-2",
+                )}
+              >
+                Privacy Policy <ExternalLinkIcon size={14} />
+              </a>
+              <a
+                href="https://www.idos.network/legal/user-agreement"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: "secondary", size: "sm" }),
+                  "flex flex-1 items-center gap-2",
+                )}
+              >
+                User Agreement <ExternalLinkIcon size={14} />
+              </a>
+            </div>
           </DrawerFooter>
         </DrawerContent>
       </Drawer>
-      <div className="fixed right-5 bottom-5 flex items-stretch gap-2 rounded-lg bg-neutral-900 p-5">
-        <Button
-          variant="secondary"
-          className="flex items-center gap-2 text-green-200!"
-          nativeButton={false}
-          render={
-            <a
-              href="https://www.idos.network/legal/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              Privacy Policy <ExternalLinkIcon size={16} />
-            </a>
-          }
-        />
-        <Button
-          variant="secondary"
-          className="flex items-center gap-2 text-green-200!"
-          nativeButton={false}
-          render={
-            <a
-              href="https://www.idos.network/legal/user-agreement"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2"
-            >
-              User Agreement <ExternalLinkIcon size={16} />
-            </a>
-          }
-        />
+      <div className="fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg bg-card p-5 lg:flex">
+        <a
+          href="https://www.idos.network/legal/privacy-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            buttonVariants({
+              variant: "secondary",
+            }),
+            "flex items-center gap-2",
+          )}
+        >
+          Privacy Policy <ExternalLinkIcon size={16} />
+        </a>
+
+        <a
+          href="https://www.idos.network/legal/user-agreement"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(
+            buttonVariants({
+              variant: "secondary",
+            }),
+            "flex items-center gap-2",
+          )}
+        >
+          User Agreement <ExternalLinkIcon size={16} />
+        </a>
       </div>
     </div>
   );

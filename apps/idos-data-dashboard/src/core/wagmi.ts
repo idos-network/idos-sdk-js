@@ -1,43 +1,53 @@
-import { defaultWagmiConfig } from "@web3modal/wagmi/react/config";
-import { BrowserProvider, JsonRpcSigner } from "ethers";
-import { useMemo } from "react";
-import type { Account, Client, Transport } from "viem";
-import { http, useConnectorClient } from "wagmi";
-import { type Chain, mainnet, sepolia } from "wagmi/chains";
+import { mainnet, sepolia } from "@reown/appkit/networks";
+import { createAppKit } from "@reown/appkit/react";
+import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
+import { disconnect, type GetAccountReturnType, getAccount } from "@wagmi/core";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+
+if (!projectId) {
+  throw new Error(
+    "Missing VITE_WALLET_CONNECT_PROJECT_ID environment variable. " +
+      "Get a project ID at https://cloud.reown.com/ and add it to your .env file.",
+  );
+}
 
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
-  url: "https://dashboard.idos.network",
-  icons: ["/idos-dashboard-logo.svg"],
+  url: import.meta.env.DEV ? window.origin : "https://dashboard.idos.network",
+  icons: ["/logo.svg"],
 };
 
-export const chains = [mainnet, sepolia] as const;
+export const networks = [mainnet, sepolia] as [typeof mainnet, typeof sepolia];
 
-export const wagmiConfig = defaultWagmiConfig({
-  chains,
+export const wagmiAdapter = new WagmiAdapter({
+  networks,
   projectId,
+});
+
+export const wagmiConfig = wagmiAdapter.wagmiConfig;
+
+export const appKit = createAppKit({
+  adapters: [wagmiAdapter],
+  networks,
   metadata,
-  transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
+  projectId,
+  features: {
+    analytics: true,
+    email: false,
+    socials: false,
   },
 });
 
-export function clientToSigner(client: Client<Transport, Chain, Account>) {
-  const { account, chain, transport } = client;
-  const network = {
-    chainId: chain.id,
-    name: chain.name,
-    ensAddress: chain.contracts?.ensRegistry?.address,
-  };
-  const provider = new BrowserProvider(transport, network);
-  return new JsonRpcSigner(provider, account.address);
+export function getEvmAccount(): GetAccountReturnType {
+  return getAccount(wagmiConfig);
 }
 
-export function useEthersSigner({ chainId }: { chainId?: number } = {}) {
-  const { data: walletClient } = useConnectorClient({ chainId });
-  return useMemo(() => (walletClient ? clientToSigner(walletClient) : undefined), [walletClient]);
+export function openEvmModal(): void {
+  appKit.open();
+}
+
+export async function disconnectEvm(): Promise<void> {
+  await disconnect(wagmiConfig);
 }

@@ -1,82 +1,86 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.svg" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <meta charset="UTF-8">
+    <link rel="icon" href="/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Urbanist:ital,wght@0,100..900;1,100..900&display=swap"
       rel="stylesheet"
-    />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>idOS Dashboard</title>
 
     <style>
-      #idos-root {
-        position: fixed;
+    #idos-root {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      visibility: hidden;
+      opacity: 0;
+      transition:
+        opacity 150ms ease-in,
+        visibility 0ms ease-in 150ms;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(2px);
+      aspect-ratio: 1;
+      z-index: 10000;
+    }
+
+    #idos-root:has(#idOS-enclave.visible) {
+      visibility: visible;
+      opacity: 1;
+      transition:
+        opacity 150ms ease-in,
+        visibility 0ms ease-in 0ms;
+    }
+
+    .idos-card {
+      display: flex;
+      flex-direction: column;
+      place-content: center;
+      align-items: center;
+      gap: 20px;
+      background: #171717;
+      padding: 20px;
+      border-radius: 12px;
+      min-width: 430px;
+
+      @media screen and (max-width: 768px) {
         width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        visibility: hidden;
-        opacity: 0;
-        transition: opacity 150ms ease-in, visibility 0ms ease-in 150ms;
-        background: rgba(0, 0, 0, 0.3);
-        backdrop-filter: blur(2px);
-        aspect-ratio: 1;
-        z-index: 10000;
+        height: 100dvh;
       }
+    }
 
-      #idos-root:has(#idOS-enclave.visible) {
-        visibility: visible;
-        opacity: 1;
-        transition: opacity 150ms ease-in, visibility 0ms ease-in 0ms;
-      }
+    .idos-card__title {
+      font-size: 20px;
+      font-weight: 600;
+      line-height: 30px;
+      text-align: center;
+    }
 
-      .idos-card {
-        display: flex;
-        flex-direction: column;
-        place-content: center;
-        align-items: center;
-        gap: 20px;
-        background: #171717;
-        padding: 20px;
-        border-radius: 12px;
-        min-width: 430px;
+    .idos-card__body {
+      display: flex;
+      flex-direction: column;
+    }
 
-        @media screen and (max-width: 768px) {
-          width: 100%;
-          height: 100dvh;
-        }
-      }
-
-      .idos-card__title {
-        font-size: 20px;
-        font-weight: 600;
-        line-height: 30px;
-        text-align: center;
-      }
-
-      .idos-card__body {
-        display: flex;
-        flex-direction: column;
-      }
-
-      #idOS-enclave {
-        display: flex;
-        height: 40px;
-        border-radius: 6px;
-        overflow: hidden;
-      }
+    #idOS-enclave {
+      display: flex;
+      height: 40px;
+      border-radius: 6px;
+      overflow: hidden;
+    }
     </style>
   </head>
 
-  <body class="dark">
+  <body>
     <div id="root" style="display: contents"></div>
     <div id="idos-root">
       <div class="idos-card">

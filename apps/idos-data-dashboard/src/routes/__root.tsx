@@ -1,45 +1,37 @@
+import type { idOSClientLoggedIn } from "@idos-network/client";
 import { TanStackDevtools } from "@tanstack/react-devtools";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import type { QueryClient } from "@tanstack/react-query";
+import { ReactQueryDevtoolsPanel } from "@tanstack/react-query-devtools";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
+import { Layout } from "@/components/layout";
 
-import Layout from "@/components/layout";
-import { IDOSClientProvider, useUnsafeIdOS } from "@/idOS.provider";
-import "@/styles/index.css";
+declare module "@tanstack/react-router" {
+  interface StaticDataRouteOption {
+    breadcrumb?: string;
+  }
+}
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+  idOSClient: idOSClientLoggedIn;
+}>()({
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
     <>
-      <IDOSClientProvider>
-        <LayoutWrapper />
-      </IDOSClientProvider>
-      {import.meta.env.DEV && (
-        <TanStackDevtools
-          config={{
-            position: "bottom-right",
-          }}
-          plugins={[
-            {
-              name: "Tanstack Router",
-              render: <TanStackRouterDevtoolsPanel />,
-            },
-          ]}
-        />
-      )}
+      <Layout>
+        <Outlet />
+      </Layout>
+      <TanStackDevtools
+        config={{ position: "bottom-right" }}
+        plugins={[
+          { name: "React Query", render: <ReactQueryDevtoolsPanel /> },
+          { name: "Tanstack Router", render: <TanStackRouterDevtoolsPanel /> },
+        ]}
+      />
     </>
-  );
-}
-
-function LayoutWrapper() {
-  const idOSClient = useUnsafeIdOS();
-  const hasAccount = idOSClient.state === "logged-in" && !!idOSClient.user?.id;
-
-  return (
-    <Layout hasAccount={hasAccount}>
-      <Outlet />
-    </Layout>
   );
 }
