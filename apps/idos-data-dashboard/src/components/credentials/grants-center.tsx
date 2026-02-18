@@ -37,7 +37,7 @@ function Shares({ credentialId, grants }: { credentialId: string; grants: idOSGr
   const revokeGrant = useRevokeGrant();
 
   if (grants.length === 0) {
-    return <span data-test-id="no-grants">You have not shared this credential with anyone.</span>;
+    return <span>You have not shared this credential with anyone.</span>;
   }
 
   const onRevoke = (grant: idOSGrant) => {

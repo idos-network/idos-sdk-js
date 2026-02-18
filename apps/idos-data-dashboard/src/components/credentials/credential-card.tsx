@@ -71,7 +71,7 @@ export function CredentialCard({
         ))}
         <div className="flex flex-col gap-2">
           <span className="text-muted-foreground text-sm">Shares</span>
-          <span data-test-id="shares-count">{shares.data?.length || 0}</span>
+          <span>{shares.data?.length || 0}</span>
         </div>
       </div>
       <div className="flex flex-col gap-4 lg:flex-row">

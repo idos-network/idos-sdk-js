@@ -26,8 +26,7 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
   _selector = await setupWalletSelector({
     network: import.meta.env.DEV ? "testnet" : "mainnet",
     debug: import.meta.env.DEV,
-    // oxlint-disable-next-line typescript/no-explicit-any -- setupMeteorWallet type mismatch
-    modules: [setupMeteorWallet() as any, setupHereWallet()],
+    modules: [setupMeteorWallet(), setupHereWallet()],
   });
 
   _modal = setupModal(_selector, {

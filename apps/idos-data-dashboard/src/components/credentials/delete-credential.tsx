@@ -104,11 +104,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
   const meta = safeParse<{ type?: string; issuer?: string }>(credential.public_notes);
 
   return (
-    <Dialog
-      data-test-id="delete-credential-dialog"
-      open={isOpen}
-      onOpenChange={(open) => !open && handleClose()}
-    >
+    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
