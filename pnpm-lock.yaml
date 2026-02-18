@@ -680,9 +680,6 @@ importers:
       '@tailwindcss/vite':
         specifier: ^4.1.1
         version: 4.1.18(vite@7.0.6(@types/node@25.2.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.41.0)(tsx@4.21.0)(yaml@2.8.0))
-      '@types/dompurify':
-        specifier: 3.2.0
-        version: 3.2.0
       ethers:
         specifier: catalog:ethereum
         version: 6.16.0(bufferutil@4.1.0)(utf-8-validate@6.0.5)
@@ -5069,10 +5066,6 @@ packages:
 
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
-
-  '@types/dompurify@3.2.0':
-    resolution: {integrity: sha512-Fgg31wv9QbLDA0SpTOXO3MaxySc4DKGLi8sna4/Utjo4r3ZRPdCt4UQee8BWr+Q5z21yifghREPJGYaEOEIACg==}
-    deprecated: This is a stub types definition. dompurify provides its own type definitions, so you do not need this installed.
 
   '@types/elliptic@6.4.18':
     resolution: {integrity: sha512-UseG6H5vjRiNpQvrhy4VF/JXdA3V/Fp5amvveaL+fs28BZ6xIKJBPnUPRlEaZpysD9MbpfaLi8lbl7PGUAkpWw==}
@@ -17328,10 +17321,6 @@ snapshots:
       '@types/ms': 2.1.0
 
   '@types/deep-eql@4.0.2': {}
-
-  '@types/dompurify@3.2.0':
-    dependencies:
-      dompurify: 3.3.1
 
   '@types/elliptic@6.4.18':
     dependencies:
