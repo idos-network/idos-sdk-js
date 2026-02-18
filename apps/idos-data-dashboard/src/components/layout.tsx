@@ -26,6 +26,7 @@ import { selectWalletAddress } from "@/machines/selectors";
 import {
   Breadcrumb,
   BreadcrumbItem,
+  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
@@ -155,18 +156,30 @@ function Breadcrumbs() {
   const matches = useMatches();
   const crumbs = matches
     .filter((match) => match.staticData?.breadcrumb)
-    .map((match) => match.staticData.breadcrumb as string);
+    .map((match) => ({
+      label: match.staticData.breadcrumb as string,
+      to: match.pathname,
+    }));
 
-  const items = ["Dashboard", ...crumbs];
+  const items = [{ label: "Dashboard", to: "/" }, ...crumbs];
   return (
     <Breadcrumb>
       <BreadcrumbList>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <Fragment key={`${item}-${index}`}>
+            <Fragment key={`${item.label}-${index}`}>
               <BreadcrumbItem>
-                <BreadcrumbPage>{item}</BreadcrumbPage>
+                {isLast ? (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                ) : (
+                  <BreadcrumbLink
+                    className="rounded-full bg-muted px-4 py-2 font-normal text-foreground"
+                    render={<Link to={item.to} />}
+                  >
+                    {item.label}
+                  </BreadcrumbLink>
+                )}
               </BreadcrumbItem>
               {!isLast ? <BreadcrumbSeparator /> : null}
             </Fragment>
