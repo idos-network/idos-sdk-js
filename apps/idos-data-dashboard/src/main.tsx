@@ -7,8 +7,9 @@ import ReactDOM from "react-dom/client";
 import { WagmiProvider } from "wagmi";
 
 import "@/machines/dashboard.actor";
+import { LogOutIcon } from "lucide-react";
 import { ErrorCard } from "@/components/error-card";
-import { Layout } from "@/components/layout";
+import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
@@ -65,9 +66,31 @@ function App() {
 
   if (isNoProfile) {
     return (
-      <Layout>
-        <span className="block font-medium text-sm">No account found</span>
-      </Layout>
+      <div className="flex min-h-screen flex-col items-center justify-center gap-8 bg-background">
+        <img
+          src="/logo-light.svg"
+          alt="idOS logo"
+          width={160}
+          height={52}
+          className="h-auto w-40 dark:hidden"
+        />
+        <img
+          src="/logo.svg"
+          alt="idOS logo"
+          width={160}
+          height={52}
+          className="hidden h-auto w-40 dark:block"
+        />
+        <p className="text-foreground text-xl">No idOS account found for the connected wallet</p>
+        <Button
+          size="lg"
+          onClick={() => dashboardActor.send({ type: "DISCONNECT" })}
+          className="flex items-center gap-2"
+        >
+          <LogOutIcon size={20} />
+          Disconnect wallet
+        </Button>
+      </div>
     );
   }
 
