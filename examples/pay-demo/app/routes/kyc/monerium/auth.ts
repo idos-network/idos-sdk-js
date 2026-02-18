@@ -1,17 +1,17 @@
+import { userContext } from "~/middlewares/auth.server";
 import { getCredentialShared } from "~/providers/idos.server";
 import { auth } from "~/providers/monerium.server";
 import { sessionStorage } from "~/providers/sessions.server";
 import type { Route } from "./+types/auth";
 
-export async function loader({ request }: Route.LoaderArgs) {
+export async function loader({ request, context }: Route.LoaderArgs) {
   const url = new URL(request.url);
   const credentialId = url.searchParams.get("credentialId");
-
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
+  const user = context.get(userContext);
 
-  if (!credentialId || !user) {
-    return Response.json({ error: "credentialId or user is required" }, { status: 400 });
+  if (!credentialId) {
+    return Response.json({ error: "credentialId is required" }, { status: 400 });
   }
 
   try {

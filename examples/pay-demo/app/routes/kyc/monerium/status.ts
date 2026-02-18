@@ -4,11 +4,10 @@ import type { Route } from "./+types/status";
 
 export async function loader({ request }: Route.LoaderArgs) {
   const session = await sessionStorage.getSession(request.headers.get("Cookie"));
-  const user = session.get("user");
   const moneriumProfileId = session.get("moneriumProfileId");
 
-  if (!moneriumProfileId || !user) {
-    return Response.json({ error: "moneriumProfileId or user is required" }, { status: 400 });
+  if (!moneriumProfileId) {
+    return Response.json({ error: "moneriumProfileId is required" }, { status: 400 });
   }
 
   try {
