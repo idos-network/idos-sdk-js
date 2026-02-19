@@ -3,6 +3,8 @@ import { useSignal } from "@preact/signals";
 import { CheckIcon, ClipboardIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import type { JSX } from "preact";
 import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
 
 function ClipboardCopyButton(props: JSX.HTMLAttributes<HTMLButtonElement>) {
   const clicked = useSignal(false);
@@ -105,7 +107,7 @@ export function PasswordReveal({
   return (
     <div class="flex flex-col gap-4 text-left">
       <div class="flex flex-col gap-1">
-        <p class="text-center text-sm">Your Password is:</p>
+        <Paragraph>Your Password is:</Paragraph>
         <ReadonlyField>
           <ReadonlyInput type={revealSecret.value ? "text" : "password"} value={password} />
           <div className="flex items-center gap-2">
@@ -164,9 +166,7 @@ export default function BackupPasswordContext({
 
   return (
     <div class="flex flex-col gap-5">
-      <h1 class="text-center font-medium text-lg text-foreground">
-        Create a backup of your idOS password or secret key.
-      </h1>
+      <Heading>Create a backup of your idOS password or secret key.</Heading>
       <Button onClick={toggleReveal}>Reveal your password</Button>
     </div>
   );

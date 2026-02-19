@@ -1,12 +1,22 @@
+import { ethers, getAddress, type Signer } from "ethers";
 import { createContext, useContext, useState } from "react";
-import { getAddress, type WalletClient } from "viem";
-import { useAccount, useConnect, useSignMessage, useWalletClient } from "wagmi";
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: {
+        method: "eth_requestAccounts" | "personal_sign";
+        params?: [string, string];
+      }) => Promise<string[] | string>;
+    };
+  }
+}
 
 interface SiweContextType {
   address: string | null;
   isAuthenticated: boolean;
   signIn: () => Promise<void>;
-  walletClient: () => Promise<WalletClient>;
+  signer: () => Promise<Signer>;
   signOut: () => void;
 }
 
@@ -21,36 +31,23 @@ export function useSiwe() {
 }
 
 export function SiweProvider({ children }: { children: React.ReactNode }) {
-  const { address: wagmiAddress, isConnected } = useAccount();
-  const { connectAsync, connectors } = useConnect();
-  const { signMessageAsync } = useSignMessage();
-  const { data: walletClientData } = useWalletClient();
+  const [address, setAddress] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const signIn = async () => {
     try {
-      // Connect wallet if not already connected
-      let address = wagmiAddress;
-      if (!isConnected) {
-        const injectedConnector = connectors.find(
-          (c) => c.id === "injected" || c.id === "walletConnect",
-        );
-        if (!injectedConnector) {
-          throw new Error("Please install MetaMask or another wallet");
-        }
-        const result = await connectAsync({ connector: injectedConnector });
-        address = result.accounts[0];
+      if (!window.ethereum) {
+        throw new Error("Please install MetaMask");
       }
 
-      if (!address) {
-        throw new Error("Failed to connect wallet");
-      }
+      const [address] = await window.ethereum.request({ method: "eth_requestAccounts" });
 
       const authResponse = await fetch(`/auth?address=${getAddress(address)}`);
       const { user } = await authResponse.json();
 
-      const signature = await signMessageAsync({
-        message: user.message,
+      const signature = await window.ethereum.request({
+        method: "personal_sign",
+        params: [user.message, address],
       });
 
       const signInResponse = await fetch("/auth", {
@@ -59,6 +56,7 @@ export function SiweProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (signInResponse.redirected) {
+        setAddress(address);
         setIsAuthenticated(true);
         window.location.href = signInResponse.url;
       }
@@ -70,27 +68,18 @@ export function SiweProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     await fetch("/auth", { method: "DELETE" });
-    setIsAuthenticated(false);
     window.location.reload();
   };
 
-  const walletClient = async (): Promise<WalletClient> => {
-    if (!walletClientData) {
-      throw new Error("Wallet client not available");
+  const signer = async () => {
+    if (!window.ethereum) {
+      throw new Error("Please install MetaMask");
     }
-    return walletClientData;
+    return new ethers.BrowserProvider(window.ethereum).getSigner();
   };
 
   return (
-    <SiweContext.Provider
-      value={{
-        address: wagmiAddress || null,
-        isAuthenticated,
-        signIn,
-        signOut,
-        walletClient,
-      }}
-    >
+    <SiweContext.Provider value={{ address, isAuthenticated, signIn, signOut, signer }}>
       {children}
     </SiweContext.Provider>
   );

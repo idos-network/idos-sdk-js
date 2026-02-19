@@ -14,7 +14,7 @@
     "@stellar/stellar-base": "catalog:stellar",
     "@stepperize/react": "^5.1.6",
     "@tanstack/react-query": "catalog:tanstack",
-    "@web3icons/react": "^4.1.17",
+    "@web3icons/react": "^4.0.14",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "viem": "catalog:ethereum",

@@ -97,8 +97,8 @@ export const actors = {
 
     const idleClient = await config.createClient();
 
-    // biome-ignore lint/suspicious/noExplicitAny: We cast to any to avoid type errors
-    const signer = await new ethers.BrowserProvider((window as any).ethereum).getSigner();
+    // @ts-expect-error
+    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
 
     return await idleClient.withUserSigner(signer);
   }),

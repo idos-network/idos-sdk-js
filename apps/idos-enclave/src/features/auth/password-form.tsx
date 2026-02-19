@@ -4,6 +4,8 @@ import { encode } from "@stablelib/base64";
 import { CircleAlertIcon, EyeIcon, EyeOffIcon } from "lucide-preact";
 import nacl from "tweetnacl";
 import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
+import { Paragraph } from "@/components/ui/paragraph";
 import { TextField, type TextFieldProps } from "@/components/ui/text-field";
 import type { UIMode } from "@/types";
 
@@ -136,13 +138,9 @@ export default function PasswordForm({
     <form className="flex flex-col gap-6" onSubmit={onSubmit}>
       {mode === "new" ? (
         <>
-          <h1 className="text-center font-medium text-lg text-foreground">
-            Create your idOS Password
-          </h1>
+          <Heading>Create your idOS Password</Heading>
 
-          <p className="text-center text-sm">
-            Create a password for encrypting and decrypting your idOS data.
-          </p>
+          <Paragraph>Create a password for encrypting and decrypting your idOS data.</Paragraph>
 
           <div class="flex flex-col gap-4">
             <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">
@@ -196,9 +194,9 @@ export default function PasswordForm({
         </>
       ) : (
         <>
-          <h1 className="text-center font-medium text-lg text-foreground">Unlock your idOS key</h1>
+          <Heading>Unlock your idOS key</Heading>
 
-          <p className="text-center text-sm">Please enter your idOS password below:</p>
+          <Paragraph>Please enter your idOS password below:</Paragraph>
 
           <div class="flex flex-col gap-4">
             <label htmlFor="idos-password-input" class="font-medium text-foreground text-sm">

@@ -1,6 +1,7 @@
 import DOMPurify from "dompurify";
 
 import { Button } from "@/components/ui/button";
+import { Heading } from "@/components/ui/heading";
 
 export interface ConfirmationProps {
   onSuccess: (result: { confirmed: boolean }) => void;
@@ -13,7 +14,7 @@ const sanitize = (html: string) => DOMPurify.sanitize(html, { ALLOWED_TAGS: [] }
 export default function Confirmation({ onSuccess, origin, message }: ConfirmationProps) {
   return (
     <div className="flex flex-col space-y-5 px-3 md:px-0">
-      <h1 className="text-center font-medium text-lg text-foreground">Confirmation request</h1>
+      <Heading>Confirmation request</Heading>
 
       {origin && (
         <div className="text-sm">
