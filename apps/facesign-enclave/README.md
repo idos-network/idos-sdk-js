@@ -6,46 +6,17 @@ A secure signing enclave application that can be embedded in 3rd party applicati
 
 - 🔐 Secure key storage using encrypted IndexedDB
 - 🖼️ Embeddable via iframe or popup window
-- 🔑 Passkey-based authentication
 - ✍️ Cryptographic signing with NaCl (Ed25519)
 - 🔒 Origin validation for secure cross-window communication
 - 📱 Responsive UI with session and signature approval flows
 
 ## Embedding in Your Application
 
-FaceSign Enclave can be embedded in your application using an iframe. See [EMBEDDING.md](./EMBEDDING.md) for detailed integration instructions.
+TODO:
 
 ### Quick Example
 
-```html
-<iframe 
-  id="facesign-enclave"
-  src="https://facesign-enclave.idos.network" 
-  sandbox="allow-scripts allow-same-origin allow-storage-access-by-user-activation"
-  style="width: 450px; height: 600px;">
-</iframe>
-
-<script>
-  const iframe = document.getElementById('facesign-enclave');
-  
-  // Wait for ready message
-  window.addEventListener('message', (event) => {
-    if (event.data.type === 'facesign_ready') {
-      // Request session
-      iframe.contentWindow.postMessage({
-        type: 'session_proposal',
-        data: {
-          id: 1,
-          metadata: {
-            name: 'My App',
-            description: 'Request access to signing key'
-          }
-        }
-      }, '*');
-    }
-  });
-</script>
-```
+TODO:
 
 ## Development
 
@@ -83,9 +54,6 @@ VITE_ENTROPY_SERVICE_URL=https://entropy.staging.sandbox.fractal.id/
 
 # FaceTec configuration
 VITE_FACETEC_DEVICE_KEY_IDENTIFIER="your-device-key"
-
-# Optional: overlay logo during FaceTec flow (defaults to /logo.svg)
-# VITE_FACETEC_BRANDING_IMAGE="/logo.svg"
 
 # Allowed parent origins for iframe embedding (comma-separated)
 # Use "*" for development, specific origins for production
