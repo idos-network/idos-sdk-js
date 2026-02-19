@@ -236,6 +236,35 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
         return;
       }
 
+      case "FaceSign": {
+        (async () => {
+          const { FaceSignSignerProvider } = await import("@/core/facesign-signer");
+          const { setFaceSignProvider } = await import("@/core/signers");
+
+          const provider = new FaceSignSignerProvider({
+            name: "idOS Dashboard",
+            description: "Connect to idOS Dashboard with FaceSign",
+          });
+
+          const address = await provider.init();
+          setFaceSignProvider(provider);
+
+          sendBack({
+            type: "WALLET_CONNECTED",
+            walletAddress: address,
+            walletPublicKey: address,
+            nearSelector: null,
+          });
+        })().catch((err) => {
+          sendBack({
+            type: "WALLET_CONNECT_ERROR",
+            error: err instanceof Error ? err.message : "FaceSign connection failed",
+          });
+        });
+
+        return;
+      }
+
       default:
         sendBack({
           type: "WALLET_CONNECT_ERROR",

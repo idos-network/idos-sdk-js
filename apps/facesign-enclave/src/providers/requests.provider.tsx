@@ -1,4 +1,4 @@
-import { useLocation, useRouter } from "@tanstack/react-router";
+import { useRouter } from "@tanstack/react-router";
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
 
@@ -37,7 +37,6 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
   const router = useRouter();
-  const location = useLocation();
 
   // Placeholder values and functions
   const contextValue: RequestsContextValue = {
@@ -47,37 +46,28 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
 
   const addSessionProposal = useCallback(
     (proposal: SessionProposal) => {
-      // Enhance callback to remove from list after decision
       const originalCallback = proposal.callback;
       proposal.callback = (approved: boolean, address?: string) => {
         originalCallback(approved, address);
         setSessionProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSessionProposals((prev) => [...prev, proposal]);
-
-      if (location.pathname === "/") {
-        router.navigate({ to: "/session" });
-      }
+      router.navigate({ to: "/session" });
     },
-    [sessionProposals, router, location],
+    [router],
   );
 
   const addSignProposal = useCallback(
     (proposal: SignProposal) => {
-      // Enhance callback to remove from list after decision
       const originalCallback = proposal.callback;
       proposal.callback = (signature: Uint8Array | null) => {
         originalCallback(signature);
         setSignProposals((prev) => prev.filter((p) => p !== proposal));
       };
-
       setSignProposals((prev) => [...prev, proposal]);
-
-      if (location.pathname === "/") {
-        router.navigate({ to: "/sign" });
-      }
+      router.navigate({ to: "/sign" });
     },
-    [signProposals, router, location],
+    [router],
   );
 
   // Initialize handlers to receive proposals
@@ -108,7 +98,7 @@ export function useRequests() {
   const context = use(RequestsContext);
 
   if (!context) {
-    throw new Error("useRequests must be used within a RequestsContextProvider");
+    throw new Error("`useRequests` must be used within a RequestsContextProvider");
   }
 
   return context;

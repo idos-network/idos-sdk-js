@@ -40,9 +40,27 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
 
       case "Stellar":
       case "XRPL":
-        // Stellar and XRPL wallets do not persist sessions, so reconnection is a no-op.
-        // Users must manually reconnect these wallets after a page refresh.
         return { nearSelector: null };
+
+      case "FaceSign": {
+        const { FaceSignSignerProvider } = await import("@/core/facesign-signer");
+        const { setFaceSignProvider } = await import("@/core/signers");
+
+        const provider = new FaceSignSignerProvider({
+          name: "idOS Dashboard",
+          description: "Connect to idOS Dashboard with FaceSign",
+        });
+
+        const address = await provider.init();
+
+        if (address !== input.walletAddress) {
+          provider.destroy();
+          throw new Error("FaceSign address mismatch: the enclave returned a different key");
+        }
+
+        setFaceSignProvider(provider);
+        return { nearSelector: null };
+      }
 
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);

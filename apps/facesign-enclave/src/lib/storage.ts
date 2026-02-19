@@ -1,9 +1,9 @@
-const DB_NAME = "keysDB";
-const DB_STORE_NAME = "keys";
+const DB_NAME = "idOS:facesign";
+const DB_STORE_NAME = "idOS:facesign:keystore";
 
 async function openDatabase() {
   return new Promise<IDBDatabase>((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 3);
+    const req = indexedDB.open(DB_NAME, 1);
 
     req.onupgradeneeded = (ev) => {
       const db = (ev.target as IDBOpenDBRequest).result;
@@ -37,11 +37,10 @@ export async function storeGet<T>(id: string): Promise<T | undefined> {
   });
 }
 
-export function storeSet<T>(id: string, value: T): Promise<void> {
-  return openDatabase().then((db) => {
-    const tx = db.transaction(DB_STORE_NAME, "readwrite");
-    const store = tx.objectStore(DB_STORE_NAME);
-    store.put({ name: id, value });
-    return tx.commit();
-  });
+export async function storeSet<T>(id: string, value: T): Promise<void> {
+  const db = await openDatabase();
+  const tx = db.transaction(DB_STORE_NAME, "readwrite");
+  const store = tx.objectStore(DB_STORE_NAME);
+  store.put({ name: id, value });
+  tx.commit();
 }

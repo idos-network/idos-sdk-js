@@ -37,6 +37,7 @@ The idOS Data Dashboard is a web application that allows users to manage their d
    VITE_IDOS_ENCLAVE_URL=https://enclave.idos.network
    VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID=idos.near
    VITE_EMBEDDED_WALLET_APP_URLS=https://dashboard.idos.network/add-wallet
+   VITE_FACESIGN_ENCLAVE_URL=https://localhost:5174
    ```
 
 3. **Start the development server**:
@@ -56,6 +57,7 @@ The idOS Data Dashboard is a web application that allows users to manage their d
 | `VITE_IDOS_ENCLAVE_URL` | Yes | URL of the idOS secure enclave for credential decryption. |
 | `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes | NEAR contract ID for the idOS access grants contract. |
 | `VITE_EMBEDDED_WALLET_APP_URLS` | Yes | Comma-separated URLs for the embedded wallet add flow popup. |
+| `VITE_FACESIGN_ENCLAVE_URL` | No | URL of the FaceSign enclave for biometric authentication. |
 
 ## Available scripts
 

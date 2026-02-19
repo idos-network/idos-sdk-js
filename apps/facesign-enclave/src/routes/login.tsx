@@ -19,8 +19,7 @@ function Login() {
 
   useEffect(() => {
     if (isKeyAvailable) {
-      // redirect may be full URL (from beforeLoad) or path; history.push handles both
-      router.history.push(redirect);
+      router.navigate({ to: redirect });
     }
   }, [isKeyAvailable, redirect, router]);
 

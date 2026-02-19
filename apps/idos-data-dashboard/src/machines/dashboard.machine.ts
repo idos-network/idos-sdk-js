@@ -17,6 +17,7 @@ export type DashboardEvent =
   | { type: "CONNECT_NEAR" }
   | { type: "CONNECT_STELLAR" }
   | { type: "CONNECT_XRPL" }
+  | { type: "CONNECT_FACESIGN" }
   | { type: "DISCONNECT" }
   | { type: "RETRY" }
   | {
@@ -198,6 +199,10 @@ export const dashboardMachine = setup({
           target: "connecting",
           actions: assign({ walletType: () => "XRPL" as const }),
         },
+        CONNECT_FACESIGN: {
+          target: "connecting",
+          actions: assign({ walletType: () => "FaceSign" as const }),
+        },
       },
     },
 
@@ -247,6 +252,10 @@ export const dashboardMachine = setup({
         CONNECT_XRPL: {
           target: "connecting",
           actions: assign({ walletType: () => "XRPL" as const }),
+        },
+        CONNECT_FACESIGN: {
+          target: "connecting",
+          actions: assign({ walletType: () => "FaceSign" as const }),
         },
       },
     },

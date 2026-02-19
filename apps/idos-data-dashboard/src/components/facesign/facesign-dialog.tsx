@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { dashboardActor } from "@/machines/dashboard.actor";
 
 const PRIVACY_POLICY_URL = "https://www.idos.network/legal/privacy-policy";
 const TRANSPARENCY_DOCUMENT_URL =
@@ -18,11 +19,14 @@ const LEARN_MORE_URL = "https://docs.idos.network";
 
 export function FacesignDialog() {
   const [step, setStep] = useState<0 | 1 | 2>(0);
+  const [open, setOpen] = useState(false);
 
   return (
     <Dialog
-      onOpenChange={(open) => {
-        if (open) {
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (nextOpen) {
           setStep(0);
         }
       }}
@@ -163,17 +167,17 @@ export function FacesignDialog() {
                   </Button>
                 }
               />
-              <DialogClose
-                render={
-                  <Button
-                    size="lg"
-                    variant="link"
-                    className="w-full text-accent-foreground underline"
-                  >
-                    Continue on this device
-                  </Button>
-                }
-              />
+              <Button
+                size="lg"
+                variant="link"
+                className="w-full text-accent-foreground underline"
+                onClick={() => {
+                  setOpen(false);
+                  dashboardActor.send({ type: "CONNECT_FACESIGN" });
+                }}
+              >
+                Continue on this device
+              </Button>
             </DialogFooter>
           </>
         )}
