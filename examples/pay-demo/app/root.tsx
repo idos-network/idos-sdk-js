@@ -11,7 +11,6 @@ import type { Route } from "./+types/root";
 import { SiweProvider } from "./providers/siwe-provider";
 import "./app.css";
 import { MachineProvider } from "./providers/state";
-import { WagmiProviderWrapper } from "./providers/wagmi-provider";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -47,13 +46,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <WagmiProviderWrapper>
-      <SiweProvider>
-        <MachineProvider>
-          <Outlet />
-        </MachineProvider>
-      </SiweProvider>
-    </WagmiProviderWrapper>
+    <SiweProvider>
+      <MachineProvider>
+        <Outlet />
+      </MachineProvider>
+    </SiweProvider>
   );
 }
 

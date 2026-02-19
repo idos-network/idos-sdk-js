@@ -1,6 +1,5 @@
 import { resolve } from "node:path";
 import tailwindcss from "@tailwindcss/vite";
-import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
@@ -12,7 +11,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": resolve(__dirname, "./src"),
       buffer: "buffer",
     },
   },
@@ -34,7 +32,6 @@ export default defineConfig({
     },
   },
   plugins: [
-    tanstackRouter({ autoCodeSplitting: true, target: "react" }),
     mkcert(),
     tailwindcss(),
     tsconfigPaths(),

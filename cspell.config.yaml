@@ -23,7 +23,6 @@ ignorePaths:
   - ".turboignore"
   - "cspell.config.yaml"
   - "**/.gitignore"
-  - "**/FaceTecSDK.js/**"
   - "**/tsconfig.tsbuildinfo"
   - "**/playwright-report/**"
   - "apps/facesign-enclave/public/facetec/**"

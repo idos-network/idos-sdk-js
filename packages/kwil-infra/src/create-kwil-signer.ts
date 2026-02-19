@@ -73,17 +73,6 @@ export interface CustomKwilSigner extends KwilSigner {
   publicKey: string;
 }
 
-function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {
-  return (
-    object !== null &&
-    typeof object === "object" &&
-    "publicAddress" in object &&
-    "signatureType" in object &&
-    "publicKey" in object &&
-    "signer" in object
-  );
-}
-
 /**
  * Helper function to check if the given object is a XRP KeyPair (Server key pairs only).
  */
@@ -212,13 +201,12 @@ export async function createClientKwilSigner(
   }
 
   if (looksLikeXrpWallet(wallet)) {
-    const xrpPublicKey = await getXrpPublicKey(wallet);
-
-    if (!xrpPublicKey || !xrpPublicKey.address) {
+    const { address: currentAddress, publicKey: walletPublicKey } = (await getXrpPublicKey(
+      wallet,
+    )) as { address: string; publicKey: string };
+    if (!currentAddress) {
       throw new Error("Failed to get XRP address");
     }
-
-    const { address: currentAddress, publicKey: walletPublicKey } = xrpPublicKey;
 
     return [
       await createXrpKwilSigner(wallet, currentAddress, store, kwilClient, walletPublicKey),
@@ -228,27 +216,8 @@ export async function createClientKwilSigner(
     ];
   }
 
-  // Stellar or FaceSign
-  if (isCustomKwilSigner(wallet)) {
-    try {
-      await kwilClient.client.auth.logoutKGW();
-    } catch (error) {
-      console.log("error logoutKGW", error);
-    }
-
-    return [
-      new KwilSigner(
-        // @ts-expect-error
-        async (msg: Uint8Array) => wallet.signMessage(msg),
-        wallet.publicAddress,
-        // This is facesign, not sure about stellar
-        "ed25519",
-      ),
-      wallet.publicAddress,
-      wallet.publicKey,
-      // @ts-expect-error Missing types
-      wallet.walletType,
-    ];
+  if ("signatureType" in wallet && "publicAddress" in wallet) {
+    return [wallet, wallet.publicAddress, wallet.publicKey, "Stellar"];
   }
 
   // Force the check that `signer` is `never`.

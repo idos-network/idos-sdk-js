@@ -26,13 +26,13 @@ catalogs:
     "base85": "^3.1.0"
     "borsh": "^2.0.0"
     "bs58": "^6.0.0"
-    "es-toolkit": "^1.43.0"
+    "es-toolkit": "^1.39.0"
 
   ethereum:
+    "wagmi": "^2.14.16"
+    "@wagmi/core": "^2.16.4"
     "viem": "^2.14.0"
     "ethers": "^6.14.0"
-    "wagmi": "^2.19.5"
-    "@wagmi/core": "^2.22.1"
 
   reown:
     "@reown/appkit": "^1.7.13"
@@ -52,14 +52,14 @@ catalogs:
     "@stellar/freighter-api": "^4.1.0"
 
   xrp:
-    "xrpl": "^4.5.0"
+    "xrpl": "^4.3.0"
     "xumm": "^1.8.0"
-    "ripple-binary-codec": "^2.6.0"
+    "ripple-binary-codec": "^2.4.0"
     "ripple-keypairs": "^2.0.0"
 
   build:
     "vite": "^7.0.6"
-    "typescript": "^5.9.3"
+    "typescript": "^5.8.3"
     "tsdown": "^0.18.0"
     "vite-plugin-node-polyfills": "0.17.0"
 
@@ -67,20 +67,20 @@ catalogs:
     "vitest": "^4.0.6"
 
   react:
-    "react": "^19.2.4"
-    "react-dom": "^19.2.4"
-    "@types/react": "^19.2.4"
-    "@types/react-dom": "^19.2.3"
+    "react": "^19.1.4"
+    "react-dom": "^19.1.4"
+    "@types/react": "^19.1.4"
+    "@types/react-dom": "^19.1.4"
 
   preact:
     "preact": "^10.28.2"
     "@preact/signals": "^2.5.1"
 
   tanstack:
-    "@tanstack/react-query": "^5.90.16"
-    "@tanstack/react-query-devtools": "^5.91.2"
-    "@tanstack/react-query-persist-client": "^5.90.18"
-    "@tanstack/query-sync-storage-persister": "^5.90.18"
-    "@tanstack/react-router": "^1.144.0"
-    "@tanstack/react-router-devtools": "^1.144.0"
-    "@tanstack/router-plugin": "^1.144.0"
+    "@tanstack/react-query": "^5.72.1"
+    "@tanstack/react-query-devtools": "^5.72.1"
+    "@tanstack/react-query-persist-client": "^5.72.1"
+    "@tanstack/query-sync-storage-persister": "^5.72.1"
+    "@tanstack/react-router": "^1.115.2"
+    "@tanstack/react-router-devtools": "^1.115.2"
+    "@tanstack/router-plugin": "^1.115.2"

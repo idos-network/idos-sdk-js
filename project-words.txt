@@ -5,7 +5,6 @@ andresz
 Anytown
 appkit
 APPKIT
-attestment
 banxa
 barebones
 betanet
@@ -30,7 +29,6 @@ facesign
 facetec
 frontmost
 GABC
-facetec
 gemwallet
 headlessui
 heroicons
@@ -62,7 +60,6 @@ kwil
 kwild
 kwilteam
 LCVJ
-lefthook
 libc
 lucide
 monerium
@@ -124,7 +121,6 @@ tsdown
 tweetnacl
 txjson
 typesafety
-Turborepo
 uidotdev
 Upserts
 usehooks
@@ -137,7 +133,6 @@ vite
 vitest
 wagmi
 webauthn
-webservice
 websdk
 wordlist
 wordlists
@@ -147,5 +142,3 @@ xsig
 xsignature
 xstate
 XUMM
-Shadcn
-ziif
