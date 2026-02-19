@@ -52,23 +52,29 @@ FaceSign Enclave can be embedded in your application using an iframe. See [EMBED
 ### Prerequisites
 
 - Node.js (v18 or higher)
-- npm/pnpm/yarn
+- pnpm (monorepo uses pnpm workspaces)
 
 ### Setup
 
-```bash
-# Install dependencies
-npm install
+From the monorepo root:
 
-# Start development server
-npm run dev
+```bash
+pnpm install
+pnpm --filter facesign-enclave dev
+```
+
+Or from this directory:
+
+```bash
+pnpm install
+pnpm dev
 ```
 
 The application will be available at `https://localhost:5173` (HTTPS enabled via mkcert).
 
 ### Environment Variables
 
-Create a `.env.local` file with:
+Create a `.env.local` file with (all required unless noted):
 
 ```bash
 # Service URLs
@@ -77,7 +83,9 @@ VITE_ENTROPY_SERVICE_URL=https://entropy.staging.sandbox.fractal.id/
 
 # FaceTec configuration
 VITE_FACETEC_DEVICE_KEY_IDENTIFIER="your-device-key"
-VITE_FACETEC_PRODUCTION_KEY='{"domains": "...", "expiryDate": "...", "key": "..."}'
+
+# Optional: overlay logo during FaceTec flow (defaults to /logo.svg)
+# VITE_FACETEC_BRANDING_IMAGE="/logo.svg"
 
 # Allowed parent origins for iframe embedding (comma-separated)
 # Use "*" for development, specific origins for production
@@ -88,22 +96,23 @@ VITE_ALLOWED_ORIGINS="*"
 
 A test page is provided for manual testing:
 
-```bash
-# Start the dev server
-npm run dev
+1. Start the dev server: `pnpm dev`
+2. Open **https://localhost:5173/iframe-test.html** in your browser.
 
-# Open test/iframe-test.html in your browser
-# It will load the enclave from localhost:5173
-```
+The test page includes:
+
+- **Page** selector (Home / Login) to load the enclave at `/` or `/login`
+- **Device** selector to simulate viewport width (Mobile, Tablet, Desktop, Large, Full)
+- **Send session proposal** / **Send sign proposal** to postMessage into the iframe
+- **Clear all storage** to clear localStorage, sessionStorage, IndexedDB, and cookies and reload the iframe
+
+Responses from the enclave appear in a fixed panel at the bottom right.
 
 ### Build
 
 ```bash
-# Build for production
-npm run build
-
-# Preview production build
-npm run preview
+pnpm build
+pnpm preview
 ```
 
 ## Security
@@ -130,9 +139,10 @@ The enclave validates incoming postMessage origins based on `VITE_ALLOWED_ORIGIN
 ## Architecture
 
 - **React**: UI framework
-- **React Router**: Page routing (login, session, sign, wallet)
+- **TanStack Router**: File-based routing (login, session, sign, wallet); protected routes via `beforeLoad` and router context
 - **Vite**: Build tool and dev server
-- **TailwindCSS**: Styling
+- **Tailwind CSS v4**: Styling
+- **shadcn/ui**: UI components (Button, Alert, Spinner)
 - **NaCl (tweetnacl)**: Cryptographic signing
 - **BIP39**: Mnemonic generation
 
