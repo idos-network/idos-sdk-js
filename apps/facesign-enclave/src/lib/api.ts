@@ -1,15 +1,13 @@
 import axios from "axios";
-import { env } from "../env.js";
+import { env } from "../env";
 
 const faceSignService = axios.create({
-  // biome-ignore lint/style/noNonNullAssertion: This is fine
-  baseURL: env.VITE_FACESIGN_SERVICE_URL!,
+  baseURL: env.VITE_FACESIGN_SERVICE_URL,
   timeout: 10000,
 });
 
 const entropyService = axios.create({
-  // biome-ignore lint/style/noNonNullAssertion: This is fine
-  baseURL: env.VITE_ENTROPY_SERVICE_URL!,
+  baseURL: env.VITE_ENTROPY_SERVICE_URL,
   timeout: 10000,
 });
 
@@ -50,7 +48,7 @@ export function isNewUserResponse(
   return "newUserConfirmationToken" in response;
 }
 
-export const login = async (requestBlob: string): Promise<LoginResponse | NewUserResponse> => {
+export async function login(requestBlob: string): Promise<LoginResponse | NewUserResponse> {
   const response = await faceSignService.post<LoginResponse | NewUserResponse>(
     "/facesign",
     JSON.stringify({
@@ -64,11 +62,11 @@ export const login = async (requestBlob: string): Promise<LoginResponse | NewUse
   );
 
   return response.data;
-};
+}
 
-export const confirmNewUser = async (
+export async function confirmNewUser(
   newUserConfirmationToken: string,
-): Promise<ConfirmUserResponse> => {
+): Promise<ConfirmUserResponse> {
   const response = await faceSignService.post<ConfirmUserResponse>(
     "/facesign/confirmation",
     JSON.stringify({
@@ -82,11 +80,11 @@ export const confirmNewUser = async (
   );
 
   return response.data;
-};
+}
 
-export const getEntropy = async (
+export async function getEntropy(
   token: string,
-): Promise<{ entropy: string; faceSignUserId: string }> => {
+): Promise<{ entropy: string; faceSignUserId: string }> {
   const response = await entropyService.post<{ entropy: string; faceSignUserId: string }>(
     "/facesign/entropy",
     JSON.stringify({ token }),
@@ -98,4 +96,4 @@ export const getEntropy = async (
   );
 
   return response.data;
-};
+}

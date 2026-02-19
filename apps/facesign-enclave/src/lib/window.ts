@@ -1,11 +1,17 @@
-import type { SessionProposal, SignProposal } from "@/contexts/requests";
 import { env } from "@/env";
+import type { SessionProposal, SignProposal } from "@/providers/requests.provider";
 
 export class BaseHandler {
+  addSignProposal: (proposal: SignProposal) => void;
+  addSessionProposal: (proposal: SessionProposal) => void;
+
   constructor(
-    protected addSignProposal: (proposal: SignProposal) => void,
-    protected addSessionProposal: (proposal: SessionProposal) => void,
-  ) {}
+    addSignProposal: (proposal: SignProposal) => void,
+    addSessionProposal: (proposal: SessionProposal) => void,
+  ) {
+    this.addSignProposal = addSignProposal;
+    this.addSessionProposal = addSessionProposal;
+  }
 
   init(): Promise<boolean> {
     return Promise.resolve(true);
@@ -17,9 +23,9 @@ export class BaseHandler {
 }
 
 export class WindowMessageHandler extends BaseHandler {
-  private isIframe: boolean;
-  private parentWindow: Window | null;
-  private allowedOrigins: string[];
+  #isIframe: boolean;
+  #parentWindow: Window | null;
+  #allowedOrigins: string[];
 
   constructor(
     addSignProposal: (proposal: SignProposal) => void,
@@ -27,66 +33,52 @@ export class WindowMessageHandler extends BaseHandler {
   ) {
     super(addSignProposal, addSessionProposal);
 
-    // Detect if running in iframe or popup window
-    this.isIframe = window.self !== window.top;
-    this.parentWindow = this.isIframe ? window.parent : window.opener;
-
-    // Parse allowed origins from environment
-    this.allowedOrigins = env.VITE_ALLOWED_ORIGINS?.split(",").map((o: string) => o.trim()) || [
+    this.#isIframe = window.self !== window.top;
+    this.#parentWindow = this.#isIframe ? window.parent : window.opener;
+    this.#allowedOrigins = env.VITE_ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()) || [
       "*",
     ];
 
-    console.log(`FaceSign Enclave initialized in ${this.isIframe ? "iframe" : "popup"} mode`);
+    console.log(`FaceSign Enclave initialized in ${this.#isIframe ? "iframe" : "popup"} mode`);
     console.log(
-      `Allowed origins: ${this.allowedOrigins.includes("*") ? "* (all origins)" : this.allowedOrigins.join(", ")}`,
+      `Allowed origins: ${this.#allowedOrigins.includes("*") ? "* (all origins)" : this.#allowedOrigins.join(", ")}`,
     );
   }
 
   async init() {
-    window.addEventListener("message", this.messageListener);
+    window.addEventListener("message", this.#messageListener);
 
-    // Send ready event to parent window
-    this.sendToParent({ type: "facesign_ready" });
+    this.#sendToParent({ type: "facesign_ready" });
 
     return true;
   }
 
   destruct(): void {
-    window.removeEventListener("message", this.messageListener);
+    window.removeEventListener("message", this.#messageListener);
   }
 
-  /**
-   * Validates if a message origin is allowed based on the configured allowlist
-   */
-  private isOriginAllowed(origin: string): boolean {
-    // Allow all origins if wildcard is configured
-    if (this.allowedOrigins.includes("*")) {
+  #isOriginAllowed(origin: string): boolean {
+    if (this.#allowedOrigins.includes("*")) {
       return true;
     }
-
-    // Check if origin is in the allowlist
-    return this.allowedOrigins.includes(origin);
+    return this.#allowedOrigins.includes(origin);
   }
 
-  /**
-   * Sends a message to the parent window (iframe parent or popup opener)
-   */
-  private sendToParent(message: Record<string, unknown>, targetOrigin = "*"): void {
-    if (!this.parentWindow) {
+  #sendToParent(message: Record<string, unknown>, targetOrigin = "*"): void {
+    if (!this.#parentWindow) {
       console.warn("No parent window available to send message to");
       return;
     }
 
     try {
-      this.parentWindow.postMessage(message, targetOrigin);
+      this.#parentWindow.postMessage(message, targetOrigin);
     } catch (error) {
       console.error("Failed to send message to parent:", error);
     }
   }
 
-  messageListener = (event: MessageEvent) => {
-    // Validate origin
-    if (!this.isOriginAllowed(event.origin)) {
+  #messageListener = (event: MessageEvent) => {
+    if (!this.#isOriginAllowed(event.origin)) {
       console.warn(`Blocked message from unauthorized origin: ${event.origin}`);
       return;
     }
@@ -97,7 +89,7 @@ export class WindowMessageHandler extends BaseHandler {
       this.addSessionProposal({
         ...data,
         callback: (approved: boolean, address?: string) => {
-          this.sendToParent(
+          this.#sendToParent(
             {
               type: "session_proposal_response",
               data: {
@@ -114,7 +106,7 @@ export class WindowMessageHandler extends BaseHandler {
       this.addSignProposal({
         ...data,
         callback: (signature: string | null) => {
-          this.sendToParent(
+          this.#sendToParent(
             {
               type: "sign_proposal_response",
               data: {

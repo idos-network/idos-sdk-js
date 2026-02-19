@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useRouter } from "@tanstack/react-router";
+import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
 
 export interface SessionProposal {
@@ -36,7 +36,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [sessionProposals, setSessionProposals] = useState<SessionProposal[]>([]);
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
-  const navigate = useNavigate();
+  const router = useRouter();
   const location = useLocation();
 
   // Placeholder values and functions
@@ -56,10 +56,10 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
       setSessionProposals((prev) => [...prev, proposal]);
 
       if (location.pathname === "/") {
-        navigate("/session");
+        router.navigate({ to: "/session" });
       }
     },
-    [sessionProposals, navigate, location],
+    [sessionProposals, router, location],
   );
 
   const addSignProposal = useCallback(
@@ -74,10 +74,10 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
       setSignProposals((prev) => [...prev, proposal]);
 
       if (location.pathname === "/") {
-        navigate("/sign");
+        router.navigate({ to: "/sign" });
       }
     },
-    [signProposals, navigate, location],
+    [signProposals, router, location],
   );
 
   // Initialize handlers to receive proposals
@@ -101,11 +101,11 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
     return <div>Loading Requests...</div>;
   }
 
-  return <RequestsContext.Provider value={contextValue}>{children}</RequestsContext.Provider>;
+  return <RequestsContext value={contextValue}>{children}</RequestsContext>;
 }
 
 export function useRequests() {
-  const context = useContext(RequestsContext);
+  const context = use(RequestsContext);
 
   if (!context) {
     throw new Error("useRequests must be used within a RequestsContextProvider");

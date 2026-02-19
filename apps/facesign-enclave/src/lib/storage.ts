@@ -37,11 +37,11 @@ export async function storeGet<T>(id: string): Promise<T | undefined> {
   });
 }
 
-export async function storeSet<T>(id: string, value: T): Promise<void> {
-  const db = await openDatabase();
-
-  const tx = db.transaction(DB_STORE_NAME, "readwrite");
-  const store = tx.objectStore(DB_STORE_NAME);
-  store.put({ name: id, value });
-  await tx.commit();
+export function storeSet<T>(id: string, value: T): Promise<void> {
+  return openDatabase().then((db) => {
+    const tx = db.transaction(DB_STORE_NAME, "readwrite");
+    const store = tx.objectStore(DB_STORE_NAME);
+    store.put({ name: id, value });
+    return tx.commit();
+  });
 }

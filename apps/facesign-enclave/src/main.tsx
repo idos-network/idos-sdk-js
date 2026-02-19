@@ -1,60 +1,44 @@
 import "./styles.css";
 
+import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { createRoot } from "react-dom/client";
-import { createBrowserRouter } from "react-router";
-import { RouterProvider } from "react-router/dom";
 
-import { App } from "./app";
-import ProtectedRoute from "./lib/protected-route";
-import ErrorPage from "./pages/error";
-import Home from "./pages/home";
-import Login from "./pages/login";
-import Session from "./pages/session";
-import Sign from "./pages/sign";
-import Wallet from "./pages/wallet";
+import { KeyStorageContextProvider, useKeyStorageContext } from "@/providers/key.provider";
+import { routeTree } from "./routeTree.gen";
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    Component: App,
-    children: [
-      {
-        index: true,
-        Component: Home,
-      },
-      {
-        path: "login",
-        Component: Login,
-      },
-      {
-        path: "error",
-        Component: ErrorPage,
-      },
-      {
-        // Protected routes - require stored encrypted mnemonic
-        Component: ProtectedRoute,
-        children: [
-          {
-            path: "session",
-            Component: Session,
-          },
-          {
-            path: "wallet",
-            Component: Wallet,
-          },
-          {
-            path: "sign",
-            Component: Sign,
-          },
-        ],
-      },
-    ],
+const router = createRouter({
+  routeTree,
+  defaultPreload: "intent",
+  context: {
+    // biome-ignore lint/style/noNonNullAssertion: This is passed in React land
+    auth: undefined!,
   },
-]);
+});
+
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+}
+
+function App() {
+  const { isKeyAvailable } = useKeyStorageContext();
+  return (
+    <RouterProvider
+      router={router}
+      context={{
+        auth: { isKeyAvailable },
+      }}
+    />
+  );
+}
 
 const domNode = document.getElementById("root");
-
 if (!domNode) throw new Error("No root element found");
 
 const root = createRoot(domNode);
-root.render(<RouterProvider router={router} />);
+root.render(
+  <KeyStorageContextProvider>
+    <App />
+  </KeyStorageContextProvider>,
+);

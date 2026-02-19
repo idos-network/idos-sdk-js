@@ -1,8 +1,6 @@
 import type { EncryptionPasswordStore } from "@idos-network/enclave";
 import { KeyRoundIcon } from "lucide-preact";
 import { Button } from "@/components/ui/button";
-import { Heading } from "@/components/ui/heading";
-import { Paragraph } from "@/components/ui/paragraph";
 import type { UIMode } from "@/types";
 
 export interface ChooserProps {
@@ -20,19 +18,21 @@ export default function Chooser({
     <div className="flex flex-col gap-6">
       {mode === "existing" && (
         <div className="flex flex-col items-center gap-6">
-          <Heading>Unlock your idOS key</Heading>
+          <h1 className="text-center font-medium text-lg text-foreground">Unlock your idOS key</h1>
 
-          <Paragraph>
+          <p className="text-center text-sm">
             To continue, select the authentication method you chose when creating your idOS profile.
-          </Paragraph>
+          </p>
         </div>
       )}
 
       {mode === "new" && (
         <div className="flex flex-col gap-6">
-          <Heading>Create your idOS encryption key</Heading>
+          <h1 className="text-center font-medium text-lg text-foreground">
+            Create your idOS encryption key
+          </h1>
 
-          <Paragraph>
+          <p className="text-center text-sm">
             To continue,{" "}
             <a
               href="https://docs.idos.network/how-it-works/key-flows/encryption-flows"
@@ -43,7 +43,7 @@ export default function Chooser({
               sign with your wallet
             </a>{" "}
             (recommended) or create a password
-          </Paragraph>
+          </p>
 
           <div class="rounded-xl bg-muted p-4">
             <div class="flex items-center gap-4">

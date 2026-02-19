@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, use, useEffect, useState } from "react";
 import nacl from "tweetnacl";
+import { Spinner } from "@/components/ui/spinner";
 import { checkKeyAvailability, getKeyPair, storeMnemonic } from "@/lib/keys";
 
 export interface KeyStorage {
@@ -21,16 +22,6 @@ export const KeyStorageContext = createContext<KeyStorage>({
     throw new Error("KeyStorageContext not initialized");
   },
 });
-
-export function useKeyStorageContext() {
-  const context = useContext(KeyStorageContext);
-
-  if (!context) {
-    throw new Error("useKeyStorageContext must be used within a KeyStorageContextProvider");
-  }
-
-  return context;
-}
 
 export function KeyStorageContextProvider({ children }: { children: React.ReactNode }) {
   const [isKeyAvailable, setIsKeyAvailable] = useState<boolean | null>(null);
@@ -61,8 +52,22 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
   }, []);
 
   if (isKeyAvailable === null) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-svh items-center justify-center">
+        <Spinner className="size-8" />
+      </div>
+    );
   }
 
-  return <KeyStorageContext.Provider value={contextValue}>{children}</KeyStorageContext.Provider>;
+  return <KeyStorageContext value={contextValue}>{children}</KeyStorageContext>;
+}
+
+export function useKeyStorageContext() {
+  const context = use(KeyStorageContext);
+
+  if (!context) {
+    throw new Error("useKeyStorageContext must be used within a KeyStorageContextProvider");
+  }
+
+  return context;
 }
