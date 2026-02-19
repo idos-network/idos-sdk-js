@@ -1,0 +1,123 @@
+import { env } from "@/env";
+import type { SessionProposal, SignProposal } from "@/providers/requests.provider";
+
+export class BaseHandler {
+  addSignProposal: (proposal: SignProposal) => void;
+  addSessionProposal: (proposal: SessionProposal) => void;
+
+  constructor(
+    addSignProposal: (proposal: SignProposal) => void,
+    addSessionProposal: (proposal: SessionProposal) => void,
+  ) {
+    this.addSignProposal = addSignProposal;
+    this.addSessionProposal = addSessionProposal;
+  }
+
+  init(): Promise<boolean> {
+    return Promise.resolve(true);
+  }
+
+  destruct(): void {
+    // Nothing to clean up by default
+  }
+}
+
+export class WindowMessageHandler extends BaseHandler {
+  #isIframe: boolean;
+  #parentWindow: Window | null;
+  #allowedOrigins: string[];
+
+  constructor(
+    addSignProposal: (proposal: SignProposal) => void,
+    addSessionProposal: (proposal: SessionProposal) => void,
+  ) {
+    super(addSignProposal, addSessionProposal);
+
+    this.#isIframe = window.self !== window.top;
+    this.#parentWindow = this.#isIframe ? window.parent : window.opener;
+    this.#allowedOrigins = env.VITE_ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()) || [
+      "*",
+    ];
+
+    console.log(`FaceSign Enclave initialized in ${this.#isIframe ? "iframe" : "popup"} mode`);
+    console.log(
+      `Allowed origins: ${this.#allowedOrigins.includes("*") ? "* (all origins)" : this.#allowedOrigins.join(", ")}`,
+    );
+  }
+
+  async init() {
+    window.addEventListener("message", this.#messageListener);
+
+    this.#sendToParent({ type: "facesign_ready" });
+
+    return true;
+  }
+
+  destruct(): void {
+    window.removeEventListener("message", this.#messageListener);
+  }
+
+  #isOriginAllowed(origin: string): boolean {
+    if (this.#allowedOrigins.includes("*")) {
+      return true;
+    }
+    return this.#allowedOrigins.includes(origin);
+  }
+
+  #sendToParent(message: Record<string, unknown>, targetOrigin = "*"): void {
+    if (!this.#parentWindow) {
+      console.warn("No parent window available to send message to");
+      return;
+    }
+
+    try {
+      this.#parentWindow.postMessage(message, targetOrigin);
+    } catch (error) {
+      console.error("Failed to send message to parent:", error);
+    }
+  }
+
+  #messageListener = (event: MessageEvent) => {
+    if (!this.#isOriginAllowed(event.origin)) {
+      console.warn(`Blocked message from unauthorized origin: ${event.origin}`);
+      return;
+    }
+
+    const { type, data } = event.data;
+
+    if (type === "session_proposal") {
+      this.addSessionProposal({
+        ...data,
+        callback: (approved: boolean, address?: string) => {
+          this.#sendToParent(
+            {
+              type: "session_proposal_response",
+              data: {
+                id: data.id,
+                approved,
+                address,
+              },
+            },
+            event.origin,
+          );
+        },
+      });
+    } else if (type === "sign_proposal") {
+      this.addSignProposal({
+        ...data,
+        callback: (signature: string | null) => {
+          this.#sendToParent(
+            {
+              type: "sign_proposal_response",
+              data: {
+                id: data.id,
+                signature,
+              },
+            },
+            event.origin,
+          );
+        },
+      });
+    }
+  };
+}
