@@ -66,6 +66,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
         },
         onError() {
           toast.dismiss(loadingToast);
+          handleClose();
           toast.error("Error while revoking grants", {
             description: "An unexpected error occurred. Please try again.",
           });
@@ -76,6 +77,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
 
   const handleDeleteCredential = async () => {
     if (hasTimeLock) {
+      handleClose();
       toast.error("Error while deleting credential", {
         description:
           "This credential has a locked grant. You can't delete it until the grant locked until date is passed.",
@@ -92,6 +94,7 @@ export function DeleteCredential({ isOpen, credential, onClose }: DeleteCredenti
       });
     } catch (error) {
       console.error("Failed to delete credential:", error);
+      handleClose();
       toast.error("Error while deleting credential", {
         description: "An unexpected error occurred. Please try again.",
       });
