@@ -139,10 +139,6 @@ export class idOSClientIdle {
     return hasProfile(this.kwilClient, { address }).then((res) => res.has_profile);
   }
 
-  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.kwilClient, params).then((res) => res.message);
-  }
-
   async withUserSigner(_signer: Wallet): Promise<idOSClientWithUserSigner> {
     let signer = _signer;
     const [kwilSigner, walletIdentifier, walletPublicKey, walletType] =
@@ -219,6 +215,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return hasProfile(this.kwilClient, { address: this.walletIdentifier }).then(
       (x) => x.has_profile,
     );
+  }
+
+  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return dwgMessage(this.kwilClient, params).then((res) => res.message);
   }
 
   async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
