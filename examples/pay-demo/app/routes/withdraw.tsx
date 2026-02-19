@@ -13,6 +13,13 @@ import { DueTos } from "~/components/withdraw/tos";
 import { TransferConfirm } from "~/components/withdraw/transfer-confirm";
 import { TransferStatusTracker } from "~/components/withdraw/transfer-status";
 import { useUser } from "~/layouts/app";
+import {
+  CURRENCY_SYMBOLS,
+  DEMO_FX_RATE,
+  DEMO_SOURCE_FEE,
+  DESTINATION_CURRENCY,
+  SOURCE_CURRENCY,
+} from "~/lib/constants";
 import { userContext } from "~/middlewares/auth.server";
 import { COMMON_ENV } from "~/providers/envFlags.common";
 import { MachineContext } from "~/providers/state";
@@ -44,10 +51,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   const dueKycLink = MachineContext.useSelector((s) => s.context.dueKycLink);
   const dueKycStatus = MachineContext.useSelector((s) => s.context.dueKycStatus);
 
-  const SOURCE_CURRENCY = "USDC";
-  const DESTINATION_CURRENCY = "EUR";
-  const DEMO_FX_RATE = 0.9245;
-  const DEMO_SOURCE_FEE = 0.25;
+  const destinationCurrencySymbol = CURRENCY_SYMBOLS[DESTINATION_CURRENCY] ?? DESTINATION_CURRENCY;
 
   // --- Local state for the demo transfer flow ---
   const [transferStep, setTransferStep] = useState<TransferStep>("recipient");
@@ -63,8 +67,9 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
 
   const normalizedSourceAmount =
     Number.isFinite(sourceAmount) && sourceAmount > 0 ? sourceAmount : 0;
-  const destinationAmount = normalizedSourceAmount * DEMO_FX_RATE;
-  const formattedSourceAmount = normalizedSourceAmount.toFixed(2);
+  const netSourceAmount = Math.max(0, normalizedSourceAmount - DEMO_SOURCE_FEE);
+  const destinationAmount = netSourceAmount * DEMO_FX_RATE;
+  const formattedSourceAmount = netSourceAmount.toFixed(2);
   const formattedDestinationAmount = destinationAmount.toFixed(2);
 
   const messageReceiver = useCallback(
@@ -506,9 +511,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
                 defaultValue={100}
                 className="flex-1"
                 onValueChange={(value) => {
-                  if (typeof value === "number" && Number.isFinite(value)) {
-                    setSourceAmount(value);
-                  }
+                  setSourceAmount(typeof value === "number" && Number.isFinite(value) ? value : 0);
                 }}
               >
                 <NumberFieldGroup>
@@ -534,10 +537,12 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
               </div>
               <div className="text-right">
                 <div className="font-medium text-foreground">
-                  &asymp; &euro;{formattedDestinationAmount}
+                  &asymp; {destinationCurrencySymbol}
+                  {formattedDestinationAmount}
                 </div>
                 <div className="font-medium text-success-foreground text-xs">
-                  Rate: 1 {SOURCE_CURRENCY} = &euro;{DEMO_FX_RATE.toFixed(4)}
+                  Rate: 1 {SOURCE_CURRENCY} = {destinationCurrencySymbol}
+                  {DEMO_FX_RATE.toFixed(2)}
                 </div>
               </div>
             </div>
