@@ -233,27 +233,6 @@ These are other parties that bear influence in the system, even though they're n
     - _Production_: <https://enclave.idos.network/>
     - _Playground_: <https://enclave.playground.idos.network/>
 
-- **idOS Isle**:
-  > 🚧 Still under construction 🚧
-  >
-  > The idOS Isle is still not ready for external developer usage. However, you can see it in action today in the Consumer & Issuer Demo.
-
-  A full-featured, standard UI component that dApps can integrate into their applications. The Isle provides a seamless user experience for interacting with idOS, including profile creation, identity verification, and credential management. It simplifies the integration process for developers while maintaining the system's security and privacy standards.
-
-  - **Relevant repo folder**:
-    - [apps/isle](../apps/isle/)
-  - **Deployments**:
-    - _Production_: <https://isle.idos.network/>
-    - _Playground_: <https://isle.playground.idos.network/>
-
-- **Passporting Server**:
-  A backend service that facilitates the sharing and verification of credentials between different entities with a very specific workflow. It plays a key role in enabling interoperability between different organizations who share mutually compatible compliance requirements. Unless your compliance officer tells you to use this, you don't have to.
-
-  - **Relevant repo folder**:
-    - [apps/passporting-server](../apps/passporting-server/)
-  - **Deployments**:
-    - There are only deployments to support the demo applications. Each Passporting participant will have to run their own passporting server.
-
 ### Demos
 
 - **Consumer & Issuer Demo**:
@@ -262,10 +241,9 @@ These are other parties that bear influence in the system, even though they're n
   Note that its KYC process accepts anything resembling an official document and doesn't force the face to match with what's on the document.
 
   - **Relevant repo folder**:
-    - [examples/consumer-and-issuer](../examples/consumer-and-issuer/)
+    - [examples/pay-demo](../examples/pay-demo/)
   - **Deployments**:
-    - _Playground_: <https://consumer-and-issuer-demo.playground.idos.network>
-      - Alternative URL: <https://demo.idos.network>
+    - _Playground_: <https://demo.idos.network/>
 
 ## Typical usage
 
