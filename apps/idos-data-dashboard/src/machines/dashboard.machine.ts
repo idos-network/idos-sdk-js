@@ -1,6 +1,5 @@
 import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
-import type { WalletSelector } from "@near-wallet-selector/core";
 import { assign, fromCallback, fromPromise, setup } from "xstate";
 
 export interface DashboardContext {
@@ -8,7 +7,6 @@ export interface DashboardContext {
   walletAddress: string | null;
   walletPublicKey: string | null;
   idOSClient: idOSClient;
-  nearSelector: WalletSelector | null;
   error: string | null;
 }
 
@@ -23,20 +21,17 @@ export type DashboardEvent =
       type: "WALLET_CONNECTED";
       walletAddress: string;
       walletPublicKey: string;
-      nearSelector: WalletSelector | null;
     }
   | { type: "WALLET_CONNECT_ERROR"; error: string };
 
 export type ConnectWalletInput = {
   walletType: WalletType;
-  nearSelector: WalletSelector | null;
 };
 
 export type InitializeIdOSInput = {
   walletType: WalletType;
   walletAddress: string;
   walletPublicKey: string;
-  nearSelector: WalletSelector | null;
 };
 
 export type InitializeIdOSOutput = {
@@ -46,7 +41,6 @@ export type InitializeIdOSOutput = {
 
 export type DisconnectWalletInput = {
   walletType: WalletType | null;
-  nearSelector: WalletSelector | null;
   idOSClient: idOSClient;
 };
 
@@ -54,10 +48,6 @@ export type ReconnectWalletInput = {
   walletType: WalletType;
   walletAddress: string;
   walletPublicKey: string;
-};
-
-export type ReconnectWalletOutput = {
-  nearSelector: WalletSelector | null;
 };
 
 export const idOSConfig = new idOSClientConfiguration({
@@ -129,7 +119,7 @@ const noopDisconnectWallet = fromPromise<void, DisconnectWalletInput>(async () =
   throw new Error("disconnectWallet actor not provided");
 });
 
-const noopReconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(async () => {
+const noopReconnectWallet = fromPromise<void, ReconnectWalletInput>(async () => {
   throw new Error("reconnectWallet actor not provided");
 });
 
@@ -158,7 +148,6 @@ export const dashboardMachine = setup({
       walletType: () => null,
       walletAddress: () => null,
       walletPublicKey: () => null,
-      nearSelector: () => null,
       error: () => null,
       idOSClient: () => idOSConfig as idOSClient,
     }),
@@ -171,7 +160,6 @@ export const dashboardMachine = setup({
     walletAddress: null,
     walletPublicKey: null,
     idOSClient: idOSConfig as idOSClient,
-    nearSelector: null,
     error: null,
   },
   states: {
@@ -210,7 +198,6 @@ export const dashboardMachine = setup({
           }
           return {
             walletType: context.walletType,
-            nearSelector: context.nearSelector,
           };
         },
       },
@@ -221,7 +208,6 @@ export const dashboardMachine = setup({
             assign({
               walletAddress: ({ event }) => event.walletAddress,
               walletPublicKey: ({ event }) => event.walletPublicKey,
-              nearSelector: ({ event }) => event.nearSelector,
             }),
             "persistWalletToStorage",
           ],
@@ -277,9 +263,6 @@ export const dashboardMachine = setup({
         },
         onDone: {
           target: "initializingIdOS",
-          actions: assign({
-            nearSelector: ({ event }) => event.output.nearSelector,
-          }),
         },
         onError: {
           target: "disconnected",
@@ -299,7 +282,6 @@ export const dashboardMachine = setup({
             walletType: context.walletType,
             walletAddress: context.walletAddress,
             walletPublicKey: context.walletPublicKey,
-            nearSelector: context.nearSelector,
           };
         },
         onDone: [
@@ -354,7 +336,6 @@ export const dashboardMachine = setup({
         src: "disconnectWallet",
         input: ({ context }): DisconnectWalletInput => ({
           walletType: context.walletType,
-          nearSelector: context.nearSelector,
           idOSClient: context.idOSClient,
         }),
         onDone: {
