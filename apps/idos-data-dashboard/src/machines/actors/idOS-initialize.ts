@@ -11,7 +11,7 @@ import { idOSConfig } from "../dashboard.machine";
 
 export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
   async ({ input }) => {
-    const { walletType, walletAddress, walletPublicKey, nearSelector } = input;
+    const { walletType, walletAddress, walletPublicKey } = input;
 
     let signer: Wallet;
     switch (walletType) {
@@ -19,10 +19,7 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         signer = await createEvmSigner();
         break;
       case "NEAR":
-        if (!nearSelector) {
-          throw new Error("NEAR selector not available");
-        }
-        signer = await createNearSigner(nearSelector);
+        signer = await createNearSigner();
         break;
       case "Stellar":
         signer = await createStellarSigner(walletPublicKey, walletAddress);

@@ -1,5 +1,4 @@
 import type { Wallet } from "@idos-network/kwil-infra";
-import type { WalletSelector } from "@near-wallet-selector/core";
 import { getWalletClient } from "@wagmi/core";
 import { wagmiConfig } from "./wagmi";
 
@@ -10,7 +9,12 @@ export async function createEvmSigner(): Promise<Wallet> {
   return provider.getSigner();
 }
 
-export async function createNearSigner(selector: WalletSelector): Promise<Wallet> {
+export async function createNearSigner(): Promise<Wallet> {
+  const { getNearSelector } = await import("./near");
+  const selector = getNearSelector();
+  if (!selector) {
+    throw new Error("NEAR selector not initialized");
+  }
   const wallet = await selector.wallet();
   return wallet as unknown as Wallet;
 }

@@ -14,7 +14,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
             type: "WALLET_CONNECTED",
             walletAddress: existingAccount.address,
             walletPublicKey: existingAccount.address,
-            nearSelector: input.nearSelector,
           });
           return;
         }
@@ -34,7 +33,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
                 type: "WALLET_CONNECTED",
                 walletAddress: account.address,
                 walletPublicKey: account.address,
-                nearSelector: input.nearSelector,
               });
             }
           },
@@ -69,7 +67,7 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
             "@/core/near"
           );
 
-          const selector = input.nearSelector ?? (await initializeNearSelector());
+          const selector = await initializeNearSelector();
 
           if (selector.isSignedIn()) {
             const accounts = selector.store.getState().accounts;
@@ -79,7 +77,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
                 type: "WALLET_CONNECTED",
                 walletAddress: accountId,
                 walletPublicKey: accountId,
-                nearSelector: selector,
               });
               return;
             }
@@ -99,7 +96,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
                 type: "WALLET_CONNECTED",
                 walletAddress: accountId,
                 walletPublicKey: accountId,
-                nearSelector: selector,
               });
             } else {
               sendBack({
@@ -157,7 +153,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
                   type: "WALLET_CONNECTED",
                   walletAddress: address,
                   walletPublicKey: publicKey,
-                  nearSelector: input.nearSelector,
                 });
               } catch (err) {
                 sendBack({
@@ -224,7 +219,6 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
               type: "WALLET_CONNECTED",
               walletAddress: publicKey.address,
               walletPublicKey: publicKey.publicKey ?? "",
-              nearSelector: input.nearSelector,
             });
           } catch (err) {
             sendBack({
