@@ -13,6 +13,13 @@ import { DueTos } from "~/components/withdraw/tos";
 import { TransferConfirm } from "~/components/withdraw/transfer-confirm";
 import { TransferStatusTracker } from "~/components/withdraw/transfer-status";
 import { useUser } from "~/layouts/app";
+import {
+  CURRENCY_SYMBOLS,
+  DEMO_FX_RATE,
+  DEMO_SOURCE_FEE,
+  DESTINATION_CURRENCY,
+  SOURCE_CURRENCY,
+} from "~/lib/constants";
 import { userContext } from "~/middlewares/auth.server";
 import { COMMON_ENV } from "~/providers/envFlags.common";
 import { MachineContext } from "~/providers/state";
@@ -44,16 +51,26 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
   const dueKycLink = MachineContext.useSelector((s) => s.context.dueKycLink);
   const dueKycStatus = MachineContext.useSelector((s) => s.context.dueKycStatus);
 
+  const destinationCurrencySymbol = CURRENCY_SYMBOLS[DESTINATION_CURRENCY] ?? DESTINATION_CURRENCY;
+
   // --- Local state for the demo transfer flow ---
   const [transferStep, setTransferStep] = useState<TransferStep>("recipient");
   const [signingWallet, setSigningWallet] = useState(false);
   const [recipient, setRecipient] = useState<SepaRecipient | null>(null);
+  const [sourceAmount, setSourceAmount] = useState(100);
   const [transferStatus, setTransferStatus] = useState<
     "awaiting_funds" | "processing" | "completed"
   >("awaiting_funds");
   const [quoteExpiry, setQuoteExpiry] = useState(() =>
     new Date(Date.now() + 2 * 60 * 1000).toISOString(),
   );
+
+  const normalizedSourceAmount =
+    Number.isFinite(sourceAmount) && sourceAmount > 0 ? sourceAmount : 0;
+  const netSourceAmount = Math.max(0, normalizedSourceAmount - DEMO_SOURCE_FEE);
+  const destinationAmount = netSourceAmount * DEMO_FX_RATE;
+  const formattedSourceAmount = netSourceAmount.toFixed(2);
+  const formattedDestinationAmount = destinationAmount.toFixed(2);
 
   const messageReceiver = useCallback(
     // biome-ignore lint/suspicious/noExplicitAny: message event type
@@ -279,9 +296,17 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
               </div>
 
               <QuoteDisplay
-                source={{ currency: "USDC", amount: "100.00", fee: "0.25" }}
-                destination={{ currency: "EUR", amount: "92.45", fee: "0.00" }}
-                fxRate={0.927}
+                source={{
+                  currency: SOURCE_CURRENCY,
+                  amount: formattedSourceAmount,
+                  fee: DEMO_SOURCE_FEE.toFixed(2),
+                }}
+                destination={{
+                  currency: DESTINATION_CURRENCY,
+                  amount: formattedDestinationAmount,
+                  fee: "0.00",
+                }}
+                fxRate={DEMO_FX_RATE}
                 expiresAt={quoteExpiry}
                 onConfirm={() => setTransferStep("confirm")}
                 onCancel={() => setTransferStep("recipient")}
@@ -305,8 +330,8 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
               </div>
 
               <TransferConfirm
-                source={{ currency: "USDC", amount: "100.00" }}
-                destination={{ currency: "EUR", amount: "92.45" }}
+                source={{ currency: SOURCE_CURRENCY, amount: formattedSourceAmount }}
+                destination={{ currency: DESTINATION_CURRENCY, amount: formattedDestinationAmount }}
                 recipientName={recipientName}
                 recipientIban={recipient?.iban ?? ""}
                 isLoading={signingWallet}
@@ -316,8 +341,8 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
                     const message = [
                       "Due Transfer Authorization",
                       "",
-                      "Send: 100.00 USDC",
-                      "Receive: 92.45 EUR",
+                      `Send: ${formattedSourceAmount} ${SOURCE_CURRENCY}`,
+                      `Receive: ${formattedDestinationAmount} ${DESTINATION_CURRENCY}`,
                       `Recipient: ${recipientName}`,
                       `IBAN: ${recipient?.iban ?? ""}`,
                       `Date: ${new Date().toISOString()}`,
@@ -357,8 +382,8 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
 
               <TransferStatusTracker
                 status={transferStatus}
-                source={{ currency: "USDC", amount: "100.00" }}
-                destination={{ currency: "EUR", amount: "92.45" }}
+                source={{ currency: SOURCE_CURRENCY, amount: formattedSourceAmount }}
+                destination={{ currency: DESTINATION_CURRENCY, amount: formattedDestinationAmount }}
                 recipientName={recipientName}
                 onDone={() => setTransferStep("done")}
               />
@@ -381,7 +406,7 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
 
               <FlowSuccess
                 title="Transfer Complete"
-                message={`92.45 EUR has been sent to ${recipientName}. The funds should arrive in your bank account shortly.`}
+                message={`${formattedDestinationAmount} ${DESTINATION_CURRENCY} has been sent to ${recipientName}. The funds should arrive in your bank account shortly.`}
               />
 
               <div id="idOS-enclave" className={provider ? "mx-auto block w-fit" : "hidden"} />
@@ -482,7 +507,13 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
           <div className="space-y-2">
             <Label>You are sending</Label>
             <div className="flex gap-2">
-              <NumberField defaultValue={100} className="flex-1">
+              <NumberField
+                defaultValue={100}
+                className="flex-1"
+                onValueChange={(value) => {
+                  setSourceAmount(typeof value === "number" && Number.isFinite(value) ? value : 0);
+                }}
+              >
                 <NumberFieldGroup>
                   <NumberFieldInput className="text-left text-lg" />
                 </NumberFieldGroup>
@@ -505,9 +536,13 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
                 </div>
               </div>
               <div className="text-right">
-                <div className="font-medium text-foreground">&asymp; &euro;92.00</div>
+                <div className="font-medium text-foreground">
+                  &asymp; {destinationCurrencySymbol}
+                  {formattedDestinationAmount}
+                </div>
                 <div className="font-medium text-success-foreground text-xs">
-                  Rate: 1 USDC = &euro;0.92
+                  Rate: 1 {SOURCE_CURRENCY} = {destinationCurrencySymbol}
+                  {DEMO_FX_RATE.toFixed(2)}
                 </div>
               </div>
             </div>
