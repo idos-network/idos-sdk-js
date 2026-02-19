@@ -2,9 +2,6 @@ name: Bundle Size Check
 
 on:
   pull_request:
-    branches:
-      - playground
-      - main
     paths:
       - "packages/**"
       - "pnpm-lock.yaml"
@@ -30,7 +27,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version-file: .node_version
-          cache: 'pnpm'
+          cache: "pnpm"
 
       - run: pnpm install
 

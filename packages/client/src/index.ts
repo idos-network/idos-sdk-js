@@ -231,6 +231,10 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     return this.enclaveProvider.ensureUserEncryptionProfile();
   }
 
+  async getUser(): Promise<idOSUser> {
+    return getUser(this.kwilClient);
+  }
+
   async logIn(): Promise<idOSClientLoggedIn> {
     if (!(await this.hasProfile())) throw new Error("User does not have a profile");
 
@@ -427,7 +431,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
 
     // we don't need to add the wallet to MPC if the user is not using MPC
     if (this.user.encryption_password_store !== "mpc") {
-      console.log("MPC is not enabled or the user is not using MPC");
       return params;
     }
 
