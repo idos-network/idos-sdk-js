@@ -1,6 +1,7 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import { watchAccount } from "@wagmi/core";
 import { fromCallback } from "xstate";
+import type { FaceSignSignerProvider } from "@/core/facesign-signer";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, DashboardEvent } from "../dashboard.machine";
 
@@ -237,16 +238,20 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
       }
 
       case "FaceSign": {
+        let provider: FaceSignSignerProvider | null = null;
+        let connected = false;
+
         (async () => {
           const { FaceSignSignerProvider } = await import("@/core/facesign-signer");
           const { setFaceSignProvider } = await import("@/core/signers");
 
-          const provider = new FaceSignSignerProvider({
+          provider = new FaceSignSignerProvider({
             name: "idOS Dashboard",
             description: "Connect to idOS Dashboard with FaceSign",
           });
 
           const address = await provider.init();
+          connected = true;
           setFaceSignProvider(provider);
 
           sendBack({
@@ -256,13 +261,20 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
             nearSelector: null,
           });
         })().catch((err) => {
+          provider?.destroy();
+          provider = null;
           sendBack({
             type: "WALLET_CONNECT_ERROR",
             error: err instanceof Error ? err.message : "FaceSign connection failed",
           });
         });
 
-        return;
+        return () => {
+          if (!connected) {
+            provider?.destroy();
+            provider = null;
+          }
+        };
       }
 
       default:

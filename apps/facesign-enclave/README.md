@@ -83,9 +83,7 @@ VITE_ENTROPY_SERVICE_URL=https://entropy.staging.sandbox.fractal.id/
 
 # FaceTec configuration
 VITE_FACETEC_DEVICE_KEY_IDENTIFIER="your-device-key"
-
-# Optional: overlay logo during FaceTec flow (defaults to /logo.svg)
-# VITE_FACETEC_BRANDING_IMAGE="/logo.svg"
+VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 
 # Allowed parent origins for iframe embedding (comma-separated)
 # Use "*" for development, specific origins for production

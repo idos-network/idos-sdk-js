@@ -91,7 +91,7 @@ export class FaceTecContainer {
   #buildCustomization(colors: ThemeColors) {
     if (!this.#FaceTecSDK) return null;
 
-    const iFrameFeatureFlag = [{ ac_ziif: "991d6c1c-5e5c-4e32-89c7-1ddfac46572e" }];
+    const iFrameFeatureFlag = [{ ac_ziif: env.VITE_FACETEC_IFRAME_FEATURE_FLAG }];
     const c = new this.#FaceTecSDK.FaceTecCustomization(iFrameFeatureFlag);
 
     c.frameCustomization.borderCornerRadius = "20px";
@@ -148,7 +148,7 @@ export class FaceTecContainer {
   #setupCustomization = (): void => {
     if (!this.#FaceTecSDK) return;
 
-    const darkLogo = env.VITE_FACETEC_BRANDING_IMAGE ?? "/facesign-logo.svg";
+    const darkLogo = "/facesign-logo.svg";
     const lightLogo = "/facesign-logo-light.svg";
 
     const dark: ThemeColors = {
