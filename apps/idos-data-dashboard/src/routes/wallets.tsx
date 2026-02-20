@@ -2,6 +2,7 @@ import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 import { createFileRoute } from "@tanstack/react-router";
 import { useSelector } from "@xstate/react";
 import { useState } from "react";
+import { FacesignBanner } from "@/components/facesign/facesign-banner";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
@@ -78,6 +79,7 @@ function Wallets() {
           <AddWalletButton />
         </div>
       </div>
+      <FacesignBanner />
       <WalletsList />
     </div>
   );
