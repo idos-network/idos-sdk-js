@@ -190,10 +190,12 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       "background-color": "transparent",
       border: "none",
       display: "block",
+      overflow: "hidden",
       width: "100%",
     };
 
     this.iframe.allow = permissionsPolicies.join("; ");
+    this.iframe.scrolling = "no";
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
     this.iframe.src = this.hostUrl.toString();

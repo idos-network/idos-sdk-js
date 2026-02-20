@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileLockIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIDOS } from "@/core/idOS";
 
@@ -10,6 +9,16 @@ export const Route = createFileRoute("/settings")({
   staticData: { breadcrumb: "Settings" },
 });
 
+function waitForDismiss() {
+  return new Promise<never>((_resolve, reject) => {
+    document.addEventListener(
+      "idos:enclave-dismissed",
+      () => reject(new DOMException("Enclave dismissed", "AbortError")),
+      { once: true },
+    );
+  });
+}
+
 function Settings() {
   const idOSClient = useIDOS();
   const [isBackingUp, setIsBackingUp] = useState(false);
@@ -17,12 +26,12 @@ function Settings() {
   const handleBackup = async () => {
     setIsBackingUp(true);
     try {
-      await idOSClient.enclaveProvider.backupUserEncryptionProfile();
-      toast.success("Backup completed successfully");
-    } catch (error) {
-      toast.error("Backup failed", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-      });
+      await Promise.race([
+        idOSClient.enclaveProvider.backupUserEncryptionProfile(),
+        waitForDismiss(),
+      ]);
+    } catch {
+      // Dismissed or failed — nothing to do.
     } finally {
       setIsBackingUp(false);
     }
