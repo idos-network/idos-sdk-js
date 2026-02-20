@@ -97,10 +97,7 @@ export class FaceSignSignerProvider {
   async signMessage(message: Uint8Array | string): Promise<Uint8Array> {
     await this.#showEnclave();
 
-    let messageToSign: Uint8Array = message;
-    if (typeof message === "string") {
-      messageToSign = new TextEncoder().encode(message);
-    }
+    const messageToSign = typeof message === "string" ? new TextEncoder().encode(message) : message;
 
     try {
       return await new Promise<Uint8Array>((resolve, reject) => {
