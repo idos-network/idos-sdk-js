@@ -10,8 +10,8 @@ import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.mac
 import { idOSConfig } from "../dashboard.machine";
 
 export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
-  async ({ input }) => {
-    const { walletType, walletAddress, walletPublicKey, nearSelector } = input;
+  async ({ input }: { input: InitializeIdOSInput }) => {
+    const { walletType, nearSelector } = input;
 
     let signer: Wallet;
     switch (walletType) {
@@ -25,7 +25,7 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         signer = await createNearSigner(nearSelector);
         break;
       case "Stellar":
-        signer = await createStellarSigner(walletPublicKey, walletAddress);
+        signer = await createStellarSigner();
         break;
       case "XRPL":
         signer = await createXrplSigner();
@@ -36,7 +36,6 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
 
     const newClient = await idOSConfig.createClient();
     const withSigner = await newClient.withUserSigner(signer);
-
     const profileExists = await withSigner.hasProfile();
     if (profileExists) {
       const loggedIn = await withSigner.logIn();
