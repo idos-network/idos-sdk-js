@@ -1,4 +1,4 @@
-import { createContext, use, useEffect, useState } from "react";
+import { createContext, use, useCallback, useEffect, useMemo, useState } from "react";
 import nacl from "tweetnacl";
 import { Spinner } from "@/components/ui/spinner";
 import { checkKeyAvailability, getKeyPair, storeMnemonic } from "@/lib/keys";
@@ -26,22 +26,30 @@ export const KeyStorageContext = createContext<KeyStorage>({
 export function KeyStorageContextProvider({ children }: { children: React.ReactNode }) {
   const [isKeyAvailable, setIsKeyAvailable] = useState<boolean | null>(null);
 
-  const contextValue = {
-    isKeyAvailable: isKeyAvailable || false,
-    setMnemonic: async (mnemonic: string) => {
-      await storeMnemonic(mnemonic);
-      setIsKeyAvailable(true);
-    },
-    getPublicKey: async () => {
-      const { publicKey } = await getKeyPair();
-      return Buffer.from(publicKey).toString("hex");
-    },
-    sign: async (data: Uint8Array) => {
-      const keyPair = await getKeyPair();
+  const setMnemonic = useCallback(async (mnemonic: string) => {
+    await storeMnemonic(mnemonic);
+    setIsKeyAvailable(true);
+  }, []);
 
-      return nacl.sign.detached(data, keyPair.secretKey);
-    },
-  };
+  const getPublicKey = useCallback(async () => {
+    const { publicKey } = await getKeyPair();
+    return Buffer.from(publicKey).toString("hex");
+  }, []);
+
+  const sign = useCallback(async (data: Uint8Array) => {
+    const keyPair = await getKeyPair();
+    return nacl.sign.detached(data, keyPair.secretKey);
+  }, []);
+
+  const contextValue = useMemo(
+    () => ({
+      isKeyAvailable: isKeyAvailable || false,
+      setMnemonic,
+      getPublicKey,
+      sign,
+    }),
+    [isKeyAvailable, setMnemonic, getPublicKey, sign],
+  );
 
   useEffect(() => {
     // Check if user already has a passkey registered
@@ -66,7 +74,7 @@ export function useKeyStorageContext() {
   const context = use(KeyStorageContext);
 
   if (!context) {
-    throw new Error("useKeyStorageContext must be used within a KeyStorageContextProvider");
+    throw new Error("`useKeyStorageContext` must be used within a KeyStorageContextProvider");
   }
 
   return context;

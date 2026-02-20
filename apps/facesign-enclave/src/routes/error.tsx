@@ -23,8 +23,12 @@ function AppError() {
           <AlertCircleIcon className="size-6" />
           <AlertDescription>{message}</AlertDescription>
         </Alert>
-        <Link to="/" className={cn(buttonVariants({ size: "lg" }))}>
-          Back to home
+        <Link
+          to="/login"
+          search={{ redirect: "/wallet" }}
+          className={cn(buttonVariants({ size: "lg" }))}
+        >
+          Try again
         </Link>
       </div>
     </div>

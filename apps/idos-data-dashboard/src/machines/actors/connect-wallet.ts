@@ -1,4 +1,5 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
+import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import { watchAccount } from "@wagmi/core";
 import { fromCallback } from "xstate";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
@@ -234,6 +235,54 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
           }
         })();
         return;
+      }
+
+      case "FaceSign": {
+        let provider: FaceSignSignerProvider | null = null;
+        let connected = false;
+
+        (async () => {
+          const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
+          const { setFaceSignProvider } = await import("@/core/signers");
+
+          const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+          if (!enclaveUrl) {
+            throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+          }
+
+          provider = new FaceSignSignerProvider({
+            metadata: {
+              name: "idOS Dashboard",
+              description: "Connect to idOS Dashboard with FaceSign",
+            },
+            enclaveUrl,
+          });
+
+          const address = await provider.init();
+          connected = true;
+          setFaceSignProvider(provider);
+
+          sendBack({
+            type: "WALLET_CONNECTED",
+            walletAddress: address,
+            walletPublicKey: address,
+            nearSelector: null,
+          });
+        })().catch((err) => {
+          provider?.destroy();
+          provider = null;
+          sendBack({
+            type: "WALLET_CONNECT_ERROR",
+            error: err instanceof Error ? err.message : "FaceSign connection failed",
+          });
+        });
+
+        return () => {
+          if (!connected) {
+            provider?.destroy();
+            provider = null;
+          }
+        };
       }
 
       default:

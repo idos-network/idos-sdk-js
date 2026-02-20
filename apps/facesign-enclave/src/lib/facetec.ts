@@ -9,9 +9,21 @@ import { SessionRequestProcessor } from "./session-request-processor";
 
 const TRANSPARENT_COLOR = "transparent";
 const BRANDING_COLOR = "#00fbb9";
-const BACKGROUND_COLOR = "#262626";
-const TEXT_COLOR = "#f5f5f5";
-const BUTTON_TEXT_COLOR = "#1a1a1a";
+
+const DARK_BACKGROUND = "#262626";
+const DARK_TEXT = "#f5f5f5";
+const DARK_BUTTON_TEXT = "#1a1a1a";
+
+const LIGHT_BACKGROUND = "#f5f5f5";
+const LIGHT_TEXT = "#1a1a1a";
+const LIGHT_BUTTON_TEXT = "#1a1a1a";
+
+interface ThemeColors {
+  background: string;
+  text: string;
+  buttonText: string;
+  brandingImage: string;
+}
 
 export class FaceTecContainer {
   #FaceTecSDK: typeof FaceTecSDK | null = null;
@@ -76,58 +88,89 @@ export class FaceTecContainer {
     });
   }
 
+  #buildCustomization(colors: ThemeColors) {
+    const sdk = this.#FaceTecSDK;
+    if (!sdk) throw new Error("FaceTecSDK is not loaded");
+
+    const iFrameFeatureFlag = [{ ac_ziif: env.VITE_FACETEC_IFRAME_FEATURE_FLAG }];
+    const c = new sdk.FaceTecCustomization(iFrameFeatureFlag);
+
+    c.frameCustomization.borderCornerRadius = "20px";
+    c.frameCustomization.backgroundColor = colors.background;
+    c.frameCustomization.borderColor = colors.background;
+
+    c.guidanceCustomization.backgroundColors = colors.background;
+    c.guidanceCustomization.foregroundColor = colors.text;
+    c.guidanceCustomization.buttonBackgroundNormalColor = BRANDING_COLOR;
+    c.guidanceCustomization.buttonBackgroundDisabledColor = BRANDING_COLOR;
+    c.guidanceCustomization.buttonBackgroundHighlightColor = BRANDING_COLOR;
+    c.guidanceCustomization.buttonTextNormalColor = colors.buttonText;
+    c.guidanceCustomization.buttonTextDisabledColor = colors.buttonText;
+    c.guidanceCustomization.buttonTextHighlightColor = colors.buttonText;
+    c.guidanceCustomization.retryScreenImageBorderColor = BRANDING_COLOR;
+    c.guidanceCustomization.retryScreenOvalStrokeColor = BRANDING_COLOR;
+
+    c.ovalCustomization.strokeColor = BRANDING_COLOR;
+    c.ovalCustomization.progressColor1 = BRANDING_COLOR;
+    c.ovalCustomization.progressColor2 = BRANDING_COLOR;
+
+    c.feedbackCustomization.backgroundColor = colors.background;
+    c.feedbackCustomization.textColor = colors.text;
+
+    c.resultScreenCustomization.backgroundColors = colors.background;
+    c.resultScreenCustomization.foregroundColor = TRANSPARENT_COLOR;
+    c.resultScreenCustomization.activityIndicatorColor = BRANDING_COLOR;
+    c.resultScreenCustomization.resultAnimationBackgroundColor = colors.background;
+    c.resultScreenCustomization.resultAnimationForegroundColor = BRANDING_COLOR;
+    c.resultScreenCustomization.uploadProgressFillColor = BRANDING_COLOR;
+
+    c.initialLoadingAnimationCustomization.backgroundColor = colors.background;
+    c.initialLoadingAnimationCustomization.foregroundColor = BRANDING_COLOR;
+    c.initialLoadingAnimationCustomization.messageTextColor = colors.text;
+
+    c.overlayCustomization.backgroundColor = TRANSPARENT_COLOR;
+    c.overlayCustomization.brandingImage = colors.brandingImage;
+
+    c.enterFullScreenCustomization.backgroundColors = colors.background;
+    c.enterFullScreenCustomization.foregroundColor = colors.text;
+    c.enterFullScreenCustomization.borderColor = colors.background;
+    c.enterFullScreenCustomization.buttonBackgroundNormalColor = BRANDING_COLOR;
+    c.enterFullScreenCustomization.buttonBackgroundHighlightColor = BRANDING_COLOR;
+    c.enterFullScreenCustomization.buttonBackgroundDisabledColor = BRANDING_COLOR;
+    c.enterFullScreenCustomization.buttonTextNormalColor = colors.buttonText;
+    c.enterFullScreenCustomization.buttonTextHighlightColor = colors.buttonText;
+    c.enterFullScreenCustomization.buttonTextDisabledColor = colors.buttonText;
+
+    c.vocalGuidanceCustomization.mode = 2;
+
+    return c;
+  }
+
   #setupCustomization = (): void => {
     if (!this.#FaceTecSDK) return;
 
-    const iFrameFeatureFlag = [{ ac_ziif: "991d6c1c-5e5c-4e32-89c7-1ddfac46572e" }];
-    const currentCustomization = new this.#FaceTecSDK.FaceTecCustomization(iFrameFeatureFlag);
+    const darkLogo = "/facesign-logo.svg";
+    const lightLogo = "/facesign-logo-light.svg";
 
-    currentCustomization.frameCustomization.borderCornerRadius = "20px";
-    currentCustomization.frameCustomization.backgroundColor = BACKGROUND_COLOR;
-    currentCustomization.frameCustomization.borderColor = BACKGROUND_COLOR;
+    const dark: ThemeColors = {
+      background: DARK_BACKGROUND,
+      text: DARK_TEXT,
+      buttonText: DARK_BUTTON_TEXT,
+      brandingImage: darkLogo,
+    };
+    const light: ThemeColors = {
+      background: LIGHT_BACKGROUND,
+      text: LIGHT_TEXT,
+      buttonText: LIGHT_BUTTON_TEXT,
+      brandingImage: lightLogo,
+    };
 
-    currentCustomization.guidanceCustomization.backgroundColors = BACKGROUND_COLOR;
-    currentCustomization.guidanceCustomization.foregroundColor = TEXT_COLOR;
-    currentCustomization.guidanceCustomization.buttonBackgroundNormalColor = BRANDING_COLOR;
-    currentCustomization.guidanceCustomization.buttonBackgroundDisabledColor = BRANDING_COLOR;
-    currentCustomization.guidanceCustomization.buttonBackgroundHighlightColor = BRANDING_COLOR;
-    currentCustomization.guidanceCustomization.buttonTextNormalColor = BUTTON_TEXT_COLOR;
-    currentCustomization.guidanceCustomization.buttonTextDisabledColor = BUTTON_TEXT_COLOR;
-    currentCustomization.guidanceCustomization.buttonTextHighlightColor = BUTTON_TEXT_COLOR;
-    currentCustomization.guidanceCustomization.retryScreenImageBorderColor = BRANDING_COLOR;
-    currentCustomization.guidanceCustomization.retryScreenOvalStrokeColor = BRANDING_COLOR;
+    const darkCustomization = this.#buildCustomization(dark);
+    const lightCustomization = this.#buildCustomization(light);
 
-    currentCustomization.ovalCustomization.strokeColor = BRANDING_COLOR;
-    currentCustomization.ovalCustomization.progressColor1 = BRANDING_COLOR;
-    currentCustomization.ovalCustomization.progressColor2 = BRANDING_COLOR;
-
-    currentCustomization.feedbackCustomization.backgroundColor = BACKGROUND_COLOR;
-    currentCustomization.feedbackCustomization.textColor = TEXT_COLOR;
-
-    currentCustomization.resultScreenCustomization.backgroundColors = BACKGROUND_COLOR;
-    currentCustomization.resultScreenCustomization.foregroundColor = TRANSPARENT_COLOR;
-    currentCustomization.resultScreenCustomization.activityIndicatorColor = BRANDING_COLOR;
-    currentCustomization.resultScreenCustomization.resultAnimationBackgroundColor =
-      BACKGROUND_COLOR;
-    currentCustomization.resultScreenCustomization.resultAnimationForegroundColor = BRANDING_COLOR;
-    currentCustomization.resultScreenCustomization.uploadProgressFillColor = BRANDING_COLOR;
-
-    currentCustomization.initialLoadingAnimationCustomization.backgroundColor = BACKGROUND_COLOR;
-    currentCustomization.initialLoadingAnimationCustomization.foregroundColor = BRANDING_COLOR;
-    currentCustomization.initialLoadingAnimationCustomization.messageTextColor = TEXT_COLOR;
-
-    currentCustomization.overlayCustomization.backgroundColor = TRANSPARENT_COLOR;
-    currentCustomization.overlayCustomization.brandingImage =
-      env.VITE_FACETEC_BRANDING_IMAGE ?? "/facesign-logo.svg";
-
-    currentCustomization.enterFullScreenCustomization.buttonBackgroundNormalColor = BRANDING_COLOR;
-    currentCustomization.enterFullScreenCustomization.buttonBackgroundHighlightColor =
-      BRANDING_COLOR;
-    currentCustomization.enterFullScreenCustomization.foregroundColor = BRANDING_COLOR;
-
-    currentCustomization.vocalGuidanceCustomization.mode = 2;
-
-    this.#FaceTecSDK.setCustomization(currentCustomization);
+    this.#FaceTecSDK.setCustomization(darkCustomization);
+    this.#FaceTecSDK.setLowLightCustomization(lightCustomization);
+    this.#FaceTecSDK.setDynamicDimmingCustomization(lightCustomization);
   };
 
   startLivenessCheck(): void {

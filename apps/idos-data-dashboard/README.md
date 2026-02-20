@@ -12,6 +12,7 @@ The idOS Data Dashboard is a web application that allows users to manage their d
 - **Manage access grants** -- See which third parties have been granted access to credentials and revoke grants.
 - **Add and remove wallets** -- Link additional wallet addresses to an idOS profile or remove existing ones.
 - **Connect with multiple chains** -- Authenticate using EVM (Ethereum, etc.), NEAR, Stellar, or XRPL wallets.
+- **Biometric authentication** -- Connect via FaceSign, an iframe-embedded biometric signer powered by FaceTec.
 
 ## Prerequisites
 
@@ -37,6 +38,7 @@ The idOS Data Dashboard is a web application that allows users to manage their d
    VITE_IDOS_ENCLAVE_URL=https://enclave.idos.network
    VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID=idos.near
    VITE_EMBEDDED_WALLET_APP_URLS=https://dashboard.idos.network/add-wallet
+   VITE_FACESIGN_ENCLAVE_URL=https://localhost:5174
    ```
 
 3. **Start the development server**:
@@ -47,6 +49,30 @@ The idOS Data Dashboard is a web application that allows users to manage their d
 
    The app will be available at `https://localhost:5173` (HTTPS via `mkcert`).
 
+### FaceSign development setup
+
+To use FaceSign locally, the FaceSign enclave must be running alongside the dashboard:
+
+1. **Start the FaceSign enclave** in a separate terminal:
+
+   ```bash
+   pnpm --filter facesign-enclave dev
+   ```
+
+   The enclave runs at `https://localhost:5174` by default (the next available port after the dashboard).
+
+2. **Ensure `VITE_FACESIGN_ENCLAVE_URL`** in the dashboard's `.env.local` points to the enclave URL (`https://localhost:5174`).
+
+3. **Configure the enclave's allowed origins** in `apps/facesign-enclave/.env.local`:
+
+   ```env
+   VITE_ALLOWED_ORIGINS="*"
+   ```
+
+   In production, restrict this to the dashboard's actual origin.
+
+Both apps must run over HTTPS (handled automatically by `mkcert`).
+
 ## Environment variables
 
 | Variable | Required | Description |
@@ -56,6 +82,7 @@ The idOS Data Dashboard is a web application that allows users to manage their d
 | `VITE_IDOS_ENCLAVE_URL` | Yes | URL of the idOS secure enclave for credential decryption. |
 | `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | Yes | NEAR contract ID for the idOS access grants contract. |
 | `VITE_EMBEDDED_WALLET_APP_URLS` | Yes | Comma-separated URLs for the embedded wallet add flow popup. |
+| `VITE_FACESIGN_ENCLAVE_URL` | No | URL of the FaceSign enclave for biometric authentication. |
 
 ## Available scripts
 
@@ -105,7 +132,7 @@ idle --> reconnecting --> initializingIdOS --> loggedIn
    \-> disconnected --> connecting --> initializingIdOS
 ```
 
-It handles wallet connection, reconnection from `localStorage`, idOS client initialization, and disconnection across all four supported chains.
+It handles wallet connection, reconnection from `localStorage`, idOS client initialization, and disconnection across all supported chains (EVM, NEAR, Stellar, XRPL, and FaceSign).
 
 ## Project structure
 
@@ -178,8 +205,9 @@ src/
 | NEAR | `@near-wallet-selector` | Lazily (dynamic `import()`) |
 | Stellar | `@creit.tech/stellar-wallets-kit` | Lazily (dynamic `import()`) |
 | XRPL | `@gemwallet/api` | Lazily (dynamic `import()`) |
+| FaceSign | `@idos-network/kwil-infra/facesign` | Lazily (dynamic `import()`) |
 
-Non-EVM wallet SDKs are dynamically imported only when the user selects that chain, keeping the initial bundle small.
+Non-EVM wallet SDKs are dynamically imported only when the user selects that chain, keeping the initial bundle small. FaceSign embeds the enclave as a fullscreen iframe and communicates via `postMessage`.
 
 ## Bundle optimization
 
@@ -196,7 +224,39 @@ Non-EVM signer and SDK code uses `import()` in actor and signer files so Rollup 
 
 ## Deployment
 
-The dashboard is hosted on [Vercel](https://vercel.com) and auto-deploys from the `main` branch. Production is available at [dashboard.idos.network](https://dashboard.idos.network).
+Both the dashboard and the FaceSign enclave are hosted on [Vercel](https://vercel.com) and auto-deploy from the `main` branch.
+
+| App | Production URL |
+| --- | --- |
+| Dashboard | [dashboard.idos.network](https://dashboard.idos.network) |
+| FaceSign enclave | [facesign-enclave.idos.network](https://facesign-enclave.idos.network) |
+
+### Vercel environment variables
+
+When deploying, set the following environment variables in each Vercel project:
+
+**Dashboard** (`idos-data-dashboard`):
+
+| Variable | Value |
+| --- | --- |
+| `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID |
+| `VITE_IDOS_NODE_URL` | `https://nodes.idos.network` |
+| `VITE_IDOS_ENCLAVE_URL` | `https://enclave.idos.network` |
+| `VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID` | `idos.near` |
+| `VITE_EMBEDDED_WALLET_APP_URLS` | `https://dashboard.idos.network/add-wallet` |
+| `VITE_FACESIGN_ENCLAVE_URL` | `https://facesign-enclave.idos.network` |
+
+**FaceSign enclave** (`facesign-enclave`):
+
+| Variable | Value |
+| --- | --- |
+| `VITE_FACESIGN_SERVICE_URL` | FaceSign service endpoint |
+| `VITE_ENTROPY_SERVICE_URL` | Entropy service endpoint |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | FaceTec device key |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | FaceTec iframe feature flag UUID |
+| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` (comma-separated for multiple) |
+
+The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it. In production, never use `"*"`.
 
 ## License
 

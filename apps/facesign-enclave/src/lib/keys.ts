@@ -2,8 +2,8 @@ import { utf8Encode } from "@idos-network/utils/codecs";
 import { mnemonicToKeyPair } from "@idos-network/utils/facesign";
 import { storeGet, storeSet } from "./storage";
 
-export const DB_KEY_KEK = "kek";
-export const DB_KEY_MNEMONIC = "mnemonic";
+export const DB_KEY_KEK = "idOS:facesign:kek";
+export const DB_KEY_MNEMONIC = "idOS:facesign:mnemonic";
 
 export async function storeMnemonic(mnemonic: string) {
   await encryptAndStore(DB_KEY_MNEMONIC, utf8Encode(mnemonic));

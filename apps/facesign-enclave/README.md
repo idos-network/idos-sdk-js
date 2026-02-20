@@ -37,11 +37,10 @@ pnpm --filter facesign-enclave dev
 Or from this directory:
 
 ```bash
-pnpm install
 pnpm dev
 ```
 
-The application will be available at `https://localhost:5173` (HTTPS enabled via mkcert).
+Vite assigns the first available port starting from 5173. When running alongside the dashboard (which typically occupies `https://localhost:5173`), the enclave will be at `https://localhost:5174`. Both apps serve over HTTPS via `mkcert`.
 
 ### Environment Variables
 
@@ -54,18 +53,47 @@ VITE_ENTROPY_SERVICE_URL=https://entropy.staging.sandbox.fractal.id/
 
 # FaceTec configuration
 VITE_FACETEC_DEVICE_KEY_IDENTIFIER="your-device-key"
+VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 
 # Allowed parent origins for iframe embedding (comma-separated)
 # Use "*" for development, specific origins for production
 VITE_ALLOWED_ORIGINS="*"
 ```
 
-### Testing the Iframe Embedding
+| Variable | Required | Description |
+| --- | --- | --- |
+| `VITE_FACESIGN_SERVICE_URL` | Yes | FaceSign backend service endpoint. |
+| `VITE_ENTROPY_SERVICE_URL` | Yes | Entropy service endpoint for key derivation. |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes | FaceTec device key identifier. |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Yes | FaceTec iframe feature flag UUID. |
+| `VITE_ALLOWED_ORIGINS` | Yes | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
 
-A test page is provided for manual testing:
+### Running with the dashboard
+
+To test the full FaceSign flow locally, both apps must be running simultaneously:
+
+1. **Terminal 1** -- Start the dashboard:
+
+   ```bash
+   pnpm --filter idos-data-dashboard dev
+   ```
+
+2. **Terminal 2** -- Start the FaceSign enclave:
+
+   ```bash
+   pnpm --filter facesign-enclave dev
+   ```
+
+3. Ensure the dashboard's `VITE_FACESIGN_ENCLAVE_URL` (in `apps/idos-data-dashboard/.env.local`) matches the enclave's URL (e.g., `https://localhost:5174`).
+
+4. Ensure the enclave's `VITE_ALLOWED_ORIGINS` includes the dashboard's origin (`https://localhost:5173` or `"*"` for development).
+
+### Testing the iframe embedding
+
+A standalone test page is provided for manual testing without the dashboard:
 
 1. Start the dev server: `pnpm dev`
-2. Open **https://localhost:5173/iframe-test.html** in your browser.
+2. Open **https://localhost:5174/iframe-test.html** in your browser.
 
 The test page includes:
 
@@ -83,6 +111,24 @@ pnpm build
 pnpm preview
 ```
 
+## Deployment
+
+The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available at [facesign-enclave.idos.network](https://facesign-enclave.idos.network).
+
+### Vercel environment variables
+
+Set these in the Vercel project settings:
+
+| Variable | Value |
+| --- | --- |
+| `VITE_FACESIGN_SERVICE_URL` | Production FaceSign service URL |
+| `VITE_ENTROPY_SERVICE_URL` | Production entropy service URL |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Production FaceTec iframe feature flag |
+| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` (never use `"*"` in production) |
+
+The `VITE_ALLOWED_ORIGINS` variable controls which parent origins can embed the enclave via iframe. In production, this must be an explicit list of trusted origins.
+
 ## Security
 
 ### Origin Validation
@@ -94,9 +140,9 @@ The enclave validates incoming postMessage origins based on `VITE_ALLOWED_ORIGIN
 
 ### Storage
 
-- Uses IndexedDB for encrypted key storage
-- Encryption key (KEK) is stored and cannot be extracted from IndexedDB 
-- Mnemonic is encrypted with AES-GCM before storage
+- Uses IndexedDB (database `idOS:facesign`, object store `idOS:facesign:keystore`) for encrypted key storage
+- Encryption key (KEK) stored under key `idOS:facesign:kek`
+- Mnemonic encrypted with AES-GCM and stored under key `idOS:facesign:mnemonic`
 
 ### Communication
 
