@@ -3,6 +3,7 @@ import type { WalletType } from "../actions";
 import { verifyNearSignature } from "../near/signature-verification";
 import { verifyRippleSignature } from "../xrp/signature-verification";
 import { verifyEvmSignature } from "./evm";
+import { verifyFaceSignSignature } from "./facesign";
 import { verifyStellarSignature } from "./stellar";
 
 export interface WalletSignature {
@@ -53,7 +54,12 @@ export const verifySignature = async (walletPayload: WalletSignature): Promise<b
           walletPayload.public_key[0],
         );
       case "FaceSign":
-        throw new Error("FaceSign signature verification not implemented");
+        return verifyFaceSignSignature(
+          walletPayload.message,
+          walletPayload.signature,
+          // @ts-expect-error - this has been checked above
+          walletPayload.public_key[0],
+        );
       default:
         throw new Error(`Unsupported wallet type: ${walletPayload.wallet_type}`);
     }
