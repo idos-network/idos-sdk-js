@@ -217,10 +217,6 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     );
   }
 
-  async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
-    return dwgMessage(this.kwilClient, params).then((res) => res.message);
-  }
-
   async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
@@ -284,11 +280,6 @@ export class idOSClientLoggedIn implements Omit<Properties<idOSClientWithUserSig
     return new idOSClientIdle(this.store, this.kwilClient, this.enclaveProvider);
   }
 
-  /**
-   * This is a duplicated code, but it's here to avoid breaking changes.
-   * And we quite often don't store idOSClientWithoutUserSigner, so it's
-   * easier to keep it here.
-   */
   async requestDWGMessage(params: idOSDelegatedWriteGrant): Promise<string> {
     return dwgMessage(this.kwilClient, params).then((res) => res.message);
   }
