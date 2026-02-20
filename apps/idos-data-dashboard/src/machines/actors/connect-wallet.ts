@@ -245,12 +245,17 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
           const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
           const { setFaceSignProvider } = await import("@/core/signers");
 
+          const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+          if (!enclaveUrl) {
+            throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+          }
+
           provider = new FaceSignSignerProvider({
             metadata: {
               name: "idOS Dashboard",
               description: "Connect to idOS Dashboard with FaceSign",
             },
-            enclaveUrl: import.meta.env.VITE_FACESIGN_ENCLAVE_URL,
+            enclaveUrl,
           });
 
           const address = await provider.init();

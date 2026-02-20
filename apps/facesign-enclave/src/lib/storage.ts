@@ -46,5 +46,6 @@ export async function storeSet<T>(id: string, value: T): Promise<void> {
   return new Promise((resolve, reject) => {
     tx.oncomplete = () => resolve();
     tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error ?? new Error("Transaction aborted in storeSet"));
   });
 }

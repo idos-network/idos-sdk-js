@@ -94,7 +94,7 @@ export class FaceSignSignerProvider {
     return this;
   }
 
-  async signMessage(message: Uint8Array): Promise<Uint8Array> {
+  async signMessage(message: Uint8Array | string): Promise<Uint8Array> {
     await this.#showEnclave();
 
     let messageToSign: Uint8Array = message;
@@ -208,7 +208,11 @@ export class FaceSignSignerProvider {
       return Promise.resolve();
     }
 
-    return new Promise<void>((resolve) => {
+    return new Promise<void>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error("FaceSign enclave failed to load"));
+      }, PROPOSAL_TIMEOUT_MS);
+
       if (!this.#container) {
         this.#container = this.#createContainer();
       }
@@ -221,7 +225,10 @@ export class FaceSignSignerProvider {
 
       this.#container.appendChild(this.#iframe);
 
-      this.#resolveOpenEnclave = resolve;
+      this.#resolveOpenEnclave = () => {
+        clearTimeout(timer);
+        resolve();
+      };
     });
   }
 

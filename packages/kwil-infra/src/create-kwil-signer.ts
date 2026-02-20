@@ -72,7 +72,7 @@ export interface CustomKwilSigner extends KwilSigner {
   signatureType: string;
   publicKey: string;
   walletType: string;
-  signMessage: (message: Uint8Array) => Promise<Uint8Array>;
+  signMessage: (message: Uint8Array | string) => Promise<Uint8Array>;
 }
 
 function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {

@@ -89,10 +89,11 @@ export class FaceTecContainer {
   }
 
   #buildCustomization(colors: ThemeColors) {
-    if (!this.#FaceTecSDK) return null;
+    const sdk = this.#FaceTecSDK;
+    if (!sdk) throw new Error("FaceTecSDK is not loaded");
 
     const iFrameFeatureFlag = [{ ac_ziif: env.VITE_FACETEC_IFRAME_FEATURE_FLAG }];
-    const c = new this.#FaceTecSDK.FaceTecCustomization(iFrameFeatureFlag);
+    const c = new sdk.FaceTecCustomization(iFrameFeatureFlag);
 
     c.frameCustomization.borderCornerRadius = "20px";
     c.frameCustomization.backgroundColor = colors.background;
@@ -167,9 +168,9 @@ export class FaceTecContainer {
     const darkCustomization = this.#buildCustomization(dark);
     const lightCustomization = this.#buildCustomization(light);
 
-    if (darkCustomization) this.#FaceTecSDK.setCustomization(darkCustomization);
-    if (lightCustomization) this.#FaceTecSDK.setLowLightCustomization(lightCustomization);
-    if (lightCustomization) this.#FaceTecSDK.setDynamicDimmingCustomization(lightCustomization);
+    this.#FaceTecSDK.setCustomization(darkCustomization);
+    this.#FaceTecSDK.setLowLightCustomization(lightCustomization);
+    this.#FaceTecSDK.setDynamicDimmingCustomization(lightCustomization);
   };
 
   startLivenessCheck(): void {
