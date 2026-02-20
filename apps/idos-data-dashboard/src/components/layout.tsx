@@ -16,9 +16,8 @@ import {
   LogOutIcon,
   MenuIcon,
   Wallet2Icon,
-  XIcon,
 } from "lucide-react";
-import { Fragment, type PropsWithChildren, useEffect } from "react";
+import { Fragment, lazy, type PropsWithChildren, Suspense, useEffect } from "react";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
 import { dashboardActor } from "@/machines/dashboard.actor";
@@ -32,9 +31,10 @@ import {
   BreadcrumbSeparator,
 } from "./ui/breadcrumb";
 import { Button, buttonVariants } from "./ui/button";
-import { Drawer, DrawerClose, DrawerContent, DrawerFooter, DrawerHeader } from "./ui/drawer";
 
-function ConnectedWallet() {
+const MobileNav = lazy(() => import("./mobile-nav"));
+
+export function ConnectedWallet() {
   const address = useSelector(dashboardActor, selectWalletAddress);
 
   if (!address) {
@@ -46,10 +46,18 @@ function ConnectedWallet() {
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
         <img
           alt={`Connected wallet ${address}`}
+          src="/wallet-light.svg"
+          width={50}
+          height={50}
+          className="h-[50px] w-[50px] dark:hidden"
+          loading="eager"
+        />
+        <img
+          alt={`Connected wallet ${address}`}
           src="/wallet.svg"
           width={50}
           height={50}
-          className="h-[50px] w-[50px]"
+          className="hidden h-[50px] w-[50px] dark:block"
           loading="eager"
         />
       </div>
@@ -81,7 +89,7 @@ function ListItemLink({ to, children }: { to: LinkProps["to"]; children: React.R
 
 const externalLinkClasses = "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle";
 
-function MainNavLinks() {
+export function MainNavLinks() {
   return (
     <ul className="flex flex-col gap-1.5">
       <li>
@@ -109,7 +117,7 @@ function MainNavLinks() {
   );
 }
 
-function FooterNavLinks() {
+export function FooterNavLinks() {
   return (
     <ul className="flex flex-1 flex-col gap-1.5">
       <li>
@@ -135,7 +143,7 @@ function FooterNavLinks() {
   );
 }
 
-function DisconnectButton() {
+export function DisconnectButton() {
   const handleDisconnect = () => {
     dashboardActor.send({ type: "DISCONNECT" });
   };
@@ -245,76 +253,11 @@ export function Layout({ children }: PropsWithChildren) {
         </div>
         {children}
       </div>
-      <Drawer open={isOpen} onOpenChange={(open) => (open ? onOpen() : onClose())} direction="left">
-        <DrawerContent className="bg-card">
-          <DrawerHeader className="relative">
-            <DrawerClose asChild>
-              <Button
-                variant="ghost"
-                className="absolute top-4 right-4"
-                aria-label="Close menu"
-                size="icon"
-              >
-                <XIcon size={20} />
-              </Button>
-            </DrawerClose>
-            <Link to="/" className="flex h-[100px] items-center">
-              <img
-                src="/logo-light.svg"
-                alt="idOS logo"
-                width={120}
-                height={39}
-                className="h-auto w-[120px] dark:hidden"
-                loading="eager"
-              />
-              <img
-                src="/logo.svg"
-                alt="idOS logo"
-                width={120}
-                height={39}
-                className="hidden h-auto w-[120px] dark:block"
-                loading="eager"
-              />
-            </Link>
-          </DrawerHeader>
-          <div className="flex-1 overflow-y-auto p-4">
-            <div className="mb-5">
-              <ConnectedWallet />
-            </div>
-            <MainNavLinks />
-          </div>
-          <DrawerFooter className="flex-col items-stretch gap-5">
-            <FooterNavLinks />
-
-            <DisconnectButton />
-
-            <div className="flex gap-2">
-              <a
-                href="https://www.idos.network/legal/privacy-policy"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  buttonVariants({ variant: "secondary", size: "sm" }),
-                  "flex flex-1 items-center gap-2",
-                )}
-              >
-                Privacy Policy <ExternalLinkIcon size={14} />
-              </a>
-              <a
-                href="https://www.idos.network/legal/user-agreement"
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cn(
-                  buttonVariants({ variant: "secondary", size: "sm" }),
-                  "flex flex-1 items-center gap-2",
-                )}
-              >
-                User Agreement <ExternalLinkIcon size={14} />
-              </a>
-            </div>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+      {isOpen && (
+        <Suspense>
+          <MobileNav isOpen={isOpen} onOpen={onOpen} onClose={onClose} />
+        </Suspense>
+      )}
       <div className="fixed right-5 bottom-5 hidden items-stretch gap-2 rounded-lg bg-card p-5 lg:flex">
         <a
           href="https://www.idos.network/legal/privacy-policy"
