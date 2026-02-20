@@ -195,7 +195,6 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
     };
 
     this.iframe.allow = permissionsPolicies.join("; ");
-    this.iframe.scrolling = "no";
     this.iframe.referrerPolicy = referrerPolicy;
     this.iframe.sandbox.add(...liftedSandboxRestrictions);
     this.iframe.src = this.hostUrl.toString();

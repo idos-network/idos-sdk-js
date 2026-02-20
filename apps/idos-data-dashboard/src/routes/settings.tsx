@@ -9,12 +9,12 @@ export const Route = createFileRoute("/settings")({
   staticData: { breadcrumb: "Settings" },
 });
 
-function waitForDismiss() {
+function waitForDismiss(signal: AbortSignal) {
   return new Promise<never>((_resolve, reject) => {
     document.addEventListener(
       "idos:enclave-dismissed",
       () => reject(new DOMException("Enclave dismissed", "AbortError")),
-      { once: true },
+      { once: true, signal },
     );
   });
 }
@@ -24,15 +24,17 @@ function Settings() {
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const handleBackup = async () => {
+    const controller = new AbortController();
     setIsBackingUp(true);
     try {
       await Promise.race([
         idOSClient.enclaveProvider.backupUserEncryptionProfile(),
-        waitForDismiss(),
+        waitForDismiss(controller.signal),
       ]);
     } catch {
       // Dismissed or failed — nothing to do.
     } finally {
+      controller.abort();
       setIsBackingUp(false);
     }
   };
