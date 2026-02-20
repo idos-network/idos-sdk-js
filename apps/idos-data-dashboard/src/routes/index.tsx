@@ -1,13 +1,24 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { CredentialCard } from "@/components/credentials/credential-card";
-import { CredentialDetails } from "@/components/credentials/credential-details";
 import { CredentialsError } from "@/components/credentials/credentials-error";
 import { CredentialsPending } from "@/components/credentials/credentials-pending";
-import { DeleteCredential } from "@/components/credentials/delete-credential";
-import { GrantsCenter } from "@/components/credentials/grants-center";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
 import { credentialsQueryOptions, useFetchCredentials } from "@/lib/queries/credentials";
+
+const CredentialDetails = lazy(() =>
+  import("@/components/credentials/credential-details").then((m) => ({
+    default: m.CredentialDetails,
+  })),
+);
+const GrantsCenter = lazy(() =>
+  import("@/components/credentials/grants-center").then((m) => ({ default: m.GrantsCenter })),
+);
+const DeleteCredential = lazy(() =>
+  import("@/components/credentials/delete-credential").then((m) => ({
+    default: m.DeleteCredential,
+  })),
+);
 
 type ActiveDialog =
   | { type: "details"; credentialId: string }
@@ -42,21 +53,25 @@ function CredentialsList() {
           </li>
         ))}
       </ul>
-      <CredentialDetails
-        credentialId={activeDialog?.type === "details" ? activeDialog.credentialId : ""}
-        isOpen={activeDialog?.type === "details"}
-        onClose={closeDialog}
-      />
-      <GrantsCenter
-        credentialId={activeDialog?.type === "grants" ? activeDialog.credentialId : ""}
-        isOpen={activeDialog?.type === "grants"}
-        onClose={closeDialog}
-      />
-      <DeleteCredential
-        credential={activeDialog?.type === "delete" ? activeDialog.credential : null}
-        isOpen={activeDialog?.type === "delete"}
-        onClose={closeDialog}
-      />
+      {activeDialog?.type === "details" && (
+        <Suspense>
+          <CredentialDetails
+            credentialId={activeDialog.credentialId}
+            isOpen
+            onClose={closeDialog}
+          />
+        </Suspense>
+      )}
+      {activeDialog?.type === "grants" && (
+        <Suspense>
+          <GrantsCenter credentialId={activeDialog.credentialId} isOpen onClose={closeDialog} />
+        </Suspense>
+      )}
+      {activeDialog?.type === "delete" && (
+        <Suspense>
+          <DeleteCredential credential={activeDialog.credential} isOpen onClose={closeDialog} />
+        </Suspense>
+      )}
     </>
   );
 }

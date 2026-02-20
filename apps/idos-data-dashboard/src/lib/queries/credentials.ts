@@ -28,7 +28,6 @@ export function useFetchCredentials() {
 export function useFetchCredentialDetails({ credentialId }: { credentialId: string }) {
   return useQuery({
     queryKey: ["credential_details", credentialId],
-    enabled: !!credentialId,
     queryFn: async () => {
       const idOSClient = getIdOSClient();
       const credential = await idOSClient.getCredentialById(credentialId);
@@ -61,7 +60,6 @@ export function useFetchGrants({ credentialId }: { credentialId: string }) {
       const idOSClient = getIdOSClient();
       return idOSClient.getAccessGrantsOwned();
     },
-    enabled: !!credentialId,
     retry: 1,
     select(grants) {
       if (!credentials || !grants) {
