@@ -64,17 +64,17 @@ describe("LocalEnclave", () => {
     const matches = { type: "kyc", level: "basic" };
     const misses = { type: "aml", level: "basic" };
 
-    const empheralKeyPair = tweetnacl.box.keyPair();
+    const ephemeralKeyPair = tweetnacl.box.keyPair();
 
     const matchesEncryption = encryptContent(
       utf8Encode(JSON.stringify(matches)),
       keyPair.publicKey,
-      empheralKeyPair.secretKey,
+      ephemeralKeyPair.secretKey,
     );
     const missesEncryption = encryptContent(
       utf8Encode(JSON.stringify(misses)),
       keyPair.publicKey,
-      empheralKeyPair.secretKey,
+      ephemeralKeyPair.secretKey,
     );
 
     const passwordContextSpy = vi.spyOn(enclave, "getPasswordContext");
@@ -85,7 +85,7 @@ describe("LocalEnclave", () => {
         user_id: "user-1",
         public_notes: "{}",
         content: base64Encode(matchesEncryption),
-        encryptor_public_key: base64Encode(empheralKeyPair.publicKey),
+        encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
         issuer_auth_public_key: "issuer",
       },
       {
@@ -93,7 +93,7 @@ describe("LocalEnclave", () => {
         user_id: "user-1",
         public_notes: "{}",
         content: base64Encode(missesEncryption),
-        encryptor_public_key: base64Encode(empheralKeyPair.publicKey),
+        encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
         issuer_auth_public_key: "issuer",
       },
     ];
