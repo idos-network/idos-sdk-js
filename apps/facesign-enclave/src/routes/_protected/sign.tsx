@@ -4,6 +4,7 @@ import { AlertCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Spinner } from "@/components/ui/spinner";
 import { useKeyStorageContext } from "@/providers/key.provider";
 import { useRequests } from "@/providers/requests.provider";
 
@@ -44,7 +45,8 @@ function Sign() {
   if (!firstProposal) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
-        <p className="text-center">No sign proposals available</p>
+        <Spinner className="size-8" />
+        <p className="text-center text-muted-foreground text-sm">Waiting for sign request...</p>
       </div>
     );
   }

@@ -1,14 +1,7 @@
 import { ArrowUpRightFromSquare } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useActorRef } from "@/machines/provider";
 
@@ -17,7 +10,14 @@ const TRANSPARENCY_DOCUMENT_URL =
   "https://drive.google.com/file/d/1lzrdgD_dwusE4xsKw_oTUcu8Hq3YU60b/view?usp=sharing";
 const LEARN_MORE_URL = "https://docs.idos.network";
 
-export function FacesignDialog() {
+interface FacesignDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onContinue: () => void;
+  isLoading?: boolean;
+}
+
+export function FacesignDialog({ open, onOpenChange, onContinue, isLoading }: FacesignDialogProps) {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [open, setOpen] = useState(false);
   const { send } = useActorRef();
@@ -26,20 +26,12 @@ export function FacesignDialog() {
     <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
-        setOpen(nextOpen);
+        onOpenChange(nextOpen);
         if (nextOpen) {
           setStep(0);
         }
       }}
     >
-      <DialogTrigger
-        render={
-          <Button className="justify-between" size="xl" variant="secondary">
-            Continue with idOS FaceSign
-            <img alt="FaceSign" src="/facesign-connect.svg" width={28} height={28} />
-          </Button>
-        }
-      />
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <img
