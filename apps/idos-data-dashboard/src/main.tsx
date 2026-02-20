@@ -17,6 +17,7 @@ import { wagmiAdapter } from "@/core/wagmi";
 import { dashboardActor } from "@/machines/dashboard.actor";
 import {
   selectError,
+  selectIsConnectingFaceSign,
   selectIsDisconnected,
   selectIsError,
   selectIsLoading,
@@ -50,16 +51,18 @@ declare module "@tanstack/react-router" {
 
 function App() {
   const isLoading = useSelector(dashboardActor, selectIsLoading);
+  const isConnectingFaceSign = useSelector(dashboardActor, selectIsConnectingFaceSign);
   const isDisconnected = useSelector(dashboardActor, selectIsDisconnected);
   const isNoProfile = useSelector(dashboardActor, selectIsNoProfile);
   const isError = useSelector(dashboardActor, selectIsError);
   const error = useSelector(dashboardActor, selectError);
   const idOSClient = useSelector(dashboardActor, selectLoggedInClient);
 
-  if (isLoading) {
+  if (isLoading || isConnectingFaceSign) {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-6" />
+      <div className="flex h-screen flex-col items-center justify-center gap-4">
+        <Spinner className="size-8" />
+        <p className="text-center text-muted-foreground text-sm">Loading</p>
       </div>
     );
   }

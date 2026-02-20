@@ -93,16 +93,17 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== "WALLET_SIGNATURE") return;
+
       if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
+          `Rejected WALLET_SIGNATURE from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
-      if (event.data?.type === "WALLET_SIGNATURE") {
-        setWalletPayload(event.data.data);
-        setIsLoading(false);
-      }
+
+      setWalletPayload(event.data.data);
+      setIsLoading(false);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });

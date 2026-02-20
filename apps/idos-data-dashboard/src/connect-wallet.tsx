@@ -1,8 +1,16 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { dashboardActor } from "@/machines/dashboard.actor";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
 
 export function ConnectWallet() {
+  const [facesignOpen, setFacesignOpen] = useState(false);
+
+  const handleFacesignContinue = () => {
+    setFacesignOpen(false);
+    dashboardActor.send({ type: "CONNECT_FACESIGN" });
+  };
+
   return (
     <div
       className="h-screen"
@@ -39,7 +47,24 @@ export function ConnectWallet() {
           <p className="text-center font-normal">Connect your wallet to get started.</p>
 
           <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
-            {import.meta.env.DEV ? <FacesignDialog /> : null}
+            {import.meta.env.DEV ? (
+              <>
+                <Button
+                  className="justify-between"
+                  size="xl"
+                  variant="secondary"
+                  onClick={() => setFacesignOpen(true)}
+                >
+                  Continue with idOS FaceSign
+                  <img alt="FaceSign" src="/facesign-connect.svg" width={28} height={28} />
+                </Button>
+                <FacesignDialog
+                  open={facesignOpen}
+                  onOpenChange={setFacesignOpen}
+                  onContinue={handleFacesignContinue}
+                />
+              </>
+            ) : null}
             <Button
               className="justify-between"
               size="xl"

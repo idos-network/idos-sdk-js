@@ -120,7 +120,7 @@ export class FaceSignSignerProvider {
               type: "sign_proposal",
               data: {
                 id: ++this.#proposalId,
-                data: Array.from(messageToSign),
+                data: messageToSign,
                 metadata: this.#metadata,
               },
             },
@@ -170,8 +170,12 @@ export class FaceSignSignerProvider {
     } finally {
       this.#resolveSessionProposal = null;
       this.#rejectSessionProposal = null;
-      this.#hideEnclave();
+      await this.#hideEnclave();
     }
+  }
+
+  hide(): Promise<void> {
+    return this.#hideEnclave();
   }
 
   destroy(): void {
@@ -232,7 +236,6 @@ export class FaceSignSignerProvider {
   #showEnclave(): Promise<void> {
     const el = this.#container;
     if (!el) return Promise.resolve();
-
     return new Promise((resolve) => {
       el.style.display = "flex";
       requestAnimationFrame(() => {
@@ -247,7 +250,6 @@ export class FaceSignSignerProvider {
   #hideEnclave(): Promise<void> {
     const el = this.#container;
     if (!el) return Promise.resolve();
-
     return new Promise((resolve) => {
       el.style.opacity = "0";
       setTimeout(() => {
