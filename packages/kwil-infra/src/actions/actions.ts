@@ -1816,10 +1816,13 @@ export async function dwgMessage(
 ): Promise<DwgMessageOutput> {
   const inputs = DwgMessageInputSchema.parse(params);
   return await kwilClient
-    .call<DwgMessageOutput[]>({
-      name: "dwg_message",
-      inputs,
-    })
+    .call<DwgMessageOutput[]>(
+      {
+        name: "dwg_message",
+        inputs,
+      },
+      undefined, // Signer is not required here
+    )
     .then((result) => result[0]);
 }
 
@@ -2017,10 +2020,13 @@ export async function dagMessage(
 ): Promise<DagMessageOutput> {
   const inputs = DagMessageInputSchema.parse(params);
   return await kwilClient
-    .call<DagMessageOutput[]>({
-      name: "dag_message",
-      inputs,
-    })
+    .call<DagMessageOutput[]>(
+      {
+        name: "dag_message",
+        inputs,
+      },
+      undefined, // Signer is not required here
+    )
     .then((result) => result[0]);
 }
 
