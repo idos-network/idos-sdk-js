@@ -46,10 +46,18 @@ export function ConnectedWallet() {
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
         <img
           alt={`Connected wallet ${address}`}
+          src="/wallet-light.svg"
+          width={50}
+          height={50}
+          className="h-[50px] w-[50px] dark:hidden"
+          loading="eager"
+        />
+        <img
+          alt={`Connected wallet ${address}`}
           src="/wallet.svg"
           width={50}
           height={50}
-          className="h-[50px] w-[50px]"
+          className="hidden h-[50px] w-[50px] dark:block"
           loading="eager"
         />
       </div>
