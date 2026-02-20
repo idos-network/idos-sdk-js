@@ -52,7 +52,7 @@ function WalletsList() {
   );
 }
 
-const hasFacesignEnclave = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
 export default function Wallets() {
   const { data: wallets } = useFetchWallets();

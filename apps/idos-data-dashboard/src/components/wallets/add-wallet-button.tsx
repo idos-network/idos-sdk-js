@@ -113,6 +113,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
       }
 
       setWalletPayload(payload);
+      setIsLoading(false);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });

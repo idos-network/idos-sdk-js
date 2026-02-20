@@ -7,7 +7,10 @@ import { useActorRef, useSelector } from "@/machines/provider";
 import {
   selectError,
   selectIsConnectingFaceSign,
+<<<<<<< HEAD
   selectIsCreatingFacesignProfile,
+=======
+>>>>>>> 98f83dd9 (feat(dashboard): add facesign as a signer)
   selectIsDisconnected,
   selectIsError,
   selectIsLoading,
