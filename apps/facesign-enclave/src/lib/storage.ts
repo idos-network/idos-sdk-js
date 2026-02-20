@@ -42,5 +42,9 @@ export async function storeSet<T>(id: string, value: T): Promise<void> {
   const tx = db.transaction(DB_STORE_NAME, "readwrite");
   const store = tx.objectStore(DB_STORE_NAME);
   store.put({ name: id, value });
-  tx.commit();
+
+  return new Promise((resolve, reject) => {
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
 }

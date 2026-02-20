@@ -43,12 +43,15 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
         return { nearSelector: null };
 
       case "FaceSign": {
-        const { FaceSignSignerProvider } = await import("@/core/facesign-signer");
+        const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
         const { setFaceSignProvider } = await import("@/core/signers");
 
         const provider = new FaceSignSignerProvider({
-          name: "idOS Dashboard",
-          description: "Connect to idOS Dashboard with FaceSign",
+          metadata: {
+            name: "idOS Dashboard",
+            description: "Connect to idOS Dashboard with FaceSign",
+          },
+          enclaveUrl: import.meta.env.VITE_FACESIGN_ENCLAVE_URL,
         });
 
         const address = await provider.init();

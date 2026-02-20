@@ -1,9 +1,17 @@
-const FACESIGN_URL = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
 const TRANSITION_MS = 200;
+// Buffer after showing the iframe before posting a message, giving the enclave time to be ready.
+const POST_MESSAGE_DELAY_MS = 300;
+// Safety net: reject proposals if the enclave doesn't respond within this window.
+const PROPOSAL_TIMEOUT_MS = 2 * 60 * 1000;
 
-interface Metadata {
+export interface FaceSignMetadata {
   name: string;
   description: string;
+}
+
+export interface FaceSignSignerProviderOptions {
+  metadata: FaceSignMetadata;
+  enclaveUrl: string;
 }
 
 interface SessionResponse {
@@ -22,36 +30,50 @@ export class FaceSignSignerProvider {
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #proposalId = 0;
-  #metadata: Metadata;
+  #metadata: FaceSignMetadata;
+  #enclaveUrl: string;
+  #enclaveOrigin: string;
 
   signatureType = "ed25519";
   walletType = "FaceSign";
   publicAddress = "";
   publicKey = "";
 
-  constructor(metadata: Metadata) {
-    this.#metadata = metadata;
+  constructor(options: FaceSignSignerProviderOptions) {
+    this.#metadata = options.metadata;
+    this.#enclaveUrl = options.enclaveUrl;
+    this.#enclaveOrigin = new URL(options.enclaveUrl).origin;
   }
 
   async init(): Promise<string> {
+    if (this.#messageListener) {
+      window.removeEventListener("message", this.#messageListener);
+    }
+
     this.#messageListener = (event: MessageEvent) => {
+      if (event.origin !== this.#enclaveOrigin) return;
+
       if (event.data?.type === "facesign_ready") {
         this.#resolveOpenEnclave?.();
       }
 
       if (event.data?.type === "sign_proposal_response") {
-        const { signature } = event.data.data;
-        if (signature) {
-          this.#resolveSignMessage?.(new Uint8Array(signature));
+        const payload = event.data.data;
+        if (!payload) return;
+
+        if (payload.signature) {
+          this.#resolveSignMessage?.(new Uint8Array(payload.signature));
         } else {
           this.#rejectSignMessage?.(new Error("Sign request rejected by user"));
         }
       }
 
       if (event.data?.type === "session_proposal_response") {
-        const { approved, address } = event.data.data;
-        if (approved && address) {
-          this.#resolveSessionProposal?.({ address });
+        const payload = event.data.data;
+        if (!payload) return;
+
+        if (payload.approved && payload.address) {
+          this.#resolveSessionProposal?.({ address: payload.address });
         } else {
           this.#rejectSessionProposal?.(new Error("Session request rejected by user"));
         }
@@ -68,7 +90,7 @@ export class FaceSignSignerProvider {
     return sessionProposal.address;
   }
 
-  get signer() {
+  get signer(): this {
     return this;
   }
 
@@ -82,8 +104,18 @@ export class FaceSignSignerProvider {
 
     try {
       return await new Promise<Uint8Array>((resolve, reject) => {
-        this.#resolveSignMessage = resolve;
-        this.#rejectSignMessage = reject;
+        const timer = setTimeout(() => {
+          reject(new Error("FaceSign sign request timed out"));
+        }, PROPOSAL_TIMEOUT_MS);
+
+        this.#resolveSignMessage = (sig) => {
+          clearTimeout(timer);
+          resolve(sig);
+        };
+        this.#rejectSignMessage = (err) => {
+          clearTimeout(timer);
+          reject(err);
+        };
 
         setTimeout(() => {
           this.#iframe?.contentWindow?.postMessage(
@@ -95,9 +127,9 @@ export class FaceSignSignerProvider {
                 metadata: this.#metadata,
               },
             },
-            FACESIGN_URL,
+            this.#enclaveUrl,
           );
-        }, 300);
+        }, POST_MESSAGE_DELAY_MS);
       });
     } finally {
       this.#resolveSignMessage = null;
@@ -112,8 +144,18 @@ export class FaceSignSignerProvider {
 
     try {
       return await new Promise<SessionResponse>((resolve, reject) => {
-        this.#resolveSessionProposal = resolve;
-        this.#rejectSessionProposal = reject;
+        const timer = setTimeout(() => {
+          reject(new Error("FaceSign session proposal timed out"));
+        }, PROPOSAL_TIMEOUT_MS);
+
+        this.#resolveSessionProposal = (res) => {
+          clearTimeout(timer);
+          resolve(res);
+        };
+        this.#rejectSessionProposal = (err) => {
+          clearTimeout(timer);
+          reject(err);
+        };
 
         setTimeout(() => {
           this.#iframe?.contentWindow?.postMessage(
@@ -124,9 +166,9 @@ export class FaceSignSignerProvider {
                 metadata: this.#metadata,
               },
             },
-            FACESIGN_URL,
+            this.#enclaveUrl,
           );
-        }, 300);
+        }, POST_MESSAGE_DELAY_MS);
       });
     } finally {
       this.#resolveSessionProposal = null;
@@ -135,7 +177,7 @@ export class FaceSignSignerProvider {
     }
   }
 
-  destroy() {
+  destroy(): void {
     if (this.#messageListener) {
       window.removeEventListener("message", this.#messageListener);
       this.#messageListener = null;
@@ -172,7 +214,7 @@ export class FaceSignSignerProvider {
       }
 
       this.#iframe = document.createElement("iframe");
-      this.#iframe.src = FACESIGN_URL;
+      this.#iframe.src = this.#enclaveUrl;
       this.#iframe.title = "FaceSign Enclave";
       this.#iframe.allow = "camera; fullscreen";
       this.#iframe.style.cssText = "width:100%;height:100%;border:none;";
@@ -211,7 +253,7 @@ export class FaceSignSignerProvider {
     });
   }
 
-  #destroyEnclave() {
+  #destroyEnclave(): void {
     if (this.#iframe) {
       this.#iframe.remove();
       this.#iframe = null;
