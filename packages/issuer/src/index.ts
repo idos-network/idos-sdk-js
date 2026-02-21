@@ -15,6 +15,7 @@ import { deriveLevel } from "@idos-network/credentials/utils";
 import { createNodeKwilClient, createServerKwilSigner } from "@idos-network/kwil-infra";
 import type {
   EditPublicNotesAsIssuerInput,
+  idOSDelegatedWriteGrant,
   idOSGrant,
   idOSPassportingPeer,
   idOSUser,
@@ -105,6 +106,10 @@ export class idOSIssuer {
 
   async getUser(id: string): Promise<idOSUser> {
     return this.#userService.getUser({ id });
+  }
+
+  async requestDelegatedWriteGrantMessage(params: idOSDelegatedWriteGrant): Promise<string> {
+    return this.#credentialService.requestDelegatedWriteGrantMessage(params);
   }
 
   async createCredentialByDelegatedWriteGrant(
