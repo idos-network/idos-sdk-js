@@ -190,6 +190,7 @@ export class IframeEnclave extends BaseProvider<IframeEnclaveOptions> {
       "background-color": "transparent",
       border: "none",
       display: "block",
+      overflow: "hidden",
       width: "100%",
     };
 

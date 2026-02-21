@@ -1,4 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { DownloadIcon } from "lucide-react";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Code } from "@/components/ui/code";
 import {
@@ -19,9 +21,20 @@ interface CredentialDetailsProps {
 }
 
 export function CredentialDetails({ isOpen, credentialId, onClose }: CredentialDetailsProps) {
+  const queryClient = useQueryClient();
   const credential = useFetchCredentialDetails({
     credentialId,
   });
+
+  useEffect(() => {
+    const dismiss = () => {
+      queryClient.cancelQueries({ queryKey: ["credential_details", credentialId] });
+      onClose();
+      queryClient.removeQueries({ queryKey: ["credential_details", credentialId] });
+    };
+    document.addEventListener("idos:enclave-dismissed", dismiss);
+    return () => document.removeEventListener("idos:enclave-dismissed", dismiss);
+  }, [onClose, credentialId, queryClient]);
 
   const jsonLink = `data:text/json;charset=utf-8,${encodeURIComponent(
     JSON.stringify(credential.data),
