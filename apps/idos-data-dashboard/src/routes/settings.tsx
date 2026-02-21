@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { FileLockIcon } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useIDOS } from "@/core/idOS";
 
@@ -31,8 +32,13 @@ function Settings() {
         idOSClient.enclaveProvider.backupUserEncryptionProfile(),
         waitForDismiss(controller.signal),
       ]);
-    } catch {
-      // Dismissed or failed — nothing to do.
+    } catch (error) {
+      const isDismissed = error instanceof DOMException && error.name === "AbortError";
+      if (!isDismissed) {
+        toast.error("Backup failed", {
+          description: error instanceof Error ? error.message : "An unexpected error occurred",
+        });
+      }
     } finally {
       controller.abort();
       setIsBackingUp(false);
