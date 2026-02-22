@@ -184,6 +184,7 @@ export type {
   idOSGrant,
   idOSUser,
   idOSUserAttribute,
+  idOSDelegatedWriteGrant,
   idOSWallet,
   CredentialFields,
   CredentialSubject,
