@@ -216,7 +216,7 @@ export class FaceSignSignerProvider {
     } finally {
       this.#resolveSessionProposal = null;
       this.#rejectSessionProposal = null;
-      await this.#hideEnclave();
+      this.#hideEnclave();
     }
   }
 
