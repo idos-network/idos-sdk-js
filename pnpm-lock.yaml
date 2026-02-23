@@ -320,6 +320,9 @@ importers:
       '@idos-network/kwil-infra':
         specifier: workspace:*
         version: link:../../packages/kwil-infra
+      '@idos-network/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       '@near-wallet-selector/core':
         specifier: catalog:near
         version: 8.10.2(near-api-js@4.0.4(encoding@0.1.13))

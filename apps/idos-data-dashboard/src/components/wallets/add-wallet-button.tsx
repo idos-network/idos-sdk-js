@@ -142,7 +142,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     setIsLoading(true);
 
     // Calculate center position for the popup
-    const popupWidth = 400;
+    const popupWidth = 520;
     const popupHeight = 620;
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;

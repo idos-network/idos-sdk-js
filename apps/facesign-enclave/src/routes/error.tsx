@@ -15,7 +15,7 @@ function AppError() {
   const { message } = Route.useSearch();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-6">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
       <img src="/facesign-error.svg" alt="idOS FaceSign" width={80} height={80} />
       <div className="flex flex-col items-center justify-center gap-4">
         <h2 className="text-center text-xl">An error occurred</h2>

@@ -49,7 +49,7 @@ function Login() {
   }, [router, setMnemonic]);
 
   return (
-    <div className="flex h-svh items-center justify-center">
+    <div className="flex h-svh items-center justify-center bg-background">
       <Spinner className="size-8" />
     </div>
   );
