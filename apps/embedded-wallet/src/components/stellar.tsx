@@ -121,7 +121,7 @@ function Stellar() {
         <div className="flex flex-col gap-4">
           <Button onClick={handleConnect}>
             Connect with Stellar
-            <TokenXLM variant="mono" size={24} />
+            <TokenXLM variant="mono" size={24} className="ml-auto" />
           </Button>
         </div>
       ))}
