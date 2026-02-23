@@ -26,13 +26,16 @@ export class WindowMessageHandler extends BaseHandler {
   #isIframe: boolean;
   #parentWindow: Window | null;
   #allowedOrigins: string[];
+  #isKeyAvailable: boolean;
 
   constructor(
     addSignProposal: (proposal: SignProposal) => void,
     addSessionProposal: (proposal: SessionProposal) => void,
+    isKeyAvailable: boolean,
   ) {
     super(addSignProposal, addSessionProposal);
 
+    this.#isKeyAvailable = isKeyAvailable;
     this.#isIframe = window.self !== window.top;
     this.#parentWindow = this.#isIframe ? window.parent : window.opener;
     this.#allowedOrigins = env.VITE_ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()) || [
@@ -48,7 +51,7 @@ export class WindowMessageHandler extends BaseHandler {
   async init() {
     window.addEventListener("message", this.#messageListener);
 
-    this.#sendToParent({ type: "facesign_ready" });
+    this.#sendToParent({ type: "facesign_ready", hasKey: this.#isKeyAvailable });
 
     return true;
   }
