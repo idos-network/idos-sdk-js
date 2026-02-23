@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { XIcon } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { useKeyStorageContext } from "@/providers/key.provider";
@@ -39,6 +39,14 @@ function Session() {
     }
   };
 
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") handleReject();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  });
+
   if (!firstProposal) {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
@@ -49,8 +57,16 @@ function Session() {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-background p-6">
-      <div className="relative flex w-full max-w-sm flex-col gap-5 rounded-xl bg-card p-6 shadow-xl">
+    <div
+      role="dialog"
+      className="fixed inset-0 flex items-center justify-center bg-background p-6"
+      onMouseDown={handleReject}
+    >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for backdrop dismiss */}
+      <div
+        className="relative flex w-full max-w-sm flex-col gap-5 rounded-xl bg-card p-6 shadow-xl"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <Button
           type="button"
           variant="ghost"
