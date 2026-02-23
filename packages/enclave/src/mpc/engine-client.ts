@@ -55,8 +55,8 @@ export class EngineClient {
     const authHeader = this.getAuthHeader(signature);
     const url = `${this.baseUrl}/offchain/${this.contractAddress}/shares/${id}`;
     const status = await putRequest(url, uploadRequest, authHeader);
-    if (status !== "201") {
-      throw new Error(`Error uploading share to ${this.contractAddress} at ${url}`);
+    if (status !== "200" && status !== "201") {
+      throw new Error(`Error uploading share to ${this.contractAddress} at ${url}, got status: ${status}`);
     }
     return status;
   }

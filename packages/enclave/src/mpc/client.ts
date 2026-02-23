@@ -119,9 +119,9 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
     
-    const successCount = statuses.filter((item) => item === "201").length;
+    const successCount = statuses.filter((item) => item === "200" || item === "201").length;
     
-    if (successCount === this.numNodes) {
+    if (successCount == this.numNodes) {
       return { status: "success" };
     }
     
@@ -175,7 +175,7 @@ export class Client {
       case "near":
         return `NEAR:${signerPublicKey?.replace('ed25519:', '')}`;
       case "stellar":
-        return `STELLAR:${signerPublicKey}`;
+        return `STELLAR:${signerAddress}`;
       case "facesign":
         return `FACESIGN:${signerPublicKey}`;
       default:
@@ -241,7 +241,7 @@ export class Client {
         addressToAddFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "stellar":
-        addressToAddFormatted = `STELLAR:${publicKey}`;
+        addressToAddFormatted = `STELLAR:${addressToAdd}`;
         break;
       case "facesign":
         addressToAddFormatted = `FACESIGN:${publicKey}`;
@@ -283,7 +283,7 @@ export class Client {
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
         break;
       case "stellar":
-        addressToRemoveFormatted = `STELLAR:${publicKey}`;
+        addressToRemoveFormatted = `STELLAR:${addressToRemove}`;
         break;
       case "facesign":
         addressToRemoveFormatted = `FACESIGN:${publicKey}`;
@@ -337,7 +337,7 @@ export class Client {
     }
     const statuses = await Promise.all(promises);
     const successCount = statuses.filter((item: string) => item == "200").length;
-    if (successCount === this.numNodes) {
+    if (successCount == this.numNodes) {
       return "success";
     }
 
