@@ -61,7 +61,7 @@ export function FacesignDialog({ open, onOpenChange, onContinue, isLoading }: Fa
 
         {step === 1 && (
           <>
-            <ScrollArea className="max-h-[50vh] w-full">
+            <ScrollArea className="max-h-[20vh] w-full">
               <div className="flex flex-col gap-4 pr-2 text-sm leading-relaxed">
                 <p className="text-muted-foreground">
                   By proceeding, you explicitly consent to idOS Association processing your
