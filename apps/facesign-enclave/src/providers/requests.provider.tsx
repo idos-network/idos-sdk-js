@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
+import { useKeyStorageContext } from "./key.provider";
 
 export interface SessionProposal {
   id: number;
@@ -37,6 +38,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
   const router = useRouter();
+  const { isKeyAvailable } = useKeyStorageContext();
 
   // Placeholder values and functions
   const contextValue: RequestsContextValue = {
@@ -73,7 +75,9 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   // Initialize handlers to receive proposals
   useEffect(() => {
     // Example: Initialize a WindowMessageHandler
-    handlers.current.push(new WindowMessageHandler(addSignProposal, addSessionProposal));
+    handlers.current.push(
+      new WindowMessageHandler(addSignProposal, addSessionProposal, isKeyAvailable),
+    );
 
     // Initialize all handlers
     Promise.allSettled(handlers.current.map((handler) => handler.init())).then(() => {

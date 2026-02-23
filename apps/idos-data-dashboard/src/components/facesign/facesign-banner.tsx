@@ -4,7 +4,7 @@ import {
   type WalletSignature,
 } from "@idos-network/kwil-infra/signature-verification";
 import { hexEncode } from "@idos-network/utils/codecs";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
@@ -13,33 +13,79 @@ import { FacesignDialog } from "./facesign-dialog";
 
 const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
 
+async function createProvider() {
+  const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
+
+  const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+  if (!enclaveUrl) {
+    throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+  }
+
+  return new FaceSignSignerProvider({
+    metadata: {
+      name: "idOS Dashboard",
+      description: "Add FaceSign to your idOS profile",
+    },
+    enclaveUrl,
+  });
+}
+
 export function FacesignBanner() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const providerRef = useRef<FaceSignSignerProvider | null>(null);
   const addWalletMutation = useAddWalletMutation();
+
+  const handleCreateClick = async () => {
+    setIsLoading(true);
+
+    try {
+      const provider = await createProvider();
+      const { hasKey } = await provider.preload();
+
+      if (hasKey) {
+        providerRef.current = provider;
+        await runAddWalletFlow(provider);
+      } else {
+        providerRef.current = provider;
+        setDialogOpen(true);
+      }
+    } catch (error) {
+      console.error("FaceSign preload failed:", error);
+      providerRef.current?.destroy();
+      providerRef.current = null;
+      setDialogOpen(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleContinue = async () => {
     setIsLoading(true);
 
-    let provider: FaceSignSignerProvider | null = null;
-
     try {
-      const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
-
-      const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-      if (!enclaveUrl) {
-        throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+      let provider = providerRef.current;
+      if (!provider) {
+        provider = await createProvider();
+        providerRef.current = provider;
       }
 
-      provider = new FaceSignSignerProvider({
-        metadata: {
-          name: "idOS Dashboard",
-          description: "Add FaceSign to your idOS profile",
-        },
-        enclaveUrl,
-      });
-
       setDialogOpen(false);
+      await runAddWalletFlow(provider);
+    } catch (error) {
+      console.error("Failed to add FaceSign:", error);
+      toast.error("Failed to add FaceSign", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    } finally {
+      providerRef.current?.destroy();
+      providerRef.current = null;
+      setIsLoading(false);
+    }
+  };
+
+  const runAddWalletFlow = async (provider: FaceSignSignerProvider) => {
+    try {
       const publicKey = await provider.init();
       const signatureBytes = await provider.signMessage(ADD_WALLET_MESSAGE);
       const signature = hexEncode(signatureBytes, true);
@@ -82,13 +128,9 @@ export function FacesignBanner() {
           },
         );
       });
-    } catch (error) {
-      console.error("Failed to add FaceSign:", error);
-      toast.error("Failed to add FaceSign", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-      });
     } finally {
-      provider?.destroy();
+      provider.destroy();
+      providerRef.current = null;
       setIsLoading(false);
     }
   };
@@ -120,7 +162,7 @@ export function FacesignBanner() {
         <Button
           className="relative min-w-[114px] shrink-0"
           isLoading={isLoading}
-          onClick={() => setDialogOpen(true)}
+          onClick={handleCreateClick}
         >
           Create
         </Button>
