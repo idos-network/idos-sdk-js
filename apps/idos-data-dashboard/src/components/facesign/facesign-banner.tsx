@@ -54,7 +54,6 @@ export function FacesignBanner() {
       console.error("FaceSign preload failed:", error);
       providerRef.current?.destroy();
       providerRef.current = null;
-      setDialogOpen(true);
     } finally {
       setIsLoading(false);
     }
@@ -174,7 +173,7 @@ export function FacesignBanner() {
         isLoading={isLoading}
       />
       {isLoading && (
-        <div className="fixed inset-0 flex flex-col items-center justify-center gap-4 bg-background">
+        <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 bg-background">
           <Spinner className="size-8" />
           <p className="text-center text-muted-foreground text-sm">Loading</p>
         </div>

@@ -24,7 +24,8 @@ export default defineConfig({
     },
   },
   server: {
-    // Enable CORS for iframe embedding during development
+    port: 5174,
+    strictPort: true,
     cors: true,
     headers: {
       // Allow iframe embedding from any origin in development

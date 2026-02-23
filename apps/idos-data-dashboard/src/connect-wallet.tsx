@@ -37,7 +37,6 @@ export function ConnectWallet() {
       }
     } catch (error) {
       console.error("FaceSign preload failed:", error);
-      setFacesignOpen(true);
     } finally {
       setFacesignLoading(false);
     }
