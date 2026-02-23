@@ -92,7 +92,7 @@ function XRPL() {
         <div className="flex flex-col gap-4">
           <Button onClick={handleConnect}>
             Connect with XRP
-            <TokenXRP variant="mono" size={24} />
+            <TokenXRP variant="mono" size={24} className="ml-auto" />
           </Button>
         </div>
       ))}

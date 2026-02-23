@@ -60,7 +60,7 @@ function App() {
 
   if (isLoading || isConnectingFaceSign) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center gap-4">
+      <div className="fixed inset-0 z-9999 flex flex-col items-center justify-center gap-4 bg-background">
         <Spinner className="size-8" />
         <p className="text-center text-muted-foreground text-sm">Loading</p>
       </div>

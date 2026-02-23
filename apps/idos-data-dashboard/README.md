@@ -256,7 +256,15 @@ When deploying, set the following environment variables in each Vercel project:
 | `VITE_FACETEC_IFRAME_FEATURE_FLAG` | FaceTec iframe feature flag UUID |
 | `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` (comma-separated for multiple) |
 
-The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it. In production, never use `"*"`.
+**Embedded wallet** (`embedded-wallet`):
+
+| Variable | Value |
+| --- | --- |
+| `VITE_DATA_DASHBOARD_URL` | `https://dashboard.idos.network` |
+| `VITE_FACESIGN_ENCLAVE_URL` | `https://facesign-enclave.idos.network` |
+| `VITE_WALLET_CONNECT_PROJECT_ID` | Your Reown (WalletConnect) project ID |
+
+The `VITE_ALLOWED_ORIGINS` variable on the enclave must list every origin that is permitted to embed it (including the embedded-wallet origin if it is hosted separately). In production, never use `"*"`.
 
 ## License
 

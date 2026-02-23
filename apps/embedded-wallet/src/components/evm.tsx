@@ -116,7 +116,7 @@ function Ethereum() {
         <div className="flex flex-col gap-4">
           <Button onClick={() => open()}>
             Connect with EVM
-            <TokenETH variant="mono" size={24} />
+            <TokenETH variant="mono" size={24} className="ml-auto" />
           </Button>
         </div>
       ))}

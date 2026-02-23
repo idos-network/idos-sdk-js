@@ -5,6 +5,7 @@
     "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:core",
     "@idos-network/kwil-infra": "workspace:*",
+    "@idos-network/utils": "workspace:*",
     "@near-wallet-selector/core": "catalog:near",
     "@near-wallet-selector/here-wallet": "catalog:near",
     "@near-wallet-selector/meteor-wallet": "catalog:near",

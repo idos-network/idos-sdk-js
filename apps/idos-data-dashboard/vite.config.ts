@@ -58,6 +58,11 @@ export default defineConfig(async (config) => {
       rollupOptions: config.isSsrBuild ? { input: "./server/app.ts" } : undefined,
     },
 
+    server: {
+      port: 5173,
+      strictPort: true,
+    },
+
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
