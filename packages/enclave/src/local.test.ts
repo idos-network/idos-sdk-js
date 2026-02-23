@@ -1,6 +1,9 @@
-import { base64Decode } from "@idos-network/utils/codecs";
+import type { idOSCredential } from "@idos-network/credentials/types";
+import { base64Decode, base64Encode, utf8Encode } from "@idos-network/utils/codecs";
+import { encryptContent } from "@idos-network/utils/cryptography";
 import { MemoryStore } from "@idos-network/utils/store";
-import { describe, expect, it } from "vitest";
+import tweetnacl from "tweetnacl";
+import { describe, expect, it, vi } from "vitest";
 import { LocalEnclave, type LocalEnclaveOptions } from "./local.js";
 
 class TestEnclave extends LocalEnclave {
@@ -47,5 +50,62 @@ describe("LocalEnclave", () => {
     const decrypted = await enclave.decrypt(content, encryptorPublicKey);
 
     expect(decrypted).toEqual(message);
+  });
+
+  it("filters credentials and strips content", async () => {
+    const store = new MemoryStore();
+    const enclave = new TestEnclave({ userId, store });
+    const { keyPair } = await enclave.getPrivateEncryptionProfile();
+
+    // Reset enclave locals
+    // @ts-expect-error This is fine, it's a custom method simulates the private encryption profile
+    enclave.storedEncryptionProfile = undefined;
+
+    const matches = { type: "kyc", level: "basic" };
+    const misses = { type: "aml", level: "basic" };
+
+    const ephemeralKeyPair = tweetnacl.box.keyPair();
+
+    const matchesEncryption = encryptContent(
+      utf8Encode(JSON.stringify(matches)),
+      keyPair.publicKey,
+      ephemeralKeyPair.secretKey,
+    );
+    const missesEncryption = encryptContent(
+      utf8Encode(JSON.stringify(misses)),
+      keyPair.publicKey,
+      ephemeralKeyPair.secretKey,
+    );
+
+    const passwordContextSpy = vi.spyOn(enclave, "getPasswordContext");
+
+    const credentials: idOSCredential[] = [
+      {
+        id: "cred-1",
+        user_id: "user-1",
+        public_notes: "{}",
+        content: base64Encode(matchesEncryption),
+        encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
+        issuer_auth_public_key: "issuer",
+      },
+      {
+        id: "cred-2",
+        user_id: "user-1",
+        public_notes: "{}",
+        content: base64Encode(missesEncryption),
+        encryptor_public_key: base64Encode(ephemeralKeyPair.publicKey),
+        issuer_auth_public_key: "issuer",
+      },
+    ];
+
+    const filtered = await enclave.filterCredentials(credentials, {
+      pick: { type: ["kyc"] },
+      omit: {},
+    });
+
+    expect(filtered).toHaveLength(1);
+    expect(filtered[0]?.id).toBe("cred-1");
+    expect(filtered[0]?.content).toBe("");
+    expect(passwordContextSpy).toHaveBeenCalledTimes(1);
   });
 });

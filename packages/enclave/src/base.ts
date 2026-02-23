@@ -230,6 +230,10 @@ export abstract class BaseProvider<K extends EnclaveOptions = EnclaveOptions> {
       }));
     }
 
+    // We need to be sure first that we have the encryption profile
+    // otherwise we can end up with a lot of signatures for each credential
+    await this.ensureUserEncryptionProfile();
+
     const decrypted = await Promise.all(
       credentials.map(async (credential: idOSCredential) => {
         const content = await this.decrypt(

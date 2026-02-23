@@ -8,6 +8,7 @@ import { WagmiProvider } from "wagmi";
 
 import "@/machines/dashboard.actor";
 import { LogOutIcon } from "lucide-react";
+import { EnclaveDialog } from "@/components/enclave-dialog";
 import { ErrorCard } from "@/components/error-card";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,7 +17,9 @@ import { ConnectWallet } from "@/connect-wallet";
 import { wagmiAdapter } from "@/core/wagmi";
 import { dashboardActor } from "@/machines/dashboard.actor";
 import {
+  selectError,
   selectIsDisconnected,
+  selectIsError,
   selectIsLoading,
   selectIsNoProfile,
   selectLoggedInClient,
@@ -50,12 +53,41 @@ function App() {
   const isLoading = useSelector(dashboardActor, selectIsLoading);
   const isDisconnected = useSelector(dashboardActor, selectIsDisconnected);
   const isNoProfile = useSelector(dashboardActor, selectIsNoProfile);
+  const isError = useSelector(dashboardActor, selectIsError);
+  const error = useSelector(dashboardActor, selectError);
   const idOSClient = useSelector(dashboardActor, selectLoggedInClient);
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
+        <p className="max-w-md text-center text-destructive text-lg">
+          {error || "Something went wrong"}
+        </p>
+        <div className="flex gap-4">
+          <Button
+            size="lg"
+            variant="secondary"
+            onClick={() => dashboardActor.send({ type: "RETRY" })}
+          >
+            Retry
+          </Button>
+          <Button
+            size="lg"
+            onClick={() => dashboardActor.send({ type: "DISCONNECT" })}
+            className="flex items-center gap-2"
+          >
+            <LogOutIcon size={20} />
+            Disconnect
+          </Button>
+        </div>
       </div>
     );
   }
@@ -105,8 +137,9 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
   <React.StrictMode>
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <App />
         <Toaster position="bottom-right" duration={3000} />
+        <EnclaveDialog />
+        <App />
       </QueryClientProvider>
     </WagmiProvider>
   </React.StrictMode>,

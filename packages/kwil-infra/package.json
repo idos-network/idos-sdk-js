@@ -43,6 +43,10 @@
       "types": "./dist/xrp/utils.d.mts",
       "import": "./dist/xrp/utils.mjs"
     },
+    "./facesign": {
+      "types": "./dist/facesign/index.d.mts",
+      "import": "./dist/facesign/index.mjs"
+    },
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"

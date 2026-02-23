@@ -92,6 +92,19 @@ export interface CustomKwilSigner extends KwilSigner {
   publicAddress: string;
   signatureType: string;
   publicKey: string;
+  walletType: string;
+  signMessage: (message: Uint8Array | string) => Promise<Uint8Array>;
+}
+
+function isCustomKwilSigner(object: unknown): object is CustomKwilSigner {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "publicAddress" in object &&
+    "signatureType" in object &&
+    "publicKey" in object &&
+    "signMessage" in object
+  );
 }
 
 /**
@@ -237,7 +250,6 @@ export async function createClientKwilSigner(
     ];
   }
   if (isStellarWallet(wallet)) {
-    // Stellar wallet
     const { address } = await wallet.getAddress();
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
     const kwilSigner = new KwilSigner(
@@ -250,6 +262,24 @@ export async function createClientKwilSigner(
       "sep53",
     );
     return [kwilSigner, address, publicKey, "Stellar"];
+  }
+  if (isCustomKwilSigner(wallet)) {
+    try {
+      await kwilClient.client.auth.logoutKGW();
+    } catch (error) {
+      console.log("error logoutKGW", error);
+    }
+
+    return [
+      new KwilSigner(
+        async (msg: Uint8Array) => wallet.signMessage(msg),
+        wallet.publicAddress,
+        "ed25519",
+      ),
+      wallet.publicAddress,
+      wallet.publicKey,
+      wallet.walletType as WalletType,
+    ];
   }
 
   // Force the check that `signer` is `never`.

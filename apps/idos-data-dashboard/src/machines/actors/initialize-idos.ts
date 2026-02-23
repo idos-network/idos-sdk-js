@@ -2,6 +2,7 @@ import type { Wallet } from "@idos-network/kwil-infra";
 import { fromPromise } from "xstate";
 import {
   createEvmSigner,
+  createFaceSignSigner,
   createNearSigner,
   createStellarSigner,
   createXrplSigner,
@@ -29,6 +30,9 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         break;
       case "XRPL":
         signer = await createXrplSigner();
+        break;
+      case "FaceSign":
+        signer = createFaceSignSigner();
         break;
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);

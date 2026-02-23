@@ -11,85 +11,10 @@
     >
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>idOS Dashboard</title>
-
-    <style>
-    #idos-root {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      visibility: hidden;
-      opacity: 0;
-      transition:
-        opacity 150ms ease-in,
-        visibility 0ms ease-in 150ms;
-      background: rgba(0, 0, 0, 0.3);
-      backdrop-filter: blur(2px);
-      aspect-ratio: 1;
-      z-index: 10000;
-    }
-
-    #idos-root:has(#idOS-enclave.visible) {
-      visibility: visible;
-      opacity: 1;
-      transition:
-        opacity 150ms ease-in,
-        visibility 0ms ease-in 0ms;
-    }
-
-    .idos-card {
-      display: flex;
-      flex-direction: column;
-      place-content: center;
-      align-items: center;
-      gap: 20px;
-      background: #171717;
-      padding: 20px;
-      border-radius: 12px;
-      min-width: 430px;
-
-      @media screen and (max-width: 768px) {
-        width: 100%;
-        height: 100dvh;
-      }
-    }
-
-    .idos-card__title {
-      font-size: 20px;
-      font-weight: 600;
-      line-height: 30px;
-      text-align: center;
-    }
-
-    .idos-card__body {
-      display: flex;
-      flex-direction: column;
-    }
-
-    #idOS-enclave {
-      display: flex;
-      height: 40px;
-      border-radius: 6px;
-      overflow: hidden;
-    }
-    </style>
   </head>
 
-  <body>
-    <div id="root" style="display: contents"></div>
-    <div id="idos-root">
-      <div class="idos-card">
-        <h3 class="idos-card__title">Access your idOS data</h3>
-        <div class="idos-card__body">
-          <div id="idOS-enclave" class="idos"></div>
-        </div>
-      </div>
-    </div>
+  <body class="relative">
+    <div id="root" class="isolate"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

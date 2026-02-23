@@ -57,10 +57,3 @@ test-results
 
 # Synpress
 .cache-synpress
-
-# next.js
-.next
-next-env.d.ts
-
-# env files
-examples/consumer-and-issuer/.env

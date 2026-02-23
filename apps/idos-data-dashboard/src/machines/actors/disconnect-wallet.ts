@@ -21,7 +21,10 @@ export const disconnectWallet = fromPromise<void, DisconnectWalletInput>(async (
       await disconnectEvm();
     }
 
-    // XRPL (GemWallet) has no persistent session to disconnect.
+    if (walletType === "FaceSign") {
+      const { clearFaceSignProvider } = await import("@/core/signers");
+      clearFaceSignProvider();
+    }
 
     if (idOSClient && "logOut" in idOSClient && idOSClient.state === "logged-in") {
       await idOSClient.logOut();
