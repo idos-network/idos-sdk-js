@@ -3,6 +3,7 @@ import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
+import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 
 export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(
   async ({ input }) => {
@@ -13,7 +14,6 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
           return {
             walletAddress: existingAccount.address,
             walletPublicKey: existingAccount.address,
-            nearSelector: input.nearSelector,
           };
         }
 
@@ -32,7 +32,6 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
                 resolve({
                   walletAddress: account.address,
                   walletPublicKey: account.address,
-                  nearSelector: input.nearSelector,
                 });
               }
             },
@@ -52,53 +51,39 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
       }
 
       case "NEAR": {
-        const { getNearModal, initializeNearSelector, openNearModal } = await import("@/core/near");
+        const { connector } = await import("@/core/near");
 
-        const selector = input.nearSelector ?? (await initializeNearSelector());
+        try {
+          const { wallet, accounts } = await connector.getConnectedWallet();
 
-        if (selector.isSignedIn()) {
-          const accounts = selector.store.getState().accounts;
-          const accountId = accounts[0]?.accountId;
-          if (accountId) {
+          if (wallet && accounts.length > 0) {
+            const accountId = accounts[0]?.accountId;
             return {
               walletAddress: accountId,
               walletPublicKey: accountId,
-              nearSelector: selector,
             };
           }
+        } catch (err) {
+          console.error("No wallet connected", err);
         }
 
-        openNearModal(selector);
-
         return new Promise<ConnectWalletOutput>((resolve, reject) => {
-          let signedIn = false;
-
-          const subscription = selector.on("signedIn", ({ accounts }) => {
-            signedIn = true;
-            subscription.remove();
-            hideSubscription?.remove();
+          connector.once("wallet:signIn", ({ accounts, success }) => {
             const accountId = accounts[0]?.accountId;
-            if (accountId) {
-              resolve({
-                walletAddress: accountId,
-                walletPublicKey: accountId,
-                nearSelector: selector,
-              });
-            } else {
+
+            if (!success || !accountId) {
               reject(new Error("No NEAR account found after sign-in"));
             }
+
+            resolve({
+              walletAddress: accountId,
+              walletPublicKey: accountId,
+            });
           });
 
-          const modal = getNearModal();
-          const hideSubscription = modal?.on("onHide", ({ hideReason }) => {
-            if (!signedIn && hideReason === "user-triggered") {
-              subscription.remove();
-              hideSubscription?.remove();
-              reject(new Error("Connection cancelled"));
-            }
-          });
+          connector.connect().catch((err) => reject(err));
         });
-      }
+    }
 
       case "Stellar": {
         const { default: stellarKit } = await import("@/core/stellar-kit");
@@ -119,7 +104,6 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
                 resolve({
                   walletAddress: address,
                   walletPublicKey: publicKey,
-                  nearSelector: input.nearSelector,
                 });
               } catch (err) {
                 reject(
@@ -152,9 +136,11 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
         }
 
         const publicKey = await getGemWalletPublicKey(GemWallet);
+
         if (!publicKey) {
           throw new Error("Failed to get XRPL public key");
         }
+
         if (!publicKey.address) {
           throw new Error("XRPL wallet returned no address");
         }
@@ -162,7 +148,6 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
         return {
           walletAddress: publicKey.address,
           walletPublicKey: publicKey.publicKey ?? "",
-          nearSelector: input.nearSelector,
         };
       }
 

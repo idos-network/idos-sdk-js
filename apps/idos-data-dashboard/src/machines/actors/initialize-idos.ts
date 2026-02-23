@@ -4,7 +4,6 @@ import { fromPromise } from "xstate";
 import {
   createEvmSigner,
   createFaceSignSigner,
-  createNearSigner,
   createStellarSigner,
   createXrplSigner,
 } from "@/core/signers";
@@ -12,7 +11,7 @@ import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.mac
 
 export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
   async ({ input }) => {
-    const { walletType, walletAddress, walletPublicKey, nearSelector } = input;
+    const { walletType, walletAddress, walletPublicKey, nearWallet } = input;
 
     const config = new idOSClientConfiguration({
       nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
@@ -28,10 +27,10 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         signer = await createEvmSigner();
         break;
       case "NEAR":
-        if (!nearSelector) {
-          throw new Error("NEAR selector not available");
+        if (!nearWallet) {
+          throw new Error("NEAR wallet not available");
         }
-        signer = await createNearSigner(nearSelector);
+        signer = nearWallet;
         break;
       case "Stellar":
         signer = await createStellarSigner(walletPublicKey, walletAddress);

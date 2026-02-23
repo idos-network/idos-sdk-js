@@ -82,7 +82,6 @@ function ListItemLink({ to, children }: { to: string; children: React.ReactNode 
   );
 }
 
-<<<<<<< HEAD
 const externalLinkClasses = "flex items-center gap-5 rounded-xl px-6 py-3 hover:bg-hover-subtle";
 
 export function MainNavLinks() {
