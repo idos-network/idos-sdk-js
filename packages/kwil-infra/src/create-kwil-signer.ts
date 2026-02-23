@@ -254,7 +254,7 @@ export async function createClientKwilSigner(
     const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
     const kwilSigner = new KwilSigner(
       async (msg: string | Uint8Array): Promise<Uint8Array> => {
-        const msgToSign = typeof msg !== "string" ? new TextDecoder().decode(msg) : msg;
+        const msgToSign = typeof msg !== "string" ? Buffer.from(msg).toString("utf8") : msg;
         const result = await wallet.signMessage(msgToSign);
         return Buffer.from(result.signedMessage, "base64");
       },

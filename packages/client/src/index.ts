@@ -170,10 +170,19 @@ export class idOSClientIdle {
 
           // Some Stellar wallets return a base64-encoded string as bytes; normalize it.
           if (signatureBytes.length > 64) {
+            const originalSignatureBytes = signatureBytes;
+            const originalSignatureBytesLength = signatureBytes.length;
             try {
               signatureBytes = base64Decode(utf8Decode(signatureBytes));
-            } catch {
+            } catch (error) {
               // Keep initial decode if fallback fails.
+              console.warn(
+                "Fallback decode failed for signatureBytes: base64Decode(utf8Decode(signatureBytes)) failed. " +
+                  `Original signatureBytes length: ${originalSignatureBytesLength}, ` +
+                  `Original signatureBytes value: ${hexEncode(originalSignatureBytes)}, ` +
+                  `Error: ${error instanceof Error ? error.message : String(error)}. ` +
+                  "Using initial base64Decode result. This will be passed to hexEncode.",
+              );
             }
           }
 

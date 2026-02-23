@@ -152,26 +152,7 @@ export class Client {
 
   public uploadRequest(blindedShares: Buffer[]): UploadSignatureMessage {
     console.log("UPLOADING TO MPC");
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "Stellar":
-        address = `STELLAR:${this.signerPublicKey}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
       recovering_addresses: [address],
@@ -194,7 +175,9 @@ export class Client {
       case "near":
         return `NEAR:${signerPublicKey?.replace('ed25519:', '')}`;
       case "stellar":
-        return `STELLAR:${signerAddress}`;
+        return `STELLAR:${signerPublicKey}`;
+      case "facesign":
+        return `FACESIGN:${signerPublicKey}`;
       default:
         throw new Error("Invalid signer type");
     }
@@ -243,26 +226,7 @@ export class Client {
     publicKey: string | undefined,
     addressToAddType: string,
   ): AddAddressMessageToSign {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "Stellar":
-        address = `STELLAR:${this.signerPublicKey}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
 
     var addressToAddFormatted = "";
     // @deprecated toLowerCase remove when we have updated the SDK
@@ -304,26 +268,7 @@ export class Client {
     publicKey: string | undefined,
     addressToRemoveType: string,
   ): RemoveAddressMessageToSign {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "Stellar":
-        address = `STELLAR:${this.signerPublicKey}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
 
     var addressToRemoveFormatted = "";
     // @deprecated toLowerCase remove when we have updated the SDK
