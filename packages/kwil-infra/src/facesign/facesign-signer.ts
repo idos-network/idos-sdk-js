@@ -30,6 +30,7 @@ export class FaceSignSignerProvider {
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #proposalId = 0;
+  #hasKey: boolean | null = null;
   #metadata: FaceSignMetadata;
   #enclaveUrl: string;
   #enclaveOrigin: string;
@@ -45,7 +46,7 @@ export class FaceSignSignerProvider {
     this.#enclaveOrigin = new URL(options.enclaveUrl).origin;
   }
 
-  async init(): Promise<string> {
+  #setupMessageListener(): void {
     if (this.#messageListener) {
       window.removeEventListener("message", this.#messageListener);
     }
@@ -54,6 +55,7 @@ export class FaceSignSignerProvider {
       if (event.origin !== this.#enclaveOrigin) return;
 
       if (event.data?.type === "facesign_ready") {
+        this.#hasKey = !!event.data.hasKey;
         this.#resolveOpenEnclave?.();
       }
 
@@ -81,6 +83,16 @@ export class FaceSignSignerProvider {
     };
 
     window.addEventListener("message", this.#messageListener);
+  }
+
+  async preload(): Promise<{ hasKey: boolean }> {
+    this.#setupMessageListener();
+    await this.#ensureEnclave();
+    return { hasKey: this.#hasKey ?? false };
+  }
+
+  async init(): Promise<string> {
+    this.#setupMessageListener();
 
     const sessionProposal = await this.#sessionProposal();
 

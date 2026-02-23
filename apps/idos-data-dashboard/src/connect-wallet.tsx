@@ -5,6 +5,42 @@ import { FacesignDialog } from "./components/facesign/facesign-dialog";
 
 export function ConnectWallet() {
   const [facesignOpen, setFacesignOpen] = useState(false);
+  const [facesignLoading, setFacesignLoading] = useState(false);
+
+  const handleFacesignClick = async () => {
+    setFacesignLoading(true);
+
+    try {
+      const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
+
+      const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+      if (!enclaveUrl) {
+        throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+      }
+
+      const provider = new FaceSignSignerProvider({
+        metadata: {
+          name: "idOS Dashboard",
+          description: "Connect to idOS Dashboard with FaceSign",
+        },
+        enclaveUrl,
+      });
+
+      const { hasKey } = await provider.preload();
+      provider.destroy();
+
+      if (hasKey) {
+        dashboardActor.send({ type: "CONNECT_FACESIGN" });
+      } else {
+        setFacesignOpen(true);
+      }
+    } catch (error) {
+      console.error("FaceSign preload failed:", error);
+      setFacesignOpen(true);
+    } finally {
+      setFacesignLoading(false);
+    }
+  };
 
   const handleFacesignContinue = () => {
     setFacesignOpen(false);
@@ -53,7 +89,8 @@ export function ConnectWallet() {
                   className="justify-between"
                   size="xl"
                   variant="secondary"
-                  onClick={() => setFacesignOpen(true)}
+                  isLoading={facesignLoading}
+                  onClick={handleFacesignClick}
                 >
                   Continue with idOS FaceSign
                   <img alt="FaceSign" src="/facesign-connect.svg" width={28} height={28} />
