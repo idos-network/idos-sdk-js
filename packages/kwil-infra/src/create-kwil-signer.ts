@@ -230,10 +230,15 @@ export async function createClientKwilSigner(
   }
 
   if (isCustomKwilSigner(wallet)) {
-    try {
-      await kwilClient.client.auth.logoutKGW();
-    } catch (error) {
-      console.log("error logoutKGW", error);
+    const storedAddress = await store.get<string>("signer-address");
+
+    if (storedAddress !== wallet.publicAddress) {
+      store.set("signer-address", wallet.publicAddress);
+      try {
+        await kwilClient.client.auth.logoutKGW();
+      } catch (error) {
+        console.log("error logoutKGW", error);
+      }
     }
 
     return [

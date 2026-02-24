@@ -27,6 +27,7 @@ export class FaceSignSignerProvider {
   #rejectSignMessage: ((error: Error) => void) | null = null;
   #resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
   #rejectSessionProposal: ((error: Error) => void) | null = null;
+  #resolveAddressRequest: ((address: string | null) => void) | null = null;
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #proposalId = 0;
@@ -80,6 +81,11 @@ export class FaceSignSignerProvider {
           this.#rejectSessionProposal?.(new Error("Session request rejected by user"));
         }
       }
+
+      if (event.data?.type === "address_response") {
+        const payload = event.data.data;
+        this.#resolveAddressRequest?.(payload?.address ?? null);
+      }
     };
 
     window.addEventListener("message", this.#messageListener);
@@ -100,6 +106,32 @@ export class FaceSignSignerProvider {
     this.publicAddress = sessionProposal.address;
 
     return sessionProposal.address;
+  }
+
+  async getAddress(): Promise<string | null> {
+    this.#setupMessageListener();
+    await this.#ensureEnclave();
+
+    if (!this.#hasKey) return null;
+
+    return new Promise<string | null>((resolve) => {
+      const timer = setTimeout(() => resolve(null), PROPOSAL_TIMEOUT_MS);
+
+      this.#resolveAddressRequest = (address) => {
+        clearTimeout(timer);
+        this.#resolveAddressRequest = null;
+        if (address) {
+          this.publicKey = address;
+          this.publicAddress = address;
+        }
+        resolve(address);
+      };
+
+      this.#iframe?.contentWindow?.postMessage(
+        { type: "address_request", data: { id: ++this.#proposalId } },
+        this.#enclaveUrl,
+      );
+    });
   }
 
   get signer(): this {
