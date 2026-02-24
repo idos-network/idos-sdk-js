@@ -6,7 +6,9 @@ export interface DueKycEvent {
   type: "bp.kyc.status_changed" | "transfer.status_changed" | "bp.tos_accepted";
   data: {
     id: string;
-    status: "passed" | "failed";
+    kyc: {
+      status: "passed" | "failed";
+    };
   };
 }
 
@@ -24,7 +26,7 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: "Invalid event type" }, { status: 400 });
   }
 
-  if (body.data.status !== "passed" && body.data.status !== "failed") {
+  if (body.data.kyc.status !== "passed" && body.data.kyc.status !== "failed") {
     return Response.json({ error: "Invalid status" }, { status: 400 });
   }
 
@@ -34,7 +36,8 @@ export async function action({ request }: Route.ActionArgs) {
     return Response.json({ error: `User not found for due ID ${body.data.id}` }, { status: 400 });
   }
 
-  userItem.due.kycStatus = body.data.status;
+  userItem.due.kycStatus = body.data.kyc.status;
+
   await setUserItem(userItem);
 
   return Response.json({ message: "KYC status updated" });
