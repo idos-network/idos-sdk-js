@@ -27,15 +27,18 @@ export class WindowMessageHandler extends BaseHandler {
   #parentWindow: Window | null;
   #allowedOrigins: string[];
   #isKeyAvailable: boolean;
+  #getStoredAddress: (() => Promise<string>) | null;
 
   constructor(
     addSignProposal: (proposal: SignProposal) => void,
     addSessionProposal: (proposal: SessionProposal) => void,
     isKeyAvailable: boolean,
+    getStoredAddress?: () => Promise<string>,
   ) {
     super(addSignProposal, addSessionProposal);
 
     this.#isKeyAvailable = isKeyAvailable;
+    this.#getStoredAddress = getStoredAddress ?? null;
     this.#isIframe = window.self !== window.top;
     this.#parentWindow = this.#isIframe ? window.parent : window.opener;
     this.#allowedOrigins = env.VITE_ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()) || [
@@ -121,6 +124,27 @@ export class WindowMessageHandler extends BaseHandler {
           );
         },
       });
+    } else if (type === "address_request") {
+      if (this.#isKeyAvailable && this.#getStoredAddress) {
+        this.#getStoredAddress()
+          .then((address) => {
+            this.#sendToParent(
+              { type: "address_response", data: { id: data.id, address } },
+              event.origin,
+            );
+          })
+          .catch(() => {
+            this.#sendToParent(
+              { type: "address_response", data: { id: data.id, address: null } },
+              event.origin,
+            );
+          });
+      } else {
+        this.#sendToParent(
+          { type: "address_response", data: { id: data.id, address: null } },
+          event.origin,
+        );
+      }
     }
   };
 }
