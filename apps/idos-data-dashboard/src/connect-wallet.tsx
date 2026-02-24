@@ -46,6 +46,8 @@ export function ConnectWallet() {
     dashboardActor.send({ type: "CONNECT_FACESIGN" });
   };
 
+  const hasFacesign = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+
   return (
     <div
       className="h-screen"
@@ -82,7 +84,7 @@ export function ConnectWallet() {
           <p className="text-center font-normal">Connect your wallet to get started.</p>
 
           <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
-            {import.meta.env.DEV ? (
+            {hasFacesign && (
               <>
                 <Button
                   className="justify-between"
@@ -100,7 +102,7 @@ export function ConnectWallet() {
                   onContinue={handleFacesignContinue}
                 />
               </>
-            ) : null}
+            )}
             <Button
               className="justify-between"
               size="xl"
