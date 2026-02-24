@@ -40,7 +40,7 @@ function Login() {
       } else if (newUserConfirmationToken) {
         router.navigate({
           to: "/error",
-          search: { message: "New user confirmation not yet implemented" },
+          search: { token: newUserConfirmationToken, redirect },
         });
       } else {
         console.error("Unexpected state: neither errorMessage nor token is set");
