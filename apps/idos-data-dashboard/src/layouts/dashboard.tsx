@@ -11,6 +11,9 @@ import {
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
 import { Link, Outlet, useLocation, useMatches } from "react-router";
+import useDisclosure from "@/hooks/use-disclosure";
+import { cn } from "@/lib/utils";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,10 +24,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { COMMON_ENV } from "@/core/envFlags.common";
-import useDisclosure from "@/hooks/use-disclosure";
-import { cn } from "@/lib/utils";
 import { useActorRef, useSelector } from "@/machines/provider";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
