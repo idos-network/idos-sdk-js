@@ -53,6 +53,9 @@ export default function Withdraw({ loaderData }: Route.ComponentProps) {
 
   const destinationCurrencySymbol = CURRENCY_SYMBOLS[DESTINATION_CURRENCY] ?? DESTINATION_CURRENCY;
 
+  console.log("state: ", state);
+  console.log("errorMessage: ", errorMessage);
+
   // --- Local state for the demo transfer flow ---
   const [transferStep, setTransferStep] = useState<TransferStep>("recipient");
   const [signingWallet, setSigningWallet] = useState(false);
