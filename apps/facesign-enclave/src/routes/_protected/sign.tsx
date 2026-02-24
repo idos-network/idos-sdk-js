@@ -62,7 +62,7 @@ function Sign() {
     <div
       role="dialog"
       className="fixed inset-0 flex items-center justify-center bg-background p-6"
-      onMouseDown={handleReject}
+      onMouseDown={(e) => e.button === 0 && handleReject()}
     >
       {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for backdrop dismiss */}
       <div
