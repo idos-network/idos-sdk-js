@@ -59,8 +59,15 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
           enclaveUrl,
         });
 
-        const address = await provider.init();
+        // Try silent reconnect: ask the enclave for the stored key without showing UI
+        const storedAddress = await provider.getAddress();
+        if (storedAddress && storedAddress === input.walletAddress) {
+          setFaceSignProvider(provider);
+          return { nearSelector: null };
+        }
 
+        // Fall back to full session proposal (face scan)
+        const address = await provider.init();
         if (address !== input.walletAddress) {
           provider.destroy();
           throw new Error("FaceSign address mismatch: the enclave returned a different key");

@@ -38,7 +38,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
   const router = useRouter();
-  const { isKeyAvailable } = useKeyStorageContext();
+  const { isKeyAvailable, getPublicKey } = useKeyStorageContext();
 
   // Placeholder values and functions
   const contextValue: RequestsContextValue = {
@@ -76,7 +76,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   useEffect(() => {
     // Example: Initialize a WindowMessageHandler
     handlers.current.push(
-      new WindowMessageHandler(addSignProposal, addSessionProposal, isKeyAvailable),
+      new WindowMessageHandler(addSignProposal, addSessionProposal, isKeyAvailable, getPublicKey),
     );
 
     // Initialize all handlers
