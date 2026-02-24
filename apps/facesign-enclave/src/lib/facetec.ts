@@ -28,7 +28,13 @@ interface ThemeColors {
 export class FaceTecContainer {
   #FaceTecSDK: typeof FaceTecSDK | null = null;
   #faceTecSDKInstance!: FaceTecSDKInstance;
-  #callback: ((errorMessage?: string, token?: string) => void) | null = null;
+  #callback:
+    | ((
+        errorMessage?: string,
+        attestationToken?: string,
+        newUserConfirmationToken?: string,
+      ) => void)
+    | null = null;
 
   init = async (
     callback: (
@@ -58,7 +64,9 @@ export class FaceTecContainer {
           this.startLivenessCheck();
         },
         onError: (errorMessage: FaceTecInitializationError) => {
-          this.#callback?.(this.descriptionForInitializationError(errorMessage));
+          const description = this.descriptionForInitializationError(errorMessage);
+          console.error("[FaceTec] Initialization error:", errorMessage, description);
+          this.#callback?.(description);
         },
       },
     );
@@ -180,16 +188,25 @@ export class FaceTecContainer {
     }
 
     this.#faceTecSDKInstance.start3DLiveness(
-      new SessionRequestProcessor((result, lastReceivedToken) => {
-        if (
-          result.status === this.#FaceTecSDK?.FaceTecSessionStatus.SessionCompleted &&
-          lastReceivedToken
-        ) {
-          this.#callback?.(undefined, lastReceivedToken);
-        } else {
-          this.#callback?.(this.descriptionForSessionStatus(result.status));
-        }
-      }),
+      new SessionRequestProcessor(
+        (result, lastReceivedAttestationToken, lastReceivedNewUserConfirmationToken) => {
+          if (result.status !== this.#FaceTecSDK?.FaceTecSessionStatus.SessionCompleted) {
+            const description = this.descriptionForSessionStatus(result.status);
+            console.error("[FaceTec] Session failed:", result.status, description);
+            this.#callback?.(description);
+            return;
+          }
+
+          if (lastReceivedAttestationToken) {
+            this.#callback?.(undefined, lastReceivedAttestationToken);
+          } else if (lastReceivedNewUserConfirmationToken) {
+            this.#callback?.(undefined, undefined, lastReceivedNewUserConfirmationToken);
+          } else {
+            console.error("[FaceTec] Session completed but no token was received.");
+            this.#callback?.("Session completed but no token was received from the server.");
+          }
+        },
+      ),
     );
   }
 
