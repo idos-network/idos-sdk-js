@@ -21,7 +21,7 @@ import { Fragment, lazy, type PropsWithChildren, Suspense, useEffect } from "rea
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
 import { dashboardActor } from "@/machines/dashboard.actor";
-import { selectWalletAddress } from "@/machines/selectors";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -36,33 +36,51 @@ const MobileNav = lazy(() => import("./mobile-nav"));
 
 export function ConnectedWallet() {
   const address = useSelector(dashboardActor, selectWalletAddress);
+  const walletType = useSelector(dashboardActor, selectWalletType);
 
   if (!address) {
     return null;
   }
 
+  const isFaceSign = walletType === "FaceSign";
+
   return (
     <div className="flex h-20 items-center gap-5">
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
-        <img
-          alt={`Connected wallet ${address}`}
-          src="/wallet-light.svg"
-          width={50}
-          height={50}
-          className="h-[50px] w-[50px] dark:hidden"
-          loading="eager"
-        />
-        <img
-          alt={`Connected wallet ${address}`}
-          src="/wallet.svg"
-          width={50}
-          height={50}
-          className="hidden h-[50px] w-[50px] dark:block"
-          loading="eager"
-        />
+        {isFaceSign ? (
+          <img
+            alt="FaceSign wallet"
+            src="/facesign-filled.svg"
+            width={36}
+            height={36}
+            className="h-9 w-9"
+            loading="eager"
+          />
+        ) : (
+          <>
+            <img
+              alt={`Connected wallet ${address}`}
+              src="/wallet-light.svg"
+              width={50}
+              height={50}
+              className="h-[50px] w-[50px] dark:hidden"
+              loading="eager"
+            />
+            <img
+              alt={`Connected wallet ${address}`}
+              src="/wallet.svg"
+              width={50}
+              height={50}
+              className="hidden h-[50px] w-[50px] dark:block"
+              loading="eager"
+            />
+          </>
+        )}
       </div>
       <div>
-        <div className="text-card-foreground">Connected Wallet</div>
+        <div className="text-card-foreground">
+          {isFaceSign ? "idOS FaceSign" : "Connected Wallet"}
+        </div>
         <code className="max-w-[180px] truncate text-muted-foreground">
           {address.slice(0, 6)}...{address.slice(-4)}
         </code>
