@@ -35,6 +35,7 @@ export class Client {
   private signerPublicKey: string | undefined;
   private factory: ShamirFactory;
   private numNodes: number;
+  private numToReconstruct: number;
 
   constructor(
     baseUrl: string,
@@ -52,6 +53,7 @@ export class Client {
     this.reconfigure(walletType, signerAddress, signerPublicKey);
     
     this.numNodes = numNodes;
+    this.numToReconstruct = numToReconstruct;
     // TODO: Make these configurable from env variables
     this.factory = new ShamirFactory({ numMalicious, numNodes, numToReconstruct });
   }
@@ -86,9 +88,10 @@ export class Client {
     
     invariant(WALLET_TYPES.includes(walletType), `Invalid signer type: ${walletType}`);
     invariant(
-      // XRPL, NEAR and FaceSign require a public key, EVM does not
-      (["XRPL", "NEAR", "FaceSign"].includes(walletType) && signerPublicKey) || walletType === "EVM",
-      "Signer public key is required for XRPL, NEAR and FaceSign",
+      // XRPL, NEAR, Stellar and FaceSign require a public key, EVM does not
+      (["XRPL", "NEAR", "Stellar", "FaceSign"].includes(walletType) && signerPublicKey) ||
+        walletType === "EVM",
+      "Signer public key is required for XRPL, NEAR, Stellar and FaceSign",
     );
 
     this.walletType = walletType;
@@ -115,12 +118,14 @@ export class Client {
       promises.push(engineClient.sendUpload(id, uploadRequest, signature));
     }
     const statuses = await Promise.all(promises);
-
-    if (statuses.every((item) => item === "201")) {
+    
+    const successCount = statuses.filter((item) => item === "200" || item === "201").length;
+    
+    if (successCount == this.numNodes) {
       return { status: "success" };
     }
-
-    if (statuses.filter((item) => item === "201").length > 0) {
+    
+    if (successCount >= this.numToReconstruct) {
       return { status: "partial-success" };
     }
 
@@ -147,23 +152,7 @@ export class Client {
 
   public uploadRequest(blindedShares: Buffer[]): UploadSignatureMessage {
     console.log("UPLOADING TO MPC");
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
     return {
       share_commitments: blindedShares.map((b) => ethers.keccak256(b)),
       recovering_addresses: [address],
@@ -177,25 +166,25 @@ export class Client {
       value: downloadRequest,
     };
   }
-
-  public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
+  private formatAddress(signerType: string, signerAddress: string, signerPublicKey?: string): string {
+    switch (signerType.toLowerCase()) {
+      case "evm":
+        return `eip712:${signerAddress}`;
+      case "xrpl":
+        return `XRPL:${signerPublicKey}`;
+      case "near":
+        return `NEAR:${signerPublicKey?.replace('ed25519:', '')}`;
+      case "stellar":
+        return `STELLAR:${signerAddress}`;
+      case "facesign":
+        return `FACESIGN:${signerPublicKey}`;
       default:
         throw new Error("Invalid signer type");
     }
+  }
+
+  public downloadRequest(publicKey: Uint8Array): DownloadSignatureMessage {
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
     return {
       recovering_address: address,
       timestamp: Date.now(),
@@ -237,23 +226,7 @@ export class Client {
     publicKey: string | undefined,
     addressToAddType: string,
   ): AddAddressMessageToSign {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
 
     var addressToAddFormatted = "";
     // @deprecated toLowerCase remove when we have updated the SDK
@@ -266,6 +239,9 @@ export class Client {
         break;
       case "near":
         addressToAddFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
+        break;
+      case "stellar":
+        addressToAddFormatted = `STELLAR:${addressToAdd}`;
         break;
       case "facesign":
         addressToAddFormatted = `FACESIGN:${publicKey}`;
@@ -292,23 +268,7 @@ export class Client {
     publicKey: string | undefined,
     addressToRemoveType: string,
   ): RemoveAddressMessageToSign {
-    var address = "";
-    switch (this.walletType) {
-      case "EVM":
-        address = `eip712:${this.signerAddress}`;
-        break;
-      case "XRPL":
-        address = `XRPL:${this.signerPublicKey}`;
-        break;
-      case "NEAR":
-        address = `NEAR:${this.signerPublicKey?.replace("ed25519:", "")}`;
-        break;
-      case "FaceSign":
-        address = `FACESIGN:${this.signerPublicKey}`;
-        break;
-      default:
-        throw new Error("Invalid signer type");
-    }
+    const address = this.formatAddress(this.walletType, this.signerAddress, this.signerPublicKey);
 
     var addressToRemoveFormatted = "";
     // @deprecated toLowerCase remove when we have updated the SDK
@@ -321,6 +281,9 @@ export class Client {
         break;
       case "near":
         addressToRemoveFormatted = `NEAR:${publicKey?.replace("ed25519:", "")}`;
+        break;
+      case "stellar":
+        addressToRemoveFormatted = `STELLAR:${addressToRemove}`;
         break;
       case "facesign":
         addressToRemoveFormatted = `FACESIGN:${publicKey}`;
@@ -373,8 +336,8 @@ export class Client {
       promises.push(engineClient.sendRemoveAddress(userId, message, signature));
     }
     const statuses = await Promise.all(promises);
-
-    if (statuses.every((item) => item === "200")) {
+    const successCount = statuses.filter((item: string) => item == "200").length;
+    if (successCount == this.numNodes) {
       return "success";
     }
 

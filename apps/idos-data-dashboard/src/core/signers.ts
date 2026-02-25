@@ -2,6 +2,7 @@ import type { Wallet } from "@idos-network/kwil-infra";
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { getWalletClient } from "@wagmi/core";
+import stellarKit from "./stellar-kit";
 import { wagmiConfig } from "./wagmi";
 
 let faceSignProvider: FaceSignSignerProvider | null = null;
@@ -36,31 +37,8 @@ export async function createXrplSigner(): Promise<Wallet> {
   return GemWallet as Wallet;
 }
 
-export async function createStellarSigner(
-  walletPublicKey: string,
-  walletAddress: string,
-): Promise<Wallet> {
-  const { default: stellarKit } = await import("./stellar-kit");
-  const { KwilSigner } = await import("@idos-network/kwil-infra");
-
-  const stellarSigner = new KwilSigner(
-    async (msg: Uint8Array): Promise<Uint8Array> => {
-      const messageBase64 = Buffer.from(msg).toString("base64");
-      const result = await stellarKit.signMessage(messageBase64);
-
-      let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-      if (signedMessage.length > 64) {
-        signedMessage = Buffer.from(signedMessage.toString(), "base64");
-      }
-      return signedMessage;
-    },
-    walletPublicKey,
-    "ed25519",
-  );
-  // @ts-expect-error KwilSigner doesn't have publicAddress in its type definition
-  stellarSigner.publicAddress = walletAddress;
-  return stellarSigner as unknown as Wallet;
+export async function createStellarSigner(): Promise<Wallet> {
+  return stellarKit;
 }
 
 export function createFaceSignSigner(): Wallet {

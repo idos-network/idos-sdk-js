@@ -3,6 +3,7 @@ import { bs58Encode, hexDecode, hexEncode } from "@idos-network/utils/codecs";
 import type { Store } from "@idos-network/utils/store";
 import type { Wallet as NearWallet } from "@near-wallet-selector/core";
 import type { Keypair as StellarKeypair } from "@stellar/stellar-sdk";
+import { StrKey } from "@stellar/stellar-sdk";
 import type { Wallet as EthersWallet, JsonRpcSigner } from "ethers";
 import type { KeyPair as NearKeyPair } from "near-api-js";
 import type { KeyPair as XrpKeyPair } from "ripple-keypairs/src/types";
@@ -19,7 +20,12 @@ import { createXrpKwilSigner } from "./xrp/signer";
 import { getXrpPublicKey, looksLikeXrpWallet } from "./xrp/utils";
 
 export { KwilSigner } from "@idos-network/kwil-js";
-export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner;
+export type Wallet = EthersWallet | JsonRpcSigner | NearWallet | CustomKwilSigner | StellarWallet;
+
+export interface StellarWallet {
+  getAddress(): Promise<{ address: string }>;
+  signMessage(message: string): Promise<{ signedMessage: string }>;
+}
 
 /**
  * Helper function to check if the given object is a `nacl.SignKeyPair`.
@@ -48,6 +54,21 @@ function isNearKeyPair(object: unknown): object is NearKeyPair {
     "sign" in object &&
     typeof object.getPublicKey === "function" &&
     typeof object.sign === "function"
+  );
+}
+
+/**
+ * Helper function to check if the given object is a Stellar wallet (StellarWalletsKit).
+ * Uses duck typing to avoid importing the full StellarWalletsKit class.
+ */
+function isStellarWallet(object: unknown): object is StellarWallet {
+  return (
+    object !== null &&
+    typeof object === "object" &&
+    "getAddress" in object &&
+    "signMessage" in object &&
+    typeof object.getAddress === "function" &&
+    typeof object.signMessage === "function"
   );
 }
 
@@ -228,7 +249,20 @@ export async function createClientKwilSigner(
       "XRPL",
     ];
   }
-
+  if (isStellarWallet(wallet)) {
+    const { address } = await wallet.getAddress();
+    const publicKey = Buffer.from(StrKey.decodeEd25519PublicKey(address)).toString("hex");
+    const kwilSigner = new KwilSigner(
+      async (msg: string | Uint8Array): Promise<Uint8Array> => {
+        const msgToSign = typeof msg !== "string" ? Buffer.from(msg).toString("utf8") : msg;
+        const result = await wallet.signMessage(msgToSign);
+        return Buffer.from(result.signedMessage, "base64");
+      },
+      Buffer.from(address).toString("hex"),
+      "sep53",
+    );
+    return [kwilSigner, address, publicKey, "Stellar"];
+  }
   if (isCustomKwilSigner(wallet)) {
     try {
       await kwilClient.client.auth.logoutKGW();
@@ -250,7 +284,5 @@ export async function createClientKwilSigner(
 
   // Force the check that `signer` is `never`.
   // If these lines start complaining, that means we're missing an `if` above.
-  return ((_: never) => {
-    throw new Error("Invalid `signer` type");
-  })(wallet);
+  throw new Error("Invalid `signer` type");
 }

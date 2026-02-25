@@ -63,22 +63,13 @@ function Stellar() {
 
   const handleSignMessage = async () => {
     if (!address || !publicKey) return;
-    // Encode the message as base64 (stellarKit expects this)
-    const messageBase64 = Buffer.from(message).toString("base64");
-
-    const result = await stellarKit.signMessage(messageBase64);
-
-    let signedMessage = Buffer.from(result.signedMessage, "base64");
-
-    if (signedMessage.length > 64) {
-      signedMessage = Buffer.from(signedMessage.toString(), "base64");
-    }
-
-    const signatureHex = signedMessage.toString("hex");
+    const result = await stellarKit.signMessage(message);
+    // Signed message is string in base64, but we need to return hex
+    const signature = Buffer.from(result.signedMessage, "base64").toString("hex");
 
     setWalletPayload({
       address,
-      signature: signatureHex,
+      signature,
       public_key: [publicKey],
       message,
       disconnect: disconnectStellar,
