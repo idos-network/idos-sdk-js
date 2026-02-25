@@ -8,6 +8,7 @@ import { WagmiProvider } from "wagmi";
 
 import "@/machines/dashboard.actor";
 import { LogOutIcon } from "lucide-react";
+import { EnclaveDialog } from "@/components/enclave-dialog";
 import { ErrorCard } from "@/components/error-card";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/sonner";
@@ -140,6 +141,7 @@ ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
     <WagmiProvider config={wagmiAdapter.wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <Toaster position="bottom-right" duration={3000} />
+        <EnclaveDialog />
         <App />
       </QueryClientProvider>
     </WagmiProvider>

@@ -185,7 +185,7 @@ export default function PasswordForm({
 
           <div class="flex items-center justify-between gap-3">
             <Button type="button" variant="secondary" onClick={onCancel} class="flex-1">
-              Cancel
+              Back
             </Button>
             <Button type="submit" class="flex-1">
               Continue

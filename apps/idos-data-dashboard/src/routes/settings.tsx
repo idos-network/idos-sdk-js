@@ -10,20 +10,37 @@ export const Route = createFileRoute("/settings")({
   staticData: { breadcrumb: "Settings" },
 });
 
+function waitForDismiss(signal: AbortSignal) {
+  return new Promise<never>((_resolve, reject) => {
+    document.addEventListener(
+      "idos:enclave-dismissed",
+      () => reject(new DOMException("Enclave dismissed", "AbortError")),
+      { once: true, signal },
+    );
+  });
+}
+
 function Settings() {
   const idOSClient = useIDOS();
   const [isBackingUp, setIsBackingUp] = useState(false);
 
   const handleBackup = async () => {
+    const controller = new AbortController();
     setIsBackingUp(true);
     try {
-      await idOSClient.enclaveProvider.backupUserEncryptionProfile();
-      toast.success("Backup completed successfully");
+      await Promise.race([
+        idOSClient.enclaveProvider.backupUserEncryptionProfile(),
+        waitForDismiss(controller.signal),
+      ]);
     } catch (error) {
-      toast.error("Backup failed", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-      });
+      const isDismissed = error instanceof DOMException && error.name === "AbortError";
+      if (!isDismissed) {
+        toast.error("Backup failed", {
+          description: error instanceof Error ? error.message : "An unexpected error occurred",
+        });
+      }
     } finally {
+      controller.abort();
       setIsBackingUp(false);
     }
   };
