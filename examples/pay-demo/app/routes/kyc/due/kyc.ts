@@ -24,8 +24,6 @@ export async function action({ request, context }: Route.ActionArgs) {
     return Response.json({ error: "DAG ID is required" }, { status: 400 });
   }
 
-  console.log("body", body);
-
   // Get share token from idOS relay for due
   let token: string | null = null;
 
