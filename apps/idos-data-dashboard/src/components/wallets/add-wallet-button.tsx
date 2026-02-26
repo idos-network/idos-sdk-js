@@ -9,9 +9,12 @@ import { toast } from "sonner";
 import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
+import { dashboardActor } from "@/machines/dashboard.actor";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
   const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
+  console.log("envUrls: ", envUrls);
   invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
   const entries = envUrls
     .split(",")
@@ -146,8 +149,18 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;
 
+    // If the dashboard is connected via Stellar, pass the address so the
+    // embedded wallet can ensure the user switches back before closing.
+    const popupUrl = new URL(EMBEDDED_WALLET_CONFIG.popupUrl);
+    const snapshot = dashboardActor.getSnapshot();
+    const currentWalletType = selectWalletType(snapshot);
+    const currentWalletAddress = selectWalletAddress(snapshot);
+    if (currentWalletType === "Stellar" && currentWalletAddress) {
+      popupUrl.searchParams.set("stellar_address", currentWalletAddress);
+    }
+
     const popup = window.open(
-      EMBEDDED_WALLET_CONFIG.popupUrl,
+      popupUrl.toString(),
       "wallet-connection",
       `width=${popupWidth},height=${popupHeight},left=${left},top=${top},scrollbars=yes,resizable=no`,
     );

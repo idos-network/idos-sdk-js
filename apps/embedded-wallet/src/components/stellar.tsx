@@ -40,6 +40,9 @@ const derivePublicKey = async (address: string) => {
 
 const queryClient = new QueryClient();
 
+/** The Stellar address the dashboard is currently connected with (if any). */
+const dashboardStellarAddress = new URLSearchParams(window.location.search).get("stellar_address");
+
 export function StellarConnector() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -106,6 +109,8 @@ function Stellar() {
     stepper.reset();
   };
 
+  const isSameAsDashboard = !!dashboardStellarAddress && address === dashboardStellarAddress;
+
   return (
     <div className="flex flex-col gap-2">
       {stepper.when("connect", () => (
@@ -116,18 +121,32 @@ function Stellar() {
           </Button>
         </div>
       ))}
-      {stepper.when("sign-message", (step) => (
-        <div className="flex flex-col gap-4">
-          <h1 className="text-center font-bold text-2xl">{step.title}</h1>
-          <p className="text-center text-neutral-400 text-sm">{step.description}</p>
-          <div className="flex flex-col gap-2">
-            <p className="text-center text-neutral-400 text-sm">Connected as:</p>
-            <p className="text-center text-neutral-400 text-sm">{address}</p>
+      {stepper.when("sign-message", (step) =>
+        isSameAsDashboard ? (
+          <div className="flex flex-col gap-4">
+            <h2 className="text-center font-bold text-xl">Same wallet detected</h2>
+            <p className="text-center text-neutral-400 text-sm">
+              This Stellar account is the one you're already using on the dashboard. To add a new
+              wallet, please disconnect and connect with a different Stellar account.
+            </p>
+            <p className="break-all rounded bg-neutral-800 px-3 py-2 text-center font-mono text-neutral-300 text-xs">
+              {address}
+            </p>
+            <Button onClick={handleDisconnect}>Disconnect</Button>
           </div>
-          <Button onClick={handleSignMessage}>Sign a message</Button>
-          <Button onClick={handleDisconnect}>Disconnect</Button>
-        </div>
-      ))}
+        ) : (
+          <div className="flex flex-col gap-4">
+            <h1 className="text-center font-bold text-2xl">{step.title}</h1>
+            <p className="text-center text-neutral-400 text-sm">{step.description}</p>
+            <div className="flex flex-col gap-2">
+              <p className="text-center text-neutral-400 text-sm">Connected as:</p>
+              <p className="text-center text-neutral-400 text-sm">{address}</p>
+            </div>
+            <Button onClick={handleSignMessage}>Sign a message</Button>
+            <Button onClick={handleDisconnect}>Disconnect</Button>
+          </div>
+        ),
+      )}
     </div>
   );
 }
