@@ -15,11 +15,6 @@ export interface DueKycEvent {
 export async function action({ request }: Route.ActionArgs) {
   const body = (await request.json()) as DueKycEvent;
 
-  console.log("DUE CALLBACK");
-  console.log("--------------------------------");
-  console.log("body", body);
-  console.log("--------------------------------");
-
   // TODO: Security checks
 
   if (body.type !== "bp.kyc.status_changed") {
