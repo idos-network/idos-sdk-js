@@ -1,3 +1,4 @@
+import { idOSClientConfiguration } from "@idos-network/client";
 import type { Wallet } from "@idos-network/kwil-infra";
 import { fromPromise } from "xstate";
 import {
@@ -8,11 +9,18 @@ import {
   createXrplSigner,
 } from "@/core/signers";
 import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.machine";
-import { idOSConfig } from "../dashboard.machine";
 
 export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
   async ({ input }) => {
     const { walletType, walletAddress, walletPublicKey, nearSelector } = input;
+
+    const config = new idOSClientConfiguration({
+      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+      enclaveOptions: {
+        container: "#idOS-enclave",
+        url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+      },
+    });
 
     let signer: Wallet;
     switch (walletType) {
@@ -38,7 +46,7 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
         throw new Error(`Unsupported wallet type: ${walletType}`);
     }
 
-    const newClient = await idOSConfig.createClient();
+    const newClient = await config.createClient();
     const withSigner = await newClient.withUserSigner(signer);
 
     const profileExists = await withSigner.hasProfile();

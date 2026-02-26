@@ -1,20 +1,9 @@
-import type { idOSClientLoggedIn } from "@idos-network/client";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { useSelector } from "@xstate/react";
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { WagmiProvider } from "wagmi";
-
-import "@/machines/dashboard.actor";
 import { LogOutIcon } from "lucide-react";
-import { EnclaveDialog } from "@/components/enclave-dialog";
-import { ErrorCard } from "@/components/error-card";
+import { Outlet, useNavigation } from "react-router";
 import { Button } from "@/components/ui/button";
-import { Toaster } from "@/components/ui/sonner";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
-import { wagmiAdapter } from "@/core/wagmi";
 import { dashboardActor } from "@/machines/dashboard.actor";
 import {
   selectError,
@@ -24,40 +13,18 @@ import {
   selectIsNoProfile,
   selectLoggedInClient,
 } from "@/machines/selectors";
-import { queryClient } from "@/query-client";
-import { routeTree } from "./routeTree.gen";
-import "@/styles/index.css";
 
-const router = createRouter({
-  routeTree,
-  defaultPreload: "intent",
-  scrollRestoration: true,
-  defaultStructuralSharing: true,
-  defaultPreloadStaleTime: 0,
-  defaultErrorComponent: ErrorCard,
-  context: {
-    queryClient,
-    // The actual idOSClient instance is injected at runtime via <RouterProvider context={...} />,
-    // which only mounts after authentication completes. This placeholder satisfies the type system.
-    idOSClient: undefined as unknown as idOSClientLoggedIn,
-  },
-});
-
-declare module "@tanstack/react-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
-
-function App() {
+export default function AppLayout() {
   const isLoading = useSelector(dashboardActor, selectIsLoading);
   const isDisconnected = useSelector(dashboardActor, selectIsDisconnected);
   const isNoProfile = useSelector(dashboardActor, selectIsNoProfile);
   const isError = useSelector(dashboardActor, selectIsError);
   const error = useSelector(dashboardActor, selectError);
   const idOSClient = useSelector(dashboardActor, selectLoggedInClient);
+  const navigation = useNavigation();
+  const isNavigating = Boolean(navigation.location);
 
-  if (isLoading) {
+  if (isLoading || isNavigating) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />
@@ -92,6 +59,7 @@ function App() {
     );
   }
 
+  console.log("isDisconnected", isDisconnected);
   if (isDisconnected) {
     return <ConnectWallet />;
   }
@@ -130,17 +98,5 @@ function App() {
     return null;
   }
 
-  return <RouterProvider router={router} context={{ queryClient, idOSClient }} />;
+  return <Outlet />;
 }
-
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <Toaster position="bottom-right" duration={3000} />
-        <EnclaveDialog />
-        <App />
-      </QueryClientProvider>
-    </WagmiProvider>
-  </React.StrictMode>,
-);

@@ -15,7 +15,7 @@ if (!projectId) {
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
-  url: import.meta.env.DEV ? window.origin : "https://dashboard.idos.network",
+  url: import.meta.env.DEV ? "*" : "https://dashboard.idos.network",
   icons: ["/logo.svg"],
 };
 

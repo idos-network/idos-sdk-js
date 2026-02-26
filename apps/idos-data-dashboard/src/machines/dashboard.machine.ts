@@ -1,4 +1,4 @@
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
+import type { idOSClient } from "@idos-network/client";
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { assign, fromCallback, fromPromise, setup } from "xstate";
@@ -7,7 +7,7 @@ export interface DashboardContext {
   walletType: WalletType | null;
   walletAddress: string | null;
   walletPublicKey: string | null;
-  idOSClient: idOSClient;
+  idOSClient: idOSClient | null;
   nearSelector: WalletSelector | null;
   error: string | null;
 }
@@ -48,7 +48,7 @@ export type InitializeIdOSOutput = {
 export type DisconnectWalletInput = {
   walletType: WalletType | null;
   nearSelector: WalletSelector | null;
-  idOSClient: idOSClient;
+  idOSClient: idOSClient | null;
 };
 
 export type ReconnectWalletInput = {
@@ -60,14 +60,6 @@ export type ReconnectWalletInput = {
 export type ReconnectWalletOutput = {
   nearSelector: WalletSelector | null;
 };
-
-export const idOSConfig = new idOSClientConfiguration({
-  nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-  enclaveOptions: {
-    container: "#idOS-enclave",
-    url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
-  },
-});
 
 const STORAGE_KEY = "dashboard-wallet";
 
@@ -161,7 +153,7 @@ export const dashboardMachine = setup({
       walletPublicKey: () => null,
       nearSelector: () => null,
       error: () => null,
-      idOSClient: () => idOSConfig as idOSClient,
+      idOSClient: () => null,
     }),
   },
 }).createMachine({
@@ -171,7 +163,7 @@ export const dashboardMachine = setup({
     walletType: null,
     walletAddress: null,
     walletPublicKey: null,
-    idOSClient: idOSConfig as idOSClient,
+    idOSClient: null,
     nearSelector: null,
     error: null,
   },

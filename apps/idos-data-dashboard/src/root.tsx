@@ -1,3 +1,5 @@
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import {
   isRouteErrorResponse,
   Links,
@@ -6,15 +8,15 @@ import {
   Scripts,
   ScrollRestoration,
 } from "react-router";
+import { WagmiProvider } from "wagmi";
 
 import type { Route } from "./+types/root";
-import { SiweProvider } from "./providers/siwe-provider";
-import "./app.css";
-import { MachineProvider } from "./providers/state";
-
-export function meta(_args: Route.MetaArgs) {
-  return [{ title: "idOS Data Dashboard" }];
-}
+import { EnclaveDialog } from "./components/enclave-dialog";
+import { Toaster } from "./components/ui/sonner";
+import { wagmiAdapter } from "./core/wagmi";
+import { MachineProvider } from "./machines/provider";
+import { queryClient } from "./query-client";
+import "./styles/index.css";
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -32,7 +34,7 @@ export const links: Route.LinksFunction = () => [
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -50,11 +52,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
-    <SiweProvider>
-      <MachineProvider>
-        <Outlet />
-      </MachineProvider>
-    </SiweProvider>
+    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <MachineProvider>
+          <Toaster position="bottom-right" duration={3000} />
+          <EnclaveDialog />
+          <Outlet />
+          <ReactQueryDevtools initialIsOpen={false} />
+        </MachineProvider>
+      </QueryClientProvider>
+    </WagmiProvider>
   );
 }
 

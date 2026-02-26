@@ -9,6 +9,10 @@
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
+    "@react-router/node": "catalog:react-router",
+    "@vercel/react-router": "catalog:react-router",
+    "@react-router/serve": "catalog:react-router",
+    "react-router": "catalog:react-router",
     "@near-wallet-selector/core": "catalog:near",
     "@near-wallet-selector/here-wallet": "catalog:near",
     "@near-wallet-selector/meteor-wallet": "catalog:near",
@@ -17,7 +21,6 @@
     "@reown/appkit-adapter-wagmi": "catalog:reown",
     "@stellar/stellar-base": "catalog:stellar",
     "@tanstack/react-query": "catalog:tanstack",
-    "@tanstack/react-router": "^1.159.4",
     "@wagmi/core": "catalog:ethereum",
     "@xstate/react": "^6.0.0",
     "class-variance-authority": "^0.7.1",
@@ -35,7 +38,8 @@
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum",
     "xstate": "^5.28.0",
-    "xumm": "catalog:xrp"
+    "xumm": "catalog:xrp",
+    "isbot": "^5"
   },
   "devDependencies": {
     "@near-js/types": "^0.3.0",
@@ -44,8 +48,6 @@
     "@tanstack/devtools-vite": "^0.5.1",
     "@tanstack/react-devtools": "^0.9.5",
     "@tanstack/react-query-devtools": "catalog:tanstack",
-    "@tanstack/react-router-devtools": "^1.159.4",
-    "@tanstack/router-plugin": "^1.159.4",
     "@testing-library/react": "^14.3.1",
     "@types/node": "^20.14.12",
     "@types/react": "catalog:react",
@@ -56,16 +58,18 @@
     "tw-animate-css": "^1.4.0",
     "typescript": "catalog:build",
     "vite": "catalog:build",
+    "@react-router/dev": "catalog:react-router",
     "vite-plugin-mkcert": "^1.17.5",
     "vite-plugin-node-polyfills": "catalog:build",
+    "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^1.6.0"
   },
   "private": true,
   "scripts": {
-    "build": "tsc && vite build",
-    "dev": "vite",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit"
+    "build": "pnpm run typecheck && react-router build",
+    "dev": "react-router dev",
+    "start": "react-router-serve ./build/server/index.js",
+    "typecheck": "react-router typegen && tsc"
   },
   "type": "module"
 }
