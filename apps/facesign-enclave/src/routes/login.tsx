@@ -28,7 +28,7 @@ function Login() {
       if (errorMessage) {
         router.navigate({
           to: "/error",
-          search: { message: errorMessage },
+          search: { message: errorMessage, token: undefined, redirect },
         });
         return;
       }
@@ -40,7 +40,11 @@ function Login() {
       } else if (newUserConfirmationToken) {
         router.navigate({
           to: "/error",
-          search: { token: newUserConfirmationToken, redirect },
+          search: {
+            message: "No FaceSign profile found",
+            token: newUserConfirmationToken,
+            redirect,
+          },
         });
       } else {
         console.error("Unexpected state: neither errorMessage nor token is set");
