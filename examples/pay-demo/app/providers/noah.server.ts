@@ -41,8 +41,6 @@ export async function createJwt(opts: {
     expiresIn: "5m",
   });
 
-  console.log(token);
-
   return token;
 }
 
