@@ -6,14 +6,9 @@ export const verifyFaceSignSignature = (
   signature: string,
   publicKey: string,
 ): boolean => {
-  try {
-    return nacl.sign.detached.verify(
-      new TextEncoder().encode(message),
-      hexDecode(signature),
-      hexDecode(publicKey),
-    );
-  } catch (error) {
-    console.warn("FaceSign signature verification failed:", error);
-    return false;
-  }
+  return nacl.sign.detached.verify(
+    new TextEncoder().encode(message),
+    hexDecode(signature),
+    hexDecode(publicKey),
+  );
 };
