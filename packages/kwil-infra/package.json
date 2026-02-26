@@ -60,7 +60,7 @@
     "near-api-js": "catalog:near",
     "ethers": "catalog:ethereum",
     "@wagmi/core": "catalog:ethereum",
-    "@near-wallet-selector/core": "catalog:near",
+    "@hot-labs/near-connect": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
     "ripple-keypairs": "catalog:xrp",
     "xrpl": "catalog:xrp"
@@ -69,7 +69,7 @@
     "near-api-js": {
       "optional": true
     },
-    "@near-wallet-selector/core": {
+    "@hot-labs/near-connect": {
       "optional": true
     },
     "@stellar/stellar-sdk": {

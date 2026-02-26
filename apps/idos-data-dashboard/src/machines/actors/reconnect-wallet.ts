@@ -1,4 +1,4 @@
-import type { WalletSelector } from "@near-wallet-selector/core";
+import type { NearWalletBase } from "@hot-labs/near-connect";
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
 import { getEvmAccount, wagmiConfig } from "@/core/wagmi";
@@ -8,13 +8,13 @@ import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.m
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(
   async ({ input }) => {
     const { walletType } = input;
-    let nearSelector: WalletSelector | null = null;
+    const nearWallet: NearWalletBase | null = null;
 
     switch (walletType) {
       case "EVM": {
         const account = getEvmAccount();
         if (account.isConnected && account.address) {
-          return { nearSelector: null };
+          return { nearWallet: null };
         }
 
         await reconnect(wagmiConfig);
@@ -27,21 +27,23 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
             `EVM reconnection address mismatch: expected ${input.walletAddress}, got ${reconnectedAccount.address}`,
           );
         }
-        return { nearSelector: null };
+        return { nearWallet: null };
       }
 
       case "NEAR": {
-        const { initializeNearSelector } = await import("@/core/near");
-        nearSelector = await initializeNearSelector();
-        if (!nearSelector.isSignedIn()) {
+        const { connector } = await import("@/core/near");
+
+        const wallet = await connector.getConnectedWallet();
+
+        if (!wallet) {
           throw new Error("NEAR wallet session expired");
         }
-        return { nearSelector };
+        return { nearWallet: wallet };
       }
 
       case "Stellar":
       case "XRPL":
-        return { nearSelector: null };
+        return { nearWallet: null };
 
       case "FaceSign": {
         const { setFaceSignProvider } = await import("@/core/signers");
@@ -63,7 +65,7 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
         }
 
         setFaceSignProvider(provider);
-        return { nearSelector: null };
+        return { nearWallet: null };
       }
 
       default:

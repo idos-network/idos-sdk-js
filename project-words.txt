@@ -70,6 +70,7 @@ lucide
 monerium
 multibase
 multicodec
+mynearwallet
 nacl
 nanostores
 Neobank
