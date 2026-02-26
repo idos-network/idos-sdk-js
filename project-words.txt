@@ -75,6 +75,7 @@ monerium
 multibase
 multicall
 multicodec
+mynearwallet
 nacl
 nanostores
 Neobank

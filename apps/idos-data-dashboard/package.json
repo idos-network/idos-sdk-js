@@ -18,15 +18,12 @@
     "@base-ui/react": "^1.1.0",
     "@creit.tech/stellar-wallets-kit": "catalog:stellar",
     "@gemwallet/api": "catalog:xrp",
+    "@hot-labs/near-connect": "catalog:near",
     "@idos-network/client": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/issuer": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
-    "@near-wallet-selector/core": "catalog:near",
-    "@near-wallet-selector/here-wallet": "catalog:near",
-    "@near-wallet-selector/meteor-wallet": "catalog:near",
-    "@near-wallet-selector/modal-ui": "catalog:near",
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "@react-router/node": "catalog:react-router",
@@ -43,7 +40,6 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "ethers": "catalog:ethereum",
-    "isbot": "^5",
     "lucide-react": "^0.577.0",
     "match-sorter": "^8.2.0",
     "near-api-js": "catalog:near",
@@ -61,7 +57,8 @@
     "wagmi": "catalog:ethereum",
     "xstate": "^5.28.0",
     "xumm": "catalog:xrp",
-    "zod": "catalog:core"
+    "zod": "catalog:core",
+    "isbot": "^5"
   },
   "devDependencies": {
     "@near-js/types": "^0.3.0",
@@ -85,6 +82,6 @@
     "vite": "catalog:build",
     "vite-plugin-mkcert": "^1.17.5",
     "vite-plugin-node-polyfills": "catalog:build",
-    "vitest": "catalog:testing"
+    "vitest": "^1.6.0"
   }
 }
