@@ -5,7 +5,8 @@
   "dependencies": {
     "@base-ui/react": "^1.1.0",
     "@idos-network/utils": "workspace:*",
-    "@tanstack/react-router": "^1.159.4",
+    "@react-router/node": "^7.5.3",
+    "react-router": "^7.5.3",
     "axios": "1.13.5",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -15,13 +16,16 @@
     "tailwind-merge": "^3.4.0",
     "tailwind-variants": "^1.0.0",
     "tiny-invariant": "^1.3.3",
-    "tweetnacl": "catalog:core"
+    "tweetnacl": "catalog:core",
+    "isbot": "^5"
   },
   "devDependencies": {
     "@heroicons/react": "^2.2.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.1",
-    "@tanstack/router-plugin": "^1.159.4",
+    "@react-router/dev": "^7.5.3",
+    "@react-router/fs-routes": "^7.5.3",
+    "@vercel/react-router": "^1.2.5",
     "@types/node": "^25.2.0",
     "@types/react": "catalog:react",
     "@types/react-dom": "catalog:react",
@@ -31,16 +35,15 @@
     "vite": "catalog:build",
     "vite-plugin-html": "^3.2.2",
     "vite-plugin-mkcert": "^1.17.8",
-    "vite-plugin-node-polyfills": "catalog:build",
     "vite-tsconfig-paths": "^5.1.4"
   },
   "license": "MIT",
   "repository": "https://github.com/idos-network/idos-sdk-js",
   "scripts": {
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
-    "dev": "vite",
-    "preview": "vite preview"
+    "build": "react-router build",
+    "typecheck": "react-router typegen && tsc --noEmit",
+    "dev": "react-router dev",
+    "preview": "react-router-serve ./build/server/index.js"
   },
   "type": "module"
 }

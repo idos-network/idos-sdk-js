@@ -1,32 +1,23 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { AlertCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { confirmNewUser, getEntropy } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useKeyStorageContext } from "@/providers/key.provider";
 
-export const Route = createFileRoute("/error")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    message: (search.message as string | undefined) ?? "An unexpected error occurred",
-    token: search.token as string | undefined,
-    redirect: (search.redirect as string | undefined) ?? "/wallet",
-  }),
-  component: AppError,
-});
-
 function NewUserView({ token, redirect }: { token: string; redirect: string }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const { setMnemonic, isKeyAvailable } = useKeyStorageContext();
   const [isCreating, setIsCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isKeyAvailable) {
-      router.navigate({ to: redirect });
+      navigate(redirect);
     }
-  }, [isKeyAvailable, redirect, router]);
+  }, [isKeyAvailable, redirect, navigate]);
 
   async function handleCreate() {
     setIsCreating(true);
@@ -60,8 +51,7 @@ function NewUserView({ token, redirect }: { token: string; redirect: string }) {
         ) : null}
         <div className="flex w-full flex-col gap-2">
           <Link
-            to="/login"
-            search={{ redirect }}
+            to={`/login?redirect=${encodeURIComponent(redirect)}`}
             className={cn(buttonVariants({ size: "lg" }), "w-full")}
           >
             I have an account! Try Again
@@ -91,11 +81,7 @@ function GenericErrorView({ message }: { message: string }) {
           <AlertCircleIcon className="size-6" />
           <AlertDescription>{message}</AlertDescription>
         </Alert>
-        <Link
-          to="/login"
-          search={{ redirect: "/wallet" }}
-          className={cn(buttonVariants({ size: "lg" }))}
-        >
+        <Link to="/login?redirect=%2Fwallet" className={cn(buttonVariants({ size: "lg" }))}>
           Try again
         </Link>
       </div>
@@ -103,8 +89,12 @@ function GenericErrorView({ message }: { message: string }) {
   );
 }
 
-function AppError() {
-  const { message, token, redirect } = Route.useSearch();
+export default function AppError() {
+  const [searchParams] = useSearchParams();
+
+  const message = searchParams.get("message") ?? "An unexpected error occurred";
+  const token = searchParams.get("token");
+  const redirect = searchParams.get("redirect") ?? "/wallet";
 
   if (token) {
     return <NewUserView token={token} redirect={redirect} />;

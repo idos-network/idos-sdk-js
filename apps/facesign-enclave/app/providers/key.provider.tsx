@@ -33,7 +33,7 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
 
   const getPublicKey = useCallback(async () => {
     const { publicKey } = await getKeyPair();
-    return Buffer.from(publicKey).toString("hex");
+    return Array.from(publicKey, (b) => b.toString(16).padStart(2, "0")).join("");
   }, []);
 
   const sign = useCallback(async (data: Uint8Array) => {
