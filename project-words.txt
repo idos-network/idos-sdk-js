@@ -93,6 +93,7 @@ preact
 Reown
 rippletest
 safekeep
+sameorigin
 sandboxed
 scure
 sdot
