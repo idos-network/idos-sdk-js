@@ -219,10 +219,28 @@ export class FaceSignSignerProvider {
   }
 
   hide(): Promise<void> {
+    this.#cancelPendingProposals();
     return this.#hideEnclave();
   }
 
+  #cancelPendingProposals(): void {
+    const cancelError = new Error("FaceSign operation cancelled");
+
+    if (this.#rejectSignMessage) {
+      this.#rejectSignMessage(cancelError);
+      this.#resolveSignMessage = null;
+      this.#rejectSignMessage = null;
+    }
+
+    if (this.#rejectSessionProposal) {
+      this.#rejectSessionProposal(cancelError);
+      this.#resolveSessionProposal = null;
+      this.#rejectSessionProposal = null;
+    }
+  }
+
   destroy(): void {
+    this.#cancelPendingProposals();
     if (this.#messageListener) {
       window.removeEventListener("message", this.#messageListener);
       this.#messageListener = null;

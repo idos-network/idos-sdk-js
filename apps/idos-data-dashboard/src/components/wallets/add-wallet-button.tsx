@@ -75,6 +75,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
           toast.success("Wallet added", {
             description: "The wallet has been added to your idOS profile",
           });
+          setIsLoading(false);
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
           onWalletAdded?.();
         },
@@ -102,8 +103,16 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
         return;
       }
 
-      setWalletPayload(event.data.data);
-      setIsLoading(false);
+      const payload = event.data.data;
+      if (!payload) {
+        toast.error("Invalid wallet data", {
+          description: "No wallet data was received from the popup",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      setWalletPayload(payload);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
