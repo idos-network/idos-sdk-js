@@ -71,6 +71,8 @@ function WalletsList() {
   );
 }
 
+const hasFacesignEnclave = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+
 function Wallets() {
   const { data: wallets } = useFetchWallets();
   const hasFacesignWallet = Object.values(wallets).some((group) =>
@@ -85,7 +87,7 @@ function Wallets() {
           <AddWalletButton />
         </div>
       </div>
-      {!hasFacesignWallet && <FacesignBanner />}
+      {hasFacesignEnclave && !hasFacesignWallet && <FacesignBanner />}
       <WalletsList />
     </div>
   );

@@ -18,7 +18,7 @@ async function createProvider() {
 
   const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
   if (!enclaveUrl) {
-    throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+    throw new Error("FaceSign is not available. Please try again later.");
   }
 
   return new FaceSignSignerProvider({
@@ -61,6 +61,7 @@ export function FacesignBanner() {
 
   const handleContinue = async () => {
     setIsLoading(true);
+    setDialogOpen(false);
 
     try {
       let provider = providerRef.current;
@@ -69,7 +70,6 @@ export function FacesignBanner() {
         providerRef.current = provider;
       }
 
-      setDialogOpen(false);
       await runAddWalletFlow(provider);
     } catch (error) {
       console.error("Failed to add FaceSign:", error);
@@ -105,27 +105,16 @@ export function FacesignBanner() {
         return;
       }
 
-      await new Promise<void>((resolve, reject) => {
-        addWalletMutation.mutate(
-          {
-            address: publicKey,
-            publicKeys: [publicKey],
-            signature,
-            message: ADD_WALLET_MESSAGE,
-            walletType: "FaceSign",
-          },
-          {
-            onSuccess: () => {
-              toast.success("FaceSign added", {
-                description: "FaceSign has been added to your idOS profile",
-              });
-              resolve();
-            },
-            onError: (error) => {
-              reject(error);
-            },
-          },
-        );
+      await addWalletMutation.mutateAsync({
+        address: publicKey,
+        publicKeys: [publicKey],
+        signature,
+        message: ADD_WALLET_MESSAGE,
+        walletType: "FaceSign",
+      });
+
+      toast.success("FaceSign added", {
+        description: "FaceSign has been added to your idOS profile",
       });
     } finally {
       provider.destroy();

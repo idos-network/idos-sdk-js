@@ -1,24 +1,37 @@
 import { utf8Decode } from "@idos-network/utils/codecs";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ProposalWaiting } from "@/components/proposal-waiting";
 import { Button } from "@/components/ui/button";
-import { Spinner } from "@/components/ui/spinner";
 import { useKeyStorageContext } from "@/providers/key.provider";
 import { useRequests } from "@/providers/requests.provider";
+import type { ProcessingAction } from "@/types/proposals";
+
+const WAITING_TIMEOUT_MS = 30_000;
 
 export const Route = createFileRoute("/_protected/sign")({
   component: Sign,
 });
 
-type ProcessingAction = "approve" | "reject" | null;
-
 function Sign() {
   const { sign } = useKeyStorageContext();
   const { signProposals } = useRequests();
   const [processingAction, setProcessingAction] = useState<ProcessingAction>(null);
+  const [timedOut, setTimedOut] = useState(false);
+  const router = useRouter();
 
   const firstProposal = signProposals[0];
+
+  useEffect(() => {
+    if (firstProposal) {
+      setTimedOut(false);
+      return;
+    }
+
+    const timer = setTimeout(() => setTimedOut(true), WAITING_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [firstProposal]);
 
   const handleApprove = async () => {
     if (!firstProposal || processingAction) return;
@@ -51,10 +64,11 @@ function Sign() {
 
   if (!firstProposal) {
     return (
-      <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
-        <Spinner className="size-8" />
-        <p className="text-center text-muted-foreground text-sm">Waiting for sign request...</p>
-      </div>
+      <ProposalWaiting
+        message="Waiting for sign request..."
+        timedOut={timedOut}
+        onBack={() => router.history.back()}
+      />
     );
   }
 
