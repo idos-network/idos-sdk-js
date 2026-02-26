@@ -71,7 +71,7 @@ function NewUserView({ token, redirect }: { token: string; redirect: string }) {
   );
 }
 
-function GenericErrorView({ message }: { message: string }) {
+function GenericErrorView({ message, redirect }: { message: string; redirect: string }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
       <img src="/facesign-error.svg" alt="idOS FaceSign" width={80} height={80} />
@@ -81,7 +81,10 @@ function GenericErrorView({ message }: { message: string }) {
           <AlertCircleIcon className="size-6" />
           <AlertDescription>{message}</AlertDescription>
         </Alert>
-        <Link to="/login?redirect=%2Fwallet" className={cn(buttonVariants({ size: "lg" }))}>
+        <Link
+          to={`/login?redirect=${encodeURIComponent(redirect)}`}
+          className={cn(buttonVariants({ size: "lg" }))}
+        >
           Try again
         </Link>
       </div>
@@ -100,5 +103,5 @@ export default function AppError() {
     return <NewUserView token={token} redirect={redirect} />;
   }
 
-  return <GenericErrorView message={message} />;
+  return <GenericErrorView message={message} redirect={redirect} />;
 }
