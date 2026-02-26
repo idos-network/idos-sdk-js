@@ -35,8 +35,9 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
 function BreadcrumbLink({
   className,
   render,
+  asChild,
   ...props
-}: useRender.ComponentProps<"a">) {
+}: useRender.ComponentProps<"a"> & { asChild?: boolean }) {
   const defaultProps = {
     className: cn("transition-colors hover:text-foreground", className),
     "data-slot": "breadcrumb-link",

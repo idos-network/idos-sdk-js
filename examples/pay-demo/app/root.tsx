@@ -12,6 +12,10 @@ import { SiweProvider } from "./providers/siwe-provider";
 import "./app.css";
 import { MachineProvider } from "./providers/state";
 
+export function meta(_args: Route.MetaArgs) {
+  return [{ title: "idOS Data Dashboard" }];
+}
+
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
   { rel: "preconnect", href: "https://fonts.googleapis.com" },

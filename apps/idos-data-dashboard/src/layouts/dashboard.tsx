@@ -194,11 +194,13 @@ function Breadcrumbs() {
                 {isLast ? (
                   <BreadcrumbPage>{item.label}</BreadcrumbPage>
                 ) : (
-                  <BreadcrumbLink
-                    className="rounded-full bg-muted px-4 py-2 font-normal text-foreground"
-                    render={<Link to={item.to} />}
-                  >
-                    {item.label}
+                  <BreadcrumbLink asChild>
+                    <Link
+                      to={item.to}
+                      className="rounded-full bg-muted px-4 py-2 font-normal text-foreground"
+                    >
+                      {item.label}
+                    </Link>
                   </BreadcrumbLink>
                 )}
               </BreadcrumbItem>
