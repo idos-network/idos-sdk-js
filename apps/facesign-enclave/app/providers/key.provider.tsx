@@ -33,6 +33,8 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
 
   const getPublicKey = useCallback(async () => {
     const { publicKey } = await getKeyPair();
+    // Convert the public key bytes to a hex string.
+    // Similar to return Buffer.from(publicKey).toString("hex");
     return Array.from(publicKey, (b) => b.toString(16).padStart(2, "0")).join("");
   }, []);
 
