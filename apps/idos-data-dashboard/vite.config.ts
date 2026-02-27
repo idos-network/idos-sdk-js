@@ -3,6 +3,7 @@ import { reactRouter } from "@react-router/dev/vite";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
@@ -15,5 +16,20 @@ export default defineConfig(({ isSsrBuild }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  plugins: [tailwindcss(), reactRouter(), tsconfigPaths(), mkcert()],
+  plugins: [
+    tailwindcss(),
+    reactRouter(),
+    tsconfigPaths(),
+    mkcert(),
+    ...(isSsrBuild
+      ? []
+      : [
+          nodePolyfills({
+            globals: {
+              // This is for @near-wallet-selector/core
+              Buffer: true,
+            },
+          }),
+        ]),
+  ],
 }));
