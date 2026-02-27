@@ -89,9 +89,5 @@ export default function AppLayout() {
     );
   }
 
-  if (!idOSClient) {
-    return null;
-  }
-
   return <Outlet />;
 }
