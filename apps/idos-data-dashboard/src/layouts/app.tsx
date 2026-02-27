@@ -30,6 +30,8 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
 
+
+
   if (isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
@@ -53,15 +55,7 @@ export default function AppLayout() {
     );
   }
 
-  if (isLoading || isNavigating || isConnectingFaceSign) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-6" />
-      </div>
-    );
-  }
-
-  if (isCreatingFacesignProfile) {
+  if (isLoading || isNavigating || isConnectingFaceSign || isCreatingFacesignProfile) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Spinner className="size-6" />

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/provider";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
+import { COMMON_ENV } from "./core/envFlags.common";
 
 export function ConnectWallet() {
   const { send } = useActorRef();
@@ -14,9 +15,8 @@ export function ConnectWallet() {
     try {
       const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
-      const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-      if (!enclaveUrl) {
-        throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+      if (!COMMON_ENV.FACESIGN_ENCLAVE_URL) {
+        throw new Error("FaceSign is not available. Please try again later.");
       }
 
       const provider = new FaceSignSignerProvider({
@@ -24,14 +24,14 @@ export function ConnectWallet() {
           name: "idOS Dashboard",
           description: "Connect to idOS Dashboard with FaceSign",
         },
-        enclaveUrl,
+        enclaveUrl: COMMON_ENV.FACESIGN_ENCLAVE_URL,
       });
 
       const { hasKey } = await provider.preload();
       provider.destroy();
 
       if (hasKey) {
-        dashboardActor.send({ type: "CONNECT_FACESIGN" });
+        send({ type: "CONNECT_FACESIGN" });
       } else {
         setFacesignOpen(true);
       }
@@ -47,7 +47,7 @@ export function ConnectWallet() {
     send({ type: "CONNECT_FACESIGN" });
   };
 
-  const hasFacesign = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+  const hasFacesign = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
   return (
     <div
