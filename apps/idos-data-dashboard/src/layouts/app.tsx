@@ -18,6 +18,7 @@ import {
 
 export default function AppLayout() {
   const { send } = useActorRef();
+  const machine = useActorRef();
   const isLoading = useSelector(selectIsLoading);
   const isConnectingFaceSign = useSelector(selectIsConnectingFaceSign);
   const isCreatingFacesignProfile = useSelector(selectIsCreatingFacesignProfile);
@@ -29,8 +30,11 @@ export default function AppLayout() {
   const walletType = useSelector(selectWalletType);
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
+  console.log("machine", machine);
 
   if (isError) {
+    console.log("isError", error);
+
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
         <p className="max-w-md text-center text-destructive text-lg">
