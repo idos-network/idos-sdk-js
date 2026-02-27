@@ -24,13 +24,16 @@ export async function createEvmSigner(): Promise<Wallet> {
   // If we are reconnecting, we need to use the new wallet client
   // we have to wait
   if (wagmiConfig.state.status === "reconnecting") {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       const unsubscribe = wagmiConfig.subscribe(
         (state) => state,
         (state, _prevState) => {
           if (state.status === "connected") {
             unsubscribe();
             resolve(createEvmSigner());
+          } else if (state.status === "disconnected") {
+            unsubscribe();
+            reject(new Error("EVM reconnection failed"));
           }
         },
       );
