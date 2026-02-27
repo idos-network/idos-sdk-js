@@ -1,5 +1,5 @@
-import { useRouter } from "@tanstack/react-router";
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
 import { useKeyStorageContext } from "./key.provider";
 
@@ -37,7 +37,7 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [sessionProposals, setSessionProposals] = useState<SessionProposal[]>([]);
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
-  const router = useRouter();
+  const navigate = useNavigate();
   const { isKeyAvailable, getPublicKey } = useKeyStorageContext();
 
   // Placeholder values and functions
@@ -54,9 +54,9 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
         setSessionProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSessionProposals((prev) => [...prev, proposal]);
-      router.navigate({ to: "/session" });
+      navigate("/session");
     },
-    [router],
+    [navigate],
   );
 
   const addSignProposal = useCallback(
@@ -67,9 +67,9 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
         setSignProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSignProposals((prev) => [...prev, proposal]);
-      router.navigate({ to: "/sign" });
+      navigate("/sign");
     },
-    [router],
+    [navigate],
   );
 
   // Initialize handlers to receive proposals

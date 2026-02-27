@@ -1,35 +1,32 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router";
 import { Spinner } from "@/components/ui/spinner";
 import { getEntropy } from "@/lib/api";
 import { faceTec } from "@/lib/facetec";
 import { useKeyStorageContext } from "@/providers/key.provider";
 
-export const Route = createFileRoute("/login")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    redirect: (search.redirect as string | undefined) ?? "/wallet",
-  }),
-  component: Login,
-});
-
-function Login() {
-  const router = useRouter();
+export default function Login() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { setMnemonic, isKeyAvailable } = useKeyStorageContext();
-  const { redirect } = Route.useSearch();
+  const initialized = useRef(false);
+
+  const redirect = searchParams.get("redirect") ?? "/wallet";
 
   useEffect(() => {
     if (isKeyAvailable) {
-      router.navigate({ to: redirect });
+      navigate(redirect);
     }
-  }, [isKeyAvailable, redirect, router]);
+  }, [isKeyAvailable, redirect, navigate]);
 
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
+
     faceTec.init((errorMessage, attestationToken, newUserConfirmationToken) => {
       if (errorMessage) {
-        router.navigate({
-          to: "/error",
-          search: { message: errorMessage, token: undefined, redirect },
-        });
+        const params = new URLSearchParams({ message: errorMessage, redirect });
+        navigate(`/error?${params}`);
         return;
       }
 
@@ -38,19 +35,17 @@ function Login() {
           setMnemonic(data.entropy);
         });
       } else if (newUserConfirmationToken) {
-        router.navigate({
-          to: "/error",
-          search: {
-            message: "No FaceSign profile found",
-            token: newUserConfirmationToken,
-            redirect,
-          },
+        const params = new URLSearchParams({
+          message: "No FaceSign profile found",
+          token: newUserConfirmationToken,
+          redirect,
         });
+        navigate(`/error?${params}`);
       } else {
         console.error("Unexpected state: neither errorMessage nor token is set");
       }
     });
-  }, [router, setMnemonic]);
+  }, []);
 
   return (
     <div className="flex h-svh items-center justify-center bg-background">

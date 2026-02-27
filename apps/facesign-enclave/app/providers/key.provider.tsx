@@ -1,3 +1,4 @@
+import { hexEncode } from "@idos-network/utils/codecs";
 import { createContext, use, useCallback, useEffect, useMemo, useState } from "react";
 import nacl from "tweetnacl";
 import { Spinner } from "@/components/ui/spinner";
@@ -33,7 +34,7 @@ export function KeyStorageContextProvider({ children }: { children: React.ReactN
 
   const getPublicKey = useCallback(async () => {
     const { publicKey } = await getKeyPair();
-    return Buffer.from(publicKey).toString("hex");
+    return hexEncode(publicKey, true);
   }, []);
 
   const sign = useCallback(async (data: Uint8Array) => {

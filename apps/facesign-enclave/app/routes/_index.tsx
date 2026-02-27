@@ -1,11 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { Spinner } from "@/components/ui/spinner";
 
-export const Route = createFileRoute("/")({
-  component: Index,
-});
-
-function Index() {
+export default function Index() {
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-4 bg-background p-6">
       <Spinner className="size-8" />

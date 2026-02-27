@@ -1,5 +1,3 @@
-import { utf8Decode } from "@idos-network/utils/codecs";
-import { createFileRoute } from "@tanstack/react-router";
 import { XIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -8,23 +6,18 @@ import { useKeyStorageContext } from "@/providers/key.provider";
 import { useRequests } from "@/providers/requests.provider";
 import type { ProcessingAction } from "@/types/proposals";
 
-export const Route = createFileRoute("/_protected/sign")({
-  component: Sign,
-});
-
-function Sign() {
-  const { sign } = useKeyStorageContext();
-  const { signProposals } = useRequests();
+export default function Session() {
+  const { sessionProposals } = useRequests();
+  const { getPublicKey } = useKeyStorageContext();
   const [processingAction, setProcessingAction] = useState<ProcessingAction>(null);
 
-  const firstProposal = signProposals[0];
+  const firstProposal = sessionProposals[0];
 
   const handleApprove = async () => {
     if (!firstProposal || processingAction) return;
     setProcessingAction("approve");
     try {
-      const signature = await sign(firstProposal.data);
-      firstProposal.callback(signature);
+      firstProposal.callback(true, await getPublicKey());
     } finally {
       setProcessingAction(null);
     }
@@ -34,7 +27,7 @@ function Sign() {
     if (!firstProposal || processingAction) return;
     setProcessingAction("reject");
     try {
-      firstProposal.callback(null);
+      firstProposal.callback(false);
     } finally {
       setProcessingAction(null);
     }
@@ -52,7 +45,7 @@ function Sign() {
     return (
       <div className="flex min-h-svh flex-col items-center justify-center gap-4 p-6">
         <Spinner className="size-8" />
-        <p className="text-center text-muted-foreground text-sm">Waiting for sign request...</p>
+        <p className="text-center text-muted-foreground text-sm">Waiting for session...</p>
       </div>
     );
   }
@@ -85,7 +78,7 @@ function Sign() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h1 className="text-center font-medium text-base">Signature Request</h1>
+          <h1 className="text-center font-medium text-base">Session Approval</h1>
           <p className="text-center text-muted-foreground text-sm">
             Review request details before you confirm.
           </p>
@@ -100,9 +93,6 @@ function Sign() {
           <div className="flex flex-col gap-2 rounded-lg bg-muted p-4">
             <p className="font-medium text-sm">Message</p>
             <p className="text-muted-foreground text-sm">{firstProposal.metadata.description}</p>
-            <p className="mt-2 break-all font-mono text-muted-foreground text-xs">
-              {utf8Decode(firstProposal.data as Uint8Array)}
-            </p>
           </div>
         </div>
 
