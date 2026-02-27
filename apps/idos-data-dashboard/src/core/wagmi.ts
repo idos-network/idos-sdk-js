@@ -1,7 +1,13 @@
 import { mainnet, sepolia } from "@reown/appkit/networks";
 import { createAppKit } from "@reown/appkit/react";
 import { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
-import { disconnect, type GetAccountReturnType, getAccount } from "@wagmi/core";
+import {
+  cookieStorage,
+  createStorage,
+  disconnect,
+  type GetAccountReturnType,
+  getAccount,
+} from "@wagmi/core";
 
 export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
 
@@ -24,6 +30,10 @@ export const networks = [mainnet, sepolia] as [typeof mainnet, typeof sepolia];
 export const wagmiAdapter = new WagmiAdapter({
   networks,
   projectId,
+  ssr: true,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
 });
 
 export const wagmiConfig = wagmiAdapter.wagmiConfig;

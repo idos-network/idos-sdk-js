@@ -1,10 +1,9 @@
-import { useSelector } from "@xstate/react";
 import { LogOutIcon } from "lucide-react";
 import { Outlet, useNavigation } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { ConnectWallet } from "@/connect-wallet";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useActorRef, useSelector } from "@/machines/provider";
 import {
   selectError,
   selectIsDisconnected,
@@ -15,14 +14,22 @@ import {
 } from "@/machines/selectors";
 
 export default function AppLayout() {
-  const isLoading = useSelector(dashboardActor, selectIsLoading);
-  const isDisconnected = useSelector(dashboardActor, selectIsDisconnected);
-  const isNoProfile = useSelector(dashboardActor, selectIsNoProfile);
-  const isError = useSelector(dashboardActor, selectIsError);
-  const error = useSelector(dashboardActor, selectError);
-  const idOSClient = useSelector(dashboardActor, selectLoggedInClient);
+  const { send } = useActorRef();
+  const isLoading = useSelector(selectIsLoading);
+  const isDisconnected = useSelector(selectIsDisconnected);
+  const isNoProfile = useSelector(selectIsNoProfile);
+  const isError = useSelector(selectIsError);
+  const error = useSelector(selectError);
+  const idOSClient = useSelector(selectLoggedInClient);
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
+
+  console.log("AppLayout render");
+  console.log("isLoading", isLoading);
+  console.log(
+    "state",
+    useSelector((s) => s.value),
+  );
 
   if (isLoading || isNavigating) {
     return (
@@ -39,16 +46,12 @@ export default function AppLayout() {
           {error || "Something went wrong"}
         </p>
         <div className="flex gap-4">
-          <Button
-            size="lg"
-            variant="secondary"
-            onClick={() => dashboardActor.send({ type: "RETRY" })}
-          >
+          <Button size="lg" variant="secondary" onClick={() => send({ type: "RETRY" })}>
             Retry
           </Button>
           <Button
             size="lg"
-            onClick={() => dashboardActor.send({ type: "DISCONNECT" })}
+            onClick={() => send({ type: "DISCONNECT" })}
             className="flex items-center gap-2"
           >
             <LogOutIcon size={20} />
@@ -60,6 +63,7 @@ export default function AppLayout() {
   }
 
   console.log("isDisconnected", isDisconnected);
+
   if (isDisconnected) {
     return <ConnectWallet />;
   }

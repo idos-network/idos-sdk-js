@@ -1,4 +1,3 @@
-import { useSelector } from "@xstate/react";
 import {
   ArchiveIcon,
   ArrowUpRightFromSquare,
@@ -24,13 +23,13 @@ import {
 import { Button, buttonVariants } from "@/components/ui/button";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useActorRef, useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
 export function ConnectedWallet() {
-  const address = useSelector(dashboardActor, selectWalletAddress);
+  const address = useSelector(selectWalletAddress);
 
   if (!address) {
     return null;
@@ -139,8 +138,10 @@ export function FooterNavLinks() {
 }
 
 export function DisconnectButton() {
+  const { send } = useActorRef();
+
   const handleDisconnect = () => {
-    dashboardActor.send({ type: "DISCONNECT" });
+    send({ type: "DISCONNECT" });
   };
 
   return (

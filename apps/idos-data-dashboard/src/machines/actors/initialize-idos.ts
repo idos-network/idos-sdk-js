@@ -22,6 +22,9 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
       },
     });
 
+    console.log("config", config);
+    console.log(walletType, walletAddress, walletPublicKey, nearSelector);
+
     let signer: Wallet;
     switch (walletType) {
       case "EVM":

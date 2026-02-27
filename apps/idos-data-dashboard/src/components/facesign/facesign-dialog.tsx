@@ -10,7 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useActorRef } from "@/machines/provider";
 
 const PRIVACY_POLICY_URL = "https://www.idos.network/legal/privacy-policy";
 const TRANSPARENCY_DOCUMENT_URL =
@@ -20,6 +20,7 @@ const LEARN_MORE_URL = "https://docs.idos.network";
 export function FacesignDialog() {
   const [step, setStep] = useState<0 | 1 | 2>(0);
   const [open, setOpen] = useState(false);
+  const { send } = useActorRef();
 
   return (
     <Dialog
@@ -173,7 +174,7 @@ export function FacesignDialog() {
                 className="w-full text-accent-foreground underline"
                 onClick={() => {
                   setOpen(false);
-                  dashboardActor.send({ type: "CONNECT_FACESIGN" });
+                  send({ type: "CONNECT_FACESIGN" });
                 }}
               >
                 Continue on this device

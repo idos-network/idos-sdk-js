@@ -1,19 +1,18 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
-import { useSelector } from "@xstate/react";
 import { useState } from "react";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useSelector } from "@/machines/provider";
 import { selectWalletAddress } from "@/machines/selectors";
 
 function WalletsList() {
   const { data: wallets } = useFetchWallets();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [walletsToDelete, setWalletsToDelete] = useState<idOSWallet[]>([]);
-  const address = useSelector(dashboardActor, selectWalletAddress);
+  const address = useSelector(selectWalletAddress);
 
   const handleDelete = (walletAddress: string) => {
     const toDelete = wallets[walletAddress];

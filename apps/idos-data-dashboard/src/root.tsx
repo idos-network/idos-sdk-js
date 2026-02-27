@@ -1,5 +1,5 @@
-import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { cookieToInitialState } from "@wagmi/core";
 import {
   isRouteErrorResponse,
   Links,
@@ -7,16 +7,19 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "react-router";
-import { WagmiProvider } from "wagmi";
 
 import type { Route } from "./+types/root";
 import { EnclaveDialog } from "./components/enclave-dialog";
 import { Toaster } from "./components/ui/sonner";
 import { wagmiAdapter } from "./core/wagmi";
-import { MachineProvider } from "./machines/provider";
-import { queryClient } from "./query-client";
+import Providers from "./providers";
 import "./styles/index.css";
+
+export function meta(_args: Route.MetaArgs) {
+  return [{ title: "idOS Data Dashboard" }];
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -50,18 +53,24 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export async function loader({ request }: Route.LoaderArgs) {
+  const cookie = request.headers.get("cookie");
+
+  const initialState = cookieToInitialState(wagmiAdapter.wagmiConfig, cookie);
+
+  return { initialState };
+}
+
 export default function App() {
+  const { initialState } = useLoaderData<typeof loader>();
+
   return (
-    <WagmiProvider config={wagmiAdapter.wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <MachineProvider>
-          <Toaster position="bottom-right" duration={3000} />
-          <EnclaveDialog />
-          <Outlet />
-          <ReactQueryDevtools initialIsOpen={false} />
-        </MachineProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <Providers initialState={initialState}>
+      <Toaster position="bottom-right" duration={3000} />
+      <EnclaveDialog />
+      <Outlet />
+      <ReactQueryDevtools initialIsOpen={false} />
+    </Providers>
   );
 }
 
