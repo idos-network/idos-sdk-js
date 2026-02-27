@@ -332,8 +332,12 @@ export const dashboardMachine = setup({
         onError: {
           target: "error",
           actions: assign({
-            error: ({ event }) =>
-              event.error instanceof Error ? event.error.message : "Failed to initialize idOS",
+            error: ({ event }) => {
+              console.error("Failed to initialize idOS", event.error);
+              return event.error instanceof Error
+                ? event.error.message
+                : "Failed to initialize idOS";
+            },
           }),
         },
       },
