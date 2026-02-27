@@ -1,7 +1,7 @@
 import type { idOSClient } from "@idos-network/client";
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import type { WalletSelector } from "@near-wallet-selector/core";
-import { assign, fromCallback, fromPromise, setup } from "xstate";
+import { assign, fromPromise, setup } from "xstate";
 
 export interface DashboardContext {
   walletType: WalletType | null;
@@ -49,6 +49,12 @@ export type DisconnectWalletInput = {
   walletType: WalletType | null;
   nearSelector: WalletSelector | null;
   idOSClient: idOSClient | null;
+};
+
+export type ConnectWalletOutput = {
+  walletAddress: string;
+  walletPublicKey: string;
+  nearSelector: WalletSelector | null;
 };
 
 export type ReconnectWalletInput = {
@@ -110,7 +116,7 @@ export function persistWallet(
 }
 
 // Placeholder actors -- real implementations are injected via `.provide()` in dashboard.actor.ts
-const noopConnectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(() => {
+const noopConnectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(async () => {
   throw new Error("connectWallet actor not provided");
 });
 
@@ -205,10 +211,22 @@ export const dashboardMachine = setup({
           if (!context.walletType) {
             throw new Error("walletType not set");
           }
+
           return {
             walletType: context.walletType,
             nearSelector: context.nearSelector,
           };
+        },
+        onDone: {
+          target: "initializingIdOS",
+          actions: [
+            assign({
+              walletAddress: ({ event }) => event.output.walletAddress,
+              walletPublicKey: ({ event }) => event.output.walletPublicKey,
+              nearSelector: ({ event }) => event.output.nearSelector,
+            }),
+            "persistWalletToStorage",
+          ],
         },
         onError: {
           target: "error",
