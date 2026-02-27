@@ -1,7 +1,10 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
+<<<<<<< HEAD
 import { COMMON_ENV } from "@/core/envFlags.common";
+=======
+>>>>>>> deef743c (Additional debug)
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
 
