@@ -10,7 +10,6 @@ import {
   selectIsError,
   selectIsLoading,
   selectIsNoProfile,
-  selectLoggedInClient,
 } from "@/machines/selectors";
 
 export default function AppLayout() {
@@ -20,7 +19,6 @@ export default function AppLayout() {
   const isNoProfile = useSelector(selectIsNoProfile);
   const isError = useSelector(selectIsError);
   const error = useSelector(selectError);
-  const idOSClient = useSelector(selectLoggedInClient);
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
 
