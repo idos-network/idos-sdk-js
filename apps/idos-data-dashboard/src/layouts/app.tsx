@@ -10,6 +10,7 @@ import {
   selectIsError,
   selectIsLoading,
   selectIsNoProfile,
+  selectLoggedInClient,
 } from "@/machines/selectors";
 
 export default function AppLayout() {
@@ -19,16 +20,9 @@ export default function AppLayout() {
   const isNoProfile = useSelector(selectIsNoProfile);
   const isError = useSelector(selectIsError);
   const error = useSelector(selectError);
+  const idOSClient = useSelector(selectLoggedInClient);
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
-
-  if (isLoading || isNavigating) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <Spinner className="size-6" />
-      </div>
-    );
-  }
 
   if (isError) {
     return (
@@ -49,6 +43,14 @@ export default function AppLayout() {
             Disconnect
           </Button>
         </div>
+      </div>
+    );
+  }
+
+  if (isLoading || isNavigating) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Spinner className="size-6" />
       </div>
     );
   }
@@ -85,6 +87,12 @@ export default function AppLayout() {
         </Button>
       </div>
     );
+  }
+
+  // Sometimes this has been processed during disconnect
+  // so we need to stop this in here.
+  if (!idOSClient) {
+    return null;
   }
 
   return <Outlet />;

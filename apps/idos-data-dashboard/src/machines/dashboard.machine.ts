@@ -210,6 +210,17 @@ export const dashboardMachine = setup({
             nearSelector: context.nearSelector,
           };
         },
+        onError: {
+          target: "error",
+          actions: assign({
+            error: ({ event }) => {
+              console.error("Failed to connect wallet", event.error);
+              return event.error instanceof Error
+                ? event.error.message
+                : "Failed to connect wallet";
+            },
+          }),
+        },
       },
       on: {
         WALLET_CONNECTED: {

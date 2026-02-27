@@ -127,6 +127,7 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
             hideSubscription?.remove();
           };
         })().catch((err) => {
+          console.error("Failed to initialize NEAR", err);
           sendBack({
             type: "WALLET_CONNECT_ERROR",
             error: err instanceof Error ? err.message : "Failed to initialize NEAR",
@@ -177,6 +178,7 @@ export const connectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(
             },
           });
         })().catch((err) => {
+          console.error("Failed to load Stellar wallet", err);
           sendBack({
             type: "WALLET_CONNECT_ERROR",
             error: err instanceof Error ? err.message : "Failed to load Stellar wallet",
