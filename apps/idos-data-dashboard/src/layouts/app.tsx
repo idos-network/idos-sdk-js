@@ -30,8 +30,6 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
 
-
-
   if (isError) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-6 bg-background p-6">
