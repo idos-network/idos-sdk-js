@@ -11,7 +11,6 @@ export default function Providers({
   children: React.ReactNode;
   initialState?: State;
 }) {
-  console.log("initialState", initialState);
   return (
     <WagmiProvider config={wagmiAdapter.wagmiConfig} initialState={initialState}>
       <QueryClientProvider client={queryClient}>

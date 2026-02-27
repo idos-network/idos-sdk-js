@@ -14,11 +14,6 @@ export const MachineContext = createActorContext(
       reconnectWallet,
     },
   }),
-  {
-    inspect: (state) => {
-      console.log("MachineContext state", state);
-    },
-  },
 );
 
 export function MachineProvider({ children }: { children: React.ReactNode }) {

@@ -24,13 +24,6 @@ export default function AppLayout() {
   const navigation = useNavigation();
   const isNavigating = Boolean(navigation.location);
 
-  console.log("AppLayout render");
-  console.log("isLoading", isLoading);
-  console.log(
-    "state",
-    useSelector((s) => s.value),
-  );
-
   if (isLoading || isNavigating) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -62,8 +55,6 @@ export default function AppLayout() {
     );
   }
 
-  console.log("isDisconnected", isDisconnected);
-
   if (isDisconnected) {
     return <ConnectWallet />;
   }
@@ -88,7 +79,7 @@ export default function AppLayout() {
         <p className="text-foreground text-xl">No idOS account found for the connected wallet</p>
         <Button
           size="lg"
-          onClick={() => dashboardActor.send({ type: "DISCONNECT" })}
+          onClick={() => send({ type: "DISCONNECT" })}
           className="flex items-center gap-2"
         >
           <LogOutIcon size={20} />

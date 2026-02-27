@@ -18,6 +18,7 @@ ignorePaths:
   - "*.svg"
   - "patches/**"
   - "examples/pay-demo/build/**"
+  - "apps/idos-data-dashboard/build/**"
   - "pnpm-lock.yaml"
   - "package.json"
   - ".turboignore"

@@ -1,13 +1,13 @@
+import type { idOSClientLoggedIn } from "@idos-network/client";
 import { base64Decode, utf8Decode } from "@idos-network/utils/codecs";
 import { queryOptions, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
-import { getIdOSClient } from "@/core/idOS";
+import { useIDOSClient } from "@/hooks/idOS";
 
-export function credentialsQueryOptions() {
+export function credentialsQueryOptions(idOSClient: idOSClientLoggedIn) {
   return queryOptions({
     queryKey: ["credentials"],
     queryFn: async () => {
-      const idOSClient = getIdOSClient();
       const credentials = await idOSClient.getAllCredentials();
       return credentials.map((credential) => ({
         ...credential,
@@ -22,14 +22,16 @@ export function credentialsQueryOptions() {
 }
 
 export function useFetchCredentials() {
-  return useSuspenseQuery(credentialsQueryOptions());
+  const idOSClient = useIDOSClient();
+  return useSuspenseQuery(credentialsQueryOptions(idOSClient));
 }
 
 export function useFetchCredentialDetails({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
+
   return useQuery({
     queryKey: ["credential_details", credentialId],
     queryFn: async () => {
-      const idOSClient = getIdOSClient();
       const credential = await idOSClient.getCredentialById(credentialId);
 
       if (!credential) {
@@ -51,15 +53,13 @@ export function useFetchCredentialDetails({ credentialId }: { credentialId: stri
 }
 
 export function useFetchGrants({ credentialId }: { credentialId: string }) {
+  const idOSClient = useIDOSClient();
   const queryClient = useQueryClient();
   const credentials = queryClient.getQueryData<idOSCredentialWithShares[]>(["credentials"]);
 
   return useQuery({
     queryKey: ["grants", credentialId],
-    queryFn: async () => {
-      const idOSClient = getIdOSClient();
-      return idOSClient.getAccessGrantsOwned();
-    },
+    queryFn: async () => idOSClient.getAccessGrantsOwned(),
     retry: 1,
     select(grants) {
       if (!credentials || !grants) {
