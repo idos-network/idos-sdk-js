@@ -52,18 +52,9 @@ function WalletsList() {
   );
 }
 
-<<<<<<< HEAD
 const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
-=======
-<<<<<<< HEAD
->>>>>>> d999ae1c (feat: improvements)
 export default function Wallets() {
-=======
-const hasFacesignEnclave = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-
-function Wallets() {
->>>>>>> 3a42504b (feat: improvements)
   const { data: wallets } = useFetchWallets();
   const hasFacesignWallet = Object.values(wallets).some((group) =>
     group?.some((w) => w.wallet_type === "FaceSign"),
