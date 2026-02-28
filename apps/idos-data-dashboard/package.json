@@ -20,8 +20,6 @@
     "@tanstack/react-query": "catalog:tanstack",
     "@wagmi/core": "catalog:ethereum",
     "@xstate/react": "^6.0.0",
-    "@web3icons/react": "^4.0.14",
-    "@web3modal/wagmi": "^4.2.3",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "ethers": "catalog:ethereum",
