@@ -1,4 +1,4 @@
-import type { NearConnector, NearWalletBase } from "@hot-labs/near-connect";
+import type { NearWalletBase } from "@hot-labs/near-connect";
 import type { Wallet } from "@idos-network/kwil-infra";
 import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 import { getWalletClient } from "@wagmi/core";
@@ -45,8 +45,13 @@ export async function createEvmSigner(): Promise<Wallet> {
   return provider.getSigner();
 }
 
-export function createNearSigner(selector: NearConnector): Promise<NearWalletBase> {
-  return selector.getConnectedWallet().then(({ wallet }) => wallet);
+export async function createNearSigner(): Promise<NearWalletBase> {
+  const { connector } = await import("@/core/near");
+  const { wallet } = await connector.getConnectedWallet();
+  if (!wallet) {
+    throw new Error("NEAR wallet not connected");
+  }
+  return wallet;
 }
 
 export async function createXrplSigner(): Promise<Wallet> {

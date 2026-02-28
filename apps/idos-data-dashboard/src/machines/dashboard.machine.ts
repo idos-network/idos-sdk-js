@@ -1,26 +1,14 @@
-<<<<<<< HEAD
+import type { NearWalletBase } from "@hot-labs/near-connect";
 import type { idOSClient } from "@idos-network/client";
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
-import type { WalletSelector } from "@near-wallet-selector/core";
 import { assign, fromPromise, setup } from "xstate";
-=======
-import type { NearWalletBase } from "@hot-labs/near-connect";
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
-import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
-import { assign, fromCallback, fromPromise, setup } from "xstate";
->>>>>>> ebc8c01d (near libs)
 
 export interface DashboardContext {
   walletType: WalletType | null;
   walletAddress: string | null;
   walletPublicKey: string | null;
-<<<<<<< HEAD
   idOSClient: idOSClient | null;
-  nearSelector: WalletSelector | null;
-=======
-  idOSClient: idOSClient;
   nearWallet: NearWalletBase | null;
->>>>>>> ebc8c01d (near libs)
   error: string | null;
 }
 
@@ -59,7 +47,6 @@ export type InitializeIdOSOutput = {
 
 export type DisconnectWalletInput = {
   walletType: WalletType | null;
-  // nearSelector: WalletSelector | null;
   idOSClient: idOSClient | null;
 };
 
@@ -342,7 +329,6 @@ export const dashboardMachine = setup({
             walletType: context.walletType,
             walletAddress: context.walletAddress,
             walletPublicKey: context.walletPublicKey,
-            nearWallet: context.nearWallet,
           };
         },
         onDone: [
