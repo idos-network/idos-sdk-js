@@ -3,7 +3,6 @@ import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
-import type { FaceSignSignerProvider } from "@idos-network/kwil-infra/facesign";
 
 export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(
   async ({ input }) => {
@@ -83,7 +82,7 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
 
           connector.connect().catch((err) => reject(err));
         });
-    }
+      }
 
       case "Stellar": {
         const { default: stellarKit } = await import("@/core/stellar-kit");
