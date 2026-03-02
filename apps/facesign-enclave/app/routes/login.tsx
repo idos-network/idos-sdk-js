@@ -79,7 +79,7 @@ export default function Login() {
         </div>
 
         <div className="text-center">
-          <div className="m-auto·inline-block·rounded-lg·bg-white·p-4">
+          <div className="m-auto inline-block rounded-lg bg-white p-4">
             <QRCode value={`https://${window.location.host}/m/${session?.id}`} />
           </div>
         </div>
