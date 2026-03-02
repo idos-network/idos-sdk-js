@@ -8,8 +8,9 @@ import {
   type GetAccountReturnType,
   getAccount,
 } from "@wagmi/core";
+import { COMMON_ENV } from "./envFlags.common";
 
-export const projectId = import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+export const projectId = COMMON_ENV.WALLET_CONNECT_PROJECT_ID;
 
 if (!projectId) {
   throw new Error(
@@ -21,7 +22,7 @@ if (!projectId) {
 const metadata = {
   name: "idOS Dashboard",
   description: "idOS Dashboard",
-  url: import.meta.env.DEV ? "*" : "https://dashboard.idos.network",
+  url: COMMON_ENV.DEV ? "*" : "https://dashboard.idos.network",
   icons: ["/logo.svg"],
 };
 

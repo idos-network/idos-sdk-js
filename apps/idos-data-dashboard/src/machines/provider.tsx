@@ -1,5 +1,6 @@
 import { createActorContext } from "@xstate/react";
 import { connectWallet } from "./actors/connect-wallet";
+import { createFacesignProfile } from "./actors/create-profile";
 import { disconnectWallet } from "./actors/disconnect-wallet";
 import { initializeIdOS } from "./actors/initialize-idos";
 import { reconnectWallet } from "./actors/reconnect-wallet";
@@ -12,6 +13,7 @@ export const MachineContext = createActorContext(
       initializeIdOS,
       disconnectWallet,
       reconnectWallet,
+      createFacesignProfile,
     },
   }),
   {

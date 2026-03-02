@@ -16,6 +16,7 @@ import { Toaster } from "./components/ui/sonner";
 import { wagmiAdapter } from "./core/wagmi";
 import Providers from "./providers";
 import "./styles/index.css";
+import { COMMON_ENV } from "./core/envFlags.common";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "idOS Data Dashboard" }];
@@ -85,7 +86,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
     message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404 ? "The requested page could not be found." : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
+  } else if (COMMON_ENV.DEV && error && error instanceof Error) {
     details = error.message;
     stack = error.stack;
   }

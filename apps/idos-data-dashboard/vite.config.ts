@@ -29,7 +29,7 @@ export default defineConfig(({ isSsrBuild }) => ({
       ? []
       : [
           nodePolyfills({
-            exclude: ["stream"],
+            exclude: ["stream", "crypto"],
             globals: {
               // This is for @near-wallet-selector/core
               Buffer: true,
