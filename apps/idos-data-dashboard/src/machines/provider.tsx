@@ -16,11 +16,6 @@ export const MachineContext = createActorContext(
       createFacesignProfile,
     },
   }),
-  {
-    inspect: (state) => {
-      console.log("MachineContext state", state);
-    },
-  },
 );
 
 export function MachineProvider({ children }: { children: React.ReactNode }) {
