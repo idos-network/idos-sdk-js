@@ -1,12 +1,4 @@
 import {
-  Link,
-  type LinkProps,
-  useMatches,
-  useMatchRoute,
-  useRouterState,
-} from "@tanstack/react-router";
-import { useSelector } from "@xstate/react";
-import {
   ArchiveIcon,
   ArrowUpRightFromSquare,
   CircleDollarSignIcon,
@@ -17,11 +9,9 @@ import {
   MenuIcon,
   Wallet2Icon,
 } from "lucide-react";
-import { Fragment, lazy, type PropsWithChildren, Suspense, useEffect } from "react";
-import useDisclosure from "@/hooks/use-disclosure";
-import { cn } from "@/lib/utils";
-import { dashboardActor } from "@/machines/dashboard.actor";
-import { selectWalletAddress } from "@/machines/selectors";
+import { Fragment, lazy, Suspense, useEffect } from "react";
+import { Link, Outlet, useLocation, useMatches } from "react-router";
+
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -29,13 +19,17 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "./ui/breadcrumb";
-import { Button, buttonVariants } from "./ui/button";
+} from "@/components/ui/breadcrumb";
+import { Button, buttonVariants } from "@/components/ui/button";
+import useDisclosure from "@/hooks/use-disclosure";
+import { cn } from "@/lib/utils";
+import { useActorRef, useSelector } from "@/machines/provider";
+import { selectWalletAddress } from "@/machines/selectors";
 
-const MobileNav = lazy(() => import("./mobile-nav"));
+const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
 export function ConnectedWallet() {
-  const address = useSelector(dashboardActor, selectWalletAddress);
+  const address = useSelector(selectWalletAddress);
 
   if (!address) {
     return null;
@@ -71,9 +65,10 @@ export function ConnectedWallet() {
   );
 }
 
-function ListItemLink({ to, children }: { to: LinkProps["to"]; children: React.ReactNode }) {
-  const matchRoute = useMatchRoute();
-  const isActive = matchRoute({ to });
+function ListItemLink({ to, children }: { to: string; children: React.ReactNode }) {
+  const location = useLocation();
+  const isActive = location.pathname === to || (to === "/" && location.pathname === "/");
+
   return (
     <Link
       to={to}
@@ -122,7 +117,6 @@ export function FooterNavLinks() {
     <ul className="flex flex-1 flex-col gap-1.5">
       <li>
         <a
-          // @todo: update to the actual Legacy app domain if/when it changes
           href="https://app.idos.network/"
           className={externalLinkClasses}
           target="_blank"
@@ -144,8 +138,10 @@ export function FooterNavLinks() {
 }
 
 export function DisconnectButton() {
+  const { send } = useActorRef();
+
   const handleDisconnect = () => {
-    dashboardActor.send({ type: "DISCONNECT" });
+    send({ type: "DISCONNECT" });
   };
 
   return (
@@ -156,12 +152,16 @@ export function DisconnectButton() {
   );
 }
 
+interface BreadcrumbHandle {
+  breadcrumb?: string;
+}
+
 function Breadcrumbs() {
   const matches = useMatches();
   const crumbs = matches
-    .filter((match) => match.staticData?.breadcrumb)
+    .filter((match) => (match.handle as BreadcrumbHandle | undefined)?.breadcrumb)
     .map((match) => ({
-      label: match.staticData.breadcrumb as string,
+      label: (match.handle as BreadcrumbHandle).breadcrumb as string,
       to: match.pathname,
     }));
 
@@ -194,13 +194,13 @@ function Breadcrumbs() {
   );
 }
 
-export function Layout({ children }: PropsWithChildren) {
+export default function DashboardLayout() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const location = useLocation();
 
   useEffect(() => {
     onClose();
-  }, [pathname, onClose]);
+  }, [location.pathname, onClose]);
 
   return (
     <div className="flex min-h-screen lg:gap-5">
@@ -251,7 +251,7 @@ export function Layout({ children }: PropsWithChildren) {
           </Button>
           <Breadcrumbs />
         </div>
-        {children}
+        <Outlet />
       </div>
       {isOpen && (
         <Suspense>

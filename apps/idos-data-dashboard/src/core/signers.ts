@@ -20,6 +20,26 @@ export function clearFaceSignProvider() {
 
 export async function createEvmSigner(): Promise<Wallet> {
   const { BrowserProvider } = await import("ethers");
+
+  // If we are reconnecting, we need to use the new wallet client
+  // we have to wait
+  if (wagmiConfig.state.status === "reconnecting") {
+    return new Promise((resolve, reject) => {
+      const unsubscribe = wagmiConfig.subscribe(
+        (state) => state,
+        (state, _prevState) => {
+          if (state.status === "connected") {
+            unsubscribe();
+            resolve(createEvmSigner());
+          } else if (state.status === "disconnected") {
+            unsubscribe();
+            reject(new Error("EVM reconnection failed"));
+          }
+        },
+      );
+    });
+  }
+
   const walletClient = await getWalletClient(wagmiConfig);
   const provider = new BrowserProvider(walletClient.transport);
   return provider.getSigner();

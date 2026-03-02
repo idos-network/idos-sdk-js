@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useActorRef } from "@/machines/provider";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
 
 export function ConnectWallet() {
+  const { send } = useActorRef();
+
   return (
     <div
       className="h-screen"
@@ -44,7 +46,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_EVM" })}
+              onClick={() => send({ type: "CONNECT_EVM" })}
             >
               Connect with a wallet
               <img alt="EVM logo" src="/wallet-connect.svg" width={36} height={36} />
@@ -53,7 +55,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_NEAR" })}
+              onClick={() => send({ type: "CONNECT_NEAR" })}
             >
               Connect with NEAR
               <img alt="NEAR logo" src="/near.svg" width={40} height={40} />
@@ -62,7 +64,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_XRPL" })}
+              onClick={() => send({ type: "CONNECT_XRPL" })}
             >
               Connect with XRP
               <img alt="XRP logo" src="/xrp.svg" width={40} height={40} />
@@ -71,7 +73,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_STELLAR" })}
+              onClick={() => send({ type: "CONNECT_STELLAR" })}
             >
               Connect with Stellar
               <img alt="Stellar logo" src="/stellar.svg" width={32} height={32} />
