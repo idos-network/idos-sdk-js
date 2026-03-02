@@ -16,6 +16,9 @@ export const selectIsDisconnected = (snapshot: DashboardSnapshot): boolean =>
 export const selectIsConnectingFaceSign = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("connecting") && snapshot.context.walletType === "FaceSign";
 
+export const selectIsCreatingFacesignProfile = (snapshot: DashboardSnapshot): boolean =>
+  snapshot.matches("creatingFacesignProfile");
+
 export const selectIsLoggedIn = (snapshot: DashboardSnapshot): boolean =>
   snapshot.matches("loggedIn");
 

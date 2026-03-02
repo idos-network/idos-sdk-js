@@ -4,6 +4,7 @@ import { FacesignBanner } from "@/components/facesign/facesign-banner";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/provider";
@@ -52,7 +53,7 @@ function WalletsList() {
   );
 }
 
-const hasFacesignEnclave = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
 export default function Wallets() {
   const { data: wallets } = useFetchWallets();

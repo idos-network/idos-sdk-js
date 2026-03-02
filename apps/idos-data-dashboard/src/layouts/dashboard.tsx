@@ -11,9 +11,6 @@ import {
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
 import { Link, Outlet, useLocation, useMatches } from "react-router";
-import useDisclosure from "@/hooks/use-disclosure";
-import { cn } from "@/lib/utils";
-import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -23,7 +20,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { COMMON_ENV } from "@/core/envFlags.common";
+import useDisclosure from "@/hooks/use-disclosure";
+import { cn } from "@/lib/utils";
 import { useActorRef, useSelector } from "@/machines/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
@@ -116,7 +117,7 @@ export function MainNavLinks() {
           <span>Wallets</span>
         </ListItemLink>
       </li>
-      {import.meta.env.DEV ? (
+      {COMMON_ENV.DEV ? (
         <li>
           <a href="#/" className={externalLinkClasses} target="_blank" rel="noopener noreferrer">
             <CircleDollarSignIcon size={24} strokeWidth="1.5" />

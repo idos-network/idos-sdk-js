@@ -8,13 +8,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
-  const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
-  invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
-  const entries = envUrls
-    .split(",")
+  const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
   const allowedOrigins: string[] = [];

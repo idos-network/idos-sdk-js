@@ -88,5 +88,5 @@ export function createFaceSignSigner(): Wallet {
     throw new Error("FaceSign provider not initialized. Connect via FaceSign first.");
   }
 
-  return faceSignProvider as unknown as Wallet;
+  return faceSignProvider;
 }
