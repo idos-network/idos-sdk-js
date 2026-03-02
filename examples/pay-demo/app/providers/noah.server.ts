@@ -22,20 +22,29 @@ export async function createJwt(opts: {
   queryParams: object | undefined;
 }): Promise<string> {
   const { body, method, path, queryParams } = opts;
-  let bodyHash: string | undefined;
+  let bodyHash: string;
 
   if (body) {
     bodyHash = crypto.createHash("sha256").update(body).digest("hex");
+  } else {
+    // SHA-256 of empty string — must match idos-app's create-noah-jwt.ts
+    bodyHash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
   }
+
+  // Ensure path includes /v1 prefix
+  const normalizedPath = path.includes("/v1") ? path : `/v1${path}`;
 
   const payload = {
     bodyHash,
     method,
-    path,
+    path: normalizedPath,
     queryParams,
   };
 
-  const token = jwt.sign(payload, SERVER_ENV.NOAH_PRIVATE_KEY, {
+  // Replace literal \n with real newlines (PEM keys in .env lose their newlines)
+  const privateKey = SERVER_ENV.NOAH_PRIVATE_KEY.replace(/\\n/g, "\n");
+
+  const token = jwt.sign(payload, privateKey, {
     algorithm: "ES384",
     audience: "https://api.noah.com",
     expiresIn: "5m",
@@ -255,4 +264,342 @@ export async function createPayInRequest(customerId: string, url: URL) {
   const data = (await response.json()) as NoahResponse;
 
   return data;
+}
+
+export interface PreparePayoutResponse {
+  CryptoAmountEstimate: string;
+  CryptoAuthorizedAmount: string;
+  FormSessionID: string;
+  TotalFee: string;
+}
+
+export interface SubmitPayoutResponse {
+  Transaction: {
+    ID: string;
+    Status: "Pending" | "Settled" | "Failed";
+    Created: string;
+    CryptoCurrency: string;
+    FiatPayment: {
+      Amount: string;
+      FeeAmount: string;
+      FiatCurrency: string;
+    };
+    FiatPaymentMethod?: {
+      ID?: string;
+      Country: string;
+      PaymentMethodCategory: string;
+      PaymentMethodType: string;
+      DisplayDetails?: Record<string, any>;
+    };
+    ExternalID?: string;
+  };
+}
+
+export interface NoahAccountsResponse {
+  Items: Array<{
+    AccountType: "Current" | "Available";
+    Available: string;
+    CryptoCurrency: "USDC" | "USDT" | "MATIC";
+    Total: string;
+  }>;
+}
+
+/**
+ * Transform form data to match Noah's expected structure
+ * This handles different payment method form structures dynamically
+ */
+function transformFormDataForNoah(
+  form: Record<string, any>,
+  paymentMethod?: string,
+): Record<string, any> {
+  let cleanedForm = { ...form };
+
+  // Remove countryCode if present (it's only for UI, not for Noah)
+  if ("countryCode" in cleanedForm) {
+    delete cleanedForm.countryCode;
+  }
+
+  // Apply payment method-specific transformations
+  switch (paymentMethod) {
+    case "BankSepa":
+      // SEPA: AccountNumber and AccountType should be nested under BankDetails
+      if (
+        "AccountNumber" in cleanedForm &&
+        "AccountType" in cleanedForm &&
+        !("BankDetails" in cleanedForm)
+      ) {
+        const { AccountNumber, AccountType, ...rest } = cleanedForm;
+        cleanedForm = {
+          ...rest,
+          BankDetails: {
+            AccountNumber,
+            AccountType,
+          },
+        };
+      }
+      break;
+
+    case "BankLocal":
+    case "BankFedwire":
+    case "BankAch":
+      // These already have BankDetails nested correctly from form components
+      // Just ensure structure is valid
+      break;
+
+    case "IdentifierPix":
+      // PIX form structure should already be correct
+      // It has: AccountHolderAddress, TaxID, PhoneNumber, PaymentPurpose, IdentifierDetails
+      break;
+
+    default:
+      // For unknown payment methods, try to detect and transform common patterns
+      // If AccountNumber and AccountType are at top level but BankDetails is missing, nest them
+      if (
+        "AccountNumber" in cleanedForm &&
+        "AccountType" in cleanedForm &&
+        !("BankDetails" in cleanedForm)
+      ) {
+        const { AccountNumber, AccountType, ...rest } = cleanedForm;
+        cleanedForm = {
+          ...rest,
+          BankDetails: {
+            AccountNumber,
+            AccountType,
+          },
+        };
+      }
+      break;
+  }
+
+  return cleanedForm;
+}
+
+/**
+ * Get Noah channels for selling crypto
+ */
+export async function getNoahChannels(
+  countryCode: string,
+  token: string,
+  fiatCurrency: string,
+  fiatAmount?: number,
+) {
+  // Convert token to Noah format (production uses USDC, USDT, MATIC not _TEST)
+  const tokenMap: Record<string, string> = {
+    USDT0: "USDT",
+    USDC0: "USDC",
+    POL: "MATIC",
+  };
+  const cryptoCurrency = token in tokenMap ? tokenMap[token] : token;
+
+  // Build URL with search parameters
+  const apiUrl = new URL(`${SERVER_ENV.NOAH_API_URL}/v1/channels/sell`);
+  apiUrl.searchParams.set("Country", countryCode);
+  apiUrl.searchParams.set("CryptoCurrency", cryptoCurrency);
+  apiUrl.searchParams.set("FiatCurrency", fiatCurrency);
+
+  // Add FiatAmount if provided
+  if (fiatAmount) {
+    apiUrl.searchParams.set("FiatAmount", fiatAmount.toString());
+  }
+
+  // Create object from searchParams
+  const queryParams = Object.fromEntries(apiUrl.searchParams);
+
+  const signature = await createJwt({
+    body: undefined,
+    method: "GET",
+    path: "/v1/channels/sell",
+    queryParams,
+  });
+
+  const response = await fetch(apiUrl, {
+    headers: {
+      Accept: "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to get Noah channels: ${text}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Get supported countries from Noah
+ */
+export async function getNoahCountries() {
+  const path = "/v1/channels/sell/countries";
+
+  const apiUrl = new URL(`${SERVER_ENV.NOAH_API_URL}${path}`);
+
+  const signature = await createJwt({
+    body: undefined,
+    method: "GET",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(apiUrl, {
+    headers: {
+      Accept: "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to get Noah countries: ${text}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Get Noah account balances
+ */
+export async function getNoahAccounts(): Promise<NoahAccountsResponse> {
+  const path = "/v1/balances";
+
+  const signature = await createJwt({
+    body: undefined,
+    method: "GET",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    headers: {
+      Accept: "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Failed to get Noah accounts: ${text}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Prepare a payout transaction with Noah
+ */
+export async function prepareNoahPayout(
+  customerId: string,
+  channelId: string,
+  cryptoCurrency: string,
+  fiatAmount: string,
+  form: Record<string, any>,
+  paymentMethod?: string,
+): Promise<PreparePayoutResponse> {
+  const path = "/v1/transactions/sell/prepare";
+
+  // Transform form data dynamically based on payment method
+  const cleanedForm = transformFormDataForNoah(form, paymentMethod);
+
+  const requestPayload = {
+    ChannelID: channelId,
+    CryptoCurrency: cryptoCurrency,
+    FiatAmount: fiatAmount.toString(),
+    Form: cleanedForm,
+    DelayedSell: true,
+  };
+
+  const body = Buffer.from(JSON.stringify(requestPayload));
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Noah API error:", JSON.stringify(errorData, null, 2));
+
+    // Format error message from validation errors
+    const validationErrors = errorData.RequestExtension?.Body;
+    if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+      const errorMessages = validationErrors
+        .map((err: any) => `${err.Field}: ${err.Description}`)
+        .join(", ");
+      throw new Error(`Validation error: ${errorMessages}`);
+    }
+
+    throw new Error(
+      errorData.message || errorData.Detail || `Noah API error: ${response.statusText}`,
+    );
+  }
+
+  return await response.json();
+}
+
+/**
+ * Submit a payout transaction with Noah
+ */
+export async function submitNoahPayout(
+  customerId: string,
+  cryptoCurrency: string,
+  fiatAmount: string,
+  cryptoAuthorizedAmount: string,
+  formSessionId: string,
+  externalId?: string,
+): Promise<SubmitPayoutResponse> {
+  const path = "/v1/transactions/sell";
+
+  const body = Buffer.from(
+    JSON.stringify({
+      CryptoCurrency: cryptoCurrency,
+      FiatAmount: fiatAmount.toString(),
+      CryptoAuthorizedAmount: cryptoAuthorizedAmount.toString(),
+      FormSessionID: formSessionId,
+      Nonce: crypto.randomUUID(), // Generate unique nonce for idempotency
+      ExternalID: externalId || crypto.randomUUID(), // Optional external reference
+    }),
+  );
+
+  const signature = await createJwt({
+    body,
+    method: "POST",
+    path,
+    queryParams: undefined,
+  });
+
+  const response = await fetch(`${SERVER_ENV.NOAH_API_URL}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      "X-Api-Key": SERVER_ENV.NOAH_API_KEY,
+      "Api-Signature": signature,
+    },
+    body,
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    console.error("Noah API error:", errorData);
+    throw new Error(errorData.message || `Noah API error: ${response.statusText}`);
+  }
+
+  return await response.json();
 }

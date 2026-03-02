@@ -51,6 +51,28 @@ export default [
           route("status", "routes/kyc/monerium/status.ts"),
         ]),
       ]),
+      ...prefix("quotes", [
+        route("due", "routes/quotes/due.ts"),
+        route("noah", "routes/quotes/noah.ts"),
+        route("provider", "routes/quotes/provider.ts"),
+      ]),
+      ...prefix("noah", [
+        route("channels", "routes/noah/channels.ts"),
+        route("countries", "routes/noah/countries.ts"),
+        route("accounts", "routes/noah/accounts.ts"),
+        route("payout-prepare", "routes/noah/payout-prepare.ts"),
+        route("payout", "routes/noah/payout.ts"),
+      ]),
+      ...prefix("transfers", [
+        ...prefix("due", [
+          route("recipient", "routes/transfers/due/recipient.ts"),
+          route("transfer", "routes/transfers/due/transfer.ts"),
+          route("transfer.$transferId", "routes/transfers/due/transfer.ts", {
+            id: "routes/transfers/due/transfer.$transferId",
+          }),
+          route("funding-address", "routes/transfers/due/funding-address.ts"),
+        ]),
+      ]),
     ]),
   ]),
 ] satisfies RouteConfig;

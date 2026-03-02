@@ -30,6 +30,7 @@ export const serverEnvSchema = z.object({
   DUE_API_URL: z.string(),
   DUE_API_KEY: z.string(),
   DUE_HTTP_URL: z.string(),
+  DUE_TEST_ACCOUNT_ID: z.string(),
   DATABASE_URL: z.string(),
 });
 
