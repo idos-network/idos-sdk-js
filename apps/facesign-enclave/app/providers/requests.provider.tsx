@@ -1,5 +1,6 @@
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
+import { getEntropy } from "@/lib/api";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
 import { useKeyStorageContext } from "./key.provider";
 
@@ -38,7 +39,16 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
   const navigate = useNavigate();
-  const { isKeyAvailable, getPublicKey } = useKeyStorageContext();
+  const { isKeyAvailable, getPublicKey, setMnemonic } = useKeyStorageContext();
+
+  const handleHandoffToken = useCallback(
+    async (attestationToken: string): Promise<string> => {
+      const { entropy } = await getEntropy(attestationToken);
+      await setMnemonic(entropy);
+      return getPublicKey();
+    },
+    [setMnemonic, getPublicKey],
+  );
 
   // Placeholder values and functions
   const contextValue: RequestsContextValue = {
@@ -76,7 +86,13 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   useEffect(() => {
     // Example: Initialize a WindowMessageHandler
     handlers.current.push(
-      new WindowMessageHandler(addSignProposal, addSessionProposal, isKeyAvailable, getPublicKey),
+      new WindowMessageHandler(
+        addSignProposal,
+        addSessionProposal,
+        isKeyAvailable,
+        getPublicKey,
+        handleHandoffToken,
+      ),
     );
 
     // Initialize all handlers

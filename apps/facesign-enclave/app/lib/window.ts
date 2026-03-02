@@ -28,17 +28,20 @@ export class WindowMessageHandler extends BaseHandler {
   #allowedOrigins: string[];
   #isKeyAvailable: boolean;
   #getStoredAddress: (() => Promise<string>) | null;
+  #onHandoffToken: ((attestationToken: string) => Promise<string>) | null;
 
   constructor(
     addSignProposal: (proposal: SignProposal) => void,
     addSessionProposal: (proposal: SessionProposal) => void,
     isKeyAvailable: boolean,
     getStoredAddress?: () => Promise<string>,
+    onHandoffToken?: (attestationToken: string) => Promise<string>,
   ) {
     super(addSignProposal, addSessionProposal);
 
     this.#isKeyAvailable = isKeyAvailable;
     this.#getStoredAddress = getStoredAddress ?? null;
+    this.#onHandoffToken = onHandoffToken ?? null;
     this.#isIframe = window.self !== window.top;
     this.#parentWindow = this.#isIframe ? window.parent : window.opener;
     this.#allowedOrigins = env.VITE_ALLOWED_ORIGINS.split(",").map((o: string) => o.trim()) || [
@@ -142,6 +145,33 @@ export class WindowMessageHandler extends BaseHandler {
       } else {
         this.#sendToParent(
           { type: "address_response", data: { id: data.id, address: null } },
+          event.origin,
+        );
+      }
+    } else if (type === "handoff_token") {
+      if (this.#onHandoffToken && data?.attestationToken) {
+        this.#onHandoffToken(data.attestationToken)
+          .then((address) => {
+            this.#sendToParent(
+              { type: "handoff_token_response", data: { id: data.id, address } },
+              event.origin,
+            );
+          })
+          .catch((err) => {
+            this.#sendToParent(
+              {
+                type: "handoff_token_response",
+                data: { id: data.id, error: err instanceof Error ? err.message : "Unknown error" },
+              },
+              event.origin,
+            );
+          });
+      } else {
+        this.#sendToParent(
+          {
+            type: "handoff_token_response",
+            data: { id: data.id, error: "Handoff not supported" },
+          },
           event.origin,
         );
       }

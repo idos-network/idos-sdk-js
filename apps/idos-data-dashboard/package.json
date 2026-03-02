@@ -30,6 +30,7 @@
     "isbot": "^5",
     "lucide-react": "^0.564.0",
     "near-api-js": "catalog:near",
+    "qrcode.react": "^4.2.0",
     "react": "catalog:react",
     "react-dom": "catalog:react",
     "react-router": "catalog:react-router",
