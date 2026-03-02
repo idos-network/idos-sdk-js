@@ -1,7 +1,7 @@
 // Buffer after showing the iframe before posting a message, giving the enclave time to be ready.
 const POST_MESSAGE_DELAY_MS = 300;
 // Safety net: reject proposals if the enclave doesn't respond within this window.
-const PROPOSAL_TIMEOUT_MS = 2 * 60 * 1000;
+const PROPOSAL_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes
 
 export interface FaceSignMetadata {
   name: string;
