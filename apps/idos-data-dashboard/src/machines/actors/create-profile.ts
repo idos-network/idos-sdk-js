@@ -10,8 +10,6 @@ export const createFacesignProfile = fromPromise<
   try {
     const { client } = input;
 
-    console.log("client", client);
-
     // Fetch the user ID and a proof message from the server
     const { userId, proofMessage } = await fetch("/api/profile").then((res) => res.json());
 
