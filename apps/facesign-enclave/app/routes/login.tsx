@@ -39,6 +39,8 @@ export default function Login() {
 
   const redirect = searchParams.get("redirect") ?? "/wallet";
 
+  // TODO: We are missing immediate redirect to "/scan" if this is already a mobile session.
+
   useEffect(() => {
     if (isKeyAvailable) {
       navigate(redirect);
