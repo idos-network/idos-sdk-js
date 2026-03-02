@@ -27,8 +27,6 @@ export class FaceSignSignerProvider {
   #resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
   #rejectSessionProposal: ((error: Error) => void) | null = null;
   #resolveAddressRequest: ((address: string | null) => void) | null = null;
-  #resolveHandoffToken: ((address: string) => void) | null = null;
-  #rejectHandoffToken: ((error: Error) => void) | null = null;
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
   #messageListenerInitialized = false;
@@ -87,19 +85,6 @@ export class FaceSignSignerProvider {
       if (event.data?.type === "address_response") {
         const payload = event.data.data;
         this.#resolveAddressRequest?.(payload?.address ?? null);
-      }
-
-      if (event.data?.type === "handoff_token_response") {
-        const payload = event.data.data;
-        if (!payload) return;
-
-        if (payload.address) {
-          this.#resolveHandoffToken?.(payload.address);
-        } else {
-          this.#rejectHandoffToken?.(
-            new Error(payload.error ?? "Handoff token rejected by enclave"),
-          );
-        }
       }
     };
 
@@ -235,41 +220,6 @@ export class FaceSignSignerProvider {
     }
   }
 
-  async completeHandoff(attestationToken: string): Promise<string> {
-    this.#setupMessageListener();
-    await this.#ensureEnclave();
-
-    return new Promise<string>((resolve, reject) => {
-      const timer = setTimeout(() => {
-        reject(new Error("FaceSign handoff timed out"));
-      }, PROPOSAL_TIMEOUT_MS);
-
-      this.#resolveHandoffToken = (address) => {
-        clearTimeout(timer);
-        this.#resolveHandoffToken = null;
-        this.#rejectHandoffToken = null;
-        this.publicKey = address;
-        this.publicAddress = address;
-        resolve(address);
-      };
-
-      this.#rejectHandoffToken = (err) => {
-        clearTimeout(timer);
-        this.#resolveHandoffToken = null;
-        this.#rejectHandoffToken = null;
-        reject(err);
-      };
-
-      this.#iframe?.contentWindow?.postMessage(
-        {
-          type: "handoff_token",
-          data: { id: ++this.#proposalId, attestationToken },
-        },
-        this.#enclaveUrl,
-      );
-    });
-  }
-
   hide(): void {
     this.#cancelPendingProposals();
     this.#hideEnclave();
@@ -289,12 +239,6 @@ export class FaceSignSignerProvider {
       this.#resolveSessionProposal = null;
       this.#rejectSessionProposal = null;
     }
-
-    if (this.#rejectHandoffToken) {
-      this.#rejectHandoffToken(cancelError);
-      this.#resolveHandoffToken = null;
-      this.#rejectHandoffToken = null;
-    }
   }
 
   destroy(): void {
@@ -302,7 +246,6 @@ export class FaceSignSignerProvider {
     if (this.#messageListener) {
       window.removeEventListener("message", this.#messageListener);
       this.#messageListener = null;
-      this.#messageListenerInitialized = false;
     }
     this.#destroyEnclave();
   }

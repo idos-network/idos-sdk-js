@@ -1,7 +1,7 @@
 {
   "headers": [
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "headers": [
         {
           "key": "Content-Security-Policy",
