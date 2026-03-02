@@ -1,3 +1,4 @@
+import { hexEncode } from "@idos-network/utils/codecs";
 import { fromPromise } from "xstate";
 import type { ProfileData } from "@/routes/api/profile";
 import type { CreateFacesignProfileInput, CreateFacesignProfileOutput } from "../dashboard.machine";
@@ -22,8 +23,7 @@ export const createFacesignProfile = fromPromise<
       encryptionPasswordStore: encryptionProfile.encryptionPasswordStore,
       walletAddress: client.walletIdentifier,
       walletPublicKey: client.walletPublicKey ?? "",
-      // @ts-expect-error signature is a Uint8Array
-      signature: Buffer.from(signature).toString("hex"),
+      signature: hexEncode(signature as Uint8Array),
     };
 
     // Call the API to create the profile
