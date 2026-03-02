@@ -90,6 +90,7 @@ PKCE
 pkoch
 pnpx
 preact
+qrcode
 Reown
 rippletest
 safekeep
