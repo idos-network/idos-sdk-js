@@ -599,9 +599,6 @@ importers:
       near-api-js:
         specifier: catalog:near
         version: 4.0.3(encoding@0.1.13)
-      qrcode.react:
-        specifier: ^4.2.0
-        version: 4.2.0(react@19.2.3)
       react:
         specifier: catalog:react
         version: 19.2.3
@@ -9754,11 +9751,6 @@ packages:
 
   pushdata-bitcoin@1.0.1:
     resolution: {integrity: sha512-hw7rcYTJRAl4olM8Owe8x0fBuJJ+WGbMhQuLWOXEMN3PxPCKQHRkhfL+XG0+iXUmSHjkMmb3Ba55Mt21cZc9kQ==}
-
-  qrcode.react@4.2.0:
-    resolution: {integrity: sha512-QpgqWi8rD9DsS9EP3z7BT+5lY5SFhsqGjpgW5DY/i3mK4M9DTBNz3ErMi8BWYEfI3L0d8GIbGmcdFAS1uIRGjA==}
-    peerDependencies:
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   qrcode@1.5.3:
     resolution: {integrity: sha512-puyri6ApkEHYiVl4CFzo1tDkAZ+ATcnbJrJ6RiBM1Fhctdn/ix9MTE3hRph33omisEbC/2fcfemsseiKgBPKZg==}
@@ -25677,10 +25669,6 @@ snapshots:
   pushdata-bitcoin@1.0.1:
     dependencies:
       bitcoin-ops: 1.4.1
-
-  qrcode.react@4.2.0(react@19.2.3):
-    dependencies:
-      react: 19.2.3
 
   qrcode@1.5.3:
     dependencies:

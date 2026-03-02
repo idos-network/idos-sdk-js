@@ -84,32 +84,9 @@ export function FacesignBanner() {
     }
   };
 
-  const handleMobileHandoffComplete = async (attestationToken: string) => {
-    setIsLoading(true);
-
+  const runAddWalletFlow = async (provider: FaceSignSignerProvider) => {
     try {
-      let provider = providerRef.current;
-      if (!provider) {
-        provider = await createProvider();
-        providerRef.current = provider;
-        await provider.preload();
-      }
-
-      const publicKey = await provider.completeHandoff(attestationToken);
-      setDialogOpen(false);
-      await completeAddWallet(provider, publicKey);
-    } catch (error) {
-      console.error("Mobile handoff failed:", error);
-      toast.error("Mobile handoff failed", {
-        description: error instanceof Error ? error.message : "An unexpected error occurred",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const completeAddWallet = async (provider: FaceSignSignerProvider, publicKey: string) => {
-    try {
+      const publicKey = await provider.init();
       const signatureBytes = await provider.signMessage(ADD_WALLET_MESSAGE);
       const signature = hexEncode(signatureBytes, true);
 
@@ -145,11 +122,6 @@ export function FacesignBanner() {
       providerRef.current = null;
       setIsLoading(false);
     }
-  };
-
-  const runAddWalletFlow = async (provider: FaceSignSignerProvider) => {
-    const publicKey = await provider.init();
-    await completeAddWallet(provider, publicKey);
   };
 
   return (
@@ -188,7 +160,6 @@ export function FacesignBanner() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onContinue={handleContinue}
-        onMobileHandoffComplete={handleMobileHandoffComplete}
         isLoading={isLoading}
       />
       {isLoading && (
