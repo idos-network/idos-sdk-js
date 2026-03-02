@@ -10,17 +10,21 @@ import {
 } from "@/core/signers";
 import type { InitializeIdOSInput, InitializeIdOSOutput } from "../dashboard.machine";
 
+let config: idOSClientConfiguration | null = null;
+
 export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSInput>(
   async ({ input }) => {
     const { walletType, walletAddress, walletPublicKey, nearSelector } = input;
 
-    const config = new idOSClientConfiguration({
-      nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-      enclaveOptions: {
-        container: "#idOS-enclave",
-        url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
-      },
-    });
+    if (!config) {
+      config = new idOSClientConfiguration({
+        nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+        enclaveOptions: {
+          container: "#idOS-enclave",
+          url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+        },
+      });
+    }
 
     let signer: Wallet;
     switch (walletType) {
