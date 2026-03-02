@@ -47,6 +47,11 @@ export function ConnectWallet() {
     send({ type: "CONNECT_FACESIGN" });
   };
 
+  const handleMobileHandoffComplete = () => {
+    setFacesignOpen(false);
+    send({ type: "CONNECT_FACESIGN" });
+  };
+
   const hasFacesign = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
   return (
@@ -101,6 +106,7 @@ export function ConnectWallet() {
                   open={facesignOpen}
                   onOpenChange={setFacesignOpen}
                   onContinue={handleFacesignContinue}
+                  onMobileHandoffComplete={handleMobileHandoffComplete}
                 />
               </>
             )}

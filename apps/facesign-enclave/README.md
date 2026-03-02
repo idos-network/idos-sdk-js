@@ -8,6 +8,7 @@ A secure signing enclave application that can be embedded in 3rd party applicati
 - 🖼️ Embeddable via iframe or popup window
 - ✍️ Cryptographic signing with NaCl (Ed25519)
 - 🔒 Origin validation for secure cross-window communication
+- 📱 Mobile handoff — desktop users can delegate FaceTec liveness to a mobile device via QR code
 - 📱 Responsive UI with session and signature approval flows
 
 ## Embedding in Your Application
@@ -58,6 +59,10 @@ VITE_FACETEC_IFRAME_FEATURE_FLAG="your-iframe-feature-flag-uuid"
 # Allowed parent origins for iframe embedding (comma-separated)
 # Use "*" for development, specific origins for production
 VITE_ALLOWED_ORIGINS="*"
+
+# Upstash Redis (for mobile handoff sessions) — provided by the Vercel KV integration
+KV_REST_API_URL="https://your-instance.upstash.io"
+KV_REST_API_TOKEN="your-token"
 ```
 
 | Variable | Required | Description |
@@ -67,6 +72,8 @@ VITE_ALLOWED_ORIGINS="*"
 | `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Yes | FaceTec device key identifier. |
 | `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Yes | FaceTec iframe feature flag UUID. |
 | `VITE_ALLOWED_ORIGINS` | Yes | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
+| `KV_REST_API_URL` | Yes | Upstash Redis REST URL for mobile handoff sessions. |
+| `KV_REST_API_TOKEN` | Yes | Upstash Redis REST token. |
 
 ### Running with the dashboard
 
@@ -113,21 +120,105 @@ pnpm preview
 
 ## Deployment
 
-The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available at [facesign-enclave.idos.network](https://facesign-enclave.idos.network).
+The FaceSign enclave is deployed to [Vercel](https://vercel.com) and available at [facesign-enclave.idos.network](https://facesign-enclave.idos.network). The app uses React Router 7 in SSR mode with the `@vercel/react-router` preset.
+
+### Prerequisites
+
+1. **Vercel KV (Upstash Redis)** — enable the Vercel KV integration on the project. This automatically provisions `KV_REST_API_URL` and `KV_REST_API_TOKEN` as environment variables.
+2. **FaceTec domain whitelist** — ensure the production domain (and the mobile handoff domain, which is the same) is whitelisted in the FaceTec developer dashboard.
 
 ### Vercel environment variables
 
-Set these in the Vercel project settings:
+Set these in the Vercel project settings (KV variables are auto-provisioned by the integration):
 
-| Variable | Value |
-| --- | --- |
-| `VITE_FACESIGN_SERVICE_URL` | Production FaceSign service URL |
-| `VITE_ENTROPY_SERVICE_URL` | Production entropy service URL |
-| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key |
-| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Production FaceTec iframe feature flag |
-| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` (never use `"*"` in production) |
+| Variable | Value | Notes |
+| --- | --- | --- |
+| `VITE_FACESIGN_SERVICE_URL` | Production FaceSign service URL | |
+| `VITE_ENTROPY_SERVICE_URL` | Production entropy service URL | |
+| `VITE_FACETEC_DEVICE_KEY_IDENTIFIER` | Production FaceTec device key | |
+| `VITE_FACETEC_IFRAME_FEATURE_FLAG` | Production FaceTec iframe feature flag | |
+| `VITE_ALLOWED_ORIGINS` | `https://dashboard.idos.network` | Never use `"*"` in production |
+| `KV_REST_API_URL` | *(auto-provisioned by Vercel KV)* | Upstash Redis REST URL |
+| `KV_REST_API_TOKEN` | *(auto-provisioned by Vercel KV)* | Upstash Redis REST token |
 
-The `VITE_ALLOWED_ORIGINS` variable controls which parent origins can embed the enclave via iframe. In production, this must be an explicit list of trusted origins.
+The `VITE_ALLOWED_ORIGINS` variable controls which parent origins can embed the enclave via iframe **and** which origins can call the handoff API routes (via CORS). In production, this must be an explicit list of trusted origins.
+
+### Post-deploy testing
+
+See the **Testing the mobile handoff** section below for a verification checklist.
+
+## Mobile Handoff
+
+The mobile handoff feature allows desktop users to delegate FaceTec liveness verification to a mobile device. This is useful when the desktop browser doesn't support camera access or when the user prefers to use their phone.
+
+### How it works
+
+1. **Dashboard** (desktop) creates a handoff session via `POST /api/handoff` and displays a QR code.
+2. **User** scans the QR code on their phone, which opens `/m/:sessionId`.
+3. **Mobile page** runs FaceTec liveness and POSTs the attestation token to `POST /api/handoff/:sessionId`.
+4. **Dashboard** polls `GET /api/handoff/:sessionId?secret=...` until the session is completed, then retrieves the attestation token.
+5. **Dashboard** sends the token to the enclave iframe via `postMessage`, which derives the key pair and returns the public address.
+
+Sessions are stored in Upstash Redis with a 5-minute TTL. The `secret` query parameter prevents unauthorized polling.
+
+### API routes
+
+| Method | Path | Description |
+| --- | --- | --- |
+| `POST` | `/api/handoff` | Creates a new session. Returns `{ sessionId, secret }`. |
+| `GET` | `/api/handoff/:sessionId?secret=...` | Polls session status. Returns `{ status, attestationToken? }`. Deletes session on completed read. |
+| `POST` | `/api/handoff/:sessionId` | Completes a session. Body: `{ attestationToken }`. |
+
+### Testing the mobile handoff
+
+**1. Verify Upstash Redis connectivity**
+
+```bash
+# Create a session
+curl -s -X POST https://<enclave-url>/api/handoff | jq
+
+# Expected: { "sessionId": "...", "secret": "..." }
+```
+
+**2. Verify session lifecycle**
+
+```bash
+# Using the sessionId and secret from step 1:
+
+# Poll (should be pending)
+curl -s "https://<enclave-url>/api/handoff/<sessionId>?secret=<secret>" | jq
+# Expected: { "status": "pending" }
+
+# Complete the session
+curl -s -X POST "https://<enclave-url>/api/handoff/<sessionId>" \
+  -H "Content-Type: application/json" \
+  -d '{"attestationToken": "test-token"}' | jq
+# Expected: { "ok": true }
+
+# Poll again (should be completed, then deleted)
+curl -s "https://<enclave-url>/api/handoff/<sessionId>?secret=<secret>" | jq
+# Expected: { "status": "completed", "attestationToken": "test-token" }
+# Subsequent polls: { "error": "Not found" }
+```
+
+**3. Verify mobile page renders**
+
+Open `https://<enclave-url>/m/<sessionId>` in a mobile browser (use a valid session ID). You should see the "Start Face Scan" button.
+
+**4. Verify CORS**
+
+```bash
+# Should return Access-Control-Allow-Origin matching the dashboard origin
+curl -s -I -X OPTIONS "https://<enclave-url>/api/handoff" \
+  -H "Origin: https://dashboard.idos.network"
+```
+
+**5. End-to-end flow (from the dashboard)**
+
+1. Open the dashboard and trigger FaceSign (either from the banner or the connect wallet page).
+2. Click "Continue on Mobile" — a QR code should appear.
+3. Scan the QR code on a phone — the mobile page should load with "Start Face Scan".
+4. Complete the face scan on mobile — the dashboard should detect completion and proceed.
 
 ## Security
 
@@ -153,12 +244,13 @@ The enclave validates incoming postMessage origins based on `VITE_ALLOWED_ORIGIN
 ## Architecture
 
 - **React**: UI framework
-- **TanStack Router**: File-based routing (login, session, sign, wallet); protected routes via `beforeLoad` and router context
+- **React Router 7** (framework mode, SSR): File-based routing with server-side loaders/actions
 - **Vite**: Build tool and dev server
 - **Tailwind CSS v4**: Styling
 - **shadcn/ui**: UI components (Button, Alert, Spinner)
 - **NaCl (tweetnacl)**: Cryptographic signing
 - **BIP39**: Mnemonic generation
+- **Upstash Redis**: Temporary session storage for mobile handoff (via Vercel KV integration)
 
 ## License
 

@@ -1,6 +1,4 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
-import { KeyStorageContextProvider } from "@/providers/key.provider";
-import { RequestsContextProvider } from "@/providers/requests.provider";
 import "./styles.css";
 
 export function Layout({ children }: { children: React.ReactNode }) {
@@ -37,12 +35,8 @@ export function HydrateFallback() {
 
 export default function App() {
   return (
-    <KeyStorageContextProvider>
-      <RequestsContextProvider>
-        <div className="min-h-svh">
-          <Outlet />
-        </div>
-      </RequestsContextProvider>
-    </KeyStorageContextProvider>
+    <div className="min-h-svh">
+      <Outlet />
+    </div>
   );
 }
