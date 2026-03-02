@@ -61,6 +61,9 @@ export async function login(requestBlob: string): Promise<LoginResponse | NewUse
     },
   );
 
+  // Store the userId in local storage
+  localStorage.setItem("faceSignUserId", response.data.faceSignUserId);
+
   return response.data;
 }
 
