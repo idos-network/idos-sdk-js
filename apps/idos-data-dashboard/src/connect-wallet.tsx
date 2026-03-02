@@ -144,7 +144,16 @@ export function ConnectWallet() {
         </div>
         <div className="flex flex-col items-stretch gap-4">
           <span className="font-semibold text-sm">
-            By connecting your wallet you confirm you read our{" "}
+            By connecting your wallet you agree to the
+            <a
+              className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
+              href="https://www.idos.network/legal/user-agreement"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              User Agreement
+            </a>{" "}
+            and confirm you read our
             <a
               className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/privacy-policy"
