@@ -1,13 +1,13 @@
-import { type idOSClient, idOSClientConfiguration } from "@idos-network/client";
+import type { idOSClient, idOSClientWithUserSigner } from "@idos-network/client";
 import { WALLET_TYPES, type WalletType } from "@idos-network/kwil-infra/actions";
 import type { WalletSelector } from "@near-wallet-selector/core";
-import { assign, fromCallback, fromPromise, setup } from "xstate";
+import { assign, fromPromise, setup } from "xstate";
 
 export interface DashboardContext {
   walletType: WalletType | null;
   walletAddress: string | null;
   walletPublicKey: string | null;
-  idOSClient: idOSClient;
+  idOSClient: idOSClient | idOSClientWithUserSigner | null;
   nearSelector: WalletSelector | null;
   error: string | null;
 }
@@ -19,6 +19,7 @@ export type DashboardEvent =
   | { type: "CONNECT_XRPL" }
   | { type: "CONNECT_FACESIGN" }
   | { type: "DISCONNECT" }
+  | { type: "CREATE_FACESIGN_PROFILE" }
   | { type: "RETRY" }
   | {
       type: "WALLET_CONNECTED";
@@ -40,6 +41,17 @@ export type InitializeIdOSInput = {
   nearSelector: WalletSelector | null;
 };
 
+export type CreateFacesignProfileInput = {
+  client: idOSClientWithUserSigner;
+};
+
+export type CreateFacesignProfileOutput = {
+  walletAddress: string;
+  walletPublicKey: string;
+  walletType: WalletType;
+  nearSelector: WalletSelector | null;
+};
+
 export type InitializeIdOSOutput = {
   client: idOSClient;
   hasProfile: boolean;
@@ -48,7 +60,13 @@ export type InitializeIdOSOutput = {
 export type DisconnectWalletInput = {
   walletType: WalletType | null;
   nearSelector: WalletSelector | null;
-  idOSClient: idOSClient;
+  idOSClient: idOSClient | null;
+};
+
+export type ConnectWalletOutput = {
+  walletAddress: string;
+  walletPublicKey: string;
+  nearSelector: WalletSelector | null;
 };
 
 export type ReconnectWalletInput = {
@@ -60,14 +78,6 @@ export type ReconnectWalletInput = {
 export type ReconnectWalletOutput = {
   nearSelector: WalletSelector | null;
 };
-
-export const idOSConfig = new idOSClientConfiguration({
-  nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
-  enclaveOptions: {
-    container: "#idOS-enclave",
-    url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
-  },
-});
 
 const STORAGE_KEY = "dashboard-wallet";
 
@@ -118,7 +128,7 @@ export function persistWallet(
 }
 
 // Placeholder actors -- real implementations are injected via `.provide()` in dashboard.actor.ts
-const noopConnectWallet = fromCallback<DashboardEvent, ConnectWalletInput>(() => {
+const noopConnectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(async () => {
   throw new Error("connectWallet actor not provided");
 });
 
@@ -134,6 +144,13 @@ const noopReconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletIn
   throw new Error("reconnectWallet actor not provided");
 });
 
+const noopCreateFacesignProfile = fromPromise<
+  CreateFacesignProfileOutput,
+  CreateFacesignProfileInput
+>(async () => {
+  throw new Error("createFacesignProfile actor not provided");
+});
+
 export const dashboardMachine = setup({
   types: {
     context: {} as DashboardContext,
@@ -144,6 +161,7 @@ export const dashboardMachine = setup({
     initializeIdOS: noopInitializeIdOS,
     disconnectWallet: noopDisconnectWallet,
     reconnectWallet: noopReconnectWallet,
+    createFacesignProfile: noopCreateFacesignProfile,
   },
   guards: {
     hasPersistedWallet: () => getPersistedWallet() !== null,
@@ -161,7 +179,7 @@ export const dashboardMachine = setup({
       walletPublicKey: () => null,
       nearSelector: () => null,
       error: () => null,
-      idOSClient: () => idOSConfig as idOSClient,
+      idOSClient: () => null,
     }),
   },
 }).createMachine({
@@ -171,7 +189,7 @@ export const dashboardMachine = setup({
     walletType: null,
     walletAddress: null,
     walletPublicKey: null,
-    idOSClient: idOSConfig as idOSClient,
+    idOSClient: null,
     nearSelector: null,
     error: null,
   },
@@ -213,10 +231,33 @@ export const dashboardMachine = setup({
           if (!context.walletType) {
             throw new Error("walletType not set");
           }
+
           return {
             walletType: context.walletType,
             nearSelector: context.nearSelector,
           };
+        },
+        onDone: {
+          target: "initializingIdOS",
+          actions: [
+            assign({
+              walletAddress: ({ event }) => event.output.walletAddress,
+              walletPublicKey: ({ event }) => event.output.walletPublicKey,
+              nearSelector: ({ event }) => event.output.nearSelector,
+            }),
+            "persistWalletToStorage",
+          ],
+        },
+        onError: {
+          target: "error",
+          actions: assign({
+            error: ({ event }) => {
+              console.error("Failed to connect wallet", event.error);
+              return event.error instanceof Error
+                ? event.error.message
+                : "Failed to connect wallet";
+            },
+          }),
         },
       },
       on: {
@@ -329,8 +370,12 @@ export const dashboardMachine = setup({
         onError: {
           target: "error",
           actions: assign({
-            error: ({ event }) =>
-              event.error instanceof Error ? event.error.message : "Failed to initialize idOS",
+            error: ({ event }) => {
+              console.error("Failed to initialize idOS", event.error);
+              return event.error instanceof Error
+                ? event.error.message
+                : "Failed to initialize idOS";
+            },
           }),
         },
       },
@@ -339,6 +384,48 @@ export const dashboardMachine = setup({
     noProfile: {
       on: {
         DISCONNECT: "disconnecting",
+        CREATE_FACESIGN_PROFILE: "creatingFacesignProfile",
+      },
+    },
+
+    creatingFacesignProfile: {
+      invoke: {
+        src: "createFacesignProfile",
+        input: ({ context }): CreateFacesignProfileInput => {
+          if (!context.idOSClient) {
+            throw new Error("idOS client not available");
+          }
+
+          if (context.idOSClient.state !== "with-user-signer") {
+            throw new Error("idOS client is not a user signer");
+          }
+
+          return {
+            client: context.idOSClient,
+          };
+        },
+        onDone: {
+          target: "initializingIdOS",
+          actions: [
+            assign({
+              walletAddress: ({ event }) => event.output.walletAddress,
+              walletPublicKey: ({ event }) => event.output.walletPublicKey,
+              nearSelector: ({ event }) => event.output.nearSelector,
+            }),
+            "persistWalletToStorage",
+          ],
+        },
+        onError: {
+          target: "error",
+          actions: assign({
+            error: ({ event }) => {
+              console.error("Failed to create Facesign profile", event.error);
+              return event.error instanceof Error
+                ? event.error.message
+                : "Failed to create Facesign profile";
+            },
+          }),
+        },
       },
     },
 

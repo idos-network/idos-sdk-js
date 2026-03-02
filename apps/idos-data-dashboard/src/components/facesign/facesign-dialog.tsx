@@ -3,6 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader } from "@/components/ui/dialog";
 import { Spinner } from "@/components/ui/spinner";
+import { COMMON_ENV } from "@/core/envFlags.common";
 
 const HANDOFF_POLL_INTERVAL_MS = 3_000;
 const HANDOFF_TIMEOUT_MS = 5 * 60 * 1000;
@@ -44,7 +45,7 @@ export function FacesignDialog({
   );
 
   const startMobileHandoff = useCallback(async () => {
-    const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+    const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
     if (!enclaveUrl) return;
 
     try {

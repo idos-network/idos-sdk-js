@@ -1,10 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
 import { lazy, Suspense, useState } from "react";
 import { CredentialCard } from "@/components/credentials/credential-card";
-import { CredentialsError } from "@/components/credentials/credentials-error";
-import { CredentialsPending } from "@/components/credentials/credentials-pending";
 import type { idOSCredentialWithShares } from "@/components/credentials/types";
-import { credentialsQueryOptions, useFetchCredentials } from "@/lib/queries/credentials";
+import { useFetchCredentials } from "@/lib/queries/credentials";
 
 const CredentialDetails = lazy(() =>
   import("@/components/credentials/credential-details").then((m) => ({
@@ -25,14 +22,6 @@ type ActiveDialog =
   | { type: "grants"; credentialId: string }
   | { type: "delete"; credential: idOSCredentialWithShares }
   | null;
-
-export const Route = createFileRoute("/")({
-  component: Credentials,
-  staticData: { breadcrumb: "Credentials" },
-  pendingComponent: CredentialsPending,
-  errorComponent: CredentialsError,
-  loader: ({ context: { queryClient } }) => queryClient.ensureQueryData(credentialsQueryOptions()),
-});
 
 function CredentialsList() {
   const { data: credentials } = useFetchCredentials();
@@ -76,7 +65,7 @@ function CredentialsList() {
   );
 }
 
-function Credentials() {
+export default function Credentials() {
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">
       <div className="flex h-14 items-center justify-between rounded-xl bg-card p-5 lg:h-20">

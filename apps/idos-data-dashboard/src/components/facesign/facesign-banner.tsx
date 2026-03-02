@@ -8,6 +8,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 import { FacesignDialog } from "./facesign-dialog";
 
@@ -16,7 +17,7 @@ const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profi
 async function createProvider() {
   const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
-  const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+  const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
   if (!enclaveUrl) {
     throw new Error("FaceSign is not available. Please try again later.");
   }

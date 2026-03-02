@@ -1,17 +1,16 @@
+import type { idOSClientLoggedIn } from "@idos-network/client";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { getIdOSClient } from "@/core/idOS";
+import { useIDOSClient } from "@/hooks/idOS";
 
-export function walletsQueryOptions() {
+export function walletsQueryOptions(idOSClient: idOSClientLoggedIn) {
   return queryOptions({
     queryKey: ["wallets"],
-    queryFn: () => {
-      const idOSClient = getIdOSClient();
-      return idOSClient.getWallets();
-    },
+    queryFn: () => idOSClient.getWallets(),
     select: (data) => Object.groupBy(data, (wallet) => wallet.address),
   });
 }
 
 export function useFetchWallets() {
-  return useSuspenseQuery(walletsQueryOptions());
+  const idOSClient = useIDOSClient();
+  return useSuspenseQuery(walletsQueryOptions(idOSClient));
 }

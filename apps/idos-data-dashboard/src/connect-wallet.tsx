@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { dashboardActor } from "@/machines/dashboard.actor";
+import { useActorRef } from "@/machines/provider";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
+import { COMMON_ENV } from "./core/envFlags.common";
 
 export function ConnectWallet() {
+  const { send } = useActorRef();
   const [facesignOpen, setFacesignOpen] = useState(false);
   const [facesignLoading, setFacesignLoading] = useState(false);
 
@@ -13,9 +15,8 @@ export function ConnectWallet() {
     try {
       const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
 
-      const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-      if (!enclaveUrl) {
-        throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
+      if (!COMMON_ENV.FACESIGN_ENCLAVE_URL) {
+        throw new Error("FaceSign is not available. Please try again later.");
       }
 
       const provider = new FaceSignSignerProvider({
@@ -23,14 +24,14 @@ export function ConnectWallet() {
           name: "idOS Dashboard",
           description: "Connect to idOS Dashboard with FaceSign",
         },
-        enclaveUrl,
+        enclaveUrl: COMMON_ENV.FACESIGN_ENCLAVE_URL,
       });
 
       const { hasKey } = await provider.preload();
       provider.destroy();
 
       if (hasKey) {
-        dashboardActor.send({ type: "CONNECT_FACESIGN" });
+        send({ type: "CONNECT_FACESIGN" });
       } else {
         setFacesignOpen(true);
       }
@@ -43,15 +44,15 @@ export function ConnectWallet() {
 
   const handleFacesignContinue = () => {
     setFacesignOpen(false);
-    dashboardActor.send({ type: "CONNECT_FACESIGN" });
+    send({ type: "CONNECT_FACESIGN" });
   };
 
   const handleMobileHandoffComplete = () => {
     setFacesignOpen(false);
-    dashboardActor.send({ type: "CONNECT_FACESIGN" });
+    send({ type: "CONNECT_FACESIGN" });
   };
 
-  const hasFacesign = !!import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+  const hasFacesign = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
   return (
     <div
@@ -113,7 +114,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_EVM" })}
+              onClick={() => send({ type: "CONNECT_EVM" })}
             >
               Connect with a wallet
               <img alt="EVM logo" src="/wallet-connect.svg" width={36} height={36} />
@@ -122,7 +123,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_NEAR" })}
+              onClick={() => send({ type: "CONNECT_NEAR" })}
             >
               Connect with NEAR
               <img alt="NEAR logo" src="/near.svg" width={40} height={40} />
@@ -131,7 +132,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_XRPL" })}
+              onClick={() => send({ type: "CONNECT_XRPL" })}
             >
               Connect with XRP
               <img alt="XRP logo" src="/xrp.svg" width={40} height={40} />
@@ -140,7 +141,7 @@ export function ConnectWallet() {
               className="justify-between"
               size="xl"
               variant="secondary"
-              onClick={() => dashboardActor.send({ type: "CONNECT_STELLAR" })}
+              onClick={() => send({ type: "CONNECT_STELLAR" })}
             >
               Connect with Stellar
               <img alt="Stellar logo" src="/stellar.svg" width={32} height={32} />

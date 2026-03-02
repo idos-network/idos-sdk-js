@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "@tanstack/react-router";
+import { useNavigate } from "react-router";
 import { ErrorCard } from "@/components/error-card";
 
 interface WalletsErrorProps {
@@ -8,12 +8,12 @@ interface WalletsErrorProps {
 
 export function WalletsError({ reset }: WalletsErrorProps) {
   const queryClient = useQueryClient();
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const handleRetry = () => {
     queryClient.removeQueries({ queryKey: ["wallets"] });
     reset?.();
-    router.invalidate();
+    navigate("/");
   };
 
   return (
