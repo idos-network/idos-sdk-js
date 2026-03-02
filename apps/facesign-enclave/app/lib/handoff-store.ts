@@ -9,41 +9,34 @@ const redis = new Redis({
 
 export interface HandoffSession {
   id: string;
-  secret: string;
   status: "pending" | "completed";
   attestationToken?: string;
   createdAt: number;
 }
 
 function sessionKey(id: string): string {
-  return `handoff:${id}`;
+  return `${process.env.KV_PREFIX ?? ""}:handoff:${id}`;
 }
 
-export async function createSession(): Promise<{ id: string; secret: string }> {
+export async function createSession(): Promise<HandoffSession> {
   const id = crypto.randomUUID();
-  const secret = crypto.randomUUID();
 
   const session: HandoffSession = {
     id,
-    secret,
     status: "pending",
     createdAt: Date.now(),
   };
 
   await redis.set(sessionKey(id), JSON.stringify(session), { ex: SESSION_TTL_SECONDS });
 
-  return { id, secret };
+  return session;
 }
 
-export async function getSession(
-  id: string,
-  secret: string | null,
-): Promise<HandoffSession | null> {
+export async function getSession(id: string): Promise<HandoffSession | null> {
   const raw = await redis.get<string>(sessionKey(id));
   if (!raw) return null;
 
   const session: HandoffSession = typeof raw === "string" ? JSON.parse(raw) : raw;
-  if (session.secret !== secret) return null;
 
   return session;
 }

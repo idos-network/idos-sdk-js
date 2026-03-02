@@ -1,21 +1,24 @@
 import { AlertCircleIcon, CheckCircle2Icon, SmartphoneIcon } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { LoaderFunctionArgs } from "react-router";
 import { data, useLoaderData } from "react-router";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { confirmNewUser } from "@/lib/api";
 import { faceTec } from "@/lib/facetec";
-import { sessionExists } from "@/lib/handoff-store";
+import { getSession } from "@/lib/handoff-store";
+import type { Route } from "./+types/m.$sessionId";
 
-export async function loader({ params }: LoaderFunctionArgs) {
-  const sessionId = params.sessionId ?? "";
-  const exists = await sessionExists(sessionId);
-  if (!exists) {
-    throw data("Session not found or expired", { status: 404 });
+export async function loader({ params }: Route.LoaderArgs) {
+  const sessionId = params.sessionId;
+
+  const session = await getSession(sessionId);
+
+  if (!session) {
+    throw data("Session not found", { status: 404 });
   }
-  return { sessionId };
+
+  return { sessionId: session.id };
 }
 
 type PageState = "ready" | "scanning" | "submitting" | "success" | "error";
