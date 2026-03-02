@@ -2,8 +2,8 @@
 
 # build
 dist
+build
 /out/
-/build
 
 # dependencies
 node_modules
@@ -38,6 +38,9 @@ lerna-debug.log*
 
 # vercel
 .vercel
+
+# react-router
+.react-router
 
 # vite timestamped configs
 vite.config.ts.timestamp-*

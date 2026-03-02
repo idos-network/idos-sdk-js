@@ -1,4 +1,3 @@
-const TRANSITION_MS = 200;
 // Buffer after showing the iframe before posting a message, giving the enclave time to be ready.
 const POST_MESSAGE_DELAY_MS = 300;
 // Safety net: reject proposals if the enclave doesn't respond within this window.
@@ -20,16 +19,19 @@ interface SessionResponse {
 
 export class FaceSignSignerProvider {
   #iframe: HTMLIFrameElement | null = null;
-  #container: HTMLElement | null = null;
+  #container: HTMLDialogElement | null = null;
 
   #resolveOpenEnclave: (() => void) | null = null;
   #resolveSignMessage: ((signature: Uint8Array) => void) | null = null;
   #rejectSignMessage: ((error: Error) => void) | null = null;
   #resolveSessionProposal: ((response: SessionResponse) => void) | null = null;
   #rejectSessionProposal: ((error: Error) => void) | null = null;
+  #resolveAddressRequest: ((address: string | null) => void) | null = null;
 
   #messageListener: ((event: MessageEvent) => void) | null = null;
+  #messageListenerInitialized = false;
   #proposalId = 0;
+  #hasKey: boolean | null = null;
   #metadata: FaceSignMetadata;
   #enclaveUrl: string;
   #enclaveOrigin: string;
@@ -45,15 +47,16 @@ export class FaceSignSignerProvider {
     this.#enclaveOrigin = new URL(options.enclaveUrl).origin;
   }
 
-  async init(): Promise<string> {
-    if (this.#messageListener) {
-      window.removeEventListener("message", this.#messageListener);
+  #setupMessageListener(): void {
+    if (this.#messageListenerInitialized) {
+      return;
     }
 
     this.#messageListener = (event: MessageEvent) => {
       if (event.origin !== this.#enclaveOrigin) return;
 
       if (event.data?.type === "facesign_ready") {
+        this.#hasKey = !!event.data.hasKey;
         this.#resolveOpenEnclave?.();
       }
 
@@ -78,9 +81,25 @@ export class FaceSignSignerProvider {
           this.#rejectSessionProposal?.(new Error("Session request rejected by user"));
         }
       }
+
+      if (event.data?.type === "address_response") {
+        const payload = event.data.data;
+        this.#resolveAddressRequest?.(payload?.address ?? null);
+      }
     };
 
     window.addEventListener("message", this.#messageListener);
+    this.#messageListenerInitialized = true;
+  }
+
+  async preload(): Promise<{ hasKey: boolean }> {
+    this.#setupMessageListener();
+    await this.#ensureEnclave();
+    return { hasKey: this.#hasKey ?? false };
+  }
+
+  async init(): Promise<string> {
+    this.#setupMessageListener();
 
     const sessionProposal = await this.#sessionProposal();
 
@@ -90,12 +109,39 @@ export class FaceSignSignerProvider {
     return sessionProposal.address;
   }
 
+  async getAddress(): Promise<string | null> {
+    this.#setupMessageListener();
+    await this.#ensureEnclave();
+
+    if (!this.#hasKey) return null;
+
+    return new Promise<string | null>((resolve) => {
+      const timer = setTimeout(() => resolve(null), PROPOSAL_TIMEOUT_MS);
+
+      this.#resolveAddressRequest = (address) => {
+        clearTimeout(timer);
+        this.#resolveAddressRequest = null;
+        if (address) {
+          this.publicKey = address;
+          this.publicAddress = address;
+        }
+        resolve(address);
+      };
+
+      this.#iframe?.contentWindow?.postMessage(
+        { type: "address_request", data: { id: ++this.#proposalId } },
+        this.#enclaveUrl,
+      );
+    });
+  }
+
   get signer(): this {
     return this;
   }
 
   async signMessage(message: Uint8Array | string): Promise<Uint8Array> {
-    await this.#showEnclave();
+    await this.#ensureEnclave();
+    this.#showEnclave();
 
     const messageToSign = typeof message === "string" ? new TextEncoder().encode(message) : message;
 
@@ -120,7 +166,7 @@ export class FaceSignSignerProvider {
               type: "sign_proposal",
               data: {
                 id: ++this.#proposalId,
-                data: Array.from(messageToSign),
+                data: messageToSign,
                 metadata: this.#metadata,
               },
             },
@@ -174,7 +220,29 @@ export class FaceSignSignerProvider {
     }
   }
 
+  hide(): void {
+    this.#cancelPendingProposals();
+    this.#hideEnclave();
+  }
+
+  #cancelPendingProposals(): void {
+    const cancelError = new Error("FaceSign operation cancelled");
+
+    if (this.#rejectSignMessage) {
+      this.#rejectSignMessage(cancelError);
+      this.#resolveSignMessage = null;
+      this.#rejectSignMessage = null;
+    }
+
+    if (this.#rejectSessionProposal) {
+      this.#rejectSessionProposal(cancelError);
+      this.#resolveSessionProposal = null;
+      this.#rejectSessionProposal = null;
+    }
+  }
+
   destroy(): void {
+    this.#cancelPendingProposals();
     if (this.#messageListener) {
       window.removeEventListener("message", this.#messageListener);
       this.#messageListener = null;
@@ -182,19 +250,16 @@ export class FaceSignSignerProvider {
     this.#destroyEnclave();
   }
 
-  #createContainer(): HTMLElement {
-    const container = document.createElement("div");
+  #createContainer(): HTMLDialogElement {
+    const container = document.createElement("dialog");
     Object.assign(container.style, {
       position: "fixed",
       top: "0",
       left: "0",
       width: "100%",
       height: "100%",
-      zIndex: "9999",
+      zIndex: "99999",
       background: "#0a0a0a",
-      display: "none",
-      opacity: "0",
-      transition: `opacity ${TRANSITION_MS}ms ease-in-out`,
     });
     document.body.appendChild(container);
     return container;
@@ -223,38 +288,26 @@ export class FaceSignSignerProvider {
       this.#container.appendChild(this.#iframe);
 
       this.#resolveOpenEnclave = () => {
+        console.log("resolveOpenEnclave");
         clearTimeout(timer);
         resolve();
       };
     });
   }
 
-  #showEnclave(): Promise<void> {
+  #showEnclave(): void {
     const el = this.#container;
-    if (!el) return Promise.resolve();
 
-    return new Promise((resolve) => {
-      el.style.display = "flex";
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.style.opacity = "1";
-          setTimeout(resolve, TRANSITION_MS);
-        });
-      });
-    });
+    if (el && !el.open) {
+      el.showModal();
+    }
   }
 
-  #hideEnclave(): Promise<void> {
+  #hideEnclave(): void {
     const el = this.#container;
-    if (!el) return Promise.resolve();
-
-    return new Promise((resolve) => {
-      el.style.opacity = "0";
-      setTimeout(() => {
-        el.style.display = "none";
-        resolve();
-      }, TRANSITION_MS);
-    });
+    if (el?.open) {
+      el.close();
+    }
   }
 
   #destroyEnclave(): void {

@@ -1,8 +1,10 @@
 import type { idOSWallet } from "@idos-network/kwil-infra/actions";
 import { useState } from "react";
+import { FacesignBanner } from "@/components/facesign/facesign-banner";
 import { AddWalletButton } from "@/components/wallets/add-wallet-button";
 import { DeleteWallet } from "@/components/wallets/delete-wallet";
 import { WalletCard } from "@/components/wallets/wallet-card";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { useFetchWallets } from "@/lib/queries/wallets";
 import { useSelector } from "@/machines/provider";
@@ -39,6 +41,7 @@ function WalletsList() {
           <li key={walletAddress} className="list-none">
             <WalletCard
               address={walletAddress}
+              walletType={wallets[walletAddress]?.[0]?.wallet_type}
               onDelete={handleDelete}
               isDisabled={address?.toLowerCase() === walletAddress.toLowerCase()}
             />
@@ -50,7 +53,14 @@ function WalletsList() {
   );
 }
 
+const hasFacesignEnclave = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
+
 export default function Wallets() {
+  const { data: wallets } = useFetchWallets();
+  const hasFacesignWallet = Object.values(wallets).some((group) =>
+    group?.some((w) => w.wallet_type === "FaceSign"),
+  );
+
   return (
     <div className="flex flex-1 flex-col items-stretch gap-5">
       <div className="flex h-14 items-center justify-between rounded-xl bg-card p-5 lg:h-20">
@@ -59,6 +69,7 @@ export default function Wallets() {
           <AddWalletButton />
         </div>
       </div>
+      {hasFacesignEnclave && !hasFacesignWallet && <FacesignBanner />}
       <WalletsList />
     </div>
   );

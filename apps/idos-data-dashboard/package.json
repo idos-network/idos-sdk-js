@@ -6,6 +6,7 @@
     "@creit.tech/stellar-wallets-kit": "^1.7.5",
     "@gemwallet/api": "^3.8.0",
     "@idos-network/client": "workspace:*",
+    "@idos-network/issuer": "workspace:*",
     "@idos-network/credentials": "workspace:*",
     "@idos-network/kwil-infra": "workspace:*",
     "@idos-network/utils": "workspace:*",
@@ -34,12 +35,14 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
+    "tweetnacl": "catalog:core",
     "vaul": "^1.1.2",
     "viem": "catalog:ethereum",
     "wagmi": "catalog:ethereum",
     "xstate": "^5.28.0",
     "xumm": "catalog:xrp",
-    "isbot": "^5"
+    "isbot": "^5",
+    "zod": "catalog:core"
   },
   "devDependencies": {
     "@near-js/types": "^0.3.0",

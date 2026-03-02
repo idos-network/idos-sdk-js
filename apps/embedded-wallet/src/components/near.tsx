@@ -96,7 +96,7 @@ export function NearConnector() {
         <div className="flex flex-col gap-4">
           <Button onClick={() => modal.show()}>
             Connect with NEAR
-            <TokenNEAR variant="mono" size={24} />
+            <TokenNEAR variant="mono" size={24} className="ml-auto" />
           </Button>
         </div>
       ))}

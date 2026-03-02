@@ -5,6 +5,7 @@ import { setupMeteorWallet } from "@near-wallet-selector/meteor-wallet";
 import type { WalletSelectorModal } from "@near-wallet-selector/modal-ui";
 import { setupModal } from "@near-wallet-selector/modal-ui";
 import "@near-wallet-selector/modal-ui/styles.css";
+import { COMMON_ENV } from "./envFlags.common";
 
 declare global {
   interface Window {
@@ -13,7 +14,7 @@ declare global {
   }
 }
 
-const contractId = import.meta.env.VITE_IDOS_NEAR_DEFAULT_CONTRACT_ID;
+const contractId = COMMON_ENV.IDOS_NEAR_DEFAULT_CONTRACT_ID;
 
 let _selector: WalletSelector | null = null;
 let _modal: WalletSelectorModal | null = null;
@@ -24,8 +25,8 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
   }
 
   _selector = await setupWalletSelector({
-    network: import.meta.env.DEV ? "testnet" : "mainnet",
-    debug: import.meta.env.DEV,
+    network: COMMON_ENV.DEV ? "testnet" : "mainnet",
+    debug: COMMON_ENV.DEV,
     modules: [setupMeteorWallet(), setupHereWallet()],
   });
 
@@ -34,7 +35,7 @@ export async function initializeNearSelector(): Promise<WalletSelector> {
     methodNames: [],
   });
 
-  if (import.meta.env.DEV) {
+  if (COMMON_ENV.DEV) {
     window.selector = _selector;
     window.modal = _modal;
   }

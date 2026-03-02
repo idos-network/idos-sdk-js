@@ -1,6 +1,7 @@
-import { useRouter } from "@tanstack/react-router";
 import { createContext, use, useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 import { type BaseHandler, WindowMessageHandler } from "@/lib/window";
+import { useKeyStorageContext } from "./key.provider";
 
 export interface SessionProposal {
   id: number;
@@ -36,7 +37,8 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
   const [sessionProposals, setSessionProposals] = useState<SessionProposal[]>([]);
   const [signProposals, setSignProposals] = useState<SignProposal[]>([]);
 
-  const router = useRouter();
+  const navigate = useNavigate();
+  const { isKeyAvailable, getPublicKey } = useKeyStorageContext();
 
   // Placeholder values and functions
   const contextValue: RequestsContextValue = {
@@ -52,9 +54,9 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
         setSessionProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSessionProposals((prev) => [...prev, proposal]);
-      router.navigate({ to: "/session" });
+      navigate("/session");
     },
-    [router],
+    [navigate],
   );
 
   const addSignProposal = useCallback(
@@ -65,15 +67,17 @@ export function RequestsContextProvider({ children }: { children: React.ReactNod
         setSignProposals((prev) => prev.filter((p) => p !== proposal));
       };
       setSignProposals((prev) => [...prev, proposal]);
-      router.navigate({ to: "/sign" });
+      navigate("/sign");
     },
-    [router],
+    [navigate],
   );
 
   // Initialize handlers to receive proposals
   useEffect(() => {
     // Example: Initialize a WindowMessageHandler
-    handlers.current.push(new WindowMessageHandler(addSignProposal, addSessionProposal));
+    handlers.current.push(
+      new WindowMessageHandler(addSignProposal, addSessionProposal, isKeyAvailable, getPublicKey),
+    );
 
     // Initialize all handlers
     Promise.allSettled(handlers.current.map((handler) => handler.init())).then(() => {

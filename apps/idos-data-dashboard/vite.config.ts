@@ -8,6 +8,10 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ isSsrBuild }) => ({
+  server: {
+    port: 5173,
+    strictPort: true,
+  },
   build: {
     rollupOptions: isSsrBuild ? { input: "./server/app.ts" } : undefined,
   },
@@ -25,7 +29,7 @@ export default defineConfig(({ isSsrBuild }) => ({
       ? []
       : [
           nodePolyfills({
-            exclude: ["stream"],
+            exclude: ["stream", "crypto"],
             globals: {
               // This is for @near-wallet-selector/core
               Buffer: true,

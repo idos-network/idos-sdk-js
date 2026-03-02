@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { Fragment, lazy, Suspense, useEffect } from "react";
 import { Link, Outlet, useLocation, useMatches } from "react-router";
-
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,42 +20,61 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import useDisclosure from "@/hooks/use-disclosure";
 import { cn } from "@/lib/utils";
 import { useActorRef, useSelector } from "@/machines/provider";
-import { selectWalletAddress } from "@/machines/selectors";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 const MobileNav = lazy(() => import("@/components/mobile-nav"));
 
 export function ConnectedWallet() {
   const address = useSelector(selectWalletAddress);
+  const walletType = useSelector(selectWalletType);
 
   if (!address) {
     return null;
   }
 
+  const isFaceSign = walletType === "FaceSign";
+
   return (
     <div className="flex h-20 items-center gap-5">
       <div className="flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-lg bg-muted">
-        <img
-          alt={`Connected wallet ${address}`}
-          src="/wallet-light.svg"
-          width={50}
-          height={50}
-          className="h-[50px] w-[50px] dark:hidden"
-          loading="eager"
-        />
-        <img
-          alt={`Connected wallet ${address}`}
-          src="/wallet.svg"
-          width={50}
-          height={50}
-          className="hidden h-[50px] w-[50px] dark:block"
-          loading="eager"
-        />
+        {isFaceSign ? (
+          <img
+            alt="FaceSign wallet"
+            src="/facesign-filled.svg"
+            width={36}
+            height={36}
+            className="h-9 w-9"
+            loading="eager"
+          />
+        ) : (
+          <>
+            <img
+              alt={`Connected wallet ${address}`}
+              src="/wallet-light.svg"
+              width={50}
+              height={50}
+              className="h-[50px] w-[50px] dark:hidden"
+              loading="eager"
+            />
+            <img
+              alt={`Connected wallet ${address}`}
+              src="/wallet.svg"
+              width={50}
+              height={50}
+              className="hidden h-[50px] w-[50px] dark:block"
+              loading="eager"
+            />
+          </>
+        )}
       </div>
       <div>
-        <div className="text-card-foreground">Connected Wallet</div>
+        <div className="text-card-foreground">
+          {isFaceSign ? "idOS FaceSign" : "Connected Wallet"}
+        </div>
         <code className="max-w-[180px] truncate text-muted-foreground">
           {address.slice(0, 6)}...{address.slice(-4)}
         </code>
@@ -99,7 +117,7 @@ export function MainNavLinks() {
           <span>Wallets</span>
         </ListItemLink>
       </li>
-      {import.meta.env.DEV ? (
+      {COMMON_ENV.DEV ? (
         <li>
           <a href="#/" className={externalLinkClasses} target="_blank" rel="noopener noreferrer">
             <CircleDollarSignIcon size={24} strokeWidth="1.5" />
