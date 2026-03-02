@@ -1,6 +1,7 @@
 import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
 
@@ -170,7 +171,7 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
         const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
         const { setFaceSignProvider } = await import("@/core/signers");
 
-        const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
+        const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
         if (!enclaveUrl) {
           throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
         }

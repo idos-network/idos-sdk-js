@@ -1,6 +1,7 @@
 import { idOSClientConfiguration } from "@idos-network/client";
 import type { Wallet } from "@idos-network/kwil-infra";
 import { fromPromise } from "xstate";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import {
   createEvmSigner,
   createFaceSignSigner,
@@ -18,10 +19,10 @@ export const initializeIdOS = fromPromise<InitializeIdOSOutput, InitializeIdOSIn
 
     if (!config) {
       config = new idOSClientConfiguration({
-        nodeUrl: import.meta.env.VITE_IDOS_NODE_URL,
+        nodeUrl: COMMON_ENV.IDOS_NODE_URL,
         enclaveOptions: {
           container: "#idOS-enclave",
-          url: import.meta.env.VITE_IDOS_ENCLAVE_URL,
+          url: COMMON_ENV.IDOS_ENCLAVE_URL,
         },
       });
     }
