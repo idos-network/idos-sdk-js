@@ -17,6 +17,7 @@ import { Toaster } from "./components/ui/sonner";
 import { wagmiAdapter } from "./core/wagmi";
 import Providers from "./providers";
 import "./styles/index.css";
+import { COMMON_ENV } from "./core/envFlags.common";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "idOS Data Dashboard" }];
@@ -88,7 +89,7 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   } else if (error && error instanceof Error) {
     Sentry.captureException(error);
 
-    if (import.meta.env.DEV) {
+    if (COMMON_ENV.DEV) {
       details = error.message;
       stack = error.stack;
     }

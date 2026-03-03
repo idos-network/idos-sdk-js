@@ -2,6 +2,7 @@ import type { ISupportedWallet } from "@creit.tech/stellar-wallets-kit";
 import { watchAccount } from "@wagmi/core";
 import { fromPromise } from "xstate";
 import { appKit, getEvmAccount, openEvmModal, wagmiConfig } from "@/core/wagmi";
+import { createFaceSignProvider } from "@/lib/facesign";
 import type { ConnectWalletInput, ConnectWalletOutput } from "../dashboard.machine";
 
 export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput>(
@@ -167,21 +168,9 @@ export const connectWallet = fromPromise<ConnectWalletOutput, ConnectWalletInput
       }
 
       case "FaceSign": {
-        const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
         const { setFaceSignProvider } = await import("@/core/signers");
 
-        const enclaveUrl = import.meta.env.VITE_FACESIGN_ENCLAVE_URL;
-        if (!enclaveUrl) {
-          throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
-        }
-
-        const provider = new FaceSignSignerProvider({
-          metadata: {
-            name: "idOS Dashboard",
-            description: "Connect to idOS Dashboard with FaceSign",
-          },
-          enclaveUrl,
-        });
+        const provider = await createFaceSignProvider();
 
         try {
           const address = await provider.init();
