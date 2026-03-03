@@ -63,6 +63,10 @@ VITE_ALLOWED_ORIGINS="*"
 # Upstash Redis (for mobile handoff sessions) — provided by the Vercel KV integration
 KV_REST_API_URL="https://your-instance.upstash.io"
 KV_REST_API_TOKEN="your-token"
+KV_PREFIX="your keys prefix"
+
+# Sessions
+SECRET_KEY_BASE="abcd1234"
 ```
 
 | Variable | Required | Description |
@@ -74,6 +78,8 @@ KV_REST_API_TOKEN="your-token"
 | `VITE_ALLOWED_ORIGINS` | Yes | Comma-separated origins allowed to embed the enclave. Use `"*"` for development only. |
 | `KV_REST_API_URL` | Yes | Upstash Redis REST URL for mobile handoff sessions. |
 | `KV_REST_API_TOKEN` | Yes | Upstash Redis REST token. |
+| `KV_PREFIX` | Yes | Redis keys prefix. |
+| `SECRET_KEY_BASE` | Yes | Session secret key. |
 
 ### Running with the dashboard
 

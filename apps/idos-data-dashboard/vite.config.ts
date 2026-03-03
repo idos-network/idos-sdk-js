@@ -59,7 +59,7 @@ export default defineConfig(async (config) => {
       rollupOptions: {
         input: config.isSsrBuild ? "./server/app.ts" : undefined,
         output: {
-          manualChunks(id) {
+          manualChunks(id: string) {
             if (!id.includes("node_modules")) return;
 
             // React core
@@ -83,7 +83,8 @@ export default defineConfig(async (config) => {
             if (id.includes("/ethers/")) return "ethers";
 
             // Web3 — NEAR (lazy-loaded)
-            if (id.includes("@near-wallet-selector/") || id.includes("/near-api-js/")) return "near";
+            if (id.includes("@near-wallet-selector/") || id.includes("/near-api-js/"))
+              return "near";
 
             // Web3 — Stellar (lazy-loaded)
             if (
