@@ -26,13 +26,15 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 
 // https://vitejs.dev/config/
 export default defineConfig(async (config) => {
-  const plugins = [tailwindcss(), reactRouter(), tsconfigPaths(), mkcert()];
-
-  if (process.env.SENTRY_AUTH_TOKEN) {
+  const plugins = [
+    tailwindcss(),
+    reactRouter(),
+    tsconfigPaths(),
+    mkcert(),
     // https://github.com/getsentry/sentry-javascript/blob/master/dev-packages/e2e-tests/test-applications/react-router-7-framework-instrumentation/vite.config.ts#L9C77-L9C86
     // biome-ignore lint/suspicious/noExplicitAny: Expected
-    plugins.push(...((await sentryReactRouter(sentryConfig, config)) as any[]));
-  }
+    ...((await sentryReactRouter(sentryConfig, config)) as any[]),
+  ];
 
   if (config.isSsrBuild) {
     plugins.push(
