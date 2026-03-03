@@ -27,14 +27,14 @@ export default defineConfig(async (config) => {
     );
 
     plugins.push(
-      await sentryReactRouter(
+      ...(await sentryReactRouter(
         {
           org: "idos-network",
           project: "data-dashboard",
           authToken: process.env.SENTRY_AUTH_TOKEN,
         },
         config,
-      ),
+      )),
     );
   }
 
