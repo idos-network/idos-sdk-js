@@ -8,13 +8,11 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import invariant from "tiny-invariant";
 import { Button } from "@/components/ui/button";
+import { COMMON_ENV } from "@/core/envFlags.common";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 
 function parseEmbeddedWalletEnv(): { popupUrl: string; allowedOrigins: string[] } {
-  const envUrls = import.meta.env.VITE_EMBEDDED_WALLET_APP_URLS;
-  invariant(envUrls && typeof envUrls === "string", "VITE_EMBEDDED_WALLET_APP_URLS is not set");
-  const entries = envUrls
-    .split(",")
+  const entries = COMMON_ENV.EMBEDDED_WALLET_APP_URLS.split(",")
     .map((s: string) => s.trim())
     .filter(Boolean);
   const allowedOrigins: string[] = [];
@@ -75,6 +73,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
           toast.success("Wallet added", {
             description: "The wallet has been added to your idOS profile",
           });
+          setIsLoading(false);
           await queryClient.invalidateQueries({ queryKey: ["wallets"] });
           onWalletAdded?.();
         },
@@ -93,16 +92,25 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     const abortController = new AbortController();
 
     const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== "WALLET_SIGNATURE") return;
+
       if (!EMBEDDED_WALLET_CONFIG.allowedOrigins.includes(event.origin)) {
         console.warn(
-          `Rejected message from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
+          `Rejected WALLET_SIGNATURE from unauthorized origin: ${event.origin}. Expected one of: ${EMBEDDED_WALLET_CONFIG.allowedOrigins.join(", ")}`,
         );
         return;
       }
-      if (event.data?.type === "WALLET_SIGNATURE") {
-        setWalletPayload(event.data.data);
+
+      const payload = event.data.data;
+      if (!payload) {
+        toast.error("Invalid wallet data", {
+          description: "No wallet data was received from the popup",
+        });
         setIsLoading(false);
+        return;
       }
+
+      setWalletPayload(payload);
     };
 
     window.addEventListener("message", handleMessage, { signal: abortController.signal });
@@ -141,7 +149,7 @@ export function AddWalletButton({ onWalletAdded }: AddWalletButtonProps) {
     setIsLoading(true);
 
     // Calculate center position for the popup
-    const popupWidth = 400;
+    const popupWidth = 520;
     const popupHeight = 620;
     const left = (window.screen.width - popupWidth) / 2;
     const top = (window.screen.height - popupHeight) / 2;

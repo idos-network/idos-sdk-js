@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/react-router";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { cookieToInitialState } from "@wagmi/core";
 import {
@@ -9,13 +10,14 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "react-router";
-
 import type { Route } from "./+types/root";
+import CookieBanner from "./components/cookie";
 import { EnclaveDialog } from "./components/enclave-dialog";
 import { Toaster } from "./components/ui/sonner";
 import { wagmiAdapter } from "./core/wagmi";
 import Providers from "./providers";
 import "./styles/index.css";
+import { COMMON_ENV } from "./core/envFlags.common";
 
 export function meta(_args: Route.MetaArgs) {
   return [{ title: "idOS Data Dashboard" }];
@@ -69,6 +71,7 @@ export default function App() {
       <Toaster position="bottom-right" duration={3000} />
       <EnclaveDialog />
       <Outlet />
+      <CookieBanner />
       <ReactQueryDevtools initialIsOpen={false} />
     </Providers>
   );
@@ -79,15 +82,17 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   let details = "An unexpected error occurred.";
   let stack: string | undefined;
 
-  console.error("ErrorBoundary", error);
-
   if (isRouteErrorResponse(error)) {
     message = error.status === 404 ? "404" : "Error";
     details =
       error.status === 404 ? "The requested page could not be found." : error.statusText || details;
-  } else if (import.meta.env.DEV && error && error instanceof Error) {
-    details = error.message;
-    stack = error.stack;
+  } else if (error && error instanceof Error) {
+    Sentry.captureException(error);
+
+    if (COMMON_ENV.DEV) {
+      details = error.message;
+      stack = error.stack;
+    }
   }
 
   return (

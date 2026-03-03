@@ -1,3 +1,5 @@
+import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
+import nacl from "tweetnacl";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("./evm", () => ({ verifyEvmSignature: vi.fn() }));
@@ -87,5 +89,22 @@ describe("verifySignature", () => {
     });
 
     expect(result).toBe(false);
+  });
+
+  it("routes FaceSign verification", async () => {
+    const keyPair = nacl.sign.keyPair();
+    const publicKey = hexEncode(keyPair.publicKey);
+    const message = utf8Encode("hello");
+    const signature = nacl.sign.detached(message, keyPair.secretKey);
+
+    const result = await verifySignature({
+      address: "faceSignAddress",
+      signature: hexEncode(signature),
+      message: "hello",
+      wallet_type: "FaceSign",
+      public_key: [publicKey],
+    });
+
+    expect(result).toBe(true);
   });
 });

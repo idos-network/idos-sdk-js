@@ -1,9 +1,42 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/provider";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
+import { COMMON_ENV } from "./core/envFlags.common";
+import { createFaceSignProvider } from "./lib/facesign";
 
 export function ConnectWallet() {
   const { send } = useActorRef();
+  const [facesignOpen, setFacesignOpen] = useState(false);
+  const [facesignLoading, setFacesignLoading] = useState(false);
+
+  const handleFacesignClick = async () => {
+    setFacesignLoading(true);
+
+    try {
+      const provider = await createFaceSignProvider();
+
+      const { hasKey } = await provider.preload();
+      provider.destroy();
+
+      if (hasKey) {
+        send({ type: "CONNECT_FACESIGN" });
+      } else {
+        setFacesignOpen(true);
+      }
+    } catch (error) {
+      console.error("FaceSign preload failed:", error);
+    } finally {
+      setFacesignLoading(false);
+    }
+  };
+
+  const handleFacesignContinue = () => {
+    setFacesignOpen(false);
+    send({ type: "CONNECT_FACESIGN" });
+  };
+
+  const hasFacesign = !!COMMON_ENV.FACESIGN_ENCLAVE_URL;
 
   return (
     <div
@@ -41,7 +74,25 @@ export function ConnectWallet() {
           <p className="text-center font-normal">Connect your wallet to get started.</p>
 
           <div className="mx-auto flex w-full min-w-0 max-w-[400px] flex-col items-stretch gap-3">
-            {import.meta.env.DEV ? <FacesignDialog /> : null}
+            {hasFacesign && (
+              <>
+                <Button
+                  className="justify-between"
+                  size="xl"
+                  variant="secondary"
+                  isLoading={facesignLoading}
+                  onClick={handleFacesignClick}
+                >
+                  Continue with idOS FaceSign
+                  <img alt="FaceSign" src="/facesign-connect.svg" width={28} height={28} />
+                </Button>
+                <FacesignDialog
+                  open={facesignOpen}
+                  onOpenChange={setFacesignOpen}
+                  onContinue={handleFacesignContinue}
+                />
+              </>
+            )}
             <Button
               className="justify-between"
               size="xl"
@@ -82,7 +133,16 @@ export function ConnectWallet() {
         </div>
         <div className="flex flex-col items-stretch gap-4">
           <span className="font-semibold text-sm">
-            By connecting your wallet you confirm you read our{" "}
+            By connecting your wallet you agree to the
+            <a
+              className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
+              href="https://www.idos.network/legal/user-agreement"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              User Agreement
+            </a>{" "}
+            and confirm you read our
             <a
               className="inline-flex items-center gap-2 text-primary text-sm hover:underline hover:underline-offset-4"
               href="https://www.idos.network/legal/privacy-policy"
