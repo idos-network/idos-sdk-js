@@ -1,7 +1,7 @@
 import "./instrument.server.mjs";
 import path from "node:path";
 import { reactRouter } from "@react-router/dev/vite";
-import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
+// import type { SentryReactRouterBuildOptions } from "@sentry/react-router";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite";
 import mkcert from "vite-plugin-mkcert";
@@ -13,20 +13,20 @@ if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENV) {
   process.env.VITE_SENTRY_ENV = `${process.env.VERCEL_ENV}@${process.env.VERCEL_DEPLOYMENT_ID}`;
 }
 
-const sentryConfig: SentryReactRouterBuildOptions = {
+/*const sentryConfig: SentryReactRouterBuildOptions = {
   org: "idos-network",
   project: "data-dashboard",
   // An auth token is required for uploading source maps;
   // store it in an environment variable to keep it secure.
   authToken: process.env.SENTRY_AUTH_TOKEN,
-};
+};*/
 
 // https://vitejs.dev/config/
 export default defineConfig(async (config) => {
   const plugins = [tailwindcss(), reactRouter(), tsconfigPaths(), mkcert()];
 
   if (process.env.SENTRY_AUTH_TOKEN) {
-    plugins.push(sentryReactRouter(sentryConfig, config));
+    // plugins.push(sentryReactRouter(sentryConfig, config));
   }
 
   if (config.isSsrBuild) {
