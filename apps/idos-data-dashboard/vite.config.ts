@@ -23,7 +23,10 @@ const sentryConfig: SentryReactRouterBuildOptions = {
   // store it in an environment variable to keep it secure.
   authToken: process.env.SENTRY_AUTH_TOKEN,
   sourceMapsUploadOptions: {
-    enabled: ["production", "playground"].includes(process.env.VERCEL_ENV ?? ""),
+    enabled:
+      ["production", "playground"].includes(process.env.VERCEL_ENV ?? "") &&
+      !!process.env.SENTRY_AUTH_TOKEN,
+    filesToDeleteAfterUpload: ["**/*.js.map"],
   },
 };
 

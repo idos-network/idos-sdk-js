@@ -71,7 +71,7 @@ export function CookieProvider({ children }: CookieProviderProps) {
         address: walletAddress,
       });
     }
-  }, [walletType, walletAddress, consent, sentryInitialized.current]);
+  }, [walletType, walletAddress, consent]);
 
   useEffect(() => {
     if (consent === null || consent === 0) return;
@@ -129,6 +129,12 @@ export function CookieProvider({ children }: CookieProviderProps) {
 
           return event;
         },
+      });
+
+      // Set user immediately after initialization
+      Sentry.setUser({
+        type: walletType,
+        address: walletAddress,
       });
     }
   }, [consent]);
