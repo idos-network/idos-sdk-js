@@ -100,7 +100,7 @@ export default function Login() {
             variant="secondary"
             size="lg"
             className="min-w-0 flex-1"
-            onClick={() => navigate("/scan")}
+            onClick={() => navigate(`/scan?redirect=${encodeURIComponent(redirect)}`)}
           >
             Or continue on this device
           </Button>
