@@ -68,8 +68,8 @@
   "private": true,
   "scripts": {
     "build": "pnpm run typecheck && react-router build",
-    "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router dev",
-    "start": "NODE_ENV=production NODE_OPTIONS='--import ./instrument.server.mjs' react-router-serve ./build/server/index.js",
+    "dev": "react-router dev",
+    "start": "NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc"
   },
   "type": "module"
