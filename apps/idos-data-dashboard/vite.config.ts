@@ -19,6 +19,9 @@ const sentryConfig: SentryReactRouterBuildOptions = {
   // An auth token is required for uploading source maps;
   // store it in an environment variable to keep it secure.
   authToken: process.env.SENTRY_AUTH_TOKEN,
+  sourceMapsUploadOptions: {
+    enabled: ["production", "playground"].includes(process.env.VERCEL_ENV ?? ""),
+  },
 };
 
 // https://vitejs.dev/config/
