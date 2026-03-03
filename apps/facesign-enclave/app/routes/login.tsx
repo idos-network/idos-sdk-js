@@ -1,6 +1,12 @@
 import { useEffect } from "react";
 import QRCode from "react-qr-code";
-import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
+import {
+  redirect,
+  useLoaderData,
+  useNavigate,
+  useRevalidator,
+  useSearchParams,
+} from "react-router";
 import { Button } from "@/components/ui/button";
 import { getEntropy } from "@/lib/api";
 import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
@@ -9,6 +15,19 @@ import { useKeyStorageContext } from "@/providers/key.provider";
 import type { Route } from "./+types/login";
 
 export async function loader({ request }: Route.LoaderArgs) {
+  const isMobile =
+    request.headers.get("Sec-CH-UA-Mobile") === "?1" ||
+    /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|Opera Mini|IEMobile/i.test(
+      request.headers.get("User-Agent") ?? "",
+    );
+
+  if (isMobile) {
+    const url = new URL(request.url);
+    const redirectParam = url.searchParams.get("redirect");
+    const target = redirectParam ? `/scan?redirect=${encodeURIComponent(redirectParam)}` : "/scan";
+    throw redirect(target);
+  }
+
   const sessionData = await sessionStorage.getSession(request.headers.get("Cookie"));
 
   let session: HandoffSession | null | undefined;
@@ -39,8 +58,6 @@ export default function Login() {
 
   const redirect = searchParams.get("redirect") ?? "/wallet";
 
-  // TODO: We are missing immediate redirect to "/scan" if this is already a mobile session.
-
   useEffect(() => {
     if (isKeyAvailable) {
       navigate(redirect);
@@ -64,8 +81,6 @@ export default function Login() {
       });
     }
   }, [session]);
-
-  console.log(`https://${window.location.host}/m/${session?.id}`);
 
   return (
     <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-background p-6">
