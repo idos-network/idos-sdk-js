@@ -29,7 +29,7 @@ export function CookieBanner() {
 
   return (
     <div className="fixed right-0 bottom-0 left-0 z-40 flex bg-background text-foreground">
-      <div className="flex w-full flex-row justify-center gap-5 px-6 py-10 align-start">
+      <div className="flex w-full flex-row items-start justify-center gap-5 px-6 py-10">
         <Collapsible className="max-w-7xl text-sm">
           <p>
             By pressing the approving button I voluntarily give my consent to set or activate
