@@ -11,7 +11,7 @@ import {
   useLoaderData,
 } from "react-router";
 import type { Route } from "./+types/root";
-import CookieBanner from "./components/cookie";
+import { CookieBanner } from "./components/cookie";
 import { EnclaveDialog } from "./components/enclave-dialog";
 import { Toaster } from "./components/ui/sonner";
 import { wagmiAdapter } from "./core/wagmi";
