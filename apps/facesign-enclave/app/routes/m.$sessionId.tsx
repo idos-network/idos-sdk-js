@@ -104,8 +104,8 @@ export default function MobileHandoff() {
             session.
           </p>
           <Button size="lg" className="w-full" onClick={startScan}>
-            <SmartphoneIcon className="size-4" />
-            Start Face Scan
+            <SmartphoneIcon className="size-6" />
+            Continue
           </Button>
         </div>
       )}
