@@ -85,7 +85,9 @@ export default function Login() {
         </div>
 
         <div className="flex flex-col gap-3">
-          <h1 className="text-center font-medium text-base">Scan your face to continue</h1>
+          <h1 className="text-center font-medium text-base">
+            Scan QR code with your phone to open idOS FaceSign on mobile
+          </h1>
           <p className="text-center text-muted-foreground text-sm">
             Scan the QR code with your smartphone to continue the face scan and verification on your
             mobile.
