@@ -66,8 +66,6 @@ export function CookieProvider({ children }: CookieProviderProps) {
     if (!sentryInitialized.current && import.meta.env.VITE_SENTRY_DSN) {
       sentryInitialized.current = true;
 
-      console.log("Initializing Sentry", import.meta.env.VITE_SENTRY_DSN);
-
       Sentry.init({
         dsn: import.meta.env.VITE_SENTRY_DSN,
         sendDefaultPii: true,
@@ -79,7 +77,7 @@ export function CookieProvider({ children }: CookieProviderProps) {
         beforeSend(event, hint) {
           const error = hint?.originalException;
 
-          // Check against usuall metamask errors, which we can't do anything about
+          // Check against usual metamask errors, which we can't do anything about
           const ignoredMessages = [
             "user rejected the request",
             "user rejected action",

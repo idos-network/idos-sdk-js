@@ -13,7 +13,7 @@ if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENV) {
 }
 
 // https://vitejs.dev/config/
-export default defineConfig((config) => {
+export default defineConfig(async (config) => {
   const plugins = [tailwindcss(), reactRouter(), tsconfigPaths(), mkcert()];
 
   if (config.isSsrBuild) {
@@ -27,7 +27,7 @@ export default defineConfig((config) => {
     );
 
     plugins.push(
-      sentryReactRouter(
+      await sentryReactRouter(
         {
           org: "idos-network",
           project: "data-dashboard",
