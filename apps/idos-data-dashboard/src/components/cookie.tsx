@@ -28,7 +28,7 @@ export function CookieBanner() {
   }
 
   return (
-    <div className="fixed right-0 bottom-0 left-0 z-1000 flex bg-background text-foreground">
+    <div className="fixed right-0 bottom-0 left-0 z-40 flex bg-background text-foreground">
       <div className="flex w-full flex-row justify-center gap-5 px-6 py-10 align-start">
         <Collapsible className="max-w-7xl text-sm">
           <p>
