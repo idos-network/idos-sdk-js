@@ -1,17 +1,45 @@
-import { useEffect, useRef } from "react";
-import { useNavigate, useSearchParams } from "react-router";
-import { Spinner } from "@/components/ui/spinner";
+import { useEffect } from "react";
+import QRCode from "react-qr-code";
+import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
+import { Button } from "@/components/ui/button";
 import { getEntropy } from "@/lib/api";
-import { faceTec } from "@/lib/facetec";
+import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
+import { sessionStorage } from "@/lib/sessions.server";
 import { useKeyStorageContext } from "@/providers/key.provider";
+import type { Route } from "./+types/login";
+
+export async function loader({ request }: Route.LoaderArgs) {
+  const sessionData = await sessionStorage.getSession(request.headers.get("Cookie"));
+
+  let session: HandoffSession | null | undefined;
+  const sessionId = sessionData.get("sessionId");
+  if (sessionId) {
+    session = await getSession(sessionId);
+  }
+
+  if (!session) {
+    session = await createSession();
+  }
+
+  sessionData.set("sessionId", session.id);
+
+  return Response.json(session, {
+    headers: {
+      "Set-Cookie": await sessionStorage.commitSession(sessionData),
+    },
+  });
+}
 
 export default function Login() {
+  const session = useLoaderData<typeof loader>() as HandoffSession;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { setMnemonic, isKeyAvailable } = useKeyStorageContext();
-  const initialized = useRef(false);
+  const { isKeyAvailable, setMnemonic } = useKeyStorageContext();
+  const { revalidate } = useRevalidator();
 
   const redirect = searchParams.get("redirect") ?? "/wallet";
+
+  // TODO: We are missing immediate redirect to "/scan" if this is already a mobile session.
 
   useEffect(() => {
     if (isKeyAvailable) {
@@ -20,36 +48,64 @@ export default function Login() {
   }, [isKeyAvailable, redirect, navigate]);
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
-
-    faceTec.init((errorMessage, attestationToken, newUserConfirmationToken) => {
-      if (errorMessage) {
-        const params = new URLSearchParams({ message: errorMessage, redirect });
-        navigate(`/error?${params}`);
-        return;
+    const interval = setInterval(() => {
+      if (document.visibilityState === "visible") {
+        revalidate();
       }
+    }, 5000);
 
-      if (attestationToken) {
-        getEntropy(attestationToken).then((data) => {
-          setMnemonic(data.entropy);
-        });
-      } else if (newUserConfirmationToken) {
-        const params = new URLSearchParams({
-          message: "No FaceSign profile found",
-          token: newUserConfirmationToken,
-          redirect,
-        });
-        navigate(`/error?${params}`);
-      } else {
-        console.error("Unexpected state: neither errorMessage nor token is set");
-      }
-    });
-  }, []);
+    return () => clearInterval(interval);
+  }, [revalidate]);
+
+  useEffect(() => {
+    if (session?.status === "completed" && session.attestationToken) {
+      getEntropy(session.attestationToken).then((data) => {
+        setMnemonic(data.entropy);
+      });
+    }
+  }, [session]);
+
+  console.log(`https://${window.location.host}/m/${session?.id}`);
 
   return (
-    <div className="flex h-svh items-center justify-center bg-background">
-      <Spinner className="size-8" />
+    <div role="dialog" className="fixed inset-0 flex items-center justify-center bg-background p-6">
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: stop propagation for backdrop dismiss */}
+      <div
+        className="relative flex w-full max-w-sm flex-col gap-5 rounded-xl bg-card p-6 shadow-xl"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <div className="flex justify-center">
+          <img alt="idOS FaceSign" src="/facesign-logo.svg" width={130} height={61} />
+        </div>
+
+        <div className="text-center">
+          <div className="m-auto inline-block rounded-lg bg-white p-4">
+            <QRCode value={`https://${window.location.host}/m/${session?.id}`} />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h1 className="text-center font-medium text-base">
+            Scan QR code with your phone to open idOS FaceSign on mobile
+          </h1>
+          <p className="text-center text-muted-foreground text-sm">
+            Scan the QR code with your smartphone to continue the face scan and verification on your
+            mobile.
+          </p>
+        </div>
+
+        <div className="flex justify-between gap-4">
+          <Button
+            type="button"
+            variant="secondary"
+            size="lg"
+            className="min-w-0 flex-1"
+            onClick={() => navigate("/scan")}
+          >
+            Or continue on this device
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }

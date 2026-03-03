@@ -94,7 +94,9 @@ PKCE
 pkoch
 pnpx
 preact
+qrcode
 Reown
+Revalidator
 rippletest
 safekeep
 sameorigin
