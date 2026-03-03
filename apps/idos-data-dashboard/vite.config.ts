@@ -1,4 +1,3 @@
-import "./instrument.server.mjs";
 import path from "node:path";
 import { reactRouter } from "@react-router/dev/vite";
 import { type SentryReactRouterBuildOptions, sentryReactRouter } from "@sentry/react-router";
@@ -46,7 +45,6 @@ export default defineConfig(async (config) => {
       }),
     );
   }
-  console.log(plugins);
 
   return {
     build: {
