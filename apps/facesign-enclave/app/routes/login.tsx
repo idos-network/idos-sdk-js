@@ -1,12 +1,7 @@
+import Bowser from "bowser";
 import { useEffect } from "react";
 import QRCode from "react-qr-code";
-import {
-  redirect,
-  useLoaderData,
-  useNavigate,
-  useRevalidator,
-  useSearchParams,
-} from "react-router";
+import { useLoaderData, useNavigate, useRevalidator, useSearchParams } from "react-router";
 import { Button } from "@/components/ui/button";
 import { getEntropy } from "@/lib/api";
 import { createSession, getSession, type HandoffSession } from "@/lib/handoff-store";
@@ -15,19 +10,6 @@ import { useKeyStorageContext } from "@/providers/key.provider";
 import type { Route } from "./+types/login";
 
 export async function loader({ request }: Route.LoaderArgs) {
-  const isMobile =
-    request.headers.get("Sec-CH-UA-Mobile") === "?1" ||
-    /Android|iPhone|iPad|iPod|Mobile|webOS|BlackBerry|Opera Mini|IEMobile/i.test(
-      request.headers.get("User-Agent") ?? "",
-    );
-
-  if (isMobile) {
-    const url = new URL(request.url);
-    const redirectParam = url.searchParams.get("redirect");
-    const target = redirectParam ? `/scan?redirect=${encodeURIComponent(redirectParam)}` : "/scan";
-    throw redirect(target);
-  }
-
   const sessionData = await sessionStorage.getSession(request.headers.get("Cookie"));
 
   let session: HandoffSession | null | undefined;
@@ -57,6 +39,15 @@ export default function Login() {
   const { revalidate } = useRevalidator();
 
   const redirect = searchParams.get("redirect") ?? "/wallet";
+
+  useEffect(() => {
+    const browser = Bowser.getParser(window.navigator.userAgent);
+    const isMobile = browser.getPlatformType(true) === "mobile";
+    if (isMobile) {
+      const target = redirect ? `/scan?redirect=${encodeURIComponent(redirect)}` : "/scan";
+      navigate(target);
+    }
+  }, [redirect, navigate]);
 
   useEffect(() => {
     if (isKeyAvailable) {

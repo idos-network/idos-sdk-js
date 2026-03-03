@@ -427,6 +427,9 @@ importers:
       axios:
         specifier: 1.13.5
         version: 1.13.5
+      bowser:
+        specifier: ^2.14.1
+        version: 2.14.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -6427,6 +6430,9 @@ packages:
 
   bowser@2.13.1:
     resolution: {integrity: sha512-OHawaAbjwx6rqICCKgSG0SAnT05bzd7ppyKLVUITZpANBaaMFBAsaNkto3LoQ31tyFP5kNujE8Cdx85G9VzOkw==}
+
+  bowser@2.14.1:
+    resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
   brace-expansion@1.1.11:
     resolution: {integrity: sha512-iCuPHDFgrHX7H2vEI/5xpz07zSHB00TpugqhmYtVmMO6518mCuRMoOYFldEBl0g187ufozdaHgWKcYFb61qGiA==}
@@ -21088,6 +21094,8 @@ snapshots:
   borsh@2.0.0: {}
 
   bowser@2.13.1: {}
+
+  bowser@2.14.1: {}
 
   brace-expansion@1.1.11:
     dependencies:
