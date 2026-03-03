@@ -1,6 +1,6 @@
 import { useCookieConsent } from "@/lib/cookie";
 import { Button } from "./ui/button";
-import { Collapsible, CollapsiblePanel, CollapsibleTrigger } from "./ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "./ui/collapsible";
 
 const PRIVACY_POLICY_URL = "https://www.idos.network/legal/privacy-policy";
 const TRANSPARENCY_DOC_URL =
@@ -38,7 +38,7 @@ export function CookieBanner() {
             {", "}or explained in more detail in documents or external links implemented there.
           </p>
 
-          <CollapsiblePanel>
+          <CollapsibleContent>
             <p className="mt-2">
               There are cookies that are necessary and stored on your browser as they are essential
               for the working of basic functionalities of the website. We also use third-party
@@ -69,9 +69,9 @@ export function CookieBanner() {
               <InlineLink href={PRIVACY_POLICY_URL}>Privacy Policy</InlineLink> and the{" "}
               <InlineLink href={TRANSPARENCY_DOC_URL}>Transparency Document</InlineLink>.
             </p>
-          </CollapsiblePanel>
+          </CollapsibleContent>
 
-          <CollapsibleTrigger className="group mt-2 border-0 bg-transparent p-0 text-primary text-sm underline-offset-4 hover:underline">
+          <CollapsibleTrigger className="group mt-2 cursor-pointer border-0 bg-transparent p-0 text-primary text-sm underline-offset-4 hover:underline">
             <span className="group-data-panel-open:hidden">Read more</span>
             <span className="hidden group-data-panel-open:inline">Read less</span>
           </CollapsibleTrigger>
