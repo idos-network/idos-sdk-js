@@ -1,8 +1,8 @@
 import type { WalletSelector } from "@near-wallet-selector/core";
 import { reconnect } from "@wagmi/core";
 import { fromPromise } from "xstate";
-import { COMMON_ENV } from "@/core/envFlags.common";
 import { getEvmAccount, wagmiConfig } from "@/core/wagmi";
+import { createFaceSignProvider } from "@/lib/facesign";
 import type { ReconnectWalletInput, ReconnectWalletOutput } from "../dashboard.machine";
 
 export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalletInput>(
@@ -44,21 +44,9 @@ export const reconnectWallet = fromPromise<ReconnectWalletOutput, ReconnectWalle
         return { nearSelector: null };
 
       case "FaceSign": {
-        const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
         const { setFaceSignProvider } = await import("@/core/signers");
 
-        const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
-        if (!enclaveUrl) {
-          throw new Error("VITE_FACESIGN_ENCLAVE_URL is not set");
-        }
-
-        const provider = new FaceSignSignerProvider({
-          metadata: {
-            name: "idOS Dashboard",
-            description: "Connect to idOS Dashboard with FaceSign",
-          },
-          enclaveUrl,
-        });
+        const provider = await createFaceSignProvider();
 
         // Try silent reconnect: ask the enclave for the stored key without showing UI
         const storedAddress = await provider.getAddress();

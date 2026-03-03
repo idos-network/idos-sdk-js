@@ -8,28 +8,11 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { COMMON_ENV } from "@/core/envFlags.common";
+import { createFaceSignProvider } from "@/lib/facesign";
 import { useAddWalletMutation } from "@/lib/mutations/wallets";
 import { FacesignDialog } from "./facesign-dialog";
 
 const ADD_WALLET_MESSAGE = "Sign this message to add FaceSign to your idOS profile";
-
-async function createProvider() {
-  const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
-
-  const enclaveUrl = COMMON_ENV.FACESIGN_ENCLAVE_URL;
-  if (!enclaveUrl) {
-    throw new Error("FaceSign is not available. Please try again later.");
-  }
-
-  return new FaceSignSignerProvider({
-    metadata: {
-      name: "idOS Dashboard",
-      description: "Add FaceSign to your idOS profile",
-    },
-    enclaveUrl,
-  });
-}
 
 export function FacesignBanner() {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -41,7 +24,7 @@ export function FacesignBanner() {
     setIsLoading(true);
 
     try {
-      const provider = await createProvider();
+      const provider = await createFaceSignProvider();
       const { hasKey } = await provider.preload();
 
       if (hasKey) {
@@ -67,7 +50,7 @@ export function FacesignBanner() {
     try {
       let provider = providerRef.current;
       if (!provider) {
-        provider = await createProvider();
+        provider = await createFaceSignProvider();
         providerRef.current = provider;
       }
 

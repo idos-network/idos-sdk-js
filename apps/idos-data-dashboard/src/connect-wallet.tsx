@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useActorRef } from "@/machines/provider";
 import { FacesignDialog } from "./components/facesign/facesign-dialog";
 import { COMMON_ENV } from "./core/envFlags.common";
+import { createFaceSignProvider } from "./lib/facesign";
 
 export function ConnectWallet() {
   const { send } = useActorRef();
@@ -13,19 +14,7 @@ export function ConnectWallet() {
     setFacesignLoading(true);
 
     try {
-      const { FaceSignSignerProvider } = await import("@idos-network/kwil-infra/facesign");
-
-      if (!COMMON_ENV.FACESIGN_ENCLAVE_URL) {
-        throw new Error("FaceSign is not available. Please try again later.");
-      }
-
-      const provider = new FaceSignSignerProvider({
-        metadata: {
-          name: "idOS Dashboard",
-          description: "Connect to idOS Dashboard with FaceSign",
-        },
-        enclaveUrl: COMMON_ENV.FACESIGN_ENCLAVE_URL,
-      });
+      const provider = await createFaceSignProvider();
 
       const { hasKey } = await provider.preload();
       provider.destroy();
