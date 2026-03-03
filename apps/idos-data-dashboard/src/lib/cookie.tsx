@@ -1,5 +1,7 @@
 import * as Sentry from "@sentry/react-router";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { useSelector } from "@/machines/provider";
+import { selectWalletAddress, selectWalletType } from "@/machines/selectors";
 
 // Version for cookie consent localStorage format
 const COOKIE_CONSENT_VERSION = "1.0";
@@ -24,6 +26,8 @@ export function CookieProvider({ children }: CookieProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sentryInitialized = useRef(false);
+  const walletType = useSelector(selectWalletType);
+  const walletAddress = useSelector(selectWalletAddress);
 
   const loadConsent = async (): Promise<void> => {
     setIsLoading(true);
@@ -61,6 +65,15 @@ export function CookieProvider({ children }: CookieProviderProps) {
   }, []);
 
   useEffect(() => {
+    if (walletType && walletAddress && sentryInitialized.current) {
+      Sentry.setUser({
+        type: walletType,
+        address: walletAddress,
+      });
+    }
+  }, [walletType, walletAddress, consent, sentryInitialized.current]);
+
+  useEffect(() => {
     if (consent === null || consent === 0) return;
 
     if (!sentryInitialized.current && import.meta.env.VITE_SENTRY_DSN) {
@@ -70,10 +83,8 @@ export function CookieProvider({ children }: CookieProviderProps) {
         dsn: import.meta.env.VITE_SENTRY_DSN,
         sendDefaultPii: true,
         tracesSampleRate: 1.0,
-        release: `frontend@${import.meta.env.VITE_SENTRY_RELEASE ?? "no-release"}`,
-        environment:
-          import.meta.env.VITE_SENTRY_ENV ??
-          `${import.meta.env.VERCEL_ENV}@${import.meta.env.VERCEL_DEPLOYMENT_ID}`,
+        release: import.meta.env.VITE_SENTRY_RELEASE ?? "unknown",
+        environment: import.meta.env.VITE_SENTRY_ENVIRONMENT ?? "unknown",
         beforeSend(event, hint) {
           const error = hint?.originalException;
 

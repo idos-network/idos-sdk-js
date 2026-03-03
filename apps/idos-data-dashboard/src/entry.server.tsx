@@ -1,4 +1,4 @@
-import "../instrument.server.mjs";
+import "./instrument.server.mjs";
 import { PassThrough } from "node:stream";
 import { createReadableStreamFromReadable } from "@react-router/node";
 import * as Sentry from "@sentry/react-router";

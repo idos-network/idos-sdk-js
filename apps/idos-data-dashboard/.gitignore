@@ -4,7 +4,3 @@
 # React Router
 /.react-router/
 /build/
-
-
-# Sentry Config File
-.env.sentry-build-plugin

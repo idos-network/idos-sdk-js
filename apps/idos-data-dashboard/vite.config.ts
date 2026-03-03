@@ -8,8 +8,12 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 // On Vercel, VITE_SENTRY_ENV can be set in Project Settings. If unset, we fall back to VERCEL_ENV.
-if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENV) {
-  process.env.VITE_SENTRY_ENV = `${process.env.VERCEL_ENV}@${process.env.VERCEL_DEPLOYMENT_ID}`;
+if (process.env.VERCEL_ENV && !process.env.VITE_SENTRY_ENVIRONMENT) {
+  process.env.VITE_SENTRY_ENVIRONMENT = process.env.VERCEL_ENV;
+}
+
+if (process.env.VERCEL_DEPLOYMENT_ID && !process.env.VITE_SENTRY_RELEASE) {
+  process.env.VITE_SENTRY_RELEASE = process.env.VERCEL_DEPLOYMENT_ID;
 }
 
 const sentryConfig: SentryReactRouterBuildOptions = {
