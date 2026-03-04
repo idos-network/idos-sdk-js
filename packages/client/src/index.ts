@@ -3,7 +3,11 @@ import {
   matchLevelOrHigher,
   recordFilter,
 } from "@idos-network/credentials/utils";
-import type { BaseProvider, PublicEncryptionProfile } from "@idos-network/enclave";
+import type {
+  BaseProvider,
+  EncryptionPasswordStore,
+  PublicEncryptionProfile,
+} from "@idos-network/enclave";
 import {
   createClientKwilSigner,
   createWebKwilClient,
@@ -217,14 +221,17 @@ export class idOSClientWithUserSigner implements Omit<Properties<idOSClientIdle>
     );
   }
 
-  async createUserEncryptionProfile(userId: string): Promise<PublicEncryptionProfile> {
+  async createUserEncryptionProfile(
+    userId: string,
+    forceEncryptionPasswordStore?: EncryptionPasswordStore,
+  ): Promise<PublicEncryptionProfile> {
     await this.enclaveProvider.reconfigure({
       mode: "new",
       userId,
       walletAddress: this.walletIdentifier,
       walletPublicKey: this.walletPublicKey,
       walletType: this.walletType,
-      encryptionPasswordStore: undefined,
+      encryptionPasswordStore: forceEncryptionPasswordStore,
       expectedUserEncryptionPublicKey: undefined,
     });
 
