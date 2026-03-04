@@ -1,5 +1,5 @@
 import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
-import { Client, decodeAccountID, type TxResponse, Wallet } from "xrpl";
+import type { Client, TxResponse, Wallet } from "xrpl";
 
 /**
  * Parameters for creating an original credential on XRPL
@@ -39,7 +39,7 @@ export type CreateCredentialForCopyParams = {
  * @example
  * ```typescript
  * const wallet = Wallet.fromSeed("s...");
- * const xrplService = new XrplCredentialsCreate("wss://s.devnet.rippletest.net:51233", wallet);
+ * const xrplService = await XrplCredentialsCreate.init("wss://s.devnet.rippletest.net:51233", wallet);
  *
  * // Create original credential
  * await xrplService.createCredentialForOriginal({
@@ -52,6 +52,13 @@ export type CreateCredentialForCopyParams = {
 export class XrplCredentialsCreate {
   readonly #client: Client;
   readonly #wallet: Wallet;
+  readonly #xrpl: typeof import("xrpl");
+
+  constructor(nodeUrl: string, seed: string, xrpl: typeof import("xrpl")) {
+    this.#xrpl = xrpl;
+    this.#client = new this.#xrpl.Client(nodeUrl);
+    this.#wallet = this.#xrpl.Wallet.fromSeed(seed);
+  }
 
   /**
    * Creates a new XRPL credentials service instance.
@@ -59,9 +66,18 @@ export class XrplCredentialsCreate {
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
    * @param seed  - The XRPL wallet seed to use for signing transactions
    */
-  constructor(nodeUrl: string, seed: string) {
-    this.#client = new Client(nodeUrl);
-    this.#wallet = Wallet.fromSeed(seed);
+  static async init(nodeUrl: string, seed: string): Promise<XrplCredentialsCreate> {
+    let xrpl: typeof import("xrpl");
+
+    try {
+      xrpl = await import("xrpl");
+    } catch {
+      throw new Error(
+        "Missing optional peer dependency 'xrpl'. Install it to use XrplCredentialsCreate.",
+      );
+    }
+
+    return new XrplCredentialsCreate(nodeUrl, seed, xrpl);
   }
 
   /**
@@ -153,7 +169,7 @@ export class XrplCredentialsCreate {
       utf8Encode("-"), // Separator
       utf8Encode(credType), // Original credential type
       utf8Encode("-"), // Separator
-      decodeAccountID(origCredIssuerAddress), // Original issuer address (decoded)
+      this.#xrpl.decodeAccountID(origCredIssuerAddress), // Original issuer address (decoded)
       utf8Encode("-"), // Separator
       utf8Encode(`${timelockYears}Y`), // Timelock period in years
     ]);

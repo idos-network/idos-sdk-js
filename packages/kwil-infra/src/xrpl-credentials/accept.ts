@@ -1,5 +1,4 @@
 import { hexEncode, utf8Encode } from "@idos-network/utils/codecs";
-import { decodeAccountID } from "xrpl";
 
 /**
  * Payload structure for XRPL CredentialAccept transaction
@@ -99,16 +98,25 @@ export function OriginalCredentialAcceptPayload(
  * // }
  * ```
  */
-export function CopyCredentialAcceptPayload(
+export async function CopyCredentialAcceptPayload(
   copyCredentialIssuerAddress: string,
   accountAddress: string,
   originalCredentialIssuerAddress: string,
   credentialType: string,
   timelockYears: number,
-): CredentialAcceptPayload {
+): Promise<CredentialAcceptPayload> {
   // Validate that timelockYears is a non-negative integer
   if (!Number.isInteger(timelockYears) || timelockYears < 0) {
     throw new Error("timelockYears must be a non-negative integer");
+  }
+
+  let decodeAccountID: typeof import("xrpl").decodeAccountID;
+  try {
+    ({ decodeAccountID } = await import("xrpl"));
+  } catch {
+    throw new Error(
+      'Missing optional peer dependency "xrpl". Install it to use Xumm public-key extraction.',
+    );
   }
 
   // Create a composite credential type string that includes:
