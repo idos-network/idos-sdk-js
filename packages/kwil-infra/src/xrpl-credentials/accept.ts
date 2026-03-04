@@ -83,7 +83,7 @@ export function OriginalCredentialAcceptPayload(
  *
  * @example
  * ```typescript
- * const payload = CopyCredentialAcceptPayload(
+ * const payload = await CopyCredentialAcceptPayload(
  *   "rCopyIssuerAddress123...",
  *   "rAccountAddress456...",
  *   "rOriginalIssuerAddress789...",
