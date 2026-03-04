@@ -7,7 +7,6 @@
     "@idos-network/utils": "workspace:*",
     "tiny-invariant": "catalog:core",
     "tweetnacl": "catalog:core",
-    "xrpl": "catalog:xrp",
     "zod": "catalog:core"
   },
   "devDependencies": {
@@ -47,6 +46,10 @@
       "types": "./dist/facesign/index.d.mts",
       "import": "./dist/facesign/index.mjs"
     },
+    "./xrpl-credentials": {
+      "types": "./dist/xrpl-credentials/index.d.mts",
+      "import": "./dist/xrpl-credentials/index.mjs"
+    },
     ".": {
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
@@ -59,7 +62,8 @@
     "@wagmi/core": "catalog:ethereum",
     "@near-wallet-selector/core": "catalog:near",
     "@stellar/stellar-sdk": "catalog:stellar",
-    "ripple-keypairs": "catalog:xrp"
+    "ripple-keypairs": "catalog:xrp",
+    "xrpl": "catalog:xrp"
   },
   "peerDependenciesMeta": {
     "near-api-js": {
@@ -75,6 +79,9 @@
       "optional": true
     },
     "@wagmi/core": {
+      "optional": true
+    },
+    "xrpl": {
       "optional": true
     }
   },

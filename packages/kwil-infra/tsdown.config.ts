@@ -7,5 +7,6 @@ export default defineConfig({
     "./src/signature-verification/index.ts",
     "./src/xrp/utils.ts",
     "./src/facesign/index.ts",
+    "./src/xrpl-credentials/index.ts",
   ],
 });

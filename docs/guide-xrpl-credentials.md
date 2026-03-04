@@ -62,7 +62,7 @@ class XrplCredentialsCreate {
 import { Wallet } from "xrpl";
 import {
     XrplCredentialsCreate,
-} from "@idos-network/utils/xrpl-credentials";
+} from "@idos-network/kwil-infra/xrpl-credentials";
 
 const wallet = Wallet.fromSeed("s...");
 const xrplService = new XrplCredentialsCreate("wss://s.devnet.rippletest.net:51233", wallet);
@@ -73,7 +73,6 @@ await xrplService.createCredentialForOriginal({
   credType: "KYC",
   userAddress: "r..."
 });
-
 
 const result = await xrplService.createCredentialForCopy({
   credId: "...uuid...",
