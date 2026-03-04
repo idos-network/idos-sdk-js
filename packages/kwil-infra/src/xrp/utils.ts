@@ -1,6 +1,5 @@
 import type * as GemWalletAPI from "@gemwallet/api";
 import type * as GemWallet from "@gemwallet/api";
-import { decode } from "xrpl";
 import type { Xumm } from "xumm";
 export type WalletName = "XAMAN" | "GEM";
 
@@ -57,6 +56,7 @@ export function signXummTx(xummInstance: Xumm, payload: Record<string, unknown>)
 export async function getXummPublicKey(wallet: Xumm): Promise<string | undefined> {
   const payload = createXummPayload("Sign request from idOS");
   const txHash = await signXummTx(wallet, payload);
+  const { decode } = await import("xrpl");
   const decodedTx = decode(txHash);
   return decodedTx.SigningPubKey as string;
 }
