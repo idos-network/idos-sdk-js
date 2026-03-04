@@ -1,4 +1,4 @@
-/** Represents the reason why intialization failed. */
+/** Represents the reason why initialization failed. */
 export declare enum FaceTecInitializationError {
   /**
    * The FaceTec Server could not validate this application.
