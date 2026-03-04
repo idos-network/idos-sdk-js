@@ -50,7 +50,7 @@ export function CookieBanner() {
               countries to the and by the companies mentioned in the{" "}
               <InlineLink href={PRIVACY_POLICY_URL}>Privacy Policy</InlineLink> and purposes, in
               particular for such transfers to third countries for which an adequacy decision of the
-              EU/EEA is absent or does exist, and to companies or other entities that are not
+              EU/EEA is absent or does not exist, and to companies or other entities that are not
               subject to an existing adequacy decision on the basis of self-certification or other
               accession criteria, and that involve significant risks and no appropriate safeguards
               for the protection of my personal data. When giving my voluntary and explicit consent,
