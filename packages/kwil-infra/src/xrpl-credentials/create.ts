@@ -64,7 +64,7 @@ export class XrplCredentialsCreate {
    * Creates a new XRPL credentials service instance.
    *
    * @param nodeUrl - The WebSocket URL of the XRPL node to connect to
-   * @param seed  - The XRPL wallet seed to use for signing transactions
+   * @param wallet  - The XRPL wallet to use for signing transactions
    */
   static async init(nodeUrl: string, wallet: Wallet): Promise<XrplCredentialsCreate> {
     let xrpl: typeof import("xrpl");
