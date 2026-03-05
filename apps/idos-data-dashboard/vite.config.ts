@@ -83,7 +83,7 @@ export default defineConfig(async (config) => {
             if (id.includes("/ethers/")) return "ethers";
 
             // Web3 — NEAR (lazy-loaded)
-            if (id.includes("@near-wallet-selector/") || id.includes("/near-api-js/"))
+            if (id.includes("@hot-labs/") || id.includes("/near-api-js/"))
               return "near";
 
             // Web3 — Stellar (lazy-loaded)

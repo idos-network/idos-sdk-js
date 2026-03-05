@@ -1,3 +1,8 @@
+import type {
+  NearWalletBase as NearWallet,
+  SignedMessage,
+  SignMessageParams,
+} from "@hot-labs/near-connect";
 import { KwilSigner } from "@idos-network/kwil-js";
 import {
   base64Decode,
@@ -8,35 +13,54 @@ import {
   hexEncode,
   utf8Decode,
 } from "@idos-network/utils/codecs";
-
 import type { Store } from "@idos-network/utils/store";
-import type {
-  Wallet as NearWallet,
-  SignedMessage,
-  SignMessageParams,
-} from "@near-wallet-selector/core";
-import type { connect as connectT } from "near-api-js";
-import type { AccessKeyList } from "near-api-js/lib/providers/provider";
+import type { BlockReference, JsonRpcProvider, ViewAccessKeyListRequest } from "near-api-js";
 import type { KwilActionClient } from "../create-kwil-client";
-import { getNearConnectionConfig } from "./get-config";
+import { getNearNodeUrl } from "./get-config";
 
-const NEAR_WALLET_TYPES: string[] = [
-  "browser",
-  "injected",
-  "instant-link",
-  "hardware",
-  "bridge",
-] satisfies NearWallet["type"][];
+// Near copy & paste types
+// since they don't expose them...
+// https://github.com/near/near-api-js/blob/master/src/rpc/types.gen.ts#L803
+export type CryptoHash = string;
+export type PublicKey = string;
+export type NearToken = string;
+export type AccessKeyPermissionView =
+  | "FullAccess"
+  | {
+      FunctionCall: {
+        allowance?: NearToken | null;
+        method_names: Array<string>;
+        receiver_id: string;
+      };
+    };
+export type AccessKeyView = {
+  nonce: number;
+  permission: AccessKeyPermissionView;
+};
+export type AccessKeyInfoView = {
+  access_key: AccessKeyView;
+  public_key: PublicKey;
+};
+export type RpcViewAccessKeyListResponse = {
+  block_hash: CryptoHash;
+  block_height: number;
+  keys: Array<AccessKeyInfoView>;
+};
 
 export function looksLikeNearWallet(signer: unknown): signer is NearWallet {
   return (
     signer !== null &&
     typeof signer === "object" &&
-    "id" in signer &&
-    "metadata" in signer &&
-    "type" in signer &&
-    typeof signer.type === "string" &&
-    NEAR_WALLET_TYPES.includes(signer.type)
+    "manifest" in signer &&
+    signer.manifest !== null &&
+    typeof signer.manifest === "object" &&
+    "id" in signer.manifest &&
+    "name" in signer.manifest &&
+    "signIn" in signer &&
+    "signOut" in signer &&
+    "getAccounts" in signer &&
+    "signMessage" in signer &&
+    "signAndSendTransaction" in signer
   );
 }
 
@@ -73,13 +97,9 @@ function createNearWalletSigner(
     const {
       nonce = nonceSuggestion,
       signature,
-      // @ts-expect-error Signatures don't seem to be updated for NEP413 yet.
-      callbackUrl,
       // biome-ignore lint/style/noNonNullAssertion: Only non-signing wallets return void.
     } = (await (
-      wallet.signMessage as (
-        _: SignMessageParams,
-      ) => Promise<SignedMessage & { nonce?: Uint8Array }>
+      wallet.signMessage as (_: SignMessageParams) => Promise<SignedMessage & { nonce: Uint8Array }>
     )({
       message: messageString,
       recipient,
@@ -101,7 +121,7 @@ function createNearWalletSigner(
       message: messageString,
       nonce: Array.from(nonce),
       recipient,
-      callbackUrl,
+      callbackUrl: undefined,
     };
 
     const nep413BorshPayload = borshSerialize(nep413BorschSchema, nep413BorshParams);
@@ -123,22 +143,26 @@ export function implicitAddressFromPublicKey(publicKey: string): string {
 export async function getNearFullAccessPublicKeys(
   namedAddress: string,
 ): Promise<string[] | undefined> {
-  let connect: typeof connectT;
+  let providerKlass: typeof JsonRpcProvider;
   try {
-    connect = (await import("near-api-js")).connect;
+    providerKlass = (await import("near-api-js")).JsonRpcProvider;
   } catch (_e) {
     throw new Error("Can't load near-api-js");
   }
-  const connectionConfig = getNearConnectionConfig(namedAddress);
-  const nearConnection = await connect(connectionConfig);
+  const nodeUrl = getNearNodeUrl(namedAddress);
+  const provider = new providerKlass({ url: nodeUrl });
 
   try {
-    const response: AccessKeyList = await nearConnection.connection.provider.query({
+    const viewAccessKeyListRequest: ViewAccessKeyListRequest & BlockReference = {
+      account_id: namedAddress,
       request_type: "view_access_key_list",
       finality: "final",
-      account_id: namedAddress,
-    });
-    return response.keys
+    };
+
+    const accessKeyList =
+      await provider.query<RpcViewAccessKeyListResponse>(viewAccessKeyListRequest);
+
+    return accessKeyList.keys
       .filter((element) => element.access_key.permission === "FullAccess")
       ?.map((i) => i.public_key);
   } catch {
@@ -166,7 +190,7 @@ export async function createNearWalletKwilSigner(
 ): Promise<{ kwilSigner: KwilSigner; publicKey: string }> {
   if (!wallet.signMessage) throw new Error("Only wallets with signMessage are supported.");
 
-  if (wallet.id === "my-near-wallet") {
+  if (wallet.manifest.id === "mynearwallet") {
     const { accountId, signature, publicKey, error } = Object.fromEntries(
       new URLSearchParams(window.location.hash.slice(1)).entries(),
     );
@@ -201,14 +225,12 @@ export async function createNearWalletKwilSigner(
         } as SignedMessage);
       }
 
-      const callbackUrl = window.location.href;
       const nonce = Buffer.from(new KwilNonce(32).clampUTF8);
 
       await store.set("sign-last-message", message);
       await store.set("sign-last-nonce", Array.from(nonce));
-      await store.set("sign-last-url", callbackUrl);
 
-      signMessageOriginal({ message, nonce, recipient, callbackUrl });
+      signMessageOriginal({ message, nonce, recipient });
 
       return new Promise(() => ({}) as SignedMessage);
     };
@@ -228,7 +250,8 @@ export async function createNearWalletKwilSigner(
     const nonce = Buffer.from(new KwilNonce(32).bytes);
     const signResult = await wallet.signMessage({ message, recipient, nonce });
     if (!signResult) throw new Error("signMessage returned no result");
-    ({ publicKey } = signResult);
+
+    publicKey = signResult.publicKey;
 
     await store.set("signer-address", currentAddress);
     await store.set("signer-public-key", publicKey);
